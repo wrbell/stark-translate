@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stark Road Gospel Hall — Live Translation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #fff;
+    --text: #333;
+    --text-dim: #777;
+    --partial-color: #aaa;
+    --divider: #d0d0d0;
+  }
+
+  body {
+    font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* Header — minimal */
+  .header {
+    padding: 8px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    opacity: 0.35;
+    font-size: 12px;
+    font-family: Calibri, sans-serif;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .header:hover { opacity: 0.7; }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #c44;
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .status-dot.connected { background: #4a4; }
+
+  /* Two-column layout */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 32px 40px 40px;
+    overflow: hidden;
+  }
+
+  .column-en {
+    border-right: 1px solid var(--divider);
+  }
+
+  .column-label {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    flex-shrink: 0;
+  }
+
+  .text-area {
+    font-size: 28px;
+    line-height: 1.5;
+  }
+
+  .sentence {
+    display: inline;
+  }
+
+  .sentence.partial {
+    color: var(--partial-color);
+    font-style: italic;
+  }
+
+  /* Older sentences fade */
+  .sentence.age-0 { opacity: 1.0; }
+  .sentence.age-1 { opacity: 0.8; }
+  .sentence.age-2 { opacity: 0.55; }
+  .sentence.age-3 { opacity: 0.35; }
+  .sentence.age-4 { opacity: 0.2; }
+
+  /* Fullscreen */
+  :fullscreen { background: var(--bg); }
+
+  /* Responsive */
+  @media (min-width: 1400px) {
+    .text-area { font-size: 34px; }
+    .column { padding: 40px 56px 56px; }
+  }
+
+  @media (min-width: 1900px) {
+    .text-area { font-size: 40px; }
+    .column { padding: 48px 80px 72px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span>Stark Road Gospel Hall</span>
+  <span><span class="status-dot" id="dot"></span><span id="status">Disconnected</span></span>
+</div>
+
+<div class="content">
+  <div class="column column-en">
+    <div class="column-label">English</div>
+    <div class="text-area" id="english"></div>
+  </div>
+  <div class="column column-es">
+    <div class="column-label">Español</div>
+    <div class="text-area" id="spanish"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const WS_URL = 'ws://localhost:8765';
+  const MAX_SENTENCES = 5;
+  const RECONNECT_MS = 2000;
+
+  const dot = document.getElementById('dot');
+  const statusEl = document.getElementById('status');
+  const spanishEl = document.getElementById('spanish');
+  const englishEl = document.getElementById('english');
+
+  const BLOCKED = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|motherfucker|piss|shit|slut|whore)\b/gi;
+  function filter(t) { return t ? t.replace(BLOCKED, m => '*'.repeat(m.length)) : ''; }
+
+  let sentences = [];
+
+  function render() {
+    const visible = sentences.slice(-MAX_SENTENCES);
+
+    englishEl.innerHTML = visible.map((s, i) => {
+      const age = visible.length - 1 - i;
+      const cls = s.partial ? 'sentence partial' : 'sentence age-' + Math.min(age, 4);
+      return '<span class="' + cls + '">' + esc(s.english) + ' </span>';
+    }).join('');
+
+    spanishEl.innerHTML = visible.map((s, i) => {
+      const age = visible.length - 1 - i;
+      const cls = s.partial ? 'sentence partial' : 'sentence age-' + Math.min(age, 4);
+      return '<span class="' + cls + '">' + esc(s.spanish) + ' </span>';
+    }).join('');
+  }
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function connect() {
+    const ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      dot.classList.add('connected');
+      statusEl.textContent = 'Live';
+    };
+
+    ws.onclose = () => {
+      dot.classList.remove('connected');
+      statusEl.textContent = 'Reconnecting...';
+      setTimeout(connect, RECONNECT_MS);
+    };
+
+    ws.onerror = () => ws.close();
+
+    ws.onmessage = (evt) => {
+      const data = JSON.parse(evt.data);
+      if (data.type !== 'translation') return;
+
+      const stage = data.stage || 'complete';
+      const en = filter(data.english || '');
+      const es = filter(data.spanish_a || data.english || '');
+
+      if (stage === 'partial') {
+        const existing = sentences.find(s => s.id === 'p-' + data.chunk_id);
+        if (existing) {
+          existing.english = en;
+          existing.spanish = es;
+        } else {
+          sentences = sentences.filter(s => !s.partial);
+          sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, partial: true });
+        }
+      } else {
+        sentences = sentences.filter(s => !s.partial);
+
+        const existing = sentences.find(s => s.id === data.chunk_id);
+        if (existing) {
+          existing.english = en;
+          existing.spanish = es;
+        } else {
+          sentences.push({ id: data.chunk_id, english: en, spanish: es, partial: false });
+        }
+
+        if (sentences.length > MAX_SENTENCES * 2) {
+          sentences = sentences.slice(-MAX_SENTENCES * 2);
+        }
+      }
+
+      render();
+    };
+  }
+
+  document.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F11' || (e.metaKey && e.shiftKey && e.key === 'f')) {
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+  });
+
+  connect();
+})();
+</script>
+</body>
+</html>

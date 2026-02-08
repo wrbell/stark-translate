@@ -38,7 +38,7 @@ import mlx_whisper
 
 SAMPLE_RATE = 16000          # Whisper/VAD require 16kHz
 MIC_SAMPLE_RATE = 48000      # Most mics are 48kHz native; will resample to 16kHz
-CHUNK_DURATION = 3.0         # seconds of speech to accumulate before processing
+CHUNK_DURATION = 2.0         # seconds of speech — more context = better word accuracy
 VAD_THRESHOLD = 0.3          # Lower threshold for better sensitivity
 WS_PORT = 8765
 MIC_DEVICE = None            # None = auto-detect best input device
@@ -48,6 +48,22 @@ CSV_PATH = f"metrics/ab_metrics_{datetime.now():%Y%m%d_%H%M%S}.csv"
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
 MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
 
+# Whisper initial_prompt — biases decoder toward theological vocabulary
+# that Whisper otherwise misrecognizes (e.g. "media" instead of "mediator")
+WHISPER_PROMPT = (
+    "Sermon at Stark Road Gospel Hall. "
+    "God is always capitalized. Christ Jesus, the Holy Spirit, God the Father. "
+    "Topics: salvation, atonement, propitiation, mediator, covenant, "
+    "righteousness, sanctification, justification, redemption, Savior, "
+    "reconciliation, intercession, predestination, sovereignty, "
+    "sin, repentance, forgiveness, reign, bow, glory, grace, mercy, "
+    "the Gospel, epistle, apostle, tabernacle, congregation, "
+    "First Timothy, Second Timothy, First Corinthians, Ephesians, "
+    "Romans, Hebrews, Galatians, Colossians, Thessalonians, Philippians, "
+    "Genesis, Exodus, Leviticus, Deuteronomy, Isaiah, Jeremiah, Ezekiel, "
+    "Scripture, the Lord, the Word of God."
+)
+
 # ---------------------------------------------------------------------------
 # Globals
 # ---------------------------------------------------------------------------
@@ -56,6 +72,7 @@ audio_queue = asyncio.Queue()
 ws_clients = set()
 chunk_id = 0
 all_results = []
+prev_text = ""  # last chunk's transcription — fed to Whisper as context
 
 # Models (set during init)
 vad_model = None
@@ -65,6 +82,8 @@ mlx_a_model = None
 mlx_a_tokenizer = None
 mlx_b_model = None
 mlx_b_tokenizer = None
+marian_model = None
+marian_tokenizer = None
 
 
 # ---------------------------------------------------------------------------
@@ -73,7 +92,7 @@ mlx_b_tokenizer = None
 
 def load_vad():
     """Load Silero VAD (~2MB)."""
-    print("[1/4] Loading Silero VAD...")
+    print("[1/6] Loading Silero VAD...")
     model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad')
     print("  VAD ready")
     return model, utils
@@ -86,7 +105,7 @@ def load_whisper():
     mx.set_cache_limit(100 * 1024 * 1024)  # prevent memory growth
 
     model_id = "mlx-community/distil-whisper-large-v3"
-    print(f"[2/4] Loading {model_id} (MLX)...")
+    print(f"[2/6] Loading {model_id} (MLX)...")
     t0 = time.time()
     # Warm up — first call downloads and compiles the model
     silence = np.zeros(16000, dtype=np.float32)
@@ -117,7 +136,7 @@ def load_mlx_gemma(model_id, label):
 
 def load_translation_models(load_b=True):
     """Load TranslateGemma model(s) via MLX."""
-    print("[3/4] Loading TranslateGemma models (MLX 4-bit)...")
+    print("[3/5] Loading TranslateGemma models (MLX 4-bit)...")
     a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)")
 
     b_model, b_tok = None, None
@@ -129,6 +148,22 @@ def load_translation_models(load_b=True):
             print("  Running 4B only.")
 
     return a_model, a_tok, b_model, b_tok
+
+
+def load_marian():
+    """Load MarianMT (~298MB) for fast partial translations."""
+    from transformers import MarianMTModel, MarianTokenizer
+    model_id = "Helsinki-NLP/opus-mt-en-es"
+    print(f"[4/6] Loading {model_id} (MarianMT)...")
+    t0 = time.time()
+    tokenizer = MarianTokenizer.from_pretrained(model_id)
+    model = MarianMTModel.from_pretrained(model_id)
+    model.eval()
+    # Warm up
+    inputs = tokenizer("Hello", return_tensors="pt", padding=True)
+    model.generate(**inputs, max_new_tokens=16)
+    print(f"  MarianMT ready ({time.time()-t0:.1f}s)")
+    return model, tokenizer
 
 
 # ---------------------------------------------------------------------------
@@ -200,7 +235,7 @@ def translate_mlx(model, tokenizer, text):
 
     Returns (translation, latency_ms, generation_tps).
     """
-    from mlx_lm import stream_generate
+    from mlx_lm import generate
 
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
@@ -216,67 +251,85 @@ def translate_mlx(model, tokenizer, text):
         messages, add_generation_prompt=True
     )
 
+    # Cap max_tokens proportional to input (Spanish ~1.3x English tokens + margin)
+    input_words = len(text.split())
+    max_tok = max(32, int(input_words * 2.5))
+
     t0 = time.perf_counter()
-    chunks = []
-    gen_tps = 0.0
-    for response in stream_generate(
+    result = generate(
         model, tokenizer,
         prompt=prompt,
-        max_tokens=128,
-    ):
-        chunks.append(response.text)
-        gen_tps = response.generation_tps
-        if response.finish_reason:
-            break
+        max_tokens=max_tok,
+        verbose=False,
+    )
     latency_ms = (time.perf_counter() - t0) * 1000
 
-    translation = "".join(chunks)
-    clean = translation.split("<end_of_turn>")[0].strip()
+    # generate returns the full text including prompt — extract just the generation
+    clean = result.split("<end_of_turn>")[0].strip()
+    # Estimate tps from output tokens and time
+    out_tokens = len(tokenizer.encode(clean))
+    gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
     return clean, latency_ms, gen_tps
+
+
+def translate_marian(text):
+    """Fast English→Spanish via MarianMT (~50-100ms). For partials."""
+    if marian_model is None or marian_tokenizer is None:
+        return "(MarianMT not loaded)", 0.0
+
+    t0 = time.perf_counter()
+    inputs = marian_tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        translated = marian_model.generate(**inputs, max_new_tokens=128)
+    result = marian_tokenizer.decode(translated[0], skip_special_tokens=True)
+    latency_ms = (time.perf_counter() - t0) * 1000
+    return result, latency_ms
 
 
 # ---------------------------------------------------------------------------
 # Audio Processing
 # ---------------------------------------------------------------------------
 
-def detect_best_mic():
-    """Find the input device with the highest signal level."""
+def detect_macbook_mic():
+    """Find the MacBook Pro built-in microphone by name.
+    Returns (device_index, measured_rms) so gain can be auto-calibrated.
+    """
     devices = sd.query_devices()
-    input_devs = [(i, d) for i, d in enumerate(devices) if d['max_input_channels'] > 0]
-    if not input_devs:
-        print("  ERROR: No input devices found!", file=sys.stderr)
-        return None
-    if len(input_devs) == 1:
-        idx, d = input_devs[0]
-        print(f"  Using: [{idx}] {d['name']}")
-        return idx
-    # Quick 0.5s test on each device
-    best_idx, best_rms, best_name = None, 0, ""
-    for idx, d in input_devs:
-        try:
-            test = sd.rec(int(0.5 * d['default_samplerate']),
+    # Find MacBook Pro mic by name
+    for idx, d in enumerate(devices):
+        if d['max_input_channels'] > 0 and 'MacBook Pro' in d['name']:
+            # Quick RMS measurement for gain calibration
+            test = sd.rec(int(1.0 * d['default_samplerate']),
                           samplerate=d['default_samplerate'],
                           channels=1, dtype='float32', device=idx)
             sd.wait()
-            rms = float(np.sqrt(np.mean(test**2)))
-            print(f"  [{idx}] {d['name']}: RMS={rms:.6f}")
-            if rms > best_rms:
-                best_rms = rms
-                best_idx = idx
-                best_name = d['name']
-        except Exception:
-            pass
-    print(f"  Selected: [{best_idx}] {best_name}")
-    return best_idx
+            rms = float(np.sqrt(np.mean(test[:, 0]**2)))
+            print(f"  Using: [{idx}] {d['name']} (RMS={rms:.4f})")
+            return idx, rms
+
+    # Fallback: use system default input if MacBook Pro mic not found
+    print("  WARNING: MacBook Pro mic not found, using system default", file=sys.stderr)
+    default_idx = sd.default.device[0]
+    d = sd.query_devices(default_idx)
+    test = sd.rec(int(1.0 * d['default_samplerate']),
+                  samplerate=d['default_samplerate'],
+                  channels=1, dtype='float32', device=default_idx)
+    sd.wait()
+    rms = float(np.sqrt(np.mean(test[:, 0]**2)))
+    print(f"  Using default: [{default_idx}] {d['name']} (RMS={rms:.4f})")
+    return default_idx, rms
 
 
-MIC_GAIN = 10.0  # Amplify quiet built-in mic signal
+MIC_GAIN = 1.0  # Set during mic detection based on measured signal level
+TARGET_RMS = 0.08  # Target RMS for speech audio fed to VAD/Whisper
 
 def audio_callback(indata, frames, time_info, status):
     """sounddevice callback — resample from mic rate to 16kHz and push to queue."""
     if status:
         print(f"  Audio status: {status}", file=sys.stderr)
     raw = indata[:, 0].copy()
+    # Clamp to [-1, 1] — some mics deliver out-of-range samples that break VAD
+    raw = np.clip(raw, -1.0, 1.0)
     # Amplify quiet mic signals
     if MIC_GAIN != 1.0:
         raw = np.clip(raw * MIC_GAIN, -1.0, 1.0)
@@ -288,35 +341,85 @@ def audio_callback(indata, frames, time_info, status):
 
 
 def is_speech(audio_chunk, model, utils):
-    """Check if audio chunk contains speech using Silero VAD."""
-    (get_speech_timestamps, _, _, _, _) = utils
+    """Check if audio chunk contains speech using Silero VAD (streaming mode).
+
+    TODO: Singing/hymns cause VAD and STT to break — likely high RMS + tonal
+    content triggers clipping or VAD confusion. Investigate: lower gain during
+    music segments, or use inaSpeechSegmenter to detect music and skip/handle
+    differently.
+    """
     tensor = torch.from_numpy(audio_chunk).float()
-    timestamps = get_speech_timestamps(tensor, model, sampling_rate=SAMPLE_RATE,
-                                        threshold=VAD_THRESHOLD)
-    return len(timestamps) > 0
+    speech_prob = model(tensor, SAMPLE_RATE).item()
+    return speech_prob > VAD_THRESHOLD
 
 
-async def process_chunk(audio_data):
-    """Process a speech chunk: STT → Translate A → Translate B → broadcast."""
-    global chunk_id
+def _whisper_prompt():
+    """Build Whisper prompt: theological vocab + previous transcription."""
+    if prev_text:
+        return WHISPER_PROMPT + " " + prev_text
+    return WHISPER_PROMPT
+
+
+async def process_partial(audio_data, utterance_id):
+    """Fast partial: STT (~500ms) + MarianMT (~80ms). Italic in UI."""
+    try:
+        t0 = time.perf_counter()
+        result = mlx_whisper.transcribe(
+            audio_data,
+            path_or_hf_repo=stt_pipe,
+            language="en",
+            condition_on_previous_text=False,
+            initial_prompt=_whisper_prompt(),
+        )
+        stt_latency = (time.perf_counter() - t0) * 1000
+        english = result["text"].strip()
+
+        if not english:
+            return
+
+        # Fast MarianMT translation for partial display
+        spanish, marian_latency = translate_marian(english)
+        total = stt_latency + marian_latency
+
+        print(f"  partial ({total:.0f}ms): {english} | {spanish}          ", end="\r")
+        await broadcast({
+            "type": "translation",
+            "stage": "partial",
+            "chunk_id": utterance_id,
+            "english": english,
+            "spanish_a": spanish,
+            "spanish_b": None,
+            "stt_latency_ms": round(stt_latency, 1),
+            "latency_a_ms": round(marian_latency, 1),
+            "timestamp": datetime.now().isoformat(),
+        })
+
+    except Exception as e:
+        print(f"\n  ERROR in partial: {e}", file=sys.stderr)
+
+
+async def process_final(audio_data):
+    """Final STT on full utterance + translation. High quality."""
+    global chunk_id, prev_text
 
     chunk_id += 1
     cid = chunk_id
 
     try:
-        # STT (MLX Whisper)
+        # --- STT on full utterance audio ---
         e2e_start = time.perf_counter()
         t0 = e2e_start
         result = mlx_whisper.transcribe(
             audio_data,
-            path_or_hf_repo=stt_pipe,  # model ID string
+            path_or_hf_repo=stt_pipe,
             language="en",
             condition_on_previous_text=False,
+            initial_prompt=_whisper_prompt(),
         )
         stt_latency = (time.perf_counter() - t0) * 1000
         english = result["text"].strip()
 
-        # Extract confidence from Whisper segments
+        # Extract confidence
         stt_confidence = None
         segments = result.get("segments", [])
         if segments:
@@ -328,19 +431,70 @@ async def process_chunk(audio_data):
         if not english:
             return
 
-        # Translate (MLX)
-        spanish_a, lat_a, tps_a = translate_mlx(mlx_a_model, mlx_a_tokenizer, english)
-        spanish_b, lat_b, tps_b = translate_mlx(mlx_b_model, mlx_b_tokenizer, english)
+        prev_text = english[-200:]
+
+        # Broadcast refined English (replaces partial)
+        print(f"\n{'='*60}")
+        print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | EN: {english}")
+        await broadcast({
+            "type": "translation",
+            "stage": "stt",
+            "chunk_id": cid,
+            "english": english,
+            "spanish_a": None,
+            "spanish_b": None,
+            "stt_latency_ms": round(stt_latency, 1),
+            "stt_confidence": stt_confidence,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+        # --- Translate ---
+        spanish_b, lat_b, tps_b, qe_b = None, 0.0, 0.0, None
+
+        if mlx_b_model is not None:
+            loop = asyncio.get_event_loop()
+            task_a = loop.run_in_executor(
+                None, lambda: translate_mlx(mlx_a_model, mlx_a_tokenizer, english))
+            task_b = loop.run_in_executor(
+                None, lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english))
+
+            spanish_a, lat_a, tps_a = await task_a
+            qe_a = qe_score(english, spanish_a)
+            await broadcast({
+                "type": "translation",
+                "stage": "translation_a",
+                "chunk_id": cid,
+                "english": english,
+                "spanish_a": spanish_a,
+                "spanish_b": None,
+                "stt_latency_ms": round(stt_latency, 1),
+                "latency_a_ms": round(lat_a, 1),
+                "stt_confidence": stt_confidence,
+                "tps_a": round(tps_a, 1),
+                "qe_a": qe_a,
+                "timestamp": datetime.now().isoformat(),
+            })
+
+            spanish_b, lat_b, tps_b = await task_b
+            qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
+        else:
+            spanish_a, lat_a, tps_a = translate_mlx(mlx_a_model, mlx_a_tokenizer, english)
+            qe_a = qe_score(english, spanish_a)
 
         e2e_latency = (time.perf_counter() - e2e_start) * 1000
 
-        # Lightweight translation QE
-        qe_a = qe_score(english, spanish_a)
-        qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
+        conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
+        qe_str = f" | QE: A={qe_a}"
+        if qe_b is not None:
+            qe_str = f" | QE: A={qe_a} B={qe_b}"
+            print(f"  +{lat_b:.0f}ms B ({tps_b:.0f} t/s): {spanish_b}")
+        print(f"  +{lat_a:.0f}ms A ({tps_a:.0f} t/s): {spanish_a}")
+        print(f"  E2E: {e2e_latency:.0f}ms{conf_str}{qe_str}")
 
-        # Build result
+        # Final broadcast
         result_data = {
             "type": "translation",
+            "stage": "complete",
             "chunk_id": cid,
             "english": english,
             "spanish_a": spanish_a,
@@ -357,20 +511,7 @@ async def process_chunk(audio_data):
             "timestamp": datetime.now().isoformat(),
         }
         all_results.append(result_data)
-
-        # Terminal output
-        conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
-        qe_str = f" | QE: A={qe_a} B={qe_b}" if qe_b is not None else f" | QE: A={qe_a}"
-        print(f"\n{'='*60}")
-        print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | A: {lat_a:.0f}ms ({tps_a:.0f} t/s) | B: {lat_b:.0f}ms ({tps_b:.0f} t/s) | E2E: {e2e_latency:.0f}ms{conf_str}{qe_str}")
-        print(f"  EN: {english}")
-        print(f"  A (4B):  {spanish_a}")
-        print(f"  B (12B): {spanish_b}")
-
-        # WebSocket broadcast
         await broadcast(result_data)
-
-        # CSV log
         write_csv_row(result_data)
 
     except Exception as e:
@@ -398,17 +539,23 @@ async def ws_handler(websocket, path=None):
 async def broadcast(data):
     """Send data to all connected WebSocket clients."""
     if not ws_clients:
+        print("  [ws] No clients connected, skipping broadcast")
         return
     msg = json.dumps(data)
     dead = set()
+    clients = list(ws_clients)
     results = await asyncio.gather(
-        *[client.send(msg) for client in ws_clients],
+        *[client.send(msg) for client in clients],
         return_exceptions=True,
     )
-    for client, result in zip(list(ws_clients), results):
+    for client, result in zip(clients, results):
         if isinstance(result, Exception):
+            print(f"  [ws] Send failed: {result}")
             dead.add(client)
-    ws_clients -= dead
+    ws_clients.difference_update(dead)
+    ok = len(clients) - len(dead)
+    if ok > 0:
+        print(f"  [ws] Sent to {ok} client(s)")
 
 
 # ---------------------------------------------------------------------------
@@ -485,9 +632,18 @@ async def audio_loop():
     """Main audio capture and processing loop with error recovery."""
     print("\nListening... (Ctrl+C to stop)\n")
 
+    PARTIAL_INTERVAL = 1.0  # seconds between partial STT updates
+    SILENCE_TRIGGER = 0.8   # seconds of silence to trigger final processing
+    MAX_UTTERANCE = 8.0     # force-process if speaker doesn't pause
+
     speech_buffer = np.array([], dtype=np.float32)
     silence_frames = 0
-    max_silence_frames = int(0.8 * SAMPLE_RATE / 512)  # ~0.8s of silence triggers processing
+    max_silence_frames = int(SILENCE_TRIGGER * SAMPLE_RATE / 512)
+    frame_count = 0
+    speech_frame_count = 0
+    last_status_time = time.time()
+    last_partial_len = 0    # audio length (samples) at last partial
+    utterance_id = 0        # tracks current utterance for partial updates
 
     while True:
         try:
@@ -507,26 +663,55 @@ async def audio_loop():
                     except asyncio.TimeoutError:
                         continue
 
+                    frame_count += 1
                     has_speech = is_speech(audio_frame, vad_model, vad_utils)
 
                     if has_speech:
+                        if len(speech_buffer) == 0:
+                            utterance_id += 1  # new utterance starting
+                            last_partial_len = 0
                         speech_buffer = np.concatenate([speech_buffer, audio_frame])
                         silence_frames = 0
+                        speech_frame_count += 1
                     else:
                         silence_frames += 1
+                        # Keep buffering during brief pauses so words aren't dropped
+                        if len(speech_buffer) > 0 and silence_frames < max_silence_frames:
+                            speech_buffer = np.concatenate([speech_buffer, audio_frame])
 
-                    # Process when we have enough speech and hit a silence gap,
-                    # or when buffer exceeds max duration
+                    # Periodic status line (~every 3s)
+                    now = time.time()
+                    if now - last_status_time >= 3.0:
+                        buf_dur = len(speech_buffer) / SAMPLE_RATE
+                        rms = float(np.sqrt(np.mean(audio_frame**2)))
+                        print(f"  [status] frames={frame_count} speech={speech_frame_count} buf={buf_dur:.1f}s silence={silence_frames} rms={rms:.4f}", end="\r")
+                        last_status_time = now
+
                     buffer_duration = len(speech_buffer) / SAMPLE_RATE
-                    should_process = (
-                        (buffer_duration >= CHUNK_DURATION and silence_frames >= max_silence_frames)
-                        or buffer_duration >= CHUNK_DURATION * 3  # Force process at 3x
+                    new_audio = (len(speech_buffer) - last_partial_len) / SAMPLE_RATE
+
+                    # --- Partial: fire every PARTIAL_INTERVAL of new audio ---
+                    if (new_audio >= PARTIAL_INTERVAL
+                            and silence_frames < max_silence_frames
+                            and buffer_duration < MAX_UTTERANCE):
+                        await process_partial(speech_buffer.copy(), utterance_id)
+                        last_partial_len = len(speech_buffer)
+
+                    # --- Final: on silence gap or max duration ---
+                    should_finalize = (
+                        (buffer_duration >= 0.5 and silence_frames >= max_silence_frames)
+                        or buffer_duration >= MAX_UTTERANCE
                     )
 
-                    if should_process and buffer_duration >= 0.5:
-                        await process_chunk(speech_buffer.copy())
+                    if should_finalize and buffer_duration >= 0.5:
+                        print()  # newline after partial line
+                        await process_final(speech_buffer.copy())
                         speech_buffer = np.array([], dtype=np.float32)
                         silence_frames = 0
+                        speech_frame_count = 0
+                        frame_count = 0
+                        last_partial_len = 0
+                        vad_model.reset_states()
 
         except sd.PortAudioError as e:
             print(f"\n  Mic error: {e} — retrying in 2s...", file=sys.stderr)
@@ -544,10 +729,11 @@ async def main_async(args):
     """Start WebSocket server and audio loop."""
     global vad_model, vad_utils, stt_pipe
     global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
+    global marian_model, marian_tokenizer
 
     print(f"{'='*60}")
     print(f"  Bilingual A/B Dry Run (MLX)")
-    print(f"  Mode: {'4B only' if args.only_4b else 'A/B parallel'}")
+    print(f"  Mode: {'A/B parallel' if args.run_ab else '4B only'}")
     print(f"  WebSocket: ws://localhost:{args.ws_port}")
     print(f"{'='*60}\n")
 
@@ -555,19 +741,27 @@ async def main_async(args):
     vad_model, vad_utils = load_vad()
     stt_pipe = load_whisper()
     mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
-        load_translation_models(load_b=not args.only_4b)
+        load_translation_models(load_b=args.run_ab)
+    marian_model, marian_tokenizer = load_marian()
 
-    # Detect best microphone
-    global MIC_DEVICE
+    # Detect best microphone and auto-calibrate gain
+    global MIC_DEVICE, MIC_GAIN
     if MIC_DEVICE is None:
-        print("[4/5] Detecting microphone...")
-        MIC_DEVICE = detect_best_mic()
+        print("[5/6] Detecting microphone...")
+        MIC_DEVICE, mic_rms = detect_macbook_mic()
+        if mic_rms > 0 and MIC_GAIN == 1.0:
+            # Auto-calibrate: scale signal to TARGET_RMS
+            MIC_GAIN = max(1.0, min(20.0, TARGET_RMS / mic_rms))
+            print(f"  Auto-gain: {MIC_GAIN:.1f}x (mic RMS={mic_rms:.4f}, target={TARGET_RMS})")
 
-    print(f"[5/5] Starting WebSocket server on port {args.ws_port}...")
+    print(f"[6/6] Starting WebSocket server on port {args.ws_port}...")
     init_csv()
 
     # Start WebSocket server
-    ws_server = await websockets.serve(ws_handler, "localhost", args.ws_port)
+    ws_server = await websockets.serve(
+        ws_handler, "localhost", args.ws_port,
+        ping_interval=None,  # disable pings — inference blocks event loop
+    )
     print(f"  WebSocket ready — open ab_display.html in browser")
 
     # Run audio loop
@@ -585,9 +779,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Live A/B bilingual speech-to-text dry run (MLX)"
     )
-    parser.add_argument("--4b-only", action="store_true", dest="only_4b",
-                        help="Load only the 4B model (skip 12B)")
-    parser.add_argument("--chunk-duration", type=float, default=3.0,
+    parser.add_argument("--ab", action="store_true", dest="run_ab",
+                        help="Load both 4B and 12B for A/B comparison (default: 4B only)")
+    parser.add_argument("--chunk-duration", type=float, default=2.0,
                         help="Seconds of speech to accumulate before processing")
     parser.add_argument("--ws-port", type=int, default=8765,
                         help="WebSocket server port")
@@ -595,8 +789,8 @@ def main():
                         help="VAD speech threshold (0-1)")
     parser.add_argument("--device", type=int, default=None,
                         help="Audio input device index (default: auto-detect)")
-    parser.add_argument("--gain", type=float, default=10.0,
-                        help="Mic gain multiplier for quiet mics (default: 10.0)")
+    parser.add_argument("--gain", type=float, default=None,
+                        help="Mic gain multiplier (default: auto-calibrate)")
     args = parser.parse_args()
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN
@@ -604,7 +798,8 @@ def main():
     WS_PORT = args.ws_port
     VAD_THRESHOLD = args.vad_threshold
     MIC_DEVICE = args.device
-    MIC_GAIN = args.gain
+    if args.gain is not None:
+        MIC_GAIN = args.gain  # Explicit gain skips auto-calibration
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):

@@ -142,6 +142,8 @@
   .conf-warn { background: var(--yellow); }
   .conf-bad { background: var(--red); }
 
+  .chunk.partial { opacity: 0.5; font-style: italic; }
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
@@ -342,22 +344,7 @@
       const data = JSON.parse(evt.data);
       if (data.type !== 'translation') return;
 
-      chunks++;
-      const latA = data.latency_a_ms || 0;
-      const latB = data.latency_b_ms || 0;
-      const latSTT = data.stt_latency_ms || 0;
-      const e2e = data.e2e_latency_ms || (latSTT + Math.max(latA, latB));
-
-      sumA += latA;
-      sumB += latB;
-      sumSTT += latSTT;
-      sumE2E += e2e;
-      if (data.spanish_a === data.spanish_b) sameCount++;
-      if (latA < latB && latB > 0) aFasterCount++;
-
-      latenciesSTT.push(latSTT);
-      latenciesA.push(latA);
-      if (latB > 0) latenciesB.push(latB);
+      const stage = data.stage || 'complete';
 
       // Confidence dot
       const conf = data.stt_confidence;
@@ -365,54 +352,117 @@
         ? '<span class="confidence-dot ' + confidenceClass(conf) + '"></span>'
         : '';
 
-      // Tokens/sec tracking
-      const tpsA = data.tps_a || 0;
-      const tpsB = data.tps_b || 0;
-      if (tpsA > 0) { sumTpsA += tpsA; tpsCountA++; }
-      if (tpsB > 0) { sumTpsB += tpsB; tpsCountB++; }
+      const isPartial = stage === 'partial';
 
-      // Add text to panels (with word filter for church display)
-      appendChunk(panels['a-en'], data.chunk_id, filterText(data.english), confDot);
-      appendChunk(panels['a-es'], data.chunk_id, filterText(data.spanish_a), '');
-      appendChunk(panels['b-en'], data.chunk_id, filterText(data.english), confDot);
-      appendChunk(panels['b-es'], data.chunk_id, filterText(data.spanish_b), '');
+      // Partials use 'p-<id>' prefix; finals use chunk_id and remove the partial
+      if (isPartial) {
+        // Show partial English + Spanish (dimmed, italic) — updates in place
+        if (data.english) {
+          upsertChunk(panels['a-en'], 'p-' + data.chunk_id, filterText(data.english), confDot, true);
+          upsertChunk(panels['b-en'], 'p-' + data.chunk_id, filterText(data.english), confDot, true);
+        }
+        if (data.spanish_a) {
+          upsertChunk(panels['a-es'], 'p-' + data.chunk_id, filterText(data.spanish_a), '', true);
+          upsertChunk(panels['b-es'], 'p-' + data.chunk_id, filterText(data.spanish_a), '', true);
+        }
+        return;  // no stats
+      }
 
-      // Update latency headers (last chunk)
-      $('latA').textContent = fmtMs(latA);
-      $('latAes').textContent = fmtMs(latA);
-      $('latB').textContent = fmtMs(latB);
-      $('latBes').textContent = fmtMs(latB);
+      // Final/complete: remove partial rows and show final text
+      removeChunk(panels['a-en'], 'p-' + data.chunk_id);
+      removeChunk(panels['b-en'], 'p-' + data.chunk_id);
+      removeChunk(panels['a-es'], 'p-' + data.chunk_id);
+      removeChunk(panels['b-es'], 'p-' + data.chunk_id);
 
-      // Update footer — averages
-      $('chunkCount').textContent = chunks;
-      $('avgA').textContent = fmtMs(sumA / chunks);
-      $('avgB').textContent = latenciesB.length > 0 ? fmtMs(sumB / latenciesB.length) : '—';
-      $('avgSTT').textContent = fmtMs(sumSTT / chunks);
-      $('sameRate').textContent = ((sameCount / chunks) * 100).toFixed(0) + '%';
-      $('aFaster').textContent = latenciesB.length > 0
-        ? ((aFasterCount / chunks) * 100).toFixed(0) + '%' : '—';
+      if (data.english) {
+        upsertChunk(panels['a-en'], data.chunk_id, filterText(data.english), confDot, false);
+        upsertChunk(panels['b-en'], data.chunk_id, filterText(data.english), confDot, false);
+      }
+      if (data.spanish_a) {
+        upsertChunk(panels['a-es'], data.chunk_id, filterText(data.spanish_a), '', false);
+      }
+      if (data.spanish_b) {
+        upsertChunk(panels['b-es'], data.chunk_id, filterText(data.spanish_b), '', false);
+      }
 
-      // Update footer — percentiles
-      $('p50STT').textContent = fmtMs(percentile(latenciesSTT, 50));
-      $('p50A').textContent = fmtMs(percentile(latenciesA, 50));
-      $('p50B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 50)) : '—';
-      $('p95STT').textContent = fmtMs(percentile(latenciesSTT, 95));
-      $('p95A').textContent = fmtMs(percentile(latenciesA, 95));
-      $('p95B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 95)) : '—';
-      $('avgE2E').textContent = fmtMs(sumE2E / chunks);
+      // Update latency headers as data arrives
+      const latSTT = data.stt_latency_ms || 0;
+      if (data.latency_a_ms) {
+        $('latA').textContent = fmtMs(data.latency_a_ms);
+        $('latAes').textContent = fmtMs(data.latency_a_ms);
+      }
+      if (data.latency_b_ms) {
+        $('latB').textContent = fmtMs(data.latency_b_ms);
+        $('latBes').textContent = fmtMs(data.latency_b_ms);
+      }
 
-      // Update footer — tokens/sec
-      $('tpsA').textContent = tpsCountA > 0 ? (sumTpsA / tpsCountA).toFixed(0) : '—';
-      $('tpsB').textContent = tpsCountB > 0 ? (sumTpsB / tpsCountB).toFixed(0) : '—';
+      // Only update stats on the final "complete" stage to avoid double-counting
+      if (stage === 'complete') {
+        const latA = data.latency_a_ms || 0;
+        const latB = data.latency_b_ms || 0;
+        const e2e = data.e2e_latency_ms || (latSTT + Math.max(latA, latB));
+
+        chunks++;
+        sumA += latA;
+        sumB += latB;
+        sumSTT += latSTT;
+        sumE2E += e2e;
+        if (data.spanish_a === data.spanish_b) sameCount++;
+        if (latA < latB && latB > 0) aFasterCount++;
+
+        latenciesSTT.push(latSTT);
+        latenciesA.push(latA);
+        if (latB > 0) latenciesB.push(latB);
+
+        const tpsA = data.tps_a || 0;
+        const tpsB = data.tps_b || 0;
+        if (tpsA > 0) { sumTpsA += tpsA; tpsCountA++; }
+        if (tpsB > 0) { sumTpsB += tpsB; tpsCountB++; }
+
+        // Update footer — averages
+        $('chunkCount').textContent = chunks;
+        $('avgA').textContent = fmtMs(sumA / chunks);
+        $('avgB').textContent = latenciesB.length > 0 ? fmtMs(sumB / latenciesB.length) : '—';
+        $('avgSTT').textContent = fmtMs(sumSTT / chunks);
+        $('sameRate').textContent = ((sameCount / chunks) * 100).toFixed(0) + '%';
+        $('aFaster').textContent = latenciesB.length > 0
+          ? ((aFasterCount / chunks) * 100).toFixed(0) + '%' : '—';
+
+        // Update footer — percentiles
+        $('p50STT').textContent = fmtMs(percentile(latenciesSTT, 50));
+        $('p50A').textContent = fmtMs(percentile(latenciesA, 50));
+        $('p50B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 50)) : '—';
+        $('p95STT').textContent = fmtMs(percentile(latenciesSTT, 95));
+        $('p95A').textContent = fmtMs(percentile(latenciesA, 95));
+        $('p95B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 95)) : '—';
+        $('avgE2E').textContent = fmtMs(sumE2E / chunks);
+
+        // Update footer — tokens/sec
+        $('tpsA').textContent = tpsCountA > 0 ? (sumTpsA / tpsCountA).toFixed(0) : '—';
+        $('tpsB').textContent = tpsCountB > 0 ? (sumTpsB / tpsCountB).toFixed(0) : '—';
+      }
     };
   }
 
-  function appendChunk(panel, id, text, prefix) {
-    const div = document.createElement('div');
-    div.className = 'chunk';
-    div.innerHTML = (prefix || '') + '<span class="chunk-num">#' + id + '</span>' + escapeHtml(text);
-    panel.appendChild(div);
+  function upsertChunk(panel, id, text, prefix, isPartial) {
+    const domId = panel.id + '-chunk-' + id;
+    let div = document.getElementById(domId);
+    if (!div) {
+      div = document.createElement('div');
+      div.id = domId;
+      div.className = 'chunk';
+      panel.appendChild(div);
+    }
+    div.className = isPartial ? 'chunk partial' : 'chunk';
+    const label = typeof id === 'string' && id.startsWith('p-') ? '' : '<span class="chunk-num">#' + id + '</span>';
+    div.innerHTML = (prefix || '') + label + escapeHtml(text);
     panel.scrollTop = panel.scrollHeight;
+  }
+
+  function removeChunk(panel, id) {
+    const domId = panel.id + '-chunk-' + id;
+    const div = document.getElementById(domId);
+    if (div) div.remove();
   }
 
   function escapeHtml(str) {
