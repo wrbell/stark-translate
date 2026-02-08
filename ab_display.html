@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A/B Bilingual STT — Stark Road Gospel Hall</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --green: #3fb950;
+    --green-dim: #1a3a2a;
+    --blue: #58a6ff;
+    --blue-dim: #1a2a3a;
+    --red: #f85149;
+    --yellow: #d29922;
+  }
+
+  body {
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .header .title {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    transition: background 0.3s;
+  }
+
+  .status-dot.connected { background: var(--green); }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    flex: 1;
+    gap: 1px;
+    background: var(--border);
+    min-height: 0;
+  }
+
+  .quadrant {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .quadrant-header {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .quadrant-header .latency {
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .q-blue .quadrant-header { background: var(--blue-dim); color: var(--blue); }
+  .q-green .quadrant-header { background: var(--green-dim); color: var(--green); }
+
+  .quadrant-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    font-size: 20px;
+    line-height: 1.5;
+    scroll-behavior: smooth;
+  }
+
+  .quadrant-content::-webkit-scrollbar { width: 4px; }
+  .quadrant-content::-webkit-scrollbar-track { background: transparent; }
+  .quadrant-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .chunk {
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+  }
+
+  .chunk .chunk-num {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-right: 6px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Footer */
+  .footer {
+    padding: 8px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .footer .stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .footer .stat-val { color: var(--text); font-weight: 600; }
+  .footer .green-val { color: var(--green); }
+  .footer .blue-val { color: var(--blue); }
+
+  .footer .hint {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* Fullscreen */
+  :fullscreen { background: var(--bg); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="title">A/B Bilingual STT — Stark Road Gospel Hall</span>
+  <div class="status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Disconnected</span>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- Top-left: B (12B) English -->
+  <div class="quadrant q-blue">
+    <div class="quadrant-header">
+      <span>B (12B) — English</span>
+      <span class="latency" id="latB">—</span>
+    </div>
+    <div class="quadrant-content" id="b-en"></div>
+  </div>
+
+  <!-- Top-right: A (4B) English -->
+  <div class="quadrant q-green">
+    <div class="quadrant-header">
+      <span>A (4B) — English</span>
+      <span class="latency" id="latA">—</span>
+    </div>
+    <div class="quadrant-content" id="a-en"></div>
+  </div>
+
+  <!-- Bottom-left: B (12B) Spanish -->
+  <div class="quadrant q-blue">
+    <div class="quadrant-header">
+      <span>B (12B) — Español</span>
+      <span class="latency" id="latBes">—</span>
+    </div>
+    <div class="quadrant-content" id="b-es"></div>
+  </div>
+
+  <!-- Bottom-right: A (4B) Spanish -->
+  <div class="quadrant q-green">
+    <div class="quadrant-header">
+      <span>A (4B) — Español</span>
+      <span class="latency" id="latAes">—</span>
+    </div>
+    <div class="quadrant-content" id="a-es"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="stats">
+    <span>Chunks: <span class="stat-val" id="chunkCount">0</span></span>
+    <span>A avg: <span class="stat-val green-val" id="avgA">—</span></span>
+    <span>B avg: <span class="stat-val blue-val" id="avgB">—</span></span>
+    <span>STT avg: <span class="stat-val" id="avgSTT">—</span></span>
+    <span>Same: <span class="stat-val" id="sameRate">—</span></span>
+    <span>A faster: <span class="stat-val green-val" id="aFaster">—</span></span>
+  </div>
+  <span class="hint">Fullscreen: F11 · Cmd+Shift+F</span>
+</div>
+
+<script>
+(function() {
+  const WS_URL = 'ws://localhost:8765';
+  const RECONNECT_MS = 2000;
+
+  // DOM refs
+  const $ = id => document.getElementById(id);
+  const statusDot = $('statusDot');
+  const statusText = $('statusText');
+  const panels = {
+    'a-en': $('a-en'), 'a-es': $('a-es'),
+    'b-en': $('b-en'), 'b-es': $('b-es'),
+  };
+
+  // Stats
+  let chunks = 0;
+  let sumA = 0, sumB = 0, sumSTT = 0;
+  let sameCount = 0, aFasterCount = 0;
+
+  function connect() {
+    const ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      statusDot.classList.add('connected');
+      statusText.textContent = 'Live';
+    };
+
+    ws.onclose = () => {
+      statusDot.classList.remove('connected');
+      statusText.textContent = 'Reconnecting...';
+      setTimeout(connect, RECONNECT_MS);
+    };
+
+    ws.onerror = () => {
+      ws.close();
+    };
+
+    ws.onmessage = (evt) => {
+      const data = JSON.parse(evt.data);
+      if (data.type !== 'translation') return;
+
+      chunks++;
+      sumA += data.latency_a_ms;
+      sumB += data.latency_b_ms;
+      sumSTT += data.stt_latency_ms;
+      if (data.spanish_a === data.spanish_b) sameCount++;
+      if (data.latency_a_ms < data.latency_b_ms) aFasterCount++;
+
+      // Add text to panels
+      appendChunk(panels['a-en'], data.chunk_id, data.english);
+      appendChunk(panels['a-es'], data.chunk_id, data.spanish_a);
+      appendChunk(panels['b-en'], data.chunk_id, data.english);
+      appendChunk(panels['b-es'], data.chunk_id, data.spanish_b);
+
+      // Update latency headers
+      $('latA').textContent = data.latency_a_ms.toFixed(0) + 'ms';
+      $('latAes').textContent = data.latency_a_ms.toFixed(0) + 'ms';
+      $('latB').textContent = data.latency_b_ms.toFixed(0) + 'ms';
+      $('latBes').textContent = data.latency_b_ms.toFixed(0) + 'ms';
+
+      // Update footer stats
+      $('chunkCount').textContent = chunks;
+      $('avgA').textContent = (sumA / chunks).toFixed(0) + 'ms';
+      $('avgB').textContent = (sumB / chunks).toFixed(0) + 'ms';
+      $('avgSTT').textContent = (sumSTT / chunks).toFixed(0) + 'ms';
+      $('sameRate').textContent = ((sameCount / chunks) * 100).toFixed(0) + '%';
+      $('aFaster').textContent = ((aFasterCount / chunks) * 100).toFixed(0) + '%';
+    };
+  }
+
+  function appendChunk(panel, id, text) {
+    const div = document.createElement('div');
+    div.className = 'chunk';
+    div.innerHTML = '<span class="chunk-num">#' + id + '</span>' + escapeHtml(text);
+    panel.appendChild(div);
+    // Auto-scroll
+    panel.scrollTop = panel.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Fullscreen toggle
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F11' || (e.metaKey && e.shiftKey && e.key === 'f')) {
+      e.preventDefault();
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        document.documentElement.requestFullscreen();
+      }
+    }
+  });
+
+  // Start
+  connect();
+})();
+</script>
+</body>
+</html>
