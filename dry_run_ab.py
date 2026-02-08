@@ -36,10 +36,12 @@ import mlx_whisper
 # Configuration
 # ---------------------------------------------------------------------------
 
-SAMPLE_RATE = 16000
-CHUNK_DURATION = 3.0        # seconds of speech to accumulate before processing
-VAD_THRESHOLD = 0.5
+SAMPLE_RATE = 16000          # Whisper/VAD require 16kHz
+MIC_SAMPLE_RATE = 48000      # Most mics are 48kHz native; will resample to 16kHz
+CHUNK_DURATION = 3.0         # seconds of speech to accumulate before processing
+VAD_THRESHOLD = 0.3          # Lower threshold for better sensitivity
 WS_PORT = 8765
+MIC_DEVICE = None            # None = auto-detect best input device
 CSV_PATH = f"metrics/ab_metrics_{datetime.now():%Y%m%d_%H%M%S}.csv"
 
 # MLX model IDs (4-bit quantized, community-converted)
@@ -237,11 +239,52 @@ def translate_mlx(model, tokenizer, text):
 # Audio Processing
 # ---------------------------------------------------------------------------
 
+def detect_best_mic():
+    """Find the input device with the highest signal level."""
+    devices = sd.query_devices()
+    input_devs = [(i, d) for i, d in enumerate(devices) if d['max_input_channels'] > 0]
+    if not input_devs:
+        print("  ERROR: No input devices found!", file=sys.stderr)
+        return None
+    if len(input_devs) == 1:
+        idx, d = input_devs[0]
+        print(f"  Using: [{idx}] {d['name']}")
+        return idx
+    # Quick 0.5s test on each device
+    best_idx, best_rms, best_name = None, 0, ""
+    for idx, d in input_devs:
+        try:
+            test = sd.rec(int(0.5 * d['default_samplerate']),
+                          samplerate=d['default_samplerate'],
+                          channels=1, dtype='float32', device=idx)
+            sd.wait()
+            rms = float(np.sqrt(np.mean(test**2)))
+            print(f"  [{idx}] {d['name']}: RMS={rms:.6f}")
+            if rms > best_rms:
+                best_rms = rms
+                best_idx = idx
+                best_name = d['name']
+        except Exception:
+            pass
+    print(f"  Selected: [{best_idx}] {best_name}")
+    return best_idx
+
+
+MIC_GAIN = 10.0  # Amplify quiet built-in mic signal
+
 def audio_callback(indata, frames, time_info, status):
-    """sounddevice callback — push raw audio frames to async queue."""
+    """sounddevice callback — resample from mic rate to 16kHz and push to queue."""
     if status:
         print(f"  Audio status: {status}", file=sys.stderr)
-    audio_queue.put_nowait(indata[:, 0].copy())
+    raw = indata[:, 0].copy()
+    # Amplify quiet mic signals
+    if MIC_GAIN != 1.0:
+        raw = np.clip(raw * MIC_GAIN, -1.0, 1.0)
+    if MIC_SAMPLE_RATE != SAMPLE_RATE:
+        from scipy.signal import resample
+        target_len = int(len(raw) * SAMPLE_RATE / MIC_SAMPLE_RATE)
+        raw = resample(raw, target_len).astype(np.float32)
+    audio_queue.put_nowait(raw)
 
 
 def is_speech(audio_chunk, model, utils):
@@ -449,11 +492,12 @@ async def audio_loop():
     while True:
         try:
             stream = sd.InputStream(
-                samplerate=SAMPLE_RATE,
+                samplerate=MIC_SAMPLE_RATE,
                 channels=1,
                 dtype="float32",
-                blocksize=512,
+                blocksize=int(MIC_SAMPLE_RATE * 0.032),  # ~32ms frames
                 callback=audio_callback,
+                device=MIC_DEVICE,
             )
 
             with stream:
@@ -513,7 +557,13 @@ async def main_async(args):
     mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
         load_translation_models(load_b=not args.only_4b)
 
-    print(f"[4/4] Starting WebSocket server on port {args.ws_port}...")
+    # Detect best microphone
+    global MIC_DEVICE
+    if MIC_DEVICE is None:
+        print("[4/5] Detecting microphone...")
+        MIC_DEVICE = detect_best_mic()
+
+    print(f"[5/5] Starting WebSocket server on port {args.ws_port}...")
     init_csv()
 
     # Start WebSocket server
@@ -541,14 +591,20 @@ def main():
                         help="Seconds of speech to accumulate before processing")
     parser.add_argument("--ws-port", type=int, default=8765,
                         help="WebSocket server port")
-    parser.add_argument("--vad-threshold", type=float, default=0.5,
+    parser.add_argument("--vad-threshold", type=float, default=0.3,
                         help="VAD speech threshold (0-1)")
+    parser.add_argument("--device", type=int, default=None,
+                        help="Audio input device index (default: auto-detect)")
+    parser.add_argument("--gain", type=float, default=10.0,
+                        help="Mic gain multiplier for quiet mics (default: 10.0)")
     args = parser.parse_args()
 
-    global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD
+    global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN
     CHUNK_DURATION = args.chunk_duration
     WS_PORT = args.ws_port
     VAD_THRESHOLD = args.vad_threshold
+    MIC_DEVICE = args.device
+    MIC_GAIN = args.gain
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):
