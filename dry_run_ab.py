@@ -4,13 +4,14 @@ dry_run_ab.py — Live A/B Bilingual Speech-to-Text Dry Run
 
 Mic → Silero VAD → Distil-Whisper STT → TranslateGemma (4B + 12B) → WebSocket → Browser
 
-Two modes:
-  - Parallel (default): Both Gemma models loaded in 4-bit via bitsandbytes
-  - Swap (fallback):    One model at a time in fp16 if 4-bit fails on macOS
+Architecture:
+  - STT: Distil-Whisper via mlx-whisper (Apple Silicon native)
+  - Translation: TranslateGemma via mlx-lm (4-bit quantized, Apple Silicon native)
+  - Both 4B and 12B loaded simultaneously (~9GB total)
 
 Usage:
-    python dry_run_ab.py                     # Parallel mode (both models in 4-bit)
-    python dry_run_ab.py --swap              # Swap mode (one model at a time)
+    python dry_run_ab.py                     # Both models (A/B parallel)
+    python dry_run_ab.py --4b-only           # 4B only (lighter)
     python dry_run_ab.py --chunk-duration 5  # Longer chunks
     python dry_run_ab.py --ws-port 9000      # Different WebSocket port
 """
@@ -29,7 +30,7 @@ import numpy as np
 import sounddevice as sd
 import torch
 import websockets
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+import mlx_whisper
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -39,8 +40,11 @@ SAMPLE_RATE = 16000
 CHUNK_DURATION = 3.0        # seconds of speech to accumulate before processing
 VAD_THRESHOLD = 0.5
 WS_PORT = 8765
-SWAP_MODE = False
 CSV_PATH = f"metrics/ab_metrics_{datetime.now():%Y%m%d_%H%M%S}.csv"
+
+# MLX model IDs (4-bit quantized, community-converted)
+MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
+MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
 
 # ---------------------------------------------------------------------------
 # Globals
@@ -55,10 +59,10 @@ all_results = []
 vad_model = None
 vad_utils = None
 stt_pipe = None
-gemma_a_model = None
-gemma_a_tokenizer = None
-gemma_b_model = None
-gemma_b_tokenizer = None
+mlx_a_model = None
+mlx_a_tokenizer = None
+mlx_b_model = None
+mlx_b_tokenizer = None
 
 
 # ---------------------------------------------------------------------------
@@ -74,87 +78,65 @@ def load_vad():
 
 
 def load_whisper():
-    """Load Distil-Whisper on MPS with float16."""
-    print("[2/4] Loading Distil-Whisper distil-large-v3...")
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
-    pipe = pipeline(
-        "automatic-speech-recognition",
-        model="distil-whisper/distil-large-v3",
-        device=device,
-        torch_dtype=torch.float16,
-    )
-    print(f"  Whisper ready on {device}")
-    return pipe
+    """Load Distil-Whisper via mlx-whisper (Apple Silicon native)."""
+    import mlx_whisper
+    import mlx.core as mx
+    mx.set_cache_limit(100 * 1024 * 1024)  # prevent memory growth
+
+    model_id = "mlx-community/distil-whisper-large-v3"
+    print(f"[2/4] Loading {model_id} (MLX)...")
+    t0 = time.time()
+    # Warm up — first call downloads and compiles the model
+    silence = np.zeros(16000, dtype=np.float32)
+    mlx_whisper.transcribe(silence, path_or_hf_repo=model_id,
+                           condition_on_previous_text=False)
+    print(f"  Whisper ready ({time.time()-t0:.1f}s)")
+    return model_id  # mlx_whisper uses model_id per call, no persistent object
 
 
-def load_gemma_4bit(model_name, label):
-    """Load a TranslateGemma model in 4-bit quantization."""
-    print(f"  Loading {model_name} (4-bit)...")
-    try:
-        from transformers import BitsAndBytesConfig
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.float16,
-        )
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            quantization_config=bnb_config,
-            device_map="auto",
-        )
-        print(f"  {label} ready (4-bit)")
-        return model, tokenizer
-    except Exception as e:
-        print(f"  4-bit load failed for {label}: {e}")
-        return None, None
+def load_mlx_gemma(model_id, label):
+    """Load a TranslateGemma model via MLX (4-bit, Apple Silicon native)."""
+    from mlx_lm import load
+    import mlx.core as mx
+    mx.set_cache_limit(100 * 1024 * 1024)  # prevent memory growth in repeated inference
 
+    print(f"  Loading {model_id}...")
+    t0 = time.time()
+    model, tokenizer = load(model_id)
 
-def load_gemma_fp16(model_name, label):
-    """Load a TranslateGemma model in fp16 (swap mode fallback)."""
-    print(f"  Loading {model_name} (fp16)...")
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        torch_dtype=torch.float16,
-        device_map="auto",
-    )
-    print(f"  {label} ready (fp16)")
+    # Fix: add <end_of_turn> as EOS so generation stops after the translation
+    eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
+    tokenizer._eos_token_ids = {tokenizer.eos_token_id, eot_id}
+
+    elapsed = time.time() - t0
+    print(f"  {label} ready ({elapsed:.1f}s)")
     return model, tokenizer
 
 
-def unload_model(model, label):
-    """Unload a model to free memory."""
-    del model
-    if torch.backends.mps.is_available():
-        torch.mps.empty_cache()
-    import gc
-    gc.collect()
-    print(f"  Unloaded {label}")
+def load_translation_models(load_b=True):
+    """Load TranslateGemma model(s) via MLX."""
+    print("[3/4] Loading TranslateGemma models (MLX 4-bit)...")
+    a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)")
 
-
-def load_gemma_parallel():
-    """Load both Gemma models in 4-bit for parallel mode."""
-    print("[3/4] Loading TranslateGemma models (parallel mode)...")
-    a_model, a_tok = load_gemma_4bit("google/translategemma-4b-it", "Approach A (4B)")
-    b_model, b_tok = load_gemma_4bit("google/translategemma-12b-it", "Approach B (12B)")
-
-    if a_model is None or b_model is None:
-        print("  WARNING: 4-bit loading failed. Try --swap mode.")
-        if a_model is None:
-            print("  Falling back to fp16 for 4B...")
-            a_model, a_tok = load_gemma_fp16("google/translategemma-4b-it", "Approach A (4B)")
-        if b_model is None:
-            print("  Skipping 12B in parallel mode (too large for fp16)")
+    b_model, b_tok = None, None
+    if load_b:
+        try:
+            b_model, b_tok = load_mlx_gemma(MLX_MODEL_B, "Approach B (12B)")
+        except Exception as e:
+            print(f"  12B load failed: {e}")
+            print("  Running 4B only.")
 
     return a_model, a_tok, b_model, b_tok
 
 
 # ---------------------------------------------------------------------------
-# Translation
+# Translation (MLX)
 # ---------------------------------------------------------------------------
 
-def translate(model, tokenizer, text):
-    """Translate English to Spanish using TranslateGemma chat template."""
+def translate_mlx(model, tokenizer, text):
+    """Translate English to Spanish using TranslateGemma via MLX."""
+    from mlx_lm import generate
+
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0
 
@@ -165,24 +147,22 @@ def translate(model, tokenizer, text):
          "text": text}
     ]}]
 
-    input_text = tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=True
+    prompt = tokenizer.apply_chat_template(
+        messages, add_generation_prompt=True
     )
-    inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
 
     t0 = time.perf_counter()
-    with torch.no_grad():
-        output = model.generate(**inputs, max_new_tokens=256)
+    translation = generate(
+        model, tokenizer,
+        prompt=prompt,
+        max_tokens=128,
+        verbose=False,
+    )
     latency_ms = (time.perf_counter() - t0) * 1000
 
-    translation = tokenizer.decode(
-        output[0][inputs.input_ids.shape[1]:], skip_special_tokens=True
-    ).strip()
-
-    if torch.backends.mps.is_available():
-        torch.mps.empty_cache()
-
-    return translation, latency_ms
+    # Strip any trailing end_of_turn tokens (safety net)
+    clean = translation.split("<end_of_turn>")[0].strip()
+    return clean, latency_ms
 
 
 # ---------------------------------------------------------------------------
@@ -205,45 +185,43 @@ def is_speech(audio_chunk, model, utils):
     return len(timestamps) > 0
 
 
-async def process_chunk(audio_data, swap_mode=False):
+async def process_chunk(audio_data):
     """Process a speech chunk: STT → Translate A → Translate B → broadcast."""
-    global chunk_id, gemma_a_model, gemma_a_tokenizer, gemma_b_model, gemma_b_tokenizer
+    global chunk_id
 
     chunk_id += 1
     cid = chunk_id
 
-    # STT
-    t0 = time.perf_counter()
-    result = stt_pipe(
-        {"raw": audio_data, "sampling_rate": SAMPLE_RATE},
-        generate_kwargs={"language": "en"},
+    # STT (MLX Whisper)
+    e2e_start = time.perf_counter()
+    t0 = e2e_start
+    result = mlx_whisper.transcribe(
+        audio_data,
+        path_or_hf_repo=stt_pipe,  # model ID string
+        language="en",
+        condition_on_previous_text=False,
     )
     stt_latency = (time.perf_counter() - t0) * 1000
     english = result["text"].strip()
 
+    # Extract confidence from Whisper segments
+    stt_confidence = None
+    segments = result.get("segments", [])
+    if segments:
+        avg_logprobs = [s.get("avg_logprob", 0) for s in segments if "avg_logprob" in s]
+        if avg_logprobs:
+            # Convert avg_logprob to 0-1 confidence (logprob of -0.3 ≈ 0.74, -1.0 ≈ 0.37)
+            mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
+            stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
+
     if not english:
         return
 
-    # Translate
-    if swap_mode:
-        # Swap mode: load/translate/unload one at a time
-        print(f"  [#{cid}] Swap: loading 4B...")
-        gemma_a_model, gemma_a_tokenizer = load_gemma_fp16(
-            "google/translategemma-4b-it", "4B")
-        spanish_a, lat_a = translate(gemma_a_model, gemma_a_tokenizer, english)
-        unload_model(gemma_a_model, "4B")
-        gemma_a_model = None
+    # Translate (MLX)
+    spanish_a, lat_a = translate_mlx(mlx_a_model, mlx_a_tokenizer, english)
+    spanish_b, lat_b = translate_mlx(mlx_b_model, mlx_b_tokenizer, english)
 
-        print(f"  [#{cid}] Swap: loading 12B...")
-        gemma_b_model, gemma_b_tokenizer = load_gemma_fp16(
-            "google/translategemma-12b-it", "12B")
-        spanish_b, lat_b = translate(gemma_b_model, gemma_b_tokenizer, english)
-        unload_model(gemma_b_model, "12B")
-        gemma_b_model = None
-    else:
-        # Parallel mode: both models already loaded
-        spanish_a, lat_a = translate(gemma_a_model, gemma_a_tokenizer, english)
-        spanish_b, lat_b = translate(gemma_b_model, gemma_b_tokenizer, english)
+    e2e_latency = (time.perf_counter() - e2e_start) * 1000
 
     # Build result
     result_data = {
@@ -255,13 +233,16 @@ async def process_chunk(audio_data, swap_mode=False):
         "stt_latency_ms": round(stt_latency, 1),
         "latency_a_ms": round(lat_a, 1),
         "latency_b_ms": round(lat_b, 1),
+        "e2e_latency_ms": round(e2e_latency, 1),
+        "stt_confidence": stt_confidence,
         "timestamp": datetime.now().isoformat(),
     }
     all_results.append(result_data)
 
     # Terminal output
+    conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
     print(f"\n{'='*60}")
-    print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | A: {lat_a:.0f}ms | B: {lat_b:.0f}ms")
+    print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | A: {lat_a:.0f}ms | B: {lat_b:.0f}ms | E2E: {e2e_latency:.0f}ms{conf_str}")
     print(f"  EN: {english}")
     print(f"  A (4B):  {spanish_a}")
     print(f"  B (12B): {spanish_b}")
@@ -314,6 +295,7 @@ def init_csv():
             "chunk_id", "timestamp", "english",
             "spanish_a", "spanish_b",
             "stt_latency_ms", "latency_a_ms", "latency_b_ms",
+            "e2e_latency_ms", "stt_confidence",
         ])
     print(f"  CSV: {CSV_PATH}")
 
@@ -326,6 +308,7 @@ def write_csv_row(data):
             data["chunk_id"], data["timestamp"], data["english"],
             data["spanish_a"], data["spanish_b"],
             data["stt_latency_ms"], data["latency_a_ms"], data["latency_b_ms"],
+            data["e2e_latency_ms"], data.get("stt_confidence", ""),
         ])
 
 
@@ -342,18 +325,22 @@ def print_summary():
     n = len(all_results)
     stt_lats = [r["stt_latency_ms"] for r in all_results]
     a_lats = [r["latency_a_ms"] for r in all_results]
-    b_lats = [r["latency_b_ms"] for r in all_results]
+    b_lats = [r["latency_b_ms"] for r in all_results if r["latency_b_ms"] > 0]
     same = sum(1 for r in all_results if r["spanish_a"] == r["spanish_b"])
-    a_faster = sum(1 for r in all_results if r["latency_a_ms"] < r["latency_b_ms"])
+    a_faster = sum(1 for r in all_results
+                   if r["latency_b_ms"] > 0 and r["latency_a_ms"] < r["latency_b_ms"])
 
     print(f"\n{'='*60}")
     print(f"SESSION SUMMARY — {n} chunks")
     print(f"{'='*60}")
     print(f"  STT avg:     {np.mean(stt_lats):.0f}ms (median {np.median(stt_lats):.0f}ms)")
     print(f"  A (4B) avg:  {np.mean(a_lats):.0f}ms (median {np.median(a_lats):.0f}ms)")
-    print(f"  B (12B) avg: {np.mean(b_lats):.0f}ms (median {np.median(b_lats):.0f}ms)")
-    print(f"  Same output: {same}/{n} ({same/n:.0%})")
-    print(f"  A faster:    {a_faster}/{n} ({a_faster/n:.0%})")
+    if b_lats:
+        print(f"  B (12B) avg: {np.mean(b_lats):.0f}ms (median {np.median(b_lats):.0f}ms)")
+        print(f"  Same output: {same}/{n} ({same/n:.0%})")
+        print(f"  A faster:    {a_faster}/{n} ({a_faster/n:.0%})")
+    else:
+        print(f"  B (12B):     not loaded")
     print(f"  CSV saved:   {CSV_PATH}")
     print(f"{'='*60}")
 
@@ -362,7 +349,7 @@ def print_summary():
 # Main Loop
 # ---------------------------------------------------------------------------
 
-async def audio_loop(swap_mode=False):
+async def audio_loop():
     """Main audio capture and processing loop."""
     print("\nListening... (Ctrl+C to stop)\n")
 
@@ -402,7 +389,7 @@ async def audio_loop(swap_mode=False):
             )
 
             if should_process and buffer_duration >= 0.5:
-                await process_chunk(speech_buffer.copy(), swap_mode=swap_mode)
+                await process_chunk(speech_buffer.copy())
                 speech_buffer = np.array([], dtype=np.float32)
                 silence_frames = 0
 
@@ -410,23 +397,19 @@ async def audio_loop(swap_mode=False):
 async def main_async(args):
     """Start WebSocket server and audio loop."""
     global vad_model, vad_utils, stt_pipe
-    global gemma_a_model, gemma_a_tokenizer, gemma_b_model, gemma_b_tokenizer
+    global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
 
     print(f"{'='*60}")
-    print(f"  Bilingual A/B Dry Run")
-    print(f"  Mode: {'Swap' if args.swap else 'Parallel'}")
+    print(f"  Bilingual A/B Dry Run (MLX)")
+    print(f"  Mode: {'4B only' if args.only_4b else 'A/B parallel'}")
     print(f"  WebSocket: ws://localhost:{args.ws_port}")
     print(f"{'='*60}\n")
 
     # Load models
     vad_model, vad_utils = load_vad()
     stt_pipe = load_whisper()
-
-    if args.swap:
-        print("[3/4] Swap mode — models loaded on demand")
-    else:
-        gemma_a_model, gemma_a_tokenizer, gemma_b_model, gemma_b_tokenizer = \
-            load_gemma_parallel()
+    mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
+        load_translation_models(load_b=not args.only_4b)
 
     print(f"[4/4] Starting WebSocket server on port {args.ws_port}...")
     init_csv()
@@ -437,7 +420,7 @@ async def main_async(args):
 
     # Run audio loop
     try:
-        await audio_loop(swap_mode=args.swap)
+        await audio_loop()
     except KeyboardInterrupt:
         pass
     finally:
@@ -448,10 +431,10 @@ async def main_async(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Live A/B bilingual speech-to-text dry run"
+        description="Live A/B bilingual speech-to-text dry run (MLX)"
     )
-    parser.add_argument("--swap", action="store_true",
-                        help="Use swap mode (one model at a time)")
+    parser.add_argument("--4b-only", action="store_true", dest="only_4b",
+                        help="Load only the 4B model (skip 12B)")
     parser.add_argument("--chunk-duration", type=float, default=3.0,
                         help="Seconds of speech to accumulate before processing")
     parser.add_argument("--ws-port", type=int, default=8765,

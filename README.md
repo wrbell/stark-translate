@@ -7,15 +7,16 @@ Real-time mic input, on-device transcription + translation, displayed in a 4-qua
 ## How It Works
 
 ```
-Mic → Silero VAD → Distil-Whisper STT → TranslateGemma EN→ES → Browser Display
+Mic → Silero VAD → mlx-whisper STT → TranslateGemma EN→ES (MLX) → Browser Display
 ```
 
-Two translation models run in parallel for A/B comparison:
+All inference runs natively on Apple Silicon via MLX (4-bit quantized). Both translation models loaded simultaneously in ~9GB:
 
-| Approach | Model | Latency | Quality |
-|----------|-------|---------|---------|
-| **A** (Lightweight) | TranslateGemma 4B | ~70-210ms | Good |
-| **B** (High-Accuracy) | TranslateGemma 12B | ~140-410ms | Better |
+| Component | Model | Framework | Latency | Memory |
+|-----------|-------|-----------|---------|--------|
+| **STT** | Distil-Whisper large-v3 | mlx-whisper | ~500ms / 3s chunk | ~1.5 GB |
+| **Translate A** | TranslateGemma 4B (4-bit) | mlx-lm | ~650ms | ~2.5 GB |
+| **Translate B** | TranslateGemma 12B (4-bit) | mlx-lm | ~1.4s | ~7 GB |
 
 ## Quick Start (Mac)
 

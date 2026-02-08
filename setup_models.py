@@ -2,19 +2,18 @@
 """
 setup_models.py — Download & Verify All Models for Current Machine
 
-Detects hardware (MPS = Mac inference, CUDA = Windows training) and downloads
-only the models needed. Reports memory usage after each load.
+Downloads MLX models for Mac inference, PyTorch models for Windows training.
+Reports memory usage and runs quick inference tests.
 
 Usage:
     python setup_models.py              # Auto-detect machine, download all
     python setup_models.py --mac        # Force Mac inference models
     python setup_models.py --windows    # Force Windows training models
-    python setup_models.py --skip-12b   # Skip TranslateGemma 12B (saves ~12GB)
+    python setup_models.py --skip-12b   # Skip TranslateGemma 12B
     python setup_models.py --dry-run    # Show what would be downloaded
 """
 
 import argparse
-import gc
 import sys
 import time
 
@@ -33,212 +32,56 @@ def get_device_info():
         info["device"] = "cuda"
         info["gpu_name"] = torch.cuda.get_device_name(0)
         info["gpu_mem_gb"] = torch.cuda.get_device_properties(0).total_mem / 1024**3
-        info["dtype"] = "bfloat16"
     elif info["mps"]:
         info["device"] = "mps"
         info["gpu_name"] = "Apple Silicon (MPS)"
         import subprocess
         result = subprocess.run(["sysctl", "hw.memsize"], capture_output=True, text=True)
         mem_bytes = int(result.stdout.strip().split(": ")[1])
-        info["gpu_mem_gb"] = mem_bytes / 1024**3  # Unified memory
-        info["dtype"] = "float16"
+        info["gpu_mem_gb"] = mem_bytes / 1024**3
     else:
         info["device"] = "cpu"
         info["gpu_name"] = "CPU only"
         info["gpu_mem_gb"] = 0
-        info["dtype"] = "float32"
+
+    # Check MLX availability
+    try:
+        import mlx.core as mx
+        info["mlx"] = True
+        info["mlx_version"] = mx.__version__
+    except ImportError:
+        info["mlx"] = False
+        info["mlx_version"] = None
 
     return info
 
 
-def mem_usage_mb():
-    """Current process RSS in MB."""
-    import psutil
-    return psutil.Process().memory_info().rss / 1024**2
-
-
-def mps_allocated_mb():
-    """MPS GPU memory allocated (Apple Silicon only)."""
-    import torch
-    if torch.backends.mps.is_available():
-        try:
-            return torch.mps.driver_allocated_memory() / 1024**2
-        except Exception:
-            return 0
-    return 0
-
-
-def cuda_allocated_mb():
-    """CUDA GPU memory allocated."""
-    import torch
-    if torch.cuda.is_available():
-        return torch.cuda.memory_allocated() / 1024**2
-    return 0
-
-
-def gpu_mem_mb():
-    """GPU memory allocated on current device."""
-    import torch
-    if torch.cuda.is_available():
-        return cuda_allocated_mb()
-    elif torch.backends.mps.is_available():
-        return mps_allocated_mb()
-    return 0
-
-
 # ---------------------------------------------------------------------------
-# Model Loaders
+# Mac Models (MLX)
 # ---------------------------------------------------------------------------
 
-def load_vad():
-    """Silero VAD (~2MB)."""
-    import torch
-    model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad',
-                                   trust_repo=True)
-    return model, utils
+def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
+    """Download and verify MLX models for Mac inference."""
+    from huggingface_hub import snapshot_download
 
-
-def load_whisper(device, dtype_str):
-    """Distil-Whisper distil-large-v3 (~1.5GB)."""
-    import torch
-    from transformers import pipeline
-
-    dtype = getattr(torch, dtype_str)
-    pipe = pipeline(
-        "automatic-speech-recognition",
-        model="distil-whisper/distil-large-v3",
-        device=device,
-        torch_dtype=dtype,
-    )
-    return pipe
-
-
-def test_whisper(pipe):
-    """Quick inference test with 1s of silence."""
-    import numpy as np
-    silence = np.zeros(16000, dtype=np.float32)
-    result = pipe({"raw": silence, "sampling_rate": 16000},
-                  generate_kwargs={"language": "en"})
-    return result["text"]
-
-
-def load_gemma(model_name, device, use_4bit=False):
-    """Load TranslateGemma model."""
-    import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-    load_kwargs = {"device_map": "auto"}
-
-    if use_4bit:
-        try:
-            from transformers import BitsAndBytesConfig
-            load_kwargs["quantization_config"] = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16,
-            )
-            quant_mode = "4-bit"
-        except Exception as e:
-            print(f"    4-bit failed ({e}), falling back to fp16")
-            load_kwargs["torch_dtype"] = torch.float16
-            quant_mode = "fp16 (4-bit failed)"
-    else:
-        load_kwargs["torch_dtype"] = torch.float16
-        quant_mode = "fp16"
-
-    model = AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
-    return model, tokenizer, quant_mode
-
-
-def test_gemma(model, tokenizer, text="Hello, how are you?"):
-    """Quick translation test."""
-    import torch
-
-    messages = [{"role": "user", "content": [
-        {"type": "text", "source_lang_code": "en",
-         "target_lang_code": "es", "text": text}
-    ]}]
-    input_text = tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=True
-    )
-    inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
-
-    with torch.no_grad():
-        output = model.generate(**inputs, max_new_tokens=64)
-
-    translation = tokenizer.decode(
-        output[0][inputs.input_ids.shape[1]:], skip_special_tokens=True
-    ).strip()
-    return translation
-
-
-def unload(model, label):
-    """Free model memory."""
-    import torch
-    del model
-    gc.collect()
-    if torch.backends.mps.is_available():
-        torch.mps.empty_cache()
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
-def main():
-    parser = argparse.ArgumentParser(description="Download & verify models")
-    parser.add_argument("--mac", action="store_true", help="Force Mac inference mode")
-    parser.add_argument("--windows", action="store_true", help="Force Windows training mode")
-    parser.add_argument("--skip-12b", action="store_true", help="Skip TranslateGemma 12B")
-    parser.add_argument("--dry-run", action="store_true", help="Show plan without downloading")
-    parser.add_argument("--no-test", action="store_true", help="Download only, skip inference tests")
-    args = parser.parse_args()
-
-    # Detect hardware
-    info = get_device_info()
-
-    if args.mac:
-        role = "mac"
-    elif args.windows:
-        role = "windows"
-    elif info["mps"]:
-        role = "mac"
-    elif info["cuda"]:
-        role = "windows"
-    else:
-        role = "mac"  # CPU fallback uses mac model set
-
-    print(f"{'='*60}")
-    print(f"  Model Setup — {role.upper()} mode")
-    print(f"{'='*60}")
-    print(f"  Device:    {info['device']} ({info['gpu_name']})")
-    print(f"  Memory:    {info['gpu_mem_gb']:.1f} GB")
-    print(f"  PyTorch:   {info['pytorch']}")
-    print(f"  Dtype:     {info['dtype']}")
-    print()
-
-    # Define model plan
     models = [
-        ("Silero VAD", "~2 MB", True),
-        ("Distil-Whisper distil-large-v3", "~1.5 GB", True),
-        ("TranslateGemma 4B", "~2.6 GB (4-bit) / ~8 GB (fp16)", True),
+        ("Silero VAD", "snakers4/silero-vad", "~2 MB", "torch_hub"),
+        ("Distil-Whisper (MLX)", "mlx-community/distil-whisper-large-v3", "~1.5 GB", "mlx_whisper"),
+        ("TranslateGemma 4B (MLX 4-bit)", "mlx-community/translategemma-4b-it-4bit", "~2.2 GB", "mlx_lm"),
     ]
-    if not args.skip_12b:
-        models.append(("TranslateGemma 12B", "~6 GB (4-bit) / ~24 GB (fp16)",
-                        role == "mac"))
+    if not skip_12b:
+        models.append(
+            ("TranslateGemma 12B (MLX 4-bit)", "mlx-community/translategemma-12b-it-4bit", "~6.6 GB", "mlx_lm")
+        )
 
     print("  Models to download:")
-    for name, size, needed in models:
-        status = "DOWNLOAD" if needed else "SKIP"
-        print(f"    [{status}] {name} ({size})")
+    for name, model_id, size, _ in models:
+        print(f"    [DOWNLOAD] {name} ({size}) — {model_id}")
     print()
 
-    if args.dry_run:
+    if dry_run:
         print("Dry run — no downloads performed.")
-        return
+        return True
 
     results = {}
 
@@ -246,86 +89,93 @@ def main():
     print(f"[1/{len(models)}] Silero VAD...")
     t0 = time.time()
     try:
-        vad_model, vad_utils = load_vad()
-        elapsed = time.time() - t0
+        import torch
+        model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad', trust_repo=True)
+        print(f"  OK ({time.time()-t0:.1f}s)")
         results["vad"] = "OK"
-        print(f"  OK ({elapsed:.1f}s)")
     except Exception as e:
+        print(f"  FAIL: {e}")
         results["vad"] = f"FAIL: {e}"
-        print(f"  FAIL: {e}")
 
-    # 2. Distil-Whisper
-    print(f"\n[2/{len(models)}] Distil-Whisper distil-large-v3...")
+    # 2. Distil-Whisper (MLX)
+    print(f"\n[2/{len(models)}] Distil-Whisper (MLX)...")
     t0 = time.time()
     try:
-        stt_pipe = load_whisper(info["device"], info["dtype"])
-        elapsed = time.time() - t0
-        gpu_mb = gpu_mem_mb()
+        snapshot_download("mlx-community/distil-whisper-large-v3")
+        print(f"  Downloaded ({time.time()-t0:.1f}s)")
+
+        if not no_test:
+            import mlx_whisper
+            import numpy as np
+            silence = np.zeros(16000, dtype=np.float32)
+            result = mlx_whisper.transcribe(
+                silence,
+                path_or_hf_repo="mlx-community/distil-whisper-large-v3",
+                condition_on_previous_text=False,
+            )
+            print(f"  Inference test: '{result['text'].strip()[:80]}'")
         results["whisper"] = "OK"
-        print(f"  Downloaded + loaded ({elapsed:.1f}s, GPU: {gpu_mb:.0f} MB)")
-
-        if not args.no_test:
-            text = test_whisper(stt_pipe)
-            print(f"  Inference test: '{text.strip()[:80]}'")
     except Exception as e:
+        print(f"  FAIL: {e}")
         results["whisper"] = f"FAIL: {e}"
-        print(f"  FAIL: {e}")
 
-    # 3. TranslateGemma 4B
-    print(f"\n[3/{len(models)}] TranslateGemma 4B (google/translategemma-4b-it)...")
+    # 3. TranslateGemma 4B (MLX)
+    print(f"\n[3/{len(models)}] TranslateGemma 4B (MLX 4-bit)...")
     t0 = time.time()
-    use_4bit = (role == "mac")  # 4-bit on Mac to save memory
     try:
-        gemma4b, tok4b, quant = load_gemma(
-            "google/translategemma-4b-it", info["device"], use_4bit=use_4bit
-        )
-        elapsed = time.time() - t0
-        gpu_mb = gpu_mem_mb()
-        results["gemma_4b"] = f"OK ({quant})"
-        print(f"  Downloaded + loaded ({elapsed:.1f}s, {quant}, GPU: {gpu_mb:.0f} MB)")
+        snapshot_download("mlx-community/translategemma-4b-it-4bit")
+        print(f"  Downloaded ({time.time()-t0:.1f}s)")
 
-        if not args.no_test:
-            translation = test_gemma(gemma4b, tok4b,
-                                      "Good morning, welcome to our service.")
-            print(f"  Translation test: '{translation[:80]}'")
+        if not no_test:
+            from mlx_lm import load, generate
+            model_4b, tok_4b = load("mlx-community/translategemma-4b-it-4bit")
+            eot = tok_4b.convert_tokens_to_ids("<end_of_turn>")
+            tok_4b._eos_token_ids = {tok_4b.eos_token_id, eot}
 
-        # Keep 4B loaded if we also need 12B (to test parallel mode)
-        if args.skip_12b or len(models) <= 3:
-            unload(gemma4b, "4B")
+            msgs = [{"role": "user", "content": [
+                {"type": "text", "source_lang_code": "en",
+                 "target_lang_code": "es", "text": "Good morning, welcome to our service."}
+            ]}]
+            prompt = tok_4b.apply_chat_template(msgs, add_generation_prompt=True)
+            result = generate(model_4b, tok_4b, prompt=prompt, max_tokens=64, verbose=False)
+            clean = result.split("<end_of_turn>")[0].strip()
+            print(f"  Translation test: '{clean[:80]}'")
+            del model_4b
+
+        results["gemma_4b"] = "OK"
     except Exception as e:
-        results["gemma_4b"] = f"FAIL: {e}"
         print(f"  FAIL: {e}")
-        gemma4b = None
+        results["gemma_4b"] = f"FAIL: {e}"
 
-    # 4. TranslateGemma 12B (optional)
-    if not args.skip_12b and len(models) > 3:
-        print(f"\n[4/{len(models)}] TranslateGemma 12B (google/translategemma-12b-it)...")
+    # 4. TranslateGemma 12B (MLX)
+    if not skip_12b:
+        print(f"\n[4/{len(models)}] TranslateGemma 12B (MLX 4-bit)...")
         t0 = time.time()
         try:
-            gemma12b, tok12b, quant = load_gemma(
-                "google/translategemma-12b-it", info["device"], use_4bit=use_4bit
-            )
-            elapsed = time.time() - t0
-            gpu_mb = gpu_mem_mb()
-            results["gemma_12b"] = f"OK ({quant})"
-            print(f"  Downloaded + loaded ({elapsed:.1f}s, {quant}, GPU: {gpu_mb:.0f} MB)")
+            snapshot_download("mlx-community/translategemma-12b-it-4bit")
+            print(f"  Downloaded ({time.time()-t0:.1f}s)")
 
-            if not args.no_test:
-                translation = test_gemma(gemma12b, tok12b,
-                                          "Justification by faith is the cornerstone of the Gospel.")
-                print(f"  Translation test: '{translation[:80]}'")
+            if not no_test:
+                from mlx_lm import load, generate
+                model_12b, tok_12b = load("mlx-community/translategemma-12b-it-4bit")
+                eot = tok_12b.convert_tokens_to_ids("<end_of_turn>")
+                tok_12b._eos_token_ids = {tok_12b.eos_token_id, eot}
 
-            # If both loaded, report parallel memory
-            if gemma4b is not None:
-                print(f"\n  PARALLEL MODE: Both models loaded, GPU: {gpu_mem_mb():.0f} MB")
+                msgs = [{"role": "user", "content": [
+                    {"type": "text", "source_lang_code": "en",
+                     "target_lang_code": "es",
+                     "text": "Justification by faith is the cornerstone of the Gospel."}
+                ]}]
+                prompt = tok_12b.apply_chat_template(msgs, add_generation_prompt=True)
+                result = generate(model_12b, tok_12b, prompt=prompt, max_tokens=64, verbose=False)
+                clean = result.split("<end_of_turn>")[0].strip()
+                print(f"  Translation test: '{clean[:80]}'")
+                del model_12b
 
-            unload(gemma12b, "12B")
+            results["gemma_12b"] = "OK"
         except Exception as e:
-            results["gemma_12b"] = f"FAIL: {e}"
             print(f"  FAIL: {e}")
-
-        if gemma4b is not None:
-            unload(gemma4b, "4B")
+            results["gemma_12b"] = f"FAIL: {e}"
 
     # Summary
     print(f"\n{'='*60}")
@@ -342,9 +192,90 @@ def main():
         print(f"\nAll models ready. Run: python dry_run_ab.py")
     else:
         print(f"\nSome models failed. Check errors above.")
-        print(f"If 4-bit failed, try: python dry_run_ab.py --swap")
 
-    return 0 if all_ok else 1
+    return all_ok
+
+
+# ---------------------------------------------------------------------------
+# Windows Models (PyTorch/CUDA)
+# ---------------------------------------------------------------------------
+
+def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
+    """Download PyTorch models for Windows/CUDA training."""
+    from huggingface_hub import snapshot_download
+
+    models = [
+        ("Distil-Whisper", "distil-whisper/distil-large-v3", "~1.5 GB"),
+        ("TranslateGemma 4B", "google/translategemma-4b-it", "~8 GB"),
+    ]
+    if not skip_12b:
+        models.append(("TranslateGemma 12B", "google/translategemma-12b-it", "~24 GB"))
+
+    print("  Models to download:")
+    for name, model_id, size in models:
+        print(f"    [DOWNLOAD] {name} ({size}) — {model_id}")
+    print()
+
+    if dry_run:
+        print("Dry run — no downloads performed.")
+        return True
+
+    all_ok = True
+    for name, model_id, size in models:
+        print(f"Downloading {name}...")
+        t0 = time.time()
+        try:
+            snapshot_download(model_id)
+            print(f"  OK ({time.time()-t0:.1f}s)")
+        except Exception as e:
+            print(f"  FAIL: {e}")
+            all_ok = False
+
+    return all_ok
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(description="Download & verify models")
+    parser.add_argument("--mac", action="store_true", help="Force Mac inference mode (MLX)")
+    parser.add_argument("--windows", action="store_true", help="Force Windows training mode (PyTorch)")
+    parser.add_argument("--skip-12b", action="store_true", help="Skip TranslateGemma 12B")
+    parser.add_argument("--dry-run", action="store_true", help="Show plan without downloading")
+    parser.add_argument("--no-test", action="store_true", help="Download only, skip inference tests")
+    args = parser.parse_args()
+
+    info = get_device_info()
+
+    if args.mac:
+        role = "mac"
+    elif args.windows:
+        role = "windows"
+    elif info["mps"] and info.get("mlx"):
+        role = "mac"
+    elif info["cuda"]:
+        role = "windows"
+    else:
+        role = "mac"
+
+    print(f"{'='*60}")
+    print(f"  Model Setup — {role.upper()} mode")
+    print(f"{'='*60}")
+    print(f"  Device:    {info['device']} ({info['gpu_name']})")
+    print(f"  Memory:    {info['gpu_mem_gb']:.1f} GB")
+    print(f"  PyTorch:   {info['pytorch']}")
+    if info.get("mlx"):
+        print(f"  MLX:       {info['mlx_version']}")
+    print()
+
+    if role == "mac":
+        ok = download_mac_models(args.skip_12b, args.dry_run, args.no_test)
+    else:
+        ok = download_windows_models(args.skip_12b, args.dry_run, args.no_test)
+
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

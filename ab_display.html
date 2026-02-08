@@ -129,6 +129,19 @@
     margin-right: 6px;
   }
 
+  .chunk .confidence-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  .conf-good { background: var(--green); }
+  .conf-warn { background: var(--yellow); }
+  .conf-bad { background: var(--red); }
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
@@ -136,22 +149,28 @@
 
   /* Footer */
   .footer {
-    padding: 8px 16px;
+    padding: 6px 16px;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .footer-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0;
     flex-wrap: wrap;
-    gap: 4px 16px;
+    gap: 4px 12px;
   }
 
   .footer .stats {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
   }
 
@@ -160,7 +179,12 @@
   .footer .blue-val { color: var(--blue); }
 
   .footer .hint {
-    font-size: 11px;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .footer .pct-label {
+    font-size: 10px;
     color: var(--text-dim);
   }
 
@@ -217,15 +241,31 @@
 </div>
 
 <div class="footer">
-  <div class="stats">
-    <span>Chunks: <span class="stat-val" id="chunkCount">0</span></span>
-    <span>A avg: <span class="stat-val green-val" id="avgA">—</span></span>
-    <span>B avg: <span class="stat-val blue-val" id="avgB">—</span></span>
-    <span>STT avg: <span class="stat-val" id="avgSTT">—</span></span>
-    <span>Same: <span class="stat-val" id="sameRate">—</span></span>
-    <span>A faster: <span class="stat-val green-val" id="aFaster">—</span></span>
+  <div class="footer-row">
+    <div class="stats">
+      <span>Chunks: <span class="stat-val" id="chunkCount">0</span></span>
+      <span>STT avg: <span class="stat-val" id="avgSTT">—</span></span>
+      <span>A avg: <span class="stat-val green-val" id="avgA">—</span></span>
+      <span>B avg: <span class="stat-val blue-val" id="avgB">—</span></span>
+      <span>Same: <span class="stat-val" id="sameRate">—</span></span>
+      <span>A faster: <span class="stat-val green-val" id="aFaster">—</span></span>
+    </div>
+    <span class="hint">Fullscreen: F11 / Cmd+Shift+F</span>
   </div>
-  <span class="hint">Fullscreen: F11 · Cmd+Shift+F</span>
+  <div class="footer-row">
+    <div class="stats">
+      <span class="pct-label">p50:</span>
+      <span>STT <span class="stat-val" id="p50STT">—</span></span>
+      <span>A <span class="stat-val green-val" id="p50A">—</span></span>
+      <span>B <span class="stat-val blue-val" id="p50B">—</span></span>
+      <span class="pct-label" style="margin-left:8px">p95:</span>
+      <span>STT <span class="stat-val" id="p95STT">—</span></span>
+      <span>A <span class="stat-val green-val" id="p95A">—</span></span>
+      <span>B <span class="stat-val blue-val" id="p95B">—</span></span>
+      <span class="pct-label" style="margin-left:8px">E2E:</span>
+      <span><span class="stat-val" id="avgE2E">—</span></span>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -244,8 +284,31 @@
 
   // Stats
   let chunks = 0;
-  let sumA = 0, sumB = 0, sumSTT = 0;
+  let sumA = 0, sumB = 0, sumSTT = 0, sumE2E = 0;
   let sameCount = 0, aFasterCount = 0;
+
+  // Arrays for percentile calculation
+  let latenciesSTT = [];
+  let latenciesA = [];
+  let latenciesB = [];
+
+  function percentile(arr, p) {
+    if (arr.length === 0) return 0;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const idx = Math.ceil((p / 100) * sorted.length) - 1;
+    return sorted[Math.max(0, idx)];
+  }
+
+  function fmtMs(ms) {
+    return ms > 0 ? ms.toFixed(0) + 'ms' : '—';
+  }
+
+  function confidenceClass(conf) {
+    if (conf === undefined || conf === null) return '';
+    if (conf >= 0.7) return 'conf-good';
+    if (conf >= 0.4) return 'conf-warn';
+    return 'conf-bad';
+  }
 
   function connect() {
     const ws = new WebSocket(WS_URL);
@@ -270,40 +333,65 @@
       if (data.type !== 'translation') return;
 
       chunks++;
-      sumA += data.latency_a_ms;
-      sumB += data.latency_b_ms;
-      sumSTT += data.stt_latency_ms;
+      const latA = data.latency_a_ms || 0;
+      const latB = data.latency_b_ms || 0;
+      const latSTT = data.stt_latency_ms || 0;
+      const e2e = data.e2e_latency_ms || (latSTT + Math.max(latA, latB));
+
+      sumA += latA;
+      sumB += latB;
+      sumSTT += latSTT;
+      sumE2E += e2e;
       if (data.spanish_a === data.spanish_b) sameCount++;
-      if (data.latency_a_ms < data.latency_b_ms) aFasterCount++;
+      if (latA < latB && latB > 0) aFasterCount++;
+
+      latenciesSTT.push(latSTT);
+      latenciesA.push(latA);
+      if (latB > 0) latenciesB.push(latB);
+
+      // Confidence dot
+      const conf = data.stt_confidence;
+      const confDot = conf !== undefined
+        ? '<span class="confidence-dot ' + confidenceClass(conf) + '"></span>'
+        : '';
 
       // Add text to panels
-      appendChunk(panels['a-en'], data.chunk_id, data.english);
-      appendChunk(panels['a-es'], data.chunk_id, data.spanish_a);
-      appendChunk(panels['b-en'], data.chunk_id, data.english);
-      appendChunk(panels['b-es'], data.chunk_id, data.spanish_b);
+      appendChunk(panels['a-en'], data.chunk_id, data.english, confDot);
+      appendChunk(panels['a-es'], data.chunk_id, data.spanish_a, '');
+      appendChunk(panels['b-en'], data.chunk_id, data.english, confDot);
+      appendChunk(panels['b-es'], data.chunk_id, data.spanish_b, '');
 
-      // Update latency headers
-      $('latA').textContent = data.latency_a_ms.toFixed(0) + 'ms';
-      $('latAes').textContent = data.latency_a_ms.toFixed(0) + 'ms';
-      $('latB').textContent = data.latency_b_ms.toFixed(0) + 'ms';
-      $('latBes').textContent = data.latency_b_ms.toFixed(0) + 'ms';
+      // Update latency headers (last chunk)
+      $('latA').textContent = fmtMs(latA);
+      $('latAes').textContent = fmtMs(latA);
+      $('latB').textContent = fmtMs(latB);
+      $('latBes').textContent = fmtMs(latB);
 
-      // Update footer stats
+      // Update footer — averages
       $('chunkCount').textContent = chunks;
-      $('avgA').textContent = (sumA / chunks).toFixed(0) + 'ms';
-      $('avgB').textContent = (sumB / chunks).toFixed(0) + 'ms';
-      $('avgSTT').textContent = (sumSTT / chunks).toFixed(0) + 'ms';
+      $('avgA').textContent = fmtMs(sumA / chunks);
+      $('avgB').textContent = latenciesB.length > 0 ? fmtMs(sumB / latenciesB.length) : '—';
+      $('avgSTT').textContent = fmtMs(sumSTT / chunks);
       $('sameRate').textContent = ((sameCount / chunks) * 100).toFixed(0) + '%';
-      $('aFaster').textContent = ((aFasterCount / chunks) * 100).toFixed(0) + '%';
+      $('aFaster').textContent = latenciesB.length > 0
+        ? ((aFasterCount / chunks) * 100).toFixed(0) + '%' : '—';
+
+      // Update footer — percentiles
+      $('p50STT').textContent = fmtMs(percentile(latenciesSTT, 50));
+      $('p50A').textContent = fmtMs(percentile(latenciesA, 50));
+      $('p50B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 50)) : '—';
+      $('p95STT').textContent = fmtMs(percentile(latenciesSTT, 95));
+      $('p95A').textContent = fmtMs(percentile(latenciesA, 95));
+      $('p95B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 95)) : '—';
+      $('avgE2E').textContent = fmtMs(sumE2E / chunks);
     };
   }
 
-  function appendChunk(panel, id, text) {
+  function appendChunk(panel, id, text, prefix) {
     const div = document.createElement('div');
     div.className = 'chunk';
-    div.innerHTML = '<span class="chunk-num">#' + id + '</span>' + escapeHtml(text);
+    div.innerHTML = (prefix || '') + '<span class="chunk-num">#' + id + '</span>' + escapeHtml(text);
     panel.appendChild(div);
-    // Auto-scroll
     panel.scrollTop = panel.scrollHeight;
   }
 
@@ -325,7 +413,6 @@
     }
   });
 
-  // Start
   connect();
 })();
 </script>

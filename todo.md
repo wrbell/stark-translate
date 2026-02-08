@@ -1,202 +1,204 @@
-# TODO.md — Dry Run: A/B Inference with Live 4-Quadrant Display
+# TODO — Stark Road Bilingual Speech-to-Text
 
-> **Goal:** Live mic → Distil-Whisper STT → TranslateGemma 4B + 12B → 4-quadrant browser display (B left, A right, English top, Spanish bottom) with latency metrics.
->
-> **Machine:** M3 Pro MacBook, 16GB unified memory
->
-> **Output:** Fullscreen browser display connected via WebSocket to the Python backend
->
-> **Time estimate:** ~30 min setup + ~25GB model download + 15 min testing
+> **Machine:** M3 Pro MacBook, 18GB unified, MLX + PyTorch
+> **Remote:** Windows Desktop (WSL2, A2000 Ada 16GB) for training
 
 ---
 
-## Phase 1: Environment Setup
+## DONE
 
-- [ ] **1.1** System deps
-  ```bash
-  brew update && brew install python@3.12 ffmpeg portaudio
-  ```
-
-- [ ] **1.2** Project + virtualenv
-  ```bash
-  mkdir -p ~/stt_bilingual
-  cd ~/stt_bilingual
-  python3.12 -m venv stt_env
-  source stt_env/bin/activate
-  ```
-
-- [ ] **1.3** PyTorch with MPS
-  ```bash
-  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
-  ```
-
-- [ ] **1.4** Verify MPS
-  ```bash
-  python -c "import torch; print('MPS available:', torch.backends.mps.is_available())"
-  ```
-
-- [ ] **1.5** Install all dependencies
-  ```bash
-  pip install transformers accelerate
-  pip install sounddevice numpy pandas
-  pip install sentencepiece protobuf
-  pip install bitsandbytes                # 4-bit quantization (both models in RAM)
-  pip install websockets                  # WebSocket server for display
-  ```
-
-- [ ] **1.6** Install Silero VAD
-  ```bash
-  pip install silero-vad
-  ```
-
-- [ ] **1.7** Mic permissions
-  - **System Settings → Privacy & Security → Microphone** → enable Terminal
+- [x] Environment setup (Python 3.11, venv, brew deps)
+- [x] All Windows pipeline scripts written (10 files)
+- [x] Directory structure with .gitkeep
+- [x] Git repo + GitHub remote
+- [x] Hardware profiled (18GB, 18-core GPU, Metal 4)
+- [x] Docs updated (CLAUDE.md, CLAUDE-macbook.md)
+- [x] README written
+- [x] HuggingFace auth configured
+- [x] PyTorch models downloaded (Whisper, Gemma 4B, 12B)
+- [x] MLX installed (mlx 0.30.6, mlx-lm 0.30.6, mlx-whisper 0.4.3)
+- [x] MLX models downloaded (4B-4bit: 2.2GB, 12B-4bit: 6.6GB, distil-whisper)
+- [x] TranslateGemma EOS fix (add `<end_of_turn>` to `_eos_token_ids`)
+- [x] Verified: both models fit in 9GB, 4B ~650ms, 12B ~1.4s
+- [x] dry_run_ab.py rewritten for MLX
+- [x] setup_models.py rewritten for MLX
+- [x] ab_display.html created
 
 ---
 
-## Phase 2: Model Downloads
+## IN PROGRESS
 
-> ~25GB total. Use Wi-Fi. Cached after first download.
+### P0 — End-to-End Live Demo (Today)
 
-- [ ] **2.1** Distil-Whisper (~1.5GB)
-  ```bash
-  python -c "
-  from transformers import pipeline; import torch
-  p = pipeline('automatic-speech-recognition', model='distil-whisper/distil-large-v3',
-               device='mps', torch_dtype=torch.float16)
-  print('✓ Distil-Whisper cached')
-  "
-  ```
+- [ ] **Run full dry_run_ab.py live** — mic → STT → translate → browser display
+  - Verify mlx-whisper works with real mic audio
+  - Verify WebSocket → browser connection
+  - Verify both 4B and 12B running simultaneously
+  - Run 5+ min, 10+ utterances
+  - Review CSV output
 
-- [ ] **2.2** TranslateGemma 4B (~5GB)
-  ```bash
-  python -c "
-  from transformers import AutoTokenizer, AutoModelForCausalLM; import torch
-  AutoTokenizer.from_pretrained('google/translategemma-4b')
-  AutoModelForCausalLM.from_pretrained('google/translategemma-4b', torch_dtype=torch.float16)
-  print('✓ TranslateGemma 4B cached')
-  "
-  ```
-  - **Auth?** `pip install huggingface_hub && huggingface-cli login`, accept license on HF
+- [ ] **Latency measurement system** — proper timing breakdown
+  - STT latency: time from audio chunk ready → text output
+  - Translation latency: time from English text → Spanish text (per model)
+  - End-to-end latency: audio chunk ready → WebSocket broadcast
+  - Display update latency: WebSocket send → browser render
+  - Log all timings to CSV and display in browser footer
+  - Add token/sec reporting from MLX generate
+  - Running p50/p95 percentile display in browser footer (per component)
 
-- [ ] **2.3** TranslateGemma 12B (~24GB)
-  ```bash
-  python -c "
-  from transformers import AutoTokenizer, AutoModelForCausalLM; import torch
-  AutoTokenizer.from_pretrained('google/translategemma-12b')
-  AutoModelForCausalLM.from_pretrained('google/translategemma-12b', torch_dtype=torch.float16)
-  print('✓ TranslateGemma 12B cached')
-  "
-  ```
+### P1 — Mac Pipeline Hardening
 
-- [ ] **2.4** Silero VAD
-  ```bash
-  python -c "
-  import torch
-  torch.hub.load('snakers4/silero-vad', 'silero_vad')
-  print('✓ Silero VAD cached')
-  "
-  ```
+- [ ] **Confidence scoring** — extract Whisper segment-level quality
+  - `avg_logprob`, `no_speech_prob`, `compression_ratio` from mlx-whisper
+  - Word-level probabilities via `word_timestamps=True`
+  - Flag segments below threshold for review
+  - Log to confidence_flags.jsonl
+
+- [ ] **Translation quality estimation (QE)** — reference-free
+  - CometKiwi: source + translation → score (0-1)
+  - LaBSE cross-lingual cosine similarity
+  - Length ratio check (Spanish 15-25% longer than English)
+  - Back-translation via MarianMT → BERTScore
+  - Log to translation_qe.jsonl
+
+- [ ] **Error handling** — graceful recovery
+  - Mic disconnect/reconnect
+  - Model OOM → unload/reload
+  - WebSocket client drop/reconnect
+  - Empty/silence audio → skip gracefully
+
+- [ ] **Streaming translation** — use mlx-lm's `stream_generate()`
+  - Show partial translations as tokens arrive
+  - Lower perceived latency
+  - Update browser display incrementally
+
+- [ ] **Prompt caching** — reuse TranslateGemma prompt prefix
+  - The chat template prefix is constant (~90 tokens)
+  - Cache with `mlx_lm.batch_generate()` prompt_caches
+  - Could cut translation latency by ~30-40%
+
+### P2 — Display & UX
+
+- [ ] **Projected display mode** — church-optimized layout
+  - Spanish top (large), English bottom (smaller)
+  - Black background, high contrast
+  - Configurable font sizes
+  - ProPresenter/PowerPoint integration research
+
+- [ ] **Mobile display** — phone/tablet view
+  - Responsive layout for phone viewing
+  - QR code to connect
+  - Spanish-only mode option
+
+- [ ] **Display polish**
+  - Smooth text transitions (CSS animations)
+  - Show confidence indicator (green/yellow/red per segment)
+  - Show translation speed comparison live
+  - Fullscreen toggle button (not just keyboard)
+  - Chunk history / scroll back
+
+### P3 — Data Collection & Prep (Windows)
+
+- [ ] **Download sermon audio** — yt-dlp from Stark Road YouTube
+  - Target: 20-50 hours
+  - Prefer soundboard recordings over room mics
+  - Store in stark_data/raw/
+
+- [ ] **Run audio preprocessing pipeline**
+  - preprocess_audio.py (10-step pipeline)
+  - Output to stark_data/cleaned/
+
+- [ ] **Pseudo-label with Whisper large-v3**
+  - transcribe_church.py
+  - Output JSON transcripts to stark_data/transcripts/
+
+- [ ] **Download Bible parallel corpus**
+  - prepare_bible_corpus.py
+  - ~155K verse pairs from scrollmapper/BibleNLP
+  - Output to bible_data/aligned/
+
+- [ ] **Build theological glossary**
+  - build_glossary.py
+  - ~200-500 terms with soft constraints
+  - Output to bible_data/glossary/
+
+- [ ] **Quality assessment baseline**
+  - assess_quality.py
+  - Sample 50-100 segments
+  - Manual transcription for WER baseline
+
+### P4 — Fine-Tuning (Windows)
+
+- [ ] **Whisper LoRA fine-tuning**
+  - train_whisper.py (r=32, α=64, encoder+decoder)
+  - 20-50 hrs church audio
+  - 3-5 epochs on A2000 Ada
+
+- [ ] **TranslateGemma QLoRA fine-tuning**
+  - train_gemma.py (r=16, 4-bit NF4)
+  - ~155K Bible verse pairs
+  - 3 epochs, packing enabled
+
+- [ ] **MarianMT fallback fine-tune**
+  - train_marian.py
+  - Full fine-tune (298MB model)
+  - Quick iteration baseline
+
+- [ ] **Evaluation**
+  - evaluate_translation.py
+  - SacreBLEU, chrF++, COMET
+  - Per-genre breakdown (narrative, poetry, epistles, etc.)
+  - Theological term spot-check
+
+- [ ] **LoRA adapter transfer**
+  - Export from Windows → Mac
+  - Test with MLX (mlx_lm supports adapter_path=)
+  - A/B test: base vs fine-tuned
+
+### P5 — Monitoring & Feedback Loop
+
+- [ ] **YouTube caption comparison**
+  - live_caption_monitor.py
+  - Compare local Whisper vs YouTube auto-captions
+  - Windowed WER tracking
+
+- [ ] **Active learning pipeline**
+  - Flag low-confidence segments → human review queue
+  - Label Studio / Prodigy integration
+  - Versioned corrections in stark_data/corrections/
+  - Re-train loop (3-5 cycles target)
+
+### P6 — Future Features
+
+- [ ] **Post-sermon 5-sentence summary**
+  - Full transcript → Gemma 3 4B → structured summary
+  - Per-speaker summary (requires diarization)
+
+- [ ] **Verse reference extraction**
+  - Regex + LLM for explicit/implicit verse citations
+  - Per-speaker verse list with timestamps
+
+- [ ] **Multi-language support**
+  - TranslateGemma supports 36 languages
+  - French, Portuguese, Chinese for broader outreach
 
 ---
 
-## Phase 3: Create Files
+## Architecture Reference
 
-Two files go in `~/stt_bilingual/`:
+```
+Mac Inference (MLX):
+  Mic → Silero VAD (PyTorch) → mlx-whisper STT → TranslateGemma 4B+12B (MLX 4-bit) → WebSocket → Browser
 
-### 3.1 — `ab_display.html`
-
-- [ ] Save `ab_display.html` into `~/stt_bilingual/ab_display.html`
-- Self-contained HTML — no build step, no npm
-- Connects to `ws://localhost:8765`
-- 4-quadrant layout:
-  - **Top-left:** B (12B) English — blue accent
-  - **Top-right:** A (4B) English — green accent
-  - **Bottom-left:** B (12B) Spanish — blue accent
-  - **Bottom-right:** A (4B) Spanish — green accent
-- Footer: running chunk count, avg latencies, same-output %, 4B-faster %
-
-### 3.2 — `dry_run_ab.py`
-
-- [ ] Save `dry_run_ab.py` into `~/stt_bilingual/dry_run_ab.py`
-- Architecture: Mic → Silero VAD → Distil-Whisper → [Gemma 4B + Gemma 12B] → WebSocket → Browser
-- Two modes:
-  - **Parallel (default):** Both Gemma models in 4-bit via bitsandbytes — real-time A/B
-  - **Swap (fallback):** Loads one model at a time if 4-bit fails on macOS
-- Also writes terminal output + CSV metrics alongside the browser display
-
----
-
-## Phase 4: Run It
-
-- [ ] **4.1** Start the backend
-  ```bash
-  cd ~/stt_bilingual
-  source stt_env/bin/activate
-  python dry_run_ab.py
-  ```
-
-- [ ] **4.2** Wait for all ✓ checkmarks (1-3 min on first run)
-
-- [ ] **4.3** Open the display
-  ```bash
-  # In a new terminal tab:
-  open ~/stt_bilingual/ab_display.html
-  ```
-  - Green dot = connected
-  - **Cmd+Shift+F** or **F11** for fullscreen
-
-- [ ] **4.4** Speak test phrases — watch all 4 quadrants update:
-
-  | Type | Phrase |
-  |------|--------|
-  | Simple | "Good morning everyone, welcome to our service." |
-  | Scripture | "Let us open our Bibles to Romans chapter 8 verse 28." |
-  | Theological | "Justification by faith is the cornerstone of the Gospel." |
-  | Names | "The apostle Paul wrote to the Philippians from prison." |
-  | Great Commission | "Go therefore and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit." |
-  | Pastoral | "Let us remember our brothers and sisters who are going through difficult times this week." |
-  | Numeric | "This letter was written around 55 AD during Paul's third missionary journey." |
-
-- [ ] **4.5** Run 5+ minutes / 10+ utterances
-
-- [ ] **4.6** Ctrl+C for summary stats
-
-- [ ] **4.7** Review CSV: `open ab_metrics_*.csv`
-
----
-
-## Phase 5: Fallback If bitsandbytes Fails
-
-Edit line ~38 of `dry_run_ab.py`:
-```python
-SWAP_MODE = True   # was False
+Windows Training (CUDA):
+  Raw audio → 10-step preprocessing → Whisper large-v3 pseudo-labels → LoRA fine-tune
+  Bible corpus → aligned JSONL → QLoRA fine-tune TranslateGemma
 ```
 
-Swap mode loads/unloads one Gemma model at a time in fp16. Slower cycles (~30-60s per swap) but no quantization dependency.
-
----
-
-## Troubleshooting
-
-| Symptom | Fix |
-|---------|-----|
-| Browser shows "Disconnected" | Backend not running — check terminal for errors |
-| `bitsandbytes` install fails | Use `SWAP_MODE = True` |
-| OOM with both models | Use `SWAP_MODE = True`; close Chrome/other apps |
-| No audio captured | Check mic permissions; `python -c "import sounddevice; print(sounddevice.query_devices())"` |
-| WebSocket port in use | Change `WS_PORT` in both files |
-| TranslateGemma outputs English | Try `"<2es> {text}"` as prompt |
-| HuggingFace 403 | `huggingface-cli login`; accept license on HF |
-| Whisper detects wrong language | Add `generate_kwargs={"language": "en"}` to stt_pipe |
-
----
-
-## After This Works ✅
-
-1. **Analyze CSV** — latency distributions, quality differences
-2. **Pick winner** or keep both (4B live, 12B offline)
-3. **Build projected caption display** — Spanish top / English bottom for church projector
-4. **Start data collection** — yt-dlp from Stark Road YouTube
-5. **Fine-tune** on church data (WSL desktop)
-6. **Integrate with church AV** (ProPresenter / PowerPoint — homework TBD)
+| Component | Model | Framework | Memory |
+|-----------|-------|-----------|--------|
+| VAD | Silero VAD | PyTorch | ~2 MB |
+| STT | distil-whisper-large-v3 | mlx-whisper | ~1.5 GB |
+| Translate A | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB |
+| Translate B | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB |
+| **Total** | | | **~11 GB / 18 GB** |
