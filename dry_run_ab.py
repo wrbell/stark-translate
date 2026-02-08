@@ -134,11 +134,14 @@ def load_translation_models(load_b=True):
 # ---------------------------------------------------------------------------
 
 def translate_mlx(model, tokenizer, text):
-    """Translate English to Spanish using TranslateGemma via MLX."""
-    from mlx_lm import generate
+    """Translate English to Spanish using TranslateGemma via MLX.
+
+    Returns (translation, latency_ms, generation_tps).
+    """
+    from mlx_lm import stream_generate
 
     if model is None or tokenizer is None:
-        return "(model not loaded)", 0.0
+        return "(model not loaded)", 0.0, 0.0
 
     messages = [{"role": "user", "content": [
         {"type": "text",
@@ -152,17 +155,22 @@ def translate_mlx(model, tokenizer, text):
     )
 
     t0 = time.perf_counter()
-    translation = generate(
+    chunks = []
+    gen_tps = 0.0
+    for response in stream_generate(
         model, tokenizer,
         prompt=prompt,
         max_tokens=128,
-        verbose=False,
-    )
+    ):
+        chunks.append(response.text)
+        gen_tps = response.generation_tps
+        if response.finish_reason:
+            break
     latency_ms = (time.perf_counter() - t0) * 1000
 
-    # Strip any trailing end_of_turn tokens (safety net)
+    translation = "".join(chunks)
     clean = translation.split("<end_of_turn>")[0].strip()
-    return clean, latency_ms
+    return clean, latency_ms, gen_tps
 
 
 # ---------------------------------------------------------------------------
@@ -192,66 +200,71 @@ async def process_chunk(audio_data):
     chunk_id += 1
     cid = chunk_id
 
-    # STT (MLX Whisper)
-    e2e_start = time.perf_counter()
-    t0 = e2e_start
-    result = mlx_whisper.transcribe(
-        audio_data,
-        path_or_hf_repo=stt_pipe,  # model ID string
-        language="en",
-        condition_on_previous_text=False,
-    )
-    stt_latency = (time.perf_counter() - t0) * 1000
-    english = result["text"].strip()
+    try:
+        # STT (MLX Whisper)
+        e2e_start = time.perf_counter()
+        t0 = e2e_start
+        result = mlx_whisper.transcribe(
+            audio_data,
+            path_or_hf_repo=stt_pipe,  # model ID string
+            language="en",
+            condition_on_previous_text=False,
+        )
+        stt_latency = (time.perf_counter() - t0) * 1000
+        english = result["text"].strip()
 
-    # Extract confidence from Whisper segments
-    stt_confidence = None
-    segments = result.get("segments", [])
-    if segments:
-        avg_logprobs = [s.get("avg_logprob", 0) for s in segments if "avg_logprob" in s]
-        if avg_logprobs:
-            # Convert avg_logprob to 0-1 confidence (logprob of -0.3 ≈ 0.74, -1.0 ≈ 0.37)
-            mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
-            stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
+        # Extract confidence from Whisper segments
+        stt_confidence = None
+        segments = result.get("segments", [])
+        if segments:
+            avg_logprobs = [s.get("avg_logprob", 0) for s in segments if "avg_logprob" in s]
+            if avg_logprobs:
+                mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
+                stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
 
-    if not english:
-        return
+        if not english:
+            return
 
-    # Translate (MLX)
-    spanish_a, lat_a = translate_mlx(mlx_a_model, mlx_a_tokenizer, english)
-    spanish_b, lat_b = translate_mlx(mlx_b_model, mlx_b_tokenizer, english)
+        # Translate (MLX)
+        spanish_a, lat_a, tps_a = translate_mlx(mlx_a_model, mlx_a_tokenizer, english)
+        spanish_b, lat_b, tps_b = translate_mlx(mlx_b_model, mlx_b_tokenizer, english)
 
-    e2e_latency = (time.perf_counter() - e2e_start) * 1000
+        e2e_latency = (time.perf_counter() - e2e_start) * 1000
 
-    # Build result
-    result_data = {
-        "type": "translation",
-        "chunk_id": cid,
-        "english": english,
-        "spanish_a": spanish_a,
-        "spanish_b": spanish_b,
-        "stt_latency_ms": round(stt_latency, 1),
-        "latency_a_ms": round(lat_a, 1),
-        "latency_b_ms": round(lat_b, 1),
-        "e2e_latency_ms": round(e2e_latency, 1),
-        "stt_confidence": stt_confidence,
-        "timestamp": datetime.now().isoformat(),
-    }
-    all_results.append(result_data)
+        # Build result
+        result_data = {
+            "type": "translation",
+            "chunk_id": cid,
+            "english": english,
+            "spanish_a": spanish_a,
+            "spanish_b": spanish_b,
+            "stt_latency_ms": round(stt_latency, 1),
+            "latency_a_ms": round(lat_a, 1),
+            "latency_b_ms": round(lat_b, 1),
+            "e2e_latency_ms": round(e2e_latency, 1),
+            "stt_confidence": stt_confidence,
+            "tps_a": round(tps_a, 1),
+            "tps_b": round(tps_b, 1),
+            "timestamp": datetime.now().isoformat(),
+        }
+        all_results.append(result_data)
 
-    # Terminal output
-    conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
-    print(f"\n{'='*60}")
-    print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | A: {lat_a:.0f}ms | B: {lat_b:.0f}ms | E2E: {e2e_latency:.0f}ms{conf_str}")
-    print(f"  EN: {english}")
-    print(f"  A (4B):  {spanish_a}")
-    print(f"  B (12B): {spanish_b}")
+        # Terminal output
+        conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
+        print(f"\n{'='*60}")
+        print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | A: {lat_a:.0f}ms ({tps_a:.0f} t/s) | B: {lat_b:.0f}ms ({tps_b:.0f} t/s) | E2E: {e2e_latency:.0f}ms{conf_str}")
+        print(f"  EN: {english}")
+        print(f"  A (4B):  {spanish_a}")
+        print(f"  B (12B): {spanish_b}")
 
-    # WebSocket broadcast
-    await broadcast(result_data)
+        # WebSocket broadcast
+        await broadcast(result_data)
 
-    # CSV log
-    write_csv_row(result_data)
+        # CSV log
+        write_csv_row(result_data)
+
+    except Exception as e:
+        print(f"\n  ERROR in chunk #{cid}: {e}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -274,12 +287,18 @@ async def ws_handler(websocket, path=None):
 
 async def broadcast(data):
     """Send data to all connected WebSocket clients."""
-    if ws_clients:
-        msg = json.dumps(data)
-        await asyncio.gather(
-            *[client.send(msg) for client in ws_clients],
-            return_exceptions=True,
-        )
+    if not ws_clients:
+        return
+    msg = json.dumps(data)
+    dead = set()
+    results = await asyncio.gather(
+        *[client.send(msg) for client in ws_clients],
+        return_exceptions=True,
+    )
+    for client, result in zip(list(ws_clients), results):
+        if isinstance(result, Exception):
+            dead.add(client)
+    ws_clients -= dead
 
 
 # ---------------------------------------------------------------------------
@@ -295,7 +314,7 @@ def init_csv():
             "chunk_id", "timestamp", "english",
             "spanish_a", "spanish_b",
             "stt_latency_ms", "latency_a_ms", "latency_b_ms",
-            "e2e_latency_ms", "stt_confidence",
+            "e2e_latency_ms", "stt_confidence", "tps_a", "tps_b",
         ])
     print(f"  CSV: {CSV_PATH}")
 
@@ -309,6 +328,7 @@ def write_csv_row(data):
             data["spanish_a"], data["spanish_b"],
             data["stt_latency_ms"], data["latency_a_ms"], data["latency_b_ms"],
             data["e2e_latency_ms"], data.get("stt_confidence", ""),
+            data.get("tps_a", ""), data.get("tps_b", ""),
         ])
 
 
@@ -350,48 +370,61 @@ def print_summary():
 # ---------------------------------------------------------------------------
 
 async def audio_loop():
-    """Main audio capture and processing loop."""
+    """Main audio capture and processing loop with error recovery."""
     print("\nListening... (Ctrl+C to stop)\n")
 
     speech_buffer = np.array([], dtype=np.float32)
     silence_frames = 0
     max_silence_frames = int(0.8 * SAMPLE_RATE / 512)  # ~0.8s of silence triggers processing
 
-    stream = sd.InputStream(
-        samplerate=SAMPLE_RATE,
-        channels=1,
-        dtype="float32",
-        blocksize=512,
-        callback=audio_callback,
-    )
-
-    with stream:
-        while True:
-            try:
-                audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
-            except asyncio.TimeoutError:
-                continue
-
-            has_speech = is_speech(audio_frame, vad_model, vad_utils)
-
-            if has_speech:
-                speech_buffer = np.concatenate([speech_buffer, audio_frame])
-                silence_frames = 0
-            else:
-                silence_frames += 1
-
-            # Process when we have enough speech and hit a silence gap,
-            # or when buffer exceeds max duration
-            buffer_duration = len(speech_buffer) / SAMPLE_RATE
-            should_process = (
-                (buffer_duration >= CHUNK_DURATION and silence_frames >= max_silence_frames)
-                or buffer_duration >= CHUNK_DURATION * 3  # Force process at 3x
+    while True:
+        try:
+            stream = sd.InputStream(
+                samplerate=SAMPLE_RATE,
+                channels=1,
+                dtype="float32",
+                blocksize=512,
+                callback=audio_callback,
             )
 
-            if should_process and buffer_duration >= 0.5:
-                await process_chunk(speech_buffer.copy())
-                speech_buffer = np.array([], dtype=np.float32)
-                silence_frames = 0
+            with stream:
+                while True:
+                    try:
+                        audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
+                    except asyncio.TimeoutError:
+                        continue
+
+                    has_speech = is_speech(audio_frame, vad_model, vad_utils)
+
+                    if has_speech:
+                        speech_buffer = np.concatenate([speech_buffer, audio_frame])
+                        silence_frames = 0
+                    else:
+                        silence_frames += 1
+
+                    # Process when we have enough speech and hit a silence gap,
+                    # or when buffer exceeds max duration
+                    buffer_duration = len(speech_buffer) / SAMPLE_RATE
+                    should_process = (
+                        (buffer_duration >= CHUNK_DURATION and silence_frames >= max_silence_frames)
+                        or buffer_duration >= CHUNK_DURATION * 3  # Force process at 3x
+                    )
+
+                    if should_process and buffer_duration >= 0.5:
+                        await process_chunk(speech_buffer.copy())
+                        speech_buffer = np.array([], dtype=np.float32)
+                        silence_frames = 0
+
+        except sd.PortAudioError as e:
+            print(f"\n  Mic error: {e} — retrying in 2s...", file=sys.stderr)
+            speech_buffer = np.array([], dtype=np.float32)
+            # Drain stale audio from queue
+            while not audio_queue.empty():
+                try:
+                    audio_queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+            await asyncio.sleep(2)
 
 
 async def main_async(args):

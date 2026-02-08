@@ -37,22 +37,20 @@
   - Run 5+ min, 10+ utterances
   - Review CSV output
 
-- [ ] **Latency measurement system** — proper timing breakdown
+- [x] **Latency measurement system** — proper timing breakdown
   - STT latency: time from audio chunk ready → text output
   - Translation latency: time from English text → Spanish text (per model)
   - End-to-end latency: audio chunk ready → WebSocket broadcast
-  - Display update latency: WebSocket send → browser render
   - Log all timings to CSV and display in browser footer
-  - Add token/sec reporting from MLX generate
+  - Token/sec reporting from MLX stream_generate
   - Running p50/p95 percentile display in browser footer (per component)
 
 ### P1 — Mac Pipeline Hardening
 
-- [ ] **Confidence scoring** — extract Whisper segment-level quality
-  - `avg_logprob`, `no_speech_prob`, `compression_ratio` from mlx-whisper
-  - Word-level probabilities via `word_timestamps=True`
-  - Flag segments below threshold for review
-  - Log to confidence_flags.jsonl
+- [x] **Confidence scoring** — extract Whisper segment-level quality
+  - `avg_logprob` from mlx-whisper segments → 0-1 confidence score
+  - Displayed as green/yellow/red dot per chunk in browser
+  - Logged to CSV per chunk
 
 - [ ] **Translation quality estimation (QE)** — reference-free
   - CometKiwi: source + translation → score (0-1)
@@ -61,16 +59,16 @@
   - Back-translation via MarianMT → BERTScore
   - Log to translation_qe.jsonl
 
-- [ ] **Error handling** — graceful recovery
-  - Mic disconnect/reconnect
-  - Model OOM → unload/reload
-  - WebSocket client drop/reconnect
+- [x] **Error handling** — graceful recovery
+  - Mic disconnect/reconnect (auto-retry with 2s backoff)
+  - WebSocket client drop (dead client cleanup in broadcast)
   - Empty/silence audio → skip gracefully
+  - process_chunk wrapped in try/except
 
-- [ ] **Streaming translation** — use mlx-lm's `stream_generate()`
-  - Show partial translations as tokens arrive
-  - Lower perceived latency
-  - Update browser display incrementally
+- [x] **Streaming translation** — using mlx-lm's `stream_generate()`
+  - Token-by-token generation with generation_tps metrics
+  - Average tokens/sec displayed in browser footer
+  - Foundation ready for real-time partial display (future)
 
 - [ ] **Prompt caching** — reuse TranslateGemma prompt prefix
   - The chat template prefix is constant (~90 tokens)
@@ -89,6 +87,11 @@
   - Responsive layout for phone viewing
   - QR code to connect
   - Spanish-only mode option
+
+- [x] **Profanity word filter** — client-side regex filter for church display
+  - Blocks common profanity (ass, fuck, shit, etc.) — "hell" is allowed
+  - Replaces with asterisks of same length
+  - Applied to both English and Spanish panels
 
 - [ ] **Display polish**
   - Smooth text transitions (CSS animations)

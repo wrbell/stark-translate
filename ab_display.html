@@ -264,6 +264,9 @@
       <span>B <span class="stat-val blue-val" id="p95B">—</span></span>
       <span class="pct-label" style="margin-left:8px">E2E:</span>
       <span><span class="stat-val" id="avgE2E">—</span></span>
+      <span class="pct-label" style="margin-left:8px">t/s:</span>
+      <span>A <span class="stat-val green-val" id="tpsA">—</span></span>
+      <span>B <span class="stat-val blue-val" id="tpsB">—</span></span>
     </div>
   </div>
 </div>
@@ -286,11 +289,18 @@
   let chunks = 0;
   let sumA = 0, sumB = 0, sumSTT = 0, sumE2E = 0;
   let sameCount = 0, aFasterCount = 0;
+  let sumTpsA = 0, sumTpsB = 0, tpsCountA = 0, tpsCountB = 0;
 
   // Arrays for percentile calculation
   let latenciesSTT = [];
   let latenciesA = [];
   let latenciesB = [];
+
+  // Word filter — replace profanity with asterisks (church display)
+  const BLOCKED_WORDS = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|motherfucker|piss|shit|slut|whore)\b/gi;
+  function filterText(text) {
+    return text.replace(BLOCKED_WORDS, m => '*'.repeat(m.length));
+  }
 
   function percentile(arr, p) {
     if (arr.length === 0) return 0;
@@ -355,11 +365,17 @@
         ? '<span class="confidence-dot ' + confidenceClass(conf) + '"></span>'
         : '';
 
-      // Add text to panels
-      appendChunk(panels['a-en'], data.chunk_id, data.english, confDot);
-      appendChunk(panels['a-es'], data.chunk_id, data.spanish_a, '');
-      appendChunk(panels['b-en'], data.chunk_id, data.english, confDot);
-      appendChunk(panels['b-es'], data.chunk_id, data.spanish_b, '');
+      // Tokens/sec tracking
+      const tpsA = data.tps_a || 0;
+      const tpsB = data.tps_b || 0;
+      if (tpsA > 0) { sumTpsA += tpsA; tpsCountA++; }
+      if (tpsB > 0) { sumTpsB += tpsB; tpsCountB++; }
+
+      // Add text to panels (with word filter for church display)
+      appendChunk(panels['a-en'], data.chunk_id, filterText(data.english), confDot);
+      appendChunk(panels['a-es'], data.chunk_id, filterText(data.spanish_a), '');
+      appendChunk(panels['b-en'], data.chunk_id, filterText(data.english), confDot);
+      appendChunk(panels['b-es'], data.chunk_id, filterText(data.spanish_b), '');
 
       // Update latency headers (last chunk)
       $('latA').textContent = fmtMs(latA);
@@ -384,6 +400,10 @@
       $('p95A').textContent = fmtMs(percentile(latenciesA, 95));
       $('p95B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 95)) : '—';
       $('avgE2E').textContent = fmtMs(sumE2E / chunks);
+
+      // Update footer — tokens/sec
+      $('tpsA').textContent = tpsCountA > 0 ? (sumTpsA / tpsCountA).toFixed(0) : '—';
+      $('tpsB').textContent = tpsCountB > 0 ? (sumTpsB / tpsCountB).toFixed(0) : '—';
     };
   }
 
