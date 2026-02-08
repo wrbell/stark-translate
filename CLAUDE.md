@@ -29,7 +29,7 @@ This project spans two machines. Each has its own detailed setup doc:
 
 | Machine | Role | Doc |
 |---------|------|-----|
-| **MacBook** (M3 Pro, 16GB) | Inference, live demos, monitoring, UI | [`CLAUDE-macbook.md`](./CLAUDE-macbook.md) |
+| **MacBook** (M3 Pro, 18GB, 18-core GPU, Metal 4) | Inference, live demos, monitoring, UI | [`CLAUDE-macbook.md`](./CLAUDE-macbook.md) |
 | **Windows Desktop** (WSL2, A2000 Ada 16GB, 64GB RAM) | Audio preprocessing, fine-tuning, training loops | [`CLAUDE-windows.md`](./CLAUDE-windows.md) |
 
 Model transfer path: WSL shared folder `/mnt/c/Users/YourName/Projects/` → copy LoRA adapters to Mac project root.
@@ -476,7 +476,7 @@ Use a two-pass approach:
 ## Compute Timeline — Training & Fine-Tuning
 
 All training runs on the **Windows Desktop** (NVIDIA A2000 Ada 16GB VRAM, 64GB RAM, WSL2).
-Inference benchmarks on the **MacBook** (M3 Pro, 16GB unified memory, MPS).
+Inference benchmarks on the **MacBook** (M3 Pro, 18GB unified memory, 12-core CPU [6P+6E], 18-core GPU, Metal 4, MPS).
 
 > A2000 Ada specs: 4,352 CUDA cores, ~16 TFLOPS FP16/BF16, 16GB GDDR6, 288 GB/s bandwidth.
 > Roughly 2× a T4 and ~60% of an RTX 3090 for training throughput.

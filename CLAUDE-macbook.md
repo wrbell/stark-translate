@@ -1,8 +1,37 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
-> **Machine:** M3 Pro MacBook, 16GB unified memory, MPS acceleration
+> **Machine:** M3 Pro MacBook (Mac15,6), 18GB unified memory, 12-core CPU (6P+6E), 18-core GPU, Metal 4, MPS acceleration
 > **Role:** Inference, live demos, quality monitoring, Streamlit UI, A/B testing
 > **Parent doc:** [`CLAUDE.md`](./CLAUDE.md)
+
+---
+
+## Hardware Profile (Verified)
+
+| Spec | Value |
+|------|-------|
+| Model | MacBook Pro (Mac15,6, MRX43LL/A) |
+| Chip | Apple M3 Pro |
+| CPU | 12 cores (6 performance + 6 efficiency) |
+| GPU | 18 cores |
+| Memory | 18 GB unified (17.2 GB usable) |
+| Metal | Metal 4 |
+| L2 Cache | 4 MB |
+| Display | 3024x1964 Retina XDR (14") |
+| iogpu wired limit | 0 (unlimited GPU memory) |
+
+### Inference Memory Budget
+
+| Component | VRAM (4-bit) | VRAM (fp16) |
+|-----------|-------------|-------------|
+| Distil-Whisper large-v3 | ~1.5 GB | ~1.5 GB |
+| TranslateGemma 4B | ~2.6 GB | ~8 GB |
+| TranslateGemma 12B | ~6 GB | ~24 GB |
+| Silero VAD | ~2 MB | ~2 MB |
+| **Total (parallel 4-bit)** | **~10.1 GB** | — |
+| **Headroom (18 GB)** | **~7.9 GB** | — |
+
+With 18 GB unified memory and no iogpu wired limit, parallel mode (both Gemma models in 4-bit) fits comfortably. fp16 is only viable for the 4B model alone.
 
 ---
 
@@ -14,22 +43,30 @@
 - Grant mic access: **System Settings → Privacy & Security → Microphone**
 - Homebrew installed
 
+### Verified Environment
+
+- Python 3.11.11
+- PyTorch 2.10.0 (MPS available, fp16 confirmed)
+- bitsandbytes 0.49.1 (4-bit quantization on Apple Silicon)
+
 ### Installation
 
 ```bash
 # Update Homebrew
 brew update
-brew install python@3.12 ffmpeg
+brew install ffmpeg portaudio
 
 # Create virtualenv
 python3 -m venv stt_env
 source stt_env/bin/activate
 
-# Core inference libs
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
-pip install transformers accelerate optimum[exporters]
+# Core inference libs (standard PyTorch includes MPS on Apple Silicon)
+pip install torch torchvision torchaudio
+pip install transformers accelerate
 pip install sounddevice silero-vad
 pip install sentencepiece protobuf
+pip install bitsandbytes                # 4-bit quantization (both Gemma models in RAM)
+pip install websockets                  # WebSocket server for browser display
 
 # UI & metrics
 pip install streamlit pandas streamlit-webrtc
@@ -67,7 +104,7 @@ First run auto-downloads models from Hugging Face — use Wi-Fi:
 | `sentence-transformers/LaBSE` | ~470 MB | Cross-lingual similarity |
 | `Helsinki-NLP/opus-mt-es-en` | ~75 MB | Back-translation |
 
-**Memory note:** Approach B peaks ~12GB. Always use `load_in_4bit=True` on Gemma models. Don't run both approaches simultaneously unless monitoring memory with `torch.mps.current_allocated_memory()`.
+**Memory note:** With 18GB unified memory, both Gemma models fit simultaneously in 4-bit (4B ~2.6 GB + 12B ~6 GB + Whisper ~1.5 GB = ~10 GB), leaving ~8 GB for macOS and buffers. Always use `load_in_4bit=True` on Gemma models. Monitor with `torch.mps.driver_allocated_memory()`.
 
 ---
 
@@ -389,7 +426,7 @@ def back_translate_check(source_en: str, translated_es: str) -> dict:
     }
 ```
 
-### Latency Budget on M3 Pro
+### Latency Budget on M3 Pro (18-core GPU, 18GB)
 
 | Component | Time |
 |-----------|------|
