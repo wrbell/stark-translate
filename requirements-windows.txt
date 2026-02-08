@@ -26,7 +26,7 @@ noisereduce
 pyloudnorm
 pydub
 demucs                        # Source separation (CUDA-accelerated)
-silero-vad
+# silero-vad: loaded via torch.hub.load('snakers4/silero-vad', 'silero_vad')
 pyannote-audio                # Speaker diarization (requires HF token)
 inaSpeechSegmenter            # Speech/music classification
 

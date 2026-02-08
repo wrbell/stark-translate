@@ -130,6 +130,66 @@ def load_translation_models(load_b=True):
 
 
 # ---------------------------------------------------------------------------
+# Translation Quality Estimation (lightweight, real-time)
+# ---------------------------------------------------------------------------
+
+import re
+
+# Common English words unlikely in valid Spanish translations
+_EN_WORDS = re.compile(
+    r'\b(the|and|of|that|have|for|not|with|you|this|but|his|from|they|'
+    r'been|said|each|which|their|will|other|about|many|then|them|these|'
+    r'would|could|should|because|into|after|before|between|under|through)\b',
+    re.IGNORECASE,
+)
+
+def qe_length_ratio(source, translation):
+    """Check if Spanish translation length is plausible vs English source.
+    Spanish is typically 15-25% longer than English.
+    Returns a score 0-1 (1 = perfect ratio, lower = suspicious).
+    """
+    if not source or not translation:
+        return 0.0
+    ratio = len(translation) / len(source)
+    # Expected range: 0.8 to 1.8 (generous bounds)
+    if 0.9 <= ratio <= 1.6:
+        return 1.0
+    elif 0.7 <= ratio <= 2.0:
+        return 0.7
+    elif 0.5 <= ratio <= 2.5:
+        return 0.4
+    return 0.1
+
+
+def qe_untranslated(source, translation):
+    """Detect if translation contains significant untranslated English.
+    Returns a score 0-1 (1 = fully translated, lower = untranslated content).
+    """
+    if not translation:
+        return 0.0
+    # Count English stopwords in translation
+    en_matches = _EN_WORDS.findall(translation)
+    words = translation.split()
+    if not words:
+        return 0.0
+    en_ratio = len(en_matches) / len(words)
+    if en_ratio < 0.05:
+        return 1.0
+    elif en_ratio < 0.15:
+        return 0.7
+    elif en_ratio < 0.30:
+        return 0.4
+    return 0.1
+
+
+def qe_score(source, translation):
+    """Combined lightweight QE score (0-1). Higher = better."""
+    lr = qe_length_ratio(source, translation)
+    ut = qe_untranslated(source, translation)
+    return round((lr + ut) / 2, 2)
+
+
+# ---------------------------------------------------------------------------
 # Translation (MLX)
 # ---------------------------------------------------------------------------
 
@@ -231,6 +291,10 @@ async def process_chunk(audio_data):
 
         e2e_latency = (time.perf_counter() - e2e_start) * 1000
 
+        # Lightweight translation QE
+        qe_a = qe_score(english, spanish_a)
+        qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
+
         # Build result
         result_data = {
             "type": "translation",
@@ -245,14 +309,17 @@ async def process_chunk(audio_data):
             "stt_confidence": stt_confidence,
             "tps_a": round(tps_a, 1),
             "tps_b": round(tps_b, 1),
+            "qe_a": qe_a,
+            "qe_b": qe_b,
             "timestamp": datetime.now().isoformat(),
         }
         all_results.append(result_data)
 
         # Terminal output
         conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
+        qe_str = f" | QE: A={qe_a} B={qe_b}" if qe_b is not None else f" | QE: A={qe_a}"
         print(f"\n{'='*60}")
-        print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | A: {lat_a:.0f}ms ({tps_a:.0f} t/s) | B: {lat_b:.0f}ms ({tps_b:.0f} t/s) | E2E: {e2e_latency:.0f}ms{conf_str}")
+        print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | A: {lat_a:.0f}ms ({tps_a:.0f} t/s) | B: {lat_b:.0f}ms ({tps_b:.0f} t/s) | E2E: {e2e_latency:.0f}ms{conf_str}{qe_str}")
         print(f"  EN: {english}")
         print(f"  A (4B):  {spanish_a}")
         print(f"  B (12B): {spanish_b}")
@@ -315,6 +382,7 @@ def init_csv():
             "spanish_a", "spanish_b",
             "stt_latency_ms", "latency_a_ms", "latency_b_ms",
             "e2e_latency_ms", "stt_confidence", "tps_a", "tps_b",
+            "qe_a", "qe_b",
         ])
     print(f"  CSV: {CSV_PATH}")
 
@@ -329,6 +397,7 @@ def write_csv_row(data):
             data["stt_latency_ms"], data["latency_a_ms"], data["latency_b_ms"],
             data["e2e_latency_ms"], data.get("stt_confidence", ""),
             data.get("tps_a", ""), data.get("tps_b", ""),
+            data.get("qe_a", ""), data.get("qe_b", ""),
         ])
 
 

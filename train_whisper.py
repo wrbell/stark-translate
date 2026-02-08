@@ -80,11 +80,13 @@ def fine_tune_whisper(
 
     print(f"Loading {model_name}...")
     processor = WhisperProcessor.from_pretrained(model_name)
+    from transformers import BitsAndBytesConfig
+    bnb_config = BitsAndBytesConfig(load_in_8bit=True)
     model = WhisperForConditionalGeneration.from_pretrained(
         model_name,
         device_map="auto",
         torch_dtype=torch.bfloat16,
-        load_in_8bit=True,  # Quantize base model for LoRA
+        quantization_config=bnb_config,
     )
 
     # LoRA config — encoder + decoder

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SRGH Live">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d1117">
+<meta name="description" content="Live bilingual translation — Stark Road Gospel Hall">
+<title>Live Translation — Stark Road Gospel Hall</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --green: #3fb950;
+    --blue: #58a6ff;
+    --red: #f85149;
+    --yellow: #d29922;
+    --spanish-accent: #d2a8ff;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 8px;
+    /* Safe area for notched phones */
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  .status-dot.connected { background: var(--green); }
+
+  .status-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ── Mode tabs (pill toggle) ── */
+  .mode-tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .mode-tab {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .mode-tab.active {
+    background: var(--border);
+    color: var(--text);
+  }
+
+  /* ── Model toggle ── */
+  .model-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .model-toggle label {
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--green);
+    border-radius: 10px;
+    transition: background 0.3s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 2px;
+    bottom: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: var(--blue);
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(16px);
+  }
+
+  .model-label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 16px;
+    text-align: center;
+  }
+
+  .model-label-a { color: var(--green); }
+  .model-label-b { color: var(--blue); }
+
+  /* ── Share button ── */
+  .share-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* ── Translation area ── */
+  .content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .translation-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+    /* Safe area for sides */
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .translation-panel::-webkit-scrollbar { width: 3px; }
+  .translation-panel::-webkit-scrollbar-track { background: transparent; }
+  .translation-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Mode: both — split into two sections */
+  .content-area[data-mode="both"] .panel-spanish {
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+  }
+  .content-area[data-mode="both"] .panel-english {
+    flex: 1;
+  }
+
+  /* Mode: spanish — spanish full, english hidden */
+  .content-area[data-mode="spanish"] .panel-spanish {
+    flex: 1;
+  }
+  .content-area[data-mode="spanish"] .panel-english {
+    display: none;
+  }
+
+  /* Mode: english — english full, spanish hidden */
+  .content-area[data-mode="english"] .panel-english {
+    flex: 1;
+  }
+  .content-area[data-mode="english"] .panel-spanish {
+    display: none;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    padding: 0 0 8px 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 1;
+  }
+
+  .panel-label-es { color: var(--spanish-accent); }
+  .panel-label-en { color: var(--blue); }
+
+  /* ── Chunks ── */
+  .chunk {
+    margin-bottom: 10px;
+    font-size: 22px;
+    line-height: 1.55;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .chunk-es {
+    color: var(--text);
+  }
+
+  .chunk-en {
+    color: #c9d1d9;
+  }
+
+  /* ── Share overlay ── */
+  .share-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .share-overlay.visible {
+    display: flex;
+  }
+
+  .share-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .share-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .share-url {
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 14px;
+    color: var(--blue);
+    word-break: break-all;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    user-select: all;
+    -webkit-user-select: all;
+  }
+
+  .share-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .share-action-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .btn-copy {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+
+  .btn-share {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+  }
+
+  .btn-close {
+    background: transparent;
+    color: var(--text-dim);
+  }
+
+  .copy-toast {
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 10px;
+    min-height: 18px;
+  }
+
+  /* ── Bottom safe area padding ── */
+  .bottom-pad {
+    flex-shrink: 0;
+    height: env(safe-area-inset-bottom, 0px);
+    background: var(--bg);
+  }
+
+  /* ── Responsive font scaling ── */
+  @media (max-width: 400px) {
+    .chunk { font-size: 20px; line-height: 1.5; }
+    .mode-tab { padding: 5px 10px; font-size: 12px; }
+    .topbar { padding: 8px 12px; gap: 6px; }
+  }
+
+  @media (min-width: 600px) {
+    .chunk { font-size: 26px; line-height: 1.6; }
+    .translation-panel { padding: 20px 24px; }
+  }
+
+  @media (min-width: 900px) {
+    .chunk { font-size: 28px; line-height: 1.65; }
+    .translation-panel { padding: 24px 32px; }
+  }
+
+  /* ── Fullscreen ── */
+  :fullscreen { background: var(--bg); }
+
+  /* ── Landscape phone: reduce padding, keep text readable ── */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .topbar { padding: 6px 12px; }
+    .chunk { font-size: 18px; line-height: 1.4; margin-bottom: 6px; }
+    .translation-panel { padding: 10px 16px; }
+    .panel-label { padding-bottom: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar: status, tabs, model toggle, share -->
+<div class="topbar">
+  <div class="status-indicator">
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-label" id="statusLabel">Offline</span>
+  </div>
+
+  <div class="mode-tabs" id="modeTabs">
+    <button class="mode-tab active" data-mode="both">Both</button>
+    <button class="mode-tab" data-mode="spanish">Espanol</button>
+    <button class="mode-tab" data-mode="english">English</button>
+  </div>
+
+  <div class="model-toggle">
+    <span class="model-label model-label-a" id="labelA">A</span>
+    <div class="toggle-switch">
+      <input type="checkbox" id="modelToggle" checked>
+      <span class="toggle-slider" id="toggleSlider"></span>
+    </div>
+    <span class="model-label model-label-b" id="labelB">B</span>
+  </div>
+
+  <button class="share-btn" id="shareBtn" aria-label="Share link">Share</button>
+</div>
+
+<!-- Translation content -->
+<div class="content-area" id="contentArea" data-mode="both">
+  <div class="translation-panel panel-spanish" id="panelSpanish">
+    <div class="panel-label panel-label-es" id="esLabel">Espanol (B)</div>
+    <div id="spanishChunks"></div>
+  </div>
+  <div class="translation-panel panel-english" id="panelEnglish">
+    <div class="panel-label panel-label-en">English</div>
+    <div id="englishChunks"></div>
+  </div>
+</div>
+
+<div class="bottom-pad"></div>
+
+<!-- Share overlay -->
+<div class="share-overlay" id="shareOverlay">
+  <div class="share-card">
+    <h3>Join Live Translation</h3>
+    <div class="share-url" id="shareUrl"></div>
+    <div class="share-actions">
+      <button class="share-action-btn btn-copy" id="btnCopy">Copy URL</button>
+      <button class="share-action-btn btn-share" id="btnShare" style="display:none">Share</button>
+      <button class="share-action-btn btn-close" id="btnCloseShare">Close</button>
+    </div>
+    <div class="copy-toast" id="copyToast"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const WS_URL = 'ws://localhost:8765';
+  const RECONNECT_MS = 2000;
+  const MAX_CHUNKS = 15;
+
+  // ── DOM refs ──
+  const $ = id => document.getElementById(id);
+  const statusDot = $('statusDot');
+  const statusLabel = $('statusLabel');
+  const contentArea = $('contentArea');
+  const spanishChunks = $('spanishChunks');
+  const englishChunks = $('englishChunks');
+  const panelSpanish = $('panelSpanish');
+  const panelEnglish = $('panelEnglish');
+  const esLabel = $('esLabel');
+  const modelToggle = $('modelToggle');
+  const shareOverlay = $('shareOverlay');
+
+  // ── State ──
+  let useModelB = true; // default to B (12B)
+  let currentMode = 'both';
+  let ws = null;
+
+  // ── Profanity filter ──
+  // Allow "hell" — block common profanity, replace with asterisks
+  const PROFANITY_RE = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|fucked|motherfucker|piss|shit|shitty|slut|whore)\b/gi;
+
+  function filterText(text) {
+    return text.replace(PROFANITY_RE, function(m) {
+      return '*'.repeat(m.length);
+    });
+  }
+
+  // ── HTML escape ──
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ── Mode switching ──
+  var modeTabs = document.querySelectorAll('.mode-tab');
+  modeTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      modeTabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      currentMode = tab.getAttribute('data-mode');
+      contentArea.setAttribute('data-mode', currentMode);
+      // Scroll both panels to bottom after layout change
+      requestAnimationFrame(function() {
+        panelSpanish.scrollTop = panelSpanish.scrollHeight;
+        panelEnglish.scrollTop = panelEnglish.scrollHeight;
+      });
+    });
+  });
+
+  // ── Model toggle ──
+  function updateModelLabel() {
+    useModelB = modelToggle.checked;
+    esLabel.textContent = useModelB ? 'Espanol (B)' : 'Espanol (A)';
+  }
+
+  modelToggle.addEventListener('change', function() {
+    updateModelLabel();
+    // Re-render all Spanish chunks with the other model's text
+    reRenderSpanish();
+  });
+
+  updateModelLabel();
+
+  // ── Chunk storage ──
+  // Store raw data so we can re-render when model toggles
+  var chunkData = [];
+
+  function addChunk(data) {
+    chunkData.push(data);
+    if (chunkData.length > MAX_CHUNKS) {
+      chunkData.shift();
+    }
+    renderLatestChunks();
+  }
+
+  function renderLatestChunks() {
+    // Render English
+    renderPanel(englishChunks, chunkData.map(function(d) {
+      return filterText(d.english);
+    }), false);
+
+    // Render Spanish
+    renderSpanishPanel();
+
+    // Auto-scroll
+    requestAnimationFrame(function() {
+      panelSpanish.scrollTop = panelSpanish.scrollHeight;
+      panelEnglish.scrollTop = panelEnglish.scrollHeight;
+    });
+  }
+
+  function renderSpanishPanel() {
+    var texts = chunkData.map(function(d) {
+      return filterText(useModelB ? d.spanish_b : d.spanish_a);
+    });
+    renderPanel(spanishChunks, texts, true);
+  }
+
+  function reRenderSpanish() {
+    renderSpanishPanel();
+    requestAnimationFrame(function() {
+      panelSpanish.scrollTop = panelSpanish.scrollHeight;
+    });
+  }
+
+  function renderPanel(container, texts, isNewRender) {
+    // Count existing chunks
+    var existing = container.children.length;
+    var needed = texts.length;
+
+    // If we have too many, remove from the front
+    while (container.children.length > needed) {
+      container.removeChild(container.firstChild);
+    }
+
+    // Update or create chunks
+    for (var i = 0; i < needed; i++) {
+      var childIdx = i - (needed - container.children.length);
+      if (childIdx >= 0 && childIdx < container.children.length) {
+        // Update existing
+        container.children[childIdx].textContent = texts[i];
+      } else {
+        // Create new
+        var div = document.createElement('div');
+        div.className = 'chunk' + (i === needed - 1 ? '' : '');
+        div.textContent = texts[i];
+        // Only animate the last (newest) chunk
+        if (i === needed - 1) {
+          div.style.animation = 'fadeIn 0.4s ease forwards';
+        } else {
+          div.style.opacity = '1';
+        }
+        container.appendChild(div);
+      }
+    }
+  }
+
+  // ── Share functionality ──
+  var shareBtn = $('shareBtn');
+  var btnCopy = $('btnCopy');
+  var btnShare = $('btnShare');
+  var btnCloseShare = $('btnCloseShare');
+  var shareUrl = $('shareUrl');
+  var copyToast = $('copyToast');
+
+  // Show native Share API button if available
+  if (navigator.share) {
+    btnShare.style.display = '';
+  }
+
+  shareBtn.addEventListener('click', function() {
+    shareUrl.textContent = window.location.href;
+    copyToast.textContent = '';
+    shareOverlay.classList.add('visible');
+  });
+
+  btnCloseShare.addEventListener('click', function() {
+    shareOverlay.classList.remove('visible');
+  });
+
+  shareOverlay.addEventListener('click', function(e) {
+    if (e.target === shareOverlay) {
+      shareOverlay.classList.remove('visible');
+    }
+  });
+
+  btnCopy.addEventListener('click', function() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+      copyToast.textContent = 'Copied!';
+      setTimeout(function() { copyToast.textContent = ''; }, 2000);
+    }).catch(function() {
+      copyToast.textContent = 'Copy failed';
+    });
+  });
+
+  btnShare.addEventListener('click', function() {
+    navigator.share({
+      title: 'Live Translation — Stark Road Gospel Hall',
+      url: window.location.href
+    }).catch(function() {});
+  });
+
+  // ── WebSocket ──
+  function connect() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = function() {
+      statusDot.classList.add('connected');
+      statusLabel.textContent = 'Live';
+    };
+
+    ws.onclose = function() {
+      statusDot.classList.remove('connected');
+      statusLabel.textContent = 'Reconnecting...';
+      setTimeout(connect, RECONNECT_MS);
+    };
+
+    ws.onerror = function() {
+      ws.close();
+    };
+
+    ws.onmessage = function(evt) {
+      var data;
+      try {
+        data = JSON.parse(evt.data);
+      } catch (e) {
+        return;
+      }
+      if (data.type !== 'translation') return;
+
+      addChunk({
+        chunk_id: data.chunk_id,
+        english: data.english || '',
+        spanish_a: data.spanish_a || '',
+        spanish_b: data.spanish_b || ''
+      });
+    };
+  }
+
+  connect();
+
+})();
+</script>
+</body>
+</html>

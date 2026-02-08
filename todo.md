@@ -45,19 +45,17 @@
   - Token/sec reporting from MLX stream_generate
   - Running p50/p95 percentile display in browser footer (per component)
 
-### P1 — Mac Pipeline Hardening
+### P1 — Mac Pipeline Hardening ✓
 
 - [x] **Confidence scoring** — extract Whisper segment-level quality
   - `avg_logprob` from mlx-whisper segments → 0-1 confidence score
   - Displayed as green/yellow/red dot per chunk in browser
   - Logged to CSV per chunk
 
-- [ ] **Translation quality estimation (QE)** — reference-free
-  - CometKiwi: source + translation → score (0-1)
-  - LaBSE cross-lingual cosine similarity
-  - Length ratio check (Spanish 15-25% longer than English)
-  - Back-translation via MarianMT → BERTScore
-  - Log to translation_qe.jsonl
+- [x] **Translation quality estimation (QE)** — reference-free
+  - Real-time: length ratio + untranslated detection (in dry_run_ab.py)
+  - Offline: translation_qe.py with 3 tiers (lightweight, MarianMT back-translation, LaBSE)
+  - QE scores logged to CSV per chunk (qe_a, qe_b)
 
 - [x] **Error handling** — graceful recovery
   - Mic disconnect/reconnect (auto-retry with 2s backoff)
@@ -70,10 +68,9 @@
   - Average tokens/sec displayed in browser footer
   - Foundation ready for real-time partial display (future)
 
-- [ ] **Prompt caching** — reuse TranslateGemma prompt prefix
-  - The chat template prefix is constant (~90 tokens)
-  - Cache with `mlx_lm.batch_generate()` prompt_caches
-  - Could cut translation latency by ~30-40%
+- [~] **Prompt caching** — deferred (prefix is only ~30-40 tokens, <50ms savings)
+  - The variable text is embedded in the JSON, so true prefix is small
+  - Not worth the complexity vs ~650ms total translation time
 
 ### P2 — Display & UX
 
@@ -184,6 +181,66 @@
 - [ ] **Multi-language support**
   - TranslateGemma supports 36 languages
   - French, Portuguese, Chinese for broader outreach
+
+- [ ] **Speaker identification** — who is speaking on a panel of 8
+  - `pyannote-audio` speaker diarization (segment → speaker cluster)
+  - Speaker enrollment: record 30s samples per person → speaker embeddings
+  - Real-time speaker ID: compare live embedding vs enrolled speakers
+  - Display speaker name alongside translation (e.g., "Pastor Jim: ...")
+  - Support 2-8 speakers in panel discussions
+  - Persistent speaker profiles stored in `stark_data/speakers/`
+  - Could use `speechbrain` or `resemblyzer` for lightweight embeddings on Mac
+
+### P7 — Latency Reduction Roadmap
+
+- [ ] **Parallel A/B translation** — run 4B and 12B simultaneously
+  - Currently sequential (~650ms + ~1400ms = ~2050ms)
+  - Use `asyncio.gather()` with thread pool or multiprocessing
+  - MLX supports concurrent model inference on Apple Silicon
+  - Target: E2E ~1500ms (limited by slower model)
+
+- [ ] **Shorter chunk duration** — reduce from 3s to 1.5-2s
+  - Faster time-to-first-output for live speech
+  - Trade-off: shorter context → slightly lower STT accuracy
+  - Test with `--chunk-duration 1.5`
+
+- [ ] **VAD-triggered instant processing** — process on silence gap, not timer
+  - Current: accumulate 3s of speech, then process
+  - Better: start processing as soon as speaker pauses (0.3-0.5s silence)
+  - Already partially implemented (silence_frames threshold)
+  - Tune max_silence_frames lower for faster trigger
+
+- [ ] **Speculative decoding** — use 4B as draft model for 12B
+  - mlx_lm supports `draft_model` parameter in stream_generate()
+  - 4B generates candidate tokens, 12B verifies in batch
+  - Could speed up 12B by 2-3x with ~90% acceptance rate
+  - Target: 12B latency from ~1400ms → ~600-800ms
+
+- [ ] **Smaller/faster translation model exploration**
+  - Test `mlx-community/Qwen2.5-3B-Instruct-4bit` with translation prompt
+  - Test `mlx-community/gemma-2-2b-it-4bit` as ultra-light translator
+  - MarianMT (`Helsinki-NLP/opus-mt-en-es`, 298MB) as fallback — ~50ms/translation
+  - Benchmark quality vs TranslateGemma on theological test set
+
+- [ ] **KV cache quantization** — reduce memory, allow larger batches
+  - `kv_bits=4` in stream_generate() — ~75% cache memory reduction
+  - Enables larger prefill_step_size for faster prompt processing
+  - May allow fitting additional models in memory
+
+- [ ] **Whisper model optimization**
+  - Test `mlx-community/whisper-tiny.en` for speed (~50ms) vs accuracy trade-off
+  - Test `mlx-community/whisper-small.en` as middle ground
+  - Streaming Whisper: process audio in 1s overlapping windows
+  - Word-level timestamps: get partial results before full chunk completes
+
+- [ ] **WebSocket batching** — reduce browser update overhead
+  - Batch multiple small updates into single WebSocket frame
+  - Use requestAnimationFrame on client for smooth rendering
+  - Reduce DOM operations per update
+
+- [ ] **Pre-warm models between chunks** — keep GPU hot
+  - Run a dummy forward pass during silence to prevent GPU clock throttling
+  - MLX lazy evaluation: ensure graph is compiled before speech arrives
 
 ---
 

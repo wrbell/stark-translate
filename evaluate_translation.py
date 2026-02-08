@@ -31,11 +31,17 @@ def load_model(base_model, adapter_dir=None):
         adapter_dir if adapter_dir and os.path.exists(adapter_dir) else base_model
     )
 
+    from transformers import BitsAndBytesConfig
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_quant_type="nf4",
+    )
     base = AutoModelForCausalLM.from_pretrained(
         base_model,
         device_map="auto",
         torch_dtype=torch.bfloat16,
-        load_in_4bit=True,
+        quantization_config=bnb_config,
     )
 
     if adapter_dir and os.path.exists(adapter_dir):

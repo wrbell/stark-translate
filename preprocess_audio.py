@@ -316,6 +316,8 @@ def process_single_file(input_path, output_dir, skip_demucs=False, skip_diarize=
         return log
 
     # Step 4: Classify segments
+    music_time = 0
+    speech_time = 0
     print(f"  [3/10] Classifying segments (speech/music/noise)...")
     try:
         segments = classify_segments(wav_16k)
@@ -332,7 +334,7 @@ def process_single_file(input_path, output_dir, skip_demucs=False, skip_diarize=
 
     # Step 5: Source separation (if music detected)
     active_audio = wav_16k
-    if not skip_demucs and music_time > 10:
+    if not skip_demucs and music_time and music_time > 10:
         print(f"  [4/10] Source separation (demucs)...")
         try:
             vocals = separate_vocals(wav_16k, work_dir)

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Bilingual Translation — Stark Road Gospel Hall</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', sans-serif;
+    background: #000;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* Show cursor on mouse move, hide after idle */
+  body.cursor-visible { cursor: default; }
+
+  /* Connection status indicator — top-right corner */
+  .status-dot {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #f85149;
+    z-index: 100;
+    transition: background 0.3s, opacity 1.5s ease;
+    opacity: 1;
+  }
+
+  .status-dot.connected {
+    background: #3fb950;
+  }
+
+  .status-dot.fade-out {
+    opacity: 0;
+  }
+
+  /* Model toggle button — top-left, small and unobtrusive */
+  .model-toggle {
+    position: fixed;
+    top: 12px;
+    left: 16px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.5);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.5s, background 0.2s, color 0.2s;
+    opacity: 0;
+    letter-spacing: 0.3px;
+  }
+
+  body.cursor-visible .model-toggle {
+    opacity: 1;
+  }
+
+  .model-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Fullscreen prompt overlay */
+  .fullscreen-prompt {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    cursor: pointer;
+    transition: opacity 0.5s;
+  }
+
+  .fullscreen-prompt.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fullscreen-prompt .prompt-text {
+    font-size: 28px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 12px;
+  }
+
+  .fullscreen-prompt .prompt-hint {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Spanish section — top, 70% of viewport */
+  .section-spanish {
+    flex: 7;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    padding: 40px 48px 24px 48px;
+    min-height: 0;
+  }
+
+  /* Divider line */
+  .divider {
+    flex-shrink: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0 48px;
+  }
+
+  /* English section — bottom, 30% of viewport */
+  .section-english {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    padding: 24px 48px 40px 48px;
+    min-height: 0;
+  }
+
+  /* Chunk containers */
+  .chunks-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    min-height: 0;
+    flex: 1;
+  }
+
+  .section-english .chunks-wrapper {
+    justify-content: flex-start;
+  }
+
+  /* Individual text chunks */
+  .chunk {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: chunkFadeIn 0.6s ease forwards;
+    transition: opacity 0.8s ease;
+    line-height: 1.35;
+  }
+
+  .chunk.fading {
+    opacity: 0.2;
+  }
+
+  /* Spanish chunks — large */
+  .section-spanish .chunk {
+    font-size: 52px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    letter-spacing: -0.3px;
+  }
+
+  /* English chunks — smaller, dimmer */
+  .section-english .chunk {
+    font-size: 26px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 6px;
+  }
+
+  @keyframes chunkFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Fullscreen styles */
+  :fullscreen {
+    background: #000;
+  }
+
+  /* Responsive scaling for smaller screens */
+  @media (max-height: 800px) {
+    .section-spanish .chunk { font-size: 40px; }
+    .section-english .chunk { font-size: 22px; }
+    .section-spanish { padding: 24px 32px 16px 32px; }
+    .section-english { padding: 16px 32px 24px 32px; }
+    .divider { margin: 0 32px; }
+  }
+
+  @media (max-height: 600px) {
+    .section-spanish .chunk { font-size: 32px; }
+    .section-english .chunk { font-size: 18px; }
+    .section-spanish { padding: 16px 24px 8px 24px; }
+    .section-english { padding: 8px 24px 16px 24px; }
+    .divider { margin: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Fullscreen prompt overlay -->
+<div class="fullscreen-prompt" id="fullscreenPrompt">
+  <div class="prompt-text">Click anywhere to enter fullscreen</div>
+  <div class="prompt-hint">Press Escape to exit fullscreen at any time</div>
+</div>
+
+<!-- Connection status dot -->
+<div class="status-dot" id="statusDot"></div>
+
+<!-- Model toggle -->
+<button class="model-toggle" id="modelToggle">Model B (12B)</button>
+
+<!-- Spanish translation — top 70% -->
+<div class="section-spanish">
+  <div class="chunks-wrapper" id="spanishChunks"></div>
+</div>
+
+<!-- Thin divider -->
+<div class="divider"></div>
+
+<!-- English original — bottom 30% -->
+<div class="section-english">
+  <div class="chunks-wrapper" id="englishChunks"></div>
+</div>
+
+<script>
+(function() {
+  const WS_URL = 'ws://localhost:8765';
+  const RECONNECT_MS = 2000;
+  const MAX_VISIBLE_CHUNKS = 10;
+
+  // State
+  let useModelB = true; // Default to Model B (12B)
+  let ws = null;
+  let cursorTimer = null;
+  let statusFadeTimer = null;
+
+  // DOM refs
+  const statusDot = document.getElementById('statusDot');
+  const modelToggle = document.getElementById('modelToggle');
+  const spanishChunks = document.getElementById('spanishChunks');
+  const englishChunks = document.getElementById('englishChunks');
+  const fullscreenPrompt = document.getElementById('fullscreenPrompt');
+
+  // Store raw data so we can re-render on model switch
+  let chunkData = [];
+
+  // ── Profanity filter (same regex as ab_display.html) ──
+  const BLOCKED_WORDS = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|motherfucker|piss|shit|slut|whore)\b/gi;
+  function filterText(text) {
+    return text.replace(BLOCKED_WORDS, m => '*'.repeat(m.length));
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ── Fullscreen prompt ──
+  fullscreenPrompt.addEventListener('click', function() {
+    document.documentElement.requestFullscreen().catch(function() {
+      // Fullscreen denied — dismiss prompt anyway
+    });
+    fullscreenPrompt.classList.add('hidden');
+  });
+
+  document.addEventListener('fullscreenchange', function() {
+    if (document.fullscreenElement) {
+      fullscreenPrompt.classList.add('hidden');
+    }
+  });
+
+  // Also allow keyboard shortcut for fullscreen
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F11' || (e.metaKey && e.shiftKey && e.key === 'f')) {
+      e.preventDefault();
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        document.documentElement.requestFullscreen().catch(function() {});
+        fullscreenPrompt.classList.add('hidden');
+      }
+    }
+  });
+
+  // ── Cursor auto-hide ──
+  document.addEventListener('mousemove', function() {
+    document.body.classList.add('cursor-visible');
+    clearTimeout(cursorTimer);
+    cursorTimer = setTimeout(function() {
+      document.body.classList.remove('cursor-visible');
+    }, 3000);
+  });
+
+  // ── Model toggle ──
+  modelToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    useModelB = !useModelB;
+    modelToggle.textContent = useModelB ? 'Model B (12B)' : 'Model A (4B)';
+    rerenderChunks();
+  });
+
+  // ── Render chunks ──
+  function renderChunks(container, getText, isSpanish) {
+    container.innerHTML = '';
+    // Only show last MAX_VISIBLE_CHUNKS
+    const visible = chunkData.slice(-MAX_VISIBLE_CHUNKS);
+    const totalVisible = visible.length;
+
+    visible.forEach(function(data, idx) {
+      var div = document.createElement('div');
+      div.className = 'chunk';
+
+      // Older chunks get a fading class (all except the last 3)
+      if (idx < totalVisible - 3 && totalVisible > 3) {
+        div.classList.add('fading');
+        div.style.opacity = 0.15 + (idx / totalVisible) * 0.35;
+      }
+
+      // Don't re-animate existing chunks on re-render
+      if (idx < totalVisible - 1) {
+        div.style.animation = 'none';
+        div.style.transform = 'translateY(0)';
+      }
+
+      var text = getText(data);
+      div.textContent = filterText(text);
+      container.appendChild(div);
+    });
+  }
+
+  function rerenderChunks() {
+    renderChunks(spanishChunks, function(d) {
+      return useModelB ? d.spanish_b : d.spanish_a;
+    }, true);
+    renderChunks(englishChunks, function(d) {
+      return d.english;
+    }, false);
+  }
+
+  function addChunk(data) {
+    chunkData.push(data);
+
+    // Trim to prevent unbounded memory growth
+    if (chunkData.length > 200) {
+      chunkData = chunkData.slice(-100);
+    }
+
+    rerenderChunks();
+  }
+
+  // ── WebSocket connection ──
+  function connect() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = function() {
+      statusDot.classList.add('connected');
+
+      // Fade out status dot after 4 seconds of stable connection
+      clearTimeout(statusFadeTimer);
+      statusFadeTimer = setTimeout(function() {
+        statusDot.classList.add('fade-out');
+      }, 4000);
+    };
+
+    ws.onclose = function() {
+      statusDot.classList.remove('connected');
+      statusDot.classList.remove('fade-out');
+      setTimeout(connect, RECONNECT_MS);
+    };
+
+    ws.onerror = function() {
+      ws.close();
+    };
+
+    ws.onmessage = function(evt) {
+      var data;
+      try {
+        data = JSON.parse(evt.data);
+      } catch (e) {
+        return;
+      }
+      if (data.type !== 'translation') return;
+
+      addChunk({
+        chunk_id: data.chunk_id,
+        english: data.english || '',
+        spanish_a: data.spanish_a || '',
+        spanish_b: data.spanish_b || '',
+      });
+    };
+  }
+
+  connect();
+})();
+</script>
+</body>
+</html>
