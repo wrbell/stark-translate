@@ -45,20 +45,14 @@
 
 ---
 
-## P2 — Display & UX
-
-- [ ] **ProPresenter/PowerPoint integration research**
-  - NDI output, text overlay APIs, OBS browser source overlay
-
----
-
 ## P3 — Data Collection & Prep
 
-- [ ] **Download sermon audio** — yt-dlp from Stark Road YouTube *(Mac or Windows)*
-  - Target: 20-50 hours, prefer soundboard recordings
+- [ ] **Download sermon audio** — `python download_sermons.py -n 30` *(Mac or Windows)*
+  - 275 videos available, 249.8 hours total
+  - Start with 30 most recent (~30 hrs), expand to 50-80 if quality is good
 
 - [ ] **Download Bible parallel corpus** *(Mac or Windows)*
-  - Clone scrollmapper, run `prepare_bible_corpus.py`
+  - Clone scrollmapper (in progress), run `prepare_bible_corpus.py`
   - ~155K verse pairs → `bible_data/aligned/`
 
 - [ ] **Run audio preprocessing pipeline** *(Windows — needs demucs GPU)*
@@ -78,21 +72,22 @@
 - [ ] **Evaluation** — SacreBLEU, chrF++, COMET, per-genre, theological term spot-check
 - [ ] **LoRA adapter transfer** — Windows → Mac, test with MLX `adapter_path=`
 
+See `docs/training_time_estimates.md` for detailed time projections.
+
 ---
 
 ## P5 — Monitoring & Feedback Loop
 
-- [ ] **YouTube caption comparison** — live_caption_monitor.py, windowed WER tracking
+- [ ] **Run first YouTube caption comparison** — test `live_caption_monitor.py post` with a downloaded sermon
 - [ ] **Active learning pipeline** — Label Studio, versioned corrections, 3-5 retrain cycles
 
 ---
 
 ## P6 — Future Features
 
-- [ ] **Speaker diarization** — pyannote-audio, 2 speakers, per-speaker labels in display
-- [ ] **Speaker identification** — enrollment embeddings, 2-8 speaker panel support
-- [ ] **Post-sermon 5-sentence summary** — Gemma 3 4B, per-speaker
-- [ ] **Verse reference extraction** — regex + LLM, per-speaker verse list with timestamps
+- [ ] **Test speaker diarization** — run `diarize.py` on a sermon WAV, verify 2-speaker output
+- [ ] **Test verse extraction** — run `extract_verses.py` on a session CSV, review accuracy
+- [ ] **Test sermon summary** — run `summarize_sermon.py` on a session CSV
 - [ ] **Multi-language support** — TranslateGemma supports 36 languages
 - [ ] **Hardware portability** — RTX 2070 endpoints (see `docs/rtx2070_feasibility.md`)
 
@@ -100,33 +95,13 @@
 
 ## P7 — Sub-1s Latency Roadmap
 
-**Target:** 4B path under 1s (currently ~1.15s), 12B path under 1.5s (currently ~1.9s)
+**Status:** Phase 1 + Phase 2 implemented. Projected 4B path: ~1150ms → ~650ms.
 
 ```
-Current budget:
-  4B:   STT ~500ms + Translate ~650ms = ~1150ms
-  12B:  STT ~500ms + Translate ~1400ms = ~1900ms
+Post Phase 1+2 budget (estimated):
+  4B:   STT ~300ms + Translate ~350ms = ~650ms
+  12B:  STT ~300ms + Translate ~800ms = ~1100ms
 ```
-
-### Phase 1 — Quick wins (~3 hrs, 4B → ~850ms)
-
-| # | Task | Savings | Effort |
-|---|------|---------|--------|
-| 1A | Disable `word_timestamps` for partials | 100-200ms | 30 min |
-| 4A | Pre-warm models during silence (1-token forward pass) | 50-150ms | 1 hr |
-| 2C | Reduce `max_tokens` multiplier (2.5 → 1.8) | 20-50ms | 5 min |
-| 1E | Trim Whisper prompt to ~40 words, cap prev_text at 100 chars | 20-30ms | 15 min |
-| 5D | Move I/O (WAV/JSONL/CSV) to background threads | 10-30ms | 30 min |
-| 5A | Replace `scipy.signal.resample` with `decimate` or record at 16kHz | 5-10ms | 15 min |
-
-### Phase 2 — Medium effort (~6 hrs, 4B → ~650ms, 12B → ~1100ms)
-
-| # | Task | Savings | Effort |
-|---|------|---------|--------|
-| 2A | Benchmark speculative decoding, tune `num_draft_tokens` 3-16 | 400-700ms (12B) | 2 hrs |
-| 2B | Prompt caching via `make_prompt_cache()` for fixed chat template prefix | 50-80ms | 1 hr |
-| 1C | Benchmark `lightning-whisper-mlx` (claims 4x faster) | 100-200ms | 2 hrs |
-| 4B | Increase `mx.set_cache_limit` from 100MB to 256MB | 20-40ms | 5 min |
 
 ### Phase 3 — Architectural (~16 hrs, 4B → ~500ms, 12B → ~800ms)
 
@@ -144,34 +119,23 @@ Current budget:
 | 1F | WhisperKit CoreML native (Swift bridge needed) | 200-300ms | 24 hrs |
 | 4D | 4-bit quantized Whisper (`whisper-large-v3-mlx-4bit`) | 50-100ms | 2 hrs |
 
-```
-Projected:        4B path    12B path
-Phase 1:          ~850ms     ~1700ms
-Phase 2:          ~650ms     ~1100ms
-Phase 3:          ~500ms     ~800ms
-Phase 4:          ~300ms     ~600ms
-```
+### Remaining P7 items
 
-### Other P7 items
-
+- [ ] **2A. Benchmark speculative decoding** — tune `num_draft_tokens` 3-16, measure actual 12B speedup
 - [ ] **1B. whisper-large-v3-turbo for partials** — ~50-100ms, benchmark WER vs distil first
 - [ ] **2D. Smaller translation models** — gemma-3-1b-it, NLLB-600M, fine-tuned MarianMT
-- [ ] **2E. Early stopping / stream_generate** — ~30-50ms, verify EOS already stops `generate()`
-- [ ] **3A. Overlap STT and translation** — partial already does this; full overlap via 3B/6C
-- [ ] **3B. Pre-compute translation prompt tokens during STT** — ~30-50ms
 - [ ] **4E. Increase prefill chunk size** — ~10-20ms
-- [ ] **5B. Move VAD to separate thread** — ~5-10ms jitter reduction
 - [ ] **5C. Use `asyncio.to_thread`** — ~1-2ms micro-optimization
 - [ ] **6D. Batch multiple short utterances** — ~100-200ms amortized
+- [ ] **Upgrade mlx-whisper to 0.4.3** — alignment computation speedup
 
 ### Research Sources
 
 - [mlx-lm: speculative decoding, prompt caching, stream_generate](https://github.com/ml-explore/mlx-lm)
 - [Apple ReDrafter: 1.37-2.3x speedup on Apple Silicon](https://machinelearning.apple.com/research/recurrent-drafter)
 - [Lightning-SimulWhisper: MLX/CoreML streaming](https://github.com/altalt-org/Lightning-SimulWhisper)
-- [lightning-whisper-mlx: 10x faster Whisper](https://github.com/mustafaaljadery/lightning-whisper-mlx)
 - [WhisperKit: 0.45s streaming latency](https://github.com/argmaxinc/WhisperKit)
-- [mlx-whisper word_timestamps overhead](https://github.com/ml-explore/mlx-examples/issues/1254)
+- [Fast STT Options feasibility study](docs/fast_stt_options.md)
 
 ---
 
@@ -179,9 +143,11 @@ Phase 4:          ~300ms     ~600ms
 
 ```
 Mac Inference (MLX) — Two-Pass Architecture:
-  Mic → Silero VAD → [Partial: mlx-whisper + MarianMT (~580ms, italic)]
-                    → [Final: mlx-whisper + TranslateGemma 4B (~1.3s, regular)]
-                    → WebSocket → Browser (A/B/C + audience + mobile)
+  Mic → Silero VAD (threaded) → [Partial: mlx-whisper + MarianMT (~480ms, italic)]
+                               → [Final: mlx-whisper + TranslateGemma 4B (~650ms, regular)]
+                               → WebSocket → Browser (A/B/C + audience + mobile + OBS)
+
+  Optimizations: prompt caching, model pre-warming, background I/O, fast resampling
 
   Serving:
     WebSocket on 0.0.0.0:8765 | HTTP on 0.0.0.0:8080
@@ -193,7 +159,7 @@ Windows Training (CUDA):
 
 | Component | Model | Framework | Memory |
 |-----------|-------|-----------|--------|
-| VAD | Silero VAD | PyTorch | ~2 MB |
+| VAD | Silero VAD | PyTorch (threaded) | ~2 MB |
 | STT | distil-whisper-large-v3 | mlx-whisper | ~1.5 GB |
 | Translate (fast) | MarianMT opus-mt-en-es | CT2 int8 | ~76 MB |
 | Translate A | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB |

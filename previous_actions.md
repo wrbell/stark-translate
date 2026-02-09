@@ -85,7 +85,59 @@
 - [x] VAD-triggered instant processing — process on silence gap (0.8s)
 - [x] MarianMT for fast partials — ~80ms vs ~650ms TranslateGemma
 
+## P2 — Display & UX
+
+- [x] OBS overlay (`obs_overlay.html`) — transparent lower-third for OBS Browser Source, URL params for model/english/lines
+- [x] Projection integration research (`docs/projection_integration.md`) — OBS, NDI, ProPresenter, PowerPoint comparison
+- [x] Church display fixes — profanity filter, WS auto-detect, fullscreen button
+
+## P5 — Monitoring
+
+- [x] `live_caption_monitor.py` — YouTube caption comparison (post-stream, live, trend report modes)
+
+## P6 — Future Features (scripts built)
+
+- [x] `diarize.py` — pyannote-audio 3.1 speaker diarization with optional enrollment-based speaker ID
+- [x] `summarize_sermon.py` — 5-sentence structured summary via MLX LLM, English + Spanish output
+- [x] `extract_verses.py` — Bible verse extraction (66 book variants, spoken numbers, context tracking)
+
+## P7 — Latency (Phase 1 + Phase 2 implemented)
+
+- [x] 1A: Disable `word_timestamps` for partials (100-200ms savings)
+- [x] 4A: Pre-warm models during silence (50-150ms savings)
+- [x] 2C: Reduce `max_tokens` multiplier 2.5→1.8 (20-50ms savings)
+- [x] 1E: Trim Whisper prompt to ~40 words, cap prev_text at 100 chars (20-30ms savings)
+- [x] 5D: Move I/O (WAV/JSONL/CSV) to background ThreadPoolExecutor (10-30ms savings)
+- [x] 5A: Replace `scipy.signal.resample` with `decimate` (5-10ms savings)
+- [x] 2B: Prompt caching via `make_prompt_cache()` for fixed chat template prefix (50-80ms savings)
+- [x] 4B: Increase `mx.set_cache_limit` from 100MB to 256MB (20-40ms savings)
+- [x] 2E: EOS verification — confirmed `<end_of_turn>` stops generation early (30-50ms savings)
+- [x] 3B: Pre-tokenize translation suffix tokens at startup (30-50ms savings)
+- [x] 5B: Move VAD to dedicated thread with queue (5-10ms jitter reduction)
+- [x] 1C: lightning-whisper-mlx researched — 1.8x SLOWER, not viable (see `docs/fast_stt_options.md`)
+- [x] STT benchmark tool (`stt_benchmark.py`) — mlx-whisper vs alternatives, profiling mode
+
+## Windows Training Pipeline (reviewed/fixed)
+
+- [x] All training scripts updated: `--resume` support, newer transformers API (`processing_class=`)
+- [x] `transcribe_church.py` rewritten with dual backend (transformers + faster-whisper)
+- [x] `train_marian.py` fixed: Seq2SeqTrainer, DataCollatorForSeq2Seq, eval during training
+- [x] `evaluate_translation.py` — added MarianMT evaluation via `--marian` flag
+- [x] `requirements-windows.txt` updated with all CUDA training deps
+- [x] `requirements-mac.txt` cleaned up (removed bitsandbytes, added ctranslate2 + jiwer)
+
+## YouTube / Data
+
+- [x] Playlist researched: 275 videos, 249.8 hours, March 2020–Feb 2026, two-speaker format
+- [x] `download_sermons.py` updated with default playlist URL, metadata extraction, ETA tracking
+
+## Documentation
+
+- [x] CLAUDE.md updated for MLX architecture, two-pass pipeline, all new files
+- [x] CLAUDE-macbook.md updated for MLX, browser displays, HTTP server, latency optimizations
+
 ## Deferred
 
-- [~] Prompt caching — deferred (prefix ~30-40 tokens, <50ms savings) → now reconsidered in P7
 - [~] KV cache quantization (`kv_bits=4`) — not beneficial for short translations (10-50 tokens), revisit for summarization
+- [~] lightning-whisper-mlx — stagnant since Apr 2024, 1.8x slower than mlx-whisper, missing key features
+- [~] WhisperKit — Swift-only, wrong architecture for numpy-array pipeline
