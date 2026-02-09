@@ -55,28 +55,39 @@ project_dir/
 ├── setup_models.py                 # One-command model download + verification
 ├── build_glossary.py               # EN→ES theological glossary builder (229 terms)
 ├── download_sermons.py             # yt-dlp sermon downloader
-├── live_caption_monitor.py         # YouTube caption comparison system
-├── translation_qe.py              # Reference-free translation quality estimation
-├── diarize.py                      # Speaker diarization via pyannote-audio
-├── summarize_sermon.py             # Post-sermon 5-sentence summary generator
-├── extract_verses.py               # Bible verse reference extraction from transcripts
 │
-├── audience_display.html           # Projector display (EN/ES side-by-side, QR overlay, fullscreen)
-├── ab_display.html                 # A/B/C operator comparison (Gemma 4B / MarianMT / 12B)
-├── mobile_display.html             # Phone/tablet responsive view (model toggle, Spanish-only)
-├── church_display.html             # Simplified church-oriented layout
+├── displays/
+│   ├── audience_display.html       # Projector display (EN/ES side-by-side, QR overlay, fullscreen)
+│   ├── ab_display.html             # A/B/C operator comparison (Gemma 4B / MarianMT / 12B)
+│   ├── mobile_display.html         # Phone/tablet responsive view (model toggle, Spanish-only)
+│   ├── church_display.html         # Simplified church-oriented layout
+│   └── obs_overlay.html            # OBS streaming overlay
 │
-├── transcribe_church.py            # Church audio transcription (WSL)
-├── preprocess_audio.py             # 10-step audio cleaning pipeline (WSL)
-├── train_whisper.py                # Whisper LoRA fine-tuning (WSL)
-├── train_gemma.py                  # TranslateGemma LoRA fine-tuning (WSL)
-├── train_marian.py                 # MarianMT full fine-tune fallback (WSL)
-├── prepare_bible_corpus.py         # Bible parallel text download + alignment (WSL)
-├── evaluate_translation.py         # SacreBLEU/chrF++/COMET scoring (Both)
-├── assess_quality.py               # Baseline transcript quality assessment (WSL)
+├── tools/
+│   ├── live_caption_monitor.py     # YouTube caption comparison system
+│   ├── translation_qe.py          # Reference-free translation quality estimation
+│   ├── benchmark_latency.py        # End-to-end latency benchmarking
+│   ├── stt_benchmark.py            # STT-specific benchmarking
+│   └── test_adaptive_model.py      # Adaptive model testing
+│
+├── features/
+│   ├── diarize.py                  # Speaker diarization via pyannote-audio
+│   ├── summarize_sermon.py         # Post-sermon 5-sentence summary generator
+│   └── extract_verses.py           # Bible verse reference extraction from transcripts
+│
+├── training/
+│   ├── transcribe_church.py        # Church audio transcription (WSL)
+│   ├── preprocess_audio.py         # 10-step audio cleaning pipeline (WSL)
+│   ├── train_whisper.py            # Whisper LoRA fine-tuning (WSL)
+│   ├── train_gemma.py              # TranslateGemma LoRA fine-tuning (WSL)
+│   ├── train_marian.py             # MarianMT full fine-tune fallback (WSL)
+│   ├── prepare_bible_corpus.py     # Bible parallel text download + alignment (WSL)
+│   ├── evaluate_translation.py     # SacreBLEU/chrF++/COMET scoring (Both)
+│   └── assess_quality.py           # Baseline transcript quality assessment (WSL)
 │
 ├── docs/
-│   └── rtx2070_feasibility.md      # RTX 2070 hardware portability analysis
+│   ├── rtx2070_feasibility.md      # RTX 2070 hardware portability analysis
+│   └── previous_actions.md         # Log of completed project actions
 │
 ├── ct2_opus_mt_en_es/              # CTranslate2 int8 MarianMT model (76MB)
 ├── fine_tuned_whisper_mi/          # LoRA adapters for Whisper (post fine-tune)
@@ -460,7 +471,7 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 
 ## Future Features
 
-> **Note:** Initial implementations of the summary and verse extraction features now exist as `summarize_sermon.py` and `extract_verses.py`. Speaker diarization is implemented in `diarize.py`. These are ready for integration testing with live session data.
+> **Note:** Initial implementations of the summary and verse extraction features now exist as `features/summarize_sermon.py` and `features/extract_verses.py`. Speaker diarization is implemented in `features/diarize.py`. These are ready for integration testing with live session data.
 
 ### 1. Post-Sermon 5-Sentence Summary
 

@@ -21,19 +21,19 @@
 │  └──────────┬───────────┘         └───────────┬──────────────┘      │
 │             │                                  │                     │
 │             ▼                                  │                     │
-│  ┌──────────────────────┐                      │                     │
-│  │ preprocess_audio.py  │                      │                     │
-│  │ 10-step pipeline     │                      │                     │
-│  │ → VAD segments       │                      │                     │
-│  └──────────┬───────────┘                      │                     │
+│  ┌───────────────────────────────┐               │                     │
+│  │ training/preprocess_audio.py │               │                     │
+│  │ 10-step pipeline              │               │                     │
+│  │ → VAD segments                │               │                     │
+│  └───────────────┬───────────────┘               │                     │
 │             │                                  │                     │
 │             ▼                                  │                     │
-│  ┌──────────────────────┐                      │                     │
-│  │ transcribe_church.py │                      │                     │
-│  │ Whisper large-v3     │                      │                     │
-│  │ → pseudo-labels      │                      │                     │
-│  │ (text for each chunk)│                      │                     │
-│  └──────────┬───────────┘                      │                     │
+│  ┌───────────────────────────────┐               │                     │
+│  │ training/transcribe_church.py│               │                     │
+│  │ Whisper large-v3              │               │                     │
+│  │ → pseudo-labels               │               │                     │
+│  │ (text for each chunk)         │               │                     │
+│  └───────────────┬───────────────┘               │                     │
 │             │                                  │                     │
 └─────────────┼──────────────────────────────────┼─────────────────────┘
               │                                  │
@@ -42,7 +42,7 @@
 │                      MODEL TRAINING                                  │
 │                                                                      │
 │  ┌────────────────────────────────────┐                              │
-│  │ train_whisper.py (LoRA)            │                              │
+│  │ training/train_whisper.py (LoRA)            │                     │
 │  │                                    │                              │
 │  │ INPUT:  Church audio segments      │                              │
 │  │         + their pseudo-labels      │                              │
@@ -61,7 +61,7 @@
 │  └────────────────────────────────────┘                              │
 │                                                                      │
 │  ┌────────────────────────────────────┐                              │
-│  │ train_marian.py (full fine-tune)   │                              │
+│  │ training/train_marian.py (full fine-tune)   │                     │
 │  │                                    │                              │
 │  │ INPUT:  bible_data/aligned/        │◄── 269K EN→ES verse pairs    │
 │  │         verse_pairs_train.jsonl    │    + glossary pairs           │
@@ -77,7 +77,7 @@
 │  └────────────────────────────────────┘                              │
 │                                                                      │
 │  ┌────────────────────────────────────┐                              │
-│  │ train_gemma.py A (QLoRA, 4B)      │                              │
+│  │ training/train_gemma.py A (QLoRA, 4B)      │                     │
 │  │                                    │                              │
 │  │ INPUT:  bible_data/aligned/        │◄── Same 269K pairs           │
 │  │         verse_pairs_train.jsonl    │    + glossary pairs           │
@@ -96,7 +96,7 @@
 │  └────────────────────────────────────┘                              │
 │                                                                      │
 │  ┌────────────────────────────────────┐                              │
-│  │ evaluate_translation.py           │                              │
+│  │ training/evaluate_translation.py           │                     │
 │  │                                    │                              │
 │  │ INPUT:  bible_data/holdout/        │◄── 27K held-out pairs        │
 │  │         verse_pairs_test.jsonl     │                              │
@@ -214,7 +214,7 @@ echo "========================================" | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 1: Audio Preprocessing (~5 hrs) ─────────────────────────
 echo "[$(date +%H:%M)] Stage 1: Audio preprocessing..." | tee -a "$LOG_DIR/progress.log"
-python preprocess_audio.py \
+python training/preprocess_audio.py \
     --input stark_data/raw \
     --output stark_data/cleaned \
     --resume \
@@ -223,7 +223,7 @@ echo "[$(date +%H:%M)] Stage 1 complete." | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 2: Pseudo-labeling with Whisper large-v3 (~2.5 hrs) ────
 echo "[$(date +%H:%M)] Stage 2: Pseudo-labeling..." | tee -a "$LOG_DIR/progress.log"
-python transcribe_church.py \
+python training/transcribe_church.py \
     --backend faster-whisper \
     --resume \
     2>&1 | tee "$LOG_DIR/02_transcribe.log"
@@ -231,13 +231,13 @@ echo "[$(date +%H:%M)] Stage 2 complete." | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 3: Baseline evaluation (before fine-tuning) (~20 min) ──
 echo "[$(date +%H:%M)] Stage 3: Baseline evaluation..." | tee -a "$LOG_DIR/progress.log"
-python evaluate_translation.py --models all \
+python training/evaluate_translation.py --models all \
     2>&1 | tee "$LOG_DIR/03_baseline_eval.log" || true
 echo "[$(date +%H:%M)] Stage 3 complete." | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 4: Whisper LoRA fine-tune (~1 hr) ──────────────────────
 echo "[$(date +%H:%M)] Stage 4: Whisper LoRA training..." | tee -a "$LOG_DIR/progress.log"
-python train_whisper.py \
+python training/train_whisper.py \
     --dataset stark_data/cleaned \
     --output fine_tuned_whisper_mi \
     --epochs 3 \
@@ -247,7 +247,7 @@ echo "[$(date +%H:%M)] Stage 4 complete." | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 5: MarianMT full fine-tune (~2.2 hrs) ─────────────────
 echo "[$(date +%H:%M)] Stage 5: MarianMT training..." | tee -a "$LOG_DIR/progress.log"
-python train_marian.py \
+python training/train_marian.py \
     --bible-data bible_data/aligned/verse_pairs_train.jsonl \
     --epochs 5 \
     2>&1 | tee "$LOG_DIR/05_marian.log"
@@ -255,7 +255,7 @@ echo "[$(date +%H:%M)] Stage 5 complete." | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 6: TranslateGemma 4B QLoRA (~12 hrs) ──────────────────
 echo "[$(date +%H:%M)] Stage 6: TranslateGemma 4B QLoRA..." | tee -a "$LOG_DIR/progress.log"
-python train_gemma.py A \
+python training/train_gemma.py A \
     --bible-data bible_data/aligned/verse_pairs_train.jsonl \
     --epochs 3 \
     2>&1 | tee "$LOG_DIR/06_gemma4b.log"
@@ -263,13 +263,13 @@ echo "[$(date +%H:%M)] Stage 6 complete." | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 7: Post-training evaluation (~1 hr) ───────────────────
 echo "[$(date +%H:%M)] Stage 7: Post-training evaluation..." | tee -a "$LOG_DIR/progress.log"
-python evaluate_translation.py --models all \
+python training/evaluate_translation.py --models all \
     2>&1 | tee "$LOG_DIR/07_post_eval.log" || true
 echo "[$(date +%H:%M)] Stage 7 complete." | tee -a "$LOG_DIR/progress.log"
 
 # ── Stage 8 (BONUS): TranslateGemma 12B if time allows (~26 hrs) ─
 echo "[$(date +%H:%M)] Stage 8: TranslateGemma 12B QLoRA..." | tee -a "$LOG_DIR/progress.log"
-python train_gemma.py B \
+python training/train_gemma.py B \
     --bible-data bible_data/aligned/verse_pairs_train.jsonl \
     --epochs 3 \
     2>&1 | tee "$LOG_DIR/08_gemma12b.log" || {

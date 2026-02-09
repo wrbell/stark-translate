@@ -96,7 +96,7 @@ The pipeline runs per-file, sequentially through 10 steps. Bottleneck analysis:
 - On the A2000 Ada, expect ~3-6x real-time for htdemucs with CUDA
 - However, not all files need demucs -- only those with significant music segments (typically 30-50% of church recordings have music)
 
-**Conditional demucs:** The `preprocess_audio.py` script skips demucs when music < 10 seconds. Assuming ~40% of files have significant music:
+**Conditional demucs:** The `training/preprocess_audio.py` script skips demucs when music < 10 seconds. Assuming ~40% of files have significant music:
 
 | Data Size | Total Audio | Files Needing Demucs | Demucs Time | Other Steps | Total Pipeline |
 |-----------|------------|---------------------|-------------|-------------|----------------|
@@ -116,7 +116,7 @@ Standalone timing: 30 hrs audio -> ~18 min. 50 hrs -> ~30 min. Negligible.
 
 This is the **second major GPU bottleneck** after demucs.
 
-**Key parameters from `transcribe_church.py`:**
+**Key parameters from `training/transcribe_church.py`:**
 - Model: `distil-whisper/distil-large-v3` (default) or `openai/whisper-large-v3` (max quality)
 - Backend: transformers pipeline or faster-whisper
 - Batch size: 8 (default)
@@ -182,7 +182,7 @@ Not GPU-bound. Estimated at 5-8x real-time for review + correction of the bottom
 
 ## 3. Whisper LoRA Training Time
 
-### 3.1 Configuration (from `train_whisper.py`)
+### 3.1 Configuration (from `training/train_whisper.py`)
 
 ```
 Model:           distil-whisper/distil-large-v3
@@ -297,7 +297,7 @@ At ~1.8 s/step:
 
 ## 4. TranslateGemma 4B QLoRA Training Time
 
-### 4.1 Configuration (from `train_gemma.py`)
+### 4.1 Configuration (from `training/train_gemma.py`)
 
 ```
 Model:           google/translategemma-4b-it
@@ -386,7 +386,7 @@ The 458 glossary pairs are <0.3% of the dataset. They add negligible training ti
 
 ## 5. TranslateGemma 12B QLoRA Training Time
 
-### 5.1 Configuration (from `train_gemma.py`)
+### 5.1 Configuration (from `training/train_gemma.py`)
 
 ```
 Model:           google/translategemma-12b-it
@@ -466,7 +466,7 @@ At ~6.5 s/step, 4,313 steps/epoch:
 
 ## 6. MarianMT Full Fine-Tune Training Time
 
-### 6.1 Configuration (from `train_marian.py`)
+### 6.1 Configuration (from `training/train_marian.py`)
 
 ```
 Model:           Helsinki-NLP/opus-mt-en-es (298 MB, ~74M parameters)
@@ -639,7 +639,7 @@ Add human correction time from Section 2.5:
 Day 1 (Evening): Start preprocessing + pseudo-labeling overnight
   [GPU] Preprocess 30 hrs audio (4-5 hrs)
   [GPU] Pseudo-label with Whisper large-v3 (2.2 hrs)
-  [CPU] Download Bible corpus, run prepare_bible_corpus.py
+  [CPU] Download Bible corpus, run training/prepare_bible_corpus.py
   -> Total: ~7 hrs, finishes by morning
 
 Day 2 (Morning): Review pseudo-labels, start human correction
@@ -776,24 +776,24 @@ The active learning feedback loop (infer -> flag -> correct -> retrain) gets fas
 
 ```bash
 # Preprocessing (overnight job)
-nohup python preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume > preprocess.log 2>&1 &
+nohup python training/preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume > preprocess.log 2>&1 &
 
 # Pseudo-labeling (overnight job, after preprocessing)
-nohup python transcribe_church.py --backend faster-whisper --resume > transcribe.log 2>&1 &
+nohup python training/transcribe_church.py --backend faster-whisper --resume > transcribe.log 2>&1 &
 
 # Whisper LoRA (quick job, ~1 hr)
-nohup python train_whisper.py --epochs 3 --dataset stark_data/cleaned > whisper_train.log 2>&1 &
+nohup python training/train_whisper.py --epochs 3 --dataset stark_data/cleaned > whisper_train.log 2>&1 &
 
 # MarianMT (quick job, ~2 hrs)
-nohup python train_marian.py --epochs 5 > marian_train.log 2>&1 &
+nohup python training/train_marian.py --epochs 5 > marian_train.log 2>&1 &
 
 # TranslateGemma 4B (overnight job, ~12 hrs)
-nohup python train_gemma.py A --epochs 3 > gemma4b_train.log 2>&1 &
+nohup python training/train_gemma.py A --epochs 3 > gemma4b_train.log 2>&1 &
 
 # TranslateGemma 12B (multi-night job, ~26 hrs, use tmux)
 tmux new-session -s gemma12b
-python train_gemma.py B --epochs 3
-# If interrupted: python train_gemma.py B --epochs 3 --resume
+python training/train_gemma.py B --epochs 3
+# If interrupted: python training/train_gemma.py B --epochs 3 --resume
 
 # Monitor GPU usage
 watch -n 1 nvidia-smi

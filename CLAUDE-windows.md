@@ -107,7 +107,7 @@ yt-dlp --write-auto-subs --sub-lang en --skip-download \
 
 ---
 
-## Phase 2: Audio Preprocessing (`preprocess_audio.py`)
+## Phase 2: Audio Preprocessing (`training/preprocess_audio.py`)
 
 The 10-step pipeline. Run each file through sequentially.
 
@@ -290,7 +290,7 @@ def final_quality_gate(chunk_audio, sr=16000, min_snr=15.0):
 
 ---
 
-## Phase 3: Data Quality Assessment (`assess_quality.py`)
+## Phase 3: Data Quality Assessment (`training/assess_quality.py`)
 
 Before fine-tuning, establish a WER baseline on 50–100 randomly sampled segments.
 
@@ -344,7 +344,7 @@ def compute_baseline_wer(assessment_path):
 
 ---
 
-## Phase 4: Transcription (`transcribe_church.py`)
+## Phase 4: Transcription (`training/transcribe_church.py`)
 
 Generate clean labels using Whisper large-v3 (not YouTube auto-captions).
 
@@ -386,7 +386,7 @@ if __name__ == "__main__":
 
 ---
 
-## Phase 4b: Biblical Parallel Corpus Preparation (`prepare_bible_corpus.py`)
+## Phase 4b: Biblical Parallel Corpus Preparation (`training/prepare_bible_corpus.py`)
 
 Build the ~155K verse-pair training set for TranslateGemma fine-tuning. All sources are public domain or CC-licensed.
 
@@ -700,7 +700,7 @@ Install: `pip install flash-attn --no-build-isolation`
 
 ## Phase 5: Fine-Tuning
 
-### Whisper LoRA (`train_whisper.py`) — Shared for A/B
+### Whisper LoRA (`training/train_whisper.py`) — Shared for A/B
 
 Apply LoRA to **both encoder and decoder**. Encoder adapts to acoustic domain (reverb, PA coloring, background noise); decoder learns domain vocabulary patterns. Research from LoRA-Whisper (Interspeech 2024) confirms encoder LoRA is critical for acoustic adaptation.
 
@@ -797,11 +797,11 @@ if __name__ == "__main__":
     fine_tune_whisper()
 ```
 
-### TranslateGemma QLoRA (`train_gemma.py`) — Biblical Domain Adaptation
+### TranslateGemma QLoRA (`training/train_gemma.py`) — Biblical Domain Adaptation
 
 TranslateGemma (Jan 2026, built on Gemma 3) supports 55 languages / ~500 pairs including EN→ES. The 4B variant loads at ~2.6 GB in 4-bit via bitsandbytes. Must follow its exact chat template with `source_lang_code` / `target_lang_code` fields.
 
-**Data:** ~155K Bible verse pairs from `prepare_bible_corpus.py` + ~1K theological glossary pairs from `build_glossary.py`. With sequence packing, Bible verses (rarely >200 tokens) pack efficiently.
+**Data:** ~155K Bible verse pairs from `training/prepare_bible_corpus.py` + ~1K theological glossary pairs from `build_glossary.py`. With sequence packing, Bible verses (rarely >200 tokens) pack efficiently.
 
 ```python
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
@@ -916,11 +916,11 @@ if __name__ == "__main__":
     import sys
     approach = sys.argv[1] if len(sys.argv) > 1 else 'A'
     fine_tune_gemma(approach)
-    # Run: python train_gemma.py A   (4B, ~8-12 hrs)
-    # Run: python train_gemma.py B   (12B, ~18-27 hrs, tight on VRAM)
+    # Run: python training/train_gemma.py A   (4B, ~8-12 hrs)
+    # Run: python training/train_gemma.py B   (12B, ~18-27 hrs, tight on VRAM)
 ```
 
-### MarianMT Fallback — Full Fine-Tune (`train_marian.py`)
+### MarianMT Fallback — Full Fine-Tune (`training/train_marian.py`)
 
 If TranslateGemma QLoRA proves too heavy or bitsandbytes causes issues on WSL, `Helsinki-NLP/opus-mt-en-es` (298 MB encoder-decoder, trained partly on OPUS Bible corpus) is small enough for full fine-tuning with no LoRA needed. Much faster iteration, lower quality ceiling.
 
@@ -1064,7 +1064,7 @@ def evaluate_cycle(model, processor, church_test, general_test):
 
 ---
 
-## Phase 6b: Translation Evaluation (`evaluate_translation.py`)
+## Phase 6b: Translation Evaluation (`training/evaluate_translation.py`)
 
 Evaluate fine-tuned TranslateGemma on the holdout Bible test set using three complementary metrics. Run on WSL after training; also runnable on Mac for post-transfer verification.
 

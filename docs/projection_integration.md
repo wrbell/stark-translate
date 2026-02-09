@@ -25,15 +25,15 @@ The pipeline broadcasts translation results over WebSocket (port 8765) as JSON:
 }
 ```
 
-Existing display pages (`audience_display.html`, `church_display.html`, `mobile_display.html`,
-`ab_display.html`) connect to this WebSocket and render text in browsers. The pipeline also runs
+Existing display pages (`displays/audience_display.html`, `displays/church_display.html`, `displays/mobile_display.html`,
+`displays/ab_display.html`) connect to this WebSocket and render text in browsers. The pipeline also runs
 an HTTP server on port 8080 to serve these pages over the LAN.
 
 ---
 
 ## Approach 1: OBS Browser Source Overlay
 
-**Status: Ready to use -- `obs_overlay.html` created.**
+**Status: Ready to use -- `displays/obs_overlay.html` created.**
 
 ### How It Works
 
@@ -45,8 +45,8 @@ as alpha transparency, meaning the text floats over whatever video/image is behi
 
 1. In OBS, add a new **Browser** source to your scene.
 2. Set the URL to either:
-   - **Local file:** `file:///path/to/SRTranslate/obs_overlay.html`
-   - **HTTP:** `http://localhost:8080/obs_overlay.html` (if the HTTP server is running)
+   - **Local file:** `file:///path/to/SRTranslate/displays/obs_overlay.html`
+   - **HTTP:** `http://localhost:8080/displays/obs_overlay.html` (if the HTTP server is running)
 3. Set **Width** to your canvas width (e.g., 1920) and **Height** to canvas height (e.g., 1080).
 4. Check the **"Custom CSS"** field and ensure it contains:
    ```css
@@ -61,9 +61,9 @@ as alpha transparency, meaning the text floats over whatever video/image is behi
    - `?port=8765` -- WebSocket port (default 8765)
    - `?lines=3` -- Max visible text lines (default 3)
 
-### obs_overlay.html Design
+### displays/obs_overlay.html Design
 
-The overlay file (`obs_overlay.html`) differs from the audience display in several ways:
+The overlay file (`displays/obs_overlay.html`) differs from the audience display in several ways:
 
 - **Transparent background** -- no black/white fill; gradient backdrop only behind text.
 - **Lower-third positioning** -- text anchored to the bottom of the viewport.
@@ -75,7 +75,7 @@ The overlay file (`obs_overlay.html`) differs from the audience display in sever
   final translation arrives.
 - **Profanity filter** -- same biblical-term-aware filter as other displays.
 
-### Can `audience_display.html` Be Used Directly?
+### Can `displays/audience_display.html` Be Used Directly?
 
 Yes, but with caveats:
 - It has a white background, which would show as a solid white rectangle in OBS.
@@ -83,7 +83,7 @@ Yes, but with caveats:
 - The two-column layout is designed for a standalone display, not an overlay.
 
 You could use it with OBS Color Key / Chroma Key to remove the white background, but this is
-fragile (white text content could also become transparent). The dedicated `obs_overlay.html` is
+fragile (white text content could also become transparent). The dedicated `displays/obs_overlay.html` is
 the better option.
 
 ### Pros
@@ -357,7 +357,7 @@ with optional translation into 60+ languages. It uses Microsoft Azure Cognitive 
 Yes, but indirectly:
 - Run PowerPoint in slideshow mode.
 - Use OBS to capture the PowerPoint window.
-- Add the `obs_overlay.html` Browser Source on top.
+- Add the `displays/obs_overlay.html` Browser Source on top.
 - Output the combined scene to the projector or NDI.
 
 This works but adds OBS to the chain and defeats the simplicity argument for using
@@ -377,12 +377,12 @@ fine-tuning planned in Phases 6-8 will widen this gap significantly.
 
 ### Short-term (this week): OBS Browser Source
 
-The OBS Browser Source approach is ready to use today with `obs_overlay.html`.
+The OBS Browser Source approach is ready to use today with `displays/obs_overlay.html`.
 
 **Setup checklist:**
 1. Start the SRTranslate pipeline (`python dry_run_ab.py`).
 2. Open OBS Studio.
-3. Add a Browser Source pointed at `http://<mac-ip>:8080/obs_overlay.html?model=a`.
+3. Add a Browser Source pointed at `http://<mac-ip>:8080/displays/obs_overlay.html?model=a`.
 4. Set width/height to match canvas (1920x1080).
 5. Position the source at the bottom of the scene (it self-positions as a lower third).
 6. Layer it above the camera/presentation source.

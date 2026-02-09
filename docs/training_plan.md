@@ -145,7 +145,7 @@ python download_sermons.py -n 30
 #### Step 2: Audio Preprocessing (Automated, GPU)
 
 ```bash
-nohup python preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume > preprocess.log 2>&1 &
+nohup python training/preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume > preprocess.log 2>&1 &
 ```
 
 | Task | Time | Notes |
@@ -156,7 +156,7 @@ nohup python preprocess_audio.py --input stark_data/raw --output stark_data/clea
 #### Step 3: Pseudo-Labeling (Automated, GPU)
 
 ```bash
-nohup python transcribe_church.py --backend faster-whisper --resume > transcribe.log 2>&1 &
+nohup python training/transcribe_church.py --backend faster-whisper --resume > transcribe.log 2>&1 &
 ```
 
 | Task | Time | Notes |
@@ -176,7 +176,7 @@ nohup python transcribe_church.py --backend faster-whisper --resume > transcribe
 #### Step 5: Bible Corpus Preparation (Automated, CPU -- runs in parallel)
 
 ```bash
-python prepare_bible_corpus.py
+python training/prepare_bible_corpus.py
 python build_glossary.py
 ```
 
@@ -196,7 +196,7 @@ All three translation models use the same Bible corpus. Whisper uses the sermon 
 **Whisper LoRA (Quick)**
 
 ```bash
-nohup python train_whisper.py --epochs 3 --dataset stark_data/cleaned > whisper_train.log 2>&1 &
+nohup python training/train_whisper.py --epochs 3 --dataset stark_data/cleaned > whisper_train.log 2>&1 &
 ```
 
 | Parameter | Value |
@@ -210,7 +210,7 @@ nohup python train_whisper.py --epochs 3 --dataset stark_data/cleaned > whisper_
 **MarianMT Full Fine-Tune (Quick)**
 
 ```bash
-nohup python train_marian.py --epochs 5 > marian_train.log 2>&1 &
+nohup python training/train_marian.py --epochs 5 > marian_train.log 2>&1 &
 ```
 
 | Parameter | Value |
@@ -224,7 +224,7 @@ nohup python train_marian.py --epochs 5 > marian_train.log 2>&1 &
 **TranslateGemma 4B QLoRA (Overnight)**
 
 ```bash
-nohup python train_gemma.py A --epochs 3 > gemma4b_train.log 2>&1 &
+nohup python training/train_gemma.py A --epochs 3 > gemma4b_train.log 2>&1 &
 ```
 
 | Parameter | Value |
@@ -238,7 +238,7 @@ nohup python train_gemma.py A --epochs 3 > gemma4b_train.log 2>&1 &
 #### Step 7: Evaluation (Automated, GPU)
 
 ```bash
-python evaluate_translation.py --models all
+python training/evaluate_translation.py --models all
 ```
 
 | Task | Time |
@@ -580,8 +580,8 @@ The GPU cannot run two training jobs simultaneously -- it must be scheduled sequ
 ```bash
 # Chain preprocessing and pseudo-labeling
 nohup bash -c '
-  python preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume &&
-  python transcribe_church.py --backend faster-whisper --resume
+  python training/preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume &&
+  python training/transcribe_church.py --backend faster-whisper --resume
 ' > pipeline.log 2>&1 &
 ```
 
@@ -589,23 +589,23 @@ nohup bash -c '
 ```bash
 # Chain Whisper, MarianMT, and evaluation
 nohup bash -c '
-  python train_whisper.py --epochs 3 --dataset stark_data/cleaned &&
-  python train_marian.py --epochs 5 &&
-  python evaluate_translation.py --models all
+  python training/train_whisper.py --epochs 3 --dataset stark_data/cleaned &&
+  python training/train_marian.py --epochs 5 &&
+  python training/evaluate_translation.py --models all
 ' > train_quick.log 2>&1 &
 ```
 
 **Night Type C: TranslateGemma 4B (12 hrs)**
 ```bash
-nohup python train_gemma.py A --epochs 3 > gemma4b_train.log 2>&1 &
+nohup python training/train_gemma.py A --epochs 3 > gemma4b_train.log 2>&1 &
 ```
 
 **Night Type D: TranslateGemma 12B (26 hrs -- spans 3 nights)**
 ```bash
 # Use tmux for multi-night training
 tmux new-session -s gemma12b
-python train_gemma.py B --epochs 3
-# If interrupted: python train_gemma.py B --epochs 3 --resume
+python training/train_gemma.py B --epochs 3
+# If interrupted: python training/train_gemma.py B --epochs 3 --resume
 ```
 
 #### GPU Schedule for Phase 1 Round 1
@@ -746,9 +746,9 @@ Establish these on base (non-fine-tuned) models before any training:
 - [ ] Verify Windows/WSL2 environment per `CLAUDE-windows.md`
 - [ ] Verify Mac environment per `CLAUDE-macbook.md`
 - [ ] Run `nvidia-smi` on WSL2 -- confirm A2000 Ada visible with 16 GB
-- [ ] Test `python train_whisper.py --help` -- confirm all dependencies installed
-- [ ] Test `python train_gemma.py --help` -- confirm bitsandbytes + QLoRA working
-- [ ] Test `python train_marian.py --help` -- confirm MarianMT fine-tune working
+- [ ] Test `python training/train_whisper.py --help` -- confirm all dependencies installed
+- [ ] Test `python training/train_gemma.py --help` -- confirm bitsandbytes + QLoRA working
+- [ ] Test `python training/train_marian.py --help` -- confirm MarianMT fine-tune working
 - [ ] Establish SSH/SCP path between Windows and Mac for adapter transfer
 - [ ] Run base model inference on a sample sermon -- establish baseline WER
 - [ ] Run base translation on sample text -- establish baseline BLEU
@@ -756,7 +756,7 @@ Establish these on base (non-fine-tuned) models before any training:
 ### Phase 1, Round 1
 
 - [ ] **Day 1:** `python download_sermons.py -n 30` (Mac or Windows)
-- [ ] **Day 1:** `python prepare_bible_corpus.py` (CPU, either machine)
+- [ ] **Day 1:** `python training/prepare_bible_corpus.py` (CPU, either machine)
 - [ ] **Day 1:** `python build_glossary.py` (CPU, either machine)
 - [ ] **Night 1:** Start preprocessing + pseudo-labeling (GPU, ~7 hrs)
 - [ ] **Day 2:** Verify preprocessing output: check `stark_data/cleaned/` segment count

@@ -1823,11 +1823,11 @@ async def main_async(args):
     print(f"  WebSocket ready on port {args.ws_port}")
     print(f"  HTTP server ready on port {args.http_port}")
     print(f"\n  Local displays:")
-    print(f"    A/B display:       file://{project_dir}/ab_display.html")
-    print(f"    Audience display:  file://{project_dir}/audience_display.html")
+    print(f"    A/B display:       file://{project_dir}/displays/ab_display.html")
+    print(f"    Audience display:  file://{project_dir}/displays/audience_display.html")
     print(f"\n  Mobile / LAN access:")
-    print(f"    http://{local_ip}:{args.http_port}/mobile_display.html")
-    print(f"    http://{local_ip}:{args.http_port}/audience_display.html")
+    print(f"    http://{local_ip}:{args.http_port}/displays/mobile_display.html")
+    print(f"    http://{local_ip}:{args.http_port}/displays/audience_display.html")
 
     # [P7-P3-6A] Initialize streaming translation queue and broadcaster
     _stream_token_queue = asyncio.Queue(maxsize=128)

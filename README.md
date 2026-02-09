@@ -41,12 +41,12 @@ All inference runs natively on Apple Silicon via MLX (4-bit quantized). No cloud
 
 | Display | File | Purpose |
 |---------|------|---------|
-| **Audience** | `audience_display.html` | Projector-friendly side-by-side EN/ES with fading context, fullscreen toggle, QR code overlay for phones |
-| **A/B/C Comparison** | `ab_display.html` | Operator view showing Gemma 4B / MarianMT / 12B side-by-side with latency stats |
-| **Mobile** | `mobile_display.html` | Responsive phone/tablet view with model toggle and Spanish-only mode, accessible via LAN |
-| **Church** | `church_display.html` | Simplified church-oriented layout |
+| **Audience** | `displays/audience_display.html` | Projector-friendly side-by-side EN/ES with fading context, fullscreen toggle, QR code overlay for phones |
+| **A/B/C Comparison** | `displays/ab_display.html` | Operator view showing Gemma 4B / MarianMT / 12B side-by-side with latency stats |
+| **Mobile** | `displays/mobile_display.html` | Responsive phone/tablet view with model toggle and Spanish-only mode, accessible via LAN |
+| **Church** | `displays/church_display.html` | Simplified church-oriented layout |
 
-Phones connect by scanning the QR code on the audience display or navigating to `http://<LAN-IP>:8080/mobile_display.html`.
+Phones connect by scanning the QR code on the audience display or navigating to `http://<LAN-IP>:8080/displays/mobile_display.html`.
 
 ## Quick Start
 
@@ -72,8 +72,8 @@ python dry_run_ab.py
 python dry_run_ab.py --ab
 
 # Open displays in browser
-open audience_display.html
-open ab_display.html
+open displays/audience_display.html
+open displays/ab_display.html
 ```
 
 ### Key Flags
@@ -154,20 +154,23 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 ├── build_glossary.py          # EN→ES theological glossary (229 terms)
 ├── download_sermons.py        # yt-dlp sermon downloader
 │
-├── audience_display.html      # Projector display (EN/ES side-by-side)
-├── ab_display.html            # A/B/C operator comparison display
-├── mobile_display.html        # Phone/tablet responsive display
-├── church_display.html        # Simplified church layout
+├── displays/
+│   ├── audience_display.html  # Projector display (EN/ES side-by-side)
+│   ├── ab_display.html        # A/B/C operator comparison display
+│   ├── mobile_display.html    # Phone/tablet responsive display
+│   └── church_display.html    # Simplified church layout
 │
-├── preprocess_audio.py        # 10-step audio cleaning (Windows)
-├── transcribe_church.py       # Whisper large-v3 pseudo-labeling (Windows)
-├── prepare_bible_corpus.py    # Bible verse pair alignment (Windows)
-├── train_whisper.py           # Whisper LoRA fine-tuning (Windows)
-├── train_gemma.py             # TranslateGemma QLoRA fine-tuning (Windows)
-├── train_marian.py            # MarianMT full fine-tune (Windows)
-├── evaluate_translation.py    # SacreBLEU/chrF++/COMET scoring
-├── assess_quality.py          # Baseline WER assessment
-├── translation_qe.py          # Reference-free translation QE
+├── training/
+│   ├── preprocess_audio.py    # 10-step audio cleaning (Windows)
+│   ├── transcribe_church.py   # Whisper large-v3 pseudo-labeling (Windows)
+│   ├── prepare_bible_corpus.py # Bible verse pair alignment (Windows)
+│   ├── train_whisper.py       # Whisper LoRA fine-tuning (Windows)
+│   ├── train_gemma.py         # TranslateGemma QLoRA fine-tuning (Windows)
+│   ├── train_marian.py        # MarianMT full fine-tune (Windows)
+│   ├── evaluate_translation.py # SacreBLEU/chrF++/COMET scoring
+│   └── assess_quality.py      # Baseline WER assessment
+├── tools/
+│   └── translation_qe.py      # Reference-free translation QE
 │
 ├── ct2_opus_mt_en_es/         # CTranslate2 int8 MarianMT model
 ├── stark_data/                # Church audio + transcripts + corrections

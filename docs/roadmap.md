@@ -208,8 +208,8 @@ Repeat
 
 ### 4C. Future Features
 
-- Post-sermon 5-sentence summary (diarize.py + summarize_sermon.py)
-- Verse reference extraction (extract_verses.py)
+- Post-sermon 5-sentence summary (features/diarize.py + features/summarize_sermon.py)
+- Verse reference extraction (features/extract_verses.py)
 - Multi-language support (TranslateGemma supports 36 languages)
 - Live dashboard for operators (Streamlit or web UI)
 

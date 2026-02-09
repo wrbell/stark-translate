@@ -244,9 +244,9 @@ python dry_run_ab.py --ab
 #   --num-draft-tokens  Enable speculative decoding (4B drafts for 12B)
 
 # Open displays
-open http://localhost:8080/audience_display.html
-open http://localhost:8080/ab_display.html
-# Phones: scan QR on audience display or go to http://<LAN-IP>:8080/mobile_display.html
+open http://localhost:8080/displays/audience_display.html
+open http://localhost:8080/displays/ab_display.html
+# Phones: scan QR on audience display or go to http://<LAN-IP>:8080/displays/mobile_display.html
 ```
 
 ---
@@ -317,7 +317,7 @@ Score every segment, sort by composite quality, route the bottom 5–15% to huma
 
 ---
 
-## Live YouTube Caption Comparison (`live_caption_monitor.py`)
+## Live YouTube Caption Comparison (`tools/live_caption_monitor.py`)
 
 ### Architecture
 
@@ -405,7 +405,7 @@ def compare_window(local_text, youtube_text):
 
 ---
 
-## Translation Quality Estimation (`translation_qe.py`)
+## Translation Quality Estimation (`tools/translation_qe.py`)
 
 ### Tier 1: Always-On Scoring (~150–300ms per segment)
 
@@ -504,21 +504,21 @@ The primary UI uses static HTML pages served over HTTP (`--http-port 8080`) with
 
 | Display | File | Purpose |
 |---------|------|---------|
-| **Audience** | `audience_display.html` | Projector-friendly EN/ES side-by-side, fading context, fullscreen toggle, QR code overlay |
-| **A/B/C Compare** | `ab_display.html` | Operator view: Gemma 4B / MarianMT / 12B side-by-side with latency stats |
-| **Mobile** | `mobile_display.html` | Responsive phone/tablet view with model toggle + Spanish-only mode |
-| **Church** | `church_display.html` | Simplified church-oriented layout |
+| **Audience** | `displays/audience_display.html` | Projector-friendly EN/ES side-by-side, fading context, fullscreen toggle, QR code overlay |
+| **A/B/C Compare** | `displays/ab_display.html` | Operator view: Gemma 4B / MarianMT / 12B side-by-side with latency stats |
+| **Mobile** | `displays/mobile_display.html` | Responsive phone/tablet view with model toggle + Spanish-only mode |
+| **Church** | `displays/church_display.html` | Simplified church-oriented layout |
 
 ### Accessing Displays
 
 ```bash
 # Local (operator)
-open http://localhost:8080/audience_display.html
-open http://localhost:8080/ab_display.html
+open http://localhost:8080/displays/audience_display.html
+open http://localhost:8080/displays/ab_display.html
 
 # LAN (phones, projector)
 # Scan QR code on audience display, or navigate to:
-http://<LAN-IP>:8080/mobile_display.html
+http://<LAN-IP>:8080/displays/mobile_display.html
 ```
 
 ### Design Notes
@@ -531,7 +531,7 @@ http://<LAN-IP>:8080/mobile_display.html
 
 ---
 
-## Post-Transfer Evaluation (`evaluate_translation.py`)
+## Post-Transfer Evaluation (`training/evaluate_translation.py`)
 
 After transferring fine-tuned adapters from WSL, verify quality on Mac before live use.
 
@@ -589,14 +589,14 @@ for en_text, expected_term in SPOT_CHECK:
 
 ### Batch Evaluation with SacreBLEU/chrF++/COMET
 
-The full `evaluate_translation.py` script (same as WSL version) can run on Mac for independent verification. Copy `bible_data/aligned/verse_pairs_test.jsonl` (~3.1K verses) alongside the adapters.
+The full `training/evaluate_translation.py` script (same as WSL version) can run on Mac for independent verification. Copy `bible_data/aligned/verse_pairs_test.jsonl` (~3.1K verses) alongside the adapters.
 
 ```bash
 # Install evaluation libs (if not already present)
 pip install sacrebleu unbabel-comet
 
 # Run evaluation
-python evaluate_translation.py
+python training/evaluate_translation.py
 ```
 
 **Expected improvement targets after fine-tuning:**

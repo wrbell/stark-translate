@@ -64,7 +64,7 @@
 
 ## Display & UX
 
-- [x] ab_display.html created (A/B/C comparison, Gemma 4B / MarianMT or 12B / Audience hybrid)
+- [x] displays/ab_display.html created (A/B/C comparison, Gemma 4B / MarianMT or 12B / Audience hybrid)
 - [x] Audience display (side-by-side EN/ES, Calibri, fading context, fullscreen)
 - [x] Mobile display — responsive phone/tablet view with model toggle + Spanish-only mode
 - [x] Mobile display profanity filter fixed (allow biblical terms)
@@ -87,19 +87,19 @@
 
 ## P2 — Display & UX
 
-- [x] OBS overlay (`obs_overlay.html`) — transparent lower-third for OBS Browser Source, URL params for model/english/lines
+- [x] OBS overlay (`displays/obs_overlay.html`) — transparent lower-third for OBS Browser Source, URL params for model/english/lines
 - [x] Projection integration research (`docs/projection_integration.md`) — OBS, NDI, ProPresenter, PowerPoint comparison
 - [x] Church display fixes — profanity filter, WS auto-detect, fullscreen button
 
 ## P5 — Monitoring
 
-- [x] `live_caption_monitor.py` — YouTube caption comparison (post-stream, live, trend report modes)
+- [x] `tools/live_caption_monitor.py` — YouTube caption comparison (post-stream, live, trend report modes)
 
 ## P6 — Future Features (scripts built)
 
-- [x] `diarize.py` — pyannote-audio 3.1 speaker diarization with optional enrollment-based speaker ID
-- [x] `summarize_sermon.py` — 5-sentence structured summary via MLX LLM, English + Spanish output
-- [x] `extract_verses.py` — Bible verse extraction (66 book variants, spoken numbers, context tracking)
+- [x] `features/diarize.py` — pyannote-audio 3.1 speaker diarization with optional enrollment-based speaker ID
+- [x] `features/summarize_sermon.py` — 5-sentence structured summary via MLX LLM, English + Spanish output
+- [x] `features/extract_verses.py` — Bible verse extraction (66 book variants, spoken numbers, context tracking)
 
 ## P7 — Latency (Phase 1 + Phase 2 implemented)
 
@@ -115,14 +115,14 @@
 - [x] 3B: Pre-tokenize translation suffix tokens at startup (30-50ms savings)
 - [x] 5B: Move VAD to dedicated thread with queue (5-10ms jitter reduction)
 - [x] 1C: lightning-whisper-mlx researched — 1.8x SLOWER, not viable (see `docs/fast_stt_options.md`)
-- [x] STT benchmark tool (`stt_benchmark.py`) — mlx-whisper vs alternatives, profiling mode
+- [x] STT benchmark tool (`tools/stt_benchmark.py`) — mlx-whisper vs alternatives, profiling mode
 
 ## Windows Training Pipeline (reviewed/fixed)
 
 - [x] All training scripts updated: `--resume` support, newer transformers API (`processing_class=`)
-- [x] `transcribe_church.py` rewritten with dual backend (transformers + faster-whisper)
-- [x] `train_marian.py` fixed: Seq2SeqTrainer, DataCollatorForSeq2Seq, eval during training
-- [x] `evaluate_translation.py` — added MarianMT evaluation via `--marian` flag
+- [x] `training/transcribe_church.py` rewritten with dual backend (transformers + faster-whisper)
+- [x] `training/train_marian.py` fixed: Seq2SeqTrainer, DataCollatorForSeq2Seq, eval during training
+- [x] `training/evaluate_translation.py` — added MarianMT evaluation via `--marian` flag
 - [x] `requirements-windows.txt` updated with all CUDA training deps
 - [x] `requirements-mac.txt` cleaned up (removed bitsandbytes, added ctranslate2 + jiwer)
 

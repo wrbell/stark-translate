@@ -38,6 +38,7 @@ bible_data/holdout/*.jsonl
 # Metrics (session-specific)
 metrics/*.csv
 metrics/*.jsonl
+metrics/*.json
 
 # Assessment files
 assessment_sample.jsonl
