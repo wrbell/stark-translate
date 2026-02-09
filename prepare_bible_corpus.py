@@ -34,61 +34,104 @@ from pathlib import Path
 # Source 1: scrollmapper/bible_databases (SQL with verse IDs)
 # ---------------------------------------------------------------------------
 
-def align_scrollmapper(db_path="bible_data/scrollmapper/bible-sqlite.db"):
+def align_scrollmapper(db_dir="bible_data/scrollmapper/formats/sqlite"):
     """
-    scrollmapper/bible_databases: SQL with numeric verse IDs.
-    Verse ID format: BBCCCVVV (e.g., 01001001 = Genesis 1:1).
-    JOIN on verse ID gives exact alignment across translations.
+    scrollmapper/bible_databases: individual SQLite DBs per translation.
+    Each DB has {Name}_verses table with (id, book_id, chapter, verse, text).
+    The 'id' column is a sequential verse index (1-31102) that aligns across
+    all Protestant canon translations, making cross-translation JOIN trivial.
+
+    Also supports legacy single-DB mode with t_kjv, t_asv, etc. tables.
     """
-    if not os.path.exists(db_path):
-        print(f"Database not found: {db_path}")
-        print("Download from: https://github.com/scrollmapper/bible_databases")
-        print("  git clone https://github.com/scrollmapper/bible_databases.git bible_data/scrollmapper")
-        return []
+    db_dir = Path(db_dir)
 
-    pairs = []
-    # English translations: t_kjv, t_asv, t_web, t_bbe, t_ylt
-    # Spanish translations: t_rvr (RVR1909)
-    en_tables = ["t_kjv", "t_asv", "t_web", "t_bbe", "t_ylt"]
-    es_tables = ["t_rvr"]
+    # Translation mappings: filename -> short name
+    en_translations = {
+        "KJV": "kjv",
+        "ASV": "asv",
+        "BBE": "bbe",
+        "YLT": "ylt",
+        "OEB": "web",      # Open English Bible = WEB equivalent
+    }
+    es_translations = {
+        "SpaRV": "rvr1909",
+        "SpaRVG": "rvg",
+        "SpaPlatense": "platense",
+    }
 
-    conn = sqlite3.connect(db_path)
-
-    # Check which tables actually exist
-    cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    available = {row[0] for row in cursor}
-    en_tables = [t for t in en_tables if t in available]
-    es_tables = [t for t in es_tables if t in available]
-
-    if not en_tables or not es_tables:
-        print(f"Available tables: {available}")
-        print(f"Expected EN: t_kjv, t_asv, t_web, t_bbe, t_ylt")
-        print(f"Expected ES: t_rvr")
+    # Load all verse texts keyed by (translation, verse_id)
+    def load_translation(db_name):
+        db_path = db_dir / f"{db_name}.db"
+        if not db_path.exists():
+            print(f"  WARNING: {db_path} not found, skipping")
+            return {}
+        conn = sqlite3.connect(str(db_path))
+        table_name = f"{db_name}_verses"
+        try:
+            rows = conn.execute(
+                f"SELECT id, text FROM {table_name} WHERE text IS NOT NULL AND LENGTH(text) > 5"
+            ).fetchall()
+        except sqlite3.OperationalError:
+            print(f"  WARNING: table {table_name} not found in {db_path}")
+            conn.close()
+            return {}
         conn.close()
+        return {row[0]: row[1].strip() for row in rows}
+
+    # Load book names from KJV for verse_id -> reference mapping
+    book_names = {}
+    kjv_db = db_dir / "KJV.db"
+    if kjv_db.exists():
+        conn = sqlite3.connect(str(kjv_db))
+        try:
+            book_names = dict(conn.execute("SELECT id, name FROM KJV_books").fetchall())
+        except sqlite3.OperationalError:
+            pass
+        conn.close()
+
+    # Load all translations
+    print("Loading English translations...")
+    en_data = {}
+    for db_name, short in en_translations.items():
+        verses = load_translation(db_name)
+        if verses:
+            en_data[short] = verses
+            print(f"  {db_name} ({short}): {len(verses)} verses")
+
+    print("Loading Spanish translations...")
+    es_data = {}
+    for db_name, short in es_translations.items():
+        verses = load_translation(db_name)
+        if verses:
+            es_data[short] = verses
+            print(f"  {db_name} ({short}): {len(verses)} verses")
+
+    if not en_data or not es_data:
+        print(f"No translations found in {db_dir}")
+        print("Download: git clone https://github.com/scrollmapper/bible_databases.git bible_data/scrollmapper")
         return []
 
-    for en_table in en_tables:
-        for es_table in es_tables:
-            query = f"""
-                SELECT e.t AS en_text, s.t AS es_text, e.id AS verse_id
-                FROM {en_table} e
-                INNER JOIN {es_table} s ON e.id = s.id
-                WHERE e.t IS NOT NULL AND s.t IS NOT NULL
-                  AND LENGTH(e.t) > 5 AND LENGTH(s.t) > 5
-            """
-            cursor = conn.execute(query)
-            for row in cursor:
-                pairs.append({
-                    "en": row[0].strip(),
-                    "es": row[1].strip(),
-                    "verse_id": row[2],
-                    "en_source": en_table.replace("t_", ""),
-                    "es_source": es_table.replace("t_", ""),
-                })
-            print(f"  {en_table} × {es_table}: {cursor.rowcount if hasattr(cursor, 'rowcount') else '?'} pairs")
+    # Build pairs by joining on verse ID
+    pairs = []
+    for en_name, en_verses in en_data.items():
+        for es_name, es_verses in es_data.items():
+            common_ids = set(en_verses.keys()) & set(es_verses.keys())
+            count = 0
+            for vid in sorted(common_ids):
+                en_text = en_verses[vid]
+                es_text = es_verses[vid]
+                if len(en_text) > 5 and len(es_text) > 5:
+                    pairs.append({
+                        "en": en_text,
+                        "es": es_text,
+                        "verse_id": vid,
+                        "en_source": en_name,
+                        "es_source": es_name,
+                    })
+                    count += 1
+            print(f"  {en_name} x {es_name}: {count} pairs")
 
-    conn.close()
-    print(f"Total scrollmapper pairs: {len(pairs)}")
+    print(f"\nTotal scrollmapper pairs: {len(pairs)}")
     return pairs
 
 
@@ -150,6 +193,36 @@ def create_multi_reference_pairs(pairs):
 # ---------------------------------------------------------------------------
 # Export
 # ---------------------------------------------------------------------------
+
+def export_individual_translations(pairs):
+    """Export individual EN and ES translation files for reference."""
+    en_by_source = defaultdict(list)
+    es_by_source = defaultdict(list)
+    for p in pairs:
+        en_by_source[p["en_source"]].append(p)
+        es_by_source[p["es_source"]].append(p)
+
+    for lang, by_source, out_dir in [("en", en_by_source, "bible_data/en"),
+                                      ("es", es_by_source, "bible_data/es")]:
+        os.makedirs(out_dir, exist_ok=True)
+        for source, items in by_source.items():
+            # Deduplicate by verse_id
+            seen = set()
+            unique = []
+            for p in items:
+                if p["verse_id"] not in seen:
+                    seen.add(p["verse_id"])
+                    unique.append(p)
+            path = os.path.join(out_dir, f"{source}.jsonl")
+            with open(path, "w", encoding="utf-8") as f:
+                for p in sorted(unique, key=lambda x: x["verse_id"]):
+                    f.write(json.dumps({
+                        "verse_id": p["verse_id"],
+                        "text": p[lang],
+                        "source": source,
+                    }, ensure_ascii=False) + "\n")
+            print(f"  {path}: {len(unique)} verses")
+
 
 def export_training_jsonl(pairs, output_path="bible_data/aligned/verse_pairs.jsonl",
                           holdout_ratio=0.1):
@@ -215,8 +288,8 @@ def main():
     parser.add_argument("--source", choices=["scrollmapper", "huggingface", "all"],
                         default="scrollmapper",
                         help="Data source to use")
-    parser.add_argument("--db", default="bible_data/scrollmapper/bible-sqlite.db",
-                        help="Path to scrollmapper SQLite database")
+    parser.add_argument("--db-dir", default="bible_data/scrollmapper/formats/sqlite",
+                        help="Directory containing per-translation SQLite databases")
     parser.add_argument("--output", default="bible_data/aligned/verse_pairs.jsonl",
                         help="Output JSONL path")
     parser.add_argument("--multi-ref", action="store_true",
@@ -226,7 +299,7 @@ def main():
     pairs = []
 
     if args.source in ("scrollmapper", "all"):
-        pairs.extend(align_scrollmapper(args.db))
+        pairs.extend(align_scrollmapper(args.db_dir))
 
     if args.source in ("huggingface", "all"):
         print("\nTrying BibleNLP corpus...")
@@ -249,6 +322,11 @@ def main():
         print(f"  Expanded to {len(pairs)} pairs")
 
     print(f"\nTotal verse pairs: {len(pairs)}")
+
+    print("\nExporting individual translation files...")
+    export_individual_translations(pairs)
+
+    print("\nExporting training JSONL...")
     export_training_jsonl(pairs, args.output)
 
 
