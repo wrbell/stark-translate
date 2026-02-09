@@ -16,13 +16,16 @@ Usage:
     python dry_run_ab.py --ws-port 9000      # Different WebSocket port
 """
 
+import os
+os.environ["NUMBA_THREADING_LAYER"] = "workqueue"   # Prevent numba from loading its own libomp (conflicts with torch's)
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"         # Safety net for any remaining libomp duplicates
+
 import argparse
 import asyncio
 import copy
 import csv
 import http.server
 import json
-import os
 import queue as queue_module
 import signal
 import socket
@@ -39,7 +42,7 @@ import numpy as np
 import sounddevice as sd
 import torch
 import websockets
-import mlx_whisper
+
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -57,11 +60,11 @@ AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 
-# [P7-6C] Pipeline overlap: STT(N) runs concurrently with Translation(N-1).
-# This ThreadPoolExecutor is dedicated to the pipeline — separate from _io_pool
-# to avoid starving I/O tasks. max_workers=3 allows STT(N) + Translation_A(N-1)
-# + Translation_B(N-1) to run concurrently.
-_pipeline_pool = ThreadPoolExecutor(max_workers=3, thread_name_prefix="pipeline")
+# Pipeline thread pool for MLX inference. MUST be max_workers=1 because MLX's
+# Metal backend is not thread-safe for concurrent GPU operations — running
+# Whisper STT and TranslateGemma translation on separate threads causes SIGSEGV.
+# All MLX calls are serialized through this single worker thread.
+_pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
 
 # MLX model IDs (4-bit quantized, community-converted)
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
@@ -115,7 +118,7 @@ diag_marian_diverge = []   # [(chunk_id, marian_text, gemma_text, similarity)]
 diag_durations = []        # [(chunk_id, duration_s)]
 diag_low_confidence = []   # [(chunk_id, confidence, text)]
 partial_translations = {}  # utterance_id → last MarianMT translation
-partial_latencies = {}     # utterance_id → {"pt_ms": float, "ct2_ms": float}
+partial_latencies = {}     # utterance_id → {"pt_ms": float}
 
 
 def check_homophones(cid, text):
@@ -203,10 +206,6 @@ def print_diagnostics():
     print(f"    Process RAM: {snap['process_ram_gb']:.1f}GB")
     print(f"    System RAM:  {snap['ram_used_gb']:.1f}GB / {psutil.virtual_memory().total / (1024**3):.0f}GB ({snap['ram_percent']:.0f}%)")
     print(f"    CPU:         {snap['cpu_percent']:.0f}%")
-
-    if ct2_translator:
-        print(f"\n  MarianMT backends: CT2 int8 (76MB) vs PyTorch fp32 (298MB)")
-        print(f"    Per-chunk latencies in CSV columns: marian_pt_ms, marian_ct2_ms")
 
     # [P7-6C] Pipeline overlap statistics
     if _pipeline_total > 0:
@@ -315,7 +314,6 @@ mlx_b_model = None
 mlx_b_tokenizer = None
 marian_model = None
 marian_tokenizer = None
-ct2_translator = None
 
 # [P7-2B] Prompt caches: pre-computed KV caches for the fixed TranslateGemma
 # chat template prefix. Reused (via deep copy) on every translation call to
@@ -334,7 +332,7 @@ mlx_b_suffix_tokens = None
 
 def load_vad():
     """Load Silero VAD (~2MB)."""
-    print("[1/7] Loading Silero VAD...")
+    print("[1/6] Loading Silero VAD...")
     model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad')
     print("  VAD ready")
     return model, utils
@@ -342,6 +340,7 @@ def load_vad():
 
 def load_whisper():
     """Load Distil-Whisper via mlx-whisper (Apple Silicon native)."""
+    global mlx_whisper  # make available to process_partial / _run_stt
     import mlx_whisper
     import mlx.core as mx
     # [P7-4B] Increased from 100MB to 256MB — allows MLX to keep more intermediate
@@ -350,7 +349,7 @@ def load_whisper():
     mx.set_cache_limit(256 * 1024 * 1024)
 
     model_id = "mlx-community/distil-whisper-large-v3"
-    print(f"[2/7] Loading {model_id} (MLX)...")
+    print(f"[2/6] Loading {model_id} (MLX)...")
     t0 = time.time()
     # Warm up — first call downloads and compiles the model
     silence = np.zeros(16000, dtype=np.float32)
@@ -466,7 +465,7 @@ def load_translation_models(load_b=True):
     global mlx_a_prompt_cache, mlx_b_prompt_cache
     global mlx_a_suffix_tokens, mlx_b_suffix_tokens
 
-    print("[3/7] Loading TranslateGemma models (MLX 4-bit)...")
+    print("[3/6] Loading TranslateGemma models (MLX 4-bit)...")
     a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)")
 
     # [P7-2B] Build prompt cache for 4B model
@@ -491,7 +490,7 @@ def load_marian():
     """Load MarianMT (~298MB) for fast partial translations."""
     from transformers import MarianMTModel, MarianTokenizer
     model_id = "Helsinki-NLP/opus-mt-en-es"
-    print(f"[4/7] Loading {model_id} (MarianMT PyTorch)...")
+    print(f"[4/6] Loading {model_id} (MarianMT PyTorch)...")
     t0 = time.time()
     tokenizer = MarianTokenizer.from_pretrained(model_id)
     model = MarianMTModel.from_pretrained(model_id)
@@ -503,23 +502,6 @@ def load_marian():
     return model, tokenizer
 
 
-def load_ct2_marian():
-    """Load CTranslate2 int8 MarianMT (~76MB) for speed comparison."""
-    ct2_path = os.path.join(os.path.dirname(__file__), "ct2_opus_mt_en_es")
-    if not os.path.isdir(ct2_path):
-        print("  CT2 model not found, skipping (run ct2 converter first)")
-        return None
-    import ctranslate2
-    print(f"[5/6] Loading CTranslate2 MarianMT (int8)...")
-    t0 = time.time()
-    translator = ctranslate2.Translator(ct2_path, device="cpu", compute_type="int8")
-    # Warm up
-    from transformers import MarianTokenizer
-    tok = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-es")
-    warm_tokens = tok.convert_ids_to_tokens(tok.encode("Hello world."))
-    translator.translate_batch([warm_tokens], max_decoding_length=32)
-    print(f"  CT2 MarianMT ready ({time.time()-t0:.1f}s, 76MB int8)")
-    return translator
 
 
 # ---------------------------------------------------------------------------
@@ -842,19 +824,6 @@ def translate_marian(text):
     return result, latency_ms
 
 
-def translate_ct2_marian(text):
-    """Fast English→Spanish via CTranslate2 int8 MarianMT (~30-90ms)."""
-    if ct2_translator is None or marian_tokenizer is None:
-        return "(CT2 not loaded)", 0.0
-
-    t0 = time.perf_counter()
-    src_tokens = marian_tokenizer.convert_ids_to_tokens(marian_tokenizer.encode(text))
-    ct2_out = ct2_translator.translate_batch(
-        [src_tokens], max_decoding_length=128, beam_size=4,
-    )
-    result = marian_tokenizer.convert_tokens_to_string(ct2_out[0].hypotheses[0])
-    latency_ms = (time.perf_counter() - t0) * 1000
-    return result, latency_ms
 
 
 # ---------------------------------------------------------------------------
@@ -981,45 +950,45 @@ def _whisper_prompt():
 
 
 async def process_partial(audio_data, utterance_id):
-    """Fast partial: STT (~500ms) + MarianMT (~80ms). Italic in UI.
-    Runs both PyTorch and CT2 MarianMT in parallel for latency comparison.
-    """
+    """Fast partial: STT (~300ms) + MarianMT (~80ms). Italic in UI."""
     try:
-        t0 = time.perf_counter()
-        # [P7-1A] word_timestamps=False for partials — saves 100-200ms.
-        # Only the final pass needs word-level confidence data.
-        result = mlx_whisper.transcribe(
-            audio_data,
-            path_or_hf_repo=stt_pipe,
-            language="en",
-            condition_on_previous_text=False,
-            initial_prompt=_whisper_prompt(),
-            word_timestamps=False,
-        )
-        stt_latency = (time.perf_counter() - t0) * 1000
-        english = result["text"].strip()
+        loop = asyncio.get_event_loop()
 
-        if not english:
+        # ALL inference runs on _pipeline_pool (single thread) to prevent
+        # conflicts between MLX Metal and PyTorch running concurrently.
+        def _partial_all():
+            t0 = time.perf_counter()
+            result = mlx_whisper.transcribe(
+                audio_data,
+                path_or_hf_repo=stt_pipe,
+                language="en",
+                condition_on_previous_text=False,
+                initial_prompt=_whisper_prompt(),
+                word_timestamps=False,
+            )
+            stt_lat = (time.perf_counter() - t0) * 1000
+            english = result["text"].strip()
+            if not english:
+                return None
+
+            spanish, marian_lat = translate_marian(english)
+            return english, stt_lat, spanish, marian_lat
+
+        result = await loop.run_in_executor(_pipeline_pool, _partial_all)
+
+        if result is None:
             return
 
-        # Run both MarianMT backends in parallel for comparison
-        loop = asyncio.get_event_loop()
-        pt_future = loop.run_in_executor(None, translate_marian, english)
-        ct2_future = loop.run_in_executor(None, translate_ct2_marian, english)
-
-        spanish, marian_latency = await pt_future
-        ct2_spanish, ct2_latency = await ct2_future
+        english, stt_latency, spanish, marian_latency = result
         total = stt_latency + marian_latency
 
         # Store for Marian/Gemma divergence comparison and latency logging
         partial_translations[utterance_id] = spanish
         partial_latencies[utterance_id] = {
             "pt_ms": round(marian_latency, 1),
-            "ct2_ms": round(ct2_latency, 1) if ct2_translator else None,
         }
 
-        ct2_tag = f" | CT2:{ct2_latency:.0f}ms" if ct2_translator else ""
-        print(f"  partial ({total:.0f}ms, PT:{marian_latency:.0f}ms{ct2_tag}): {english} | {spanish}          ", end="\r")
+        print(f"  partial ({total:.0f}ms, Marian:{marian_latency:.0f}ms): {english} | {spanish}          ", end="\r")
         await broadcast({
             "type": "translation",
             "stage": "partial",
@@ -1030,7 +999,6 @@ async def process_partial(audio_data, utterance_id):
             "stt_latency_ms": round(stt_latency, 1),
             "latency_a_ms": round(marian_latency, 1),
             "marian_pt_ms": round(marian_latency, 1),
-            "marian_ct2_ms": round(ct2_latency, 1) if ct2_translator else None,
             "timestamp": datetime.now().isoformat(),
         })
 
@@ -1052,11 +1020,11 @@ async def process_partial(audio_data, utterance_id):
 #     3. When STT(N) completes → broadcast English → submit Translation(N)
 #     4. When Translation(N) completes → broadcast Spanish → log results
 #
-# The key overlap: STT(N) and Translation(N-1) run concurrently on the Metal
-# GPU. MLX models share the GPU but operate on different memory regions.
-# This hides ~650ms of translation latency behind ~300ms of STT time,
-# reducing effective per-chunk latency from ~950ms to ~650ms (or better
-# when STT and translation have similar durations).
+# NOTE: MLX Metal is NOT thread-safe for concurrent GPU operations.
+# The pipeline pool uses max_workers=1 to serialize all MLX calls.
+# The overlap benefit comes from the async architecture: while MLX
+# inference runs on the worker thread, the audio loop continues
+# capturing and the VAD thread keeps processing — no audio is dropped.
 #
 # The audio loop never blocks on STT or translation, so VAD and audio
 # capture continue uninterrupted.
@@ -1537,7 +1505,7 @@ def init_csv():
             "e2e_latency_ms", "stt_confidence", "tps_a", "tps_b",
             "qe_a", "qe_b",
             "utterance_dur", "homophone_flags", "bad_split", "marian_similarity",
-            "marian_pt_ms", "marian_ct2_ms",
+            "marian_pt_ms",
         ])
     print(f"  CSV: {CSV_PATH}")
 
@@ -1570,7 +1538,6 @@ def write_csv_row(data):
             "Y" if bad_sp else "",
             marian_sim,
             ml["pt_ms"] if ml else "",
-            ml["ct2_ms"] if ml and ml["ct2_ms"] is not None else "",
         ])
 
 
@@ -1731,7 +1698,7 @@ async def audio_loop():
                     if (len(speech_buffer) == 0 and silence_frames > 0
                             and _warmup_pending):
                         loop = asyncio.get_event_loop()
-                        loop.run_in_executor(None, warmup_translation_models)
+                        loop.run_in_executor(_pipeline_pool, warmup_translation_models)
 
         except sd.PortAudioError as e:
             print(f"\n  Mic error: {e} — retrying in 2s...", file=sys.stderr)
@@ -1760,7 +1727,7 @@ async def main_async(args):
     """Start WebSocket server and audio loop."""
     global vad_model, vad_utils, stt_pipe
     global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
-    global marian_model, marian_tokenizer, ct2_translator
+    global marian_model, marian_tokenizer
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
 
@@ -1782,12 +1749,11 @@ async def main_async(args):
     mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
         load_translation_models(load_b=args.run_ab)
     marian_model, marian_tokenizer = load_marian()
-    ct2_translator = load_ct2_marian()
 
     # Detect best microphone and auto-calibrate gain
     global MIC_DEVICE, MIC_GAIN
     if MIC_DEVICE is None:
-        print("[6/7] Detecting microphone...")
+        print("[5/6] Detecting microphone...")
         MIC_DEVICE, mic_rms = detect_macbook_mic()
         if mic_rms > 0 and MIC_GAIN == 1.0:
             # Auto-calibrate: scale signal to TARGET_RMS
@@ -1806,7 +1772,7 @@ async def main_async(args):
           f"{hw_profile['ram_total_gb']}GB RAM | "
           f"{hw_profile.get('gpu_model', '?')}")
 
-    print(f"[7/7] Starting servers...")
+    print(f"[6/6] Starting servers...")
     init_csv()
 
     # Start HTTP server for mobile access
