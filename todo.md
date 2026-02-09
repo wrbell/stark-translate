@@ -23,106 +23,128 @@
 - [x] dry_run_ab.py rewritten for MLX
 - [x] setup_models.py rewritten for MLX
 - [x] ab_display.html created
+- [x] Latency measurement system (STT/translation/E2E, p50/p95, tokens/sec)
+- [x] Confidence scoring (avg_logprob → green/yellow/red dots)
+- [x] Translation QE (length ratio + untranslated detection)
+- [x] Error handling (mic reconnect, WebSocket cleanup, silence skip)
+- [x] Profanity filter (removed "ass", "damn", "whore" — biblical terms)
+- [x] VAD fixed — Silero streaming API (`model(tensor, sr).item()`)
+- [x] WebSocket fixed — `difference_update()`, `ping_interval=None`
+- [x] Two-pass STT — fast partials (1s) + quality finals (on silence)
+- [x] MarianMT for partials (~80ms) + TranslateGemma for finals (~650ms)
+- [x] Audience display (side-by-side EN/ES, Calibri, fading context, fullscreen)
+- [x] A/B/C comparison display (Gemma 4B / MarianMT or 12B / Audience hybrid)
+- [x] MacBook Pro mic only (no external mic selection)
+- [x] Whisper theological prompt (sin, reign, bow, mediator, etc.)
+- [x] Previous-text context passed to Whisper for cross-chunk accuracy
+- [x] Default 4B only (`--ab` flag for both models)
+- [x] Parallel A/B translation via `run_in_executor`
+- [x] `generate` instead of `stream_generate` (eliminates callback overhead)
+- [x] Dynamic `max_tokens` based on input word count
+- [x] Automated diagnostics (homophones, bad splits, Marian divergence, durations)
+- [x] Per-chunk audio WAV saving for fine-tuning (`stark_data/live_sessions/`)
+- [x] Structured JSONL review queue with priority scoring
+- [x] Word-level timestamps + per-word confidence logging
+- [x] Segment metadata (compression_ratio, no_speech_prob, avg_logprob)
+- [x] Hallucination detection (compression_ratio > 2.4)
+- [x] Hardware profiling + per-chunk resource monitoring (CPU, RAM)
+- [x] CTranslate2 int8 MarianMT (76MB, 3.3x faster than PyTorch, identical output)
+- [x] Parallel PyTorch/CT2 MarianMT comparison in live testing (logged to CSV)
+- [~] Prompt caching — deferred (prefix ~30-40 tokens, <50ms savings)
+- [x] Mobile display — responsive phone/tablet view with model toggle + Spanish-only mode
+- [x] Mobile display profanity filter fixed (allow "ass", "damn", "whore" — biblical terms)
+- [x] Mobile display WebSocket auto-detect (connects via LAN, not just localhost)
+- [x] Audience display QR code overlay (click header → QR for phone URL)
+- [x] Audience display scroll history (all sentences kept, scrollable, auto-scroll with pause)
+- [x] Fullscreen toggle button on audience + A/B/C displays (bottom-right, auto-hide)
+- [x] HTTP static server in dry_run_ab.py (`--http-port 8080`) for phone/LAN access
+- [x] WebSocket binds 0.0.0.0 (phones can connect over LAN)
+- [x] All displays auto-detect WebSocket host (work over LAN, not just localhost)
+- [x] Theological glossary expanded to 229 terms (66 books, 31 proper names, theological concepts, liturgical terms, sermon phrases)
 
 ---
 
 ## IN PROGRESS
 
-### P0 — End-to-End Live Demo (Today)
+### P0 — Live Testing (Requires Running Sessions)
 
 - [ ] **Run full dry_run_ab.py live** — mic → STT → translate → browser display
-  - Verify mlx-whisper works with real mic audio
-  - Verify WebSocket → browser connection
-  - Verify both 4B and 12B running simultaneously
+  - Verify MarianMT partials + TranslateGemma finals working end-to-end
+  - Verify A/B/C display renders correctly
+  - Verify audio WAVs and diagnostics JSONL saving
   - Run 5+ min, 10+ utterances
-  - Review CSV output
+  - Review CSV output + diagnostics summary
 
-- [x] **Latency measurement system** — proper timing breakdown
-  - STT latency: time from audio chunk ready → text output
-  - Translation latency: time from English text → Spanish text (per model)
-  - End-to-end latency: audio chunk ready → WebSocket broadcast
-  - Log all timings to CSV and display in browser footer
-  - Token/sec reporting from MLX stream_generate
-  - Running p50/p95 percentile display in browser footer (per component)
+- [ ] **Tune VAD parameters** — need data from live sessions
+  - VAD_THRESHOLD (currently 0.3) — too low catches breaths, too high drops words
+  - SILENCE_TRIGGER (0.8s) — too short splits mid-sentence, too long delays output
+  - MAX_UTTERANCE (8s) — find sweet spot for Whisper context vs lag
 
-### P1 — Mac Pipeline Hardening ✓
+- [ ] **Expand Whisper prompt** — run 5-10 live sessions
+  - Review homophone flags in diagnostics summary
+  - Add every misrecognized theological word to WHISPER_PROMPT
+  - This list becomes the fine-tuning evaluation checklist
+  - Currently tracking: reign/rain, mediator/media, profit/prophet, alter/altar
 
-- [x] **Confidence scoring** — extract Whisper segment-level quality
-  - `avg_logprob` from mlx-whisper segments → 0-1 confidence score
-  - Displayed as green/yellow/red dot per chunk in browser
-  - Logged to CSV per chunk
+- [ ] **Tune sentence boundary splitting** — review bad_split flags in CSV
+  - Utterances ending with function words = mid-phrase cuts
+  - Adjust SILENCE_TRIGGER and MAX_UTTERANCE to find natural pauses
+  - Consider smarter boundary detection beyond simple silence gap
 
-- [x] **Translation quality estimation (QE)** — reference-free
-  - Real-time: length ratio + untranslated detection (in dry_run_ab.py)
-  - Offline: translation_qe.py with 3 tiers (lightweight, MarianMT back-translation, LaBSE)
-  - QE scores logged to CSV per chunk (qe_a, qe_b)
+- [ ] **Evaluate MarianMT vs TranslateGemma divergence** — review marian_similarity
+  - Identify systematic patterns where MarianMT misleads before Gemma corrects
+  - If certain phrase types consistently diverge, assess UX impact
 
-- [x] **Error handling** — graceful recovery
-  - Mic disconnect/reconnect (auto-retry with 2s backoff)
-  - WebSocket client drop (dead client cleanup in broadcast)
-  - Empty/silence audio → skip gracefully
-  - process_chunk wrapped in try/except
+- [ ] **Calibrate QE thresholds** — need qe_a/qe_b data from 5+ sessions
+  - Tune so flagged scores actually correlate with bad translations
+  - Consider adding CometKiwi as Tier 1 QE when ready
 
-- [x] **Streaming translation** — using mlx-lm's `stream_generate()`
-  - Token-by-token generation with generation_tps metrics
-  - Average tokens/sec displayed in browser footer
-  - Foundation ready for real-time partial display (future)
+- [ ] **Fix singing/hymns breaking VAD and STT**
+  - Singing causes VAD confusion and STT garbage
+  - Options: lower gain during music, inaSpeechSegmenter to detect & skip music,
+    or RMS + tonal content heuristic
 
-- [~] **Prompt caching** — deferred (prefix is only ~30-40 tokens, <50ms savings)
-  - The variable text is embedded in the JSON, so true prefix is small
-  - Not worth the complexity vs ~650ms total translation time
+### P1 — Physical Testing
+
+- [ ] **Test in actual church environment**
+  - Mic gain calibration in the room (PA system, HVAC, congregation)
+  - Projection display readability from pews
+  - Multiple speakers switching — does silence gap handle handoffs?
+  - Font size, fade timing, partial→final replacement feedback from users
+
+- [ ] **Test audience display readability with real users**
+  - Get feedback from non-English speakers
+  - Is 5 sentences of fading context right?
+  - How disorienting is italic→regular replacement?
+  - Side-by-side EN/ES vs stacked layout?
 
 ### P2 — Display & UX
 
-- [ ] **Projected display mode** — church-optimized layout
-  - Spanish top (large), English bottom (smaller)
-  - Black background, high contrast
-  - Configurable font sizes
-  - ProPresenter/PowerPoint integration research
+- [ ] **ProPresenter/PowerPoint integration research**
+  - Investigate NDI output, text overlay APIs, or MIDI control
+  - Alternative: OBS overlay via browser source
 
-- [ ] **Mobile display** — phone/tablet view
-  - Responsive layout for phone viewing
-  - QR code to connect
-  - Spanish-only mode option
+### P3 — Data Collection & Prep
 
-- [x] **Profanity word filter** — client-side regex filter for church display
-  - Blocks common profanity (ass, fuck, shit, etc.) — "hell" is allowed
-  - Replaces with asterisks of same length
-  - Applied to both English and Spanish panels
-
-- [ ] **Display polish**
-  - Smooth text transitions (CSS animations)
-  - Show confidence indicator (green/yellow/red per segment)
-  - Show translation speed comparison live
-  - Fullscreen toggle button (not just keyboard)
-  - Chunk history / scroll back
-
-### P3 — Data Collection & Prep (Windows)
-
-- [ ] **Download sermon audio** — yt-dlp from Stark Road YouTube
+- [ ] **Download sermon audio** — yt-dlp from Stark Road YouTube *(Mac or Windows)*
   - Target: 20-50 hours
   - Prefer soundboard recordings over room mics
   - Store in stark_data/raw/
 
-- [ ] **Run audio preprocessing pipeline**
+- [ ] **Run audio preprocessing pipeline** *(Windows — needs demucs GPU)*
   - preprocess_audio.py (10-step pipeline)
   - Output to stark_data/cleaned/
 
-- [ ] **Pseudo-label with Whisper large-v3**
+- [ ] **Pseudo-label with Whisper large-v3** *(Windows — needs CUDA)*
   - transcribe_church.py
   - Output JSON transcripts to stark_data/transcripts/
 
-- [ ] **Download Bible parallel corpus**
+- [ ] **Download Bible parallel corpus** *(Mac or Windows)*
   - prepare_bible_corpus.py
   - ~155K verse pairs from scrollmapper/BibleNLP
   - Output to bible_data/aligned/
 
-- [ ] **Build theological glossary**
-  - build_glossary.py
-  - ~200-500 terms with soft constraints
-  - Output to bible_data/glossary/
-
-- [ ] **Quality assessment baseline**
+- [ ] **Quality assessment baseline** *(Windows)*
   - assess_quality.py
   - Sample 50-100 segments
   - Manual transcription for WER baseline
@@ -148,7 +170,7 @@
   - evaluate_translation.py
   - SacreBLEU, chrF++, COMET
   - Per-genre breakdown (narrative, poetry, epistles, etc.)
-  - Theological term spot-check
+  - Theological term spot-check against 229-term glossary
 
 - [ ] **LoRA adapter transfer**
   - Export from Windows → Mac
@@ -170,6 +192,17 @@
 
 ### P6 — Future Features
 
+- [ ] **Speaker diarization** — tag which speaker is talking
+  - pyannote-audio with min_speakers=2, max_speakers=2
+  - Store speaker labels in diagnostics JSONL
+  - Display speaker name alongside translation
+
+- [ ] **Speaker identification** — who is speaking on a panel of 8
+  - Speaker enrollment: record 30s samples → embeddings
+  - Real-time speaker ID: compare live embedding vs enrolled
+  - Support 2-8 speakers in panel discussions
+  - Persistent profiles in `stark_data/speakers/`
+
 - [ ] **Post-sermon 5-sentence summary**
   - Full transcript → Gemma 3 4B → structured summary
   - Per-speaker summary (requires diarization)
@@ -182,73 +215,66 @@
   - TranslateGemma supports 36 languages
   - French, Portuguese, Chinese for broader outreach
 
-- [ ] **Speaker identification** — who is speaking on a panel of 8
-  - `pyannote-audio` speaker diarization (segment → speaker cluster)
-  - Speaker enrollment: record 30s samples per person → speaker embeddings
-  - Real-time speaker ID: compare live embedding vs enrolled speakers
-  - Display speaker name alongside translation (e.g., "Pastor Jim: ...")
-  - Support 2-8 speakers in panel discussions
-  - Persistent speaker profiles stored in `stark_data/speakers/`
-  - Could use `speechbrain` or `resemblyzer` for lightweight embeddings on Mac
+- [ ] **Hardware portability** — port to church PCs (Windows/Intel)
+  - MLX → CTranslate2/ONNX for non-Apple hardware
+  - Models and fine-tuning are portable, runtime changes
+  - Use hardware_*.json + per-chunk resource logs to spec requirements
+  - 4B fits in 2.5GB RAM (most PCs), 12B needs 16GB+
+  - MarianMT (298MB) runs anywhere
 
 ### P7 — Latency Reduction Roadmap
 
-- [ ] **Parallel A/B translation** — run 4B and 12B simultaneously
-  - Currently sequential (~650ms + ~1400ms = ~2050ms)
-  - Use `asyncio.gather()` with thread pool or multiprocessing
-  - MLX supports concurrent model inference on Apple Silicon
-  - Target: E2E ~1500ms (limited by slower model)
-
-- [ ] **Shorter chunk duration** — reduce from 3s to 1.5-2s
-  - Faster time-to-first-output for live speech
-  - Trade-off: shorter context → slightly lower STT accuracy
-  - Test with `--chunk-duration 1.5`
-
-- [ ] **VAD-triggered instant processing** — process on silence gap, not timer
-  - Current: accumulate 3s of speech, then process
-  - Better: start processing as soon as speaker pauses (0.3-0.5s silence)
-  - Already partially implemented (silence_frames threshold)
-  - Tune max_silence_frames lower for faster trigger
+- [x] **Parallel A/B translation** — `run_in_executor` for simultaneous inference
+- [x] **Shorter chunk duration** — 2s chunks + two-pass partial/final architecture
+- [x] **VAD-triggered instant processing** — process on silence gap (0.8s)
+- [x] **MarianMT for fast partials** — ~80ms vs ~650ms TranslateGemma
 
 - [ ] **Speculative decoding** — use 4B as draft model for 12B
-  - mlx_lm supports `draft_model` parameter in stream_generate()
-  - 4B generates candidate tokens, 12B verifies in batch
-  - Could speed up 12B by 2-3x with ~90% acceptance rate
-  - Target: 12B latency from ~1400ms → ~600-800ms
+  - `mlx_lm.generate` supports `draft_model` parameter
+  - Both models already loaded in A/B mode — zero additional memory
+  - Expected 1.5-3x speedup on 12B (1400ms → 600-900ms)
+  - Zero quality degradation (rejected drafts replaced by target model tokens)
+  - Tune `num_draft_tokens` (4-16, start at 8)
+  - **Implementation:** modify `translate_mlx()` to pass `draft_model=mlx_a_model` when translating with 12B
+
+- [ ] **Pre-warm models during silence** — dummy forward pass to keep Metal GPU warm
+  - Fire a 1-token forward pass when silence detected (>2s gap)
+  - Prevents ~50-150ms cold-start latency on first token after idle
+  - Add to `audio_loop()` during silence gap detection
+  - Low complexity, high impact for perceived responsiveness
+
+- [~] **KV cache quantization** — `kv_bits=4` — deferred
+  - Not beneficial for short translations (10-50 tokens)
+  - Would help for long-context features (summarization, 3K+ tokens)
+  - Revisit when post-sermon summary feature is implemented
 
 - [ ] **Smaller/faster translation model exploration**
-  - Test `mlx-community/Qwen2.5-3B-Instruct-4bit` with translation prompt
-  - Test `mlx-community/gemma-2-2b-it-4bit` as ultra-light translator
-  - MarianMT (`Helsinki-NLP/opus-mt-en-es`, 298MB) as fallback — ~50ms/translation
+  - Test Qwen2.5-3B, gemma-2-2b as ultra-light translators
   - Benchmark quality vs TranslateGemma on theological test set
 
-- [ ] **KV cache quantization** — reduce memory, allow larger batches
-  - `kv_bits=4` in stream_generate() — ~75% cache memory reduction
-  - Enables larger prefill_step_size for faster prompt processing
-  - May allow fitting additional models in memory
-
 - [ ] **Whisper model optimization**
-  - Test `mlx-community/whisper-tiny.en` for speed (~50ms) vs accuracy trade-off
-  - Test `mlx-community/whisper-small.en` as middle ground
-  - Streaming Whisper: process audio in 1s overlapping windows
-  - Word-level timestamps: get partial results before full chunk completes
-
-- [ ] **WebSocket batching** — reduce browser update overhead
-  - Batch multiple small updates into single WebSocket frame
-  - Use requestAnimationFrame on client for smooth rendering
-  - Reduce DOM operations per update
-
-- [ ] **Pre-warm models between chunks** — keep GPU hot
-  - Run a dummy forward pass during silence to prevent GPU clock throttling
-  - MLX lazy evaluation: ensure graph is compiled before speech arrives
+  - Test whisper-tiny.en (~50ms) vs whisper-small.en as speed/accuracy trade-offs
+  - Streaming Whisper: process audio in overlapping windows
 
 ---
 
 ## Architecture Reference
 
 ```
-Mac Inference (MLX):
-  Mic → Silero VAD (PyTorch) → mlx-whisper STT → TranslateGemma 4B+12B (MLX 4-bit) → WebSocket → Browser
+Mac Inference (MLX) — Two-Pass Architecture:
+  Mic → Silero VAD → [Partial: mlx-whisper STT + MarianMT (~580ms, italic)]
+                    → [Final: mlx-whisper STT + TranslateGemma 4B (~1.3s, regular)]
+                    → WebSocket → Browser (A/B/C display + audience display + mobile)
+
+  Serving:
+    → WebSocket on 0.0.0.0:8765 (all displays connect here)
+    → HTTP server on 0.0.0.0:8080 (serves HTML to phones over LAN)
+
+  Per-chunk data saved:
+    → Audio WAV (stark_data/live_sessions/)
+    → Diagnostics JSONL (metrics/) with review priority scoring
+    → CSV metrics (metrics/)
+    → Hardware profile (metrics/)
 
 Windows Training (CUDA):
   Raw audio → 10-step preprocessing → Whisper large-v3 pseudo-labels → LoRA fine-tune
@@ -259,6 +285,9 @@ Windows Training (CUDA):
 |-----------|-------|-----------|--------|
 | VAD | Silero VAD | PyTorch | ~2 MB |
 | STT | distil-whisper-large-v3 | mlx-whisper | ~1.5 GB |
+| Translate (fast) | MarianMT opus-mt-en-es | PyTorch fp32 | ~300 MB |
+| Translate (fast) | MarianMT opus-mt-en-es | CT2 int8 | ~76 MB |
 | Translate A | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB |
 | Translate B | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB |
-| **Total** | | | **~11 GB / 18 GB** |
+| **Total (4B only)** | | | **~4.3 GB / 18 GB** |
+| **Total (A/B)** | | | **~11.3 GB / 18 GB** |

@@ -23,8 +23,10 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    cursor: none;
   }
+
+  :fullscreen { cursor: none; }
+  :fullscreen .fs-btn { display: none; }
 
   /* Header — minimal */
   .header {
@@ -64,9 +66,9 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     padding: 32px 40px 40px;
     overflow: hidden;
+    min-height: 0;
   }
 
   .column-en {
@@ -86,7 +88,14 @@
   .text-area {
     font-size: 28px;
     line-height: 1.5;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
+
+  .text-area::-webkit-scrollbar { width: 4px; }
+  .text-area::-webkit-scrollbar-track { background: transparent; }
+  .text-area::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 2px; }
 
   .sentence {
     display: inline;
@@ -104,8 +113,73 @@
   .sentence.age-3 { opacity: 0.35; }
   .sentence.age-4 { opacity: 0.2; }
 
-  /* Fullscreen */
-  :fullscreen { background: var(--bg); }
+  /* Fullscreen button */
+  .fs-btn {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  body:hover .fs-btn,
+  .fs-btn:focus { opacity: 0.7; }
+  .fs-btn:hover { opacity: 1; }
+
+  /* QR code overlay */
+  .qr-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-overlay.visible { display: flex; }
+
+  .qr-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+  }
+  .qr-card h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 16px;
+  }
+  .qr-card canvas {
+    display: block;
+    margin: 0 auto 16px;
+  }
+  .qr-url {
+    font-family: monospace;
+    font-size: 14px;
+    color: #555;
+    word-break: break-all;
+    padding: 8px 12px;
+    background: #f0f0f0;
+    border-radius: 8px;
+  }
+
+  .header { cursor: pointer; }
 
   /* Responsive */
   @media (min-width: 1400px) {
@@ -137,10 +211,21 @@
   </div>
 </div>
 
+<button class="fs-btn" id="fsBtn" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
+
+<div class="qr-overlay" id="qrOverlay">
+  <div class="qr-card">
+    <h3>Scan to view on your phone</h3>
+    <canvas id="qrCanvas"></canvas>
+    <div class="qr-url" id="qrUrl"></div>
+  </div>
+</div>
+
 <script>
 (function() {
-  const WS_URL = 'ws://localhost:8765';
-  const MAX_SENTENCES = 5;
+  const wsHost = location.hostname || 'localhost';
+  const WS_URL = 'ws://' + wsHost + ':8765';
+  const FADE_COUNT = 5;  // number of recent sentences to apply fading to
   const RECONNECT_MS = 2000;
 
   const dot = document.getElementById('dot');
@@ -148,25 +233,45 @@
   const spanishEl = document.getElementById('spanish');
   const englishEl = document.getElementById('english');
 
-  const BLOCKED = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|motherfucker|piss|shit|slut|whore)\b/gi;
+  // Note: "ass" (donkey), "damn" (damnation), "whore" (KJV) removed — legitimate biblical terms
+  const BLOCKED = /\b(asshole|bitch|bastard|crap|cunt|dick|fuck|fucking|motherfucker|piss|shit|slut)\b/gi;
   function filter(t) { return t ? t.replace(BLOCKED, m => '*'.repeat(m.length)) : ''; }
 
   let sentences = [];
+  let autoScrollEn = true;
+  let autoScrollEs = true;
+
+  // Pause auto-scroll when user scrolls up, resume at bottom
+  function setupAutoScroll(el, setter) {
+    el.addEventListener('scroll', () => {
+      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+      setter(atBottom);
+    });
+  }
+  setupAutoScroll(englishEl, (v) => { autoScrollEn = v; });
+  setupAutoScroll(spanishEl, (v) => { autoScrollEs = v; });
 
   function render() {
-    const visible = sentences.slice(-MAX_SENTENCES);
+    const total = sentences.length;
 
-    englishEl.innerHTML = visible.map((s, i) => {
-      const age = visible.length - 1 - i;
-      const cls = s.partial ? 'sentence partial' : 'sentence age-' + Math.min(age, 4);
+    englishEl.innerHTML = sentences.map((s, i) => {
+      const age = total - 1 - i;
+      const cls = s.partial ? 'sentence partial'
+        : age < FADE_COUNT ? 'sentence age-' + Math.min(age, 4)
+        : 'sentence age-4';
       return '<span class="' + cls + '">' + esc(s.english) + ' </span>';
     }).join('');
 
-    spanishEl.innerHTML = visible.map((s, i) => {
-      const age = visible.length - 1 - i;
-      const cls = s.partial ? 'sentence partial' : 'sentence age-' + Math.min(age, 4);
+    spanishEl.innerHTML = sentences.map((s, i) => {
+      const age = total - 1 - i;
+      const cls = s.partial ? 'sentence partial'
+        : age < FADE_COUNT ? 'sentence age-' + Math.min(age, 4)
+        : 'sentence age-4';
       return '<span class="' + cls + '">' + esc(s.spanish) + ' </span>';
     }).join('');
+
+    if (autoScrollEn) englishEl.scrollTop = englishEl.scrollHeight;
+    if (autoScrollEs) spanishEl.scrollTop = spanishEl.scrollHeight;
   }
 
   function esc(str) {
@@ -219,8 +324,9 @@
           sentences.push({ id: data.chunk_id, english: en, spanish: es, partial: false });
         }
 
-        if (sentences.length > MAX_SENTENCES * 2) {
-          sentences = sentences.slice(-MAX_SENTENCES * 2);
+        // Keep all sentences for scroll history (capped at 200 to limit memory)
+        if (sentences.length > 200) {
+          sentences = sentences.slice(-200);
         }
       }
 
@@ -228,19 +334,316 @@
     };
   }
 
-  document.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    }
-  });
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }
+
+  document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'F11' || (e.metaKey && e.shiftKey && e.key === 'f')) {
       e.preventDefault();
-      if (document.fullscreenElement) document.exitFullscreen();
-      else document.documentElement.requestFullscreen();
+      toggleFullscreen();
     }
   });
+
+  // ── QR Code overlay (click header to show) ──
+  (function() {
+    const overlay = document.getElementById('qrOverlay');
+    const header = document.querySelector('.header');
+    const qrUrl = document.getElementById('qrUrl');
+    const qrCanvas = document.getElementById('qrCanvas');
+
+    header.addEventListener('click', (e) => {
+      // Don't trigger if clicking status elements
+      const mobileUrl = location.protocol + '//' + location.hostname + ':' + (location.port || '8080') + '/mobile_display.html';
+      qrUrl.textContent = mobileUrl;
+      drawQR(qrCanvas, mobileUrl, 200);
+      overlay.classList.add('visible');
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('visible');
+    });
+
+    // Minimal QR Code generator (alphanumeric, version auto-select)
+    // Encodes text onto a canvas. Supports URLs up to ~150 chars.
+    function drawQR(canvas, text, size) {
+      // Use a simple QR encoding via the qr-creator pattern:
+      // For offline reliability, we generate a QR data URL via a minimal encoder.
+      // This uses error correction level L for maximum data capacity.
+      const modules = generateQR(text);
+      const n = modules.length;
+      const cellSize = Math.floor(size / n);
+      canvas.width = cellSize * n;
+      canvas.height = cellSize * n;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000';
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (modules[r][c]) {
+            ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+          }
+        }
+      }
+    }
+
+    // Minimal QR Code encoder (byte mode, ECC-L, versions 1-10)
+    function generateQR(text) {
+      // Encode as byte mode
+      const data = [];
+      for (let i = 0; i < text.length; i++) data.push(text.charCodeAt(i));
+
+      // Version selection (byte mode, ECC-L capacities)
+      const caps = [0,17,32,53,78,106,134,154,192,230,271];
+      let ver = 1;
+      for (let v = 1; v <= 10; v++) { if (caps[v] >= data.length) { ver = v; break; } }
+      const size = ver * 4 + 17;
+
+      // Build data codewords
+      const totalBits = getDataBits(ver);
+      const bits = [];
+      function pushBits(val, len) { for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); }
+
+      pushBits(0b0100, 4); // byte mode
+      pushBits(data.length, ver >= 10 ? 16 : 8);
+      data.forEach(b => pushBits(b, 8));
+      pushBits(0, Math.min(4, totalBits - bits.length)); // terminator
+      while (bits.length % 8 !== 0) bits.push(0);
+      while (bits.length < totalBits) {
+        pushBits(0xEC, 8);
+        if (bits.length < totalBits) pushBits(0x11, 8);
+      }
+
+      // Convert to bytes
+      const codewords = [];
+      for (let i = 0; i < bits.length; i += 8) {
+        let b = 0;
+        for (let j = 0; j < 8; j++) b = (b << 1) | (bits[i + j] || 0);
+        codewords.push(b);
+      }
+
+      // Add error correction
+      const ecInfo = getECInfo(ver);
+      const allCodewords = addErrorCorrection(codewords, ecInfo);
+
+      // Create module grid
+      const grid = Array.from({length: size}, () => Array(size).fill(null));
+      const reserved = Array.from({length: size}, () => Array(size).fill(false));
+
+      // Place function patterns
+      placeFinder(grid, reserved, 0, 0);
+      placeFinder(grid, reserved, 0, size - 7);
+      placeFinder(grid, reserved, size - 7, 0);
+
+      // Timing patterns
+      for (let i = 8; i < size - 8; i++) {
+        grid[6][i] = i % 2 === 0 ? 1 : 0;
+        grid[i][6] = i % 2 === 0 ? 1 : 0;
+        reserved[6][i] = true;
+        reserved[i][6] = true;
+      }
+
+      // Alignment patterns (ver >= 2)
+      if (ver >= 2) {
+        const positions = getAlignmentPositions(ver);
+        for (const r of positions) {
+          for (const c of positions) {
+            if (reserved[r] && reserved[r][c]) continue;
+            placeAlignment(grid, reserved, r, c);
+          }
+        }
+      }
+
+      // Reserve format info areas
+      for (let i = 0; i < 8; i++) {
+        reserved[8][i] = true; reserved[i][8] = true;
+        reserved[8][size - 1 - i] = true; reserved[size - 1 - i][8] = true;
+      }
+      reserved[8][8] = true;
+      grid[size - 8][8] = 1; reserved[size - 8][8] = true; // dark module
+
+      // Place data bits
+      let bitIdx = 0;
+      const dataBits = [];
+      allCodewords.forEach(b => { for (let i = 7; i >= 0; i--) dataBits.push((b >> i) & 1); });
+
+      let upward = true;
+      for (let col = size - 1; col >= 1; col -= 2) {
+        if (col === 6) col = 5; // skip timing column
+        const rows = upward ? range(size - 1, -1) : range(0, size);
+        for (const row of rows) {
+          for (const c of [col, col - 1]) {
+            if (c < 0 || reserved[row][c]) continue;
+            grid[row][c] = bitIdx < dataBits.length ? dataBits[bitIdx++] : 0;
+          }
+        }
+        upward = !upward;
+      }
+
+      // Apply mask 0 (checkerboard) and format info
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          if (!reserved[r][c] && grid[r][c] !== null) {
+            if ((r + c) % 2 === 0) grid[r][c] ^= 1;
+          }
+        }
+      }
+
+      // Write format info (ECC-L = 01, mask 0 = 000 → format bits)
+      const formatBits = getFormatBits(0, 1); // mask 0, ECC-L
+      placeFormatBits(grid, size, formatBits);
+
+      // Fill any remaining nulls
+      for (let r = 0; r < size; r++)
+        for (let c = 0; c < size; c++)
+          if (grid[r][c] === null) grid[r][c] = 0;
+
+      return grid;
+    }
+
+    function range(start, end) {
+      const arr = [];
+      if (start > end) { for (let i = start; i > end; i--) arr.push(i); }
+      else { for (let i = start; i < end; i++) arr.push(i); }
+      return arr;
+    }
+
+    function placeFinder(grid, reserved, row, col) {
+      for (let r = -1; r <= 7; r++) {
+        for (let c = -1; c <= 7; c++) {
+          const rr = row + r, cc = col + c;
+          if (rr < 0 || rr >= grid.length || cc < 0 || cc >= grid.length) continue;
+          const inOuter = r === 0 || r === 6 || c === 0 || c === 6;
+          const inInner = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+          grid[rr][cc] = (inOuter || inInner) && r >= 0 && r <= 6 && c >= 0 && c <= 6 ? 1 : 0;
+          reserved[rr][cc] = true;
+        }
+      }
+    }
+
+    function placeAlignment(grid, reserved, centerR, centerC) {
+      for (let r = -2; r <= 2; r++) {
+        for (let c = -2; c <= 2; c++) {
+          const rr = centerR + r, cc = centerC + c;
+          if (rr < 0 || rr >= grid.length || cc < 0 || cc >= grid.length) continue;
+          grid[rr][cc] = (Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0)) ? 1 : 0;
+          reserved[rr][cc] = true;
+        }
+      }
+    }
+
+    function getAlignmentPositions(ver) {
+      const table = {2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34],7:[6,22,38],8:[6,24,42],9:[6,26,46],10:[6,28,50]};
+      return table[ver] || [];
+    }
+
+    function getDataBits(ver) {
+      // Total data codewords * 8 for ECC-L
+      const table = {1:152,2:272,3:440,4:640,5:864,6:1088,7:1248,8:1552,9:1856,10:2192};
+      return table[ver] || 152;
+    }
+
+    function getECInfo(ver) {
+      // {dataCodewords, ecCodewordsPerBlock, numBlocks}
+      const table = {
+        1:{dc:19,ec:7,b:1},2:{dc:34,ec:10,b:1},3:{dc:55,ec:15,b:1},
+        4:{dc:80,ec:20,b:1},5:{dc:108,ec:26,b:1},6:{dc:136,ec:18,b:2},
+        7:{dc:156,ec:20,b:2},8:{dc:194,ec:24,b:2},9:{dc:232,ec:30,b:2},
+        10:{dc:274,ec:18,b:2}
+      };
+      return table[ver] || table[1];
+    }
+
+    function addErrorCorrection(data, info) {
+      const {dc, ec, b} = info;
+      const blockSize = Math.floor(dc / b);
+      const blocks = [];
+      let offset = 0;
+      for (let i = 0; i < b; i++) {
+        const bs = i < b - (dc % b) ? blockSize : blockSize + 1;
+        blocks.push(data.slice(offset, offset + bs));
+        offset += bs;
+      }
+      const ecBlocks = blocks.map(block => rsEncode(block, ec));
+
+      // Interleave data
+      const result = [];
+      const maxData = Math.max(...blocks.map(b => b.length));
+      for (let i = 0; i < maxData; i++)
+        for (const block of blocks)
+          if (i < block.length) result.push(block[i]);
+      // Interleave EC
+      for (let i = 0; i < ec; i++)
+        for (const ecBlock of ecBlocks)
+          if (i < ecBlock.length) result.push(ecBlock[i]);
+
+      return result;
+    }
+
+    // Reed-Solomon encoder over GF(256)
+    function rsEncode(data, numEC) {
+      const gfExp = new Uint8Array(512);
+      const gfLog = new Uint8Array(256);
+      let x = 1;
+      for (let i = 0; i < 255; i++) {
+        gfExp[i] = x; gfLog[x] = i;
+        x = (x << 1) ^ (x >= 128 ? 0x11d : 0);
+      }
+      for (let i = 255; i < 512; i++) gfExp[i] = gfExp[i - 255];
+
+      function gfMul(a, b) { return a === 0 || b === 0 ? 0 : gfExp[gfLog[a] + gfLog[b]]; }
+
+      // Build generator polynomial
+      let gen = [1];
+      for (let i = 0; i < numEC; i++) {
+        const newGen = new Array(gen.length + 1).fill(0);
+        for (let j = 0; j < gen.length; j++) {
+          newGen[j] ^= gen[j];
+          newGen[j + 1] ^= gfMul(gen[j], gfExp[i]);
+        }
+        gen = newGen;
+      }
+
+      const msg = new Array(data.length + numEC).fill(0);
+      for (let i = 0; i < data.length; i++) msg[i] = data[i];
+
+      for (let i = 0; i < data.length; i++) {
+        const coef = msg[i];
+        if (coef !== 0) {
+          for (let j = 1; j < gen.length; j++) {
+            msg[i + j] ^= gfMul(gen[j], coef);
+          }
+        }
+      }
+
+      return msg.slice(data.length);
+    }
+
+    function getFormatBits(mask, eccLevel) {
+      const formatValue = (eccLevel << 3) | mask;
+      let rem = formatValue;
+      for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >> 9) ? 0x537 : 0);
+      const bits = ((formatValue << 10) | rem) ^ 0x5412;
+      const result = [];
+      for (let i = 14; i >= 0; i--) result.push((bits >> i) & 1);
+      return result;
+    }
+
+    function placeFormatBits(grid, size, bits) {
+      // Around top-left finder
+      const pos1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+      // Around other finders
+      const pos2 = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+      for (let i = 0; i < 15; i++) {
+        grid[pos1[i][0]][pos1[i][1]] = bits[i];
+        grid[pos2[i][0]][pos2[i][1]] = bits[i];
+      }
+    }
+  })();
 
   connect();
 })();

@@ -464,7 +464,8 @@
 (function() {
   'use strict';
 
-  const WS_URL = 'ws://localhost:8765';
+  const wsHost = location.hostname || 'localhost';
+  const WS_URL = 'ws://' + wsHost + ':8765';
   const RECONNECT_MS = 2000;
   const MAX_CHUNKS = 15;
 
@@ -488,7 +489,8 @@
 
   // ── Profanity filter ──
   // Allow "hell" — block common profanity, replace with asterisks
-  const PROFANITY_RE = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|fucked|motherfucker|piss|shit|shitty|slut|whore)\b/gi;
+  // Note: "ass" (donkey), "damn" (damnation), "whore" (KJV) removed — legitimate biblical terms
+  const PROFANITY_RE = /\b(asshole|bitch|bastard|crap|cunt|dick|fuck|fucking|fucked|motherfucker|piss|shit|shitty|slut)\b/gi;
 
   function filterText(text) {
     return text.replace(PROFANITY_RE, function(m) {

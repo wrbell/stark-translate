@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A/B Bilingual STT — Stark Road Gospel Hall</title>
+<title>A/B/C Bilingual STT — Stark Road Gospel Hall</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -17,6 +17,8 @@
     --green-dim: #1a3a2a;
     --blue: #58a6ff;
     --blue-dim: #1a2a3a;
+    --purple: #bc8cff;
+    --purple-dim: #2a1a3a;
     --red: #f85149;
     --yellow: #d29922;
   }
@@ -32,7 +34,6 @@
     user-select: none;
   }
 
-  /* Header */
   .header {
     display: flex;
     justify-content: space-between;
@@ -44,10 +45,7 @@
     flex-shrink: 0;
   }
 
-  .header .title {
-    font-weight: 600;
-    font-size: 14px;
-  }
+  .header .title { font-weight: 600; font-size: 14px; }
 
   .status {
     display: flex;
@@ -56,19 +54,17 @@
   }
 
   .status-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--red);
     transition: background 0.3s;
   }
-
   .status-dot.connected { background: var(--green); }
 
-  /* Grid */
+  /* 3-column × 2-row grid */
   .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     flex: 1;
     gap: 1px;
@@ -76,16 +72,16 @@
     min-height: 0;
   }
 
-  .quadrant {
+  .cell {
     background: var(--bg);
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
 
-  .quadrant-header {
-    padding: 8px 16px;
-    font-size: 12px;
+  .cell-header {
+    padding: 6px 12px;
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -95,46 +91,46 @@
     align-items: center;
   }
 
-  .quadrant-header .latency {
+  .cell-header .latency {
     font-weight: 400;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-dim);
   }
 
-  .q-blue .quadrant-header { background: var(--blue-dim); color: var(--blue); }
-  .q-green .quadrant-header { background: var(--green-dim); color: var(--green); }
+  .q-green .cell-header { background: var(--green-dim); color: var(--green); }
+  .q-blue .cell-header { background: var(--blue-dim); color: var(--blue); }
+  .q-purple .cell-header { background: var(--purple-dim); color: var(--purple); }
 
-  .quadrant-content {
+  .cell-content {
     flex: 1;
     overflow-y: auto;
-    padding: 12px 16px;
-    font-size: 20px;
+    padding: 8px 12px;
+    font-size: 17px;
     line-height: 1.5;
     scroll-behavior: smooth;
   }
 
-  .quadrant-content::-webkit-scrollbar { width: 4px; }
-  .quadrant-content::-webkit-scrollbar-track { background: transparent; }
-  .quadrant-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .cell-content::-webkit-scrollbar { width: 4px; }
+  .cell-content::-webkit-scrollbar-track { background: transparent; }
+  .cell-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
   .chunk {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     opacity: 0;
     animation: fadeIn 0.4s ease forwards;
   }
 
   .chunk .chunk-num {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-dim);
-    margin-right: 6px;
+    margin-right: 4px;
   }
 
   .chunk .confidence-dot {
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
-    margin-right: 4px;
+    margin-right: 3px;
     vertical-align: middle;
   }
 
@@ -149,12 +145,11 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Footer */
   .footer {
-    padding: 6px 16px;
+    padding: 5px 12px;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-dim);
     display: flex;
     flex-direction: column;
@@ -167,37 +162,57 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 4px 12px;
+    gap: 3px 10px;
   }
 
   .footer .stats {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
   }
 
   .footer .stat-val { color: var(--text); font-weight: 600; }
   .footer .green-val { color: var(--green); }
   .footer .blue-val { color: var(--blue); }
+  .footer .purple-val { color: var(--purple); }
 
-  .footer .hint {
-    font-size: 10px;
-    color: var(--text-dim);
-  }
+  .footer .hint { font-size: 9px; color: var(--text-dim); }
+  .footer .pct-label { font-size: 9px; color: var(--text-dim); }
 
-  .footer .pct-label {
-    font-size: 10px;
-    color: var(--text-dim);
-  }
-
-  /* Fullscreen */
   :fullscreen { background: var(--bg); }
+  :fullscreen .fs-btn { display: none; }
+
+  .fs-btn {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  body:hover .fs-btn,
+  .fs-btn:focus { opacity: 0.7; }
+  .fs-btn:hover { opacity: 1; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <span class="title">A/B Bilingual STT — Stark Road Gospel Hall</span>
+  <span class="title">A/B/C Bilingual STT — Stark Road Gospel Hall</span>
   <div class="status">
     <span class="status-dot" id="statusDot"></span>
     <span id="statusText">Disconnected</span>
@@ -205,40 +220,50 @@
 </div>
 
 <div class="grid">
-  <!-- Top-left: B (12B) English -->
-  <div class="quadrant q-blue">
-    <div class="quadrant-header">
-      <span>B (12B) — English</span>
-      <span class="latency" id="latB">—</span>
-    </div>
-    <div class="quadrant-content" id="b-en"></div>
-  </div>
-
-  <!-- Top-right: A (4B) English -->
-  <div class="quadrant q-green">
-    <div class="quadrant-header">
-      <span>A (4B) — English</span>
+  <!-- Row 1: English -->
+  <div class="cell q-green">
+    <div class="cell-header">
+      <span id="labelA">A — English</span>
       <span class="latency" id="latA">—</span>
     </div>
-    <div class="quadrant-content" id="a-en"></div>
+    <div class="cell-content" id="a-en"></div>
   </div>
-
-  <!-- Bottom-left: B (12B) Spanish -->
-  <div class="quadrant q-blue">
-    <div class="quadrant-header">
-      <span>B (12B) — Español</span>
-      <span class="latency" id="latBes">—</span>
+  <div class="cell q-blue">
+    <div class="cell-header">
+      <span id="labelB">B — English</span>
+      <span class="latency" id="latB">—</span>
     </div>
-    <div class="quadrant-content" id="b-es"></div>
+    <div class="cell-content" id="b-en"></div>
+  </div>
+  <div class="cell q-purple">
+    <div class="cell-header">
+      <span>C (Audience) — English</span>
+      <span class="latency" id="latC">—</span>
+    </div>
+    <div class="cell-content" id="c-en"></div>
   </div>
 
-  <!-- Bottom-right: A (4B) Spanish -->
-  <div class="quadrant q-green">
-    <div class="quadrant-header">
-      <span>A (4B) — Español</span>
+  <!-- Row 2: Spanish -->
+  <div class="cell q-green">
+    <div class="cell-header">
+      <span id="labelAes">A — Español</span>
       <span class="latency" id="latAes">—</span>
     </div>
-    <div class="quadrant-content" id="a-es"></div>
+    <div class="cell-content" id="a-es"></div>
+  </div>
+  <div class="cell q-blue">
+    <div class="cell-header">
+      <span id="labelBes">B — Español</span>
+      <span class="latency" id="latBes">—</span>
+    </div>
+    <div class="cell-content" id="b-es"></div>
+  </div>
+  <div class="cell q-purple">
+    <div class="cell-header">
+      <span>C (Audience) — Español</span>
+      <span class="latency" id="latCes">—</span>
+    </div>
+    <div class="cell-content" id="c-es"></div>
   </div>
 </div>
 
@@ -246,11 +271,11 @@
   <div class="footer-row">
     <div class="stats">
       <span>Chunks: <span class="stat-val" id="chunkCount">0</span></span>
-      <span>STT avg: <span class="stat-val" id="avgSTT">—</span></span>
-      <span>A avg: <span class="stat-val green-val" id="avgA">—</span></span>
-      <span>B avg: <span class="stat-val blue-val" id="avgB">—</span></span>
+      <span>STT: <span class="stat-val" id="avgSTT">—</span></span>
+      <span>A: <span class="stat-val green-val" id="avgA">—</span></span>
+      <span>B: <span class="stat-val blue-val" id="avgB">—</span></span>
+      <span>E2E: <span class="stat-val" id="avgE2E">—</span></span>
       <span>Same: <span class="stat-val" id="sameRate">—</span></span>
-      <span>A faster: <span class="stat-val green-val" id="aFaster">—</span></span>
     </div>
     <span class="hint">Fullscreen: F11 / Cmd+Shift+F</span>
   </div>
@@ -260,48 +285,49 @@
       <span>STT <span class="stat-val" id="p50STT">—</span></span>
       <span>A <span class="stat-val green-val" id="p50A">—</span></span>
       <span>B <span class="stat-val blue-val" id="p50B">—</span></span>
-      <span class="pct-label" style="margin-left:8px">p95:</span>
+      <span class="pct-label" style="margin-left:6px">p95:</span>
       <span>STT <span class="stat-val" id="p95STT">—</span></span>
       <span>A <span class="stat-val green-val" id="p95A">—</span></span>
       <span>B <span class="stat-val blue-val" id="p95B">—</span></span>
-      <span class="pct-label" style="margin-left:8px">E2E:</span>
-      <span><span class="stat-val" id="avgE2E">—</span></span>
-      <span class="pct-label" style="margin-left:8px">t/s:</span>
+      <span class="pct-label" style="margin-left:6px">t/s:</span>
       <span>A <span class="stat-val green-val" id="tpsA">—</span></span>
       <span>B <span class="stat-val blue-val" id="tpsB">—</span></span>
     </div>
   </div>
 </div>
 
+<button class="fs-btn" id="fsBtn" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
+
 <script>
 (function() {
-  const WS_URL = 'ws://localhost:8765';
+  const wsHost = location.hostname || 'localhost';
+  const WS_URL = 'ws://' + wsHost + ':8765';
   const RECONNECT_MS = 2000;
 
-  // DOM refs
   const $ = id => document.getElementById(id);
   const statusDot = $('statusDot');
   const statusText = $('statusText');
   const panels = {
     'a-en': $('a-en'), 'a-es': $('a-es'),
     'b-en': $('b-en'), 'b-es': $('b-es'),
+    'c-en': $('c-en'), 'c-es': $('c-es'),
   };
 
   // Stats
   let chunks = 0;
   let sumA = 0, sumB = 0, sumSTT = 0, sumE2E = 0;
-  let sameCount = 0, aFasterCount = 0;
+  let sameCount = 0;
   let sumTpsA = 0, sumTpsB = 0, tpsCountA = 0, tpsCountB = 0;
+  let latenciesSTT = [], latenciesA = [], latenciesB = [];
 
-  // Arrays for percentile calculation
-  let latenciesSTT = [];
-  let latenciesA = [];
-  let latenciesB = [];
+  // Track model names — auto-detect from first data
+  let modelA = null, modelB = null;
+  let hasAB = false;  // true when 12B is running
 
-  // Word filter — replace profanity with asterisks (church display)
-  const BLOCKED_WORDS = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|motherfucker|piss|shit|slut|whore)\b/gi;
+  // Note: "ass" (donkey), "damn" (damnation), "whore" (KJV) removed — legitimate biblical terms
+  const BLOCKED_WORDS = /\b(asshole|bitch|bastard|crap|cunt|dick|fuck|fucking|motherfucker|piss|shit|slut)\b/gi;
   function filterText(text) {
-    return text.replace(BLOCKED_WORDS, m => '*'.repeat(m.length));
+    return text ? text.replace(BLOCKED_WORDS, m => '*'.repeat(m.length)) : '';
   }
 
   function percentile(arr, p) {
@@ -311,9 +337,7 @@
     return sorted[Math.max(0, idx)];
   }
 
-  function fmtMs(ms) {
-    return ms > 0 ? ms.toFixed(0) + 'ms' : '—';
-  }
+  function fmtMs(ms) { return ms > 0 ? ms.toFixed(0) + 'ms' : '—'; }
 
   function confidenceClass(conf) {
     if (conf === undefined || conf === null) return '';
@@ -321,6 +345,23 @@
     if (conf >= 0.4) return 'conf-warn';
     return 'conf-bad';
   }
+
+  function updateLabels() {
+    if (hasAB) {
+      $('labelA').textContent = 'A (Gemma 4B) — English';
+      $('labelAes').textContent = 'A (Gemma 4B) — Español';
+      $('labelB').textContent = 'B (Gemma 12B) — English';
+      $('labelBes').textContent = 'B (Gemma 12B) — Español';
+    } else {
+      $('labelA').textContent = 'A (Gemma 4B) — English';
+      $('labelAes').textContent = 'A (Gemma 4B) — Español';
+      $('labelB').textContent = 'B (MarianMT) — English';
+      $('labelBes').textContent = 'B (MarianMT) — Español';
+    }
+  }
+
+  // Track last MarianMT partial per utterance for column B (non-AB mode)
+  let lastMarianPartial = {};
 
   function connect() {
     const ws = new WebSocket(WS_URL);
@@ -336,17 +377,13 @@
       setTimeout(connect, RECONNECT_MS);
     };
 
-    ws.onerror = () => {
-      ws.close();
-    };
+    ws.onerror = () => ws.close();
 
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
       if (data.type !== 'translation') return;
 
       const stage = data.stage || 'complete';
-
-      // Confidence dot
       const conf = data.stt_confidence;
       const confDot = conf !== undefined
         ? '<span class="confidence-dot ' + confidenceClass(conf) + '"></span>'
@@ -354,49 +391,90 @@
 
       const isPartial = stage === 'partial';
 
-      // Partials use 'p-<id>' prefix; finals use chunk_id and remove the partial
       if (isPartial) {
-        // Show partial English + Spanish (dimmed, italic) — updates in place
-        if (data.english) {
-          upsertChunk(panels['a-en'], 'p-' + data.chunk_id, filterText(data.english), confDot, true);
-          upsertChunk(panels['b-en'], 'p-' + data.chunk_id, filterText(data.english), confDot, true);
+        // --- PARTIAL (MarianMT fast translation) ---
+        const en = filterText(data.english || '');
+        const es = filterText(data.spanish_a || '');
+
+        // Column C (audience): show italic partial
+        if (en) upsertChunk(panels['c-en'], 'p-' + data.chunk_id, en, confDot, true);
+        if (es) upsertChunk(panels['c-es'], 'p-' + data.chunk_id, es, '', true);
+
+        // Column B (MarianMT in non-AB mode): show italic partial
+        if (!hasAB) {
+          if (en) upsertChunk(panels['b-en'], 'p-' + data.chunk_id, en, confDot, true);
+          if (es) {
+            upsertChunk(panels['b-es'], 'p-' + data.chunk_id, es, '', true);
+            lastMarianPartial[data.chunk_id] = es;
+          }
         }
-        if (data.spanish_a) {
-          upsertChunk(panels['a-es'], 'p-' + data.chunk_id, filterText(data.spanish_a), '', true);
-          upsertChunk(panels['b-es'], 'p-' + data.chunk_id, filterText(data.spanish_a), '', true);
+
+        // Column A: show English partial only (no Gemma translation yet)
+        if (en) upsertChunk(panels['a-en'], 'p-' + data.chunk_id, en, confDot, true);
+
+        // Latency for partial
+        if (data.latency_a_ms) {
+          $('latB').textContent = fmtMs(data.latency_a_ms);
+          $('latBes').textContent = fmtMs(data.latency_a_ms);
+          $('latC').textContent = fmtMs((data.stt_latency_ms || 0) + data.latency_a_ms);
+          $('latCes').textContent = fmtMs((data.stt_latency_ms || 0) + data.latency_a_ms);
         }
-        return;  // no stats
+
+        return;
       }
 
-      // Final/complete: remove partial rows and show final text
-      removeChunk(panels['a-en'], 'p-' + data.chunk_id);
-      removeChunk(panels['b-en'], 'p-' + data.chunk_id);
-      removeChunk(panels['a-es'], 'p-' + data.chunk_id);
-      removeChunk(panels['b-es'], 'p-' + data.chunk_id);
+      // --- FINAL (stt / translation_a / complete) ---
 
-      if (data.english) {
-        upsertChunk(panels['a-en'], data.chunk_id, filterText(data.english), confDot, false);
-        upsertChunk(panels['b-en'], data.chunk_id, filterText(data.english), confDot, false);
-      }
-      if (data.spanish_a) {
-        upsertChunk(panels['a-es'], data.chunk_id, filterText(data.spanish_a), '', false);
-      }
-      if (data.spanish_b) {
-        upsertChunk(panels['b-es'], data.chunk_id, filterText(data.spanish_b), '', false);
+      // Detect A/B mode on first complete message
+      if (stage === 'complete' && data.spanish_b && !hasAB) {
+        hasAB = true;
+        updateLabels();
       }
 
-      // Update latency headers as data arrives
+      // Remove partial rows from all columns
+      const pid = 'p-' + data.chunk_id;
+      Object.values(panels).forEach(p => removeChunk(p, pid));
+
+      const en = filterText(data.english || '');
+      const esA = filterText(data.spanish_a || '');
+      const esB = filterText(data.spanish_b || '');
+
+      // Column A (Gemma 4B): always shows Gemma translation
+      if (en) upsertChunk(panels['a-en'], data.chunk_id, en, confDot, false);
+      if (esA) upsertChunk(panels['a-es'], data.chunk_id, esA, '', false);
+
+      if (hasAB) {
+        // AB mode: Column B = Gemma 12B
+        if (en) upsertChunk(panels['b-en'], data.chunk_id, en, confDot, false);
+        if (esB) upsertChunk(panels['b-es'], data.chunk_id, esB, '', false);
+      } else {
+        // Non-AB mode: Column B = MarianMT (keep the last partial as the final)
+        if (en) upsertChunk(panels['b-en'], data.chunk_id, en, confDot, false);
+        const marianFinal = lastMarianPartial[data.chunk_id] || '';
+        if (marianFinal) upsertChunk(panels['b-es'], data.chunk_id, marianFinal, '', false);
+        delete lastMarianPartial[data.chunk_id];
+      }
+
+      // Column C (audience output): show final Gemma (replaces italic partial)
+      if (en) upsertChunk(panels['c-en'], data.chunk_id, en, confDot, false);
+      if (esA) upsertChunk(panels['c-es'], data.chunk_id, esA, '', false);
+
+      // Latency updates
       const latSTT = data.stt_latency_ms || 0;
       if (data.latency_a_ms) {
         $('latA').textContent = fmtMs(data.latency_a_ms);
         $('latAes').textContent = fmtMs(data.latency_a_ms);
       }
-      if (data.latency_b_ms) {
+      if (data.latency_b_ms && hasAB) {
         $('latB').textContent = fmtMs(data.latency_b_ms);
         $('latBes').textContent = fmtMs(data.latency_b_ms);
       }
+      if (data.e2e_latency_ms) {
+        $('latC').textContent = fmtMs(data.e2e_latency_ms);
+        $('latCes').textContent = fmtMs(data.e2e_latency_ms);
+      }
 
-      // Only update stats on the final "complete" stage to avoid double-counting
+      // Stats on complete only
       if (stage === 'complete') {
         const latA = data.latency_a_ms || 0;
         const latB = data.latency_b_ms || 0;
@@ -407,8 +485,7 @@
         sumB += latB;
         sumSTT += latSTT;
         sumE2E += e2e;
-        if (data.spanish_a === data.spanish_b) sameCount++;
-        if (latA < latB && latB > 0) aFasterCount++;
+        if (data.spanish_a === data.spanish_b && data.spanish_b) sameCount++;
 
         latenciesSTT.push(latSTT);
         latenciesA.push(latA);
@@ -419,25 +496,21 @@
         if (tpsA > 0) { sumTpsA += tpsA; tpsCountA++; }
         if (tpsB > 0) { sumTpsB += tpsB; tpsCountB++; }
 
-        // Update footer — averages
         $('chunkCount').textContent = chunks;
         $('avgA').textContent = fmtMs(sumA / chunks);
         $('avgB').textContent = latenciesB.length > 0 ? fmtMs(sumB / latenciesB.length) : '—';
         $('avgSTT').textContent = fmtMs(sumSTT / chunks);
-        $('sameRate').textContent = ((sameCount / chunks) * 100).toFixed(0) + '%';
-        $('aFaster').textContent = latenciesB.length > 0
-          ? ((aFasterCount / chunks) * 100).toFixed(0) + '%' : '—';
+        $('avgE2E').textContent = fmtMs(sumE2E / chunks);
+        $('sameRate').textContent = hasAB
+          ? ((sameCount / chunks) * 100).toFixed(0) + '%' : '—';
 
-        // Update footer — percentiles
         $('p50STT').textContent = fmtMs(percentile(latenciesSTT, 50));
         $('p50A').textContent = fmtMs(percentile(latenciesA, 50));
         $('p50B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 50)) : '—';
         $('p95STT').textContent = fmtMs(percentile(latenciesSTT, 95));
         $('p95A').textContent = fmtMs(percentile(latenciesA, 95));
         $('p95B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 95)) : '—';
-        $('avgE2E').textContent = fmtMs(sumE2E / chunks);
 
-        // Update footer — tokens/sec
         $('tpsA').textContent = tpsCountA > 0 ? (sumTpsA / tpsCountA).toFixed(0) : '—';
         $('tpsB').textContent = tpsCountB > 0 ? (sumTpsB / tpsCountB).toFixed(0) : '—';
       }
@@ -467,22 +540,25 @@
 
   function escapeHtml(str) {
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = str || '';
     return div.innerHTML;
   }
 
-  // Fullscreen toggle
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }
+
+  document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'F11' || (e.metaKey && e.shiftKey && e.key === 'f')) {
       e.preventDefault();
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        document.documentElement.requestFullscreen();
-      }
+      toggleFullscreen();
     }
   });
 
+  updateLabels();
   connect();
 })();
 </script>

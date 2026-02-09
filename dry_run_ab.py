@@ -19,12 +19,18 @@ Usage:
 import argparse
 import asyncio
 import csv
+import http.server
 import json
 import os
 import signal
+import socket
 import sys
+import threading
 import time
 from datetime import datetime
+
+import platform
+import psutil
 
 import numpy as np
 import sounddevice as sd
@@ -42,7 +48,10 @@ CHUNK_DURATION = 2.0         # seconds of speech — more context = better word 
 VAD_THRESHOLD = 0.3          # Lower threshold for better sensitivity
 WS_PORT = 8765
 MIC_DEVICE = None            # None = auto-detect best input device
-CSV_PATH = f"metrics/ab_metrics_{datetime.now():%Y%m%d_%H%M%S}.csv"
+SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
+CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
+AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
+DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 
 # MLX model IDs (4-bit quantized, community-converted)
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
@@ -65,6 +74,214 @@ WHISPER_PROMPT = (
 )
 
 # ---------------------------------------------------------------------------
+# Live Testing Diagnostics
+# ---------------------------------------------------------------------------
+
+# Misrecognized word → likely correct theological word
+# Flagged when the common word appears in STT output during a sermon
+HOMOPHONE_FLAGS = {
+    "rain": "reign",
+    "rein": "reign",
+    "media": "mediator",
+    "profit": "prophet",
+    "alter": "altar",
+    "prey": "pray",
+    "angles": "angels",
+    "piece": "peace",
+    "patients": "patience",
+    "presents": "presence",
+    "council": "counsel",
+    "palms": "psalms",
+}
+
+# Utterances ending with these words likely got cut mid-phrase
+_SPLIT_WORDS = frozenset({
+    "the", "a", "an", "of", "in", "to", "for", "and", "but", "or",
+    "by", "with", "his", "her", "their", "our", "my", "your", "its",
+    "this", "that", "is", "was", "are", "were", "be", "been",
+    "has", "have", "had", "he", "she", "we", "they", "it",
+})
+
+# Session-level diagnostic accumulators
+diag_homophones = []       # [(chunk_id, flagged_word, likely_word, text)]
+diag_bad_splits = []       # [(chunk_id, last_word, text)]
+diag_marian_diverge = []   # [(chunk_id, marian_text, gemma_text, similarity)]
+diag_durations = []        # [(chunk_id, duration_s)]
+diag_low_confidence = []   # [(chunk_id, confidence, text)]
+partial_translations = {}  # utterance_id → last MarianMT translation
+partial_latencies = {}     # utterance_id → {"pt_ms": float, "ct2_ms": float}
+
+
+def check_homophones(cid, text):
+    """Flag potential homophone misrecognitions in STT output."""
+    words = text.lower().split()
+    for w in words:
+        clean = w.strip(".,!?;:'\"")
+        if clean in HOMOPHONE_FLAGS:
+            diag_homophones.append((cid, clean, HOMOPHONE_FLAGS[clean], text))
+            print(f"  >> HOMOPHONE: '{clean}' -> maybe '{HOMOPHONE_FLAGS[clean]}'?")
+
+
+def check_bad_split(cid, text):
+    """Flag utterances that end with function words (likely mid-phrase cut)."""
+    words = text.strip().split()
+    if words:
+        last = words[-1].lower().strip(".,!?;:'\"")
+        if last in _SPLIT_WORDS:
+            diag_bad_splits.append((cid, last, text))
+            print(f"  >> BAD SPLIT: ends with '{last}'")
+
+
+def check_marian_divergence(cid, marian_text, gemma_text):
+    """Compare MarianMT partial vs TranslateGemma final translation."""
+    if not marian_text or not gemma_text:
+        return
+    m_words = set(marian_text.lower().split())
+    g_words = set(gemma_text.lower().split())
+    if not m_words or not g_words:
+        return
+    intersection = m_words & g_words
+    union = m_words | g_words
+    similarity = len(intersection) / len(union) if union else 1.0
+    diag_marian_diverge.append((cid, marian_text, gemma_text, round(similarity, 2)))
+    if similarity < 0.3:
+        print(f"  >> MARIAN/GEMMA divergence: {similarity:.0%} overlap")
+
+
+def print_diagnostics():
+    """Print live testing diagnostics summary."""
+    print(f"\n{'~'*60}")
+    print(f"DIAGNOSTICS SUMMARY")
+    print(f"{'~'*60}")
+
+    if diag_homophones:
+        print(f"\n  Homophone flags: {len(diag_homophones)}")
+        for cid, flagged, likely, text in diag_homophones:
+            print(f"    #{cid}: '{flagged}' -> '{likely}' in: {text[:60]}")
+    else:
+        print(f"\n  Homophone flags: 0 (clean)")
+
+    if diag_bad_splits:
+        print(f"\n  Bad sentence splits: {len(diag_bad_splits)}")
+        for cid, last, text in diag_bad_splits[:10]:
+            print(f"    #{cid}: ends with '{last}': ...{text[-40:]}")
+    else:
+        print(f"\n  Bad sentence splits: 0 (clean)")
+
+    if diag_marian_diverge:
+        sims = [s for _, _, _, s in diag_marian_diverge]
+        avg_sim = sum(sims) / len(sims)
+        low = sum(1 for s in sims if s < 0.3)
+        print(f"\n  Marian/Gemma avg similarity: {avg_sim:.0%} ({low} high-divergence)")
+        for cid, mt, gt, sim in sorted(diag_marian_diverge, key=lambda x: x[3])[:5]:
+            print(f"    #{cid} ({sim:.0%}): MT='{mt[:40]}' | TG='{gt[:40]}'")
+
+    if diag_durations:
+        durs = [d for _, d in diag_durations]
+        short = sum(1 for d in durs if d < 1.0)
+        long_count = sum(1 for d in durs if d > 6.0)
+        print(f"\n  Utterance durations: avg={sum(durs)/len(durs):.1f}s, "
+              f"<1s={short}, >6s={long_count}, "
+              f"min={min(durs):.1f}s, max={max(durs):.1f}s")
+
+    if diag_low_confidence:
+        print(f"\n  Low confidence chunks: {len(diag_low_confidence)}")
+        for cid, conf, text in diag_low_confidence:
+            print(f"    #{cid} (conf={conf:.2f}): {text[:60]}")
+    else:
+        print(f"\n  Low confidence chunks: 0 (clean)")
+
+    # Resource usage summary
+    snap = get_resource_snapshot()
+    print(f"\n  Resource usage (current):")
+    print(f"    Process RAM: {snap['process_ram_gb']:.1f}GB")
+    print(f"    System RAM:  {snap['ram_used_gb']:.1f}GB / {psutil.virtual_memory().total / (1024**3):.0f}GB ({snap['ram_percent']:.0f}%)")
+    print(f"    CPU:         {snap['cpu_percent']:.0f}%")
+
+    if ct2_translator:
+        print(f"\n  MarianMT backends: CT2 int8 (76MB) vs PyTorch fp32 (298MB)")
+        print(f"    Per-chunk latencies in CSV columns: marian_pt_ms, marian_ct2_ms")
+
+    print(f"\n  Fine-tuning data: {AUDIO_DIR}/")
+    print(f"  Review queue:     {DIAG_PATH}")
+    print(f"  Mic gain used:    {MIC_GAIN:.1f}x")
+    print(f"{'~'*60}")
+
+
+# ---------------------------------------------------------------------------
+# Hardware Profile & Resource Monitoring (for portability planning)
+# ---------------------------------------------------------------------------
+
+def get_hardware_profile():
+    """Capture hardware info for portability analysis."""
+    import subprocess
+    profile = {
+        "platform": platform.platform(),
+        "processor": platform.processor(),
+        "cpu_count_physical": psutil.cpu_count(logical=False),
+        "cpu_count_logical": psutil.cpu_count(logical=True),
+        "ram_total_gb": round(psutil.virtual_memory().total / (1024**3), 1),
+        "python_version": platform.python_version(),
+    }
+    # Apple Silicon GPU info
+    try:
+        result = subprocess.run(
+            ["system_profiler", "SPDisplaysDataType", "-json"],
+            capture_output=True, text=True, timeout=5,
+        )
+        import json as _json
+        gpu_data = _json.loads(result.stdout)
+        gpus = gpu_data.get("SPDisplaysDataType", [])
+        if gpus:
+            gpu = gpus[0]
+            profile["gpu_model"] = gpu.get("sppci_model", "unknown")
+            profile["gpu_cores"] = gpu.get("sppci_cores", "unknown")
+            profile["metal_support"] = gpu.get("spmetal_supported", "unknown")
+    except Exception:
+        profile["gpu_model"] = "unknown"
+    return profile
+
+
+def get_resource_snapshot():
+    """Capture current CPU/memory usage for a single chunk."""
+    mem = psutil.virtual_memory()
+    proc = psutil.Process()
+    return {
+        "cpu_percent": psutil.cpu_percent(interval=None),
+        "ram_used_gb": round(mem.used / (1024**3), 2),
+        "ram_percent": mem.percent,
+        "process_ram_gb": round(proc.memory_info().rss / (1024**3), 2),
+    }
+
+
+# ---------------------------------------------------------------------------
+# HTTP Static Server (serves display pages to phones on LAN)
+# ---------------------------------------------------------------------------
+
+def get_local_ip():
+    """Get the local network IP for LAN access."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+
+def start_http_server(port, directory):
+    """Start a simple HTTP server in a background thread."""
+    handler = lambda *args, **kwargs: http.server.SimpleHTTPRequestHandler(
+        *args, directory=directory, **kwargs
+    )
+    server = http.server.HTTPServer(("0.0.0.0", port), handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server
+
+
+# ---------------------------------------------------------------------------
 # Globals
 # ---------------------------------------------------------------------------
 
@@ -84,6 +301,7 @@ mlx_b_model = None
 mlx_b_tokenizer = None
 marian_model = None
 marian_tokenizer = None
+ct2_translator = None
 
 
 # ---------------------------------------------------------------------------
@@ -92,7 +310,7 @@ marian_tokenizer = None
 
 def load_vad():
     """Load Silero VAD (~2MB)."""
-    print("[1/6] Loading Silero VAD...")
+    print("[1/7] Loading Silero VAD...")
     model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad')
     print("  VAD ready")
     return model, utils
@@ -105,7 +323,7 @@ def load_whisper():
     mx.set_cache_limit(100 * 1024 * 1024)  # prevent memory growth
 
     model_id = "mlx-community/distil-whisper-large-v3"
-    print(f"[2/6] Loading {model_id} (MLX)...")
+    print(f"[2/7] Loading {model_id} (MLX)...")
     t0 = time.time()
     # Warm up — first call downloads and compiles the model
     silence = np.zeros(16000, dtype=np.float32)
@@ -136,7 +354,7 @@ def load_mlx_gemma(model_id, label):
 
 def load_translation_models(load_b=True):
     """Load TranslateGemma model(s) via MLX."""
-    print("[3/5] Loading TranslateGemma models (MLX 4-bit)...")
+    print("[3/7] Loading TranslateGemma models (MLX 4-bit)...")
     a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)")
 
     b_model, b_tok = None, None
@@ -154,7 +372,7 @@ def load_marian():
     """Load MarianMT (~298MB) for fast partial translations."""
     from transformers import MarianMTModel, MarianTokenizer
     model_id = "Helsinki-NLP/opus-mt-en-es"
-    print(f"[4/6] Loading {model_id} (MarianMT)...")
+    print(f"[4/7] Loading {model_id} (MarianMT PyTorch)...")
     t0 = time.time()
     tokenizer = MarianTokenizer.from_pretrained(model_id)
     model = MarianMTModel.from_pretrained(model_id)
@@ -164,6 +382,25 @@ def load_marian():
     model.generate(**inputs, max_new_tokens=16)
     print(f"  MarianMT ready ({time.time()-t0:.1f}s)")
     return model, tokenizer
+
+
+def load_ct2_marian():
+    """Load CTranslate2 int8 MarianMT (~76MB) for speed comparison."""
+    ct2_path = os.path.join(os.path.dirname(__file__), "ct2_opus_mt_en_es")
+    if not os.path.isdir(ct2_path):
+        print("  CT2 model not found, skipping (run ct2 converter first)")
+        return None
+    import ctranslate2
+    print(f"[5/6] Loading CTranslate2 MarianMT (int8)...")
+    t0 = time.time()
+    translator = ctranslate2.Translator(ct2_path, device="cpu", compute_type="int8")
+    # Warm up
+    from transformers import MarianTokenizer
+    tok = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-es")
+    warm_tokens = tok.convert_ids_to_tokens(tok.encode("Hello world."))
+    translator.translate_batch([warm_tokens], max_decoding_length=32)
+    print(f"  CT2 MarianMT ready ({time.time()-t0:.1f}s, 76MB int8)")
+    return translator
 
 
 # ---------------------------------------------------------------------------
@@ -273,7 +510,7 @@ def translate_mlx(model, tokenizer, text):
 
 
 def translate_marian(text):
-    """Fast English→Spanish via MarianMT (~50-100ms). For partials."""
+    """Fast English→Spanish via MarianMT PyTorch (~50-100ms). For partials."""
     if marian_model is None or marian_tokenizer is None:
         return "(MarianMT not loaded)", 0.0
 
@@ -282,6 +519,21 @@ def translate_marian(text):
     with torch.no_grad():
         translated = marian_model.generate(**inputs, max_new_tokens=128)
     result = marian_tokenizer.decode(translated[0], skip_special_tokens=True)
+    latency_ms = (time.perf_counter() - t0) * 1000
+    return result, latency_ms
+
+
+def translate_ct2_marian(text):
+    """Fast English→Spanish via CTranslate2 int8 MarianMT (~30-90ms)."""
+    if ct2_translator is None or marian_tokenizer is None:
+        return "(CT2 not loaded)", 0.0
+
+    t0 = time.perf_counter()
+    src_tokens = marian_tokenizer.convert_ids_to_tokens(marian_tokenizer.encode(text))
+    ct2_out = ct2_translator.translate_batch(
+        [src_tokens], max_decoding_length=128, beam_size=4,
+    )
+    result = marian_tokenizer.convert_tokens_to_string(ct2_out[0].hypotheses[0])
     latency_ms = (time.perf_counter() - t0) * 1000
     return result, latency_ms
 
@@ -361,7 +613,9 @@ def _whisper_prompt():
 
 
 async def process_partial(audio_data, utterance_id):
-    """Fast partial: STT (~500ms) + MarianMT (~80ms). Italic in UI."""
+    """Fast partial: STT (~500ms) + MarianMT (~80ms). Italic in UI.
+    Runs both PyTorch and CT2 MarianMT in parallel for latency comparison.
+    """
     try:
         t0 = time.perf_counter()
         result = mlx_whisper.transcribe(
@@ -377,11 +631,24 @@ async def process_partial(audio_data, utterance_id):
         if not english:
             return
 
-        # Fast MarianMT translation for partial display
-        spanish, marian_latency = translate_marian(english)
+        # Run both MarianMT backends in parallel for comparison
+        loop = asyncio.get_event_loop()
+        pt_future = loop.run_in_executor(None, translate_marian, english)
+        ct2_future = loop.run_in_executor(None, translate_ct2_marian, english)
+
+        spanish, marian_latency = await pt_future
+        ct2_spanish, ct2_latency = await ct2_future
         total = stt_latency + marian_latency
 
-        print(f"  partial ({total:.0f}ms): {english} | {spanish}          ", end="\r")
+        # Store for Marian/Gemma divergence comparison and latency logging
+        partial_translations[utterance_id] = spanish
+        partial_latencies[utterance_id] = {
+            "pt_ms": round(marian_latency, 1),
+            "ct2_ms": round(ct2_latency, 1) if ct2_translator else None,
+        }
+
+        ct2_tag = f" | CT2:{ct2_latency:.0f}ms" if ct2_translator else ""
+        print(f"  partial ({total:.0f}ms, PT:{marian_latency:.0f}ms{ct2_tag}): {english} | {spanish}          ", end="\r")
         await broadcast({
             "type": "translation",
             "stage": "partial",
@@ -391,6 +658,8 @@ async def process_partial(audio_data, utterance_id):
             "spanish_b": None,
             "stt_latency_ms": round(stt_latency, 1),
             "latency_a_ms": round(marian_latency, 1),
+            "marian_pt_ms": round(marian_latency, 1),
+            "marian_ct2_ms": round(ct2_latency, 1) if ct2_translator else None,
             "timestamp": datetime.now().isoformat(),
         })
 
@@ -415,15 +684,36 @@ async def process_final(audio_data):
             language="en",
             condition_on_previous_text=False,
             initial_prompt=_whisper_prompt(),
+            word_timestamps=True,
         )
         stt_latency = (time.perf_counter() - t0) * 1000
         english = result["text"].strip()
 
-        # Extract confidence
+        # Extract segment-level metadata for fine-tuning
         stt_confidence = None
+        segment_meta = []
+        low_conf_words = []
         segments = result.get("segments", [])
         if segments:
-            avg_logprobs = [s.get("avg_logprob", 0) for s in segments if "avg_logprob" in s]
+            avg_logprobs = []
+            for seg in segments:
+                meta = {
+                    "avg_logprob": seg.get("avg_logprob"),
+                    "no_speech_prob": seg.get("no_speech_prob"),
+                    "compression_ratio": seg.get("compression_ratio"),
+                }
+                segment_meta.append(meta)
+                if "avg_logprob" in seg:
+                    avg_logprobs.append(seg["avg_logprob"])
+                # Extract per-word confidence
+                for w in seg.get("words", []):
+                    if w.get("probability", 1.0) < 0.5:
+                        low_conf_words.append({
+                            "word": w.get("word", ""),
+                            "probability": round(w["probability"], 3),
+                            "start": w.get("start"),
+                            "end": w.get("end"),
+                        })
             if avg_logprobs:
                 mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
                 stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
@@ -483,6 +773,32 @@ async def process_final(audio_data):
 
         e2e_latency = (time.perf_counter() - e2e_start) * 1000
 
+        # --- Diagnostics ---
+        utterance_dur = len(audio_data) / SAMPLE_RATE
+        diag_durations.append((cid, utterance_dur))
+        check_homophones(cid, english)
+        check_bad_split(cid, english)
+        if stt_confidence is not None and stt_confidence < 0.5:
+            diag_low_confidence.append((cid, stt_confidence, english))
+        # Hallucination check
+        for seg in segment_meta:
+            cr = seg.get("compression_ratio")
+            if cr is not None and cr > 2.4:
+                print(f"  >> HALLUCINATION: compression_ratio={cr:.1f} (>2.4)")
+                break
+        # Low-confidence words
+        if low_conf_words:
+            words_str = ", ".join(f"'{w['word']}'({w['probability']:.0%})" for w in low_conf_words[:5])
+            print(f"  >> LOW CONF WORDS: {words_str}")
+        # Compare last MarianMT partial against Gemma final
+        last_marian = partial_translations.pop(cid, None)
+        if last_marian is None:
+            # utterance_id doesn't match chunk_id — try recent entries
+            for uid in list(partial_translations.keys()):
+                last_marian = partial_translations.pop(uid, None)
+        if last_marian and spanish_a:
+            check_marian_divergence(cid, last_marian, spanish_a)
+
         conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
         qe_str = f" | QE: A={qe_a}"
         if qe_b is not None:
@@ -513,6 +829,14 @@ async def process_final(audio_data):
         all_results.append(result_data)
         await broadcast(result_data)
         write_csv_row(result_data)
+
+        # Save audio + structured diagnostics for fine-tuning pipeline
+        audio_path = save_chunk_audio(audio_data, cid)
+        resources = get_resource_snapshot()
+        write_diag_jsonl(result_data, audio_path,
+                         segment_meta=segment_meta,
+                         low_conf_words=low_conf_words,
+                         resources=resources)
 
     except Exception as e:
         print(f"\n  ERROR in chunk #{cid}: {e}", file=sys.stderr)
@@ -559,8 +883,94 @@ async def broadcast(data):
 
 
 # ---------------------------------------------------------------------------
-# CSV Logging
+# Data Persistence (audio + CSV + diagnostics JSONL for fine-tuning)
 # ---------------------------------------------------------------------------
+
+def save_chunk_audio(audio_data, cid):
+    """Save chunk audio as 16kHz WAV for later Whisper fine-tuning."""
+    import scipy.io.wavfile as wav
+    os.makedirs(AUDIO_DIR, exist_ok=True)
+    path = os.path.join(AUDIO_DIR, f"chunk_{cid:04d}.wav")
+    wav.write(path, SAMPLE_RATE, audio_data)
+    return path
+
+
+def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, resources=None):
+    """Append a structured diagnostics record for the active learning loop.
+
+    This JSONL feeds into Label Studio / human review queue. Each line has:
+      - audio file path (for Whisper fine-tuning)
+      - transcription + translations (for correction)
+      - full Whisper segment metadata (for filtering/analysis)
+      - per-word confidence (for pinpointing misrecognitions)
+      - all diagnostic flags (for prioritizing review)
+    """
+    cid = data["chunk_id"]
+    homo = [{"flagged": f, "likely": l} for c, f, l, _ in diag_homophones if c == cid]
+    bad_sp = any(c == cid for c, _, _ in diag_bad_splits)
+    marian_sim = next((s for c, _, _, s in diag_marian_diverge if c == cid), None)
+    marian_text = next((mt for c, mt, _, _ in diag_marian_diverge if c == cid), None)
+    utt_dur = next((d for c, d in diag_durations if c == cid), None)
+
+    # Hallucination detection: compression_ratio > 2.4 = likely garbage
+    is_hallucination = False
+    if segment_meta:
+        for seg in segment_meta:
+            cr = seg.get("compression_ratio")
+            if cr is not None and cr > 2.4:
+                is_hallucination = True
+                break
+
+    # Compute a review priority score (higher = more likely needs correction)
+    priority = 0
+    conf = data.get("stt_confidence")
+    if conf is not None and conf < 0.7:
+        priority += 3 if conf < 0.5 else 1
+    if homo:
+        priority += 2 * len(homo)
+    if bad_sp:
+        priority += 1
+    if data.get("qe_a") is not None and data["qe_a"] < 0.7:
+        priority += 2
+    if marian_sim is not None and marian_sim < 0.3:
+        priority += 1
+    if is_hallucination:
+        priority += 5
+    if low_conf_words:
+        priority += min(3, len(low_conf_words))  # cap contribution
+
+    record = {
+        "chunk_id": cid,
+        "session": SESSION_ID,
+        "timestamp": data["timestamp"],
+        "audio_path": audio_path,
+        "mic_gain": MIC_GAIN,
+        "english": data["english"],
+        "spanish_gemma": data.get("spanish_a"),
+        "spanish_marian": marian_text,
+        "stt_confidence": conf,
+        "qe_a": data.get("qe_a"),
+        "utterance_dur": round(utt_dur, 2) if utt_dur else None,
+        "segment_metadata": segment_meta,
+        "low_confidence_words": low_conf_words,
+        "is_hallucination": is_hallucination,
+        "homophone_flags": homo,
+        "bad_split": bad_sp,
+        "marian_similarity": marian_sim,
+        "review_priority": priority,
+        "marian_backend_latency": next(
+            (partial_latencies.get(c) for c in [cid] if c in partial_latencies),
+            None,
+        ),
+        "resources": resources,
+        "corrected_english": None,   # filled in during human review
+        "corrected_spanish": None,   # filled in during human review
+    }
+
+    os.makedirs(os.path.dirname(DIAG_PATH), exist_ok=True)
+    with open(DIAG_PATH, "a") as f:
+        f.write(json.dumps(record) + "\n")
+
 
 def init_csv():
     """Initialize CSV file with headers."""
@@ -573,12 +983,26 @@ def init_csv():
             "stt_latency_ms", "latency_a_ms", "latency_b_ms",
             "e2e_latency_ms", "stt_confidence", "tps_a", "tps_b",
             "qe_a", "qe_b",
+            "utterance_dur", "homophone_flags", "bad_split", "marian_similarity",
+            "marian_pt_ms", "marian_ct2_ms",
         ])
     print(f"  CSV: {CSV_PATH}")
 
 
 def write_csv_row(data):
     """Append a row to the CSV log."""
+    cid = data["chunk_id"]
+    # Gather diagnostic flags for this chunk
+    homo = [f"{f}->{l}" for c, f, l, _ in diag_homophones if c == cid]
+    bad_sp = any(c == cid for c, _, _ in diag_bad_splits)
+    marian_sim = next((s for c, _, _, s in diag_marian_diverge if c == cid), "")
+    utt_dur = next((d for c, d in diag_durations if c == cid), "")
+    # Get MarianMT latency comparison from partial pass
+    ml = partial_latencies.pop(cid, None)
+    if ml is None:
+        for uid in list(partial_latencies.keys()):
+            ml = partial_latencies.pop(uid, None)
+
     with open(CSV_PATH, "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([
@@ -588,6 +1012,12 @@ def write_csv_row(data):
             data["e2e_latency_ms"], data.get("stt_confidence", ""),
             data.get("tps_a", ""), data.get("tps_b", ""),
             data.get("qe_a", ""), data.get("qe_b", ""),
+            round(utt_dur, 2) if utt_dur else "",
+            "|".join(homo) if homo else "",
+            "Y" if bad_sp else "",
+            marian_sim,
+            ml["pt_ms"] if ml else "",
+            ml["ct2_ms"] if ml and ml["ct2_ms"] is not None else "",
         ])
 
 
@@ -622,6 +1052,7 @@ def print_summary():
         print(f"  B (12B):     not loaded")
     print(f"  CSV saved:   {CSV_PATH}")
     print(f"{'='*60}")
+    print_diagnostics()
 
 
 # ---------------------------------------------------------------------------
@@ -729,7 +1160,7 @@ async def main_async(args):
     """Start WebSocket server and audio loop."""
     global vad_model, vad_utils, stt_pipe
     global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
-    global marian_model, marian_tokenizer
+    global marian_model, marian_tokenizer, ct2_translator
 
     print(f"{'='*60}")
     print(f"  Bilingual A/B Dry Run (MLX)")
@@ -743,26 +1174,52 @@ async def main_async(args):
     mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
         load_translation_models(load_b=args.run_ab)
     marian_model, marian_tokenizer = load_marian()
+    ct2_translator = load_ct2_marian()
 
     # Detect best microphone and auto-calibrate gain
     global MIC_DEVICE, MIC_GAIN
     if MIC_DEVICE is None:
-        print("[5/6] Detecting microphone...")
+        print("[6/7] Detecting microphone...")
         MIC_DEVICE, mic_rms = detect_macbook_mic()
         if mic_rms > 0 and MIC_GAIN == 1.0:
             # Auto-calibrate: scale signal to TARGET_RMS
             MIC_GAIN = max(1.0, min(20.0, TARGET_RMS / mic_rms))
             print(f"  Auto-gain: {MIC_GAIN:.1f}x (mic RMS={mic_rms:.4f}, target={TARGET_RMS})")
 
-    print(f"[6/6] Starting WebSocket server on port {args.ws_port}...")
+    # Save hardware profile for portability planning
+    hw_profile = get_hardware_profile()
+    hw_path = os.path.join(os.path.dirname(DIAG_PATH), f"hardware_{SESSION_ID}.json")
+    os.makedirs(os.path.dirname(hw_path), exist_ok=True)
+    with open(hw_path, "w") as f:
+        json.dump(hw_profile, f, indent=2)
+    print(f"  Hardware profile: {hw_path}")
+    print(f"    {hw_profile.get('processor', '?')} | "
+          f"{hw_profile['cpu_count_physical']}P+{hw_profile['cpu_count_logical'] - hw_profile['cpu_count_physical']}E cores | "
+          f"{hw_profile['ram_total_gb']}GB RAM | "
+          f"{hw_profile.get('gpu_model', '?')}")
+
+    print(f"[7/7] Starting servers...")
     init_csv()
 
-    # Start WebSocket server
+    # Start HTTP server for mobile access
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    http_srv = start_http_server(args.http_port, project_dir)
+    local_ip = get_local_ip()
+
+    # Start WebSocket server (bind 0.0.0.0 so phones can connect)
     ws_server = await websockets.serve(
-        ws_handler, "localhost", args.ws_port,
+        ws_handler, "0.0.0.0", args.ws_port,
         ping_interval=None,  # disable pings — inference blocks event loop
     )
-    print(f"  WebSocket ready — open ab_display.html in browser")
+
+    print(f"  WebSocket ready on port {args.ws_port}")
+    print(f"  HTTP server ready on port {args.http_port}")
+    print(f"\n  Local displays:")
+    print(f"    A/B display:       file://{project_dir}/ab_display.html")
+    print(f"    Audience display:  file://{project_dir}/audience_display.html")
+    print(f"\n  Mobile / LAN access:")
+    print(f"    http://{local_ip}:{args.http_port}/mobile_display.html")
+    print(f"    http://{local_ip}:{args.http_port}/audience_display.html")
 
     # Run audio loop
     try:
@@ -785,6 +1242,8 @@ def main():
                         help="Seconds of speech to accumulate before processing")
     parser.add_argument("--ws-port", type=int, default=8765,
                         help="WebSocket server port")
+    parser.add_argument("--http-port", type=int, default=8080,
+                        help="HTTP server port for serving display pages to phones")
     parser.add_argument("--vad-threshold", type=float, default=0.3,
                         help="VAD speech threshold (0-1)")
     parser.add_argument("--device", type=int, default=None,

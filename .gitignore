@@ -20,10 +20,12 @@ fine_tuned_gemma_mi_A/*.safetensors
 fine_tuned_gemma_mi_A/*.bin
 fine_tuned_gemma_mi_B/*.safetensors
 fine_tuned_gemma_mi_B/*.bin
+ct2_opus_mt_en_es/
 
 # Audio data (too large for git)
 stark_data/raw/*.wav
 stark_data/cleaned/**/*.wav
+stark_data/live_sessions/
 stark_data/raw/*.vtt
 stark_data/raw/*.srt
 
