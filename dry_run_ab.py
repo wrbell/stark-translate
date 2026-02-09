@@ -52,6 +52,7 @@ SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
 CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
+NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 
 # MLX model IDs (4-bit quantized, community-converted)
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
@@ -467,8 +468,17 @@ def qe_score(source, translation):
 # Translation (MLX)
 # ---------------------------------------------------------------------------
 
-def translate_mlx(model, tokenizer, text):
+def translate_mlx(model, tokenizer, text, draft_model=None):
     """Translate English to Spanish using TranslateGemma via MLX.
+
+    Args:
+        model: The MLX model to use for generation.
+        tokenizer: The tokenizer for the model.
+        text: English text to translate.
+        draft_model: Optional smaller model for speculative decoding.
+            When provided, the draft model proposes NUM_DRAFT_TOKENS tokens
+            at a time, and the main model verifies them in a single forward
+            pass. Speeds up generation when draft acceptance rate is high.
 
     Returns (translation, latency_ms, generation_tps).
     """
@@ -492,12 +502,19 @@ def translate_mlx(model, tokenizer, text):
     input_words = len(text.split())
     max_tok = max(32, int(input_words * 2.5))
 
-    t0 = time.perf_counter()
-    result = generate(
-        model, tokenizer,
+    gen_kwargs = dict(
         prompt=prompt,
         max_tokens=max_tok,
         verbose=False,
+    )
+    if draft_model is not None:
+        gen_kwargs["draft_model"] = draft_model
+        gen_kwargs["num_draft_tokens"] = NUM_DRAFT_TOKENS
+
+    t0 = time.perf_counter()
+    result = generate(
+        model, tokenizer,
+        **gen_kwargs,
     )
     latency_ms = (time.perf_counter() - t0) * 1000
 
@@ -745,8 +762,10 @@ async def process_final(audio_data):
             loop = asyncio.get_event_loop()
             task_a = loop.run_in_executor(
                 None, lambda: translate_mlx(mlx_a_model, mlx_a_tokenizer, english))
+            # Speculative decoding: 4B model drafts tokens for 12B to verify
             task_b = loop.run_in_executor(
-                None, lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english))
+                None, lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english,
+                                            draft_model=mlx_a_model))
 
             spanish_a, lat_a, tps_a = await task_a
             qe_a = qe_score(english, spanish_a)
@@ -1162,9 +1181,15 @@ async def main_async(args):
     global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
     global marian_model, marian_tokenizer, ct2_translator
 
+    spec_info = ""
+    if args.run_ab:
+        spec_info = f"  Speculative decoding: 4B drafts {NUM_DRAFT_TOKENS} tokens for 12B\n"
+
     print(f"{'='*60}")
     print(f"  Bilingual A/B Dry Run (MLX)")
     print(f"  Mode: {'A/B parallel' if args.run_ab else '4B only'}")
+    if spec_info:
+        print(spec_info, end="")
     print(f"  WebSocket: ws://localhost:{args.ws_port}")
     print(f"{'='*60}\n")
 
@@ -1250,15 +1275,18 @@ def main():
                         help="Audio input device index (default: auto-detect)")
     parser.add_argument("--gain", type=float, default=None,
                         help="Mic gain multiplier (default: auto-calibrate)")
+    parser.add_argument("--num-draft-tokens", type=int, default=3,
+                        help="Speculative decoding: tokens drafted by 4B for 12B to verify (default: 3)")
     args = parser.parse_args()
 
-    global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN
+    global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
     CHUNK_DURATION = args.chunk_duration
     WS_PORT = args.ws_port
     VAD_THRESHOLD = args.vad_threshold
     MIC_DEVICE = args.device
     if args.gain is not None:
         MIC_GAIN = args.gain  # Explicit gain skips auto-calibration
+    NUM_DRAFT_TOKENS = args.num_draft_tokens
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):
