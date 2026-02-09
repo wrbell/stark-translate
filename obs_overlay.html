@@ -61,6 +61,25 @@
     font-style: italic;
   }
 
+  /* [P7-P3-6A] Streaming cursor for progressive text */
+  .text-spanish.streaming {
+    opacity: 1;
+  }
+
+  .streaming-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 0.9em;
+    background: rgba(255, 255, 255, 0.7);
+    margin-left: 3px;
+    vertical-align: text-bottom;
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
   /* English text — secondary, smaller */
   .text-english {
     font-size: 24px;
@@ -194,23 +213,28 @@
   }
 
   // ── Display ──
-  function showText(spanish, english, isPartial) {
+  function showText(spanish, english, isPartial, isStreaming) {
     // Reset clear timer
     if (clearTimer) clearTimeout(clearTimer);
     clearTimer = setTimeout(clearText, CLEAR_AFTER_MS);
 
     container.classList.remove('empty');
 
-    // Spanish
-    spanishText.textContent = spanish;
+    // Spanish — [P7-P3-6A] add streaming cursor when actively streaming
+    if (isStreaming) {
+      spanishText.innerHTML = escapeHtml(spanish) + '<span class="streaming-cursor"></span>';
+    } else {
+      spanishText.textContent = spanish;
+    }
     spanishText.classList.add('visible');
-    spanishText.classList.toggle('partial', !!isPartial);
+    spanishText.classList.toggle('partial', !!isPartial && !isStreaming);
+    spanishText.classList.toggle('streaming', !!isStreaming);
 
     // English
     if (showEnglish) {
       englishText.textContent = english;
       englishText.classList.add('visible');
-      englishText.classList.toggle('partial', !!isPartial);
+      englishText.classList.toggle('partial', !!isPartial && !isStreaming);
     }
   }
 
@@ -228,7 +252,7 @@
   }
 
   // ── Chunk management for multi-line display ──
-  function addChunk(data, isPartial) {
+  function addChunk(data, isPartial, isStreaming) {
     var spanish = '';
     if (useModel === 'b' && data.spanish_b) {
       spanish = filterText(data.spanish_b);
@@ -237,23 +261,38 @@
     }
     var english = filterText(data.english || '');
 
-    if (isPartial) {
-      // Update or add partial
+    if (isStreaming) {
+      // [P7-P3-6A] Streaming: update or add streaming chunk
       var found = false;
       for (var i = 0; i < recentChunks.length; i++) {
-        if (recentChunks[i].partial) {
-          recentChunks[i] = { spanish: spanish, english: english, partial: true };
+        if (recentChunks[i].streaming) {
+          recentChunks[i].spanish = spanish;
+          if (english) recentChunks[i].english = english;
           found = true;
           break;
         }
       }
       if (!found) {
-        recentChunks.push({ spanish: spanish, english: english, partial: true });
+        recentChunks = recentChunks.filter(function(c) { return !c.partial; });
+        recentChunks.push({ spanish: spanish, english: english, partial: false, streaming: true });
+      }
+    } else if (isPartial) {
+      // Update or add partial
+      var found = false;
+      for (var i = 0; i < recentChunks.length; i++) {
+        if (recentChunks[i].partial) {
+          recentChunks[i] = { spanish: spanish, english: english, partial: true, streaming: false };
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        recentChunks.push({ spanish: spanish, english: english, partial: true, streaming: false });
       }
     } else {
-      // Remove any partial, add final
-      recentChunks = recentChunks.filter(function(c) { return !c.partial; });
-      recentChunks.push({ spanish: spanish, english: english, partial: false });
+      // Remove any partial and streaming, add final
+      recentChunks = recentChunks.filter(function(c) { return !c.partial && !c.streaming; });
+      recentChunks.push({ spanish: spanish, english: english, partial: false, streaming: false });
     }
 
     // Keep only last N chunks
@@ -265,11 +304,13 @@
     var spanishLines = recentChunks.map(function(c) { return c.spanish; }).filter(Boolean);
     var englishLines = recentChunks.map(function(c) { return c.english; }).filter(Boolean);
     var lastIsPartial = recentChunks.length > 0 && recentChunks[recentChunks.length - 1].partial;
+    var lastIsStreaming = recentChunks.length > 0 && recentChunks[recentChunks.length - 1].streaming;
 
     showText(
       spanishLines.join(' '),
       englishLines[englishLines.length - 1] || '',
-      lastIsPartial
+      lastIsPartial,
+      lastIsStreaming
     );
   }
 
@@ -302,12 +343,34 @@
       } catch (e) {
         return;
       }
+
+      // [P7-P3-6A] Handle streaming translation messages
+      if (data.type === 'translation_start') {
+        // STT completed — show English immediately, create streaming placeholder
+        addChunk({
+          english: data.english,
+          spanish_a: '',
+          spanish_b: '',
+        }, false, true);
+        return;
+      }
+
+      if (data.type === 'translation_stream') {
+        // Progressive Spanish text update
+        addChunk({
+          english: '',
+          spanish_a: data.partial_spanish_a || '',
+          spanish_b: '',
+        }, false, true);
+        return;
+      }
+
       if (data.type !== 'translation') return;
 
       var stage = data.stage || 'complete';
       var isPartial = (stage === 'partial');
 
-      addChunk(data, isPartial);
+      addChunk(data, isPartial, false);
     };
   }
 

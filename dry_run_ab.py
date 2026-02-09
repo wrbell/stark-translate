@@ -657,6 +657,137 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
     return clean, latency_ms, gen_tps
 
 
+# ---------------------------------------------------------------------------
+# [P7-P3-6A] Streaming Translation (MLX)
+# ---------------------------------------------------------------------------
+
+# Queue for passing streaming tokens from the synchronous MLX generator
+# to the async WebSocket broadcaster. Each item is either:
+#   ("token", chunk_id, partial_text, tokens_so_far)  — intermediate token batch
+#   ("done", chunk_id, final_text, gen_tps, latency_ms) — generation complete
+_stream_token_queue = None  # set to asyncio.Queue in async context
+_stream_loop = None         # event loop reference for thread-safe queue access
+
+STREAM_TOKEN_BATCH_SIZE = 3  # Send every N tokens to reduce WebSocket overhead
+
+
+def _enqueue_stream_token(item):
+    """[P7-P3-6A] Thread-safe enqueue: schedule put on the event loop.
+    asyncio.Queue is not thread-safe, so we use call_soon_threadsafe
+    from the executor thread to schedule the put on the main loop.
+    """
+    if _stream_token_queue is None or _stream_loop is None:
+        return
+    try:
+        _stream_loop.call_soon_threadsafe(_stream_token_queue.put_nowait, item)
+    except Exception:
+        pass  # queue full or loop closed — skip this update
+
+
+def translate_mlx_streaming(model, tokenizer, text, chunk_id,
+                            prompt_cache_template=None, suffix_tokens=None):
+    """[P7-P3-6A] Translate English->Spanish with token streaming.
+
+    Uses mlx_lm.stream_generate() to yield tokens as they're generated.
+    Pushes intermediate results to _stream_token_queue for the async
+    WebSocket broadcaster to pick up.
+
+    This is a synchronous function meant to run in a ThreadPoolExecutor.
+
+    Args:
+        model: The MLX model to use for generation.
+        tokenizer: The tokenizer for the model.
+        text: English text to translate.
+        chunk_id: Current chunk ID for WebSocket message correlation.
+        prompt_cache_template: Pre-computed KV cache for chat template prefix.
+        suffix_tokens: Pre-tokenized suffix tokens.
+
+    Returns (translation, latency_ms, generation_tps).
+    """
+    from mlx_lm import stream_generate
+    import mlx.core as mx
+
+    if model is None or tokenizer is None:
+        return "(model not loaded)", 0.0, 0.0
+
+    input_words = len(text.split())
+    max_tok = max(32, int(input_words * 1.8))
+
+    use_cache = (prompt_cache_template is not None
+                 and suffix_tokens is not None)
+
+    if use_cache:
+        cached = copy.deepcopy(prompt_cache_template)
+        text_tokens = tokenizer.encode(text, add_special_tokens=False)
+        dynamic_tokens = text_tokens + suffix_tokens
+        gen_kwargs = dict(
+            prompt=dynamic_tokens,
+            max_tokens=max_tok,
+            prompt_cache=cached,
+        )
+    else:
+        messages = [{"role": "user", "content": [
+            {"type": "text",
+             "source_lang_code": "en",
+             "target_lang_code": "es",
+             "text": text}
+        ]}]
+        prompt = tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True
+        )
+        gen_kwargs = dict(
+            prompt=prompt,
+            max_tokens=max_tok,
+        )
+
+    t0 = time.perf_counter()
+    accumulated_text = ""
+    tokens_generated = 0
+    gen_tps = 0.0
+    last_sent_tokens = 0
+
+    for response in stream_generate(model, tokenizer, **gen_kwargs):
+        accumulated_text += response.text
+        tokens_generated = response.generation_tokens
+        gen_tps = response.generation_tps
+
+        # Batch tokens: only push to queue every STREAM_TOKEN_BATCH_SIZE tokens
+        if tokens_generated - last_sent_tokens >= STREAM_TOKEN_BATCH_SIZE:
+            # Clean any end-of-turn markers from partial text
+            partial = accumulated_text.split("<end_of_turn>")[0].strip()
+            if partial:
+                _enqueue_stream_token(
+                    ("token", chunk_id, partial, tokens_generated))
+                last_sent_tokens = tokens_generated
+
+    latency_ms = (time.perf_counter() - t0) * 1000
+    clean = accumulated_text.split("<end_of_turn>")[0].strip()
+
+    return clean, latency_ms, gen_tps
+
+
+async def stream_token_broadcaster():
+    """[P7-P3-6A] Async task that reads streaming tokens from the queue
+    and broadcasts them to WebSocket clients.
+
+    Runs as a background task in the event loop. Exits when it receives None.
+    """
+    while True:
+        item = await _stream_token_queue.get()
+        if item is None:
+            break
+
+        msg_type = item[0]
+        if msg_type == "token":
+            _, cid, partial_spanish, tokens_so_far = item
+            await broadcast({
+                "type": "translation_stream",
+                "chunk_id": cid,
+                "partial_spanish_a": partial_spanish,
+                "tokens_so_far": tokens_so_far,
+            })
+
+
 # [P7-4A] Pre-warm translation models during silence to keep Metal GPU hot.
 # Called once when transitioning from speech to silence — prevents cold-start
 # latency when speech resumes after a pause.
@@ -949,9 +1080,20 @@ async def process_final(audio_data):
 
         prev_text = english[-100:]  # [P7-1E] capped at 100 chars (was 200)
 
-        # Broadcast refined English (replaces partial)
+        # [P7-P3-6A] Broadcast English immediately + translation_start signal
+        # so displays can show English text before translation begins
         print(f"\n{'='*60}")
         print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | EN: {english}")
+        await broadcast({
+            "type": "translation_start",
+            "chunk_id": cid,
+            "english": english,
+            "stage": "final",
+            "stt_latency_ms": round(stt_latency, 1),
+            "stt_confidence": stt_confidence,
+            "timestamp": datetime.now().isoformat(),
+        })
+        # Also send the legacy stt stage message for backward compatibility
         await broadcast({
             "type": "translation",
             "stage": "stt",
@@ -969,11 +1111,13 @@ async def process_final(audio_data):
 
         if mlx_b_model is not None:
             loop = asyncio.get_event_loop()
-            # [P7-2B] Pass prompt cache to skip re-prefilling template tokens
+            # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
+            # non-streaming (speculative decoding can't stream).
             task_a = loop.run_in_executor(
-                None, lambda: translate_mlx(mlx_a_model, mlx_a_tokenizer, english,
-                                            prompt_cache_template=mlx_a_prompt_cache,
-                                            suffix_tokens=mlx_a_suffix_tokens))
+                None, lambda: translate_mlx_streaming(
+                    mlx_a_model, mlx_a_tokenizer, english, cid,
+                    prompt_cache_template=mlx_a_prompt_cache,
+                    suffix_tokens=mlx_a_suffix_tokens))
             # Speculative decoding: 4B model drafts tokens for 12B to verify
             # Note: prompt cache not used with speculative decoding (incompatible)
             task_b = loop.run_in_executor(
@@ -1000,11 +1144,14 @@ async def process_final(audio_data):
             spanish_b, lat_b, tps_b = await task_b
             qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
         else:
-            # [P7-2B] Pass prompt cache for 4B-only mode
-            spanish_a, lat_a, tps_a = translate_mlx(
-                mlx_a_model, mlx_a_tokenizer, english,
-                prompt_cache_template=mlx_a_prompt_cache,
-                suffix_tokens=mlx_a_suffix_tokens)
+            # [P7-P3-6A] 4B-only mode: use streaming translation for
+            # progressive display (biggest perceived latency win: 300-500ms)
+            loop = asyncio.get_event_loop()
+            spanish_a, lat_a, tps_a = await loop.run_in_executor(
+                None, lambda: translate_mlx_streaming(
+                    mlx_a_model, mlx_a_tokenizer, english, cid,
+                    prompt_cache_template=mlx_a_prompt_cache,
+                    suffix_tokens=mlx_a_suffix_tokens))
             qe_a = qe_score(english, spanish_a)
 
         e2e_latency = (time.perf_counter() - e2e_start) * 1000
@@ -1449,6 +1596,7 @@ async def main_async(args):
     global vad_model, vad_utils, stt_pipe
     global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
     global marian_model, marian_tokenizer, ct2_translator
+    global _stream_token_queue, _stream_loop
 
     spec_info = ""
     if args.run_ab:
@@ -1515,12 +1663,22 @@ async def main_async(args):
     print(f"    http://{local_ip}:{args.http_port}/mobile_display.html")
     print(f"    http://{local_ip}:{args.http_port}/audience_display.html")
 
+    # [P7-P3-6A] Initialize streaming translation queue and broadcaster
+    _stream_token_queue = asyncio.Queue(maxsize=128)
+    _stream_loop = asyncio.get_event_loop()
+    stream_task = asyncio.create_task(stream_token_broadcaster())
+    print(f"  [P7-P3-6A] Streaming translation broadcaster started")
+
     # Run audio loop
     try:
         await audio_loop()
     except KeyboardInterrupt:
         pass
     finally:
+        # [P7-P3-6A] Stop streaming broadcaster
+        if _stream_token_queue is not None:
+            await _stream_token_queue.put(None)
+        stream_task.cancel()
         stop_vad_thread()  # [P7-5B] Clean up VAD thread
         print_summary()
         ws_server.close()

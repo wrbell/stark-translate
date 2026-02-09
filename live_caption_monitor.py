@@ -987,6 +987,60 @@ def run_live(video_id, duration_seconds, language="en"):
             print_trend_report()
 
 
+def run_wav(video_id, wav_path, language="en", chunk_seconds=30.0):
+    """WAV mode: transcribe a WAV file with Whisper and compare against YouTube captions."""
+    print(f"\n  Mode: WAV TRANSCRIBE + COMPARE")
+    print(f"  Video: {video_id}")
+    print(f"  WAV:   {wav_path}")
+
+    # Transcribe WAV locally with mlx-whisper
+    import mlx_whisper
+    import mlx.core as mx
+    mx.set_cache_limit(256 * 1024 * 1024)
+
+    print(f"\n  Phase 1: Transcribing WAV with mlx-whisper...")
+    t0 = time.perf_counter()
+    result = mlx_whisper.transcribe(
+        wav_path,
+        path_or_hf_repo="mlx-community/distil-whisper-large-v3",
+        language="en",
+        word_timestamps=False,
+        condition_on_previous_text=True,
+        initial_prompt="church sermon gospel Bible God Jesus Christ faith grace prayer",
+    )
+    stt_ms = (time.perf_counter() - t0) * 1000
+
+    local_segments = []
+    for seg in result.get("segments", []):
+        text = seg.get("text", "").strip()
+        if text:
+            local_segments.append(TimedSegment(seg["start"], seg["end"], text))
+
+    audio_duration = local_segments[-1].end if local_segments else 0
+    print(f"  Transcribed {len(local_segments)} segments in {stt_ms/1000:.1f}s "
+          f"({audio_duration:.0f}s audio, {audio_duration/(stt_ms/1000):.1f}x realtime)")
+
+    if not local_segments:
+        print("  ERROR: No segments transcribed", file=sys.stderr)
+        return
+
+    # Fetch YouTube captions
+    print(f"\n  Phase 2: Fetching YouTube captions...")
+    yt_segments = fetch_youtube_captions(video_id, language)
+    if not yt_segments:
+        print("  ERROR: No YouTube captions fetched", file=sys.stderr)
+        return
+
+    # Compare
+    print(f"\n  Phase 3: Comparing {len(local_segments)} local segments "
+          f"against {len(yt_segments)} YouTube segments...")
+    records = compare_windowed(local_segments, yt_segments)
+
+    # Log and report
+    session = write_jsonl(records, video_id, "wav", csv_path=wav_path)
+    print_session_summary(session)
+
+
 def run_report():
     """Report mode: show trend analysis from existing JSONL data."""
     print_trend_report()
@@ -1049,6 +1103,19 @@ Cross-system WER interpretation:
     live_parser.add_argument("--output", default=JSONL_PATH,
                              help=f"Output JSONL path (default: {JSONL_PATH})")
 
+    # WAV mode
+    wav_parser = subparsers.add_parser("wav", help="Transcribe WAV + compare against YouTube")
+    wav_parser.add_argument("--video-id", required=True,
+                            help="YouTube video ID for the same sermon")
+    wav_parser.add_argument("--wav", required=True,
+                            help="Path to WAV file (16kHz mono)")
+    wav_parser.add_argument("--language", default="en",
+                            help="Caption language code (default: en)")
+    wav_parser.add_argument("--window-size", type=float, default=WINDOW_SECONDS,
+                            help=f"Comparison window size in seconds (default: {WINDOW_SECONDS})")
+    wav_parser.add_argument("--output", default=JSONL_PATH,
+                            help=f"Output JSONL path (default: {JSONL_PATH})")
+
     # Report mode
     report_parser = subparsers.add_parser("report", help="Trend analysis report")
     report_parser.add_argument("--input", default=JSONL_PATH,
@@ -1061,7 +1128,7 @@ Cross-system WER interpretation:
         sys.exit(1)
 
     # Apply shared options
-    if args.mode in ("post", "live"):
+    if args.mode in ("post", "live", "wav"):
         WINDOW_SECONDS = args.window_size
         JSONL_PATH = args.output
 
@@ -1082,6 +1149,13 @@ Cross-system WER interpretation:
     elif args.mode == "live":
         video_id = extract_video_id(args.video_id)
         run_live(video_id, args.duration, args.language)
+
+    elif args.mode == "wav":
+        if not os.path.exists(args.wav):
+            print(f"  ERROR: WAV file not found: {args.wav}", file=sys.stderr)
+            sys.exit(1)
+        video_id = extract_video_id(args.video_id)
+        run_wav(video_id, args.wav, args.language)
 
     elif args.mode == "report":
         JSONL_PATH = args.input

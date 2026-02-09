@@ -106,6 +106,25 @@
     font-style: italic;
   }
 
+  /* [P7-P3-6A] Streaming translation cursor */
+  .sentence.streaming {
+    color: var(--text);
+  }
+
+  .streaming-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: var(--text-dim);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
   /* Older sentences fade */
   .sentence.age-0 { opacity: 1.0; }
   .sentence.age-1 { opacity: 0.8; }
@@ -257,6 +276,7 @@
     englishEl.innerHTML = sentences.map((s, i) => {
       const age = total - 1 - i;
       const cls = s.partial ? 'sentence partial'
+        : s.streaming ? 'sentence streaming'
         : age < FADE_COUNT ? 'sentence age-' + Math.min(age, 4)
         : 'sentence age-4';
       return '<span class="' + cls + '">' + esc(s.english) + ' </span>';
@@ -264,6 +284,11 @@
 
     spanishEl.innerHTML = sentences.map((s, i) => {
       const age = total - 1 - i;
+      // [P7-P3-6A] Streaming sentences get a blinking cursor
+      if (s.streaming) {
+        const cursor = '<span class="streaming-cursor"></span>';
+        return '<span class="sentence streaming">' + esc(s.spanish) + cursor + ' </span>';
+      }
       const cls = s.partial ? 'sentence partial'
         : age < FADE_COUNT ? 'sentence age-' + Math.min(age, 4)
         : 'sentence age-4';
@@ -298,6 +323,34 @@
 
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
+
+      // [P7-P3-6A] Handle streaming translation tokens
+      if (data.type === 'translation_start') {
+        // STT completed — show English immediately, create streaming placeholder for Spanish
+        const en = filter(data.english || '');
+        sentences = sentences.filter(s => !s.partial && !s.streaming);
+        sentences.push({
+          id: 'stream-' + data.chunk_id,
+          english: en,
+          spanish: '',
+          partial: false,
+          streaming: true,
+        });
+        render();
+        return;
+      }
+
+      if (data.type === 'translation_stream') {
+        // Progressive Spanish text from streaming generation
+        const partialEs = filter(data.partial_spanish_a || '');
+        const existing = sentences.find(s => s.id === 'stream-' + data.chunk_id);
+        if (existing) {
+          existing.spanish = partialEs;
+        }
+        render();
+        return;
+      }
+
       if (data.type !== 'translation') return;
 
       const stage = data.stage || 'complete';
@@ -311,17 +364,18 @@
           existing.spanish = es;
         } else {
           sentences = sentences.filter(s => !s.partial);
-          sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, partial: true });
+          sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, partial: true, streaming: false });
         }
       } else {
-        sentences = sentences.filter(s => !s.partial);
+        // Final translation — remove partials and streaming placeholders
+        sentences = sentences.filter(s => !s.partial && !s.streaming);
 
         const existing = sentences.find(s => s.id === data.chunk_id);
         if (existing) {
           existing.english = en;
           existing.spanish = es;
         } else {
-          sentences.push({ id: data.chunk_id, english: en, spanish: es, partial: false });
+          sentences.push({ id: data.chunk_id, english: en, spanish: es, partial: false, streaming: false });
         }
 
         // Keep all sentences for scroll history (capped at 200 to limit memory)

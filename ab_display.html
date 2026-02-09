@@ -140,6 +140,23 @@
 
   .chunk.partial { opacity: 0.5; font-style: italic; }
 
+  /* [P7-P3-6A] Streaming chunk with cursor */
+  .chunk.streaming { opacity: 0.85; }
+
+  .streaming-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 0.85em;
+    background: var(--text-dim);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
@@ -381,6 +398,33 @@
 
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
+
+      // [P7-P3-6A] Handle streaming translation messages
+      if (data.type === 'translation_start') {
+        // STT completed — show English in A column with streaming placeholder
+        const en = filterText(data.english || '');
+        const conf = data.stt_confidence;
+        const confDot = conf !== undefined
+          ? '<span class="confidence-dot ' + confidenceClass(conf) + '"></span>'
+          : '';
+        // Show English in A column
+        if (en) upsertChunk(panels['a-en'], 'stream-' + data.chunk_id, en, confDot, false, false);
+        // Create streaming placeholder in A Spanish column
+        upsertChunk(panels['a-es'], 'stream-' + data.chunk_id, '', '', false, true);
+        // Show English in C column too
+        if (en) upsertChunk(panels['c-en'], 'stream-' + data.chunk_id, en, confDot, false, false);
+        upsertChunk(panels['c-es'], 'stream-' + data.chunk_id, '', '', false, true);
+        return;
+      }
+
+      if (data.type === 'translation_stream') {
+        // Progressive Spanish text update for A column
+        const partialEs = filterText(data.partial_spanish_a || '');
+        upsertChunk(panels['a-es'], 'stream-' + data.chunk_id, partialEs, '', false, true);
+        upsertChunk(panels['c-es'], 'stream-' + data.chunk_id, partialEs, '', false, true);
+        return;
+      }
+
       if (data.type !== 'translation') return;
 
       const stage = data.stage || 'complete';
@@ -431,9 +475,10 @@
         updateLabels();
       }
 
-      // Remove partial rows from all columns
+      // Remove partial and streaming rows from all columns
       const pid = 'p-' + data.chunk_id;
-      Object.values(panels).forEach(p => removeChunk(p, pid));
+      const sid = 'stream-' + data.chunk_id;
+      Object.values(panels).forEach(p => { removeChunk(p, pid); removeChunk(p, sid); });
 
       const en = filterText(data.english || '');
       const esA = filterText(data.spanish_a || '');
@@ -517,7 +562,7 @@
     };
   }
 
-  function upsertChunk(panel, id, text, prefix, isPartial) {
+  function upsertChunk(panel, id, text, prefix, isPartial, isStreaming) {
     const domId = panel.id + '-chunk-' + id;
     let div = document.getElementById(domId);
     if (!div) {
@@ -526,9 +571,12 @@
       div.className = 'chunk';
       panel.appendChild(div);
     }
-    div.className = isPartial ? 'chunk partial' : 'chunk';
-    const label = typeof id === 'string' && id.startsWith('p-') ? '' : '<span class="chunk-num">#' + id + '</span>';
-    div.innerHTML = (prefix || '') + label + escapeHtml(text);
+    div.className = isStreaming ? 'chunk streaming' : isPartial ? 'chunk partial' : 'chunk';
+    const isTemporary = typeof id === 'string' && (id.startsWith('p-') || id.startsWith('stream-'));
+    const label = isTemporary ? '' : '<span class="chunk-num">#' + id + '</span>';
+    // [P7-P3-6A] Add streaming cursor for actively streaming text
+    const cursor = isStreaming ? '<span class="streaming-cursor"></span>' : '';
+    div.innerHTML = (prefix || '') + label + escapeHtml(text) + cursor;
     panel.scrollTop = panel.scrollHeight;
   }
 
