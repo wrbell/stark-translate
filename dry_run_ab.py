@@ -66,6 +66,11 @@ NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 # All MLX calls are serialized through this single worker thread.
 _pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
 
+# Lock for PyTorch calls. The VAD thread and pipeline thread both use PyTorch
+# (Silero VAD + MarianMT). Concurrent PyTorch from different threads causes
+# heap corruption on macOS. This lock serializes all PyTorch inference.
+_pytorch_lock = threading.Lock()
+
 # MLX model IDs (4-bit quantized, community-converted)
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
 MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
@@ -817,8 +822,9 @@ def translate_marian(text):
 
     t0 = time.perf_counter()
     inputs = marian_tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-    with torch.no_grad():
-        translated = marian_model.generate(**inputs, max_new_tokens=128)
+    with _pytorch_lock:
+        with torch.no_grad():
+            translated = marian_model.generate(**inputs, max_new_tokens=128)
     result = marian_tokenizer.decode(translated[0], skip_special_tokens=True)
     latency_ms = (time.perf_counter() - t0) * 1000
     return result, latency_ms
@@ -898,7 +904,8 @@ def is_speech(audio_chunk, model, utils):
     differently.
     """
     tensor = torch.from_numpy(audio_chunk).float()
-    speech_prob = model(tensor, SAMPLE_RATE).item()
+    with _pytorch_lock:
+        speech_prob = model(tensor, SAMPLE_RATE).item()
     return speech_prob > VAD_THRESHOLD
 
 
@@ -1597,9 +1604,6 @@ async def audio_loop():
     last_partial_len = 0    # audio length (samples) at last partial
     utterance_id = 0        # tracks current utterance for partial updates
 
-    # [P7-5B] Start the dedicated VAD thread
-    start_vad_thread()
-
     while True:
         try:
             stream = sd.InputStream(
@@ -1613,28 +1617,13 @@ async def audio_loop():
 
             with stream:
                 while True:
-                    # [P7-5B] Feed audio frames to VAD thread, then read results.
-                    # This two-step approach decouples audio capture from VAD latency.
+                    # Get audio frame from sounddevice callback, run VAD inline.
+                    # VAD is <1ms so running it on the asyncio thread is fine.
                     try:
                         audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
                     except asyncio.TimeoutError:
-                        # Even on timeout, check if VAD has results pending
-                        try:
-                            audio_frame, has_speech = _vad_out_q.get_nowait()
-                        except queue_module.Empty:
-                            continue
-                    else:
-                        # Submit frame to VAD thread
-                        try:
-                            _vad_in_q.put_nowait(audio_frame)
-                        except queue_module.Full:
-                            pass  # drop frame rather than block audio capture
-                        # Read VAD result (may be from a slightly earlier frame —
-                        # acceptable since VAD processes frames in ~1-2ms)
-                        try:
-                            audio_frame, has_speech = _vad_out_q.get(timeout=0.05)
-                        except queue_module.Empty:
-                            continue  # VAD hasn't caught up yet, skip this tick
+                        continue
+                    has_speech = is_speech(audio_frame, vad_model, vad_utils)
 
                     frame_count += 1
 
@@ -1684,12 +1673,6 @@ async def audio_loop():
                         frame_count = 0
                         last_partial_len = 0
                         vad_model.reset_states()
-                        # [P7-5B] Drain any stale VAD results after reset
-                        while not _vad_out_q.empty():
-                            try:
-                                _vad_out_q.get_nowait()
-                            except queue_module.Empty:
-                                break
                         # [P7-4A] Schedule a GPU warmup now that speech ended
                         _warmup_pending = True
 
@@ -1708,17 +1691,6 @@ async def audio_loop():
                 try:
                     audio_queue.get_nowait()
                 except asyncio.QueueEmpty:
-                    break
-            # [P7-5B] Drain VAD queues too
-            while not _vad_in_q.empty():
-                try:
-                    _vad_in_q.get_nowait()
-                except queue_module.Empty:
-                    break
-            while not _vad_out_q.empty():
-                try:
-                    _vad_out_q.get_nowait()
-                except queue_module.Empty:
                     break
             await asyncio.sleep(2)
 
@@ -1821,7 +1793,6 @@ async def main_async(args):
         if _stream_token_queue is not None:
             await _stream_token_queue.put(None)
         stream_task.cancel()
-        stop_vad_thread()  # [P7-5B] Clean up VAD thread
         print_summary()
         ws_server.close()
         await ws_server.wait_closed()
