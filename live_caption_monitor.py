@@ -144,6 +144,132 @@ def normalize_text(text):
 
 
 # ---------------------------------------------------------------------------
+# English Stopwords (for content-word overlap checking)
+# ---------------------------------------------------------------------------
+
+STOPWORDS = frozenset({
+    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
+    "being", "have", "has", "had", "do", "does", "did", "will", "would",
+    "could", "should", "may", "might", "shall", "can", "need", "must",
+    "it", "its", "i", "me", "my", "we", "us", "our", "you", "your",
+    "he", "him", "his", "she", "her", "they", "them", "their", "this",
+    "that", "these", "those", "what", "which", "who", "whom", "how",
+    "when", "where", "why", "not", "no", "nor", "so", "if", "then",
+    "than", "too", "very", "just", "about", "up", "out", "all", "also",
+    "as", "into", "over", "after", "before", "between", "through",
+    "there", "here", "some", "any", "each", "every", "both", "few",
+    "more", "most", "other", "such", "only", "own", "same", "now",
+})
+
+
+def get_content_words(text):
+    """Extract content words (non-stopwords) from normalized text."""
+    return {w for w in text.split() if w not in STOPWORDS and len(w) > 1}
+
+
+# ---------------------------------------------------------------------------
+# YouTube Caption Quality Detection
+# ---------------------------------------------------------------------------
+
+def detect_youtube_repetition(text):
+    """Detect word-level and phrase-level repetition in YouTube captions.
+
+    YouTube's live auto-caption engine sometimes enters repetition loops,
+    producing text like "but what's it mean what's it mean to but what's
+    it mean what's it mean to".
+
+    Returns:
+        (is_degraded, details_dict) where is_degraded is True if the text
+        shows significant repetition patterns.
+    """
+    words = text.split()
+    n_words = len(words)
+    details = {
+        "word_repeat_ratio": 0.0,
+        "phrase_repeat_count": 0,
+        "repeated_phrases": [],
+    }
+
+    if n_words < 4:
+        return False, details
+
+    # --- Word-level repetition: consecutive duplicate words ---
+    consecutive_repeats = 0
+    for i in range(1, n_words):
+        if words[i] == words[i - 1]:
+            consecutive_repeats += 1
+    word_repeat_ratio = consecutive_repeats / (n_words - 1) if n_words > 1 else 0.0
+    details["word_repeat_ratio"] = round(word_repeat_ratio, 3)
+
+    # --- Phrase-level repetition: 3+ word n-grams appearing multiple times ---
+    # Check trigrams (3-word sequences)
+    phrase_coverage = 0.0
+    has_adjacent_repeats = False
+    if n_words >= 6:
+        trigrams = {}
+        trigram_positions = {}  # track positions for adjacency check
+        for i in range(n_words - 2):
+            gram = " ".join(words[i:i + 3])
+            trigrams[gram] = trigrams.get(gram, 0) + 1
+            if gram not in trigram_positions:
+                trigram_positions[gram] = []
+            trigram_positions[gram].append(i)
+
+        repeated_phrases = {g: c for g, c in trigrams.items() if c >= 2}
+        details["phrase_repeat_count"] = len(repeated_phrases)
+        # Keep the top 3 worst offenders for debugging
+        top_repeated = sorted(repeated_phrases.items(), key=lambda x: -x[1])[:3]
+        details["repeated_phrases"] = [f"{g} (x{c})" for g, c in top_repeated]
+
+        # Compute what fraction of the text is covered by repeated trigrams
+        # A high ratio means the text is mostly repetition
+        repeated_word_positions = set()
+        for gram, count in repeated_phrases.items():
+            if count >= 2:
+                gram_words = gram.split()
+                for i in range(n_words - 2):
+                    if words[i:i + 3] == gram_words:
+                        repeated_word_positions.update([i, i + 1, i + 2])
+        phrase_coverage = len(repeated_word_positions) / n_words if n_words > 0 else 0.0
+
+        # Check for near-adjacent repeated 4+ word sequences (YouTube stutter signature).
+        # Natural text repeats a prefix like "the lord is" but follows with DIFFERENT
+        # words ("the lord is my shepherd" vs "the lord is gracious"). YouTube stutters
+        # repeat the same 4+ word sequence: "the lord is my the lord is my".
+        # We check 4-grams for adjacency to distinguish the two cases.
+        if n_words >= 8:
+            fourgram_positions = {}
+            for i in range(n_words - 3):
+                gram4 = " ".join(words[i:i + 4])
+                if gram4 not in fourgram_positions:
+                    fourgram_positions[gram4] = []
+                fourgram_positions[gram4].append(i)
+
+            for gram4, positions in fourgram_positions.items():
+                if len(positions) >= 2:
+                    for j in range(1, len(positions)):
+                        gap = positions[j] - positions[j - 1]
+                        if gap <= 8:
+                            has_adjacent_repeats = True
+                            break
+                if has_adjacent_repeats:
+                    break
+
+    # --- Decision: flag as degraded if either criterion triggers ---
+    # Word-level: >25% of consecutive word pairs are repeats
+    # Phrase-level: >50% of words are part of repeated trigrams (general)
+    # OR: >35% coverage WITH adjacent repeated trigrams (YouTube stutter pattern)
+    is_degraded = (
+        word_repeat_ratio > 0.25
+        or phrase_coverage > 0.50
+        or (phrase_coverage > 0.35 and has_adjacent_repeats)
+    )
+
+    return is_degraded, details
+
+
+# ---------------------------------------------------------------------------
 # WER/CER Computation with Offset Search
 # ---------------------------------------------------------------------------
 
@@ -227,11 +353,15 @@ def find_best_offset(local_segments, yt_segments, window_start, window_end,
     Searches offsets in [-search_range, +search_range] at search_step intervals.
     The offset is applied to YouTube timestamps: yt_time + offset = local_time.
 
-    Returns (best_offset, best_wer, local_text, yt_text_at_best_offset).
+    After finding the best offset, validates alignment by checking content-word
+    overlap. If fewer than 5 content words are shared, marks alignment as
+    uncertain and falls back to offset=0.
+
+    Returns (best_offset, best_wer, local_text, yt_text_at_best_offset, alignment_uncertain).
     """
     local_text = normalize_text(segments_in_window(local_segments, window_start, window_end))
     if not local_text:
-        return 0.0, None, "", ""
+        return 0.0, None, "", "", False
 
     best_wer = float("inf")
     best_offset = 0.0
@@ -253,9 +383,26 @@ def find_best_offset(local_segments, yt_segments, window_start, window_end,
         offset += search_step
 
     if best_wer == float("inf"):
-        return 0.0, None, local_text, ""
+        return 0.0, None, local_text, "", False
 
-    return best_offset, best_wer, local_text, best_yt_text
+    # --- Alignment validation: check content-word overlap ---
+    local_content = get_content_words(local_text)
+    yt_content = get_content_words(best_yt_text)
+    shared_content = local_content & yt_content
+    alignment_uncertain = len(shared_content) < 5
+
+    if alignment_uncertain and abs(best_offset) > 0.01:
+        # Fall back to 0 offset since the matched offset looks like a false alignment
+        yt_text_zero = normalize_text(segments_in_window(
+            yt_segments, window_start, window_end
+        ))
+        if yt_text_zero:
+            wer_zero, _, _ = compute_wer_cer(local_text, yt_text_zero)
+            best_offset = 0.0
+            best_wer = wer_zero
+            best_yt_text = yt_text_zero
+
+    return best_offset, best_wer, local_text, best_yt_text, alignment_uncertain
 
 
 # ---------------------------------------------------------------------------
@@ -584,6 +731,14 @@ def compare_windowed(local_segments, yt_segments, window_size=WINDOW_SECONDS):
     Divides the timeline into windows of window_size seconds and computes
     WER/CER for each window, using offset search to handle latency drift.
 
+    Each window record includes a 'quality_status' field:
+      - 'comparable':          Both sides have sufficient content and align well
+      - 'youtube_degraded':    YouTube caption shows repetition/stuttering
+      - 'alignment_uncertain': Offset search found no meaningful content overlap
+      - 'too_few_words':       One or both sides have < 3 words (skipped)
+
+    Only 'comparable' windows contribute to the headline "clean WER" metric.
+
     Returns a list of per-window comparison records.
     """
     if not local_segments or not yt_segments:
@@ -597,18 +752,38 @@ def compare_windowed(local_segments, yt_segments, window_size=WINDOW_SECONDS):
 
     records = []
     window_start = 0.0
+    n_skipped_few_words = 0
 
     while window_start < total_duration:
         window_end = window_start + window_size
 
-        best_offset, wer, local_text, yt_text = find_best_offset(
+        best_offset, wer, local_text, yt_text, alignment_uncertain = find_best_offset(
             local_segments, yt_segments, window_start, window_end
         )
 
         if wer is not None and local_text:
+            local_words = len(local_text.split())
+            yt_words = len(yt_text.split())
+
+            # --- Window rejection: too few words ---
+            if local_words < 3 or yt_words < 3:
+                n_skipped_few_words += 1
+                window_start += window_size
+                continue
+
             # Also compute CER at the best offset
             _, cer, ops = compute_wer_cer(local_text, yt_text)
             interpretation = interpret_wer(wer)
+
+            # --- Determine quality status ---
+            yt_degraded, yt_rep_details = detect_youtube_repetition(yt_text)
+
+            if yt_degraded:
+                quality_status = "youtube_degraded"
+            elif alignment_uncertain:
+                quality_status = "alignment_uncertain"
+            else:
+                quality_status = "comparable"
 
             record = {
                 "window_start": round(window_start, 1),
@@ -616,16 +791,25 @@ def compare_windowed(local_segments, yt_segments, window_size=WINDOW_SECONDS):
                 "wer": round(wer, 4),
                 "cer": round(cer, 4),
                 "offset_seconds": round(best_offset, 1),
-                "local_words": len(local_text.split()),
-                "yt_words": len(yt_text.split()),
+                "local_words": local_words,
+                "yt_words": yt_words,
                 "ops": ops,
                 "interpretation": interpretation,
+                "quality_status": quality_status,
                 "local_text": local_text[:200],
                 "yt_text": yt_text[:200],
             }
+
+            # Attach repetition details for degraded windows (debugging aid)
+            if yt_degraded:
+                record["yt_repetition"] = yt_rep_details
+
             records.append(record)
 
         window_start += window_size
+
+    if n_skipped_few_words:
+        print(f"  Skipped {n_skipped_few_words} window(s) with < 3 words on one/both sides")
 
     return records
 
@@ -635,7 +819,12 @@ def compare_windowed(local_segments, yt_segments, window_size=WINDOW_SECONDS):
 # ---------------------------------------------------------------------------
 
 def write_jsonl(records, video_id, mode, csv_path=None):
-    """Append comparison results to the JSONL log file."""
+    """Append comparison results to the JSONL log file.
+
+    Computes separate aggregates for comparable, youtube_degraded, and
+    alignment_uncertain windows. The headline metric is 'clean_wer' which
+    only includes comparable windows.
+    """
     os.makedirs(os.path.dirname(JSONL_PATH), exist_ok=True)
 
     session_record = {
@@ -649,23 +838,62 @@ def write_jsonl(records, video_id, mode, csv_path=None):
         "windows": records,
     }
 
-    # Compute session-level aggregates
+    # Compute session-level aggregates split by quality status
     if records:
-        wers = [r["wer"] for r in records]
-        cers = [r["cer"] for r in records]
-        session_record["aggregate"] = {
-            "mean_wer": round(float(np.mean(wers)), 4),
-            "median_wer": round(float(np.median(wers)), 4),
-            "std_wer": round(float(np.std(wers)), 4),
-            "min_wer": round(float(np.min(wers)), 4),
-            "max_wer": round(float(np.max(wers)), 4),
-            "p95_wer": round(float(np.percentile(wers, 95)), 4),
-            "mean_cer": round(float(np.mean(cers)), 4),
-            "median_cer": round(float(np.median(cers)), 4),
-            "windows_comparable": sum(1 for w in wers if w <= 0.15),
-            "windows_issues": sum(1 for w in wers if 0.15 < w <= 0.25),
-            "windows_degraded": sum(1 for w in wers if w > 0.25),
+        # Partition records by quality status
+        comparable = [r for r in records if r.get("quality_status") == "comparable"]
+        yt_degraded = [r for r in records if r.get("quality_status") == "youtube_degraded"]
+        align_uncertain = [r for r in records if r.get("quality_status") == "alignment_uncertain"]
+
+        # Raw metrics (all windows, for backward compat)
+        all_wers = [r["wer"] for r in records]
+        all_cers = [r["cer"] for r in records]
+
+        agg = {
+            # --- Headline: clean metrics (comparable windows only) ---
+            "num_comparable": len(comparable),
+            "num_youtube_degraded": len(yt_degraded),
+            "num_alignment_uncertain": len(align_uncertain),
         }
+
+        if comparable:
+            clean_wers = [r["wer"] for r in comparable]
+            clean_cers = [r["cer"] for r in comparable]
+            agg["clean_mean_wer"] = round(float(np.mean(clean_wers)), 4)
+            agg["clean_median_wer"] = round(float(np.median(clean_wers)), 4)
+            agg["clean_std_wer"] = round(float(np.std(clean_wers)), 4)
+            agg["clean_min_wer"] = round(float(np.min(clean_wers)), 4)
+            agg["clean_max_wer"] = round(float(np.max(clean_wers)), 4)
+            agg["clean_p95_wer"] = round(float(np.percentile(clean_wers, 95)), 4)
+            agg["clean_mean_cer"] = round(float(np.mean(clean_cers)), 4)
+            agg["clean_median_cer"] = round(float(np.median(clean_cers)), 4)
+
+        # --- Secondary: raw metrics (all windows) ---
+        agg["raw_mean_wer"] = round(float(np.mean(all_wers)), 4)
+        agg["raw_median_wer"] = round(float(np.median(all_wers)), 4)
+        agg["raw_std_wer"] = round(float(np.std(all_wers)), 4)
+        agg["raw_min_wer"] = round(float(np.min(all_wers)), 4)
+        agg["raw_max_wer"] = round(float(np.max(all_wers)), 4)
+        agg["raw_p95_wer"] = round(float(np.percentile(all_wers, 95)), 4)
+        agg["raw_mean_cer"] = round(float(np.mean(all_cers)), 4)
+        agg["raw_median_cer"] = round(float(np.median(all_cers)), 4)
+
+        # WER interpretation buckets (on comparable windows only)
+        if comparable:
+            clean_wers = [r["wer"] for r in comparable]
+            agg["windows_comparable_low_wer"] = sum(1 for w in clean_wers if w <= 0.15)
+            agg["windows_comparable_mid_wer"] = sum(1 for w in clean_wers if 0.15 < w <= 0.25)
+            agg["windows_comparable_high_wer"] = sum(1 for w in clean_wers if w > 0.25)
+
+        # Backward compat aliases (map to clean when available, raw otherwise)
+        if comparable:
+            agg["mean_wer"] = agg["clean_mean_wer"]
+            agg["median_wer"] = agg["clean_median_wer"]
+        else:
+            agg["mean_wer"] = agg["raw_mean_wer"]
+            agg["median_wer"] = agg["raw_median_wer"]
+
+        session_record["aggregate"] = agg
 
     with open(JSONL_PATH, "a") as f:
         f.write(json.dumps(session_record) + "\n")
@@ -679,7 +907,12 @@ def write_jsonl(records, video_id, mode, csv_path=None):
 # ---------------------------------------------------------------------------
 
 def print_session_summary(session_record):
-    """Print a detailed summary of a comparison session."""
+    """Print a detailed summary of a comparison session.
+
+    Shows the quality-filtered breakdown with clean WER as headline metric
+    and raw WER as secondary. Separates comparable, YouTube-degraded, and
+    alignment-uncertain windows.
+    """
     records = session_record.get("windows", [])
     agg = session_record.get("aggregate", {})
 
@@ -695,58 +928,115 @@ def print_session_summary(session_record):
         print(f"{'='*70}")
         return
 
-    # Overall metrics
-    print(f"\n  Overall Metrics ({len(records)} windows):")
-    print(f"    Mean WER:   {agg.get('mean_wer', 0):.1%}")
-    print(f"    Median WER: {agg.get('median_wer', 0):.1%}")
-    print(f"    Std WER:    {agg.get('std_wer', 0):.1%}")
-    print(f"    Min WER:    {agg.get('min_wer', 0):.1%}")
-    print(f"    Max WER:    {agg.get('max_wer', 0):.1%}")
-    print(f"    P95 WER:    {agg.get('p95_wer', 0):.1%}")
-    print(f"    Mean CER:   {agg.get('mean_cer', 0):.1%}")
-    print(f"    Median CER: {agg.get('median_cer', 0):.1%}")
-
-    # Interpretation breakdown
-    n_comp = agg.get("windows_comparable", 0)
-    n_issues = agg.get("windows_issues", 0)
-    n_deg = agg.get("windows_degraded", 0)
+    # Partition by quality status
+    comparable = [r for r in records if r.get("quality_status") == "comparable"]
+    yt_degraded = [r for r in records if r.get("quality_status") == "youtube_degraded"]
+    align_uncertain = [r for r in records if r.get("quality_status") == "alignment_uncertain"]
     n = len(records)
 
-    print(f"\n  Interpretation Breakdown:")
-    print(f"    Comparable/better (<=15%): {n_comp}/{n} ({n_comp/n:.0%})")
-    print(f"    Potential issues (15-25%): {n_issues}/{n} ({n_issues/n:.0%})")
-    print(f"    Likely degradation (>25%): {n_deg}/{n} ({n_deg/n:.0%})")
-
-    # Per-window detail (show worst 5 and best 5)
-    sorted_records = sorted(records, key=lambda r: r["wer"])
-
-    if len(sorted_records) > 5:
-        print(f"\n  Best 5 Windows:")
-        for r in sorted_records[:5]:
-            print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                  f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
-                  f"offset={r['offset_seconds']:+.1f}s "
-                  f"({r['local_words']}w local, {r['yt_words']}w YT)")
-
-        print(f"\n  Worst 5 Windows:")
-        for r in sorted_records[-5:]:
-            print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                  f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
-                  f"offset={r['offset_seconds']:+.1f}s "
-                  f"({r['local_words']}w local, {r['yt_words']}w YT)")
-            if r["wer"] > 0.25:
-                print(f"      Local: {r['local_text'][:100]}")
-                print(f"      YT:    {r['yt_text'][:100]}")
+    # --- Window quality breakdown ---
+    print(f"\n  Window Quality Breakdown ({n} total):")
+    if comparable:
+        clean_mean = agg.get("clean_mean_wer", 0)
+        print(f"    Comparable windows:    {len(comparable):>3}/{n} "
+              f"({len(comparable)/n:.0%}) -- Mean WER: {clean_mean:.1%}")
     else:
-        print(f"\n  All Windows:")
-        for r in sorted_records:
-            print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                  f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
-                  f"offset={r['offset_seconds']:+.1f}s")
+        print(f"    Comparable windows:    {len(comparable):>3}/{n} "
+              f"({len(comparable)/n:.0%}) -- no clean metrics")
+    print(f"    YouTube degraded:      {len(yt_degraded):>3}/{n} "
+          f"({len(yt_degraded)/n:.0%}) -- excluded from metrics")
+    print(f"    Alignment uncertain:   {len(align_uncertain):>3}/{n} "
+          f"({len(align_uncertain)/n:.0%}) -- excluded from metrics")
 
-    # Offset drift analysis
-    offsets = [r["offset_seconds"] for r in records]
-    print(f"\n  Latency Drift Analysis:")
+    # --- Headline: clean metrics (comparable windows only) ---
+    if comparable:
+        print(f"\n  Clean Metrics ({len(comparable)} comparable windows):")
+        print(f"    Mean WER:   {agg.get('clean_mean_wer', 0):.1%}")
+        print(f"    Median WER: {agg.get('clean_median_wer', 0):.1%}")
+        print(f"    Std WER:    {agg.get('clean_std_wer', 0):.1%}")
+        print(f"    Min WER:    {agg.get('clean_min_wer', 0):.1%}")
+        print(f"    Max WER:    {agg.get('clean_max_wer', 0):.1%}")
+        print(f"    P95 WER:    {agg.get('clean_p95_wer', 0):.1%}")
+        print(f"    Mean CER:   {agg.get('clean_mean_cer', 0):.1%}")
+        print(f"    Median CER: {agg.get('clean_median_cer', 0):.1%}")
+
+        # Interpretation breakdown for comparable windows
+        n_low = agg.get("windows_comparable_low_wer", 0)
+        n_mid = agg.get("windows_comparable_mid_wer", 0)
+        n_high = agg.get("windows_comparable_high_wer", 0)
+        nc = len(comparable)
+
+        print(f"\n  WER Interpretation (comparable windows):")
+        print(f"    Comparable/better (<=15%): {n_low}/{nc} ({n_low/nc:.0%})")
+        print(f"    Potential issues (15-25%): {n_mid}/{nc} ({n_mid/nc:.0%})")
+        print(f"    Likely degradation (>25%): {n_high}/{nc} ({n_high/nc:.0%})")
+    else:
+        print(f"\n  WARNING: No comparable windows -- all excluded by quality filters")
+
+    # --- Secondary: raw metrics (all windows) ---
+    print(f"\n  Raw Metrics ({n} windows, all included):")
+    print(f"    Mean WER:   {agg.get('raw_mean_wer', 0):.1%}")
+    print(f"    Median WER: {agg.get('raw_median_wer', 0):.1%}")
+    print(f"    P95 WER:    {agg.get('raw_p95_wer', 0):.1%}")
+    print(f"    Mean CER:   {agg.get('raw_mean_cer', 0):.1%}")
+
+    # --- Per-window detail: best/worst comparable windows ---
+    if comparable:
+        sorted_comp = sorted(comparable, key=lambda r: r["wer"])
+
+        if len(sorted_comp) > 5:
+            print(f"\n  Best 5 Comparable Windows:")
+            for r in sorted_comp[:5]:
+                print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                      f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
+                      f"offset={r['offset_seconds']:+.1f}s "
+                      f"({r['local_words']}w local, {r['yt_words']}w YT)")
+
+            print(f"\n  Worst 5 Comparable Windows:")
+            for r in sorted_comp[-5:]:
+                print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                      f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
+                      f"offset={r['offset_seconds']:+.1f}s "
+                      f"({r['local_words']}w local, {r['yt_words']}w YT)")
+                if r["wer"] > 0.25:
+                    print(f"      Local: {r['local_text'][:100]}")
+                    print(f"      YT:    {r['yt_text'][:100]}")
+        else:
+            print(f"\n  All Comparable Windows:")
+            for r in sorted_comp:
+                print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                      f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
+                      f"offset={r['offset_seconds']:+.1f}s")
+
+    # --- Detail on excluded windows for debugging ---
+    if yt_degraded:
+        print(f"\n  YouTube Degraded Windows ({len(yt_degraded)}):")
+        for r in yt_degraded[:3]:  # show first 3 for brevity
+            rep = r.get("yt_repetition", {})
+            phrases = ", ".join(rep.get("repeated_phrases", [])[:2])
+            print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                  f"word_repeat={rep.get('word_repeat_ratio', 0):.0%} "
+                  f"phrase_repeats={rep.get('phrase_repeat_count', 0)}")
+            if phrases:
+                print(f"      Repeated: {phrases}")
+            print(f"      YT text: {r['yt_text'][:120]}")
+        if len(yt_degraded) > 3:
+            print(f"    ... and {len(yt_degraded) - 3} more")
+
+    if align_uncertain:
+        print(f"\n  Alignment Uncertain Windows ({len(align_uncertain)}):")
+        for r in align_uncertain[:3]:
+            print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                  f"offset={r['offset_seconds']:+.1f}s "
+                  f"({r['local_words']}w local, {r['yt_words']}w YT)")
+        if len(align_uncertain) > 3:
+            print(f"    ... and {len(align_uncertain) - 3} more")
+
+    # Offset drift analysis (comparable windows only)
+    offset_records = comparable if comparable else records
+    offsets = [r["offset_seconds"] for r in offset_records]
+    label = "comparable" if comparable else "all"
+    print(f"\n  Latency Drift Analysis ({label} windows):")
     print(f"    Mean offset:   {np.mean(offsets):+.1f}s")
     print(f"    Std offset:    {np.std(offsets):.1f}s")
     print(f"    Range:         [{min(offsets):+.1f}s, {max(offsets):+.1f}s]")
@@ -780,43 +1070,47 @@ def print_trend_report(jsonl_path=JSONL_PATH):
     print(f"  TREND ANALYSIS ({len(sessions)} sessions)")
     print(f"{'='*70}")
 
-    # Table header
-    print(f"\n  {'Session':<20} {'Video':<15} {'Mode':<6} {'Windows':>7} "
-          f"{'Mean WER':>9} {'Med WER':>8} {'Comp%':>6} {'Deg%':>5}")
-    print(f"  {'-'*20} {'-'*15} {'-'*6} {'-'*7} {'-'*9} {'-'*8} {'-'*6} {'-'*5}")
+    # Table header -- show clean WER and quality breakdown
+    print(f"\n  {'Session':<20} {'Video':<15} {'Mode':<6} {'Win':>4} "
+          f"{'Clean WER':>10} {'Raw WER':>8} {'Comp':>5} {'YTDeg':>5} {'Unc':>4}")
+    print(f"  {'-'*20} {'-'*15} {'-'*6} {'-'*4} "
+          f"{'-'*10} {'-'*8} {'-'*5} {'-'*5} {'-'*4}")
 
-    mean_wers = []
+    clean_wers = []
     for s in sessions:
         sid = s.get("session_id", "?")[:20]
         vid = s.get("video_id", "?")[:15]
         mode = s.get("mode", "?")[:6]
         agg = s.get("aggregate", {})
         n = s.get("num_windows", 0)
-        m_wer = agg.get("mean_wer", None)
-        med_wer = agg.get("median_wer", None)
-        n_comp = agg.get("windows_comparable", 0)
-        n_deg = agg.get("windows_degraded", 0)
 
-        comp_pct = f"{n_comp/n:.0%}" if n > 0 else "N/A"
-        deg_pct = f"{n_deg/n:.0%}" if n > 0 else "N/A"
-        m_wer_str = f"{m_wer:.1%}" if m_wer is not None else "N/A"
-        med_wer_str = f"{med_wer:.1%}" if med_wer is not None else "N/A"
+        # New-format fields (clean vs raw)
+        clean_wer = agg.get("clean_mean_wer", None)
+        raw_wer = agg.get("raw_mean_wer", agg.get("mean_wer", None))
+        n_comp = agg.get("num_comparable", agg.get("windows_comparable", 0))
+        n_ytdeg = agg.get("num_youtube_degraded", 0)
+        n_unc = agg.get("num_alignment_uncertain", 0)
 
-        print(f"  {sid:<20} {vid:<15} {mode:<6} {n:>7} "
-              f"{m_wer_str:>9} {med_wer_str:>8} {comp_pct:>6} {deg_pct:>5}")
+        clean_str = f"{clean_wer:.1%}" if clean_wer is not None else "N/A"
+        raw_str = f"{raw_wer:.1%}" if raw_wer is not None else "N/A"
 
-        if m_wer is not None:
-            mean_wers.append(m_wer)
+        print(f"  {sid:<20} {vid:<15} {mode:<6} {n:>4} "
+              f"{clean_str:>10} {raw_str:>8} {n_comp:>5} {n_ytdeg:>5} {n_unc:>4}")
 
-    if len(mean_wers) >= 2:
-        # Simple trend: is the mean WER going down over time?
-        first_half = mean_wers[:len(mean_wers)//2]
-        second_half = mean_wers[len(mean_wers)//2:]
+        # Use clean WER for trend if available, otherwise raw
+        wer_for_trend = clean_wer if clean_wer is not None else raw_wer
+        if wer_for_trend is not None:
+            clean_wers.append(wer_for_trend)
+
+    if len(clean_wers) >= 2:
+        # Simple trend: is the WER going down over time?
+        first_half = clean_wers[:len(clean_wers)//2]
+        second_half = clean_wers[len(clean_wers)//2:]
         avg_first = np.mean(first_half)
         avg_second = np.mean(second_half)
         delta = avg_second - avg_first
 
-        print(f"\n  Trend:")
+        print(f"\n  Trend (using clean WER where available, raw otherwise):")
         print(f"    First half avg WER:  {avg_first:.1%} ({len(first_half)} sessions)")
         print(f"    Second half avg WER: {avg_second:.1%} ({len(second_half)} sessions)")
         if delta < -0.01:
@@ -827,10 +1121,10 @@ def print_trend_report(jsonl_path=JSONL_PATH):
             print(f"    Direction: STABLE (WER delta {delta:+.1%})")
 
         # Overall stats
-        print(f"\n  Overall ({len(mean_wers)} sessions):")
-        print(f"    Mean of means: {np.mean(mean_wers):.1%}")
-        print(f"    Best session:  {min(mean_wers):.1%}")
-        print(f"    Worst session: {max(mean_wers):.1%}")
+        print(f"\n  Overall ({len(clean_wers)} sessions):")
+        print(f"    Mean of means: {np.mean(clean_wers):.1%}")
+        print(f"    Best session:  {min(clean_wers):.1%}")
+        print(f"    Worst session: {max(clean_wers):.1%}")
 
     print(f"\n{'='*70}")
 

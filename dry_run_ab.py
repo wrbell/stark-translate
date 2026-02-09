@@ -57,6 +57,12 @@ AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 
+# [P7-6C] Pipeline overlap: STT(N) runs concurrently with Translation(N-1).
+# This ThreadPoolExecutor is dedicated to the pipeline — separate from _io_pool
+# to avoid starving I/O tasks. max_workers=3 allows STT(N) + Translation_A(N-1)
+# + Translation_B(N-1) to run concurrently.
+_pipeline_pool = ThreadPoolExecutor(max_workers=3, thread_name_prefix="pipeline")
+
 # MLX model IDs (4-bit quantized, community-converted)
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
 MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
@@ -201,6 +207,14 @@ def print_diagnostics():
     if ct2_translator:
         print(f"\n  MarianMT backends: CT2 int8 (76MB) vs PyTorch fp32 (298MB)")
         print(f"    Per-chunk latencies in CSV columns: marian_pt_ms, marian_ct2_ms")
+
+    # [P7-6C] Pipeline overlap statistics
+    if _pipeline_total > 0:
+        pct = _pipeline_overlaps / _pipeline_total if _pipeline_total else 0
+        print(f"\n  [P7-6C] Pipeline overlap: {_pipeline_overlaps}/{_pipeline_total} "
+              f"chunks ({pct:.0%}) had STT(N) overlapping Translation(N-1)")
+    else:
+        print(f"\n  [P7-6C] Pipeline overlap: no chunks processed")
 
     print(f"\n  Fine-tuning data: {AUDIO_DIR}/")
     print(f"  Review queue:     {DIAG_PATH}")
@@ -1024,135 +1038,154 @@ async def process_partial(audio_data, utterance_id):
         print(f"\n  ERROR in partial: {e}", file=sys.stderr)
 
 
-async def process_final(audio_data):
-    """Final STT on full utterance + translation. High quality."""
-    global chunk_id, prev_text
+# ---------------------------------------------------------------------------
+# [P7-6C] Pipeline N/N-1 Overlap
+# ---------------------------------------------------------------------------
+#
+# Architecture:
+#   Audio loop → _pipeline_submit(audio) → returns immediately
+#                    ↓
+#   _pipeline_coordinator (async task) picks up chunks in order:
+#     1. Submit STT(N) to _pipeline_pool
+#     2. While STT(N) runs, Translation(N-1) may still be running — that's fine,
+#        they use different models (Whisper vs TranslateGemma)
+#     3. When STT(N) completes → broadcast English → submit Translation(N)
+#     4. When Translation(N) completes → broadcast Spanish → log results
+#
+# The key overlap: STT(N) and Translation(N-1) run concurrently on the Metal
+# GPU. MLX models share the GPU but operate on different memory regions.
+# This hides ~650ms of translation latency behind ~300ms of STT time,
+# reducing effective per-chunk latency from ~950ms to ~650ms (or better
+# when STT and translation have similar durations).
+#
+# The audio loop never blocks on STT or translation, so VAD and audio
+# capture continue uninterrupted.
 
-    chunk_id += 1
-    cid = chunk_id
+_pipeline_chunk_queue = None  # asyncio.Queue — audio chunks awaiting processing
+_pipeline_translation_lock = None  # asyncio.Lock — serialize translations to avoid
+                                   # Metal GPU contention between concurrent
+                                   # TranslateGemma calls; initialized in main_async
 
+# [P7-6C] Counters for overlap statistics
+_pipeline_overlaps = 0   # how many times STT(N) overlapped with Translation(N-1)
+_pipeline_total = 0      # total chunks processed through pipeline
+
+
+def _run_stt(audio_data, whisper_prompt):
+    """[P7-6C] Run Whisper STT in the pipeline pool (synchronous).
+
+    Separated from process_final so it can be submitted as a future
+    that runs concurrently with translation of the previous chunk.
+
+    Returns (english, stt_latency_ms, stt_confidence, segment_meta, low_conf_words).
+    """
+    t0 = time.perf_counter()
+    result = mlx_whisper.transcribe(
+        audio_data,
+        path_or_hf_repo=stt_pipe,
+        language="en",
+        condition_on_previous_text=False,
+        initial_prompt=whisper_prompt,
+        word_timestamps=True,
+    )
+    stt_latency = (time.perf_counter() - t0) * 1000
+    english = result["text"].strip()
+
+    # Extract segment-level metadata for fine-tuning
+    stt_confidence = None
+    segment_meta = []
+    low_conf_words = []
+    segments = result.get("segments", [])
+    if segments:
+        avg_logprobs = []
+        for seg in segments:
+            meta = {
+                "avg_logprob": seg.get("avg_logprob"),
+                "no_speech_prob": seg.get("no_speech_prob"),
+                "compression_ratio": seg.get("compression_ratio"),
+            }
+            segment_meta.append(meta)
+            if "avg_logprob" in seg:
+                avg_logprobs.append(seg["avg_logprob"])
+            # Extract per-word confidence
+            for w in seg.get("words", []):
+                if w.get("probability", 1.0) < 0.5:
+                    low_conf_words.append({
+                        "word": w.get("word", ""),
+                        "probability": round(w["probability"], 3),
+                        "start": w.get("start"),
+                        "end": w.get("end"),
+                    })
+        if avg_logprobs:
+            mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
+            stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
+
+    return english, stt_latency, stt_confidence, segment_meta, low_conf_words
+
+
+async def _pipeline_translate_and_finalize(cid, english, stt_latency,
+                                            stt_confidence, segment_meta,
+                                            low_conf_words, audio_data,
+                                            e2e_start):
+    """[P7-6C] Run translation and finalization for a chunk.
+
+    This is the second half of what was process_final(). It runs as a
+    separate coroutine so the pipeline coordinator can start STT on the
+    next chunk while this is still translating.
+
+    The _pipeline_translation_lock ensures only one translation runs at a
+    time — multiple concurrent TranslateGemma calls would thrash the Metal
+    GPU and actually be slower than sequential.
+    """
     try:
-        # --- STT on full utterance audio ---
-        e2e_start = time.perf_counter()
-        t0 = e2e_start
-        result = mlx_whisper.transcribe(
-            audio_data,
-            path_or_hf_repo=stt_pipe,
-            language="en",
-            condition_on_previous_text=False,
-            initial_prompt=_whisper_prompt(),
-            word_timestamps=True,
-        )
-        stt_latency = (time.perf_counter() - t0) * 1000
-        english = result["text"].strip()
+        async with _pipeline_translation_lock:
+            # --- Translate ---
+            spanish_b, lat_b, tps_b, qe_b = None, 0.0, 0.0, None
 
-        # Extract segment-level metadata for fine-tuning
-        stt_confidence = None
-        segment_meta = []
-        low_conf_words = []
-        segments = result.get("segments", [])
-        if segments:
-            avg_logprobs = []
-            for seg in segments:
-                meta = {
-                    "avg_logprob": seg.get("avg_logprob"),
-                    "no_speech_prob": seg.get("no_speech_prob"),
-                    "compression_ratio": seg.get("compression_ratio"),
-                }
-                segment_meta.append(meta)
-                if "avg_logprob" in seg:
-                    avg_logprobs.append(seg["avg_logprob"])
-                # Extract per-word confidence
-                for w in seg.get("words", []):
-                    if w.get("probability", 1.0) < 0.5:
-                        low_conf_words.append({
-                            "word": w.get("word", ""),
-                            "probability": round(w["probability"], 3),
-                            "start": w.get("start"),
-                            "end": w.get("end"),
-                        })
-            if avg_logprobs:
-                mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
-                stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
-
-        if not english:
-            return
-
-        prev_text = english[-100:]  # [P7-1E] capped at 100 chars (was 200)
-
-        # [P7-P3-6A] Broadcast English immediately + translation_start signal
-        # so displays can show English text before translation begins
-        print(f"\n{'='*60}")
-        print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | EN: {english}")
-        await broadcast({
-            "type": "translation_start",
-            "chunk_id": cid,
-            "english": english,
-            "stage": "final",
-            "stt_latency_ms": round(stt_latency, 1),
-            "stt_confidence": stt_confidence,
-            "timestamp": datetime.now().isoformat(),
-        })
-        # Also send the legacy stt stage message for backward compatibility
-        await broadcast({
-            "type": "translation",
-            "stage": "stt",
-            "chunk_id": cid,
-            "english": english,
-            "spanish_a": None,
-            "spanish_b": None,
-            "stt_latency_ms": round(stt_latency, 1),
-            "stt_confidence": stt_confidence,
-            "timestamp": datetime.now().isoformat(),
-        })
-
-        # --- Translate ---
-        spanish_b, lat_b, tps_b, qe_b = None, 0.0, 0.0, None
-
-        if mlx_b_model is not None:
             loop = asyncio.get_event_loop()
-            # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
-            # non-streaming (speculative decoding can't stream).
-            task_a = loop.run_in_executor(
-                None, lambda: translate_mlx_streaming(
-                    mlx_a_model, mlx_a_tokenizer, english, cid,
-                    prompt_cache_template=mlx_a_prompt_cache,
-                    suffix_tokens=mlx_a_suffix_tokens))
-            # Speculative decoding: 4B model drafts tokens for 12B to verify
-            # Note: prompt cache not used with speculative decoding (incompatible)
-            task_b = loop.run_in_executor(
-                None, lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english,
-                                            draft_model=mlx_a_model))
 
-            spanish_a, lat_a, tps_a = await task_a
-            qe_a = qe_score(english, spanish_a)
-            await broadcast({
-                "type": "translation",
-                "stage": "translation_a",
-                "chunk_id": cid,
-                "english": english,
-                "spanish_a": spanish_a,
-                "spanish_b": None,
-                "stt_latency_ms": round(stt_latency, 1),
-                "latency_a_ms": round(lat_a, 1),
-                "stt_confidence": stt_confidence,
-                "tps_a": round(tps_a, 1),
-                "qe_a": qe_a,
-                "timestamp": datetime.now().isoformat(),
-            })
+            if mlx_b_model is not None:
+                # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
+                # non-streaming (speculative decoding can't stream).
+                task_a = loop.run_in_executor(
+                    _pipeline_pool, lambda: translate_mlx_streaming(
+                        mlx_a_model, mlx_a_tokenizer, english, cid,
+                        prompt_cache_template=mlx_a_prompt_cache,
+                        suffix_tokens=mlx_a_suffix_tokens))
+                # Speculative decoding: 4B model drafts tokens for 12B to verify
+                # Note: prompt cache not used with speculative decoding (incompatible)
+                task_b = loop.run_in_executor(
+                    _pipeline_pool, lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english,
+                                                draft_model=mlx_a_model))
 
-            spanish_b, lat_b, tps_b = await task_b
-            qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
-        else:
-            # [P7-P3-6A] 4B-only mode: use streaming translation for
-            # progressive display (biggest perceived latency win: 300-500ms)
-            loop = asyncio.get_event_loop()
-            spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                None, lambda: translate_mlx_streaming(
-                    mlx_a_model, mlx_a_tokenizer, english, cid,
-                    prompt_cache_template=mlx_a_prompt_cache,
-                    suffix_tokens=mlx_a_suffix_tokens))
-            qe_a = qe_score(english, spanish_a)
+                spanish_a, lat_a, tps_a = await task_a
+                qe_a = qe_score(english, spanish_a)
+                await broadcast({
+                    "type": "translation",
+                    "stage": "translation_a",
+                    "chunk_id": cid,
+                    "english": english,
+                    "spanish_a": spanish_a,
+                    "spanish_b": None,
+                    "stt_latency_ms": round(stt_latency, 1),
+                    "latency_a_ms": round(lat_a, 1),
+                    "stt_confidence": stt_confidence,
+                    "tps_a": round(tps_a, 1),
+                    "qe_a": qe_a,
+                    "timestamp": datetime.now().isoformat(),
+                })
+
+                spanish_b, lat_b, tps_b = await task_b
+                qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
+            else:
+                # [P7-P3-6A] 4B-only mode: use streaming translation for
+                # progressive display (biggest perceived latency win: 300-500ms)
+                spanish_a, lat_a, tps_a = await loop.run_in_executor(
+                    _pipeline_pool, lambda: translate_mlx_streaming(
+                        mlx_a_model, mlx_a_tokenizer, english, cid,
+                        prompt_cache_template=mlx_a_prompt_cache,
+                        suffix_tokens=mlx_a_suffix_tokens))
+                qe_a = qe_score(english, spanish_a)
 
         e2e_latency = (time.perf_counter() - e2e_start) * 1000
 
@@ -1227,7 +1260,139 @@ async def process_final(audio_data):
         _io_pool.submit(_save_io)
 
     except Exception as e:
-        print(f"\n  ERROR in chunk #{cid}: {e}", file=sys.stderr)
+        print(f"\n  ERROR in chunk #{cid} translation: {e}", file=sys.stderr)
+
+
+async def _pipeline_coordinator():
+    """[P7-6C] Async task that coordinates the STT/translation pipeline.
+
+    Reads audio chunks from _pipeline_chunk_queue and processes them with
+    overlap: STT for chunk N runs concurrently with translation for chunk N-1.
+
+    Flow per chunk:
+      1. Submit STT to _pipeline_pool → get a Future
+      2. Immediately start a translation task for the previous chunk (if any)
+         as a fire-and-forget asyncio.Task
+      3. Await STT completion
+      4. Broadcast English text
+      5. Start translation (which will run during next chunk's STT)
+
+    The translation lock ensures translations don't overlap with each other
+    (they share the same MLX models), but STT can overlap with translation
+    freely since they use different models (Whisper vs TranslateGemma).
+    """
+    global chunk_id, prev_text, _pipeline_overlaps, _pipeline_total
+
+    # Track the currently-running translation task so we can measure overlap
+    active_translation_task = None
+
+    while True:
+        item = await _pipeline_chunk_queue.get()
+        if item is None:
+            # Poison pill — wait for any in-flight translation to finish
+            if active_translation_task is not None:
+                await active_translation_task
+            break
+
+        audio_data = item
+        chunk_id += 1
+        cid = chunk_id
+        _pipeline_total += 1
+        e2e_start = time.perf_counter()
+
+        try:
+            # [P7-6C] Check if translation from previous chunk is still running.
+            # If so, STT(N) will overlap with Translation(N-1) — this is the
+            # core latency win.
+            overlap_detected = (active_translation_task is not None
+                                and not active_translation_task.done())
+            if overlap_detected:
+                _pipeline_overlaps += 1
+                print(f"  [P7-6C] OVERLAP: STT #{cid} starting while "
+                      f"Translation #{cid-1} still running")
+
+            # --- STT: submit to pipeline pool ---
+            loop = asyncio.get_event_loop()
+            whisper_prompt = _whisper_prompt()
+            stt_future = loop.run_in_executor(
+                _pipeline_pool, _run_stt, audio_data, whisper_prompt)
+
+            # Await STT completion (translation of N-1 may still be running
+            # concurrently in another thread — that's the overlap)
+            english, stt_latency, stt_confidence, segment_meta, low_conf_words = \
+                await stt_future
+
+            if not english:
+                continue
+
+            prev_text = english[-100:]  # [P7-1E] capped at 100 chars
+
+            # [P7-P3-6A] Broadcast English immediately + translation_start signal
+            print(f"\n{'='*60}")
+            print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | EN: {english}"
+                  + (f" [overlapped]" if overlap_detected else ""))
+            await broadcast({
+                "type": "translation_start",
+                "chunk_id": cid,
+                "english": english,
+                "stage": "final",
+                "stt_latency_ms": round(stt_latency, 1),
+                "stt_confidence": stt_confidence,
+                "timestamp": datetime.now().isoformat(),
+            })
+            # Legacy stt stage message for backward compatibility
+            await broadcast({
+                "type": "translation",
+                "stage": "stt",
+                "chunk_id": cid,
+                "english": english,
+                "spanish_a": None,
+                "spanish_b": None,
+                "stt_latency_ms": round(stt_latency, 1),
+                "stt_confidence": stt_confidence,
+                "timestamp": datetime.now().isoformat(),
+            })
+
+            # --- Wait for previous translation to finish before starting new one ---
+            # We don't want two translations running at once (Metal GPU contention),
+            # but STT can freely overlap with translation.
+            if active_translation_task is not None:
+                await active_translation_task
+
+            # --- Start translation as a fire-and-forget task ---
+            # This task will run concurrently with the next chunk's STT
+            active_translation_task = asyncio.create_task(
+                _pipeline_translate_and_finalize(
+                    cid, english, stt_latency, stt_confidence,
+                    segment_meta, low_conf_words, audio_data, e2e_start))
+
+        except Exception as e:
+            print(f"\n  ERROR in pipeline chunk #{cid}: {e}", file=sys.stderr)
+
+    # Print overlap statistics
+    if _pipeline_total > 0:
+        print(f"\n  [P7-6C] Pipeline stats: {_pipeline_overlaps}/{_pipeline_total} "
+              f"chunks overlapped ({_pipeline_overlaps/_pipeline_total:.0%})")
+
+
+async def pipeline_submit(audio_data):
+    """[P7-6C] Submit audio to the pipeline without blocking the audio loop.
+
+    Called from audio_loop when an utterance is finalized. Returns immediately;
+    the _pipeline_coordinator processes the chunk asynchronously.
+    """
+    if _pipeline_chunk_queue is not None:
+        await _pipeline_chunk_queue.put(audio_data)
+
+
+async def process_final(audio_data):
+    """Final STT on full utterance + translation. High quality.
+
+    [P7-6C] Now delegates to the pipeline coordinator for overlapped execution.
+    This function returns immediately after submitting the audio chunk,
+    allowing the audio loop to continue capturing the next utterance.
+    """
+    await pipeline_submit(audio_data)
 
 
 # ---------------------------------------------------------------------------
@@ -1597,6 +1762,7 @@ async def main_async(args):
     global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
     global marian_model, marian_tokenizer, ct2_translator
     global _stream_token_queue, _stream_loop
+    global _pipeline_chunk_queue, _pipeline_translation_lock
 
     spec_info = ""
     if args.run_ab:
@@ -1669,12 +1835,22 @@ async def main_async(args):
     stream_task = asyncio.create_task(stream_token_broadcaster())
     print(f"  [P7-P3-6A] Streaming translation broadcaster started")
 
+    # [P7-6C] Initialize pipeline coordinator for STT/translation overlap
+    _pipeline_chunk_queue = asyncio.Queue(maxsize=8)
+    _pipeline_translation_lock = asyncio.Lock()
+    pipeline_task = asyncio.create_task(_pipeline_coordinator())
+    print(f"  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
+
     # Run audio loop
     try:
         await audio_loop()
     except KeyboardInterrupt:
         pass
     finally:
+        # [P7-6C] Stop pipeline coordinator — send poison pill and wait
+        if _pipeline_chunk_queue is not None:
+            await _pipeline_chunk_queue.put(None)
+        await asyncio.wait_for(pipeline_task, timeout=10.0)
         # [P7-P3-6A] Stop streaming broadcaster
         if _stream_token_queue is not None:
             await _stream_token_queue.put(None)
