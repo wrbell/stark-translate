@@ -18,15 +18,18 @@ Usage:
 
 import argparse
 import asyncio
+import copy
 import csv
 import http.server
 import json
 import os
+import queue as queue_module
 import signal
 import socket
 import sys
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 import platform
@@ -58,19 +61,15 @@ NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
 MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
 
-# Whisper initial_prompt — biases decoder toward theological vocabulary
-# that Whisper otherwise misrecognizes (e.g. "media" instead of "mediator")
+# [P7-1E] Whisper initial_prompt — capped at ~40 words to reduce prefill time.
+# Biases decoder toward theological vocabulary that Whisper otherwise
+# misrecognizes (e.g. "media" instead of "mediator").
 WHISPER_PROMPT = (
     "Sermon at Stark Road Gospel Hall. "
-    "God is always capitalized. Christ Jesus, the Holy Spirit, God the Father. "
-    "Topics: salvation, atonement, propitiation, mediator, covenant, "
-    "righteousness, sanctification, justification, redemption, Savior, "
-    "reconciliation, intercession, predestination, sovereignty, "
-    "sin, repentance, forgiveness, reign, bow, glory, grace, mercy, "
-    "the Gospel, epistle, apostle, tabernacle, congregation, "
-    "First Timothy, Second Timothy, First Corinthians, Ephesians, "
-    "Romans, Hebrews, Galatians, Colossians, Thessalonians, Philippians, "
-    "Genesis, Exodus, Leviticus, Deuteronomy, Isaiah, Jeremiah, Ezekiel, "
+    "Christ Jesus, the Holy Spirit, God the Father. "
+    "Atonement, propitiation, mediator, covenant, righteousness, "
+    "sanctification, justification, redemption, reconciliation, "
+    "repentance, reign, grace, mercy, the Gospel, epistle, apostle, "
     "Scripture, the Lord, the Word of God."
 )
 
@@ -304,6 +303,16 @@ marian_model = None
 marian_tokenizer = None
 ct2_translator = None
 
+# [P7-2B] Prompt caches: pre-computed KV caches for the fixed TranslateGemma
+# chat template prefix. Reused (via deep copy) on every translation call to
+# skip re-prefilling the ~30-40 token template overhead (saves 50-80ms).
+mlx_a_prompt_cache = None   # KV cache for 4B model template prefix
+mlx_b_prompt_cache = None   # KV cache for 12B model template prefix
+# [P7-3B] Pre-tokenized suffix tokens: the closing part of the prompt after
+# where the English text is inserted. Tokenized once at startup.
+mlx_a_suffix_tokens = None
+mlx_b_suffix_tokens = None
+
 
 # ---------------------------------------------------------------------------
 # Model Loading
@@ -321,7 +330,10 @@ def load_whisper():
     """Load Distil-Whisper via mlx-whisper (Apple Silicon native)."""
     import mlx_whisper
     import mlx.core as mx
-    mx.set_cache_limit(100 * 1024 * 1024)  # prevent memory growth
+    # [P7-4B] Increased from 100MB to 256MB — allows MLX to keep more intermediate
+    # computation results cached in Metal memory, reducing recomputation.
+    # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
+    mx.set_cache_limit(256 * 1024 * 1024)
 
     model_id = "mlx-community/distil-whisper-large-v3"
     print(f"[2/7] Loading {model_id} (MLX)...")
@@ -338,30 +350,122 @@ def load_mlx_gemma(model_id, label):
     """Load a TranslateGemma model via MLX (4-bit, Apple Silicon native)."""
     from mlx_lm import load
     import mlx.core as mx
-    mx.set_cache_limit(100 * 1024 * 1024)  # prevent memory growth in repeated inference
+    # [P7-4B] Increased from 100MB to 256MB (same rationale as load_whisper)
+    mx.set_cache_limit(256 * 1024 * 1024)
 
     print(f"  Loading {model_id}...")
     t0 = time.time()
     model, tokenizer = load(model_id)
 
-    # Fix: add <end_of_turn> as EOS so generation stops after the translation
+    # [P7-2E] Verify and fix EOS tokens for early stopping.
+    # TranslateGemma uses <end_of_turn> (id=106) as its actual EOS, but the
+    # tokenizer's default EOS is <eos> (id=1) which the model never generates.
+    # Without this fix, generation runs to max_tokens (~5s wasted on pad tokens).
     eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
-    tokenizer._eos_token_ids = {tokenizer.eos_token_id, eot_id}
+    default_eos = tokenizer.eos_token_id
+    if not hasattr(tokenizer, '_eos_token_ids') or eot_id not in tokenizer._eos_token_ids:
+        tokenizer._eos_token_ids = {default_eos, eot_id}
+        print(f"  [P7-2E] EOS fix applied: added <end_of_turn> (id={eot_id}) to "
+              f"EOS set (was only <eos> id={default_eos})")
+    else:
+        # Already has it (e.g. from a newer tokenizer version)
+        print(f"  [P7-2E] EOS tokens verified: {tokenizer._eos_token_ids}")
 
     elapsed = time.time() - t0
     print(f"  {label} ready ({elapsed:.1f}s)")
     return model, tokenizer
 
 
+def _build_prompt_cache(model, tokenizer, label):
+    """[P7-2B] Pre-compute KV cache for the fixed TranslateGemma chat template prefix.
+
+    The TranslateGemma prompt has a fixed prefix (the chat template + language
+    codes) that is identical for every translation. By pre-filling the KV cache
+    once at startup, we skip re-computing those ~30-40 tokens on each call.
+
+    Returns (prompt_cache, prefix_token_count, suffix_tokens).
+    """
+    from mlx_lm.models.cache import make_prompt_cache
+    from mlx_lm.generate import generate_step
+    import mlx.core as mx
+
+    # Build a prompt with a known marker so we can split prefix/suffix
+    marker = "SPLIT_HERE"
+    messages = [{"role": "user", "content": [
+        {"type": "text",
+         "source_lang_code": "en",
+         "target_lang_code": "es",
+         "text": marker}
+    ]}]
+    full_prompt = tokenizer.apply_chat_template(
+        messages, add_generation_prompt=True
+    )
+    # full_prompt is a list of token IDs
+    if isinstance(full_prompt, str):
+        full_tokens = tokenizer.encode(full_prompt, add_special_tokens=False)
+    else:
+        full_tokens = list(full_prompt)
+
+    # Tokenize just the marker to find where it appears
+    marker_tokens = tokenizer.encode(marker, add_special_tokens=False)
+
+    # Find marker position in the full token sequence
+    marker_len = len(marker_tokens)
+    prefix_end = None
+    for i in range(len(full_tokens) - marker_len + 1):
+        if full_tokens[i:i + marker_len] == marker_tokens:
+            prefix_end = i
+            break
+
+    if prefix_end is None:
+        print(f"  WARNING: Could not locate marker in prompt for {label}, skipping cache")
+        return None, 0, []
+
+    prefix_tokens = full_tokens[:prefix_end]
+    suffix_tokens = full_tokens[prefix_end + marker_len:]
+
+    if len(prefix_tokens) < 3:
+        print(f"  WARNING: Prefix too short ({len(prefix_tokens)} tokens) for {label}, skipping cache")
+        return None, 0, suffix_tokens
+
+    # Create the KV cache and pre-fill with the prefix
+    prompt_cache = make_prompt_cache(model)
+    prompt_array = mx.array(prefix_tokens)
+
+    # Run generate_step with max_tokens=0 to just fill the cache
+    for _ in generate_step(
+        prompt_array, model,
+        max_tokens=0,
+        prompt_cache=prompt_cache,
+    ):
+        pass  # max_tokens=0 means no tokens generated, just prefill
+
+    mx.eval([c.state for c in prompt_cache])
+    print(f"  {label} prompt cache: {len(prefix_tokens)} prefix tokens cached, "
+          f"{len(suffix_tokens)} suffix tokens")
+
+    return prompt_cache, len(prefix_tokens), suffix_tokens
+
+
 def load_translation_models(load_b=True):
     """Load TranslateGemma model(s) via MLX."""
+    global mlx_a_prompt_cache, mlx_b_prompt_cache
+    global mlx_a_suffix_tokens, mlx_b_suffix_tokens
+
     print("[3/7] Loading TranslateGemma models (MLX 4-bit)...")
     a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)")
+
+    # [P7-2B] Build prompt cache for 4B model
+    mlx_a_prompt_cache, _, mlx_a_suffix_tokens = _build_prompt_cache(
+        a_model, a_tok, "4B")
 
     b_model, b_tok = None, None
     if load_b:
         try:
             b_model, b_tok = load_mlx_gemma(MLX_MODEL_B, "Approach B (12B)")
+            # [P7-2B] Build prompt cache for 12B model
+            mlx_b_prompt_cache, _, mlx_b_suffix_tokens = _build_prompt_cache(
+                b_model, b_tok, "12B")
         except Exception as e:
             print(f"  12B load failed: {e}")
             print("  Running 4B only.")
@@ -468,7 +572,8 @@ def qe_score(source, translation):
 # Translation (MLX)
 # ---------------------------------------------------------------------------
 
-def translate_mlx(model, tokenizer, text, draft_model=None):
+def translate_mlx(model, tokenizer, text, draft_model=None,
+                  prompt_cache_template=None, suffix_tokens=None):
     """Translate English to Spanish using TranslateGemma via MLX.
 
     Args:
@@ -479,37 +584,60 @@ def translate_mlx(model, tokenizer, text, draft_model=None):
             When provided, the draft model proposes NUM_DRAFT_TOKENS tokens
             at a time, and the main model verifies them in a single forward
             pass. Speeds up generation when draft acceptance rate is high.
+        prompt_cache_template: [P7-2B] Pre-computed KV cache for the fixed
+            chat template prefix. Deep-copied and reused per call.
+        suffix_tokens: [P7-3B] Pre-tokenized suffix tokens (after where
+            the English text is inserted in the template).
 
     Returns (translation, latency_ms, generation_tps).
     """
     from mlx_lm import generate
+    import mlx.core as mx
 
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
 
-    messages = [{"role": "user", "content": [
-        {"type": "text",
-         "source_lang_code": "en",
-         "target_lang_code": "es",
-         "text": text}
-    ]}]
-
-    prompt = tokenizer.apply_chat_template(
-        messages, add_generation_prompt=True
-    )
-
-    # Cap max_tokens proportional to input (Spanish ~1.3x English tokens + margin)
+    # [P7-2C] Cap max_tokens proportional to input. Reduced from 2.5x to 1.8x —
+    # Spanish is typically 15-25% longer than English, so 1.8x is still generous.
     input_words = len(text.split())
-    max_tok = max(32, int(input_words * 2.5))
+    max_tok = max(32, int(input_words * 1.8))
 
-    gen_kwargs = dict(
-        prompt=prompt,
-        max_tokens=max_tok,
-        verbose=False,
-    )
-    if draft_model is not None:
-        gen_kwargs["draft_model"] = draft_model
-        gen_kwargs["num_draft_tokens"] = NUM_DRAFT_TOKENS
+    # [P7-2B] Use prompt cache when available (not compatible with speculative decoding)
+    use_cache = (prompt_cache_template is not None
+                 and suffix_tokens is not None
+                 and draft_model is None)
+
+    if use_cache:
+        # [P7-2B] Deep-copy the pre-computed KV cache so we don't mutate the template
+        cached = copy.deepcopy(prompt_cache_template)
+        # [P7-3B] Build only the dynamic part of the prompt: English text + suffix
+        text_tokens = tokenizer.encode(text, add_special_tokens=False)
+        dynamic_tokens = text_tokens + suffix_tokens
+        gen_kwargs = dict(
+            prompt=dynamic_tokens,
+            max_tokens=max_tok,
+            verbose=False,
+            prompt_cache=cached,
+        )
+    else:
+        # Fallback: full prompt (used with speculative decoding or if cache unavailable)
+        messages = [{"role": "user", "content": [
+            {"type": "text",
+             "source_lang_code": "en",
+             "target_lang_code": "es",
+             "text": text}
+        ]}]
+        prompt = tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True
+        )
+        gen_kwargs = dict(
+            prompt=prompt,
+            max_tokens=max_tok,
+            verbose=False,
+        )
+        if draft_model is not None:
+            gen_kwargs["draft_model"] = draft_model
+            gen_kwargs["num_draft_tokens"] = NUM_DRAFT_TOKENS
 
     t0 = time.perf_counter()
     result = generate(
@@ -519,11 +647,40 @@ def translate_mlx(model, tokenizer, text, draft_model=None):
     latency_ms = (time.perf_counter() - t0) * 1000
 
     # generate returns the full text including prompt — extract just the generation
+    # [P7-2E] EOS early stopping is handled by stream_generate checking
+    # tokenizer.eos_token_ids (which includes <end_of_turn> id=106, set in
+    # load_mlx_gemma). Clean any residual end-of-turn marker just in case.
     clean = result.split("<end_of_turn>")[0].strip()
     # Estimate tps from output tokens and time
     out_tokens = len(tokenizer.encode(clean))
     gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
     return clean, latency_ms, gen_tps
+
+
+# [P7-4A] Pre-warm translation models during silence to keep Metal GPU hot.
+# Called once when transitioning from speech to silence — prevents cold-start
+# latency when speech resumes after a pause.
+_warmup_pending = False  # flag to avoid repeated warmups during sustained silence
+
+def warmup_translation_models():
+    """Dummy 1-token forward pass on translation models to keep Metal GPU warm."""
+    global _warmup_pending
+    if not _warmup_pending:
+        return
+    _warmup_pending = False
+    try:
+        from mlx_lm import generate
+        if mlx_a_model is not None and mlx_a_tokenizer is not None:
+            messages = [{"role": "user", "content": [
+                {"type": "text", "source_lang_code": "en",
+                 "target_lang_code": "es", "text": "hello"}
+            ]}]
+            prompt = mlx_a_tokenizer.apply_chat_template(
+                messages, add_generation_prompt=True)
+            generate(mlx_a_model, mlx_a_tokenizer,
+                     prompt=prompt, max_tokens=1, verbose=False)
+    except Exception:
+        pass  # warmup is best-effort, never block the pipeline
 
 
 def translate_marian(text):
@@ -592,6 +749,9 @@ def detect_macbook_mic():
 MIC_GAIN = 1.0  # Set during mic detection based on measured signal level
 TARGET_RMS = 0.08  # Target RMS for speech audio fed to VAD/Whisper
 
+# [P7-5D] Background thread pool for non-blocking I/O (WAV saves, CSV/JSONL writes)
+_io_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="io")
+
 def audio_callback(indata, frames, time_info, status):
     """sounddevice callback — resample from mic rate to 16kHz and push to queue."""
     if status:
@@ -602,10 +762,16 @@ def audio_callback(indata, frames, time_info, status):
     # Amplify quiet mic signals
     if MIC_GAIN != 1.0:
         raw = np.clip(raw * MIC_GAIN, -1.0, 1.0)
+    # [P7-5A] Use decimate instead of resample — faster for integer factor (48k/16k = 3x)
     if MIC_SAMPLE_RATE != SAMPLE_RATE:
-        from scipy.signal import resample
-        target_len = int(len(raw) * SAMPLE_RATE / MIC_SAMPLE_RATE)
-        raw = resample(raw, target_len).astype(np.float32)
+        from scipy.signal import decimate
+        factor = MIC_SAMPLE_RATE // SAMPLE_RATE  # 48000 // 16000 = 3
+        if MIC_SAMPLE_RATE % SAMPLE_RATE == 0 and factor > 1:
+            raw = decimate(raw, factor, zero_phase=False).astype(np.float32)
+        else:
+            from scipy.signal import resample
+            target_len = int(len(raw) * SAMPLE_RATE / MIC_SAMPLE_RATE)
+            raw = resample(raw, target_len).astype(np.float32)
     audio_queue.put_nowait(raw)
 
 
@@ -622,10 +788,50 @@ def is_speech(audio_chunk, model, utils):
     return speech_prob > VAD_THRESHOLD
 
 
+# [P7-5B] Dedicated VAD thread — moves Silero inference off the main async
+# event loop to reduce jitter in audio processing. Audio frames are pushed
+# into _vad_in_q by the main loop; results (frame, has_speech) are read
+# from _vad_out_q. This decouples VAD latency spikes from audio capture.
+_vad_in_q = queue_module.Queue(maxsize=64)
+_vad_out_q = queue_module.Queue(maxsize=64)
+_vad_thread = None
+_vad_thread_stop = threading.Event()
+
+
+def _vad_worker():
+    """[P7-5B] Background thread running VAD inference in a tight loop."""
+    while not _vad_thread_stop.is_set():
+        try:
+            audio_chunk = _vad_in_q.get(timeout=0.1)
+        except queue_module.Empty:
+            continue
+        has_speech = is_speech(audio_chunk, vad_model, vad_utils)
+        _vad_out_q.put((audio_chunk, has_speech))
+
+
+def start_vad_thread():
+    """[P7-5B] Start the dedicated VAD worker thread."""
+    global _vad_thread
+    _vad_thread_stop.clear()
+    _vad_thread = threading.Thread(target=_vad_worker, daemon=True,
+                                    name="vad-worker")
+    _vad_thread.start()
+    print("  VAD thread started")
+
+
+def stop_vad_thread():
+    """[P7-5B] Stop the dedicated VAD worker thread."""
+    _vad_thread_stop.set()
+    if _vad_thread is not None:
+        _vad_thread.join(timeout=2.0)
+
+
 def _whisper_prompt():
-    """Build Whisper prompt: theological vocab + previous transcription."""
+    """Build Whisper prompt: theological vocab + previous transcription.
+    [P7-1E] prev_text capped at 100 chars to reduce Whisper prefill time.
+    """
     if prev_text:
-        return WHISPER_PROMPT + " " + prev_text
+        return WHISPER_PROMPT + " " + prev_text[-100:]
     return WHISPER_PROMPT
 
 
@@ -635,12 +841,15 @@ async def process_partial(audio_data, utterance_id):
     """
     try:
         t0 = time.perf_counter()
+        # [P7-1A] word_timestamps=False for partials — saves 100-200ms.
+        # Only the final pass needs word-level confidence data.
         result = mlx_whisper.transcribe(
             audio_data,
             path_or_hf_repo=stt_pipe,
             language="en",
             condition_on_previous_text=False,
             initial_prompt=_whisper_prompt(),
+            word_timestamps=False,
         )
         stt_latency = (time.perf_counter() - t0) * 1000
         english = result["text"].strip()
@@ -738,7 +947,7 @@ async def process_final(audio_data):
         if not english:
             return
 
-        prev_text = english[-200:]
+        prev_text = english[-100:]  # [P7-1E] capped at 100 chars (was 200)
 
         # Broadcast refined English (replaces partial)
         print(f"\n{'='*60}")
@@ -760,9 +969,13 @@ async def process_final(audio_data):
 
         if mlx_b_model is not None:
             loop = asyncio.get_event_loop()
+            # [P7-2B] Pass prompt cache to skip re-prefilling template tokens
             task_a = loop.run_in_executor(
-                None, lambda: translate_mlx(mlx_a_model, mlx_a_tokenizer, english))
+                None, lambda: translate_mlx(mlx_a_model, mlx_a_tokenizer, english,
+                                            prompt_cache_template=mlx_a_prompt_cache,
+                                            suffix_tokens=mlx_a_suffix_tokens))
             # Speculative decoding: 4B model drafts tokens for 12B to verify
+            # Note: prompt cache not used with speculative decoding (incompatible)
             task_b = loop.run_in_executor(
                 None, lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english,
                                             draft_model=mlx_a_model))
@@ -787,7 +1000,11 @@ async def process_final(audio_data):
             spanish_b, lat_b, tps_b = await task_b
             qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
         else:
-            spanish_a, lat_a, tps_a = translate_mlx(mlx_a_model, mlx_a_tokenizer, english)
+            # [P7-2B] Pass prompt cache for 4B-only mode
+            spanish_a, lat_a, tps_a = translate_mlx(
+                mlx_a_model, mlx_a_tokenizer, english,
+                prompt_cache_template=mlx_a_prompt_cache,
+                suffix_tokens=mlx_a_suffix_tokens)
             qe_a = qe_score(english, spanish_a)
 
         e2e_latency = (time.perf_counter() - e2e_start) * 1000
@@ -847,15 +1064,20 @@ async def process_final(audio_data):
         }
         all_results.append(result_data)
         await broadcast(result_data)
-        write_csv_row(result_data)
+
+        # [P7-5D] Move I/O to background threads — prevents disk writes from
+        # blocking the main processing loop (saves 10-30ms on the critical path).
+        _io_pool.submit(write_csv_row, result_data)
 
         # Save audio + structured diagnostics for fine-tuning pipeline
-        audio_path = save_chunk_audio(audio_data, cid)
         resources = get_resource_snapshot()
-        write_diag_jsonl(result_data, audio_path,
-                         segment_meta=segment_meta,
-                         low_conf_words=low_conf_words,
-                         resources=resources)
+        def _save_io():
+            audio_path = save_chunk_audio(audio_data, cid)
+            write_diag_jsonl(result_data, audio_path,
+                             segment_meta=segment_meta,
+                             low_conf_words=low_conf_words,
+                             resources=resources)
+        _io_pool.submit(_save_io)
 
     except Exception as e:
         print(f"\n  ERROR in chunk #{cid}: {e}", file=sys.stderr)
@@ -1080,6 +1302,7 @@ def print_summary():
 
 async def audio_loop():
     """Main audio capture and processing loop with error recovery."""
+    global _warmup_pending  # [P7-4A]
     print("\nListening... (Ctrl+C to stop)\n")
 
     PARTIAL_INTERVAL = 1.0  # seconds between partial STT updates
@@ -1095,6 +1318,9 @@ async def audio_loop():
     last_partial_len = 0    # audio length (samples) at last partial
     utterance_id = 0        # tracks current utterance for partial updates
 
+    # [P7-5B] Start the dedicated VAD thread
+    start_vad_thread()
+
     while True:
         try:
             stream = sd.InputStream(
@@ -1108,13 +1334,30 @@ async def audio_loop():
 
             with stream:
                 while True:
+                    # [P7-5B] Feed audio frames to VAD thread, then read results.
+                    # This two-step approach decouples audio capture from VAD latency.
                     try:
                         audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
                     except asyncio.TimeoutError:
-                        continue
+                        # Even on timeout, check if VAD has results pending
+                        try:
+                            audio_frame, has_speech = _vad_out_q.get_nowait()
+                        except queue_module.Empty:
+                            continue
+                    else:
+                        # Submit frame to VAD thread
+                        try:
+                            _vad_in_q.put_nowait(audio_frame)
+                        except queue_module.Full:
+                            pass  # drop frame rather than block audio capture
+                        # Read VAD result (may be from a slightly earlier frame —
+                        # acceptable since VAD processes frames in ~1-2ms)
+                        try:
+                            audio_frame, has_speech = _vad_out_q.get(timeout=0.05)
+                        except queue_module.Empty:
+                            continue  # VAD hasn't caught up yet, skip this tick
 
                     frame_count += 1
-                    has_speech = is_speech(audio_frame, vad_model, vad_utils)
 
                     if has_speech:
                         if len(speech_buffer) == 0:
@@ -1162,6 +1405,21 @@ async def audio_loop():
                         frame_count = 0
                         last_partial_len = 0
                         vad_model.reset_states()
+                        # [P7-5B] Drain any stale VAD results after reset
+                        while not _vad_out_q.empty():
+                            try:
+                                _vad_out_q.get_nowait()
+                            except queue_module.Empty:
+                                break
+                        # [P7-4A] Schedule a GPU warmup now that speech ended
+                        _warmup_pending = True
+
+                    # [P7-4A] Pre-warm during silence: run dummy forward pass
+                    # once after speech→silence transition to keep Metal GPU hot
+                    if (len(speech_buffer) == 0 and silence_frames > 0
+                            and _warmup_pending):
+                        loop = asyncio.get_event_loop()
+                        loop.run_in_executor(None, warmup_translation_models)
 
         except sd.PortAudioError as e:
             print(f"\n  Mic error: {e} — retrying in 2s...", file=sys.stderr)
@@ -1171,6 +1429,17 @@ async def audio_loop():
                 try:
                     audio_queue.get_nowait()
                 except asyncio.QueueEmpty:
+                    break
+            # [P7-5B] Drain VAD queues too
+            while not _vad_in_q.empty():
+                try:
+                    _vad_in_q.get_nowait()
+                except queue_module.Empty:
+                    break
+            while not _vad_out_q.empty():
+                try:
+                    _vad_out_q.get_nowait()
+                except queue_module.Empty:
                     break
             await asyncio.sleep(2)
 
@@ -1252,6 +1521,7 @@ async def main_async(args):
     except KeyboardInterrupt:
         pass
     finally:
+        stop_vad_thread()  # [P7-5B] Clean up VAD thread
         print_summary()
         ws_server.close()
         await ws_server.wait_closed()

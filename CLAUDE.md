@@ -4,17 +4,23 @@
 
 A fully on-device, live English speech-to-text system with dual English/Spanish output, built for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Designed for low-latency local transcription that outperforms YouTube's built-in captions, with automated quality monitoring and an iterative fine-tuning loop.
 
-Two architectures run in parallel for A/B comparison:
+A **two-pass pipeline** provides fast partials and high-quality finals:
 
-- **Approach A (Lightweight):** Distil-Whisper + TranslateGemma-4B — ultra-low latency (~70–210ms partials), edge efficiency
-- **Approach B (High-Accuracy):** Distil-Whisper + TranslateGemma-12B — trades speed (~140–410ms partials) for better nuance (higher BLEU)
+- **Partials (while speaking):** mlx-whisper STT + MarianMT CT2 int8 translation (~580ms) -- displayed in italics
+- **Finals (on silence):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit translation (~1.3s / ~1.9s) -- replaces partial
 
-All Python, MPS-accelerated on Apple Silicon for inference, CUDA-accelerated on NVIDIA for training.
+Two translation models run in parallel for A/B comparison:
+
+- **Approach A (Lightweight):** TranslateGemma-4B 4-bit via mlx-lm -- ~650ms translation, ~1.3s end-to-end
+- **Approach B (High-Accuracy):** TranslateGemma-12B 4-bit via mlx-lm -- ~1.4s translation, ~1.9s end-to-end
+- **Speculative decoding:** 4B serves as draft model for 12B via `mlx_lm.generate(draft_model=)`, configurable via `--num-draft-tokens`
+
+All Python, MLX-accelerated on Apple Silicon for inference (mlx-whisper for STT, mlx-lm for translation), CUDA-accelerated on NVIDIA for training.
 
 ### Goals
 
 - Real-time mic input with <500ms partial outputs
-- Side-by-side A/B comparison in a Streamlit UI
+- Side-by-side A/B comparison in browser displays (served over LAN via HTTP + WebSocket)
 - Automated quality monitoring against YouTube livestream captions
 - Confidence-based flagging to minimize human review effort
 - Reference-free translation quality estimation (no Spanish ground truth needed)
@@ -43,12 +49,22 @@ project_dir/
 ├── CLAUDE.md                       # This file — project overview
 ├── CLAUDE-macbook.md               # Mac inference environment guide
 ├── CLAUDE-windows.md               # Windows/WSL training environment guide
+├── README.md                       # Quick-start guide and architecture summary
 │
-├── stt_pipeline.py                 # Core dual-pipeline (Approach A & B)
-├── stt_ui.py                       # Streamlit dashboard UI
+├── dry_run_ab.py                   # Main pipeline: mic → VAD → STT → translate → WebSocket + HTTP
+├── setup_models.py                 # One-command model download + verification
+├── build_glossary.py               # EN→ES theological glossary builder (229 terms)
+├── download_sermons.py             # yt-dlp sermon downloader
 ├── live_caption_monitor.py         # YouTube caption comparison system
-├── confidence_scorer.py            # Whisper confidence extraction & flagging
 ├── translation_qe.py              # Reference-free translation quality estimation
+├── diarize.py                      # Speaker diarization via pyannote-audio
+├── summarize_sermon.py             # Post-sermon 5-sentence summary generator
+├── extract_verses.py               # Bible verse reference extraction from transcripts
+│
+├── audience_display.html           # Projector display (EN/ES side-by-side, QR overlay, fullscreen)
+├── ab_display.html                 # A/B/C operator comparison (Gemma 4B / MarianMT / 12B)
+├── mobile_display.html             # Phone/tablet responsive view (model toggle, Spanish-only)
+├── church_display.html             # Simplified church-oriented layout
 │
 ├── transcribe_church.py            # Church audio transcription (WSL)
 ├── preprocess_audio.py             # 10-step audio cleaning pipeline (WSL)
@@ -56,10 +72,13 @@ project_dir/
 ├── train_gemma.py                  # TranslateGemma LoRA fine-tuning (WSL)
 ├── train_marian.py                 # MarianMT full fine-tune fallback (WSL)
 ├── prepare_bible_corpus.py         # Bible parallel text download + alignment (WSL)
-├── build_glossary.py               # Theological term glossary builder (WSL)
 ├── evaluate_translation.py         # SacreBLEU/chrF++/COMET scoring (Both)
 ├── assess_quality.py               # Baseline transcript quality assessment (WSL)
 │
+├── docs/
+│   └── rtx2070_feasibility.md      # RTX 2070 hardware portability analysis
+│
+├── ct2_opus_mt_en_es/              # CTranslate2 int8 MarianMT model (76MB)
 ├── fine_tuned_whisper_mi/          # LoRA adapters for Whisper (post fine-tune)
 ├── fine_tuned_gemma_mi_A/          # LoRA adapters for Gemma 4B
 ├── fine_tuned_gemma_mi_B/          # LoRA adapters for Gemma 12B
@@ -68,13 +87,14 @@ project_dir/
 │   ├── raw/                        # Original downloads from yt-dlp
 │   ├── cleaned/                    # Post-preprocessing audio
 │   ├── transcripts/                # JSON transcription labels
-│   └── corrections/                # Human-corrected segments (feedback loop)
+│   ├── corrections/                # Human-corrected segments (feedback loop)
+│   └── live_sessions/              # Per-chunk WAV files from live runs (for fine-tuning)
 │
 ├── bible_data/                     # Biblical parallel text for translation fine-tuning
 │   ├── en/                         # English verse text (KJV, ASV, WEB, BBE, YLT)
 │   ├── es/                         # Spanish verse text (RVR1909, Español Sencillo)
 │   ├── aligned/                    # Verse-aligned JSONL pairs (~155K)
-│   ├── glossary/                   # Theological term glossary (EN→ES, ~200–500 terms)
+│   ├── glossary/                   # Theological term glossary (EN→ES, 229 terms)
 │   └── holdout/                    # Stratified test set (~3.1K verses by genre)
 │
 ├── metrics/
@@ -83,7 +103,9 @@ project_dir/
 │   ├── confidence_flags.jsonl      # Low-confidence segment queue
 │   └── translation_qe.jsonl       # Translation quality scores
 │
-└── stt_env/                        # Python 3.12 virtualenv
+├── requirements-mac.txt            # Mac pip dependencies
+├── requirements-windows.txt        # Windows/WSL pip dependencies
+└── stt_env/                        # Python 3.11 virtualenv
 ```
 
 ---
@@ -224,7 +246,7 @@ The Protestant Bible contains ~31,102 verses per translation. Pairing five publi
 
 **Copyright warning:** Do NOT use ESV, NASB, NIV, NLT, NVI, LBLA, RVR1960, or DHH as training data. Their "fair use" policies cap at ~500 verses for quotation — not bulk ML training. Stick to pre-1923 or explicitly dedicated public-domain translations.
 
-**Supplementary data:** Theological glossary pairs (~200–500 single-term translations), bilingual catechism excerpts (Westminster Shorter, Heidelberg), and any bilingual sermon transcripts the church produces.
+**Supplementary data:** Theological glossary (229 terms, covering all 66 books, 31 proper names, theological concepts), bilingual catechism excerpts (Westminster Shorter, Heidelberg), and any bilingual sermon transcripts the church produces.
 
 ### Sermon Audio Data via Pseudo-Labeling
 
@@ -280,7 +302,7 @@ The 4B variant loads at ~2.6 GB in 4-bit, leaving ample headroom for training on
 
 **TranslateGemma chat template** must be followed exactly — it requires `source_lang_code` and `target_lang_code` fields in the user message content.
 
-**MarianMT fallback:** If TranslateGemma proves too heavy, `Helsinki-NLP/opus-mt-en-es` (298MB) supports full fine-tuning without LoRA and runs inference much faster. Lower quality ceiling but dramatically higher iteration speed.
+**MarianMT for partials:** `Helsinki-NLP/opus-mt-en-es` runs as CT2 int8 (76MB, ~50ms) for fast partial translations during speech, while TranslateGemma handles final translations on silence. The PyTorch variant (298MB, ~80ms) runs in parallel for comparison logging. MarianMT also supports full fine-tuning without LoRA for lower quality ceiling but dramatically higher iteration speed.
 
 ### Theological Vocabulary Challenges
 
@@ -296,7 +318,7 @@ Critical translations that require context-dependent disambiguation:
 | Sanctification | *santificación* | Consistent across contexts |
 | Grace | *gracia* | Also means "humor/charm" — theological context needed |
 
-**Mitigation strategies:** Build a 200–500 term glossary for soft constraint training (append target terms to source during training), dictionary augmentation (inject glossary pairs as training examples), and theological term spot-checking in evaluation.
+**Mitigation strategies:** A 229-term theological glossary has been built covering all 66 books, 31 proper names, theological concepts, and liturgical terms. Used for soft constraint training (append target terms to source during training), dictionary augmentation (inject glossary pairs as training examples), and theological term spot-checking in evaluation.
 
 ### Evaluation Strategy
 
@@ -327,8 +349,9 @@ No published work exists on fine-tuning Whisper for church/religious speech — 
 2. **Compare:** Latency histograms, error rates per phrase length
 3. **Edge cases:** Test accents, background noise (fan hum, coffee shop ambiance)
 4. **Metrics columns:** `approach`, `latency_ms`, `stt_wer`, `bleu`, `en_text`, `es_text`
-5. **Expected baselines:** A avg 140ms / BLEU ~40 vs. B avg 275ms / BLEU ~44
+5. **Measured baselines:** Partials ~580ms (MarianMT CT2), finals A ~1.3s (4B), finals B ~1.9s (12B)
 6. **Scaling:** Wrap in loop for 10+ runs; use `timeit` for precise RTF
+7. **Serving:** HTTP on `0.0.0.0:8080` (LAN/phone access), WebSocket on `0.0.0.0:8765`
 
 ---
 
@@ -352,7 +375,7 @@ Five public-domain English Bibles paired against two freely licensed Spanish tra
 
 **Copyright boundary:** ESV, NASB, NIV, NLT, NVI, LBLA, RVR1960, DHH are all copyrighted with fair-use caps of ~500 verses — not bulk ML training. Only use pre-1923 or explicitly dedicated translations.
 
-**Supplementary data:** Theological glossary pairs (~200–500 terms), bilingual catechism excerpts (Westminster Shorter, Heidelberg), any bilingual sermon transcripts the church produces.
+**Supplementary data:** Theological glossary (229 terms, covering all 66 books, 31 proper names, theological concepts, liturgical terms), bilingual catechism excerpts (Westminster Shorter, Heidelberg), any bilingual sermon transcripts the church produces.
 
 ### Training Data: 20–50 Hours Sermon Audio
 
@@ -377,7 +400,7 @@ Catastrophic forgetting is minimal with LoRA (base weights frozen). For extra sa
 
 TranslateGemma 4B in 4-bit quantization (~2.6 GB) via bitsandbytes. Config: r=16, α=16, target `"all-linear"`, NF4 quantization, paged AdamW 32-bit optimizer. Use TRL's SFTTrainer with sequence packing (Bible verses rarely exceed 200 tokens). Must follow TranslateGemma's exact chat template with `source_lang_code` / `target_lang_code` fields. Fits in ~10–12 GB on A2000 Ada.
 
-MarianMT (`Helsinki-NLP/opus-mt-en-es`, 298 MB) as a lightweight fallback — small enough for full fine-tuning, much faster iteration, lower quality ceiling.
+MarianMT (`Helsinki-NLP/opus-mt-en-es`) as a lightweight fallback and partial-translation engine. Currently deployed as CT2 int8 (76MB, ~50ms) for real-time partials and PyTorch fp32 (298MB, ~80ms) for comparison logging. Small enough for full fine-tuning, much faster iteration, lower quality ceiling.
 
 ### Theological Vocabulary Challenges
 
@@ -388,7 +411,7 @@ Critical disambiguation failures in generic MT:
 - **Righteousness** → *justicia* — also means "justice" in everyday Spanish
 - **James** → *Jacobo* (apostle in Mark 3:17), *Santiago* (epistle), *Jaime* (modern name) — context-dependent
 
-Build a ~200–500 term theological glossary for constrained decoding. Three approaches: soft constraint training (append target term to source during training), LeCA code-switching augmentation, or constrained beam search at inference. Soft constraints recommended as starting point.
+A 229-term theological glossary has been built (`build_glossary.py`) for constrained decoding. Three approaches: soft constraint training (append target term to source during training), LeCA code-switching augmentation, or constrained beam search at inference. Soft constraints recommended as starting point.
 
 ### Evaluation
 
@@ -406,8 +429,12 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 
 | Library | Role | Mac | WSL |
 |---------|------|-----|-----|
-| `distil-whisper/distil-large-v3` | STT model | ✅ (MPS) | ✅ (CUDA) |
-| `google/translategemma-4b` / `12b` | Translation | ✅ (MPS) | ✅ (CUDA) |
+| `mlx-whisper` | STT inference (distil-large-v3) | ✅ (MLX) | — |
+| `mlx-lm` | TranslateGemma 4B/12B 4-bit inference | ✅ (MLX) | — |
+| `ctranslate2` | MarianMT int8 for fast partials (76MB) | ✅ (CPU) | — |
+| `Helsinki-NLP/opus-mt-en-es` | MarianMT PyTorch fallback (298MB) | ✅ (CPU) | ✅ (CUDA) |
+| `distil-whisper/distil-large-v3` | STT model (training) | — | ✅ (CUDA) |
+| `google/translategemma-4b` / `12b` | Translation (training) | — | ✅ (CUDA) |
 | `silero-vad` | Voice activity detection | ✅ | ✅ |
 | `noisereduce` | Spectral noise reduction | ✅ | ✅ |
 | `demucs` v4 | Source separation | ✅ (MPS/CPU) | ✅ (CUDA) |
@@ -415,7 +442,7 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 | `inaSpeechSegmenter` | Speech/music classification | ✅ | ✅ |
 | `pyannote-audio` 3.1 | Speaker diarization | ✅ (CPU) | ✅ (CUDA) |
 | `jiwer` | WER/CER computation | ✅ | ✅ |
-| `faster-whisper` | Confidence scores + speed | ✅ | ✅ |
+| `faster-whisper` | Confidence scores (CTranslate2 backend) | ✅ (CPU) | ✅ |
 | `whisper-timestamped` | Word-level confidence | ✅ | ✅ |
 | `Unbabel/wmt22-cometkiwi-da` | Translation QE | ✅ (CPU) | — |
 | `sentence-transformers/LaBSE` | Cross-lingual similarity | ✅ | — |
@@ -423,7 +450,7 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 | `language_tool_python` | Spanish grammar | ✅ | — |
 | `peft` (LoRA) | Parameter-efficient fine-tuning | — | ✅ (CUDA) |
 | `trl` (SFTTrainer) | Supervised fine-tuning w/ packing | — | ✅ (CUDA) |
-| `bitsandbytes` | 4-bit quantization (QLoRA) | — | ✅ (CUDA) |
+| `bitsandbytes` | 4-bit quantization (QLoRA, CUDA-only) | — | ✅ (CUDA) |
 | `sacrebleu` + `unbabel-comet` | Translation eval (BLEU/chrF++/COMET) | ✅ | ✅ |
 | `Label Studio` | Annotation / correction UI | ✅ (web) | ✅ (web) |
 | `streamlit` | Dashboard UI | ✅ | — |
@@ -432,6 +459,8 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 ---
 
 ## Future Features
+
+> **Note:** Initial implementations of the summary and verse extraction features now exist as `summarize_sermon.py` and `extract_verses.py`. Speaker diarization is implemented in `diarize.py`. These are ready for integration testing with live session data.
 
 ### 1. Post-Sermon 5-Sentence Summary
 
@@ -476,7 +505,7 @@ Use a two-pass approach:
 ## Compute Timeline — Training & Fine-Tuning
 
 All training runs on the **Windows Desktop** (NVIDIA A2000 Ada 16GB VRAM, 64GB RAM, WSL2).
-Inference benchmarks on the **MacBook** (M3 Pro, 18GB unified memory, 12-core CPU [6P+6E], 18-core GPU, Metal 4, MPS).
+Inference benchmarks on the **MacBook** (M3 Pro, 18GB unified memory, 12-core CPU [6P+6E], 18-core GPU, Metal 4, MLX).
 
 > A2000 Ada specs: 4,352 CUDA cores, ~16 TFLOPS FP16/BF16, 16GB GDDR6, 288 GB/s bandwidth.
 > Roughly 2× a T4 and ~60% of an RTX 3090 for training throughput.
@@ -545,8 +574,8 @@ Inference benchmarks on the **MacBook** (M3 Pro, 18GB unified memory, 12-core CP
 
 ## Next Steps (Ordered)
 
-- [ ] **Phase 0 — Setup:** Configure both environments per machine-specific docs
-- [ ] **Phase 1 — Baseline:** Run base A/B test (no fine-tuning) to establish latency and WER baselines
+- [x] **Phase 0 — Setup:** Configure both environments per machine-specific docs
+- [x] **Phase 1 — Baseline:** Run base A/B test (no fine-tuning) to establish latency and WER baselines
 - [ ] **Phase 2 — Data collection:** Download and sample 10–20 hours of Stark Road audio via `yt-dlp`
 - [ ] **Phase 3 — Quality assessment:** Manually transcribe 50–100 sample segments, compute baseline WER
 - [ ] **Phase 4 — Preprocessing:** Run the 10-step audio cleaning pipeline on all collected data

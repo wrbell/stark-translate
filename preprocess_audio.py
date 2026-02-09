@@ -9,18 +9,27 @@ Usage:
     python preprocess_audio.py --input stark_data/raw --output stark_data/cleaned
     python preprocess_audio.py --input stark_data/raw/sermon1.wav --output stark_data/cleaned
     python preprocess_audio.py --download --urls urls.txt --output stark_data/raw
+    python preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume
 """
 
 import argparse
 import glob
 import json
+import logging
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
 import soundfile as sf
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -416,6 +425,23 @@ def process_single_file(input_path, output_dir, skip_demucs=False, skip_diarize=
     return log
 
 
+def load_completed_stems(log_path):
+    """Load stems of files already processed (for resume support)."""
+    completed = set()
+    if os.path.exists(log_path):
+        try:
+            with open(log_path, "r") as f:
+                logs = json.load(f)
+            for entry in logs:
+                stem = entry.get("stem")
+                final_gate = entry.get("steps", {}).get("final_gate")
+                if stem and final_gate and isinstance(final_gate, dict):
+                    completed.add(stem)
+        except (json.JSONDecodeError, KeyError):
+            pass
+    return completed
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="10-step audio preprocessing pipeline for church sermon data"
@@ -434,6 +460,8 @@ def main():
                         help="Skip speaker diarization (default: skip)")
     parser.add_argument("--diarize", action="store_true",
                         help="Enable speaker diarization")
+    parser.add_argument("--resume", action="store_true",
+                        help="Skip files that were already processed (from preprocessing_log.json)")
     args = parser.parse_args()
 
     if args.download:
@@ -451,23 +479,49 @@ def main():
             print(f"No WAV files found in {args.input}")
             sys.exit(1)
 
-    print(f"Processing {len(files)} files...")
+    # Resume support: skip already-processed files
+    log_path = os.path.join(args.output, "preprocessing_log.json")
     all_logs = []
+    if args.resume:
+        completed = load_completed_stems(log_path)
+        if completed:
+            before = len(files)
+            files = [f for f in files if Path(f).stem not in completed]
+            print(f"Resume: skipping {before - len(files)} already-processed files")
+            # Reload existing logs to append to
+            try:
+                with open(log_path, "r") as lf:
+                    all_logs = json.load(lf)
+            except (FileNotFoundError, json.JSONDecodeError):
+                all_logs = []
+
+    print(f"Processing {len(files)} files...")
+    start_time = time.time()
 
     for i, f in enumerate(files):
         print(f"\n[{i+1}/{len(files)}] {os.path.basename(f)}")
-        log = process_single_file(
-            f, args.output,
-            skip_demucs=args.skip_demucs,
-            skip_diarize=not args.diarize,
-        )
-        all_logs.append(log)
+        try:
+            log = process_single_file(
+                f, args.output,
+                skip_demucs=args.skip_demucs,
+                skip_diarize=not args.diarize,
+            )
+            all_logs.append(log)
+        except Exception as e:
+            print(f"  ERROR processing {os.path.basename(f)}: {e}")
+            all_logs.append({
+                "input": str(f),
+                "stem": Path(f).stem,
+                "steps": {"error": str(e)},
+            })
 
-    # Save processing log
-    log_path = os.path.join(args.output, "preprocessing_log.json")
-    with open(log_path, "w") as f:
-        json.dump(all_logs, f, indent=2)
-    print(f"\nProcessing log saved to {log_path}")
+        # Save log after each file (crash-safe)
+        with open(log_path, "w") as lf:
+            json.dump(all_logs, lf, indent=2)
+
+    elapsed = time.time() - start_time
+    print(f"\nProcessing complete in {elapsed:.0f}s")
+    print(f"Processing log saved to {log_path}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBS Overlay — Live Translation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    /* OBS Browser Source: transparent background requires no background set,
+       or background: transparent. OBS renders rgba(0,0,0,0) as transparent. */
+    background: transparent !important;
+    font-family: 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    /* Prevent any text selection in OBS */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Container anchored to bottom of viewport — lower-third style */
+  .overlay-container {
+    padding: 24px 48px 32px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Semi-transparent backdrop for readability over any background */
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.75) 0%,
+      rgba(0, 0, 0, 0.55) 60%,
+      rgba(0, 0, 0, 0.0) 100%
+    );
+  }
+
+  /* Spanish text — primary, large */
+  .text-spanish {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    min-height: 0;
+  }
+
+  .text-spanish.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .text-spanish.partial {
+    opacity: 0.55;
+    font-style: italic;
+  }
+
+  /* English text — secondary, smaller */
+  .text-english {
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.72);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease 0.05s, transform 0.5s ease 0.05s;
+    min-height: 0;
+  }
+
+  .text-english.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .text-english.partial {
+    opacity: 0.4;
+    font-style: italic;
+  }
+
+  /* Hidden state: no English shown */
+  .text-english.hidden {
+    display: none;
+  }
+
+  /* Connection indicator — tiny dot, top-right, fades after connection */
+  .status-dot {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f85149;
+    transition: background 0.3s, opacity 1.5s ease;
+    opacity: 0.6;
+    z-index: 10;
+  }
+
+  .status-dot.connected {
+    background: #3fb950;
+  }
+
+  .status-dot.faded {
+    opacity: 0;
+  }
+
+  /* When overlay has no text, hide the gradient backdrop entirely */
+  .overlay-container.empty {
+    background: transparent;
+  }
+
+  /* Responsive: scale text for different OBS canvas sizes */
+  @media (max-width: 1280px) {
+    .text-spanish { font-size: 38px; }
+    .text-english { font-size: 20px; }
+    .overlay-container { padding: 20px 32px 24px 32px; }
+  }
+
+  @media (min-width: 2560px) {
+    .text-spanish { font-size: 64px; }
+    .text-english { font-size: 32px; }
+    .overlay-container { padding: 32px 64px 48px 64px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="status-dot" id="statusDot"></div>
+
+<div class="overlay-container" id="container">
+  <div class="text-spanish" id="spanishText"></div>
+  <div class="text-english" id="englishText"></div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Configuration from URL params ──
+  // ?model=a     → use spanish_a (Gemma 4B)
+  // ?model=b     → use spanish_b (Gemma 12B)
+  // ?port=8765   → WebSocket port (default 8765)
+  // ?english=0   → hide English subtitle
+  // ?english=1   → show English subtitle (default)
+  // ?lines=3     → max visible lines for Spanish text (default 3)
+  var params = new URLSearchParams(window.location.search);
+  var useModel = (params.get('model') || 'a').toLowerCase();
+  var wsPort = parseInt(params.get('port') || '8765', 10);
+  var showEnglish = params.get('english') !== '0';
+  var maxLines = parseInt(params.get('lines') || '3', 10);
+
+  var wsHost = window.location.hostname || 'localhost';
+  var WS_URL = 'ws://' + wsHost + ':' + wsPort;
+  var RECONNECT_MS = 2000;
+  var CLEAR_AFTER_MS = 12000; // Clear text after 12s of no new messages
+
+  // ── DOM refs ──
+  var statusDot = document.getElementById('statusDot');
+  var container = document.getElementById('container');
+  var spanishText = document.getElementById('spanishText');
+  var englishText = document.getElementById('englishText');
+
+  if (!showEnglish) {
+    englishText.classList.add('hidden');
+  }
+
+  // ── State ──
+  var ws = null;
+  var clearTimer = null;
+  var statusFadeTimer = null;
+  var recentChunks = []; // store last N chunks for multi-line display
+
+  // ── Profanity filter ──
+  // Allow biblical terms: "ass" (donkey), "damn" (damnation), "whore" (KJV), "hell"
+  var PROFANITY_RE = /\b(asshole|bitch|bastard|crap|cunt|dick|fuck|fucking|fucked|motherfucker|piss|shit|shitty|slut)\b/gi;
+
+  function filterText(text) {
+    return text ? text.replace(PROFANITY_RE, function(m) {
+      return '*'.repeat(m.length);
+    }) : '';
+  }
+
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  // ── Display ──
+  function showText(spanish, english, isPartial) {
+    // Reset clear timer
+    if (clearTimer) clearTimeout(clearTimer);
+    clearTimer = setTimeout(clearText, CLEAR_AFTER_MS);
+
+    container.classList.remove('empty');
+
+    // Spanish
+    spanishText.textContent = spanish;
+    spanishText.classList.add('visible');
+    spanishText.classList.toggle('partial', !!isPartial);
+
+    // English
+    if (showEnglish) {
+      englishText.textContent = english;
+      englishText.classList.add('visible');
+      englishText.classList.toggle('partial', !!isPartial);
+    }
+  }
+
+  function clearText() {
+    spanishText.classList.remove('visible');
+    englishText.classList.remove('visible');
+    // After fade-out transition completes, mark container as empty
+    setTimeout(function() {
+      if (!spanishText.classList.contains('visible')) {
+        container.classList.add('empty');
+        spanishText.textContent = '';
+        englishText.textContent = '';
+      }
+    }, 600);
+  }
+
+  // ── Chunk management for multi-line display ──
+  function addChunk(data, isPartial) {
+    var spanish = '';
+    if (useModel === 'b' && data.spanish_b) {
+      spanish = filterText(data.spanish_b);
+    } else {
+      spanish = filterText(data.spanish_a || '');
+    }
+    var english = filterText(data.english || '');
+
+    if (isPartial) {
+      // Update or add partial
+      var found = false;
+      for (var i = 0; i < recentChunks.length; i++) {
+        if (recentChunks[i].partial) {
+          recentChunks[i] = { spanish: spanish, english: english, partial: true };
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        recentChunks.push({ spanish: spanish, english: english, partial: true });
+      }
+    } else {
+      // Remove any partial, add final
+      recentChunks = recentChunks.filter(function(c) { return !c.partial; });
+      recentChunks.push({ spanish: spanish, english: english, partial: false });
+    }
+
+    // Keep only last N chunks
+    while (recentChunks.length > maxLines) {
+      recentChunks.shift();
+    }
+
+    // Render: join recent chunks, most recent at bottom
+    var spanishLines = recentChunks.map(function(c) { return c.spanish; }).filter(Boolean);
+    var englishLines = recentChunks.map(function(c) { return c.english; }).filter(Boolean);
+    var lastIsPartial = recentChunks.length > 0 && recentChunks[recentChunks.length - 1].partial;
+
+    showText(
+      spanishLines.join(' '),
+      englishLines[englishLines.length - 1] || '',
+      lastIsPartial
+    );
+  }
+
+  // ── WebSocket ──
+  function connect() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = function() {
+      statusDot.classList.add('connected');
+      // Fade out status dot after 3 seconds
+      clearTimeout(statusFadeTimer);
+      statusFadeTimer = setTimeout(function() {
+        statusDot.classList.add('faded');
+      }, 3000);
+    };
+
+    ws.onclose = function() {
+      statusDot.classList.remove('connected', 'faded');
+      setTimeout(connect, RECONNECT_MS);
+    };
+
+    ws.onerror = function() {
+      ws.close();
+    };
+
+    ws.onmessage = function(evt) {
+      var data;
+      try {
+        data = JSON.parse(evt.data);
+      } catch (e) {
+        return;
+      }
+      if (data.type !== 'translation') return;
+
+      var stage = data.stage || 'complete';
+      var isPartial = (stage === 'partial');
+
+      addChunk(data, isPartial);
+    };
+  }
+
+  // Start with empty state
+  container.classList.add('empty');
+  connect();
+})();
+</script>
+</body>
+</html>

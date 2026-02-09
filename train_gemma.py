@@ -5,7 +5,7 @@ train_gemma.py — TranslateGemma QLoRA Fine-Tuning on Biblical Text
 QLoRA fine-tuning for TranslateGemma 4B/12B on ~155K Bible verse pairs
 plus theological glossary pairs. Runs on Windows/WSL with A2000 Ada 16GB VRAM.
 
-Config: r=16, α=16, 4-bit NF4, target all-linear, paged AdamW
+Config: r=16, alpha=16, 4-bit NF4, target all-linear, paged AdamW
 VRAM: ~10-12 GB (4B) | ~14-15 GB (12B)
 Training: ~8-12 hrs (4B) | ~18-27 hrs (12B) for 3 epochs
 
@@ -14,9 +14,11 @@ Usage:
     python train_gemma.py B                    # Fine-tune 12B (Approach B)
     python train_gemma.py A --epochs 5 --lr 1e-4
     python train_gemma.py A --bible-data bible_data/aligned/verse_pairs_train.jsonl
+    python train_gemma.py A --resume           # Resume from checkpoint
 """
 
 import argparse
+import logging
 import os
 import sys
 
@@ -25,6 +27,13 @@ from datasets import concatenate_datasets, load_dataset
 from peft import LoraConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import SFTConfig, SFTTrainer
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 
 def fine_tune_gemma(
@@ -37,6 +46,7 @@ def fine_tune_gemma(
     epochs=3,
     lr=2e-4,
     max_seq_length=512,
+    resume_from_checkpoint=None,
 ):
     """QLoRA fine-tuning for TranslateGemma on biblical text.
 
@@ -56,9 +66,10 @@ def fine_tune_gemma(
     batch_size = 1 if is_12b else 2
     grad_accum = 8 if is_12b else 4
 
-    print(f"Fine-tuning {model_name} (Approach {approach})")
-    print(f"  LoRA: r={lora_r}, α={lora_alpha}")
-    print(f"  Batch: {batch_size} × {grad_accum} = {batch_size * grad_accum} effective")
+    logger.info(f"Fine-tuning {model_name} (Approach {approach})")
+    logger.info(f"  LoRA: r={lora_r}, alpha={lora_alpha}")
+    logger.info(f"  Batch: {batch_size} x {grad_accum} = {batch_size * grad_accum} effective")
+    logger.info(f"  Output: {output_dir}")
 
     # 4-bit quantization config
     bnb_config = BitsAndBytesConfig(
@@ -68,10 +79,12 @@ def fine_tune_gemma(
         bnb_4bit_compute_dtype=torch.bfloat16,
     )
 
-    print(f"Loading tokenizer...")
+    logger.info("Loading tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
-    print(f"Loading model in 4-bit...")
+    logger.info("Loading model in 4-bit...")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         quantization_config=bnb_config,
@@ -89,23 +102,23 @@ def fine_tune_gemma(
     )
 
     # Load Bible + glossary data
-    print(f"Loading training data...")
+    logger.info("Loading training data...")
     datasets_to_merge = []
 
     if os.path.exists(bible_data):
         bible_ds = load_dataset("json", data_files=bible_data, split="train")
         datasets_to_merge.append(bible_ds)
-        print(f"  Bible pairs: {len(bible_ds)}")
+        logger.info(f"  Bible pairs: {len(bible_ds)}")
     else:
-        print(f"  WARNING: Bible data not found at {bible_data}")
+        logger.warning(f"Bible data not found at {bible_data}")
 
     if glossary_data and os.path.exists(glossary_data):
         glossary_ds = load_dataset("json", data_files=glossary_data, split="train")
         datasets_to_merge.append(glossary_ds)
-        print(f"  Glossary pairs: {len(glossary_ds)}")
+        logger.info(f"  Glossary pairs: {len(glossary_ds)}")
 
     if not datasets_to_merge:
-        print("ERROR: No training data found!")
+        logger.error("No training data found!")
         sys.exit(1)
 
     if len(datasets_to_merge) > 1:
@@ -113,7 +126,7 @@ def fine_tune_gemma(
     else:
         full_ds = datasets_to_merge[0].shuffle(seed=42)
 
-    print(f"  Total training examples: {len(full_ds)}")
+    logger.info(f"  Total training examples: {len(full_ds)}")
 
     def format_for_translategemma(example):
         """Format using TranslateGemma's required chat template."""
@@ -126,7 +139,15 @@ def fine_tune_gemma(
             ]},
             {"role": "assistant", "content": example["es"]},
         ]
-        return {"text": tokenizer.apply_chat_template(messages, tokenize=False)}
+        try:
+            formatted = tokenizer.apply_chat_template(messages, tokenize=False)
+        except Exception:
+            # Fallback: simple prompt format if chat template fails
+            formatted = (f"<start_of_turn>user\n"
+                        f"Translate from English to Spanish:\n{example['en']}"
+                        f"<end_of_turn>\n"
+                        f"<start_of_turn>model\n{example['es']}<end_of_turn>")
+        return {"text": formatted}
 
     full_ds = full_ds.map(format_for_translategemma, remove_columns=full_ds.column_names)
 
@@ -148,6 +169,8 @@ def fine_tune_gemma(
         logging_steps=50,
         save_steps=500,
         save_total_limit=3,
+        dataloader_num_workers=4,
+        report_to="none",
     )
 
     trainer = SFTTrainer(
@@ -155,14 +178,19 @@ def fine_tune_gemma(
         args=training_args,
         train_dataset=full_ds,
         peft_config=peft_config,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
     )
 
-    print("Starting training...")
-    trainer.train()
+    logger.info("Starting training...")
+    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+
+    # Save final model + tokenizer
     model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
-    print(f"TranslateGemma QLoRA adapters ({approach}) saved to {output_dir}")
+    logger.info(f"TranslateGemma QLoRA adapters ({approach}) saved to {output_dir}")
+
+    # Save training metrics
+    trainer.save_metrics("train", trainer.state.log_history[-1] if trainer.state.log_history else {})
 
 
 def main():
@@ -182,7 +210,11 @@ def main():
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--max-seq-length", type=int, default=512)
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume training from the latest checkpoint")
     args = parser.parse_args()
+
+    resume = True if args.resume else None
 
     fine_tune_gemma(
         approach=args.approach,
@@ -194,6 +226,7 @@ def main():
         epochs=args.epochs,
         lr=args.lr,
         max_seq_length=args.max_seq_length,
+        resume_from_checkpoint=resume,
     )
 
 

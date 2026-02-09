@@ -187,6 +187,27 @@
     }
   }
 
+  /* Fullscreen toggle button */
+  .fs-btn {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  body:hover .fs-btn { opacity: 0.7; }
+  .fs-btn:hover { opacity: 1 !important; background: rgba(255,255,255,0.2); }
+  :fullscreen .fs-btn { display: none; }
+
   /* Fullscreen styles */
   :fullscreen {
     background: #000;
@@ -221,6 +242,9 @@
 <!-- Connection status dot -->
 <div class="status-dot" id="statusDot"></div>
 
+<!-- Fullscreen toggle button -->
+<button class="fs-btn" onclick="toggleFullscreen()" title="Fullscreen">&#x26F6;</button>
+
 <!-- Model toggle -->
 <button class="model-toggle" id="modelToggle">Model B (12B)</button>
 
@@ -239,7 +263,8 @@
 
 <script>
 (function() {
-  const WS_URL = 'ws://localhost:8765';
+  const wsHost = location.hostname || 'localhost';
+  const WS_URL = 'ws://' + wsHost + ':8765';
   const RECONNECT_MS = 2000;
   const MAX_VISIBLE_CHUNKS = 10;
 
@@ -260,7 +285,7 @@
   let chunkData = [];
 
   // ── Profanity filter (same regex as ab_display.html) ──
-  const BLOCKED_WORDS = /\b(ass|asshole|bitch|bastard|crap|cunt|damn|dick|fuck|fucking|motherfucker|piss|shit|slut|whore)\b/gi;
+  const BLOCKED_WORDS = /\b(asshole|bitch|bastard|crap|cunt|dick|fuck|fucking|fucked|motherfucker|piss|shit|shitty|slut)\b/gi;
   function filterText(text) {
     return text.replace(BLOCKED_WORDS, m => '*'.repeat(m.length));
   }
@@ -408,6 +433,14 @@
 
   connect();
 })();
+
+function toggleFullscreen() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.documentElement.requestFullscreen().catch(function(){});
+  }
+}
 </script>
 </body>
 </html>

@@ -13,11 +13,17 @@ Supports:
   - Text files containing one URL per line
 
 Usage examples:
-  # Download all videos from a channel
-  python download_sermons.py -s "https://www.youtube.com/@StarkRoadGospelHall"
+  # Download from default Stark Road Gospel playlist (no args needed)
+  python download_sermons.py
 
-  # Download a specific playlist, max 20 videos
-  python download_sermons.py -s "https://www.youtube.com/playlist?list=PLxxx" -n 20
+  # Dry run to preview what would be downloaded
+  python download_sermons.py --dry-run
+
+  # Download only 5 most recent videos for testing
+  python download_sermons.py -n 5
+
+  # Download with a different playlist
+  python download_sermons.py --playlist-url "https://www.youtube.com/playlist?list=PLxxx"
 
   # Download specific videos
   python download_sermons.py -s "https://youtu.be/abc123" "https://youtu.be/def456"
@@ -25,8 +31,8 @@ Usage examples:
   # Download from a URL list file, only videos after a date
   python download_sermons.py -s urls.txt --after-date 20240101
 
-  # Dry run to see what would be downloaded
-  python download_sermons.py -s "https://www.youtube.com/@StarkRoadGospelHall" --dry-run
+  # Download all videos from a channel
+  python download_sermons.py -s "https://www.youtube.com/@StarkRoadGospelHall"
 """
 
 import argparse
@@ -45,6 +51,9 @@ from pathlib import Path
 # Constants
 # ---------------------------------------------------------------------------
 
+DEFAULT_PLAYLIST_URL = (
+    "https://www.youtube.com/playlist?list=PLtTHU_srjk52WQQzZYzZiagLbKrS4BowV"
+)
 DEFAULT_OUTPUT_DIR = "stark_data/raw"
 DEFAULT_METADATA_FILE = "stark_data/download_log.jsonl"
 DEFAULT_MIN_DURATION_MIN = 10
@@ -52,6 +61,9 @@ DEFAULT_MAX_DURATION_MIN = 180
 DEFAULT_RETRIES = 3
 SLEEP_BETWEEN_DOWNLOADS = 2.0  # seconds -- basic rate limiting
 SLEEP_BETWEEN_RETRIES = 5.0   # seconds
+
+# 16kHz mono 16-bit PCM = 32,000 bytes per second of audio
+WAV_BYTES_PER_SECOND = 16000 * 2
 
 
 # ---------------------------------------------------------------------------
@@ -99,8 +111,9 @@ def format_duration(seconds: float) -> str:
     return f"{m}m{s:02d}s"
 
 
-def format_size(size_bytes: int) -> str:
+def format_size(size_bytes: int | float) -> str:
     """Format byte count into a human-readable string."""
+    size_bytes = int(size_bytes)
     if size_bytes < 1024:
         return f"{size_bytes} B"
     elif size_bytes < 1024 ** 2:
@@ -224,12 +237,82 @@ def filter_by_duration(videos: list[dict], min_sec: float, max_sec: float) -> tu
     return kept, skipped
 
 
+def fetch_video_description(video_url: str) -> str:
+    """Fetch the description field from a single video via yt-dlp."""
+    try:
+        result = subprocess.run(
+            [
+                "yt-dlp",
+                "--dump-json",
+                "--no-download",
+                "--no-warnings",
+                "--ignore-errors",
+                video_url,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            data = json.loads(result.stdout.strip().splitlines()[0])
+            return data.get("description", "")
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception):
+        pass
+    return ""
+
+
+def save_video_metadata(output_dir: Path, video: dict, wav_path: Path,
+                        description: str = "") -> Path:
+    """
+    Save per-video metadata as a JSON file alongside the WAV file.
+
+    Returns the path to the written JSON file.
+    """
+    json_path = wav_path.with_suffix(".json")
+
+    # Extract speaker info from description
+    speakers = ""
+    if description:
+        # Descriptions typically start with "Speakers: ..." or "Speaker: ..."
+        m = re.match(r'Speakers?:\s*(.+?)(?:\.|$|\n)', description, re.IGNORECASE)
+        if m:
+            speakers = m.group(1).strip()
+
+    metadata = {
+        "video_id": video.get("id", ""),
+        "title": video.get("title", ""),
+        "upload_date": video.get("upload_date", ""),
+        "duration_seconds": video.get("duration", 0),
+        "channel": video.get("channel", ""),
+        "url": video.get("url", ""),
+        "speakers": speakers,
+        "description": description,
+        "wav_filename": wav_path.name,
+        "wav_path": str(wav_path),
+        "download_timestamp": datetime.now(timezone.utc).isoformat(),
+        "audio_format": "16kHz mono PCM s16le WAV",
+        "sample_rate": 16000,
+        "channels": 1,
+        "bit_depth": 16,
+    }
+
+    if wav_path.exists():
+        stat = wav_path.stat()
+        metadata["filesize_bytes"] = stat.st_size
+
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
+
+    return json_path
+
+
 def download_and_convert(
     video: dict,
     output_dir: Path,
     audio_format: str,
     skip_existing: bool,
     retries: int,
+    save_per_video_json: bool = True,
 ) -> dict | None:
     """
     Download a single video's audio and convert to 16kHz mono WAV.
@@ -264,19 +347,20 @@ def download_and_convert(
     temp_template = str(output_dir / f".tmp_{video_id}.%(ext)s")
     wav_path_temp = output_dir / f".tmp_{video_id}.wav"
 
-    # Build yt-dlp command -- download audio only
+    # Build yt-dlp command -- download best quality audio only
     ytdlp_cmd = [
         "yt-dlp",
         "--no-warnings",
         "--ignore-errors",
         "--extract-audio",
         "--audio-format", "wav",
-        "--audio-quality", "0",
+        "--audio-quality", "0",           # best quality
         "-f", audio_format,
         "--output", temp_template,
-        "--no-playlist",  # ensure we download just this video
+        "--no-playlist",                  # ensure we download just this video
         "--retries", str(retries),
         "--fragment-retries", str(retries),
+        "--concurrent-fragments", "4",    # speed up downloads
     ]
     ytdlp_cmd.append(video["url"])
 
@@ -350,6 +434,12 @@ def download_and_convert(
             # Get accurate duration from the converted WAV via ffprobe
             duration = _get_wav_duration(output_path) or video.get("duration", 0)
 
+            # Fetch description for speaker info and save per-video JSON
+            description = ""
+            if save_per_video_json:
+                description = fetch_video_description(video["url"])
+                save_video_metadata(output_dir, video, output_path, description)
+
             return {
                 "video_id": video_id,
                 "title": title,
@@ -357,6 +447,7 @@ def download_and_convert(
                 "duration_seconds": duration,
                 "channel": video.get("channel", ""),
                 "url": video["url"],
+                "description": description,
                 "output_path": str(output_path),
                 "download_timestamp": datetime.now(timezone.utc).isoformat(),
                 "filesize_bytes": stat.st_size,
@@ -443,26 +534,77 @@ def load_existing_ids(metadata_file: Path) -> set[str]:
     return ids
 
 
+def print_download_estimates(videos: list[dict]):
+    """Print estimated download sizes and times for the given video list."""
+    total_duration = sum(v.get("duration", 0) or 0 for v in videos)
+    known_count = sum(1 for v in videos if (v.get("duration") or 0) > 0)
+    unknown_count = len(videos) - known_count
+
+    # WAV output size: 16kHz * 2 bytes * mono = 32KB/s
+    wav_size = total_duration * WAV_BYTES_PER_SECOND
+
+    # Compressed download from YouTube (typically ~128kbps for bestaudio m4a)
+    compressed_size = total_duration * 128 * 1000 / 8  # bits to bytes
+
+    # Estimate download time at various speeds
+    speeds_mbps = [10, 50, 100]
+
+    print(f"\n--- DOWNLOAD ESTIMATES ---")
+    print(f"  Videos with known duration: {known_count}")
+    if unknown_count > 0:
+        print(f"  Videos with unknown duration: {unknown_count} (estimates may be low)")
+    print(f"  Total audio duration: {format_duration(total_duration)} ({total_duration / 3600:.1f} hours)")
+    print(f"  Estimated compressed download: ~{format_size(compressed_size)}")
+    print(f"  Final WAV output size (16kHz mono): ~{format_size(wav_size)}")
+    print(f"  Estimated download time:")
+    for speed in speeds_mbps:
+        dl_seconds = compressed_size / (speed * 1_000_000 / 8)
+        # Add overhead for ffmpeg conversion (~0.5x real-time) + rate limiting
+        convert_seconds = total_duration * 0.1  # ffmpeg is fast for resampling
+        rate_limit_seconds = len(videos) * SLEEP_BETWEEN_DOWNLOADS
+        total_time = dl_seconds + convert_seconds + rate_limit_seconds
+        print(f"    At {speed:3d} Mbps: ~{format_duration(total_time)} "
+              f"(download: {format_duration(dl_seconds)}, "
+              f"convert: {format_duration(convert_seconds)}, "
+              f"rate-limit: {format_duration(rate_limit_seconds)})")
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Download sermon audio from YouTube and convert to 16kHz mono WAV for Whisper.",
+        description=(
+            "Download sermon audio from YouTube and convert to 16kHz mono WAV for Whisper.\n\n"
+            "By default, downloads from the Stark Road Gospel Hall 'Gospel' playlist.\n"
+            "Use --source/-s or --playlist-url to override."
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
 
-    parser.add_argument(
+    source_group = parser.add_mutually_exclusive_group()
+    source_group.add_argument(
         "--source", "-s",
         nargs="+",
-        required=True,
+        default=None,
         help=(
             "YouTube URL(s) -- channel, playlist, or individual video URLs. "
-            "Can also be a path to a text file with one URL per line."
+            "Can also be a path to a text file with one URL per line. "
+            "If omitted, uses the default Stark Road Gospel playlist."
         ),
     )
+    source_group.add_argument(
+        "--playlist-url",
+        type=str,
+        default=None,
+        help=(
+            "YouTube playlist URL to download from. "
+            f"Default: {DEFAULT_PLAYLIST_URL}"
+        ),
+    )
+
     parser.add_argument(
         "--output-dir", "-o",
         type=str,
@@ -518,6 +660,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show what would be downloaded without actually downloading",
     )
     parser.add_argument(
+        "--no-video-json",
+        action="store_true",
+        default=False,
+        help="Skip saving per-video JSON metadata alongside WAV files",
+    )
+    parser.add_argument(
         "--metadata-file",
         type=str,
         default=DEFAULT_METADATA_FILE,
@@ -546,8 +694,15 @@ def main():
     # Ensure output directory exists
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Parse all source URLs
-    urls = parse_sources(args.source)
+    # Determine source URLs: --source, --playlist-url, or default playlist
+    if args.source:
+        urls = parse_sources(args.source)
+    elif args.playlist_url:
+        urls = [args.playlist_url]
+    else:
+        urls = [DEFAULT_PLAYLIST_URL]
+        print(f"Using default playlist: {DEFAULT_PLAYLIST_URL}")
+
     if not urls:
         print("ERROR: No URLs provided.", file=sys.stderr)
         sys.exit(1)
@@ -606,6 +761,9 @@ def main():
 
     print(f"\n{len(videos)} video(s) to process")
 
+    # Show download estimates
+    print_download_estimates(videos)
+
     # Dry run -- print and exit
     if args.dry_run:
         print("\n--- DRY RUN ---")
@@ -628,12 +786,23 @@ def main():
         "failed": [],
     }
     total_count = len(videos)
+    start_time = time.monotonic()
 
     for i, video in enumerate(videos, 1):
         title = video.get("title", video["id"])
         dur = video.get("duration", 0)
         dur_str = format_duration(dur) if dur else "??m"
-        print(f"Downloading {i}/{total_count}: {title[:70]} ({dur_str})")
+
+        # Progress with ETA
+        elapsed = time.monotonic() - start_time
+        if i > 1 and elapsed > 0:
+            rate = (i - 1) / elapsed
+            remaining = (total_count - i + 1) / rate
+            eta_str = f" [ETA: {format_duration(remaining)}]"
+        else:
+            eta_str = ""
+
+        print(f"[{i}/{total_count}]{eta_str} {title[:65]} ({dur_str})")
 
         meta = download_and_convert(
             video=video,
@@ -641,6 +810,7 @@ def main():
             audio_format=args.format,
             skip_existing=args.skip_existing,
             retries=DEFAULT_RETRIES,
+            save_per_video_json=not args.no_video_json,
         )
 
         if meta is None:
@@ -660,6 +830,7 @@ def main():
             time.sleep(SLEEP_BETWEEN_DOWNLOADS)
 
     # Summary
+    total_elapsed = time.monotonic() - start_time
     print("\n" + "=" * 60)
     print("DOWNLOAD SUMMARY")
     print("=" * 60)
@@ -676,6 +847,7 @@ def main():
     print(f"  Failed:      {len(failed)}")
     print(f"  Total duration downloaded: {format_duration(total_downloaded_duration)}")
     print(f"  Total size downloaded:     {format_size(total_downloaded_size)}")
+    print(f"  Wall clock time:           {format_duration(total_elapsed)}")
     print(f"  Output directory:          {output_dir}")
     print(f"  Metadata log:              {metadata_file}")
 

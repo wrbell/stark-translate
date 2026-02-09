@@ -12,26 +12,36 @@ Usage:
     python evaluate_translation.py --adapter fine_tuned_gemma_mi_A --test bible_data/holdout/verse_pairs_test.jsonl
     python evaluate_translation.py --spot-check-only
     python evaluate_translation.py --base-model google/translategemma-12b-it --adapter fine_tuned_gemma_mi_B
+    python evaluate_translation.py --output-file metrics/translation_eval.json
+    python evaluate_translation.py --marian fine_tuned_marian_mi   # Evaluate MarianMT instead
 """
 
 import argparse
 import json
+import logging
 import os
-import sys
+import time
 
 import sacrebleu
 import torch
-from peft import PeftModel
-from transformers import AutoModelForCausalLM, AutoTokenizer
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 
-def load_model(base_model, adapter_dir=None):
+def load_gemma_model(base_model, adapter_dir=None):
     """Load TranslateGemma with optional QLoRA adapter."""
+    from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+
     tokenizer = AutoTokenizer.from_pretrained(
         adapter_dir if adapter_dir and os.path.exists(adapter_dir) else base_model
     )
 
-    from transformers import BitsAndBytesConfig
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_compute_dtype=torch.bfloat16,
@@ -46,15 +56,27 @@ def load_model(base_model, adapter_dir=None):
 
     if adapter_dir and os.path.exists(adapter_dir):
         model = PeftModel.from_pretrained(base, adapter_dir)
-        print(f"Loaded fine-tuned model from {adapter_dir}")
+        logger.info(f"Loaded fine-tuned model from {adapter_dir}")
     else:
         model = base
-        print(f"Using base model: {base_model}")
+        logger.info(f"Using base model: {base_model}")
 
     return model, tokenizer
 
 
-def translate(model, tokenizer, text):
+def load_marian_model(model_dir):
+    """Load fine-tuned MarianMT model."""
+    from transformers import MarianMTModel, MarianTokenizer
+
+    tokenizer = MarianTokenizer.from_pretrained(model_dir)
+    model = MarianMTModel.from_pretrained(model_dir)
+    if torch.cuda.is_available():
+        model = model.to("cuda")
+    logger.info(f"Loaded MarianMT from {model_dir}")
+    return model, tokenizer
+
+
+def translate_gemma(model, tokenizer, text):
     """Translate English to Spanish using TranslateGemma chat template."""
     messages = [{"role": "user", "content": [
         {"type": "text", "source_lang_code": "en",
@@ -74,50 +96,83 @@ def translate(model, tokenizer, text):
     return translation.strip()
 
 
+def translate_marian(model, tokenizer, text):
+    """Translate English to Spanish using MarianMT."""
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True,
+                       max_length=128)
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+    with torch.no_grad():
+        output = model.generate(**inputs, max_new_tokens=128)
+
+    translation = tokenizer.decode(output[0], skip_special_tokens=True)
+    return translation.strip()
+
+
 def evaluate_biblical_translation(
     adapter_dir="fine_tuned_gemma_mi_A",
     test_data="bible_data/holdout/verse_pairs_test.jsonl",
     base_model="google/translategemma-4b-it",
     max_samples=None,
+    output_file=None,
+    marian_dir=None,
 ):
-    """Evaluate fine-tuned TranslateGemma on holdout Bible verses.
+    """Evaluate translation model on holdout Bible verses.
 
     Metrics:
     - SacreBLEU: n-gram precision (standard MT metric)
     - chrF++: character-level n-grams (better for Spanish morphology)
     - COMET: neural metric with highest correlation to human judgments
     """
-    model, tokenizer = load_model(base_model, adapter_dir)
+    # Load model
+    if marian_dir:
+        model, tokenizer = load_marian_model(marian_dir)
+        translate_fn = translate_marian
+    else:
+        model, tokenizer = load_gemma_model(base_model, adapter_dir)
+        translate_fn = translate_gemma
 
     # Load test set
     if not os.path.exists(test_data):
-        print(f"Test data not found: {test_data}")
+        logger.error(f"Test data not found: {test_data}")
         return None
     test = [json.loads(line) for line in open(test_data, encoding="utf-8")]
     if max_samples:
         test = test[:max_samples]
 
-    print(f"Translating {len(test)} verses...")
+    logger.info(f"Translating {len(test)} verses...")
     sources, references, hypotheses = [], [], []
+    start_time = time.time()
 
     for i, example in enumerate(test):
-        translation = translate(model, tokenizer, example["en"])
+        try:
+            translation = translate_fn(model, tokenizer, example["en"])
+        except Exception as e:
+            logger.warning(f"Translation failed for example {i}: {e}")
+            translation = ""
         sources.append(example["en"])
         references.append(example["es"])
         hypotheses.append(translation)
 
         if (i + 1) % 100 == 0:
-            print(f"  [{i+1}/{len(test)}]")
+            elapsed = time.time() - start_time
+            rate = (i + 1) / elapsed
+            eta = (len(test) - i - 1) / rate
+            logger.info(f"  [{i+1}/{len(test)}] {rate:.1f} verse/s, ETA: {eta:.0f}s")
+
+    elapsed = time.time() - start_time
+    logger.info(f"Translation complete in {elapsed:.0f}s ({len(test)/elapsed:.1f} verse/s)")
 
     # SacreBLEU
     bleu = sacrebleu.corpus_bleu(hypotheses, [references])
-    print(f"\nSacreBLEU: {bleu.score:.1f}")
+    logger.info(f"\nSacreBLEU: {bleu.score:.1f}")
 
     # chrF++
     chrf = sacrebleu.corpus_chrf(hypotheses, [references], word_order=2)
-    print(f"chrF++: {chrf.score:.1f}")
+    logger.info(f"chrF++: {chrf.score:.1f}")
 
     # COMET (neural, highest human correlation)
+    comet_val = None
     try:
         from comet import download_model, load_from_checkpoint
         comet_path = download_model("Unbabel/wmt22-comet-da")
@@ -125,11 +180,12 @@ def evaluate_biblical_translation(
         comet_input = [{"src": s, "mt": h, "ref": r}
                        for s, h, r in zip(sources, hypotheses, references)]
         comet_score = comet_model.predict(comet_input, batch_size=8)
-        print(f"COMET: {comet_score.system_score:.4f}")
         comet_val = comet_score.system_score
+        logger.info(f"COMET: {comet_val:.4f}")
+    except ImportError:
+        logger.warning("COMET unavailable (install unbabel-comet). Skipping.")
     except Exception as e:
-        print(f"COMET unavailable: {e}")
-        comet_val = None
+        logger.warning(f"COMET error: {e}")
 
     # Per-genre breakdown
     genres = {
@@ -141,7 +197,8 @@ def evaluate_biblical_translation(
         "epistles": range(44, 66),       # Acts-Jude
         "apocalyptic": range(66, 67),    # Revelation
     }
-    print("\nPer-genre BLEU:")
+    logger.info("\nPer-genre BLEU:")
+    genre_scores = {}
     for genre, book_range in genres.items():
         genre_hyps = [h for h, ex in zip(hypotheses, test)
                       if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range]
@@ -149,17 +206,43 @@ def evaluate_biblical_translation(
                       if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range]
         if genre_hyps:
             genre_bleu = sacrebleu.corpus_bleu(genre_hyps, [genre_refs])
-            print(f"  {genre:15s}: BLEU {genre_bleu.score:5.1f} ({len(genre_hyps)} verses)")
+            genre_scores[genre] = {
+                "bleu": genre_bleu.score,
+                "count": len(genre_hyps),
+            }
+            logger.info(f"  {genre:15s}: BLEU {genre_bleu.score:5.1f} ({len(genre_hyps)} verses)")
 
-    return {"bleu": bleu.score, "chrf": chrf.score, "comet": comet_val}
+    scores = {
+        "bleu": bleu.score,
+        "chrf": chrf.score,
+        "comet": comet_val,
+        "genres": genre_scores,
+        "num_verses": len(test),
+        "elapsed_s": round(elapsed, 1),
+    }
+
+    # Save metrics to file
+    if output_file:
+        os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
+        with open(output_file, "w") as f:
+            json.dump(scores, f, indent=2)
+        logger.info(f"\nMetrics saved to {output_file}")
+
+    return scores
 
 
 def evaluate_theological_terms(
     adapter_dir="fine_tuned_gemma_mi_A",
     base_model="google/translategemma-4b-it",
+    marian_dir=None,
 ):
     """Spot-check critical theological term translations."""
-    model, tokenizer = load_model(base_model, adapter_dir)
+    if marian_dir:
+        model, tokenizer = load_marian_model(marian_dir)
+        translate_fn = translate_marian
+    else:
+        model, tokenizer = load_gemma_model(base_model, adapter_dir)
+        translate_fn = translate_gemma
 
     test_sentences = [
         ("Christ's atonement covers all sins.", "expiación"),
@@ -173,50 +256,67 @@ def evaluate_theological_terms(
     ]
 
     correct = 0
-    print()
+    results = []
+    logger.info("")
     for en_sentence, expected_es_term in test_sentences:
-        translation = translate(model, tokenizer, en_sentence)
+        try:
+            translation = translate_fn(model, tokenizer, en_sentence)
+        except Exception as e:
+            translation = f"[ERROR: {e}]"
         found = expected_es_term.lower() in translation.lower()
         correct += found
         status = "PASS" if found else "FAIL"
-        print(f"  [{status}] '{en_sentence}'")
-        print(f"         -> '{translation}'")
-        print(f"         expected: '{expected_es_term}' {'(found)' if found else '(MISSING)'}")
+        logger.info(f"  [{status}] '{en_sentence}'")
+        logger.info(f"         -> '{translation}'")
+        logger.info(f"         expected: '{expected_es_term}' {'(found)' if found else '(MISSING)'}")
+        results.append({
+            "en": en_sentence,
+            "translation": translation,
+            "expected_term": expected_es_term,
+            "found": found,
+        })
 
-    print(f"\nTheological term accuracy: {correct}/{len(test_sentences)} "
-          f"({correct/len(test_sentences):.0%})")
-    return correct, len(test_sentences)
+    accuracy = correct / len(test_sentences)
+    logger.info(f"\nTheological term accuracy: {correct}/{len(test_sentences)} ({accuracy:.0%})")
+    return correct, len(test_sentences), results
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Evaluate fine-tuned TranslateGemma translation quality"
+        description="Evaluate fine-tuned translation model quality"
     )
     parser.add_argument("--adapter", default="fine_tuned_gemma_mi_A",
-                        help="Path to QLoRA adapter directory")
+                        help="Path to QLoRA adapter directory (for TranslateGemma)")
     parser.add_argument("--base-model", default="google/translategemma-4b-it",
                         help="Base TranslateGemma model")
     parser.add_argument("--test", default="bible_data/holdout/verse_pairs_test.jsonl",
                         help="Path to test JSONL")
     parser.add_argument("--max-samples", type=int, default=None,
-                        help="Limit evaluation to N samples")
+                        help="Limit evaluation to N samples (useful for quick checks)")
     parser.add_argument("--spot-check-only", action="store_true",
                         help="Only run theological term spot-check")
+    parser.add_argument("--output-file", default=None,
+                        help="Save metrics to JSON file (e.g., metrics/translation_eval.json)")
+    parser.add_argument("--marian", default=None,
+                        help="Evaluate MarianMT model instead (path to fine-tuned dir)")
     args = parser.parse_args()
 
     if not args.spot_check_only:
-        print("=== Corpus-level metrics ===")
+        logger.info("=== Corpus-level metrics ===")
         scores = evaluate_biblical_translation(
             adapter_dir=args.adapter,
             test_data=args.test,
             base_model=args.base_model,
             max_samples=args.max_samples,
+            output_file=args.output_file,
+            marian_dir=args.marian,
         )
 
-    print("\n=== Theological term spot-check ===")
+    logger.info("\n=== Theological term spot-check ===")
     evaluate_theological_terms(
         adapter_dir=args.adapter,
         base_model=args.base_model,
+        marian_dir=args.marian,
     )
 
 

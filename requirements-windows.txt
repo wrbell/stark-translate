@@ -7,33 +7,42 @@
 #   - ffmpeg (via apt)
 #   - yt-dlp (via apt or pip)
 #
-# PyTorch must be installed separately with CUDA:
+# PyTorch must be installed separately FIRST with CUDA:
 #   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#
+# FlashAttention-2 (optional, for faster training on Ada GPUs):
+#   pip install flash-attn --no-build-isolation
 
 # Core ML / Training
-transformers>=4.36
-accelerate
-peft                          # LoRA / QLoRA adapters
-trl                           # SFTTrainer for QLoRA fine-tuning
-datasets                      # HuggingFace datasets
-bitsandbytes                  # 4-bit quantization (QLoRA) + 8-bit optimizers
+transformers>=4.45
+accelerate>=0.34
+peft>=0.13                        # LoRA / QLoRA adapters
+trl>=0.12                         # SFTTrainer for QLoRA fine-tuning
+datasets>=3.0                     # HuggingFace datasets
+bitsandbytes>=0.44                # 4-bit quantization (QLoRA) + 8-bit optimizers
 sentencepiece
 protobuf
 
 # Audio Preprocessing
-soundfile
-noisereduce
-pyloudnorm
-pydub
-demucs                        # Source separation (CUDA-accelerated)
+soundfile                         # WAV file I/O
+noisereduce                       # Spectral noise reduction
+pyloudnorm                        # EBU R128 loudness normalization
+pydub                             # Audio manipulation utilities
+demucs                            # Source separation (CUDA-accelerated)
 # silero-vad: loaded via torch.hub.load('snakers4/silero-vad', 'silero_vad')
-pyannote-audio                # Speaker diarization (requires HF token)
-inaSpeechSegmenter            # Speech/music classification
+pyannote-audio                    # Speaker diarization (requires HF token)
+inaSpeechSegmenter                # Speech/music classification
+
+# Transcription
+faster-whisper                    # CTranslate2 Whisper with confidence scores
 
 # Evaluation
-jiwer                         # WER/CER computation
-sacrebleu                     # SacreBLEU + chrF++
-unbabel-comet                 # COMET neural translation quality
+jiwer                             # WER/CER computation
+sacrebleu                         # SacreBLEU + chrF++
+unbabel-comet                     # COMET neural translation quality
+
+# Data Collection
+yt-dlp                            # YouTube audio downloader
 
 # Utilities
 numpy
