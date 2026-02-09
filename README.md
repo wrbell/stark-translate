@@ -15,18 +15,22 @@ Real-time mic input, fully on-device transcription and translation, displayed in
             ┌───────────────────────────────────────┘
             │
             ├─ PARTIAL (on 1s of new speech, while speaker is talking)
-            │    mlx-whisper STT (~500ms)
-            │    MarianMT EN→ES (~80ms)                    ← italic in UI
-            │    Total: ~580ms
+            │    mlx-whisper STT (~300ms)
+            │    MarianMT EN→ES CT2 int8 (~50ms)           ← italic in UI
+            │    Total: ~350ms
             │
             └─ FINAL (on silence gap or 8s max utterance)
-                 mlx-whisper STT (~500ms, word timestamps)
-                 TranslateGemma 4B EN→ES (~650ms)          ← replaces partial
-                 TranslateGemma 12B EN→ES (~1.4s, --ab)    ← side-by-side
-                 Total: ~1.3s (4B) / ~1.9s (A/B)
+            │    mlx-whisper STT (~300ms, word timestamps)
+            │    TranslateGemma 4B EN→ES (~350ms)          ← replaces partial
+            │    TranslateGemma 12B EN→ES (~800ms, --ab)   ← side-by-side
+            │    Total: ~650ms (4B) / ~1.1s (A/B)
+            │
+            │    Pipeline overlap (6C): translation runs on utterance N
+            │    while STT runs on utterance N+1, hiding translation latency.
                                      │
                                      ▼
                           WebSocket (0.0.0.0:8765)
+                           HTTP (0.0.0.0:8080)
                                      │
               ┌──────────┬───────────┼───────────┐
               ▼          ▼           ▼           ▼
@@ -45,6 +49,7 @@ All inference runs natively on Apple Silicon via MLX (4-bit quantized). No cloud
 | **A/B/C Comparison** | `displays/ab_display.html` | Operator view showing Gemma 4B / MarianMT / 12B side-by-side with latency stats |
 | **Mobile** | `displays/mobile_display.html` | Responsive phone/tablet view with model toggle and Spanish-only mode, accessible via LAN |
 | **Church** | `displays/church_display.html` | Simplified church-oriented layout |
+| **OBS Overlay** | `displays/obs_overlay.html` | Transparent overlay for OBS Studio / streaming integration |
 
 Phones connect by scanning the QR code on the audience display or navigating to `http://<LAN-IP>:8080/displays/mobile_display.html`.
 
@@ -93,17 +98,17 @@ open displays/ab_display.html
 | Component | Model | Framework | Size | Latency |
 |-----------|-------|-----------|------|---------|
 | VAD | Silero VAD | PyTorch | ~2 MB | <1ms |
-| STT | Distil-Whisper large-v3 | mlx-whisper | ~1.5 GB | ~500ms |
+| STT | Distil-Whisper large-v3 | mlx-whisper | ~1.5 GB | ~300ms |
 | Translate (partials) | MarianMT opus-mt-en-es | CTranslate2 int8 | ~76 MB | ~50ms |
-| Translate (partials) | MarianMT opus-mt-en-es | PyTorch fp32 | ~300 MB | ~80ms |
-| Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~650ms |
-| Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~1.4s |
+| Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~350ms |
+| Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~800ms |
 
-Both CTranslate2 and PyTorch MarianMT backends run in parallel for latency comparison logging.
+Pipeline overlap (P7-6C) hides translation latency by running translation on utterance N while STT processes utterance N+1.
 
 ## Features
 
-- **Two-pass STT pipeline** -- fast italic partials (MarianMT, ~580ms) replaced by high-quality finals (TranslateGemma, ~1.3s) on silence detection
+- **Two-pass STT pipeline** -- fast italic partials (MarianMT, ~350ms) replaced by high-quality finals (TranslateGemma, ~650ms) on silence detection
+- **Pipeline overlap** -- translation runs concurrently with next utterance's STT, hiding translation latency
 - **A/B translation comparison** -- 4B and 12B TranslateGemma run in parallel via `run_in_executor`, logged to CSV
 - **Theological Whisper prompt** -- biases STT toward church vocabulary (atonement, propitiation, mediator, etc.) to reduce homophone errors
 - **Previous-text context** -- last transcription fed to Whisper for cross-chunk accuracy
@@ -149,45 +154,67 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 ## Project Structure
 
 ```
-├── dry_run_ab.py              # Main pipeline: mic → VAD → STT → translate → WebSocket
+├── dry_run_ab.py              # Main pipeline: mic → VAD → STT → translate → WebSocket + HTTP
 ├── setup_models.py            # One-command model download + verification
 ├── build_glossary.py          # EN→ES theological glossary (229 terms)
 ├── download_sermons.py        # yt-dlp sermon downloader
 │
 ├── displays/
-│   ├── audience_display.html  # Projector display (EN/ES side-by-side)
+│   ├── audience_display.html  # Projector display (EN/ES side-by-side, QR overlay)
 │   ├── ab_display.html        # A/B/C operator comparison display
 │   ├── mobile_display.html    # Phone/tablet responsive display
-│   └── church_display.html    # Simplified church layout
+│   ├── church_display.html    # Simplified church layout
+│   └── obs_overlay.html       # Transparent overlay for OBS Studio
 │
-├── training/
-│   ├── preprocess_audio.py    # 10-step audio cleaning (Windows)
-│   ├── transcribe_church.py   # Whisper large-v3 pseudo-labeling (Windows)
-│   ├── prepare_bible_corpus.py # Bible verse pair alignment (Windows)
-│   ├── train_whisper.py       # Whisper LoRA fine-tuning (Windows)
-│   ├── train_gemma.py         # TranslateGemma QLoRA fine-tuning (Windows)
-│   ├── train_marian.py        # MarianMT full fine-tune (Windows)
+├── training/                  # Windows/WSL training scripts (CUDA)
+│   ├── preprocess_audio.py    # 10-step audio cleaning pipeline
+│   ├── transcribe_church.py   # Whisper large-v3 pseudo-labeling
+│   ├── prepare_bible_corpus.py # Bible verse pair alignment
+│   ├── train_whisper.py       # Whisper LoRA fine-tuning
+│   ├── train_gemma.py         # TranslateGemma QLoRA fine-tuning
+│   ├── train_marian.py        # MarianMT full fine-tune
 │   ├── evaluate_translation.py # SacreBLEU/chrF++/COMET scoring
 │   └── assess_quality.py      # Baseline WER assessment
-├── tools/
-│   └── translation_qe.py      # Reference-free translation QE
+│
+├── tools/                     # Mac benchmarking & monitoring
+│   ├── live_caption_monitor.py # YouTube caption comparison (post/live/trend)
+│   ├── translation_qe.py      # Reference-free translation QE
+│   ├── benchmark_latency.py   # End-to-end latency profiling
+│   ├── stt_benchmark.py       # STT-only benchmarking
+│   └── test_adaptive_model.py # Adaptive model selection testing
+│
+├── features/                  # Standalone future features
+│   ├── diarize.py             # Speaker diarization (pyannote-audio)
+│   ├── extract_verses.py      # Bible verse reference extraction
+│   └── summarize_sermon.py    # Post-sermon 5-sentence summary
+│
+├── docs/
+│   ├── seattle_training_run.md # 6-day unattended training plan (Feb 12-17)
+│   ├── training_plan.md       # Full training schedule + go/no-go gates
+│   ├── training_time_estimates.md # A2000 Ada GPU time estimates
+│   ├── roadmap.md             # Mac → Windows → RTX 2070 deployment roadmap
+│   ├── rtx2070_feasibility.md # RTX 2070 hardware analysis
+│   ├── projection_integration.md # OBS/NDI/ProPresenter integration
+│   ├── fast_stt_options.md    # Lightning-whisper-mlx feasibility study
+│   └── previous_actions.md    # Completed work log
 │
 ├── ct2_opus_mt_en_es/         # CTranslate2 int8 MarianMT model
 ├── stark_data/                # Church audio + transcripts + corrections
-├── bible_data/                # Biblical parallel text corpus
-├── metrics/                   # CSV logs, diagnostics JSONL, hardware profiles
-│
-├── CLAUDE.md                  # Full architecture, training strategy, research basis
-├── CLAUDE-macbook.md          # Mac environment setup guide
-├── CLAUDE-windows.md          # Windows/WSL training environment guide
-└── todo.md                    # Task tracking
+├── bible_data/                # Biblical parallel text corpus (269K pairs)
+└── metrics/                   # CSV logs, diagnostics JSONL, hardware profiles
 ```
 
 ## Docs
 
-- [`CLAUDE.md`](./CLAUDE.md) -- Full project overview, 6-layer architecture, fine-tuning strategy, compute timeline
-- [`CLAUDE-macbook.md`](./CLAUDE-macbook.md) -- Mac inference environment setup
-- [`CLAUDE-windows.md`](./CLAUDE-windows.md) -- Windows/WSL training environment setup
+| Doc | Contents |
+|-----|----------|
+| [`CLAUDE.md`](./CLAUDE.md) | Full project overview, 6-layer architecture, fine-tuning strategy, compute timeline |
+| [`CLAUDE-macbook.md`](./CLAUDE-macbook.md) | Mac inference environment setup |
+| [`CLAUDE-windows.md`](./CLAUDE-windows.md) | Windows/WSL training environment setup |
+| [`docs/seattle_training_run.md`](./docs/seattle_training_run.md) | 6-day unattended training run design (Feb 12-17) |
+| [`docs/roadmap.md`](./docs/roadmap.md) | Full project roadmap: Mac → training → RTX 2070 deployment |
+| [`docs/training_plan.md`](./docs/training_plan.md) | Training schedule, data sources, go/no-go gates |
+| [`todo.md`](./todo.md) | Phased task list aligned to Seattle training schedule |
 
 ## License
 
