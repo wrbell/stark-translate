@@ -3,7 +3,7 @@
 > Living document tracking the full project trajectory from Mac prototype
 > through Windows training to RTX 2070 edge deployment.
 >
-> **Last updated:** 2026-02-08
+> **Last updated:** 2026-02-14
 
 ---
 
@@ -17,6 +17,18 @@ Mac (M3 Pro 18GB, MLX)           Windows (A2000 Ada 16GB, CUDA)
               ~911ms finals         Seattle run designed (Feb 12-17)
   Pipeline overlap (6C) done
   P5 caption comparison fixed
+
+Accent-Diverse STT (code complete, data collection pending)
+  download_sermons.py --accent       Accent-tagged downloads → stark_data/raw/{accent}/
+  preprocess_audio.py                Accent propagation through preprocessing
+  prepare_whisper_dataset.py (NEW)   Temperature-balanced accent sampling (T=0.5)
+  train_whisper.py                   AccentBalancedTrainer + per-accent WER eval
+                                     Forced language="en" (Scottish→Welsh fix)
+
+Multilingual (planned, not started)
+  Hindi & Chinese todo list          docs/multi_lingual.md
+  Multilingual research proposal     docs/multilingual_tuning_proposal.md
+  Accent tuning plan                 docs/accent_tuning_plan.md
 ```
 
 ---
@@ -50,6 +62,36 @@ See [`seattle_training_run.md`](seattle_training_run.md) for full details.
 
 3-5 cycles of: infer → flag low-confidence → human correct → retrain.
 Each cycle: ~1 overnight GPU run + 3-5 days human correction.
+
+### 1D. Accent-Diverse STT Tuning (Weeks 2-5) — CODE COMPLETE
+
+See [`accent_tuning_plan.md`](accent_tuning_plan.md) for full 4-week execution timeline.
+
+**Problem:** Base Whisper has 22-34% WER on Scottish English vs <10% on Standard American. Visiting speakers at Stark Road have Scottish, Canadian, and British accents.
+
+**Implementation (done):**
+- `download_sermons.py --accent {label}` — tags downloads with accent metadata, organizes into `stark_data/raw/{accent}/` subdirectories
+- `preprocess_audio.py` — reads accent from companion JSON, writes chunks to `stark_data/cleaned/chunks/{accent}/`
+- `prepare_whisper_dataset.py` **(new)** — temperature-based accent balancing (T=0.5), confidence filtering, stratified train/eval split, outputs HuggingFace audiofolder with accent column
+- `train_whisper.py` — `AccentBalancedTrainer` with `WeightedRandomSampler`, per-accent WER eval (`wer_scottish`, `wer_canadian`, etc.), `wer_accent_gap` fairness metric, forced `language="en"` to prevent Scottish→Welsh misclassification
+
+**Data collection targets:**
+
+| Accent | Hours | Priority | Rationale |
+|--------|-------|----------|-----------|
+| Midwest | 20-50 hrs | High | Primary domain (Stark Road) |
+| Scottish | 3-5 hrs | **Critical** | 22-34% WER gap |
+| British | 2-3 hrs | Medium | 10-15% WER |
+| Canadian | 1-2 hrs | Low | Already handled well |
+| West Coast | 0-1 hrs | Lowest | Well-covered by base model |
+
+**Quality target:** Accent WER gap < 5% absolute (max accent WER - min accent WER).
+
+**Execution:**
+1. Week 1: Download accent-tagged audio from YouTube playlists (user provides URLs)
+2. Week 2: Preprocess, build balanced dataset, train Round 1
+3. Week 3: Active learning on worst accent (Scottish), train Rounds 2-3
+4. Week 4: Integration test on Mac, verify no Midwest regression
 
 ---
 
@@ -93,6 +135,35 @@ Each cycle: ~1 overnight GPU run + 3-5 days human correction.
 - Distill 12B knowledge into 4B on A2000
 - Matches 12B baseline (+2-4% over single model) in smaller footprint
 - Critical for 2070 deployment where 12B won't fit comfortably
+
+### 2E. Multilingual Expansion: Hindi & Chinese — PLANNED
+
+See [`multi_lingual.md`](multi_lingual.md) for actionable checklist and [`multilingual_tuning_proposal.md`](multilingual_tuning_proposal.md) for full research.
+
+**Key insight:** TranslateGemma natively supports Hindi and Chinese — no new model needed. Fine-tuning is domain adaptation (theological register), not teaching new languages. Same models, different LoRA adapters per language.
+
+**Recommended order:**
+1. Accent-tune Whisper first (Phase 1D) — better STT benefits all downstream translations
+2. Then fine-tune TranslateGemma for Hindi/Chinese
+
+**Summary:**
+
+| Phase | Duration | What |
+|-------|----------|------|
+| Zero-shot baseline | 1 day | Test TranslateGemma with `target_lang_code="hi"` / `"zh-Hans"` |
+| Data preparation | 3-5 days | ~155K EN-HI + ~310K EN-ZH biblical verse pairs, theological glossaries |
+| Hindi QLoRA | 1 night | r=32, 768 max_seq_length (high token fertility), separate adapter |
+| Chinese QLoRA | 1 night | r=32, 512 max_seq_length, separate adapter |
+| Evaluation | 1 day | chrF++, COMET, theological term accuracy |
+| Pipeline integration | 1-2 days | Adapter switching, partial models, WebSocket multi-language |
+| Display updates | 1 day | Devanagari/CJK fonts, mobile language selector |
+
+**Key decisions:**
+- Hindi partial display: English partial + Hindi final only (SOV word order garbles partials)
+- Chinese: 神 (Shen) for God, not 上帝 (Shangdi) — matches CUV majority edition
+- Separate LoRA adapters per language (no joint training — risk of catastrophic forgetting)
+
+**Total:** ~8-10 days, ~13-20 GPU hours, ~28-44 human hours
 
 ---
 
@@ -217,14 +288,29 @@ Repeat
 
 ## Target Metrics by Phase
 
+### STT & Spanish Translation
+
 | Metric | Current (Base) | Phase 1 Target | Phase 2 Target | Phase 3 (2070) |
 |--------|---------------|----------------|----------------|----------------|
-| Whisper WER (church) | ~12-18% | <10% | <5% | <5% |
-| SacreBLEU (biblical) | ~35-42 | >44 | >48 | >46 (post-quant) |
-| Theological terms | ~40-60% | >65% | >85% | >80% (post-quant) |
+| Whisper WER (church, Midwest) | ~12-18% | <10% | <5% | <5% |
+| Whisper WER (Scottish) | ~22-34% | <15% | <10% | <10% |
+| Accent WER gap (max-min) | ~15-24% | <10% | <5% | <5% |
+| SacreBLEU (biblical, ES) | ~35-42 | >44 | >48 | >46 (post-quant) |
+| Theological terms (ES) | ~40-60% | >65% | >85% | >80% (post-quant) |
 | Partial latency | 153ms (Mac) | 153ms | 153ms | <100ms (TensorRT) |
 | Final latency | 911ms (Mac) | ~600ms (6C) | ~500ms (adaptive) | <500ms (TensorRT) |
 | End-to-end perceived | ~900ms | ~600ms | ~400ms | <400ms |
+
+### Multilingual (Phase 2E)
+
+| Metric | Hindi Target | Chinese Target |
+|--------|-------------|----------------|
+| chrF++ improvement over zero-shot | > +2 points | > +2 points |
+| COMET improvement over zero-shot | > +0.02 | > +0.02 |
+| Theological term accuracy | > 80% | > 80% |
+| Hindi honorific accuracy (तू for God) | > 90% | N/A |
+| Chinese 神/上帝 consistency | N/A | > 95% |
+| Final latency (4B) | ~700-800ms | ~600-700ms |
 
 ---
 
@@ -236,7 +322,11 @@ Repeat
 | RTX 2070 timing | After Phase 2 accuracy targets met | Buy/configure hardware |
 | TensorRT vs torch.compile | Phase 3 start | TensorRT = more work, faster; torch.compile = quick win |
 | 12B deployment strategy | Phase 2D results | Distill to 4B vs aggressive quantization |
-| Multi-language | After English-Spanish proven | French, Portuguese next? |
+| Scottish accent playlist sources | Phase 1D Week 1 | User provides YouTube playlist URLs |
+| Chinese 神 vs 上帝 | Phase 2E data prep | 神 recommended (CUV majority edition) |
+| Hindi partial model | Phase 2E integration | IndicTrans2-Dist (quality) vs opus-mt-en-hi (simplicity) |
+| Hindi partial display | Phase 2E integration | English partial + Hindi final (recommended) vs delayed partial |
+| Train 12B for Hindi/Chinese? | Phase 2E eval | Only if 4B theological accuracy < 70% |
 
 ---
 
@@ -247,6 +337,9 @@ Repeat
 | [`training_plan.md`](training_plan.md) | Full training schedule, channel inventory, go/no-go gates |
 | [`seattle_training_run.md`](seattle_training_run.md) | 6-day unattended run design with data flow |
 | [`training_time_estimates.md`](training_time_estimates.md) | A2000 Ada GPU time estimates per model |
+| [`accent_tuning_plan.md`](accent_tuning_plan.md) | 4-week accent-diverse STT tuning plan (code complete) |
+| [`multi_lingual.md`](multi_lingual.md) | Hindi & Chinese actionable todo list |
+| [`multilingual_tuning_proposal.md`](multilingual_tuning_proposal.md) | Full Hindi/Chinese research: corpora, glossaries, QLoRA, evaluation |
 | [`rtx2070_feasibility.md`](rtx2070_feasibility.md) | RTX 2070 hardware analysis |
 | [`fast_stt_options.md`](fast_stt_options.md) | Lightning-whisper-mlx feasibility (not viable) |
 | [`projection_integration.md`](projection_integration.md) | OBS/NDI/ProPresenter integration |

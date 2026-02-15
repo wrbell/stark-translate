@@ -56,6 +56,7 @@ DEFAULT_PLAYLIST_URL = (
 )
 DEFAULT_OUTPUT_DIR = "stark_data/raw"
 DEFAULT_METADATA_FILE = "stark_data/download_log.jsonl"
+ACCENT_CHOICES = ["midwest", "scottish", "canadian", "westcoast", "british", "general"]
 DEFAULT_MIN_DURATION_MIN = 10
 DEFAULT_MAX_DURATION_MIN = 180
 DEFAULT_RETRIES = 3
@@ -262,7 +263,7 @@ def fetch_video_description(video_url: str) -> str:
 
 
 def save_video_metadata(output_dir: Path, video: dict, wav_path: Path,
-                        description: str = "") -> Path:
+                        description: str = "", accent: str = "general") -> Path:
     """
     Save per-video metadata as a JSON file alongside the WAV file.
 
@@ -286,6 +287,7 @@ def save_video_metadata(output_dir: Path, video: dict, wav_path: Path,
         "channel": video.get("channel", ""),
         "url": video.get("url", ""),
         "speakers": speakers,
+        "accent": accent,
         "description": description,
         "wav_filename": wav_path.name,
         "wav_path": str(wav_path),
@@ -313,6 +315,7 @@ def download_and_convert(
     skip_existing: bool,
     retries: int,
     save_per_video_json: bool = True,
+    accent: str = "general",
 ) -> dict | None:
     """
     Download a single video's audio and convert to 16kHz mono WAV.
@@ -337,6 +340,7 @@ def download_and_convert(
             "duration_seconds": video.get("duration", 0),
             "channel": video.get("channel", ""),
             "url": video["url"],
+            "accent": accent,
             "output_path": str(output_path),
             "download_timestamp": datetime.now(timezone.utc).isoformat(),
             "filesize_bytes": stat.st_size,
@@ -438,7 +442,8 @@ def download_and_convert(
             description = ""
             if save_per_video_json:
                 description = fetch_video_description(video["url"])
-                save_video_metadata(output_dir, video, output_path, description)
+                save_video_metadata(output_dir, video, output_path, description,
+                                    accent=accent)
 
             return {
                 "video_id": video_id,
@@ -447,6 +452,7 @@ def download_and_convert(
                 "duration_seconds": duration,
                 "channel": video.get("channel", ""),
                 "url": video["url"],
+                "accent": accent,
                 "description": description,
                 "output_path": str(output_path),
                 "download_timestamp": datetime.now(timezone.utc).isoformat(),
@@ -671,6 +677,17 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_METADATA_FILE,
         help=f"Path to write download metadata JSONL (default: {DEFAULT_METADATA_FILE})",
     )
+    parser.add_argument(
+        "--accent",
+        type=str,
+        choices=ACCENT_CHOICES,
+        default="general",
+        help=(
+            "Accent label to tag all downloads from this run "
+            f"(choices: {', '.join(ACCENT_CHOICES)}, default: general). "
+            "Downloads are organized into stark_data/raw/{accent}/ subdirectories."
+        ),
+    )
 
     return parser
 
@@ -687,6 +704,8 @@ def main():
     output_dir = Path(args.output_dir)
     if not output_dir.is_absolute():
         output_dir = project_root / output_dir
+    # Organize downloads into accent subdirectory
+    output_dir = output_dir / args.accent
     metadata_file = Path(args.metadata_file)
     if not metadata_file.is_absolute():
         metadata_file = project_root / metadata_file
@@ -708,6 +727,7 @@ def main():
         sys.exit(1)
 
     print(f"Sources: {len(urls)} URL(s)")
+    print(f"Accent:  {args.accent}")
     print(f"Output:  {output_dir}")
     print(f"Duration filter: {args.min_duration}m - {args.max_duration}m")
     if args.after_date:
@@ -811,6 +831,7 @@ def main():
             skip_existing=args.skip_existing,
             retries=DEFAULT_RETRIES,
             save_per_video_json=not args.no_video_json,
+            accent=args.accent,
         )
 
         if meta is None:

@@ -301,14 +301,29 @@ def final_quality_gate(chunk_audio, sr=16000, min_snr=15.0):
 # Full Pipeline Orchestration
 # ---------------------------------------------------------------------------
 
+def _read_accent_tag(input_path):
+    """Read accent tag from companion .json metadata file (if it exists)."""
+    json_path = Path(input_path).with_suffix(".json")
+    if json_path.exists():
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+            return meta.get("accent", "general")
+        except (json.JSONDecodeError, KeyError):
+            pass
+    return "general"
+
+
 def process_single_file(input_path, output_dir, skip_demucs=False, skip_diarize=True):
     """Run the full 10-step pipeline on a single audio file."""
     stem = Path(input_path).stem
+    accent = _read_accent_tag(input_path)
     work_dir = os.path.join(output_dir, "_work", stem)
     os.makedirs(work_dir, exist_ok=True)
-    os.makedirs(os.path.join(output_dir, "chunks"), exist_ok=True)
+    chunk_dir = os.path.join(output_dir, "chunks", accent)
+    os.makedirs(chunk_dir, exist_ok=True)
 
-    log = {"input": input_path, "stem": stem, "steps": {}}
+    log = {"input": input_path, "stem": stem, "accent": accent, "steps": {}}
 
     # Step 2: Convert to Whisper format
     wav_16k = os.path.join(work_dir, f"{stem}_16k.wav")
@@ -409,7 +424,7 @@ def process_single_file(input_path, output_dir, skip_demucs=False, skip_diarize=
         ok, reason = final_quality_gate(chunk_audio, sr)
         if ok:
             chunk_path = os.path.join(
-                output_dir, "chunks", f"{stem}_chunk{i:04d}.wav"
+                chunk_dir, f"{stem}_chunk{i:04d}.wav"
             )
             sf.write(chunk_path, chunk_audio, sr)
             passed_chunks += 1
@@ -469,14 +484,24 @@ def main():
 
     os.makedirs(args.output, exist_ok=True)
 
-    # Collect input files
+    # Collect input files (search recursively to find WAVs in accent subdirs)
     input_path = Path(args.input)
     if input_path.is_file():
         files = [str(input_path)]
     else:
         files = sorted(glob.glob(os.path.join(args.input, "*.wav")))
+        # Also search accent subdirectories (e.g. stark_data/raw/scottish/*.wav)
+        files += sorted(glob.glob(os.path.join(args.input, "*", "*.wav")))
+        # Deduplicate while preserving order
+        seen = set()
+        unique_files = []
+        for f in files:
+            if f not in seen:
+                seen.add(f)
+                unique_files.append(f)
+        files = unique_files
         if not files:
-            print(f"No WAV files found in {args.input}")
+            print(f"No WAV files found in {args.input} or its subdirectories")
             sys.exit(1)
 
     # Resume support: skip already-processed files

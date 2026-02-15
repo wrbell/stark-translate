@@ -129,9 +129,97 @@
 
 ---
 
+## Phase D — Accent-Diverse STT Tuning (Code Complete, Data Pending)
+
+> **Code implemented:** `download_sermons.py --accent`, `preprocess_audio.py` accent propagation,
+> `prepare_whisper_dataset.py` (new), `train_whisper.py` AccentBalancedTrainer.
+> See [`docs/accent_tuning_plan.md`](docs/accent_tuning_plan.md) for full 4-week plan.
+
+### D1. Data Collection (Week 1)
+
+27. [ ] **Identify Scottish preacher YouTube playlists** — need 3-5 hrs, 5+ speakers
+28. [ ] **Identify British preacher YouTube playlists** — need 2-3 hrs, 5+ speakers
+29. [ ] **Identify Canadian preacher YouTube playlists** — need 1-2 hrs, 3+ speakers
+30. [ ] **Download Midwest audio** — `python download_sermons.py --accent midwest -n 30`
+31. [ ] **Download Scottish audio** — `python download_sermons.py --accent scottish "PLAYLIST_URL"`
+32. [ ] **Download British audio** — `python download_sermons.py --accent british "PLAYLIST_URL"`
+33. [ ] **Download Canadian audio** — `python download_sermons.py --accent canadian "PLAYLIST_URL"`
+34. [ ] **Preprocess all accent audio** — `python training/preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume`
+35. [ ] **Pseudo-label all accent audio** — `python training/transcribe_church.py --backend faster-whisper --resume`
+
+### D2. Training (Week 2)
+
+36. [ ] **Human-correct bottom 10% of Scottish transcripts** — highest error rate, 4-6 hrs
+37. [ ] **Build accent-balanced dataset** — `python training/prepare_whisper_dataset.py`
+   - Verify `metadata.csv` accent distribution
+   - Verify temperature balancing (T=0.5) rebalances Scottish up
+38. [ ] **Train Whisper LoRA Round 1** — `python training/train_whisper.py --accent-balance --dataset stark_data/whisper_dataset`
+39. [ ] **Evaluate Round 1** — check per-accent WER, accent gap metric
+   - `wer_midwest`, `wer_scottish`, `wer_british`, `wer_canadian`, `wer_accent_gap`
+40. [ ] **Human-correct Scottish segments with WER > 30%** — 3-5 hrs
+41. [ ] **Train Whisper LoRA Round 2** — retrain with corrected data
+42. [ ] **Evaluate Round 2** — compare accent gap improvement
+
+### D3. Gap Closing (Week 3)
+
+43. [ ] **Re-pseudo-label all accent data with Round 2 model**
+44. [ ] **Active learning: flag bottom 5-15% per accent, correct**
+45. [ ] **Train Whisper LoRA Round 3**
+46. [ ] **Evaluate Round 3** — target: accent WER gap < 5%, Scottish WER < 10%
+
+### D4. Integration (Week 4)
+
+47. [ ] **Transfer accent-tuned adapters to Mac**
+48. [ ] **Test live inference with Scottish test audio**
+49. [ ] **Verify no Midwest WER regression** — primary domain must not degrade
+50. [ ] **Record final per-accent WER in `metrics/accent_wer.csv`**
+
+---
+
+## Phase E — Multilingual: Hindi & Chinese (After Phase D)
+
+> See [`docs/multi_lingual.md`](docs/multi_lingual.md) for detailed checklist
+> and [`docs/multilingual_tuning_proposal.md`](docs/multilingual_tuning_proposal.md) for research.
+
+### E0. Zero-Shot Baseline (1 day)
+
+51. [ ] **Test TranslateGemma with `target_lang_code="hi"`** — 10 test sentences
+52. [ ] **Test TranslateGemma with `target_lang_code="zh-Hans"`** — 10 test sentences
+53. [ ] **Spot-check:** Hindi honorifics (तू vs आप for God), Chinese 神 vs 上帝 consistency
+54. [ ] **Record baseline chrF++ and COMET** — 50 sample translations per language
+
+### E1. Data Preparation (3-5 days)
+
+55. [ ] **Download Hindi IRV Bible** — `bible-nlp/biblenlp-corpus`, ~31K verses, CC-BY-SA 4.0
+56. [ ] **Download Chinese CUV Bible** — Simplified + Traditional, ~31K verses each, public domain
+57. [ ] **Align verse pairs** — EN × Hindi = ~155K pairs, EN × Chinese = ~310K+ pairs
+58. [ ] **Build Hindi theological glossary** — ~100-150 terms modeled on `build_glossary.py`
+59. [ ] **Build Chinese theological glossary** — ~100-150 terms, enforce Protestant terminology
+60. [ ] **Decision: 神 vs 上帝** — recommend 神
+
+### E2. QLoRA Training (2 nights)
+
+61. [ ] **Hindi QLoRA** — r=32, max_seq_length=768, 3 epochs on A2000 Ada (~6-9 hrs)
+62. [ ] **Chinese QLoRA** — r=32, max_seq_length=512, 3 epochs on A2000 Ada (~6-9 hrs)
+63. [ ] **Evaluate both** — chrF++, COMET, theological term accuracy, Hindi honorific accuracy
+
+### E3. Pipeline Integration (1-2 days)
+
+64. [ ] **Transfer adapters to Mac, implement adapter switching** in `dry_run_ab.py`
+65. [ ] **Wire up partial models** — IndicTrans2-Dist for Hindi, opus-mt-en-zh for Chinese
+66. [ ] **Extend WebSocket protocol** — multi-language translation object
+67. [ ] **Hindi partial display strategy** — English partial + Hindi final only (SOV issue)
+
+### E4. Display Updates (1 day)
+
+68. [ ] **Add Devanagari/CJK fonts** — Noto Sans Devanagari (~200KB) + system CJK stack
+69. [ ] **Mobile language selector** — [EN] [ES] [HI] [ZH] tabs in `mobile_display.html`
+70. [ ] **Test rendering** — Devanagari line-height 1.6, CJK line-height 1.5
+
+---
+
 ## Future (P6)
 
-- [ ] **Multi-language support** — TranslateGemma supports 36 languages
 - [ ] **RTX 2070 edge deployment** — see `docs/roadmap.md` Phase 3
 
 ---

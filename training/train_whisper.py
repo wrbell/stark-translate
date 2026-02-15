@@ -19,10 +19,13 @@ Usage:
 import argparse
 import logging
 import os
+from collections import Counter
 
+import numpy as np
 import torch
 from datasets import Audio, load_dataset
 from peft import LoraConfig, get_peft_model
+from torch.utils.data import WeightedRandomSampler
 from transformers import (
     BitsAndBytesConfig,
     DataCollatorForSeq2Seq,
@@ -92,6 +95,83 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
     return mixed.shuffle(seed=42)
 
 
+def make_compute_metrics(processor, eval_accent_labels):
+    """Create a compute_metrics function that reports per-accent WER.
+
+    Args:
+        processor: WhisperProcessor for decoding predictions.
+        eval_accent_labels: list of accent strings aligned with eval dataset indices.
+    """
+    import jiwer
+
+    def compute_metrics(pred):
+        pred_ids = pred.predictions
+        label_ids = pred.label_ids
+
+        # Replace -100 padding with pad token id for decoding
+        label_ids[label_ids == -100] = processor.tokenizer.pad_token_id
+
+        pred_str = processor.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+        label_str = processor.tokenizer.batch_decode(label_ids, skip_special_tokens=True)
+
+        # Overall WER
+        wer_overall = jiwer.wer(label_str, pred_str)
+        metrics = {"wer_overall": wer_overall}
+
+        # Per-accent WER
+        if eval_accent_labels and len(eval_accent_labels) == len(pred_str):
+            accent_preds = {}
+            accent_labels = {}
+            for accent, p, l in zip(eval_accent_labels, pred_str, label_str):
+                accent_preds.setdefault(accent, []).append(p)
+                accent_labels.setdefault(accent, []).append(l)
+
+            accent_wers = {}
+            for accent in sorted(accent_preds.keys()):
+                accent_wer = jiwer.wer(accent_labels[accent], accent_preds[accent])
+                metrics[f"wer_{accent}"] = accent_wer
+                accent_wers[accent] = accent_wer
+
+            # Accent WER gap (fairness metric)
+            if len(accent_wers) > 1:
+                metrics["wer_accent_gap"] = max(accent_wers.values()) - min(accent_wers.values())
+
+        return metrics
+
+    return compute_metrics
+
+
+class AccentBalancedTrainer(Seq2SeqTrainer):
+    """Seq2SeqTrainer with WeightedRandomSampler for accent-balanced batches."""
+
+    def __init__(self, *args, accent_sampler=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._accent_sampler = accent_sampler
+
+    def _get_train_sampler(self):
+        if self._accent_sampler is not None:
+            return self._accent_sampler
+        return super()._get_train_sampler()
+
+
+def build_accent_sampler(accent_labels):
+    """Build a WeightedRandomSampler that balances accent representation per batch.
+
+    Each sample's weight is inversely proportional to its accent's frequency,
+    so minority accents are sampled more often.
+    """
+    counts = Counter(accent_labels)
+    total = len(accent_labels)
+    # Weight = total / (num_accents * count_for_this_accent)
+    num_accents = len(counts)
+    weights = [total / (num_accents * counts[accent]) for accent in accent_labels]
+    return WeightedRandomSampler(
+        weights=weights,
+        num_samples=total,
+        replacement=True,
+    )
+
+
 def fine_tune_whisper(
     dataset_path="stark_data/cleaned",
     output_dir="fine_tuned_whisper_mi",
@@ -105,6 +185,7 @@ def fine_tune_whisper(
     lr=1e-4,
     replay_ratio=0.3,
     resume_from_checkpoint=False,
+    accent_balance=True,
 ):
     """LoRA fine-tuning for Whisper on church audio.
 
@@ -142,22 +223,38 @@ def fine_tune_whisper(
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
 
-    # Load dataset (expects audiofolder format with audio + text columns)
+    # Load dataset (expects audiofolder format with audio + transcription columns)
     logger.info(f"Loading dataset from {dataset_path}...")
     dataset = load_dataset("audiofolder", data_dir=dataset_path)
     dataset = dataset.cast_column("audio", Audio(sampling_rate=16000))
+
+    # Detect text column name (audiofolder uses "transcription", older format uses "text")
+    sample_cols = dataset.column_names["train"]
+    text_col = "transcription" if "transcription" in sample_cols else "text"
+    has_accent = "accent" in sample_cols
+    if has_accent:
+        logger.info("Accent labels detected in dataset")
+
+    # Extract accent labels before processing (needed for sampler + eval)
+    train_accent_labels = None
+    eval_accent_labels = None
+    if has_accent:
+        train_accent_labels = dataset["train"]["accent"]
+
+    # Determine columns to remove (keep accent out of model inputs but save it first)
+    remove_cols = [c for c in sample_cols if c not in ("input_features", "labels")]
 
     def prepare_dataset(batch):
         audio = batch["audio"]
         batch["input_features"] = processor(
             audio["array"], sampling_rate=audio["sampling_rate"]
         ).input_features[0]
-        batch["labels"] = processor.tokenizer(batch["text"]).input_ids
+        batch["labels"] = processor.tokenizer(batch[text_col]).input_ids
         return batch
 
     dataset = dataset.map(
         prepare_dataset,
-        remove_columns=dataset.column_names["train"],
+        remove_columns=remove_cols,
         num_proc=4,
     )
 
@@ -167,18 +264,59 @@ def fine_tune_whisper(
         split = dataset["train"].train_test_split(test_size=0.05, seed=42)
         train_dataset = split["train"]
         eval_dataset = split["test"]
+        # Split accent labels correspondingly
+        if train_accent_labels:
+            all_labels = np.array(train_accent_labels)
+            train_indices = split["train"]._indices
+            test_indices = split["test"]._indices
+            if train_indices is not None:
+                train_accent_labels = all_labels[train_indices.column(0).to_pylist()].tolist()
+                eval_accent_labels = all_labels[test_indices.column(0).to_pylist()].tolist()
+            else:
+                # Fallback: indices not available, skip per-accent eval
+                train_accent_labels = None
+                eval_accent_labels = None
     else:
         train_dataset = dataset["train"]
         eval_dataset = dataset.get("test") or dataset.get("validation")
+        # For pre-split datasets with accent column, extract eval accent labels
+        if has_accent and eval_dataset is not None:
+            eval_split_name = "test" if "test" in dataset else "validation"
+            # Re-load just to get accent labels before columns were removed
+            raw_dataset = load_dataset("audiofolder", data_dir=dataset_path)
+            if eval_split_name in raw_dataset:
+                eval_accent_labels = raw_dataset[eval_split_name]["accent"]
 
     # Optionally mix with general-domain data
     if replay_ratio > 0:
         logger.info(f"Mixing with {replay_ratio:.0%} general-domain replay data...")
+        pre_mix_size = len(train_dataset)
         train_dataset = prepare_mixed_dataset(train_dataset, processor, replay_ratio)
+        # Extend accent labels for replay samples (tagged as "general")
+        if train_accent_labels:
+            extra = len(train_dataset) - pre_mix_size
+            train_accent_labels = train_accent_labels + ["general"] * extra
 
     logger.info(f"Training: {len(train_dataset)} examples")
     if eval_dataset:
         logger.info(f"Evaluation: {len(eval_dataset)} examples")
+
+    # Log accent distribution
+    if train_accent_labels:
+        accent_counts = Counter(train_accent_labels)
+        logger.info("Training accent distribution:")
+        for accent, count in sorted(accent_counts.items()):
+            logger.info(f"  {accent}: {count}")
+
+    # Build accent-balanced sampler
+    accent_sampler = None
+    if accent_balance and train_accent_labels and len(set(train_accent_labels)) > 1:
+        logger.info("Building accent-balanced sampler...")
+        accent_sampler = build_accent_sampler(train_accent_labels)
+
+    # Force English language to prevent Scottish→Welsh misclassification
+    forced_decoder_ids = processor.get_decoder_prompt_ids(language="en", task="transcribe")
+    model.config.forced_decoder_ids = forced_decoder_ids
 
     # Training args optimized for A2000 Ada 16GB
     # bf16 preferred over fp16 on Ada architecture (compute capability 8.9)
@@ -211,13 +349,23 @@ def fine_tune_whisper(
         model=model,
     )
 
-    trainer = Seq2SeqTrainer(
+    # Build compute_metrics with per-accent WER
+    metrics_fn = None
+    if eval_dataset and eval_accent_labels:
+        metrics_fn = make_compute_metrics(processor, eval_accent_labels)
+    elif eval_dataset:
+        # Basic WER without per-accent breakdown
+        metrics_fn = make_compute_metrics(processor, [])
+
+    trainer = AccentBalancedTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=data_collator,
         processing_class=processor.feature_extractor,
+        compute_metrics=metrics_fn,
+        accent_sampler=accent_sampler,
     )
 
     logger.info("Starting training...")
@@ -257,6 +405,9 @@ def main():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--replay-ratio", type=float, default=0.3,
                         help="Ratio of general-domain replay data (0 to disable)")
+    parser.add_argument("--accent-balance", action=argparse.BooleanOptionalAction,
+                        default=True,
+                        help="Enable accent-balanced sampling (default: True)")
     parser.add_argument("--resume", action="store_true",
                         help="Resume training from the latest checkpoint")
     args = parser.parse_args()
@@ -277,6 +428,7 @@ def main():
         lr=args.lr,
         replay_ratio=args.replay_ratio,
         resume_from_checkpoint=resume,
+        accent_balance=args.accent_balance,
     )
 
 

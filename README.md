@@ -16,8 +16,8 @@ Real-time mic input, fully on-device transcription and translation, displayed in
             │
             ├─ PARTIAL (on 1s of new speech, while speaker is talking)
             │    mlx-whisper STT (~300ms)
-            │    MarianMT EN→ES CT2 int8 (~50ms)           ← italic in UI
-            │    Total: ~350ms
+            │    MarianMT EN→ES PyTorch (~80ms)             ← italic in UI
+            │    Total: ~380ms
             │
             └─ FINAL (on silence gap or 8s max utterance)
             │    mlx-whisper STT (~300ms, word timestamps)
@@ -99,7 +99,7 @@ open displays/ab_display.html
 |-----------|-------|-----------|------|---------|
 | VAD | Silero VAD | PyTorch | ~2 MB | <1ms |
 | STT | Distil-Whisper large-v3 | mlx-whisper | ~1.5 GB | ~300ms |
-| Translate (partials) | MarianMT opus-mt-en-es | CTranslate2 int8 | ~76 MB | ~50ms |
+| Translate (partials) | MarianMT opus-mt-en-es | PyTorch | ~298 MB | ~80ms |
 | Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~350ms |
 | Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~800ms |
 
@@ -107,7 +107,7 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 
 ## Features
 
-- **Two-pass STT pipeline** -- fast italic partials (MarianMT, ~350ms) replaced by high-quality finals (TranslateGemma, ~650ms) on silence detection
+- **Two-pass STT pipeline** -- fast italic partials (MarianMT, ~380ms) replaced by high-quality finals (TranslateGemma, ~650ms) on silence detection
 - **Pipeline overlap** -- translation runs concurrently with next utterance's STT, hiding translation latency
 - **A/B translation comparison** -- 4B and 12B TranslateGemma run in parallel via `run_in_executor`, logged to CSV
 - **Theological Whisper prompt** -- biases STT toward church vocabulary (atonement, propitiation, mediator, etc.) to reduce homophone errors
@@ -145,11 +145,11 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 
 Fine-tuning runs on the Windows desktop and adapters transfer to the Mac for inference:
 
-- **Whisper LoRA** (r=32) on 20-50 hours of church sermon audio
-- **TranslateGemma QLoRA** (r=16, 4-bit NF4) on ~155K biblical verse pairs (public domain)
+- **Whisper LoRA** (r=32) on 20-50 hours of church sermon audio, with accent-balanced sampling across Midwest/Scottish/British/Canadian accents
+- **TranslateGemma QLoRA** (r=16, 4-bit NF4) on ~155K biblical verse pairs (public domain) for Spanish; Hindi and Chinese adapters planned (~155K-310K pairs each)
 - **MarianMT full fine-tune** as a lightweight fallback (298 MB)
 
-Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/YLT paired with RVR1909). See [`CLAUDE.md`](./CLAUDE.md) for the full architecture, training strategy, and compute timeline.
+Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/YLT paired with RVR1909). Accent-diverse audio tagged via `--accent` flag and balanced with temperature-based sampling. See [`CLAUDE.md`](./CLAUDE.md) for the full architecture, training strategy, and compute timeline.
 
 ## Project Structure
 
@@ -167,10 +167,11 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 │   └── obs_overlay.html       # Transparent overlay for OBS Studio
 │
 ├── training/                  # Windows/WSL training scripts (CUDA)
-│   ├── preprocess_audio.py    # 10-step audio cleaning pipeline
+│   ├── preprocess_audio.py    # 10-step audio cleaning pipeline (accent-aware)
 │   ├── transcribe_church.py   # Whisper large-v3 pseudo-labeling
 │   ├── prepare_bible_corpus.py # Bible verse pair alignment
-│   ├── train_whisper.py       # Whisper LoRA fine-tuning
+│   ├── prepare_whisper_dataset.py # Accent-balanced audiofolder builder (NEW)
+│   ├── train_whisper.py       # Whisper LoRA fine-tuning (accent-balanced + per-accent WER)
 │   ├── train_gemma.py         # TranslateGemma QLoRA fine-tuning
 │   ├── train_marian.py        # MarianMT full fine-tune
 │   ├── evaluate_translation.py # SacreBLEU/chrF++/COMET scoring
@@ -193,12 +194,15 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 │   ├── training_plan.md       # Full training schedule + go/no-go gates
 │   ├── training_time_estimates.md # A2000 Ada GPU time estimates
 │   ├── roadmap.md             # Mac → Windows → RTX 2070 deployment roadmap
+│   ├── accent_tuning_plan.md  # 4-week accent-diverse STT tuning plan
+│   ├── multi_lingual.md       # Hindi & Chinese actionable todo list
+│   ├── multilingual_tuning_proposal.md # Hindi/Chinese research + QLoRA strategy
 │   ├── rtx2070_feasibility.md # RTX 2070 hardware analysis
 │   ├── projection_integration.md # OBS/NDI/ProPresenter integration
 │   ├── fast_stt_options.md    # Lightning-whisper-mlx feasibility study
+│   ├── macos_libomp_fix.md   # libomp conflict diagnosis + fix
 │   └── previous_actions.md    # Completed work log
 │
-├── ct2_opus_mt_en_es/         # CTranslate2 int8 MarianMT model
 ├── stark_data/                # Church audio + transcripts + corrections
 ├── bible_data/                # Biblical parallel text corpus (269K pairs)
 └── metrics/                   # CSV logs, diagnostics JSONL, hardware profiles
@@ -214,6 +218,10 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 | [`docs/seattle_training_run.md`](./docs/seattle_training_run.md) | 6-day unattended training run design (Feb 12-17) |
 | [`docs/roadmap.md`](./docs/roadmap.md) | Full project roadmap: Mac → training → RTX 2070 deployment |
 | [`docs/training_plan.md`](./docs/training_plan.md) | Training schedule, data sources, go/no-go gates |
+| [`docs/accent_tuning_plan.md`](./docs/accent_tuning_plan.md) | 4-week accent-diverse STT tuning plan (code complete) |
+| [`docs/multi_lingual.md`](./docs/multi_lingual.md) | Hindi & Chinese actionable todo list |
+| [`docs/multilingual_tuning_proposal.md`](./docs/multilingual_tuning_proposal.md) | Hindi/Chinese research: corpora, glossaries, QLoRA, evaluation |
+| [`docs/macos_libomp_fix.md`](./docs/macos_libomp_fix.md) | macOS libomp conflict diagnosis and fix |
 | [`todo.md`](./todo.md) | Phased task list aligned to Seattle training schedule |
 
 ## License
