@@ -52,18 +52,23 @@ def transcribe_with_transformers(data_dir, output_dir, model_name, batch_size,
         torch_dtype=dtype,
     )
 
-    audio_files = sorted(glob.glob(os.path.join(data_dir, "*.wav")))
+    # Search top-level and accent subdirectories
+    audio_files = sorted(glob.glob(os.path.join(data_dir, "**", "*.wav"),
+                                   recursive=True))
     if not audio_files:
-        logger.warning(f"No WAV files found in {data_dir}")
+        logger.warning(f"No WAV files found in {data_dir} (searched recursively)")
         return
 
     # Resume support: skip already-transcribed files
     if resume:
-        existing = {
-            os.path.basename(f).replace(".json", ".wav")
-            for f in glob.glob(os.path.join(output_dir, "*.json"))
-            if not os.path.basename(f).startswith("_")
-        }
+        existing = set()
+        for f in glob.glob(os.path.join(output_dir, "*.json")):
+            if not os.path.basename(f).startswith("_"):
+                existing.add(os.path.basename(f).replace(".json", ".wav"))
+        # Also check accent subdirectories in output
+        for f in glob.glob(os.path.join(output_dir, "*", "*.json")):
+            if not os.path.basename(f).startswith("_"):
+                existing.add(os.path.basename(f).replace(".json", ".wav"))
         before = len(audio_files)
         audio_files = [f for f in audio_files
                        if os.path.basename(f) not in existing]
@@ -159,18 +164,22 @@ def transcribe_with_faster_whisper(data_dir, output_dir, model_name, batch_size,
     logger.info(f"Loading faster-whisper model '{fw_model}' on {device}...")
     model = WhisperModel(fw_model, device=device, compute_type=compute_type)
 
-    audio_files = sorted(glob.glob(os.path.join(data_dir, "*.wav")))
+    # Search top-level and accent subdirectories
+    audio_files = sorted(glob.glob(os.path.join(data_dir, "**", "*.wav"),
+                                   recursive=True))
     if not audio_files:
-        logger.warning(f"No WAV files found in {data_dir}")
+        logger.warning(f"No WAV files found in {data_dir} (searched recursively)")
         return
 
     # Resume support
     if resume:
-        existing = {
-            os.path.basename(f).replace(".json", ".wav")
-            for f in glob.glob(os.path.join(output_dir, "*.json"))
-            if not os.path.basename(f).startswith("_")
-        }
+        existing = set()
+        for f in glob.glob(os.path.join(output_dir, "*.json")):
+            if not os.path.basename(f).startswith("_"):
+                existing.add(os.path.basename(f).replace(".json", ".wav"))
+        for f in glob.glob(os.path.join(output_dir, "*", "*.json")):
+            if not os.path.basename(f).startswith("_"):
+                existing.add(os.path.basename(f).replace(".json", ".wav"))
         before = len(audio_files)
         audio_files = [f for f in audio_files
                        if os.path.basename(f) not in existing]

@@ -410,15 +410,16 @@ def find_best_offset(local_segments, yt_segments, window_start, window_end,
 # ---------------------------------------------------------------------------
 
 def fetch_youtube_captions_api(video_id, language="en"):
-    """Fetch captions using youtube-transcript-api.
+    """Fetch captions using youtube-transcript-api (v1.x API).
 
     Returns a list of TimedSegment objects.
     """
     YouTubeTranscriptApi = _import_youtube_transcript_api()
+    api = YouTubeTranscriptApi()
 
     print(f"  Fetching YouTube captions for {video_id} via transcript API...")
     try:
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        transcript_list = api.list(video_id=video_id)
     except Exception as e:
         print(f"  WARNING: Could not list transcripts: {e}", file=sys.stderr)
         return []
@@ -435,12 +436,12 @@ def fetch_youtube_captions_api(video_id, language="en"):
             print(f"  WARNING: No {language} transcript found: {e}", file=sys.stderr)
             return []
 
-    raw = transcript.fetch()
+    fetched = transcript.fetch()
     segments = []
-    for entry in raw:
-        start = entry["start"]
-        duration = entry.get("duration", 0)
-        text = entry.get("text", "")
+    for entry in fetched:
+        start = entry.start
+        duration = entry.duration
+        text = entry.text
         if text.strip():
             segments.append(TimedSegment(start, start + duration, text))
 
@@ -1143,6 +1144,7 @@ def poll_youtube_captions_live(video_id, duration_seconds, language="en"):
     Falls back to post-stream fetching if live captions are not available.
     """
     YouTubeTranscriptApi = _import_youtube_transcript_api()
+    api = YouTubeTranscriptApi()
 
     print(f"  Polling YouTube captions every {POLL_INTERVAL}s for {duration_seconds}s...")
     all_segments = []
@@ -1151,18 +1153,18 @@ def poll_youtube_captions_live(video_id, duration_seconds, language="en"):
 
     while (time.time() - t_start) < duration_seconds:
         try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            transcript_list = api.list(video_id=video_id)
             transcript = transcript_list.find_generated_transcript([language])
-            raw = transcript.fetch()
+            fetched = transcript.fetch()
 
             new_count = 0
-            for entry in raw:
-                text = entry.get("text", "").strip()
-                start = entry["start"]
+            for entry in fetched:
+                text = entry.text.strip()
+                start = entry.start
                 key = f"{start:.1f}:{text}"
                 if key not in seen_texts and text:
                     seen_texts.add(key)
-                    duration = entry.get("duration", 0)
+                    duration = entry.duration
                     all_segments.append(TimedSegment(start, start + duration, text))
                     new_count += 1
 
