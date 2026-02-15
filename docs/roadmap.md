@@ -334,6 +334,7 @@ Repeat
 
 | Doc | Contents |
 |-----|----------|
+| [`implementation_plans.md`](implementation_plans.md) | Practical execution guide: scripts, VRAM budgets, code changes, quality gates |
 | [`training_plan.md`](training_plan.md) | Full training schedule, channel inventory, go/no-go gates |
 | [`seattle_training_run.md`](seattle_training_run.md) | 6-day unattended run design with data flow |
 | [`training_time_estimates.md`](training_time_estimates.md) | A2000 Ada GPU time estimates per model |
