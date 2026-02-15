@@ -115,8 +115,161 @@
 24. [ ] **Tune sentence boundary splitting** — review bad_split flags in CSV
 25. [ ] **Fix singing/hymns breaking VAD and STT**
     - Options: lower gain during music, inaSpeechSegmenter, RMS heuristic
-26. [ ] **Active learning pipeline** — Label Studio, versioned corrections, 3-5 retrain cycles
-    - Route low-QE segments to human review → retrain on Windows
+
+### Active Learning Pipeline (Phase C2)
+
+> **What exists:** `dry_run_ab.py` captures diagnostics JSONL with review_priority scoring,
+> per-word confidence, hallucination flags, and audio chunks. `corrected_english` /
+> `corrected_spanish` placeholder fields are in the JSONL but always `null`.
+> **What's missing:** everything from human review through retraining.
+
+#### AL1. Review Interface Setup
+
+26. [ ] **Choose and configure review tool** — Label Studio (recommended) or custom web UI
+    - Label Studio: `pip install label-studio && label-studio start`
+    - Config: audio player + pre-filled transcription text + correction fields
+    - Import template should read diagnostics JSONL and display audio_path + english + spanish
+27. [ ] **Write JSONL → Label Studio export script** — `tools/export_for_review.py`
+    - Read `metrics/diagnostics_*.jsonl`, filter by `review_priority >= 3`
+    - Sort by priority descending (highest-need-for-correction first)
+    - Output Label Studio import format (JSON with audio URLs + pre-annotations)
+    - Support `--session` to export a specific session, `--top-n` to limit count
+    - Support `--threshold` to set minimum review_priority (default: 3)
+
+#### AL2. Correction Workflow
+
+28. [ ] **Write Label Studio → corrections export script** — `tools/import_corrections.py`
+    - Read completed Label Studio annotations (JSON export)
+    - Write to `stark_data/corrections/{session_id}.jsonl` with fields:
+      `chunk_id`, `audio_path`, `original_english`, `corrected_english`,
+      `original_spanish`, `corrected_spanish`, `reviewer`, `timestamp`
+    - Deduplicate against existing corrections
+    - Track correction stats: total reviewed, total corrected, correction rate
+29. [ ] **Define correction versioning scheme** — `stark_data/corrections/` structure
+    - One JSONL per session (matches diagnostics naming)
+    - Git-tracked for reproducibility (corrections are small text, not audio)
+    - Include a `_corrections_summary.json` with cumulative stats
+
+#### AL3. Training Integration
+
+30. [ ] **Update `train_whisper.py` to consume corrections**
+    - Read `stark_data/corrections/*.jsonl` for corrected English transcripts
+    - Override pseudo-labels with human corrections where available
+    - Log: N corrections loaded, N original pseudo-labels replaced
+31. [ ] **Update `train_gemma.py` to consume sermon pair corrections**
+    - Read corrected EN→ES pairs from corrections JSONL
+    - Mix with Bible corpus (see data scaling logic in `--max-pairs`)
+    - Weight corrected sermon pairs higher (2x loss weight) — real-domain data
+32. [ ] **Write `tools/merge_corrections.py`** — prepares unified training dataset
+    - Reads pseudo-labels from `stark_data/transcripts/`
+    - Overlays corrections from `stark_data/corrections/`
+    - Outputs merged audiofolder for `train_whisper.py`
+    - Reports: correction coverage %, segments still uncorrected
+
+#### AL4. Batch QE Scoring (Offline CometKiwi)
+
+33. [ ] **Add CometKiwi batch scoring to `tools/translation_qe.py`**
+    - Run `Unbabel/wmt22-cometkiwi-da` on session diagnostics post-hoc
+    - Re-score and re-rank review priority using neural QE (not just length ratio)
+    - Output: updated JSONL with `cometkiwi_score` field
+    - Note: `qe_a`/`qe_b` in live pipeline is cheap heuristic only (length ratio + untranslated detection), NOT CometKiwi
+34. [ ] **Add `unbabel-comet` to `requirements-mac.txt`** — needed for batch QE
+    - ~400MB model, ~150-300ms per sentence on CPU
+    - Only used offline, not in live pipeline
+
+#### AL5. Auto-Collection from Live Sessions
+
+35. [ ] **Add composite quality scoring to `dry_run_ab.py`**
+    - Score: `0.45 * neural_qe + 0.35 * stt_confidence + 0.20 * marian_agreement`
+    - Until CometKiwi is wired up, use existing heuristic QE as proxy
+    - Auto-accept pairs with score >= 0.85 → `stark_data/live_sessions/sermon_pairs.jsonl`
+    - Log moderate (0.70-0.85) and review (0.50-0.70) pairs separately
+36. [ ] **Calibrate auto-accept threshold** — after 5+ sessions (~500 pairs)
+    - Manually verify 100 auto-accepted pairs for quality
+    - Adjust threshold if precision < 90% (tighten) or yield < 30% (loosen)
+
+#### AL6. Cycle Execution
+
+37. [ ] **Run active learning cycle 1** — after Seattle fine-tuning
+    - Run 3+ live sessions → collect diagnostics + audio
+    - Export top-50 priority chunks to review tool
+    - Correct English transcriptions + Spanish translations
+    - Retrain Whisper + Gemma with corrections mixed in
+    - Evaluate: WER and BLEU improvement vs pre-correction model
+38. [ ] **Run active learning cycles 2-3** — monthly cadence
+    - Each cycle: flag bottom 5-15%, correct, retrain overnight
+    - Expected: 20-40% relative WER reduction in cycle 1, diminishing after cycle 3
+    - Go/No-Go for cycle 4: improvement < 2% relative = stop
+
+### Hybrid STT-Translation Tuning (Phase 2C)
+
+> Three complementary approaches that reduce end-to-end theological translation
+> errors. Each can be tested independently. Combined estimate: ~60-85% reduction
+> in theological term errors. See `docs/implementation_plans.md` Phase 2C.
+
+#### Approach 1: Dictionary Post-Correction (zero training cost)
+
+39. [ ] **Build theological ASR correction dictionary** — `THEOLOGICAL_CORRECTIONS` map
+    - Mine homophone_flags from 5+ session diagnostics CSVs for real confusion pairs
+    - Seed with known pairs: propitiation→proposition, atonement→"atone meant", etc.
+    - Add biblical names: Nebuchadnezzar, Habakkuk, Zerubbabel, Melchizedek
+    - Target: 50-100 correction entries
+40. [ ] **Add `correct_theological_terms()` to `dry_run_ab.py`**
+    - Insert between STT output and translation input
+    - Case-insensitive regex replacement, <1ms per call
+    - Log all corrections to diagnostics JSONL for dictionary expansion
+41. [ ] **Evaluate Approach 1** — compare WER on 50 theological test sentences
+    - Baseline: uncorrected Whisper output
+    - After: with dictionary correction applied
+    - Metric: theological term WER specifically (not overall WER)
+    - Expected: ~30-50% of theological term errors caught
+
+#### Approach 2: Weighted Whisper LoRA on Theological Terms (~2-4 GPU hrs)
+
+42. [ ] **Extract theological token IDs** from Whisper tokenizer
+    - Tokenize all 229 glossary terms → collect unique token IDs (~500-800 IDs)
+    - Save to `bible_data/glossary/theological_token_ids.json`
+43. [ ] **Implement `TheologicalWeightedTrainer`** in `train_whisper.py`
+    - Subclass `Seq2SeqTrainer`, override `compute_loss`
+    - Apply `--term-weight` (default 3.0) multiplier on loss for theological tokens
+    - Non-theological tokens get weight 1.0 (standard cross-entropy)
+44. [ ] **Train Whisper LoRA with weighted loss** — A/B comparison
+    - Run A: standard LoRA (baseline, already from Seattle run)
+    - Run B: weighted LoRA with `--term-weight 3.0`
+    - Compare: overall WER + theological-term-specific WER
+    - Expected: ~15-25% relative WER reduction on theological terms
+45. [ ] **Evaluate Approach 2** — theological term accuracy test
+    - Test set: 50 sentences containing glossary terms
+    - Metric: term-level accuracy (exact match on theological words)
+    - Go/No-Go: theological WER improvement > 10% relative without overall WER regression > 2%
+
+#### Approach 3: Pipeline-Aware TranslateGemma Training (~8-12 GPU hrs)
+
+46. [ ] **Generate Whisper-noisy training pairs**
+    - Run Whisper on church audio → save actual ASR outputs (with errors)
+    - Pair Whisper outputs with reference Spanish translations
+    - Alternative: inject synthetic ASR errors into clean Bible text using confusion map
+47. [ ] **Build ASR confusion map** from live session data
+    - Mine diagnostics JSONL for recurrent misrecognitions
+    - Format: `{"propitiation": ["proposition", "propagation"], ...}`
+    - Use for synthetic error augmentation of Bible training text
+48. [ ] **Train TranslateGemma on noisy-source pairs**
+    - Mix: 70% clean Bible pairs + 30% noisy/Whisper-output pairs
+    - Use `--sermon-data` flag with noisy pairs JSONL
+    - Evaluate: BLEU on clean input AND on Whisper-noisy input
+    - Expected: minimal BLEU drop on clean, significant gain on noisy input
+49. [ ] **Evaluate Approach 3** — end-to-end pipeline test
+    - Feed same 50 audio clips through full pipeline (STT → translate)
+    - Compare: base Gemma vs pipeline-aware Gemma on Whisper outputs
+    - Metric: BLEU of final Spanish vs reference, starting from audio (not clean text)
+
+#### Combined Evaluation
+
+50. [ ] **Stack all three approaches** — dictionary + weighted Whisper + pipeline-aware Gemma
+    - Run full pipeline on 50 theological test audio clips
+    - Compare: baseline pipeline vs fully-stacked pipeline
+    - Target: ~60-85% reduction in theological term translation errors
+    - Document which approach contributed most (ablation)
 
 ---
 
@@ -137,42 +290,42 @@
 
 ### D1. Data Collection (Week 1)
 
-27. [ ] **Identify Scottish preacher YouTube playlists** — need 3-5 hrs, 5+ speakers
-28. [ ] **Identify British preacher YouTube playlists** — need 2-3 hrs, 5+ speakers
-29. [ ] **Identify Canadian preacher YouTube playlists** — need 1-2 hrs, 3+ speakers
-30. [ ] **Download Midwest audio** — `python download_sermons.py --accent midwest -n 30`
-31. [ ] **Download Scottish audio** — `python download_sermons.py --accent scottish "PLAYLIST_URL"`
-32. [ ] **Download British audio** — `python download_sermons.py --accent british "PLAYLIST_URL"`
-33. [ ] **Download Canadian audio** — `python download_sermons.py --accent canadian "PLAYLIST_URL"`
-34. [ ] **Preprocess all accent audio** — `python training/preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume`
-35. [ ] **Pseudo-label all accent audio** — `python training/transcribe_church.py --backend faster-whisper --resume`
+51. [ ] **Identify Scottish preacher YouTube playlists** — need 3-5 hrs, 5+ speakers
+52. [ ] **Identify British preacher YouTube playlists** — need 2-3 hrs, 5+ speakers
+53. [ ] **Identify Canadian preacher YouTube playlists** — need 1-2 hrs, 3+ speakers
+54. [ ] **Download Midwest audio** — `python download_sermons.py --accent midwest -n 30`
+55. [ ] **Download Scottish audio** — `python download_sermons.py --accent scottish "PLAYLIST_URL"`
+56. [ ] **Download British audio** — `python download_sermons.py --accent british "PLAYLIST_URL"`
+57. [ ] **Download Canadian audio** — `python download_sermons.py --accent canadian "PLAYLIST_URL"`
+58. [ ] **Preprocess all accent audio** — `python training/preprocess_audio.py --input stark_data/raw --output stark_data/cleaned --resume`
+59. [ ] **Pseudo-label all accent audio** — `python training/transcribe_church.py --backend faster-whisper --resume`
 
 ### D2. Training (Week 2)
 
-36. [ ] **Human-correct bottom 10% of Scottish transcripts** — highest error rate, 4-6 hrs
-37. [ ] **Build accent-balanced dataset** — `python training/prepare_whisper_dataset.py`
+60. [ ] **Human-correct bottom 10% of Scottish transcripts** — highest error rate, 4-6 hrs
+61. [ ] **Build accent-balanced dataset** — `python training/prepare_whisper_dataset.py`
    - Verify `metadata.csv` accent distribution
    - Verify temperature balancing (T=0.5) rebalances Scottish up
-38. [ ] **Train Whisper LoRA Round 1** — `python training/train_whisper.py --accent-balance --dataset stark_data/whisper_dataset`
-39. [ ] **Evaluate Round 1** — check per-accent WER, accent gap metric
+62. [ ] **Train Whisper LoRA Round 1** — `python training/train_whisper.py --accent-balance --dataset stark_data/whisper_dataset`
+63. [ ] **Evaluate Round 1** — check per-accent WER, accent gap metric
    - `wer_midwest`, `wer_scottish`, `wer_british`, `wer_canadian`, `wer_accent_gap`
-40. [ ] **Human-correct Scottish segments with WER > 30%** — 3-5 hrs
-41. [ ] **Train Whisper LoRA Round 2** — retrain with corrected data
-42. [ ] **Evaluate Round 2** — compare accent gap improvement
+64. [ ] **Human-correct Scottish segments with WER > 30%** — 3-5 hrs
+65. [ ] **Train Whisper LoRA Round 2** — retrain with corrected data
+66. [ ] **Evaluate Round 2** — compare accent gap improvement
 
 ### D3. Gap Closing (Week 3)
 
-43. [ ] **Re-pseudo-label all accent data with Round 2 model**
-44. [ ] **Active learning: flag bottom 5-15% per accent, correct**
-45. [ ] **Train Whisper LoRA Round 3**
-46. [ ] **Evaluate Round 3** — target: accent WER gap < 5%, Scottish WER < 10%
+67. [ ] **Re-pseudo-label all accent data with Round 2 model**
+68. [ ] **Active learning: flag bottom 5-15% per accent, correct**
+69. [ ] **Train Whisper LoRA Round 3**
+70. [ ] **Evaluate Round 3** — target: accent WER gap < 5%, Scottish WER < 10%
 
 ### D4. Integration (Week 4)
 
-47. [ ] **Transfer accent-tuned adapters to Mac**
-48. [ ] **Test live inference with Scottish test audio**
-49. [ ] **Verify no Midwest WER regression** — primary domain must not degrade
-50. [ ] **Record final per-accent WER in `metrics/accent_wer.csv`**
+71. [ ] **Transfer accent-tuned adapters to Mac**
+72. [ ] **Test live inference with Scottish test audio**
+73. [ ] **Verify no Midwest WER regression** — primary domain must not degrade
+74. [ ] **Record final per-accent WER in `metrics/accent_wer.csv`**
 
 ---
 
@@ -183,38 +336,38 @@
 
 ### E0. Zero-Shot Baseline (1 day)
 
-51. [ ] **Test TranslateGemma with `target_lang_code="hi"`** — 10 test sentences
-52. [ ] **Test TranslateGemma with `target_lang_code="zh-Hans"`** — 10 test sentences
-53. [ ] **Spot-check:** Hindi honorifics (तू vs आप for God), Chinese 神 vs 上帝 consistency
-54. [ ] **Record baseline chrF++ and COMET** — 50 sample translations per language
+75. [ ] **Test TranslateGemma with `target_lang_code="hi"`** — 10 test sentences
+76. [ ] **Test TranslateGemma with `target_lang_code="zh-Hans"`** — 10 test sentences
+77. [ ] **Spot-check:** Hindi honorifics (तू vs आप for God), Chinese 神 vs 上帝 consistency
+78. [ ] **Record baseline chrF++ and COMET** — 50 sample translations per language
 
 ### E1. Data Preparation (3-5 days)
 
-55. [ ] **Download Hindi IRV Bible** — `bible-nlp/biblenlp-corpus`, ~31K verses, CC-BY-SA 4.0
-56. [ ] **Download Chinese CUV Bible** — Simplified + Traditional, ~31K verses each, public domain
-57. [ ] **Align verse pairs** — EN × Hindi = ~155K pairs, EN × Chinese = ~310K+ pairs
-58. [ ] **Build Hindi theological glossary** — ~100-150 terms modeled on `build_glossary.py`
-59. [ ] **Build Chinese theological glossary** — ~100-150 terms, enforce Protestant terminology
-60. [ ] **Decision: 神 vs 上帝** — recommend 神
+79. [ ] **Download Hindi IRV Bible** — `bible-nlp/biblenlp-corpus`, ~31K verses, CC-BY-SA 4.0
+80. [ ] **Download Chinese CUV Bible** — Simplified + Traditional, ~31K verses each, public domain
+81. [ ] **Align verse pairs** — EN × Hindi = ~155K pairs, EN × Chinese = ~310K+ pairs
+82. [ ] **Build Hindi theological glossary** — ~100-150 terms modeled on `build_glossary.py`
+83. [ ] **Build Chinese theological glossary** — ~100-150 terms, enforce Protestant terminology
+84. [ ] **Decision: 神 vs 上帝** — recommend 神
 
 ### E2. QLoRA Training (2 nights)
 
-61. [ ] **Hindi QLoRA** — r=32, max_seq_length=768, 3 epochs on A2000 Ada (~6-9 hrs)
-62. [ ] **Chinese QLoRA** — r=32, max_seq_length=512, 3 epochs on A2000 Ada (~6-9 hrs)
-63. [ ] **Evaluate both** — chrF++, COMET, theological term accuracy, Hindi honorific accuracy
+85. [ ] **Hindi QLoRA** — r=32, max_seq_length=768, 3 epochs on A2000 Ada (~6-9 hrs)
+86. [ ] **Chinese QLoRA** — r=32, max_seq_length=512, 3 epochs on A2000 Ada (~6-9 hrs)
+87. [ ] **Evaluate both** — chrF++, COMET, theological term accuracy, Hindi honorific accuracy
 
 ### E3. Pipeline Integration (1-2 days)
 
-64. [ ] **Transfer adapters to Mac, implement adapter switching** in `dry_run_ab.py`
-65. [ ] **Wire up partial models** — IndicTrans2-Dist for Hindi, opus-mt-en-zh for Chinese
-66. [ ] **Extend WebSocket protocol** — multi-language translation object
-67. [ ] **Hindi partial display strategy** — English partial + Hindi final only (SOV issue)
+88. [ ] **Transfer adapters to Mac, implement adapter switching** in `dry_run_ab.py`
+89. [ ] **Wire up partial models** — IndicTrans2-Dist for Hindi, opus-mt-en-zh for Chinese
+90. [ ] **Extend WebSocket protocol** — multi-language translation object
+91. [ ] **Hindi partial display strategy** — English partial + Hindi final only (SOV issue)
 
 ### E4. Display Updates (1 day)
 
-68. [ ] **Add Devanagari/CJK fonts** — Noto Sans Devanagari (~200KB) + system CJK stack
-69. [ ] **Mobile language selector** — [EN] [ES] [HI] [ZH] tabs in `mobile_display.html`
-70. [ ] **Test rendering** — Devanagari line-height 1.6, CJK line-height 1.5
+92. [ ] **Add Devanagari/CJK fonts** — Noto Sans Devanagari (~200KB) + system CJK stack
+93. [ ] **Mobile language selector** — [EN] [ES] [HI] [ZH] tabs in `mobile_display.html`
+94. [ ] **Test rendering** — Devanagari line-height 1.6, CJK line-height 1.5
 
 ---
 
