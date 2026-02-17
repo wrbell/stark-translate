@@ -3,10 +3,13 @@
 train_whisper.py — Whisper LoRA Fine-Tuning for Church Audio
 
 Applies LoRA to both encoder (acoustic domain shift) and decoder (vocabulary patterns)
-of Distil-Whisper large-v3. Runs on Windows/WSL with A2000 Ada 16GB VRAM.
+of Whisper Large-V3-Turbo (openai/whisper-large-v3-turbo). ~809M params (32→4 decoder
+layers), MIT license. Faster training than full large-v3 due to smaller decoder.
+Runs on Windows/WSL with A2000 Ada 16GB VRAM.
 
 Config: r=32, alpha=64, target q_proj+v_proj, bf16, gradient checkpointing
-VRAM: ~8-10 GB | Training time: ~5-8 hrs for 3 epochs on 20 hrs audio
+VRAM: ~6-8 GB (Turbo) / ~8-10 GB (Distil/large-v3)
+Expected re-tune time: ~4-8 hrs on A2000 for 3 epochs on 20 hrs audio
 
 Usage:
     python train_whisper.py
@@ -175,7 +178,7 @@ def build_accent_sampler(accent_labels):
 def fine_tune_whisper(
     dataset_path="stark_data/cleaned",
     output_dir="fine_tuned_whisper_mi",
-    model_name="distil-whisper/distil-large-v3",
+    model_name="openai/whisper-large-v3-turbo",
     target_modules=None,
     lora_r=32,
     lora_alpha=64,
@@ -193,7 +196,7 @@ def fine_tune_whisper(
     - r=32, alpha=64 (most commonly validated)
     - Both encoder + decoder (encoder for acoustic adaptation, decoder for vocab)
     - bf16 with gradient checkpointing on Ada architecture
-    - ~8-10 GB VRAM, fits comfortably on A2000 Ada
+    - ~6-8 GB VRAM (Turbo) / ~8-10 GB (Distil/large-v3), fits comfortably on A2000 Ada
     """
     if target_modules is None:
         target_modules = ["q_proj", "v_proj"]
@@ -222,6 +225,12 @@ def fine_tune_whisper(
     )
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
+
+    # Turbo has only 4 decoder layers (vs 32 in large-v3), so LoRA adapts faster
+    # but the decoder has less capacity — monitor theological term accuracy closely
+    if "turbo" in model_name.lower():
+        logger.info("Turbo model detected — 4 decoder layers, faster training expected")
+        logger.info("Monitor theological term accuracy (lighter decoder = less vocabulary capacity)")
 
     # Load dataset (expects audiofolder format with audio + transcription columns)
     logger.info(f"Loading dataset from {dataset_path}...")
@@ -377,6 +386,8 @@ def fine_tune_whisper(
     logger.info(f"Whisper LoRA adapters saved to {output_dir}")
 
     # Log final metrics
+    # TODO: Use --eval-chunked flag to test chunked vs sequential Turbo inference modes
+    # Chunked mode is faster but may introduce stitching artifacts at chunk boundaries
     if eval_dataset:
         metrics = trainer.evaluate()
         logger.info(f"Final eval metrics: {metrics}")
@@ -391,8 +402,8 @@ def main():
                         help="Path to audiofolder dataset")
     parser.add_argument("--output", "-o", default="fine_tuned_whisper_mi",
                         help="Output directory for LoRA adapters")
-    parser.add_argument("--model", default="distil-whisper/distil-large-v3",
-                        help="Base Whisper model")
+    parser.add_argument("--model", default="openai/whisper-large-v3-turbo",
+                        help="Base Whisper model (default: large-v3-turbo, alt: distil-whisper/distil-large-v3)")
     parser.add_argument("--target-modules", nargs="+",
                         default=["q_proj", "v_proj"],
                         help="LoRA target modules (extend: q_proj v_proj k_proj out_proj fc1 fc2)")
@@ -410,6 +421,8 @@ def main():
                         help="Enable accent-balanced sampling (default: True)")
     parser.add_argument("--resume", action="store_true",
                         help="Resume training from the latest checkpoint")
+    parser.add_argument("--eval-chunked", action="store_true",
+                        help="Use chunked inference during evaluation (faster but may have stitching artifacts)")
     args = parser.parse_args()
 
     # Resolve resume_from_checkpoint: True means auto-detect last checkpoint

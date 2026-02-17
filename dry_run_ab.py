@@ -2,23 +2,36 @@
 """
 dry_run_ab.py — Live A/B Bilingual Speech-to-Text Dry Run
 
-Mic → Silero VAD → Distil-Whisper STT → TranslateGemma (4B + 12B) → WebSocket → Browser
+Mic → Silero VAD → Whisper STT → TranslateGemma (4B + 12B) → WebSocket → Browser
 
 Architecture:
-  - STT: Distil-Whisper via mlx-whisper (Apple Silicon native)
-  - Translation: TranslateGemma via mlx-lm (4-bit quantized, Apple Silicon native)
-  - Both 4B and 12B loaded simultaneously (~9GB total)
+  - STT: Whisper via mlx-whisper (Apple Silicon) or faster-whisper (CUDA)
+  - Translation: TranslateGemma via mlx-lm (Apple Silicon) or transformers (CUDA)
+  - Both 4B and 12B loaded simultaneously (~9GB total on MLX)
 
 Usage:
-    python dry_run_ab.py                     # Both models (A/B parallel)
-    python dry_run_ab.py --4b-only           # 4B only (lighter)
-    python dry_run_ab.py --chunk-duration 5  # Longer chunks
-    python dry_run_ab.py --ws-port 9000      # Different WebSocket port
+    python dry_run_ab.py                         # Auto-detect backend, 4B only
+    python dry_run_ab.py --ab                    # Both 4B and 12B (A/B parallel)
+    python dry_run_ab.py --backend cuda          # Force CUDA backend
+    python dry_run_ab.py --no-ab                 # Explicitly disable 12B
+    python dry_run_ab.py --low-vram              # MarianMT-only (no Gemma)
+    python dry_run_ab.py --dry-run-text "Hello"  # Test pipeline without mic
+    python dry_run_ab.py --chunk-duration 5      # Longer chunks
+    python dry_run_ab.py --ws-port 9000          # Different WebSocket port
 """
 
 import os
 os.environ["NUMBA_THREADING_LAYER"] = "workqueue"   # Prevent numba from loading its own libomp (conflicts with torch's)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"         # Safety net for any remaining libomp duplicates
+
+# Backend detection — MLX for Apple Silicon, CUDA for NVIDIA
+# Must come before other imports so we know which inference paths are available.
+try:
+    import mlx.core as _mx
+    import mlx_lm as _mlx_lm
+    MLX_AVAILABLE = True
+except ImportError:
+    MLX_AVAILABLE = False
 
 import argparse
 import asyncio
@@ -59,6 +72,14 @@ CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
+
+# Inference backend — resolved in main() from --backend flag
+# Values: "mlx" (Apple Silicon), "cuda" (NVIDIA), "cpu" (fallback)
+BACKEND = "mlx"
+
+# Whisper model IDs
+WHISPER_MODEL_TURBO = "mlx-community/whisper-large-v3-turbo"   # Default: faster, 4 decoder layers
+WHISPER_MODEL_DISTIL = "mlx-community/distil-whisper-large-v3"  # Fallback: if Turbo regresses
 
 # Pipeline thread pool for MLX inference. MUST be max_workers=1 because MLX's
 # Metal backend is not thread-safe for concurrent GPU operations — running
@@ -343,25 +364,67 @@ def load_vad():
     return model, utils
 
 
-def load_whisper():
-    """Load Distil-Whisper via mlx-whisper (Apple Silicon native)."""
-    global mlx_whisper  # make available to process_partial / _run_stt
-    import mlx_whisper
-    import mlx.core as mx
-    # [P7-4B] Increased from 100MB to 256MB — allows MLX to keep more intermediate
-    # computation results cached in Metal memory, reducing recomputation.
-    # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
-    mx.set_cache_limit(256 * 1024 * 1024)
+def load_whisper(backend="mlx"):
+    """Load Whisper STT model for the given backend.
 
-    model_id = "mlx-community/distil-whisper-large-v3"
-    print(f"[2/6] Loading {model_id} (MLX)...")
-    t0 = time.time()
-    # Warm up — first call downloads and compiles the model
-    silence = np.zeros(16000, dtype=np.float32)
-    mlx_whisper.transcribe(silence, path_or_hf_repo=model_id,
-                           condition_on_previous_text=False)
-    print(f"  Whisper ready ({time.time()-t0:.1f}s)")
-    return model_id  # mlx_whisper uses model_id per call, no persistent object
+    MLX backend: uses mlx-whisper with whisper-large-v3-turbo (default)
+                 or distil-whisper-large-v3 (fallback).
+    CUDA backend: uses faster-whisper with large-v3-turbo on GPU.
+    CPU backend: uses faster-whisper with large-v3-turbo on CPU.
+
+    Returns:
+        MLX: model_id string (mlx_whisper uses it per call)
+        CUDA/CPU: faster_whisper.WhisperModel instance
+    """
+    if backend == "mlx":
+        global mlx_whisper  # make available to process_partial / _run_stt
+        import mlx_whisper
+        import mlx.core as mx
+        # [P7-4B] Increased from 100MB to 256MB — allows MLX to keep more intermediate
+        # computation results cached in Metal memory, reducing recomputation.
+        # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
+        mx.set_cache_limit(256 * 1024 * 1024)
+
+        model_id = WHISPER_MODEL_TURBO
+        print(f"[2/6] Loading {model_id} (MLX)...")
+        t0 = time.time()
+        try:
+            # Warm up — first call downloads and compiles the model
+            silence = np.zeros(16000, dtype=np.float32)
+            mlx_whisper.transcribe(silence, path_or_hf_repo=model_id,
+                                   condition_on_previous_text=False)
+            print(f"  Whisper Turbo ready ({time.time()-t0:.1f}s)")
+        except Exception as e:
+            print(f"  Turbo load failed ({e}), falling back to distil...")
+            model_id = WHISPER_MODEL_DISTIL
+            t0 = time.time()
+            silence = np.zeros(16000, dtype=np.float32)
+            mlx_whisper.transcribe(silence, path_or_hf_repo=model_id,
+                                   condition_on_previous_text=False)
+            print(f"  Whisper Distil ready ({time.time()-t0:.1f}s)")
+        return model_id  # mlx_whisper uses model_id per call, no persistent object
+
+    elif backend in ("cuda", "cpu"):
+        # CUDA/CPU: use faster-whisper (CTranslate2 backend)
+        try:
+            from faster_whisper import WhisperModel
+        except ImportError:
+            print("ERROR: faster-whisper not installed. Install with: pip install faster-whisper",
+                  file=sys.stderr)
+            sys.exit(1)
+
+        device = "cuda" if backend == "cuda" else "cpu"
+        compute_type = "int8" if backend == "cuda" else "int8"
+        fw_model_id = "large-v3-turbo"
+        print(f"[2/6] Loading faster-whisper {fw_model_id} ({device})...")
+        t0 = time.time()
+        model = WhisperModel(fw_model_id, device=device, compute_type=compute_type)
+        # Warm up
+        silence = np.zeros(16000, dtype=np.float32)
+        segments, _ = model.transcribe(silence, language="en")
+        list(segments)  # consume generator to trigger actual inference
+        print(f"  Whisper Turbo ready ({time.time()-t0:.1f}s)")
+        return model
 
 
 def load_mlx_gemma(model_id, label):
@@ -499,12 +562,54 @@ def load_marian():
     t0 = time.time()
     tokenizer = MarianTokenizer.from_pretrained(model_id)
     model = MarianMTModel.from_pretrained(model_id)
+    if BACKEND == "cuda" and torch.cuda.is_available():
+        model = model.to("cuda")
     model.eval()
     # Warm up
     inputs = tokenizer("Hello", return_tensors="pt", padding=True)
+    if BACKEND == "cuda" and torch.cuda.is_available():
+        inputs = {k: v.to("cuda") for k, v in inputs.items()}
     model.generate(**inputs, max_new_tokens=16)
     print(f"  MarianMT ready ({time.time()-t0:.1f}s)")
     return model, tokenizer
+
+
+def load_cuda_translation_models(load_gemma=True):
+    """Load translation models for CUDA backend.
+
+    Uses transformers + bitsandbytes for 4-bit quantized TranslateGemma.
+    Returns (gemma_model, gemma_tokenizer, None, None) — no 12B on CUDA
+    (single GPU VRAM constraint).
+    """
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    gemma_model, gemma_tokenizer = None, None
+    if load_gemma:
+        print("[3/6] Loading TranslateGemma 4B (CUDA 4-bit)...")
+        try:
+            gemma_tokenizer = AutoTokenizer.from_pretrained("google/translategemma-4b-it")
+            gemma_model = AutoModelForCausalLM.from_pretrained(
+                "google/translategemma-4b-it",
+                load_in_4bit=True,
+                torch_dtype=torch.bfloat16,
+                device_map="cuda",
+            )
+            gemma_model.eval()
+            # Apply same EOS fix as MLX path — TranslateGemma uses <end_of_turn>
+            # (id=106) as its actual EOS, but default EOS is <eos> (id=1).
+            eot_id = gemma_tokenizer.convert_tokens_to_ids("<end_of_turn>")
+            default_eos = gemma_tokenizer.eos_token_id
+            if hasattr(gemma_tokenizer, '_eos_token_ids'):
+                gemma_tokenizer._eos_token_ids.add(eot_id)
+            else:
+                gemma_tokenizer._eos_token_ids = {default_eos, eot_id}
+            print(f"  EOS fix applied: added <end_of_turn> (id={eot_id})")
+            print("  TranslateGemma 4B (CUDA) ready")
+        except Exception as e:
+            print(f"  Gemma 4B load failed: {e}")
+            print("  Falling back to MarianMT-only mode")
+
+    return gemma_model, gemma_tokenizer, None, None  # no 12B on CUDA
 
 
 
@@ -659,6 +764,42 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
 
 
 # ---------------------------------------------------------------------------
+# Translation (CUDA)
+# ---------------------------------------------------------------------------
+
+def translate_cuda_gemma(model, tokenizer, text):
+    """Translate English->Spanish using TranslateGemma on CUDA.
+
+    Returns (translation, latency_ms, generation_tps).
+    """
+    if model is None or tokenizer is None:
+        return "(model not loaded)", 0.0, 0.0
+
+    messages = [{"role": "user", "content": [
+        {"type": "text", "source_lang_code": "en",
+         "target_lang_code": "es", "text": text}
+    ]}]
+    prompt = tokenizer.apply_chat_template(
+        messages, add_generation_prompt=True, return_tensors="pt")
+    prompt = prompt.to("cuda")
+
+    input_words = len(text.split())
+    max_tok = max(32, int(input_words * 1.8))
+
+    t0 = time.perf_counter()
+    with torch.no_grad():
+        output = model.generate(prompt, max_new_tokens=max_tok, do_sample=False)
+    generated = output[0][prompt.shape[1]:]
+    result = tokenizer.decode(generated, skip_special_tokens=False)
+    latency_ms = (time.perf_counter() - t0) * 1000
+
+    clean = result.split("<end_of_turn>")[0].strip()
+    out_tokens = len(generated)
+    gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
+    return clean, latency_ms, gen_tps
+
+
+# ---------------------------------------------------------------------------
 # [P7-P3-6A] Streaming Translation (MLX)
 # ---------------------------------------------------------------------------
 
@@ -795,11 +936,18 @@ async def stream_token_broadcaster():
 _warmup_pending = False  # flag to avoid repeated warmups during sustained silence
 
 def warmup_translation_models():
-    """Dummy 1-token forward pass on translation models to keep Metal GPU warm."""
+    """Dummy 1-token forward pass on translation models to keep Metal GPU warm.
+
+    Only needed for MLX backend — Metal GPU enters idle power state after
+    a few seconds of inactivity, causing cold-start latency on next call.
+    CUDA does not have this issue.
+    """
     global _warmup_pending
     if not _warmup_pending:
         return
     _warmup_pending = False
+    if BACKEND != "mlx":
+        return  # warmup only needed for Metal GPU
     try:
         from mlx_lm import generate
         if mlx_a_model is not None and mlx_a_tokenizer is not None:
@@ -822,6 +970,8 @@ def translate_marian(text):
 
     t0 = time.perf_counter()
     inputs = marian_tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    if BACKEND == "cuda" and torch.cuda.is_available():
+        inputs = {k: v.to("cuda") for k, v in inputs.items()}
     with _pytorch_lock:
         with torch.no_grad():
             translated = marian_model.generate(**inputs, max_new_tokens=128)
@@ -965,16 +1115,29 @@ async def process_partial(audio_data, utterance_id):
         # conflicts between MLX Metal and PyTorch running concurrently.
         def _partial_all():
             t0 = time.perf_counter()
-            result = mlx_whisper.transcribe(
-                audio_data,
-                path_or_hf_repo=stt_pipe,
-                language="en",
-                condition_on_previous_text=False,
-                initial_prompt=_whisper_prompt(),
-                word_timestamps=False,
-            )
-            stt_lat = (time.perf_counter() - t0) * 1000
-            english = result["text"].strip()
+            if BACKEND == "mlx":
+                result = mlx_whisper.transcribe(
+                    audio_data,
+                    path_or_hf_repo=stt_pipe,
+                    language="en",
+                    condition_on_previous_text=False,
+                    initial_prompt=_whisper_prompt(),
+                    word_timestamps=False,
+                )
+                stt_lat = (time.perf_counter() - t0) * 1000
+                english = result["text"].strip()
+            else:
+                # CUDA/CPU: faster-whisper
+                segments_gen, _ = stt_pipe.transcribe(
+                    audio_data,
+                    language="en",
+                    condition_on_previous_text=False,
+                    initial_prompt=_whisper_prompt(),
+                    word_timestamps=False,
+                )
+                segments_list = list(segments_gen)
+                stt_lat = (time.perf_counter() - t0) * 1000
+                english = " ".join(seg.text.strip() for seg in segments_list).strip()
             if not english:
                 return None
 
@@ -1052,8 +1215,18 @@ def _run_stt(audio_data, whisper_prompt):
     Separated from process_final so it can be submitted as a future
     that runs concurrently with translation of the previous chunk.
 
+    Dispatches to mlx-whisper (MLX backend) or faster-whisper (CUDA/CPU backend).
+
     Returns (english, stt_latency_ms, stt_confidence, segment_meta, low_conf_words).
     """
+    if BACKEND == "mlx":
+        return _run_stt_mlx(audio_data, whisper_prompt)
+    else:
+        return _run_stt_faster_whisper(audio_data, whisper_prompt)
+
+
+def _run_stt_mlx(audio_data, whisper_prompt):
+    """Run STT via mlx-whisper (Apple Silicon / MLX backend)."""
     t0 = time.perf_counter()
     result = mlx_whisper.transcribe(
         audio_data,
@@ -1098,6 +1271,61 @@ def _run_stt(audio_data, whisper_prompt):
     return english, stt_latency, stt_confidence, segment_meta, low_conf_words
 
 
+def _run_stt_faster_whisper(audio_data, whisper_prompt):
+    """Run STT via faster-whisper (CUDA/CPU backend).
+
+    faster-whisper returns a generator of segments with a different format
+    than mlx-whisper. This function normalizes the output to match.
+    """
+    t0 = time.perf_counter()
+    # faster-whisper expects numpy float32 array at 16kHz (same as mlx-whisper)
+    segments_gen, info = stt_pipe.transcribe(
+        audio_data,
+        language="en",
+        condition_on_previous_text=False,
+        initial_prompt=whisper_prompt,
+        word_timestamps=True,
+    )
+
+    # Consume the generator to get all segments
+    segments_list = list(segments_gen)
+    stt_latency = (time.perf_counter() - t0) * 1000
+
+    # Build English text from segments
+    english = " ".join(seg.text.strip() for seg in segments_list).strip()
+
+    # Extract segment-level metadata (faster-whisper uses attributes, not dicts)
+    stt_confidence = None
+    segment_meta = []
+    low_conf_words = []
+    if segments_list:
+        avg_logprobs = []
+        for seg in segments_list:
+            meta = {
+                "avg_logprob": getattr(seg, "avg_logprob", None),
+                "no_speech_prob": getattr(seg, "no_speech_prob", None),
+                "compression_ratio": getattr(seg, "compression_ratio", None),
+            }
+            segment_meta.append(meta)
+            if meta["avg_logprob"] is not None:
+                avg_logprobs.append(meta["avg_logprob"])
+            # Extract per-word confidence from faster-whisper Word objects
+            for w in (seg.words or []):
+                prob = getattr(w, "probability", 1.0)
+                if prob < 0.5:
+                    low_conf_words.append({
+                        "word": getattr(w, "word", ""),
+                        "probability": round(prob, 3),
+                        "start": getattr(w, "start", None),
+                        "end": getattr(w, "end", None),
+                    })
+        if avg_logprobs:
+            mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
+            stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
+
+    return english, stt_latency, stt_confidence, segment_meta, low_conf_words
+
+
 async def _pipeline_translate_and_finalize(cid, english, stt_latency,
                                             stt_confidence, segment_meta,
                                             low_conf_words, audio_data,
@@ -1119,7 +1347,21 @@ async def _pipeline_translate_and_finalize(cid, english, stt_latency,
 
             loop = asyncio.get_event_loop()
 
-            if mlx_b_model is not None:
+            if BACKEND == "cuda":
+                # CUDA backend: use translate_cuda_gemma (no streaming, no A/B)
+                if mlx_a_model is not None:
+                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
+                        _pipeline_pool, lambda: translate_cuda_gemma(
+                            mlx_a_model, mlx_a_tokenizer, english))
+                else:
+                    # Low-VRAM mode: MarianMT only
+                    spanish_a, lat_a = translate_marian(english)
+                    tps_a = 0.0
+                qe_a = qe_score(english, spanish_a)
+                # TODO: Add CUDA A/B mode when multi-GPU or sufficient VRAM
+                # TODO: Add CUDA streaming translation support
+
+            elif mlx_b_model is not None:
                 # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
                 # non-streaming (speculative decoding can't stream).
                 task_a = loop.run_in_executor(
@@ -1704,23 +1946,60 @@ async def main_async(args):
     global _pipeline_chunk_queue, _pipeline_translation_lock
 
     spec_info = ""
-    if args.run_ab:
+    if args.run_ab and BACKEND == "mlx":
         spec_info = f"  Speculative decoding: 4B drafts {NUM_DRAFT_TOKENS} tokens for 12B\n"
 
+    mode_str = "MarianMT-only (low-VRAM)" if args.low_vram else \
+               ("A/B parallel" if args.run_ab else "4B only")
+
     print(f"{'='*60}")
-    print(f"  Bilingual A/B Dry Run (MLX)")
-    print(f"  Mode: {'A/B parallel' if args.run_ab else '4B only'}")
+    print(f"  Bilingual A/B Dry Run")
+    print(f"  Backend: {BACKEND.upper()}")
+    print(f"  Mode: {mode_str}")
     if spec_info:
         print(spec_info, end="")
     print(f"  WebSocket: ws://localhost:{args.ws_port}")
     print(f"{'='*60}\n")
 
-    # Load models
+    # Load models — dispatch based on backend
     vad_model, vad_utils = load_vad()
-    stt_pipe = load_whisper()
-    mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
-        load_translation_models(load_b=args.run_ab)
+    stt_pipe = load_whisper(BACKEND)
+
+    if args.low_vram:
+        # Low-VRAM mode: skip Gemma entirely, MarianMT handles all translation
+        mlx_a_model, mlx_a_tokenizer = None, None
+        mlx_b_model, mlx_b_tokenizer = None, None
+    elif BACKEND == "mlx":
+        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
+            load_translation_models(load_b=args.run_ab)
+    elif BACKEND == "cuda":
+        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
+            load_cuda_translation_models(load_gemma=True)
+    else:
+        # CPU fallback: no Gemma, MarianMT only
+        mlx_a_model, mlx_a_tokenizer = None, None
+        mlx_b_model, mlx_b_tokenizer = None, None
+
     marian_model, marian_tokenizer = load_marian()
+
+    # --- Dry-run text mode: translate a single string and exit ---
+    if args.dry_run_text:
+        print(f"\n--- DRY RUN TEXT MODE ---")
+        print(f"Input: {args.dry_run_text}")
+        if BACKEND == "mlx" and mlx_a_model is not None:
+            spanish, lat, tps = translate_mlx(
+                mlx_a_model, mlx_a_tokenizer, args.dry_run_text,
+                prompt_cache_template=mlx_a_prompt_cache,
+                suffix_tokens=mlx_a_suffix_tokens)
+        elif BACKEND == "cuda" and mlx_a_model is not None:
+            spanish, lat, tps = translate_cuda_gemma(
+                mlx_a_model, mlx_a_tokenizer, args.dry_run_text)
+        else:
+            spanish, lat = translate_marian(args.dry_run_text)
+            tps = 0.0
+        print(f"Spanish: {spanish}")
+        print(f"Latency: {lat:.0f}ms, TPS: {tps:.1f}")
+        return
 
     # Detect best microphone and auto-calibrate gain
     global MIC_DEVICE, MIC_GAIN
@@ -1800,10 +2079,18 @@ async def main_async(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Live A/B bilingual speech-to-text dry run (MLX)"
+        description="Live A/B bilingual speech-to-text dry run"
     )
     parser.add_argument("--ab", action="store_true", dest="run_ab",
                         help="Load both 4B and 12B for A/B comparison (default: 4B only)")
+    parser.add_argument("--backend", choices=["auto", "mlx", "cuda"], default="auto",
+                        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA)")
+    parser.add_argument("--no-ab", action="store_true",
+                        help="Skip 12B model, use 4B only (for low-VRAM devices)")
+    parser.add_argument("--low-vram", action="store_true",
+                        help="Minimal VRAM mode: MarianMT-only translation, no Gemma")
+    parser.add_argument("--dry-run-text", type=str, default=None,
+                        help="Run a single text through the pipeline without mic (for testing)")
     parser.add_argument("--chunk-duration", type=float, default=2.0,
                         help="Seconds of speech to accumulate before processing")
     parser.add_argument("--ws-port", type=int, default=8765,
@@ -1819,6 +2106,39 @@ def main():
     parser.add_argument("--num-draft-tokens", type=int, default=3,
                         help="Speculative decoding: tokens drafted by 4B for 12B to verify (default: 3)")
     args = parser.parse_args()
+
+    # --- Resolve backend ---
+    global BACKEND
+    if args.backend == "auto":
+        if MLX_AVAILABLE:
+            BACKEND = "mlx"
+        elif torch.cuda.is_available():
+            BACKEND = "cuda"
+        else:
+            BACKEND = "cpu"
+    elif args.backend == "mlx":
+        if not MLX_AVAILABLE:
+            print("ERROR: MLX not available. Install mlx, mlx-lm, mlx-whisper.",
+                  file=sys.stderr)
+            sys.exit(1)
+        BACKEND = "mlx"
+    elif args.backend == "cuda":
+        if not torch.cuda.is_available():
+            print("ERROR: CUDA not available.", file=sys.stderr)
+            sys.exit(1)
+        BACKEND = "cuda"
+
+    # --low-vram implies --no-ab
+    if args.low_vram:
+        args.run_ab = False
+    # --no-ab overrides --ab
+    if args.no_ab:
+        args.run_ab = False
+    # CUDA backend: A/B not supported (single GPU VRAM constraint)
+    if BACKEND == "cuda" and args.run_ab:
+        print("WARNING: A/B mode not supported on CUDA (single GPU VRAM). Disabling 12B.",
+              file=sys.stderr)
+        args.run_ab = False
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
     CHUNK_DURATION = args.chunk_duration

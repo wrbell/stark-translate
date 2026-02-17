@@ -9,6 +9,7 @@ Usage:
     python setup_models.py              # Auto-detect machine, download all
     python setup_models.py --mac        # Force Mac inference models
     python setup_models.py --windows    # Force Windows training models
+    python setup_models.py --nvidia-inference  # NVIDIA/CUDA inference models
     python setup_models.py --skip-12b   # Skip TranslateGemma 12B
     python setup_models.py --dry-run    # Show what would be downloaded
 """
@@ -67,6 +68,7 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     models = [
         ("Silero VAD", "snakers4/silero-vad", "~2 MB", "torch_hub"),
         ("Distil-Whisper (MLX)", "mlx-community/distil-whisper-large-v3", "~1.5 GB", "mlx_whisper"),
+        ("Whisper Large-V3-Turbo (MLX)", "mlx-community/whisper-large-v3-turbo", "~1.1 GB", "mlx_whisper"),
         ("TranslateGemma 4B (MLX 4-bit)", "mlx-community/translategemma-4b-it-4bit", "~2.2 GB", "mlx_lm"),
     ]
     if not skip_12b:
@@ -119,8 +121,30 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         print(f"  FAIL: {e}")
         results["whisper"] = f"FAIL: {e}"
 
-    # 3. TranslateGemma 4B (MLX)
-    print(f"\n[3/{len(models)}] TranslateGemma 4B (MLX 4-bit)...")
+    # 3. Whisper Large-V3-Turbo (MLX)
+    print(f"\n[3/{len(models)}] Whisper Large-V3-Turbo (MLX)...")
+    t0 = time.time()
+    try:
+        snapshot_download("mlx-community/whisper-large-v3-turbo")
+        print(f"  Downloaded ({time.time()-t0:.1f}s)")
+
+        if not no_test:
+            import mlx_whisper
+            import numpy as np
+            silence = np.zeros(16000, dtype=np.float32)
+            result = mlx_whisper.transcribe(
+                silence,
+                path_or_hf_repo="mlx-community/whisper-large-v3-turbo",
+                condition_on_previous_text=False,
+            )
+            print(f"  Inference test: '{result['text'].strip()[:80]}'")
+        results["whisper_turbo"] = "OK"
+    except Exception as e:
+        print(f"  FAIL: {e}")
+        results["whisper_turbo"] = f"FAIL: {e}"
+
+    # 4. TranslateGemma 4B (MLX)
+    print(f"\n[4/{len(models)}] TranslateGemma 4B (MLX 4-bit)...")
     t0 = time.time()
     try:
         snapshot_download("mlx-community/translategemma-4b-it-4bit")
@@ -147,9 +171,9 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         print(f"  FAIL: {e}")
         results["gemma_4b"] = f"FAIL: {e}"
 
-    # 4. TranslateGemma 12B (MLX)
+    # 5. TranslateGemma 12B (MLX)
     if not skip_12b:
-        print(f"\n[4/{len(models)}] TranslateGemma 12B (MLX 4-bit)...")
+        print(f"\n[5/{len(models)}] TranslateGemma 12B (MLX 4-bit)...")
         t0 = time.time()
         try:
             snapshot_download("mlx-community/translategemma-12b-it-4bit")
@@ -206,6 +230,7 @@ def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
 
     models = [
         ("Distil-Whisper", "distil-whisper/distil-large-v3", "~1.5 GB"),
+        ("Whisper Large-V3-Turbo", "openai/whisper-large-v3-turbo", "~1.5 GB"),
         ("TranslateGemma 4B", "google/translategemma-4b-it", "~8 GB"),
     ]
     if not skip_12b:
@@ -235,6 +260,27 @@ def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
 
 
 # ---------------------------------------------------------------------------
+# NVIDIA Inference Models (PyTorch/CUDA — not training)
+# ---------------------------------------------------------------------------
+
+def download_nvidia_inference_models(skip_12b=False, dry_run=False, no_test=False):
+    """Download models for NVIDIA/CUDA inference (not training).
+
+    This is distinct from --windows which downloads full-precision models for
+    fine-tuning. NVIDIA inference uses CTranslate2 Whisper Turbo, MarianMT,
+    and quantized TranslateGemma.
+    """
+    # TODO: Implement NVIDIA inference model downloads:
+    #   - Whisper Large-V3-Turbo (CTranslate2 format for faster-whisper)
+    #   - MarianMT EN->ES (CTranslate2 int8)
+    #   - TranslateGemma 4B (bitsandbytes 4-bit)
+    #   - Silero VAD
+    print("NVIDIA inference model download not yet implemented.")
+    print("Use --windows for training models, or --mac for MLX inference models.")
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -242,6 +288,7 @@ def main():
     parser = argparse.ArgumentParser(description="Download & verify models")
     parser.add_argument("--mac", action="store_true", help="Force Mac inference mode (MLX)")
     parser.add_argument("--windows", action="store_true", help="Force Windows training mode (PyTorch)")
+    parser.add_argument("--nvidia-inference", action="store_true", help="NVIDIA/CUDA inference models (not training)")
     parser.add_argument("--skip-12b", action="store_true", help="Skip TranslateGemma 12B")
     parser.add_argument("--dry-run", action="store_true", help="Show plan without downloading")
     parser.add_argument("--no-test", action="store_true", help="Download only, skip inference tests")
@@ -253,6 +300,8 @@ def main():
         role = "mac"
     elif args.windows:
         role = "windows"
+    elif args.nvidia_inference:
+        role = "nvidia-inference"
     elif info["mps"] and info.get("mlx"):
         role = "mac"
     elif info["cuda"]:
@@ -272,6 +321,8 @@ def main():
 
     if role == "mac":
         ok = download_mac_models(args.skip_12b, args.dry_run, args.no_test)
+    elif role == "nvidia-inference":
+        ok = download_nvidia_inference_models(args.skip_12b, args.dry_run, args.no_test)
     else:
         ok = download_windows_models(args.skip_12b, args.dry_run, args.no_test)
 
