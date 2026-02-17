@@ -12,28 +12,40 @@
 ```
 Mac (M3 Pro 18GB, MLX)           Windows (A2000 Ada 16GB, CUDA)
   Live inference prototype          Training pipeline built
-  Two-pass: MarianMT + Gemma 4B    Bible corpus: 269K verse pairs
-  P7 latency: ~150ms partials      5 test sermons downloaded
-              ~911ms finals         Seattle run designed (Feb 12-17)
+  Whisper Large-V3-Turbo (STT)     Bible corpus: 269K verse pairs
+  engines/ package (MLX + CUDA)    5 test sermons downloaded
+  settings.py (pydantic-settings)  train_whisper.py → Turbo base
+  Backend: --backend auto|mlx|cuda Piper TTS training scripts ready
+  Fallback: lazy-load on low conf
+  P7 latency: ~150ms partials
+              ~911ms finals
   Pipeline overlap (6C) done
   P5 caption comparison fixed
 
-Production Endpoints (planned):
-  1. Mid-tier MacBook (M2/M3 non-Pro, 8-16 GB) — MLX, 4B only (--no-ab)
-  2. RTX 2070 Windows (8 GB VRAM) — CUDA/faster-whisper, 4B/Marian (--no-ab)
-  Dev: M3 Pro 18 GB — full A/B (both 4B + 12B)
+Production Endpoints (implemented):
+  1. Mac (M-series, 8-18 GB) — MLX, --backend=mlx
+  2. RTX 2070 Windows (8 GB VRAM) — CUDA/faster-whisper, --backend=cuda --no-ab
+  3. Dev M3 Pro 18 GB — full A/B (both 4B + 12B)
+
+New in feature/turbo-dual-prod-v2:
+  engines/              STT + Translation engine ABCs, MLX + CUDA impl, factory
+  settings.py           Unified config (STARK_ env prefix, .env support)
+  requirements-nvidia.txt  CUDA inference deps
+  tools/convert_models_to_both.py  Dual-endpoint model export
+  training/train_piper.py          Piper voice fine-tuning
+  training/prepare_piper_dataset.py  LJSpeech format conversion
+  training/export_piper_onnx.py    ONNX export + validation
+  training/evaluate_piper.py       TTS quality assessment
 
 Accent-Diverse STT (code complete, data collection pending)
-  download_sermons.py --accent       Accent-tagged downloads → stark_data/raw/{accent}/
-  preprocess_audio.py                Accent propagation through preprocessing
-  prepare_whisper_dataset.py (NEW)   Temperature-balanced accent sampling (T=0.5)
-  train_whisper.py                   AccentBalancedTrainer + per-accent WER eval
-                                     Forced language="en" (Scottish→Welsh fix)
+  download_sermons.py --accent       Accent-tagged downloads
+  preprocess_audio.py                Accent propagation
+  prepare_whisper_dataset.py         Temperature-balanced sampling
+  train_whisper.py                   AccentBalancedTrainer + per-accent WER
 
 Multilingual (planned, not started)
   Hindi & Chinese todo list          docs/multi_lingual.md
   Multilingual research proposal     docs/multilingual_tuning_proposal.md
-  Accent tuning plan                 docs/accent_tuning_plan.md
 ```
 
 ---
@@ -108,15 +120,21 @@ See [`accent_tuning_plan.md`](accent_tuning_plan.md) for full 4-week execution t
 
 ### 1T-A. Mac Turbo Partials (Days 1-2 — lowest risk, highest immediate value)
 
+> **Status: DONE** — Wholesale Turbo swap (both partials and finals) in `dry_run_ab.py`.
+
 Replace Distil-large-v3 with `mlx-community/whisper-large-v3-turbo-4bit` in partial path of `dry_run_ab.py`. Expected: partials drop from ~300-380ms → **<150-200ms**. Memory drops from ~1.5-2 GB → ~1.1-1.6 GB (4-bit), freeing headroom for Gemma.
 
 Rollback: 1-line config revert. Test on 5-10 sermon clips before deploying to live services.
 
 ### 1T-B. Engines Package & Factory (Days 2-3)
 
+> **Status: DONE** — `engines/` package: base.py, mlx_engine.py, cuda_engine.py, factory.py, active_learning.py.
+
 Create `engines/` package with abstract STT interface so Mac (MLX) and Windows (faster-whisper) share common API. Factory pattern loads Turbo by default, falls back to Distil via config.
 
 ### 1T-C. Turbo Fine-Tune + Dual-Endpoint Export (Days 4-6, A2000)
+
+> **Status: PARTIAL** — `train_whisper.py` updated, `tools/convert_models_to_both.py` created, fallback logic in engines. Remaining: actual fine-tuning run on A2000.
 
 - LoRA re-tune on church audio with Turbo base (~4-8 hrs on A2000, faster than large-v3)
 - Target: <1% WER delta vs current Distil on church sermons
@@ -125,17 +143,23 @@ Create `engines/` package with abstract STT interface so Mac (MLX) and Windows (
 
 ### 1T-D. RTX 2070 Integration + Benchmarks (Days 7-8)
 
+> **Status: PENDING** — Blocked on fine-tuning and hardware access.
+
 - Convert Gemma LoRAs to GGUF Q4_K_M for llama.cpp
 - Full pipeline test: Turbo STT + Gemma translation → target 1.3-2.0s finals
 - VRAM budget: Turbo INT8 ~1.5-2.5 GB + Gemma Q4 ~3.2 GB (tight but viable on 8 GB)
 
 ### 1T-E. Unified Config + Deployment (Days 9-11)
 
+> **Status: PARTIAL** — `settings.py` created. `run_live.py` deferred.
+
 - `settings.py` with pydantic-settings: Turbo flags, model paths, endpoint selection
 - `run_live.py` unified entrypoint defaulting to Turbo on both endpoints
 - Loguru logging tagged with "turbo" + endpoint + chunk_duration
 
 ### 1T-F. Testing, Regression & Release (Days 11-12)
+
+> **Status: PENDING** — Needs models running to benchmark.
 
 - Benchmark: Turbo vs old STT on 50 clips (focus long sermons, chunked vs sequential)
 - Theological term audit: glossary 229 terms, verify initial_prompt conditioning with 4-layer decoder
@@ -162,6 +186,8 @@ Create `engines/` package with abstract STT interface so Mac (MLX) and Windows (
 
 ### 1G-A. Backend Selection & CUDA Fallback (1-2 hours)
 
+> **Status: DONE** — Backend selection, import guards, CUDA fallback paths, --no-ab, --low-vram implemented.
+
 Add `--backend` flag (auto/mlx/cuda) to `dry_run_ab.py` with import guards for MLX availability. CUDA fallback paths:
 
 | Component | MLX Path (Mac) | CUDA Path (2070/Windows) |
@@ -174,17 +200,23 @@ Add `--no-ab` flag to skip 12B on low-VRAM devices. Add `--low-vram` for Marian-
 
 ### 1G-B. CUDA Model Loading & Compatibility (2-4 hours)
 
+> **Status: DONE** — bitsandbytes 4-bit Gemma with EOS fix, --dry-run-text flag.
+
 - Gemma 4B via `AutoModelForCausalLM.from_pretrained(..., load_in_4bit=True, device_map="cuda")`
 - Generate wrapper to mimic `mlx_lm.generate` signature
 - Dry-run test without mic: `--backend=cuda --no-ab --dry-run-text "Test sentence"`
 
 ### 1G-C. Cross-Platform Validation (1-2 hours)
 
+> **Status: PENDING** — Needs cross-platform testing.
+
 - Verify HTTP/WebSocket servers work unchanged on Windows
 - Test display HTML files on Windows + LAN phone access
 - Validate mid-tier MacBook (M2/M3 non-Pro) as second prod endpoint
 
 ### 1G-D. Packaging & Launch Scripts (1-2 hours)
+
+> **Status: PARTIAL** — requirements-nvidia.txt created. Launch scripts deferred.
 
 ```
 run_mac.sh:       python dry_run_ab.py --backend=mlx "$@"        # Full A/B
@@ -373,12 +405,16 @@ The M3 Pro is a development machine. For production:
 
 ### 3T-A. Data & Dataset Preparation (1-2 weeks)
 
+> **Status: DONE** — `prepare_piper_dataset.py` created.
+
 - Extend `download_sermons.py` for TTS-quality audio collection (10-20 hrs per language)
 - Update `preprocess_audio.py` for Piper: 16-22 kHz normalize, silence trimming
 - Create `training/prepare_piper_dataset.py`: WAVs + transcripts → LJSpeech format
 - Reuse existing Whisper pseudo-labeling + theological glossary for text accuracy
 
 ### 3T-B. Voice Fine-Tuning (2-4 weeks per language)
+
+> **Status: DONE (scripts)** — `train_piper.py`, `export_piper_onnx.py`, `evaluate_piper.py` created. Actual training pending data + A2000.
 
 Fine-tune from Piper base checkpoints on A2000 Ada:
 
@@ -395,6 +431,8 @@ Evaluation: WER round-trip (TTS → STT → compare), prosody checks, theologica
 
 ### 3T-C. Multi-Channel Integration (1-2 weeks)
 
+> **Status: PENDING**
+
 - Pre-load PiperVoice dict per language at pipeline startup
 - Concurrent synthesis via ThreadPoolExecutor on final translations
 - Route to specific audio devices via sounddevice (device_map dict)
@@ -402,6 +440,8 @@ Evaluation: WER round-trip (TTS → STT → compare), prosody checks, theologica
 - Target: <200ms added latency for TTS synthesis
 
 ### 3T-D. Hardware Routing & AudioFetch (1 week)
+
+> **Status: PENDING**
 
 ```
 RTX 2070 Pipeline Output:
@@ -417,6 +457,8 @@ Hardware: USB audio adapters or multi-channel interface for separate outputs.
 Fallback: Virtual cables (Voicemeeter/VB-Cable) for testing without hardware.
 
 ### 3T-E. Testing & Rollout
+
+> **Status: PENDING**
 
 - End-to-end live test: full pipeline + multi-lang audio sync in church
 - Docs: `piper_tts_integration.md`, `multi_channel_routing.md`
@@ -503,8 +545,8 @@ Repeat
 | AudioFetch vs software routing | Phase 3T-D | Hardware (AudioFetch Express) vs software (Voicemeeter) |
 | TTS on Mac vs 2070 only | Phase 3T-C | 2070 recommended (always-on church install) |
 | Mid-tier MacBook model (M2 vs M3) | Phase 1G hardware purchase | M2 Air 16GB or M3 base 16GB |
-| CUDA Gemma loading method | Phase 1G-B | bitsandbytes 4-bit (simple) vs GGUF/llama.cpp (faster) |
-| Separate venvs vs unified | Phase 1G-D | Separate recommended (stt_env vs stt_env_nvidia) |
+| CUDA Gemma loading method | **RESOLVED** | bitsandbytes 4-bit (implemented in engines/cuda_engine.py) |
+| Separate venvs vs unified | **RESOLVED** | Separate (requirements-nvidia.txt created) |
 
 ---
 

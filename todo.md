@@ -294,11 +294,11 @@
 
 ### T1. Preparation & Mac Turbo Partials First (Days 1-2)
 
-- [ ] **Create feature branch** — `git checkout -b feature/turbo-dual-prod-v2`
-- [ ] **Update requirements files**
+- [x] **Create feature branch** — `git checkout -b feature/turbo-dual-prod-v2`
+- [x] **Update requirements files**
   - `requirements-mac.txt`: add `mlx-whisper` (latest) + `mlx-community/whisper-large-v3-turbo-4bit`
-  - `requirements-windows.txt`: add `faster-whisper`, `pydantic-settings`, `loguru`
-- [ ] **Migrate Mac partials to Turbo (MLX)** — replace Distil-large-v3 in `dry_run_ab.py`
+  - `requirements-nvidia.txt`: add `faster-whisper`, `pydantic-settings`, `loguru`
+- [x] **Migrate Mac to Turbo (MLX)** — wholesale swap (both partials AND finals) in `dry_run_ab.py`
   - Use `mlx-community/whisper-large-v3-turbo-4bit`, beam_size=5, word_timestamps=True
   - Keep theological initial_prompt + condition_on_previous_text=True
   - Expected: ~300-380ms partials → **<150-200ms** (5-8x on M3 due to Metal kernels)
@@ -311,14 +311,14 @@
 
 ### T2. Engines Package & Factory (Days 2-3)
 
-- [ ] **Create `engines/` package** with base classes and factory pattern
+- [x] **Create `engines/` package** with base classes and factory pattern
   - `base.py`: Turbo-specific defaults (chunk_length_s=30, chunked algo for long sermons)
   - Factory: Load Turbo model names by default (override via config for old Distil)
   - Abstract STT interface so Mac (MLX) and Windows (faster-whisper) share common API
 
 ### T3. Full Turbo STT + Fine-Tune & Export (Days 4-6, A2000 focus)
 
-- [ ] **Update training pipeline for Turbo** — `training/train_whisper.py`
+- [x] **Update training pipeline for Turbo** — `training/train_whisper.py`
   - Change base to `openai/whisper-large-v3-turbo` (or `Systran/faster-whisper-large-v3-turbo`)
   - Keep accent-balanced sampling, theological prompt, pseudo-labeling
   - Expected re-tune: ~4-8 hrs on A2000 (smaller model = faster)
@@ -326,11 +326,11 @@
   - Target <1% WER delta vs current Distil on church sermons
   - Test sequential vs chunked modes for long-form stability
   - Glossary + prior-context injection critical for lighter 4-layer decoder
-- [ ] **Create dual-endpoint model export script** — `tools/convert_models_to_both.py --whisper`
+- [x] **Create dual-endpoint model export script** — `tools/convert_models_to_both.py --whisper`
   - Mac: 4-bit MLX via mlx_lm tools → `mlx-community/whisper-large-v3-turbo-4bit`
   - 2070: `ct2-transformers-converter --quantization int8` → `whisper-turbo-ct2/`
   - Validate: Mac ~80-150ms full chunk; 2070 INT8 ~19-22s for 60-90s audio
-- [ ] **Implement Turbo fallback logic** in engines `base.py`
+- [x] **Implement Turbo fallback logic** in engines `base.py`
   - avg_logprob < -1.2 or compression_ratio >2.4 → retry with old Distil/large-v3 (lazy load)
   - Log divergence to active-learning JSONL for next re-tune cycle
 
@@ -344,9 +344,9 @@
 
 ### T5. Unified Config, Logging, Fallbacks (Day 9)
 
-- [ ] **Build `settings.py` with pydantic-settings** — Turbo-specific flags
+- [x] **Build `settings.py` with pydantic-settings** — Turbo-specific flags
   - `use_chunked_algo: bool`, `fallback_on_low_conf: bool`, model paths, endpoint selection
-  - Environment variable overrides for easy deployment switching
+  - STARK_ env prefix, nested config, .env support
 - [ ] **Integrate loguru logging** — tag entries with "turbo" + endpoint + chunk_duration
 
 ### T6. Deployment Packaging (Days 10-11)
@@ -381,31 +381,32 @@
 
 ### G1. Preparation & Minimal Patches (1-2 hours)
 
-- [ ] **Create branch** — `git checkout -b inference-dual-target`
-- [ ] **Create `requirements-nvidia.txt`** — duplicate `requirements-mac.txt`, remove MLX packages, add:
+- [x] **Create branch** — combined into `feature/turbo-dual-prod-v2`
+- [x] **Create `requirements-nvidia.txt`** — duplicate `requirements-mac.txt`, remove MLX packages, add:
   - `torch --index-url https://download.pytorch.org/whl/cu121`
   - `transformers accelerate bitsandbytes faster-whisper sounddevice pyaudio websockets`
-- [ ] **Add backend selection to `dry_run_ab.py`**
+- [x] **Add backend selection to `dry_run_ab.py`**
   - Import guards: `try: import mlx_lm, mlx_whisper; MLX_AVAILABLE = True except ImportError: MLX_AVAILABLE = False`
   - CLI flag: `--backend` choices=["auto", "mlx", "cuda"], default="auto"
   - Auto logic: use MLX if available, else CUDA
   - Wrap MLX model loads/inference in `if backend == "mlx"` blocks
-- [ ] **Add CUDA fallback paths**
+- [x] **Add CUDA fallback paths**
   - STT: faster-whisper (CUDA) or transformers pipeline `"automatic-speech-recognition"` on device=0
   - Translation finals: transformers MarianMT on device=0, OR bitsandbytes 4-bit Gemma-4B if VRAM allows (`load_in_4bit=True, device_map="cuda"`)
   - Partials: keep MarianMT via transformers (already PyTorch)
-- [ ] **Add `--no-ab` / `--model-size {4b, Marian}` flag** — skip 12B on low-VRAM devices
+- [x] **Add `--no-ab` and `--low-vram` flags** — skip 12B on low-VRAM devices
 
 ### G2. Model Loading & Compatibility (2-4 hours)
 
-- [ ] **Implement CUDA Gemma 4B loading** via transformers + bitsandbytes
+- [x] **Implement CUDA Gemma 4B loading** via transformers + bitsandbytes
   - `AutoModelForCausalLM.from_pretrained(..., load_in_4bit=True, torch_dtype=torch.bfloat16, device_map="cuda")`
   - Add generate wrapper to mimic `mlx_lm.generate` signature (prompt, max_tokens, etc.)
+  - EOS fix applied (add `<end_of_turn>` to tokenizer._eos_token_ids)
   - MarianMT fallback already works (PyTorch)
-- [ ] **Test dry run without mic**
+- [x] **Add `--dry-run-text` flag** for testing without mic
   - `python dry_run_ab.py --backend=cuda --no-ab --dry-run-text "Test sentence for translation"`
   - Verify output without crashing on both 2070 and mid-tier Mac
-- [ ] **Add `--low-vram` flag** — auto-forces `--no-ab`, Marian-only translation if needed
+- [x] **Add `--low-vram` flag** — auto-forces `--no-ab`, Marian-only translation if needed
 
 ### G3. Server & Display Compatibility (1 hour)
 
@@ -538,20 +539,20 @@
 
 95. [ ] **Extend `download_sermons.py` for TTS data** — fetch 10-20 hrs church sermons/Bible readings per target lang (EN, ES, HI, ZH) via yt-dlp; focus on clear single-speaker audio
 96. [ ] **Update `preprocess_audio.py` for Piper** — 16-22 kHz normalize, silence trimming, accent balance; output format compatible with Piper training
-97. [ ] **Create `training/prepare_piper_dataset.py`** — convert stark_data WAVs + corrected transcripts → LJSpeech format (wav/ + metadata.csv); reuse Whisper pseudo-labeling + theological glossary for text accuracy
+97. [x] **Create `training/prepare_piper_dataset.py`** — convert stark_data WAVs + corrected transcripts → LJSpeech format (wav/ + metadata.csv); reuse Whisper pseudo-labeling + theological glossary for text accuracy
 98. [ ] **Build initial datasets** — English first (existing live_sessions), then ES/HI/ZH parallels
 
 ### F2. Fine-Tuning Piper Voices (2-4 weeks per language)
 
-99. [ ] **Create `training/train_piper.py`**
+99. [x] **Create `training/train_piper.py`**
     - Use rhasspy/piper TRAINING.md as base (preprocess → train → export)
     - Fine-tune from high/medium checkpoints:
       - `en_US-lessac-high`, `es_ES-carlfm-high`, `hi_IN-kusal-medium`, `zh_CN-huayan-medium`
     - Flags: `--lang en|es|hi|zh`, batch 16-32, epochs 2000-4000, resume_from_checkpoint
     - Monitor: tensorboard loss + sample generation every 50 epochs (test Bible verses)
     - Train English custom voice first → test domain fit (preaching pace, emphasis)
-100. [ ] **Create `training/export_piper_onnx.py`** — export best .ckpt → .onnx + .json; optimize with onnx-simplifier
-101. [ ] **Create `training/evaluate_piper.py`** — WER/prosody checks + subjective church-term listening tests (CSV log like translation QE); test theological term pronunciation
+100. [x] **Create `training/export_piper_onnx.py`** — export best .ckpt → .onnx + .json; optimize with onnx-simplifier
+101. [x] **Create `training/evaluate_piper.py`** — WER/prosody checks + subjective church-term listening tests (CSV log like translation QE); test theological term pronunciation
 
 ### F3. Inference & Multi-Channel Integration (1-2 weeks)
 
@@ -602,7 +603,7 @@ Post Phase 1+2+6C budget (measured):
 | 6A | Streaming translation display | 300-500ms perceived | TODO | Phase B |
 | 6B | Adaptive model selection | 200-400ms on simple | TODO | Phase B |
 | 6D | Batch short utterances | ~100-200ms amortized | TODO | Phase B |
-| 1B | whisper-large-v3-turbo | ~150-200ms STT | TODO | **Phase T** (full migration) |
+| 1B | whisper-large-v3-turbo | ~150-200ms STT | DONE | **Phase T** (wholesale swap) |
 | 2D | Smaller translation models | varies | TODO | Phase C |
 | 2A | Speculative decoding | — | DEFERRED | benchmarked 18-90% slower on M3 Pro |
 
@@ -616,10 +617,20 @@ Post Phase 1+2+6C budget (measured):
 ## Architecture Reference
 
 ```
-Mac Inference (MLX) — Two-Pass Architecture:
-  Mic → Silero VAD (threaded) → [Partial: mlx-whisper + MarianMT (~480ms, italic)]
-                               → [Final: mlx-whisper + TranslateGemma 4B (~650ms, regular)]
-                               → WebSocket → Browser (displays/)
+Mac Inference (MLX) — Two-Pass Architecture via engines/ package:
+  Mic → Silero VAD (inline) → engines/mlx_engine.py
+    → [Partial: mlx-whisper Turbo + MarianMT PyTorch (~480ms, italic)]
+    → [Final:   mlx-whisper Turbo + TranslateGemma 4B (~650ms, regular)]
+    → WebSocket → Browser (displays/)
+
+CUDA Inference (RTX 2070 / NVIDIA) — via engines/ package:
+  Mic → Silero VAD (inline) → engines/cuda_engine.py
+    → [Partial: faster-whisper Turbo INT8 + MarianMT PyTorch]
+    → [Final:   faster-whisper Turbo INT8 + Gemma 4B bitsandbytes 4-bit]
+    → WebSocket → Browser (displays/)
+
+  Backend selection: --backend auto|mlx|cuda (auto-detected via engines/factory.py)
+  Flags: --no-ab (skip 12B), --low-vram, --dry-run-text
 
   Optimizations: prompt caching, model pre-warming, background I/O,
                  fast resampling, pipeline overlap (6C)
@@ -634,10 +645,10 @@ Windows Training (CUDA):
 
 | Component | Model | Framework | Memory |
 |-----------|-------|-----------|--------|
-| VAD | Silero VAD | PyTorch (threaded) | ~2 MB |
-| STT | distil-whisper-large-v3 | mlx-whisper | ~1.5 GB |
-| Translate (fast) | MarianMT opus-mt-en-es | CT2 int8 | ~76 MB |
-| Translate A | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB |
+| VAD | Silero VAD | PyTorch (inline) | ~2 MB |
+| STT | whisper-large-v3-turbo | mlx-whisper (Mac) / faster-whisper (CUDA) | ~1.1-1.6 GB (4-bit MLX) |
+| Translate (fast) | MarianMT opus-mt-en-es | PyTorch | ~298 MB |
+| Translate A | TranslateGemma 4B 4-bit | mlx-lm (Mac) / bitsandbytes (CUDA) | ~2.5 GB |
 | Translate B | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB |
-| **Total (4B only)** | | | **~4.3 GB / 18 GB** |
-| **Total (A/B)** | | | **~11.3 GB / 18 GB** |
+| **Total (4B only)** | | | **~4.0 GB / 18 GB** |
+| **Total (A/B)** | | | **~11.0 GB / 18 GB** |
