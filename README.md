@@ -183,8 +183,15 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 ├── setup_models.py            # One-command model download + verification
 ├── build_glossary.py          # EN→ES theological glossary (229 terms)
 ├── download_sermons.py        # yt-dlp sermon downloader
+├── requirements-mac.txt       # Mac/MLX pip dependencies
+├── requirements-nvidia.txt    # NVIDIA/CUDA inference dependencies
 │
-├── engines/                   # STT + translation engine abstraction
+├── engines/                   # STT + translation engine abstraction (MLX + CUDA)
+│   ├── base.py                # ABCs: STTEngine, TranslationEngine, result dataclasses
+│   ├── mlx_engine.py          # MLXWhisperEngine, MLXGemmaEngine, MarianEngine
+│   ├── cuda_engine.py         # FasterWhisperEngine, CUDAGemmaEngine
+│   ├── factory.py             # create_stt_engine(), create_translation_engine(), auto-detect
+│   └── active_learning.py     # Fallback event JSONL logger
 │
 ├── displays/
 │   ├── audience_display.html  # Projector display (EN/ES side-by-side, QR overlay)
@@ -255,6 +262,27 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 | [`docs/multilingual_tuning_proposal.md`](./docs/multilingual_tuning_proposal.md) | Hindi/Chinese research: corpora, glossaries, QLoRA, evaluation |
 | [`docs/macos_libomp_fix.md`](./docs/macos_libomp_fix.md) | macOS libomp conflict diagnosis and fix |
 | [`todo.md`](./todo.md) | Phased task list aligned to Seattle training schedule |
+
+## Development Status
+
+**Active branch:** `feature/turbo-dual-prod-v2` — Turbo migration, engines package, dual-target inference, TTS training scripts, unified config.
+
+**What's done:**
+- Wholesale swap to Whisper Large-V3-Turbo (both partials and finals)
+- `engines/` package: MLX + CUDA engine implementations with factory auto-detection
+- `settings.py`: pydantic-settings unified config (`STARK_` env prefix, `.env` support)
+- Backend selection (`--backend auto|mlx|cuda`) with CUDA fallback paths
+- STT fallback logic (lazy-load fallback model on low confidence / hallucination)
+- `tools/convert_models_to_both.py`: dual-endpoint model export
+- Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
+- `requirements-nvidia.txt` for CUDA inference environments
+
+**What's next:**
+- Test Turbo on sermon clips and compare WER (#4)
+- Fine-tune Turbo on church audio on A2000 Ada (#7)
+- Integrate Piper TTS into live pipeline (#22)
+- Cross-platform server/display verification (#29)
+- See [`todo.md`](./todo.md) for full task list
 
 ## License
 
