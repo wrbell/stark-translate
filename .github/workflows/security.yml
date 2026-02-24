@@ -32,17 +32,18 @@ jobs:
 
       - name: Audit ${{ matrix.requirements }}
         run: |
-          # Strip platform-specific packages that can't resolve on Linux CI:
-          #   mlx/mlx-metal/mlx-lm/mlx-whisper (macOS Metal only)
-          #   piper-tts (requires piper native binary)
+          # Strip packages that can't resolve on Linux CI:
+          #   mlx* (macOS Metal only), piper-tts (native binary)
           #   inaSpeechSegmenter, demucs, pyannote-audio (complex native builds)
-          #   torch/torchaudio/torchvision lines with --index-url (CUDA-specific)
+          #   unbabel-comet (transitive pandas build fails without pkg_resources)
+          #   torch* (CUDA-specific index URLs)
           sed -E \
             -e '/^mlx/d' \
             -e '/^piper-tts/d' \
             -e '/^inaSpeechSegmenter/d' \
             -e '/^demucs/d' \
             -e '/^pyannote-audio/d' \
+            -e '/^unbabel-comet/d' \
             -e '/^pandas/d' \
             -e '/^torch(audio|vision)?[>=<]/d' \
             -e '/^--/d' \
