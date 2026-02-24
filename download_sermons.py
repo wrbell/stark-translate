@@ -43,17 +43,14 @@ import shutil
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-DEFAULT_PLAYLIST_URL = (
-    "https://www.youtube.com/playlist?list=PLtTHU_srjk52WQQzZYzZiagLbKrS4BowV"
-)
+DEFAULT_PLAYLIST_URL = "https://www.youtube.com/playlist?list=PLtTHU_srjk52WQQzZYzZiagLbKrS4BowV"
 DEFAULT_OUTPUT_DIR = "stark_data/raw"
 DEFAULT_METADATA_FILE = "stark_data/download_log.jsonl"
 ACCENT_CHOICES = ["midwest", "scottish", "canadian", "westcoast", "british", "general"]
@@ -61,7 +58,7 @@ DEFAULT_MIN_DURATION_MIN = 10
 DEFAULT_MAX_DURATION_MIN = 180
 DEFAULT_RETRIES = 3
 SLEEP_BETWEEN_DOWNLOADS = 2.0  # seconds -- basic rate limiting
-SLEEP_BETWEEN_RETRIES = 5.0   # seconds
+SLEEP_BETWEEN_RETRIES = 5.0  # seconds
 
 # 16kHz mono 16-bit PCM = 32,000 bytes per second of audio
 WAV_BYTES_PER_SECOND = 16000 * 2
@@ -70,6 +67,7 @@ WAV_BYTES_PER_SECOND = 16000 * 2
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def check_dependencies():
     """Verify that yt-dlp and ffmpeg are available on PATH."""
@@ -91,11 +89,11 @@ def check_dependencies():
 def sanitize_filename(name: str) -> str:
     """Remove or replace characters that are unsafe in filenames."""
     # Replace common problematic characters with underscores
-    name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', name)
+    name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name)
     # Collapse multiple underscores/spaces
-    name = re.sub(r'[_\s]+', '_', name)
+    name = re.sub(r"[_\s]+", "_", name)
     # Strip leading/trailing underscores and dots
-    name = name.strip('_. ')
+    name = name.strip("_. ")
     # Truncate to a reasonable length (leave room for video ID suffix + extension)
     if len(name) > 150:
         name = name[:150]
@@ -117,12 +115,12 @@ def format_size(size_bytes: int | float) -> str:
     size_bytes = int(size_bytes)
     if size_bytes < 1024:
         return f"{size_bytes} B"
-    elif size_bytes < 1024 ** 2:
+    elif size_bytes < 1024**2:
         return f"{size_bytes / 1024:.1f} KB"
-    elif size_bytes < 1024 ** 3:
-        return f"{size_bytes / 1024 ** 2:.1f} MB"
+    elif size_bytes < 1024**3:
+        return f"{size_bytes / 1024**2:.1f} MB"
     else:
-        return f"{size_bytes / 1024 ** 3:.2f} GB"
+        return f"{size_bytes / 1024**3:.2f} GB"
 
 
 def parse_sources(source_args: list[str]) -> list[str]:
@@ -137,7 +135,7 @@ def parse_sources(source_args: list[str]) -> list[str]:
     for src in source_args:
         # Check if it looks like a file path (exists on disk)
         if os.path.isfile(src):
-            with open(src, "r", encoding="utf-8") as f:
+            with open(src, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith("#"):
@@ -206,14 +204,16 @@ def get_video_list(url: str, args: argparse.Namespace) -> list[dict]:
         if not video_url:
             video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-        videos.append({
-            "id": video_id,
-            "title": title,
-            "duration": duration,
-            "upload_date": upload_date,
-            "channel": channel,
-            "url": video_url,
-        })
+        videos.append(
+            {
+                "id": video_id,
+                "title": title,
+                "duration": duration,
+                "upload_date": upload_date,
+                "channel": channel,
+                "url": video_url,
+            }
+        )
 
     return videos
 
@@ -262,8 +262,9 @@ def fetch_video_description(video_url: str) -> str:
     return ""
 
 
-def save_video_metadata(output_dir: Path, video: dict, wav_path: Path,
-                        description: str = "", accent: str = "general") -> Path:
+def save_video_metadata(
+    output_dir: Path, video: dict, wav_path: Path, description: str = "", accent: str = "general"
+) -> Path:
     """
     Save per-video metadata as a JSON file alongside the WAV file.
 
@@ -275,7 +276,7 @@ def save_video_metadata(output_dir: Path, video: dict, wav_path: Path,
     speakers = ""
     if description:
         # Descriptions typically start with "Speakers: ..." or "Speaker: ..."
-        m = re.match(r'Speakers?:\s*(.+?)(?:\.|$|\n)', description, re.IGNORECASE)
+        m = re.match(r"Speakers?:\s*(.+?)(?:\.|$|\n)", description, re.IGNORECASE)
         if m:
             speakers = m.group(1).strip()
 
@@ -291,7 +292,7 @@ def save_video_metadata(output_dir: Path, video: dict, wav_path: Path,
         "description": description,
         "wav_filename": wav_path.name,
         "wav_path": str(wav_path),
-        "download_timestamp": datetime.now(timezone.utc).isoformat(),
+        "download_timestamp": datetime.now(UTC).isoformat(),
         "audio_format": "16kHz mono PCM s16le WAV",
         "sample_rate": 16000,
         "channels": 1,
@@ -342,7 +343,7 @@ def download_and_convert(
             "url": video["url"],
             "accent": accent,
             "output_path": str(output_path),
-            "download_timestamp": datetime.now(timezone.utc).isoformat(),
+            "download_timestamp": datetime.now(UTC).isoformat(),
             "filesize_bytes": stat.st_size,
             "status": "skipped_existing",
         }
@@ -357,14 +358,21 @@ def download_and_convert(
         "--no-warnings",
         "--ignore-errors",
         "--extract-audio",
-        "--audio-format", "wav",
-        "--audio-quality", "0",           # best quality
-        "-f", audio_format,
-        "--output", temp_template,
-        "--no-playlist",                  # ensure we download just this video
-        "--retries", str(retries),
-        "--fragment-retries", str(retries),
-        "--concurrent-fragments", "4",    # speed up downloads
+        "--audio-format",
+        "wav",
+        "--audio-quality",
+        "0",  # best quality
+        "-f",
+        audio_format,
+        "--output",
+        temp_template,
+        "--no-playlist",  # ensure we download just this video
+        "--retries",
+        str(retries),
+        "--fragment-retries",
+        str(retries),
+        "--concurrent-fragments",
+        "4",  # speed up downloads
     ]
     ytdlp_cmd.append(video["url"])
 
@@ -380,10 +388,16 @@ def download_and_convert(
             if result.returncode != 0:
                 last_error = result.stderr.strip() or result.stdout.strip()
                 # Check for unrecoverable errors
-                if any(phrase in last_error.lower() for phrase in [
-                    "private video", "video unavailable", "this video is not available",
-                    "sign in to confirm your age", "removed by the uploader",
-                ]):
+                if any(
+                    phrase in last_error.lower()
+                    for phrase in [
+                        "private video",
+                        "video unavailable",
+                        "this video is not available",
+                        "sign in to confirm your age",
+                        "removed by the uploader",
+                    ]
+                ):
                     print(f"  UNAVAILABLE: {last_error[:120]}")
                     return None
                 if attempt < retries:
@@ -398,7 +412,7 @@ def download_and_convert(
                 # Sometimes the extension differs; look for any temp file
                 candidates = list(output_dir.glob(f".tmp_{video_id}.*"))
                 if not candidates:
-                    print(f"  ERROR: yt-dlp completed but no output file found")
+                    print("  ERROR: yt-dlp completed but no output file found")
                     return None
                 # Use the first candidate and convert
                 source_file = candidates[0]
@@ -408,11 +422,15 @@ def download_and_convert(
             # Convert to 16kHz mono WAV using ffmpeg
             ffmpeg_cmd = [
                 "ffmpeg",
-                "-y",                    # overwrite output
-                "-i", str(source_file),  # input
-                "-ar", "16000",          # 16kHz sample rate
-                "-ac", "1",              # mono
-                "-c:a", "pcm_s16le",     # 16-bit signed little-endian PCM
+                "-y",  # overwrite output
+                "-i",
+                str(source_file),  # input
+                "-ar",
+                "16000",  # 16kHz sample rate
+                "-ac",
+                "1",  # mono
+                "-c:a",
+                "pcm_s16le",  # 16-bit signed little-endian PCM
                 str(output_path),
             ]
 
@@ -442,8 +460,7 @@ def download_and_convert(
             description = ""
             if save_per_video_json:
                 description = fetch_video_description(video["url"])
-                save_video_metadata(output_dir, video, output_path, description,
-                                    accent=accent)
+                save_video_metadata(output_dir, video, output_path, description, accent=accent)
 
             return {
                 "video_id": video_id,
@@ -455,7 +472,7 @@ def download_and_convert(
                 "accent": accent,
                 "description": description,
                 "output_path": str(output_path),
-                "download_timestamp": datetime.now(timezone.utc).isoformat(),
+                "download_timestamp": datetime.now(UTC).isoformat(),
                 "filesize_bytes": stat.st_size,
                 "status": "downloaded",
             }
@@ -498,9 +515,12 @@ def _get_wav_duration(wav_path: Path) -> float | None:
         result = subprocess.run(
             [
                 "ffprobe",
-                "-v", "quiet",
-                "-show_entries", "format=duration",
-                "-of", "csv=p=0",
+                "-v",
+                "quiet",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "csv=p=0",
                 str(wav_path),
             ],
             capture_output=True,
@@ -525,7 +545,7 @@ def load_existing_ids(metadata_file: Path) -> set[str]:
     """Load video IDs already present in the metadata log."""
     ids = set()
     if metadata_file.exists():
-        with open(metadata_file, "r", encoding="utf-8") as f:
+        with open(metadata_file, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -555,29 +575,32 @@ def print_download_estimates(videos: list[dict]):
     # Estimate download time at various speeds
     speeds_mbps = [10, 50, 100]
 
-    print(f"\n--- DOWNLOAD ESTIMATES ---")
+    print("\n--- DOWNLOAD ESTIMATES ---")
     print(f"  Videos with known duration: {known_count}")
     if unknown_count > 0:
         print(f"  Videos with unknown duration: {unknown_count} (estimates may be low)")
     print(f"  Total audio duration: {format_duration(total_duration)} ({total_duration / 3600:.1f} hours)")
     print(f"  Estimated compressed download: ~{format_size(compressed_size)}")
     print(f"  Final WAV output size (16kHz mono): ~{format_size(wav_size)}")
-    print(f"  Estimated download time:")
+    print("  Estimated download time:")
     for speed in speeds_mbps:
         dl_seconds = compressed_size / (speed * 1_000_000 / 8)
         # Add overhead for ffmpeg conversion (~0.5x real-time) + rate limiting
         convert_seconds = total_duration * 0.1  # ffmpeg is fast for resampling
         rate_limit_seconds = len(videos) * SLEEP_BETWEEN_DOWNLOADS
         total_time = dl_seconds + convert_seconds + rate_limit_seconds
-        print(f"    At {speed:3d} Mbps: ~{format_duration(total_time)} "
-              f"(download: {format_duration(dl_seconds)}, "
-              f"convert: {format_duration(convert_seconds)}, "
-              f"rate-limit: {format_duration(rate_limit_seconds)})")
+        print(
+            f"    At {speed:3d} Mbps: ~{format_duration(total_time)} "
+            f"(download: {format_duration(dl_seconds)}, "
+            f"convert: {format_duration(convert_seconds)}, "
+            f"rate-limit: {format_duration(rate_limit_seconds)})"
+        )
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -592,7 +615,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     source_group = parser.add_mutually_exclusive_group()
     source_group.add_argument(
-        "--source", "-s",
+        "--source",
+        "-s",
         nargs="+",
         default=None,
         help=(
@@ -605,20 +629,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--playlist-url",
         type=str,
         default=None,
-        help=(
-            "YouTube playlist URL to download from. "
-            f"Default: {DEFAULT_PLAYLIST_URL}"
-        ),
+        help=(f"YouTube playlist URL to download from. Default: {DEFAULT_PLAYLIST_URL}"),
     )
 
     parser.add_argument(
-        "--output-dir", "-o",
+        "--output-dir",
+        "-o",
         type=str,
         default=DEFAULT_OUTPUT_DIR,
         help=f"Output directory for WAV files (default: {DEFAULT_OUTPUT_DIR})",
     )
     parser.add_argument(
-        "--max-videos", "-n",
+        "--max-videos",
+        "-n",
         type=int,
         default=None,
         help="Maximum number of videos to download (default: unlimited)",
@@ -777,7 +800,7 @@ def main():
 
     # Apply max-videos limit (after filtering)
     if args.max_videos is not None and len(videos) > args.max_videos:
-        videos = videos[:args.max_videos]
+        videos = videos[: args.max_videos]
 
     print(f"\n{len(videos)} video(s) to process")
 
@@ -873,7 +896,7 @@ def main():
     print(f"  Metadata log:              {metadata_file}")
 
     if failed:
-        print(f"\nFailed videos:")
+        print("\nFailed videos:")
         for v in failed:
             print(f"  - {v.get('title', v['id'])[:70]} [{v['id']}]")
 

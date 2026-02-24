@@ -38,7 +38,6 @@ from pathlib import Path
 
 import numpy as np
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -68,6 +67,7 @@ WHISPER_PROMPT = (
 # Audio Loading
 # ---------------------------------------------------------------------------
 
+
 def load_audio_file(path):
     """Load a single WAV file and return (audio_array, sample_rate)."""
     import scipy.io.wavfile as wav
@@ -88,6 +88,7 @@ def load_audio_file(path):
     # Resample to 16kHz if needed
     if sr != SAMPLE_RATE:
         from scipy.signal import resample
+
         target_len = int(len(audio) * SAMPLE_RATE / sr)
         audio = resample(audio, target_len).astype(np.float32)
         sr = SAMPLE_RATE
@@ -119,7 +120,7 @@ def load_session_directory(session_dir):
 
     combined = np.concatenate(segments)
     duration = len(combined) / SAMPLE_RATE
-    print(f"  Combined audio: {duration:.1f}s ({duration/60:.1f} min)")
+    print(f"  Combined audio: {duration:.1f}s ({duration / 60:.1f} min)")
     return combined, SAMPLE_RATE
 
 
@@ -132,17 +133,17 @@ def load_input_audio(input_path):
         print(f"  Loading audio: {input_path}")
         audio, sr = load_audio_file(input_path)
         duration = len(audio) / sr
-        print(f"  Duration: {duration:.1f}s ({duration/60:.1f} min)")
+        print(f"  Duration: {duration:.1f}s ({duration / 60:.1f} min)")
         return audio, sr
     else:
-        print(f"ERROR: Input must be a WAV file or session directory: {input_path}",
-              file=sys.stderr)
+        print(f"ERROR: Input must be a WAV file or session directory: {input_path}", file=sys.stderr)
         sys.exit(1)
 
 
 # ---------------------------------------------------------------------------
 # Speaker Embedding / Identification
 # ---------------------------------------------------------------------------
+
 
 def load_speaker_embeddings(embeddings_dir, inference_obj):
     """Load enrollment WAV samples and compute speaker embeddings.
@@ -160,8 +161,7 @@ def load_speaker_embeddings(embeddings_dir, inference_obj):
     """
     emb_path = Path(embeddings_dir)
     if not emb_path.is_dir():
-        print(f"WARNING: Embeddings directory not found: {embeddings_dir}",
-              file=sys.stderr)
+        print(f"WARNING: Embeddings directory not found: {embeddings_dir}", file=sys.stderr)
         return {}
 
     embeddings = {}
@@ -172,12 +172,10 @@ def load_speaker_embeddings(embeddings_dir, inference_obj):
             embeddings[label] = embedding
             print(f"  Enrolled speaker: {label} (from {wav_file.name})")
         except Exception as e:
-            print(f"  WARNING: Failed to enroll {wav_file.name}: {e}",
-                  file=sys.stderr)
+            print(f"  WARNING: Failed to enroll {wav_file.name}: {e}", file=sys.stderr)
 
     if not embeddings:
-        print(f"WARNING: No valid speaker embeddings loaded from {embeddings_dir}",
-              file=sys.stderr)
+        print(f"WARNING: No valid speaker embeddings loaded from {embeddings_dir}", file=sys.stderr)
 
     return embeddings
 
@@ -221,7 +219,7 @@ def identify_speakers(diarization, embeddings, inference_obj, audio_path):
 
         # Extract embedding from longest segments (more reliable)
         speaker_segments.sort(key=lambda s: s.duration, reverse=True)
-        top_segments = speaker_segments[:min(5, len(speaker_segments))]
+        top_segments = speaker_segments[: min(5, len(speaker_segments))]
 
         # Average embeddings across top segments
         seg_embeddings = []
@@ -245,8 +243,9 @@ def identify_speakers(diarization, embeddings, inference_obj, audio_path):
         best_sim = -1.0
         for name, ref_emb in embeddings.items():
             # Cosine similarity
-            sim = float(np.dot(avg_embedding, ref_emb) /
-                       (np.linalg.norm(avg_embedding) * np.linalg.norm(ref_emb) + 1e-8))
+            sim = float(
+                np.dot(avg_embedding, ref_emb) / (np.linalg.norm(avg_embedding) * np.linalg.norm(ref_emb) + 1e-8)
+            )
             if sim > best_sim:
                 best_sim = sim
                 best_name = name
@@ -265,6 +264,7 @@ def identify_speakers(diarization, embeddings, inference_obj, audio_path):
 # ---------------------------------------------------------------------------
 # Diarization Pipeline
 # ---------------------------------------------------------------------------
+
 
 def run_diarization(audio_path, min_speakers, max_speakers):
     """Run pyannote speaker diarization pipeline.
@@ -288,13 +288,13 @@ def run_diarization(audio_path, min_speakers, max_speakers):
 
     from pyannote.audio import Pipeline
 
-    print(f"[1/3] Loading pyannote speaker-diarization-3.1...")
+    print("[1/3] Loading pyannote speaker-diarization-3.1...")
     t0 = time.time()
     pipeline = Pipeline.from_pretrained(
         "pyannote/speaker-diarization-3.1",
         use_auth_token=hf_token,
     )
-    print(f"  Pipeline loaded ({time.time()-t0:.1f}s)")
+    print(f"  Pipeline loaded ({time.time() - t0:.1f}s)")
 
     print(f"[2/3] Running diarization (speakers: {min_speakers}-{max_speakers})...")
     t0 = time.time()
@@ -325,6 +325,7 @@ def run_diarization(audio_path, min_speakers, max_speakers):
 def _get_audio_duration(audio_path):
     """Get duration of an audio file in seconds."""
     import scipy.io.wavfile as wav
+
     sr, audio = wav.read(audio_path)
     if audio.ndim > 1:
         return len(audio) / sr
@@ -334,6 +335,7 @@ def _get_audio_duration(audio_path):
 # ---------------------------------------------------------------------------
 # Transcription (per-segment STT)
 # ---------------------------------------------------------------------------
+
 
 def transcribe_segments(audio, diarization, label_map=None):
     """Transcribe each diarized segment using mlx-whisper.
@@ -346,8 +348,9 @@ def transcribe_segments(audio, diarization, label_map=None):
     Returns:
         List of dicts with speaker, start, end, duration, text.
     """
-    import mlx_whisper
     import mlx.core as mx
+    import mlx_whisper
+
     mx.set_cache_limit(100 * 1024 * 1024)
 
     model_id = "mlx-community/distil-whisper-large-v3"
@@ -356,20 +359,21 @@ def transcribe_segments(audio, diarization, label_map=None):
     # Warm up Whisper
     t0 = time.time()
     silence = np.zeros(SAMPLE_RATE, dtype=np.float32)
-    mlx_whisper.transcribe(silence, path_or_hf_repo=model_id,
-                           condition_on_previous_text=False)
-    print(f"  Whisper ready ({time.time()-t0:.1f}s)")
+    mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
+    print(f"  Whisper ready ({time.time() - t0:.1f}s)")
 
     # Collect segments sorted by time
     segments = []
     for segment, _, label in diarization.itertracks(yield_label=True):
         speaker = label_map.get(label, label) if label_map else label
-        segments.append({
-            "speaker": speaker,
-            "start": segment.start,
-            "end": segment.end,
-            "duration": segment.end - segment.start,
-        })
+        segments.append(
+            {
+                "speaker": speaker,
+                "start": segment.start,
+                "end": segment.end,
+                "duration": segment.end - segment.start,
+            }
+        )
 
     # Sort by start time
     segments.sort(key=lambda s: s["start"])
@@ -377,9 +381,7 @@ def transcribe_segments(audio, diarization, label_map=None):
     # Merge adjacent segments from the same speaker (within 0.5s gap)
     merged = []
     for seg in segments:
-        if (merged
-                and merged[-1]["speaker"] == seg["speaker"]
-                and seg["start"] - merged[-1]["end"] < 0.5):
+        if merged and merged[-1]["speaker"] == seg["speaker"] and seg["start"] - merged[-1]["end"] < 0.5:
             merged[-1]["end"] = seg["end"]
             merged[-1]["duration"] = merged[-1]["end"] - merged[-1]["start"]
         else:
@@ -425,8 +427,7 @@ def transcribe_segments(audio, diarization, label_map=None):
         confidence = None
         stt_segments = result.get("segments", [])
         if stt_segments:
-            logprobs = [s.get("avg_logprob", 0) for s in stt_segments
-                       if s.get("avg_logprob") is not None]
+            logprobs = [s.get("avg_logprob", 0) for s in stt_segments if s.get("avg_logprob") is not None]
             if logprobs:
                 mean_lp = sum(logprobs) / len(logprobs)
                 confidence = round(min(1.0, max(0.0, 1.0 + mean_lp)), 2)
@@ -453,6 +454,7 @@ def transcribe_segments(audio, diarization, label_map=None):
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
+
 
 def _format_timestamp(seconds):
     """Format seconds as HH:MM:SS.mmm."""
@@ -482,12 +484,13 @@ def write_jsonl(results, output_path, metadata=None):
         speakers = set(r["speaker"] for r in results)
         total_dur = sum(r["duration"] for r in results)
         print(f"  Speakers: {len(speakers)} ({', '.join(sorted(speakers))})")
-        print(f"  Total speech: {total_dur:.1f}s ({total_dur/60:.1f} min)")
+        print(f"  Total speech: {total_dur:.1f}s ({total_dur / 60:.1f} min)")
 
 
 def write_temp_wav(audio, sample_rate):
     """Write audio array to a temporary WAV file (pyannote needs a file path)."""
     import tempfile
+
     import scipy.io.wavfile as wav
 
     tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
@@ -498,6 +501,7 @@ def write_temp_wav(audio, sample_rate):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -513,26 +517,44 @@ Examples:
         """,
     )
     parser.add_argument("input", help="WAV file or live session directory")
-    parser.add_argument("--min-speakers", type=int, default=DEFAULT_MIN_SPEAKERS,
-                        help=f"Minimum speakers (default: {DEFAULT_MIN_SPEAKERS})")
-    parser.add_argument("--max-speakers", type=int, default=DEFAULT_MAX_SPEAKERS,
-                        help=f"Maximum speakers (default: {DEFAULT_MAX_SPEAKERS})")
-    parser.add_argument("--embeddings", type=str, default=None,
-                        help="Directory of WAV enrollment samples for speaker identification "
-                             "(one file per speaker, filename = speaker name)")
-    parser.add_argument("-o", "--output", type=str, default=None,
-                        help="Output JSONL path (default: metrics/diarization/<input_name>.jsonl)")
-    parser.add_argument("--no-transcribe", action="store_true",
-                        help="Skip STT — output only speaker segments with timestamps")
+    parser.add_argument(
+        "--min-speakers",
+        type=int,
+        default=DEFAULT_MIN_SPEAKERS,
+        help=f"Minimum speakers (default: {DEFAULT_MIN_SPEAKERS})",
+    )
+    parser.add_argument(
+        "--max-speakers",
+        type=int,
+        default=DEFAULT_MAX_SPEAKERS,
+        help=f"Maximum speakers (default: {DEFAULT_MAX_SPEAKERS})",
+    )
+    parser.add_argument(
+        "--embeddings",
+        type=str,
+        default=None,
+        help="Directory of WAV enrollment samples for speaker identification "
+        "(one file per speaker, filename = speaker name)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        default=None,
+        help="Output JSONL path (default: metrics/diarization/<input_name>.jsonl)",
+    )
+    parser.add_argument(
+        "--no-transcribe", action="store_true", help="Skip STT — output only speaker segments with timestamps"
+    )
     args = parser.parse_args()
 
-    print(f"{'='*60}")
-    print(f"  Speaker Diarization (pyannote 3.1)")
+    print(f"{'=' * 60}")
+    print("  Speaker Diarization (pyannote 3.1)")
     print(f"  Input: {args.input}")
     print(f"  Speakers: {args.min_speakers}-{args.max_speakers}")
     if args.embeddings:
         print(f"  Enrollment: {args.embeddings}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     # Load audio
     audio, sr = load_input_audio(args.input)
@@ -549,6 +571,7 @@ Examples:
         if args.embeddings:
             hf_token = os.environ.get("HF_TOKEN")
             from pyannote.audio import Inference
+
             embedding_model = Inference(
                 "pyannote/embedding",
                 use_auth_token=hf_token,
@@ -556,23 +579,23 @@ Examples:
             )
             enrolled = load_speaker_embeddings(args.embeddings, embedding_model)
             if enrolled:
-                label_map = identify_speakers(
-                    diarization, enrolled, embedding_model, tmp_path
-                )
+                label_map = identify_speakers(diarization, enrolled, embedding_model, tmp_path)
 
         # Transcribe segments (or just output timestamps)
         if args.no_transcribe:
             results = []
             for segment, _, label in diarization.itertracks(yield_label=True):
                 speaker = label_map.get(label, label) if label_map else label
-                results.append({
-                    "speaker": speaker,
-                    "start": round(segment.start, 3),
-                    "end": round(segment.end, 3),
-                    "duration": round(segment.end - segment.start, 3),
-                    "text": None,
-                    "confidence": None,
-                })
+                results.append(
+                    {
+                        "speaker": speaker,
+                        "start": round(segment.start, 3),
+                        "end": round(segment.end, 3),
+                        "duration": round(segment.end - segment.start, 3),
+                        "text": None,
+                        "confidence": None,
+                    }
+                )
             results.sort(key=lambda r: r["start"])
         else:
             results = transcribe_segments(audio, diarization, label_map)
@@ -599,9 +622,9 @@ Examples:
         write_jsonl(results, output_path, metadata)
 
         # Print summary
-        print(f"\n{'='*60}")
-        print(f"  DIARIZATION COMPLETE")
-        print(f"{'='*60}")
+        print(f"\n{'=' * 60}")
+        print("  DIARIZATION COMPLETE")
+        print(f"{'=' * 60}")
 
     finally:
         # Clean up temp file

@@ -15,12 +15,12 @@ Real-time mic input, fully on-device transcription and translation, displayed in
             ┌───────────────────────────────────────┘
             │
             ├─ PARTIAL (on 1s of new speech, while speaker is talking)
-            │    mlx-whisper STT (~300ms)
+            │    Whisper Large-V3-Turbo STT (~300ms)
             │    MarianMT EN→ES PyTorch (~80ms)             ← italic in UI
             │    Total: ~380ms
             │
             └─ FINAL (on silence gap or 8s max utterance)
-            │    mlx-whisper STT (~300ms, word timestamps)
+            │    Whisper Large-V3-Turbo STT (~300ms, word timestamps)
             │    TranslateGemma 4B EN→ES (~350ms)          ← replaces partial
             │    TranslateGemma 12B EN→ES (~800ms, --ab)   ← side-by-side
             │    Total: ~650ms (4B) / ~1.1s (A/B)
@@ -39,7 +39,7 @@ Real-time mic input, fully on-device transcription and translation, displayed in
          (projector) (operator)  (QR code)    (JSONL)
 ```
 
-All inference runs natively on Apple Silicon via MLX (4-bit quantized). No cloud APIs, no internet required at runtime.
+Inference runs on Apple Silicon (MLX) or NVIDIA GPUs (CUDA). No cloud APIs, no internet required at runtime.
 
 ## Display Modes
 
@@ -81,11 +81,23 @@ open displays/audience_display.html
 open displays/ab_display.html
 ```
 
+### NVIDIA/CUDA Setup
+
+```bash
+# NVIDIA/CUDA setup (RTX 2070 or similar)
+pip install -r requirements-nvidia.txt
+python dry_run_ab.py --backend=cuda --no-ab
+```
+
 ### Key Flags
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--ab` | off | Load both 4B and 12B for A/B comparison |
+| `--backend` | auto | Inference backend: auto, mlx, cuda, cpu |
+| `--no-ab` | off | Skip 12B model (for low-VRAM devices) |
+| `--low-vram` | off | Marian-only translation mode |
+| `--dry-run-text` | off | Test with text input instead of mic |
 | `--http-port` | 8080 | HTTP server port (serves display pages to phones over LAN) |
 | `--ws-port` | 8765 | WebSocket server port |
 | `--vad-threshold` | 0.3 | VAD speech detection sensitivity (0-1) |
@@ -98,10 +110,12 @@ open displays/ab_display.html
 | Component | Model | Framework | Size | Latency |
 |-----------|-------|-----------|------|---------|
 | VAD | Silero VAD | PyTorch | ~2 MB | <1ms |
-| STT | Distil-Whisper large-v3 | mlx-whisper | ~1.5 GB | ~300ms |
-| Translate (partials) | MarianMT opus-mt-en-es | PyTorch | ~298 MB | ~80ms |
+| STT | Whisper Large-V3-Turbo | mlx-whisper / faster-whisper | ~1.5 GB | ~300ms |
+| Translate (partials) | MarianMT opus-mt-en-es | PyTorch (CPU, ~80ms) | ~298 MB | ~80ms |
 | Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~350ms |
 | Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~800ms |
+
+CUDA variants: bitsandbytes 4-bit for TranslateGemma, faster-whisper INT8 for STT.
 
 Pipeline overlap (P7-6C) hides translation latency by running translation on utterance N while STT processes utterance N+1.
 
@@ -124,6 +138,9 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 - **Hardware profiling** -- per-session CPU/RAM/GPU snapshots for portability planning
 - **LAN serving** -- HTTP server + WebSocket on `0.0.0.0` so phones connect over local network
 - **229-term theological glossary** -- covers 66 books, 31 proper names, theological concepts, liturgical terms
+- **Dual-target inference** -- runs on Apple Silicon (MLX) or NVIDIA GPUs (CUDA) from a single codebase
+- **Unified configuration** -- pydantic-settings with STARK_ env prefix, .env file support
+- **STT fallback** -- automatic retry with fallback model on low-confidence or hallucinated segments
 
 ## Hardware Requirements
 
@@ -133,6 +150,13 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 - **8 GB+** unified memory for 4B-only mode (~4.3 GB used)
 - **18 GB+** unified memory for A/B mode (~11.3 GB used)
 - Python 3.11, macOS with Metal support
+
+### NVIDIA (Inference -- RTX 2070 or similar)
+
+- NVIDIA GPU with 6 GB+ VRAM
+- CUDA 12.x toolkit
+- Python 3.11, Windows or Linux
+- `pip install -r requirements-nvidia.txt`
 
 ### Windows (Training)
 
@@ -155,9 +179,19 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 
 ```
 ├── dry_run_ab.py              # Main pipeline: mic → VAD → STT → translate → WebSocket + HTTP
+├── settings.py                # Unified pydantic-settings config (STARK_ env prefix, .env support)
 ├── setup_models.py            # One-command model download + verification
 ├── build_glossary.py          # EN→ES theological glossary (229 terms)
 ├── download_sermons.py        # yt-dlp sermon downloader
+├── requirements-mac.txt       # Mac/MLX pip dependencies
+├── requirements-nvidia.txt    # NVIDIA/CUDA inference dependencies
+│
+├── engines/                   # STT + translation engine abstraction (MLX + CUDA)
+│   ├── base.py                # ABCs: STTEngine, TranslationEngine, result dataclasses
+│   ├── mlx_engine.py          # MLXWhisperEngine, MLXGemmaEngine, MarianEngine
+│   ├── cuda_engine.py         # FasterWhisperEngine, CUDAGemmaEngine
+│   ├── factory.py             # create_stt_engine(), create_translation_engine(), auto-detect
+│   └── active_learning.py     # Fallback event JSONL logger
 │
 ├── displays/
 │   ├── audience_display.html  # Projector display (EN/ES side-by-side, QR overlay)
@@ -170,11 +204,15 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 │   ├── preprocess_audio.py    # 10-step audio cleaning pipeline (accent-aware)
 │   ├── transcribe_church.py   # Whisper large-v3 pseudo-labeling
 │   ├── prepare_bible_corpus.py # Bible verse pair alignment
-│   ├── prepare_whisper_dataset.py # Accent-balanced audiofolder builder (NEW)
+│   ├── prepare_whisper_dataset.py # Accent-balanced audiofolder builder
+│   ├── prepare_piper_dataset.py # LJSpeech format conversion for Piper TTS
 │   ├── train_whisper.py       # Whisper LoRA fine-tuning (accent-balanced + per-accent WER)
 │   ├── train_gemma.py         # TranslateGemma QLoRA fine-tuning
 │   ├── train_marian.py        # MarianMT full fine-tune
+│   ├── train_piper.py         # Piper TTS voice fine-tuning
+│   ├── export_piper_onnx.py   # Piper TTS model export to ONNX
 │   ├── evaluate_translation.py # SacreBLEU/chrF++/COMET scoring
+│   ├── evaluate_piper.py      # Piper TTS quality assessment
 │   └── assess_quality.py      # Baseline WER assessment
 │
 ├── tools/                     # Mac benchmarking & monitoring
@@ -182,6 +220,7 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 │   ├── translation_qe.py      # Reference-free translation QE
 │   ├── benchmark_latency.py   # End-to-end latency profiling
 │   ├── stt_benchmark.py       # STT-only benchmarking
+│   ├── convert_models_to_both.py # Model format conversion (MLX ↔ CUDA)
 │   └── test_adaptive_model.py # Adaptive model selection testing
 │
 ├── features/                  # Standalone future features
@@ -223,6 +262,27 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 | [`docs/multilingual_tuning_proposal.md`](./docs/multilingual_tuning_proposal.md) | Hindi/Chinese research: corpora, glossaries, QLoRA, evaluation |
 | [`docs/macos_libomp_fix.md`](./docs/macos_libomp_fix.md) | macOS libomp conflict diagnosis and fix |
 | [`todo.md`](./todo.md) | Phased task list aligned to Seattle training schedule |
+
+## Development Status
+
+**Active branch:** `feature/turbo-dual-prod-v2` — Turbo migration, engines package, dual-target inference, TTS training scripts, unified config.
+
+**What's done:**
+- Wholesale swap to Whisper Large-V3-Turbo (both partials and finals)
+- `engines/` package: MLX + CUDA engine implementations with factory auto-detection
+- `settings.py`: pydantic-settings unified config (`STARK_` env prefix, `.env` support)
+- Backend selection (`--backend auto|mlx|cuda`) with CUDA fallback paths
+- STT fallback logic (lazy-load fallback model on low confidence / hallucination)
+- `tools/convert_models_to_both.py`: dual-endpoint model export
+- Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
+- `requirements-nvidia.txt` for CUDA inference environments
+
+**What's next:**
+- Test Turbo on sermon clips and compare WER (#4)
+- Fine-tune Turbo on church audio on A2000 Ada (#7)
+- Integrate Piper TTS into live pipeline (#22)
+- Cross-platform server/display verification (#29)
+- See [`todo.md`](./todo.md) for full task list
 
 ## License
 

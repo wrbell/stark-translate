@@ -26,7 +26,6 @@ import json
 import os
 import queue as queue_module
 import statistics
-import sys
 import tempfile
 import threading
 import time
@@ -83,6 +82,7 @@ SPEC_DRAFT_TOKENS = [3, 4, 6, 8, 12, 16]
 # Utility: stats helper
 # ---------------------------------------------------------------------------
 
+
 def compute_stats(latencies):
     """Compute summary stats for a list of latency measurements."""
     if not latencies:
@@ -102,9 +102,11 @@ def compute_stats(latencies):
 
 def fmt_stats(stats):
     """Format stats dict as a compact string."""
-    return (f"mean={stats['mean']:.1f}ms  median={stats['median']:.1f}ms  "
-            f"p95={stats['p95']:.1f}ms  min={stats['min']:.1f}ms  max={stats['max']:.1f}ms  "
-            f"stdev={stats['stdev']:.1f}ms  (n={stats['n']})")
+    return (
+        f"mean={stats['mean']:.1f}ms  median={stats['median']:.1f}ms  "
+        f"p95={stats['p95']:.1f}ms  min={stats['min']:.1f}ms  max={stats['max']:.1f}ms  "
+        f"stdev={stats['stdev']:.1f}ms  (n={stats['n']})"
+    )
 
 
 def delta_str(before_mean, after_mean):
@@ -120,6 +122,7 @@ def delta_str(before_mean, after_mean):
 # ---------------------------------------------------------------------------
 # Audio generation / loading (from stt_benchmark.py)
 # ---------------------------------------------------------------------------
+
 
 def generate_test_audio(duration_s=3.0):
     """Generate synthetic speech-like audio for benchmarking.
@@ -155,6 +158,7 @@ def load_audio_file(path):
     ext = os.path.splitext(path)[1].lower()
     if ext == ".wav":
         import scipy.io.wavfile as wav
+
         sr, data = wav.read(path)
         if data.dtype == np.int16:
             data = data.astype(np.float32) / 32768.0
@@ -164,6 +168,7 @@ def load_audio_file(path):
             data = data[:, 0]
         if sr != SAMPLE_RATE:
             from scipy.signal import resample
+
             target_len = int(len(data) * SAMPLE_RATE / sr)
             data = resample(data, target_len).astype(np.float32)
         return data
@@ -172,9 +177,9 @@ def load_audio_file(path):
             tmp_path = tmp.name
         try:
             subprocess.run(
-                ["ffmpeg", "-y", "-i", path, "-ar", str(SAMPLE_RATE), "-ac", "1",
-                 "-f", "wav", tmp_path],
-                capture_output=True, check=True,
+                ["ffmpeg", "-y", "-i", path, "-ar", str(SAMPLE_RATE), "-ac", "1", "-f", "wav", tmp_path],
+                capture_output=True,
+                check=True,
             )
             return load_audio_file(tmp_path)
         finally:
@@ -193,14 +198,14 @@ def _load_mlx_whisper():
     """Load/warm mlx-whisper and return the model_id string."""
     if "whisper" in _models_loaded:
         return _models_loaded["whisper"]
-    import mlx_whisper
     import mlx.core as mx
+    import mlx_whisper
+
     mx.set_cache_limit(256 * 1024 * 1024)
     print("  Loading mlx-whisper (distil-large-v3)...")
     t0 = time.perf_counter()
     silence = np.zeros(16000, dtype=np.float32)
-    mlx_whisper.transcribe(silence, path_or_hf_repo=MODEL_ID,
-                           condition_on_previous_text=False)
+    mlx_whisper.transcribe(silence, path_or_hf_repo=MODEL_ID, condition_on_previous_text=False)
     elapsed = time.perf_counter() - t0
     print(f"  Whisper ready ({elapsed:.1f}s)")
     _models_loaded["whisper"] = MODEL_ID
@@ -212,8 +217,9 @@ def _load_mlx_gemma(model_id, label):
     key = model_id
     if key in _models_loaded:
         return _models_loaded[key]
-    from mlx_lm import load
     import mlx.core as mx
+    from mlx_lm import load
+
     mx.set_cache_limit(256 * 1024 * 1024)
     print(f"  Loading {label} ({model_id})...")
     t0 = time.perf_counter()
@@ -221,7 +227,7 @@ def _load_mlx_gemma(model_id, label):
     # EOS fix: add <end_of_turn> (id=106) to EOS set
     eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
     default_eos = tokenizer.eos_token_id
-    if not hasattr(tokenizer, '_eos_token_ids') or eot_id not in tokenizer._eos_token_ids:
+    if not hasattr(tokenizer, "_eos_token_ids") or eot_id not in tokenizer._eos_token_ids:
         tokenizer._eos_token_ids = {default_eos, eot_id}
     elapsed = time.perf_counter() - t0
     print(f"  {label} ready ({elapsed:.1f}s)")
@@ -231,15 +237,17 @@ def _load_mlx_gemma(model_id, label):
 
 def _build_prompt_cache(model, tokenizer, label):
     """Build prompt cache for TranslateGemma (replicates dry_run_ab._build_prompt_cache)."""
-    from mlx_lm.models.cache import make_prompt_cache
-    from mlx_lm.generate import generate_step
     import mlx.core as mx
+    from mlx_lm.generate import generate_step
+    from mlx_lm.models.cache import make_prompt_cache
 
     marker = "SPLIT_HERE"
-    messages = [{"role": "user", "content": [
-        {"type": "text", "source_lang_code": "en", "target_lang_code": "es",
-         "text": marker}
-    ]}]
+    messages = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": marker}],
+        }
+    ]
     full_prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
     if isinstance(full_prompt, str):
         full_tokens = tokenizer.encode(full_prompt, add_special_tokens=False)
@@ -250,7 +258,7 @@ def _build_prompt_cache(model, tokenizer, label):
     marker_len = len(marker_tokens)
     prefix_end = None
     for i in range(len(full_tokens) - marker_len + 1):
-        if full_tokens[i:i + marker_len] == marker_tokens:
+        if full_tokens[i : i + marker_len] == marker_tokens:
             prefix_end = i
             break
 
@@ -259,7 +267,7 @@ def _build_prompt_cache(model, tokenizer, label):
         return None, 0, []
 
     prefix_tokens = full_tokens[:prefix_end]
-    suffix_tokens = full_tokens[prefix_end + marker_len:]
+    suffix_tokens = full_tokens[prefix_end + marker_len :]
 
     if len(prefix_tokens) < 3:
         print(f"  WARNING: Prefix too short for {label}, skipping cache")
@@ -270,8 +278,7 @@ def _build_prompt_cache(model, tokenizer, label):
     for _ in generate_step(prompt_array, model, max_tokens=0, prompt_cache=prompt_cache):
         pass
     mx.eval([c.state for c in prompt_cache])
-    print(f"  {label} prompt cache: {len(prefix_tokens)} prefix tokens, "
-          f"{len(suffix_tokens)} suffix tokens")
+    print(f"  {label} prompt cache: {len(prefix_tokens)} prefix tokens, {len(suffix_tokens)} suffix tokens")
     return prompt_cache, len(prefix_tokens), suffix_tokens
 
 
@@ -280,9 +287,10 @@ def _load_vad():
     if "vad" in _models_loaded:
         return _models_loaded["vad"]
     import torch
+
     print("  Loading Silero VAD...")
     t0 = time.perf_counter()
-    model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad')
+    model, utils = torch.hub.load("snakers4/silero-vad", "silero_vad")
     elapsed = time.perf_counter() - t0
     print(f"  VAD ready ({elapsed:.1f}s)")
     _models_loaded["vad"] = (model, utils)
@@ -294,6 +302,7 @@ def _load_marian():
     if "marian" in _models_loaded:
         return _models_loaded["marian"]
     from transformers import MarianMTModel, MarianTokenizer
+
     model_id = "Helsinki-NLP/opus-mt-en-es"
     print(f"  Loading MarianMT PyTorch ({model_id})...")
     t0 = time.perf_counter()
@@ -301,6 +310,7 @@ def _load_marian():
     model = MarianMTModel.from_pretrained(model_id)
     model.eval()
     import torch
+
     inputs = tokenizer("Hello", return_tensors="pt", padding=True)
     with torch.no_grad():
         model.generate(**inputs, max_new_tokens=16)
@@ -321,6 +331,7 @@ def _load_ct2_marian():
         return None
     import ctranslate2
     from transformers import MarianTokenizer
+
     print("  Loading CTranslate2 MarianMT (int8)...")
     t0 = time.perf_counter()
     translator = ctranslate2.Translator(ct2_path, device="cpu", compute_type="int8")
@@ -337,14 +348,21 @@ def _load_ct2_marian():
 # Translation helper (replicates dry_run_ab.translate_mlx logic)
 # ---------------------------------------------------------------------------
 
-def translate_mlx(model, tokenizer, text, draft_model=None,
-                  prompt_cache_template=None, suffix_tokens=None,
-                  max_tok_ratio=1.8, num_draft_tokens=3):
+
+def translate_mlx(
+    model,
+    tokenizer,
+    text,
+    draft_model=None,
+    prompt_cache_template=None,
+    suffix_tokens=None,
+    max_tok_ratio=1.8,
+    num_draft_tokens=3,
+):
     """Translate English->Spanish using TranslateGemma via MLX.
     Returns (translation, latency_ms, tokens_per_sec).
     """
     from mlx_lm import generate
-    import mlx.core as mx
 
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
@@ -352,9 +370,7 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
     input_words = len(text.split())
     max_tok = max(32, int(input_words * max_tok_ratio))
 
-    use_cache = (prompt_cache_template is not None
-                 and suffix_tokens is not None
-                 and draft_model is None)
+    use_cache = prompt_cache_template is not None and suffix_tokens is not None and draft_model is None
 
     if use_cache:
         cached = copy.deepcopy(prompt_cache_template)
@@ -367,10 +383,12 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
             prompt_cache=cached,
         )
     else:
-        messages = [{"role": "user", "content": [
-            {"type": "text", "source_lang_code": "en", "target_lang_code": "es",
-             "text": text}
-        ]}]
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+            }
+        ]
         prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
         gen_kwargs = dict(prompt=prompt, max_tokens=max_tok, verbose=False)
         if draft_model is not None:
@@ -391,10 +409,10 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
 #  1. STT BENCHMARKS
 # ===================================================================
 
+
 def bench_stt_suite(audio, runs, warmup):
     """Run all STT benchmark variants and return results dict."""
     import mlx_whisper
-    import mlx.core as mx
 
     _load_mlx_whisper()
     results = {}
@@ -414,57 +432,54 @@ def bench_stt_suite(audio, runs, warmup):
         stats["text_consistent"] = len(set(texts)) == 1
         return stats
 
-    base_kwargs = dict(path_or_hf_repo=MODEL_ID, language="en",
-                       condition_on_previous_text=False)
+    base_kwargs = dict(path_or_hf_repo=MODEL_ID, language="en", condition_on_previous_text=False)
 
     # 1. word_timestamps=True vs False
     print("\n  [1/6] STT with word_timestamps=True...")
     results["stt_word_ts_on"] = _run_stt(
-        "word_timestamps=True",
-        {**base_kwargs, "word_timestamps": True, "initial_prompt": WHISPER_PROMPT},
-        runs, warmup)
+        "word_timestamps=True", {**base_kwargs, "word_timestamps": True, "initial_prompt": WHISPER_PROMPT}, runs, warmup
+    )
     print(f"        {fmt_stats(results['stt_word_ts_on'])}")
 
     print("  [2/6] STT with word_timestamps=False...")
     results["stt_word_ts_off"] = _run_stt(
         "word_timestamps=False",
         {**base_kwargs, "word_timestamps": False, "initial_prompt": WHISPER_PROMPT},
-        runs, warmup)
+        runs,
+        warmup,
+    )
     print(f"        {fmt_stats(results['stt_word_ts_off'])}")
 
     # 2. with/without initial_prompt
     print("  [3/6] STT with initial_prompt...")
     results["stt_with_prompt"] = _run_stt(
-        "with prompt",
-        {**base_kwargs, "word_timestamps": False, "initial_prompt": WHISPER_PROMPT},
-        runs, warmup)
+        "with prompt", {**base_kwargs, "word_timestamps": False, "initial_prompt": WHISPER_PROMPT}, runs, warmup
+    )
     print(f"        {fmt_stats(results['stt_with_prompt'])}")
 
     print("  [4/6] STT without initial_prompt...")
-    results["stt_no_prompt"] = _run_stt(
-        "no prompt",
-        {**base_kwargs, "word_timestamps": False},
-        runs, warmup)
+    results["stt_no_prompt"] = _run_stt("no prompt", {**base_kwargs, "word_timestamps": False}, runs, warmup)
     print(f"        {fmt_stats(results['stt_no_prompt'])}")
 
     # 3. long vs short prev_text
-    long_prev = "And so we see that the righteousness of God is revealed from faith to faith, as it is written, the just shall live by faith. This is the message of Romans chapter one." + " Filler text." * 5
+    long_prev = (
+        "And so we see that the righteousness of God is revealed from faith to faith, as it is written, the just shall live by faith. This is the message of Romans chapter one."
+        + " Filler text." * 5
+    )
     short_prev = long_prev[-100:]
     long_prompt = WHISPER_PROMPT + " " + long_prev[-200:]
     short_prompt = WHISPER_PROMPT + " " + short_prev
 
     print("  [5/6] STT with long prev_text (200 chars)...")
     results["stt_long_prev"] = _run_stt(
-        "long prev_text",
-        {**base_kwargs, "word_timestamps": False, "initial_prompt": long_prompt},
-        runs, warmup)
+        "long prev_text", {**base_kwargs, "word_timestamps": False, "initial_prompt": long_prompt}, runs, warmup
+    )
     print(f"        {fmt_stats(results['stt_long_prev'])}")
 
     print("  [6/6] STT with short prev_text (100 chars)...")
     results["stt_short_prev"] = _run_stt(
-        "short prev_text",
-        {**base_kwargs, "word_timestamps": False, "initial_prompt": short_prompt},
-        runs, warmup)
+        "short prev_text", {**base_kwargs, "word_timestamps": False, "initial_prompt": short_prompt}, runs, warmup
+    )
     print(f"        {fmt_stats(results['stt_short_prev'])}")
 
     return results
@@ -473,6 +488,7 @@ def bench_stt_suite(audio, runs, warmup):
 # ===================================================================
 #  2. TRANSLATION BENCHMARKS
 # ===================================================================
+
 
 def bench_translate_suite(runs, warmup):
     """Run all translation benchmark variants and return results dict."""
@@ -510,9 +526,8 @@ def bench_translate_suite(runs, warmup):
     # --- 4B without cache ---
     print("\n  [1/5] TranslateGemma 4B without prompt cache...")
     results["4b_no_cache"] = _run_translate(
-        "4B no cache",
-        lambda text: translate_mlx(model_a, tok_a, text),
-        runs, warmup)
+        "4B no cache", lambda text: translate_mlx(model_a, tok_a, text), runs, warmup
+    )
     for k, v in results["4b_no_cache"].items():
         print(f"        {k}: {fmt_stats(v)}  tps={v['tps_mean']}")
 
@@ -520,10 +535,10 @@ def bench_translate_suite(runs, warmup):
     print("  [2/5] TranslateGemma 4B with prompt cache...")
     results["4b_with_cache"] = _run_translate(
         "4B with cache",
-        lambda text: translate_mlx(model_a, tok_a, text,
-                                   prompt_cache_template=cache_a,
-                                   suffix_tokens=suffix_a),
-        runs, warmup)
+        lambda text: translate_mlx(model_a, tok_a, text, prompt_cache_template=cache_a, suffix_tokens=suffix_a),
+        runs,
+        warmup,
+    )
     for k, v in results["4b_with_cache"].items():
         print(f"        {k}: {fmt_stats(v)}  tps={v['tps_mean']}")
 
@@ -531,22 +546,26 @@ def bench_translate_suite(runs, warmup):
     print("  [3/5] TranslateGemma 4B max_tokens ratio 2.5x vs 1.8x...")
     results["4b_ratio_2.5"] = _run_translate(
         "4B ratio 2.5x",
-        lambda text: translate_mlx(model_a, tok_a, text,
-                                   prompt_cache_template=cache_a,
-                                   suffix_tokens=suffix_a,
-                                   max_tok_ratio=2.5),
-        runs, warmup)
+        lambda text: translate_mlx(
+            model_a, tok_a, text, prompt_cache_template=cache_a, suffix_tokens=suffix_a, max_tok_ratio=2.5
+        ),
+        runs,
+        warmup,
+    )
     results["4b_ratio_1.8"] = _run_translate(
         "4B ratio 1.8x",
-        lambda text: translate_mlx(model_a, tok_a, text,
-                                   prompt_cache_template=cache_a,
-                                   suffix_tokens=suffix_a,
-                                   max_tok_ratio=1.8),
-        runs, warmup)
+        lambda text: translate_mlx(
+            model_a, tok_a, text, prompt_cache_template=cache_a, suffix_tokens=suffix_a, max_tok_ratio=1.8
+        ),
+        runs,
+        warmup,
+    )
     for k in TEST_SENTENCES:
-        print(f"        {k}: 2.5x={results['4b_ratio_2.5'][k]['mean']:.1f}ms  "
-              f"1.8x={results['4b_ratio_1.8'][k]['mean']:.1f}ms  "
-              f"delta={delta_str(results['4b_ratio_2.5'][k]['mean'], results['4b_ratio_1.8'][k]['mean'])}")
+        print(
+            f"        {k}: 2.5x={results['4b_ratio_2.5'][k]['mean']:.1f}ms  "
+            f"1.8x={results['4b_ratio_1.8'][k]['mean']:.1f}ms  "
+            f"delta={delta_str(results['4b_ratio_2.5'][k]['mean'], results['4b_ratio_1.8'][k]['mean'])}"
+        )
 
     # --- MarianMT CT2 vs PyTorch ---
     print("  [4/5] MarianMT: CT2 int8 vs PyTorch fp32...")
@@ -569,11 +588,11 @@ def bench_translate_suite(runs, warmup):
         print(f"        PyTorch {k}: {fmt_stats(v)}")
 
     if ct2_translator is not None:
+
         def _translate_marian_ct2(text):
             t0 = time.perf_counter()
             src_tokens = marian_tok.convert_ids_to_tokens(marian_tok.encode(text))
-            ct2_out = ct2_translator.translate_batch(
-                [src_tokens], max_decoding_length=128, beam_size=4)
+            ct2_out = ct2_translator.translate_batch([src_tokens], max_decoding_length=128, beam_size=4)
             result = marian_tok.convert_tokens_to_string(ct2_out[0].hypotheses[0])
             lat = (time.perf_counter() - t0) * 1000
             return result, lat, 0.0
@@ -595,10 +614,10 @@ def bench_translate_suite(runs, warmup):
         print("        12B baseline (no spec, with cache)...")
         results["12b_no_spec"] = _run_translate(
             "12B no spec",
-            lambda text: translate_mlx(model_b, tok_b, text,
-                                       prompt_cache_template=cache_b,
-                                       suffix_tokens=suffix_b),
-            runs, warmup)
+            lambda text: translate_mlx(model_b, tok_b, text, prompt_cache_template=cache_b, suffix_tokens=suffix_b),
+            runs,
+            warmup,
+        )
         for k, v in results["12b_no_spec"].items():
             print(f"          {k}: {fmt_stats(v)}  tps={v['tps_mean']}")
 
@@ -609,16 +628,14 @@ def bench_translate_suite(runs, warmup):
             print(f"        12B speculative num_draft_tokens={ndt}...")
             results["spec_sweep"][tag] = _run_translate(
                 f"12B spec ndt={ndt}",
-                lambda text, _ndt=ndt: translate_mlx(
-                    model_b, tok_b, text,
-                    draft_model=model_a,
-                    num_draft_tokens=_ndt),
-                runs, warmup,
-                sentences={"medium": TEST_SENTENCES["medium"]})
+                lambda text, _ndt=ndt: translate_mlx(model_b, tok_b, text, draft_model=model_a, num_draft_tokens=_ndt),
+                runs,
+                warmup,
+                sentences={"medium": TEST_SENTENCES["medium"]},
+            )
             v = results["spec_sweep"][tag]["medium"]
             baseline = results["12b_no_spec"]["medium"]["mean"]
-            print(f"          medium: {fmt_stats(v)}  "
-                  f"vs baseline: {delta_str(baseline, v['mean'])}")
+            print(f"          medium: {fmt_stats(v)}  vs baseline: {delta_str(baseline, v['mean'])}")
 
     except Exception as e:
         print(f"        12B loading failed: {e}")
@@ -633,9 +650,11 @@ def bench_translate_suite(runs, warmup):
 #  3. VAD BENCHMARKS
 # ===================================================================
 
+
 def bench_vad_suite(runs, warmup):
     """Benchmark VAD inline vs threaded."""
     import torch
+
     results = {}
     vad_model, vad_utils = _load_vad()
 
@@ -643,9 +662,15 @@ def bench_vad_suite(runs, warmup):
     frame_dur_samples = 512
     n_frames = 50  # process 50 frames per measurement
     frames = [
-        np.clip(0.3 * np.sin(2 * np.pi * 300 * np.linspace(0, frame_dur_samples / SAMPLE_RATE,
-                frame_dur_samples, dtype=np.float32))
-                + 0.05 * np.random.randn(frame_dur_samples).astype(np.float32), -1, 1)
+        np.clip(
+            0.3
+            * np.sin(
+                2 * np.pi * 300 * np.linspace(0, frame_dur_samples / SAMPLE_RATE, frame_dur_samples, dtype=np.float32)
+            )
+            + 0.05 * np.random.randn(frame_dur_samples).astype(np.float32),
+            -1,
+            1,
+        )
         for _ in range(n_frames * (runs + warmup))
     ]
 
@@ -694,9 +719,15 @@ def bench_vad_suite(runs, warmup):
 
     # Regenerate frames for threaded benchmark
     frames_t = [
-        np.clip(0.3 * np.sin(2 * np.pi * 300 * np.linspace(0, frame_dur_samples / SAMPLE_RATE,
-                frame_dur_samples, dtype=np.float32))
-                + 0.05 * np.random.randn(frame_dur_samples).astype(np.float32), -1, 1)
+        np.clip(
+            0.3
+            * np.sin(
+                2 * np.pi * 300 * np.linspace(0, frame_dur_samples / SAMPLE_RATE, frame_dur_samples, dtype=np.float32)
+            )
+            + 0.05 * np.random.randn(frame_dur_samples).astype(np.float32),
+            -1,
+            1,
+        )
         for _ in range(n_frames * (runs + warmup))
     ]
 
@@ -740,9 +771,11 @@ def bench_vad_suite(runs, warmup):
     results["vad_threaded"]["per_frame_ms"] = round(results["vad_threaded"]["mean"] / n_frames, 3)
     print(f"        {fmt_stats(results['vad_threaded'])}  per_frame={results['vad_threaded']['per_frame_ms']:.3f}ms")
     # The key metric for threaded VAD is jitter reduction (stdev), not raw throughput
-    print(f"        Jitter (stdev): inline={results['vad_inline']['stdev']:.2f}ms  "
-          f"threaded={results['vad_threaded']['stdev']:.2f}ms  "
-          f"delta={delta_str(results['vad_inline']['stdev'], results['vad_threaded']['stdev'])}")
+    print(
+        f"        Jitter (stdev): inline={results['vad_inline']['stdev']:.2f}ms  "
+        f"threaded={results['vad_threaded']['stdev']:.2f}ms  "
+        f"delta={delta_str(results['vad_inline']['stdev'], results['vad_threaded']['stdev'])}"
+    )
 
     return results
 
@@ -751,22 +784,29 @@ def bench_vad_suite(runs, warmup):
 #  4. I/O BENCHMARKS
 # ===================================================================
 
+
 def bench_io_suite(runs, warmup):
     """Benchmark synchronous vs async I/O writes."""
     import scipy.io.wavfile as wav
+
     results = {}
 
     # Generate test data
     audio_chunk = generate_test_audio(2.0)
     csv_row = {
-        "chunk_id": 1, "timestamp": datetime.now().isoformat(),
+        "chunk_id": 1,
+        "timestamp": datetime.now().isoformat(),
         "english": "Test transcription for benchmark",
         "spanish_a": "Transcripcion de prueba para benchmark",
-        "stt_latency_ms": 350.0, "latency_a_ms": 500.0,
+        "stt_latency_ms": 350.0,
+        "latency_a_ms": 500.0,
     }
     jsonl_record = {
-        "chunk_id": 1, "english": "Test", "spanish_gemma": "Prueba",
-        "stt_confidence": 0.85, "review_priority": 0,
+        "chunk_id": 1,
+        "english": "Test",
+        "spanish_gemma": "Prueba",
+        "stt_confidence": 0.85,
+        "review_priority": 0,
     }
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -824,6 +864,7 @@ def bench_io_suite(runs, warmup):
 #  5. RESAMPLING BENCHMARKS
 # ===================================================================
 
+
 def bench_resample_suite(runs, warmup):
     """Benchmark scipy.signal.resample vs decimate for 48kHz->16kHz.
 
@@ -832,7 +873,8 @@ def bench_resample_suite(runs, warmup):
       actual size processed per audio_callback invocation in dry_run_ab.py.
     - Buffer-level: ~2s accumulated speech buffer (96000 samples at 48kHz).
     """
-    from scipy.signal import resample, decimate
+    from scipy.signal import decimate, resample
+
     results = {}
     factor = MIC_SAMPLE_RATE // SAMPLE_RATE  # 3
 
@@ -893,17 +935,20 @@ def bench_resample_suite(runs, warmup):
 #  6. METAL CACHE BENCHMARK
 # ===================================================================
 
+
 def bench_metal_cache(audio, runs, warmup):
     """Benchmark mlx-whisper with different Metal cache limits."""
-    import mlx_whisper
     import mlx.core as mx
+    import mlx_whisper
 
     _load_mlx_whisper()
     results = {}
 
     base_kwargs = dict(
-        path_or_hf_repo=MODEL_ID, language="en",
-        condition_on_previous_text=False, word_timestamps=False,
+        path_or_hf_repo=MODEL_ID,
+        language="en",
+        condition_on_previous_text=False,
+        word_timestamps=False,
         initial_prompt=WHISPER_PROMPT,
     )
 
@@ -937,11 +982,12 @@ def bench_metal_cache(audio, runs, warmup):
 #  7. END-TO-END PIPELINE BENCHMARK
 # ===================================================================
 
+
 def bench_e2e_suite(audio, runs, warmup):
     """Benchmark end-to-end pipeline paths."""
     import mlx_whisper
-    import mlx.core as mx
     import torch
+
     results = {}
 
     # Load all models
@@ -953,13 +999,17 @@ def bench_e2e_suite(audio, runs, warmup):
     ct2_translator = _load_ct2_marian()
 
     stt_kwargs_partial = dict(
-        path_or_hf_repo=MODEL_ID, language="en",
-        condition_on_previous_text=False, word_timestamps=False,
+        path_or_hf_repo=MODEL_ID,
+        language="en",
+        condition_on_previous_text=False,
+        word_timestamps=False,
         initial_prompt=WHISPER_PROMPT,
     )
     stt_kwargs_final = dict(
-        path_or_hf_repo=MODEL_ID, language="en",
-        condition_on_previous_text=False, word_timestamps=True,
+        path_or_hf_repo=MODEL_ID,
+        language="en",
+        condition_on_previous_text=False,
+        word_timestamps=True,
         initial_prompt=WHISPER_PROMPT,
     )
 
@@ -1010,16 +1060,14 @@ def bench_e2e_suite(audio, runs, warmup):
     for _ in range(warmup):
         r = mlx_whisper.transcribe(audio, **stt_kwargs_final)
         text = r.get("text", "").strip() or "test"
-        translate_mlx(model_a, tok_a, text,
-                      prompt_cache_template=cache_a, suffix_tokens=suffix_a)
+        translate_mlx(model_a, tok_a, text, prompt_cache_template=cache_a, suffix_tokens=suffix_a)
 
     latencies = []
     for _ in range(runs):
         t0 = time.perf_counter()
         r = mlx_whisper.transcribe(audio, **stt_kwargs_final)
         text = r.get("text", "").strip() or "test"
-        translate_mlx(model_a, tok_a, text,
-                      prompt_cache_template=cache_a, suffix_tokens=suffix_a)
+        translate_mlx(model_a, tok_a, text, prompt_cache_template=cache_a, suffix_tokens=suffix_a)
         latencies.append((time.perf_counter() - t0) * 1000)
 
     results["e2e_final_4b"] = compute_stats(latencies)
@@ -1033,8 +1081,7 @@ def bench_e2e_suite(audio, runs, warmup):
         for _ in range(warmup):
             r = mlx_whisper.transcribe(audio, **stt_kwargs_final)
             text = r.get("text", "").strip() or "test"
-            translate_mlx(model_a, tok_a, text,
-                          prompt_cache_template=cache_a, suffix_tokens=suffix_a)
+            translate_mlx(model_a, tok_a, text, prompt_cache_template=cache_a, suffix_tokens=suffix_a)
             translate_mlx(model_b, tok_b, text, draft_model=model_a, num_draft_tokens=3)
 
         latencies = []
@@ -1048,8 +1095,7 @@ def bench_e2e_suite(audio, runs, warmup):
             text = r.get("text", "").strip() or "test"
 
             t1 = time.perf_counter()
-            translate_mlx(model_a, tok_a, text,
-                          prompt_cache_template=cache_a, suffix_tokens=suffix_a)
+            translate_mlx(model_a, tok_a, text, prompt_cache_template=cache_a, suffix_tokens=suffix_a)
             t_4b = (time.perf_counter() - t1) * 1000
 
             t2 = time.perf_counter()
@@ -1083,13 +1129,16 @@ def bench_e2e_suite(audio, runs, warmup):
     results["cold_start"] = {}
     # These are already measured during loading; report from _models_loaded timing
     # We measure a fresh tokenizer.apply_chat_template + first generate as proxy
-    messages_test = [{"role": "user", "content": [
-        {"type": "text", "source_lang_code": "en", "target_lang_code": "es",
-         "text": "Hello world."}
-    ]}]
+    messages_test = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": "Hello world."}],
+        }
+    ]
     prompt = tok_a.apply_chat_template(messages_test, add_generation_prompt=True)
     t0 = time.perf_counter()
     from mlx_lm import generate
+
     generate(model_a, tok_a, prompt=prompt, max_tokens=5, verbose=False)
     results["cold_start"]["first_generate_4b_ms"] = round((time.perf_counter() - t0) * 1000, 1)
     print(f"        First generate (4B): {results['cold_start']['first_generate_4b_ms']:.1f}ms")
@@ -1101,11 +1150,12 @@ def bench_e2e_suite(audio, runs, warmup):
 #  REPORT GENERATION
 # ===================================================================
 
+
 def generate_report(all_results):
     """Generate the P7 Optimization Impact Report."""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("P7 OPTIMIZATION IMPACT REPORT")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     stt = all_results.get("stt", {})
     translate = all_results.get("translate", {})
@@ -1116,20 +1166,26 @@ def generate_report(all_results):
     e2e = all_results.get("e2e", {})
 
     # --- STT Optimizations ---
-    print(f"\nSTT Optimizations:")
+    print("\nSTT Optimizations:")
     if "stt_word_ts_on" in stt and "stt_word_ts_off" in stt:
-        print(f"  [P7-1A] word_timestamps disabled:      "
-              f"{delta_str(stt['stt_word_ts_on']['mean'], stt['stt_word_ts_off']['mean'])}")
+        print(
+            f"  [P7-1A] word_timestamps disabled:      "
+            f"{delta_str(stt['stt_word_ts_on']['mean'], stt['stt_word_ts_off']['mean'])}"
+        )
     if "stt_with_prompt" in stt and "stt_no_prompt" in stt:
-        print(f"  [P7-1E] initial_prompt overhead:        "
-              f"{delta_str(stt['stt_no_prompt']['mean'], stt['stt_with_prompt']['mean'])} "
-              f"(cost of prompt, accepted for quality)")
+        print(
+            f"  [P7-1E] initial_prompt overhead:        "
+            f"{delta_str(stt['stt_no_prompt']['mean'], stt['stt_with_prompt']['mean'])} "
+            f"(cost of prompt, accepted for quality)"
+        )
     if "stt_long_prev" in stt and "stt_short_prev" in stt:
-        print(f"  [P7-1E] Shorter prev_text (200->100):   "
-              f"{delta_str(stt['stt_long_prev']['mean'], stt['stt_short_prev']['mean'])}")
+        print(
+            f"  [P7-1E] Shorter prev_text (200->100):   "
+            f"{delta_str(stt['stt_long_prev']['mean'], stt['stt_short_prev']['mean'])}"
+        )
 
     # --- Translation Optimizations ---
-    print(f"\nTranslation Optimizations:")
+    print("\nTranslation Optimizations:")
     if "4b_no_cache" in translate and "4b_with_cache" in translate:
         for length_key in TEST_SENTENCES:
             if length_key in translate["4b_no_cache"] and length_key in translate["4b_with_cache"]:
@@ -1152,31 +1208,39 @@ def generate_report(all_results):
                 print(f"  MarianMT CT2 vs PyTorch ({length_key}):  {delta_str(pt, ct)}")
 
     # --- Infrastructure Optimizations ---
-    print(f"\nInfrastructure Optimizations:")
+    print("\nInfrastructure Optimizations:")
     if "cache_100mb" in metal and "cache_256mb" in metal:
-        print(f"  [P7-4B] Metal cache 100->256MB:         "
-              f"{delta_str(metal['cache_100mb']['mean'], metal['cache_256mb']['mean'])}")
+        print(
+            f"  [P7-4B] Metal cache 100->256MB:         "
+            f"{delta_str(metal['cache_100mb']['mean'], metal['cache_256mb']['mean'])}"
+        )
 
     if "resample_scipy" in resample and "resample_decimate" in resample:
-        print(f"  [P7-5A] decimate vs resample:           "
-              f"{delta_str(resample['resample_scipy']['mean'], resample['resample_decimate']['mean'])}")
+        print(
+            f"  [P7-5A] decimate vs resample:           "
+            f"{delta_str(resample['resample_scipy']['mean'], resample['resample_decimate']['mean'])}"
+        )
         if "quality_correlation" in resample:
             print(f"          Quality correlation:             {resample['quality_correlation']:.6f}")
 
     if "io_sync" in io_results and "io_async" in io_results:
-        print(f"  [P7-5D] Background I/O:                 "
-              f"{delta_str(io_results['io_sync']['mean'], io_results['io_async']['mean'])} "
-              f"(main thread blocking)")
+        print(
+            f"  [P7-5D] Background I/O:                 "
+            f"{delta_str(io_results['io_sync']['mean'], io_results['io_async']['mean'])} "
+            f"(main thread blocking)"
+        )
 
     if "vad_inline" in vad and "vad_threaded" in vad:
-        print(f"  [P7-5B] VAD threading (jitter):         "
-              f"{delta_str(vad['vad_inline']['stdev'], vad['vad_threaded']['stdev'])} stdev")
+        print(
+            f"  [P7-5B] VAD threading (jitter):         "
+            f"{delta_str(vad['vad_inline']['stdev'], vad['vad_threaded']['stdev'])} stdev"
+        )
 
     # --- Speculative Decoding ---
     spec_sweep = translate.get("spec_sweep", {})
     baseline_12b = translate.get("12b_no_spec", {})
     if spec_sweep and baseline_12b:
-        print(f"\nSpeculative Decoding (12B with 4B draft):")
+        print("\nSpeculative Decoding (12B with 4B draft):")
         baseline_mean = baseline_12b.get("medium", {}).get("mean", 0)
         best_ndt = None
         best_mean = float("inf")
@@ -1190,11 +1254,13 @@ def generate_report(all_results):
                     best_mean = mean
                     best_ndt = ndt
         if best_ndt is not None:
-            print(f"  Optimal: num_draft_tokens={best_ndt}           "
-                  f"{best_mean:.1f}ms  {delta_str(baseline_mean, best_mean)}")
+            print(
+                f"  Optimal: num_draft_tokens={best_ndt}           "
+                f"{best_mean:.1f}ms  {delta_str(baseline_mean, best_mean)}"
+            )
 
     # --- End-to-End Pipeline ---
-    print(f"\nEnd-to-End Pipeline:")
+    print("\nEnd-to-End Pipeline:")
     if "e2e_partial_ct2" in e2e:
         print(f"  Partial path (STT+MarianMT CT2):        {e2e['e2e_partial_ct2']['mean']:.1f}ms")
     elif "e2e_partial_pt" in e2e:
@@ -1203,18 +1269,21 @@ def generate_report(all_results):
         print(f"  Final 4B path (STT+TG 4B cached):       {e2e['e2e_final_4b']['mean']:.1f}ms")
     if "e2e_ab" in e2e and e2e["e2e_ab"] is not None:
         print(f"  A/B path (STT+4B+12B sequential):       {e2e['e2e_ab']['mean']:.1f}ms")
-        if "e2e_ab_breakdown" in e2e and e2e["e2e_ab_breakdown"]:
+        if e2e.get("e2e_ab_breakdown"):
             bd = e2e["e2e_ab_breakdown"]
-            print(f"    Breakdown: STT={bd['stt']['mean']:.0f}ms  "
-                  f"4B={bd['translate_4b']['mean']:.0f}ms  "
-                  f"12B={bd['translate_12b']['mean']:.0f}ms")
+            print(
+                f"    Breakdown: STT={bd['stt']['mean']:.0f}ms  "
+                f"4B={bd['translate_4b']['mean']:.0f}ms  "
+                f"12B={bd['translate_12b']['mean']:.0f}ms"
+            )
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
 
 
 # ===================================================================
 #  MAIN
 # ===================================================================
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -1231,22 +1300,32 @@ Examples:
   python benchmark_latency.py --runs 10 --warmup 3   # Custom run count
         """,
     )
-    parser.add_argument("--only", type=str, default=None,
-                        choices=["stt", "translate", "vad", "io", "resample",
-                                 "metal", "e2e"],
-                        help="Run only a specific benchmark category")
-    parser.add_argument("--quick", action="store_true",
-                        help="Quick mode: fewer runs for faster results")
-    parser.add_argument("--audio", type=str, default=None,
-                        help="Path to real audio file (WAV/MP3). Default: synthetic audio")
-    parser.add_argument("--duration", type=float, default=3.0,
-                        help="Duration of synthetic audio in seconds (default: 3.0)")
-    parser.add_argument("--runs", type=int, default=None,
-                        help=f"Number of measured runs (default: {DEFAULT_RUNS}, quick: {QUICK_RUNS})")
-    parser.add_argument("--warmup", type=int, default=None,
-                        help=f"Number of warmup runs (default: {DEFAULT_WARMUP}, quick: {QUICK_WARMUP})")
-    parser.add_argument("--output", type=str, default=None,
-                        help="Output JSON path (default: metrics/latency_benchmark_TIMESTAMP.json)")
+    parser.add_argument(
+        "--only",
+        type=str,
+        default=None,
+        choices=["stt", "translate", "vad", "io", "resample", "metal", "e2e"],
+        help="Run only a specific benchmark category",
+    )
+    parser.add_argument("--quick", action="store_true", help="Quick mode: fewer runs for faster results")
+    parser.add_argument(
+        "--audio", type=str, default=None, help="Path to real audio file (WAV/MP3). Default: synthetic audio"
+    )
+    parser.add_argument(
+        "--duration", type=float, default=3.0, help="Duration of synthetic audio in seconds (default: 3.0)"
+    )
+    parser.add_argument(
+        "--runs", type=int, default=None, help=f"Number of measured runs (default: {DEFAULT_RUNS}, quick: {QUICK_RUNS})"
+    )
+    parser.add_argument(
+        "--warmup",
+        type=int,
+        default=None,
+        help=f"Number of warmup runs (default: {DEFAULT_WARMUP}, quick: {QUICK_WARMUP})",
+    )
+    parser.add_argument(
+        "--output", type=str, default=None, help="Output JSON path (default: metrics/latency_benchmark_TIMESTAMP.json)"
+    )
     args = parser.parse_args()
 
     # Resolve run counts
@@ -1287,51 +1366,51 @@ Examples:
 
     # --- STT ---
     if run_all or args.only == "stt":
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print("STT BENCHMARKS")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         all_results["stt"] = bench_stt_suite(audio, n_runs, n_warmup)
 
     # --- Metal Cache ---
     if run_all or args.only == "metal":
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print("METAL CACHE BENCHMARKS")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         all_results["metal_cache"] = bench_metal_cache(audio, n_runs, n_warmup)
 
     # --- Translation ---
     if run_all or args.only == "translate":
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print("TRANSLATION BENCHMARKS")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         all_results["translate"] = bench_translate_suite(n_runs, n_warmup)
 
     # --- VAD ---
     if run_all or args.only == "vad":
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print("VAD BENCHMARKS")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         all_results["vad"] = bench_vad_suite(n_runs, n_warmup)
 
     # --- I/O ---
     if run_all or args.only == "io":
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print("I/O BENCHMARKS")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         all_results["io"] = bench_io_suite(n_runs, n_warmup)
 
     # --- Resampling ---
     if run_all or args.only == "resample":
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print("RESAMPLING BENCHMARKS")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         all_results["resample"] = bench_resample_suite(n_runs, n_warmup)
 
     # --- End-to-End ---
     if run_all or args.only == "e2e":
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print("END-TO-END PIPELINE BENCHMARKS")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         all_results["e2e"] = bench_e2e_suite(audio, n_runs, n_warmup)
 
     # --- Report ---

@@ -1,0 +1,37 @@
+display-files:
+  - changed-files:
+      - any-glob-to-any-file: "displays/**"
+
+pipeline:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "dry_run_ab.py"
+          - "settings.py"
+          - "setup_models.py"
+
+engines:
+  - changed-files:
+      - any-glob-to-any-file: "engines/**"
+
+training:
+  - changed-files:
+      - any-glob-to-any-file: "training/**"
+
+tools:
+  - changed-files:
+      - any-glob-to-any-file: "tools/**"
+
+features:
+  - changed-files:
+      - any-glob-to-any-file: "features/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: "requirements*.txt"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+          - "pyproject.toml"
+          - ".pre-commit-config.yaml"

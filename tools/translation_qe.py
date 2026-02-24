@@ -22,17 +22,15 @@ import json
 import os
 import re
 import sys
-import time
-from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Tier 1: Lightweight checks (no model downloads)
 # ---------------------------------------------------------------------------
 
 _EN_STOPWORDS = re.compile(
-    r'\b(the|and|of|that|have|for|not|with|you|this|but|his|from|they|'
-    r'been|said|each|which|their|will|other|about|many|then|them|these|'
-    r'would|could|should|because|into|after|before|between|under|through)\b',
+    r"\b(the|and|of|that|have|for|not|with|you|this|but|his|from|they|"
+    r"been|said|each|which|their|will|other|about|many|then|them|these|"
+    r"would|could|should|because|into|after|before|between|under|through)\b",
     re.IGNORECASE,
 )
 
@@ -89,18 +87,18 @@ def _load_backtranslation():
     if _backtranslation_model is not None:
         return
     from transformers import MarianMTModel, MarianTokenizer
+
     model_id = "Helsinki-NLP/opus-mt-es-en"
     print(f"  Loading {model_id} for back-translation...")
     _backtranslation_tokenizer = MarianTokenizer.from_pretrained(model_id)
     _backtranslation_model = MarianMTModel.from_pretrained(model_id)
-    print(f"  MarianMT ready")
+    print("  MarianMT ready")
 
 
 def backtranslate(spanish_text):
     """Translate Spanish back to English using MarianMT."""
     _load_backtranslation()
-    inputs = _backtranslation_tokenizer(spanish_text, return_tensors="pt",
-                                         truncation=True, max_length=512)
+    inputs = _backtranslation_tokenizer(spanish_text, return_tensors="pt", truncation=True, max_length=512)
     outputs = _backtranslation_model.generate(**inputs, max_new_tokens=256)
     return _backtranslation_tokenizer.decode(outputs[0], skip_special_tokens=True)
 
@@ -136,6 +134,7 @@ def _load_labse():
     if _labse_model is not None:
         return
     from sentence_transformers import SentenceTransformer
+
     print("  Loading LaBSE for cross-lingual similarity...")
     _labse_model = SentenceTransformer("sentence-transformers/LaBSE")
     print("  LaBSE ready")
@@ -145,15 +144,18 @@ def tier3_labse(source, translation):
     """LaBSE cross-lingual cosine similarity."""
     _load_labse()
     import numpy as np
+
     embeddings = _labse_model.encode([source, translation])
-    cos_sim = float(np.dot(embeddings[0], embeddings[1]) /
-                    (np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1])))
+    cos_sim = float(
+        np.dot(embeddings[0], embeddings[1]) / (np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1]))
+    )
     return {"labse_similarity": round(cos_sim, 3)}
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def process_csv(csv_path, tiers, output_path):
     """Process a CSV file and run QE on all rows."""
@@ -200,7 +202,7 @@ def process_csv(csv_path, tiers, output_path):
         results.append(entry)
 
         if (i + 1) % 10 == 0:
-            print(f"  {i+1}/{len(rows)} processed")
+            print(f"  {i + 1}/{len(rows)} processed")
 
     # Write output
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
@@ -218,7 +220,8 @@ def process_csv(csv_path, tiers, output_path):
                     t1_scores.append(r[key]["tier1"])
         if t1_scores:
             import numpy as np
-            print(f"\nTier 1 QE summary:")
+
+            print("\nTier 1 QE summary:")
             print(f"  Mean: {np.mean(t1_scores):.3f}")
             print(f"  Median: {np.median(t1_scores):.3f}")
             print(f"  Min: {np.min(t1_scores):.3f}")
@@ -227,15 +230,19 @@ def process_csv(csv_path, tiers, output_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Offline translation quality estimation on A/B test CSV"
-    )
+    parser = argparse.ArgumentParser(description="Offline translation quality estimation on A/B test CSV")
     parser.add_argument("csv_files", nargs="+", help="CSV file(s) from dry_run_ab.py")
-    parser.add_argument("--output", "-o", default="metrics/translation_qe.jsonl",
-                        help="Output JSONL path (default: metrics/translation_qe.jsonl)")
-    parser.add_argument("--tiers", default="1",
-                        help="Comma-separated tier numbers to run (default: 1). "
-                             "1=lightweight, 2=back-translation, 3=LaBSE")
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="metrics/translation_qe.jsonl",
+        help="Output JSONL path (default: metrics/translation_qe.jsonl)",
+    )
+    parser.add_argument(
+        "--tiers",
+        default="1",
+        help="Comma-separated tier numbers to run (default: 1). 1=lightweight, 2=back-translation, 3=LaBSE",
+    )
     args = parser.parse_args()
 
     tiers = set(int(t.strip()) for t in args.tiers.split(","))

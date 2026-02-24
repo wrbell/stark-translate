@@ -1,0 +1,51 @@
+# requirements-nvidia.txt — NVIDIA/CUDA Inference Environment
+# This is for NVIDIA GPU inference machines (e.g., Jetson, desktop with RTX).
+# For WSL/Windows training, see requirements-windows.txt instead.
+#
+# Install: pip install -r requirements-nvidia.txt
+#
+# PyTorch must be installed separately FIRST with CUDA:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# STT
+faster-whisper                        # CTranslate2 Whisper with confidence scores
+
+# Translation / LLM
+transformers>=4.45
+accelerate>=0.34
+bitsandbytes>=0.44                    # 4-bit quantization for inference
+sentencepiece
+protobuf
+
+# Audio
+sounddevice==0.5.5
+pyaudio                               # Alternative audio I/O (PortAudio-based)
+silero-vad>=6.2.0
+
+# TTS
+piper-tts                             # Piper TTS inference (ONNX-based, lightweight)
+
+# Config / Logging
+pydantic-settings                     # Settings management via pydantic
+loguru                                # Structured logging
+
+# Networking
+websockets>=16.0
+
+# Evaluation
+jiwer>=3.0.0
+
+# Utilities
+numpy
+scipy
+psutil
+tqdm
+packaging
+requests
+safetensors
+huggingface_hub
+tokenizers
+regex
+PyYAML
+filelock
+typing_extensions

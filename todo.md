@@ -282,6 +282,161 @@
 
 ---
 
+## Phase T — Whisper Large-V3-Turbo + Unified Dual-Prod Pipeline (~10-12 working days)
+
+> **Goal:** Migrate from Distil-large-v3 to Whisper Large-V3-Turbo (OpenAI's pruned variant:
+> 32→4 decoder layers, ~809M params, MIT license) for 5-8x faster STT on Apple Silicon.
+> Build unified engine abstraction for Mac (MLX) + RTX 2070 (faster-whisper INT8).
+>
+> **Risks:** Turbo WER regression ~0.2-2% on long-form sermons (mitigated by LoRA re-tune +
+> active-learning). Chunking artifacts on long sermons. 2070 VRAM tight (Turbo INT8 ~1.5-2.5 GB
+> + Gemma Q4 ~3.2 GB). Hallucination filter (compression_ratio >2.4) stays in place.
+
+### T1. Preparation & Mac Turbo Partials First (Days 1-2)
+
+- [x] **Create feature branch** — `git checkout -b feature/turbo-dual-prod-v2`
+- [x] **Update requirements files**
+  - `requirements-mac.txt`: add `mlx-whisper` (latest) + `mlx-community/whisper-large-v3-turbo-4bit`
+  - `requirements-nvidia.txt`: add `faster-whisper`, `pydantic-settings`, `loguru`
+- [x] **Migrate Mac to Turbo (MLX)** — wholesale swap (both partials AND finals) in `dry_run_ab.py`
+  - Use `mlx-community/whisper-large-v3-turbo-4bit`, beam_size=5, word_timestamps=True
+  - Keep theological initial_prompt + condition_on_previous_text=True
+  - Expected: ~300-380ms partials → **<150-200ms** (5-8x on M3 due to Metal kernels)
+  - Memory: ~1.1-1.6 GB (4-bit) vs ~1.5-2 GB current → frees memory for Gemma
+  - Rollback: 1-line config revert to old model
+- [ ] **Test Turbo partials on sermon clips** — 5-10 clips from `stark_data/`
+  - Compare WER and hallucination rates vs current Distil-large-v3
+  - Monitor via `live_caption_monitor.py`
+  - Expected: ~0.2-1% WER regression on clean, up to ~1-2% on noisy/church-domain
+
+### T2. Engines Package & Factory (Days 2-3)
+
+- [x] **Create `engines/` package** with base classes and factory pattern
+  - `base.py`: Turbo-specific defaults (chunk_length_s=30, chunked algo for long sermons)
+  - Factory: Load Turbo model names by default (override via config for old Distil)
+  - Abstract STT interface so Mac (MLX) and Windows (faster-whisper) share common API
+
+### T3. Full Turbo STT + Fine-Tune & Export (Days 4-6, A2000 focus)
+
+- [x] **Update training pipeline for Turbo** — `training/train_whisper.py`
+  - Change base to `openai/whisper-large-v3-turbo` (or `Systran/faster-whisper-large-v3-turbo`)
+  - Keep accent-balanced sampling, theological prompt, pseudo-labeling
+  - Expected re-tune: ~4-8 hrs on A2000 (smaller model = faster)
+- [ ] **Fine-tune Turbo on church sermon audio**
+  - Target <1% WER delta vs current Distil on church sermons
+  - Test sequential vs chunked modes for long-form stability
+  - Glossary + prior-context injection critical for lighter 4-layer decoder
+- [x] **Create dual-endpoint model export script** — `tools/convert_models_to_both.py --whisper`
+  - Mac: 4-bit MLX via mlx_lm tools → `mlx-community/whisper-large-v3-turbo-4bit`
+  - 2070: `ct2-transformers-converter --quantization int8` → `whisper-turbo-ct2/`
+  - Validate: Mac ~80-150ms full chunk; 2070 INT8 ~19-22s for 60-90s audio
+- [x] **Implement Turbo fallback logic** in engines `base.py`
+  - avg_logprob < -1.2 or compression_ratio >2.4 → retry with old Distil/large-v3 (lazy load)
+  - Log divergence to active-learning JSONL for next re-tune cycle
+
+### T4. 2070 Gemma Path + Benchmarks (Days 7-8)
+
+- [ ] **Convert Gemma LoRAs to GGUF Q4_K_M** for llama.cpp on Windows
+- [ ] **Test full pipeline on RTX 2070** — end-to-end Turbo STT + Gemma translation
+  - Target: 1.3-2.0s finals with overlap
+  - VRAM: Turbo INT8 ~1.5-2.5 GB + Gemma Q4 ~3.2 GB (monitor nvidia-smi)
+  - Update `docs/rtx2070_feasibility.md` with Turbo numbers
+
+### T5. Unified Config, Logging, Fallbacks (Day 9)
+
+- [x] **Build `settings.py` with pydantic-settings** — Turbo-specific flags
+  - `use_chunked_algo: bool`, `fallback_on_low_conf: bool`, model paths, endpoint selection
+  - STARK_ env prefix, nested config, .env support
+- [ ] **Integrate loguru logging** — tag entries with "turbo" + endpoint + chunk_duration
+
+### T6. Deployment Packaging (Days 10-11)
+
+- [ ] **Create `run_live.py`** — unified entrypoint, default to Turbo on both endpoints
+  - Operator-friendly CLI, status indicators, graceful error handling
+  - Installers/docs mentioning Turbo speed gains + fallback behavior
+
+### T7. Testing, Regression, Docs & Release (Days 11-12)
+
+- [ ] **Benchmark suite: Turbo vs old STT on 50 clips** — focus long sermons
+  - Chunked vs sequential modes, latency on both Mac and 2070
+  - Memory usage profiles
+- [ ] **Theological term audit post-Turbo** — glossary 229 terms
+  - Verify initial_prompt conditioning still effective with 4-layer decoder
+  - Compare against Distil-large-v3 baseline on same segments
+- [ ] **Write Turbo migration docs** — `docs/fast_stt_options.md` + `docs/system_architecture.md`
+  - Architecture (32→4 decoder layers, ~809M params, MIT license)
+  - Benchmarks, fallback behavior, chunked vs sequential, VRAM budgets
+- [ ] **Tag release** with Turbo migration notes
+
+---
+
+## Phase G — Inference Dual-Target: Mac + RTX 2070 (~6-10 hours)
+
+> **Goal:** Make the live pipeline runnable on **two production endpoints**: a mid-tier MacBook
+> M-series (M2 base, M3 non-Pro, 8-16 GB unified — MLX) and the RTX 2070 Windows machine
+> (8 GB VRAM — CUDA/faster-whisper). Single codebase, backend auto-detection.
+>
+> **Outcome:** `--backend=auto` picks MLX on Mac, CUDA on Windows. `--no-ab` skips 12B for
+> low-VRAM devices. Same displays, same WebSocket protocol, same operator experience.
+
+### G1. Preparation & Minimal Patches (1-2 hours)
+
+- [x] **Create branch** — combined into `feature/turbo-dual-prod-v2`
+- [x] **Create `requirements-nvidia.txt`** — duplicate `requirements-mac.txt`, remove MLX packages, add:
+  - `torch --index-url https://download.pytorch.org/whl/cu121`
+  - `transformers accelerate bitsandbytes faster-whisper sounddevice pyaudio websockets`
+- [x] **Add backend selection to `dry_run_ab.py`**
+  - Import guards: `try: import mlx_lm, mlx_whisper; MLX_AVAILABLE = True except ImportError: MLX_AVAILABLE = False`
+  - CLI flag: `--backend` choices=["auto", "mlx", "cuda"], default="auto"
+  - Auto logic: use MLX if available, else CUDA
+  - Wrap MLX model loads/inference in `if backend == "mlx"` blocks
+- [x] **Add CUDA fallback paths**
+  - STT: faster-whisper (CUDA) or transformers pipeline `"automatic-speech-recognition"` on device=0
+  - Translation finals: transformers MarianMT on device=0, OR bitsandbytes 4-bit Gemma-4B if VRAM allows (`load_in_4bit=True, device_map="cuda"`)
+  - Partials: keep MarianMT via transformers (already PyTorch)
+- [x] **Add `--no-ab` and `--low-vram` flags** — skip 12B on low-VRAM devices
+
+### G2. Model Loading & Compatibility (2-4 hours)
+
+- [x] **Implement CUDA Gemma 4B loading** via transformers + bitsandbytes
+  - `AutoModelForCausalLM.from_pretrained(..., load_in_4bit=True, torch_dtype=torch.bfloat16, device_map="cuda")`
+  - Add generate wrapper to mimic `mlx_lm.generate` signature (prompt, max_tokens, etc.)
+  - EOS fix applied (add `<end_of_turn>` to tokenizer._eos_token_ids)
+  - MarianMT fallback already works (PyTorch)
+- [x] **Add `--dry-run-text` flag** for testing without mic
+  - `python dry_run_ab.py --backend=cuda --no-ab --dry-run-text "Test sentence for translation"`
+  - Verify output without crashing on both 2070 and mid-tier Mac
+- [x] **Add `--low-vram` flag** — auto-forces `--no-ab`, Marian-only translation if needed
+
+### G3. Server & Display Compatibility (1 hour)
+
+- [ ] **Confirm cross-platform servers** — HTTP/WebSocket (Flask/websockets) are pure Python, already cross-platform
+- [ ] **Test display HTML on Windows** — `start displays\audience_display.html`
+- [ ] **Verify LAN access** from phones: `http://<windows-ip>:8080/displays/mobile_display.html`
+- [ ] **Test on mid-tier MacBook** — validate second prod endpoint (M2/M3 non-Pro, 8-16 GB)
+
+### G4. Packaging & Documentation (1-2 hours)
+
+- [ ] **Add README section** — "Inference-only on Non-Apple Hardware (RTX 2070 / CUDA)"
+  - Hardware reqs: RTX 2070 8 GB VRAM, Windows + CUDA 12.x
+  - Setup: create venv, `pip install -r requirements-nvidia.txt`
+  - Run: `python dry_run_ab.py --backend=cuda --no-ab`
+  - Limitations: Gemma 12B unsupported, expect higher latency than MLX
+- [ ] **Create launch scripts**
+  - `run_mac.sh`: `source stt_env/bin/activate && python dry_run_ab.py --backend=mlx "$@"`
+  - `run_nvidia.bat`: `call stt_env_nvidia\Scripts\activate.bat && python dry_run_ab.py --backend=cuda --no-ab %*`
+- [ ] **Add note in README** — Mac = optimal (MLX speed & efficiency); mid-tier MacBook = second prod (MLX, --no-ab); RTX 2070 = functional CUDA fallback
+
+### G5. Validation Runs (30-60 min)
+
+- [ ] **Mac (M3 Pro, 18 GB)** — `python dry_run_ab.py --backend=mlx --ab` → full A/B experience
+- [ ] **Mid-tier MacBook (M2/M3, 8-16 GB)** — `python dry_run_ab.py --backend=mlx --no-ab` → 4B-only
+- [ ] **RTX 2070 Windows** — `python dry_run_ab.py --backend=cuda --no-ab` → basic 4B/Marian mode
+- [ ] **Cross-machine comparison** — speak same test phrase, compare output on all endpoints (audience + mobile display)
+- [ ] **Merge to main** if stable
+
+---
+
 ## Phase D — Accent-Diverse STT Tuning (Code Complete, Data Pending)
 
 > **Code implemented:** `download_sermons.py --accent`, `preprocess_audio.py` accent propagation,
@@ -371,6 +526,61 @@
 
 ---
 
+## Phase F — Piper TTS Multi-Language Audio Output (~2-3 months)
+
+> **Goal:** Add fine-tuned, multi-language text-to-speech using Piper (rhasspy/piper, ONNX runtime,
+> MIT license) for simultaneous audio output to separate channels/hardware. Attendees select their
+> language via AudioFetch app on their phone → hear real-time TTS in their language.
+>
+> **Priority order:** English → Spanish (most immediate need) → Hindi → Chinese.
+> **Hardware target:** RTX 2070 endpoint for inference; A2000 Ada for training.
+
+### F1. Data & Dataset Preparation (1-2 weeks)
+
+95. [ ] **Extend `download_sermons.py` for TTS data** — fetch 10-20 hrs church sermons/Bible readings per target lang (EN, ES, HI, ZH) via yt-dlp; focus on clear single-speaker audio
+96. [ ] **Update `preprocess_audio.py` for Piper** — 16-22 kHz normalize, silence trimming, accent balance; output format compatible with Piper training
+97. [x] **Create `training/prepare_piper_dataset.py`** — convert stark_data WAVs + corrected transcripts → LJSpeech format (wav/ + metadata.csv); reuse Whisper pseudo-labeling + theological glossary for text accuracy
+98. [ ] **Build initial datasets** — English first (existing live_sessions), then ES/HI/ZH parallels
+
+### F2. Fine-Tuning Piper Voices (2-4 weeks per language)
+
+99. [x] **Create `training/train_piper.py`**
+    - Use rhasspy/piper TRAINING.md as base (preprocess → train → export)
+    - Fine-tune from high/medium checkpoints:
+      - `en_US-lessac-high`, `es_ES-carlfm-high`, `hi_IN-kusal-medium`, `zh_CN-huayan-medium`
+    - Flags: `--lang en|es|hi|zh`, batch 16-32, epochs 2000-4000, resume_from_checkpoint
+    - Monitor: tensorboard loss + sample generation every 50 epochs (test Bible verses)
+    - Train English custom voice first → test domain fit (preaching pace, emphasis)
+100. [x] **Create `training/export_piper_onnx.py`** — export best .ckpt → .onnx + .json; optimize with onnx-simplifier
+101. [x] **Create `training/evaluate_piper.py`** — WER/prosody checks + subjective church-term listening tests (CSV log like translation QE); test theological term pronunciation
+
+### F3. Inference & Multi-Channel Integration (1-2 weeks)
+
+102. [ ] **Extend `setup_models.py`** — download base Piper voices + place custom .onnx files
+103. [ ] **Integrate Piper TTS into `dry_run_ab.py`**
+     - Pre-load PiperVoice dict per lang at startup
+     - On final multi-lang texts: concurrent synthesis via ThreadPoolExecutor
+     - Route playback: use sounddevice to specific devices/USB outputs (device_map dict)
+     - Add toggle flags: `--tts-enabled`, `--tts-voice custom|stock`, `--multi-channel`
+104. [ ] **Test concurrent synthesis** — EN + ES + HI + ZH → separate channels; verify no cross-talk, sync <200ms added latency
+
+### F4. Hardware Routing & AudioFetch (1 week)
+
+105. [ ] **Acquire/test hardware** — USB audio adapters or multi-channel interface for separate outputs
+106. [ ] **Connect RTX 2070 → AudioFetch** — Express/Signature inputs (line-in per channel)
+     - Route: original mic → main PA/Channel 1; TTS ES → Channel 2; HI → Channel 3; ZH → Channel 4
+107. [ ] **Update displays** — QR to AudioFetch app + channel selector instructions in mobile/audience displays
+108. [ ] **Fallback** — Virtual cables (Voicemeeter/VB-Cable) for testing without hardware
+
+### F5. Testing, Docs & Rollout (Ongoing)
+
+109. [ ] **End-to-end live test** — full pipeline + multi-lang audio sync in church setting
+110. [ ] **Write TTS docs** — `docs/piper_tts_integration.md`, `docs/multi_channel_routing.md`; update `training_plan.md` and `roadmap.md`
+111. [ ] **Diagnostics** — log TTS latency/confidence per utterance (extend JSONL)
+112. [ ] **Iterate** — collect feedback → more fine-tuning hours if needed
+
+---
+
 ## Future (P6)
 
 - [ ] **RTX 2070 edge deployment** — see `docs/roadmap.md` Phase 3
@@ -393,7 +603,7 @@ Post Phase 1+2+6C budget (measured):
 | 6A | Streaming translation display | 300-500ms perceived | TODO | Phase B |
 | 6B | Adaptive model selection | 200-400ms on simple | TODO | Phase B |
 | 6D | Batch short utterances | ~100-200ms amortized | TODO | Phase B |
-| 1B | whisper-large-v3-turbo | ~50-100ms STT | TODO | Phase B |
+| 1B | whisper-large-v3-turbo | ~150-200ms STT | DONE | **Phase T** (wholesale swap) |
 | 2D | Smaller translation models | varies | TODO | Phase C |
 | 2A | Speculative decoding | — | DEFERRED | benchmarked 18-90% slower on M3 Pro |
 
@@ -407,10 +617,20 @@ Post Phase 1+2+6C budget (measured):
 ## Architecture Reference
 
 ```
-Mac Inference (MLX) — Two-Pass Architecture:
-  Mic → Silero VAD (threaded) → [Partial: mlx-whisper + MarianMT (~480ms, italic)]
-                               → [Final: mlx-whisper + TranslateGemma 4B (~650ms, regular)]
-                               → WebSocket → Browser (displays/)
+Mac Inference (MLX) — Two-Pass Architecture via engines/ package:
+  Mic → Silero VAD (inline) → engines/mlx_engine.py
+    → [Partial: mlx-whisper Turbo + MarianMT PyTorch (~480ms, italic)]
+    → [Final:   mlx-whisper Turbo + TranslateGemma 4B (~650ms, regular)]
+    → WebSocket → Browser (displays/)
+
+CUDA Inference (RTX 2070 / NVIDIA) — via engines/ package:
+  Mic → Silero VAD (inline) → engines/cuda_engine.py
+    → [Partial: faster-whisper Turbo INT8 + MarianMT PyTorch]
+    → [Final:   faster-whisper Turbo INT8 + Gemma 4B bitsandbytes 4-bit]
+    → WebSocket → Browser (displays/)
+
+  Backend selection: --backend auto|mlx|cuda (auto-detected via engines/factory.py)
+  Flags: --no-ab (skip 12B), --low-vram, --dry-run-text
 
   Optimizations: prompt caching, model pre-warming, background I/O,
                  fast resampling, pipeline overlap (6C)
@@ -425,10 +645,10 @@ Windows Training (CUDA):
 
 | Component | Model | Framework | Memory |
 |-----------|-------|-----------|--------|
-| VAD | Silero VAD | PyTorch (threaded) | ~2 MB |
-| STT | distil-whisper-large-v3 | mlx-whisper | ~1.5 GB |
-| Translate (fast) | MarianMT opus-mt-en-es | CT2 int8 | ~76 MB |
-| Translate A | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB |
+| VAD | Silero VAD | PyTorch (inline) | ~2 MB |
+| STT | whisper-large-v3-turbo | mlx-whisper (Mac) / faster-whisper (CUDA) | ~1.1-1.6 GB (4-bit MLX) |
+| Translate (fast) | MarianMT opus-mt-en-es | PyTorch | ~298 MB |
+| Translate A | TranslateGemma 4B 4-bit | mlx-lm (Mac) / bitsandbytes (CUDA) | ~2.5 GB |
 | Translate B | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB |
-| **Total (4B only)** | | | **~4.3 GB / 18 GB** |
-| **Total (A/B)** | | | **~11.3 GB / 18 GB** |
+| **Total (4B only)** | | | **~4.0 GB / 18 GB** |
+| **Total (A/B)** | | | **~11.0 GB / 18 GB** |

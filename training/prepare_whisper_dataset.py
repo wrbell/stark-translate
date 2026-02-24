@@ -28,7 +28,6 @@ import argparse
 import csv
 import json
 import logging
-import os
 import shutil
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -82,9 +81,9 @@ def load_transcripts(transcripts_dir, chunks_dir):
 
     for json_path in json_files:
         try:
-            with open(json_path, "r", encoding="utf-8") as f:
+            with open(json_path, encoding="utf-8") as f:
                 transcript = json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Skipping {json_path.name}: {e}")
             continue
 
@@ -123,12 +122,9 @@ def load_transcripts(transcripts_dir, chunks_dir):
         segments = transcript.get("segments", [])
         seg_meta = {}
         if segments and isinstance(segments[0], dict):
-            avg_logprobs = [s.get("avg_logprob", 0) for s in segments
-                           if "avg_logprob" in s]
-            compression_ratios = [s.get("compression_ratio", 0) for s in segments
-                                  if "compression_ratio" in s]
-            no_speech_probs = [s.get("no_speech_prob", 0) for s in segments
-                               if "no_speech_prob" in s]
+            avg_logprobs = [s.get("avg_logprob", 0) for s in segments if "avg_logprob" in s]
+            compression_ratios = [s.get("compression_ratio", 0) for s in segments if "compression_ratio" in s]
+            no_speech_probs = [s.get("no_speech_prob", 0) for s in segments if "no_speech_prob" in s]
             if avg_logprobs:
                 seg_meta["avg_logprob"] = np.mean(avg_logprobs)
             if compression_ratios:
@@ -136,12 +132,14 @@ def load_transcripts(transcripts_dir, chunks_dir):
             if no_speech_probs:
                 seg_meta["max_no_speech_prob"] = max(no_speech_probs)
 
-        entries.append({
-            "audio_path": str(audio_path.resolve()),
-            "text": text,
-            "accent": accent,
-            "segments_meta": seg_meta,
-        })
+        entries.append(
+            {
+                "audio_path": str(audio_path.resolve()),
+                "text": text,
+                "accent": accent,
+                "segments_meta": seg_meta,
+            }
+        )
 
     return entries
 
@@ -208,7 +206,7 @@ def balance_accents(entries, temperature=0.5, seed=42):
 
     logger.info("Accent distribution before balancing:")
     for accent, count in sorted(counts.items()):
-        logger.info(f"  {accent}: {count} ({count/total:.1%})")
+        logger.info(f"  {accent}: {count} ({count / total:.1%})")
 
     if len(counts) <= 1:
         logger.info("Only one accent present, skipping balancing")
@@ -220,8 +218,7 @@ def balance_accents(entries, temperature=0.5, seed=42):
     target_fractions = {accent: w / weight_sum for accent, w in raw_weights.items()}
 
     # Target total size = original total size
-    target_counts = {accent: max(1, int(total * frac))
-                     for accent, frac in target_fractions.items()}
+    target_counts = {accent: max(1, int(total * frac)) for accent, frac in target_fractions.items()}
 
     balanced = []
     for accent, target in target_counts.items():
@@ -245,7 +242,7 @@ def balance_accents(entries, temperature=0.5, seed=42):
     logger.info("Accent distribution after balancing:")
     for accent in sorted(new_counts):
         count = new_counts[accent]
-        logger.info(f"  {accent}: {count} ({count/new_total:.1%})")
+        logger.info(f"  {accent}: {count} ({count / new_total:.1%})")
 
     return balanced
 
@@ -316,11 +313,13 @@ def write_audiofolder(entries, output_dir, copy_files=False):
         # Relative path from output_dir for metadata.csv
         rel_path = dest.relative_to(output_path)
 
-        metadata_rows.append({
-            "file_name": str(rel_path),
-            "transcription": entry["text"],
-            "accent": accent,
-        })
+        metadata_rows.append(
+            {
+                "file_name": str(rel_path),
+                "transcription": entry["text"],
+                "accent": accent,
+            }
+        )
 
     # Write metadata.csv
     csv_path = output_path / "metadata.csv"
@@ -333,27 +332,32 @@ def write_audiofolder(entries, output_dir, copy_files=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Build accent-balanced Whisper training dataset from transcripts"
+    parser = argparse.ArgumentParser(description="Build accent-balanced Whisper training dataset from transcripts")
+    parser.add_argument(
+        "--chunks-dir",
+        default="stark_data/cleaned/chunks",
+        help="Directory containing cleaned audio chunks (with accent subdirs)",
     )
-    parser.add_argument("--chunks-dir", default="stark_data/cleaned/chunks",
-                        help="Directory containing cleaned audio chunks (with accent subdirs)")
-    parser.add_argument("--transcripts-dir", default="stark_data/transcripts",
-                        help="Directory containing transcript JSONs")
-    parser.add_argument("--output", "-o", default="stark_data/whisper_dataset",
-                        help="Output directory for audiofolder dataset")
-    parser.add_argument("--temperature", "-t", type=float, default=0.5,
-                        help="Temperature for accent balancing (0→uniform, 1→proportional, default: 0.5)")
-    parser.add_argument("--eval-ratio", type=float, default=0.05,
-                        help="Fraction of data for evaluation split (default: 0.05)")
-    parser.add_argument("--no-balance", action="store_true",
-                        help="Skip accent balancing (use raw distribution)")
-    parser.add_argument("--no-filter", action="store_true",
-                        help="Skip confidence-based filtering")
-    parser.add_argument("--copy", action="store_true",
-                        help="Copy WAV files instead of symlinking")
-    parser.add_argument("--seed", type=int, default=42,
-                        help="Random seed for reproducibility")
+    parser.add_argument(
+        "--transcripts-dir", default="stark_data/transcripts", help="Directory containing transcript JSONs"
+    )
+    parser.add_argument(
+        "--output", "-o", default="stark_data/whisper_dataset", help="Output directory for audiofolder dataset"
+    )
+    parser.add_argument(
+        "--temperature",
+        "-t",
+        type=float,
+        default=0.5,
+        help="Temperature for accent balancing (0→uniform, 1→proportional, default: 0.5)",
+    )
+    parser.add_argument(
+        "--eval-ratio", type=float, default=0.05, help="Fraction of data for evaluation split (default: 0.05)"
+    )
+    parser.add_argument("--no-balance", action="store_true", help="Skip accent balancing (use raw distribution)")
+    parser.add_argument("--no-filter", action="store_true", help="Skip confidence-based filtering")
+    parser.add_argument("--copy", action="store_true", help="Copy WAV files instead of symlinking")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     args = parser.parse_args()
 
     # Resolve paths relative to project root
@@ -391,9 +395,7 @@ def main():
 
     # Step 4: Stratified train/eval split
     logger.info(f"Creating train/eval split (eval_ratio={args.eval_ratio})...")
-    train_entries, eval_entries = stratified_split(
-        entries, eval_ratio=args.eval_ratio, seed=args.seed
-    )
+    train_entries, eval_entries = stratified_split(entries, eval_ratio=args.eval_ratio, seed=args.seed)
     logger.info(f"Train: {len(train_entries)}, Eval: {len(eval_entries)}")
 
     # Step 5: Write audiofolder format

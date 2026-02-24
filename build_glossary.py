@@ -17,7 +17,6 @@ import argparse
 import json
 import os
 
-
 # ---------------------------------------------------------------------------
 # Core Glossary (~65 terms — extend to 200-500 as needed)
 # ---------------------------------------------------------------------------
@@ -44,7 +43,6 @@ THEOLOGICAL_GLOSSARY = {
     "substitutionary atonement": "expiación sustitutoria",
     "born again": "nacido de nuevo",
     "new creation": "nueva creación",
-
     # ─── Theology proper ───
     "righteousness": "justicia",
     "holiness": "santidad",
@@ -77,13 +75,12 @@ THEOLOGICAL_GLOSSARY = {
     "the cross": "la cruz",
     "crucifixion": "crucifixión",
     "blood of Christ": "sangre de Cristo",
-
     # ─── Ecclesiology & worship ───
-    "covenant": "pacto",               # Protestant convention (vs. "alianza" Catholic)
+    "covenant": "pacto",  # Protestant convention (vs. "alianza" Catholic)
     "congregation": "congregación",
     "fellowship": "comunión",
     "baptism": "bautismo",
-    "communion": "comunión",           # Also "Lord's Supper" = "Cena del Señor"
+    "communion": "comunión",  # Also "Lord's Supper" = "Cena del Señor"
     "Lord's Supper": "Cena del Señor",
     "breaking of bread": "partimiento del pan",
     "tithe": "diezmo",
@@ -118,7 +115,6 @@ THEOLOGICAL_GLOSSARY = {
     "Pharisee": "fariseo",
     "Sadducee": "saduceo",
     "scribe": "escriba",
-
     # ─── Liturgical & worship terms ───
     "benediction": "bendición",
     "doxology": "doxología",
@@ -127,7 +123,6 @@ THEOLOGICAL_GLOSSARY = {
     "hosanna": "hosanna",
     "invocation": "invocación",
     "supplication": "súplica",
-    "intercession": "intercesión",
     "thanksgiving": "acción de gracias",
     "confession": "confesión",
     "absolution": "absolución",
@@ -135,7 +130,6 @@ THEOLOGICAL_GLOSSARY = {
     "ordination": "ordenación",
     "laying on of hands": "imposición de manos",
     "anointing": "unción",
-
     # ─── Common sermon phrases ───
     "let us pray": "oremos",
     "the Word of the Lord": "la Palabra del Señor",
@@ -152,7 +146,6 @@ THEOLOGICAL_GLOSSARY = {
     "good news": "buenas nuevas",
     "great commission": "gran comisión",
     "the Lord's prayer": "el Padrenuestro",
-
     # ─── Eschatology ───
     "rapture": "arrebatamiento",
     "tribulation": "tribulación",
@@ -166,7 +159,6 @@ THEOLOGICAL_GLOSSARY = {
     "lake of fire": "lago de fuego",
     "Antichrist": "anticristo",
     "abomination of desolation": "abominación desoladora",
-
     # ─── Bible book names (66 books, EN → ES) ───
     # Old Testament
     "Genesis": "Génesis",
@@ -236,7 +228,6 @@ THEOLOGICAL_GLOSSARY = {
     "3 John": "3 Juan",
     "Jude": "Judas",
     "Revelation": "Apocalipsis",
-
     # ─── Proper names (EN → ES Bible convention) ───
     "James (apostle)": "Jacobo",
     "James (epistle)": "Santiago",
@@ -277,6 +268,7 @@ THEOLOGICAL_GLOSSARY = {
 # Training Pair Generation
 # ---------------------------------------------------------------------------
 
+
 def create_glossary_training_pairs(glossary=None):
     """Convert glossary to short training examples for TranslateGemma.
 
@@ -292,10 +284,12 @@ def create_glossary_training_pairs(glossary=None):
         # Direct term pair
         pairs.append({"en": en_term, "es": es_term})
         # In-sentence example
-        pairs.append({
-            "en": f"The pastor spoke about {en_term} in today's sermon.",
-            "es": f"El pastor habló sobre {es_term} en el sermón de hoy.",
-        })
+        pairs.append(
+            {
+                "en": f"The pastor spoke about {en_term} in today's sermon.",
+                "es": f"El pastor habló sobre {es_term} en el sermón de hoy.",
+            }
+        )
 
     return pairs
 
@@ -304,8 +298,8 @@ def create_glossary_training_pairs(glossary=None):
 # Soft Constraint Augmentation
 # ---------------------------------------------------------------------------
 
-def augment_with_soft_constraints(verse_pairs_path, glossary=None,
-                                  output_path=None):
+
+def augment_with_soft_constraints(verse_pairs_path, glossary=None, output_path=None):
     """Soft constraint training (Dinu et al., 2019):
 
     Append target terminology to source sentences during training.
@@ -317,7 +311,7 @@ def augment_with_soft_constraints(verse_pairs_path, glossary=None,
         glossary = THEOLOGICAL_GLOSSARY
 
     augmented = []
-    with open(verse_pairs_path, "r", encoding="utf-8") as f:
+    with open(verse_pairs_path, encoding="utf-8") as f:
         for line in f:
             pair = json.loads(line)
             en_lower = pair["en"].lower()
@@ -328,10 +322,12 @@ def augment_with_soft_constraints(verse_pairs_path, glossary=None,
                     constraints.append(f"{en_term}={es_term}")
 
             if constraints:
-                augmented.append({
-                    "en": f"{pair['en']} [GLOSSARY: {', '.join(constraints)}]",
-                    "es": pair["es"],
-                })
+                augmented.append(
+                    {
+                        "en": f"{pair['en']} [GLOSSARY: {', '.join(constraints)}]",
+                        "es": pair["es"],
+                    }
+                )
             else:
                 augmented.append(pair)
 
@@ -351,6 +347,7 @@ def augment_with_soft_constraints(verse_pairs_path, glossary=None,
 # Export
 # ---------------------------------------------------------------------------
 
+
 def export_glossary(glossary=None, output_dir="bible_data/glossary"):
     """Export glossary in multiple formats."""
     if glossary is None:
@@ -359,8 +356,7 @@ def export_glossary(glossary=None, output_dir="bible_data/glossary"):
     os.makedirs(output_dir, exist_ok=True)
 
     # 1. Raw glossary JSON
-    with open(os.path.join(output_dir, "theological_glossary.json"), "w",
-              encoding="utf-8") as f:
+    with open(os.path.join(output_dir, "theological_glossary.json"), "w", encoding="utf-8") as f:
         json.dump(glossary, f, indent=2, ensure_ascii=False)
 
     # 2. Training pairs JSONL
@@ -378,15 +374,10 @@ def export_glossary(glossary=None, output_dir="bible_data/glossary"):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Build EN→ES theological glossary for translation fine-tuning"
-    )
-    parser.add_argument("--output", "-o", default="bible_data/glossary",
-                        help="Output directory")
-    parser.add_argument("--augment",
-                        help="Path to verse pairs JSONL to augment with soft constraints")
-    parser.add_argument("--augment-output",
-                        help="Output path for augmented pairs (default: <input>_augmented.jsonl)")
+    parser = argparse.ArgumentParser(description="Build EN→ES theological glossary for translation fine-tuning")
+    parser.add_argument("--output", "-o", default="bible_data/glossary", help="Output directory")
+    parser.add_argument("--augment", help="Path to verse pairs JSONL to augment with soft constraints")
+    parser.add_argument("--augment-output", help="Output path for augmented pairs (default: <input>_augmented.jsonl)")
     args = parser.parse_args()
 
     # Export glossary

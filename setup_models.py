@@ -9,6 +9,7 @@ Usage:
     python setup_models.py              # Auto-detect machine, download all
     python setup_models.py --mac        # Force Mac inference models
     python setup_models.py --windows    # Force Windows training models
+    python setup_models.py --nvidia-inference  # NVIDIA/CUDA inference models
     python setup_models.py --skip-12b   # Skip TranslateGemma 12B
     python setup_models.py --dry-run    # Show what would be downloaded
 """
@@ -36,6 +37,7 @@ def get_device_info():
         info["device"] = "mps"
         info["gpu_name"] = "Apple Silicon (MPS)"
         import subprocess
+
         result = subprocess.run(["sysctl", "hw.memsize"], capture_output=True, text=True)
         mem_bytes = int(result.stdout.strip().split(": ")[1])
         info["gpu_mem_gb"] = mem_bytes / 1024**3
@@ -47,6 +49,7 @@ def get_device_info():
     # Check MLX availability
     try:
         import mlx.core as mx
+
         info["mlx"] = True
         info["mlx_version"] = mx.__version__
     except ImportError:
@@ -60,6 +63,7 @@ def get_device_info():
 # Mac Models (MLX)
 # ---------------------------------------------------------------------------
 
+
 def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     """Download and verify MLX models for Mac inference."""
     from huggingface_hub import snapshot_download
@@ -67,6 +71,7 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     models = [
         ("Silero VAD", "snakers4/silero-vad", "~2 MB", "torch_hub"),
         ("Distil-Whisper (MLX)", "mlx-community/distil-whisper-large-v3", "~1.5 GB", "mlx_whisper"),
+        ("Whisper Large-V3-Turbo (MLX)", "mlx-community/whisper-large-v3-turbo", "~1.1 GB", "mlx_whisper"),
         ("TranslateGemma 4B (MLX 4-bit)", "mlx-community/translategemma-4b-it-4bit", "~2.2 GB", "mlx_lm"),
     ]
     if not skip_12b:
@@ -90,8 +95,9 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     t0 = time.time()
     try:
         import torch
-        model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad', trust_repo=True)
-        print(f"  OK ({time.time()-t0:.1f}s)")
+
+        model, utils = torch.hub.load("snakers4/silero-vad", "silero_vad", trust_repo=True)
+        print(f"  OK ({time.time() - t0:.1f}s)")
         results["vad"] = "OK"
     except Exception as e:
         print(f"  FAIL: {e}")
@@ -102,11 +108,12 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     t0 = time.time()
     try:
         snapshot_download("mlx-community/distil-whisper-large-v3")
-        print(f"  Downloaded ({time.time()-t0:.1f}s)")
+        print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
         if not no_test:
             import mlx_whisper
             import numpy as np
+
             silence = np.zeros(16000, dtype=np.float32)
             result = mlx_whisper.transcribe(
                 silence,
@@ -119,23 +126,56 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         print(f"  FAIL: {e}")
         results["whisper"] = f"FAIL: {e}"
 
-    # 3. TranslateGemma 4B (MLX)
-    print(f"\n[3/{len(models)}] TranslateGemma 4B (MLX 4-bit)...")
+    # 3. Whisper Large-V3-Turbo (MLX)
+    print(f"\n[3/{len(models)}] Whisper Large-V3-Turbo (MLX)...")
+    t0 = time.time()
+    try:
+        snapshot_download("mlx-community/whisper-large-v3-turbo")
+        print(f"  Downloaded ({time.time() - t0:.1f}s)")
+
+        if not no_test:
+            import mlx_whisper
+            import numpy as np
+
+            silence = np.zeros(16000, dtype=np.float32)
+            result = mlx_whisper.transcribe(
+                silence,
+                path_or_hf_repo="mlx-community/whisper-large-v3-turbo",
+                condition_on_previous_text=False,
+            )
+            print(f"  Inference test: '{result['text'].strip()[:80]}'")
+        results["whisper_turbo"] = "OK"
+    except Exception as e:
+        print(f"  FAIL: {e}")
+        results["whisper_turbo"] = f"FAIL: {e}"
+
+    # 4. TranslateGemma 4B (MLX)
+    print(f"\n[4/{len(models)}] TranslateGemma 4B (MLX 4-bit)...")
     t0 = time.time()
     try:
         snapshot_download("mlx-community/translategemma-4b-it-4bit")
-        print(f"  Downloaded ({time.time()-t0:.1f}s)")
+        print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
         if not no_test:
-            from mlx_lm import load, generate
+            from mlx_lm import generate, load
+
             model_4b, tok_4b = load("mlx-community/translategemma-4b-it-4bit")
             eot = tok_4b.convert_tokens_to_ids("<end_of_turn>")
             tok_4b._eos_token_ids = {tok_4b.eos_token_id, eot}
 
-            msgs = [{"role": "user", "content": [
-                {"type": "text", "source_lang_code": "en",
-                 "target_lang_code": "es", "text": "Good morning, welcome to our service."}
-            ]}]
+            msgs = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "source_lang_code": "en",
+                            "target_lang_code": "es",
+                            "text": "Good morning, welcome to our service.",
+                        }
+                    ],
+                }
+            ]
             prompt = tok_4b.apply_chat_template(msgs, add_generation_prompt=True)
             result = generate(model_4b, tok_4b, prompt=prompt, max_tokens=64, verbose=False)
             clean = result.split("<end_of_turn>")[0].strip()
@@ -147,25 +187,34 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         print(f"  FAIL: {e}")
         results["gemma_4b"] = f"FAIL: {e}"
 
-    # 4. TranslateGemma 12B (MLX)
+    # 5. TranslateGemma 12B (MLX)
     if not skip_12b:
-        print(f"\n[4/{len(models)}] TranslateGemma 12B (MLX 4-bit)...")
+        print(f"\n[5/{len(models)}] TranslateGemma 12B (MLX 4-bit)...")
         t0 = time.time()
         try:
             snapshot_download("mlx-community/translategemma-12b-it-4bit")
-            print(f"  Downloaded ({time.time()-t0:.1f}s)")
+            print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
             if not no_test:
-                from mlx_lm import load, generate
+                from mlx_lm import generate, load
+
                 model_12b, tok_12b = load("mlx-community/translategemma-12b-it-4bit")
                 eot = tok_12b.convert_tokens_to_ids("<end_of_turn>")
                 tok_12b._eos_token_ids = {tok_12b.eos_token_id, eot}
 
-                msgs = [{"role": "user", "content": [
-                    {"type": "text", "source_lang_code": "en",
-                     "target_lang_code": "es",
-                     "text": "Justification by faith is the cornerstone of the Gospel."}
-                ]}]
+                msgs = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "source_lang_code": "en",
+                                "target_lang_code": "es",
+                                "text": "Justification by faith is the cornerstone of the Gospel.",
+                            }
+                        ],
+                    }
+                ]
                 prompt = tok_12b.apply_chat_template(msgs, add_generation_prompt=True)
                 result = generate(model_12b, tok_12b, prompt=prompt, max_tokens=64, verbose=False)
                 clean = result.split("<end_of_turn>")[0].strip()
@@ -178,9 +227,9 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
             results["gemma_12b"] = f"FAIL: {e}"
 
     # Summary
-    print(f"\n{'='*60}")
-    print(f"  SUMMARY")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print("  SUMMARY")
+    print(f"{'=' * 60}")
     all_ok = True
     for name, status in results.items():
         icon = "OK" if status.startswith("OK") else "FAIL"
@@ -189,9 +238,9 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         print(f"  [{icon:4s}] {name}: {status}")
 
     if all_ok:
-        print(f"\nAll models ready. Run: python dry_run_ab.py")
+        print("\nAll models ready. Run: python dry_run_ab.py")
     else:
-        print(f"\nSome models failed. Check errors above.")
+        print("\nSome models failed. Check errors above.")
 
     return all_ok
 
@@ -200,12 +249,14 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
 # Windows Models (PyTorch/CUDA)
 # ---------------------------------------------------------------------------
 
+
 def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
     """Download PyTorch models for Windows/CUDA training."""
     from huggingface_hub import snapshot_download
 
     models = [
         ("Distil-Whisper", "distil-whisper/distil-large-v3", "~1.5 GB"),
+        ("Whisper Large-V3-Turbo", "openai/whisper-large-v3-turbo", "~1.5 GB"),
         ("TranslateGemma 4B", "google/translategemma-4b-it", "~8 GB"),
     ]
     if not skip_12b:
@@ -226,7 +277,7 @@ def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
         t0 = time.time()
         try:
             snapshot_download(model_id)
-            print(f"  OK ({time.time()-t0:.1f}s)")
+            print(f"  OK ({time.time() - t0:.1f}s)")
         except Exception as e:
             print(f"  FAIL: {e}")
             all_ok = False
@@ -235,13 +286,37 @@ def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
 
 
 # ---------------------------------------------------------------------------
+# NVIDIA Inference Models (PyTorch/CUDA — not training)
+# ---------------------------------------------------------------------------
+
+
+def download_nvidia_inference_models(skip_12b=False, dry_run=False, no_test=False):
+    """Download models for NVIDIA/CUDA inference (not training).
+
+    This is distinct from --windows which downloads full-precision models for
+    fine-tuning. NVIDIA inference uses CTranslate2 Whisper Turbo, MarianMT,
+    and quantized TranslateGemma.
+    """
+    # TODO: Implement NVIDIA inference model downloads:
+    #   - Whisper Large-V3-Turbo (CTranslate2 format for faster-whisper)
+    #   - MarianMT EN->ES (CTranslate2 int8)
+    #   - TranslateGemma 4B (bitsandbytes 4-bit)
+    #   - Silero VAD
+    print("NVIDIA inference model download not yet implemented.")
+    print("Use --windows for training models, or --mac for MLX inference models.")
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main():
     parser = argparse.ArgumentParser(description="Download & verify models")
     parser.add_argument("--mac", action="store_true", help="Force Mac inference mode (MLX)")
     parser.add_argument("--windows", action="store_true", help="Force Windows training mode (PyTorch)")
+    parser.add_argument("--nvidia-inference", action="store_true", help="NVIDIA/CUDA inference models (not training)")
     parser.add_argument("--skip-12b", action="store_true", help="Skip TranslateGemma 12B")
     parser.add_argument("--dry-run", action="store_true", help="Show plan without downloading")
     parser.add_argument("--no-test", action="store_true", help="Download only, skip inference tests")
@@ -253,6 +328,8 @@ def main():
         role = "mac"
     elif args.windows:
         role = "windows"
+    elif args.nvidia_inference:
+        role = "nvidia-inference"
     elif info["mps"] and info.get("mlx"):
         role = "mac"
     elif info["cuda"]:
@@ -260,9 +337,9 @@ def main():
     else:
         role = "mac"
 
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Model Setup — {role.upper()} mode")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Device:    {info['device']} ({info['gpu_name']})")
     print(f"  Memory:    {info['gpu_mem_gb']:.1f} GB")
     print(f"  PyTorch:   {info['pytorch']}")
@@ -272,6 +349,8 @@ def main():
 
     if role == "mac":
         ok = download_mac_models(args.skip_12b, args.dry_run, args.no_test)
+    elif role == "nvidia-inference":
+        ok = download_nvidia_inference_models(args.skip_12b, args.dry_run, args.no_test)
     else:
         ok = download_windows_models(args.skip_12b, args.dry_run, args.no_test)
 

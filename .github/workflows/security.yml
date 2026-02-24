@@ -1,0 +1,55 @@
+name: Security
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"  # Monday 8AM UTC
+  push:
+    branches: [main]
+    paths: ["requirements*.txt"]
+  pull_request:
+    branches: [main]
+    paths: ["requirements*.txt"]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        requirements:
+          - requirements-mac.txt
+          - requirements-windows.txt
+          - requirements-nvidia.txt
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pip-audit
+        run: pip install pip-audit setuptools
+
+      - name: Audit ${{ matrix.requirements }}
+        run: |
+          # Strip packages that can't resolve on Linux CI:
+          #   mlx* (macOS Metal only), piper-tts (native binary)
+          #   inaSpeechSegmenter, demucs, pyannote-audio (complex native builds)
+          #   unbabel-comet (transitive pandas build fails without pkg_resources)
+          #   torch* (CUDA-specific index URLs)
+          sed -E \
+            -e '/^mlx/d' \
+            -e '/^piper-tts/d' \
+            -e '/^inaSpeechSegmenter/d' \
+            -e '/^demucs/d' \
+            -e '/^pyannote-audio/d' \
+            -e '/^unbabel-comet/d' \
+            -e '/^pandas/d' \
+            -e '/^torch(audio|vision)?[>=<]/d' \
+            -e '/^--/d' \
+            -e '/^#/d' \
+            -e '/^\s*$/d' \
+            "${{ matrix.requirements }}" > /tmp/audit-reqs.txt
+          echo "Auditing packages:"
+          cat /tmp/audit-reqs.txt
+          pip-audit -r /tmp/audit-reqs.txt --desc --no-deps

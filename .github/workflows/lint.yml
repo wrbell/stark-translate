@@ -1,0 +1,46 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install lint dependencies
+        run: pip install ruff mypy pydantic pydantic-settings numpy
+
+      - name: Ruff check
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: Mypy (engines + settings)
+        run: mypy engines/ settings.py
+
+      - name: Validate HTML displays
+        run: |
+          sudo apt-get -qq install -y tidy
+          ERRORS=0
+          for f in displays/*.html; do
+            echo "::group::$f"
+            # tidy exits 0=clean, 1=warnings, 2=errors
+            tidy -q -e --show-info no "$f" 2>&1 || STATUS=$?
+            if [ "${STATUS:-0}" -eq 2 ]; then
+              echo "::error file=$f::HTML errors detected"
+              ERRORS=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $ERRORS
