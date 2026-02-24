@@ -57,6 +57,46 @@ jobs:
             requirements-nvidia.txt \
             -x "**/__pycache__/*" "**/*.pyc"
 
+      - name: Verify Mac bundle
+        run: |
+          echo "::group::Mac bundle contents"
+          unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-mac.zip"
+          echo "::endgroup::"
+          for f in dry_run_ab.py settings.py engines/base.py engines/factory.py \
+                   displays/audience_display.html displays/ab_display.html \
+                   displays/mobile_display.html displays/church_display.html \
+                   displays/obs_overlay.html requirements-mac.txt; do
+            unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-mac.zip" | grep -q "$f" \
+              || { echo "MISSING from mac bundle: $f"; exit 1; }
+          done
+          ! unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-mac.zip" | grep -q '__pycache__\|\.pyc' \
+            || { echo "ERROR: __pycache__ or .pyc found in mac bundle"; exit 1; }
+
+      - name: Verify Windows bundle
+        run: |
+          echo "::group::Windows bundle contents"
+          unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-windows.zip"
+          echo "::endgroup::"
+          for f in training/train_whisper.py training/train_gemma.py \
+                   tools/stt_benchmark.py requirements-windows.txt; do
+            unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-windows.zip" | grep -q "$f" \
+              || { echo "MISSING from windows bundle: $f"; exit 1; }
+          done
+          ! unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-windows.zip" | grep -q '__pycache__\|\.pyc' \
+            || { echo "ERROR: __pycache__ or .pyc found in windows bundle"; exit 1; }
+
+      - name: Verify NVIDIA bundle
+        run: |
+          echo "::group::NVIDIA bundle contents"
+          unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-nvidia.zip"
+          echo "::endgroup::"
+          for f in engines/base.py settings.py requirements-nvidia.txt; do
+            unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-nvidia.zip" | grep -q "$f" \
+              || { echo "MISSING from nvidia bundle: $f"; exit 1; }
+          done
+          ! unzip -l "stark-translate-${{ steps.tag.outputs.TAG }}-nvidia.zip" | grep -q '__pycache__\|\.pyc' \
+            || { echo "ERROR: __pycache__ or .pyc found in nvidia bundle"; exit 1; }
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

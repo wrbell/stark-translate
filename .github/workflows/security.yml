@@ -1,0 +1,34 @@
+name: Security
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"  # Monday 8AM UTC
+  push:
+    branches: [main]
+    paths: ["requirements*.txt"]
+  pull_request:
+    branches: [main]
+    paths: ["requirements*.txt"]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        requirements:
+          - requirements-mac.txt
+          - requirements-windows.txt
+          - requirements-nvidia.txt
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit ${{ matrix.requirements }}
+        run: pip-audit -r ${{ matrix.requirements }} --desc

@@ -30,6 +30,16 @@ _MOCK_MODULES = [
     "silero_vad",
     "noisereduce",
     "demucs",
+    "scipy",
+    "scipy.io",
+    "scipy.io.wavfile",
+    "jiwer",
+    "youtube_transcript_api",
+    "bitsandbytes",
+    "yt_dlp",
+    "language_tool_python",
+    "sentence_transformers",
+    "streamlink",
 ]
 
 

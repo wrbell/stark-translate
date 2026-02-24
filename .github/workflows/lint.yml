@@ -28,3 +28,19 @@ jobs:
 
       - name: Mypy (engines + settings)
         run: mypy engines/ settings.py
+
+      - name: Validate HTML displays
+        run: |
+          sudo apt-get -qq install -y tidy
+          ERRORS=0
+          for f in displays/*.html; do
+            echo "::group::$f"
+            # tidy exits 0=clean, 1=warnings, 2=errors
+            tidy -q -e --show-info no "$f" 2>&1 || STATUS=$?
+            if [ "${STATUS:-0}" -eq 2 ]; then
+              echo "::error file=$f::HTML errors detected"
+              ERRORS=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $ERRORS

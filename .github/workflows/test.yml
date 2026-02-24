@@ -21,4 +21,4 @@ jobs:
         run: pip install pytest pytest-cov pydantic pydantic-settings numpy jiwer
 
       - name: Run tests
-        run: pytest tests/ -v --tb=short
+        run: pytest tests/ -v --tb=short --cov=engines --cov=tools --cov=features --cov-report=term-missing
