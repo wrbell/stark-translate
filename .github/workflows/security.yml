@@ -31,4 +31,23 @@ jobs:
         run: pip install pip-audit
 
       - name: Audit ${{ matrix.requirements }}
-        run: pip-audit -r ${{ matrix.requirements }} --desc
+        run: |
+          # Strip platform-specific packages that can't resolve on Linux CI:
+          #   mlx/mlx-metal/mlx-lm/mlx-whisper (macOS Metal only)
+          #   piper-tts (requires piper native binary)
+          #   inaSpeechSegmenter, demucs, pyannote-audio (complex native builds)
+          #   torch/torchaudio/torchvision lines with --index-url (CUDA-specific)
+          sed -E \
+            -e '/^mlx/d' \
+            -e '/^piper-tts/d' \
+            -e '/^inaSpeechSegmenter/d' \
+            -e '/^demucs/d' \
+            -e '/^pyannote-audio/d' \
+            -e '/^torch(audio|vision)?[>=<]/d' \
+            -e '/^--/d' \
+            -e '/^#/d' \
+            -e '/^\s*$/d' \
+            "${{ matrix.requirements }}" > /tmp/audit-reqs.txt
+          echo "Auditing packages:"
+          cat /tmp/audit-reqs.txt
+          pip-audit -r /tmp/audit-reqs.txt --desc
