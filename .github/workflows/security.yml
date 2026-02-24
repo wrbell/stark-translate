@@ -51,4 +51,4 @@ jobs:
             "${{ matrix.requirements }}" > /tmp/audit-reqs.txt
           echo "Auditing packages:"
           cat /tmp/audit-reqs.txt
-          pip-audit -r /tmp/audit-reqs.txt --desc
+          pip-audit -r /tmp/audit-reqs.txt --desc --no-deps
