@@ -43,6 +43,7 @@ jobs:
             -e '/^inaSpeechSegmenter/d' \
             -e '/^demucs/d' \
             -e '/^pyannote-audio/d' \
+            -e '/^pandas/d' \
             -e '/^torch(audio|vision)?[>=<]/d' \
             -e '/^--/d' \
             -e '/^#/d' \
