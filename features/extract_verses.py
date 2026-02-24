@@ -29,7 +29,6 @@ from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -46,100 +45,208 @@ CONTEXT_CHARS = 80
 
 # Canonical name -> list of regex-safe aliases (longest first to avoid greedy issues)
 # Each alias is case-insensitive in the regex
-BOOK_ALIASES = OrderedDict([
-    # --- Old Testament ---
-    ("Genesis", ["Genesis", "Gen"]),
-    ("Exodus", ["Exodus", "Exod", "Exo"]),
-    ("Leviticus", ["Leviticus", "Lev"]),
-    ("Numbers", ["Numbers", "Num"]),
-    ("Deuteronomy", ["Deuteronomy", "Deut", "Deu"]),
-    ("Joshua", ["Joshua", "Josh", "Jos"]),
-    ("Judges", ["Judges", "Judg", "Jdg"]),
-    ("Ruth", ["Ruth", "Rut"]),
-    ("1 Samuel", ["First Samuel", "1st Samuel", "1 Samuel", "I Samuel", "1Samuel", "1Sam", "1 Sam"]),
-    ("2 Samuel", ["Second Samuel", "2nd Samuel", "2 Samuel", "II Samuel", "2Samuel", "2Sam", "2 Sam"]),
-    ("1 Kings", ["First Kings", "1st Kings", "1 Kings", "I Kings", "1Kings", "1Kgs", "1 Kgs"]),
-    ("2 Kings", ["Second Kings", "2nd Kings", "2 Kings", "II Kings", "2Kings", "2Kgs", "2 Kgs"]),
-    ("1 Chronicles", ["First Chronicles", "1st Chronicles", "1 Chronicles", "I Chronicles", "1Chronicles", "1Chr", "1 Chr", "1 Chron"]),
-    ("2 Chronicles", ["Second Chronicles", "2nd Chronicles", "2 Chronicles", "II Chronicles", "2Chronicles", "2Chr", "2 Chr", "2 Chron"]),
-    ("Ezra", ["Ezra", "Ezr"]),
-    ("Nehemiah", ["Nehemiah", "Neh"]),
-    ("Esther", ["Esther", "Est", "Esth"]),
-    ("Job", ["Job"]),
-    ("Psalms", ["Psalms", "Psalm", "Psa", "Ps"]),
-    ("Proverbs", ["Proverbs", "Prov", "Pro"]),
-    ("Ecclesiastes", ["Ecclesiastes", "Eccles", "Eccl", "Ecc"]),
-    ("Song of Solomon", ["Song of Solomon", "Song of Songs", "Songs of Solomon", "Song", "SOS", "SS"]),
-    ("Isaiah", ["Isaiah", "Isa"]),
-    ("Jeremiah", ["Jeremiah", "Jer"]),
-    ("Lamentations", ["Lamentations", "Lam"]),
-    ("Ezekiel", ["Ezekiel", "Ezek", "Eze"]),
-    ("Daniel", ["Daniel", "Dan"]),
-    ("Hosea", ["Hosea", "Hos"]),
-    ("Joel", ["Joel"]),
-    ("Amos", ["Amos"]),
-    ("Obadiah", ["Obadiah", "Obad", "Oba"]),
-    ("Jonah", ["Jonah", "Jon"]),
-    ("Micah", ["Micah", "Mic"]),
-    ("Nahum", ["Nahum", "Nah"]),
-    ("Habakkuk", ["Habakkuk", "Hab"]),
-    ("Zephaniah", ["Zephaniah", "Zeph", "Zep"]),
-    ("Haggai", ["Haggai", "Hag"]),
-    ("Zechariah", ["Zechariah", "Zech", "Zec"]),
-    ("Malachi", ["Malachi", "Mal"]),
-    # --- New Testament ---
-    ("Matthew", ["Matthew", "Matt", "Mat"]),
-    ("Mark", ["Mark", "Mrk"]),
-    ("Luke", ["Luke", "Luk"]),
-    ("John", ["John", "Joh", "Jn"]),
-    ("Acts", ["Acts", "Act"]),
-    ("Romans", ["Romans", "Rom"]),
-    ("1 Corinthians", ["First Corinthians", "1st Corinthians", "1 Corinthians", "I Corinthians", "1Corinthians", "1Cor", "1 Cor"]),
-    ("2 Corinthians", ["Second Corinthians", "2nd Corinthians", "2 Corinthians", "II Corinthians", "2Corinthians", "2Cor", "2 Cor"]),
-    ("Galatians", ["Galatians", "Gal"]),
-    ("Ephesians", ["Ephesians", "Eph"]),
-    ("Philippians", ["Philippians", "Phil", "Php"]),
-    ("Colossians", ["Colossians", "Col"]),
-    ("1 Thessalonians", ["First Thessalonians", "1st Thessalonians", "1 Thessalonians", "I Thessalonians", "1Thessalonians", "1Thess", "1 Thess", "1Th", "1 Th"]),
-    ("2 Thessalonians", ["Second Thessalonians", "2nd Thessalonians", "2 Thessalonians", "II Thessalonians", "2Thessalonians", "2Thess", "2 Thess", "2Th", "2 Th"]),
-    ("1 Timothy", ["First Timothy", "1st Timothy", "1 Timothy", "I Timothy", "1Timothy", "1Tim", "1 Tim"]),
-    ("2 Timothy", ["Second Timothy", "2nd Timothy", "2 Timothy", "II Timothy", "2Timothy", "2Tim", "2 Tim"]),
-    ("Titus", ["Titus", "Tit"]),
-    ("Philemon", ["Philemon", "Phlm", "Phm"]),
-    ("Hebrews", ["Hebrews", "Heb"]),
-    ("James", ["James", "Jas"]),
-    ("1 Peter", ["First Peter", "1st Peter", "1 Peter", "I Peter", "1Peter", "1Pet", "1 Pet"]),
-    ("2 Peter", ["Second Peter", "2nd Peter", "2 Peter", "II Peter", "2Peter", "2Pet", "2 Pet"]),
-    ("1 John", ["First John", "1st John", "1 John", "I John", "1John", "1Jn", "1 Jn"]),
-    ("2 John", ["Second John", "2nd John", "2 John", "II John", "2John", "2Jn", "2 Jn"]),
-    ("3 John", ["Third John", "3rd John", "3 John", "III John", "3John", "3Jn", "3 Jn"]),
-    ("Jude", ["Jude"]),
-    ("Revelation", ["Revelation", "Revelations", "Rev"]),
-])
+BOOK_ALIASES = OrderedDict(
+    [
+        # --- Old Testament ---
+        ("Genesis", ["Genesis", "Gen"]),
+        ("Exodus", ["Exodus", "Exod", "Exo"]),
+        ("Leviticus", ["Leviticus", "Lev"]),
+        ("Numbers", ["Numbers", "Num"]),
+        ("Deuteronomy", ["Deuteronomy", "Deut", "Deu"]),
+        ("Joshua", ["Joshua", "Josh", "Jos"]),
+        ("Judges", ["Judges", "Judg", "Jdg"]),
+        ("Ruth", ["Ruth", "Rut"]),
+        ("1 Samuel", ["First Samuel", "1st Samuel", "1 Samuel", "I Samuel", "1Samuel", "1Sam", "1 Sam"]),
+        ("2 Samuel", ["Second Samuel", "2nd Samuel", "2 Samuel", "II Samuel", "2Samuel", "2Sam", "2 Sam"]),
+        ("1 Kings", ["First Kings", "1st Kings", "1 Kings", "I Kings", "1Kings", "1Kgs", "1 Kgs"]),
+        ("2 Kings", ["Second Kings", "2nd Kings", "2 Kings", "II Kings", "2Kings", "2Kgs", "2 Kgs"]),
+        (
+            "1 Chronicles",
+            [
+                "First Chronicles",
+                "1st Chronicles",
+                "1 Chronicles",
+                "I Chronicles",
+                "1Chronicles",
+                "1Chr",
+                "1 Chr",
+                "1 Chron",
+            ],
+        ),
+        (
+            "2 Chronicles",
+            [
+                "Second Chronicles",
+                "2nd Chronicles",
+                "2 Chronicles",
+                "II Chronicles",
+                "2Chronicles",
+                "2Chr",
+                "2 Chr",
+                "2 Chron",
+            ],
+        ),
+        ("Ezra", ["Ezra", "Ezr"]),
+        ("Nehemiah", ["Nehemiah", "Neh"]),
+        ("Esther", ["Esther", "Est", "Esth"]),
+        ("Job", ["Job"]),
+        ("Psalms", ["Psalms", "Psalm", "Psa", "Ps"]),
+        ("Proverbs", ["Proverbs", "Prov", "Pro"]),
+        ("Ecclesiastes", ["Ecclesiastes", "Eccles", "Eccl", "Ecc"]),
+        ("Song of Solomon", ["Song of Solomon", "Song of Songs", "Songs of Solomon", "Song", "SOS", "SS"]),
+        ("Isaiah", ["Isaiah", "Isa"]),
+        ("Jeremiah", ["Jeremiah", "Jer"]),
+        ("Lamentations", ["Lamentations", "Lam"]),
+        ("Ezekiel", ["Ezekiel", "Ezek", "Eze"]),
+        ("Daniel", ["Daniel", "Dan"]),
+        ("Hosea", ["Hosea", "Hos"]),
+        ("Joel", ["Joel"]),
+        ("Amos", ["Amos"]),
+        ("Obadiah", ["Obadiah", "Obad", "Oba"]),
+        ("Jonah", ["Jonah", "Jon"]),
+        ("Micah", ["Micah", "Mic"]),
+        ("Nahum", ["Nahum", "Nah"]),
+        ("Habakkuk", ["Habakkuk", "Hab"]),
+        ("Zephaniah", ["Zephaniah", "Zeph", "Zep"]),
+        ("Haggai", ["Haggai", "Hag"]),
+        ("Zechariah", ["Zechariah", "Zech", "Zec"]),
+        ("Malachi", ["Malachi", "Mal"]),
+        # --- New Testament ---
+        ("Matthew", ["Matthew", "Matt", "Mat"]),
+        ("Mark", ["Mark", "Mrk"]),
+        ("Luke", ["Luke", "Luk"]),
+        ("John", ["John", "Joh", "Jn"]),
+        ("Acts", ["Acts", "Act"]),
+        ("Romans", ["Romans", "Rom"]),
+        (
+            "1 Corinthians",
+            ["First Corinthians", "1st Corinthians", "1 Corinthians", "I Corinthians", "1Corinthians", "1Cor", "1 Cor"],
+        ),
+        (
+            "2 Corinthians",
+            [
+                "Second Corinthians",
+                "2nd Corinthians",
+                "2 Corinthians",
+                "II Corinthians",
+                "2Corinthians",
+                "2Cor",
+                "2 Cor",
+            ],
+        ),
+        ("Galatians", ["Galatians", "Gal"]),
+        ("Ephesians", ["Ephesians", "Eph"]),
+        ("Philippians", ["Philippians", "Phil", "Php"]),
+        ("Colossians", ["Colossians", "Col"]),
+        (
+            "1 Thessalonians",
+            [
+                "First Thessalonians",
+                "1st Thessalonians",
+                "1 Thessalonians",
+                "I Thessalonians",
+                "1Thessalonians",
+                "1Thess",
+                "1 Thess",
+                "1Th",
+                "1 Th",
+            ],
+        ),
+        (
+            "2 Thessalonians",
+            [
+                "Second Thessalonians",
+                "2nd Thessalonians",
+                "2 Thessalonians",
+                "II Thessalonians",
+                "2Thessalonians",
+                "2Thess",
+                "2 Thess",
+                "2Th",
+                "2 Th",
+            ],
+        ),
+        ("1 Timothy", ["First Timothy", "1st Timothy", "1 Timothy", "I Timothy", "1Timothy", "1Tim", "1 Tim"]),
+        ("2 Timothy", ["Second Timothy", "2nd Timothy", "2 Timothy", "II Timothy", "2Timothy", "2Tim", "2 Tim"]),
+        ("Titus", ["Titus", "Tit"]),
+        ("Philemon", ["Philemon", "Phlm", "Phm"]),
+        ("Hebrews", ["Hebrews", "Heb"]),
+        ("James", ["James", "Jas"]),
+        ("1 Peter", ["First Peter", "1st Peter", "1 Peter", "I Peter", "1Peter", "1Pet", "1 Pet"]),
+        ("2 Peter", ["Second Peter", "2nd Peter", "2 Peter", "II Peter", "2Peter", "2Pet", "2 Pet"]),
+        ("1 John", ["First John", "1st John", "1 John", "I John", "1John", "1Jn", "1 Jn"]),
+        ("2 John", ["Second John", "2nd John", "2 John", "II John", "2John", "2Jn", "2 Jn"]),
+        ("3 John", ["Third John", "3rd John", "3 John", "III John", "3John", "3Jn", "3 Jn"]),
+        ("Jude", ["Jude"]),
+        ("Revelation", ["Revelation", "Revelations", "Rev"]),
+    ]
+)
 
 # Spoken number words -> digits (for "chapter eight" -> 8)
 SPOKEN_NUMBERS = {
-    "one": "1", "two": "2", "three": "3", "four": "4", "five": "5",
-    "six": "6", "seven": "7", "eight": "8", "nine": "9", "ten": "10",
-    "eleven": "11", "twelve": "12", "thirteen": "13", "fourteen": "14",
-    "fifteen": "15", "sixteen": "16", "seventeen": "17", "eighteen": "18",
-    "nineteen": "19", "twenty": "20", "twenty-one": "21", "twenty-two": "22",
-    "twenty-three": "23", "twenty-four": "24", "twenty-five": "25",
-    "twenty-six": "26", "twenty-seven": "27", "twenty-eight": "28",
-    "twenty-nine": "29", "thirty": "30", "thirty-one": "31",
-    "thirty-two": "32", "thirty-three": "33", "thirty-four": "34",
-    "thirty-five": "35", "thirty-six": "36", "thirty-seven": "37",
-    "thirty-eight": "38", "thirty-nine": "39", "forty": "40",
-    "fifty": "50", "sixty": "60", "seventy": "70", "eighty": "80",
-    "ninety": "90", "hundred": "100",
-    "first": "1", "second": "2", "third": "3", "fourth": "4", "fifth": "5",
-    "sixth": "6", "seventh": "7", "eighth": "8", "ninth": "9", "tenth": "10",
+    "one": "1",
+    "two": "2",
+    "three": "3",
+    "four": "4",
+    "five": "5",
+    "six": "6",
+    "seven": "7",
+    "eight": "8",
+    "nine": "9",
+    "ten": "10",
+    "eleven": "11",
+    "twelve": "12",
+    "thirteen": "13",
+    "fourteen": "14",
+    "fifteen": "15",
+    "sixteen": "16",
+    "seventeen": "17",
+    "eighteen": "18",
+    "nineteen": "19",
+    "twenty": "20",
+    "twenty-one": "21",
+    "twenty-two": "22",
+    "twenty-three": "23",
+    "twenty-four": "24",
+    "twenty-five": "25",
+    "twenty-six": "26",
+    "twenty-seven": "27",
+    "twenty-eight": "28",
+    "twenty-nine": "29",
+    "thirty": "30",
+    "thirty-one": "31",
+    "thirty-two": "32",
+    "thirty-three": "33",
+    "thirty-four": "34",
+    "thirty-five": "35",
+    "thirty-six": "36",
+    "thirty-seven": "37",
+    "thirty-eight": "38",
+    "thirty-nine": "39",
+    "forty": "40",
+    "fifty": "50",
+    "sixty": "60",
+    "seventy": "70",
+    "eighty": "80",
+    "ninety": "90",
+    "hundred": "100",
+    "first": "1",
+    "second": "2",
+    "third": "3",
+    "fourth": "4",
+    "fifth": "5",
+    "sixth": "6",
+    "seventh": "7",
+    "eighth": "8",
+    "ninth": "9",
+    "tenth": "10",
 }
 
 
 # ---------------------------------------------------------------------------
 # Build Regex Patterns
 # ---------------------------------------------------------------------------
+
 
 def _build_book_pattern():
     """Build a regex alternation matching any Bible book name.
@@ -203,8 +310,7 @@ EXPLICIT_PATTERN = re.compile(
     rf"(?P<chapter>\d+)"
     rf"\s*[:]\s*"
     rf"(?P<verse_start>\d+)"
-    rf"(?:\s*[-\u2013\u2014]\s*(?P<verse_end>\d+))?"  # optional range
-    ,
+    rf"(?:\s*[-\u2013\u2014]\s*(?P<verse_end>\d+))?",  # optional range
     re.IGNORECASE,
 )
 
@@ -215,8 +321,7 @@ CHAPTER_ONLY_PATTERN = re.compile(
     rf"(?P<book>{BOOK_PATTERN})"
     rf"\s+"
     rf"(?P<chapter>\d+)\b"
-    rf"(?!\s*[:]\s*\d)"  # NOT followed by :verse
-    ,
+    rf"(?!\s*[:]\s*\d)",  # NOT followed by :verse
     re.IGNORECASE,
 )
 
@@ -225,8 +330,7 @@ CHAPTER_VERSE_SPOKEN = re.compile(
     rf"(?P<book>{BOOK_PATTERN})"
     rf"\s+chapter\s+(?P<chapter>{NUM})"
     rf"(?:\s*,?\s*verses?\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?)?"
-    ,
+    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?)?",
     re.IGNORECASE,
 )
 
@@ -254,8 +358,7 @@ SPOKEN_INTRO_PATTERN = re.compile(
     rf"  \s+(?P<chapter2>{NUM})"  # bare "three sixteen"
     rf"  (?:\s+(?P<verse_start2>{NUM})"
     rf"    (?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end2>{NUM}))?)?"
-    rf")?"
-    ,
+    rf")?",
     re.IGNORECASE | re.VERBOSE,
 )
 
@@ -264,16 +367,14 @@ SPOKEN_BARE_PATTERN = re.compile(
     rf"(?P<book>{BOOK_PATTERN})"
     rf"\s+(?P<chapter>{NUM})"
     rf"\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?"
-    ,
+    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?",
     re.IGNORECASE,
 )
 
 # "verse 28" / "verses 3 to 5" (contextual — needs recent book/chapter)
 BARE_VERSE_PATTERN = re.compile(
     rf"verses?\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|and|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?"
-    ,
+    rf"(?:\s*(?:to|through|and|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?",
     re.IGNORECASE,
 )
 
@@ -281,8 +382,7 @@ BARE_VERSE_PATTERN = re.compile(
 BARE_CHAPTER_PATTERN = re.compile(
     rf"chapter\s+(?P<chapter>{NUM})"
     rf"(?:\s*,?\s*verses?\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?)?"
-    ,
+    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?)?",
     re.IGNORECASE,
 )
 
@@ -290,6 +390,7 @@ BARE_CHAPTER_PATTERN = re.compile(
 # ---------------------------------------------------------------------------
 # Extraction Engine
 # ---------------------------------------------------------------------------
+
 
 class VerseExtractor:
     """Stateful verse reference extractor with context tracking.
@@ -302,10 +403,9 @@ class VerseExtractor:
         self.current_book = None
         self.current_chapter = None
         self.references = []  # list of extracted reference dicts
-        self._seen = set()    # dedup key: (book, chapter, verse_start, verse_end)
+        self._seen = set()  # dedup key: (book, chapter, verse_start, verse_end)
 
-    def _add_reference(self, book, chapter, verse_start, verse_end,
-                       timestamp, speaker, context, pattern_name):
+    def _add_reference(self, book, chapter, verse_start, verse_end, timestamp, speaker, context, pattern_name):
         """Add a reference, updating context and deduplicating."""
         # Normalize
         canonical_book = resolve_book(book)
@@ -341,7 +441,7 @@ class VerseExtractor:
             "verse_end": ve,
             "timestamp": timestamp,
             "speaker": speaker,
-            "context": context.strip()[:CONTEXT_CHARS * 2] if context else "",
+            "context": context.strip()[: CONTEXT_CHARS * 2] if context else "",
             "pattern": pattern_name,
         }
         self.references.append(entry)
@@ -521,20 +621,23 @@ def _extract_context(text, start, end):
 # Transcript Loading (shared with summarize_sermon.py)
 # ---------------------------------------------------------------------------
 
+
 def load_csv_transcript(csv_path):
     """Load transcript from dry_run_ab.py CSV."""
     entries = []
-    with open(csv_path, "r", newline="") as f:
+    with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             text = row.get("english", "").strip()
             if not text:
                 continue
-            entries.append({
-                "timestamp": row.get("timestamp", ""),
-                "text": text,
-                "speaker": None,
-            })
+            entries.append(
+                {
+                    "timestamp": row.get("timestamp", ""),
+                    "text": text,
+                    "speaker": None,
+                }
+            )
     print(f"  Loaded {len(entries)} segments from CSV")
     return entries
 
@@ -542,7 +645,7 @@ def load_csv_transcript(csv_path):
 def load_jsonl_transcript(jsonl_path):
     """Load transcript from diarize.py JSONL."""
     entries = []
-    with open(jsonl_path, "r") as f:
+    with open(jsonl_path) as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -558,11 +661,13 @@ def load_jsonl_transcript(jsonl_path):
             m = int((start % 3600) // 60)
             s = int(start % 60)
             ts = f"{h:02d}:{m:02d}:{s:02d}"
-            entries.append({
-                "timestamp": ts,
-                "text": text,
-                "speaker": record.get("speaker"),
-            })
+            entries.append(
+                {
+                    "timestamp": ts,
+                    "text": text,
+                    "speaker": record.get("speaker"),
+                }
+            )
     speakers = set(e["speaker"] for e in entries if e["speaker"])
     print(f"  Loaded {len(entries)} segments from JSONL")
     if speakers:
@@ -586,6 +691,7 @@ def load_transcript(input_path):
 # Output
 # ---------------------------------------------------------------------------
 
+
 def format_output(extractor, input_path, entries):
     """Format extraction results as a structured dict for JSON output."""
     refs = extractor.references
@@ -600,24 +706,28 @@ def format_output(extractor, input_path, entries):
             spk = ref.get("speaker") or "Unknown"
             if spk not in by_speaker:
                 by_speaker[spk] = []
-            by_speaker[spk].append({
-                "reference": ref["reference"],
-                "book": ref["book"],
-                "chapter": ref["chapter"],
-                "verse_start": ref["verse_start"],
-                "verse_end": ref["verse_end"],
-                "timestamp": ref["timestamp"],
-                "context": ref["context"],
-                "pattern": ref["pattern"],
-            })
+            by_speaker[spk].append(
+                {
+                    "reference": ref["reference"],
+                    "book": ref["book"],
+                    "chapter": ref["chapter"],
+                    "verse_start": ref["verse_start"],
+                    "verse_end": ref["verse_end"],
+                    "timestamp": ref["timestamp"],
+                    "context": ref["context"],
+                    "pattern": ref["pattern"],
+                }
+            )
 
         speaker_results = []
         for spk in sorted(by_speaker.keys()):
-            speaker_results.append({
-                "speaker": spk,
-                "verses": by_speaker[spk],
-                "count": len(by_speaker[spk]),
-            })
+            speaker_results.append(
+                {
+                    "speaker": spk,
+                    "verses": by_speaker[spk],
+                    "count": len(by_speaker[spk]),
+                }
+            )
     else:
         speaker_results = None
 
@@ -668,6 +778,7 @@ def write_output(data, output_path):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Extract Bible verse references from sermon transcripts",
@@ -679,18 +790,21 @@ Examples:
     python extract_verses.py transcript.csv -o metrics/verse_references/session.json
         """,
     )
-    parser.add_argument("input", nargs="+",
-                        help="CSV or JSONL transcript file(s)")
-    parser.add_argument("-o", "--output", type=str, default=None,
-                        help="Output JSON path (default: metrics/verse_references/<input_name>.json)")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                        help="Print each reference as it's found")
+    parser.add_argument("input", nargs="+", help="CSV or JSONL transcript file(s)")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        default=None,
+        help="Output JSON path (default: metrics/verse_references/<input_name>.json)",
+    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Print each reference as it's found")
     args = parser.parse_args()
 
-    print(f"{'='*60}")
-    print(f"  Bible Verse Reference Extraction")
+    print(f"{'=' * 60}")
+    print("  Bible Verse Reference Extraction")
     print(f"  Input(s): {len(args.input)} file(s)")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     # Load and merge all input transcripts
     all_entries = []
@@ -709,7 +823,7 @@ Examples:
     # Extract verse references
     extractor = VerseExtractor()
 
-    print(f"\n  Extracting verse references...\n")
+    print("\n  Extracting verse references...\n")
     for entry in all_entries:
         extractor.extract_from_text(
             text=entry["text"],
@@ -734,24 +848,24 @@ Examples:
     write_output(data, output_path)
 
     # Print summary
-    print(f"\n{'='*60}")
-    print(f"  VERSE REFERENCES SUMMARY")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print("  VERSE REFERENCES SUMMARY")
+    print(f"{'=' * 60}")
     print(f"  Total references found: {data['total_references']}")
     print(f"  Unique references: {len(data['unique_references'])}")
 
     if data["unique_references"]:
-        print(f"\n  Unique verses:")
+        print("\n  Unique verses:")
         for ref in data["unique_references"]:
             print(f"    - {ref}")
 
     if data["books_referenced"]:
-        print(f"\n  Books referenced (by frequency):")
+        print("\n  Books referenced (by frequency):")
         for book, count in data["books_referenced"].items():
             print(f"    {book}: {count}x")
 
     if data["by_speaker"]:
-        print(f"\n  By speaker:")
+        print("\n  By speaker:")
         for spk_data in data["by_speaker"]:
             print(f"    {spk_data['speaker']}: {spk_data['count']} references")
             for v in spk_data["verses"][:5]:
@@ -759,7 +873,7 @@ Examples:
             if spk_data["count"] > 5:
                 print(f"      ... and {spk_data['count'] - 5} more")
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
 
 
 if __name__ == "__main__":

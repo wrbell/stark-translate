@@ -166,6 +166,7 @@ def fine_tune_marian(
         inputs = tokenizer(sent, return_tensors="pt", padding=True)
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
         import torch
+
         with torch.no_grad():
             outputs = model.generate(**inputs, max_new_tokens=64)
         translation = tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -174,24 +175,22 @@ def fine_tune_marian(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="MarianMT full fine-tune fallback for EN->ES translation"
+    parser = argparse.ArgumentParser(description="MarianMT full fine-tune fallback for EN->ES translation")
+    parser.add_argument(
+        "--bible-data", default="bible_data/aligned/verse_pairs_train.jsonl", help="Path to Bible verse pairs JSONL"
     )
-    parser.add_argument("--bible-data", default="bible_data/aligned/verse_pairs_train.jsonl",
-                        help="Path to Bible verse pairs JSONL")
-    parser.add_argument("--test-data", default="bible_data/holdout/verse_pairs_test.jsonl",
-                        help="Path to holdout test JSONL for eval during training")
-    parser.add_argument("--output", "-o", default="fine_tuned_marian_mi",
-                        help="Output directory")
-    parser.add_argument("--model", default="Helsinki-NLP/opus-mt-en-es",
-                        help="Base MarianMT model")
+    parser.add_argument(
+        "--test-data",
+        default="bible_data/holdout/verse_pairs_test.jsonl",
+        help="Path to holdout test JSONL for eval during training",
+    )
+    parser.add_argument("--output", "-o", default="fine_tuned_marian_mi", help="Output directory")
+    parser.add_argument("--model", default="Helsinki-NLP/opus-mt-en-es", help="Base MarianMT model")
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--grad-accum", type=int, default=1,
-                        help="Gradient accumulation steps")
+    parser.add_argument("--grad-accum", type=int, default=1, help="Gradient accumulation steps")
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--lr", type=float, default=5e-5)
-    parser.add_argument("--resume", action="store_true",
-                        help="Resume training from the latest checkpoint")
+    parser.add_argument("--resume", action="store_true", help="Resume training from the latest checkpoint")
     args = parser.parse_args()
 
     resume = True if args.resume else None

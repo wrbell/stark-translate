@@ -37,6 +37,7 @@ def get_device_info():
         info["device"] = "mps"
         info["gpu_name"] = "Apple Silicon (MPS)"
         import subprocess
+
         result = subprocess.run(["sysctl", "hw.memsize"], capture_output=True, text=True)
         mem_bytes = int(result.stdout.strip().split(": ")[1])
         info["gpu_mem_gb"] = mem_bytes / 1024**3
@@ -48,6 +49,7 @@ def get_device_info():
     # Check MLX availability
     try:
         import mlx.core as mx
+
         info["mlx"] = True
         info["mlx_version"] = mx.__version__
     except ImportError:
@@ -60,6 +62,7 @@ def get_device_info():
 # ---------------------------------------------------------------------------
 # Mac Models (MLX)
 # ---------------------------------------------------------------------------
+
 
 def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     """Download and verify MLX models for Mac inference."""
@@ -92,8 +95,9 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     t0 = time.time()
     try:
         import torch
-        model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad', trust_repo=True)
-        print(f"  OK ({time.time()-t0:.1f}s)")
+
+        model, utils = torch.hub.load("snakers4/silero-vad", "silero_vad", trust_repo=True)
+        print(f"  OK ({time.time() - t0:.1f}s)")
         results["vad"] = "OK"
     except Exception as e:
         print(f"  FAIL: {e}")
@@ -104,11 +108,12 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     t0 = time.time()
     try:
         snapshot_download("mlx-community/distil-whisper-large-v3")
-        print(f"  Downloaded ({time.time()-t0:.1f}s)")
+        print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
         if not no_test:
             import mlx_whisper
             import numpy as np
+
             silence = np.zeros(16000, dtype=np.float32)
             result = mlx_whisper.transcribe(
                 silence,
@@ -126,11 +131,12 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     t0 = time.time()
     try:
         snapshot_download("mlx-community/whisper-large-v3-turbo")
-        print(f"  Downloaded ({time.time()-t0:.1f}s)")
+        print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
         if not no_test:
             import mlx_whisper
             import numpy as np
+
             silence = np.zeros(16000, dtype=np.float32)
             result = mlx_whisper.transcribe(
                 silence,
@@ -148,18 +154,28 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
     t0 = time.time()
     try:
         snapshot_download("mlx-community/translategemma-4b-it-4bit")
-        print(f"  Downloaded ({time.time()-t0:.1f}s)")
+        print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
         if not no_test:
-            from mlx_lm import load, generate
+            from mlx_lm import generate, load
+
             model_4b, tok_4b = load("mlx-community/translategemma-4b-it-4bit")
             eot = tok_4b.convert_tokens_to_ids("<end_of_turn>")
             tok_4b._eos_token_ids = {tok_4b.eos_token_id, eot}
 
-            msgs = [{"role": "user", "content": [
-                {"type": "text", "source_lang_code": "en",
-                 "target_lang_code": "es", "text": "Good morning, welcome to our service."}
-            ]}]
+            msgs = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "source_lang_code": "en",
+                            "target_lang_code": "es",
+                            "text": "Good morning, welcome to our service.",
+                        }
+                    ],
+                }
+            ]
             prompt = tok_4b.apply_chat_template(msgs, add_generation_prompt=True)
             result = generate(model_4b, tok_4b, prompt=prompt, max_tokens=64, verbose=False)
             clean = result.split("<end_of_turn>")[0].strip()
@@ -177,19 +193,28 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         t0 = time.time()
         try:
             snapshot_download("mlx-community/translategemma-12b-it-4bit")
-            print(f"  Downloaded ({time.time()-t0:.1f}s)")
+            print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
             if not no_test:
-                from mlx_lm import load, generate
+                from mlx_lm import generate, load
+
                 model_12b, tok_12b = load("mlx-community/translategemma-12b-it-4bit")
                 eot = tok_12b.convert_tokens_to_ids("<end_of_turn>")
                 tok_12b._eos_token_ids = {tok_12b.eos_token_id, eot}
 
-                msgs = [{"role": "user", "content": [
-                    {"type": "text", "source_lang_code": "en",
-                     "target_lang_code": "es",
-                     "text": "Justification by faith is the cornerstone of the Gospel."}
-                ]}]
+                msgs = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "source_lang_code": "en",
+                                "target_lang_code": "es",
+                                "text": "Justification by faith is the cornerstone of the Gospel.",
+                            }
+                        ],
+                    }
+                ]
                 prompt = tok_12b.apply_chat_template(msgs, add_generation_prompt=True)
                 result = generate(model_12b, tok_12b, prompt=prompt, max_tokens=64, verbose=False)
                 clean = result.split("<end_of_turn>")[0].strip()
@@ -202,9 +227,9 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
             results["gemma_12b"] = f"FAIL: {e}"
 
     # Summary
-    print(f"\n{'='*60}")
-    print(f"  SUMMARY")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print("  SUMMARY")
+    print(f"{'=' * 60}")
     all_ok = True
     for name, status in results.items():
         icon = "OK" if status.startswith("OK") else "FAIL"
@@ -213,9 +238,9 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         print(f"  [{icon:4s}] {name}: {status}")
 
     if all_ok:
-        print(f"\nAll models ready. Run: python dry_run_ab.py")
+        print("\nAll models ready. Run: python dry_run_ab.py")
     else:
-        print(f"\nSome models failed. Check errors above.")
+        print("\nSome models failed. Check errors above.")
 
     return all_ok
 
@@ -223,6 +248,7 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
 # ---------------------------------------------------------------------------
 # Windows Models (PyTorch/CUDA)
 # ---------------------------------------------------------------------------
+
 
 def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
     """Download PyTorch models for Windows/CUDA training."""
@@ -251,7 +277,7 @@ def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
         t0 = time.time()
         try:
             snapshot_download(model_id)
-            print(f"  OK ({time.time()-t0:.1f}s)")
+            print(f"  OK ({time.time() - t0:.1f}s)")
         except Exception as e:
             print(f"  FAIL: {e}")
             all_ok = False
@@ -262,6 +288,7 @@ def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
 # ---------------------------------------------------------------------------
 # NVIDIA Inference Models (PyTorch/CUDA — not training)
 # ---------------------------------------------------------------------------
+
 
 def download_nvidia_inference_models(skip_12b=False, dry_run=False, no_test=False):
     """Download models for NVIDIA/CUDA inference (not training).
@@ -283,6 +310,7 @@ def download_nvidia_inference_models(skip_12b=False, dry_run=False, no_test=Fals
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main():
     parser = argparse.ArgumentParser(description="Download & verify models")
@@ -309,9 +337,9 @@ def main():
     else:
         role = "mac"
 
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Model Setup — {role.upper()} mode")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Device:    {info['device']} ({info['gpu_name']})")
     print(f"  Memory:    {info['gpu_mem_gb']:.1f} GB")
     print(f"  PyTorch:   {info['pytorch']}")

@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get tag name
+        id: tag
+        run: echo "TAG=${GITHUB_REF_NAME:-v0.0.0-dev}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --sort=-v:refname | head -2 | tail -1 || echo "")
+          if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "${{ steps.tag.outputs.TAG }}" ]; then
+            CHANGELOG=$(git log "${PREV_TAG}..HEAD" --oneline --no-merges)
+          else
+            CHANGELOG=$(git log --oneline --no-merges -20)
+          fi
+          {
+            echo "CHANGELOG<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Bundle Mac (inference)
+        run: |
+          zip -r "stark-translate-${{ steps.tag.outputs.TAG }}-mac.zip" \
+            dry_run_ab.py setup_models.py build_glossary.py settings.py \
+            engines/ features/ displays/ \
+            requirements-mac.txt \
+            -x "**/__pycache__/*" "**/*.pyc"
+
+      - name: Bundle Windows (training)
+        run: |
+          zip -r "stark-translate-${{ steps.tag.outputs.TAG }}-windows.zip" \
+            training/ tools/ \
+            requirements-windows.txt \
+            -x "**/__pycache__/*" "**/*.pyc"
+
+      - name: Bundle NVIDIA (inference)
+        run: |
+          zip -r "stark-translate-${{ steps.tag.outputs.TAG }}-nvidia.zip" \
+            engines/ settings.py \
+            requirements-nvidia.txt \
+            -x "**/__pycache__/*" "**/*.pyc"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: ${{ steps.tag.outputs.TAG }}
+          body: |
+            ## Changes
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ## Platform Bundles
+
+            - **mac** — Inference pipeline (dry_run_ab.py, engines/, displays/, features/)
+            - **windows** — Training pipeline (training/, tools/)
+            - **nvidia** — NVIDIA inference (engines/, settings.py)
+          files: |
+            stark-translate-${{ steps.tag.outputs.TAG }}-mac.zip
+            stark-translate-${{ steps.tag.outputs.TAG }}-windows.zip
+            stark-translate-${{ steps.tag.outputs.TAG }}-nvidia.zip

@@ -24,10 +24,10 @@ Usage:
     print(settings.resolve_backend())
 """
 
-from typing import Optional, Literal
+from typing import Literal
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
-
 
 # ---------------------------------------------------------------------------
 # Sub-settings groups
@@ -49,11 +49,11 @@ class AudioSettings(BaseSettings):
         default=2.0,
         description="Seconds of speech per chunk — more context = better word accuracy",
     )
-    mic_device: Optional[int] = Field(
+    mic_device: int | None = Field(
         default=None,
         description="Audio input device index (None = auto-detect best input)",
     )
-    mic_gain: Optional[float] = Field(
+    mic_gain: float | None = Field(
         default=None,
         description="Mic gain multiplier (None = auto-calibrate from target_rms)",
     )
@@ -244,8 +244,7 @@ class PipelineSettings(BaseSettings):
     backend: Literal["auto", "mlx", "cuda", "cpu"] = Field(
         default="auto",
         description=(
-            "Inference backend: auto (detect best available), "
-            "mlx (Apple Silicon), cuda (NVIDIA), cpu (fallback)"
+            "Inference backend: auto (detect best available), mlx (Apple Silicon), cuda (NVIDIA), cpu (fallback)"
         ),
     )
     run_ab: bool = Field(
@@ -292,7 +291,7 @@ class PipelineSettings(BaseSettings):
 
         # Check for CUDA (NVIDIA GPU)
         try:
-            import torch  # noqa: F401
+            import torch
 
             if torch.cuda.is_available():
                 return "cuda"

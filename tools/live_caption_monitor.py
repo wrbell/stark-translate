@@ -46,7 +46,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 
@@ -63,10 +63,12 @@ except ImportError:
 # Optional dependencies with helpful error messages
 # ---------------------------------------------------------------------------
 
+
 def _import_youtube_transcript_api():
     """Lazy import for youtube-transcript-api."""
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
+
         return YouTubeTranscriptApi
     except ImportError:
         print(
@@ -80,14 +82,14 @@ def _import_youtube_transcript_api():
 def _import_mlx_whisper():
     """Lazy import for mlx_whisper."""
     try:
-        import mlx_whisper
         import mlx.core as mx
+        import mlx_whisper
+
         mx.set_cache_limit(100 * 1024 * 1024)  # prevent Metal cache growth
         return mlx_whisper
     except ImportError:
         print(
-            "ERROR: mlx_whisper is required for local transcription.\n"
-            "  Install with: pip install mlx-whisper",
+            "ERROR: mlx_whisper is required for local transcription.\n  Install with: pip install mlx-whisper",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -99,10 +101,10 @@ def _import_mlx_whisper():
 
 WHISPER_MODEL = "mlx-community/distil-whisper-large-v3"
 SAMPLE_RATE = 16000
-WINDOW_SECONDS = 30.0          # comparison window size
-OFFSET_SEARCH_RANGE = 5.0      # +/- seconds for latency drift alignment
-OFFSET_SEARCH_STEP = 0.5       # step size for offset search
-POLL_INTERVAL = 7.0            # seconds between YouTube caption polls (live mode)
+WINDOW_SECONDS = 30.0  # comparison window size
+OFFSET_SEARCH_RANGE = 5.0  # +/- seconds for latency drift alignment
+OFFSET_SEARCH_STEP = 0.5  # step size for offset search
+POLL_INTERVAL = 7.0  # seconds between YouTube caption polls (live mode)
 JSONL_PATH = "metrics/caption_comparison.jsonl"
 SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
 
@@ -126,6 +128,7 @@ WHISPER_PROMPT = (
 # Text Normalization
 # ---------------------------------------------------------------------------
 
+
 def normalize_text(text):
     """Normalize text for WER/CER comparison.
 
@@ -136,10 +139,10 @@ def normalize_text(text):
         return ""
     t = text.lower()
     # Remove common transcription artifacts
-    t = re.sub(r'\[.*?\]', '', t)          # [Music], [Applause], etc.
-    t = re.sub(r'\(.*?\)', '', t)          # (inaudible), etc.
-    t = re.sub(r'[^\w\s\']', ' ', t)      # keep apostrophes for contractions
-    t = re.sub(r'\s+', ' ', t).strip()
+    t = re.sub(r"\[.*?\]", "", t)  # [Music], [Applause], etc.
+    t = re.sub(r"\(.*?\)", "", t)  # (inaudible), etc.
+    t = re.sub(r"[^\w\s\']", " ", t)  # keep apostrophes for contractions
+    t = re.sub(r"\s+", " ", t).strip()
     return t
 
 
@@ -147,20 +150,116 @@ def normalize_text(text):
 # English Stopwords (for content-word overlap checking)
 # ---------------------------------------------------------------------------
 
-STOPWORDS = frozenset({
-    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
-    "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
-    "being", "have", "has", "had", "do", "does", "did", "will", "would",
-    "could", "should", "may", "might", "shall", "can", "need", "must",
-    "it", "its", "i", "me", "my", "we", "us", "our", "you", "your",
-    "he", "him", "his", "she", "her", "they", "them", "their", "this",
-    "that", "these", "those", "what", "which", "who", "whom", "how",
-    "when", "where", "why", "not", "no", "nor", "so", "if", "then",
-    "than", "too", "very", "just", "about", "up", "out", "all", "also",
-    "as", "into", "over", "after", "before", "between", "through",
-    "there", "here", "some", "any", "each", "every", "both", "few",
-    "more", "most", "other", "such", "only", "own", "same", "now",
-})
+STOPWORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "from",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "need",
+        "must",
+        "it",
+        "its",
+        "i",
+        "me",
+        "my",
+        "we",
+        "us",
+        "our",
+        "you",
+        "your",
+        "he",
+        "him",
+        "his",
+        "she",
+        "her",
+        "they",
+        "them",
+        "their",
+        "this",
+        "that",
+        "these",
+        "those",
+        "what",
+        "which",
+        "who",
+        "whom",
+        "how",
+        "when",
+        "where",
+        "why",
+        "not",
+        "no",
+        "nor",
+        "so",
+        "if",
+        "then",
+        "than",
+        "too",
+        "very",
+        "just",
+        "about",
+        "up",
+        "out",
+        "all",
+        "also",
+        "as",
+        "into",
+        "over",
+        "after",
+        "before",
+        "between",
+        "through",
+        "there",
+        "here",
+        "some",
+        "any",
+        "each",
+        "every",
+        "both",
+        "few",
+        "more",
+        "most",
+        "other",
+        "such",
+        "only",
+        "own",
+        "same",
+        "now",
+    }
+)
 
 
 def get_content_words(text):
@@ -171,6 +270,7 @@ def get_content_words(text):
 # ---------------------------------------------------------------------------
 # YouTube Caption Quality Detection
 # ---------------------------------------------------------------------------
+
 
 def detect_youtube_repetition(text):
     """Detect word-level and phrase-level repetition in YouTube captions.
@@ -210,7 +310,7 @@ def detect_youtube_repetition(text):
         trigrams = {}
         trigram_positions = {}  # track positions for adjacency check
         for i in range(n_words - 2):
-            gram = " ".join(words[i:i + 3])
+            gram = " ".join(words[i : i + 3])
             trigrams[gram] = trigrams.get(gram, 0) + 1
             if gram not in trigram_positions:
                 trigram_positions[gram] = []
@@ -229,7 +329,7 @@ def detect_youtube_repetition(text):
             if count >= 2:
                 gram_words = gram.split()
                 for i in range(n_words - 2):
-                    if words[i:i + 3] == gram_words:
+                    if words[i : i + 3] == gram_words:
                         repeated_word_positions.update([i, i + 1, i + 2])
         phrase_coverage = len(repeated_word_positions) / n_words if n_words > 0 else 0.0
 
@@ -241,7 +341,7 @@ def detect_youtube_repetition(text):
         if n_words >= 8:
             fourgram_positions = {}
             for i in range(n_words - 3):
-                gram4 = " ".join(words[i:i + 4])
+                gram4 = " ".join(words[i : i + 4])
                 if gram4 not in fourgram_positions:
                     fourgram_positions[gram4] = []
                 fourgram_positions[gram4].append(i)
@@ -261,9 +361,7 @@ def detect_youtube_repetition(text):
     # Phrase-level: >50% of words are part of repeated trigrams (general)
     # OR: >35% coverage WITH adjacent repeated trigrams (YouTube stutter pattern)
     is_degraded = (
-        word_repeat_ratio > 0.25
-        or phrase_coverage > 0.50
-        or (phrase_coverage > 0.35 and has_adjacent_repeats)
+        word_repeat_ratio > 0.25 or phrase_coverage > 0.50 or (phrase_coverage > 0.35 and has_adjacent_repeats)
     )
 
     return is_degraded, details
@@ -272,6 +370,7 @@ def detect_youtube_repetition(text):
 # ---------------------------------------------------------------------------
 # WER/CER Computation with Offset Search
 # ---------------------------------------------------------------------------
+
 
 def compute_wer_cer(reference, hypothesis):
     """Compute WER and CER between two normalized text strings.
@@ -322,10 +421,11 @@ def interpret_wer(wer):
 # Timed Text Segments
 # ---------------------------------------------------------------------------
 
+
 class TimedSegment:
     """A text segment with a start and end time (seconds from stream start)."""
 
-    __slots__ = ("start", "end", "text")
+    __slots__ = ("end", "start", "text")
 
     def __init__(self, start, end, text):
         self.start = float(start)
@@ -346,8 +446,14 @@ def segments_in_window(segments, window_start, window_end):
     return " ".join(texts)
 
 
-def find_best_offset(local_segments, yt_segments, window_start, window_end,
-                     search_range=OFFSET_SEARCH_RANGE, search_step=OFFSET_SEARCH_STEP):
+def find_best_offset(
+    local_segments,
+    yt_segments,
+    window_start,
+    window_end,
+    search_range=OFFSET_SEARCH_RANGE,
+    search_step=OFFSET_SEARCH_STEP,
+):
     """Find the time offset that minimizes WER between local and YouTube captions.
 
     Searches offsets in [-search_range, +search_range] at search_step intervals.
@@ -369,11 +475,13 @@ def find_best_offset(local_segments, yt_segments, window_start, window_end,
 
     offset = -search_range
     while offset <= search_range + 1e-9:
-        yt_text = normalize_text(segments_in_window(
-            yt_segments,
-            window_start - offset,
-            window_end - offset,
-        ))
+        yt_text = normalize_text(
+            segments_in_window(
+                yt_segments,
+                window_start - offset,
+                window_end - offset,
+            )
+        )
         if yt_text:
             wer, _, _ = compute_wer_cer(local_text, yt_text)
             if wer < best_wer:
@@ -393,9 +501,7 @@ def find_best_offset(local_segments, yt_segments, window_start, window_end,
 
     if alignment_uncertain and abs(best_offset) > 0.01:
         # Fall back to 0 offset since the matched offset looks like a false alignment
-        yt_text_zero = normalize_text(segments_in_window(
-            yt_segments, window_start, window_end
-        ))
+        yt_text_zero = normalize_text(segments_in_window(yt_segments, window_start, window_end))
         if yt_text_zero:
             wer_zero, _, _ = compute_wer_cer(local_text, yt_text_zero)
             best_offset = 0.0
@@ -408,6 +514,7 @@ def find_best_offset(local_segments, yt_segments, window_start, window_end,
 # ---------------------------------------------------------------------------
 # YouTube Caption Fetching
 # ---------------------------------------------------------------------------
+
 
 def fetch_youtube_captions_api(video_id, language="en"):
     """Fetch captions using youtube-transcript-api (v1.x API).
@@ -445,9 +552,11 @@ def fetch_youtube_captions_api(video_id, language="en"):
         if text.strip():
             segments.append(TimedSegment(start, start + duration, text))
 
-    print(f"  Fetched {len(segments)} YouTube caption segments "
-          f"({segments[0].start:.1f}s - {segments[-1].end:.1f}s)" if segments else
-          "  No segments returned")
+    print(
+        f"  Fetched {len(segments)} YouTube caption segments ({segments[0].start:.1f}s - {segments[-1].end:.1f}s)"
+        if segments
+        else "  No segments returned"
+    )
     return segments
 
 
@@ -464,10 +573,13 @@ def fetch_youtube_captions_ytdlp(video_id, language="en"):
         cmd = [
             "yt-dlp",
             "--write-auto-subs",
-            "--sub-lang", language,
-            "--sub-format", "vtt",
+            "--sub-lang",
+            language,
+            "--sub-format",
+            "vtt",
             "--skip-download",
-            "-o", out_template,
+            "-o",
+            out_template,
             url,
         ]
         try:
@@ -495,11 +607,9 @@ def fetch_youtube_captions_ytdlp(video_id, language="en"):
 def parse_vtt(vtt_path):
     """Parse a WebVTT file into TimedSegment objects."""
     segments = []
-    timestamp_re = re.compile(
-        r'(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})'
-    )
+    timestamp_re = re.compile(r"(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})")
 
-    with open(vtt_path, "r", encoding="utf-8") as f:
+    with open(vtt_path, encoding="utf-8") as f:
         lines = f.readlines()
 
     i = 0
@@ -517,7 +627,7 @@ def parse_vtt(vtt_path):
             text_lines = []
             while i < len(lines) and lines[i].strip():
                 # Remove VTT formatting tags
-                clean = re.sub(r'<[^>]+>', '', lines[i].strip())
+                clean = re.sub(r"<[^>]+>", "", lines[i].strip())
                 if clean:
                     text_lines.append(clean)
                 i += 1
@@ -544,6 +654,7 @@ def fetch_youtube_captions(video_id, language="en"):
 # Local Transcription CSV Loading (Post-Stream Mode)
 # ---------------------------------------------------------------------------
 
+
 def load_local_csv(csv_path):
     """Load local Whisper transcription from a dry_run_ab.py CSV.
 
@@ -556,7 +667,7 @@ def load_local_csv(csv_path):
     segments = []
     rows = []
 
-    with open(csv_path, "r", newline="", encoding="utf-8") as f:
+    with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             text = row.get("english", "").strip()
@@ -588,14 +699,14 @@ def load_local_csv(csv_path):
             end = start + 3.0
         segments.append(TimedSegment(start, end, text))
 
-    print(f"  Loaded {len(segments)} local segments from CSV "
-          f"({segments[0].start:.1f}s - {segments[-1].end:.1f}s)")
+    print(f"  Loaded {len(segments)} local segments from CSV ({segments[0].start:.1f}s - {segments[-1].end:.1f}s)")
     return segments
 
 
 # ---------------------------------------------------------------------------
 # Live Audio Capture and Transcription
 # ---------------------------------------------------------------------------
+
 
 def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISPER_PROMPT):
     """Capture live audio from a YouTube stream via streamlink and transcribe.
@@ -612,15 +723,14 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
         subprocess.run(["streamlink", "--version"], capture_output=True, timeout=5)
     except FileNotFoundError:
         print(
-            "ERROR: streamlink is required for live mode.\n"
-            "  Install with: pip install streamlink",
+            "ERROR: streamlink is required for live mode.\n  Install with: pip install streamlink",
             file=sys.stderr,
         )
         sys.exit(1)
 
     url = f"https://www.youtube.com/watch?v={video_id}"
     print(f"  Opening live stream: {url}")
-    print(f"  Duration: {duration_seconds}s ({duration_seconds/60:.1f} min)")
+    print(f"  Duration: {duration_seconds}s ({duration_seconds / 60:.1f} min)")
 
     # streamlink pipes audio to stdout; ffmpeg converts to raw 16kHz mono PCM
     streamlink_cmd = [
@@ -632,12 +742,18 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
 
     ffmpeg_cmd = [
         "ffmpeg",
-        "-i", "pipe:0",
-        "-f", "s16le",        # raw signed 16-bit little-endian
-        "-acodec", "pcm_s16le",
-        "-ar", str(SAMPLE_RATE),
-        "-ac", "1",
-        "-loglevel", "error",
+        "-i",
+        "pipe:0",
+        "-f",
+        "s16le",  # raw signed 16-bit little-endian
+        "-acodec",
+        "pcm_s16le",
+        "-ar",
+        str(SAMPLE_RATE),
+        "-ac",
+        "1",
+        "-loglevel",
+        "error",
         "pipe:1",
     ]
 
@@ -646,7 +762,7 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
     bytes_per_sample = 2  # 16-bit
     chunk_bytes = chunk_size_samples * bytes_per_sample
 
-    print(f"  Starting capture pipeline: streamlink | ffmpeg | mlx-whisper")
+    print("  Starting capture pipeline: streamlink | ffmpeg | mlx-whisper")
     print(f"  Chunk size: {WINDOW_SECONDS}s ({chunk_size_samples} samples)")
 
     # Warm up Whisper
@@ -661,9 +777,7 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
     print("  Whisper ready")
 
     try:
-        streamlink_proc = subprocess.Popen(
-            streamlink_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        streamlink_proc = subprocess.Popen(streamlink_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         ffmpeg_proc = subprocess.Popen(
             ffmpeg_cmd,
             stdin=streamlink_proc.stdout,
@@ -725,6 +839,7 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
 # ---------------------------------------------------------------------------
 # Windowed Comparison
 # ---------------------------------------------------------------------------
+
 
 def compare_windowed(local_segments, yt_segments, window_size=WINDOW_SECONDS):
     """Compare local and YouTube segments using sliding windows.
@@ -819,6 +934,7 @@ def compare_windowed(local_segments, yt_segments, window_size=WINDOW_SECONDS):
 # JSONL Logging
 # ---------------------------------------------------------------------------
 
+
 def write_jsonl(records, video_id, mode, csv_path=None):
     """Append comparison results to the JSONL log file.
 
@@ -830,7 +946,7 @@ def write_jsonl(records, video_id, mode, csv_path=None):
 
     session_record = {
         "session_id": SESSION_ID,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "video_id": video_id,
         "mode": mode,
         "csv_path": csv_path,
@@ -907,6 +1023,7 @@ def write_jsonl(records, video_id, mode, csv_path=None):
 # Summary Report
 # ---------------------------------------------------------------------------
 
+
 def print_session_summary(session_record):
     """Print a detailed summary of a comparison session.
 
@@ -917,16 +1034,16 @@ def print_session_summary(session_record):
     records = session_record.get("windows", [])
     agg = session_record.get("aggregate", {})
 
-    print(f"\n{'='*70}")
-    print(f"  CAPTION COMPARISON SUMMARY")
+    print(f"\n{'=' * 70}")
+    print("  CAPTION COMPARISON SUMMARY")
     print(f"  Session: {session_record.get('session_id', 'N/A')}")
     print(f"  Video:   {session_record.get('video_id', 'N/A')}")
     print(f"  Mode:    {session_record.get('mode', 'N/A')}")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     if not records:
         print("  No comparison windows produced.")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         return
 
     # Partition by quality status
@@ -939,15 +1056,17 @@ def print_session_summary(session_record):
     print(f"\n  Window Quality Breakdown ({n} total):")
     if comparable:
         clean_mean = agg.get("clean_mean_wer", 0)
-        print(f"    Comparable windows:    {len(comparable):>3}/{n} "
-              f"({len(comparable)/n:.0%}) -- Mean WER: {clean_mean:.1%}")
+        print(
+            f"    Comparable windows:    {len(comparable):>3}/{n} "
+            f"({len(comparable) / n:.0%}) -- Mean WER: {clean_mean:.1%}"
+        )
     else:
-        print(f"    Comparable windows:    {len(comparable):>3}/{n} "
-              f"({len(comparable)/n:.0%}) -- no clean metrics")
-    print(f"    YouTube degraded:      {len(yt_degraded):>3}/{n} "
-          f"({len(yt_degraded)/n:.0%}) -- excluded from metrics")
-    print(f"    Alignment uncertain:   {len(align_uncertain):>3}/{n} "
-          f"({len(align_uncertain)/n:.0%}) -- excluded from metrics")
+        print(f"    Comparable windows:    {len(comparable):>3}/{n} ({len(comparable) / n:.0%}) -- no clean metrics")
+    print(f"    YouTube degraded:      {len(yt_degraded):>3}/{n} ({len(yt_degraded) / n:.0%}) -- excluded from metrics")
+    print(
+        f"    Alignment uncertain:   {len(align_uncertain):>3}/{n} "
+        f"({len(align_uncertain) / n:.0%}) -- excluded from metrics"
+    )
 
     # --- Headline: clean metrics (comparable windows only) ---
     if comparable:
@@ -967,12 +1086,12 @@ def print_session_summary(session_record):
         n_high = agg.get("windows_comparable_high_wer", 0)
         nc = len(comparable)
 
-        print(f"\n  WER Interpretation (comparable windows):")
-        print(f"    Comparable/better (<=15%): {n_low}/{nc} ({n_low/nc:.0%})")
-        print(f"    Potential issues (15-25%): {n_mid}/{nc} ({n_mid/nc:.0%})")
-        print(f"    Likely degradation (>25%): {n_high}/{nc} ({n_high/nc:.0%})")
+        print("\n  WER Interpretation (comparable windows):")
+        print(f"    Comparable/better (<=15%): {n_low}/{nc} ({n_low / nc:.0%})")
+        print(f"    Potential issues (15-25%): {n_mid}/{nc} ({n_mid / nc:.0%})")
+        print(f"    Likely degradation (>25%): {n_high}/{nc} ({n_high / nc:.0%})")
     else:
-        print(f"\n  WARNING: No comparable windows -- all excluded by quality filters")
+        print("\n  WARNING: No comparable windows -- all excluded by quality filters")
 
     # --- Secondary: raw metrics (all windows) ---
     print(f"\n  Raw Metrics ({n} windows, all included):")
@@ -986,28 +1105,34 @@ def print_session_summary(session_record):
         sorted_comp = sorted(comparable, key=lambda r: r["wer"])
 
         if len(sorted_comp) > 5:
-            print(f"\n  Best 5 Comparable Windows:")
+            print("\n  Best 5 Comparable Windows:")
             for r in sorted_comp[:5]:
-                print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                      f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
-                      f"offset={r['offset_seconds']:+.1f}s "
-                      f"({r['local_words']}w local, {r['yt_words']}w YT)")
+                print(
+                    f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                    f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
+                    f"offset={r['offset_seconds']:+.1f}s "
+                    f"({r['local_words']}w local, {r['yt_words']}w YT)"
+                )
 
-            print(f"\n  Worst 5 Comparable Windows:")
+            print("\n  Worst 5 Comparable Windows:")
             for r in sorted_comp[-5:]:
-                print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                      f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
-                      f"offset={r['offset_seconds']:+.1f}s "
-                      f"({r['local_words']}w local, {r['yt_words']}w YT)")
+                print(
+                    f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                    f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
+                    f"offset={r['offset_seconds']:+.1f}s "
+                    f"({r['local_words']}w local, {r['yt_words']}w YT)"
+                )
                 if r["wer"] > 0.25:
                     print(f"      Local: {r['local_text'][:100]}")
                     print(f"      YT:    {r['yt_text'][:100]}")
         else:
-            print(f"\n  All Comparable Windows:")
+            print("\n  All Comparable Windows:")
             for r in sorted_comp:
-                print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                      f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
-                      f"offset={r['offset_seconds']:+.1f}s")
+                print(
+                    f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                    f"WER={r['wer']:.1%} CER={r['cer']:.1%} "
+                    f"offset={r['offset_seconds']:+.1f}s"
+                )
 
     # --- Detail on excluded windows for debugging ---
     if yt_degraded:
@@ -1015,9 +1140,11 @@ def print_session_summary(session_record):
         for r in yt_degraded[:3]:  # show first 3 for brevity
             rep = r.get("yt_repetition", {})
             phrases = ", ".join(rep.get("repeated_phrases", [])[:2])
-            print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                  f"word_repeat={rep.get('word_repeat_ratio', 0):.0%} "
-                  f"phrase_repeats={rep.get('phrase_repeat_count', 0)}")
+            print(
+                f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                f"word_repeat={rep.get('word_repeat_ratio', 0):.0%} "
+                f"phrase_repeats={rep.get('phrase_repeat_count', 0)}"
+            )
             if phrases:
                 print(f"      Repeated: {phrases}")
             print(f"      YT text: {r['yt_text'][:120]}")
@@ -1027,9 +1154,11 @@ def print_session_summary(session_record):
     if align_uncertain:
         print(f"\n  Alignment Uncertain Windows ({len(align_uncertain)}):")
         for r in align_uncertain[:3]:
-            print(f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
-                  f"offset={r['offset_seconds']:+.1f}s "
-                  f"({r['local_words']}w local, {r['yt_words']}w YT)")
+            print(
+                f"    [{r['window_start']:.0f}s-{r['window_end']:.0f}s] "
+                f"offset={r['offset_seconds']:+.1f}s "
+                f"({r['local_words']}w local, {r['yt_words']}w YT)"
+            )
         if len(align_uncertain) > 3:
             print(f"    ... and {len(align_uncertain) - 3} more")
 
@@ -1042,9 +1171,9 @@ def print_session_summary(session_record):
     print(f"    Std offset:    {np.std(offsets):.1f}s")
     print(f"    Range:         [{min(offsets):+.1f}s, {max(offsets):+.1f}s]")
     if np.std(offsets) > 2.0:
-        print(f"    WARNING: High offset variance -- latency drift detected")
+        print("    WARNING: High offset variance -- latency drift detected")
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
 
 
 def print_trend_report(jsonl_path=JSONL_PATH):
@@ -1054,7 +1183,7 @@ def print_trend_report(jsonl_path=JSONL_PATH):
         return
 
     sessions = []
-    with open(jsonl_path, "r") as f:
+    with open(jsonl_path) as f:
         for line in f:
             line = line.strip()
             if line:
@@ -1067,15 +1196,16 @@ def print_trend_report(jsonl_path=JSONL_PATH):
         print("  No valid sessions in JSONL")
         return
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"  TREND ANALYSIS ({len(sessions)} sessions)")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     # Table header -- show clean WER and quality breakdown
-    print(f"\n  {'Session':<20} {'Video':<15} {'Mode':<6} {'Win':>4} "
-          f"{'Clean WER':>10} {'Raw WER':>8} {'Comp':>5} {'YTDeg':>5} {'Unc':>4}")
-    print(f"  {'-'*20} {'-'*15} {'-'*6} {'-'*4} "
-          f"{'-'*10} {'-'*8} {'-'*5} {'-'*5} {'-'*4}")
+    print(
+        f"\n  {'Session':<20} {'Video':<15} {'Mode':<6} {'Win':>4} "
+        f"{'Clean WER':>10} {'Raw WER':>8} {'Comp':>5} {'YTDeg':>5} {'Unc':>4}"
+    )
+    print(f"  {'-' * 20} {'-' * 15} {'-' * 6} {'-' * 4} {'-' * 10} {'-' * 8} {'-' * 5} {'-' * 5} {'-' * 4}")
 
     clean_wers = []
     for s in sessions:
@@ -1095,8 +1225,9 @@ def print_trend_report(jsonl_path=JSONL_PATH):
         clean_str = f"{clean_wer:.1%}" if clean_wer is not None else "N/A"
         raw_str = f"{raw_wer:.1%}" if raw_wer is not None else "N/A"
 
-        print(f"  {sid:<20} {vid:<15} {mode:<6} {n:>4} "
-              f"{clean_str:>10} {raw_str:>8} {n_comp:>5} {n_ytdeg:>5} {n_unc:>4}")
+        print(
+            f"  {sid:<20} {vid:<15} {mode:<6} {n:>4} {clean_str:>10} {raw_str:>8} {n_comp:>5} {n_ytdeg:>5} {n_unc:>4}"
+        )
 
         # Use clean WER for trend if available, otherwise raw
         wer_for_trend = clean_wer if clean_wer is not None else raw_wer
@@ -1105,13 +1236,13 @@ def print_trend_report(jsonl_path=JSONL_PATH):
 
     if len(clean_wers) >= 2:
         # Simple trend: is the WER going down over time?
-        first_half = clean_wers[:len(clean_wers)//2]
-        second_half = clean_wers[len(clean_wers)//2:]
+        first_half = clean_wers[: len(clean_wers) // 2]
+        second_half = clean_wers[len(clean_wers) // 2 :]
         avg_first = np.mean(first_half)
         avg_second = np.mean(second_half)
         delta = avg_second - avg_first
 
-        print(f"\n  Trend (using clean WER where available, raw otherwise):")
+        print("\n  Trend (using clean WER where available, raw otherwise):")
         print(f"    First half avg WER:  {avg_first:.1%} ({len(first_half)} sessions)")
         print(f"    Second half avg WER: {avg_second:.1%} ({len(second_half)} sessions)")
         if delta < -0.01:
@@ -1127,12 +1258,13 @@ def print_trend_report(jsonl_path=JSONL_PATH):
         print(f"    Best session:  {min(clean_wers):.1%}")
         print(f"    Worst session: {max(clean_wers):.1%}")
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
 
 
 # ---------------------------------------------------------------------------
 # Live Mode: Poll YouTube Captions Periodically
 # ---------------------------------------------------------------------------
+
 
 def poll_youtube_captions_live(video_id, duration_seconds, language="en"):
     """Poll YouTube captions periodically during a livestream.
@@ -1169,11 +1301,10 @@ def poll_youtube_captions_live(video_id, duration_seconds, language="en"):
                     new_count += 1
 
             if new_count > 0:
-                print(f"  [{time.time()-t_start:.0f}s] +{new_count} new YT segments "
-                      f"(total: {len(all_segments)})")
+                print(f"  [{time.time() - t_start:.0f}s] +{new_count} new YT segments (total: {len(all_segments)})")
 
         except Exception as e:
-            print(f"  [{time.time()-t_start:.0f}s] YT poll failed: {e}")
+            print(f"  [{time.time() - t_start:.0f}s] YT poll failed: {e}")
 
         time.sleep(POLL_INTERVAL)
 
@@ -1187,9 +1318,10 @@ def poll_youtube_captions_live(video_id, duration_seconds, language="en"):
 # Mode Handlers
 # ---------------------------------------------------------------------------
 
+
 def run_post_stream(video_id, csv_path, language="en"):
     """Post-stream mode: compare saved CSV against YouTube auto-subs."""
-    print(f"\n  Mode: POST-STREAM")
+    print("\n  Mode: POST-STREAM")
     print(f"  Video: {video_id}")
     print(f"  CSV:   {csv_path}")
 
@@ -1206,8 +1338,7 @@ def run_post_stream(video_id, csv_path, language="en"):
         return
 
     # Compare
-    print(f"\n  Comparing {len(local_segments)} local segments "
-          f"against {len(yt_segments)} YouTube segments...")
+    print(f"\n  Comparing {len(local_segments)} local segments against {len(yt_segments)} YouTube segments...")
     records = compare_windowed(local_segments, yt_segments)
 
     # Log and report
@@ -1216,7 +1347,7 @@ def run_post_stream(video_id, csv_path, language="en"):
 
     # Check for historical trend data
     if os.path.exists(JSONL_PATH):
-        with open(JSONL_PATH, "r") as f:
+        with open(JSONL_PATH) as f:
             n_sessions = sum(1 for line in f if line.strip())
         if n_sessions > 1:
             print_trend_report()
@@ -1224,7 +1355,7 @@ def run_post_stream(video_id, csv_path, language="en"):
 
 def run_live(video_id, duration_seconds, language="en"):
     """Live mode: capture audio, transcribe locally, compare against YT captions."""
-    print(f"\n  Mode: LIVE")
+    print("\n  Mode: LIVE")
     print(f"  Video: {video_id}")
     print(f"  Duration: {duration_seconds}s")
 
@@ -1250,8 +1381,10 @@ def run_live(video_id, duration_seconds, language="en"):
         yt_segments = poll_youtube_captions_live(video_id, min(60, duration_seconds), language)
 
     if not yt_segments:
-        print("  WARNING: No YouTube captions available yet. "
-              "Saving local transcription for later comparison.", file=sys.stderr)
+        print(
+            "  WARNING: No YouTube captions available yet. Saving local transcription for later comparison.",
+            file=sys.stderr,
+        )
         # Save local segments to a temporary CSV so they can be compared later
         tmp_csv = f"metrics/live_local_{SESSION_ID}.csv"
         os.makedirs("metrics", exist_ok=True)
@@ -1262,13 +1395,12 @@ def run_live(video_id, duration_seconds, language="en"):
             for i, seg in enumerate(local_segments):
                 writer.writerow([i + 1, t0.isoformat(), seg.text])
         print(f"  Local transcription saved to {tmp_csv}")
-        print(f"  Re-run in post mode once YouTube captions are available:")
+        print("  Re-run in post mode once YouTube captions are available:")
         print(f"    python live_caption_monitor.py post --video-id {video_id} --csv {tmp_csv}")
         return
 
     # Compare
-    print(f"\n  Phase 3: Comparing {len(local_segments)} local segments "
-          f"against {len(yt_segments)} YouTube segments...")
+    print(f"\n  Phase 3: Comparing {len(local_segments)} local segments against {len(yt_segments)} YouTube segments...")
     records = compare_windowed(local_segments, yt_segments)
 
     # Log and report
@@ -1277,7 +1409,7 @@ def run_live(video_id, duration_seconds, language="en"):
 
     # Check for historical trend data
     if os.path.exists(JSONL_PATH):
-        with open(JSONL_PATH, "r") as f:
+        with open(JSONL_PATH) as f:
             n_sessions = sum(1 for line in f if line.strip())
         if n_sessions > 1:
             print_trend_report()
@@ -1285,16 +1417,17 @@ def run_live(video_id, duration_seconds, language="en"):
 
 def run_wav(video_id, wav_path, language="en", chunk_seconds=30.0):
     """WAV mode: transcribe a WAV file with Whisper and compare against YouTube captions."""
-    print(f"\n  Mode: WAV TRANSCRIBE + COMPARE")
+    print("\n  Mode: WAV TRANSCRIBE + COMPARE")
     print(f"  Video: {video_id}")
     print(f"  WAV:   {wav_path}")
 
     # Transcribe WAV locally with mlx-whisper
-    import mlx_whisper
     import mlx.core as mx
+    import mlx_whisper
+
     mx.set_cache_limit(256 * 1024 * 1024)
 
-    print(f"\n  Phase 1: Transcribing WAV with mlx-whisper...")
+    print("\n  Phase 1: Transcribing WAV with mlx-whisper...")
     t0 = time.perf_counter()
     result = mlx_whisper.transcribe(
         wav_path,
@@ -1313,23 +1446,24 @@ def run_wav(video_id, wav_path, language="en", chunk_seconds=30.0):
             local_segments.append(TimedSegment(seg["start"], seg["end"], text))
 
     audio_duration = local_segments[-1].end if local_segments else 0
-    print(f"  Transcribed {len(local_segments)} segments in {stt_ms/1000:.1f}s "
-          f"({audio_duration:.0f}s audio, {audio_duration/(stt_ms/1000):.1f}x realtime)")
+    print(
+        f"  Transcribed {len(local_segments)} segments in {stt_ms / 1000:.1f}s "
+        f"({audio_duration:.0f}s audio, {audio_duration / (stt_ms / 1000):.1f}x realtime)"
+    )
 
     if not local_segments:
         print("  ERROR: No segments transcribed", file=sys.stderr)
         return
 
     # Fetch YouTube captions
-    print(f"\n  Phase 2: Fetching YouTube captions...")
+    print("\n  Phase 2: Fetching YouTube captions...")
     yt_segments = fetch_youtube_captions(video_id, language)
     if not yt_segments:
         print("  ERROR: No YouTube captions fetched", file=sys.stderr)
         return
 
     # Compare
-    print(f"\n  Phase 3: Comparing {len(local_segments)} local segments "
-          f"against {len(yt_segments)} YouTube segments...")
+    print(f"\n  Phase 3: Comparing {len(local_segments)} local segments against {len(yt_segments)} YouTube segments...")
     records = compare_windowed(local_segments, yt_segments)
 
     # Log and report
@@ -1345,6 +1479,7 @@ def run_report():
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def main():
     global WINDOW_SECONDS, JSONL_PATH
@@ -1375,47 +1510,48 @@ Cross-system WER interpretation:
 
     # Post-stream mode
     post_parser = subparsers.add_parser("post", help="Post-stream comparison")
-    post_parser.add_argument("--video-id", required=True,
-                             help="YouTube video ID (e.g., dQw4w9WgXcQ)")
-    post_parser.add_argument("--csv", required=True,
-                             help="Path to local transcription CSV from dry_run_ab.py")
-    post_parser.add_argument("--language", default="en",
-                             help="Caption language code (default: en)")
-    post_parser.add_argument("--window-size", type=float, default=WINDOW_SECONDS,
-                             help=f"Comparison window size in seconds (default: {WINDOW_SECONDS})")
-    post_parser.add_argument("--output", default=JSONL_PATH,
-                             help=f"Output JSONL path (default: {JSONL_PATH})")
+    post_parser.add_argument("--video-id", required=True, help="YouTube video ID (e.g., dQw4w9WgXcQ)")
+    post_parser.add_argument("--csv", required=True, help="Path to local transcription CSV from dry_run_ab.py")
+    post_parser.add_argument("--language", default="en", help="Caption language code (default: en)")
+    post_parser.add_argument(
+        "--window-size",
+        type=float,
+        default=WINDOW_SECONDS,
+        help=f"Comparison window size in seconds (default: {WINDOW_SECONDS})",
+    )
+    post_parser.add_argument("--output", default=JSONL_PATH, help=f"Output JSONL path (default: {JSONL_PATH})")
 
     # Live mode
     live_parser = subparsers.add_parser("live", help="Live stream monitoring")
-    live_parser.add_argument("--video-id", required=True,
-                             help="YouTube video ID or URL")
-    live_parser.add_argument("--duration", type=int, default=3600,
-                             help="Duration to monitor in seconds (default: 3600)")
-    live_parser.add_argument("--language", default="en",
-                             help="Caption language code (default: en)")
-    live_parser.add_argument("--window-size", type=float, default=WINDOW_SECONDS,
-                             help=f"Comparison window size in seconds (default: {WINDOW_SECONDS})")
-    live_parser.add_argument("--output", default=JSONL_PATH,
-                             help=f"Output JSONL path (default: {JSONL_PATH})")
+    live_parser.add_argument("--video-id", required=True, help="YouTube video ID or URL")
+    live_parser.add_argument(
+        "--duration", type=int, default=3600, help="Duration to monitor in seconds (default: 3600)"
+    )
+    live_parser.add_argument("--language", default="en", help="Caption language code (default: en)")
+    live_parser.add_argument(
+        "--window-size",
+        type=float,
+        default=WINDOW_SECONDS,
+        help=f"Comparison window size in seconds (default: {WINDOW_SECONDS})",
+    )
+    live_parser.add_argument("--output", default=JSONL_PATH, help=f"Output JSONL path (default: {JSONL_PATH})")
 
     # WAV mode
     wav_parser = subparsers.add_parser("wav", help="Transcribe WAV + compare against YouTube")
-    wav_parser.add_argument("--video-id", required=True,
-                            help="YouTube video ID for the same sermon")
-    wav_parser.add_argument("--wav", required=True,
-                            help="Path to WAV file (16kHz mono)")
-    wav_parser.add_argument("--language", default="en",
-                            help="Caption language code (default: en)")
-    wav_parser.add_argument("--window-size", type=float, default=WINDOW_SECONDS,
-                            help=f"Comparison window size in seconds (default: {WINDOW_SECONDS})")
-    wav_parser.add_argument("--output", default=JSONL_PATH,
-                            help=f"Output JSONL path (default: {JSONL_PATH})")
+    wav_parser.add_argument("--video-id", required=True, help="YouTube video ID for the same sermon")
+    wav_parser.add_argument("--wav", required=True, help="Path to WAV file (16kHz mono)")
+    wav_parser.add_argument("--language", default="en", help="Caption language code (default: en)")
+    wav_parser.add_argument(
+        "--window-size",
+        type=float,
+        default=WINDOW_SECONDS,
+        help=f"Comparison window size in seconds (default: {WINDOW_SECONDS})",
+    )
+    wav_parser.add_argument("--output", default=JSONL_PATH, help=f"Output JSONL path (default: {JSONL_PATH})")
 
     # Report mode
     report_parser = subparsers.add_parser("report", help="Trend analysis report")
-    report_parser.add_argument("--input", default=JSONL_PATH,
-                               help=f"Input JSONL path (default: {JSONL_PATH})")
+    report_parser.add_argument("--input", default=JSONL_PATH, help=f"Input JSONL path (default: {JSONL_PATH})")
 
     args = parser.parse_args()
 
@@ -1428,11 +1564,11 @@ Cross-system WER interpretation:
         WINDOW_SECONDS = args.window_size
         JSONL_PATH = args.output
 
-    print(f"{'='*70}")
-    print(f"  Live Caption Monitor — YouTube vs Local Whisper")
+    print(f"{'=' * 70}")
+    print("  Live Caption Monitor — YouTube vs Local Whisper")
     print(f"  Session: {SESSION_ID}")
     print(f"  Output:  {JSONL_PATH}")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     if args.mode == "post":
         if not os.path.exists(args.csv):
@@ -1462,7 +1598,7 @@ def extract_video_id(video_id_or_url):
     """Extract a YouTube video ID from a URL or return as-is if already an ID."""
     # Handle full YouTube URLs
     patterns = [
-        r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/live/)([a-zA-Z0-9_-]{11})',
+        r"(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/live/)([a-zA-Z0-9_-]{11})",
     ]
     for pattern in patterns:
         m = re.search(pattern, video_id_or_url)

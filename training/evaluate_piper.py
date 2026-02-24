@@ -22,7 +22,6 @@ import csv
 import io
 import json
 import logging
-import struct
 import sys
 import time
 import wave
@@ -51,8 +50,8 @@ except ImportError:
     PIPER_AVAILABLE = False
 
 try:
-    import mlx_whisper
     import mlx.core as mx
+    import mlx_whisper
 
     MLX_WHISPER_AVAILABLE = True
 except ImportError:
@@ -191,6 +190,7 @@ THEOLOGICAL_TERMS = {
 # Piper synthesis helpers
 # ---------------------------------------------------------------------------
 
+
 def load_piper_voice(voice_path_or_name, lang="en"):
     """Load a Piper voice from an ONNX path or a named model.
 
@@ -284,6 +284,7 @@ def get_audio_duration(wav_bytes):
 # Whisper STT helper
 # ---------------------------------------------------------------------------
 
+
 def transcribe_audio(audio_float32, whisper_model=DEFAULT_WHISPER_MODEL, lang="en"):
     """Transcribe a float32 audio array using mlx-whisper.
 
@@ -312,6 +313,7 @@ def transcribe_audio(audio_float32, whisper_model=DEFAULT_WHISPER_MODEL, lang="e
 # Prosody analysis
 # ---------------------------------------------------------------------------
 
+
 def analyze_prosody(wav_bytes, text, lang="en"):
     """Analyze prosody of synthesized audio.
 
@@ -336,14 +338,14 @@ def analyze_prosody(wav_bytes, text, lang="en"):
 
     # Pause detection via frame-level energy thresholding
     frame_len = int(sr * SILENCE_FRAME_MS / 1000)
-    overall_rms = np.sqrt(np.mean(audio ** 2)) + 1e-10
+    overall_rms = np.sqrt(np.mean(audio**2)) + 1e-10
     threshold = overall_rms * SILENCE_ENERGY_RATIO
 
     n_frames = len(audio) // frame_len
     is_silent = np.zeros(n_frames, dtype=bool)
     for i in range(n_frames):
         frame = audio[i * frame_len : (i + 1) * frame_len]
-        frame_rms = np.sqrt(np.mean(frame ** 2))
+        frame_rms = np.sqrt(np.mean(frame**2))
         is_silent[i] = frame_rms < threshold
 
     # Identify contiguous silent regions
@@ -357,19 +359,23 @@ def analyze_prosody(wav_bytes, text, lang="en"):
         elif not is_silent[i] and in_pause:
             pause_dur_s = (i - pause_start) * SILENCE_FRAME_MS / 1000
             if pause_dur_s >= LONG_PAUSE_THRESHOLD_S:
-                long_pauses.append((
-                    round(pause_start * SILENCE_FRAME_MS / 1000, 3),
-                    round(pause_dur_s, 3),
-                ))
+                long_pauses.append(
+                    (
+                        round(pause_start * SILENCE_FRAME_MS / 1000, 3),
+                        round(pause_dur_s, 3),
+                    )
+                )
             in_pause = False
     # Handle trailing silence
     if in_pause:
         pause_dur_s = (n_frames - pause_start) * SILENCE_FRAME_MS / 1000
         if pause_dur_s >= LONG_PAUSE_THRESHOLD_S:
-            long_pauses.append((
-                round(pause_start * SILENCE_FRAME_MS / 1000, 3),
-                round(pause_dur_s, 3),
-            ))
+            long_pauses.append(
+                (
+                    round(pause_start * SILENCE_FRAME_MS / 1000, 3),
+                    round(pause_dur_s, 3),
+                )
+            )
 
     return {
         "duration_s": round(duration_s, 3),
@@ -385,6 +391,7 @@ def analyze_prosody(wav_bytes, text, lang="en"):
 # ---------------------------------------------------------------------------
 # Round-trip evaluation (TTS -> STT -> compare)
 # ---------------------------------------------------------------------------
+
 
 def evaluate_round_trip(voice, text, lang="en", whisper_model=DEFAULT_WHISPER_MODEL):
     """Synthesize text, transcribe back, compute WER/CER.
@@ -452,15 +459,18 @@ def evaluate_theological_terms(voice, lang="en", whisper_model=DEFAULT_WHISPER_M
 
         # Normalize for comparison -- strip punctuation and lowercase
         import re
+
         norm_original = re.sub(r"[^\w\s]", "", term.lower()).strip()
         norm_transcription = re.sub(r"[^\w\s]", "", transcription.lower()).strip()
         match = norm_original == norm_transcription
 
-        results.append({
-            "term": term,
-            "transcription": transcription,
-            "match": match,
-        })
+        results.append(
+            {
+                "term": term,
+                "transcription": transcription,
+                "match": match,
+            }
+        )
 
         status = "OK" if match else "MISMATCH"
         logger.info(f"  [{status}] {term!r} -> {transcription!r}")
@@ -471,6 +481,7 @@ def evaluate_theological_terms(voice, lang="en", whisper_model=DEFAULT_WHISPER_M
 # ---------------------------------------------------------------------------
 # Full evaluation pipeline
 # ---------------------------------------------------------------------------
+
 
 def evaluate_voice(
     voice_path_or_name,
@@ -524,7 +535,10 @@ def evaluate_voice(
         for i, sentence in enumerate(sentences, 1):
             logger.info(f"  [{i}/{len(sentences)}] {sentence[:60]}{'...' if len(sentence) > 60 else ''}")
             result = evaluate_round_trip(
-                voice, sentence, lang=lang, whisper_model=whisper_model,
+                voice,
+                sentence,
+                lang=lang,
+                whisper_model=whisper_model,
             )
             result["voice"] = voice_label
             result["language"] = lang
@@ -569,14 +583,20 @@ def evaluate_voice(
     if not skip_roundtrip:
         logger.info("\n--- Theological term spot-check ---")
         term_results = evaluate_theological_terms(
-            voice, lang=lang, whisper_model=whisper_model,
+            voice,
+            lang=lang,
+            whisper_model=whisper_model,
         )
 
     # ------------------------------------------------------------------
     # Aggregate summary
     # ------------------------------------------------------------------
     summary = _build_summary(
-        voice_label, lang, sentence_results, term_results, timestamp,
+        voice_label,
+        lang,
+        sentence_results,
+        term_results,
+        timestamp,
         skip_roundtrip=skip_roundtrip,
     )
 
@@ -590,8 +610,7 @@ def evaluate_voice(
     return summary
 
 
-def _build_summary(voice_label, lang, sentence_results, term_results, timestamp,
-                   skip_roundtrip=False):
+def _build_summary(voice_label, lang, sentence_results, term_results, timestamp, skip_roundtrip=False):
     """Compute aggregate metrics from per-sentence results."""
     summary = {
         "voice": voice_label,
@@ -634,9 +653,7 @@ def _build_summary(voice_label, lang, sentence_results, term_results, timestamp,
         summary["term_correct"] = n_match
         summary["term_total"] = len(term_results)
         summary["term_mismatches"] = [
-            {"term": t["term"], "got": t["transcription"]}
-            for t in term_results
-            if not t["match"]
+            {"term": t["term"], "got": t["transcription"]} for t in term_results if not t["match"]
         ]
 
     return summary
@@ -646,13 +663,20 @@ def _build_summary(voice_label, lang, sentence_results, term_results, timestamp,
 # Output helpers
 # ---------------------------------------------------------------------------
 
+
 def _write_csv(csv_path, sentence_results, voice_label, lang):
     """Append sentence-level results to the CSV log."""
     file_exists = csv_path.exists()
 
     fieldnames = [
-        "voice", "language", "test_sentence", "round_trip_wer", "round_trip_cer",
-        "speaking_rate_wpm", "duration_s", "timestamp",
+        "voice",
+        "language",
+        "test_sentence",
+        "round_trip_wer",
+        "round_trip_cer",
+        "speaking_rate_wpm",
+        "duration_s",
+        "timestamp",
     ]
 
     with open(csv_path, "a", newline="", encoding="utf-8") as f:
@@ -660,16 +684,18 @@ def _write_csv(csv_path, sentence_results, voice_label, lang):
         if not file_exists:
             writer.writeheader()
         for r in sentence_results:
-            writer.writerow({
-                "voice": r["voice"],
-                "language": r["language"],
-                "test_sentence": r["original"],
-                "round_trip_wer": r["wer"] if r["wer"] is not None else "",
-                "round_trip_cer": r["cer"] if r["cer"] is not None else "",
-                "speaking_rate_wpm": r["prosody"]["speaking_rate_wpm"],
-                "duration_s": r["duration_s"],
-                "timestamp": r["timestamp"],
-            })
+            writer.writerow(
+                {
+                    "voice": r["voice"],
+                    "language": r["language"],
+                    "test_sentence": r["original"],
+                    "round_trip_wer": r["wer"] if r["wer"] is not None else "",
+                    "round_trip_cer": r["cer"] if r["cer"] is not None else "",
+                    "speaking_rate_wpm": r["prosody"]["speaking_rate_wpm"],
+                    "duration_s": r["duration_s"],
+                    "timestamp": r["timestamp"],
+                }
+            )
 
     logger.info(f"CSV results appended to {csv_path}")
 
@@ -684,7 +710,7 @@ def _write_json_summary(json_path, summary):
     all_summaries = {}
     if json_path.exists():
         try:
-            with open(json_path, "r", encoding="utf-8") as f:
+            with open(json_path, encoding="utf-8") as f:
                 all_summaries = json.load(f)
         except (json.JSONDecodeError, OSError):
             pass
@@ -701,7 +727,7 @@ def _write_json_summary(json_path, summary):
 def _print_summary_table(summary):
     """Print a human-readable summary table to stdout."""
     print(f"\n{'=' * 60}")
-    print(f"TTS EVALUATION SUMMARY")
+    print("TTS EVALUATION SUMMARY")
     print(f"{'=' * 60}")
     print(f"  Voice:              {summary['voice']}")
     print(f"  Language:           {summary['language']}")
@@ -728,10 +754,12 @@ def _print_summary_table(summary):
         print(f"  Total audio:        {total_dur:.1f}s")
 
     if "term_accuracy" in summary:
-        print(f"\n  Theological terms:")
-        print(f"    Accuracy:         {summary['term_accuracy']:.0%} ({summary['term_correct']}/{summary['term_total']})")
+        print("\n  Theological terms:")
+        print(
+            f"    Accuracy:         {summary['term_accuracy']:.0%} ({summary['term_correct']}/{summary['term_total']})"
+        )
         if summary.get("term_mismatches"):
-            print(f"    Mismatches:")
+            print("    Mismatches:")
             for m in summary["term_mismatches"]:
                 print(f"      {m['term']!r} -> {m['got']!r}")
 
@@ -742,8 +770,8 @@ def _print_summary_table(summary):
 # Comparison mode
 # ---------------------------------------------------------------------------
 
-def compare_voices(voice_a, voice_b, lang="en", whisper_model=DEFAULT_WHISPER_MODEL,
-                   output_dir=None):
+
+def compare_voices(voice_a, voice_b, lang="en", whisper_model=DEFAULT_WHISPER_MODEL, output_dir=None):
     """Evaluate two voices side by side and print a comparison table.
 
     Useful for comparing a stock Piper voice against a fine-tuned church voice.
@@ -753,10 +781,16 @@ def compare_voices(voice_a, voice_b, lang="en", whisper_model=DEFAULT_WHISPER_MO
     logger.info(f"  Voice B: {voice_b}")
 
     summary_a = evaluate_voice(
-        voice_a, lang=lang, whisper_model=whisper_model, output_dir=output_dir,
+        voice_a,
+        lang=lang,
+        whisper_model=whisper_model,
+        output_dir=output_dir,
     )
     summary_b = evaluate_voice(
-        voice_b, lang=lang, whisper_model=whisper_model, output_dir=output_dir,
+        voice_b,
+        lang=lang,
+        whisper_model=whisper_model,
+        output_dir=output_dir,
     )
 
     if summary_a is None or summary_b is None:
@@ -785,13 +819,16 @@ def _print_comparison(a, b):
     ]
 
     if not a.get("skip_roundtrip") and not b.get("skip_roundtrip"):
+
         def fmt_pct(v):
             return f"{v:.2%}" if v is not None else "N/A"
 
-        rows.extend([
-            ("Mean WER", fmt_pct(a.get("mean_wer")), fmt_pct(b.get("mean_wer"))),
-            ("Mean CER", fmt_pct(a.get("mean_cer")), fmt_pct(b.get("mean_cer"))),
-        ])
+        rows.extend(
+            [
+                ("Mean WER", fmt_pct(a.get("mean_wer")), fmt_pct(b.get("mean_wer"))),
+                ("Mean CER", fmt_pct(a.get("mean_cer")), fmt_pct(b.get("mean_cer"))),
+            ]
+        )
 
         # Delta
         if a.get("mean_wer") is not None and b.get("mean_wer") is not None:
@@ -803,18 +840,22 @@ def _print_comparison(a, b):
         r = s.get("mean_speaking_rate_wpm")
         return f"{r:.0f} WPM" if r is not None else "N/A"
 
-    rows.extend([
-        ("Speaking rate", fmt_rate(a), fmt_rate(b)),
-        ("Rate out of range", str(a.get("num_rate_out_of_range", 0)), str(b.get("num_rate_out_of_range", 0))),
-        ("Long pauses", str(a.get("total_long_pauses", 0)), str(b.get("total_long_pauses", 0))),
-    ])
+    rows.extend(
+        [
+            ("Speaking rate", fmt_rate(a), fmt_rate(b)),
+            ("Rate out of range", str(a.get("num_rate_out_of_range", 0)), str(b.get("num_rate_out_of_range", 0))),
+            ("Long pauses", str(a.get("total_long_pauses", 0)), str(b.get("total_long_pauses", 0))),
+        ]
+    )
 
     if "term_accuracy" in a and "term_accuracy" in b:
-        rows.append((
-            "Term accuracy",
-            f"{a['term_accuracy']:.0%} ({a['term_correct']}/{a['term_total']})",
-            f"{b['term_accuracy']:.0%} ({b['term_correct']}/{b['term_total']})",
-        ))
+        rows.append(
+            (
+                "Term accuracy",
+                f"{a['term_accuracy']:.0%} ({a['term_correct']}/{a['term_total']})",
+                f"{b['term_accuracy']:.0%} ({b['term_correct']}/{b['term_total']})",
+            )
+        )
 
     for label, va, vb in rows:
         print(f"{label.ljust(label_w)}{str(va).ljust(col_w)}{str(vb).ljust(col_w)}")
@@ -826,32 +867,45 @@ def _print_comparison(a, b):
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Evaluate Piper TTS voice quality via round-trip STT comparison",
     )
     parser.add_argument(
-        "--voice", type=str, default=None,
+        "--voice",
+        type=str,
+        default=None,
         help="Piper voice name or path to custom ONNX model",
     )
     parser.add_argument(
-        "--lang", type=str, default="en", choices=["en", "es", "hi", "zh"],
+        "--lang",
+        type=str,
+        default="en",
+        choices=["en", "es", "hi", "zh"],
         help="Language code (default: en)",
     )
     parser.add_argument(
-        "--output-dir", type=str, default=None,
+        "--output-dir",
+        type=str,
+        default=None,
         help="Metrics output directory (default: metrics/)",
     )
     parser.add_argument(
-        "--whisper-model", type=str, default=DEFAULT_WHISPER_MODEL,
+        "--whisper-model",
+        type=str,
+        default=DEFAULT_WHISPER_MODEL,
         help=f"Whisper model for STT verification (default: {DEFAULT_WHISPER_MODEL})",
     )
     parser.add_argument(
-        "--skip-roundtrip", action="store_true",
+        "--skip-roundtrip",
+        action="store_true",
         help="Skip round-trip WER evaluation (prosody analysis only)",
     )
     parser.add_argument(
-        "--compare", nargs=2, metavar=("VOICE_A", "VOICE_B"),
+        "--compare",
+        nargs=2,
+        metavar=("VOICE_A", "VOICE_B"),
         help="Compare two voices side by side (e.g. stock vs fine-tuned)",
     )
     args = parser.parse_args()

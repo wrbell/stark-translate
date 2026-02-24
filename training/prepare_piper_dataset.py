@@ -25,11 +25,9 @@ Usage:
 """
 
 import argparse
-import csv
 import json
 import logging
 import os
-import struct
 import wave
 from pathlib import Path
 
@@ -163,6 +161,7 @@ def normalize_text(text):
 # Source 1: Preprocessed chunks + transcript JSONs
 # ---------------------------------------------------------------------------
 
+
 def load_from_chunks(chunks_dir, transcripts_dir, min_confidence, min_dur, max_dur):
     """Load entries from preprocessed audio chunks and their transcript JSONs.
 
@@ -189,9 +188,9 @@ def load_from_chunks(chunks_dir, transcripts_dir, min_confidence, min_dur, max_d
 
     for json_path in json_files:
         try:
-            with open(json_path, "r", encoding="utf-8") as f:
+            with open(json_path, encoding="utf-8") as f:
                 transcript = json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Skipping {json_path.name}: {e}")
             continue
 
@@ -235,19 +234,20 @@ def load_from_chunks(chunks_dir, transcripts_dir, min_confidence, min_dur, max_d
         segments = transcript.get("segments", [])
         avg_logprob = None
         if segments and isinstance(segments[0], dict):
-            logprobs = [s.get("avg_logprob") for s in segments
-                        if s.get("avg_logprob") is not None]
+            logprobs = [s.get("avg_logprob") for s in segments if s.get("avg_logprob") is not None]
             if logprobs:
                 avg_logprob = sum(logprobs) / len(logprobs)
 
         if avg_logprob is not None and avg_logprob < min_confidence:
             continue
 
-        entries.append({
-            "audio_path": str(audio_path.resolve()),
-            "text": text,
-            "confidence": avg_logprob,
-        })
+        entries.append(
+            {
+                "audio_path": str(audio_path.resolve()),
+                "text": text,
+                "confidence": avg_logprob,
+            }
+        )
 
     return entries
 
@@ -255,6 +255,7 @@ def load_from_chunks(chunks_dir, transcripts_dir, min_confidence, min_dur, max_d
 # ---------------------------------------------------------------------------
 # Source 2: Live session output (chunk WAVs + diagnostics JSONL)
 # ---------------------------------------------------------------------------
+
 
 def load_from_live_sessions(sessions_dir, lang, min_confidence, min_dur, max_dur):
     """Load entries from live pipeline output directories.
@@ -282,10 +283,7 @@ def load_from_live_sessions(sessions_dir, lang, min_confidence, min_dur, max_dur
         return entries
 
     # Find all session directories
-    session_dirs = sorted([
-        d for d in sessions_path.iterdir()
-        if d.is_dir() and not d.name.startswith(".")
-    ])
+    session_dirs = sorted([d for d in sessions_path.iterdir() if d.is_dir() and not d.name.startswith(".")])
 
     if not session_dirs:
         logger.info(f"No session directories found in {sessions_path}")
@@ -306,12 +304,12 @@ def load_from_live_sessions(sessions_dir, lang, min_confidence, min_dur, max_dur
         # Load all diagnostics records for this session
         records = []
         try:
-            with open(diag_path, "r", encoding="utf-8") as f:
+            with open(diag_path, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if line:
                         records.append(json.loads(line))
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"  Error reading diagnostics for {session_id}: {e}")
             continue
 
@@ -336,8 +334,7 @@ def load_from_live_sessions(sessions_dir, lang, min_confidence, min_dur, max_dur
                 text = record.get("english", "").strip()
             elif lang == "es":
                 # Prefer corrected Spanish, fall back to Gemma translation
-                text = (record.get("corrected_spanish")
-                        or record.get("spanish_gemma", "")).strip()
+                text = (record.get("corrected_spanish") or record.get("spanish_gemma", "")).strip()
             elif lang == "hi":
                 text = record.get("hindi", "").strip()
             elif lang == "zh":
@@ -363,11 +360,13 @@ def load_from_live_sessions(sessions_dir, lang, min_confidence, min_dur, max_dur
                 if equiv_logprob < min_confidence:
                     continue
 
-            entries.append({
-                "audio_path": str(audio_path.resolve()),
-                "text": text,
-                "confidence": confidence,
-            })
+            entries.append(
+                {
+                    "audio_path": str(audio_path.resolve()),
+                    "text": text,
+                    "confidence": confidence,
+                }
+            )
 
     return entries
 
@@ -375,6 +374,7 @@ def load_from_live_sessions(sessions_dir, lang, min_confidence, min_dur, max_dur
 # ---------------------------------------------------------------------------
 # Dataset assembly
 # ---------------------------------------------------------------------------
+
 
 def build_piper_dataset(entries, output_dir, lang):
     """Convert entries to Piper/LJSpeech format with resampled audio.
@@ -410,11 +410,13 @@ def build_piper_dataset(entries, output_dir, lang):
         text = entry["text"]
         normalized = normalize_text(text)
 
-        metadata_rows.append({
-            "filename": wav_name,
-            "transcription": text,
-            "normalized_transcription": normalized,
-        })
+        metadata_rows.append(
+            {
+                "filename": wav_name,
+                "transcription": text,
+                "normalized_transcription": normalized,
+            }
+        )
 
         if (i + 1) % 100 == 0:
             logger.info(f"  Processed {i + 1}/{len(entries)} clips...")
@@ -430,29 +432,32 @@ def build_piper_dataset(entries, output_dir, lang):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Convert church audio to Piper/LJSpeech training format"
+    parser = argparse.ArgumentParser(description="Convert church audio to Piper/LJSpeech training format")
+    parser.add_argument("--lang", default="en", choices=["en", "es", "hi", "zh"], help="Target language (default: en)")
+    parser.add_argument(
+        "--input",
+        "-i",
+        default=None,
+        help="Input directory with cleaned audio chunks (default: stark_data/cleaned/chunks)",
     )
-    parser.add_argument("--lang", default="en", choices=["en", "es", "hi", "zh"],
-                        help="Target language (default: en)")
-    parser.add_argument("--input", "-i", default=None,
-                        help="Input directory with cleaned audio chunks "
-                        "(default: stark_data/cleaned/chunks)")
-    parser.add_argument("--transcripts", default=None,
-                        help="Transcripts directory "
-                        "(default: stark_data/transcripts)")
-    parser.add_argument("--live-sessions", default=None,
-                        help="Live session directory to also include "
-                        "(default: stark_data/live_sessions)")
-    parser.add_argument("--output", "-o", default=None,
-                        help="Output directory "
-                        "(default: stark_data/piper_dataset/{lang})")
-    parser.add_argument("--min-confidence", type=float, default=-0.5,
-                        help="Minimum avg_logprob to include (default: -0.5)")
-    parser.add_argument("--min-duration", type=float, default=1.0,
-                        help="Minimum clip duration in seconds (default: 1.0)")
-    parser.add_argument("--max-duration", type=float, default=15.0,
-                        help="Maximum clip duration in seconds (default: 15.0)")
+    parser.add_argument("--transcripts", default=None, help="Transcripts directory (default: stark_data/transcripts)")
+    parser.add_argument(
+        "--live-sessions",
+        default=None,
+        help="Live session directory to also include (default: stark_data/live_sessions)",
+    )
+    parser.add_argument(
+        "--output", "-o", default=None, help="Output directory (default: stark_data/piper_dataset/{lang})"
+    )
+    parser.add_argument(
+        "--min-confidence", type=float, default=-0.5, help="Minimum avg_logprob to include (default: -0.5)"
+    )
+    parser.add_argument(
+        "--min-duration", type=float, default=1.0, help="Minimum clip duration in seconds (default: 1.0)"
+    )
+    parser.add_argument(
+        "--max-duration", type=float, default=15.0, help="Maximum clip duration in seconds (default: 15.0)"
+    )
     args = parser.parse_args()
 
     # Resolve paths relative to project root
@@ -466,7 +471,9 @@ def main():
     if not transcripts_dir.is_absolute():
         transcripts_dir = project_root / transcripts_dir
 
-    live_sessions_dir = Path(args.live_sessions) if args.live_sessions else project_root / "stark_data" / "live_sessions"
+    live_sessions_dir = (
+        Path(args.live_sessions) if args.live_sessions else project_root / "stark_data" / "live_sessions"
+    )
     if not live_sessions_dir.is_absolute():
         live_sessions_dir = project_root / live_sessions_dir
 
@@ -487,7 +494,8 @@ def main():
     # Source 1: Preprocessed chunks + transcript JSONs
     logger.info("\n--- Loading from preprocessed chunks ---")
     chunk_entries = load_from_chunks(
-        str(chunks_dir), str(transcripts_dir),
+        str(chunks_dir),
+        str(transcripts_dir),
         min_confidence=args.min_confidence,
         min_dur=args.min_duration,
         max_dur=args.max_duration,
@@ -498,7 +506,8 @@ def main():
     # Source 2: Live session output
     logger.info("\n--- Loading from live sessions ---")
     session_entries = load_from_live_sessions(
-        str(live_sessions_dir), args.lang,
+        str(live_sessions_dir),
+        args.lang,
         min_confidence=args.min_confidence,
         min_dur=args.min_duration,
         max_dur=args.max_duration,
@@ -529,12 +538,12 @@ def main():
     n_clips, total_dur, n_errors = build_piper_dataset(all_entries, str(output_dir), args.lang)
 
     # Summary
-    logger.info(f"\n{'='*50}")
+    logger.info(f"\n{'=' * 50}")
     logger.info(f"Piper Dataset Summary ({args.lang})")
-    logger.info(f"{'='*50}")
+    logger.info(f"{'=' * 50}")
     logger.info(f"  Total clips:       {n_clips}")
-    logger.info(f"  Total duration:    {total_dur:.1f}s ({total_dur/60:.1f} min)")
-    logger.info(f"  Avg clip duration: {total_dur/max(n_clips,1):.1f}s")
+    logger.info(f"  Total duration:    {total_dur:.1f}s ({total_dur / 60:.1f} min)")
+    logger.info(f"  Avg clip duration: {total_dur / max(n_clips, 1):.1f}s")
     logger.info(f"  Resample errors:   {n_errors}")
     logger.info(f"  Filtered out:      {len(all_entries) - n_clips - n_errors}")
     logger.info(f"  Output:            {output_dir}")

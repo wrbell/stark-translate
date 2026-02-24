@@ -7,13 +7,14 @@ Provides:
 
 import logging
 import time
-from typing import Optional
 
 import numpy as np
 
 from engines.base import (
-    STTEngine, STTResult,
-    TranslationEngine, TranslationResult,
+    STTEngine,
+    STTResult,
+    TranslationEngine,
+    TranslationResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 try:
     from faster_whisper import WhisperModel
+
     FASTER_WHISPER_AVAILABLE = True
 except ImportError:
     WhisperModel = None
@@ -30,6 +32,7 @@ except ImportError:
 
 try:
     import torch
+
     TORCH_AVAILABLE = True
 except ImportError:
     torch = None
@@ -37,6 +40,7 @@ except ImportError:
 
 try:
     import bitsandbytes  # noqa: F401 -- presence check only
+
     BITSANDBYTES_AVAILABLE = True
 except ImportError:
     BITSANDBYTES_AVAILABLE = False
@@ -45,6 +49,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Faster-Whisper STT (CTranslate2 backend)
 # ---------------------------------------------------------------------------
+
 
 class FasterWhisperEngine(STTEngine):
     """Speech-to-text engine wrapping faster-whisper on CUDA or CPU.
@@ -75,10 +80,7 @@ class FasterWhisperEngine(STTEngine):
         fallback_on_low_conf: bool = True,
     ):
         if not FASTER_WHISPER_AVAILABLE:
-            raise RuntimeError(
-                "faster-whisper is not installed. "
-                "Install with: pip install faster-whisper"
-            )
+            raise RuntimeError("faster-whisper is not installed. Install with: pip install faster-whisper")
         self._model_id_str = model_id
         self._compute_type = compute_type
         self._device = device
@@ -97,7 +99,9 @@ class FasterWhisperEngine(STTEngine):
         """Create the WhisperModel and warm up with 1 s of silence."""
         logger.info(
             "Loading faster-whisper %s (device=%s, compute=%s)...",
-            self._model_id_str, self._device, self._compute_type,
+            self._model_id_str,
+            self._device,
+            self._compute_type,
         )
         t0 = time.time()
         self._model = WhisperModel(
@@ -119,7 +123,7 @@ class FasterWhisperEngine(STTEngine):
         audio: np.ndarray,
         *,
         language: str = "en",
-        initial_prompt: Optional[str] = None,
+        initial_prompt: str | None = None,
         word_timestamps: bool = False,
     ) -> STTResult:
         """Transcribe *audio* (16 kHz float32 mono) to text.
@@ -155,8 +159,7 @@ class FasterWhisperEngine(STTEngine):
             self._load_fallback_model()
 
         logger.info(
-            "Fallback triggered (avg_logprob=%.3f, compression_ratio=%.2f) "
-            "-- retrying with %s",
+            "Fallback triggered (avg_logprob=%.3f, compression_ratio=%.2f) -- retrying with %s",
             primary_result.avg_logprob or 0.0,
             primary_result.compression_ratio or 0.0,
             self._fallback_model_id,
@@ -175,8 +178,7 @@ class FasterWhisperEngine(STTEngine):
         chosen.used_fallback = True
 
         logger.info(
-            "Fallback result: chose %s (primary conf=%.2f avg_lp=%.3f, "
-            "retry conf=%.2f avg_lp=%.3f)",
+            "Fallback result: chose %s (primary conf=%.2f avg_lp=%.3f, retry conf=%.2f avg_lp=%.3f)",
             chosen_label,
             primary_result.confidence or 0.0,
             primary_result.avg_logprob or 0.0,
@@ -197,7 +199,7 @@ class FasterWhisperEngine(STTEngine):
         *,
         model,
         language: str = "en",
-        initial_prompt: Optional[str] = None,
+        initial_prompt: str | None = None,
         word_timestamps: bool = False,
     ) -> STTResult:
         """Run faster-whisper transcription against a specific model instance.
@@ -242,15 +244,17 @@ class FasterWhisperEngine(STTEngine):
                 if meta["compression_ratio"] is not None:
                     compression_ratios.append(meta["compression_ratio"])
                 # Per-word confidence from faster-whisper Word objects
-                for w in (seg.words or []):
+                for w in seg.words or []:
                     prob = getattr(w, "probability", 1.0)
                     if prob < 0.5:
-                        low_conf_words.append({
-                            "word": getattr(w, "word", ""),
-                            "probability": round(prob, 3),
-                            "start": getattr(w, "start", None),
-                            "end": getattr(w, "end", None),
-                        })
+                        low_conf_words.append(
+                            {
+                                "word": getattr(w, "word", ""),
+                                "probability": round(prob, 3),
+                                "start": getattr(w, "start", None),
+                                "end": getattr(w, "end", None),
+                            }
+                        )
             if avg_logprobs:
                 overall_avg_logprob = sum(avg_logprobs) / len(avg_logprobs)
                 confidence = round(min(1.0, max(0.0, 1.0 + overall_avg_logprob)), 2)
@@ -282,7 +286,9 @@ class FasterWhisperEngine(STTEngine):
         """
         logger.info(
             "Lazy-loading fallback model %s (faster-whisper, device=%s, compute=%s)...",
-            self._fallback_model_id, self._device, self._compute_type,
+            self._fallback_model_id,
+            self._device,
+            self._compute_type,
         )
         t0 = time.time()
         self._fallback_model = WhisperModel(
@@ -296,7 +302,8 @@ class FasterWhisperEngine(STTEngine):
         list(segments)
         logger.info(
             "Fallback model ready (%s) (%.1fs)",
-            self._fallback_model_id, time.time() - t0,
+            self._fallback_model_id,
+            time.time() - t0,
         )
         self._fallback_loaded = True
 
@@ -364,6 +371,7 @@ class FasterWhisperEngine(STTEngine):
 # CUDA TranslateGemma (transformers + bitsandbytes 4-bit)
 # ---------------------------------------------------------------------------
 
+
 class CUDAGemmaEngine(TranslationEngine):
     """Translation engine wrapping TranslateGemma on CUDA with 4-bit quantization.
 
@@ -380,9 +388,7 @@ class CUDAGemmaEngine(TranslationEngine):
         if not TORCH_AVAILABLE:
             raise RuntimeError("PyTorch is not installed.")
         if not torch.cuda.is_available():
-            raise RuntimeError(
-                "CUDA is not available. CUDAGemmaEngine requires an NVIDIA GPU."
-            )
+            raise RuntimeError("CUDA is not available. CUDAGemmaEngine requires an NVIDIA GPU.")
         self._model_id_str = model_id
         self._model = None
         self._tokenizer = None
@@ -396,8 +402,7 @@ class CUDAGemmaEngine(TranslationEngine):
 
         if not BITSANDBYTES_AVAILABLE:
             raise RuntimeError(
-                "bitsandbytes is not installed. Required for 4-bit quantization. "
-                "Install with: pip install bitsandbytes"
+                "bitsandbytes is not installed. Required for 4-bit quantization. Install with: pip install bitsandbytes"
             )
 
         logger.info("Loading %s (CUDA 4-bit)...", self._model_id_str)
@@ -422,7 +427,8 @@ class CUDAGemmaEngine(TranslationEngine):
         else:
             self._tokenizer._eos_token_ids = {default_eos, eot_id}
         logger.info(
-            "EOS fix applied: added <end_of_turn> (id=%d) to EOS set", eot_id,
+            "EOS fix applied: added <end_of_turn> (id=%d) to EOS set",
+            eot_id,
         )
 
         logger.info("TranslateGemma ready (%.1fs)", time.time() - t0)
@@ -445,14 +451,18 @@ class CUDAGemmaEngine(TranslationEngine):
         if self._model is None or self._tokenizer is None:
             return TranslationResult(text="(model not loaded)", latency_ms=0.0)
 
-        messages = [{"role": "user", "content": [
-            {"type": "text",
-             "source_lang_code": source_lang,
-             "target_lang_code": target_lang,
-             "text": text}
-        ]}]
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "source_lang_code": source_lang, "target_lang_code": target_lang, "text": text}
+                ],
+            }
+        ]
         prompt = self._tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True, return_tensors="pt",
+            messages,
+            add_generation_prompt=True,
+            return_tensors="pt",
         )
         prompt = prompt.to("cuda")
 
@@ -463,7 +473,7 @@ class CUDAGemmaEngine(TranslationEngine):
         t0 = time.perf_counter()
         with torch.no_grad():
             output = self._model.generate(prompt, max_new_tokens=max_tok, do_sample=False)
-        generated = output[0][prompt.shape[1]:]
+        generated = output[0][prompt.shape[1] :]
         result = self._tokenizer.decode(generated, skip_special_tokens=False)
         latency_ms = (time.perf_counter() - t0) * 1000
 

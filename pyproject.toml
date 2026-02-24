@@ -1,0 +1,106 @@
+[project]
+name = "stark-translate"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Live bilingual speech-to-text for church outreach"
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    "pre-commit>=4.0",
+]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+exclude = [
+    "bible_data/scrollmapper",
+    "stt_env",
+    "stt_train_env",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",   # line length — handled by formatter
+    "E402",   # module-level import not at top (conditional imports throughout)
+    "E731",   # lambda assignment (used for closures in HTTP handler etc.)
+    "E741",   # ambiguous variable name (common in ML: l, I, O)
+    "B007",   # unused loop control variable (rename to _ is noisy)
+    "B008",   # function call in default argument (Pydantic Field())
+    "B905",   # zip() without strict= (too pervasive, low value)
+    "SIM103", # return condition directly — multi-condition readability
+    "SIM110", # use any() — for-loop-with-return is often clearer
+    "SIM105", # contextlib.suppress — try/except/pass is clearer for I/O
+    "SIM108", # ternary operator — readability preference
+    "SIM115", # context manager for open() — not always appropriate
+    "SIM210", # bool() instead of ternary — style preference
+    "RUF002", # ambiguous unicode in docstrings (multiplication sign etc.)
+    "RUF012", # mutable class variable (Pydantic model_config)
+    "RUF013", # implicit Optional — existing codebase convention
+    "RUF034", # useless if-else (intentional for clarity in config)
+    "RUF059", # unused unpacked variable — false positives with API returns
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["engines", "features", "tools", "training", "settings"]
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = true
+disallow_untyped_defs = false
+warn_return_any = false
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "engines.base",
+    "engines.factory",
+    "engines.active_learning",
+    "settings",
+]
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "engines.mlx_engine",
+    "engines.cuda_engine",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "training.*"
+ignore_errors = true
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests that take >10s (deselect with '-m \"not slow\"')",
+    "gpu: marks tests requiring GPU/model downloads (deselect with '-m \"not gpu\"')",
+]

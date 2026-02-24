@@ -21,14 +21,16 @@ Usage:
 """
 
 import os
-os.environ["NUMBA_THREADING_LAYER"] = "workqueue"   # Prevent numba from loading its own libomp (conflicts with torch's)
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"         # Safety net for any remaining libomp duplicates
+
+os.environ["NUMBA_THREADING_LAYER"] = "workqueue"  # Prevent numba from loading its own libomp (conflicts with torch's)
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # Safety net for any remaining libomp duplicates
 
 # Backend detection — MLX for Apple Silicon, CUDA for NVIDIA
 # Must come before other imports so we know which inference paths are available.
 try:
-    import mlx.core as _mx
-    import mlx_lm as _mlx_lm
+    import mlx.core as _mx  # noqa: F401
+    import mlx_lm as _mlx_lm  # noqa: F401
+
     MLX_AVAILABLE = True
 except ImportError:
     MLX_AVAILABLE = False
@@ -39,6 +41,7 @@ import copy
 import csv
 import http.server
 import json
+import platform
 import queue as queue_module
 import signal
 import socket
@@ -48,25 +51,22 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-import platform
-import psutil
-
 import numpy as np
+import psutil
 import sounddevice as sd
 import torch
 import websockets
-
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
-SAMPLE_RATE = 16000          # Whisper/VAD require 16kHz
-MIC_SAMPLE_RATE = 48000      # Most mics are 48kHz native; will resample to 16kHz
-CHUNK_DURATION = 2.0         # seconds of speech — more context = better word accuracy
-VAD_THRESHOLD = 0.3          # Lower threshold for better sensitivity
+SAMPLE_RATE = 16000  # Whisper/VAD require 16kHz
+MIC_SAMPLE_RATE = 48000  # Most mics are 48kHz native; will resample to 16kHz
+CHUNK_DURATION = 2.0  # seconds of speech — more context = better word accuracy
+VAD_THRESHOLD = 0.3  # Lower threshold for better sensitivity
 WS_PORT = 8765
-MIC_DEVICE = None            # None = auto-detect best input device
+MIC_DEVICE = None  # None = auto-detect best input device
 SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
 CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
@@ -78,7 +78,7 @@ NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 BACKEND = "mlx"
 
 # Whisper model IDs
-WHISPER_MODEL_TURBO = "mlx-community/whisper-large-v3-turbo"   # Default: faster, 4 decoder layers
+WHISPER_MODEL_TURBO = "mlx-community/whisper-large-v3-turbo"  # Default: faster, 4 decoder layers
 WHISPER_MODEL_DISTIL = "mlx-community/distil-whisper-large-v3"  # Fallback: if Turbo regresses
 
 # Pipeline thread pool for MLX inference. MUST be max_workers=1 because MLX's
@@ -93,7 +93,7 @@ _pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline"
 _pytorch_lock = threading.Lock()
 
 # MLX model IDs (4-bit quantized, community-converted)
-MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"   # ~2.2GB
+MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"  # ~2.2GB
 MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
 
 # [P7-1E] Whisper initial_prompt — capped at ~40 words to reduce prefill time.
@@ -130,21 +130,54 @@ HOMOPHONE_FLAGS = {
 }
 
 # Utterances ending with these words likely got cut mid-phrase
-_SPLIT_WORDS = frozenset({
-    "the", "a", "an", "of", "in", "to", "for", "and", "but", "or",
-    "by", "with", "his", "her", "their", "our", "my", "your", "its",
-    "this", "that", "is", "was", "are", "were", "be", "been",
-    "has", "have", "had", "he", "she", "we", "they", "it",
-})
+_SPLIT_WORDS = frozenset(
+    {
+        "the",
+        "a",
+        "an",
+        "of",
+        "in",
+        "to",
+        "for",
+        "and",
+        "but",
+        "or",
+        "by",
+        "with",
+        "his",
+        "her",
+        "their",
+        "our",
+        "my",
+        "your",
+        "its",
+        "this",
+        "that",
+        "is",
+        "was",
+        "are",
+        "were",
+        "be",
+        "been",
+        "has",
+        "have",
+        "had",
+        "he",
+        "she",
+        "we",
+        "they",
+        "it",
+    }
+)
 
 # Session-level diagnostic accumulators
-diag_homophones = []       # [(chunk_id, flagged_word, likely_word, text)]
-diag_bad_splits = []       # [(chunk_id, last_word, text)]
-diag_marian_diverge = []   # [(chunk_id, marian_text, gemma_text, similarity)]
-diag_durations = []        # [(chunk_id, duration_s)]
-diag_low_confidence = []   # [(chunk_id, confidence, text)]
+diag_homophones = []  # [(chunk_id, flagged_word, likely_word, text)]
+diag_bad_splits = []  # [(chunk_id, last_word, text)]
+diag_marian_diverge = []  # [(chunk_id, marian_text, gemma_text, similarity)]
+diag_durations = []  # [(chunk_id, duration_s)]
+diag_low_confidence = []  # [(chunk_id, confidence, text)]
 partial_translations = {}  # utterance_id → last MarianMT translation
-partial_latencies = {}     # utterance_id → {"pt_ms": float}
+partial_latencies = {}  # utterance_id → {"pt_ms": float}
 
 
 def check_homophones(cid, text):
@@ -185,23 +218,23 @@ def check_marian_divergence(cid, marian_text, gemma_text):
 
 def print_diagnostics():
     """Print live testing diagnostics summary."""
-    print(f"\n{'~'*60}")
-    print(f"DIAGNOSTICS SUMMARY")
-    print(f"{'~'*60}")
+    print(f"\n{'~' * 60}")
+    print("DIAGNOSTICS SUMMARY")
+    print(f"{'~' * 60}")
 
     if diag_homophones:
         print(f"\n  Homophone flags: {len(diag_homophones)}")
         for cid, flagged, likely, text in diag_homophones:
             print(f"    #{cid}: '{flagged}' -> '{likely}' in: {text[:60]}")
     else:
-        print(f"\n  Homophone flags: 0 (clean)")
+        print("\n  Homophone flags: 0 (clean)")
 
     if diag_bad_splits:
         print(f"\n  Bad sentence splits: {len(diag_bad_splits)}")
         for cid, last, text in diag_bad_splits[:10]:
             print(f"    #{cid}: ends with '{last}': ...{text[-40:]}")
     else:
-        print(f"\n  Bad sentence splits: 0 (clean)")
+        print("\n  Bad sentence splits: 0 (clean)")
 
     if diag_marian_diverge:
         sims = [s for _, _, _, s in diag_marian_diverge]
@@ -215,45 +248,53 @@ def print_diagnostics():
         durs = [d for _, d in diag_durations]
         short = sum(1 for d in durs if d < 1.0)
         long_count = sum(1 for d in durs if d > 6.0)
-        print(f"\n  Utterance durations: avg={sum(durs)/len(durs):.1f}s, "
-              f"<1s={short}, >6s={long_count}, "
-              f"min={min(durs):.1f}s, max={max(durs):.1f}s")
+        print(
+            f"\n  Utterance durations: avg={sum(durs) / len(durs):.1f}s, "
+            f"<1s={short}, >6s={long_count}, "
+            f"min={min(durs):.1f}s, max={max(durs):.1f}s"
+        )
 
     if diag_low_confidence:
         print(f"\n  Low confidence chunks: {len(diag_low_confidence)}")
         for cid, conf, text in diag_low_confidence:
             print(f"    #{cid} (conf={conf:.2f}): {text[:60]}")
     else:
-        print(f"\n  Low confidence chunks: 0 (clean)")
+        print("\n  Low confidence chunks: 0 (clean)")
 
     # Resource usage summary
     snap = get_resource_snapshot()
-    print(f"\n  Resource usage (current):")
+    print("\n  Resource usage (current):")
     print(f"    Process RAM: {snap['process_ram_gb']:.1f}GB")
-    print(f"    System RAM:  {snap['ram_used_gb']:.1f}GB / {psutil.virtual_memory().total / (1024**3):.0f}GB ({snap['ram_percent']:.0f}%)")
+    print(
+        f"    System RAM:  {snap['ram_used_gb']:.1f}GB / {psutil.virtual_memory().total / (1024**3):.0f}GB ({snap['ram_percent']:.0f}%)"
+    )
     print(f"    CPU:         {snap['cpu_percent']:.0f}%")
 
     # [P7-6C] Pipeline overlap statistics
     if _pipeline_total > 0:
         pct = _pipeline_overlaps / _pipeline_total if _pipeline_total else 0
-        print(f"\n  [P7-6C] Pipeline overlap: {_pipeline_overlaps}/{_pipeline_total} "
-              f"chunks ({pct:.0%}) had STT(N) overlapping Translation(N-1)")
+        print(
+            f"\n  [P7-6C] Pipeline overlap: {_pipeline_overlaps}/{_pipeline_total} "
+            f"chunks ({pct:.0%}) had STT(N) overlapping Translation(N-1)"
+        )
     else:
-        print(f"\n  [P7-6C] Pipeline overlap: no chunks processed")
+        print("\n  [P7-6C] Pipeline overlap: no chunks processed")
 
     print(f"\n  Fine-tuning data: {AUDIO_DIR}/")
     print(f"  Review queue:     {DIAG_PATH}")
     print(f"  Mic gain used:    {MIC_GAIN:.1f}x")
-    print(f"{'~'*60}")
+    print(f"{'~' * 60}")
 
 
 # ---------------------------------------------------------------------------
 # Hardware Profile & Resource Monitoring (for portability planning)
 # ---------------------------------------------------------------------------
 
+
 def get_hardware_profile():
     """Capture hardware info for portability analysis."""
     import subprocess
+
     profile = {
         "platform": platform.platform(),
         "processor": platform.processor(),
@@ -266,9 +307,12 @@ def get_hardware_profile():
     try:
         result = subprocess.run(
             ["system_profiler", "SPDisplaysDataType", "-json"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         import json as _json
+
         gpu_data = _json.loads(result.stdout)
         gpus = gpu_data.get("SPDisplaysDataType", [])
         if gpus:
@@ -297,6 +341,7 @@ def get_resource_snapshot():
 # HTTP Static Server (serves display pages to phones on LAN)
 # ---------------------------------------------------------------------------
 
+
 def get_local_ip():
     """Get the local network IP for LAN access."""
     try:
@@ -311,9 +356,7 @@ def get_local_ip():
 
 def start_http_server(port, directory):
     """Start a simple HTTP server in a background thread."""
-    handler = lambda *args, **kwargs: http.server.SimpleHTTPRequestHandler(
-        *args, directory=directory, **kwargs
-    )
+    handler = lambda *args, **kwargs: http.server.SimpleHTTPRequestHandler(*args, directory=directory, **kwargs)
     server = http.server.HTTPServer(("0.0.0.0", port), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -344,8 +387,8 @@ marian_tokenizer = None
 # [P7-2B] Prompt caches: pre-computed KV caches for the fixed TranslateGemma
 # chat template prefix. Reused (via deep copy) on every translation call to
 # skip re-prefilling the ~30-40 token template overhead (saves 50-80ms).
-mlx_a_prompt_cache = None   # KV cache for 4B model template prefix
-mlx_b_prompt_cache = None   # KV cache for 12B model template prefix
+mlx_a_prompt_cache = None  # KV cache for 4B model template prefix
+mlx_b_prompt_cache = None  # KV cache for 12B model template prefix
 # [P7-3B] Pre-tokenized suffix tokens: the closing part of the prompt after
 # where the English text is inserted. Tokenized once at startup.
 mlx_a_suffix_tokens = None
@@ -356,10 +399,11 @@ mlx_b_suffix_tokens = None
 # Model Loading
 # ---------------------------------------------------------------------------
 
+
 def load_vad():
     """Load Silero VAD (~2MB)."""
     print("[1/6] Loading Silero VAD...")
-    model, utils = torch.hub.load('snakers4/silero-vad', 'silero_vad')
+    model, utils = torch.hub.load("snakers4/silero-vad", "silero_vad")
     print("  VAD ready")
     return model, utils
 
@@ -378,8 +422,9 @@ def load_whisper(backend="mlx"):
     """
     if backend == "mlx":
         global mlx_whisper  # make available to process_partial / _run_stt
-        import mlx_whisper
         import mlx.core as mx
+        import mlx_whisper
+
         # [P7-4B] Increased from 100MB to 256MB — allows MLX to keep more intermediate
         # computation results cached in Metal memory, reducing recomputation.
         # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
@@ -391,17 +436,15 @@ def load_whisper(backend="mlx"):
         try:
             # Warm up — first call downloads and compiles the model
             silence = np.zeros(16000, dtype=np.float32)
-            mlx_whisper.transcribe(silence, path_or_hf_repo=model_id,
-                                   condition_on_previous_text=False)
-            print(f"  Whisper Turbo ready ({time.time()-t0:.1f}s)")
+            mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
+            print(f"  Whisper Turbo ready ({time.time() - t0:.1f}s)")
         except Exception as e:
             print(f"  Turbo load failed ({e}), falling back to distil...")
             model_id = WHISPER_MODEL_DISTIL
             t0 = time.time()
             silence = np.zeros(16000, dtype=np.float32)
-            mlx_whisper.transcribe(silence, path_or_hf_repo=model_id,
-                                   condition_on_previous_text=False)
-            print(f"  Whisper Distil ready ({time.time()-t0:.1f}s)")
+            mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
+            print(f"  Whisper Distil ready ({time.time() - t0:.1f}s)")
         return model_id  # mlx_whisper uses model_id per call, no persistent object
 
     elif backend in ("cuda", "cpu"):
@@ -409,8 +452,7 @@ def load_whisper(backend="mlx"):
         try:
             from faster_whisper import WhisperModel
         except ImportError:
-            print("ERROR: faster-whisper not installed. Install with: pip install faster-whisper",
-                  file=sys.stderr)
+            print("ERROR: faster-whisper not installed. Install with: pip install faster-whisper", file=sys.stderr)
             sys.exit(1)
 
         device = "cuda" if backend == "cuda" else "cpu"
@@ -423,14 +465,15 @@ def load_whisper(backend="mlx"):
         silence = np.zeros(16000, dtype=np.float32)
         segments, _ = model.transcribe(silence, language="en")
         list(segments)  # consume generator to trigger actual inference
-        print(f"  Whisper Turbo ready ({time.time()-t0:.1f}s)")
+        print(f"  Whisper Turbo ready ({time.time() - t0:.1f}s)")
         return model
 
 
 def load_mlx_gemma(model_id, label):
     """Load a TranslateGemma model via MLX (4-bit, Apple Silicon native)."""
-    from mlx_lm import load
     import mlx.core as mx
+    from mlx_lm import load
+
     # [P7-4B] Increased from 100MB to 256MB (same rationale as load_whisper)
     mx.set_cache_limit(256 * 1024 * 1024)
 
@@ -444,10 +487,11 @@ def load_mlx_gemma(model_id, label):
     # Without this fix, generation runs to max_tokens (~5s wasted on pad tokens).
     eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
     default_eos = tokenizer.eos_token_id
-    if not hasattr(tokenizer, '_eos_token_ids') or eot_id not in tokenizer._eos_token_ids:
+    if not hasattr(tokenizer, "_eos_token_ids") or eot_id not in tokenizer._eos_token_ids:
         tokenizer._eos_token_ids = {default_eos, eot_id}
-        print(f"  [P7-2E] EOS fix applied: added <end_of_turn> (id={eot_id}) to "
-              f"EOS set (was only <eos> id={default_eos})")
+        print(
+            f"  [P7-2E] EOS fix applied: added <end_of_turn> (id={eot_id}) to EOS set (was only <eos> id={default_eos})"
+        )
     else:
         # Already has it (e.g. from a newer tokenizer version)
         print(f"  [P7-2E] EOS tokens verified: {tokenizer._eos_token_ids}")
@@ -466,21 +510,19 @@ def _build_prompt_cache(model, tokenizer, label):
 
     Returns (prompt_cache, prefix_token_count, suffix_tokens).
     """
-    from mlx_lm.models.cache import make_prompt_cache
-    from mlx_lm.generate import generate_step
     import mlx.core as mx
+    from mlx_lm.generate import generate_step
+    from mlx_lm.models.cache import make_prompt_cache
 
     # Build a prompt with a known marker so we can split prefix/suffix
     marker = "SPLIT_HERE"
-    messages = [{"role": "user", "content": [
-        {"type": "text",
-         "source_lang_code": "en",
-         "target_lang_code": "es",
-         "text": marker}
-    ]}]
-    full_prompt = tokenizer.apply_chat_template(
-        messages, add_generation_prompt=True
-    )
+    messages = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": marker}],
+        }
+    ]
+    full_prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
     # full_prompt is a list of token IDs
     if isinstance(full_prompt, str):
         full_tokens = tokenizer.encode(full_prompt, add_special_tokens=False)
@@ -494,7 +536,7 @@ def _build_prompt_cache(model, tokenizer, label):
     marker_len = len(marker_tokens)
     prefix_end = None
     for i in range(len(full_tokens) - marker_len + 1):
-        if full_tokens[i:i + marker_len] == marker_tokens:
+        if full_tokens[i : i + marker_len] == marker_tokens:
             prefix_end = i
             break
 
@@ -503,7 +545,7 @@ def _build_prompt_cache(model, tokenizer, label):
         return None, 0, []
 
     prefix_tokens = full_tokens[:prefix_end]
-    suffix_tokens = full_tokens[prefix_end + marker_len:]
+    suffix_tokens = full_tokens[prefix_end + marker_len :]
 
     if len(prefix_tokens) < 3:
         print(f"  WARNING: Prefix too short ({len(prefix_tokens)} tokens) for {label}, skipping cache")
@@ -515,15 +557,15 @@ def _build_prompt_cache(model, tokenizer, label):
 
     # Run generate_step with max_tokens=0 to just fill the cache
     for _ in generate_step(
-        prompt_array, model,
+        prompt_array,
+        model,
         max_tokens=0,
         prompt_cache=prompt_cache,
     ):
         pass  # max_tokens=0 means no tokens generated, just prefill
 
     mx.eval([c.state for c in prompt_cache])
-    print(f"  {label} prompt cache: {len(prefix_tokens)} prefix tokens cached, "
-          f"{len(suffix_tokens)} suffix tokens")
+    print(f"  {label} prompt cache: {len(prefix_tokens)} prefix tokens cached, {len(suffix_tokens)} suffix tokens")
 
     return prompt_cache, len(prefix_tokens), suffix_tokens
 
@@ -537,16 +579,14 @@ def load_translation_models(load_b=True):
     a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)")
 
     # [P7-2B] Build prompt cache for 4B model
-    mlx_a_prompt_cache, _, mlx_a_suffix_tokens = _build_prompt_cache(
-        a_model, a_tok, "4B")
+    mlx_a_prompt_cache, _, mlx_a_suffix_tokens = _build_prompt_cache(a_model, a_tok, "4B")
 
     b_model, b_tok = None, None
     if load_b:
         try:
             b_model, b_tok = load_mlx_gemma(MLX_MODEL_B, "Approach B (12B)")
             # [P7-2B] Build prompt cache for 12B model
-            mlx_b_prompt_cache, _, mlx_b_suffix_tokens = _build_prompt_cache(
-                b_model, b_tok, "12B")
+            mlx_b_prompt_cache, _, mlx_b_suffix_tokens = _build_prompt_cache(b_model, b_tok, "12B")
         except Exception as e:
             print(f"  12B load failed: {e}")
             print("  Running 4B only.")
@@ -557,6 +597,7 @@ def load_translation_models(load_b=True):
 def load_marian():
     """Load MarianMT (~298MB) for fast partial translations."""
     from transformers import MarianMTModel, MarianTokenizer
+
     model_id = "Helsinki-NLP/opus-mt-en-es"
     print(f"[4/6] Loading {model_id} (MarianMT PyTorch)...")
     t0 = time.time()
@@ -570,7 +611,7 @@ def load_marian():
     if BACKEND == "cuda" and torch.cuda.is_available():
         inputs = {k: v.to("cuda") for k, v in inputs.items()}
     model.generate(**inputs, max_new_tokens=16)
-    print(f"  MarianMT ready ({time.time()-t0:.1f}s)")
+    print(f"  MarianMT ready ({time.time() - t0:.1f}s)")
     return model, tokenizer
 
 
@@ -599,7 +640,7 @@ def load_cuda_translation_models(load_gemma=True):
             # (id=106) as its actual EOS, but default EOS is <eos> (id=1).
             eot_id = gemma_tokenizer.convert_tokens_to_ids("<end_of_turn>")
             default_eos = gemma_tokenizer.eos_token_id
-            if hasattr(gemma_tokenizer, '_eos_token_ids'):
+            if hasattr(gemma_tokenizer, "_eos_token_ids"):
                 gemma_tokenizer._eos_token_ids.add(eot_id)
             else:
                 gemma_tokenizer._eos_token_ids = {default_eos, eot_id}
@@ -612,8 +653,6 @@ def load_cuda_translation_models(load_gemma=True):
     return gemma_model, gemma_tokenizer, None, None  # no 12B on CUDA
 
 
-
-
 # ---------------------------------------------------------------------------
 # Translation Quality Estimation (lightweight, real-time)
 # ---------------------------------------------------------------------------
@@ -622,11 +661,12 @@ import re
 
 # Common English words unlikely in valid Spanish translations
 _EN_WORDS = re.compile(
-    r'\b(the|and|of|that|have|for|not|with|you|this|but|his|from|they|'
-    r'been|said|each|which|their|will|other|about|many|then|them|these|'
-    r'would|could|should|because|into|after|before|between|under|through)\b',
+    r"\b(the|and|of|that|have|for|not|with|you|this|but|his|from|they|"
+    r"been|said|each|which|their|will|other|about|many|then|them|these|"
+    r"would|could|should|because|into|after|before|between|under|through)\b",
     re.IGNORECASE,
 )
+
 
 def qe_length_ratio(source, translation):
     """Check if Spanish translation length is plausible vs English source.
@@ -678,8 +718,8 @@ def qe_score(source, translation):
 # Translation (MLX)
 # ---------------------------------------------------------------------------
 
-def translate_mlx(model, tokenizer, text, draft_model=None,
-                  prompt_cache_template=None, suffix_tokens=None):
+
+def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_template=None, suffix_tokens=None):
     """Translate English to Spanish using TranslateGemma via MLX.
 
     Args:
@@ -698,7 +738,6 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
     Returns (translation, latency_ms, generation_tps).
     """
     from mlx_lm import generate
-    import mlx.core as mx
 
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
@@ -709,9 +748,7 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
     max_tok = max(32, int(input_words * 1.8))
 
     # [P7-2B] Use prompt cache when available (not compatible with speculative decoding)
-    use_cache = (prompt_cache_template is not None
-                 and suffix_tokens is not None
-                 and draft_model is None)
+    use_cache = prompt_cache_template is not None and suffix_tokens is not None and draft_model is None
 
     if use_cache:
         # [P7-2B] Deep-copy the pre-computed KV cache so we don't mutate the template
@@ -727,15 +764,13 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
         )
     else:
         # Fallback: full prompt (used with speculative decoding or if cache unavailable)
-        messages = [{"role": "user", "content": [
-            {"type": "text",
-             "source_lang_code": "en",
-             "target_lang_code": "es",
-             "text": text}
-        ]}]
-        prompt = tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True
-        )
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+            }
+        ]
+        prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
         gen_kwargs = dict(
             prompt=prompt,
             max_tokens=max_tok,
@@ -747,7 +782,8 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
 
     t0 = time.perf_counter()
     result = generate(
-        model, tokenizer,
+        model,
+        tokenizer,
         **gen_kwargs,
     )
     latency_ms = (time.perf_counter() - t0) * 1000
@@ -767,6 +803,7 @@ def translate_mlx(model, tokenizer, text, draft_model=None,
 # Translation (CUDA)
 # ---------------------------------------------------------------------------
 
+
 def translate_cuda_gemma(model, tokenizer, text):
     """Translate English->Spanish using TranslateGemma on CUDA.
 
@@ -775,12 +812,13 @@ def translate_cuda_gemma(model, tokenizer, text):
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
 
-    messages = [{"role": "user", "content": [
-        {"type": "text", "source_lang_code": "en",
-         "target_lang_code": "es", "text": text}
-    ]}]
-    prompt = tokenizer.apply_chat_template(
-        messages, add_generation_prompt=True, return_tensors="pt")
+    messages = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+        }
+    ]
+    prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt")
     prompt = prompt.to("cuda")
 
     input_words = len(text.split())
@@ -789,7 +827,7 @@ def translate_cuda_gemma(model, tokenizer, text):
     t0 = time.perf_counter()
     with torch.no_grad():
         output = model.generate(prompt, max_new_tokens=max_tok, do_sample=False)
-    generated = output[0][prompt.shape[1]:]
+    generated = output[0][prompt.shape[1] :]
     result = tokenizer.decode(generated, skip_special_tokens=False)
     latency_ms = (time.perf_counter() - t0) * 1000
 
@@ -808,7 +846,7 @@ def translate_cuda_gemma(model, tokenizer, text):
 #   ("token", chunk_id, partial_text, tokens_so_far)  — intermediate token batch
 #   ("done", chunk_id, final_text, gen_tps, latency_ms) — generation complete
 _stream_token_queue = None  # set to asyncio.Queue in async context
-_stream_loop = None         # event loop reference for thread-safe queue access
+_stream_loop = None  # event loop reference for thread-safe queue access
 
 STREAM_TOKEN_BATCH_SIZE = 3  # Send every N tokens to reduce WebSocket overhead
 
@@ -826,8 +864,7 @@ def _enqueue_stream_token(item):
         pass  # queue full or loop closed — skip this update
 
 
-def translate_mlx_streaming(model, tokenizer, text, chunk_id,
-                            prompt_cache_template=None, suffix_tokens=None):
+def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_template=None, suffix_tokens=None):
     """[P7-P3-6A] Translate English->Spanish with token streaming.
 
     Uses mlx_lm.stream_generate() to yield tokens as they're generated.
@@ -847,7 +884,6 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id,
     Returns (translation, latency_ms, generation_tps).
     """
     from mlx_lm import stream_generate
-    import mlx.core as mx
 
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
@@ -855,8 +891,7 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id,
     input_words = len(text.split())
     max_tok = max(32, int(input_words * 1.8))
 
-    use_cache = (prompt_cache_template is not None
-                 and suffix_tokens is not None)
+    use_cache = prompt_cache_template is not None and suffix_tokens is not None
 
     if use_cache:
         cached = copy.deepcopy(prompt_cache_template)
@@ -868,15 +903,13 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id,
             prompt_cache=cached,
         )
     else:
-        messages = [{"role": "user", "content": [
-            {"type": "text",
-             "source_lang_code": "en",
-             "target_lang_code": "es",
-             "text": text}
-        ]}]
-        prompt = tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True
-        )
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+            }
+        ]
+        prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
         gen_kwargs = dict(
             prompt=prompt,
             max_tokens=max_tok,
@@ -898,8 +931,7 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id,
             # Clean any end-of-turn markers from partial text
             partial = accumulated_text.split("<end_of_turn>")[0].strip()
             if partial:
-                _enqueue_stream_token(
-                    ("token", chunk_id, partial, tokens_generated))
+                _enqueue_stream_token(("token", chunk_id, partial, tokens_generated))
                 last_sent_tokens = tokens_generated
 
     latency_ms = (time.perf_counter() - t0) * 1000
@@ -922,18 +954,21 @@ async def stream_token_broadcaster():
         msg_type = item[0]
         if msg_type == "token":
             _, cid, partial_spanish, tokens_so_far = item
-            await broadcast({
-                "type": "translation_stream",
-                "chunk_id": cid,
-                "partial_spanish_a": partial_spanish,
-                "tokens_so_far": tokens_so_far,
-            })
+            await broadcast(
+                {
+                    "type": "translation_stream",
+                    "chunk_id": cid,
+                    "partial_spanish_a": partial_spanish,
+                    "tokens_so_far": tokens_so_far,
+                }
+            )
 
 
 # [P7-4A] Pre-warm translation models during silence to keep Metal GPU hot.
 # Called once when transitioning from speech to silence — prevents cold-start
 # latency when speech resumes after a pause.
 _warmup_pending = False  # flag to avoid repeated warmups during sustained silence
+
 
 def warmup_translation_models():
     """Dummy 1-token forward pass on translation models to keep Metal GPU warm.
@@ -950,15 +985,16 @@ def warmup_translation_models():
         return  # warmup only needed for Metal GPU
     try:
         from mlx_lm import generate
+
         if mlx_a_model is not None and mlx_a_tokenizer is not None:
-            messages = [{"role": "user", "content": [
-                {"type": "text", "source_lang_code": "en",
-                 "target_lang_code": "es", "text": "hello"}
-            ]}]
-            prompt = mlx_a_tokenizer.apply_chat_template(
-                messages, add_generation_prompt=True)
-            generate(mlx_a_model, mlx_a_tokenizer,
-                     prompt=prompt, max_tokens=1, verbose=False)
+            messages = [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": "hello"}],
+                }
+            ]
+            prompt = mlx_a_tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+            generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
     except Exception:
         pass  # warmup is best-effort, never block the pipeline
 
@@ -972,19 +1008,17 @@ def translate_marian(text):
     inputs = marian_tokenizer(text, return_tensors="pt", padding=True, truncation=True)
     if BACKEND == "cuda" and torch.cuda.is_available():
         inputs = {k: v.to("cuda") for k, v in inputs.items()}
-    with _pytorch_lock:
-        with torch.no_grad():
-            translated = marian_model.generate(**inputs, max_new_tokens=128)
+    with _pytorch_lock, torch.no_grad():
+        translated = marian_model.generate(**inputs, max_new_tokens=128)
     result = marian_tokenizer.decode(translated[0], skip_special_tokens=True)
     latency_ms = (time.perf_counter() - t0) * 1000
     return result, latency_ms
 
 
-
-
 # ---------------------------------------------------------------------------
 # Audio Processing
 # ---------------------------------------------------------------------------
+
 
 def detect_macbook_mic():
     """Find the MacBook Pro built-in microphone by name.
@@ -993,13 +1027,17 @@ def detect_macbook_mic():
     devices = sd.query_devices()
     # Find MacBook Pro mic by name
     for idx, d in enumerate(devices):
-        if d['max_input_channels'] > 0 and 'MacBook Pro' in d['name']:
+        if d["max_input_channels"] > 0 and "MacBook Pro" in d["name"]:
             # Quick RMS measurement for gain calibration
-            test = sd.rec(int(1.0 * d['default_samplerate']),
-                          samplerate=d['default_samplerate'],
-                          channels=1, dtype='float32', device=idx)
+            test = sd.rec(
+                int(1.0 * d["default_samplerate"]),
+                samplerate=d["default_samplerate"],
+                channels=1,
+                dtype="float32",
+                device=idx,
+            )
             sd.wait()
-            rms = float(np.sqrt(np.mean(test[:, 0]**2)))
+            rms = float(np.sqrt(np.mean(test[:, 0] ** 2)))
             print(f"  Using: [{idx}] {d['name']} (RMS={rms:.4f})")
             return idx, rms
 
@@ -1007,11 +1045,15 @@ def detect_macbook_mic():
     print("  WARNING: MacBook Pro mic not found, using system default", file=sys.stderr)
     default_idx = sd.default.device[0]
     d = sd.query_devices(default_idx)
-    test = sd.rec(int(1.0 * d['default_samplerate']),
-                  samplerate=d['default_samplerate'],
-                  channels=1, dtype='float32', device=default_idx)
+    test = sd.rec(
+        int(1.0 * d["default_samplerate"]),
+        samplerate=d["default_samplerate"],
+        channels=1,
+        dtype="float32",
+        device=default_idx,
+    )
     sd.wait()
-    rms = float(np.sqrt(np.mean(test[:, 0]**2)))
+    rms = float(np.sqrt(np.mean(test[:, 0] ** 2)))
     print(f"  Using default: [{default_idx}] {d['name']} (RMS={rms:.4f})")
     return default_idx, rms
 
@@ -1021,6 +1063,7 @@ TARGET_RMS = 0.08  # Target RMS for speech audio fed to VAD/Whisper
 
 # [P7-5D] Background thread pool for non-blocking I/O (WAV saves, CSV/JSONL writes)
 _io_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="io")
+
 
 def audio_callback(indata, frames, time_info, status):
     """sounddevice callback — resample from mic rate to 16kHz and push to queue."""
@@ -1035,11 +1078,13 @@ def audio_callback(indata, frames, time_info, status):
     # [P7-5A] Use decimate instead of resample — faster for integer factor (48k/16k = 3x)
     if MIC_SAMPLE_RATE != SAMPLE_RATE:
         from scipy.signal import decimate
+
         factor = MIC_SAMPLE_RATE // SAMPLE_RATE  # 48000 // 16000 = 3
         if MIC_SAMPLE_RATE % SAMPLE_RATE == 0 and factor > 1:
             raw = decimate(raw, factor, zero_phase=False).astype(np.float32)
         else:
             from scipy.signal import resample
+
             target_len = int(len(raw) * SAMPLE_RATE / MIC_SAMPLE_RATE)
             raw = resample(raw, target_len).astype(np.float32)
     audio_queue.put_nowait(raw)
@@ -1084,8 +1129,7 @@ def start_vad_thread():
     """[P7-5B] Start the dedicated VAD worker thread."""
     global _vad_thread
     _vad_thread_stop.clear()
-    _vad_thread = threading.Thread(target=_vad_worker, daemon=True,
-                                    name="vad-worker")
+    _vad_thread = threading.Thread(target=_vad_worker, daemon=True, name="vad-worker")
     _vad_thread.start()
     print("  VAD thread started")
 
@@ -1159,18 +1203,20 @@ async def process_partial(audio_data, utterance_id):
         }
 
         print(f"  partial ({total:.0f}ms, Marian:{marian_latency:.0f}ms): {english} | {spanish}          ", end="\r")
-        await broadcast({
-            "type": "translation",
-            "stage": "partial",
-            "chunk_id": utterance_id,
-            "english": english,
-            "spanish_a": spanish,
-            "spanish_b": None,
-            "stt_latency_ms": round(stt_latency, 1),
-            "latency_a_ms": round(marian_latency, 1),
-            "marian_pt_ms": round(marian_latency, 1),
-            "timestamp": datetime.now().isoformat(),
-        })
+        await broadcast(
+            {
+                "type": "translation",
+                "stage": "partial",
+                "chunk_id": utterance_id,
+                "english": english,
+                "spanish_a": spanish,
+                "spanish_b": None,
+                "stt_latency_ms": round(stt_latency, 1),
+                "latency_a_ms": round(marian_latency, 1),
+                "marian_pt_ms": round(marian_latency, 1),
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
     except Exception as e:
         print(f"\n  ERROR in partial: {e}", file=sys.stderr)
@@ -1201,12 +1247,12 @@ async def process_partial(audio_data, utterance_id):
 
 _pipeline_chunk_queue = None  # asyncio.Queue — audio chunks awaiting processing
 _pipeline_translation_lock = None  # asyncio.Lock — serialize translations to avoid
-                                   # Metal GPU contention between concurrent
-                                   # TranslateGemma calls; initialized in main_async
+# Metal GPU contention between concurrent
+# TranslateGemma calls; initialized in main_async
 
 # [P7-6C] Counters for overlap statistics
-_pipeline_overlaps = 0   # how many times STT(N) overlapped with Translation(N-1)
-_pipeline_total = 0      # total chunks processed through pipeline
+_pipeline_overlaps = 0  # how many times STT(N) overlapped with Translation(N-1)
+_pipeline_total = 0  # total chunks processed through pipeline
 
 
 def _run_stt(audio_data, whisper_prompt):
@@ -1258,12 +1304,14 @@ def _run_stt_mlx(audio_data, whisper_prompt):
             # Extract per-word confidence
             for w in seg.get("words", []):
                 if w.get("probability", 1.0) < 0.5:
-                    low_conf_words.append({
-                        "word": w.get("word", ""),
-                        "probability": round(w["probability"], 3),
-                        "start": w.get("start"),
-                        "end": w.get("end"),
-                    })
+                    low_conf_words.append(
+                        {
+                            "word": w.get("word", ""),
+                            "probability": round(w["probability"], 3),
+                            "start": w.get("start"),
+                            "end": w.get("end"),
+                        }
+                    )
         if avg_logprobs:
             mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
             stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
@@ -1310,15 +1358,17 @@ def _run_stt_faster_whisper(audio_data, whisper_prompt):
             if meta["avg_logprob"] is not None:
                 avg_logprobs.append(meta["avg_logprob"])
             # Extract per-word confidence from faster-whisper Word objects
-            for w in (seg.words or []):
+            for w in seg.words or []:
                 prob = getattr(w, "probability", 1.0)
                 if prob < 0.5:
-                    low_conf_words.append({
-                        "word": getattr(w, "word", ""),
-                        "probability": round(prob, 3),
-                        "start": getattr(w, "start", None),
-                        "end": getattr(w, "end", None),
-                    })
+                    low_conf_words.append(
+                        {
+                            "word": getattr(w, "word", ""),
+                            "probability": round(prob, 3),
+                            "start": getattr(w, "start", None),
+                            "end": getattr(w, "end", None),
+                        }
+                    )
         if avg_logprobs:
             mean_logprob = sum(avg_logprobs) / len(avg_logprobs)
             stt_confidence = round(min(1.0, max(0.0, 1.0 + mean_logprob)), 2)
@@ -1326,10 +1376,9 @@ def _run_stt_faster_whisper(audio_data, whisper_prompt):
     return english, stt_latency, stt_confidence, segment_meta, low_conf_words
 
 
-async def _pipeline_translate_and_finalize(cid, english, stt_latency,
-                                            stt_confidence, segment_meta,
-                                            low_conf_words, audio_data,
-                                            e2e_start):
+async def _pipeline_translate_and_finalize(
+    cid, english, stt_latency, stt_confidence, segment_meta, low_conf_words, audio_data, e2e_start
+):
     """[P7-6C] Run translation and finalization for a chunk.
 
     This is the second half of what was process_final(). It runs as a
@@ -1351,8 +1400,8 @@ async def _pipeline_translate_and_finalize(cid, english, stt_latency,
                 # CUDA backend: use translate_cuda_gemma (no streaming, no A/B)
                 if mlx_a_model is not None:
                     spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                        _pipeline_pool, lambda: translate_cuda_gemma(
-                            mlx_a_model, mlx_a_tokenizer, english))
+                        _pipeline_pool, lambda: translate_cuda_gemma(mlx_a_model, mlx_a_tokenizer, english)
+                    )
                 else:
                     # Low-VRAM mode: MarianMT only
                     spanish_a, lat_a = translate_marian(english)
@@ -1365,32 +1414,41 @@ async def _pipeline_translate_and_finalize(cid, english, stt_latency,
                 # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
                 # non-streaming (speculative decoding can't stream).
                 task_a = loop.run_in_executor(
-                    _pipeline_pool, lambda: translate_mlx_streaming(
-                        mlx_a_model, mlx_a_tokenizer, english, cid,
+                    _pipeline_pool,
+                    lambda: translate_mlx_streaming(
+                        mlx_a_model,
+                        mlx_a_tokenizer,
+                        english,
+                        cid,
                         prompt_cache_template=mlx_a_prompt_cache,
-                        suffix_tokens=mlx_a_suffix_tokens))
+                        suffix_tokens=mlx_a_suffix_tokens,
+                    ),
+                )
                 # Speculative decoding: 4B model drafts tokens for 12B to verify
                 # Note: prompt cache not used with speculative decoding (incompatible)
                 task_b = loop.run_in_executor(
-                    _pipeline_pool, lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english,
-                                                draft_model=mlx_a_model))
+                    _pipeline_pool,
+                    lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english, draft_model=mlx_a_model),
+                )
 
                 spanish_a, lat_a, tps_a = await task_a
                 qe_a = qe_score(english, spanish_a)
-                await broadcast({
-                    "type": "translation",
-                    "stage": "translation_a",
-                    "chunk_id": cid,
-                    "english": english,
-                    "spanish_a": spanish_a,
-                    "spanish_b": None,
-                    "stt_latency_ms": round(stt_latency, 1),
-                    "latency_a_ms": round(lat_a, 1),
-                    "stt_confidence": stt_confidence,
-                    "tps_a": round(tps_a, 1),
-                    "qe_a": qe_a,
-                    "timestamp": datetime.now().isoformat(),
-                })
+                await broadcast(
+                    {
+                        "type": "translation",
+                        "stage": "translation_a",
+                        "chunk_id": cid,
+                        "english": english,
+                        "spanish_a": spanish_a,
+                        "spanish_b": None,
+                        "stt_latency_ms": round(stt_latency, 1),
+                        "latency_a_ms": round(lat_a, 1),
+                        "stt_confidence": stt_confidence,
+                        "tps_a": round(tps_a, 1),
+                        "qe_a": qe_a,
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                )
 
                 spanish_b, lat_b, tps_b = await task_b
                 qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
@@ -1398,10 +1456,16 @@ async def _pipeline_translate_and_finalize(cid, english, stt_latency,
                 # [P7-P3-6A] 4B-only mode: use streaming translation for
                 # progressive display (biggest perceived latency win: 300-500ms)
                 spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                    _pipeline_pool, lambda: translate_mlx_streaming(
-                        mlx_a_model, mlx_a_tokenizer, english, cid,
+                    _pipeline_pool,
+                    lambda: translate_mlx_streaming(
+                        mlx_a_model,
+                        mlx_a_tokenizer,
+                        english,
+                        cid,
                         prompt_cache_template=mlx_a_prompt_cache,
-                        suffix_tokens=mlx_a_suffix_tokens))
+                        suffix_tokens=mlx_a_suffix_tokens,
+                    ),
+                )
                 qe_a = qe_score(english, spanish_a)
 
         e2e_latency = (time.perf_counter() - e2e_start) * 1000
@@ -1468,12 +1532,13 @@ async def _pipeline_translate_and_finalize(cid, english, stt_latency,
 
         # Save audio + structured diagnostics for fine-tuning pipeline
         resources = get_resource_snapshot()
+
         def _save_io():
             audio_path = save_chunk_audio(audio_data, cid)
-            write_diag_jsonl(result_data, audio_path,
-                             segment_meta=segment_meta,
-                             low_conf_words=low_conf_words,
-                             resources=resources)
+            write_diag_jsonl(
+                result_data, audio_path, segment_meta=segment_meta, low_conf_words=low_conf_words, resources=resources
+            )
+
         _io_pool.submit(_save_io)
 
     except Exception as e:
@@ -1521,23 +1586,19 @@ async def _pipeline_coordinator():
             # [P7-6C] Check if translation from previous chunk is still running.
             # If so, STT(N) will overlap with Translation(N-1) — this is the
             # core latency win.
-            overlap_detected = (active_translation_task is not None
-                                and not active_translation_task.done())
+            overlap_detected = active_translation_task is not None and not active_translation_task.done()
             if overlap_detected:
                 _pipeline_overlaps += 1
-                print(f"  [P7-6C] OVERLAP: STT #{cid} starting while "
-                      f"Translation #{cid-1} still running")
+                print(f"  [P7-6C] OVERLAP: STT #{cid} starting while Translation #{cid - 1} still running")
 
             # --- STT: submit to pipeline pool ---
             loop = asyncio.get_event_loop()
             whisper_prompt = _whisper_prompt()
-            stt_future = loop.run_in_executor(
-                _pipeline_pool, _run_stt, audio_data, whisper_prompt)
+            stt_future = loop.run_in_executor(_pipeline_pool, _run_stt, audio_data, whisper_prompt)
 
             # Await STT completion (translation of N-1 may still be running
             # concurrently in another thread — that's the overlap)
-            english, stt_latency, stt_confidence, segment_meta, low_conf_words = \
-                await stt_future
+            english, stt_latency, stt_confidence, segment_meta, low_conf_words = await stt_future
 
             if not english:
                 continue
@@ -1545,30 +1606,36 @@ async def _pipeline_coordinator():
             prev_text = english[-100:]  # [P7-1E] capped at 100 chars
 
             # [P7-P3-6A] Broadcast English immediately + translation_start signal
-            print(f"\n{'='*60}")
-            print(f"Chunk #{cid} | STT: {stt_latency:.0f}ms | EN: {english}"
-                  + (f" [overlapped]" if overlap_detected else ""))
-            await broadcast({
-                "type": "translation_start",
-                "chunk_id": cid,
-                "english": english,
-                "stage": "final",
-                "stt_latency_ms": round(stt_latency, 1),
-                "stt_confidence": stt_confidence,
-                "timestamp": datetime.now().isoformat(),
-            })
+            print(f"\n{'=' * 60}")
+            print(
+                f"Chunk #{cid} | STT: {stt_latency:.0f}ms | EN: {english}"
+                + (" [overlapped]" if overlap_detected else "")
+            )
+            await broadcast(
+                {
+                    "type": "translation_start",
+                    "chunk_id": cid,
+                    "english": english,
+                    "stage": "final",
+                    "stt_latency_ms": round(stt_latency, 1),
+                    "stt_confidence": stt_confidence,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
             # Legacy stt stage message for backward compatibility
-            await broadcast({
-                "type": "translation",
-                "stage": "stt",
-                "chunk_id": cid,
-                "english": english,
-                "spanish_a": None,
-                "spanish_b": None,
-                "stt_latency_ms": round(stt_latency, 1),
-                "stt_confidence": stt_confidence,
-                "timestamp": datetime.now().isoformat(),
-            })
+            await broadcast(
+                {
+                    "type": "translation",
+                    "stage": "stt",
+                    "chunk_id": cid,
+                    "english": english,
+                    "spanish_a": None,
+                    "spanish_b": None,
+                    "stt_latency_ms": round(stt_latency, 1),
+                    "stt_confidence": stt_confidence,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
 
             # --- Wait for previous translation to finish before starting new one ---
             # We don't want two translations running at once (Metal GPU contention),
@@ -1580,16 +1647,19 @@ async def _pipeline_coordinator():
             # This task will run concurrently with the next chunk's STT
             active_translation_task = asyncio.create_task(
                 _pipeline_translate_and_finalize(
-                    cid, english, stt_latency, stt_confidence,
-                    segment_meta, low_conf_words, audio_data, e2e_start))
+                    cid, english, stt_latency, stt_confidence, segment_meta, low_conf_words, audio_data, e2e_start
+                )
+            )
 
         except Exception as e:
             print(f"\n  ERROR in pipeline chunk #{cid}: {e}", file=sys.stderr)
 
     # Print overlap statistics
     if _pipeline_total > 0:
-        print(f"\n  [P7-6C] Pipeline stats: {_pipeline_overlaps}/{_pipeline_total} "
-              f"chunks overlapped ({_pipeline_overlaps/_pipeline_total:.0%})")
+        print(
+            f"\n  [P7-6C] Pipeline stats: {_pipeline_overlaps}/{_pipeline_total} "
+            f"chunks overlapped ({_pipeline_overlaps / _pipeline_total:.0%})"
+        )
 
 
 async def pipeline_submit(audio_data):
@@ -1615,6 +1685,7 @@ async def process_final(audio_data):
 # ---------------------------------------------------------------------------
 # WebSocket Server
 # ---------------------------------------------------------------------------
+
 
 async def ws_handler(websocket, path=None):
     """Handle new WebSocket connections."""
@@ -1656,9 +1727,11 @@ async def broadcast(data):
 # Data Persistence (audio + CSV + diagnostics JSONL for fine-tuning)
 # ---------------------------------------------------------------------------
 
+
 def save_chunk_audio(audio_data, cid):
     """Save chunk audio as 16kHz WAV for later Whisper fine-tuning."""
     import scipy.io.wavfile as wav
+
     os.makedirs(AUDIO_DIR, exist_ok=True)
     path = os.path.join(AUDIO_DIR, f"chunk_{cid:04d}.wav")
     wav.write(path, SAMPLE_RATE, audio_data)
@@ -1733,8 +1806,8 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
             None,
         ),
         "resources": resources,
-        "corrected_english": None,   # filled in during human review
-        "corrected_spanish": None,   # filled in during human review
+        "corrected_english": None,  # filled in during human review
+        "corrected_spanish": None,  # filled in during human review
     }
 
     os.makedirs(os.path.dirname(DIAG_PATH), exist_ok=True)
@@ -1747,15 +1820,29 @@ def init_csv():
     os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
     with open(CSV_PATH, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            "chunk_id", "timestamp", "english",
-            "spanish_a", "spanish_b",
-            "stt_latency_ms", "latency_a_ms", "latency_b_ms",
-            "e2e_latency_ms", "stt_confidence", "tps_a", "tps_b",
-            "qe_a", "qe_b",
-            "utterance_dur", "homophone_flags", "bad_split", "marian_similarity",
-            "marian_pt_ms",
-        ])
+        writer.writerow(
+            [
+                "chunk_id",
+                "timestamp",
+                "english",
+                "spanish_a",
+                "spanish_b",
+                "stt_latency_ms",
+                "latency_a_ms",
+                "latency_b_ms",
+                "e2e_latency_ms",
+                "stt_confidence",
+                "tps_a",
+                "tps_b",
+                "qe_a",
+                "qe_b",
+                "utterance_dur",
+                "homophone_flags",
+                "bad_split",
+                "marian_similarity",
+                "marian_pt_ms",
+            ]
+        )
     print(f"  CSV: {CSV_PATH}")
 
 
@@ -1775,24 +1862,35 @@ def write_csv_row(data):
 
     with open(CSV_PATH, "a", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            data["chunk_id"], data["timestamp"], data["english"],
-            data["spanish_a"], data["spanish_b"],
-            data["stt_latency_ms"], data["latency_a_ms"], data["latency_b_ms"],
-            data["e2e_latency_ms"], data.get("stt_confidence", ""),
-            data.get("tps_a", ""), data.get("tps_b", ""),
-            data.get("qe_a", ""), data.get("qe_b", ""),
-            round(utt_dur, 2) if utt_dur else "",
-            "|".join(homo) if homo else "",
-            "Y" if bad_sp else "",
-            marian_sim,
-            ml["pt_ms"] if ml else "",
-        ])
+        writer.writerow(
+            [
+                data["chunk_id"],
+                data["timestamp"],
+                data["english"],
+                data["spanish_a"],
+                data["spanish_b"],
+                data["stt_latency_ms"],
+                data["latency_a_ms"],
+                data["latency_b_ms"],
+                data["e2e_latency_ms"],
+                data.get("stt_confidence", ""),
+                data.get("tps_a", ""),
+                data.get("tps_b", ""),
+                data.get("qe_a", ""),
+                data.get("qe_b", ""),
+                round(utt_dur, 2) if utt_dur else "",
+                "|".join(homo) if homo else "",
+                "Y" if bad_sp else "",
+                marian_sim,
+                ml["pt_ms"] if ml else "",
+            ]
+        )
 
 
 # ---------------------------------------------------------------------------
 # Summary Stats
 # ---------------------------------------------------------------------------
+
 
 def print_summary():
     """Print summary statistics on exit."""
@@ -1805,22 +1903,21 @@ def print_summary():
     a_lats = [r["latency_a_ms"] for r in all_results]
     b_lats = [r["latency_b_ms"] for r in all_results if r["latency_b_ms"] > 0]
     same = sum(1 for r in all_results if r["spanish_a"] == r["spanish_b"])
-    a_faster = sum(1 for r in all_results
-                   if r["latency_b_ms"] > 0 and r["latency_a_ms"] < r["latency_b_ms"])
+    a_faster = sum(1 for r in all_results if r["latency_b_ms"] > 0 and r["latency_a_ms"] < r["latency_b_ms"])
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"SESSION SUMMARY — {n} chunks")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  STT avg:     {np.mean(stt_lats):.0f}ms (median {np.median(stt_lats):.0f}ms)")
     print(f"  A (4B) avg:  {np.mean(a_lats):.0f}ms (median {np.median(a_lats):.0f}ms)")
     if b_lats:
         print(f"  B (12B) avg: {np.mean(b_lats):.0f}ms (median {np.median(b_lats):.0f}ms)")
-        print(f"  Same output: {same}/{n} ({same/n:.0%})")
-        print(f"  A faster:    {a_faster}/{n} ({a_faster/n:.0%})")
+        print(f"  Same output: {same}/{n} ({same / n:.0%})")
+        print(f"  A faster:    {a_faster}/{n} ({a_faster / n:.0%})")
     else:
-        print(f"  B (12B):     not loaded")
+        print("  B (12B):     not loaded")
     print(f"  CSV saved:   {CSV_PATH}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print_diagnostics()
 
 
@@ -1828,14 +1925,15 @@ def print_summary():
 # Main Loop
 # ---------------------------------------------------------------------------
 
+
 async def audio_loop():
     """Main audio capture and processing loop with error recovery."""
     global _warmup_pending  # [P7-4A]
     print("\nListening... (Ctrl+C to stop)\n")
 
     PARTIAL_INTERVAL = 1.0  # seconds between partial STT updates
-    SILENCE_TRIGGER = 0.8   # seconds of silence to trigger final processing
-    MAX_UTTERANCE = 8.0     # force-process if speaker doesn't pause
+    SILENCE_TRIGGER = 0.8  # seconds of silence to trigger final processing
+    MAX_UTTERANCE = 8.0  # force-process if speaker doesn't pause
 
     speech_buffer = np.array([], dtype=np.float32)
     silence_frames = 0
@@ -1843,8 +1941,8 @@ async def audio_loop():
     frame_count = 0
     speech_frame_count = 0
     last_status_time = time.time()
-    last_partial_len = 0    # audio length (samples) at last partial
-    utterance_id = 0        # tracks current utterance for partial updates
+    last_partial_len = 0  # audio length (samples) at last partial
+    utterance_id = 0  # tracks current utterance for partial updates
 
     while True:
         try:
@@ -1863,7 +1961,7 @@ async def audio_loop():
                     # VAD is <1ms so running it on the asyncio thread is fine.
                     try:
                         audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
-                    except asyncio.TimeoutError:
+                    except TimeoutError:
                         continue
                     has_speech = is_speech(audio_frame, vad_model, vad_utils)
 
@@ -1887,24 +1985,28 @@ async def audio_loop():
                     if now - last_status_time >= 3.0:
                         buf_dur = len(speech_buffer) / SAMPLE_RATE
                         rms = float(np.sqrt(np.mean(audio_frame**2)))
-                        print(f"  [status] frames={frame_count} speech={speech_frame_count} buf={buf_dur:.1f}s silence={silence_frames} rms={rms:.4f}", end="\r")
+                        print(
+                            f"  [status] frames={frame_count} speech={speech_frame_count} buf={buf_dur:.1f}s silence={silence_frames} rms={rms:.4f}",
+                            end="\r",
+                        )
                         last_status_time = now
 
                     buffer_duration = len(speech_buffer) / SAMPLE_RATE
                     new_audio = (len(speech_buffer) - last_partial_len) / SAMPLE_RATE
 
                     # --- Partial: fire every PARTIAL_INTERVAL of new audio ---
-                    if (new_audio >= PARTIAL_INTERVAL
-                            and silence_frames < max_silence_frames
-                            and buffer_duration < MAX_UTTERANCE):
+                    if (
+                        new_audio >= PARTIAL_INTERVAL
+                        and silence_frames < max_silence_frames
+                        and buffer_duration < MAX_UTTERANCE
+                    ):
                         await process_partial(speech_buffer.copy(), utterance_id)
                         last_partial_len = len(speech_buffer)
 
                     # --- Final: on silence gap or max duration ---
                     should_finalize = (
-                        (buffer_duration >= 0.5 and silence_frames >= max_silence_frames)
-                        or buffer_duration >= MAX_UTTERANCE
-                    )
+                        buffer_duration >= 0.5 and silence_frames >= max_silence_frames
+                    ) or buffer_duration >= MAX_UTTERANCE
 
                     if should_finalize and buffer_duration >= 0.5:
                         print()  # newline after partial line
@@ -1920,8 +2022,7 @@ async def audio_loop():
 
                     # [P7-4A] Pre-warm during silence: run dummy forward pass
                     # once after speech→silence transition to keep Metal GPU hot
-                    if (len(speech_buffer) == 0 and silence_frames > 0
-                            and _warmup_pending):
+                    if len(speech_buffer) == 0 and silence_frames > 0 and _warmup_pending:
                         loop = asyncio.get_event_loop()
                         loop.run_in_executor(_pipeline_pool, warmup_translation_models)
 
@@ -1949,17 +2050,16 @@ async def main_async(args):
     if args.run_ab and BACKEND == "mlx":
         spec_info = f"  Speculative decoding: 4B drafts {NUM_DRAFT_TOKENS} tokens for 12B\n"
 
-    mode_str = "MarianMT-only (low-VRAM)" if args.low_vram else \
-               ("A/B parallel" if args.run_ab else "4B only")
+    mode_str = "MarianMT-only (low-VRAM)" if args.low_vram else ("A/B parallel" if args.run_ab else "4B only")
 
-    print(f"{'='*60}")
-    print(f"  Bilingual A/B Dry Run")
+    print(f"{'=' * 60}")
+    print("  Bilingual A/B Dry Run")
     print(f"  Backend: {BACKEND.upper()}")
     print(f"  Mode: {mode_str}")
     if spec_info:
         print(spec_info, end="")
     print(f"  WebSocket: ws://localhost:{args.ws_port}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     # Load models — dispatch based on backend
     vad_model, vad_utils = load_vad()
@@ -1970,11 +2070,9 @@ async def main_async(args):
         mlx_a_model, mlx_a_tokenizer = None, None
         mlx_b_model, mlx_b_tokenizer = None, None
     elif BACKEND == "mlx":
-        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
-            load_translation_models(load_b=args.run_ab)
+        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_translation_models(load_b=args.run_ab)
     elif BACKEND == "cuda":
-        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = \
-            load_cuda_translation_models(load_gemma=True)
+        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_cuda_translation_models(load_gemma=True)
     else:
         # CPU fallback: no Gemma, MarianMT only
         mlx_a_model, mlx_a_tokenizer = None, None
@@ -1984,16 +2082,18 @@ async def main_async(args):
 
     # --- Dry-run text mode: translate a single string and exit ---
     if args.dry_run_text:
-        print(f"\n--- DRY RUN TEXT MODE ---")
+        print("\n--- DRY RUN TEXT MODE ---")
         print(f"Input: {args.dry_run_text}")
         if BACKEND == "mlx" and mlx_a_model is not None:
             spanish, lat, tps = translate_mlx(
-                mlx_a_model, mlx_a_tokenizer, args.dry_run_text,
+                mlx_a_model,
+                mlx_a_tokenizer,
+                args.dry_run_text,
                 prompt_cache_template=mlx_a_prompt_cache,
-                suffix_tokens=mlx_a_suffix_tokens)
+                suffix_tokens=mlx_a_suffix_tokens,
+            )
         elif BACKEND == "cuda" and mlx_a_model is not None:
-            spanish, lat, tps = translate_cuda_gemma(
-                mlx_a_model, mlx_a_tokenizer, args.dry_run_text)
+            spanish, lat, tps = translate_cuda_gemma(mlx_a_model, mlx_a_tokenizer, args.dry_run_text)
         else:
             spanish, lat = translate_marian(args.dry_run_text)
             tps = 0.0
@@ -2018,31 +2118,35 @@ async def main_async(args):
     with open(hw_path, "w") as f:
         json.dump(hw_profile, f, indent=2)
     print(f"  Hardware profile: {hw_path}")
-    print(f"    {hw_profile.get('processor', '?')} | "
-          f"{hw_profile['cpu_count_physical']}P+{hw_profile['cpu_count_logical'] - hw_profile['cpu_count_physical']}E cores | "
-          f"{hw_profile['ram_total_gb']}GB RAM | "
-          f"{hw_profile.get('gpu_model', '?')}")
+    print(
+        f"    {hw_profile.get('processor', '?')} | "
+        f"{hw_profile['cpu_count_physical']}P+{hw_profile['cpu_count_logical'] - hw_profile['cpu_count_physical']}E cores | "
+        f"{hw_profile['ram_total_gb']}GB RAM | "
+        f"{hw_profile.get('gpu_model', '?')}"
+    )
 
-    print(f"[6/6] Starting servers...")
+    print("[6/6] Starting servers...")
     init_csv()
 
     # Start HTTP server for mobile access
     project_dir = os.path.dirname(os.path.abspath(__file__))
-    http_srv = start_http_server(args.http_port, project_dir)
+    start_http_server(args.http_port, project_dir)
     local_ip = get_local_ip()
 
     # Start WebSocket server (bind 0.0.0.0 so phones can connect)
     ws_server = await websockets.serve(
-        ws_handler, "0.0.0.0", args.ws_port,
+        ws_handler,
+        "0.0.0.0",
+        args.ws_port,
         ping_interval=None,  # disable pings — inference blocks event loop
     )
 
     print(f"  WebSocket ready on port {args.ws_port}")
     print(f"  HTTP server ready on port {args.http_port}")
-    print(f"\n  Local displays:")
+    print("\n  Local displays:")
     print(f"    A/B display:       file://{project_dir}/displays/ab_display.html")
     print(f"    Audience display:  file://{project_dir}/displays/audience_display.html")
-    print(f"\n  Mobile / LAN access:")
+    print("\n  Mobile / LAN access:")
     print(f"    http://{local_ip}:{args.http_port}/displays/mobile_display.html")
     print(f"    http://{local_ip}:{args.http_port}/displays/audience_display.html")
 
@@ -2050,13 +2154,13 @@ async def main_async(args):
     _stream_token_queue = asyncio.Queue(maxsize=128)
     _stream_loop = asyncio.get_event_loop()
     stream_task = asyncio.create_task(stream_token_broadcaster())
-    print(f"  [P7-P3-6A] Streaming translation broadcaster started")
+    print("  [P7-P3-6A] Streaming translation broadcaster started")
 
     # [P7-6C] Initialize pipeline coordinator for STT/translation overlap
     _pipeline_chunk_queue = asyncio.Queue(maxsize=8)
     _pipeline_translation_lock = asyncio.Lock()
     pipeline_task = asyncio.create_task(_pipeline_coordinator())
-    print(f"  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
+    print("  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
 
     # Run audio loop
     try:
@@ -2078,33 +2182,42 @@ async def main_async(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Live A/B bilingual speech-to-text dry run"
+    parser = argparse.ArgumentParser(description="Live A/B bilingual speech-to-text dry run")
+    parser.add_argument(
+        "--ab", action="store_true", dest="run_ab", help="Load both 4B and 12B for A/B comparison (default: 4B only)"
     )
-    parser.add_argument("--ab", action="store_true", dest="run_ab",
-                        help="Load both 4B and 12B for A/B comparison (default: 4B only)")
-    parser.add_argument("--backend", choices=["auto", "mlx", "cuda"], default="auto",
-                        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA)")
-    parser.add_argument("--no-ab", action="store_true",
-                        help="Skip 12B model, use 4B only (for low-VRAM devices)")
-    parser.add_argument("--low-vram", action="store_true",
-                        help="Minimal VRAM mode: MarianMT-only translation, no Gemma")
-    parser.add_argument("--dry-run-text", type=str, default=None,
-                        help="Run a single text through the pipeline without mic (for testing)")
-    parser.add_argument("--chunk-duration", type=float, default=2.0,
-                        help="Seconds of speech to accumulate before processing")
-    parser.add_argument("--ws-port", type=int, default=8765,
-                        help="WebSocket server port")
-    parser.add_argument("--http-port", type=int, default=8080,
-                        help="HTTP server port for serving display pages to phones")
-    parser.add_argument("--vad-threshold", type=float, default=0.3,
-                        help="VAD speech threshold (0-1)")
-    parser.add_argument("--device", type=int, default=None,
-                        help="Audio input device index (default: auto-detect)")
-    parser.add_argument("--gain", type=float, default=None,
-                        help="Mic gain multiplier (default: auto-calibrate)")
-    parser.add_argument("--num-draft-tokens", type=int, default=3,
-                        help="Speculative decoding: tokens drafted by 4B for 12B to verify (default: 3)")
+    parser.add_argument(
+        "--backend",
+        choices=["auto", "mlx", "cuda"],
+        default="auto",
+        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA)",
+    )
+    parser.add_argument("--no-ab", action="store_true", help="Skip 12B model, use 4B only (for low-VRAM devices)")
+    parser.add_argument(
+        "--low-vram", action="store_true", help="Minimal VRAM mode: MarianMT-only translation, no Gemma"
+    )
+    parser.add_argument(
+        "--dry-run-text",
+        type=str,
+        default=None,
+        help="Run a single text through the pipeline without mic (for testing)",
+    )
+    parser.add_argument(
+        "--chunk-duration", type=float, default=2.0, help="Seconds of speech to accumulate before processing"
+    )
+    parser.add_argument("--ws-port", type=int, default=8765, help="WebSocket server port")
+    parser.add_argument(
+        "--http-port", type=int, default=8080, help="HTTP server port for serving display pages to phones"
+    )
+    parser.add_argument("--vad-threshold", type=float, default=0.3, help="VAD speech threshold (0-1)")
+    parser.add_argument("--device", type=int, default=None, help="Audio input device index (default: auto-detect)")
+    parser.add_argument("--gain", type=float, default=None, help="Mic gain multiplier (default: auto-calibrate)")
+    parser.add_argument(
+        "--num-draft-tokens",
+        type=int,
+        default=3,
+        help="Speculative decoding: tokens drafted by 4B for 12B to verify (default: 3)",
+    )
     args = parser.parse_args()
 
     # --- Resolve backend ---
@@ -2118,8 +2231,7 @@ def main():
             BACKEND = "cpu"
     elif args.backend == "mlx":
         if not MLX_AVAILABLE:
-            print("ERROR: MLX not available. Install mlx, mlx-lm, mlx-whisper.",
-                  file=sys.stderr)
+            print("ERROR: MLX not available. Install mlx, mlx-lm, mlx-whisper.", file=sys.stderr)
             sys.exit(1)
         BACKEND = "mlx"
     elif args.backend == "cuda":
@@ -2136,8 +2248,7 @@ def main():
         args.run_ab = False
     # CUDA backend: A/B not supported (single GPU VRAM constraint)
     if BACKEND == "cuda" and args.run_ab:
-        print("WARNING: A/B mode not supported on CUDA (single GPU VRAM). Disabling 12B.",
-              file=sys.stderr)
+        print("WARNING: A/B mode not supported on CUDA (single GPU VRAM). Disabling 12B.", file=sys.stderr)
         args.run_ab = False
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS

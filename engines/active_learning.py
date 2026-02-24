@@ -13,9 +13,8 @@ Usage:
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 from engines.base import STTResult
 
@@ -33,7 +32,7 @@ def log_fallback_event(
     original: STTResult,
     retry: STTResult,
     audio_hash: str,
-    output_path: Optional[str] = None,
+    output_path: str | None = None,
     *,
     chosen: str = "retry",
     primary_model: str = "",
@@ -56,7 +55,7 @@ def log_fallback_event(
         output_path = _DEFAULT_OUTPUT_PATH
 
     record = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "audio_hash": audio_hash,
         "primary_model": primary_model,
         "fallback_model": fallback_model,

@@ -40,7 +40,7 @@ import random
 import sys
 
 import torch
-from datasets import Dataset, concatenate_datasets, load_dataset
+from datasets import Dataset
 from peft import LoraConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import SFTConfig, SFTTrainer
@@ -59,7 +59,7 @@ logger = logging.getLogger(__name__)
 # This prevents the model from learning overly formal/archaic Spanish.
 # ---------------------------------------------------------------------------
 MODERN_TRANSLATIONS = {"web", "espanol_sencillo", "bbe"}  # modern/accessible
-ARCHAIC_TRANSLATIONS = {"kjv", "rvr1909", "asv", "ylt"}   # formal/archaic
+ARCHAIC_TRANSLATIONS = {"kjv", "rvr1909", "asv", "ylt"}  # formal/archaic
 
 # Glossary oversampling factor — ensures theological terms are well-represented
 # even in small training runs. 229 terms * 2 pairs/term * 15x = ~6,870 pairs.
@@ -118,8 +118,7 @@ def _subsample_bible_pairs(pairs, max_pairs, seed=42):
 
     modern_count = min(len(modern), max_pairs)
     archaic_count = len(result) - modern_count
-    logger.info(f"  Subsampled to {len(result)} pairs "
-                f"({modern_count} modern, {archaic_count} archaic/unknown)")
+    logger.info(f"  Subsampled to {len(result)} pairs ({modern_count} modern, {archaic_count} archaic/unknown)")
     return result
 
 
@@ -155,8 +154,7 @@ def fine_tune_gemma(
     - Glossary pairs are always fully included with 15x oversampling.
     - Sermon pairs (from live sessions) are always fully included at 2x weight.
     """
-    model_name = ("google/translategemma-4b-it" if approach == "A"
-                  else "google/translategemma-12b-it")
+    model_name = "google/translategemma-4b-it" if approach == "A" else "google/translategemma-12b-it"
     if output_dir is None:
         output_dir = f"fine_tuned_gemma_mi_{approach}"
 
@@ -213,9 +211,11 @@ def fine_tune_gemma(
             bible_pairs = [json.loads(line) for line in f]
         original_count = len(bible_pairs)
         bible_pairs = _subsample_bible_pairs(bible_pairs, max_pairs)
-        logger.info(f"  Bible pairs: {len(bible_pairs)}"
-                    f" (of {original_count} available"
-                    f"{', subsampled' if len(bible_pairs) < original_count else ''})")
+        logger.info(
+            f"  Bible pairs: {len(bible_pairs)}"
+            f" (of {original_count} available"
+            f"{', subsampled' if len(bible_pairs) < original_count else ''})"
+        )
         all_pairs.extend(bible_pairs)
     else:
         logger.warning(f"Bible data not found at {bible_data}")
@@ -225,8 +225,7 @@ def fine_tune_gemma(
         with open(glossary_data) as f:
             glossary_pairs = [json.loads(line) for line in f]
         oversampled = glossary_pairs * GLOSSARY_OVERSAMPLE
-        logger.info(f"  Glossary pairs: {len(glossary_pairs)} x {GLOSSARY_OVERSAMPLE} "
-                    f"= {len(oversampled)}")
+        logger.info(f"  Glossary pairs: {len(glossary_pairs)} x {GLOSSARY_OVERSAMPLE} = {len(oversampled)}")
         all_pairs.extend(oversampled)
     else:
         logger.info("  No glossary data (skipping)")
@@ -238,8 +237,7 @@ def fine_tune_gemma(
         # Include sermon pairs twice — real-domain data is more valuable
         # than bulk Bible pairs for generalization to spoken register
         doubled = sermon_pairs * 2
-        logger.info(f"  Sermon pairs: {len(sermon_pairs)} x 2 = {len(doubled)} "
-                    f"(real-domain, 2x weighted)")
+        logger.info(f"  Sermon pairs: {len(sermon_pairs)} x 2 = {len(doubled)} (real-domain, 2x weighted)")
         all_pairs.extend(doubled)
     elif sermon_data:
         logger.info(f"  Sermon data not found at {sermon_data} (skipping)")
@@ -262,22 +260,24 @@ def fine_tune_gemma(
     def format_for_translategemma(example):
         """Format using TranslateGemma's required chat template."""
         messages = [
-            {"role": "user", "content": [
-                {"type": "text",
-                 "source_lang_code": "en",
-                 "target_lang_code": "es",
-                 "text": example["en"]}
-            ]},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": example["en"]}
+                ],
+            },
             {"role": "assistant", "content": example["es"]},
         ]
         try:
             formatted = tokenizer.apply_chat_template(messages, tokenize=False)
         except Exception:
             # Fallback: simple prompt format if chat template fails
-            formatted = (f"<start_of_turn>user\n"
-                        f"Translate from English to Spanish:\n{example['en']}"
-                        f"<end_of_turn>\n"
-                        f"<start_of_turn>model\n{example['es']}<end_of_turn>")
+            formatted = (
+                f"<start_of_turn>user\n"
+                f"Translate from English to Spanish:\n{example['en']}"
+                f"<end_of_turn>\n"
+                f"<start_of_turn>model\n{example['es']}<end_of_turn>"
+            )
         return {"text": formatted}
 
     full_ds = full_ds.map(format_for_translategemma, remove_columns=full_ds.column_names)
@@ -292,7 +292,7 @@ def fine_tune_gemma(
         gradient_checkpointing=True,
         bf16=True,
         max_seq_length=max_seq_length,
-        packing=True,               # Pack multiple short verses per sequence
+        packing=True,  # Pack multiple short verses per sequence
         optim="paged_adamw_32bit",
         warmup_ratio=0.03,
         max_grad_norm=0.3,
@@ -325,30 +325,30 @@ def fine_tune_gemma(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="TranslateGemma QLoRA fine-tuning on biblical text"
+    parser = argparse.ArgumentParser(description="TranslateGemma QLoRA fine-tuning on biblical text")
+    parser.add_argument("approach", nargs="?", default="A", choices=["A", "B"], help="A = 4B model, B = 12B model")
+    parser.add_argument(
+        "--bible-data", default="bible_data/aligned/verse_pairs_train.jsonl", help="Path to Bible verse pairs JSONL"
     )
-    parser.add_argument("approach", nargs="?", default="A",
-                        choices=["A", "B"],
-                        help="A = 4B model, B = 12B model")
-    parser.add_argument("--bible-data", default="bible_data/aligned/verse_pairs_train.jsonl",
-                        help="Path to Bible verse pairs JSONL")
-    parser.add_argument("--glossary-data", default="bible_data/glossary/glossary_pairs.jsonl",
-                        help="Path to glossary pairs JSONL")
-    parser.add_argument("--sermon-data", default=None,
-                        help="Path to sermon pairs JSONL (from live sessions)")
+    parser.add_argument(
+        "--glossary-data", default="bible_data/glossary/glossary_pairs.jsonl", help="Path to glossary pairs JSONL"
+    )
+    parser.add_argument("--sermon-data", default=None, help="Path to sermon pairs JSONL (from live sessions)")
     parser.add_argument("--output", "-o", help="Output directory for QLoRA adapters")
     parser.add_argument("--lora-r", type=int, default=16)
     parser.add_argument("--lora-alpha", type=int, default=16)
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--max-seq-length", type=int, default=512)
-    parser.add_argument("--max-pairs", type=int, default=20000,
-                        help="Max Bible pairs to use (0=unlimited). "
-                        "Start at 20K, scale to 50K if BLEU < +2. "
-                        "Glossary and sermon pairs are always fully included.")
-    parser.add_argument("--resume", action="store_true",
-                        help="Resume training from the latest checkpoint")
+    parser.add_argument(
+        "--max-pairs",
+        type=int,
+        default=20000,
+        help="Max Bible pairs to use (0=unlimited). "
+        "Start at 20K, scale to 50K if BLEU < +2. "
+        "Glossary and sermon pairs are always fully included.",
+    )
+    parser.add_argument("--resume", action="store_true", help="Resume training from the latest checkpoint")
     args = parser.parse_args()
 
     resume = True if args.resume else None

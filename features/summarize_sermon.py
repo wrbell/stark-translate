@@ -38,7 +38,6 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -60,6 +59,7 @@ TRANSLATE_MODEL_ID = "mlx-community/translategemma-4b-it-4bit"
 # Transcript Loading
 # ---------------------------------------------------------------------------
 
+
 def load_csv_transcript(csv_path):
     """Load transcript from a dry_run_ab.py CSV file.
 
@@ -69,17 +69,19 @@ def load_csv_transcript(csv_path):
         list of dicts with 'timestamp', 'text', 'speaker' (None for CSV).
     """
     entries = []
-    with open(csv_path, "r", newline="") as f:
+    with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             text = row.get("english", "").strip()
             if not text:
                 continue
-            entries.append({
-                "timestamp": row.get("timestamp", ""),
-                "text": text,
-                "speaker": None,  # CSV has no speaker diarization
-            })
+            entries.append(
+                {
+                    "timestamp": row.get("timestamp", ""),
+                    "text": text,
+                    "speaker": None,  # CSV has no speaker diarization
+                }
+            )
 
     if not entries:
         print(f"WARNING: No transcript entries found in {csv_path}", file=sys.stderr)
@@ -99,7 +101,7 @@ def load_jsonl_transcript(jsonl_path):
         list of dicts with 'timestamp', 'text', 'speaker'.
     """
     entries = []
-    with open(jsonl_path, "r") as f:
+    with open(jsonl_path) as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -118,11 +120,13 @@ def load_jsonl_transcript(jsonl_path):
             start = record.get("start", 0)
             ts = _format_timestamp(start)
 
-            entries.append({
-                "timestamp": ts,
-                "text": text,
-                "speaker": record.get("speaker"),
-            })
+            entries.append(
+                {
+                    "timestamp": ts,
+                    "text": text,
+                    "speaker": record.get("speaker"),
+                }
+            )
 
     if not entries:
         print(f"WARNING: No transcript entries found in {jsonl_path}", file=sys.stderr)
@@ -152,14 +156,14 @@ def load_transcript(input_path):
         return load_jsonl_transcript(input_path)
     else:
         print(f"ERROR: Unsupported file type: {p.suffix}", file=sys.stderr)
-        print(f"  Supported: .csv (dry_run_ab.py output), .jsonl (diarize.py output)",
-              file=sys.stderr)
+        print("  Supported: .csv (dry_run_ab.py output), .jsonl (diarize.py output)", file=sys.stderr)
         sys.exit(1)
 
 
 # ---------------------------------------------------------------------------
 # Transcript Preparation
 # ---------------------------------------------------------------------------
+
 
 def has_diarization(entries):
     """Check if transcript entries have speaker labels."""
@@ -211,16 +215,18 @@ def get_speaker_texts(entries):
 # LLM Summarization (MLX)
 # ---------------------------------------------------------------------------
 
+
 def load_summarization_model(model_id):
     """Load a small chat LLM via mlx-lm for summarization."""
-    from mlx_lm import load
     import mlx.core as mx
+    from mlx_lm import load
+
     mx.set_cache_limit(100 * 1024 * 1024)
 
     print(f"  Loading {model_id}...")
     t0 = time.time()
     model, tokenizer = load(model_id)
-    print(f"  Model ready ({time.time()-t0:.1f}s)")
+    print(f"  Model ready ({time.time() - t0:.1f}s)")
     return model, tokenizer
 
 
@@ -229,12 +235,11 @@ def generate_text(model, tokenizer, prompt, max_tokens=512):
     from mlx_lm import generate
 
     messages = [{"role": "user", "content": prompt}]
-    chat_prompt = tokenizer.apply_chat_template(
-        messages, add_generation_prompt=True
-    )
+    chat_prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
 
     result = generate(
-        model, tokenizer,
+        model,
+        tokenizer,
         prompt=chat_prompt,
         max_tokens=max_tokens,
         verbose=False,
@@ -253,9 +258,7 @@ def summarize_with_diarization(model, tokenizer, transcript_text, speaker_texts)
     Returns dict with 'english' and 'spanish' summary strings.
     """
     # Sort speakers by total text length (primary speaker = most text)
-    sorted_speakers = sorted(speaker_texts.keys(),
-                            key=lambda s: len(speaker_texts[s]),
-                            reverse=True)
+    sorted_speakers = sorted(speaker_texts.keys(), key=lambda s: len(speaker_texts[s]), reverse=True)
     spk1 = sorted_speakers[0] if len(sorted_speakers) > 0 else "Speaker 1"
     spk2 = sorted_speakers[1] if len(sorted_speakers) > 1 else "Speaker 2"
 
@@ -273,10 +276,10 @@ Transcript:
 
 Write your 5-sentence summary:"""
 
-    print(f"  Generating English summary...")
+    print("  Generating English summary...")
     t0 = time.time()
     en_summary = generate_text(model, tokenizer, prompt, max_tokens=400)
-    print(f"  English summary ready ({time.time()-t0:.1f}s)")
+    print(f"  English summary ready ({time.time() - t0:.1f}s)")
 
     # Generate Spanish summary
     es_prompt = f"""Translate the following church sermon summary into natural, fluent Spanish. Preserve all theological terms accurately. Use Protestant Spanish conventions (e.g., "pacto" not "alianza" for covenant).
@@ -286,10 +289,10 @@ English summary:
 
 Spanish translation:"""
 
-    print(f"  Generating Spanish summary...")
+    print("  Generating Spanish summary...")
     t0 = time.time()
     es_summary = generate_text(model, tokenizer, es_prompt, max_tokens=500)
-    print(f"  Spanish summary ready ({time.time()-t0:.1f}s)")
+    print(f"  Spanish summary ready ({time.time() - t0:.1f}s)")
 
     return {
         "english": en_summary,
@@ -316,10 +319,10 @@ Transcript:
 
 Write your 3-sentence summary:"""
 
-    print(f"  Generating English summary...")
+    print("  Generating English summary...")
     t0 = time.time()
     en_summary = generate_text(model, tokenizer, prompt, max_tokens=300)
-    print(f"  English summary ready ({time.time()-t0:.1f}s)")
+    print(f"  English summary ready ({time.time() - t0:.1f}s)")
 
     # Generate Spanish summary
     es_prompt = f"""Translate the following church sermon summary into natural, fluent Spanish. Preserve all theological terms accurately. Use Protestant Spanish conventions (e.g., "pacto" not "alianza" for covenant).
@@ -329,10 +332,10 @@ English summary:
 
 Spanish translation:"""
 
-    print(f"  Generating Spanish summary...")
+    print("  Generating Spanish summary...")
     t0 = time.time()
     es_summary = generate_text(model, tokenizer, es_prompt, max_tokens=400)
-    print(f"  Spanish summary ready ({time.time()-t0:.1f}s)")
+    print(f"  Spanish summary ready ({time.time() - t0:.1f}s)")
 
     return {
         "english": en_summary,
@@ -348,45 +351,46 @@ def translate_with_translategemma(en_summary):
     This is optional — only used if --translate-with-gemma is specified.
     Returns Spanish translation string.
     """
-    from mlx_lm import load, generate
     import mlx.core as mx
+    from mlx_lm import generate, load
+
     mx.set_cache_limit(100 * 1024 * 1024)
 
-    print(f"  Loading TranslateGemma for Spanish translation...")
+    print("  Loading TranslateGemma for Spanish translation...")
     t0 = time.time()
     model, tokenizer = load(TRANSLATE_MODEL_ID)
 
     # Fix EOS token (same as dry_run_ab.py)
     eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
     tokenizer._eos_token_ids = {tokenizer.eos_token_id, eot_id}
-    print(f"  TranslateGemma ready ({time.time()-t0:.1f}s)")
+    print(f"  TranslateGemma ready ({time.time() - t0:.1f}s)")
 
-    messages = [{"role": "user", "content": [
-        {"type": "text",
-         "source_lang_code": "en",
-         "target_lang_code": "es",
-         "text": en_summary}
-    ]}]
+    messages = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": en_summary}],
+        }
+    ]
 
-    prompt = tokenizer.apply_chat_template(
-        messages, add_generation_prompt=True
-    )
+    prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
 
     t0 = time.time()
     result = generate(
-        model, tokenizer,
+        model,
+        tokenizer,
         prompt=prompt,
         max_tokens=600,
         verbose=False,
     )
     clean = result.split("<end_of_turn>")[0].strip()
-    print(f"  TranslateGemma translation ready ({(time.time()-t0)*1000:.0f}ms)")
+    print(f"  TranslateGemma translation ready ({(time.time() - t0) * 1000:.0f}ms)")
     return clean
 
 
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
+
 
 def write_summary(summary_data, output_path):
     """Write summary to JSON file."""
@@ -400,6 +404,7 @@ def write_summary(summary_data, output_path):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Generate post-sermon 5-sentence summary using local LLM (MLX)",
@@ -412,22 +417,29 @@ Examples:
     python summarize_sermon.py transcript.jsonl --translate-with-gemma
         """,
     )
-    parser.add_argument("input", nargs="+",
-                        help="CSV or JSONL transcript file(s)")
-    parser.add_argument("--model", type=str, default=DEFAULT_MODEL,
-                        help=f"MLX model for summarization (default: {DEFAULT_MODEL})")
-    parser.add_argument("--translate-with-gemma", action="store_true",
-                        help="Use TranslateGemma 4B for Spanish translation "
-                             "instead of the summarization model")
-    parser.add_argument("-o", "--output", type=str, default=None,
-                        help="Output JSON path (default: metrics/sermon_summaries/<input_name>.json)")
+    parser.add_argument("input", nargs="+", help="CSV or JSONL transcript file(s)")
+    parser.add_argument(
+        "--model", type=str, default=DEFAULT_MODEL, help=f"MLX model for summarization (default: {DEFAULT_MODEL})"
+    )
+    parser.add_argument(
+        "--translate-with-gemma",
+        action="store_true",
+        help="Use TranslateGemma 4B for Spanish translation instead of the summarization model",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        default=None,
+        help="Output JSON path (default: metrics/sermon_summaries/<input_name>.json)",
+    )
     args = parser.parse_args()
 
-    print(f"{'='*60}")
-    print(f"  Post-Sermon Summary Generator")
+    print(f"{'=' * 60}")
+    print("  Post-Sermon Summary Generator")
     print(f"  Model: {args.model}")
     print(f"  Input(s): {len(args.input)} file(s)")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     # Load and merge all input transcripts
     all_entries = []
@@ -446,9 +458,9 @@ Examples:
     # Check for diarization
     diarized = has_diarization(all_entries)
     if diarized:
-        print(f"  Mode: 5-sentence diarized summary")
+        print("  Mode: 5-sentence diarized summary")
     else:
-        print(f"  Mode: 3-sentence overall summary (no speaker labels)")
+        print("  Mode: 3-sentence overall summary (no speaker labels)")
 
     # Build transcript text
     transcript_text = build_transcript_text(all_entries)
@@ -466,10 +478,11 @@ Examples:
 
     # Optionally re-translate with TranslateGemma for higher quality
     if args.translate_with_gemma:
-        print(f"\n  Re-translating with TranslateGemma...")
+        print("\n  Re-translating with TranslateGemma...")
         # Free the summarization model first to save memory
         del model, tokenizer
         import gc
+
         gc.collect()
 
         es_translation = translate_with_translategemma(summary["english"])
@@ -499,20 +512,20 @@ Examples:
     write_summary(summary, output_path)
 
     # Print results
-    print(f"\n{'='*60}")
-    print(f"  SERMON SUMMARY")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print("  SERMON SUMMARY")
+    print(f"{'=' * 60}")
     print(f"\n  English ({summary['format']}):")
-    print(f"  {'-'*40}")
+    print(f"  {'-' * 40}")
     for line in summary["english"].split("\n"):
         if line.strip():
             print(f"    {line.strip()}")
-    print(f"\n  Spanish:")
-    print(f"  {'-'*40}")
+    print("\n  Spanish:")
+    print(f"  {'-' * 40}")
     for line in summary["spanish"].split("\n"):
         if line.strip():
             print(f"    {line.strip()}")
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
 
 
 if __name__ == "__main__":

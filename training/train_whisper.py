@@ -21,7 +21,6 @@ Usage:
 
 import argparse
 import logging
-import os
 from collections import Counter
 
 import numpy as np
@@ -61,7 +60,8 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
     logger.info(f"Loading general-domain replay data (ratio={replay_ratio})...")
     try:
         general = load_dataset(
-            "mozilla-foundation/common_voice_16_1", "en",
+            "mozilla-foundation/common_voice_16_1",
+            "en",
             split="train[:2000]",
             trust_remote_code=True,
         )
@@ -74,9 +74,7 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
     # Process the general dataset with the same preprocessing
     def prepare_general(batch):
         audio = batch["audio"]
-        batch["input_features"] = processor(
-            audio["array"], sampling_rate=audio["sampling_rate"]
-        ).input_features[0]
+        batch["input_features"] = processor(audio["array"], sampling_rate=audio["sampling_rate"]).input_features[0]
         # Common Voice uses "sentence" column
         text = batch.get("text") or batch.get("sentence", "")
         batch["labels"] = processor.tokenizer(text).input_ids
@@ -255,9 +253,7 @@ def fine_tune_whisper(
 
     def prepare_dataset(batch):
         audio = batch["audio"]
-        batch["input_features"] = processor(
-            audio["array"], sampling_rate=audio["sampling_rate"]
-        ).input_features[0]
+        batch["input_features"] = processor(audio["array"], sampling_rate=audio["sampling_rate"]).input_features[0]
         batch["labels"] = processor.tokenizer(batch[text_col]).input_ids
         return batch
 
@@ -395,34 +391,46 @@ def fine_tune_whisper(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Whisper LoRA fine-tuning for church audio"
+    parser = argparse.ArgumentParser(description="Whisper LoRA fine-tuning for church audio")
+    parser.add_argument("--dataset", "-d", default="stark_data/cleaned", help="Path to audiofolder dataset")
+    parser.add_argument("--output", "-o", default="fine_tuned_whisper_mi", help="Output directory for LoRA adapters")
+    parser.add_argument(
+        "--model",
+        default="openai/whisper-large-v3-turbo",
+        help="Base Whisper model (default: large-v3-turbo, alt: distil-whisper/distil-large-v3)",
     )
-    parser.add_argument("--dataset", "-d", default="stark_data/cleaned",
-                        help="Path to audiofolder dataset")
-    parser.add_argument("--output", "-o", default="fine_tuned_whisper_mi",
-                        help="Output directory for LoRA adapters")
-    parser.add_argument("--model", default="openai/whisper-large-v3-turbo",
-                        help="Base Whisper model (default: large-v3-turbo, alt: distil-whisper/distil-large-v3)")
-    parser.add_argument("--target-modules", nargs="+",
-                        default=["q_proj", "v_proj"],
-                        help="LoRA target modules (extend: q_proj v_proj k_proj out_proj fc1 fc2)")
+    parser.add_argument(
+        "--target-modules",
+        nargs="+",
+        default=["q_proj", "v_proj"],
+        help="LoRA target modules (extend: q_proj v_proj k_proj out_proj fc1 fc2)",
+    )
     parser.add_argument("--lora-r", type=int, default=32)
     parser.add_argument("--lora-alpha", type=int, default=64)
     parser.add_argument("--batch-size", type=int, default=4)
-    parser.add_argument("--grad-accum", type=int, default=4,
-                        help="Gradient accumulation steps (effective batch = batch_size * grad_accum)")
+    parser.add_argument(
+        "--grad-accum",
+        type=int,
+        default=4,
+        help="Gradient accumulation steps (effective batch = batch_size * grad_accum)",
+    )
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--replay-ratio", type=float, default=0.3,
-                        help="Ratio of general-domain replay data (0 to disable)")
-    parser.add_argument("--accent-balance", action=argparse.BooleanOptionalAction,
-                        default=True,
-                        help="Enable accent-balanced sampling (default: True)")
-    parser.add_argument("--resume", action="store_true",
-                        help="Resume training from the latest checkpoint")
-    parser.add_argument("--eval-chunked", action="store_true",
-                        help="Use chunked inference during evaluation (faster but may have stitching artifacts)")
+    parser.add_argument(
+        "--replay-ratio", type=float, default=0.3, help="Ratio of general-domain replay data (0 to disable)"
+    )
+    parser.add_argument(
+        "--accent-balance",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Enable accent-balanced sampling (default: True)",
+    )
+    parser.add_argument("--resume", action="store_true", help="Resume training from the latest checkpoint")
+    parser.add_argument(
+        "--eval-chunked",
+        action="store_true",
+        help="Use chunked inference during evaluation (faster but may have stitching artifacts)",
+    )
     args = parser.parse_args()
 
     # Resolve resume_from_checkpoint: True means auto-detect last checkpoint

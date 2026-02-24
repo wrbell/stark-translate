@@ -10,13 +10,14 @@ import copy
 import logging
 import threading
 import time
-from typing import Optional
 
 import numpy as np
 
 from engines.base import (
-    STTEngine, STTResult,
-    TranslationEngine, TranslationResult,
+    STTEngine,
+    STTResult,
+    TranslationEngine,
+    TranslationResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ try:
     import mlx.core as mx
     import mlx_lm
     import mlx_whisper
+
     MLX_AVAILABLE = True
 except ImportError:
     mx = None
@@ -38,10 +40,10 @@ except ImportError:
 # PyTorch is always available (used by MarianEngine and as a fallback)
 import torch
 
-
 # ---------------------------------------------------------------------------
 # MLX Whisper STT
 # ---------------------------------------------------------------------------
+
 
 class MLXWhisperEngine(STTEngine):
     """Speech-to-text engine wrapping mlx-whisper.
@@ -108,7 +110,9 @@ class MLXWhisperEngine(STTEngine):
         except Exception as exc:
             logger.warning(
                 "Primary model %s failed (%s), falling back to %s",
-                self._model_id, exc, self._fallback_model_id,
+                self._model_id,
+                exc,
+                self._fallback_model_id,
             )
             self._model_id = self._fallback_model_id
             t0 = time.time()
@@ -126,7 +130,7 @@ class MLXWhisperEngine(STTEngine):
         audio: np.ndarray,
         *,
         language: str = "en",
-        initial_prompt: Optional[str] = None,
+        initial_prompt: str | None = None,
         word_timestamps: bool = False,
     ) -> STTResult:
         """Transcribe *audio* (16 kHz float32 mono) to text.
@@ -164,8 +168,7 @@ class MLXWhisperEngine(STTEngine):
             self._load_fallback_model()
 
         logger.info(
-            "Fallback triggered (avg_logprob=%.3f, compression_ratio=%.2f) "
-            "-- retrying with %s",
+            "Fallback triggered (avg_logprob=%.3f, compression_ratio=%.2f) -- retrying with %s",
             primary_result.avg_logprob or 0.0,
             primary_result.compression_ratio or 0.0,
             self._fallback_model_id,
@@ -184,8 +187,7 @@ class MLXWhisperEngine(STTEngine):
         chosen.used_fallback = True
 
         logger.info(
-            "Fallback result: chose %s (primary conf=%.2f avg_lp=%.3f, "
-            "retry conf=%.2f avg_lp=%.3f)",
+            "Fallback result: chose %s (primary conf=%.2f avg_lp=%.3f, retry conf=%.2f avg_lp=%.3f)",
             chosen_label,
             primary_result.confidence or 0.0,
             primary_result.avg_logprob or 0.0,
@@ -206,7 +208,7 @@ class MLXWhisperEngine(STTEngine):
         *,
         model_repo: str,
         language: str = "en",
-        initial_prompt: Optional[str] = None,
+        initial_prompt: str | None = None,
         word_timestamps: bool = False,
     ) -> STTResult:
         """Run mlx-whisper transcription against a specific model repo.
@@ -250,12 +252,14 @@ class MLXWhisperEngine(STTEngine):
                 # Per-word confidence
                 for w in seg.get("words", []):
                     if w.get("probability", 1.0) < 0.5:
-                        low_conf_words.append({
-                            "word": w.get("word", ""),
-                            "probability": round(w["probability"], 3),
-                            "start": w.get("start"),
-                            "end": w.get("end"),
-                        })
+                        low_conf_words.append(
+                            {
+                                "word": w.get("word", ""),
+                                "probability": round(w["probability"], 3),
+                                "start": w.get("start"),
+                                "end": w.get("end"),
+                            }
+                        )
             if avg_logprobs:
                 overall_avg_logprob = sum(avg_logprobs) / len(avg_logprobs)
                 confidence = round(min(1.0, max(0.0, 1.0 + overall_avg_logprob)), 2)
@@ -297,7 +301,8 @@ class MLXWhisperEngine(STTEngine):
         )
         logger.info(
             "Fallback model ready (%s) (%.1fs)",
-            self._fallback_model_id, time.time() - t0,
+            self._fallback_model_id,
+            time.time() - t0,
         )
         self._fallback_loaded = True
 
@@ -365,6 +370,7 @@ class MLXWhisperEngine(STTEngine):
 # MLX TranslateGemma
 # ---------------------------------------------------------------------------
 
+
 class MLXGemmaEngine(TranslationEngine):
     """Translation engine wrapping TranslateGemma via mlx-lm.
 
@@ -384,8 +390,7 @@ class MLXGemmaEngine(TranslationEngine):
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
-                "MLX is not available. MLXGemmaEngine requires Apple Silicon "
-                "with mlx and mlx-lm installed."
+                "MLX is not available. MLXGemmaEngine requires Apple Silicon with mlx and mlx-lm installed."
             )
         self._model_id = model_id
         self._cache_limit_mb = cache_limit_mb
@@ -418,8 +423,9 @@ class MLXGemmaEngine(TranslationEngine):
         if not hasattr(self._tokenizer, "_eos_token_ids") or eot_id not in self._tokenizer._eos_token_ids:
             self._tokenizer._eos_token_ids = {default_eos, eot_id}
             logger.info(
-                "EOS fix applied: added <end_of_turn> (id=%d) to EOS set "
-                "(was only <eos> id=%d)", eot_id, default_eos,
+                "EOS fix applied: added <end_of_turn> (id=%d) to EOS set (was only <eos> id=%d)",
+                eot_id,
+                default_eos,
             )
         else:
             logger.info("EOS tokens already correct: %s", self._tokenizer._eos_token_ids)
@@ -457,10 +463,7 @@ class MLXGemmaEngine(TranslationEngine):
         input_words = len(text.split())
         max_tok = max(32, int(input_words * 1.8))
 
-        use_cache = (
-            self._prompt_cache_template is not None
-            and self._suffix_tokens is not None
-        )
+        use_cache = self._prompt_cache_template is not None and self._suffix_tokens is not None
 
         if use_cache:
             # Deep-copy the pre-computed KV cache so we don't mutate the template
@@ -474,14 +477,17 @@ class MLXGemmaEngine(TranslationEngine):
                 prompt_cache=cached,
             )
         else:
-            messages = [{"role": "user", "content": [
-                {"type": "text",
-                 "source_lang_code": source_lang,
-                 "target_lang_code": target_lang,
-                 "text": text}
-            ]}]
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "source_lang_code": source_lang, "target_lang_code": target_lang, "text": text}
+                    ],
+                }
+            ]
             prompt = self._tokenizer.apply_chat_template(
-                messages, add_generation_prompt=True,
+                messages,
+                add_generation_prompt=True,
             )
             gen_kwargs = dict(
                 prompt=prompt,
@@ -532,18 +538,19 @@ class MLXGemmaEngine(TranslationEngine):
 
         Returns (prompt_cache, suffix_tokens) or (None, None) on failure.
         """
-        from mlx_lm.models.cache import make_prompt_cache
         from mlx_lm.generate import generate_step
+        from mlx_lm.models.cache import make_prompt_cache
 
         marker = "SPLIT_HERE"
-        messages = [{"role": "user", "content": [
-            {"type": "text",
-             "source_lang_code": "en",
-             "target_lang_code": "es",
-             "text": marker}
-        ]}]
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": marker}],
+            }
+        ]
         full_prompt = self._tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True,
+            messages,
+            add_generation_prompt=True,
         )
         if isinstance(full_prompt, str):
             full_tokens = self._tokenizer.encode(full_prompt, add_special_tokens=False)
@@ -556,7 +563,7 @@ class MLXGemmaEngine(TranslationEngine):
         # Locate the marker in the token sequence
         prefix_end = None
         for i in range(len(full_tokens) - marker_len + 1):
-            if full_tokens[i:i + marker_len] == marker_tokens:
+            if full_tokens[i : i + marker_len] == marker_tokens:
                 prefix_end = i
                 break
 
@@ -565,11 +572,10 @@ class MLXGemmaEngine(TranslationEngine):
             return None, None
 
         prefix_tokens = full_tokens[:prefix_end]
-        suffix_tokens = full_tokens[prefix_end + marker_len:]
+        suffix_tokens = full_tokens[prefix_end + marker_len :]
 
         if len(prefix_tokens) < 3:
-            logger.warning("Prefix too short (%d tokens) for %s, skipping cache",
-                           len(prefix_tokens), self._model_id)
+            logger.warning("Prefix too short (%d tokens) for %s, skipping cache", len(prefix_tokens), self._model_id)
             return None, suffix_tokens
 
         # Create and pre-fill the KV cache
@@ -577,7 +583,8 @@ class MLXGemmaEngine(TranslationEngine):
         prompt_array = mx.array(prefix_tokens)
 
         for _ in generate_step(
-            prompt_array, self._model,
+            prompt_array,
+            self._model,
             max_tokens=0,
             prompt_cache=prompt_cache,
         ):
@@ -586,7 +593,8 @@ class MLXGemmaEngine(TranslationEngine):
         mx.eval([c.state for c in prompt_cache])
         logger.info(
             "Prompt cache built: %d prefix tokens cached, %d suffix tokens",
-            len(prefix_tokens), len(suffix_tokens),
+            len(prefix_tokens),
+            len(suffix_tokens),
         )
         return prompt_cache, suffix_tokens
 
@@ -676,9 +684,8 @@ class MarianEngine(TranslationEngine):
         inputs = self._tokenizer(text, return_tensors="pt", padding=True, truncation=True)
         if self._device == "cuda":
             inputs = {k: v.to("cuda") for k, v in inputs.items()}
-        with _pytorch_lock:
-            with torch.no_grad():
-                translated = self._model.generate(**inputs, max_new_tokens=128)
+        with _pytorch_lock, torch.no_grad():
+            translated = self._model.generate(**inputs, max_new_tokens=128)
         result = self._tokenizer.decode(translated[0], skip_special_tokens=True)
         latency_ms = (time.perf_counter() - t0) * 1000
 

@@ -35,22 +35,62 @@ THEOLOGICAL_PHRASES = set()
 # Bible names and places that MarianMT may transliterate incorrectly.
 # These overlap with the glossary but are maintained separately for clarity.
 BIBLE_NAMES = {
-    "jesus", "christ", "god", "lord", "moses", "abraham", "david",
-    "solomon", "elijah", "elisha", "peter", "paul", "james", "john",
-    "matthew", "mark", "luke", "timothy", "stephen", "barnabas",
-    "nicodemus", "lazarus", "mary", "martha", "joseph", "jacob",
-    "isaac", "noah", "adam", "eve", "aaron", "samuel", "gideon",
-    "samson", "saul", "pharaoh", "herod", "pilate", "satan",
-    "jerusalem", "bethlehem", "nazareth", "galilee", "jordan",
-    "egypt", "israel", "zion", "sinai", "calvary", "gethsemane",
+    "jesus",
+    "christ",
+    "god",
+    "lord",
+    "moses",
+    "abraham",
+    "david",
+    "solomon",
+    "elijah",
+    "elisha",
+    "peter",
+    "paul",
+    "james",
+    "john",
+    "matthew",
+    "mark",
+    "luke",
+    "timothy",
+    "stephen",
+    "barnabas",
+    "nicodemus",
+    "lazarus",
+    "mary",
+    "martha",
+    "joseph",
+    "jacob",
+    "isaac",
+    "noah",
+    "adam",
+    "eve",
+    "aaron",
+    "samuel",
+    "gideon",
+    "samson",
+    "saul",
+    "pharaoh",
+    "herod",
+    "pilate",
+    "satan",
+    "jerusalem",
+    "bethlehem",
+    "nazareth",
+    "galilee",
+    "jordan",
+    "egypt",
+    "israel",
+    "zion",
+    "sinai",
+    "calvary",
+    "gethsemane",
 }
 
 
 def load_glossary():
     """Load theological terms from bible_data/glossary/glossary_pairs.jsonl."""
-    glossary_path = os.path.join(
-        os.path.dirname(__file__), "bible_data", "glossary", "glossary_pairs.jsonl"
-    )
+    glossary_path = os.path.join(os.path.dirname(__file__), "bible_data", "glossary", "glossary_pairs.jsonl")
     if not os.path.exists(glossary_path):
         print(f"  Glossary not found at {glossary_path}, using hardcoded terms only")
         return
@@ -69,8 +109,9 @@ def load_glossary():
                 THEOLOGICAL_TERMS.add(term)
             count += 1
 
-    print(f"  Loaded {count} glossary terms ({len(THEOLOGICAL_TERMS)} single-word, "
-          f"{len(THEOLOGICAL_PHRASES)} multi-word)")
+    print(
+        f"  Loaded {count} glossary terms ({len(THEOLOGICAL_TERMS)} single-word, {len(THEOLOGICAL_PHRASES)} multi-word)"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -79,10 +120,10 @@ def load_glossary():
 
 # Conjunctions and relative pronouns that indicate multi-clause sentences
 _CLAUSE_MARKERS = re.compile(
-    r'\b(who|whom|whose|which|that|where|when|while|although|though|'
-    r'because|since|unless|whereas|whereby|wherein|wherever|whenever|'
-    r'whoever|whatever|however|moreover|furthermore|nevertheless|'
-    r'therefore|accordingly|consequently)\b',
+    r"\b(who|whom|whose|which|that|where|when|while|although|though|"
+    r"because|since|unless|whereas|whereby|wherein|wherever|whenever|"
+    r"whoever|whatever|however|moreover|furthermore|nevertheless|"
+    r"therefore|accordingly|consequently)\b",
     re.IGNORECASE,
 )
 
@@ -159,12 +200,7 @@ def compute_complexity(text):
 
     # Combined score: weighted average
     # Theological terms and clause complexity matter most
-    combined = (
-        0.20 * wc_score +
-        0.30 * clause_score +
-        0.30 * theo_score +
-        0.20 * name_score
-    )
+    combined = 0.20 * wc_score + 0.30 * clause_score + 0.30 * theo_score + 0.20 * name_score
 
     return {
         "word_count": word_count,
@@ -207,7 +243,6 @@ TEST_SENTENCES = [
     ("Please turn to page forty-two.", "easy"),
     ("We will now sing a hymn.", "easy"),
     ("Let us read together.", "easy"),
-
     # --- Medium (borderline: could go either way) ---
     ("The grace of God is sufficient for all of us.", "medium"),
     ("We are saved by faith and not by works.", "medium"),
@@ -219,43 +254,80 @@ TEST_SENTENCES = [
     ("The Word of God is living and powerful.", "medium"),
     ("Jesus said I am the way, the truth, and the life.", "medium"),
     ("Brothers and sisters, let us encourage one another.", "medium"),
-
     # --- Hard (expect: Gemma) ---
-    ("For there is one God, and one mediator between God and men, the man Christ Jesus, "
-     "who gave himself a ransom for all.", "hard"),
-    ("The apostle Paul wrote to the Romans about justification by faith, "
-     "explaining how the righteousness of God is revealed from faith to faith.", "hard"),
-    ("In the Gospel of John, Jesus tells Nicodemus that unless a man is born again, "
-     "he cannot see the kingdom of God.", "hard"),
-    ("Abraham believed God, and it was counted unto him for righteousness, "
-     "just as David also describes the blessedness of the man to whom God imputes "
-     "righteousness without works.", "hard"),
-    ("The prophet Isaiah foretold that the Messiah would be wounded for our "
-     "transgressions and bruised for our iniquities.", "hard"),
-    ("Moses led the children of Israel out of Egypt through the Red Sea, "
-     "and God provided manna from heaven during their wilderness journey.", "hard"),
-    ("Peter declared at Pentecost that God had made Jesus both Lord and Christ, "
-     "and three thousand souls were added to the church that day.", "hard"),
-    ("The epistle to the Hebrews teaches that Jesus is the high priest of our "
-     "confession, who passed through the heavens.", "hard"),
-
+    (
+        "For there is one God, and one mediator between God and men, the man Christ Jesus, "
+        "who gave himself a ransom for all.",
+        "hard",
+    ),
+    (
+        "The apostle Paul wrote to the Romans about justification by faith, "
+        "explaining how the righteousness of God is revealed from faith to faith.",
+        "hard",
+    ),
+    (
+        "In the Gospel of John, Jesus tells Nicodemus that unless a man is born again, "
+        "he cannot see the kingdom of God.",
+        "hard",
+    ),
+    (
+        "Abraham believed God, and it was counted unto him for righteousness, "
+        "just as David also describes the blessedness of the man to whom God imputes "
+        "righteousness without works.",
+        "hard",
+    ),
+    (
+        "The prophet Isaiah foretold that the Messiah would be wounded for our "
+        "transgressions and bruised for our iniquities.",
+        "hard",
+    ),
+    (
+        "Moses led the children of Israel out of Egypt through the Red Sea, "
+        "and God provided manna from heaven during their wilderness journey.",
+        "hard",
+    ),
+    (
+        "Peter declared at Pentecost that God had made Jesus both Lord and Christ, "
+        "and three thousand souls were added to the church that day.",
+        "hard",
+    ),
+    (
+        "The epistle to the Hebrews teaches that Jesus is the high priest of our "
+        "confession, who passed through the heavens.",
+        "hard",
+    ),
     # --- Very Hard (definitely Gemma) ---
-    ("The doctrine of propitiation teaches us that Christ's atoning sacrifice "
-     "satisfied the righteous wrath of God against sin.", "very_hard"),
-    ("The substitutionary atonement of Christ on the cross accomplished our "
-     "redemption, reconciliation, and justification before a holy God, "
-     "fulfilling the covenant promises made to Abraham.", "very_hard"),
-    ("The Westminster Confession teaches that God's eternal decree of election "
-     "and predestination is the foundation of our sanctification, "
-     "which is the progressive work of the Holy Spirit in the believer.", "very_hard"),
-    ("In Romans chapter eight, Paul writes that there is therefore now no "
-     "condemnation to them which are in Christ Jesus, who walk not after the flesh "
-     "but after the Spirit, for the law of the Spirit of life in Christ Jesus "
-     "hath made me free from the law of sin and death.", "very_hard"),
-    ("The sovereignty of God in providence means that He sustains, directs, "
-     "and governs all creatures and all events, from the greatest to the least, "
-     "by His most wise and holy counsel, according to His infallible foreknowledge "
-     "and the free and immutable counsel of His own will.", "very_hard"),
+    (
+        "The doctrine of propitiation teaches us that Christ's atoning sacrifice "
+        "satisfied the righteous wrath of God against sin.",
+        "very_hard",
+    ),
+    (
+        "The substitutionary atonement of Christ on the cross accomplished our "
+        "redemption, reconciliation, and justification before a holy God, "
+        "fulfilling the covenant promises made to Abraham.",
+        "very_hard",
+    ),
+    (
+        "The Westminster Confession teaches that God's eternal decree of election "
+        "and predestination is the foundation of our sanctification, "
+        "which is the progressive work of the Holy Spirit in the believer.",
+        "very_hard",
+    ),
+    (
+        "In Romans chapter eight, Paul writes that there is therefore now no "
+        "condemnation to them which are in Christ Jesus, who walk not after the flesh "
+        "but after the Spirit, for the law of the Spirit of life in Christ Jesus "
+        "hath made me free from the law of sin and death.",
+        "very_hard",
+    ),
+    (
+        "The sovereignty of God in providence means that He sustains, directs, "
+        "and governs all creatures and all events, from the greatest to the least, "
+        "by His most wise and holy counsel, according to His infallible foreknowledge "
+        "and the free and immutable counsel of His own will.",
+        "very_hard",
+    ),
 ]
 
 
@@ -264,9 +336,9 @@ TEST_SENTENCES = [
 # ---------------------------------------------------------------------------
 
 _EN_WORDS = re.compile(
-    r'\b(the|and|of|that|have|for|not|with|you|this|but|his|from|they|'
-    r'been|said|each|which|their|will|other|about|many|then|them|these|'
-    r'would|could|should|because|into|after|before|between|under|through)\b',
+    r"\b(the|and|of|that|have|for|not|with|you|this|but|his|from|they|"
+    r"been|said|each|which|their|will|other|about|many|then|them|these|"
+    r"would|could|should|because|into|after|before|between|under|through)\b",
     re.IGNORECASE,
 )
 
@@ -314,6 +386,7 @@ def qe_combined(source, translation):
 # Model Loading & Translation
 # ---------------------------------------------------------------------------
 
+
 def load_ct2_marian():
     """Load CTranslate2 int8 MarianMT (~76MB)."""
     ct2_path = os.path.join(os.path.dirname(__file__), "ct2_opus_mt_en_es")
@@ -333,14 +406,15 @@ def load_ct2_marian():
     # Warm up
     warm_tokens = tokenizer.convert_ids_to_tokens(tokenizer.encode("Hello world."))
     translator.translate_batch([warm_tokens], max_decoding_length=32)
-    print(f"  CT2 MarianMT ready ({time.time()-t0:.1f}s)")
+    print(f"  CT2 MarianMT ready ({time.time() - t0:.1f}s)")
     return translator, tokenizer
 
 
 def load_gemma_4b():
     """Load TranslateGemma 4B via MLX (4-bit quantized)."""
-    from mlx_lm import load
     import mlx.core as mx
+    from mlx_lm import load
+
     mx.set_cache_limit(256 * 1024 * 1024)
 
     model_id = "mlx-community/translategemma-4b-it-4bit"
@@ -351,10 +425,10 @@ def load_gemma_4b():
     # Fix EOS tokens (same as dry_run_ab.py)
     eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
     default_eos = tokenizer.eos_token_id
-    if not hasattr(tokenizer, '_eos_token_ids') or eot_id not in tokenizer._eos_token_ids:
+    if not hasattr(tokenizer, "_eos_token_ids") or eot_id not in tokenizer._eos_token_ids:
         tokenizer._eos_token_ids = {default_eos, eot_id}
 
-    print(f"  Gemma 4B ready ({time.time()-t0:.1f}s)")
+    print(f"  Gemma 4B ready ({time.time() - t0:.1f}s)")
     return model, tokenizer
 
 
@@ -363,7 +437,9 @@ def translate_ct2(text, translator, tokenizer):
     t0 = time.perf_counter()
     src_tokens = tokenizer.convert_ids_to_tokens(tokenizer.encode(text))
     ct2_out = translator.translate_batch(
-        [src_tokens], max_decoding_length=128, beam_size=4,
+        [src_tokens],
+        max_decoding_length=128,
+        beam_size=4,
     )
     result = tokenizer.convert_tokens_to_string(ct2_out[0].hypotheses[0])
     latency_ms = (time.perf_counter() - t0) * 1000
@@ -377,12 +453,12 @@ def translate_gemma(text, model, tokenizer):
     input_words = len(text.split())
     max_tok = max(32, int(input_words * 1.8))
 
-    messages = [{"role": "user", "content": [
-        {"type": "text",
-         "source_lang_code": "en",
-         "target_lang_code": "es",
-         "text": text}
-    ]}]
+    messages = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+        }
+    ]
     prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
 
     t0 = time.perf_counter()
@@ -397,12 +473,12 @@ def translate_gemma(text, model, tokenizer):
 # Report Generation
 # ---------------------------------------------------------------------------
 
+
 def print_table(results, show_qe=True):
     """Print a formatted comparison table."""
     # Header
     print()
-    print(f"{'#':>3}  {'Cplx':>5}  {'Route':>6}  {'Diff':>6}  "
-          f"{'MT ms':>6}  {'TG ms':>6}  {'Save':>6}  ", end="")
+    print(f"{'#':>3}  {'Cplx':>5}  {'Route':>6}  {'Diff':>6}  {'MT ms':>6}  {'TG ms':>6}  {'Save':>6}  ", end="")
     if show_qe:
         print(f"{'QE-MT':>5}  {'QE-TG':>5}  {'QE-D':>5}  ", end="")
     print(f"{'Cat':>9}  Sentence")
@@ -413,7 +489,7 @@ def print_table(results, show_qe=True):
         qe_diff = (r.get("qe_marian", 0) or 0) - (r.get("qe_gemma", 0) or 0)
 
         route = route_model(r["complexity"])
-        print(f"{i+1:>3}  {r['complexity']:>5.3f}  {route:>6}  ", end="")
+        print(f"{i + 1:>3}  {r['complexity']:>5.3f}  {route:>6}  ", end="")
 
         # Color-code the quality difference (positive = MarianMT worse)
         print(f"{qe_diff:>+6.2f}  " if show_qe else "        ", end="")
@@ -433,40 +509,38 @@ def print_table(results, show_qe=True):
 
 def print_translations(results):
     """Print full translations for manual inspection."""
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("FULL TRANSLATIONS (for manual review)")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
     for i, r in enumerate(results):
         route = route_model(r["complexity"])
-        print(f"\n--- #{i+1} [{r['category']}] complexity={r['complexity']:.3f} route={route} ---")
+        print(f"\n--- #{i + 1} [{r['category']}] complexity={r['complexity']:.3f} route={route} ---")
         print(f"  EN: {r['english']}")
         print(f"  MT: {r['marian_text']}  ({r['marian_ms']:.0f}ms)")
         print(f"  TG: {r['gemma_text']}  ({r['gemma_ms']:.0f}ms)")
         if r.get("qe_marian") is not None and r.get("qe_gemma") is not None:
             diff = r["qe_marian"] - r["qe_gemma"]
             flag = " <<< QUALITY DROP" if diff < -0.2 else ""
-            print(f"  QE: MT={r['qe_marian']:.2f}  TG={r['qe_gemma']:.2f}  "
-                  f"diff={diff:+.2f}{flag}")
+            print(f"  QE: MT={r['qe_marian']:.2f}  TG={r['qe_gemma']:.2f}  diff={diff:+.2f}{flag}")
 
 
 def print_recommendation(results):
     """Print the recommendation report."""
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("RECOMMENDATION REPORT")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
 
     # Analyze different thresholds
     thresholds = [0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
-    has_qe = all(r.get("qe_marian") is not None and r.get("qe_gemma") is not None
-                 for r in results)
+    has_qe = all(r.get("qe_marian") is not None and r.get("qe_gemma") is not None for r in results)
 
-    print(f"\n1. THRESHOLD ANALYSIS")
+    print("\n1. THRESHOLD ANALYSIS")
     print(f"   {'Thresh':>6}  {'->MT':>5}  {'->TG':>5}  {'Avg Save':>9}  ", end="")
     if has_qe:
         print(f"{'Avg QE Loss':>11}  {'FP (>0.15)':>10}  {'FP (>0.10)':>10}")
     else:
         print()
-    print(f"   {'-'*70}")
+    print(f"   {'-' * 70}")
 
     best_threshold = 0.35
     best_score = -999
@@ -501,7 +575,7 @@ def print_recommendation(results):
             print()
 
     # Category breakdown
-    print(f"\n2. CATEGORY BREAKDOWN")
+    print("\n2. CATEGORY BREAKDOWN")
     categories = ["easy", "medium", "hard", "very_hard"]
     for cat in categories:
         cat_results = [r for r in results if r["category"] == cat]
@@ -513,14 +587,16 @@ def print_recommendation(results):
         max_c = max(complexities)
         marian_routed = sum(1 for c in complexities if c < best_threshold)
         avg_save = sum(r["gemma_ms"] - r["marian_ms"] for r in cat_results) / len(cat_results)
-        print(f"   {cat:>10}: n={len(cat_results):>2}  "
-              f"complexity={avg_c:.3f} [{min_c:.3f}-{max_c:.3f}]  "
-              f"->MarianMT={marian_routed}/{len(cat_results)}  "
-              f"avg_save={avg_save:+.0f}ms")
+        print(
+            f"   {cat:>10}: n={len(cat_results):>2}  "
+            f"complexity={avg_c:.3f} [{min_c:.3f}-{max_c:.3f}]  "
+            f"->MarianMT={marian_routed}/{len(cat_results)}  "
+            f"avg_save={avg_save:+.0f}ms"
+        )
 
     # Projected savings
-    print(f"\n3. PROJECTED LATENCY SAVINGS (typical sermon)")
-    print(f"   Assumed distribution: 40% easy, 30% medium, 20% hard, 10% very hard")
+    print("\n3. PROJECTED LATENCY SAVINGS (typical sermon)")
+    print("   Assumed distribution: 40% easy, 30% medium, 20% hard, 10% very hard")
     print(f"   Recommended threshold: {best_threshold:.2f}")
 
     weights = {"easy": 0.40, "medium": 0.30, "hard": 0.20, "very_hard": 0.10}
@@ -546,15 +622,18 @@ def print_recommendation(results):
 
     print(f"   Baseline (all Gemma):    ~{total_latency_baseline:.0f}ms avg per sentence")
     print(f"   Adaptive (mixed):        ~{total_latency_adaptive:.0f}ms avg per sentence")
-    print(f"   Projected savings:       ~{total_save_weighted:.0f}ms avg per sentence "
-          f"({total_save_weighted/total_latency_baseline*100:.0f}% reduction)"
-          if total_latency_baseline > 0 else "")
+    print(
+        f"   Projected savings:       ~{total_save_weighted:.0f}ms avg per sentence "
+        f"({total_save_weighted / total_latency_baseline * 100:.0f}% reduction)"
+        if total_latency_baseline > 0
+        else ""
+    )
 
     # False positive analysis
     if has_qe:
         print(f"\n4. FALSE POSITIVE ANALYSIS (threshold={best_threshold:.2f})")
-        print(f"   Sentences routed to MarianMT that should have used Gemma")
-        print(f"   (QE loss > 0.15 = meaningful quality drop)")
+        print("   Sentences routed to MarianMT that should have used Gemma")
+        print("   (QE loss > 0.15 = meaningful quality drop)")
         print()
         fp_count = 0
         for i, r in enumerate(results):
@@ -562,24 +641,20 @@ def print_recommendation(results):
                 qe_loss = r["qe_marian"] - r["qe_gemma"]
                 if qe_loss < -0.15:
                     fp_count += 1
-                    print(f"   FALSE POSITIVE #{fp_count}: [{r['category']}] "
-                          f"complexity={r['complexity']:.3f}")
+                    print(f"   FALSE POSITIVE #{fp_count}: [{r['category']}] complexity={r['complexity']:.3f}")
                     print(f"     EN: {r['english'][:70]}")
-                    print(f"     QE: MT={r['qe_marian']:.2f} TG={r['qe_gemma']:.2f} "
-                          f"loss={qe_loss:+.2f}")
+                    print(f"     QE: MT={r['qe_marian']:.2f} TG={r['qe_gemma']:.2f} loss={qe_loss:+.2f}")
                     print()
         if fp_count == 0:
-            print(f"   None found. All MarianMT-routed sentences maintain quality.")
+            print("   None found. All MarianMT-routed sentences maintain quality.")
 
         marian_count = sum(1 for r in results if r["complexity"] < best_threshold)
         fp_rate = fp_count / marian_count if marian_count > 0 else 0.0
-        print(f"   False positive rate: {fp_count}/{marian_count} "
-              f"({fp_rate:.0%})")
+        print(f"   False positive rate: {fp_count}/{marian_count} ({fp_rate:.0%})")
 
     # Sentences safe for MarianMT
     print(f"\n5. SENTENCES SAFE FOR MARIANMT (threshold={best_threshold:.2f})")
-    safe = [(i, r) for i, r in enumerate(results)
-            if r["complexity"] < best_threshold]
+    safe = [(i, r) for i, r in enumerate(results) if r["complexity"] < best_threshold]
     if not safe:
         print("   None at this threshold.")
     else:
@@ -587,13 +662,13 @@ def print_recommendation(results):
             qe_str = ""
             if r.get("qe_marian") is not None:
                 qe_str = f" QE={r['qe_marian']:.2f}"
-            print(f"   #{i+1} [{r['category']}] c={r['complexity']:.3f}{qe_str}: "
-                  f"{r['english'][:60]}")
+            print(f"   #{i + 1} [{r['category']}] c={r['complexity']:.3f}{qe_str}: {r['english'][:60]}")
 
 
 # ---------------------------------------------------------------------------
 # CSV Ingestion (for real session data)
 # ---------------------------------------------------------------------------
+
 
 def load_sentences_from_csv(csv_paths):
     """Load English sentences from A/B metrics CSV files."""
@@ -622,11 +697,12 @@ def load_sentences_from_csv(csv_paths):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def run_test(sentences, quick=False):
     """Run the full adaptive model selection test."""
-    print(f"\n{'='*80}")
-    print(f"ADAPTIVE MODEL SELECTION TEST — P7 Item 6B")
-    print(f"{'='*80}")
+    print(f"\n{'=' * 80}")
+    print("ADAPTIVE MODEL SELECTION TEST — P7 Item 6B")
+    print(f"{'=' * 80}")
     print(f"  Sentences: {len(sentences)}")
     print(f"  Quick mode: {quick}")
     print()
@@ -677,9 +753,11 @@ def run_test(sentences, quick=False):
 
         route = route_model(cx["complexity"])
         save = tg_ms - mt_ms if tg_ms > 0 else 0
-        print(f"  [{i+1:>2}/{len(sentences)}] c={cx['complexity']:.3f} "
-              f"route={route:>6}  MT={mt_ms:>5.0f}ms  TG={tg_ms:>5.0f}ms  "
-              f"save={save:>+5.0f}ms  {text[:50]}")
+        print(
+            f"  [{i + 1:>2}/{len(sentences)}] c={cx['complexity']:.3f} "
+            f"route={route:>6}  MT={mt_ms:>5.0f}ms  TG={tg_ms:>5.0f}ms  "
+            f"save={save:>+5.0f}ms  {text[:50]}"
+        )
 
     # Reports
     show_qe = gemma_model is not None
@@ -689,33 +767,36 @@ def run_test(sentences, quick=False):
     print_recommendation(results)
 
     # Summary stats
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("SUMMARY STATISTICS")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
     mt_lats = [r["marian_ms"] for r in results]
     tg_lats = [r["gemma_ms"] for r in results if r["gemma_ms"] > 0]
-    print(f"  MarianMT CT2:  avg={sum(mt_lats)/len(mt_lats):.0f}ms  "
-          f"min={min(mt_lats):.0f}ms  max={max(mt_lats):.0f}ms")
+    print(
+        f"  MarianMT CT2:  avg={sum(mt_lats) / len(mt_lats):.0f}ms  min={min(mt_lats):.0f}ms  max={max(mt_lats):.0f}ms"
+    )
     if tg_lats:
-        print(f"  Gemma 4B:      avg={sum(tg_lats)/len(tg_lats):.0f}ms  "
-              f"min={min(tg_lats):.0f}ms  max={max(tg_lats):.0f}ms")
-        speedup = (sum(tg_lats)/len(tg_lats)) / (sum(mt_lats)/len(mt_lats))
+        print(
+            f"  Gemma 4B:      avg={sum(tg_lats) / len(tg_lats):.0f}ms  "
+            f"min={min(tg_lats):.0f}ms  max={max(tg_lats):.0f}ms"
+        )
+        speedup = (sum(tg_lats) / len(tg_lats)) / (sum(mt_lats) / len(mt_lats))
         print(f"  Gemma/MarianMT ratio: {speedup:.1f}x slower")
 
     return results
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Test adaptive model selection (MarianMT vs Gemma 4B) "
-                    "for P7 item 6B"
+    parser = argparse.ArgumentParser(description="Test adaptive model selection (MarianMT vs Gemma 4B) for P7 item 6B")
+    parser.add_argument(
+        "--csv", nargs="+", metavar="CSV", help="CSV file(s) from dry_run_ab.py to use as test sentences"
     )
-    parser.add_argument("--csv", nargs="+", metavar="CSV",
-                        help="CSV file(s) from dry_run_ab.py to use as test sentences")
-    parser.add_argument("--quick", action="store_true",
-                        help="Quick mode: skip Gemma 4B, only test complexity heuristics + MarianMT")
-    parser.add_argument("--threshold", type=float, default=0.35,
-                        help="Complexity threshold for routing (default: 0.35)")
+    parser.add_argument(
+        "--quick", action="store_true", help="Quick mode: skip Gemma 4B, only test complexity heuristics + MarianMT"
+    )
+    parser.add_argument(
+        "--threshold", type=float, default=0.35, help="Complexity threshold for routing (default: 0.35)"
+    )
     args = parser.parse_args()
 
     if args.csv:

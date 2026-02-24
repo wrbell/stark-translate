@@ -24,7 +24,6 @@ import logging
 import os
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 logging.basicConfig(
@@ -97,7 +96,7 @@ def export_checkpoint_to_onnx(checkpoint_path, output_onnx_path):
 
     The command below uses Option A as the most likely pattern.
     """
-    logger.info(f"Exporting checkpoint to ONNX...")
+    logger.info("Exporting checkpoint to ONNX...")
     logger.info(f"  Input:  {checkpoint_path}")
     logger.info(f"  Output: {output_onnx_path}")
 
@@ -106,7 +105,9 @@ def export_checkpoint_to_onnx(checkpoint_path, output_onnx_path):
     # TODO: Confirm this is the correct export command for the installed
     # version of piper-tts / piper-train.
     export_cmd = [
-        "python", "-m", "piper_train.export_onnx",
+        "python",
+        "-m",
+        "piper_train.export_onnx",
         str(checkpoint_path),
         str(output_onnx_path),
     ]
@@ -175,8 +176,7 @@ def generate_voice_config(output_json_path, lang, checkpoint_path=None):
         "model": {
             "architecture": "vits",
             "key": f"church-{lang}",
-            "description": f"Church-domain Piper voice ({lang}), "
-                           f"fine-tuned on Stark Road Gospel Hall audio",
+            "description": f"Church-domain Piper voice ({lang}), fine-tuned on Stark Road Gospel Hall audio",
         },
         "inference": {
             "noise_scale": 0.667,
@@ -217,7 +217,7 @@ def optimize_onnx(onnx_path):
     onnxsim performs constant folding, dead code elimination, and graph
     optimization. Typically reduces model size by 5-15%.
     """
-    logger.info(f"Optimizing ONNX model with onnx-simplifier...")
+    logger.info("Optimizing ONNX model with onnx-simplifier...")
 
     original_size = Path(onnx_path).stat().st_size
     optimized_path = str(onnx_path) + ".optimized"
@@ -239,8 +239,8 @@ def optimize_onnx(onnx_path):
         os.replace(optimized_path, onnx_path)
 
         reduction = (1 - optimized_size / original_size) * 100
-        logger.info(f"  Original:  {original_size / (1024*1024):.1f} MB")
-        logger.info(f"  Optimized: {optimized_size / (1024*1024):.1f} MB")
+        logger.info(f"  Original:  {original_size / (1024 * 1024):.1f} MB")
+        logger.info(f"  Optimized: {optimized_size / (1024 * 1024):.1f} MB")
         logger.info(f"  Reduction: {reduction:.1f}%")
         return True
 
@@ -279,6 +279,7 @@ def validate_exported_model(onnx_path, config_path, lang):
 
         # Synthesize test sentence
         import wave
+
         with wave.open(str(test_wav), "wb") as wf:
             voice.synthesize(test_text, wf)
 
@@ -286,18 +287,17 @@ def validate_exported_model(onnx_path, config_path, lang):
         if test_wav.exists() and test_wav.stat().st_size > 0:
             with wave.open(str(test_wav), "rb") as wf:
                 duration = wf.getnframes() / wf.getframerate()
-            logger.info(f"  Validation successful!")
+            logger.info("  Validation successful!")
             logger.info(f"  Test audio: {test_wav}")
             logger.info(f"  Duration:   {duration:.2f}s")
-            logger.info(f"  Text:       \"{test_text}\"")
+            logger.info(f'  Text:       "{test_text}"')
             return True
         else:
             logger.warning("  Validation produced empty audio")
             return False
 
     except ImportError:
-        logger.warning("  piper-tts not installed for validation. "
-                       "Install with: pip install piper-tts")
+        logger.warning("  piper-tts not installed for validation. Install with: pip install piper-tts")
         logger.warning("  Skipping validation. Model may still be valid.")
         return False
     except Exception as e:
@@ -337,7 +337,7 @@ def export_piper(checkpoint, output_dir, lang, optimize=False, validate=True):
     onnx_path = output_dir / "voice.onnx"
     config_path = output_dir / "voice.onnx.json"
 
-    logger.info(f"Piper ONNX Export")
+    logger.info("Piper ONNX Export")
     logger.info(f"  Checkpoint: {checkpoint_path}")
     logger.info(f"  Output:     {output_dir}")
     logger.info(f"  Language:   {lang}")
@@ -364,34 +364,28 @@ def export_piper(checkpoint, output_dir, lang, optimize=False, validate=True):
     onnx_size = onnx_path.stat().st_size / (1024 * 1024)
     config_size = config_path.stat().st_size / 1024
 
-    logger.info(f"\n{'='*50}")
-    logger.info(f"Export Summary")
-    logger.info(f"{'='*50}")
+    logger.info(f"\n{'=' * 50}")
+    logger.info("Export Summary")
+    logger.info(f"{'=' * 50}")
     logger.info(f"  ONNX model:  {onnx_path}  ({onnx_size:.1f} MB)")
     logger.info(f"  Voice config: {config_path}  ({config_size:.1f} KB)")
     logger.info(f"  Language:     {lang}")
     logger.info(f"  Sample rate:  {PIPER_SAMPLE_RATE} Hz")
-    logger.info(f"")
-    logger.info(f"  To use this voice:")
-    logger.info(f"    from piper import PiperVoice")
-    logger.info(f"    voice = PiperVoice.load(\"{onnx_path}\")")
+    logger.info("")
+    logger.info("  To use this voice:")
+    logger.info("    from piper import PiperVoice")
+    logger.info(f'    voice = PiperVoice.load("{onnx_path}")')
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Export trained Piper checkpoint to ONNX for deployment"
+    parser = argparse.ArgumentParser(description="Export trained Piper checkpoint to ONNX for deployment")
+    parser.add_argument("--checkpoint", "-c", required=True, help="Path to the .ckpt file from train_piper.py")
+    parser.add_argument("--output", "-o", default=None, help="Output directory (default: piper_voices/{lang})")
+    parser.add_argument(
+        "--lang", default="en", choices=["en", "es", "hi", "zh"], help="Language for voice metadata (default: en)"
     )
-    parser.add_argument("--checkpoint", "-c", required=True,
-                        help="Path to the .ckpt file from train_piper.py")
-    parser.add_argument("--output", "-o", default=None,
-                        help="Output directory "
-                        "(default: piper_voices/{lang})")
-    parser.add_argument("--lang", default="en", choices=["en", "es", "hi", "zh"],
-                        help="Language for voice metadata (default: en)")
-    parser.add_argument("--optimize", action="store_true",
-                        help="Run onnx-simplifier for size reduction")
-    parser.add_argument("--no-validate", action="store_true",
-                        help="Skip validation synthesis after export")
+    parser.add_argument("--optimize", action="store_true", help="Run onnx-simplifier for size reduction")
+    parser.add_argument("--no-validate", action="store_true", help="Skip validation synthesis after export")
     args = parser.parse_args()
 
     export_piper(

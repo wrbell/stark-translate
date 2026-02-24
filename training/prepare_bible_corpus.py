@@ -29,10 +29,10 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # Source 1: scrollmapper/bible_databases (SQL with verse IDs)
 # ---------------------------------------------------------------------------
+
 
 def align_scrollmapper(db_dir="bible_data/scrollmapper/formats/sqlite"):
     """
@@ -51,7 +51,7 @@ def align_scrollmapper(db_dir="bible_data/scrollmapper/formats/sqlite"):
         "ASV": "asv",
         "BBE": "bbe",
         "YLT": "ylt",
-        "OEB": "web",      # Open English Bible = WEB equivalent
+        "OEB": "web",  # Open English Bible = WEB equivalent
     }
     es_translations = {
         "SpaRV": "rvr1909",
@@ -78,13 +78,12 @@ def align_scrollmapper(db_dir="bible_data/scrollmapper/formats/sqlite"):
         conn.close()
         return {row[0]: row[1].strip() for row in rows}
 
-    # Load book names from KJV for verse_id -> reference mapping
-    book_names = {}
+    # Validate KJV database exists and has expected tables
     kjv_db = db_dir / "KJV.db"
     if kjv_db.exists():
         conn = sqlite3.connect(str(kjv_db))
         try:
-            book_names = dict(conn.execute("SELECT id, name FROM KJV_books").fetchall())
+            dict(conn.execute("SELECT id, name FROM KJV_books").fetchall())  # validate table exists
         except sqlite3.OperationalError:
             pass
         conn.close()
@@ -121,13 +120,15 @@ def align_scrollmapper(db_dir="bible_data/scrollmapper/formats/sqlite"):
                 en_text = en_verses[vid]
                 es_text = es_verses[vid]
                 if len(en_text) > 5 and len(es_text) > 5:
-                    pairs.append({
-                        "en": en_text,
-                        "es": es_text,
-                        "verse_id": vid,
-                        "en_source": en_name,
-                        "es_source": es_name,
-                    })
+                    pairs.append(
+                        {
+                            "en": en_text,
+                            "es": es_text,
+                            "verse_id": vid,
+                            "en_source": en_name,
+                            "es_source": es_name,
+                        }
+                    )
                     count += 1
             print(f"  {en_name} x {es_name}: {count} pairs")
 
@@ -139,9 +140,11 @@ def align_scrollmapper(db_dir="bible_data/scrollmapper/formats/sqlite"):
 # Source 2: HuggingFace bible-nlp/biblenlp-corpus
 # ---------------------------------------------------------------------------
 
+
 def download_biblenlp():
     """Primary source: BibleNLP corpus on HuggingFace (833 languages, CC-BY-4.0)."""
     from datasets import load_dataset
+
     try:
         ds = load_dataset("bible-nlp/biblenlp-corpus", languages=["eng", "spa"])
         return ds
@@ -154,9 +157,11 @@ def download_biblenlp():
 # Source 3: Helsinki-NLP/bible_para
 # ---------------------------------------------------------------------------
 
+
 def download_helsinki():
     """Alternative: Helsinki-NLP bible_para (Christodoulopoulos/Steedman, CC0-1.0)."""
     from datasets import load_dataset
+
     try:
         ds = load_dataset("Helsinki-NLP/bible_para", lang1="en", lang2="es")
         return ds
@@ -168,6 +173,7 @@ def download_helsinki():
 # ---------------------------------------------------------------------------
 # Multi-Reference Pairing (Data Augmentation)
 # ---------------------------------------------------------------------------
+
 
 def create_multi_reference_pairs(pairs):
     """Group by verse_id, create (en_variant, es) pairs for all combinations.
@@ -194,6 +200,7 @@ def create_multi_reference_pairs(pairs):
 # Export
 # ---------------------------------------------------------------------------
 
+
 def export_individual_translations(pairs):
     """Export individual EN and ES translation files for reference."""
     en_by_source = defaultdict(list)
@@ -202,8 +209,7 @@ def export_individual_translations(pairs):
         en_by_source[p["en_source"]].append(p)
         es_by_source[p["es_source"]].append(p)
 
-    for lang, by_source, out_dir in [("en", en_by_source, "bible_data/en"),
-                                      ("es", es_by_source, "bible_data/es")]:
+    for lang, by_source, out_dir in [("en", en_by_source, "bible_data/en"), ("es", es_by_source, "bible_data/es")]:
         os.makedirs(out_dir, exist_ok=True)
         for source, items in by_source.items():
             # Deduplicate by verse_id
@@ -216,16 +222,21 @@ def export_individual_translations(pairs):
             path = os.path.join(out_dir, f"{source}.jsonl")
             with open(path, "w", encoding="utf-8") as f:
                 for p in sorted(unique, key=lambda x: x["verse_id"]):
-                    f.write(json.dumps({
-                        "verse_id": p["verse_id"],
-                        "text": p[lang],
-                        "source": source,
-                    }, ensure_ascii=False) + "\n")
+                    f.write(
+                        json.dumps(
+                            {
+                                "verse_id": p["verse_id"],
+                                "text": p[lang],
+                                "source": source,
+                            },
+                            ensure_ascii=False,
+                        )
+                        + "\n"
+                    )
             print(f"  {path}: {len(unique)} verses")
 
 
-def export_training_jsonl(pairs, output_path="bible_data/aligned/verse_pairs.jsonl",
-                          holdout_ratio=0.1):
+def export_training_jsonl(pairs, output_path="bible_data/aligned/verse_pairs.jsonl", holdout_ratio=0.1):
     """Export as JSONL for HuggingFace Trainer.
 
     Stratified split: train/test by hashing verse_id (~10% holdout).
@@ -282,18 +293,17 @@ def export_training_jsonl(pairs, output_path="bible_data/aligned/verse_pairs.jso
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Download & align Bible parallel corpus for translation fine-tuning"
+    parser = argparse.ArgumentParser(description="Download & align Bible parallel corpus for translation fine-tuning")
+    parser.add_argument(
+        "--source", choices=["scrollmapper", "huggingface", "all"], default="scrollmapper", help="Data source to use"
     )
-    parser.add_argument("--source", choices=["scrollmapper", "huggingface", "all"],
-                        default="scrollmapper",
-                        help="Data source to use")
-    parser.add_argument("--db-dir", default="bible_data/scrollmapper/formats/sqlite",
-                        help="Directory containing per-translation SQLite databases")
-    parser.add_argument("--output", default="bible_data/aligned/verse_pairs.jsonl",
-                        help="Output JSONL path")
-    parser.add_argument("--multi-ref", action="store_true",
-                        help="Create multi-reference expanded pairs")
+    parser.add_argument(
+        "--db-dir",
+        default="bible_data/scrollmapper/formats/sqlite",
+        help="Directory containing per-translation SQLite databases",
+    )
+    parser.add_argument("--output", default="bible_data/aligned/verse_pairs.jsonl", help="Output JSONL path")
+    parser.add_argument("--multi-ref", action="store_true", help="Create multi-reference expanded pairs")
     args = parser.parse_args()
 
     pairs = []

@@ -19,7 +19,6 @@ import argparse
 import json
 import os
 import statistics
-import sys
 import time
 from datetime import datetime
 
@@ -48,6 +47,7 @@ WHISPER_PROMPT = (
 # ---------------------------------------------------------------------------
 # Audio generation / loading
 # ---------------------------------------------------------------------------
+
 
 def generate_test_audio(duration_s=3.0):
     """Generate synthetic speech-like audio for benchmarking.
@@ -78,6 +78,7 @@ def load_audio_file(path):
     ext = os.path.splitext(path)[1].lower()
     if ext == ".wav":
         import scipy.io.wavfile as wav
+
         sr, data = wav.read(path)
         if data.dtype == np.int16:
             data = data.astype(np.float32) / 32768.0
@@ -87,6 +88,7 @@ def load_audio_file(path):
             data = data[:, 0]  # mono
         if sr != SAMPLE_RATE:
             from scipy.signal import resample
+
             target_len = int(len(data) * SAMPLE_RATE / sr)
             data = resample(data, target_len).astype(np.float32)
         return data
@@ -97,9 +99,17 @@ def load_audio_file(path):
         try:
             subprocess.run(
                 [
-                    "ffmpeg", "-y", "-i", path,
-                    "-ar", str(SAMPLE_RATE), "-ac", "1",
-                    "-f", "wav", tmp_path,
+                    "ffmpeg",
+                    "-y",
+                    "-i",
+                    path,
+                    "-ar",
+                    str(SAMPLE_RATE),
+                    "-ac",
+                    "1",
+                    "-f",
+                    "wav",
+                    tmp_path,
                 ],
                 capture_output=True,
                 check=True,
@@ -114,11 +124,14 @@ def load_audio_file(path):
 # mlx-whisper backend
 # ---------------------------------------------------------------------------
 
-def bench_mlx_whisper(audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS,
-                      word_timestamps=False, initial_prompt=None, profile=False):
+
+def bench_mlx_whisper(
+    audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS, word_timestamps=False, initial_prompt=None, profile=False
+):
     """Benchmark mlx-whisper and return structured results."""
-    import mlx_whisper
     import mlx.core as mx
+    import mlx_whisper
+
     mx.set_cache_limit(256 * 1024 * 1024)
 
     kwargs = dict(
@@ -182,17 +195,18 @@ def bench_mlx_whisper(audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS,
 # lightning-whisper-mlx backend
 # ---------------------------------------------------------------------------
 
+
 def _check_lightning_available():
     """Check if lightning-whisper-mlx is installed."""
     try:
         from lightning_whisper_mlx import LightningWhisperMLX  # noqa: F401
+
         return True
     except ImportError:
         return False
 
 
-def bench_lightning_whisper(audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS,
-                            word_timestamps=False, initial_prompt=None):
+def bench_lightning_whisper(audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS, word_timestamps=False, initial_prompt=None):
     """Benchmark lightning-whisper-mlx and return structured results.
 
     NOTE: lightning-whisper-mlx's transcribe() method only accepts
@@ -203,6 +217,7 @@ def bench_lightning_whisper(audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS,
     array. We write to a temp file for each call.
     """
     import tempfile
+
     import scipy.io.wavfile as wav
     from lightning_whisper_mlx import LightningWhisperMLX
 
@@ -214,7 +229,9 @@ def bench_lightning_whisper(audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS,
 
     try:
         whisper = LightningWhisperMLX(
-            model="distil-large-v3", batch_size=12, quant=None,
+            model="distil-large-v3",
+            batch_size=12,
+            quant=None,
         )
 
         # Warmup
@@ -261,6 +278,7 @@ def bench_lightning_whisper(audio, runs=DEFAULT_RUNS, warmup=WARMUP_RUNS,
 # Profile mode: measure word_timestamps overhead
 # ---------------------------------------------------------------------------
 
+
 def profile_word_timestamps(audio, runs=3):
     """Measure the latency cost of enabling word_timestamps in mlx-whisper."""
     print("\n--- Profiling word_timestamps overhead ---")
@@ -288,16 +306,24 @@ def profile_initial_prompt(audio, runs=3):
     print("\n--- Profiling initial_prompt overhead ---")
 
     result_no_prompt = bench_mlx_whisper(
-        audio, runs=runs, word_timestamps=False, initial_prompt=None,
+        audio,
+        runs=runs,
+        word_timestamps=False,
+        initial_prompt=None,
     )
     result_prompt = bench_mlx_whisper(
-        audio, runs=runs, word_timestamps=False, initial_prompt=WHISPER_PROMPT,
+        audio,
+        runs=runs,
+        word_timestamps=False,
+        initial_prompt=WHISPER_PROMPT,
     )
 
     overhead_ms = result_prompt["mean_ms"] - result_no_prompt["mean_ms"]
     overhead_pct = (overhead_ms / result_no_prompt["mean_ms"]) * 100 if result_no_prompt["mean_ms"] > 0 else 0
 
-    print(f"  Without initial_prompt:  {result_no_prompt['mean_ms']:.0f}ms (median {result_no_prompt['median_ms']:.0f}ms)")
+    print(
+        f"  Without initial_prompt:  {result_no_prompt['mean_ms']:.0f}ms (median {result_no_prompt['median_ms']:.0f}ms)"
+    )
     print(f"  With initial_prompt:     {result_prompt['mean_ms']:.0f}ms (median {result_prompt['median_ms']:.0f}ms)")
     print(f"  Overhead:                {overhead_ms:+.0f}ms ({overhead_pct:+.0f}%)")
 
@@ -313,11 +339,12 @@ def profile_initial_prompt(audio, runs=3):
 # Reporting
 # ---------------------------------------------------------------------------
 
+
 def print_comparison_table(results):
     """Print a formatted comparison table of benchmark results."""
-    print(f"\n{'='*72}")
+    print(f"\n{'=' * 72}")
     print("STT BENCHMARK RESULTS")
-    print(f"{'='*72}")
+    print(f"{'=' * 72}")
 
     # Header
     headers = ["Metric", *[r["backend"] for r in results]]
@@ -336,14 +363,11 @@ def print_comparison_table(results):
         ("Median latency (ms)", [f"{r['median_ms']:.0f}" for r in results]),
         ("Stdev (ms)", [f"{r['stdev_ms']:.0f}" for r in results]),
         ("Min / Max (ms)", [f"{r['min_ms']:.0f} / {r['max_ms']:.0f}" for r in results]),
-        ("word_timestamps", [
-            "YES" if r["has_word_timestamps"] else ("N/A" if not r["word_timestamps"] else "NO")
-            for r in results
-        ]),
-        ("initial_prompt", [
-            "YES" if r["initial_prompt"] else "NO (not supported)"
-            for r in results
-        ]),
+        (
+            "word_timestamps",
+            ["YES" if r["has_word_timestamps"] else ("N/A" if not r["word_timestamps"] else "NO") for r in results],
+        ),
+        ("initial_prompt", ["YES" if r["initial_prompt"] else "NO (not supported)" for r in results]),
         ("Segments", [str(r["segment_count"]) for r in results]),
         ("Text consistent", ["YES" if r["text_consistent"] else "NO" for r in results]),
         ("Runs", [str(r["runs"]) for r in results]),
@@ -356,7 +380,7 @@ def print_comparison_table(results):
             line += v.ljust(w)
         print(line)
 
-    print(f"\n{'='*72}")
+    print(f"\n{'=' * 72}")
 
     # Text comparison
     print("\nTranscription output comparison:")
@@ -377,36 +401,49 @@ def print_comparison_table(results):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Benchmark STT backends for SRTranslate",
     )
     parser.add_argument(
-        "--audio", type=str, default=None,
+        "--audio",
+        type=str,
+        default=None,
         help="Path to audio file (WAV/MP3/etc). Default: generate synthetic audio.",
     )
     parser.add_argument(
-        "--duration", type=float, default=3.0,
+        "--duration",
+        type=float,
+        default=3.0,
         help="Duration of synthetic audio in seconds (default: 3.0)",
     )
     parser.add_argument(
-        "--runs", type=int, default=DEFAULT_RUNS,
+        "--runs",
+        type=int,
+        default=DEFAULT_RUNS,
         help=f"Number of timed runs per backend (default: {DEFAULT_RUNS})",
     )
     parser.add_argument(
-        "--warmup", type=int, default=WARMUP_RUNS,
+        "--warmup",
+        type=int,
+        default=WARMUP_RUNS,
         help=f"Number of warmup runs per backend (default: {WARMUP_RUNS})",
     )
     parser.add_argument(
-        "--profile", action="store_true",
+        "--profile",
+        action="store_true",
         help="Run detailed profiling (word_timestamps overhead, initial_prompt overhead)",
     )
     parser.add_argument(
-        "--skip-lightning", action="store_true",
+        "--skip-lightning",
+        action="store_true",
         help="Skip lightning-whisper-mlx benchmark even if installed",
     )
     parser.add_argument(
-        "--output", type=str, default=None,
+        "--output",
+        type=str,
+        default=None,
         help="Output JSON path (default: metrics/stt_benchmark_<timestamp>.json)",
     )
     args = parser.parse_args()
@@ -428,7 +465,7 @@ def main():
     profile_data = {}
 
     # --- mlx-whisper benchmark ---
-    print(f"\n--- mlx-whisper (word_timestamps=True, initial_prompt=True) ---")
+    print("\n--- mlx-whisper (word_timestamps=True, initial_prompt=True) ---")
     result_mlx = bench_mlx_whisper(
         audio,
         runs=args.runs,
@@ -442,10 +479,12 @@ def main():
     # --- lightning-whisper-mlx benchmark ---
     lightning_available = _check_lightning_available() and not args.skip_lightning
     if lightning_available:
-        print(f"\n--- lightning-whisper-mlx (file-based, no word_timestamps/prompt) ---")
+        print("\n--- lightning-whisper-mlx (file-based, no word_timestamps/prompt) ---")
         try:
             result_lightning = bench_lightning_whisper(
-                audio, runs=args.runs, warmup=args.warmup,
+                audio,
+                runs=args.runs,
+                warmup=args.warmup,
             )
             all_results.append(result_lightning)
             print(f"  Mean: {result_lightning['mean_ms']:.0f}ms | Median: {result_lightning['median_ms']:.0f}ms")
@@ -466,16 +505,16 @@ def main():
     print_comparison_table(all_results)
 
     if profile_data:
-        print(f"\n{'='*72}")
+        print(f"\n{'=' * 72}")
         print("PROFILING SUMMARY")
-        print(f"{'='*72}")
+        print(f"{'=' * 72}")
         if "word_timestamps" in profile_data:
             wt = profile_data["word_timestamps"]
             print(f"  word_timestamps overhead: {wt['overhead_ms']:+.0f}ms ({wt['overhead_pct']:+.0f}%)")
         if "initial_prompt" in profile_data:
             ip = profile_data["initial_prompt"]
             print(f"  initial_prompt overhead:  {ip['overhead_ms']:+.0f}ms ({ip['overhead_pct']:+.0f}%)")
-        print(f"{'='*72}")
+        print(f"{'=' * 72}")
 
     # --- Save results ---
     output_path = args.output

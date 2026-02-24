@@ -9,6 +9,7 @@ before using ``.transcribe()`` or ``.translate()``.
 """
 
 import logging
+from typing import Any
 
 from engines.base import STTEngine, TranslationEngine
 
@@ -17,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 def create_stt_engine(
     backend: str = "auto",
-    model_id: str = None,
-    fallback_threshold: float = None,
-    hallucination_threshold: float = None,
-    fallback_on_low_conf: bool = None,
-    **kwargs,
+    model_id: str | None = None,
+    fallback_threshold: float | None = None,
+    hallucination_threshold: float | None = None,
+    fallback_on_low_conf: bool | None = None,
+    **kwargs: Any,
 ) -> STTEngine:
     """Create an STT engine for the given backend.
 
@@ -56,12 +57,14 @@ def create_stt_engine(
 
     if backend == "mlx":
         from engines.mlx_engine import MLXWhisperEngine
+
         return MLXWhisperEngine(
             model_id=model_id or "mlx-community/whisper-large-v3-turbo",
             **merged_kwargs,
         )
     elif backend in ("cuda", "cpu"):
         from engines.cuda_engine import FasterWhisperEngine
+
         return FasterWhisperEngine(
             model_id=model_id or "large-v3-turbo",
             device=backend,
@@ -73,9 +76,9 @@ def create_stt_engine(
 
 def create_translation_engine(
     backend: str = "auto",
-    model_id: str = None,
+    model_id: str | None = None,
     engine_type: str = "gemma",
-    **kwargs,
+    **kwargs: Any,
 ) -> TranslationEngine:
     """Create a translation engine.
 
@@ -93,6 +96,7 @@ def create_translation_engine(
 
     if engine_type == "marian":
         from engines.mlx_engine import MarianEngine
+
         return MarianEngine(
             model_id=model_id or "Helsinki-NLP/opus-mt-en-es",
             **kwargs,
@@ -100,12 +104,14 @@ def create_translation_engine(
 
     if backend == "mlx":
         from engines.mlx_engine import MLXGemmaEngine
+
         return MLXGemmaEngine(
             model_id=model_id or "mlx-community/translategemma-4b-it-4bit",
             **kwargs,
         )
     elif backend == "cuda":
         from engines.cuda_engine import CUDAGemmaEngine
+
         return CUDAGemmaEngine(
             model_id=model_id or "google/translategemma-4b-it",
             **kwargs,
@@ -121,6 +127,7 @@ def _detect_backend() -> str:
     """
     try:
         import mlx.core  # noqa: F401
+
         logger.info("Auto-detected backend: mlx (Apple Silicon)")
         return "mlx"
     except ImportError:
@@ -128,6 +135,7 @@ def _detect_backend() -> str:
 
     try:
         import torch
+
         if torch.cuda.is_available():
             logger.info("Auto-detected backend: cuda (NVIDIA)")
             return "cuda"

@@ -31,8 +31,6 @@ Usage:
 
 import argparse
 import logging
-import os
-import shutil
 import sys
 import time
 from pathlib import Path
@@ -66,10 +64,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Optional imports — guarded for cross-platform compatibility
 # ---------------------------------------------------------------------------
 
+
 def _check_ctranslate2():
     """Check if CTranslate2 is available."""
     try:
         import ctranslate2  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -79,6 +79,7 @@ def _check_mlx():
     """Check if MLX is available (Apple Silicon)."""
     try:
         import mlx.core  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -88,6 +89,7 @@ def _check_peft():
     """Check if PEFT (LoRA) is available."""
     try:
         import peft  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -97,6 +99,7 @@ def _check_transformers():
     """Check if transformers is available."""
     try:
         import transformers  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -105,6 +108,7 @@ def _check_transformers():
 # ---------------------------------------------------------------------------
 # Utility helpers
 # ---------------------------------------------------------------------------
+
 
 def get_dir_size_mb(path):
     """Calculate total size of a directory in MB."""
@@ -129,6 +133,7 @@ def format_size(size_mb):
 # Whisper Export
 # ---------------------------------------------------------------------------
 
+
 def export_whisper_mlx(output_dir, dry_run=False):
     """Download/reference the pre-quantized MLX Whisper model.
 
@@ -145,11 +150,17 @@ def export_whisper_mlx(output_dir, dry_run=False):
 
     if dry_run:
         logger.info("  [DRY RUN] Would download/verify model via snapshot_download")
-        return {"model": "Whisper", "target": "MLX", "format": "MLX fp16",
-                "size": "~1.1 GB", "status": "SKIP (dry run)"}
+        return {
+            "model": "Whisper",
+            "target": "MLX",
+            "format": "MLX fp16",
+            "size": "~1.1 GB",
+            "status": "SKIP (dry run)",
+        }
 
     try:
         from huggingface_hub import snapshot_download
+
         t0 = time.time()
         cache_path = snapshot_download(MLX_WHISPER_MODEL)
         elapsed = time.time() - t0
@@ -157,12 +168,10 @@ def export_whisper_mlx(output_dir, dry_run=False):
         logger.info(f"  Cached at: {cache_path}")
         logger.info(f"  Size:      {format_size(size_mb)}")
         logger.info(f"  Time:      {elapsed:.1f}s")
-        return {"model": "Whisper", "target": "MLX", "format": "MLX fp16",
-                "size": format_size(size_mb), "status": "OK"}
+        return {"model": "Whisper", "target": "MLX", "format": "MLX fp16", "size": format_size(size_mb), "status": "OK"}
     except Exception as e:
         logger.error(f"  FAILED: {e}")
-        return {"model": "Whisper", "target": "MLX", "format": "MLX fp16",
-                "size": "—", "status": f"FAIL: {e}"}
+        return {"model": "Whisper", "target": "MLX", "format": "MLX fp16", "size": "—", "status": f"FAIL: {e}"}
 
 
 def export_whisper_ct2(output_dir, dry_run=False):
@@ -181,18 +190,33 @@ def export_whisper_ct2(output_dir, dry_run=False):
 
     if dry_run:
         logger.info("  [DRY RUN] Would convert model via TransformersConverter")
-        return {"model": "Whisper", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": "~800 MB", "status": "SKIP (dry run)"}
+        return {
+            "model": "Whisper",
+            "target": "CUDA/CT2",
+            "format": "CT2 int8",
+            "size": "~800 MB",
+            "status": "SKIP (dry run)",
+        }
 
     if not _check_ctranslate2():
         logger.error("  ctranslate2 not installed. Install with: pip install ctranslate2")
-        return {"model": "Whisper", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": "—", "status": "FAIL: ctranslate2 not installed"}
+        return {
+            "model": "Whisper",
+            "target": "CUDA/CT2",
+            "format": "CT2 int8",
+            "size": "—",
+            "status": "FAIL: ctranslate2 not installed",
+        }
 
     if not _check_transformers():
         logger.error("  transformers not installed. Install with: pip install transformers")
-        return {"model": "Whisper", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": "—", "status": "FAIL: transformers not installed"}
+        return {
+            "model": "Whisper",
+            "target": "CUDA/CT2",
+            "format": "CT2 int8",
+            "size": "—",
+            "status": "FAIL: transformers not installed",
+        }
 
     try:
         import ctranslate2
@@ -223,13 +247,17 @@ def export_whisper_ct2(output_dir, dry_run=False):
         size_mb = get_dir_size_mb(ct2_dir)
         logger.info(f"  Converted in {elapsed:.1f}s")
         logger.info(f"  Size: {format_size(size_mb)}")
-        return {"model": "Whisper", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": format_size(size_mb), "status": "OK"}
+        return {
+            "model": "Whisper",
+            "target": "CUDA/CT2",
+            "format": "CT2 int8",
+            "size": format_size(size_mb),
+            "status": "OK",
+        }
 
     except Exception as e:
         logger.error(f"  FAILED: {e}")
-        return {"model": "Whisper", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": "—", "status": f"FAIL: {e}"}
+        return {"model": "Whisper", "target": "CUDA/CT2", "format": "CT2 int8", "size": "—", "status": f"FAIL: {e}"}
 
 
 def validate_whisper_mlx():
@@ -260,8 +288,8 @@ def validate_whisper_ct2(ct2_dir):
     """Validate CTranslate2 Whisper by transcribing a short silence array."""
     logger.info("  Validating CT2 Whisper (faster-whisper)...")
     try:
-        from faster_whisper import WhisperModel
         import numpy as np
+        from faster_whisper import WhisperModel
 
         model = WhisperModel(
             str(ct2_dir),
@@ -285,6 +313,7 @@ def validate_whisper_ct2(ct2_dir):
 # ---------------------------------------------------------------------------
 # TranslateGemma Export
 # ---------------------------------------------------------------------------
+
 
 def export_gemma_mlx(output_dir, lora_path=None, dry_run=False):
     """Download/reference the pre-quantized MLX TranslateGemma 4B model.
@@ -310,11 +339,17 @@ def export_gemma_mlx(output_dir, lora_path=None, dry_run=False):
 
     if dry_run:
         logger.info("  [DRY RUN] Would download/verify model via snapshot_download")
-        return {"model": "TranslateGemma 4B", "target": "MLX", "format": "MLX 4-bit",
-                "size": "~2.2 GB", "status": "SKIP (dry run)"}
+        return {
+            "model": "TranslateGemma 4B",
+            "target": "MLX",
+            "format": "MLX 4-bit",
+            "size": "~2.2 GB",
+            "status": "SKIP (dry run)",
+        }
 
     try:
         from huggingface_hub import snapshot_download
+
         t0 = time.time()
         cache_path = snapshot_download(MLX_GEMMA_4B_MODEL)
         elapsed = time.time() - t0
@@ -322,12 +357,22 @@ def export_gemma_mlx(output_dir, lora_path=None, dry_run=False):
         logger.info(f"  Cached at: {cache_path}")
         logger.info(f"  Size:      {format_size(size_mb)}")
         logger.info(f"  Time:      {elapsed:.1f}s")
-        return {"model": "TranslateGemma 4B", "target": "MLX", "format": "MLX 4-bit",
-                "size": format_size(size_mb), "status": "OK"}
+        return {
+            "model": "TranslateGemma 4B",
+            "target": "MLX",
+            "format": "MLX 4-bit",
+            "size": format_size(size_mb),
+            "status": "OK",
+        }
     except Exception as e:
         logger.error(f"  FAILED: {e}")
-        return {"model": "TranslateGemma 4B", "target": "MLX", "format": "MLX 4-bit",
-                "size": "—", "status": f"FAIL: {e}"}
+        return {
+            "model": "TranslateGemma 4B",
+            "target": "MLX",
+            "format": "MLX 4-bit",
+            "size": "—",
+            "status": f"FAIL: {e}",
+        }
 
 
 def export_gemma_cuda(output_dir, lora_path=None, dry_run=False):
@@ -374,9 +419,13 @@ def export_gemma_cuda(output_dir, lora_path=None, dry_run=False):
         else:
             logger.info("  [DRY RUN] Would download/verify base model via snapshot_download")
             logger.info("            (No conversion needed — quantized at load time)")
-        return {"model": "TranslateGemma 4B", "target": "CUDA/bnb", "format": "bnb NF4",
-                "size": "~8 GB (fp16)" if not lora_path else "~8 GB (merged)",
-                "status": "SKIP (dry run)"}
+        return {
+            "model": "TranslateGemma 4B",
+            "target": "CUDA/bnb",
+            "format": "bnb NF4",
+            "size": "~8 GB (fp16)" if not lora_path else "~8 GB (merged)",
+            "status": "SKIP (dry run)",
+        }
 
     # If LoRA path provided, merge the adapter into the base model
     if lora_path:
@@ -386,23 +435,38 @@ def export_gemma_cuda(output_dir, lora_path=None, dry_run=False):
 
         if not lora_p.exists():
             logger.error(f"  LoRA adapter path not found: {lora_p}")
-            return {"model": "TranslateGemma 4B", "target": "CUDA/bnb", "format": "bnb NF4",
-                    "size": "—", "status": f"FAIL: LoRA path not found: {lora_p}"}
+            return {
+                "model": "TranslateGemma 4B",
+                "target": "CUDA/bnb",
+                "format": "bnb NF4",
+                "size": "—",
+                "status": f"FAIL: LoRA path not found: {lora_p}",
+            }
 
         if not _check_peft():
             logger.error("  peft not installed. Install with: pip install peft")
-            return {"model": "TranslateGemma 4B", "target": "CUDA/bnb", "format": "bnb NF4",
-                    "size": "—", "status": "FAIL: peft not installed"}
+            return {
+                "model": "TranslateGemma 4B",
+                "target": "CUDA/bnb",
+                "format": "bnb NF4",
+                "size": "—",
+                "status": "FAIL: peft not installed",
+            }
 
         if not _check_transformers():
             logger.error("  transformers not installed. Install with: pip install transformers")
-            return {"model": "TranslateGemma 4B", "target": "CUDA/bnb", "format": "bnb NF4",
-                    "size": "—", "status": "FAIL: transformers not installed"}
+            return {
+                "model": "TranslateGemma 4B",
+                "target": "CUDA/bnb",
+                "format": "bnb NF4",
+                "size": "—",
+                "status": "FAIL: transformers not installed",
+            }
 
         try:
             import torch
-            from transformers import AutoModelForCausalLM, AutoTokenizer
             from peft import PeftModel
+            from transformers import AutoModelForCausalLM, AutoTokenizer
 
             t0 = time.time()
             logger.info("  Loading base model in fp16 for LoRA merge...")
@@ -432,17 +496,28 @@ def export_gemma_cuda(output_dir, lora_path=None, dry_run=False):
             logger.info(f"  Size: {format_size(size_mb)}")
 
             del model, base_model
-            return {"model": "TranslateGemma 4B", "target": "CUDA/bnb",
-                    "format": "fp16 (merged)", "size": format_size(size_mb), "status": "OK"}
+            return {
+                "model": "TranslateGemma 4B",
+                "target": "CUDA/bnb",
+                "format": "fp16 (merged)",
+                "size": format_size(size_mb),
+                "status": "OK",
+            }
 
         except Exception as e:
             logger.error(f"  FAILED: {e}")
-            return {"model": "TranslateGemma 4B", "target": "CUDA/bnb", "format": "bnb NF4",
-                    "size": "—", "status": f"FAIL: {e}"}
+            return {
+                "model": "TranslateGemma 4B",
+                "target": "CUDA/bnb",
+                "format": "bnb NF4",
+                "size": "—",
+                "status": f"FAIL: {e}",
+            }
 
     # No LoRA — just ensure the base model is cached
     try:
         from huggingface_hub import snapshot_download
+
         t0 = time.time()
         cache_path = snapshot_download(CUDA_GEMMA_4B_MODEL)
         elapsed = time.time() - t0
@@ -450,17 +525,28 @@ def export_gemma_cuda(output_dir, lora_path=None, dry_run=False):
         logger.info(f"  Cached at: {cache_path}")
         logger.info(f"  Size:      {format_size(size_mb)}")
         logger.info(f"  Time:      {elapsed:.1f}s")
-        return {"model": "TranslateGemma 4B", "target": "CUDA/bnb", "format": "bnb NF4",
-                "size": format_size(size_mb), "status": "OK"}
+        return {
+            "model": "TranslateGemma 4B",
+            "target": "CUDA/bnb",
+            "format": "bnb NF4",
+            "size": format_size(size_mb),
+            "status": "OK",
+        }
     except Exception as e:
         logger.error(f"  FAILED: {e}")
-        return {"model": "TranslateGemma 4B", "target": "CUDA/bnb", "format": "bnb NF4",
-                "size": "—", "status": f"FAIL: {e}"}
+        return {
+            "model": "TranslateGemma 4B",
+            "target": "CUDA/bnb",
+            "format": "bnb NF4",
+            "size": "—",
+            "status": f"FAIL: {e}",
+        }
 
 
 # ---------------------------------------------------------------------------
 # MarianMT Export
 # ---------------------------------------------------------------------------
+
 
 def export_marian_pytorch(output_dir, dry_run=False):
     """Ensure MarianMT PyTorch weights are cached locally.
@@ -476,11 +562,17 @@ def export_marian_pytorch(output_dir, dry_run=False):
 
     if dry_run:
         logger.info("  [DRY RUN] Would download/verify model via snapshot_download")
-        return {"model": "MarianMT", "target": "PyTorch", "format": "fp32",
-                "size": "~298 MB", "status": "SKIP (dry run)"}
+        return {
+            "model": "MarianMT",
+            "target": "PyTorch",
+            "format": "fp32",
+            "size": "~298 MB",
+            "status": "SKIP (dry run)",
+        }
 
     try:
         from huggingface_hub import snapshot_download
+
         t0 = time.time()
         cache_path = snapshot_download(CUDA_MARIAN_MODEL)
         elapsed = time.time() - t0
@@ -488,12 +580,16 @@ def export_marian_pytorch(output_dir, dry_run=False):
         logger.info(f"  Cached at: {cache_path}")
         logger.info(f"  Size:      {format_size(size_mb)}")
         logger.info(f"  Time:      {elapsed:.1f}s")
-        return {"model": "MarianMT", "target": "PyTorch", "format": "fp32",
-                "size": format_size(size_mb), "status": "OK"}
+        return {
+            "model": "MarianMT",
+            "target": "PyTorch",
+            "format": "fp32",
+            "size": format_size(size_mb),
+            "status": "OK",
+        }
     except Exception as e:
         logger.error(f"  FAILED: {e}")
-        return {"model": "MarianMT", "target": "PyTorch", "format": "fp32",
-                "size": "—", "status": f"FAIL: {e}"}
+        return {"model": "MarianMT", "target": "PyTorch", "format": "fp32", "size": "—", "status": f"FAIL: {e}"}
 
 
 def export_marian_ct2(output_dir, dry_run=False):
@@ -512,13 +608,23 @@ def export_marian_ct2(output_dir, dry_run=False):
 
     if dry_run:
         logger.info("  [DRY RUN] Would convert model via OpusMTConverter")
-        return {"model": "MarianMT", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": "~76 MB", "status": "SKIP (dry run)"}
+        return {
+            "model": "MarianMT",
+            "target": "CUDA/CT2",
+            "format": "CT2 int8",
+            "size": "~76 MB",
+            "status": "SKIP (dry run)",
+        }
 
     if not _check_ctranslate2():
         logger.error("  ctranslate2 not installed. Install with: pip install ctranslate2")
-        return {"model": "MarianMT", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": "—", "status": "FAIL: ctranslate2 not installed"}
+        return {
+            "model": "MarianMT",
+            "target": "CUDA/CT2",
+            "format": "CT2 int8",
+            "size": "—",
+            "status": "FAIL: ctranslate2 not installed",
+        }
 
     try:
         import ctranslate2
@@ -537,18 +643,23 @@ def export_marian_ct2(output_dir, dry_run=False):
         size_mb = get_dir_size_mb(ct2_dir)
         logger.info(f"  Converted in {elapsed:.1f}s")
         logger.info(f"  Size: {format_size(size_mb)}")
-        return {"model": "MarianMT", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": format_size(size_mb), "status": "OK"}
+        return {
+            "model": "MarianMT",
+            "target": "CUDA/CT2",
+            "format": "CT2 int8",
+            "size": format_size(size_mb),
+            "status": "OK",
+        }
 
     except Exception as e:
         logger.error(f"  FAILED: {e}")
-        return {"model": "MarianMT", "target": "CUDA/CT2", "format": "CT2 int8",
-                "size": "—", "status": f"FAIL: {e}"}
+        return {"model": "MarianMT", "target": "CUDA/CT2", "format": "CT2 int8", "size": "—", "status": f"FAIL: {e}"}
 
 
 # ---------------------------------------------------------------------------
 # Summary table
 # ---------------------------------------------------------------------------
+
 
 def print_summary(results):
     """Print a formatted summary table of all export results."""
@@ -610,6 +721,7 @@ def print_summary(results):
 # ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
+
 
 def run_exports(args):
     """Execute the requested model exports and return results."""
@@ -699,49 +811,59 @@ def main():
     # Model selection (at least one required unless --all)
     model_group = parser.add_argument_group("model selection")
     model_group.add_argument(
-        "--whisper", action="store_true",
+        "--whisper",
+        action="store_true",
         help="Export Whisper Large-V3-Turbo for both targets",
     )
     model_group.add_argument(
-        "--gemma", action="store_true",
+        "--gemma",
+        action="store_true",
         help="Export TranslateGemma 4B for both targets",
     )
     model_group.add_argument(
-        "--marian", action="store_true",
+        "--marian",
+        action="store_true",
         help="Export MarianMT (opus-mt-en-es) for both targets",
     )
     model_group.add_argument(
-        "--all", action="store_true",
+        "--all",
+        action="store_true",
         help="Export all models (Whisper + TranslateGemma + MarianMT)",
     )
 
     # Target selection
     target_group = parser.add_argument_group("target selection")
     target_group.add_argument(
-        "--skip-mlx", action="store_true",
+        "--skip-mlx",
+        action="store_true",
         help="Skip MLX (Mac/Apple Silicon) exports",
     )
     target_group.add_argument(
-        "--skip-cuda", action="store_true",
+        "--skip-cuda",
+        action="store_true",
         help="Skip CUDA (NVIDIA/CTranslate2) exports",
     )
 
     # Options
     options_group = parser.add_argument_group("options")
     options_group.add_argument(
-        "--output-dir", default="./exported_models/",
+        "--output-dir",
+        default="./exported_models/",
         help="Base output directory for converted models (default: ./exported_models/)",
     )
     options_group.add_argument(
-        "--lora-path", default=None,
+        "--lora-path",
+        default=None,
         help="Path to LoRA adapter directory to merge before export (TranslateGemma only)",
     )
     options_group.add_argument(
-        "--dry-run", action="store_true",
+        "--dry-run",
+        action="store_true",
         help="Show what would be done without executing any conversions or downloads",
     )
     options_group.add_argument(
-        "--no-validate", action="store_true",
+        "--no-validate",
+        action="store_true",
         help="Skip post-export validation inference tests",
     )
 

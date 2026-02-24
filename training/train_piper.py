@@ -24,7 +24,6 @@ Usage:
 import argparse
 import json
 import logging
-import os
 import subprocess
 import sys
 import time
@@ -97,7 +96,7 @@ def validate_dataset(dataset_dir):
 
     # Count entries in metadata.csv
     n_entries = 0
-    with open(metadata_path, "r", encoding="utf-8") as f:
+    with open(metadata_path, encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 n_entries += 1
@@ -147,12 +146,19 @@ def run_piper_preprocessing(dataset_dir, output_dir, lang):
     espeak_lang = espeak_lang_map.get(lang, lang)
 
     preprocess_cmd = [
-        "python", "-m", "piper_train.preprocess",
-        "--language", espeak_lang,
-        "--input-dir", str(dataset_dir),
-        "--output-dir", str(output_dir),
-        "--dataset-format", "ljspeech",
-        "--sample-rate", str(PIPER_SAMPLE_RATE),
+        "python",
+        "-m",
+        "piper_train.preprocess",
+        "--language",
+        espeak_lang,
+        "--input-dir",
+        str(dataset_dir),
+        "--output-dir",
+        str(output_dir),
+        "--dataset-format",
+        "ljspeech",
+        "--sample-rate",
+        str(PIPER_SAMPLE_RATE),
     ]
 
     logger.info(f"  Command: {' '.join(preprocess_cmd)}")
@@ -199,10 +205,15 @@ def synthesize_test_sample(checkpoint_path, lang, output_wav, text=None):
     # Piper's normal inference uses ONNX models, but during training we may
     # need to use the PyTorch checkpoint directly via piper_train.
     synth_cmd = [
-        "python", "-m", "piper_train.infer",
-        "--checkpoint", str(checkpoint_path),
-        "--output", str(output_wav),
-        "--text", text,
+        "python",
+        "-m",
+        "piper_train.infer",
+        "--checkpoint",
+        str(checkpoint_path),
+        "--output",
+        str(output_wav),
+        "--text",
+        text,
     ]
 
     try:
@@ -332,17 +343,29 @@ def train_piper(
     #   --quality high/medium/low
     #   --max-epochs vs --max_epochs
     train_cmd = [
-        "python", "-m", "piper_train",
-        "--dataset-dir", str(preprocessed_dir),
-        "--accelerator", "gpu",
-        "--devices", "1",
-        "--batch-size", str(batch_size),
-        "--validation-split", "0.05",
-        "--max-epochs", str(epochs),
-        "--learning-rate", str(lr),
-        "--checkpoint-epochs", str(sample_every),
-        "--default-root-dir", str(log_dir),
-        "--quality", "high",
+        "python",
+        "-m",
+        "piper_train",
+        "--dataset-dir",
+        str(preprocessed_dir),
+        "--accelerator",
+        "gpu",
+        "--devices",
+        "1",
+        "--batch-size",
+        str(batch_size),
+        "--validation-split",
+        "0.05",
+        "--max-epochs",
+        str(epochs),
+        "--learning-rate",
+        str(lr),
+        "--checkpoint-epochs",
+        str(sample_every),
+        "--default-root-dir",
+        str(log_dir),
+        "--quality",
+        "high",
     ]
 
     # Resume from checkpoint if specified
@@ -383,7 +406,7 @@ def train_piper(
     logger.info(f"Training config saved to {config_path}")
 
     # Launch training
-    logger.info(f"\nStarting Piper training...")
+    logger.info("\nStarting Piper training...")
     logger.info(f"  Language:    {lang}")
     logger.info(f"  Base model:  {base_checkpoint}")
     logger.info(f"  Dataset:     {dataset_dir}")
@@ -431,7 +454,7 @@ def train_piper(
         elapsed = time.time() - start_time
 
     # Post-training: list checkpoints and synthesize final test sample
-    logger.info(f"\nTraining complete in {elapsed/3600:.1f} hours")
+    logger.info(f"\nTraining complete in {elapsed / 3600:.1f} hours")
     logger.info(f"Logs: {log_dir}")
     logger.info(f"Train output: {train_log_path}")
 
@@ -452,24 +475,18 @@ def train_piper(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Piper TTS voice fine-tuning for church audio"
+    parser = argparse.ArgumentParser(description="Piper TTS voice fine-tuning for church audio")
+    parser.add_argument("--lang", default="en", choices=["en", "es", "hi", "zh"], help="Target language (default: en)")
+    parser.add_argument(
+        "--dataset", "-d", default=None, help="Path to Piper dataset (default: stark_data/piper_dataset/{lang})"
     )
-    parser.add_argument("--lang", default="en", choices=["en", "es", "hi", "zh"],
-                        help="Target language (default: en)")
-    parser.add_argument("--dataset", "-d", default=None,
-                        help="Path to Piper dataset "
-                        "(default: stark_data/piper_dataset/{lang})")
-    parser.add_argument("--checkpoint", "-c", default=None,
-                        help="Path to .ckpt file to resume training from")
-    parser.add_argument("--batch-size", type=int, default=16,
-                        help="Training batch size (default: 16)")
-    parser.add_argument("--epochs", type=int, default=3000,
-                        help="Maximum training epochs (default: 3000)")
-    parser.add_argument("--lr", type=float, default=1e-4,
-                        help="Learning rate (default: 1e-4)")
-    parser.add_argument("--sample-every", type=int, default=50,
-                        help="Synthesize test sample every N epochs (default: 50)")
+    parser.add_argument("--checkpoint", "-c", default=None, help="Path to .ckpt file to resume training from")
+    parser.add_argument("--batch-size", type=int, default=16, help="Training batch size (default: 16)")
+    parser.add_argument("--epochs", type=int, default=3000, help="Maximum training epochs (default: 3000)")
+    parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate (default: 1e-4)")
+    parser.add_argument(
+        "--sample-every", type=int, default=50, help="Synthesize test sample every N epochs (default: 50)"
+    )
     args = parser.parse_args()
 
     train_piper(

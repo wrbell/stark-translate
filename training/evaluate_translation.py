@@ -78,28 +78,25 @@ def load_marian_model(model_dir):
 
 def translate_gemma(model, tokenizer, text):
     """Translate English to Spanish using TranslateGemma chat template."""
-    messages = [{"role": "user", "content": [
-        {"type": "text", "source_lang_code": "en",
-         "target_lang_code": "es", "text": text}
-    ]}]
-    input_text = tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=True
-    )
+    messages = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+        }
+    ]
+    input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
 
     with torch.no_grad():
         output = model.generate(**inputs, max_new_tokens=256)
 
-    translation = tokenizer.decode(
-        output[0][inputs.input_ids.shape[1]:], skip_special_tokens=True
-    )
+    translation = tokenizer.decode(output[0][inputs.input_ids.shape[1] :], skip_special_tokens=True)
     return translation.strip()
 
 
 def translate_marian(model, tokenizer, text):
     """Translate English to Spanish using MarianMT."""
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True,
-                       max_length=128)
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
     with torch.no_grad():
@@ -158,10 +155,10 @@ def evaluate_biblical_translation(
             elapsed = time.time() - start_time
             rate = (i + 1) / elapsed
             eta = (len(test) - i - 1) / rate
-            logger.info(f"  [{i+1}/{len(test)}] {rate:.1f} verse/s, ETA: {eta:.0f}s")
+            logger.info(f"  [{i + 1}/{len(test)}] {rate:.1f} verse/s, ETA: {eta:.0f}s")
 
     elapsed = time.time() - start_time
-    logger.info(f"Translation complete in {elapsed:.0f}s ({len(test)/elapsed:.1f} verse/s)")
+    logger.info(f"Translation complete in {elapsed:.0f}s ({len(test) / elapsed:.1f} verse/s)")
 
     # SacreBLEU
     bleu = sacrebleu.corpus_bleu(hypotheses, [references])
@@ -175,10 +172,10 @@ def evaluate_biblical_translation(
     comet_val = None
     try:
         from comet import download_model, load_from_checkpoint
+
         comet_path = download_model("Unbabel/wmt22-comet-da")
         comet_model = load_from_checkpoint(comet_path)
-        comet_input = [{"src": s, "mt": h, "ref": r}
-                       for s, h, r in zip(sources, hypotheses, references)]
+        comet_input = [{"src": s, "mt": h, "ref": r} for s, h, r in zip(sources, hypotheses, references)]
         comet_score = comet_model.predict(comet_input, batch_size=8)
         comet_val = comet_score.system_score
         logger.info(f"COMET: {comet_val:.4f}")
@@ -189,21 +186,23 @@ def evaluate_biblical_translation(
 
     # Per-genre breakdown
     genres = {
-        "pentateuch": range(1, 6),       # Genesis-Deuteronomy
-        "history": range(6, 18),         # Joshua-Esther
-        "poetry": range(18, 23),         # Job-Song of Solomon
-        "prophecy": range(23, 40),       # Isaiah-Malachi
-        "gospels": range(40, 44),        # Matthew-John
-        "epistles": range(44, 66),       # Acts-Jude
-        "apocalyptic": range(66, 67),    # Revelation
+        "pentateuch": range(1, 6),  # Genesis-Deuteronomy
+        "history": range(6, 18),  # Joshua-Esther
+        "poetry": range(18, 23),  # Job-Song of Solomon
+        "prophecy": range(23, 40),  # Isaiah-Malachi
+        "gospels": range(40, 44),  # Matthew-John
+        "epistles": range(44, 66),  # Acts-Jude
+        "apocalyptic": range(66, 67),  # Revelation
     }
     logger.info("\nPer-genre BLEU:")
     genre_scores = {}
     for genre, book_range in genres.items():
-        genre_hyps = [h for h, ex in zip(hypotheses, test)
-                      if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range]
-        genre_refs = [r for r, ex in zip(references, test)
-                      if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range]
+        genre_hyps = [
+            h for h, ex in zip(hypotheses, test) if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range
+        ]
+        genre_refs = [
+            r for r, ex in zip(references, test) if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range
+        ]
         if genre_hyps:
             genre_bleu = sacrebleu.corpus_bleu(genre_hyps, [genre_refs])
             genre_scores[genre] = {
@@ -249,8 +248,8 @@ def evaluate_theological_terms(
         ("The covenant between God and Abraham.", "pacto"),
         ("We are saved by grace through faith.", "gracia"),
         ("The righteousness of God is revealed.", "justicia"),
-        ("James wrote about faith and works.", "Santiago"),       # Epistle context
-        ("James and John were fishermen.", "Jacobo"),             # Apostle context
+        ("James wrote about faith and works.", "Santiago"),  # Epistle context
+        ("James and John were fishermen.", "Jacobo"),  # Apostle context
         ("He preached about sanctification.", "santificación"),
         ("The propitiation for our sins.", "propiciación"),
     ]
@@ -269,12 +268,14 @@ def evaluate_theological_terms(
         logger.info(f"  [{status}] '{en_sentence}'")
         logger.info(f"         -> '{translation}'")
         logger.info(f"         expected: '{expected_es_term}' {'(found)' if found else '(MISSING)'}")
-        results.append({
-            "en": en_sentence,
-            "translation": translation,
-            "expected_term": expected_es_term,
-            "found": found,
-        })
+        results.append(
+            {
+                "en": en_sentence,
+                "translation": translation,
+                "expected_term": expected_es_term,
+                "found": found,
+            }
+        )
 
     accuracy = correct / len(test_sentences)
     logger.info(f"\nTheological term accuracy: {correct}/{len(test_sentences)} ({accuracy:.0%})")
@@ -282,28 +283,25 @@ def evaluate_theological_terms(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Evaluate fine-tuned translation model quality"
+    parser = argparse.ArgumentParser(description="Evaluate fine-tuned translation model quality")
+    parser.add_argument(
+        "--adapter", default="fine_tuned_gemma_mi_A", help="Path to QLoRA adapter directory (for TranslateGemma)"
     )
-    parser.add_argument("--adapter", default="fine_tuned_gemma_mi_A",
-                        help="Path to QLoRA adapter directory (for TranslateGemma)")
-    parser.add_argument("--base-model", default="google/translategemma-4b-it",
-                        help="Base TranslateGemma model")
-    parser.add_argument("--test", default="bible_data/holdout/verse_pairs_test.jsonl",
-                        help="Path to test JSONL")
-    parser.add_argument("--max-samples", type=int, default=None,
-                        help="Limit evaluation to N samples (useful for quick checks)")
-    parser.add_argument("--spot-check-only", action="store_true",
-                        help="Only run theological term spot-check")
-    parser.add_argument("--output-file", default=None,
-                        help="Save metrics to JSON file (e.g., metrics/translation_eval.json)")
-    parser.add_argument("--marian", default=None,
-                        help="Evaluate MarianMT model instead (path to fine-tuned dir)")
+    parser.add_argument("--base-model", default="google/translategemma-4b-it", help="Base TranslateGemma model")
+    parser.add_argument("--test", default="bible_data/holdout/verse_pairs_test.jsonl", help="Path to test JSONL")
+    parser.add_argument(
+        "--max-samples", type=int, default=None, help="Limit evaluation to N samples (useful for quick checks)"
+    )
+    parser.add_argument("--spot-check-only", action="store_true", help="Only run theological term spot-check")
+    parser.add_argument(
+        "--output-file", default=None, help="Save metrics to JSON file (e.g., metrics/translation_eval.json)"
+    )
+    parser.add_argument("--marian", default=None, help="Evaluate MarianMT model instead (path to fine-tuned dir)")
     args = parser.parse_args()
 
     if not args.spot_check_only:
         logger.info("=== Corpus-level metrics ===")
-        scores = evaluate_biblical_translation(
+        evaluate_biblical_translation(
             adapter_dir=args.adapter,
             test_data=args.test,
             base_model=args.base_model,
