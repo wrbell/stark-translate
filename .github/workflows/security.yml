@@ -28,7 +28,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install pip-audit
-        run: pip install pip-audit
+        run: pip install pip-audit setuptools
 
       - name: Audit ${{ matrix.requirements }}
         run: |
