@@ -13,13 +13,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
           cache: pip
+          cache-dependency-path: |
+            requirements-mac.txt
+            requirements-windows.txt
+            pyproject.toml
 
       - name: Install test dependencies
         run: pip install pytest pytest-cov pydantic pydantic-settings numpy jiwer
@@ -30,10 +37,10 @@ jobs:
           --cov=engines --cov=tools --cov=features
           --cov-report=term-missing
           --cov-report=json:coverage.json
-          --cov-fail-under=15
+          --cov-fail-under=18
 
       - name: Coverage PR comment
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && matrix.python-version == '3.11'
         uses: MishaKav/pytest-coverage-comment@v1
         with:
           pytest-coverage-path: coverage.json

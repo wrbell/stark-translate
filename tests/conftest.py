@@ -40,6 +40,7 @@ _MOCK_MODULES = [
     "language_tool_python",
     "sentence_transformers",
     "streamlink",
+    "soundfile",
 ]
 
 

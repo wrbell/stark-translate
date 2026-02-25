@@ -1415,7 +1415,7 @@ def run_live(video_id, duration_seconds, language="en"):
             print_trend_report()
 
 
-def run_wav(video_id, wav_path, language="en", chunk_seconds=30.0):
+def run_wav(video_id, wav_path, language="en", _chunk_seconds=30.0):
     """WAV mode: transcribe a WAV file with Whisper and compare against YouTube captions."""
     print("\n  Mode: WAV TRANSCRIBE + COMPARE")
     print(f"  Video: {video_id}")
