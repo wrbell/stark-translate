@@ -1,0 +1,13 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+    patch:
+      default:
+        target: 0%
+
+ignore:
+  - "engines/cuda_engine.py"
+  - "engines/mlx_engine.py"
+  - "training/**"
