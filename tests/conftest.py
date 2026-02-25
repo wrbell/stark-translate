@@ -43,6 +43,15 @@ _MOCK_MODULES = [
     "soundfile",
 ]
 
+# ---------------------------------------------------------------------------
+# Pre-install mocks at module level so that top-level imports in test fixtures
+# (e.g. `import dry_run_ab`) don't fail during collection.  The per-test
+# monkeypatch fixture below re-applies them for proper cleanup.
+# ---------------------------------------------------------------------------
+for _mod in _MOCK_MODULES:
+    if _mod not in sys.modules:
+        sys.modules[_mod] = MagicMock()
+
 
 @pytest.fixture(autouse=True)
 def _mock_heavy_deps(monkeypatch):

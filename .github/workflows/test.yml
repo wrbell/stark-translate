@@ -29,7 +29,7 @@ jobs:
             pyproject.toml
 
       - name: Install test dependencies
-        run: pip install pytest pytest-cov pydantic pydantic-settings numpy jiwer
+        run: pip install pytest pytest-cov pydantic pydantic-settings numpy jiwer psutil
 
       - name: Run tests
         run: >
