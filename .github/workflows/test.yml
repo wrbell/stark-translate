@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,4 +25,16 @@ jobs:
         run: pip install pytest pytest-cov pydantic pydantic-settings numpy jiwer
 
       - name: Run tests
-        run: pytest tests/ -v --tb=short --cov=engines --cov=tools --cov=features --cov-report=term-missing
+        run: >
+          pytest tests/ -v --tb=short
+          --cov=engines --cov=tools --cov=features
+          --cov-report=term-missing
+          --cov-report=json:coverage.json
+          --cov-fail-under=15
+
+      - name: Coverage PR comment
+        if: github.event_name == 'pull_request'
+        uses: MishaKav/pytest-coverage-comment@v1
+        with:
+          pytest-coverage-path: coverage.json
+          junitxml-path: ""

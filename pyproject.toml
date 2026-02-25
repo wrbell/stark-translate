@@ -1,6 +1,6 @@
 [project]
 name = "stark-translate"
-version = "0.1.0"
+version = "2026.2.4.0"
 requires-python = ">=3.11"
 description = "Live bilingual speech-to-text for church outreach"
 
@@ -11,6 +11,8 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=6.0",
     "pre-commit>=4.0",
+    "bandit>=1.7",
+    "vulture>=2.11",
 ]
 
 # ---------------------------------------------------------------------------

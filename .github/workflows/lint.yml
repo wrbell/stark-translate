@@ -18,7 +18,7 @@ jobs:
           cache: pip
 
       - name: Install lint dependencies
-        run: pip install ruff mypy pydantic pydantic-settings numpy
+        run: pip install ruff mypy pydantic pydantic-settings numpy bandit vulture
 
       - name: Ruff check
         run: ruff check .
@@ -28,6 +28,12 @@ jobs:
 
       - name: Mypy (engines + settings)
         run: mypy engines/ settings.py
+
+      - name: Bandit security scan
+        run: bandit -r engines/ features/ tools/ settings.py -s B101,B603,B607 --severity-level medium
+
+      - name: Vulture dead code detection (advisory)
+        run: vulture engines/ features/ tools/ settings.py --min-confidence 80 || true
 
       - name: Validate HTML displays
         run: |

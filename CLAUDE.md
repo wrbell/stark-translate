@@ -6,7 +6,7 @@ A fully on-device, live English speech-to-text system with dual English/Spanish 
 
 A **two-pass pipeline** provides fast partials and high-quality finals:
 
-- **Partials (while speaking):** mlx-whisper STT + MarianMT CT2 int8 translation (~580ms) -- displayed in italics
+- **Partials (while speaking):** mlx-whisper STT + MarianMT PyTorch translation (~380ms) -- displayed in italics
 - **Finals (on silence):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit translation (~1.3s / ~1.9s) -- replaces partial
 
 Two translation models run in parallel for A/B comparison:
@@ -50,6 +50,33 @@ project_dir/
 ├── CLAUDE-macbook.md               # Mac inference environment guide
 ├── CLAUDE-windows.md               # Windows/WSL training environment guide
 ├── README.md                       # Quick-start guide and architecture summary
+├── pyproject.toml                  # Project metadata, ruff/mypy/pytest config, CalVer version
+├── .pre-commit-config.yaml         # Pre-commit hooks (ruff check + format)
+├── .commitlintrc.yml               # Conventional commit enforcement config
+│
+├── .github/
+│   ├── dependabot.yml              # Automated dependency updates (pip + actions)
+│   ├── labeler.yml                 # PR auto-labeling rules by path
+│   └── workflows/
+│       ├── lint.yml                # Ruff, mypy, bandit, vulture, HTML tidy
+│       ├── test.yml                # pytest + coverage threshold + PR comment
+│       ├── release.yml             # GitHub Release on version tags
+│       ├── security.yml            # pip-audit weekly + on push
+│       ├── label.yml               # Auto-label PRs by changed paths
+│       └── commitlint.yml          # Conventional commit format check
+│
+├── tests/
+│   ├── conftest.py                 # Shared fixtures, heavy-dep mocking for CI
+│   ├── test_engine_base.py         # STTResult, TranslationResult dataclasses
+│   ├── test_engine_factory.py      # Factory auto-detection logic
+│   ├── test_settings.py            # Pydantic settings validation
+│   ├── test_active_learning.py     # Fallback event logger
+│   ├── test_glossary.py            # Theological glossary builder
+│   ├── test_imports.py             # Import smoke tests
+│   ├── test_translation_qe.py      # Translation quality estimation
+│   ├── test_verse_extraction.py    # Bible verse reference extraction
+│   ├── test_pipeline_integration.py # WebSocket message contract tests
+│   └── test_caption_monitor.py     # Caption monitor utility functions
 │
 ├── dry_run_ab.py                   # Main pipeline: mic → VAD → STT → translate → WebSocket + HTTP
 ├── setup_models.py                 # One-command model download + verification
@@ -89,7 +116,6 @@ project_dir/
 │   ├── rtx2070_feasibility.md      # RTX 2070 hardware portability analysis
 │   └── previous_actions.md         # Log of completed project actions
 │
-├── ct2_opus_mt_en_es/              # CTranslate2 int8 MarianMT model (76MB)
 ├── fine_tuned_whisper_mi/          # LoRA adapters for Whisper (post fine-tune)
 ├── fine_tuned_gemma_mi_A/          # LoRA adapters for Gemma 4B
 ├── fine_tuned_gemma_mi_B/          # LoRA adapters for Gemma 12B
@@ -116,7 +142,7 @@ project_dir/
 │
 ├── requirements-mac.txt            # Mac pip dependencies
 ├── requirements-windows.txt        # Windows/WSL pip dependencies
-└── stt_env/                        # Python 3.11 virtualenv
+└── stt_env/                        # Python 3.11 virtualenv (gitignored)
 ```
 
 ---
@@ -313,7 +339,7 @@ The 4B variant loads at ~2.6 GB in 4-bit, leaving ample headroom for training on
 
 **TranslateGemma chat template** must be followed exactly — it requires `source_lang_code` and `target_lang_code` fields in the user message content.
 
-**MarianMT for partials:** `Helsinki-NLP/opus-mt-en-es` runs as CT2 int8 (76MB, ~50ms) for fast partial translations during speech, while TranslateGemma handles final translations on silence. The PyTorch variant (298MB, ~80ms) runs in parallel for comparison logging. MarianMT also supports full fine-tuning without LoRA for lower quality ceiling but dramatically higher iteration speed.
+**MarianMT for partials:** `Helsinki-NLP/opus-mt-en-es` runs as PyTorch (~298MB, ~80ms) for fast partial translations during speech, while TranslateGemma handles final translations on silence. MarianMT also supports full fine-tuning without LoRA for lower quality ceiling but dramatically higher iteration speed.
 
 ### Theological Vocabulary Challenges
 
@@ -360,9 +386,44 @@ No published work exists on fine-tuning Whisper for church/religious speech — 
 2. **Compare:** Latency histograms, error rates per phrase length
 3. **Edge cases:** Test accents, background noise (fan hum, coffee shop ambiance)
 4. **Metrics columns:** `approach`, `latency_ms`, `stt_wer`, `bleu`, `en_text`, `es_text`
-5. **Measured baselines:** Partials ~580ms (MarianMT CT2), finals A ~1.3s (4B), finals B ~1.9s (12B)
+5. **Measured baselines:** Partials ~380ms (MarianMT PyTorch), finals A ~1.3s (4B), finals B ~1.9s (12B)
 6. **Scaling:** Wrap in loop for 10+ runs; use `timeit` for precise RTF
 7. **Serving:** HTTP on `0.0.0.0:8080` (LAN/phone access), WebSocket on `0.0.0.0:8765`
+
+---
+
+## CI/CD Pipeline
+
+Six GitHub Actions workflows enforce quality on every push and PR to `main`:
+
+| Workflow | Trigger | What it does |
+|----------|---------|-------------|
+| **Lint** (`lint.yml`) | push / PR | Ruff check + format, mypy, bandit security scan, vulture dead code (advisory), HTML tidy |
+| **Test** (`test.yml`) | push / PR | pytest (130+ tests), coverage threshold (≥15%), coverage PR comment |
+| **Release** (`release.yml`) | `v*` tag push | Creates GitHub Release from tag |
+| **Security** (`security.yml`) | push / PR / weekly | pip-audit on both requirements files |
+| **Label** (`label.yml`) | PR | Auto-labels PRs by changed paths (engines, displays, training, etc.) |
+| **Commitlint** (`commitlint.yml`) | PR | Enforces conventional commit format (`feat:`, `fix:`, `docs:`, `ci:`, etc.) |
+| **Dependabot** (`dependabot.yml`) | weekly | Opens PRs for pip (minor/patch) and Actions version updates |
+
+### Running Locally
+
+```bash
+# Lint
+ruff check . && ruff format --check .
+mypy engines/ settings.py
+bandit -r engines/ features/ tools/ settings.py -s B101,B603,B607 --severity-level medium
+
+# Tests
+pytest tests/ -v --cov=engines --cov=tools --cov=features --cov-report=term-missing
+
+# Pre-commit (runs ruff + format on staged files)
+pre-commit run --all-files
+```
+
+### Version Numbering
+
+CalVer format: `YYYY.M.W.PATCH` (e.g., `2026.2.4.0` = 2026, February, week 4, first release). Single source of truth in `pyproject.toml`.
 
 ---
 
@@ -411,7 +472,7 @@ Catastrophic forgetting is minimal with LoRA (base weights frozen). For extra sa
 
 TranslateGemma 4B in 4-bit quantization (~2.6 GB) via bitsandbytes. Config: r=16, α=16, target `"all-linear"`, NF4 quantization, paged AdamW 32-bit optimizer. Use TRL's SFTTrainer with sequence packing (Bible verses rarely exceed 200 tokens). Must follow TranslateGemma's exact chat template with `source_lang_code` / `target_lang_code` fields. Fits in ~10–12 GB on A2000 Ada.
 
-MarianMT (`Helsinki-NLP/opus-mt-en-es`) as a lightweight fallback and partial-translation engine. Currently deployed as CT2 int8 (76MB, ~50ms) for real-time partials and PyTorch fp32 (298MB, ~80ms) for comparison logging. Small enough for full fine-tuning, much faster iteration, lower quality ceiling.
+MarianMT (`Helsinki-NLP/opus-mt-en-es`) as a lightweight fallback and partial-translation engine. Currently deployed as PyTorch (~298MB, ~80ms) for real-time partials. CT2 was removed due to libomp conflicts on macOS (see `docs/macos_libomp_fix.md`). Small enough for full fine-tuning, much faster iteration, lower quality ceiling.
 
 ### Theological Vocabulary Challenges
 
@@ -442,8 +503,7 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 |---------|------|-----|-----|
 | `mlx-whisper` | STT inference (distil-large-v3) | ✅ (MLX) | — |
 | `mlx-lm` | TranslateGemma 4B/12B 4-bit inference | ✅ (MLX) | — |
-| `ctranslate2` | MarianMT int8 for fast partials (76MB) | ✅ (CPU) | — |
-| `Helsinki-NLP/opus-mt-en-es` | MarianMT PyTorch fallback (298MB) | ✅ (CPU) | ✅ (CUDA) |
+| `Helsinki-NLP/opus-mt-en-es` | MarianMT PyTorch (298MB) | ✅ (CPU) | ✅ (CUDA) |
 | `distil-whisper/distil-large-v3` | STT model (training) | — | ✅ (CUDA) |
 | `google/translategemma-4b` / `12b` | Translation (training) | — | ✅ (CUDA) |
 | `silero-vad` | Voice activity detection | ✅ | ✅ |
@@ -587,6 +647,7 @@ Inference benchmarks on the **MacBook** (M3 Pro, 18GB unified memory, 12-core CP
 
 - [x] **Phase 0 — Setup:** Configure both environments per machine-specific docs
 - [x] **Phase 1 — Baseline:** Run base A/B test (no fine-tuning) to establish latency and WER baselines
+- [x] **Phase 1.5 — CI/CD:** GitHub Actions (lint, test, security, release), pre-commit, CalVer versioning, 130+ tests
 - [ ] **Phase 2 — Data collection:** Download and sample 10–20 hours of Stark Road audio via `yt-dlp`
 - [ ] **Phase 3 — Quality assessment:** Manually transcribe 50–100 sample segments, compute baseline WER
 - [ ] **Phase 4 — Preprocessing:** Run the 10-step audio cleaning pipeline on all collected data

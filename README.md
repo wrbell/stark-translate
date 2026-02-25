@@ -1,5 +1,9 @@
 # stark-translate
 
+[![Lint](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml)
+[![Test](https://github.com/wrbell/stark-translate/actions/workflows/test.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/test.yml)
+[![Security](https://github.com/wrbell/stark-translate/actions/workflows/security.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/security.yml)
+
 Live bilingual (English/Spanish) speech-to-text for church outreach at Stark Road Gospel Hall, Farmington Hills, MI.
 
 Real-time mic input, fully on-device transcription and translation, displayed in browser. Uses a two-pass pipeline for fast partials and high-quality finals, with A/B model comparison for translation quality analysis.
@@ -104,6 +108,22 @@ python dry_run_ab.py --backend=cuda --no-ab
 | `--gain` | auto | Mic gain multiplier (auto-calibrates by default) |
 | `--device` | auto | Audio input device index |
 | `--chunk-duration` | 2.0 | Seconds of speech to accumulate |
+
+## Testing
+
+```bash
+# Run full test suite (130+ tests, no GPU required)
+pytest tests/ -v
+
+# With coverage report
+pytest tests/ -v --cov=engines --cov=tools --cov=features --cov-report=term-missing
+
+# Lint
+ruff check . && ruff format --check .
+mypy engines/ settings.py
+```
+
+Tests run on CI (Ubuntu, Python 3.11) without GPU or model downloads. Heavy ML dependencies are mocked.
 
 ## Models
 
@@ -265,8 +285,6 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 
 ## Development Status
 
-**Active branch:** `feature/turbo-dual-prod-v2` — Turbo migration, engines package, dual-target inference, TTS training scripts, unified config.
-
 **What's done:**
 - Wholesale swap to Whisper Large-V3-Turbo (both partials and finals)
 - `engines/` package: MLX + CUDA engine implementations with factory auto-detection
@@ -276,6 +294,9 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 - `tools/convert_models_to_both.py`: dual-endpoint model export
 - Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
 - `requirements-nvidia.txt` for CUDA inference environments
+- CI/CD pipeline: 6 GitHub Actions workflows (lint, test, security, release, label, commitlint)
+- 130+ tests with coverage threshold, pre-commit hooks, CalVer versioning (`2026.2.4.0`)
+- Dependabot for automated dependency updates
 
 **What's next:**
 - Test Turbo on sermon clips and compare WER (#4)
