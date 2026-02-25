@@ -53,7 +53,7 @@ class MLXWhisperEngine(STTEngine):
                                  (default: mlx-community/whisper-large-v3-turbo).
         fallback_model_id:       Used for quality-based retry when the primary
                                  model returns low-confidence output
-                                 (default: mlx-community/distil-whisper-large-v3).
+                                 (default: wbell7/distil-whisper-large-v3.5-mlx).
         cache_limit_mb:          Metal memory cache limit in megabytes (default: 256).
         fallback_threshold:      avg_logprob below which to retry with fallback
                                  model (default: -1.2).
@@ -66,7 +66,7 @@ class MLXWhisperEngine(STTEngine):
     def __init__(
         self,
         model_id: str = "mlx-community/whisper-large-v3-turbo",
-        fallback_model_id: str = "mlx-community/distil-whisper-large-v3",
+        fallback_model_id: str = "wbell7/distil-whisper-large-v3.5-mlx",
         cache_limit_mb: int = 256,
         fallback_threshold: float = -1.2,
         hallucination_threshold: float = 2.4,

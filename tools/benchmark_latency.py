@@ -40,7 +40,7 @@ import numpy as np
 
 SAMPLE_RATE = 16000
 MIC_SAMPLE_RATE = 48000
-MODEL_ID = "mlx-community/distil-whisper-large-v3"
+MODEL_ID = "wbell7/distil-whisper-large-v3.5-mlx"
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"
 MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"
 
@@ -202,7 +202,7 @@ def _load_mlx_whisper():
     import mlx_whisper
 
     mx.set_cache_limit(256 * 1024 * 1024)
-    print("  Loading mlx-whisper (distil-large-v3)...")
+    print("  Loading mlx-whisper (distil-large-v3.5)...")
     t0 = time.perf_counter()
     silence = np.zeros(16000, dtype=np.float32)
     mlx_whisper.transcribe(silence, path_or_hf_repo=MODEL_ID, condition_on_previous_text=False)

@@ -99,7 +99,7 @@ def _import_mlx_whisper():
 # Configuration
 # ---------------------------------------------------------------------------
 
-WHISPER_MODEL = "mlx-community/distil-whisper-large-v3"
+WHISPER_MODEL = "wbell7/distil-whisper-large-v3.5-mlx"
 SAMPLE_RATE = 16000
 WINDOW_SECONDS = 30.0  # comparison window size
 OFFSET_SEARCH_RANGE = 5.0  # +/- seconds for latency drift alignment
@@ -1431,7 +1431,7 @@ def run_wav(video_id, wav_path, language="en", _chunk_seconds=30.0):
     t0 = time.perf_counter()
     result = mlx_whisper.transcribe(
         wav_path,
-        path_or_hf_repo="mlx-community/distil-whisper-large-v3",
+        path_or_hf_repo=WHISPER_MODEL,
         language="en",
         word_timestamps=False,
         condition_on_previous_text=True,

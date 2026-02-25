@@ -152,6 +152,7 @@ def transcribe_with_faster_whisper(data_dir, output_dir, model_name, batch_size,
 
     # Map HuggingFace model names to faster-whisper equivalents
     fw_model_map = {
+        "distil-whisper/distil-large-v3.5": "distil-large-v3.5",
         "distil-whisper/distil-large-v3": "distil-large-v3",
         "openai/whisper-large-v3": "large-v3",
         "openai/whisper-large-v2": "large-v2",
@@ -299,7 +300,7 @@ def main():
     parser.add_argument(
         "--output", "-o", default="stark_data/transcripts", help="Output directory for JSON transcripts"
     )
-    parser.add_argument("--model", "-m", default="distil-whisper/distil-large-v3", help="Whisper model to use")
+    parser.add_argument("--model", "-m", default="distil-whisper/distil-large-v3.5", help="Whisper model to use")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument(
         "--backend",

@@ -29,7 +29,7 @@ import numpy as np
 # ---------------------------------------------------------------------------
 
 SAMPLE_RATE = 16000
-MODEL_ID = "mlx-community/distil-whisper-large-v3"
+MODEL_ID = "wbell7/distil-whisper-large-v3.5-mlx"
 DEFAULT_RUNS = 5
 WARMUP_RUNS = 1
 
