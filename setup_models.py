@@ -70,7 +70,7 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
 
     models = [
         ("Silero VAD", "snakers4/silero-vad", "~2 MB", "torch_hub"),
-        ("Distil-Whisper (MLX)", "mlx-community/distil-whisper-large-v3", "~1.5 GB", "mlx_whisper"),
+        ("Distil-Whisper v3.5 (MLX)", "wbell7/distil-whisper-large-v3.5-mlx", "~1.5 GB", "mlx_whisper"),
         ("Whisper Large-V3-Turbo (MLX)", "mlx-community/whisper-large-v3-turbo", "~1.1 GB", "mlx_whisper"),
         ("TranslateGemma 4B (MLX 4-bit)", "mlx-community/translategemma-4b-it-4bit", "~2.2 GB", "mlx_lm"),
     ]
@@ -103,11 +103,11 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
         print(f"  FAIL: {e}")
         results["vad"] = f"FAIL: {e}"
 
-    # 2. Distil-Whisper (MLX)
-    print(f"\n[2/{len(models)}] Distil-Whisper (MLX)...")
+    # 2. Distil-Whisper v3.5 (MLX)
+    print(f"\n[2/{len(models)}] Distil-Whisper v3.5 (MLX)...")
     t0 = time.time()
     try:
-        snapshot_download("mlx-community/distil-whisper-large-v3")
+        snapshot_download("wbell7/distil-whisper-large-v3.5-mlx")
         print(f"  Downloaded ({time.time() - t0:.1f}s)")
 
         if not no_test:
@@ -117,7 +117,7 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
             silence = np.zeros(16000, dtype=np.float32)
             result = mlx_whisper.transcribe(
                 silence,
-                path_or_hf_repo="mlx-community/distil-whisper-large-v3",
+                path_or_hf_repo="wbell7/distil-whisper-large-v3.5-mlx",
                 condition_on_previous_text=False,
             )
             print(f"  Inference test: '{result['text'].strip()[:80]}'")
@@ -255,7 +255,7 @@ def download_windows_models(skip_12b=False, dry_run=False, no_test=False):
     from huggingface_hub import snapshot_download
 
     models = [
-        ("Distil-Whisper", "distil-whisper/distil-large-v3", "~1.5 GB"),
+        ("Distil-Whisper v3.5", "distil-whisper/distil-large-v3.5", "~1.5 GB"),
         ("Whisper Large-V3-Turbo", "openai/whisper-large-v3-turbo", "~1.5 GB"),
         ("TranslateGemma 4B", "google/translategemma-4b-it", "~8 GB"),
     ]

@@ -57,10 +57,10 @@
 
 ### P7 Latency — Benchmarking (needs models loaded)
 
-10. [ ] **P7-1B: Benchmark whisper-large-v3-turbo** — potential ~50-100ms STT savings
-    - `pip install mlx-whisper` already installed; download turbo variant
-    - Compare WER and latency vs distil-whisper-large-v3
-    - If WER is comparable, switch partials to turbo
+10. [x] **P7-1B: Upgrade STT fallback to distil-whisper-large-v3.5** — 4x more training data (98k hrs), -0.45pp short-form WER
+    - Self-converted to MLX format (`wbell7/distil-whisper-large-v3.5-mlx`); mlx-whisper can't auto-convert HF transformers format
+    - Updated all 9 source files + documentation
+    - whisper-large-v3-turbo remains primary STT model
 
 ### P5 — Monitoring
 

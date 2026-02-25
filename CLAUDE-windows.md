@@ -359,7 +359,7 @@ def transcribe_all(data_dir="stark_data/cleaned", output_dir="stark_data/transcr
 
     stt_pipe = pipeline(
         "automatic-speech-recognition",
-        model="distil-whisper/distil-large-v3",  # Or "openai/whisper-large-v3" for max quality
+        model="distil-whisper/distil-large-v3.5",  # Or "openai/whisper-large-v3" for max quality
         device="cuda",
         torch_dtype=torch.float16
     )
@@ -688,7 +688,7 @@ The Ada architecture (compute capability 8.9) fully supports FlashAttention-2. E
 
 ```python
 model = WhisperForConditionalGeneration.from_pretrained(
-    "distil-whisper/distil-large-v3",
+    "distil-whisper/distil-large-v3.5",
     attn_implementation="flash_attention_2",  # Requires flash-attn package
     torch_dtype=torch.bfloat16,
 )
@@ -721,9 +721,9 @@ def fine_tune_whisper(dataset_path="stark_data/cleaned",
     - bf16 (Ada arch supports natively) with gradient checkpointing
     - ~8-10 GB VRAM, fits comfortably on A2000 Ada
     """
-    processor = WhisperProcessor.from_pretrained("distil-whisper/distil-large-v3")
+    processor = WhisperProcessor.from_pretrained("distil-whisper/distil-large-v3.5")
     model = WhisperForConditionalGeneration.from_pretrained(
-        "distil-whisper/distil-large-v3",
+        "distil-whisper/distil-large-v3.5",
         device_map="auto",
         torch_dtype=torch.bfloat16,
         load_in_8bit=True              # Quantize base model for LoRA
@@ -1231,7 +1231,7 @@ Verify on Mac:
 from peft import PeftModel
 from transformers import WhisperForConditionalGeneration
 
-base = WhisperForConditionalGeneration.from_pretrained("distil-whisper/distil-large-v3")
+base = WhisperForConditionalGeneration.from_pretrained("distil-whisper/distil-large-v3.5")
 model = PeftModel.from_pretrained(base, "./fine_tuned_whisper_mi")
 print("Adapter loaded successfully:", model.peft_config)
 ```

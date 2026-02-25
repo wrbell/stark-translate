@@ -112,7 +112,7 @@ Run `python setup_models.py` to download and verify all models. Uses Wi-Fi — t
 
 | Model | Framework | Size | Purpose |
 |-------|-----------|------|---------|
-| `mlx-community/distil-whisper-large-v3` | mlx-whisper | ~1.5 GB | STT |
+| `wbell7/distil-whisper-large-v3.5-mlx` | mlx-whisper | ~1.5 GB | STT |
 | `mlx-community/translategemma-4b-it-4bit` | mlx-lm | ~2.2 GB disk, ~2.5 GB RAM | Translation A |
 | `mlx-community/translategemma-12b-it-4bit` | mlx-lm | ~6.6 GB disk, ~7 GB RAM | Translation B |
 | `Helsinki-NLP/opus-mt-en-es` (CT2 int8) | ctranslate2 | ~76 MB | Fast partial translation |
@@ -159,7 +159,7 @@ Mic (48kHz) → Resample 16kHz → Silero VAD ─┐
 
 ### Key Details
 
-- **STT:** `mlx-whisper` with `mlx-community/distil-whisper-large-v3`, word timestamps on finals only (disabled for partials to save ~100-200ms)
+- **STT:** `mlx-whisper` with `wbell7/distil-whisper-large-v3.5-mlx`, word timestamps on finals only (disabled for partials to save ~100-200ms)
 - **Fast translation:** MarianMT CT2 int8 (`ct2_opus_mt_en_es/`, 76MB). PyTorch variant runs in parallel for comparison logging
 - **Quality translation:** TranslateGemma via `mlx-lm` — 4B always, 12B with `--ab` flag
 - **Speculative decoding:** 4B as draft model for 12B via `mlx_lm.generate(draft_model=)`, configurable with `--num-draft-tokens`

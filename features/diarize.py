@@ -353,7 +353,7 @@ def transcribe_segments(audio, diarization, label_map=None):
 
     mx.set_cache_limit(100 * 1024 * 1024)
 
-    model_id = "mlx-community/distil-whisper-large-v3"
+    model_id = "wbell7/distil-whisper-large-v3.5-mlx"
     print(f"[3/3] Transcribing segments with {model_id}...")
 
     # Warm up Whisper

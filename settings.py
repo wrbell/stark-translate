@@ -96,7 +96,7 @@ class STTSettings(BaseSettings):
         description="Primary Whisper model (MLX community repo ID)",
     )
     whisper_fallback: str = Field(
-        default="mlx-community/distil-whisper-large-v3",
+        default="wbell7/distil-whisper-large-v3.5-mlx",
         description="Fallback Whisper model if primary returns low-confidence output",
     )
     whisper_cuda_model: str = Field(

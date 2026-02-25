@@ -79,7 +79,7 @@ BACKEND = "mlx"
 
 # Whisper model IDs
 WHISPER_MODEL_TURBO = "mlx-community/whisper-large-v3-turbo"  # Default: faster, 4 decoder layers
-WHISPER_MODEL_DISTIL = "mlx-community/distil-whisper-large-v3"  # Fallback: if Turbo regresses
+WHISPER_MODEL_DISTIL = "wbell7/distil-whisper-large-v3.5-mlx"  # Fallback: if Turbo regresses
 
 # Pipeline thread pool for MLX inference. MUST be max_workers=1 because MLX's
 # Metal backend is not thread-safe for concurrent GPU operations — running
@@ -412,7 +412,7 @@ def load_whisper(backend="mlx"):
     """Load Whisper STT model for the given backend.
 
     MLX backend: uses mlx-whisper with whisper-large-v3-turbo (default)
-                 or distil-whisper-large-v3 (fallback).
+                 or distil-whisper-large-v3.5 (fallback).
     CUDA backend: uses faster-whisper with large-v3-turbo on GPU.
     CPU backend: uses faster-whisper with large-v3-turbo on CPU.
 

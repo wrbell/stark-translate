@@ -501,10 +501,10 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 
 | Library | Role | Mac | WSL |
 |---------|------|-----|-----|
-| `mlx-whisper` | STT inference (distil-large-v3) | ✅ (MLX) | — |
+| `mlx-whisper` | STT inference (distil-large-v3.5) | ✅ (MLX) | — |
 | `mlx-lm` | TranslateGemma 4B/12B 4-bit inference | ✅ (MLX) | — |
 | `Helsinki-NLP/opus-mt-en-es` | MarianMT PyTorch (298MB) | ✅ (CPU) | ✅ (CUDA) |
-| `distil-whisper/distil-large-v3` | STT model (training) | — | ✅ (CUDA) |
+| `distil-whisper/distil-large-v3.5` | STT model (training) | — | ✅ (CUDA) |
 | `google/translategemma-4b` / `12b` | Translation (training) | — | ✅ (CUDA) |
 | `silero-vad` | Voice activity detection | ✅ | ✅ |
 | `noisereduce` | Spectral noise reduction | ✅ | ✅ |
