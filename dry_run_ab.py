@@ -129,6 +129,62 @@ HOMOPHONE_FLAGS = {
     "palms": "psalms",
 }
 
+# [P7-6B] Theological terms that need TranslateGemma quality — MarianMT alone
+# may mistranslate these (e.g. "grace" → "gracia" in humor sense, "covenant" →
+# "alianza" instead of "pacto").  Includes HOMOPHONE_FLAGS target words.
+THEOLOGICAL_TERMS = frozenset(
+    {
+        "atonement",
+        "propitiation",
+        "mediator",
+        "covenant",
+        "righteousness",
+        "sanctification",
+        "justification",
+        "redemption",
+        "reconciliation",
+        "repentance",
+        "grace",
+        "mercy",
+        "gospel",
+        "epistle",
+        "apostle",
+        "scripture",
+        "reign",
+        "salvation",
+        "resurrection",
+        "crucifixion",
+        "baptism",
+        "communion",
+        "trinity",
+        "prophecy",
+        "parable",
+    }
+    | frozenset(HOMOPHONE_FLAGS.values())
+)
+
+
+def should_use_marian_only(english: str, stt_confidence: float | None) -> bool:
+    """[P7-6B] Decide if an utterance is simple enough for MarianMT-only.
+
+    Returns True when ALL of these hold:
+      1. Word count < 8
+      2. No theological terms present
+      3. STT confidence >= 0.8
+
+    This saves 200-400ms by skipping TranslateGemma on trivial phrases
+    like "good morning" or "let's turn to page five".
+    """
+    words = english.lower().split()
+    if len(words) >= 8:
+        return False
+    if stt_confidence is None or stt_confidence < 0.8:
+        return False
+    if any(w.strip(".,;:!?\"'()") in THEOLOGICAL_TERMS for w in words):
+        return False
+    return True
+
+
 # Utterances ending with these words likely got cut mid-phrase
 _SPLIT_WORDS = frozenset(
     {
@@ -1396,7 +1452,19 @@ async def _pipeline_translate_and_finalize(
 
             loop = asyncio.get_event_loop()
 
-            if BACKEND == "cuda":
+            # [P7-6B] Adaptive routing: skip TranslateGemma for simple
+            # utterances when NOT in A/B mode and NOT on CUDA with Gemma loaded.
+            if (
+                BACKEND != "cuda"
+                and mlx_b_model is None
+                and mlx_a_model is not None
+                and should_use_marian_only(english, stt_confidence)
+            ):
+                spanish_a, lat_a = translate_marian(english)
+                tps_a = 0.0
+                qe_a = qe_score(english, spanish_a)
+                print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
+            elif BACKEND == "cuda":
                 # CUDA backend: use translate_cuda_gemma (no streaming, no A/B)
                 if mlx_a_model is not None:
                     spanish_a, lat_a, tps_a = await loop.run_in_executor(

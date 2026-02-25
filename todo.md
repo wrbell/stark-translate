@@ -43,17 +43,20 @@
 
 ### P7 Latency — Code Work (no models needed)
 
-7. [ ] **P7-6A: Streaming translation display** — 300-500ms perceived savings
+7. [x] **P7-6A: Streaming translation display** — 300-500ms perceived savings
    - Show translation tokens as they generate (via `mlx_lm.stream_generate`)
    - WebSocket sends partial translation tokens → display renders incrementally
    - User sees first words ~200ms after STT, instead of waiting for full translation
-8. [ ] **P7-6B: Adaptive model selection** — 200-400ms on simple utterances
+   - Implemented: `translate_mlx_streaming()`, `stream_token_broadcaster()`, handled in audience/ab/obs displays
+8. [x] **P7-6B: Adaptive model selection** — 200-400ms on simple utterances
    - Route short/simple utterances to MarianMT-only (skip TranslateGemma)
    - Heuristic: <8 words, no theological terms, high STT confidence → fast path
    - Falls back to TranslateGemma for complex sentences
-9. [ ] **P7-6D: Batch multiple short utterances** — ~100-200ms amortized
+   - Implemented: `THEOLOGICAL_TERMS` frozenset (25 terms + HOMOPHONE_FLAGS), `should_use_marian_only()`, early-exit in `_pipeline_translate_and_finalize()`
+9. [x] **P7-6D: Batch multiple short utterances** — ~100-200ms amortized
    - Combine rapid-fire short phrases into single translation call
    - Reduces per-utterance overhead for back-and-forth dialogue
+   - Implemented: `_pipeline_flush_batch()`, `_pipeline_drain_batch()`, timer-based batching in `_pipeline_coordinator()`
 
 ### P7 Latency — Benchmarking (needs models loaded)
 
@@ -600,9 +603,9 @@ Post Phase 1+2+6C budget (measured):
 | # | Task | Savings | Status | When |
 |---|------|---------|--------|------|
 | 6C | Pipeline N/N-1 overlap | 300-500ms actual | DONE | — |
-| 6A | Streaming translation display | 300-500ms perceived | TODO | Phase B |
-| 6B | Adaptive model selection | 200-400ms on simple | TODO | Phase B |
-| 6D | Batch short utterances | ~100-200ms amortized | TODO | Phase B |
+| 6A | Streaming translation display | 300-500ms perceived | DONE | — |
+| 6B | Adaptive model selection | 200-400ms on simple | DONE | — |
+| 6D | Batch short utterances | ~100-200ms amortized | DONE | — |
 | 1B | whisper-large-v3-turbo | ~150-200ms STT | DONE | **Phase T** (wholesale swap) |
 | 2D | Smaller translation models | varies | TODO | Phase C |
 | 2A | Speculative decoding | — | DEFERRED | benchmarked 18-90% slower on M3 Pro |

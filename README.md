@@ -113,7 +113,7 @@ python dry_run_ab.py --backend=cuda --no-ab
 ## Testing
 
 ```bash
-# Run full test suite (130+ tests, no GPU required)
+# Run full test suite (150+ tests, no GPU required)
 pytest tests/ -v
 
 # With coverage report
@@ -124,7 +124,7 @@ ruff check . && ruff format --check .
 mypy engines/ settings.py
 ```
 
-Tests run on CI (Ubuntu, Python 3.11) without GPU or model downloads. Heavy ML dependencies are mocked.
+Tests run on CI (Ubuntu, Python 3.11 + 3.12) without GPU or model downloads. Heavy ML dependencies are mocked.
 
 ## Models
 
@@ -295,15 +295,14 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 - `tools/convert_models_to_both.py`: dual-endpoint model export
 - Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
 - `requirements-nvidia.txt` for CUDA inference environments
-- CI/CD pipeline: 6 GitHub Actions workflows (lint, test, security, release, label, commitlint)
-- 130+ tests with coverage threshold, pre-commit hooks, CalVer versioning (`2026.2.4.0`)
+- CI/CD pipeline: 7 GitHub Actions workflows (lint, test, security, release, label, commitlint, stale) + Codecov
+- 150+ tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
 - Dependabot for automated dependency updates
 
 **What's next:**
-- Test Turbo on sermon clips and compare WER (#4)
-- Fine-tune Turbo on church audio on A2000 Ada (#7)
-- Integrate Piper TTS into live pipeline (#22)
-- Cross-platform server/display verification (#29)
+- Fine-tune Whisper + TranslateGemma on church audio (Phase 2-6)
+- Active learning feedback loop: flag → correct → retrain (Phase C)
+- Hindi & Chinese translation adapters (Phase E)
 - See [`todo.md`](./todo.md) for full task list
 
 ## License

@@ -53,22 +53,26 @@ project_dir/
 ├── pyproject.toml                  # Project metadata, ruff/mypy/pytest config, CalVer version
 ├── .pre-commit-config.yaml         # Pre-commit hooks (ruff check + format)
 ├── .commitlintrc.yml               # Conventional commit enforcement config
+├── codecov.yml                     # Codecov coverage config (ignore engines, training)
+├── todo.md                         # Phased task list
 │
 ├── .github/
 │   ├── dependabot.yml              # Automated dependency updates (pip + actions)
 │   ├── labeler.yml                 # PR auto-labeling rules by path
 │   └── workflows/
 │       ├── lint.yml                # Ruff, mypy, bandit, vulture, HTML tidy
-│       ├── test.yml                # pytest + coverage threshold + PR comment
+│       ├── test.yml                # pytest + coverage threshold (≥18%) + PR comment + Codecov
 │       ├── release.yml             # GitHub Release on version tags
 │       ├── security.yml            # pip-audit weekly + on push
 │       ├── label.yml               # Auto-label PRs by changed paths
-│       └── commitlint.yml          # Conventional commit format check
+│       ├── commitlint.yml          # Conventional commit format check
+│       └── stale.yml               # Auto-close stale issues/PRs
 │
 ├── tests/
 │   ├── conftest.py                 # Shared fixtures, heavy-dep mocking for CI
 │   ├── test_engine_base.py         # STTResult, TranslationResult dataclasses
 │   ├── test_engine_factory.py      # Factory auto-detection logic
+│   ├── test_engine_utilities.py    # Engine utility functions
 │   ├── test_settings.py            # Pydantic settings validation
 │   ├── test_active_learning.py     # Fallback event logger
 │   ├── test_glossary.py            # Theological glossary builder
@@ -76,9 +80,17 @@ project_dir/
 │   ├── test_translation_qe.py      # Translation quality estimation
 │   ├── test_verse_extraction.py    # Bible verse reference extraction
 │   ├── test_pipeline_integration.py # WebSocket message contract tests
-│   └── test_caption_monitor.py     # Caption monitor utility functions
+│   ├── test_caption_monitor.py     # Caption monitor utility functions
+│   ├── test_caption_monitor_utils.py # Caption monitor helpers
+│   ├── test_diarize_utils.py       # Diarization utility tests
+│   ├── test_dry_run_diagnostics.py # Dry-run diagnostics tests
+│   ├── test_dry_run_io.py          # Dry-run I/O tests
+│   ├── test_dry_run_utils.py       # Dry-run utility tests
+│   ├── test_summarize_sermon.py    # Sermon summarization tests
+│   └── test_training_utils.py      # Training utility tests
 │
 ├── dry_run_ab.py                   # Main pipeline: mic → VAD → STT → translate → WebSocket + HTTP
+├── settings.py                     # Unified pydantic-settings config (STARK_ env prefix, .env)
 ├── setup_models.py                 # One-command model download + verification
 ├── build_glossary.py               # EN→ES theological glossary builder (229 terms)
 ├── download_sermons.py             # yt-dlp sermon downloader
@@ -90,11 +102,20 @@ project_dir/
 │   ├── church_display.html         # Simplified church-oriented layout
 │   └── obs_overlay.html            # OBS streaming overlay
 │
+├── engines/
+│   ├── __init__.py
+│   ├── base.py                     # ABCs: STTEngine, TranslationEngine, result dataclasses
+│   ├── mlx_engine.py               # MLXWhisperEngine, MLXGemmaEngine, MarianEngine
+│   ├── cuda_engine.py              # FasterWhisperEngine, CUDAGemmaEngine
+│   ├── factory.py                  # create_stt_engine(), create_translation_engine()
+│   └── active_learning.py          # Fallback event JSONL logger
+│
 ├── tools/
 │   ├── live_caption_monitor.py     # YouTube caption comparison system
-│   ├── translation_qe.py          # Reference-free translation quality estimation
+│   ├── translation_qe.py           # Reference-free translation quality estimation
 │   ├── benchmark_latency.py        # End-to-end latency benchmarking
 │   ├── stt_benchmark.py            # STT-specific benchmarking
+│   ├── convert_models_to_both.py   # Model format conversion (MLX ↔ CUDA)
 │   └── test_adaptive_model.py      # Adaptive model testing
 │
 ├── features/
@@ -103,17 +124,33 @@ project_dir/
 │   └── extract_verses.py           # Bible verse reference extraction from transcripts
 │
 ├── training/
-│   ├── transcribe_church.py        # Church audio transcription (WSL)
-│   ├── preprocess_audio.py         # 10-step audio cleaning pipeline (WSL)
-│   ├── train_whisper.py            # Whisper LoRA fine-tuning (WSL)
-│   ├── train_gemma.py              # TranslateGemma LoRA fine-tuning (WSL)
-│   ├── train_marian.py             # MarianMT full fine-tune fallback (WSL)
+│   ├── preprocess_audio.py         # 10-step audio cleaning pipeline (accent-aware, WSL)
+│   ├── transcribe_church.py        # Whisper large-v3 pseudo-labeling (WSL)
 │   ├── prepare_bible_corpus.py     # Bible parallel text download + alignment (WSL)
+│   ├── prepare_whisper_dataset.py  # Accent-balanced audiofolder builder (WSL)
+│   ├── prepare_piper_dataset.py    # LJSpeech format conversion for Piper TTS (WSL)
+│   ├── train_whisper.py            # Whisper LoRA fine-tuning (accent-balanced, WSL)
+│   ├── train_gemma.py              # TranslateGemma QLoRA fine-tuning (WSL)
+│   ├── train_marian.py             # MarianMT full fine-tune fallback (WSL)
+│   ├── train_piper.py              # Piper TTS voice fine-tuning (WSL)
+│   ├── export_piper_onnx.py        # Piper TTS model export to ONNX (WSL)
 │   ├── evaluate_translation.py     # SacreBLEU/chrF++/COMET scoring (Both)
+│   ├── evaluate_piper.py           # Piper TTS quality assessment (WSL)
 │   └── assess_quality.py           # Baseline transcript quality assessment (WSL)
 │
 ├── docs/
+│   ├── seattle_training_run.md     # 6-day unattended training plan
+│   ├── training_plan.md            # Full training schedule + go/no-go gates
+│   ├── training_time_estimates.md  # A2000 Ada GPU time estimates
+│   ├── roadmap.md                  # Mac → Windows → RTX 2070 deployment roadmap
+│   ├── accent_tuning_plan.md       # 4-week accent-diverse STT tuning plan
+│   ├── multi_lingual.md            # Hindi & Chinese actionable todo list
+│   ├── multilingual_tuning_proposal.md # Hindi/Chinese research + QLoRA strategy
 │   ├── rtx2070_feasibility.md      # RTX 2070 hardware portability analysis
+│   ├── projection_integration.md   # OBS/NDI/ProPresenter integration
+│   ├── fast_stt_options.md         # Lightning-whisper-mlx feasibility study
+│   ├── implementation_plans.md     # Detailed implementation plans
+│   ├── macos_libomp_fix.md         # libomp conflict diagnosis + fix
 │   └── previous_actions.md         # Log of completed project actions
 │
 ├── fine_tuned_whisper_mi/          # LoRA adapters for Whisper (post fine-tune)
@@ -138,10 +175,11 @@ project_dir/
 │   ├── ab_metrics.csv              # A/B test output logs
 │   ├── caption_comparison.jsonl    # YouTube vs. local WER logs
 │   ├── confidence_flags.jsonl      # Low-confidence segment queue
-│   └── translation_qe.jsonl       # Translation quality scores
+│   └── translation_qe.jsonl        # Translation quality scores
 │
 ├── requirements-mac.txt            # Mac pip dependencies
-├── requirements-windows.txt        # Windows/WSL pip dependencies
+├── requirements-nvidia.txt         # NVIDIA/CUDA inference dependencies
+├── requirements-windows.txt        # Windows/WSL training pip dependencies
 └── stt_env/                        # Python 3.11 virtualenv (gitignored)
 ```
 
@@ -394,16 +432,17 @@ No published work exists on fine-tuning Whisper for church/religious speech — 
 
 ## CI/CD Pipeline
 
-Six GitHub Actions workflows enforce quality on every push and PR to `main`:
+Seven GitHub Actions workflows enforce quality on every push and PR to `main`:
 
 | Workflow | Trigger | What it does |
 |----------|---------|-------------|
 | **Lint** (`lint.yml`) | push / PR | Ruff check + format, mypy, bandit security scan, vulture dead code (advisory), HTML tidy |
-| **Test** (`test.yml`) | push / PR | pytest (130+ tests), coverage threshold (≥15%), coverage PR comment |
+| **Test** (`test.yml`) | push / PR | pytest (150+ tests, Python 3.11 + 3.12), coverage threshold (≥18%), Codecov upload, PR comment |
 | **Release** (`release.yml`) | `v*` tag push | Creates GitHub Release from tag |
 | **Security** (`security.yml`) | push / PR / weekly | pip-audit on both requirements files |
 | **Label** (`label.yml`) | PR | Auto-labels PRs by changed paths (engines, displays, training, etc.) |
 | **Commitlint** (`commitlint.yml`) | PR | Enforces conventional commit format (`feat:`, `fix:`, `docs:`, `ci:`, etc.) |
+| **Stale** (`stale.yml`) | scheduled | Auto-closes stale issues and PRs |
 | **Dependabot** (`dependabot.yml`) | weekly | Opens PRs for pip (minor/patch) and Actions version updates |
 
 ### Running Locally
@@ -501,7 +540,7 @@ The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem.
 
 | Library | Role | Mac | WSL |
 |---------|------|-----|-----|
-| `mlx-whisper` | STT inference (distil-large-v3.5) | ✅ (MLX) | — |
+| `mlx-whisper` | STT inference (large-v3-turbo primary, distil-large-v3.5 fallback) | ✅ (MLX) | — |
 | `mlx-lm` | TranslateGemma 4B/12B 4-bit inference | ✅ (MLX) | — |
 | `Helsinki-NLP/opus-mt-en-es` | MarianMT PyTorch (298MB) | ✅ (CPU) | ✅ (CUDA) |
 | `distil-whisper/distil-large-v3.5` | STT model (training) | — | ✅ (CUDA) |
