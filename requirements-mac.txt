@@ -30,7 +30,7 @@ numba==0.63.1
 numpy==2.3.5
 onnxruntime==1.24.1
 packaging==26.0
-pandas==3.0.0
+pandas==3.0.1
 pillow==12.1.1
 protobuf==6.33.5
 psutil==7.2.2
