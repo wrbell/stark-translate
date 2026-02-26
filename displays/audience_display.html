@@ -355,7 +355,7 @@
 
       const stage = data.stage || 'complete';
       const en = filter(data.english || '');
-      const es = filter(data.spanish_a || data.english || '');
+      const es = filter(data.spanish_a || '');
 
       if (stage === 'partial') {
         const existing = sentences.find(s => s.id === 'p-' + data.chunk_id);

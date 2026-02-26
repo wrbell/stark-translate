@@ -87,10 +87,23 @@ WHISPER_MODEL_DISTIL = "wbell7/distil-whisper-large-v3.5-mlx"  # Fallback: if Tu
 # All MLX calls are serialized through this single worker thread.
 _pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
 
+# Separate pool for PyTorch-only work (MarianMT). Runs concurrently with the
+# MLX pipeline pool — safe because MarianMT uses PyTorch/CPU, not Metal GPU.
+_pytorch_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pytorch")
+
 # Lock for PyTorch calls. The VAD thread and pipeline thread both use PyTorch
 # (Silero VAD + MarianMT). Concurrent PyTorch from different threads causes
 # heap corruption on macOS. This lock serializes all PyTorch inference.
 _pytorch_lock = threading.Lock()
+
+# --- Partial/final coordination ---
+# When a final is pending, partials are skipped to avoid starving the pipeline.
+_final_pending = threading.Event()
+# Track the active partial future so we can cancel it when a final arrives.
+_active_partial_future = None
+_partial_future_lock = threading.Lock()
+# prevent fire-and-forget partial tasks from being garbage-collected (RUF006)
+_partial_tasks = set()
 
 # MLX model IDs (4-bit quantized, community-converted)
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"  # ~2.2GB
@@ -1206,14 +1219,59 @@ def _whisper_prompt():
     return WHISPER_PROMPT
 
 
+# Regex: same 2-4 character sequence repeating 4+ times in a row (no spaces)
+_REPEATING_NGRAM_RE = re.compile(r"(.{2,4})\1{3,}")
+
+
+def _is_garbage_text(text: str) -> bool:
+    """Detect hallucinated/garbage STT output.
+
+    Catches repetitive patterns like 'gagagagagaga' or 'aaaaaaa' that Whisper
+    sometimes emits.  Returns True if text looks like garbage.
+    """
+    t = text.strip()
+    if len(t) < 6:
+        return False
+
+    # Repeating single character runs (5+ of the same char in a row)
+    for ch in set(t.lower()):
+        if ch != " " and ch * 5 in t.lower():
+            return True
+
+    # Repeating 2-4 char n-gram patterns within individual words
+    # (e.g. "gagagagaga").  Per-word check avoids false positives from
+    # legitimate repeated words like "no no no no".
+    for word in t.lower().split():
+        if _REPEATING_NGRAM_RE.search(word):
+            return True
+
+    # Very low unique character ratio — garbage tends to be monotonous
+    alphanum = [c.lower() for c in t if c.isalnum()]
+    if len(alphanum) >= 6 and len(set(alphanum)) / len(alphanum) < 0.3:
+        return True
+
+    return False
+
+
 async def process_partial(audio_data, utterance_id):
-    """Fast partial: STT (~300ms) + MarianMT (~80ms). Italic in UI."""
+    """Fast partial: STT (~300ms) + MarianMT (~80ms). Italic in UI.
+
+    [FIX] Partials are skipped when a final is pending to avoid starving
+    the MLX pipeline thread. MarianMT runs on a separate PyTorch pool
+    to free ~80ms of MLX pool time per partial.
+    """
+    global _active_partial_future
+
+    # [FIX] Skip partial if a final is queued — finals take priority
+    if _final_pending.is_set():
+        print("  [FIX] partial skipped (final pending)", end="\r")
+        return
+
     try:
         loop = asyncio.get_event_loop()
 
-        # ALL inference runs on _pipeline_pool (single thread) to prevent
-        # conflicts between MLX Metal and PyTorch running concurrently.
-        def _partial_all():
+        # --- Step 1: Whisper STT on the MLX pipeline pool ---
+        def _partial_stt():
             t0 = time.perf_counter()
             if BACKEND == "mlx":
                 result = mlx_whisper.transcribe(
@@ -1240,16 +1298,35 @@ async def process_partial(audio_data, utterance_id):
                 english = " ".join(seg.text.strip() for seg in segments_list).strip()
             if not english:
                 return None
+            return english, stt_lat
 
-            spanish, marian_lat = translate_marian(english)
-            return english, stt_lat, spanish, marian_lat
+        # Submit STT and track the future so process_final can cancel it
+        stt_future = loop.run_in_executor(_pipeline_pool, _partial_stt)
+        with _partial_future_lock:
+            _active_partial_future = stt_future
 
-        result = await loop.run_in_executor(_pipeline_pool, _partial_all)
+        stt_result = await stt_future
 
-        if result is None:
+        with _partial_future_lock:
+            _active_partial_future = None
+
+        if stt_result is None:
             return
 
-        english, stt_latency, spanish, marian_latency = result
+        english, stt_latency = stt_result
+
+        # [FILTER] Suppress garbage/hallucinated text
+        if _is_garbage_text(english):
+            print(f"  [FILTER] garbage partial suppressed: {english!r}")
+            return
+
+        # [FIX] Re-check after STT — a final may have arrived while we were running
+        if _final_pending.is_set():
+            print("  [FIX] partial skipped after STT (final pending)", end="\r")
+            return
+
+        # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
+        spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
         total = stt_latency + marian_latency
 
         # Store for Marian/Gemma divergence comparison and latency logging
@@ -1274,8 +1351,13 @@ async def process_partial(audio_data, utterance_id):
             }
         )
 
+    except asyncio.CancelledError:
+        print("  [FIX] partial cancelled (final arrived)", end="\r")
     except Exception as e:
         print(f"\n  ERROR in partial: {e}", file=sys.stderr)
+    finally:
+        with _partial_future_lock:
+            _active_partial_future = None
 
 
 # ---------------------------------------------------------------------------
@@ -1668,7 +1750,15 @@ async def _pipeline_coordinator():
             # concurrently in another thread — that's the overlap)
             english, stt_latency, stt_confidence, segment_meta, low_conf_words = await stt_future
 
+            # [FIX] Final STT done — allow partials again for the next utterance
+            _final_pending.clear()
+
             if not english:
+                continue
+
+            # [FILTER] Suppress garbage/hallucinated text
+            if _is_garbage_text(english):
+                print(f"  [FILTER] garbage final suppressed: {english!r}")
                 continue
 
             prev_text = english[-100:]  # [P7-1E] capped at 100 chars
@@ -1690,20 +1780,6 @@ async def _pipeline_coordinator():
                     "timestamp": datetime.now().isoformat(),
                 }
             )
-            # Legacy stt stage message for backward compatibility
-            await broadcast(
-                {
-                    "type": "translation",
-                    "stage": "stt",
-                    "chunk_id": cid,
-                    "english": english,
-                    "spanish_a": None,
-                    "spanish_b": None,
-                    "stt_latency_ms": round(stt_latency, 1),
-                    "stt_confidence": stt_confidence,
-                    "timestamp": datetime.now().isoformat(),
-                }
-            )
 
             # --- Wait for previous translation to finish before starting new one ---
             # We don't want two translations running at once (Metal GPU contention),
@@ -1720,6 +1796,7 @@ async def _pipeline_coordinator():
             )
 
         except Exception as e:
+            _final_pending.clear()  # [FIX] Don't leave flag stuck on error
             print(f"\n  ERROR in pipeline chunk #{cid}: {e}", file=sys.stderr)
 
     # Print overlap statistics
@@ -1746,7 +1823,20 @@ async def process_final(audio_data):
     [P7-6C] Now delegates to the pipeline coordinator for overlapped execution.
     This function returns immediately after submitting the audio chunk,
     allowing the audio loop to continue capturing the next utterance.
+
+    [FIX] Sets _final_pending to suppress new partials and cancels any
+    queued partial future so finals get immediate access to the MLX thread.
     """
+    # Signal partials to stop — finals take priority on the MLX thread
+    _final_pending.set()
+
+    # Cancel any queued (not-yet-started) partial STT future
+    with _partial_future_lock:
+        if _active_partial_future is not None:
+            cancelled = _active_partial_future.cancel()
+            if cancelled:
+                print("  [FIX] cancelled queued partial (final arriving)")
+
     await pipeline_submit(audio_data)
 
 
@@ -2068,7 +2158,10 @@ async def audio_loop():
                         and silence_frames < max_silence_frames
                         and buffer_duration < MAX_UTTERANCE
                     ):
-                        await process_partial(speech_buffer.copy(), utterance_id)
+                        # [FIX] Fire-and-forget: don't block audio loop on partials
+                        task = asyncio.create_task(process_partial(speech_buffer.copy(), utterance_id))
+                        _partial_tasks.add(task)
+                        task.add_done_callback(_partial_tasks.discard)
                         last_partial_len = len(speech_buffer)
 
                     # --- Final: on silence gap or max duration ---
@@ -2244,6 +2337,8 @@ async def main_async(args):
         if _stream_token_queue is not None:
             await _stream_token_queue.put(None)
         stream_task.cancel()
+        # [FIX] Shut down the PyTorch pool (MarianMT partial translations)
+        _pytorch_pool.shutdown(wait=False)
         print_summary()
         ws_server.close()
         await ws_server.wait_closed()
