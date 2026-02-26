@@ -292,6 +292,7 @@
       <span>A: <span class="stat-val green-val" id="avgA">—</span></span>
       <span>B: <span class="stat-val blue-val" id="avgB">—</span></span>
       <span>E2E: <span class="stat-val" id="avgE2E">—</span></span>
+      <span>Marian: <span class="stat-val purple-val" id="avgMarian">—</span></span>
       <span>Same: <span class="stat-val" id="sameRate">—</span></span>
     </div>
     <span class="hint">Fullscreen: F11 / Cmd+Shift+F</span>
@@ -302,10 +303,12 @@
       <span>STT <span class="stat-val" id="p50STT">—</span></span>
       <span>A <span class="stat-val green-val" id="p50A">—</span></span>
       <span>B <span class="stat-val blue-val" id="p50B">—</span></span>
+      <span>M <span class="stat-val purple-val" id="p50Marian">—</span></span>
       <span class="pct-label" style="margin-left:6px">p95:</span>
       <span>STT <span class="stat-val" id="p95STT">—</span></span>
       <span>A <span class="stat-val green-val" id="p95A">—</span></span>
       <span>B <span class="stat-val blue-val" id="p95B">—</span></span>
+      <span>M <span class="stat-val purple-val" id="p95Marian">—</span></span>
       <span class="pct-label" style="margin-left:6px">t/s:</span>
       <span>A <span class="stat-val green-val" id="tpsA">—</span></span>
       <span>B <span class="stat-val blue-val" id="tpsB">—</span></span>
@@ -335,6 +338,7 @@
   let sumA = 0, sumB = 0, sumSTT = 0, sumE2E = 0;
   let sameCount = 0;
   let sumTpsA = 0, sumTpsB = 0, tpsCountA = 0, tpsCountB = 0;
+  let sumMarian = 0, marianCount = 0, latenciesMarian = [];
   let latenciesSTT = [], latenciesA = [], latenciesB = [];
 
   // Track model names — auto-detect from first data
@@ -462,6 +466,17 @@
           $('latBes').textContent = fmtMs(data.latency_a_ms);
           $('latC').textContent = fmtMs((data.stt_latency_ms || 0) + data.latency_a_ms);
           $('latCes').textContent = fmtMs((data.stt_latency_ms || 0) + data.latency_a_ms);
+        }
+
+        // MarianMT latency tracking (partials only — Marian doesn't run on finals)
+        const marianMs = data.marian_pt_ms || data.latency_a_ms || 0;
+        if (marianMs > 0) {
+          sumMarian += marianMs;
+          marianCount++;
+          latenciesMarian.push(marianMs);
+          $('avgMarian').textContent = fmtMs(sumMarian / marianCount);
+          $('p50Marian').textContent = fmtMs(percentile(latenciesMarian, 50));
+          $('p95Marian').textContent = fmtMs(percentile(latenciesMarian, 95));
         }
 
         return;

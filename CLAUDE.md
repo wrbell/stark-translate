@@ -68,26 +68,8 @@ project_dir/
 │       ├── commitlint.yml          # Conventional commit format check
 │       └── stale.yml               # Auto-close stale issues/PRs
 │
-├── tests/
-│   ├── conftest.py                 # Shared fixtures, heavy-dep mocking for CI
-│   ├── test_engine_base.py         # STTResult, TranslationResult dataclasses
-│   ├── test_engine_factory.py      # Factory auto-detection logic
-│   ├── test_engine_utilities.py    # Engine utility functions
-│   ├── test_settings.py            # Pydantic settings validation
-│   ├── test_active_learning.py     # Fallback event logger
-│   ├── test_glossary.py            # Theological glossary builder
-│   ├── test_imports.py             # Import smoke tests
-│   ├── test_translation_qe.py      # Translation quality estimation
-│   ├── test_verse_extraction.py    # Bible verse reference extraction
-│   ├── test_pipeline_integration.py # WebSocket message contract tests
-│   ├── test_caption_monitor.py     # Caption monitor utility functions
-│   ├── test_caption_monitor_utils.py # Caption monitor helpers
-│   ├── test_diarize_utils.py       # Diarization utility tests
-│   ├── test_dry_run_diagnostics.py # Dry-run diagnostics tests
-│   ├── test_dry_run_io.py          # Dry-run I/O tests
-│   ├── test_dry_run_utils.py       # Dry-run utility tests
-│   ├── test_summarize_sermon.py    # Sermon summarization tests
-│   └── test_training_utils.py      # Training utility tests
+├── tests/                          # 150+ tests (conftest.py + 18 test_*.py files)
+│   └── ...                         # engines, settings, glossary, pipeline, QE, dry-run, features
 │
 ├── dry_run_ab.py                   # Main pipeline: mic → VAD → STT → translate → WebSocket + HTTP
 ├── settings.py                     # Unified pydantic-settings config (STARK_ env prefix, .env)
@@ -123,35 +105,18 @@ project_dir/
 │   ├── summarize_sermon.py         # Post-sermon 5-sentence summary generator
 │   └── extract_verses.py           # Bible verse reference extraction from transcripts
 │
-├── training/
-│   ├── preprocess_audio.py         # 10-step audio cleaning pipeline (accent-aware, WSL)
-│   ├── transcribe_church.py        # Whisper large-v3 pseudo-labeling (WSL)
-│   ├── prepare_bible_corpus.py     # Bible parallel text download + alignment (WSL)
-│   ├── prepare_whisper_dataset.py  # Accent-balanced audiofolder builder (WSL)
-│   ├── prepare_piper_dataset.py    # LJSpeech format conversion for Piper TTS (WSL)
-│   ├── train_whisper.py            # Whisper LoRA fine-tuning (accent-balanced, WSL)
-│   ├── train_gemma.py              # TranslateGemma QLoRA fine-tuning (WSL)
-│   ├── train_marian.py             # MarianMT full fine-tune fallback (WSL)
-│   ├── train_piper.py              # Piper TTS voice fine-tuning (WSL)
-│   ├── export_piper_onnx.py        # Piper TTS model export to ONNX (WSL)
-│   ├── evaluate_translation.py     # SacreBLEU/chrF++/COMET scoring (Both)
-│   ├── evaluate_piper.py           # Piper TTS quality assessment (WSL)
-│   └── assess_quality.py           # Baseline transcript quality assessment (WSL)
+├── training/                       # All WSL — 14 scripts
+│   ├── preprocess_audio.py         # 10-step audio cleaning pipeline
+│   ├── transcribe_church.py        # Whisper large-v3 pseudo-labeling
+│   ├── prepare_*.py                # Bible corpus, Whisper dataset, Piper dataset builders
+│   ├── train_*.py                  # Whisper LoRA, Gemma QLoRA, MarianMT, Piper TTS
+│   ├── evaluate_*.py               # SacreBLEU/chrF++/COMET, Piper quality
+│   └── assess_quality.py           # Baseline transcript quality assessment
 │
-├── docs/
-│   ├── seattle_training_run.md     # 6-day unattended training plan
+├── docs/                           # 13 docs — training plans, roadmaps, troubleshooting
 │   ├── training_plan.md            # Full training schedule + go/no-go gates
-│   ├── training_time_estimates.md  # A2000 Ada GPU time estimates
-│   ├── roadmap.md                  # Mac → Windows → RTX 2070 deployment roadmap
-│   ├── accent_tuning_plan.md       # 4-week accent-diverse STT tuning plan
-│   ├── multi_lingual.md            # Hindi & Chinese actionable todo list
-│   ├── multilingual_tuning_proposal.md # Hindi/Chinese research + QLoRA strategy
-│   ├── rtx2070_feasibility.md      # RTX 2070 hardware portability analysis
-│   ├── projection_integration.md   # OBS/NDI/ProPresenter integration
-│   ├── fast_stt_options.md         # Lightning-whisper-mlx feasibility study
-│   ├── implementation_plans.md     # Detailed implementation plans
 │   ├── macos_libomp_fix.md         # libomp conflict diagnosis + fix
-│   └── previous_actions.md         # Log of completed project actions
+│   └── ...                         # seattle run, accent tuning, multilingual, RTX 2070, OBS integration
 │
 ├── fine_tuned_whisper_mi/          # LoRA adapters for Whisper (post fine-tune)
 ├── fine_tuned_gemma_mi_A/          # LoRA adapters for Gemma 4B
@@ -247,15 +212,7 @@ Run local Whisper transcription simultaneously with YouTube livestream caption e
 - Alignment: 30-second windowed comparison with sliding-window offset search to handle latency drift
 - Metrics: `jiwer` computes per-window WER, CER with word-level diffs
 
-**Interpreting cross-system WER:**
-
-| Cross-System WER | Interpretation |
-|-----------------|----------------|
-| 5–15% | Comparable or better — normal disagreement range |
-| 15–25% | Potential issues or genuinely ambiguous segments |
-| > 25% | Likely real degradation — flag for review |
-
-Track trends over sessions, not absolute values. Log everything to JSONL.
+**Interpreting cross-system WER:** 5–15% = normal disagreement, 15–25% = potential issues, >25% = likely degradation. Track trends over sessions, not absolute values. Log everything to JSONL.
 
 ### Layer 5: Translation Quality Estimation (Mac — Inference Time)
 
@@ -292,7 +249,7 @@ Four stages per cycle: **infer → flag → correct → retrain**
 - Learning rate 40x lower than pretraining (e.g., ~6.25e-5 for Whisper-large)
 - Elastic Weight Consolidation if forgetting persists
 
-**Curriculum learning:** Train on high-confidence clean samples first (first 30%), medium-difficulty in middle phase, all data including hardest cases in final phase. Yields ~5–7% additional WER reduction vs. random ordering.
+**Curriculum learning:** Clean → medium → hard samples across training phases. Yields ~5–7% additional WER reduction vs. random ordering.
 
 ---
 
@@ -466,76 +423,6 @@ CalVer format: `YYYY.M.W.PATCH` (e.g., `2026.2.4.0` = 2026, February, week 4, fi
 
 ---
 
-## Biblical Fine-Tuning Strategy
-
-Fine-tuning both Whisper (STT) and TranslateGemma (translation) on church-domain data is what makes this pipeline outperform PowerPoint Live Captions long-term. No published work exists on fine-tuning Whisper for church audio — this is a genuine gap.
-
-### Training Data: ~155K Biblical Verse Pairs
-
-Five public-domain English Bibles paired against two freely licensed Spanish translations produce ~155,000 verse-aligned training pairs for TranslateGemma:
-
-| English | Spanish | Pairs | Register |
-|---------|---------|-------|----------|
-| KJV (public domain) | RVR1909 (public domain) | ~31K | Formal / archaic |
-| ASV (public domain) | RVR1909 | ~31K | Formal / slightly modern |
-| WEB (public domain) | Español Sencillo (CC BY-SA 4.0) | ~31K | Modern / accessible |
-| BBE (public domain) | RVR1909 | ~31K | Simplified English / formal Spanish |
-| YLT (public domain) | RVR1909 | ~31K | Hyper-literal / formal |
-
-**Sources:** `bible-nlp/biblenlp-corpus` on HuggingFace (833 languages, CC-BY-4.0 license metadata), `Helsinki-NLP/bible_para` (Christodoulopoulos/Steedman corpus, CC0-1.0), `scrollmapper/bible_databases` on GitHub (SQL/JSON/CSV with numeric verse IDs for trivial alignment via JOIN).
-
-**Copyright boundary:** ESV, NASB, NIV, NLT, NVI, LBLA, RVR1960, DHH are all copyrighted with fair-use caps of ~500 verses — not bulk ML training. Only use pre-1923 or explicitly dedicated translations.
-
-**Supplementary data:** Theological glossary (229 terms, covering all 66 books, 31 proper names, theological concepts, liturgical terms), bilingual catechism excerpts (Westminster Shorter, Heidelberg), any bilingual sermon transcripts the church produces.
-
-### Training Data: 20–50 Hours Sermon Audio
-
-No dedicated English church sermon ASR dataset exists publicly. Build your own via pseudo-labeling:
-
-1. Collect 20–50 hours of sermon audio (prioritize soundboard recordings over room mics)
-2. Segment into 5–30s chunks using Silero VAD
-3. Pseudo-label with base Distil-Whisper large-v3
-4. Filter by confidence (reject compression_ratio > 2.4 or avg_logprob < -1.0)
-5. Human-correct the bottom 20% by confidence, focusing on theological terms and biblical names
-6. Format as HuggingFace Dataset with `audio` + `sentence` columns
-
-Church audio challenges: reverberant sanctuaries (>2s RT60), PA system artifacts (comb filtering, delay arrivals), background noise (congregation, HVAC, page-turning). Soundboard recordings bypass most room acoustics.
-
-### LoRA Strategy: Whisper
-
-Apply LoRA to **both encoder and decoder** — encoder adapts to acoustic domain (reverb, PA coloring), decoder learns domain vocabulary. Config: r=32, α=64, target `q_proj` + `v_proj` minimum (extend to `k_proj`, `out_proj`, `fc1`, `fc2` for maximum adaptation). Learning rate 1e-4, bf16, gradient checkpointing. Fits in ~8–10 GB on A2000 Ada.
-
-Catastrophic forgetting is minimal with LoRA (base weights frozen). For extra safety, mix 70–80% domain data with 20–30% general English ASR (LibriSpeech/Common Voice).
-
-### QLoRA Strategy: TranslateGemma
-
-TranslateGemma 4B in 4-bit quantization (~2.6 GB) via bitsandbytes. Config: r=16, α=16, target `"all-linear"`, NF4 quantization, paged AdamW 32-bit optimizer. Use TRL's SFTTrainer with sequence packing (Bible verses rarely exceed 200 tokens). Must follow TranslateGemma's exact chat template with `source_lang_code` / `target_lang_code` fields. Fits in ~10–12 GB on A2000 Ada.
-
-MarianMT (`Helsinki-NLP/opus-mt-en-es`) as a lightweight fallback and partial-translation engine. Currently deployed as PyTorch (~298MB, ~80ms) for real-time partials. CT2 was removed due to libomp conflicts on macOS (see `docs/macos_libomp_fix.md`). Small enough for full fine-tuning, much faster iteration, lower quality ceiling.
-
-### Theological Vocabulary Challenges
-
-Critical disambiguation failures in generic MT:
-
-- **Atonement** → *expiación* (removal of sin) vs. *propiciación* (appeasing wrath) — context-dependent
-- **Covenant** → *pacto* (Protestant/RVR) vs. *alianza* (Catholic/DHH) — audience-dependent
-- **Righteousness** → *justicia* — also means "justice" in everyday Spanish
-- **James** → *Jacobo* (apostle in Mark 3:17), *Santiago* (epistle), *Jaime* (modern name) — context-dependent
-
-A 229-term theological glossary has been built (`build_glossary.py`) for constrained decoding. Three approaches: soft constraint training (append target term to source during training), LeCA code-switching augmentation, or constrained beam search at inference. Soft constraints recommended as starting point.
-
-### Evaluation
-
-Use **SacreBLEU**, **chrF++**, and **COMET** together for translation. Stratify holdout test set by biblical genre: OT narrative, poetry, prophecy, Gospels, Epistles, apocalyptic. Reserve ~3,100 verses (10%) for testing. Human evaluation assesses adequacy, fluency, and theological precision — the last cannot be captured by automatic metrics.
-
-For Whisper, measure WER on held-out sermon segments vs. base model. Target 10–30% relative WER reduction on church audio.
-
-### Prior Research
-
-The **BibleNLP community** (biblenlp.github.io) maintains the richest ecosystem. SIL International operates Serval (open-source REST API for NMT fine-tuned on NLLB-200). "From Priest to Doctor" (COLING 2025) confirmed strong domain transfer from Bible-trained models. eBible Corpus paper (2023) found NLLB-600M outperformed both SMT and OpenNMT on Bible translation. Domain-adapted Whisper studies cover aviation (WER 70% → 28%), industrial jargon (~1–2% WER after 5 epochs), and maritime — techniques transfer directly to church audio.
-
----
-
 ## Key Library Reference
 
 | Library | Role | Mac | WSL |
@@ -586,99 +473,30 @@ After each service, the pipeline generates a structured 5-sentence summary from 
 
 ### 2. Verse Reference Extraction
 
-Return a per-speaker list of every Bible verse referenced during the sermon.
-
-**Implementation:** Pattern-match the transcript for verse citation formats:
-- Explicit: "Romans 8:28", "First Corinthians chapter 13 verse 4", "Genesis 1 verses 1 through 3"
-- Spoken: "turn to Romans chapter eight", "the passage in John three sixteen"
-- Partial: "verse 28" (resolve via context — which book/chapter is the speaker currently in?)
-
-Use a two-pass approach:
-1. **Regex + rule-based extraction** for explicit citations (high precision)
-2. **LLM-assisted extraction** for implicit or spoken-form references (feed 30-second transcript windows to Gemma with a structured extraction prompt)
-
-**Output format per speaker:**
-```json
-{
-  "speaker": "Speaker 1",
-  "verses": [
-    {"reference": "Romans 8:28", "timestamp": "00:12:34", "context": "And we know that..."},
-    {"reference": "John 3:16", "timestamp": "00:18:02", "context": "For God so loved..."}
-  ]
-}
-```
-
-**Stretch goal:** Cross-reference extracted verses against the translation output to verify theological term accuracy on those specific passages.
+Return a per-speaker list of every Bible verse referenced during the sermon. Two-pass approach: (1) regex + rule-based extraction for explicit citations ("Romans 8:28"), (2) LLM-assisted extraction for spoken-form references ("turn to Romans chapter eight"). Outputs per-speaker JSON with reference, timestamp, and context snippet. Stretch goal: cross-reference extracted verses against translation output for theological accuracy checks.
 
 ---
 
 ## Compute Timeline — Training & Fine-Tuning
 
-All training runs on the **Windows Desktop** (NVIDIA A2000 Ada 16GB VRAM, 64GB RAM, WSL2).
-Inference benchmarks on the **MacBook** (M3 Pro, 18GB unified memory, 12-core CPU [6P+6E], 18-core GPU, Metal 4, MLX).
+All training runs on the **Windows Desktop** (A2000 Ada 16GB, ~16 TFLOPS FP16, ~2× T4). Total project estimate: **~48–73 GPU-hrs**, **~33–53 human-hrs** over ~5 weeks.
 
-> A2000 Ada specs: 4,352 CUDA cores, ~16 TFLOPS FP16/BF16, 16GB GDDR6, 288 GB/s bandwidth.
-> Roughly 2× a T4 and ~60% of an RTX 3090 for training throughput.
+| Task | Wall Clock | VRAM |
+|------|-----------|------|
+| Bible corpus download + alignment | ~15 min | CPU |
+| Sermon audio download (50 hrs) | ~1–2 hrs | Network |
+| Audio preprocessing (10-step pipeline) | ~4–6 hrs | GPU (demucs bottleneck) |
+| Pseudo-labeling (Whisper large-v3, 50 hrs) | ~3–5 hrs | ~8 GB |
+| Human correction (bottom 20%, ~12K segs) | ~15–25 hrs | Manual |
+| **Distil-Whisper LoRA** (20 hrs audio, 3 epochs) | ~5–8 hrs | ~8–10 GB |
+| **Distil-Whisper LoRA** (50 hrs audio, 3 epochs) | ~11–15 hrs | ~8–10 GB |
+| **TranslateGemma 4B QLoRA** (155K pairs, 3 epochs) | ~8–12 hrs | ~10–12 GB |
+| **TranslateGemma 12B QLoRA** (155K pairs, 3 epochs) | ~18–27 hrs | ~14–15 GB |
+| Evaluation (BLEU/WER/COMET on holdout) | ~30–60 min | ~6 GB |
 
-### Data Preparation (One-Time)
+**Cycle timing:** Cycle 1 ~40–62 hrs (includes one-time data prep). Cycles 2–5 ~17–30 hrs each (re-label → correct → retrain → eval).
 
-| Task | Input | Compute | Wall Clock | Notes |
-|------|-------|---------|------------|-------|
-| Bible corpus download | HuggingFace / GitHub | Network-bound | ~5 min | BibleNLP + scrollmapper, <500MB total |
-| Verse pair alignment | ~31K verses × 5 EN × 2 ES | CPU | ~10 min | JOIN on verse ID, export JSONL |
-| Sermon audio download | 50 hrs via yt-dlp | Network-bound | ~1–2 hrs | Depends on internet; ~3GB/hr at 128kbps |
-| Audio preprocessing (full 10-step) | 50 hrs raw audio | GPU (demucs) + CPU | ~4–6 hrs | Demucs is the bottleneck at ~0.5–1× real-time |
-| VAD segmentation | 50 hrs cleaned audio | CPU | ~30 min | Silero VAD runs at ~100× real-time |
-| Pseudo-labeling (Whisper large-v3) | 50 hrs → ~60K segments | A2000 Ada GPU | ~3–5 hrs | ~10–15× real-time with bf16, batch 8 |
-| Human correction (bottom 20%) | ~12K segments | Manual | ~15–25 hrs | ~5–8× real-time for review + correction |
-| **Total data prep** | | | **~25–40 hrs** | **Dominated by human correction time** |
-
-### Fine-Tuning Runs
-
-| Model | Config | Data | Steps | Time/Epoch | Total Time | VRAM Used |
-|-------|--------|------|-------|------------|------------|-----------|
-| **Distil-Whisper LoRA** | r=32, α=64, bf16, grad ckpt | 20 hrs audio (~24K segs) | ~1,500/epoch | ~1.5–2.5 hrs | **~5–8 hrs** (3 epochs) | ~8–10 GB |
-| **Distil-Whisper LoRA** | Same | 50 hrs audio (~60K segs) | ~3,750/epoch | ~3.5–5 hrs | **~11–15 hrs** (3 epochs) | ~8–10 GB |
-| **TranslateGemma 4B QLoRA** | r=16, 4-bit, bf16, packing | 155K verse pairs | ~10K (packed) | ~3–4 hrs | **~8–12 hrs** (3 epochs) | ~10–12 GB |
-| **TranslateGemma 12B QLoRA** | r=16, 4-bit, bf16, packing | 155K verse pairs | ~10K (packed) | ~6–9 hrs | **~18–27 hrs** (3 epochs) | ~14–15 GB |
-| **Evaluation (BLEU/WER/COMET)** | Inference on holdout sets | ~3K verses + ~500 audio segs | — | — | **~30–60 min** | ~6 GB |
-
-### Full Training Cycle (Per Iteration)
-
-| Phase | Duration | Cumulative |
-|-------|----------|------------|
-| Data prep (first time only) | 25–40 hrs | 25–40 hrs |
-| Whisper LoRA (20 hrs audio) | 5–8 hrs | 30–48 hrs |
-| TranslateGemma 4B QLoRA | 8–12 hrs | 38–60 hrs |
-| Evaluation + analysis | 1–2 hrs | 39–62 hrs |
-| **Cycle 1 total** | | **~40–62 hrs** |
-
-| Phase | Duration | Cumulative |
-|-------|----------|------------|
-| Re-pseudo-label with improved model | 3–5 hrs | 3–5 hrs |
-| Human correction (shrinks each cycle) | 5–10 hrs | 8–15 hrs |
-| Whisper LoRA (incremental) | 3–5 hrs | 11–20 hrs |
-| TranslateGemma QLoRA (incremental) | 5–8 hrs | 16–28 hrs |
-| Evaluation | 1–2 hrs | 17–30 hrs |
-| **Cycle 2–5 total (each)** | | **~17–30 hrs** |
-
-### End-to-End Project Timeline
-
-| Week | Activity | Compute Hrs | Human Hrs |
-|------|----------|-------------|-----------|
-| **Week 1** | Data collection + preprocessing + Bible corpus | ~8–10 | ~3–5 |
-| **Week 2** | Pseudo-labeling + human correction | ~4–6 | ~15–25 |
-| **Week 3** | Fine-tuning cycle 1 (Whisper + Gemma 4B) | ~14–22 | ~2–3 |
-| **Week 4** | Evaluation + cycle 2 (re-label, correct, retrain) | ~12–20 | ~8–12 |
-| **Week 5** | Cycle 3 + transfer to Mac + A/B testing | ~10–15 | ~5–8 |
-| **Total** | | **~48–73 GPU-hrs** | **~33–53 human-hrs** |
-
-### Key Bottlenecks
-
-- **Human correction is the slowest step.** Budget 15–25 hours for the first pass. This shrinks significantly in subsequent cycles as model quality improves.
-- **TranslateGemma 12B QLoRA is tight on VRAM.** At ~14–15 GB peak, it leaves <2 GB headroom on the A2000 Ada. Reduce batch size to 1 with grad accum 8 if OOM. Consider training only the 4B model if time-constrained.
-- **Demucs source separation** is the data-prep GPU bottleneck. Run overnight as a batch job.
-- **Overnight training:** Both Whisper LoRA and Gemma QLoRA fit within a single overnight run (8–15 hrs). Schedule with `nohup` or `tmux` and check results in the morning.
+**Key bottlenecks:** Human correction dominates cycle 1 (15–25 hrs, shrinks each cycle). TranslateGemma 12B is tight on VRAM (~14–15 GB peak; reduce batch to 1 + grad accum 8 if OOM). Demucs is the data-prep GPU bottleneck — run overnight. Both LoRA and QLoRA fit within a single overnight run (8–15 hrs).
 
 ---
 

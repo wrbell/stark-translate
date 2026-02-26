@@ -46,6 +46,7 @@ class STTEngine(ABC):
         language: str = "en",
         initial_prompt: str | None = None,
         word_timestamps: bool = False,
+        beam_size: int | None = None,
     ) -> STTResult:
         """Transcribe audio to text."""
         ...

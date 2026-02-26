@@ -138,6 +138,21 @@ class STTSettings(BaseSettings):
         default=2.4,
         description="compression_ratio above which output is flagged as hallucination",
     )
+    word_timestamps: bool = Field(
+        default=False,
+        description=(
+            "Enable per-word timestamps and confidence scores (DTW alignment). "
+            "Adds ~200-400ms to final STT. Useful for active learning, not needed for live display."
+        ),
+    )
+    beam_size: int = Field(
+        default=1,
+        description=(
+            "Beam search width for Whisper decoding (faster-whisper/CUDA only). "
+            "1 = greedy (fastest), 5 = default beam search. "
+            "mlx-whisper always uses greedy decoding (beam search not implemented)."
+        ),
+    )
 
     model_config = {"env_prefix": "STARK_STT_"}
 
@@ -254,6 +269,14 @@ class PipelineSettings(BaseSettings):
     low_vram: bool = Field(
         default=False,
         description="Minimal VRAM mode: MarianMT-only translation, no Gemma loaded",
+    )
+    multiprocess: bool = Field(
+        default=False,
+        description=(
+            "Run STT and translation in separate OS processes for true GPU overlap. "
+            "Each process gets its own Metal context, avoiding the MLX thread-safety issue. "
+            "Improves throughput ~33% for consecutive utterances."
+        ),
     )
 
     # Nested sub-settings

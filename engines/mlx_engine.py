@@ -132,6 +132,7 @@ class MLXWhisperEngine(STTEngine):
         language: str = "en",
         initial_prompt: str | None = None,
         word_timestamps: bool = False,
+        beam_size: int | None = None,
     ) -> STTResult:
         """Transcribe *audio* (16 kHz float32 mono) to text.
 
@@ -153,6 +154,7 @@ class MLXWhisperEngine(STTEngine):
             language=language,
             initial_prompt=initial_prompt,
             word_timestamps=word_timestamps,
+            beam_size=beam_size,
         )
 
         # -- quality-based fallback retry ------------------------------------
@@ -180,6 +182,7 @@ class MLXWhisperEngine(STTEngine):
             language=language,
             initial_prompt=initial_prompt,
             word_timestamps=word_timestamps,
+            beam_size=beam_size,
         )
 
         # Pick the better result (higher confidence = less negative logprob)
@@ -210,13 +213,19 @@ class MLXWhisperEngine(STTEngine):
         language: str = "en",
         initial_prompt: str | None = None,
         word_timestamps: bool = False,
+        beam_size: int | None = None,
     ) -> STTResult:
         """Run mlx-whisper transcription against a specific model repo.
 
         This is the core transcription logic extracted so it can be called
         for both the primary and fallback models.
+
+        Note: ``beam_size`` is accepted for interface compatibility with
+        FasterWhisperEngine but ignored here — mlx-whisper only supports
+        greedy decoding (beam search is not implemented).
         """
         t0 = time.perf_counter()
+        # mlx-whisper is always greedy; beam_size param is ignored
         result = mlx_whisper.transcribe(
             audio,
             path_or_hf_repo=model_repo,
@@ -459,9 +468,12 @@ class MLXGemmaEngine(TranslationEngine):
         if self._model is None or self._tokenizer is None:
             return TranslationResult(text="(model not loaded)", latency_ms=0.0)
 
-        # Dynamic max-tokens cap: Spanish is ~15-25% longer than English
+        # Dynamic max-tokens cap: Spanish averages ~1.3 words per English word,
+        # but subword tokenization adds ~1.5-2x overhead.  3.0x words-to-tokens
+        # gives comfortable headroom without increasing latency (generation
+        # stops at EOS regardless).
         input_words = len(text.split())
-        max_tok = max(32, int(input_words * 1.8))
+        max_tok = max(64, int(input_words * 3.0))
 
         use_cache = self._prompt_cache_template is not None and self._suffix_tokens is not None
 

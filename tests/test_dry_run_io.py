@@ -53,7 +53,7 @@ class TestInitCsv:
         with open(d.CSV_PATH, newline="") as f:
             reader = csv.reader(f)
             header = next(reader)
-        assert len(header) == 19
+        assert len(header) == 20
 
     def test_creates_parent_dirs(self, tmp_path):
         import dry_run_ab as d
@@ -124,8 +124,8 @@ class TestWriteCsvRow:
         d.write_csv_row(self._make_data(cid=1))
         with open(d.CSV_PATH, newline="") as f:
             rows = list(csv.reader(f))
-        # bad_split column (index 16)
-        assert rows[1][16] == "Y"
+        # bad_split column (index 17, after near_miss_flags at 16)
+        assert rows[1][17] == "Y"
 
 
 # ===================================================================

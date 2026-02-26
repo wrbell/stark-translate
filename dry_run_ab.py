@@ -41,6 +41,7 @@ import copy
 import csv
 import http.server
 import json
+import multiprocessing
 import platform
 import queue as queue_module
 import signal
@@ -57,6 +58,8 @@ import sounddevice as sd
 import torch
 import websockets
 
+from settings import settings
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -72,6 +75,9 @@ CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
+WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
+BEAM_SIZE = 1  # Whisper beam search width: 1=greedy (fastest), 5=default
+MULTIPROCESS = False  # separate OS processes for STT and translation
 
 # Inference backend — resolved in main() from --backend flag
 # Values: "mlx" (Apple Silicon), "cuda" (NVIDIA), "cpu" (fallback)
@@ -95,6 +101,17 @@ _pytorch_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pytorch")
 # (Silero VAD + MarianMT). Concurrent PyTorch from different threads causes
 # heap corruption on macOS. This lock serializes all PyTorch inference.
 _pytorch_lock = threading.Lock()
+
+# --- Multiprocess worker state (only used when MULTIPROCESS is True) ---
+# When enabled, STT and Translation run in separate OS processes with their
+# own Metal contexts, enabling true GPU parallelism between the two.
+_stt_worker_proc = None
+_stt_worker_conn = None  # multiprocessing.Connection for STT worker IPC
+_trans_worker_proc = None
+_trans_worker_conn = None  # multiprocessing.Connection for Translation worker IPC
+_stt_comm_pool = None  # ThreadPoolExecutor(1) for async STT pipe I/O
+_trans_comm_pool = None  # ThreadPoolExecutor(1) for async Translation pipe I/O
+_RUN_AB = False  # Whether A/B mode is enabled (needed when models aren't in main process)
 
 # --- Partial/final coordination ---
 # When a final is pending, partials are skipped to avoid starving the pipeline.
@@ -140,6 +157,22 @@ HOMOPHONE_FLAGS = {
     "presents": "presence",
     "council": "counsel",
     "palms": "psalms",
+    "boosting": "boasting",
+}
+
+# Near-miss corrections: edit-distance-close domain words that aren't true
+# homophones but appear as STT artifacts for theological vocabulary.
+NEAR_MISS_CORRECTIONS = {
+    "exhitation": "exaltation",
+    "self-exhitation": "self-exaltation",
+    "exhaltation": "exaltation",
+    "self-exhaltation": "self-exaltation",
+}
+
+# Multi-word phrase corrections for STT artifacts that span multiple words.
+PHRASE_CORRECTIONS = {
+    "waver in the beach": "wavering in speech",
+    "waver in the speech": "wavering in speech",
 }
 
 # [P7-6B] Theological terms that need TranslateGemma quality — MarianMT alone
@@ -239,12 +272,32 @@ _SPLIT_WORDS = frozenset(
     }
 )
 
+# Known-good short phrases that get low STT confidence but are correct.
+# Used to dampen false alarms in review_priority scoring.
+_SHORT_PHRASE_WHITELIST = frozenset(
+    {
+        "amen",
+        "thank you",
+        "hallelujah",
+        "praise god",
+        "praise the lord",
+        "yes",
+        "no",
+        "okay",
+        "good morning",
+        "good evening",
+    }
+)
+
 # Session-level diagnostic accumulators
 diag_homophones = []  # [(chunk_id, flagged_word, likely_word, text)]
 diag_bad_splits = []  # [(chunk_id, last_word, text)]
 diag_marian_diverge = []  # [(chunk_id, marian_text, gemma_text, similarity)]
 diag_durations = []  # [(chunk_id, duration_s)]
 diag_low_confidence = []  # [(chunk_id, confidence, text)]
+diag_empty_stt = []  # [(stage, id, buffer_duration_s)]
+diag_force_cuts = []  # [(chunk_id, cut_type, buffer_duration_s, cut_position_s)]
+diag_near_misses = []  # [(chunk_id, original_word, correction, match_type, text)]
 partial_translations = {}  # utterance_id → last MarianMT translation
 partial_latencies = {}  # utterance_id → {"pt_ms": float}
 
@@ -269,6 +322,47 @@ def check_bad_split(cid, text):
             print(f"  >> BAD SPLIT: ends with '{last}'")
 
 
+def check_near_miss(cid, text, threshold=0.80):
+    """Flag words that are edit-distance-close to theological terms.
+
+    Three checks in order:
+      1. Exact match in NEAR_MISS_CORRECTIONS dict.
+      2. Multi-word phrase match in PHRASE_CORRECTIONS dict.
+      3. Fuzzy match against THEOLOGICAL_TERMS via SequenceMatcher.
+    """
+    from difflib import SequenceMatcher
+
+    text_lower = text.lower()
+
+    # 1. Multi-word phrase corrections
+    for phrase, correction in PHRASE_CORRECTIONS.items():
+        if phrase in text_lower:
+            diag_near_misses.append((cid, phrase, correction, "phrase", text))
+            print(f"  >> NEAR-MISS PHRASE: '{phrase}' -> '{correction}'")
+
+    # 2. Per-word checks
+    words = text_lower.split()
+    for w in words:
+        clean = w.strip(".,!?;:'\"")
+        if not clean or clean in HOMOPHONE_FLAGS:
+            continue  # already caught by check_homophones
+
+        # Exact near-miss correction
+        if clean in NEAR_MISS_CORRECTIONS:
+            diag_near_misses.append((cid, clean, NEAR_MISS_CORRECTIONS[clean], "exact", text))
+            print(f"  >> NEAR-MISS: '{clean}' -> '{NEAR_MISS_CORRECTIONS[clean]}'")
+            continue
+
+        # Fuzzy match against theological terms
+        if len(clean) >= 5:  # skip short words to avoid noise
+            for term in THEOLOGICAL_TERMS:
+                ratio = SequenceMatcher(None, clean, term).ratio()
+                if ratio >= threshold and clean != term:
+                    diag_near_misses.append((cid, clean, term, "fuzzy", text))
+                    print(f"  >> NEAR-MISS (fuzzy {ratio:.0%}): '{clean}' -> '{term}'?")
+                    break  # one match per word is enough
+
+
 def check_marian_divergence(cid, marian_text, gemma_text):
     """Compare MarianMT partial vs TranslateGemma final translation."""
     if not marian_text or not gemma_text:
@@ -285,6 +379,46 @@ def check_marian_divergence(cid, marian_text, gemma_text):
         print(f"  >> MARIAN/GEMMA divergence: {similarity:.0%} overlap")
 
 
+def _log_stt_drop(stage, uid_or_cid, buffer_duration):
+    """Log when Whisper returns empty text for an audio chunk.
+
+    Called from process_partial() and _pipeline_coordinator() to give
+    operators visibility into silently dropped audio.
+    """
+    diag_empty_stt.append((stage, uid_or_cid, round(buffer_duration, 2)))
+    print(f"  [DROP] {stage} #{uid_or_cid}: empty STT ({buffer_duration:.1f}s audio)")
+
+    record = {
+        "event": "empty_stt_drop",
+        "stage": stage,
+        "id": uid_or_cid,
+        "buffer_duration_s": round(buffer_duration, 2),
+        "session": SESSION_ID,
+        "timestamp": datetime.now().isoformat(),
+    }
+    _io_pool.submit(_write_jsonl_record, record)
+
+
+def _write_jsonl_record(record):
+    """Append a JSONL record to the diagnostics file (runs on _io_pool)."""
+    os.makedirs(os.path.dirname(DIAG_PATH), exist_ok=True)
+    with open(DIAG_PATH, "a") as f:
+        f.write(json.dumps(record) + "\n")
+
+
+def _compute_force_cut(buffer_len, sample_rate, last_silence_boundary, min_cut_s=0.5):
+    """Decide where to cut a maxed-out speech buffer.
+
+    Returns (cut_type, split_position) where cut_type is "smart" or "hard".
+    A smart cut splits at the last detected silence boundary (if far enough
+    into the buffer). A hard cut sends the entire buffer.
+    """
+    min_samples = int(min_cut_s * sample_rate)
+    if last_silence_boundary > min_samples:
+        return ("smart", last_silence_boundary)
+    return ("hard", buffer_len)
+
+
 def print_diagnostics():
     """Print live testing diagnostics summary."""
     print(f"\n{'~' * 60}")
@@ -297,6 +431,13 @@ def print_diagnostics():
             print(f"    #{cid}: '{flagged}' -> '{likely}' in: {text[:60]}")
     else:
         print("\n  Homophone flags: 0 (clean)")
+
+    if diag_near_misses:
+        print(f"\n  Near-miss flags: {len(diag_near_misses)}")
+        for cid, orig, correction, match_type, text in diag_near_misses[:10]:
+            print(f"    #{cid}: '{orig}' -> '{correction}' ({match_type}) in: {text[:60]}")
+    else:
+        print("\n  Near-miss flags: 0 (clean)")
 
     if diag_bad_splits:
         print(f"\n  Bad sentence splits: {len(diag_bad_splits)}")
@@ -329,6 +470,27 @@ def print_diagnostics():
             print(f"    #{cid} (conf={conf:.2f}): {text[:60]}")
     else:
         print("\n  Low confidence chunks: 0 (clean)")
+
+    if diag_empty_stt:
+        partials = sum(1 for s, _, _ in diag_empty_stt if s == "partial")
+        finals = sum(1 for s, _, _ in diag_empty_stt if s == "final")
+        total_dur = sum(d for _, _, d in diag_empty_stt)
+        print(
+            f"\n  Empty STT drops: {len(diag_empty_stt)} ({partials} partial, {finals} final, {total_dur:.1f}s audio)"
+        )
+        for stage, uid, dur in diag_empty_stt[:10]:
+            print(f"    {stage} #{uid}: {dur:.1f}s")
+    else:
+        print("\n  Empty STT drops: 0 (clean)")
+
+    if diag_force_cuts:
+        smart = sum(1 for _, ct, _, _ in diag_force_cuts if ct == "smart")
+        hard = sum(1 for _, ct, _, _ in diag_force_cuts if ct == "hard")
+        print(f"\n  Force-cuts: {len(diag_force_cuts)} ({smart} smart, {hard} hard)")
+        for cid_fc, ct, dur, pos in diag_force_cuts[:10]:
+            print(f"    #{cid_fc}: {ct} at {pos:.1f}s of {dur:.1f}s buffer")
+    else:
+        print("\n  Force-cuts: 0 (clean)")
 
     # Resource usage summary
     snap = get_resource_snapshot()
@@ -441,6 +603,7 @@ ws_clients = set()
 chunk_id = 0
 all_results = []
 prev_text = ""  # last chunk's transcription — fed to Whisper as context
+_last_final_text = ""  # consecutive duplicate suppression
 
 # Models (set during init)
 vad_model = None
@@ -720,6 +883,122 @@ def load_cuda_translation_models(load_gemma=True):
             print("  Falling back to MarianMT-only mode")
 
     return gemma_model, gemma_tokenizer, None, None  # no 12B on CUDA
+
+
+# ---------------------------------------------------------------------------
+# Multiprocess Workers (--multiprocess flag)
+# ---------------------------------------------------------------------------
+
+
+def _start_workers(run_ab=False):
+    """Start STT and Translation worker processes.
+
+    Each worker runs in its own OS process with a dedicated Metal context,
+    enabling true GPU parallelism between STT and Translation.
+    """
+    global _stt_worker_proc, _stt_worker_conn
+    global _trans_worker_proc, _trans_worker_conn
+    global _stt_comm_pool, _trans_comm_pool
+
+    from workers import stt_worker_main, translation_worker_main
+
+    print("[3/6] Starting multiprocess workers...")
+
+    # --- STT Worker ---
+    parent_conn, child_conn = multiprocessing.Pipe()
+    _stt_worker_conn = parent_conn
+    _stt_worker_proc = multiprocessing.Process(
+        target=stt_worker_main,
+        args=(child_conn, WHISPER_MODEL_TURBO),
+        daemon=True,
+    )
+    _stt_worker_proc.start()
+    msg = _stt_worker_conn.recv()
+    if msg != "ready":
+        raise RuntimeError(f"STT worker failed to start: {msg}")
+    print("  STT worker ready (separate process)")
+
+    # --- Translation Worker ---
+    model_12b_id = MLX_MODEL_B if run_ab else None
+    parent_conn2, child_conn2 = multiprocessing.Pipe()
+    _trans_worker_conn = parent_conn2
+    _trans_worker_proc = multiprocessing.Process(
+        target=translation_worker_main,
+        args=(child_conn2, MLX_MODEL_A, model_12b_id, NUM_DRAFT_TOKENS),
+        daemon=True,
+    )
+    _trans_worker_proc.start()
+    msg = _trans_worker_conn.recv()
+    if msg != "ready":
+        raise RuntimeError(f"Translation worker failed to start: {msg}")
+    print("  Translation worker ready (separate process)")
+
+    # Thread pools for async pipe I/O (run_in_executor bridges async ↔ blocking pipe)
+    _stt_comm_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="stt-comm")
+    _trans_comm_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="trans-comm")
+
+
+def _stop_workers():
+    """Shut down worker processes gracefully."""
+    global _stt_worker_proc, _stt_worker_conn
+    global _trans_worker_proc, _trans_worker_conn
+    global _stt_comm_pool, _trans_comm_pool
+
+    for label, conn, proc in [
+        ("STT", _stt_worker_conn, _stt_worker_proc),
+        ("Translation", _trans_worker_conn, _trans_worker_proc),
+    ]:
+        if conn is not None:
+            try:
+                conn.send(None)  # shutdown sentinel
+            except (BrokenPipeError, OSError):
+                pass
+        if proc is not None:
+            proc.join(timeout=5)
+            if proc.is_alive():
+                proc.terminate()
+                print(f"  {label} worker terminated (did not exit cleanly)")
+
+    if _stt_comm_pool is not None:
+        _stt_comm_pool.shutdown(wait=False)
+    if _trans_comm_pool is not None:
+        _trans_comm_pool.shutdown(wait=False)
+
+    _stt_worker_proc = None
+    _stt_worker_conn = None
+    _trans_worker_proc = None
+    _trans_worker_conn = None
+    _stt_comm_pool = None
+    _trans_comm_pool = None
+
+
+def _run_stt_via_worker(audio_data, whisper_prompt):
+    """Send STT request to worker process and return result (blocking).
+
+    Matches the return signature of _run_stt():
+    (english, stt_latency_ms, stt_confidence, segment_meta, low_conf_words)
+    """
+    _stt_worker_conn.send(("transcribe", audio_data, whisper_prompt, WORD_TIMESTAMPS, BEAM_SIZE))
+    return _stt_worker_conn.recv()
+
+
+def _run_partial_stt_via_worker(audio_data):
+    """Send partial STT request to worker (blocking). Always greedy, no word timestamps."""
+    _stt_worker_conn.send(("transcribe", audio_data, _whisper_prompt(), False, 1))
+    result = _stt_worker_conn.recv()
+    english, stt_lat, _, _, _ = result
+    if not english:
+        return None
+    return english, stt_lat
+
+
+def _translate_via_worker(english, run_ab=False):
+    """Send translation request to worker process and return result (blocking).
+
+    Returns (spanish_a, lat_a, tps_a, spanish_b, lat_b, tps_b).
+    """
+    _trans_worker_conn.send(("translate", english, run_ab))
+    return _trans_worker_conn.recv()
 
 
 # ---------------------------------------------------------------------------
@@ -1245,11 +1524,6 @@ def _is_garbage_text(text: str) -> bool:
         if _REPEATING_NGRAM_RE.search(word):
             return True
 
-    # Very low unique character ratio — garbage tends to be monotonous
-    alphanum = [c.lower() for c in t if c.isalnum()]
-    if len(alphanum) >= 6 and len(set(alphanum)) / len(alphanum) < 0.3:
-        return True
-
     return False
 
 
@@ -1301,7 +1575,10 @@ async def process_partial(audio_data, utterance_id):
             return english, stt_lat
 
         # Submit STT and track the future so process_final can cancel it
-        stt_future = loop.run_in_executor(_pipeline_pool, _partial_stt)
+        if MULTIPROCESS:
+            stt_future = loop.run_in_executor(_stt_comm_pool, _run_partial_stt_via_worker, audio_data)
+        else:
+            stt_future = loop.run_in_executor(_pipeline_pool, _partial_stt)
         with _partial_future_lock:
             _active_partial_future = stt_future
 
@@ -1311,6 +1588,8 @@ async def process_partial(audio_data, utterance_id):
             _active_partial_future = None
 
         if stt_result is None:
+            buf_dur = len(audio_data) / SAMPLE_RATE
+            _log_stt_drop("partial", utterance_id, buf_dur)
             return
 
         english, stt_latency = stt_result
@@ -1410,7 +1689,11 @@ def _run_stt(audio_data, whisper_prompt):
 
 
 def _run_stt_mlx(audio_data, whisper_prompt):
-    """Run STT via mlx-whisper (Apple Silicon / MLX backend)."""
+    """Run STT via mlx-whisper (Apple Silicon / MLX backend).
+
+    Note: mlx-whisper is always greedy (beam search not implemented).
+    beam_size is only used by faster-whisper (CUDA backend).
+    """
     t0 = time.perf_counter()
     result = mlx_whisper.transcribe(
         audio_data,
@@ -1418,7 +1701,7 @@ def _run_stt_mlx(audio_data, whisper_prompt):
         language="en",
         condition_on_previous_text=False,
         initial_prompt=whisper_prompt,
-        word_timestamps=True,
+        word_timestamps=WORD_TIMESTAMPS,
     )
     stt_latency = (time.perf_counter() - t0) * 1000
     english = result["text"].strip()
@@ -1470,7 +1753,8 @@ def _run_stt_faster_whisper(audio_data, whisper_prompt):
         language="en",
         condition_on_previous_text=False,
         initial_prompt=whisper_prompt,
-        word_timestamps=True,
+        word_timestamps=WORD_TIMESTAMPS,
+        beam_size=BEAM_SIZE,
     )
 
     # Consume the generator to get all segments
@@ -1534,9 +1818,24 @@ async def _pipeline_translate_and_finalize(
 
             loop = asyncio.get_event_loop()
 
+            # --- Multiprocess path: dispatch to translation worker process ---
+            if MULTIPROCESS:
+                # Adaptive routing still works — MarianMT is in the main process
+                if not _RUN_AB and should_use_marian_only(english, stt_confidence):
+                    spanish_a, lat_a = translate_marian(english)
+                    tps_a = 0.0
+                    qe_a = qe_score(english, spanish_a)
+                    print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
+                else:
+                    result = await loop.run_in_executor(_trans_comm_pool, _translate_via_worker, english, _RUN_AB)
+                    spanish_a, lat_a, tps_a, spanish_b, lat_b, tps_b = result
+                    qe_a = qe_score(english, spanish_a)
+                    if spanish_b:
+                        qe_b = qe_score(english, spanish_b)
+
             # [P7-6B] Adaptive routing: skip TranslateGemma for simple
             # utterances when NOT in A/B mode and NOT on CUDA with Gemma loaded.
-            if (
+            elif (
                 BACKEND != "cuda"
                 and mlx_b_model is None
                 and mlx_a_model is not None
@@ -1625,6 +1924,7 @@ async def _pipeline_translate_and_finalize(
         diag_durations.append((cid, utterance_dur))
         check_homophones(cid, english)
         check_bad_split(cid, english)
+        check_near_miss(cid, english)
         if stt_confidence is not None and stt_confidence < 0.5:
             diag_low_confidence.append((cid, stt_confidence, english))
         # Hallucination check
@@ -1678,7 +1978,15 @@ async def _pipeline_translate_and_finalize(
 
         # [P7-5D] Move I/O to background threads — prevents disk writes from
         # blocking the main processing loop (saves 10-30ms on the critical path).
-        _io_pool.submit(write_csv_row, result_data)
+        #
+        # Extract MarianMT latency BEFORE submitting to pool — both CSV and
+        # JSONL writers need it, and .pop() from one would race with the other.
+        marian_lat = partial_latencies.pop(cid, None)
+        if marian_lat is None:
+            for uid in list(partial_latencies.keys()):
+                marian_lat = partial_latencies.pop(uid, None)
+
+        _io_pool.submit(write_csv_row, result_data, marian_lat)
 
         # Save audio + structured diagnostics for fine-tuning pipeline
         resources = get_resource_snapshot()
@@ -1686,7 +1994,12 @@ async def _pipeline_translate_and_finalize(
         def _save_io():
             audio_path = save_chunk_audio(audio_data, cid)
             write_diag_jsonl(
-                result_data, audio_path, segment_meta=segment_meta, low_conf_words=low_conf_words, resources=resources
+                result_data,
+                audio_path,
+                segment_meta=segment_meta,
+                low_conf_words=low_conf_words,
+                resources=resources,
+                marian_lat=marian_lat,
             )
 
         _io_pool.submit(_save_io)
@@ -1713,7 +2026,7 @@ async def _pipeline_coordinator():
     (they share the same MLX models), but STT can overlap with translation
     freely since they use different models (Whisper vs TranslateGemma).
     """
-    global chunk_id, prev_text, _pipeline_overlaps, _pipeline_total
+    global chunk_id, prev_text, _last_final_text, _pipeline_overlaps, _pipeline_total
 
     # Track the currently-running translation task so we can measure overlap
     active_translation_task = None
@@ -1744,7 +2057,10 @@ async def _pipeline_coordinator():
             # --- STT: submit to pipeline pool ---
             loop = asyncio.get_event_loop()
             whisper_prompt = _whisper_prompt()
-            stt_future = loop.run_in_executor(_pipeline_pool, _run_stt, audio_data, whisper_prompt)
+            if MULTIPROCESS:
+                stt_future = loop.run_in_executor(_stt_comm_pool, _run_stt_via_worker, audio_data, whisper_prompt)
+            else:
+                stt_future = loop.run_in_executor(_pipeline_pool, _run_stt, audio_data, whisper_prompt)
 
             # Await STT completion (translation of N-1 may still be running
             # concurrently in another thread — that's the overlap)
@@ -1754,12 +2070,20 @@ async def _pipeline_coordinator():
             _final_pending.clear()
 
             if not english:
+                buf_dur = len(audio_data) / SAMPLE_RATE
+                _log_stt_drop("final", cid, buf_dur)
                 continue
 
             # [FILTER] Suppress garbage/hallucinated text
             if _is_garbage_text(english):
                 print(f"  [FILTER] garbage final suppressed: {english!r}")
                 continue
+
+            # [DEDUP] Suppress consecutive identical finals (e.g., repeated "Amen")
+            if english.strip().lower() == _last_final_text:
+                print(f"  [DEDUP] suppressed consecutive duplicate: {english!r}")
+                continue
+            _last_final_text = english.strip().lower()
 
             prev_text = english[-100:]  # [P7-1E] capped at 100 chars
 
@@ -1896,7 +2220,7 @@ def save_chunk_audio(audio_data, cid):
     return path
 
 
-def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, resources=None):
+def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, resources=None, marian_lat=None):
     """Append a structured diagnostics record for the active learning loop.
 
     This JSONL feeds into Label Studio / human review queue. Each line has:
@@ -1908,6 +2232,9 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
     """
     cid = data["chunk_id"]
     homo = [{"flagged": f, "likely": l} for c, f, l, _ in diag_homophones if c == cid]
+    near_misses = [
+        {"original": orig, "correction": corr, "type": mt} for c, orig, corr, mt, _ in diag_near_misses if c == cid
+    ]
     bad_sp = any(c == cid for c, _, _ in diag_bad_splits)
     marian_sim = next((s for c, _, _, s in diag_marian_diverge if c == cid), None)
     marian_text = next((mt for c, mt, _, _ in diag_marian_diverge if c == cid), None)
@@ -1922,6 +2249,11 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
                 is_hallucination = True
                 break
 
+    # Short-phrase false-alarm dampening: correct short utterances like
+    # "Amen" or "Thank you" get low confidence but aren't actually errors.
+    english_lower = data.get("english", "").strip().lower().rstrip(".,!?;:'\"")
+    is_short_whitelist = english_lower in _SHORT_PHRASE_WHITELIST
+
     # Compute a review priority score (higher = more likely needs correction)
     priority = 0
     conf = data.get("stt_confidence")
@@ -1929,6 +2261,8 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         priority += 3 if conf < 0.5 else 1
     if homo:
         priority += 2 * len(homo)
+    if near_misses:
+        priority += 2 * len(near_misses)
     if bad_sp:
         priority += 1
     if data.get("qe_a") is not None and data["qe_a"] < 0.7:
@@ -1939,6 +2273,8 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         priority += 5
     if low_conf_words:
         priority += min(3, len(low_conf_words))  # cap contribution
+    if is_short_whitelist:
+        priority = max(0, priority - 2)  # dampen false alarm
 
     record = {
         "chunk_id": cid,
@@ -1956,13 +2292,11 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "low_confidence_words": low_conf_words,
         "is_hallucination": is_hallucination,
         "homophone_flags": homo,
+        "near_miss_flags": near_misses,
         "bad_split": bad_sp,
         "marian_similarity": marian_sim,
         "review_priority": priority,
-        "marian_backend_latency": next(
-            (partial_latencies.get(c) for c in [cid] if c in partial_latencies),
-            None,
-        ),
+        "marian_backend_latency": marian_lat,
         "resources": resources,
         "corrected_english": None,  # filled in during human review
         "corrected_spanish": None,  # filled in during human review
@@ -1996,6 +2330,7 @@ def init_csv():
                 "qe_b",
                 "utterance_dur",
                 "homophone_flags",
+                "near_miss_flags",
                 "bad_split",
                 "marian_similarity",
                 "marian_pt_ms",
@@ -2004,19 +2339,21 @@ def init_csv():
     print(f"  CSV: {CSV_PATH}")
 
 
-def write_csv_row(data):
-    """Append a row to the CSV log."""
+def write_csv_row(data, marian_lat=None):
+    """Append a row to the CSV log.
+
+    Args:
+        data: Result dict from the pipeline.
+        marian_lat: Pre-extracted MarianMT latency dict (avoids race with
+                    write_diag_jsonl which used to race on partial_latencies).
+    """
     cid = data["chunk_id"]
     # Gather diagnostic flags for this chunk
     homo = [f"{f}->{l}" for c, f, l, _ in diag_homophones if c == cid]
+    near_miss = [f"{o}->{c}" for ci, o, c, _, _ in diag_near_misses if ci == cid]
     bad_sp = any(c == cid for c, _, _ in diag_bad_splits)
     marian_sim = next((s for c, _, _, s in diag_marian_diverge if c == cid), "")
     utt_dur = next((d for c, d in diag_durations if c == cid), "")
-    # Get MarianMT latency comparison from partial pass
-    ml = partial_latencies.pop(cid, None)
-    if ml is None:
-        for uid in list(partial_latencies.keys()):
-            ml = partial_latencies.pop(uid, None)
 
     with open(CSV_PATH, "a", newline="") as f:
         writer = csv.writer(f)
@@ -2038,9 +2375,10 @@ def write_csv_row(data):
                 data.get("qe_b", ""),
                 round(utt_dur, 2) if utt_dur else "",
                 "|".join(homo) if homo else "",
+                "|".join(near_miss) if near_miss else "",
                 "Y" if bad_sp else "",
                 marian_sim,
-                ml["pt_ms"] if ml else "",
+                marian_lat["pt_ms"] if marian_lat else "",
             ]
         )
 
@@ -2089,9 +2427,9 @@ async def audio_loop():
     global _warmup_pending  # [P7-4A]
     print("\nListening... (Ctrl+C to stop)\n")
 
-    PARTIAL_INTERVAL = 1.0  # seconds between partial STT updates
-    SILENCE_TRIGGER = 0.8  # seconds of silence to trigger final processing
-    MAX_UTTERANCE = 8.0  # force-process if speaker doesn't pause
+    PARTIAL_INTERVAL = settings.vad.partial_interval
+    SILENCE_TRIGGER = settings.vad.silence_trigger
+    MAX_UTTERANCE = settings.vad.max_utterance
 
     speech_buffer = np.array([], dtype=np.float32)
     silence_frames = 0
@@ -2101,6 +2439,7 @@ async def audio_loop():
     last_status_time = time.time()
     last_partial_len = 0  # audio length (samples) at last partial
     utterance_id = 0  # tracks current utterance for partial updates
+    last_silence_boundary = 0  # sample index of last silence gap start
 
     while True:
         try:
@@ -2129,10 +2468,14 @@ async def audio_loop():
                         if len(speech_buffer) == 0:
                             utterance_id += 1  # new utterance starting
                             last_partial_len = 0
+                            last_silence_boundary = 0
                         speech_buffer = np.concatenate([speech_buffer, audio_frame])
                         silence_frames = 0
                         speech_frame_count += 1
                     else:
+                        # Record silence boundary on speech→silence transition
+                        if len(speech_buffer) > 0 and silence_frames == 0:
+                            last_silence_boundary = len(speech_buffer)
                         silence_frames += 1
                         # Keep buffering during brief pauses so words aren't dropped
                         if len(speech_buffer) > 0 and silence_frames < max_silence_frames:
@@ -2165,21 +2508,54 @@ async def audio_loop():
                         last_partial_len = len(speech_buffer)
 
                     # --- Final: on silence gap or max duration ---
-                    should_finalize = (
-                        buffer_duration >= 0.5 and silence_frames >= max_silence_frames
-                    ) or buffer_duration >= MAX_UTTERANCE
+                    silence_triggered = buffer_duration >= 0.5 and silence_frames >= max_silence_frames
+                    force_cut_triggered = buffer_duration >= MAX_UTTERANCE
 
-                    if should_finalize and buffer_duration >= 0.5:
+                    if (silence_triggered or force_cut_triggered) and buffer_duration >= 0.5:
                         print()  # newline after partial line
-                        await process_final(speech_buffer.copy())
-                        speech_buffer = np.array([], dtype=np.float32)
-                        silence_frames = 0
-                        speech_frame_count = 0
-                        frame_count = 0
-                        last_partial_len = 0
-                        vad_model.reset_states()
-                        # [P7-4A] Schedule a GPU warmup now that speech ended
-                        _warmup_pending = True
+
+                        if force_cut_triggered and not silence_triggered:
+                            # Speaker hasn't paused — try to cut at last silence boundary
+                            cut_type, split_pos = _compute_force_cut(
+                                len(speech_buffer), SAMPLE_RATE, last_silence_boundary
+                            )
+                            cut_dur = len(speech_buffer) / SAMPLE_RATE
+                            cut_pos_s = split_pos / SAMPLE_RATE
+                            diag_force_cuts.append((utterance_id, cut_type, round(cut_dur, 2), round(cut_pos_s, 2)))
+                            print(
+                                f"  [{cut_type.upper()}-CUT] #{utterance_id}: {cut_pos_s:.1f}s of {cut_dur:.1f}s buffer"
+                            )
+
+                            if cut_type == "smart":
+                                # Send first part as final, carry over remainder
+                                await process_final(speech_buffer[:split_pos].copy())
+                                speech_buffer = speech_buffer[split_pos:].copy()
+                                utterance_id += 1
+                                last_partial_len = 0
+                                last_silence_boundary = 0
+                            else:
+                                # No silence found — send entire buffer (original behavior)
+                                await process_final(speech_buffer.copy())
+                                speech_buffer = np.array([], dtype=np.float32)
+                                silence_frames = 0
+                                speech_frame_count = 0
+                                frame_count = 0
+                                last_partial_len = 0
+                                last_silence_boundary = 0
+                                vad_model.reset_states()
+                                _warmup_pending = True
+                        else:
+                            # Normal silence-triggered finalization
+                            await process_final(speech_buffer.copy())
+                            speech_buffer = np.array([], dtype=np.float32)
+                            silence_frames = 0
+                            speech_frame_count = 0
+                            frame_count = 0
+                            last_partial_len = 0
+                            last_silence_boundary = 0
+                            vad_model.reset_states()
+                            # [P7-4A] Schedule a GPU warmup now that speech ended
+                            _warmup_pending = True
 
                     # [P7-4A] Pre-warm during silence: run dummy forward pass
                     # once after speech→silence transition to keep Metal GPU hot
@@ -2206,17 +2582,21 @@ async def main_async(args):
     global marian_model, marian_tokenizer
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
+    global _RUN_AB
+
+    _RUN_AB = args.run_ab
 
     spec_info = ""
     if args.run_ab and BACKEND == "mlx":
         spec_info = f"  Speculative decoding: 4B drafts {NUM_DRAFT_TOKENS} tokens for 12B\n"
 
+    mp_str = " [multiprocess]" if MULTIPROCESS else ""
     mode_str = "MarianMT-only (low-VRAM)" if args.low_vram else ("A/B parallel" if args.run_ab else "4B only")
 
     print(f"{'=' * 60}")
     print("  Bilingual A/B Dry Run")
     print(f"  Backend: {BACKEND.upper()}")
-    print(f"  Mode: {mode_str}")
+    print(f"  Mode: {mode_str}{mp_str}")
     if spec_info:
         print(spec_info, end="")
     print(f"  WebSocket: ws://localhost:{args.ws_port}")
@@ -2224,20 +2604,28 @@ async def main_async(args):
 
     # Load models — dispatch based on backend
     vad_model, vad_utils = load_vad()
-    stt_pipe = load_whisper(BACKEND)
 
-    if args.low_vram:
-        # Low-VRAM mode: skip Gemma entirely, MarianMT handles all translation
+    if MULTIPROCESS and BACKEND == "mlx" and not args.low_vram:
+        # Multiprocess mode: STT and Translation models load in worker processes.
+        # Main process only loads VAD (inline) and MarianMT (CPU, for partials).
+        stt_pipe = None  # loaded in STT worker
         mlx_a_model, mlx_a_tokenizer = None, None
         mlx_b_model, mlx_b_tokenizer = None, None
-    elif BACKEND == "mlx":
-        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_translation_models(load_b=args.run_ab)
-    elif BACKEND == "cuda":
-        mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_cuda_translation_models(load_gemma=True)
+        _start_workers(run_ab=args.run_ab)
     else:
-        # CPU fallback: no Gemma, MarianMT only
-        mlx_a_model, mlx_a_tokenizer = None, None
-        mlx_b_model, mlx_b_tokenizer = None, None
+        stt_pipe = load_whisper(BACKEND)
+        if args.low_vram:
+            # Low-VRAM mode: skip Gemma entirely, MarianMT handles all translation
+            mlx_a_model, mlx_a_tokenizer = None, None
+            mlx_b_model, mlx_b_tokenizer = None, None
+        elif BACKEND == "mlx":
+            mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_translation_models(load_b=args.run_ab)
+        elif BACKEND == "cuda":
+            mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_cuda_translation_models(load_gemma=True)
+        else:
+            # CPU fallback: no Gemma, MarianMT only
+            mlx_a_model, mlx_a_tokenizer = None, None
+            mlx_b_model, mlx_b_tokenizer = None, None
 
     marian_model, marian_tokenizer = load_marian()
 
@@ -2321,7 +2709,10 @@ async def main_async(args):
     _pipeline_chunk_queue = asyncio.Queue(maxsize=8)
     _pipeline_translation_lock = asyncio.Lock()
     pipeline_task = asyncio.create_task(_pipeline_coordinator())
-    print("  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
+    if MULTIPROCESS:
+        print("  [P7-6C] Pipeline coordinator started (multiprocess: true GPU overlap)")
+    else:
+        print("  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
 
     # Run audio loop
     try:
@@ -2339,6 +2730,9 @@ async def main_async(args):
         stream_task.cancel()
         # [FIX] Shut down the PyTorch pool (MarianMT partial translations)
         _pytorch_pool.shutdown(wait=False)
+        # Stop multiprocess workers if running
+        if MULTIPROCESS:
+            _stop_workers()
         print_summary()
         ws_server.close()
         await ws_server.wait_closed()
@@ -2381,6 +2775,24 @@ def main():
         default=3,
         help="Speculative decoding: tokens drafted by 4B for 12B to verify (default: 3)",
     )
+    parser.add_argument(
+        "--word-timestamps",
+        action="store_true",
+        default=False,
+        help="Enable per-word timestamps/confidence in final STT (adds ~200-400ms, useful for active learning)",
+    )
+    parser.add_argument(
+        "--beam-size",
+        type=int,
+        default=1,
+        help="Whisper beam search width: 1=greedy (fastest), 5=default beam search (default: 1)",
+    )
+    parser.add_argument(
+        "--multiprocess",
+        action="store_true",
+        default=False,
+        help="Run STT and translation in separate OS processes for GPU overlap (~33%% throughput gain)",
+    )
     args = parser.parse_args()
 
     # --- Resolve backend ---
@@ -2415,6 +2827,7 @@ def main():
         args.run_ab = False
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
+    global WORD_TIMESTAMPS, BEAM_SIZE, MULTIPROCESS
     CHUNK_DURATION = args.chunk_duration
     WS_PORT = args.ws_port
     VAD_THRESHOLD = args.vad_threshold
@@ -2422,6 +2835,9 @@ def main():
     if args.gain is not None:
         MIC_GAIN = args.gain  # Explicit gain skips auto-calibration
     NUM_DRAFT_TOKENS = args.num_draft_tokens
+    WORD_TIMESTAMPS = args.word_timestamps
+    BEAM_SIZE = args.beam_size
+    MULTIPROCESS = args.multiprocess
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):

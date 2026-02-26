@@ -44,6 +44,18 @@ class TestSTTSettings:
         assert "atonement" in s.whisper_prompt.lower()
         assert "propitiation" in s.whisper_prompt.lower()
 
+    def test_word_timestamps_default_false(self):
+        from settings import STTSettings
+
+        s = STTSettings()
+        assert s.word_timestamps is False
+
+    def test_beam_size_default_one(self):
+        from settings import STTSettings
+
+        s = STTSettings()
+        assert s.beam_size == 1
+
 
 class TestTranslationSettings:
     def test_defaults(self):
@@ -85,6 +97,7 @@ class TestPipelineSettings:
         assert s.backend == "auto"
         assert s.run_ab is False
         assert s.low_vram is False
+        assert s.multiprocess is False
 
     def test_nested_settings_accessible(self):
         from settings import PipelineSettings

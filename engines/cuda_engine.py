@@ -125,6 +125,7 @@ class FasterWhisperEngine(STTEngine):
         language: str = "en",
         initial_prompt: str | None = None,
         word_timestamps: bool = False,
+        beam_size: int | None = None,
     ) -> STTResult:
         """Transcribe *audio* (16 kHz float32 mono) to text.
 
@@ -144,6 +145,7 @@ class FasterWhisperEngine(STTEngine):
             language=language,
             initial_prompt=initial_prompt,
             word_timestamps=word_timestamps,
+            beam_size=beam_size,
         )
 
         # -- quality-based fallback retry ------------------------------------
@@ -171,6 +173,7 @@ class FasterWhisperEngine(STTEngine):
             language=language,
             initial_prompt=initial_prompt,
             word_timestamps=word_timestamps,
+            beam_size=beam_size,
         )
 
         # Pick the better result (higher confidence = less negative logprob)
@@ -201,6 +204,7 @@ class FasterWhisperEngine(STTEngine):
         language: str = "en",
         initial_prompt: str | None = None,
         word_timestamps: bool = False,
+        beam_size: int | None = None,
     ) -> STTResult:
         """Run faster-whisper transcription against a specific model instance.
 
@@ -208,13 +212,15 @@ class FasterWhisperEngine(STTEngine):
         for both the primary and fallback models.
         """
         t0 = time.perf_counter()
-        segments_gen, _info = model.transcribe(
-            audio,
+        transcribe_kwargs: dict = dict(
             language=language,
             condition_on_previous_text=False,
             initial_prompt=initial_prompt,
             word_timestamps=word_timestamps,
         )
+        if beam_size is not None:
+            transcribe_kwargs["beam_size"] = beam_size
+        segments_gen, _info = model.transcribe(audio, **transcribe_kwargs)
 
         # Consume the generator to get all segments
         segments_list = list(segments_gen)
