@@ -78,6 +78,8 @@ NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
 BEAM_SIZE = 1  # Whisper beam search width: 1=greedy (fastest), 5=default
 MULTIPROCESS = False  # separate OS processes for STT and translation
+MUSIC_THRESHOLD = 0.02  # RMS threshold for music detection (no speech + high energy)
+MUSIC_HOLDOFF = 2.0  # seconds of music-like audio before entering music-hold mode
 
 # Inference backend — resolved in main() from --backend flag
 # Values: "mlx" (Apple Silicon), "cuda" (NVIDIA), "cpu" (fallback)
@@ -205,6 +207,11 @@ THEOLOGICAL_TERMS = frozenset(
         "trinity",
         "prophecy",
         "parable",
+        # Core names — serve as theological context markers for STT correction
+        "christ",
+        "jesus",
+        "god",
+        "lord",
     }
     | frozenset(HOMOPHONE_FLAGS.values())
 )
@@ -298,6 +305,8 @@ diag_low_confidence = []  # [(chunk_id, confidence, text)]
 diag_empty_stt = []  # [(stage, id, buffer_duration_s)]
 diag_force_cuts = []  # [(chunk_id, cut_type, buffer_duration_s, cut_position_s)]
 diag_near_misses = []  # [(chunk_id, original_word, correction, match_type, text)]
+diag_music_holds = []  # [(start_frame, end_frame, duration_s)]
+diag_stt_corrections = []  # [(chunk_id, original, corrected, correction_type)]
 partial_translations = {}  # utterance_id → last MarianMT translation
 partial_latencies = {}  # utterance_id → {"pt_ms": float}
 
@@ -361,6 +370,69 @@ def check_near_miss(cid, text, threshold=0.80):
                     diag_near_misses.append((cid, clean, term, "fuzzy", text))
                     print(f"  >> NEAR-MISS (fuzzy {ratio:.0%}): '{clean}' -> '{term}'?")
                     break  # one match per word is enough
+
+
+def correct_stt_output(text):
+    """Context-aware STT correction for theological domain.
+
+    Three correction layers:
+      1. PHRASE_CORRECTIONS — always applied (multi-word, unambiguous)
+      2. NEAR_MISS_CORRECTIONS — always applied (unambiguous misspellings)
+      3. HOMOPHONE_FLAGS — only when theological context is present
+
+    Homophones are context-gated: "It started to rain" must NOT become
+    "It started to reign", but "the rain of Christ" (theological context)
+    should become "the reign of Christ".
+
+    Returns (corrected_text, corrections_list) where each correction is
+    (original, replacement, correction_type).
+    """
+    corrections = []
+    result = text
+
+    # 1. Always apply phrase corrections (multi-word, unambiguous)
+    for phrase, replacement in PHRASE_CORRECTIONS.items():
+        if phrase in result.lower():
+            pattern = re.compile(re.escape(phrase), re.IGNORECASE)
+            result = pattern.sub(replacement, result)
+            corrections.append((phrase, replacement, "phrase"))
+
+    # 2. Always apply near-miss corrections (unambiguous misspellings)
+    words = result.split()
+    for i, w in enumerate(words):
+        clean = w.lower().strip(".,!?;:'\"()")
+        if clean in NEAR_MISS_CORRECTIONS:
+            replacement = NEAR_MISS_CORRECTIONS[clean]
+            # Preserve leading case
+            if w and w[0].isupper():
+                replacement = replacement[0].upper() + replacement[1:]
+            # Preserve trailing punctuation
+            stripped = w.rstrip(".,!?;:'\"()")
+            trailing = w[len(stripped) :]
+            words[i] = replacement + trailing
+            corrections.append((clean, NEAR_MISS_CORRECTIONS[clean], "near_miss"))
+    result = " ".join(words)
+
+    # 3. Context-gated homophone corrections
+    # Only apply if ANY theological term is present in the text
+    words_lower = {w.lower().strip(".,!?;:'\"()") for w in result.split()}
+    has_theological_context = bool(words_lower & THEOLOGICAL_TERMS)
+
+    if has_theological_context:
+        words = result.split()
+        for i, w in enumerate(words):
+            clean = w.lower().strip(".,!?;:'\"()")
+            if clean in HOMOPHONE_FLAGS:
+                replacement = HOMOPHONE_FLAGS[clean]
+                if w and w[0].isupper():
+                    replacement = replacement[0].upper() + replacement[1:]
+                stripped = w.rstrip(".,!?;:'\"()")
+                trailing = w[len(stripped) :]
+                words[i] = replacement + trailing
+                corrections.append((clean, HOMOPHONE_FLAGS[clean], "homophone"))
+        result = " ".join(words)
+
+    return result, corrections
 
 
 def check_marian_divergence(cid, marian_text, gemma_text):
@@ -491,6 +563,21 @@ def print_diagnostics():
             print(f"    #{cid_fc}: {ct} at {pos:.1f}s of {dur:.1f}s buffer")
     else:
         print("\n  Force-cuts: 0 (clean)")
+
+    if diag_music_holds:
+        total_hold = sum(d for _, _, d in diag_music_holds)
+        print(f"\n  Music holds: {len(diag_music_holds)} ({total_hold:.1f}s total)")
+        for start, end, dur in diag_music_holds[:10]:
+            print(f"    frame {start}-{end}: {dur:.1f}s")
+    else:
+        print("\n  Music holds: 0")
+
+    if diag_stt_corrections:
+        print(f"\n  STT corrections: {len(diag_stt_corrections)}")
+        for cid_c, orig, fixed, ctype in diag_stt_corrections[:15]:
+            print(f"    #{cid_c}: '{orig}' → '{fixed}' ({ctype})")
+    else:
+        print("\n  STT corrections: 0")
 
     # Resource usage summary
     snap = get_resource_snapshot()
@@ -2085,6 +2172,13 @@ async def _pipeline_coordinator():
                 continue
             _last_final_text = english.strip().lower()
 
+            # [CORRECT] Apply context-aware STT corrections before translation
+            english, stt_corrections = correct_stt_output(english)
+            if stt_corrections:
+                diag_stt_corrections.extend([(cid, orig, fixed, ctype) for orig, fixed, ctype in stt_corrections])
+                for orig, fixed, ctype in stt_corrections:
+                    print(f"  >> STT CORRECTED ({ctype}): '{orig}' → '{fixed}'")
+
             prev_text = english[-100:]  # [P7-1E] capped at 100 chars
 
             # [P7-P3-6A] Broadcast English immediately + translation_start signal
@@ -2298,6 +2392,9 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "review_priority": priority,
         "marian_backend_latency": marian_lat,
         "resources": resources,
+        "stt_corrections": [
+            {"original": orig, "correction": corr, "type": ct} for c, orig, corr, ct in diag_stt_corrections if c == cid
+        ],
         "corrected_english": None,  # filled in during human review
         "corrected_spanish": None,  # filled in during human review
     }
@@ -2441,6 +2538,14 @@ async def audio_loop():
     utterance_id = 0  # tracks current utterance for partial updates
     last_silence_boundary = 0  # sample index of last silence gap start
 
+    # Music/hymn auto-muting state
+    music_hold_active = False
+    music_nonspeech_frames = 0  # consecutive non-speech high-RMS frames
+    music_speech_frames = 0  # consecutive speech frames (for exiting music hold)
+    music_holdoff_frames = int(MUSIC_HOLDOFF * SAMPLE_RATE / 512)  # ~2s
+    music_resume_frames = int(0.5 * SAMPLE_RATE / 512)  # ~0.5s speech to exit
+    music_hold_start_frame = 0
+
     while True:
         try:
             stream = sd.InputStream(
@@ -2463,6 +2568,51 @@ async def audio_loop():
                     has_speech = is_speech(audio_frame, vad_model, vad_utils)
 
                     frame_count += 1
+
+                    # --- Music/hymn auto-muting ---
+                    frame_rms = float(np.sqrt(np.mean(audio_frame**2)))
+                    if not has_speech and frame_rms > MUSIC_THRESHOLD:
+                        music_nonspeech_frames += 1
+                        music_speech_frames = 0
+                    elif has_speech:
+                        music_speech_frames += 1
+                        music_nonspeech_frames = 0
+                    else:
+                        # Silence (no speech, low RMS)
+                        music_nonspeech_frames = 0
+                        music_speech_frames = 0
+
+                    # Enter music hold
+                    if not music_hold_active and music_nonspeech_frames >= music_holdoff_frames:
+                        music_hold_active = True
+                        music_hold_start_frame = frame_count
+                        print("\n  [MUSIC] Music detected — muting STT")
+                        # Discard any accumulated speech buffer (it's likely music garbage)
+                        if len(speech_buffer) > 0:
+                            speech_buffer = np.array([], dtype=np.float32)
+                            silence_frames = 0
+                            last_partial_len = 0
+                            last_silence_boundary = 0
+                        # Broadcast music_hold to displays
+                        task = asyncio.create_task(broadcast({"type": "music_hold", "active": True}))
+                        _partial_tasks.add(task)
+                        task.add_done_callback(_partial_tasks.discard)
+
+                    # Exit music hold when speech resumes for ~0.5s
+                    if music_hold_active and music_speech_frames >= music_resume_frames:
+                        hold_dur = (frame_count - music_hold_start_frame) * 512 / SAMPLE_RATE
+                        diag_music_holds.append((music_hold_start_frame, frame_count, round(hold_dur, 1)))
+                        music_hold_active = False
+                        music_nonspeech_frames = 0
+                        print(f"  [MUSIC] Speech resumed after {hold_dur:.1f}s hold")
+                        vad_model.reset_states()
+                        task = asyncio.create_task(broadcast({"type": "music_hold", "active": False}))
+                        _partial_tasks.add(task)
+                        task.add_done_callback(_partial_tasks.discard)
+
+                    # Skip all speech buffering when in music hold
+                    if music_hold_active:
+                        continue
 
                     if has_speech:
                         if len(speech_buffer) == 0:
@@ -2793,6 +2943,18 @@ def main():
         default=False,
         help="Run STT and translation in separate OS processes for GPU overlap (~33%% throughput gain)",
     )
+    parser.add_argument(
+        "--music-threshold",
+        type=float,
+        default=0.02,
+        help="RMS threshold for music detection (no speech + high energy). Default: 0.02",
+    )
+    parser.add_argument(
+        "--music-holdoff",
+        type=float,
+        default=2.0,
+        help="Seconds of music-like audio before muting STT. Default: 2.0",
+    )
     args = parser.parse_args()
 
     # --- Resolve backend ---
@@ -2827,7 +2989,7 @@ def main():
         args.run_ab = False
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
-    global WORD_TIMESTAMPS, BEAM_SIZE, MULTIPROCESS
+    global WORD_TIMESTAMPS, BEAM_SIZE, MULTIPROCESS, MUSIC_THRESHOLD, MUSIC_HOLDOFF
     CHUNK_DURATION = args.chunk_duration
     WS_PORT = args.ws_port
     VAD_THRESHOLD = args.vad_threshold
@@ -2838,6 +3000,8 @@ def main():
     WORD_TIMESTAMPS = args.word_timestamps
     BEAM_SIZE = args.beam_size
     MULTIPROCESS = args.multiprocess
+    MUSIC_THRESHOLD = args.music_threshold
+    MUSIC_HOLDOFF = args.music_holdoff
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):

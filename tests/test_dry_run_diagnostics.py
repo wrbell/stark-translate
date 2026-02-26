@@ -20,6 +20,8 @@ def _clear_diagnostics():
     d.diag_empty_stt.clear()
     d.diag_force_cuts.clear()
     d.diag_near_misses.clear()
+    d.diag_music_holds.clear()
+    d.diag_stt_corrections.clear()
     yield
     d.diag_homophones.clear()
     d.diag_bad_splits.clear()
@@ -29,6 +31,8 @@ def _clear_diagnostics():
     d.diag_empty_stt.clear()
     d.diag_force_cuts.clear()
     d.diag_near_misses.clear()
+    d.diag_music_holds.clear()
+    d.diag_stt_corrections.clear()
 
 
 # ===================================================================
@@ -538,3 +542,120 @@ class TestShortPhraseDampening:
         import dry_run_ab as d
 
         assert "hallelujah" in d._SHORT_PHRASE_WHITELIST
+
+
+# ===================================================================
+# correct_stt_output (context-aware STT correction)
+# ===================================================================
+
+
+class TestCorrectSttOutput:
+    """Tests for context-aware theological STT correction."""
+
+    def test_homophone_corrected_with_theological_context(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("the rain of Christ")
+        assert "reign" in text.lower()
+        assert any(c[2] == "homophone" for c in corrections)
+
+    def test_homophone_not_corrected_without_context(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("It started to rain")
+        assert "rain" in text.lower()
+        assert not any(c[2] == "homophone" for c in corrections)
+
+    def test_near_miss_always_corrected(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("The exhitation of the crowd")
+        assert "exaltation" in text.lower()
+        assert any(c[2] == "near_miss" for c in corrections)
+
+    def test_phrase_always_corrected(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("He began to waver in the beach")
+        assert "wavering in speech" in text.lower()
+        assert any(c[2] == "phrase" for c in corrections)
+
+    def test_no_corrections_for_clean_text(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("God is love and mercy")
+        assert corrections == []
+        assert text == "God is love and mercy"
+
+    def test_preserves_case(self):
+        from dry_run_ab import correct_stt_output
+
+        text, _ = correct_stt_output("The Exhitation was glorious")
+        assert text.startswith("The Exaltation")
+
+    def test_preserves_trailing_punctuation(self):
+        from dry_run_ab import correct_stt_output
+
+        text, _ = correct_stt_output("It was exhaltation.")
+        assert text.endswith("exaltation.")
+
+    def test_media_corrected_in_theological_context(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("Christ is the media between God and man")
+        assert "mediator" in text.lower()
+
+    def test_media_preserved_without_theological_context(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("Check the media for updates")
+        assert "media" in text.lower()
+        assert "mediator" not in text.lower()
+
+    def test_multiple_corrections_in_one_text(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("The exhitation and the rain of God's grace")
+        assert "exaltation" in text.lower()
+        assert "reign" in text.lower()
+        assert len(corrections) >= 2
+
+    def test_returns_empty_corrections_for_empty_text(self):
+        from dry_run_ab import correct_stt_output
+
+        text, corrections = correct_stt_output("")
+        assert text == ""
+        assert corrections == []
+
+
+# ===================================================================
+# Music hold diagnostics accumulator
+# ===================================================================
+
+
+class TestMusicHoldDiagnostics:
+    """Tests for music hold diagnostic accumulator existence and structure."""
+
+    def test_accumulator_exists(self):
+        import dry_run_ab as d
+
+        assert hasattr(d, "diag_music_holds")
+        assert isinstance(d.diag_music_holds, list)
+
+    def test_music_threshold_default(self):
+        import dry_run_ab as d
+
+        assert hasattr(d, "MUSIC_THRESHOLD")
+        assert d.MUSIC_THRESHOLD == 0.02
+
+    def test_music_holdoff_default(self):
+        import dry_run_ab as d
+
+        assert hasattr(d, "MUSIC_HOLDOFF")
+        assert d.MUSIC_HOLDOFF == 2.0
+
+    def test_stt_corrections_accumulator_exists(self):
+        import dry_run_ab as d
+
+        assert hasattr(d, "diag_stt_corrections")
+        assert isinstance(d.diag_stt_corrections, list)

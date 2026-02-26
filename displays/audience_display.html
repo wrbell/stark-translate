@@ -200,6 +200,21 @@
 
   .header { cursor: pointer; }
 
+  /* Music hold indicator */
+  .music-hold {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    color: var(--text-dim);
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 10;
+    letter-spacing: 4px;
+  }
+  .music-hold.visible { opacity: 0.5; }
+
   /* Responsive */
   @media (min-width: 1400px) {
     .text-area { font-size: 34px; }
@@ -230,6 +245,7 @@
   </div>
 </div>
 
+<div class="music-hold" id="musicHold">&#9835; &#9835; &#9835;</div>
 <button class="fs-btn" id="fsBtn" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
 
 <div class="qr-overlay" id="qrOverlay">
@@ -323,6 +339,14 @@
 
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
+
+      // Music hold indicator
+      if (data.type === 'music_hold') {
+        const el = document.getElementById('musicHold');
+        if (data.active) el.classList.add('visible');
+        else el.classList.remove('visible');
+        return;
+      }
 
       // [P7-P3-6A] Handle streaming translation tokens
       if (data.type === 'translation_start') {

@@ -1,6 +1,6 @@
 [project]
 name = "stark-translate"
-version = "2026.2.4.2"
+version = "2026.3.1.0"
 requires-python = ">=3.11"
 description = "Live bilingual speech-to-text for church outreach"
 
