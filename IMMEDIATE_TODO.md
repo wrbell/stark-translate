@@ -40,6 +40,15 @@ A 5-step post-sermon validation run using existing models on both the locally re
 
 ---
 
+## NEXT: Spanish STT & Spanish Text-Text Translation
+
+Two new capabilities to add before the C++ retool:
+
+1. **Spanish STT** — Add Spanish speech-to-text so the pipeline can transcribe a Spanish-speaking preacher directly. Whisper already supports Spanish (`language="es"`); wire up a language toggle or auto-detect mode. Enables the reverse direction: Spanish audio → Spanish text → English translation.
+2. **Spanish text-text translation (ES→EN)** — Add Spanish-to-English translation path. MarianMT has `Helsinki-NLP/opus-mt-es-en` (~75MB, already used for back-translation QE). TranslateGemma supports `es→en` natively. This completes bidirectional support: EN→ES (current) and ES→EN (new).
+
+---
+
 ## LATER: C++ / GPU Optimization Proposal
 
 **Philosophy:** Dev in Python, prod optimized in C++
