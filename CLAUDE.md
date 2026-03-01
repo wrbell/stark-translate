@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-A fully on-device, live English speech-to-text system with dual English/Spanish output, built for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Designed for low-latency local transcription that outperforms YouTube's built-in captions, with automated quality monitoring and an iterative fine-tuning loop.
+A fully on-device, live bidirectional speech-to-text system with English/Spanish output, built for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Supports both English speakers (`--lang en`, EN→ES) and Spanish speakers (`--lang es`, ES→EN). Designed for low-latency local transcription that outperforms YouTube's built-in captions, with automated quality monitoring and an iterative fine-tuning loop.
 
 A **two-pass pipeline** provides fast partials and high-quality finals:
 
@@ -54,7 +54,7 @@ project_dir/
 ├── .pre-commit-config.yaml         # Pre-commit hooks (ruff check + format)
 ├── .commitlintrc.yml               # Conventional commit enforcement config
 ├── codecov.yml                     # Codecov coverage config (ignore engines, training)
-├── todo.md                         # Phased task list
+├── docs/todo.md                    # Phased task list
 │
 ├── .github/
 │   ├── dependabot.yml              # Automated dependency updates (pip + actions)
@@ -68,7 +68,7 @@ project_dir/
 │       ├── commitlint.yml          # Conventional commit format check
 │       └── stale.yml               # Auto-close stale issues/PRs
 │
-├── tests/                          # 150+ tests (conftest.py + 18 test_*.py files)
+├── tests/                          # 450+ tests (conftest.py + 18 test_*.py files)
 │   └── ...                         # engines, settings, glossary, pipeline, QE, dry-run, features
 │
 ├── dry_run_ab.py                   # Main pipeline: mic → VAD → STT → translate → WebSocket + HTTP
@@ -113,7 +113,12 @@ project_dir/
 │   ├── evaluate_*.py               # SacreBLEU/chrF++/COMET, Piper quality
 │   └── assess_quality.py           # Baseline transcript quality assessment
 │
-├── docs/                           # 13 docs — training plans, roadmaps, troubleshooting
+├── docs/                           # 18 docs — plans, roadmaps, troubleshooting
+│   ├── immediate_todo.md           # Live demo session notes + immediate actions
+│   ├── todo.md                     # Phased task list
+│   ├── release_plan.md             # Release planning
+│   ├── optimized.md                # NVIDIA C++ inference optimization plan
+│   ├── deploy.md                   # Automated adapter deployment system plan
 │   ├── training_plan.md            # Full training schedule + go/no-go gates
 │   ├── macos_libomp_fix.md         # libomp conflict diagnosis + fix
 │   └── ...                         # seattle run, accent tuning, multilingual, RTX 2070, OBS integration
@@ -394,7 +399,7 @@ Seven GitHub Actions workflows enforce quality on every push and PR to `main`:
 | Workflow | Trigger | What it does |
 |----------|---------|-------------|
 | **Lint** (`lint.yml`) | push / PR | Ruff check + format, mypy, bandit security scan, vulture dead code (advisory), HTML tidy |
-| **Test** (`test.yml`) | push / PR | pytest (150+ tests, Python 3.11 + 3.12), coverage threshold (≥18%), Codecov upload, PR comment |
+| **Test** (`test.yml`) | push / PR | pytest (450+ tests, Python 3.11 + 3.12), coverage threshold (≥18%), Codecov upload, PR comment |
 | **Release** (`release.yml`) | `v*` tag push | Creates GitHub Release from tag |
 | **Security** (`security.yml`) | push / PR / weekly | pip-audit on both requirements files |
 | **Label** (`label.yml`) | PR | Auto-labels PRs by changed paths (engines, displays, training, etc.) |
@@ -504,7 +509,8 @@ All training runs on the **Windows Desktop** (A2000 Ada 16GB, ~16 TFLOPS FP16, ~
 
 - [x] **Phase 0 — Setup:** Configure both environments per machine-specific docs
 - [x] **Phase 1 — Baseline:** Run base A/B test (no fine-tuning) to establish latency and WER baselines
-- [x] **Phase 1.5 — CI/CD:** GitHub Actions (lint, test, security, release), pre-commit, CalVer versioning, 130+ tests
+- [x] **Phase 1.5 — CI/CD:** GitHub Actions (lint, test, security, release), pre-commit, CalVer versioning, 450+ tests
+- [x] **Phase 1.6 — Spanish STT:** Bidirectional language support (`--lang en`/`--lang es`), ES→EN translation via MarianMT + TranslateGemma
 - [ ] **Phase 2 — Data collection:** Download and sample 10–20 hours of Stark Road audio via `yt-dlp`
 - [ ] **Phase 3 — Quality assessment:** Manually transcribe 50–100 sample segments, compute baseline WER
 - [ ] **Phase 4 — Preprocessing:** Run the 10-step audio cleaning pipeline on all collected data

@@ -5,9 +5,9 @@
 [![Security](https://github.com/wrbell/stark-translate/actions/workflows/security.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/wrbell/stark-translate/graph/badge.svg)](https://codecov.io/gh/wrbell/stark-translate)
 
-Live bilingual (English/Spanish) speech-to-text for church outreach at Stark Road Gospel Hall, Farmington Hills, MI.
+Live bidirectional (English/Spanish) speech-to-text for church outreach at Stark Road Gospel Hall, Farmington Hills, MI.
 
-Real-time mic input, fully on-device transcription and translation, displayed in browser. Uses a two-pass pipeline for fast partials and high-quality finals, with A/B model comparison for translation quality analysis.
+Real-time mic input, fully on-device transcription and translation, displayed in browser. Supports both English and Spanish speakers via `--lang` flag. Uses a two-pass pipeline for fast partials and high-quality finals, with A/B model comparison for translation quality analysis.
 
 ## Architecture
 
@@ -21,13 +21,13 @@ Real-time mic input, fully on-device transcription and translation, displayed in
             │
             ├─ PARTIAL (on 1s of new speech, while speaker is talking)
             │    Whisper Large-V3-Turbo STT (~300ms)
-            │    MarianMT EN→ES PyTorch (~80ms)             ← italic in UI
+            │    MarianMT EN↔ES PyTorch (~80ms)             ← italic in UI
             │    Total: ~380ms
             │
             └─ FINAL (on silence gap or 8s max utterance)
             │    Whisper Large-V3-Turbo STT (~300ms, word timestamps)
-            │    TranslateGemma 4B EN→ES (~350ms)          ← replaces partial
-            │    TranslateGemma 12B EN→ES (~800ms, --ab)   ← side-by-side
+            │    TranslateGemma 4B EN↔ES (~350ms)          ← replaces partial
+            │    TranslateGemma 12B EN↔ES (~800ms, --ab)   ← side-by-side
             │    Total: ~650ms (4B) / ~1.1s (A/B)
             │
             │    Pipeline overlap (6C): translation runs on utterance N
@@ -81,6 +81,9 @@ python dry_run_ab.py
 # Run — A/B mode with both 4B and 12B (~11.3 GB RAM)
 python dry_run_ab.py --ab
 
+# Run — Spanish speaker mode (ES→EN translation)
+python dry_run_ab.py --lang es
+
 # Open displays in browser
 open displays/audience_display.html
 open displays/ab_display.html
@@ -98,6 +101,7 @@ python dry_run_ab.py --backend=cuda --no-ab
 
 | Flag | Default | Description |
 |------|---------|-------------|
+| `--lang` | en | Source language: `en` (English→Spanish) or `es` (Spanish→English) |
 | `--ab` | off | Load both 4B and 12B for A/B comparison |
 | `--backend` | auto | Inference backend: auto, mlx, cuda, cpu |
 | `--no-ab` | off | Skip 12B model (for low-VRAM devices) |
@@ -113,7 +117,7 @@ python dry_run_ab.py --backend=cuda --no-ab
 ## Testing
 
 ```bash
-# Run full test suite (150+ tests, no GPU required)
+# Run full test suite (450+ tests, no GPU required)
 pytest tests/ -v
 
 # With coverage report
@@ -132,7 +136,7 @@ Tests run on CI (Ubuntu, Python 3.11 + 3.12) without GPU or model downloads. Hea
 |-----------|-------|-----------|------|---------|
 | VAD | Silero VAD | PyTorch | ~2 MB | <1ms |
 | STT | Whisper Large-V3-Turbo | mlx-whisper / faster-whisper | ~1.5 GB | ~300ms |
-| Translate (partials) | MarianMT opus-mt-en-es | PyTorch (CPU, ~80ms) | ~298 MB | ~80ms |
+| Translate (partials) | MarianMT opus-mt-en-es / es-en | PyTorch (CPU, ~80ms) | ~298 MB | ~80ms |
 | Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~350ms |
 | Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~800ms |
 
@@ -142,6 +146,7 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 
 ## Features
 
+- **Bidirectional language support** -- `--lang en` (English→Spanish, default) or `--lang es` (Spanish→English) with automatic model selection
 - **Two-pass STT pipeline** -- fast italic partials (MarianMT, ~380ms) replaced by high-quality finals (TranslateGemma, ~650ms) on silence detection
 - **Pipeline overlap** -- translation runs concurrently with next utterance's STT, hiding translation latency
 - **A/B translation comparison** -- 4B and 12B TranslateGemma run in parallel via `run_in_executor`, logged to CSV
@@ -250,18 +255,16 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 │   └── summarize_sermon.py    # Post-sermon 5-sentence summary
 │
 ├── docs/
-│   ├── seattle_training_run.md # 6-day unattended training plan (Feb 12-17)
+│   ├── immediate_todo.md      # Live demo session notes + session issues
+│   ├── todo.md                # Phased task list
+│   ├── release_plan.md        # Release planning
+│   ├── optimized.md           # NVIDIA C++ inference optimization plan
+│   ├── deploy.md              # Automated adapter deployment system plan
 │   ├── training_plan.md       # Full training schedule + go/no-go gates
-│   ├── training_time_estimates.md # A2000 Ada GPU time estimates
 │   ├── roadmap.md             # Mac → Windows → RTX 2070 deployment roadmap
 │   ├── accent_tuning_plan.md  # 4-week accent-diverse STT tuning plan
-│   ├── multi_lingual.md       # Hindi & Chinese actionable todo list
-│   ├── multilingual_tuning_proposal.md # Hindi/Chinese research + QLoRA strategy
-│   ├── rtx2070_feasibility.md # RTX 2070 hardware analysis
-│   ├── projection_integration.md # OBS/NDI/ProPresenter integration
-│   ├── fast_stt_options.md    # Lightning-whisper-mlx feasibility study
-│   ├── macos_libomp_fix.md   # libomp conflict diagnosis + fix
-│   └── previous_actions.md    # Completed work log
+│   ├── macos_libomp_fix.md    # libomp conflict diagnosis + fix
+│   └── ...                    # 18 docs total
 │
 ├── stark_data/                # Church audio + transcripts + corrections
 ├── bible_data/                # Biblical parallel text corpus (269K pairs)
@@ -275,35 +278,38 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 | [`CLAUDE.md`](./CLAUDE.md) | Full project overview, 6-layer architecture, fine-tuning strategy, compute timeline |
 | [`CLAUDE-macbook.md`](./CLAUDE-macbook.md) | Mac inference environment setup |
 | [`CLAUDE-windows.md`](./CLAUDE-windows.md) | Windows/WSL training environment setup |
-| [`docs/seattle_training_run.md`](./docs/seattle_training_run.md) | 6-day unattended training run design (Feb 12-17) |
+| [`docs/optimized.md`](./docs/optimized.md) | NVIDIA C++ inference optimization plan (llama.cpp / exllamav2) |
+| [`docs/deploy.md`](./docs/deploy.md) | Automated adapter deployment, health checks, hot-reload, rollback |
+| [`docs/immediate_todo.md`](./docs/immediate_todo.md) | Live demo session notes and immediate action items |
 | [`docs/roadmap.md`](./docs/roadmap.md) | Full project roadmap: Mac → training → RTX 2070 deployment |
 | [`docs/training_plan.md`](./docs/training_plan.md) | Training schedule, data sources, go/no-go gates |
 | [`docs/accent_tuning_plan.md`](./docs/accent_tuning_plan.md) | 4-week accent-diverse STT tuning plan (code complete) |
 | [`docs/multi_lingual.md`](./docs/multi_lingual.md) | Hindi & Chinese actionable todo list |
-| [`docs/multilingual_tuning_proposal.md`](./docs/multilingual_tuning_proposal.md) | Hindi/Chinese research: corpora, glossaries, QLoRA, evaluation |
 | [`docs/macos_libomp_fix.md`](./docs/macos_libomp_fix.md) | macOS libomp conflict diagnosis and fix |
-| [`todo.md`](./todo.md) | Phased task list aligned to Seattle training schedule |
+| [`docs/todo.md`](./docs/todo.md) | Phased task list |
 
 ## Development Status
 
 **What's done:**
+- Bidirectional language support: `--lang en` (EN→ES) and `--lang es` (ES→EN) with automatic model selection
 - Wholesale swap to Whisper Large-V3-Turbo (both partials and finals)
 - `engines/` package: MLX + CUDA engine implementations with factory auto-detection
 - `settings.py`: pydantic-settings unified config (`STARK_` env prefix, `.env` support)
 - Backend selection (`--backend auto|mlx|cuda`) with CUDA fallback paths
 - STT fallback logic (lazy-load fallback model on low confidence / hallucination)
-- `tools/convert_models_to_both.py`: dual-endpoint model export
+- Validation pipeline (`tools/validate_session.py`) for post-session quality analysis
 - Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
-- `requirements-nvidia.txt` for CUDA inference environments
 - CI/CD pipeline: 7 GitHub Actions workflows (lint, test, security, release, label, commitlint, stale) + Codecov
-- 150+ tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
+- 450+ tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
 - Dependabot for automated dependency updates
 
 **What's next:**
+- NVIDIA C++ inference optimization — llama.cpp/exllamav2 for sub-1s translation ([plan](./docs/optimized.md))
+- Automated adapter deployment with health checks and rollback ([plan](./docs/deploy.md))
 - Fine-tune Whisper + TranslateGemma on church audio (Phase 2-6)
-- Active learning feedback loop: flag → correct → retrain (Phase C)
-- Hindi & Chinese translation adapters (Phase E)
-- See [`todo.md`](./todo.md) for full task list
+- Active learning feedback loop: flag → correct → retrain
+- Hindi & Chinese translation adapters
+- See [`docs/todo.md`](./docs/todo.md) for full task list
 
 ## License
 

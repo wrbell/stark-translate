@@ -1,6 +1,6 @@
 # Previous Actions — Stark Road Bilingual Speech-to-Text
 
-> Completed work moved here from todo.md for reference.
+> Completed work moved here from `todo.md` for reference.
 
 ---
 
