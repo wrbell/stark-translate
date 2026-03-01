@@ -2220,11 +2220,10 @@ async def _pipeline_coordinator():
                 await active_translation_task
             break
 
-        audio_data = item
+        audio_data, e2e_start = item
         chunk_id += 1
         cid = chunk_id
         _pipeline_total += 1
-        e2e_start = time.perf_counter()
 
         # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
         speech_rms = float(np.sqrt(np.mean(audio_data**2)))
@@ -2343,7 +2342,7 @@ async def pipeline_submit(audio_data):
     the _pipeline_coordinator processes the chunk asynchronously.
     """
     if _pipeline_chunk_queue is not None:
-        await _pipeline_chunk_queue.put(audio_data)
+        await _pipeline_chunk_queue.put((audio_data, time.perf_counter()))
 
 
 async def process_final(audio_data, finalized_utterance_id=None):
@@ -2505,6 +2504,12 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "marian_similarity": marian_sim,
         "review_priority": priority,
         "marian_backend_latency": marian_lat,
+        "stt_latency_ms": data.get("stt_latency_ms"),
+        "latency_a_ms": data.get("latency_a_ms"),
+        "latency_b_ms": data.get("latency_b_ms"),
+        "e2e_latency_ms": data.get("e2e_latency_ms"),
+        "tps_a": data.get("tps_a"),
+        "tps_b": data.get("tps_b"),
         "resources": resources,
         "stt_corrections": [
             {"original": orig, "correction": corr, "type": ct} for c, orig, corr, ct in diag_stt_corrections if c == cid

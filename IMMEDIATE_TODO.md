@@ -6,9 +6,9 @@ Observations from today's live church service run (`dry_run_ab.py`, 4B default m
 
 ## Speaker 1 Issues
 
-- **Mic inflections** — Microphone catching vocal inflections (breath sounds, trailing syllables, pitch shifts) that Whisper misinterprets as speech
+- ~~**Mic inflections**~~ — DONE. VAD threshold raised 0.30→0.42, min buffer 0.5→0.7s, pre-STT RMS energy gate added.
 - ~~**Erroneous "thank you"s (TOP NEED)**~~ — DONE. 4-tier hallucination suppression in `dry_run_ab.py` (Tier 1: garbage phrases, Tier 2: confidence+duration, Tier 3: low-conf short, Tier 4: dedup). "Thank you" caught by Tier 1 exact match + Tier 2 confidence gate.
-- **"That we / Daniel"** — Specific misrecognition where Whisper produced "That we" or "Daniel" incorrectly from similar-sounding speech
+- ~~**"That we / Daniel"**~~ — DONE. Phrase corrections `"damn you" → "Daniel"` and `"danic" → "Daniel"` added.
 - **Restart between speakers** — Test whether restarting the pipeline between Speaker 1 and Speaker 2 fixes the inflection issue. Accumulated state/context may be degrading STT quality over the session.
 - ~~**Erroneous text filter**~~ — DONE. 4-tier suppression system implemented in `dry_run_ab.py:307-373`. Catches phantom phrases, low-confidence hallucinations, short-duration garbage, and consecutive duplicates.
 
