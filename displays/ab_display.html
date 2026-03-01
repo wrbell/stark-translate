@@ -304,11 +304,13 @@
       <span>A <span class="stat-val green-val" id="p50A">—</span></span>
       <span>B <span class="stat-val blue-val" id="p50B">—</span></span>
       <span>M <span class="stat-val purple-val" id="p50Marian">—</span></span>
+      <span>E2E <span class="stat-val" id="p50E2E">—</span></span>
       <span class="pct-label" style="margin-left:6px">p95:</span>
       <span>STT <span class="stat-val" id="p95STT">—</span></span>
       <span>A <span class="stat-val green-val" id="p95A">—</span></span>
       <span>B <span class="stat-val blue-val" id="p95B">—</span></span>
       <span>M <span class="stat-val purple-val" id="p95Marian">—</span></span>
+      <span>E2E <span class="stat-val" id="p95E2E">—</span></span>
       <span class="pct-label" style="margin-left:6px">t/s:</span>
       <span>A <span class="stat-val green-val" id="tpsA">—</span></span>
       <span>B <span class="stat-val blue-val" id="tpsB">—</span></span>
@@ -339,7 +341,7 @@
   let sameCount = 0;
   let sumTpsA = 0, sumTpsB = 0, tpsCountA = 0, tpsCountB = 0;
   let sumMarian = 0, marianCount = 0, latenciesMarian = [];
-  let latenciesSTT = [], latenciesA = [], latenciesB = [];
+  let latenciesSTT = [], latenciesA = [], latenciesB = [], latenciesE2E = [];
 
   // Track model names — auto-detect from first data
   let modelA = null, modelB = null;
@@ -550,6 +552,7 @@
         latenciesSTT.push(latSTT);
         latenciesA.push(latA);
         if (latB > 0) latenciesB.push(latB);
+        latenciesE2E.push(e2e);
 
         const tpsA = data.tps_a || 0;
         const tpsB = data.tps_b || 0;
@@ -567,9 +570,11 @@
         $('p50STT').textContent = fmtMs(percentile(latenciesSTT, 50));
         $('p50A').textContent = fmtMs(percentile(latenciesA, 50));
         $('p50B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 50)) : '—';
+        $('p50E2E').textContent = fmtMs(percentile(latenciesE2E, 50));
         $('p95STT').textContent = fmtMs(percentile(latenciesSTT, 95));
         $('p95A').textContent = fmtMs(percentile(latenciesA, 95));
         $('p95B').textContent = latenciesB.length > 0 ? fmtMs(percentile(latenciesB, 95)) : '—';
+        $('p95E2E').textContent = fmtMs(percentile(latenciesE2E, 95));
 
         $('tpsA').textContent = tpsCountA > 0 ? (sumTpsA / tpsCountA).toFixed(0) : '—';
         $('tpsB').textContent = tpsCountB > 0 ? (sumTpsB / tpsCountB).toFixed(0) : '—';

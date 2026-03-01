@@ -69,7 +69,7 @@ class VADSettings(BaseSettings):
     """Voice Activity Detection (Silero VAD) configuration."""
 
     threshold: float = Field(
-        default=0.3,
+        default=0.42,
         description="Speech probability threshold (0-1). Lower = more sensitive.",
     )
     silence_trigger: float = Field(

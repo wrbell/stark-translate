@@ -118,6 +118,9 @@ _RUN_AB = False  # Whether A/B mode is enabled (needed when models aren't in mai
 # --- Partial/final coordination ---
 # When a final is pending, partials are skipped to avoid starving the pipeline.
 _final_pending = threading.Event()
+_final_pending_utterance_id = (
+    None  # which utterance is being finalized (new partials for OTHER utterances pass through)
+)
 # Track the active partial future so we can cancel it when a final arrives.
 _active_partial_future = None
 _partial_future_lock = threading.Lock()
@@ -164,17 +167,24 @@ HOMOPHONE_FLAGS = {
 
 # Near-miss corrections: edit-distance-close domain words that aren't true
 # homophones but appear as STT artifacts for theological vocabulary.
+# "prugot" appeared as a Whisper hallucination suffix on "Daniel" (March 1).
 NEAR_MISS_CORRECTIONS = {
     "exhitation": "exaltation",
     "self-exhitation": "self-exaltation",
     "exhaltation": "exaltation",
     "self-exhaltation": "self-exaltation",
+    "prugot": "proved God",
+    "danic": "Daniel",
 }
 
 # Multi-word phrase corrections for STT artifacts that span multiple words.
+# "damn you" → "Daniel" is a critical phonetic near-miss: Whisper mishears
+# the name Daniel as offensive text (March 1 2026, chunk 229, conf=0.64).
 PHRASE_CORRECTIONS = {
     "waver in the beach": "wavering in speech",
     "waver in the speech": "wavering in speech",
+    "damn you": "Daniel",
+    "damn you,": "Daniel,",
 }
 
 # [P7-6B] Theological terms that need TranslateGemma quality — MarianMT alone
@@ -295,6 +305,76 @@ _SHORT_PHRASE_WHITELIST = frozenset(
         "good evening",
     }
 )
+
+# ---------------------------------------------------------------------------
+# Hallucination suppression — catches phantom text Whisper generates from
+# silence, breaths, mic pops, and ambient noise.  Data-driven from analysis
+# of March 1 2026 live sessions (49 hallucinations across 611 chunks).
+# ---------------------------------------------------------------------------
+
+# Phrases Whisper hallucinates from near-silence (its most common training
+# data phrases).  Suppressed when confidence is below the paired threshold.
+_HALLUCINATION_PHRASES: dict[str, float] = {
+    "thank you": 0.70,
+    "thanks for watching": 0.80,
+    "please subscribe": 0.80,
+    "bye": 0.50,
+    "you": 0.40,
+}
+
+# Minimum utterance duration (seconds).  Chunks at or below this are
+# nearly always VAD floor artifacts containing only breaths/clicks.
+_MIN_UTTERANCE_DUR = 0.80  # VAD floor is 0.77s; anything <= 0.80 is suspect
+
+
+def _should_suppress(
+    text: str,
+    confidence: float | None,
+    utterance_dur: float | None,
+) -> str | None:
+    """Check if STT output should be suppressed as a hallucination.
+
+    Returns a reason string if suppressed, or None if the text should be kept.
+
+    Four tiers:
+      1. Known hallucination phrases at low confidence (exact match)
+      2. Ultra-short VAD-floor chunks at low confidence
+      3. Very short text (<=2 words) at very low confidence (<0.30)
+      4. Short fragments (<=4 words) at low confidence (<0.50), not whitelisted
+         Catches nonsensical mic artifacts like "And this is my head alarm",
+         "I was blanking", "A continuous life" that are grammatically valid
+         but semantically garbage in sermon context.
+    """
+    t = text.strip()
+    if not t:
+        return None
+
+    t_lower = t.lower().rstrip(".,!?;:'\"")
+    word_count = len(t.split())
+    conf = confidence if confidence is not None else 1.0
+
+    # Tier 1: Known hallucination phrases below their confidence threshold
+    for phrase, threshold in _HALLUCINATION_PHRASES.items():
+        if t_lower == phrase and conf < threshold:
+            return f"hallucination phrase {t_lower!r} (conf={conf:.2f} < {threshold})"
+
+    # Tier 2: VAD-floor duration chunks (<=0.80s) with low confidence
+    # Every 0.77s chunk in March 1 data was a hallucination
+    if utterance_dur is not None and utterance_dur <= _MIN_UTTERANCE_DUR and conf < 0.70:
+        return f"VAD-floor chunk (dur={utterance_dur:.2f}s, conf={conf:.2f})"
+
+    # Tier 3: Ultra-short text at very low confidence
+    if word_count <= 2 and conf < 0.30:
+        return f"ultra-short low-conf (words={word_count}, conf={conf:.2f})"
+
+    # Tier 4: Short fragments at low confidence, not in whitelist
+    # In March 1 data, every chunk with <=4 words and conf < 0.50 that
+    # wasn't a known phrase ("Amen", "Good morning") was garbage text.
+    if word_count <= 4 and conf < 0.50 and t_lower not in _SHORT_PHRASE_WHITELIST:
+        return f"short fragment not whitelisted (words={word_count}, conf={conf:.2f})"
+
+    return None
+
 
 # Session-level diagnostic accumulators
 diag_homophones = []  # [(chunk_id, flagged_word, likely_word, text)]
@@ -1623,9 +1703,16 @@ async def process_partial(audio_data, utterance_id):
     """
     global _active_partial_future
 
-    # [FIX] Skip partial if a final is queued — finals take priority
-    if _final_pending.is_set():
+    # [FIX] Skip partial if a final is queued for the SAME utterance — finals take priority.
+    # Partials for a NEW utterance (different utterance_id) are allowed through.
+    if _final_pending.is_set() and utterance_id == _final_pending_utterance_id:
         print("  [FIX] partial skipped (final pending)", end="\r")
+        return
+
+    # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
+    speech_rms = float(np.sqrt(np.mean(audio_data**2)))
+    if speech_rms < 0.008:
+        print(f"  [FILTER] low-energy partial skipped (RMS={speech_rms:.4f})", end="\r")
         return
 
     try:
@@ -1686,8 +1773,15 @@ async def process_partial(audio_data, utterance_id):
             print(f"  [FILTER] garbage partial suppressed: {english!r}")
             return
 
+        # [FILTER] Suppress phantom hallucinations (partials lack confidence, use dur+text only)
+        utt_dur = len(audio_data) / SAMPLE_RATE
+        suppress_reason = _should_suppress(english, None, utt_dur)
+        if suppress_reason:
+            print(f"  [FILTER] hallucination partial suppressed: {english!r} — {suppress_reason}")
+            return
+
         # [FIX] Re-check after STT — a final may have arrived while we were running
-        if _final_pending.is_set():
+        if _final_pending.is_set() and utterance_id == _final_pending_utterance_id:
             print("  [FIX] partial skipped after STT (final pending)", end="\r")
             return
 
@@ -2113,7 +2207,7 @@ async def _pipeline_coordinator():
     (they share the same MLX models), but STT can overlap with translation
     freely since they use different models (Whisper vs TranslateGemma).
     """
-    global chunk_id, prev_text, _last_final_text, _pipeline_overlaps, _pipeline_total
+    global chunk_id, prev_text, _last_final_text, _pipeline_overlaps, _pipeline_total, _final_pending_utterance_id
 
     # Track the currently-running translation task so we can measure overlap
     active_translation_task = None
@@ -2126,11 +2220,18 @@ async def _pipeline_coordinator():
                 await active_translation_task
             break
 
-        audio_data = item
+        audio_data, e2e_start = item
         chunk_id += 1
         cid = chunk_id
         _pipeline_total += 1
-        e2e_start = time.perf_counter()
+
+        # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
+        speech_rms = float(np.sqrt(np.mean(audio_data**2)))
+        if speech_rms < 0.008:
+            print(f"  [FILTER] low-energy final #{cid} skipped (RMS={speech_rms:.4f})")
+            _final_pending.clear()
+            _final_pending_utterance_id = None
+            continue
 
         try:
             # [P7-6C] Check if translation from previous chunk is still running.
@@ -2155,6 +2256,7 @@ async def _pipeline_coordinator():
 
             # [FIX] Final STT done — allow partials again for the next utterance
             _final_pending.clear()
+            _final_pending_utterance_id = None
 
             if not english:
                 buf_dur = len(audio_data) / SAMPLE_RATE
@@ -2164,6 +2266,13 @@ async def _pipeline_coordinator():
             # [FILTER] Suppress garbage/hallucinated text
             if _is_garbage_text(english):
                 print(f"  [FILTER] garbage final suppressed: {english!r}")
+                continue
+
+            # [FILTER] Suppress phantom hallucinations (thank you, VAD-floor, etc.)
+            utt_dur = len(audio_data) / SAMPLE_RATE
+            suppress_reason = _should_suppress(english, stt_confidence, utt_dur)
+            if suppress_reason:
+                print(f"  [FILTER] hallucination suppressed: {english!r} — {suppress_reason}")
                 continue
 
             # [DEDUP] Suppress consecutive identical finals (e.g., repeated "Amen")
@@ -2215,6 +2324,7 @@ async def _pipeline_coordinator():
 
         except Exception as e:
             _final_pending.clear()  # [FIX] Don't leave flag stuck on error
+            _final_pending_utterance_id = None
             print(f"\n  ERROR in pipeline chunk #{cid}: {e}", file=sys.stderr)
 
     # Print overlap statistics
@@ -2232,20 +2342,23 @@ async def pipeline_submit(audio_data):
     the _pipeline_coordinator processes the chunk asynchronously.
     """
     if _pipeline_chunk_queue is not None:
-        await _pipeline_chunk_queue.put(audio_data)
+        await _pipeline_chunk_queue.put((audio_data, time.perf_counter()))
 
 
-async def process_final(audio_data):
+async def process_final(audio_data, finalized_utterance_id=None):
     """Final STT on full utterance + translation. High quality.
 
     [P7-6C] Now delegates to the pipeline coordinator for overlapped execution.
     This function returns immediately after submitting the audio chunk,
     allowing the audio loop to continue capturing the next utterance.
 
-    [FIX] Sets _final_pending to suppress new partials and cancels any
-    queued partial future so finals get immediate access to the MLX thread.
+    [FIX] Sets _final_pending to suppress partials for the SAME utterance
+    and cancels any queued partial future so finals get immediate access
+    to the MLX thread. Partials for NEW utterances are allowed through.
     """
-    # Signal partials to stop — finals take priority on the MLX thread
+    global _final_pending_utterance_id
+    # Signal partials for this utterance to stop — finals take priority on the MLX thread
+    _final_pending_utterance_id = finalized_utterance_id
     _final_pending.set()
 
     # Cancel any queued (not-yet-started) partial STT future
@@ -2391,6 +2504,12 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "marian_similarity": marian_sim,
         "review_priority": priority,
         "marian_backend_latency": marian_lat,
+        "stt_latency_ms": data.get("stt_latency_ms"),
+        "latency_a_ms": data.get("latency_a_ms"),
+        "latency_b_ms": data.get("latency_b_ms"),
+        "e2e_latency_ms": data.get("e2e_latency_ms"),
+        "tps_a": data.get("tps_a"),
+        "tps_b": data.get("tps_b"),
         "resources": resources,
         "stt_corrections": [
             {"original": orig, "correction": corr, "type": ct} for c, orig, corr, ct in diag_stt_corrections if c == cid
@@ -2658,10 +2777,11 @@ async def audio_loop():
                         last_partial_len = len(speech_buffer)
 
                     # --- Final: on silence gap or max duration ---
-                    silence_triggered = buffer_duration >= 0.5 and silence_frames >= max_silence_frames
+                    # Min 0.7s buffer — sub-0.7s breath pops are almost never real speech
+                    silence_triggered = buffer_duration >= 0.7 and silence_frames >= max_silence_frames
                     force_cut_triggered = buffer_duration >= MAX_UTTERANCE
 
-                    if (silence_triggered or force_cut_triggered) and buffer_duration >= 0.5:
+                    if (silence_triggered or force_cut_triggered) and buffer_duration >= 0.7:
                         print()  # newline after partial line
 
                         if force_cut_triggered and not silence_triggered:
@@ -2678,14 +2798,14 @@ async def audio_loop():
 
                             if cut_type == "smart":
                                 # Send first part as final, carry over remainder
-                                await process_final(speech_buffer[:split_pos].copy())
+                                await process_final(speech_buffer[:split_pos].copy(), utterance_id)
                                 speech_buffer = speech_buffer[split_pos:].copy()
                                 utterance_id += 1
                                 last_partial_len = 0
                                 last_silence_boundary = 0
                             else:
                                 # No silence found — send entire buffer (original behavior)
-                                await process_final(speech_buffer.copy())
+                                await process_final(speech_buffer.copy(), utterance_id)
                                 speech_buffer = np.array([], dtype=np.float32)
                                 silence_frames = 0
                                 speech_frame_count = 0
@@ -2696,7 +2816,7 @@ async def audio_loop():
                                 _warmup_pending = True
                         else:
                             # Normal silence-triggered finalization
-                            await process_final(speech_buffer.copy())
+                            await process_final(speech_buffer.copy(), utterance_id)
                             speech_buffer = np.array([], dtype=np.float32)
                             silence_frames = 0
                             speech_frame_count = 0
