@@ -439,7 +439,7 @@
     <div id="spanishChunks"></div>
   </div>
   <div class="translation-panel panel-english" id="panelEnglish">
-    <div class="panel-label panel-label-en">English</div>
+    <div class="panel-label panel-label-en" id="enLabel">English</div>
     <div id="englishChunks"></div>
   </div>
 </div>
@@ -678,6 +678,13 @@
       try {
         data = JSON.parse(evt.data);
       } catch (e) {
+        return;
+      }
+      // Handle language config — swap panel labels
+      if (data.type === 'lang_config') {
+        var suffix = useModelB ? ' (B)' : ' (A)';
+        $('esLabel').textContent = data.target_label + suffix;
+        $('enLabel').textContent = data.source_label;
         return;
       }
       if (data.type !== 'translation') return;

@@ -236,11 +236,11 @@
 
 <div class="content">
   <div class="column column-en">
-    <div class="column-label">English</div>
+    <div class="column-label" id="srcLabel">English</div>
     <div class="text-area" id="english"></div>
   </div>
   <div class="column column-es">
-    <div class="column-label">Español</div>
+    <div class="column-label" id="tgtLabel">Español</div>
     <div class="text-area" id="spanish"></div>
   </div>
 </div>
@@ -339,6 +339,13 @@
 
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
+
+      // Handle language config — swap column labels
+      if (data.type === 'lang_config') {
+        document.getElementById('srcLabel').textContent = data.source_label;
+        document.getElementById('tgtLabel').textContent = data.target_label;
+        return;
+      }
 
       // Music hold indicator
       if (data.type === 'music_hold') {

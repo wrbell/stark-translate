@@ -21,7 +21,7 @@ import time
 import numpy as np
 
 
-def stt_worker_main(conn, model_id, cache_limit_mb=256):
+def stt_worker_main(conn, model_id, cache_limit_mb=256, source_lang="en"):
     """STT worker process entry point.
 
     Loads mlx-whisper, warms up, then processes transcription requests
@@ -63,7 +63,7 @@ def stt_worker_main(conn, model_id, cache_limit_mb=256):
         result = mlx_whisper.transcribe(
             audio,
             path_or_hf_repo=model_id,
-            language="en",
+            language=source_lang,
             condition_on_previous_text=False,
             initial_prompt=prompt,
             word_timestamps=word_ts,
@@ -110,6 +110,8 @@ def translation_worker_main(
     model_12b_id=None,
     num_draft_tokens=3,
     cache_limit_mb=256,
+    source_lang="en",
+    target_lang="es",
 ):
     """Translation worker process entry point.
 
@@ -117,8 +119,8 @@ def translation_worker_main(
     and processes translation requests until shutdown.
 
     Protocol:
-        Request:  ("translate", english_text, run_ab)
-        Response: (spanish_a, lat_a, tps_a, spanish_b, lat_b, tps_b)
+        Request:  ("translate", text, run_ab)
+        Response: (translation_a, lat_a, tps_a, translation_b, lat_b, tps_b)
         Shutdown: None
     """
     os.environ["NUMBA_THREADING_LAYER"] = "workqueue"
@@ -132,7 +134,7 @@ def translation_worker_main(
     # --- Load 4B model ---
     model_a, tok_a = mlx_load(model_4b_id)  # type: ignore[misc]
     _fix_eos(tok_a)
-    prompt_cache, suffix_tokens = _build_prompt_cache(model_a, tok_a)
+    prompt_cache, suffix_tokens = _build_prompt_cache(model_a, tok_a, source_lang, target_lang)
 
     # --- Optional 12B model ---
     model_b, tok_b = None, None
@@ -141,7 +143,7 @@ def translation_worker_main(
         _fix_eos(tok_b)
 
     # Warm up with a test translation
-    _translate_4b(model_a, tok_a, "Hello", prompt_cache, suffix_tokens)
+    _translate_4b(model_a, tok_a, "Hello", prompt_cache, suffix_tokens, source_lang, target_lang)
 
     conn.send("ready")
 
@@ -150,17 +152,21 @@ def translation_worker_main(
         if request is None:
             break
 
-        _, english, run_ab = request
+        _, text, run_ab = request
 
         # 4B translation
-        spanish_a, lat_a, tps_a = _translate_4b(model_a, tok_a, english, prompt_cache, suffix_tokens)
+        trans_a, lat_a, tps_a = _translate_4b(
+            model_a, tok_a, text, prompt_cache, suffix_tokens, source_lang, target_lang
+        )
 
         # Optional 12B with speculative decoding
-        spanish_b, lat_b, tps_b = None, 0.0, 0.0
+        trans_b, lat_b, tps_b = None, 0.0, 0.0
         if run_ab and model_b is not None:
-            spanish_b, lat_b, tps_b = _translate_12b(model_b, tok_b, english, model_a, num_draft_tokens)
+            trans_b, lat_b, tps_b = _translate_12b(
+                model_b, tok_b, text, model_a, num_draft_tokens, source_lang, target_lang
+            )
 
-        conn.send((spanish_a, lat_a, tps_a, spanish_b, lat_b, tps_b))
+        conn.send((trans_a, lat_a, tps_a, trans_b, lat_b, tps_b))
 
 
 # ---------------------------------------------------------------------------
@@ -180,7 +186,7 @@ def _fix_eos(tokenizer):
         tokenizer._eos_token_ids = {default_eos, eot_id}
 
 
-def _build_prompt_cache(model, tokenizer):
+def _build_prompt_cache(model, tokenizer, source_lang="en", target_lang="es"):
     """Build KV prompt cache for the TranslateGemma chat template prefix.
 
     Same logic as MLXGemmaEngine._build_prompt_cache and
@@ -197,8 +203,8 @@ def _build_prompt_cache(model, tokenizer):
             "content": [
                 {
                     "type": "text",
-                    "source_lang_code": "en",
-                    "target_lang_code": "es",
+                    "source_lang_code": source_lang,
+                    "target_lang_code": target_lang,
                     "text": marker,
                 }
             ],
@@ -236,7 +242,7 @@ def _build_prompt_cache(model, tokenizer):
     return cache, suffix_tokens
 
 
-def _translate_4b(model, tokenizer, text, prompt_cache, suffix_tokens):
+def _translate_4b(model, tokenizer, text, prompt_cache, suffix_tokens, source_lang="en", target_lang="es"):
     """Translate using 4B model with optional prompt cache."""
     from mlx_lm import generate
 
@@ -260,8 +266,8 @@ def _translate_4b(model, tokenizer, text, prompt_cache, suffix_tokens):
                 "content": [
                     {
                         "type": "text",
-                        "source_lang_code": "en",
-                        "target_lang_code": "es",
+                        "source_lang_code": source_lang,
+                        "target_lang_code": target_lang,
                         "text": text,
                     }
                 ],
@@ -281,7 +287,7 @@ def _translate_4b(model, tokenizer, text, prompt_cache, suffix_tokens):
     return clean, latency_ms, tps
 
 
-def _translate_12b(model, tokenizer, text, draft_model, num_draft_tokens):
+def _translate_12b(model, tokenizer, text, draft_model, num_draft_tokens, source_lang="en", target_lang="es"):
     """Translate using 12B model with speculative decoding (4B as draft)."""
     from mlx_lm import generate
 
@@ -294,8 +300,8 @@ def _translate_12b(model, tokenizer, text, draft_model, num_draft_tokens):
             "content": [
                 {
                     "type": "text",
-                    "source_lang_code": "en",
-                    "target_lang_code": "es",
+                    "source_lang_code": source_lang,
+                    "target_lang_code": target_lang,
                     "text": text,
                 }
             ],

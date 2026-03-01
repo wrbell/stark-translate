@@ -1,4 +1,4 @@
-# IMMEDIATE_TODO.md — Live Demo Session Notes (March 1, 2026)
+# Immediate TODO — Live Demo Session Notes (March 1, 2026)
 
 Observations from today's live church service run (`dry_run_ab.py`, 4B default mode).
 
@@ -40,12 +40,12 @@ A 5-step post-sermon validation run using existing models on both the locally re
 
 ---
 
-## NEXT: Spanish STT & Spanish Text-Text Translation
+## ~~NEXT: Spanish STT & Spanish Text-Text Translation~~ — DONE
 
-Two new capabilities to add before the C++ retool:
+~~Two new capabilities to add before the C++ retool:~~
 
-1. **Spanish STT** — Add Spanish speech-to-text so the pipeline can transcribe a Spanish-speaking preacher directly. Whisper already supports Spanish (`language="es"`); wire up a language toggle or auto-detect mode. Enables the reverse direction: Spanish audio → Spanish text → English translation.
-2. **Spanish text-text translation (ES→EN)** — Add Spanish-to-English translation path. MarianMT has `Helsinki-NLP/opus-mt-es-en` (~75MB, already used for back-translation QE). TranslateGemma supports `es→en` natively. This completes bidirectional support: EN→ES (current) and ES→EN (new).
+1. ~~**Spanish STT**~~ — DONE (PR #17). `--lang es` flag threads through Whisper STT, TranslateGemma, MarianMT model selection, prompt cache, session data paths, and display labels.
+2. ~~**Spanish text-text translation (ES→EN)**~~ — DONE (PR #17). MarianMT `opus-mt-es-en` selected at startup; TranslateGemma uses `source_lang_code`/`target_lang_code` globals.
 
 ---
 

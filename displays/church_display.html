@@ -420,6 +420,8 @@
       } catch (e) {
         return;
       }
+      // lang_config: acknowledged but no visible labels to swap in this display
+      if (data.type === 'lang_config') return;
       if (data.type !== 'translation') return;
 
       addChunk({
