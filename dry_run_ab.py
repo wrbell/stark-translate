@@ -70,6 +70,8 @@ CHUNK_DURATION = 2.0  # seconds of speech — more context = better word accurac
 VAD_THRESHOLD = 0.3  # Lower threshold for better sensitivity
 WS_PORT = 8765
 MIC_DEVICE = None  # None = auto-detect best input device
+# Session paths — set in main() after SOURCE_LANG is resolved so the language
+# tag is included, keeping EN and ES data separate.
 SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
 CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
@@ -84,6 +86,11 @@ MUSIC_HOLDOFF = 2.0  # seconds of music-like audio before entering music-hold mo
 # Inference backend — resolved in main() from --backend flag
 # Values: "mlx" (Apple Silicon), "cuda" (NVIDIA), "cpu" (fallback)
 BACKEND = "mlx"
+
+# Language direction — resolved in main() from --lang flag.
+# Default: English→Spanish.  --lang es flips to Spanish→English.
+SOURCE_LANG = "en"
+TARGET_LANG = "es"
 
 # Whisper model IDs
 WHISPER_MODEL_TURBO = "mlx-community/whisper-large-v3-turbo"  # Default: faster, 4 decoder layers
@@ -134,7 +141,7 @@ MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
 # [P7-1E] Whisper initial_prompt — capped at ~40 words to reduce prefill time.
 # Biases decoder toward theological vocabulary that Whisper otherwise
 # misrecognizes (e.g. "media" instead of "mediator").
-WHISPER_PROMPT = (
+WHISPER_PROMPT_EN = (
     "Sermon at Stark Road Gospel Hall. "
     "Christ Jesus, the Holy Spirit, God the Father. "
     "Atonement, propitiation, mediator, covenant, righteousness, "
@@ -142,6 +149,19 @@ WHISPER_PROMPT = (
     "repentance, reign, grace, mercy, the Gospel, epistle, apostle, "
     "Scripture, the Lord, the Word of God."
 )
+
+WHISPER_PROMPT_ES = (
+    "Predicación en la Iglesia Cristiana. "
+    "Cristo Jesús, el Espíritu Santo, Dios Padre. "
+    "La expiación, la propiciación, el mediador, el pacto, la justicia, "
+    "la santificación, la justificación, la redención, la reconciliación, "
+    "el arrepentimiento, el reino, la gracia, la misericordia, "
+    "el Evangelio, la epístola, el apóstol, la Escritura, el Señor, "
+    "la Palabra de Dios."
+)
+
+# Default to English; overridden in main() when --lang es is used.
+WHISPER_PROMPT = WHISPER_PROMPT_EN
 
 # ---------------------------------------------------------------------------
 # Live Testing Diagnostics
@@ -862,7 +882,7 @@ def load_whisper(backend="mlx"):
         model = WhisperModel(fw_model_id, device=device, compute_type=compute_type)
         # Warm up
         silence = np.zeros(16000, dtype=np.float32)
-        segments, _ = model.transcribe(silence, language="en")
+        segments, _ = model.transcribe(silence, language=SOURCE_LANG)
         list(segments)  # consume generator to trigger actual inference
         print(f"  Whisper Turbo ready ({time.time() - t0:.1f}s)")
         return model
@@ -918,7 +938,9 @@ def _build_prompt_cache(model, tokenizer, label):
     messages = [
         {
             "role": "user",
-            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": marker}],
+            "content": [
+                {"type": "text", "source_lang_code": SOURCE_LANG, "target_lang_code": TARGET_LANG, "text": marker}
+            ],
         }
     ]
     full_prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
@@ -997,7 +1019,7 @@ def load_marian():
     """Load MarianMT (~298MB) for fast partial translations."""
     from transformers import MarianMTModel, MarianTokenizer
 
-    model_id = "Helsinki-NLP/opus-mt-en-es"
+    model_id = "Helsinki-NLP/opus-mt-es-en" if SOURCE_LANG == "es" else "Helsinki-NLP/opus-mt-en-es"
     print(f"[4/6] Loading {model_id} (MarianMT PyTorch)...")
     t0 = time.time()
     tokenizer = MarianTokenizer.from_pretrained(model_id)
@@ -1077,6 +1099,7 @@ def _start_workers(run_ab=False):
     _stt_worker_proc = multiprocessing.Process(
         target=stt_worker_main,
         args=(child_conn, WHISPER_MODEL_TURBO),
+        kwargs={"source_lang": SOURCE_LANG},
         daemon=True,
     )
     _stt_worker_proc.start()
@@ -1092,6 +1115,7 @@ def _start_workers(run_ab=False):
     _trans_worker_proc = multiprocessing.Process(
         target=translation_worker_main,
         args=(child_conn2, MLX_MODEL_A, model_12b_id, NUM_DRAFT_TOKENS),
+        kwargs={"source_lang": SOURCE_LANG, "target_lang": TARGET_LANG},
         daemon=True,
     )
     _trans_worker_proc.start()
@@ -1282,7 +1306,9 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
         messages = [
             {
                 "role": "user",
-                "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+                "content": [
+                    {"type": "text", "source_lang_code": SOURCE_LANG, "target_lang_code": TARGET_LANG, "text": text}
+                ],
             }
         ]
         prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
@@ -1320,7 +1346,7 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
 
 
 def translate_cuda_gemma(model, tokenizer, text):
-    """Translate English->Spanish using TranslateGemma on CUDA.
+    """Translate using TranslateGemma on CUDA (direction set by SOURCE_LANG/TARGET_LANG).
 
     Returns (translation, latency_ms, generation_tps).
     """
@@ -1330,7 +1356,9 @@ def translate_cuda_gemma(model, tokenizer, text):
     messages = [
         {
             "role": "user",
-            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+            "content": [
+                {"type": "text", "source_lang_code": SOURCE_LANG, "target_lang_code": TARGET_LANG, "text": text}
+            ],
         }
     ]
     prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt")
@@ -1421,7 +1449,9 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
         messages = [
             {
                 "role": "user",
-                "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": text}],
+                "content": [
+                    {"type": "text", "source_lang_code": SOURCE_LANG, "target_lang_code": TARGET_LANG, "text": text}
+                ],
             }
         ]
         prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
@@ -1505,7 +1535,14 @@ def warmup_translation_models():
             messages = [
                 {
                     "role": "user",
-                    "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": "hello"}],
+                    "content": [
+                        {
+                            "type": "text",
+                            "source_lang_code": SOURCE_LANG,
+                            "target_lang_code": TARGET_LANG,
+                            "text": "hello",
+                        }
+                    ],
                 }
             ]
             prompt = mlx_a_tokenizer.apply_chat_template(messages, add_generation_prompt=True)
@@ -1725,7 +1762,7 @@ async def process_partial(audio_data, utterance_id):
                 result = mlx_whisper.transcribe(
                     audio_data,
                     path_or_hf_repo=stt_pipe,
-                    language="en",
+                    language=SOURCE_LANG,
                     condition_on_previous_text=False,
                     initial_prompt=_whisper_prompt(),
                     word_timestamps=False,
@@ -1736,7 +1773,7 @@ async def process_partial(audio_data, utterance_id):
                 # CUDA/CPU: faster-whisper
                 segments_gen, _ = stt_pipe.transcribe(
                     audio_data,
-                    language="en",
+                    language=SOURCE_LANG,
                     condition_on_previous_text=False,
                     initial_prompt=_whisper_prompt(),
                     word_timestamps=False,
@@ -1879,7 +1916,7 @@ def _run_stt_mlx(audio_data, whisper_prompt):
     result = mlx_whisper.transcribe(
         audio_data,
         path_or_hf_repo=stt_pipe,
-        language="en",
+        language=SOURCE_LANG,
         condition_on_previous_text=False,
         initial_prompt=whisper_prompt,
         word_timestamps=WORD_TIMESTAMPS,
@@ -1931,7 +1968,7 @@ def _run_stt_faster_whisper(audio_data, whisper_prompt):
     # faster-whisper expects numpy float32 array at 16kHz (same as mlx-whisper)
     segments_gen, info = stt_pipe.transcribe(
         audio_data,
-        language="en",
+        language=SOURCE_LANG,
         condition_on_previous_text=False,
         initial_prompt=whisper_prompt,
         word_timestamps=WORD_TIMESTAMPS,
@@ -2380,6 +2417,22 @@ async def ws_handler(websocket, path=None):
     """Handle new WebSocket connections."""
     ws_clients.add(websocket)
     print(f"  Browser connected ({len(ws_clients)} client(s))")
+    # Send language config so displays can swap their labels
+    try:
+        await websocket.send(
+            json.dumps(
+                {
+                    "type": "lang_config",
+                    "source_lang": SOURCE_LANG,
+                    "target_lang": TARGET_LANG,
+                    "source_label": "Español" if SOURCE_LANG == "es" else "English",
+                    "target_label": "English" if SOURCE_LANG == "es" else "Español",
+                }
+            )
+        )
+    except websockets.ConnectionClosed:
+        ws_clients.discard(websocket)
+        return
     try:
         async for _ in websocket:
             pass  # We only send, not receive
@@ -2863,9 +2916,12 @@ async def main_async(args):
     mp_str = " [multiprocess]" if MULTIPROCESS else ""
     mode_str = "MarianMT-only (low-VRAM)" if args.low_vram else ("A/B parallel" if args.run_ab else "4B only")
 
+    lang_str = "Spanish→English" if SOURCE_LANG == "es" else "English→Spanish"
+
     print(f"{'=' * 60}")
     print("  Bilingual A/B Dry Run")
     print(f"  Backend: {BACKEND.upper()}")
+    print(f"  Language: {lang_str}")
     print(f"  Mode: {mode_str}{mp_str}")
     if spec_info:
         print(spec_info, end="")
@@ -3075,6 +3131,12 @@ def main():
         default=2.0,
         help="Seconds of music-like audio before muting STT. Default: 2.0",
     )
+    parser.add_argument(
+        "--lang",
+        choices=["en", "es"],
+        default="en",
+        help="Input language: en (English→Spanish, default) or es (Spanish→English)",
+    )
     args = parser.parse_args()
 
     # --- Resolve backend ---
@@ -3107,6 +3169,19 @@ def main():
     if BACKEND == "cuda" and args.run_ab:
         print("WARNING: A/B mode not supported on CUDA (single GPU VRAM). Disabling 12B.", file=sys.stderr)
         args.run_ab = False
+
+    # --- Resolve language direction ---
+    global SOURCE_LANG, TARGET_LANG, WHISPER_PROMPT
+    global SESSION_ID, CSV_PATH, AUDIO_DIR, DIAG_PATH
+    SOURCE_LANG = args.lang
+    TARGET_LANG = "es" if args.lang == "en" else "en"
+    WHISPER_PROMPT = WHISPER_PROMPT_ES if SOURCE_LANG == "es" else WHISPER_PROMPT_EN
+
+    # Re-derive session paths with language tag so EN/ES data stays separate
+    SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}_{SOURCE_LANG}"
+    CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
+    AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"
+    DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
     global WORD_TIMESTAMPS, BEAM_SIZE, MULTIPROCESS, MUSIC_THRESHOLD, MUSIC_HOLDOFF

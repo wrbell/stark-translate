@@ -405,6 +405,19 @@
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
 
+      // Handle language config — swap row labels for source/target
+      if (data.type === 'lang_config') {
+        const srcLabel = data.source_label;
+        const tgtLabel = data.target_label;
+        // Row 1 labels (source language)
+        $('labelA').textContent = $('labelA').textContent.replace(/English|Español/, srcLabel);
+        $('labelB').textContent = $('labelB').textContent.replace(/English|Español/, srcLabel);
+        // Row 2 labels (target language)
+        $('labelAes').textContent = $('labelAes').textContent.replace(/Español|English/, tgtLabel);
+        $('labelBes').textContent = $('labelBes').textContent.replace(/Español|English/, tgtLabel);
+        return;
+      }
+
       // [P7-P3-6A] Handle streaming translation messages
       if (data.type === 'translation_start') {
         // STT completed — show English in A column with streaming placeholder
