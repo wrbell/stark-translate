@@ -53,11 +53,11 @@
   }
   .status-dot.connected { background: #4a4; }
 
-  /* Two-column layout */
+  /* Stacked layout: English top, Spanish bottom */
   .content {
     flex: 1;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     overflow: hidden;
     min-height: 0;
   }
@@ -66,13 +66,13 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 32px 40px 40px;
+    padding: 24px 40px 28px;
     overflow: hidden;
     min-height: 0;
   }
 
   .column-en {
-    border-right: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider);
   }
 
   .column-label {
@@ -218,12 +218,12 @@
   /* Responsive */
   @media (min-width: 1400px) {
     .text-area { font-size: 34px; }
-    .column { padding: 40px 56px 56px; }
+    .column { padding: 32px 56px 36px; }
   }
 
   @media (min-width: 1900px) {
     .text-area { font-size: 40px; }
-    .column { padding: 48px 80px 72px; }
+    .column { padding: 40px 80px 48px; }
   }
 </style>
 </head>
@@ -350,16 +350,30 @@
 
       // [P7-P3-6A] Handle streaming translation tokens
       if (data.type === 'translation_start') {
-        // STT completed — show English immediately, create streaming placeholder for Spanish
+        // STT completed — update English, keep MarianMT Spanish visible until Gemma streams in
         const en = filter(data.english || '');
-        sentences = sentences.filter(s => !s.partial && !s.streaming);
-        sentences.push({
-          id: 'stream-' + data.chunk_id,
-          english: en,
-          spanish: '',
-          partial: false,
-          streaming: true,
-        });
+        const partialId = 'p-' + data.chunk_id;
+        const existing = sentences.find(s => s.id === partialId);
+        if (existing) {
+          // Convert partial in-place — MarianMT Spanish stays visible (no blank flash)
+          existing.id = 'stream-' + data.chunk_id;
+          existing.english = en;
+          existing.partial = false;
+          existing.streaming = true;
+        } else {
+          // No partial existed (e.g. speaker paused without partials) — create fresh
+          // Only clear partials/streaming for THIS chunk, keep partials for other utterances
+          sentences = sentences.filter(s =>
+            s.id !== 'p-' + data.chunk_id && s.id !== 'stream-' + data.chunk_id
+          );
+          sentences.push({
+            id: 'stream-' + data.chunk_id,
+            english: en,
+            spanish: '',
+            partial: false,
+            streaming: true,
+          });
+        }
         render();
         return;
       }
@@ -391,8 +405,12 @@
           sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, partial: true, streaming: false });
         }
       } else {
-        // Final translation — remove partials and streaming placeholders
-        sentences = sentences.filter(s => !s.partial && !s.streaming);
+        // Final translation — remove partials and streaming for THIS chunk only,
+        // keep partials for the next utterance (eliminates gap between final and next partial)
+        sentences = sentences.filter(s =>
+          (!s.partial && !s.streaming) ||
+          (s.id !== 'p-' + data.chunk_id && s.id !== 'stream-' + data.chunk_id)
+        );
 
         const existing = sentences.find(s => s.id === data.chunk_id);
         if (existing) {

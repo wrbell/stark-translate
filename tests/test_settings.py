@@ -21,7 +21,7 @@ class TestVADSettings:
         from settings import VADSettings
 
         s = VADSettings()
-        assert s.threshold == 0.3
+        assert s.threshold == 0.42
         assert s.silence_trigger == 0.8
         assert s.max_utterance == 8.0
         assert s.partial_interval == 1.0
@@ -104,7 +104,7 @@ class TestPipelineSettings:
 
         s = PipelineSettings()
         assert s.audio.sample_rate == 16000
-        assert s.vad.threshold == 0.3
+        assert s.vad.threshold == 0.42
         assert s.stt.fallback_on_low_conf is True
         assert s.server.ws_port == 8765
 
