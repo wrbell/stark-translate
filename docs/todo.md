@@ -529,7 +529,7 @@
 
 ---
 
-## Phase F — Piper TTS Multi-Language Audio Output (~2-3 months)
+## Phase F — Piper TTS Multi-Language Audio Output (~2-3 months) — F1-F3 partially complete
 
 > **Goal:** Add fine-tuned, multi-language text-to-speech using Piper (rhasspy/piper, ONNX runtime,
 > MIT license) for simultaneous audio output to separate channels/hardware. Attendees select their
@@ -537,6 +537,9 @@
 >
 > **Priority order:** English → Spanish (most immediate need) → Hindi → Chinese.
 > **Hardware target:** RTX 2070 endpoint for inference; A2000 Ada for training.
+>
+> **Status:** F2 training scripts complete, F3 inference engine integrated (`--tts` flag, WebSocket + WAV output).
+> Roundtrip quality test (`tools/roundtrip_test.py`) validates STT WER 3.8-8.8%, ~134ms/word TTS.
 
 ### F1. Data & Dataset Preparation (1-2 weeks)
 
@@ -559,12 +562,12 @@
 
 ### F3. Inference & Multi-Channel Integration (1-2 weeks)
 
-102. [ ] **Extend `setup_models.py`** — download base Piper voices + place custom .onnx files
-103. [ ] **Integrate Piper TTS into `dry_run_ab.py`**
-     - Pre-load PiperVoice dict per lang at startup
-     - On final multi-lang texts: concurrent synthesis via ThreadPoolExecutor
-     - Route playback: use sounddevice to specific devices/USB outputs (device_map dict)
-     - Add toggle flags: `--tts-enabled`, `--tts-voice custom|stock`, `--multi-channel`
+102. [x] **Extend `setup_models.py`** — download base Piper voices + place custom .onnx files
+103. [x] **Integrate Piper TTS into `dry_run_ab.py`**
+     - PiperTTSEngine in `engines/mlx_engine.py`, `create_tts_engine()` in factory
+     - `--tts` flag enables TTS, `--tts-output ws|wav|both` controls output mode
+     - Thread-safe synthesis via ThreadPoolExecutor
+     - WebSocket audio broadcast + WAV file saving
 104. [ ] **Test concurrent synthesis** — EN + ES + HI + ZH → separate channels; verify no cross-talk, sync <200ms added latency
 
 ### F4. Hardware Routing & AudioFetch (1 week)
@@ -581,6 +584,17 @@
 110. [ ] **Write TTS docs** — `docs/piper_tts_integration.md`, `docs/multi_channel_routing.md`; update `training_plan.md` and `roadmap.md`
 111. [ ] **Diagnostics** — log TTS latency/confidence per utterance (extend JSONL)
 112. [ ] **Iterate** — collect feedback → more fine-tuning hours if needed
+
+### F6. Roundtrip Quality Testing & Bug Fixes (Done)
+
+113. [x] **Create `tools/roundtrip_test.py`** — end-to-end STT + TTS roundtrip quality test
+     - Measures STT WER, roundtrip WER, TTS latency per word
+     - Results: STT WER 3.8-8.8%, roundtrip WER ~56%, ~134ms/word
+114. [x] **Fix PiperTTSEngine thread safety** — ensure ONNX inference is thread-safe
+115. [x] **Fix `create_tts_engine()` factory** — proper engine instantiation and model loading
+116. [x] **Create `tools/validate_session.py`** — post-session validation vs YouTube captions
+     - Text-based anchor alignment for live-vs-YouTube offset (19.6% WER on 2026-03-01 session)
+117. [x] **Create `tools/prepare_finetune_data.py`** — export review queue + dataset from live sessions
 
 ---
 
@@ -653,5 +667,6 @@ Windows Training (CUDA):
 | Translate (fast) | MarianMT opus-mt-en-es | PyTorch | ~298 MB |
 | Translate A | TranslateGemma 4B 4-bit | mlx-lm (Mac) / bitsandbytes (CUDA) | ~2.5 GB |
 | Translate B | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB |
+| TTS | Piper (en_US-lessac-high / es_MX-claude-high) | ONNX Runtime (CPU) | ~63 MB/voice |
 | **Total (4B only)** | | | **~4.0 GB / 18 GB** |
 | **Total (A/B)** | | | **~11.0 GB / 18 GB** |

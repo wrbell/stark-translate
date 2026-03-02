@@ -2215,10 +2215,7 @@ async def _pipeline_translate_and_finalize(
                 _run_tts(tts_engine, tts_text, tts_lang, cid, settings.tts.output_mode, loop)
                 # Log dual E2E: speech-to-translated-text vs speech-to-translated-speech
                 speech_to_speech_ms = (time.perf_counter() - tts_e2e_start) * 1000
-                print(
-                    f"  [tts] E2E speech→text: {e2e_latency:.0f}ms | "
-                    f"E2E speech→speech: {speech_to_speech_ms:.0f}ms"
-                )
+                print(f"  [tts] E2E speech→text: {e2e_latency:.0f}ms | E2E speech→speech: {speech_to_speech_ms:.0f}ms")
 
             _tts_pool.submit(_tts_with_latency)
 
@@ -2572,7 +2569,9 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
 
         # Log TTS latency
         tts_e2e_ms = tts_result.latency_ms
-        print(f"  [tts] Synthesized chunk #{cid}: {tts_e2e_ms:.0f}ms, {len(tts_result.audio) / tts_result.sample_rate:.1f}s audio")
+        print(
+            f"  [tts] Synthesized chunk #{cid}: {tts_e2e_ms:.0f}ms, {len(tts_result.audio) / tts_result.sample_rate:.1f}s audio"
+        )
 
     except Exception as e:
         print(f"  [tts] ERROR: {e}", file=sys.stderr)
@@ -2871,7 +2870,9 @@ async def audio_loop():
                     if not music_hold_active and music_nonspeech_frames >= music_holdoff_frames:
                         music_hold_active = True
                         music_hold_start_frame = frame_count
-                        print(f"\n  [MUSIC] Music detected — muting STT (RMS={frame_rms:.4f}, threshold={MUSIC_THRESHOLD})")
+                        print(
+                            f"\n  [MUSIC] Music detected — muting STT (RMS={frame_rms:.4f}, threshold={MUSIC_THRESHOLD})"
+                        )
                         # Discard any accumulated speech buffer (it's likely music garbage)
                         if len(speech_buffer) > 0:
                             speech_buffer = np.array([], dtype=np.float32)
@@ -3180,7 +3181,7 @@ async def main_async(args):
     print(f"    http://{local_ip}:{args.http_port}/displays/mobile_display.html")
     print(f"    http://{local_ip}:{args.http_port}/displays/audience_display.html")
     if tts_ws_server:
-        print(f"\n  TTS audio stream:")
+        print("\n  TTS audio stream:")
         print(f"    ws://{local_ip}:{settings.tts.audio_ws_port}  (binary PCM, int16, mono)")
 
     # [P7-P3-6A] Initialize streaming translation queue and broadcaster

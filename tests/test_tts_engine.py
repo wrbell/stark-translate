@@ -122,7 +122,7 @@ class TestPiperTTSEngine:
             wav_file.writeframes(audio_int16.tobytes())
 
         voice_instance = MagicMock()
-        voice_instance.synthesize = mock_synthesize
+        voice_instance.synthesize_wav = mock_synthesize
         mock_piper_voice.PiperVoice.load.return_value = voice_instance
 
         return mock_piper, mock_piper_voice, voice_instance
