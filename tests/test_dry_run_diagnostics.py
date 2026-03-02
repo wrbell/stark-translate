@@ -646,13 +646,13 @@ class TestMusicHoldDiagnostics:
         import dry_run_ab as d
 
         assert hasattr(d, "MUSIC_THRESHOLD")
-        assert d.MUSIC_THRESHOLD == 0.02
+        assert d.MUSIC_THRESHOLD == 0.15
 
     def test_music_holdoff_default(self):
         import dry_run_ab as d
 
         assert hasattr(d, "MUSIC_HOLDOFF")
-        assert d.MUSIC_HOLDOFF == 2.0
+        assert d.MUSIC_HOLDOFF == 5.0
 
     def test_stt_corrections_accumulator_exists(self):
         import dry_run_ab as d

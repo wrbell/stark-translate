@@ -11,7 +11,7 @@ before using ``.transcribe()`` or ``.translate()``.
 import logging
 from typing import Any
 
-from engines.base import STTEngine, TranslationEngine
+from engines.base import STTEngine, TranslationEngine, TTSEngine
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +118,21 @@ def create_translation_engine(
         )
     else:
         raise ValueError(f"Unsupported translation backend: {backend!r}")
+
+
+def create_tts_engine(voices: dict[str, str] | None = None) -> TTSEngine:
+    """Create a TTS engine with the specified voice configuration.
+
+    Args:
+        voices:  Dict mapping language codes to Piper voice names.
+                 Default: ``{"es": "es_ES-carlfm-high"}``.
+
+    Returns:
+        An *unloaded* ``TTSEngine`` instance.  Call ``.load()`` to initialise.
+    """
+    from engines.mlx_engine import PiperTTSEngine
+
+    return PiperTTSEngine(voices=voices or {"es": "es_ES-carlfm-high"})
 
 
 def _detect_backend() -> str:

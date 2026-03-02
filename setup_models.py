@@ -246,6 +246,67 @@ def download_mac_models(skip_12b=False, dry_run=False, no_test=False):
 
 
 # ---------------------------------------------------------------------------
+# Piper TTS Voices
+# ---------------------------------------------------------------------------
+
+
+def setup_piper_voices(voices=None, dry_run=False, no_test=False):
+    """Download and verify Piper TTS voices.
+
+    Args:
+        voices:   Dict mapping language codes to voice names.
+                  Default: {"es": "es_ES-carlfm-high", "en": "en_US-lessac-high"}.
+        dry_run:  Show plan without downloading.
+        no_test:  Skip inference test.
+    """
+    if voices is None:
+        voices = {
+            "es": "es_ES-carlfm-high",
+            "en": "en_US-lessac-high",
+        }
+
+    print("\n  Piper TTS voices to download:")
+    for lang, voice_name in voices.items():
+        print(f"    [{lang}] {voice_name}")
+    print()
+
+    if dry_run:
+        print("Dry run — no downloads performed.")
+        return True
+
+    results = {}
+    for lang, voice_name in voices.items():
+        print(f"  Setting up voice: {voice_name} ({lang})...")
+        t0 = time.time()
+        try:
+            from engines.mlx_engine import PiperTTSEngine
+
+            engine = PiperTTSEngine(voices={lang: voice_name})
+            engine.load()
+
+            if not no_test:
+                test_text = "Hola, bienvenidos." if lang == "es" else "Hello, welcome."
+                result = engine.synthesize(test_text, language=lang)
+                print(
+                    f"    Inference test: {result.latency_ms:.0f}ms, {len(result.audio) / result.sample_rate:.1f}s audio"
+                )
+
+            engine.unload()
+            print(f"    OK ({time.time() - t0:.1f}s)")
+            results[voice_name] = "OK"
+        except Exception as e:
+            print(f"    FAIL: {e}")
+            results[voice_name] = f"FAIL: {e}"
+
+    all_ok = all(v == "OK" for v in results.values())
+    for name, status in results.items():
+        icon = "OK" if status == "OK" else "FAIL"
+        print(f"  [{icon:4s}] {name}: {status}")
+
+    return all_ok
+
+
+# ---------------------------------------------------------------------------
 # Windows Models (PyTorch/CUDA)
 # ---------------------------------------------------------------------------
 
@@ -320,6 +381,7 @@ def main():
     parser.add_argument("--skip-12b", action="store_true", help="Skip TranslateGemma 12B")
     parser.add_argument("--dry-run", action="store_true", help="Show plan without downloading")
     parser.add_argument("--no-test", action="store_true", help="Download only, skip inference tests")
+    parser.add_argument("--piper", action="store_true", help="Download Piper TTS voices")
     args = parser.parse_args()
 
     info = get_device_info()
@@ -346,6 +408,10 @@ def main():
     if info.get("mlx"):
         print(f"  MLX:       {info['mlx_version']}")
     print()
+
+    if args.piper:
+        ok = setup_piper_voices(dry_run=args.dry_run, no_test=args.no_test)
+        return 0 if ok else 1
 
     if role == "mac":
         ok = download_mac_models(args.skip_12b, args.dry_run, args.no_test)
