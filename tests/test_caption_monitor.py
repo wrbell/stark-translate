@@ -18,6 +18,7 @@ from tools.live_caption_monitor import (
     compute_wer_cer,
     detect_youtube_repetition,
     extract_video_id,
+    find_global_offset_by_text,
     get_content_words,
     interpret_wer,
     normalize_text,
@@ -265,3 +266,160 @@ class TestSegmentsInWindow:
     def test_empty_segments(self):
         result = segments_in_window([], 0.0, 30.0)
         assert result == ""
+
+
+# ---------------------------------------------------------------------------
+# find_global_offset_by_text
+# ---------------------------------------------------------------------------
+
+
+class TestFindGlobalOffsetByText:
+    """Tests for the text-based anchor alignment function."""
+
+    def _make_segments(self, texts_and_times):
+        """Build TimedSegments from list of (start, end, text) tuples."""
+        return [TimedSegment(s, e, t) for s, e, t in texts_and_times]
+
+    def test_empty_local_returns_zero(self):
+        yt = self._make_segments([(0, 10, "hello world from the stream")])
+        offset, confidence = find_global_offset_by_text([], yt)
+        assert offset == 0.0
+        assert confidence == 0.0
+
+    def test_empty_yt_returns_zero(self):
+        local = self._make_segments([(0, 10, "hello world from the sermon")])
+        offset, confidence = find_global_offset_by_text(local, [])
+        assert offset == 0.0
+        assert confidence == 0.0
+
+    def test_identical_text_zero_offset(self):
+        """When local and YouTube have the same text at the same times, offset should be ~0."""
+        segs = [
+            (0, 10, "the lord is my shepherd i shall not want"),
+            (10, 20, "he makes me lie down in green pastures"),
+            (20, 30, "he leads me beside still waters"),
+            (30, 40, "he restores my soul and leads me"),
+        ]
+        local = self._make_segments(segs)
+        yt = self._make_segments(segs)
+        offset, confidence = find_global_offset_by_text(local, yt)
+        assert abs(offset) < 5.0
+        assert confidence > 0.0
+
+    def test_known_positive_offset(self):
+        """Local starts at t=600 (wall clock), YouTube has same text at t=0."""
+        base_segs = [
+            (0, 10, "salvation through faith alone not works"),
+            (15, 25, "the righteousness of christ imputed freely"),
+            (30, 40, "sanctification proceeds from justification always"),
+            (45, 55, "covenant mercy shown to those redeemed"),
+            (60, 70, "the gospel proclaimed throughout all nations"),
+            (75, 85, "atonement accomplished at calvary completely"),
+            (90, 100, "propitiation satisfying divine wrath fully"),
+            (105, 115, "mediator between god and men forever"),
+            (120, 130, "redemption purchased through precious blood"),
+            (135, 145, "intercession made continuously for believers"),
+        ]
+        time_offset = 600.0  # 10 minutes
+        local = self._make_segments(
+            [(s + time_offset, e + time_offset, t) for s, e, t in base_segs]
+        )
+        yt = self._make_segments(base_segs)
+
+        offset, confidence = find_global_offset_by_text(local, yt)
+        # Offset should be close to 600s (local_time - yt_time = 600)
+        assert abs(offset - time_offset) < 5.0
+        assert confidence >= 0.3
+
+    def test_known_negative_offset(self):
+        """YouTube starts later than local (unusual but possible)."""
+        base_segs = [
+            (0, 10, "repentance and faith required for salvation"),
+            (15, 25, "predestination according to sovereign purpose"),
+            (30, 40, "glorification the final step completed"),
+            (45, 55, "perseverance of saints through tribulation"),
+            (60, 70, "adoption into the family established firmly"),
+        ]
+        time_offset = -300.0  # local is 5 minutes before YouTube
+        local = self._make_segments(
+            [(s + 300, e + 300, t) for s, e, t in base_segs]
+        )
+        yt = self._make_segments(
+            [(s + 600, e + 600, t) for s, e, t in base_segs]
+        )
+
+        offset, confidence = find_global_offset_by_text(local, yt)
+        # local_time - yt_time = 300 - 600 = -300
+        assert abs(offset - time_offset) < 5.0
+        assert confidence >= 0.3
+
+    def test_partial_word_mismatch_still_aligns(self):
+        """STT differences between local and YouTube shouldn't prevent alignment."""
+        time_offset = 1200.0
+
+        local = self._make_segments([
+            (time_offset + 0, time_offset + 10, "the lord is my shepherd i shall not want"),
+            (time_offset + 15, time_offset + 25, "he makes me to lie down in green pastures"),
+            (time_offset + 30, time_offset + 40, "he leads me beside the still waters here"),
+            (time_offset + 45, time_offset + 55, "he restores my soul and guides my path"),
+            (time_offset + 60, time_offset + 70, "surely goodness and mercy shall follow me"),
+        ])
+        # YouTube has slight STT differences
+        yt = self._make_segments([
+            (0, 10, "the lord is my shepherd i shall not want"),
+            (15, 25, "he makes me lie down in green pastures"),  # missing "to"
+            (30, 40, "he leads me beside still waters"),  # missing "the", "here"
+            (45, 55, "he restores my soul and guides my path"),
+            (60, 70, "surely goodness and mercy shall follow me"),
+        ])
+
+        offset, confidence = find_global_offset_by_text(local, yt)
+        assert abs(offset - time_offset) < 5.0
+        assert confidence > 0.0
+
+    def test_no_matching_text_returns_zero(self):
+        """Completely different texts should yield zero offset with zero confidence."""
+        local = self._make_segments([
+            (0, 10, "the weather today is sunny and warm"),
+            (15, 25, "tomorrow will bring rain and clouds"),
+        ])
+        yt = self._make_segments([
+            (0, 10, "salvation through faith alone by grace"),
+            (15, 25, "the righteousness of christ imputed freely"),
+        ])
+
+        offset, confidence = find_global_offset_by_text(local, yt)
+        assert confidence < 0.3
+
+    def test_short_segments_skipped(self):
+        """Segments with fewer than 4 words should be skipped as anchors."""
+        local = self._make_segments([
+            (0, 5, "yes"),
+            (5, 10, "okay then"),
+            (10, 15, "uh huh"),
+        ])
+        yt = self._make_segments([
+            (100, 110, "completely different sermon content here"),
+        ])
+
+        offset, confidence = find_global_offset_by_text(local, yt)
+        assert confidence == 0.0
+
+    def test_large_offset_1800s(self):
+        """Test with a 30-minute offset (common for church streams)."""
+        time_offset = 1800.0
+        base_segs = [
+            (0, 10, "the apostle paul wrote to the corinthians"),
+            (15, 25, "concerning spiritual gifts and their proper use"),
+            (30, 40, "love is patient and love is always kind"),
+            (45, 55, "prophecy and tongues will eventually cease"),
+            (60, 70, "faith hope and love these three remain"),
+        ]
+        local = self._make_segments(
+            [(s + time_offset, e + time_offset, t) for s, e, t in base_segs]
+        )
+        yt = self._make_segments(base_segs)
+
+        offset, confidence = find_global_offset_by_text(local, yt)
+        assert abs(offset - time_offset) < 5.0
+        assert confidence >= 0.3

@@ -511,6 +511,123 @@ def find_best_offset(
     return best_offset, best_wer, local_text, best_yt_text, alignment_uncertain
 
 
+def find_global_offset_by_text(
+    local_segments,
+    yt_segments,
+    n_anchors=10,
+    phrase_len=6,
+    tolerance=3.0,
+):
+    """Find global time offset using text-based anchor matching.
+
+    When the live session and YouTube video have very different time bases
+    (e.g. the live recording started 20 minutes into the stream), the narrow
+    ±5s offset search in find_best_offset() will fail. This function searches
+    the entire YouTube timeline by matching distinctive phrases from the live
+    session against the YouTube transcript.
+
+    Args:
+        local_segments: list of TimedSegment from the live session
+        yt_segments: list of TimedSegment from YouTube captions
+        n_anchors: number of anchor phrases to extract from local segments
+        phrase_len: number of words per anchor phrase
+        tolerance: seconds within which candidate offsets are clustered
+
+    Returns:
+        (offset, confidence) where offset is seconds to add to YouTube
+        timestamps so they align with local timestamps, and confidence
+        is 0.0-1.0 (fraction of anchors that agreed on the winning offset).
+    """
+    if not local_segments or not yt_segments:
+        return 0.0, 0.0
+
+    # --- Step 1: Pick anchor segments evenly spaced through local session ---
+    # Filter to segments with enough words to be distinctive
+    viable = [
+        s for s in local_segments
+        if len(normalize_text(s.text).split()) >= 4
+    ]
+    if not viable:
+        return 0.0, 0.0
+
+    step = max(1, len(viable) // n_anchors)
+    anchors = viable[::step][:n_anchors]
+
+    # --- Step 2: Build word-level index from YouTube segments ---
+    yt_words = []  # list of (word, timestamp)
+    for seg in yt_segments:
+        words = normalize_text(seg.text).split()
+        if not words:
+            continue
+        # Interpolate timestamps evenly across words in the segment
+        duration = seg.end - seg.start
+        for i, w in enumerate(words):
+            t = seg.start + duration * (i + 0.5) / len(words)
+            yt_words.append((w, t))
+
+    if not yt_words:
+        return 0.0, 0.0
+
+    # --- Step 3: For each anchor, find the best match in YouTube ---
+    candidate_offsets = []
+
+    for anchor_seg in anchors:
+        anchor_text = normalize_text(anchor_seg.text)
+        anchor_words = anchor_text.split()
+        anchor_time = (anchor_seg.start + anchor_seg.end) / 2.0
+
+        # Use the middle phrase_len words (most distinctive part)
+        if len(anchor_words) > phrase_len:
+            start_idx = (len(anchor_words) - phrase_len) // 2
+            anchor_phrase = anchor_words[start_idx : start_idx + phrase_len]
+        else:
+            anchor_phrase = anchor_words
+
+        anchor_set = set(anchor_phrase)
+        window_len = len(anchor_phrase)
+        best_sim = 0.0
+        best_yt_time = 0.0
+
+        # Slide through YouTube words
+        for i in range(len(yt_words) - window_len + 1):
+            window_set = {yt_words[i + j][0] for j in range(window_len)}
+            # Jaccard similarity
+            intersection = len(anchor_set & window_set)
+            union = len(anchor_set | window_set)
+            sim = intersection / union if union > 0 else 0.0
+
+            if sim > best_sim:
+                best_sim = sim
+                # Use midpoint of matched window
+                best_yt_time = (
+                    yt_words[i][1] + yt_words[i + window_len - 1][1]
+                ) / 2.0
+
+        if best_sim > 0.6:
+            candidate_offsets.append(anchor_time - best_yt_time)
+
+    if not candidate_offsets:
+        return 0.0, 0.0
+
+    # --- Step 4: Cluster candidate offsets and pick the best ---
+    candidate_offsets.sort()
+    best_cluster = []
+    for i, off in enumerate(candidate_offsets):
+        cluster = [off]
+        for j in range(i + 1, len(candidate_offsets)):
+            if abs(candidate_offsets[j] - off) <= tolerance:
+                cluster.append(candidate_offsets[j])
+            else:
+                break
+        if len(cluster) > len(best_cluster):
+            best_cluster = cluster
+
+    confidence = len(best_cluster) / n_anchors
+    offset = float(np.median(best_cluster))
+
+    return offset, confidence
+
+
 # ---------------------------------------------------------------------------
 # YouTube Caption Fetching
 # ---------------------------------------------------------------------------
