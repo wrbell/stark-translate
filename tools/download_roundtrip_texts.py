@@ -17,7 +17,7 @@ TEXTS_DIR = Path(__file__).resolve().parent / "roundtrip_texts"
 
 def fetch_gutenberg(url: str) -> str:
     """Fetch plain-text from Project Gutenberg, strip header/footer."""
-    raw = urlopen(url).read().decode("utf-8", errors="replace")
+    raw = urlopen(url).read().decode("utf-8", errors="replace")  # nosec B310 — hardcoded https URLs only
     # Strip PG header (ends with "***") and footer (starts with "***")
     parts = raw.split("***")
     if len(parts) >= 3:
