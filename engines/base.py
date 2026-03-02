@@ -98,3 +98,45 @@ class TranslationEngine(ABC):
     def backend(self) -> str:
         """Return backend name ('mlx', 'cuda', 'cpu')."""
         ...
+
+
+@dataclass
+class TTSResult:
+    """Result from text-to-speech synthesis."""
+
+    audio: np.ndarray  # float32 mono audio samples
+    sample_rate: int  # e.g., 22050
+    latency_ms: float
+    text: str  # input text that was synthesized
+    wav_path: str | None = None  # set when saved to file
+
+
+class TTSEngine(ABC):
+    """Abstract text-to-speech engine interface."""
+
+    @abstractmethod
+    def load(self) -> None:
+        """Load voice model(s) into memory."""
+        ...
+
+    @abstractmethod
+    def synthesize(self, text: str, *, language: str = "es") -> TTSResult:
+        """Synthesize text to audio."""
+        ...
+
+    @abstractmethod
+    def unload(self) -> None:
+        """Release voice model(s) from memory."""
+        ...
+
+    @property
+    @abstractmethod
+    def model_id(self) -> str:
+        """Return the voice/model identifier."""
+        ...
+
+    @property
+    @abstractmethod
+    def backend(self) -> str:
+        """Return backend name ('onnx', 'cpu', etc.)."""
+        ...

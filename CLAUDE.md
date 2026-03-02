@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-A fully on-device, live bidirectional speech-to-text system with English/Spanish output, built for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Supports both English speakers (`--lang en`, EN→ES) and Spanish speakers (`--lang es`, ES→EN). Designed for low-latency local transcription that outperforms YouTube's built-in captions, with automated quality monitoring and an iterative fine-tuning loop.
+A fully on-device, live bidirectional speech-to-text system with English/Spanish output, built for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Supports both English speakers (`--lang en`, EN→ES) and Spanish speakers (`--lang es`, ES→EN). Includes Piper TTS audio synthesis (`--tts`) for translated text output. Designed for low-latency local transcription that outperforms YouTube's built-in captions, with automated quality monitoring and an iterative fine-tuning loop.
 
 A **two-pass pipeline** provides fast partials and high-quality finals:
 
@@ -86,10 +86,10 @@ project_dir/
 │
 ├── engines/
 │   ├── __init__.py
-│   ├── base.py                     # ABCs: STTEngine, TranslationEngine, result dataclasses
-│   ├── mlx_engine.py               # MLXWhisperEngine, MLXGemmaEngine, MarianEngine
+│   ├── base.py                     # ABCs: STTEngine, TranslationEngine, TTSEngine, result dataclasses
+│   ├── mlx_engine.py               # MLXWhisperEngine, MLXGemmaEngine, MarianEngine, PiperTTSEngine
 │   ├── cuda_engine.py              # FasterWhisperEngine, CUDAGemmaEngine
-│   ├── factory.py                  # create_stt_engine(), create_translation_engine()
+│   ├── factory.py                  # create_stt_engine(), create_translation_engine(), create_tts_engine()
 │   └── active_learning.py          # Fallback event JSONL logger
 │
 ├── tools/
@@ -97,6 +97,10 @@ project_dir/
 │   ├── translation_qe.py           # Reference-free translation quality estimation
 │   ├── benchmark_latency.py        # End-to-end latency benchmarking
 │   ├── stt_benchmark.py            # STT-specific benchmarking
+│   ├── roundtrip_test.py           # End-to-end STT + translation roundtrip quality test
+│   ├── validate_session.py         # Post-session validation vs YouTube captions
+│   ├── prepare_finetune_data.py    # Fine-tuning data export from live sessions
+│   ├── download_roundtrip_texts.py # Download test texts for roundtrip testing
 │   ├── convert_models_to_both.py   # Model format conversion (MLX ↔ CUDA)
 │   └── test_adaptive_model.py      # Adaptive model testing
 │
@@ -457,6 +461,8 @@ CalVer format: `YYYY.M.W.PATCH` (e.g., `2026.2.4.0` = 2026, February, week 4, fi
 | `Label Studio` | Annotation / correction UI | ✅ (web) | ✅ (web) |
 | `streamlit` | Dashboard UI | ✅ | — |
 | `youtube-transcript-api` | YT caption extraction | ✅ | — |
+| `piper-tts` | Text-to-speech synthesis (ONNX) | ✅ (CPU) | — |
+| `onnxruntime` | ONNX model execution for Piper | ✅ | — |
 
 ---
 
@@ -511,6 +517,7 @@ All training runs on the **Windows Desktop** (A2000 Ada 16GB, ~16 TFLOPS FP16, ~
 - [x] **Phase 1 — Baseline:** Run base A/B test (no fine-tuning) to establish latency and WER baselines
 - [x] **Phase 1.5 — CI/CD:** GitHub Actions (lint, test, security, release), pre-commit, CalVer versioning, 450+ tests
 - [x] **Phase 1.6 — Spanish STT:** Bidirectional language support (`--lang en`/`--lang es`), ES→EN translation via MarianMT + TranslateGemma
+- [x] **Phase 1.7 — TTS & Roundtrip:** Piper TTS integration (`--tts`), roundtrip quality test, validation pipeline with text-anchor alignment
 - [ ] **Phase 2 — Data collection:** Download and sample 10–20 hours of Stark Road audio via `yt-dlp`
 - [ ] **Phase 3 — Quality assessment:** Manually transcribe 50–100 sample segments, compute baseline WER
 - [ ] **Phase 4 — Preprocessing:** Run the 10-step audio cleaning pipeline on all collected data

@@ -6,6 +6,7 @@ import re
 import socket
 
 import numpy as np
+import pytest
 
 
 class TestGetLocalIp:
@@ -261,3 +262,71 @@ class TestPhraseCorrections:
         result, corrections = self._correct(text)
         assert result == text
         assert len(corrections) == 0
+
+
+class TestComputeWordStability:
+    """Tests for compute_word_stability() — LCS-based partial→final word preservation."""
+
+    def _stability(self, partial, final):
+        from dry_run_ab import compute_word_stability
+
+        return compute_word_stability(partial, final)
+
+    def test_identical_texts(self):
+        """Identical partial and final → 1.0 (100% preserved)."""
+        assert self._stability("en la cruz", "en la cruz") == 1.0
+
+    def test_zero_overlap(self):
+        """Completely different words → 0.0."""
+        assert self._stability("hola mundo", "buenos días") == 0.0
+
+    def test_partial_overlap(self):
+        """Some words preserved in order."""
+        # "la" and "cruz" appear in both, LCS = 2 out of 3 partial words
+        result = self._stability("en la cruz", "la santa cruz de cristo")
+        assert result == pytest.approx(2 / 3, abs=0.01)
+
+    def test_empty_partial(self):
+        """Empty partial text → None."""
+        assert self._stability("", "en la cruz") is None
+
+    def test_empty_final(self):
+        """Empty final text → None."""
+        assert self._stability("en la cruz", "") is None
+
+    def test_both_empty(self):
+        """Both empty → None."""
+        assert self._stability("", "") is None
+
+    def test_none_partial(self):
+        """None partial → None."""
+        assert self._stability(None, "en la cruz") is None
+
+    def test_none_final(self):
+        """None final → None."""
+        assert self._stability("en la cruz", None) is None
+
+    def test_case_insensitive(self):
+        """Comparison should be case-insensitive."""
+        assert self._stability("En La Cruz", "en la cruz") == 1.0
+
+    def test_real_marian_gemma_pair(self):
+        """Real-world MarianMT vs TranslateGemma output."""
+        marian = "donde vi por primera vez la luz y la carga de mi corazón."
+        gemma = "Donde vi la luz por primera vez, y el peso de mi corazón se desvaneció."
+        result = self._stability(marian, gemma)
+        # Several words preserved: "donde", "vi", "primera", "vez", "la", "y", "de", "mi", "corazón."
+        assert result is not None
+        assert 0.3 <= result <= 0.9  # reasonable partial overlap
+
+    def test_superset_final(self):
+        """Final contains all partial words plus extras → 1.0."""
+        assert self._stability("la cruz", "en la santa cruz de cristo") == 1.0
+
+    def test_single_word_match(self):
+        """Single-word partial that appears in final."""
+        assert self._stability("cruz", "la cruz") == 1.0
+
+    def test_single_word_no_match(self):
+        """Single-word partial that doesn't appear in final."""
+        assert self._stability("hola", "la cruz") == 0.0

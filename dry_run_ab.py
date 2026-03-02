@@ -16,6 +16,9 @@ Usage:
     python dry_run_ab.py --no-ab                 # Explicitly disable 12B
     python dry_run_ab.py --low-vram              # MarianMT-only (no Gemma)
     python dry_run_ab.py --dry-run-text "Hello"  # Test pipeline without mic
+    python dry_run_ab.py --tts                   # Enable TTS audio output
+    python dry_run_ab.py --tts --tts-output wav  # TTS to WAV files
+    python dry_run_ab.py --tts --tts-output both # TTS to WebSocket + WAV
     python dry_run_ab.py --chunk-duration 5      # Longer chunks
     python dry_run_ab.py --ws-port 9000          # Different WebSocket port
 """
@@ -80,8 +83,8 @@ NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
 BEAM_SIZE = 1  # Whisper beam search width: 1=greedy (fastest), 5=default
 MULTIPROCESS = False  # separate OS processes for STT and translation
-MUSIC_THRESHOLD = 0.02  # RMS threshold for music detection (no speech + high energy)
-MUSIC_HOLDOFF = 2.0  # seconds of music-like audio before entering music-hold mode
+MUSIC_THRESHOLD = 0.15  # RMS threshold for music detection (no speech + high energy)
+MUSIC_HOLDOFF = 5.0  # seconds of music-like audio before entering music-hold mode
 
 # Inference backend — resolved in main() from --backend flag
 # Values: "mlx" (Apple Silicon), "cuda" (NVIDIA), "cpu" (fallback)
@@ -121,6 +124,12 @@ _trans_worker_conn = None  # multiprocessing.Connection for Translation worker I
 _stt_comm_pool = None  # ThreadPoolExecutor(1) for async STT pipe I/O
 _trans_comm_pool = None  # ThreadPoolExecutor(1) for async Translation pipe I/O
 _RUN_AB = False  # Whether A/B mode is enabled (needed when models aren't in main process)
+
+# --- TTS state (set up in main_async when --tts is enabled) ---
+tts_engine = None  # PiperTTSEngine instance
+_tts_pool = None  # ThreadPoolExecutor(1) for ONNX TTS (thread-safe, separate from MLX)
+tts_ws_clients: set = set()  # WebSocket clients for TTS audio stream
+_tts_chunk_counter = 0  # monotonic counter for TTS audio chunks
 
 # --- Partial/final coordination ---
 # When a final is pending, partials are skipped to avoid starving the pipeline.
@@ -549,6 +558,31 @@ def check_marian_divergence(cid, marian_text, gemma_text):
     diag_marian_diverge.append((cid, marian_text, gemma_text, round(similarity, 2)))
     if similarity < 0.3:
         print(f"  >> MARIAN/GEMMA divergence: {similarity:.0%} overlap")
+
+
+def compute_word_stability(partial_text: str, final_text: str) -> float | None:
+    """LCS-based word stability: % of partial words preserved in final (sequential).
+
+    Measures how many words from the partial (MarianMT) translation appear
+    in the same order in the final (TranslateGemma) translation. Higher
+    values mean less jarring visual replacement on screen.
+    """
+    if not partial_text or not final_text:
+        return None
+    p_words = partial_text.lower().split()
+    f_words = final_text.lower().split()
+    if not p_words:
+        return None
+    # Standard DP LCS — O(n*m), partials are <30 words so trivial
+    m, n = len(p_words), len(f_words)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if p_words[i - 1] == f_words[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    return round(dp[m][n] / m, 3)
 
 
 def _log_stt_drop(stage, uid_or_cid, buffer_duration):
@@ -1889,6 +1923,16 @@ _pipeline_translation_lock = None  # asyncio.Lock — serialize translations to 
 _pipeline_overlaps = 0  # how many times STT(N) overlapped with Translation(N-1)
 _pipeline_total = 0  # total chunks processed through pipeline
 
+# KPI counters: processing success rate (attempted vs completed with breakdown)
+_chunks_attempted = 0
+_chunks_completed = 0
+_chunks_empty_stt = 0
+_chunks_hallucination = 0
+_chunks_dedup = 0
+
+# KPI: true E2E latency — maps utterance_id → perf_counter at first audio frame
+_utterance_start_times: dict[int, float] = {}
+
 
 def _run_stt(audio_data, whisper_prompt):
     """[P7-6C] Run Whisper STT in the pipeline pool (synchronous).
@@ -2017,7 +2061,7 @@ def _run_stt_faster_whisper(audio_data, whisper_prompt):
 
 
 async def _pipeline_translate_and_finalize(
-    cid, english, stt_latency, stt_confidence, segment_meta, low_conf_words, audio_data, e2e_start
+    cid, english, stt_latency, stt_confidence, segment_meta, low_conf_words, audio_data, e2e_start, utterance_start=None
 ):
     """[P7-6C] Run translation and finalization for a chunk.
 
@@ -2029,6 +2073,7 @@ async def _pipeline_translate_and_finalize(
     time — multiple concurrent TranslateGemma calls would thrash the Metal
     GPU and actually be slower than sequential.
     """
+    global _chunks_completed
     try:
         async with _pipeline_translation_lock:
             # --- Translate ---
@@ -2135,7 +2180,9 @@ async def _pipeline_translate_and_finalize(
                 )
                 qe_a = qe_score(english, spanish_a)
 
-        e2e_latency = (time.perf_counter() - e2e_start) * 1000
+        now = time.perf_counter()
+        e2e_latency = (now - e2e_start) * 1000
+        true_e2e_ms = round((now - utterance_start) * 1000, 1) if utterance_start is not None else None
 
         # --- Diagnostics ---
         utterance_dur = len(audio_data) / SAMPLE_RATE
@@ -2155,14 +2202,16 @@ async def _pipeline_translate_and_finalize(
         if low_conf_words:
             words_str = ", ".join(f"'{w['word']}'({w['probability']:.0%})" for w in low_conf_words[:5])
             print(f"  >> LOW CONF WORDS: {words_str}")
-        # Compare last MarianMT partial against Gemma final
+        # Compare last MarianMT partial against Gemma final + word stability
         last_marian = partial_translations.pop(cid, None)
         if last_marian is None:
             # utterance_id doesn't match chunk_id — try recent entries
             for uid in list(partial_translations.keys()):
                 last_marian = partial_translations.pop(uid, None)
+        word_stability_pct = None
         if last_marian and spanish_a:
             check_marian_divergence(cid, last_marian, spanish_a)
+            word_stability_pct = compute_word_stability(last_marian, spanish_a)
 
         conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
         qe_str = f" | QE: A={qe_a}"
@@ -2170,7 +2219,11 @@ async def _pipeline_translate_and_finalize(
             qe_str = f" | QE: A={qe_a} B={qe_b}"
             print(f"  +{lat_b:.0f}ms B ({tps_b:.0f} t/s): {spanish_b}")
         print(f"  +{lat_a:.0f}ms A ({tps_a:.0f} t/s): {spanish_a}")
-        print(f"  E2E: {e2e_latency:.0f}ms{conf_str}{qe_str}")
+        true_e2e_str = f" | true_e2e: {true_e2e_ms:.0f}ms" if true_e2e_ms is not None else ""
+        ws_str = f" | ws: {word_stability_pct:.0%}" if word_stability_pct is not None else ""
+        print(f"  E2E: {e2e_latency:.0f}ms{true_e2e_str}{conf_str}{qe_str}{ws_str}")
+
+        _chunks_completed += 1
 
         # Final broadcast
         result_data = {
@@ -2184,15 +2237,33 @@ async def _pipeline_translate_and_finalize(
             "latency_a_ms": round(lat_a, 1),
             "latency_b_ms": round(lat_b, 1),
             "e2e_latency_ms": round(e2e_latency, 1),
+            "true_e2e_ms": true_e2e_ms,
             "stt_confidence": stt_confidence,
             "tps_a": round(tps_a, 1),
             "tps_b": round(tps_b, 1),
             "qe_a": qe_a,
             "qe_b": qe_b,
+            "word_stability_pct": word_stability_pct,
             "timestamp": datetime.now().isoformat(),
         }
         all_results.append(result_data)
         await broadcast(result_data)
+
+        # --- TTS: fire-and-forget synthesis of translated text ---
+        if tts_engine and settings.tts.enabled and _tts_pool is not None:
+            # Dynamic language: TTS speaks TARGET_LANG (the translated output)
+            tts_text = spanish_a  # Use 4B translation (always available)
+            tts_lang = TARGET_LANG
+            tts_e2e_start = e2e_start  # capture for E2E speech-to-speech timing
+            loop = asyncio.get_event_loop()
+
+            def _tts_with_latency():
+                _run_tts(tts_engine, tts_text, tts_lang, cid, settings.tts.output_mode, loop)
+                # Log dual E2E: speech-to-translated-text vs speech-to-translated-speech
+                speech_to_speech_ms = (time.perf_counter() - tts_e2e_start) * 1000
+                print(f"  [tts] E2E speech→text: {e2e_latency:.0f}ms | E2E speech→speech: {speech_to_speech_ms:.0f}ms")
+
+            _tts_pool.submit(_tts_with_latency)
 
         # [P7-5D] Move I/O to background threads — prevents disk writes from
         # blocking the main processing loop (saves 10-30ms on the critical path).
@@ -2245,6 +2316,7 @@ async def _pipeline_coordinator():
     freely since they use different models (Whisper vs TranslateGemma).
     """
     global chunk_id, prev_text, _last_final_text, _pipeline_overlaps, _pipeline_total, _final_pending_utterance_id
+    global _chunks_attempted, _chunks_completed, _chunks_empty_stt, _chunks_hallucination, _chunks_dedup
 
     # Track the currently-running translation task so we can measure overlap
     active_translation_task = None
@@ -2257,10 +2329,11 @@ async def _pipeline_coordinator():
                 await active_translation_task
             break
 
-        audio_data, e2e_start = item
+        audio_data, e2e_start, utterance_start = item
         chunk_id += 1
         cid = chunk_id
         _pipeline_total += 1
+        _chunks_attempted += 1
 
         # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
         speech_rms = float(np.sqrt(np.mean(audio_data**2)))
@@ -2298,11 +2371,13 @@ async def _pipeline_coordinator():
             if not english:
                 buf_dur = len(audio_data) / SAMPLE_RATE
                 _log_stt_drop("final", cid, buf_dur)
+                _chunks_empty_stt += 1
                 continue
 
             # [FILTER] Suppress garbage/hallucinated text
             if _is_garbage_text(english):
                 print(f"  [FILTER] garbage final suppressed: {english!r}")
+                _chunks_hallucination += 1
                 continue
 
             # [FILTER] Suppress phantom hallucinations (thank you, VAD-floor, etc.)
@@ -2310,11 +2385,13 @@ async def _pipeline_coordinator():
             suppress_reason = _should_suppress(english, stt_confidence, utt_dur)
             if suppress_reason:
                 print(f"  [FILTER] hallucination suppressed: {english!r} — {suppress_reason}")
+                _chunks_hallucination += 1
                 continue
 
             # [DEDUP] Suppress consecutive identical finals (e.g., repeated "Amen")
             if english.strip().lower() == _last_final_text:
                 print(f"  [DEDUP] suppressed consecutive duplicate: {english!r}")
+                _chunks_dedup += 1
                 continue
             _last_final_text = english.strip().lower()
 
@@ -2355,7 +2432,15 @@ async def _pipeline_coordinator():
             # This task will run concurrently with the next chunk's STT
             active_translation_task = asyncio.create_task(
                 _pipeline_translate_and_finalize(
-                    cid, english, stt_latency, stt_confidence, segment_meta, low_conf_words, audio_data, e2e_start
+                    cid,
+                    english,
+                    stt_latency,
+                    stt_confidence,
+                    segment_meta,
+                    low_conf_words,
+                    audio_data,
+                    e2e_start,
+                    utterance_start=utterance_start,
                 )
             )
 
@@ -2372,14 +2457,18 @@ async def _pipeline_coordinator():
         )
 
 
-async def pipeline_submit(audio_data):
+async def pipeline_submit(audio_data, utterance_start=None):
     """[P7-6C] Submit audio to the pipeline without blocking the audio loop.
 
     Called from audio_loop when an utterance is finalized. Returns immediately;
     the _pipeline_coordinator processes the chunk asynchronously.
+
+    Args:
+        audio_data: Audio samples for the utterance.
+        utterance_start: perf_counter timestamp of first audio frame (for true E2E).
     """
     if _pipeline_chunk_queue is not None:
-        await _pipeline_chunk_queue.put((audio_data, time.perf_counter()))
+        await _pipeline_chunk_queue.put((audio_data, time.perf_counter(), utterance_start))
 
 
 async def process_final(audio_data, finalized_utterance_id=None):
@@ -2405,7 +2494,9 @@ async def process_final(audio_data, finalized_utterance_id=None):
             if cancelled:
                 print("  [FIX] cancelled queued partial (final arriving)")
 
-    await pipeline_submit(audio_data)
+    # Extract utterance start time for true E2E latency measurement
+    utterance_start = _utterance_start_times.pop(finalized_utterance_id, None)
+    await pipeline_submit(audio_data, utterance_start=utterance_start)
 
 
 # ---------------------------------------------------------------------------
@@ -2463,6 +2554,93 @@ async def broadcast(data):
     ok = len(clients) - len(dead)
     if ok > 0:
         print(f"  [ws] Sent to {ok} client(s)")
+
+
+# ---------------------------------------------------------------------------
+# TTS Audio WebSocket (binary PCM on separate port from text JSON)
+# ---------------------------------------------------------------------------
+
+
+async def tts_ws_handler(websocket, path=None):
+    """Handle TTS audio WebSocket connections (binary PCM stream)."""
+    tts_ws_clients.add(websocket)
+    print(f"  [tts-ws] Audio client connected ({len(tts_ws_clients)} client(s))")
+    try:
+        async for _ in websocket:
+            pass  # clients only receive, never send
+    except websockets.ConnectionClosed:
+        pass
+    finally:
+        tts_ws_clients.discard(websocket)
+        print(f"  [tts-ws] Audio client disconnected ({len(tts_ws_clients)} client(s))")
+
+
+async def broadcast_tts_audio(chunk_id: int, audio: np.ndarray, sample_rate: int):
+    """Broadcast TTS audio as binary WebSocket frames.
+
+    Frame format: 8-byte header (chunk_id uint32 LE + sample_rate uint32 LE)
+    followed by int16 PCM audio samples.
+    """
+    if not tts_ws_clients:
+        return
+    import struct
+
+    header = struct.pack("<II", chunk_id, sample_rate)
+    audio_int16 = (audio * 32767).astype(np.int16).tobytes()
+    payload = header + audio_int16
+    dead = set()
+    for client in list(tts_ws_clients):
+        try:
+            await client.send(payload)
+        except Exception:
+            dead.add(client)
+    tts_ws_clients.difference_update(dead)
+    ok = len(tts_ws_clients) - len(dead)
+    if ok > 0:
+        print(f"  [tts-ws] Sent {len(audio_int16) // 2} samples to {ok} client(s)")
+
+
+def _run_tts(engine, text, language, cid, output_mode, loop):
+    """Synthesize TTS and dispatch output (runs on _tts_pool thread).
+
+    This is fire-and-forget — doesn't block the next STT/translation cycle.
+    """
+    global _tts_chunk_counter
+
+    if not text or not text.strip():
+        return
+
+    try:
+        tts_result = engine.synthesize(text, language=language)
+        _tts_chunk_counter += 1
+
+        # WAV file output
+        if output_mode in ("wav", "both"):
+            import scipy.io.wavfile as wav
+
+            tts_dir = os.path.join(AUDIO_DIR, "tts")
+            os.makedirs(tts_dir, exist_ok=True)
+            wav_path = os.path.join(tts_dir, f"tts_{cid:04d}.wav")
+            audio_int16 = (tts_result.audio * 32767).astype(np.int16)
+            wav.write(wav_path, tts_result.sample_rate, audio_int16)
+            tts_result.wav_path = wav_path
+            print(f"  [tts] WAV saved: {wav_path} ({len(tts_result.audio) / tts_result.sample_rate:.1f}s)")
+
+        # WebSocket stream output
+        if output_mode in ("ws", "both"):
+            asyncio.run_coroutine_threadsafe(
+                broadcast_tts_audio(_tts_chunk_counter, tts_result.audio, tts_result.sample_rate),
+                loop,
+            )
+
+        # Log TTS latency
+        tts_e2e_ms = tts_result.latency_ms
+        print(
+            f"  [tts] Synthesized chunk #{cid}: {tts_e2e_ms:.0f}ms, {len(tts_result.audio) / tts_result.sample_rate:.1f}s audio"
+        )
+
+    except Exception as e:
+        print(f"  [tts] ERROR: {e}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -2561,6 +2739,8 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "latency_a_ms": data.get("latency_a_ms"),
         "latency_b_ms": data.get("latency_b_ms"),
         "e2e_latency_ms": data.get("e2e_latency_ms"),
+        "true_e2e_ms": data.get("true_e2e_ms"),
+        "word_stability_pct": data.get("word_stability_pct"),
         "tps_a": data.get("tps_a"),
         "tps_b": data.get("tps_b"),
         "resources": resources,
@@ -2592,6 +2772,7 @@ def init_csv():
                 "latency_a_ms",
                 "latency_b_ms",
                 "e2e_latency_ms",
+                "true_e2e_ms",
                 "stt_confidence",
                 "tps_a",
                 "tps_b",
@@ -2603,6 +2784,7 @@ def init_csv():
                 "bad_split",
                 "marian_similarity",
                 "marian_pt_ms",
+                "word_stability_pct",
             ]
         )
     print(f"  CSV: {CSV_PATH}")
@@ -2637,6 +2819,7 @@ def write_csv_row(data, marian_lat=None):
                 data["latency_a_ms"],
                 data["latency_b_ms"],
                 data["e2e_latency_ms"],
+                data.get("true_e2e_ms", ""),
                 data.get("stt_confidence", ""),
                 data.get("tps_a", ""),
                 data.get("tps_b", ""),
@@ -2648,6 +2831,7 @@ def write_csv_row(data, marian_lat=None):
                 "Y" if bad_sp else "",
                 marian_sim,
                 marian_lat["pt_ms"] if marian_lat else "",
+                data.get("word_stability_pct", ""),
             ]
         )
 
@@ -2681,9 +2865,41 @@ def print_summary():
         print(f"  A faster:    {a_faster}/{n} ({a_faster / n:.0%})")
     else:
         print("  B (12B):     not loaded")
+
+    # KPI: Processing rate
+    if _chunks_attempted > 0:
+        rate = _chunks_completed / _chunks_attempted * 100
+        print(
+            f"  Processing:  {_chunks_completed}/{_chunks_attempted} ({rate:.1f}%)"
+            f" — empty_stt={_chunks_empty_stt}, hallucination={_chunks_hallucination}, dedup={_chunks_dedup}"
+        )
+
+    # KPI: True E2E latency summary
+    true_e2es = [r["true_e2e_ms"] for r in all_results if r.get("true_e2e_ms") is not None]
+    if true_e2es:
+        print(f"  True E2E:    avg={np.mean(true_e2es):.0f}ms (median {np.median(true_e2es):.0f}ms)")
+
+    # KPI: Word stability summary
+    stabilities = [r["word_stability_pct"] for r in all_results if r.get("word_stability_pct") is not None]
+    if stabilities:
+        print(f"  Stability:   avg={np.mean(stabilities):.0%} ({len(stabilities)} chunks with partials)")
+
     print(f"  CSV saved:   {CSV_PATH}")
     print(f"{'=' * 60}")
     print_diagnostics()
+
+    # Write session summary to diagnostics JSONL for KPI report tool
+    summary_record = {
+        "event": "session_summary",
+        "session": SESSION_ID,
+        "timestamp": datetime.now().isoformat(),
+        "chunks_attempted": _chunks_attempted,
+        "chunks_completed": _chunks_completed,
+        "chunks_empty_stt": _chunks_empty_stt,
+        "chunks_hallucination": _chunks_hallucination,
+        "chunks_dedup": _chunks_dedup,
+    }
+    _io_pool.submit(_write_jsonl_record, summary_record)
 
 
 # ---------------------------------------------------------------------------
@@ -2758,7 +2974,9 @@ async def audio_loop():
                     if not music_hold_active and music_nonspeech_frames >= music_holdoff_frames:
                         music_hold_active = True
                         music_hold_start_frame = frame_count
-                        print("\n  [MUSIC] Music detected — muting STT")
+                        print(
+                            f"\n  [MUSIC] Music detected — muting STT (RMS={frame_rms:.4f}, threshold={MUSIC_THRESHOLD})"
+                        )
                         # Discard any accumulated speech buffer (it's likely music garbage)
                         if len(speech_buffer) > 0:
                             speech_buffer = np.array([], dtype=np.float32)
@@ -2789,6 +3007,7 @@ async def audio_loop():
                     if has_speech:
                         if len(speech_buffer) == 0:
                             utterance_id += 1  # new utterance starting
+                            _utterance_start_times[utterance_id] = time.perf_counter()
                             last_partial_len = 0
                             last_silence_boundary = 0
                         speech_buffer = np.concatenate([speech_buffer, audio_frame])
@@ -2854,6 +3073,7 @@ async def audio_loop():
                                 await process_final(speech_buffer[:split_pos].copy(), utterance_id)
                                 speech_buffer = speech_buffer[split_pos:].copy()
                                 utterance_id += 1
+                                _utterance_start_times[utterance_id] = time.perf_counter()
                                 last_partial_len = 0
                                 last_silence_boundary = 0
                             else:
@@ -2955,6 +3175,23 @@ async def main_async(args):
 
     marian_model, marian_tokenizer = load_marian()
 
+    # --- TTS engine (optional, ONNX Runtime — thread-safe, separate pool) ---
+    global tts_engine, _tts_pool
+    if args.tts:
+        from engines.mlx_engine import PiperTTSEngine
+
+        # Dynamic language: TTS speaks in TARGET_LANG (the translated language)
+        tts_voice = settings.tts.voices.get(TARGET_LANG)
+        if tts_voice:
+            tts_engine = PiperTTSEngine(voices={TARGET_LANG: tts_voice})
+            tts_engine.load()
+            _tts_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="tts")
+            settings.tts.enabled = True
+            settings.tts.output_mode = args.tts_output
+            print(f"  TTS enabled: {TARGET_LANG} voice ({tts_voice}), output={args.tts_output}")
+        else:
+            print(f"  WARNING: No TTS voice configured for {TARGET_LANG}, TTS disabled", file=sys.stderr)
+
     # --- Dry-run text mode: translate a single string and exit ---
     if args.dry_run_text:
         print("\n--- DRY RUN TEXT MODE ---")
@@ -2972,8 +3209,22 @@ async def main_async(args):
         else:
             spanish, lat = translate_marian(args.dry_run_text)
             tps = 0.0
-        print(f"Spanish: {spanish}")
+        print(f"Translation ({TARGET_LANG}): {spanish}")
         print(f"Latency: {lat:.0f}ms, TPS: {tps:.1f}")
+
+        # TTS in dry-run mode: synthesize translated text
+        if tts_engine and settings.tts.enabled:
+            tts_result = tts_engine.synthesize(spanish, language=TARGET_LANG)
+            print(f"TTS: {tts_result.latency_ms:.0f}ms, {len(tts_result.audio) / tts_result.sample_rate:.1f}s audio")
+            if settings.tts.output_mode in ("wav", "both"):
+                import scipy.io.wavfile as wav
+
+                os.makedirs(AUDIO_DIR, exist_ok=True)
+                wav_path = os.path.join(AUDIO_DIR, "tts_dry_run.wav")
+                audio_int16 = (tts_result.audio * 32767).astype(np.int16)
+                wav.write(wav_path, tts_result.sample_rate, audio_int16)
+                print(f"TTS WAV: {wav_path}")
+
         return
 
     # Detect best microphone and auto-calibrate gain
@@ -3016,6 +3267,17 @@ async def main_async(args):
         ping_interval=None,  # disable pings — inference blocks event loop
     )
 
+    # Start TTS audio WebSocket server (separate port for binary PCM)
+    tts_ws_server = None
+    if tts_engine and settings.tts.enabled and settings.tts.output_mode in ("ws", "both"):
+        tts_ws_server = await websockets.serve(
+            tts_ws_handler,
+            "0.0.0.0",
+            settings.tts.audio_ws_port,
+            ping_interval=None,
+        )
+        print(f"  TTS audio WebSocket ready on port {settings.tts.audio_ws_port}")
+
     print(f"  WebSocket ready on port {args.ws_port}")
     print(f"  HTTP server ready on port {args.http_port}")
     print("\n  Local displays:")
@@ -3024,6 +3286,9 @@ async def main_async(args):
     print("\n  Mobile / LAN access:")
     print(f"    http://{local_ip}:{args.http_port}/displays/mobile_display.html")
     print(f"    http://{local_ip}:{args.http_port}/displays/audience_display.html")
+    if tts_ws_server:
+        print("\n  TTS audio stream:")
+        print(f"    ws://{local_ip}:{settings.tts.audio_ws_port}  (binary PCM, int16, mono)")
 
     # [P7-P3-6A] Initialize streaming translation queue and broadcaster
     _stream_token_queue = asyncio.Queue(maxsize=128)
@@ -3056,12 +3321,20 @@ async def main_async(args):
         stream_task.cancel()
         # [FIX] Shut down the PyTorch pool (MarianMT partial translations)
         _pytorch_pool.shutdown(wait=False)
+        # Shut down TTS pool if running
+        if _tts_pool is not None:
+            _tts_pool.shutdown(wait=False)
+        if tts_engine is not None:
+            tts_engine.unload()
         # Stop multiprocess workers if running
         if MULTIPROCESS:
             _stop_workers()
         print_summary()
         ws_server.close()
         await ws_server.wait_closed()
+        if tts_ws_server is not None:
+            tts_ws_server.close()
+            await tts_ws_server.wait_closed()
 
 
 def main():
@@ -3122,20 +3395,32 @@ def main():
     parser.add_argument(
         "--music-threshold",
         type=float,
-        default=0.02,
-        help="RMS threshold for music detection (no speech + high energy). Default: 0.02",
+        default=0.15,
+        help="RMS threshold for music detection (no speech + high energy). Default: 0.15",
     )
     parser.add_argument(
         "--music-holdoff",
         type=float,
-        default=2.0,
-        help="Seconds of music-like audio before muting STT. Default: 2.0",
+        default=5.0,
+        help="Seconds of music-like audio before muting STT. Default: 5.0",
     )
     parser.add_argument(
         "--lang",
         choices=["en", "es"],
         default="en",
         help="Input language: en (English→Spanish, default) or es (Spanish→English)",
+    )
+    parser.add_argument(
+        "--tts",
+        action="store_true",
+        default=False,
+        help="Enable TTS audio output of translated text (Piper ONNX)",
+    )
+    parser.add_argument(
+        "--tts-output",
+        choices=["ws", "wav", "both"],
+        default="ws",
+        help="TTS output mode: ws (WebSocket stream), wav (file), both (default: ws)",
     )
     args = parser.parse_args()
 

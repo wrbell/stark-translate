@@ -8,6 +8,7 @@ Provides:
 
 import copy
 import logging
+import os
 import threading
 import time
 
@@ -18,6 +19,8 @@ from engines.base import (
     STTResult,
     TranslationEngine,
     TranslationResult,
+    TTSEngine,
+    TTSResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -475,7 +478,13 @@ class MLXGemmaEngine(TranslationEngine):
         input_words = len(text.split())
         max_tok = max(64, int(input_words * 3.0))
 
-        use_cache = self._prompt_cache_template is not None and self._suffix_tokens is not None
+        # Prompt cache is pre-built for en→es only; skip it for other directions
+        use_cache = (
+            self._prompt_cache_template is not None
+            and self._suffix_tokens is not None
+            and source_lang == "en"
+            and target_lang == "es"
+        )
 
         if use_cache:
             # Deep-copy the pre-computed KV cache so we don't mutate the template
@@ -722,3 +731,140 @@ class MarianEngine(TranslationEngine):
         if self._device is not None:
             return self._device
         return "cpu"
+
+
+# ---------------------------------------------------------------------------
+# Piper TTS (ONNX Runtime -- works on any backend, thread-safe)
+# ---------------------------------------------------------------------------
+
+
+class PiperTTSEngine(TTSEngine):
+    """Text-to-speech engine wrapping Piper (ONNX Runtime).
+
+    Piper uses ONNX Runtime for inference (CPU), not MLX. Despite living in
+    mlx_engine.py, it's the Mac-side TTS engine. ONNX Runtime is thread-safe,
+    so TTS can run on its own thread pool without the MLX single-thread restriction.
+
+    Constructor args:
+        voices:  Dict mapping language codes to Piper voice names or paths.
+                 Default: ``{"es": "es_ES-carlfm-high"}``.
+    """
+
+    def __init__(self, voices: dict[str, str] | None = None):
+        self._voice_specs = voices or {"es": "es_ES-carlfm-high"}
+        self._voices: dict = {}  # lang -> PiperVoice instance
+        self._loaded = False
+
+    def load(self) -> None:
+        """Load Piper voice models for each configured language."""
+        from piper.voice import PiperVoice
+
+        logger.info("Loading Piper TTS voices: %s", self._voice_specs)
+        t0 = time.time()
+
+        for lang, voice_spec in self._voice_specs.items():
+            # Try custom path first, then resolve from Piper's download cache
+            custom_path = f"piper_voices/{lang}/{voice_spec}.onnx"
+            if os.path.exists(custom_path):
+                voice = PiperVoice.load(custom_path)
+                logger.info("  Loaded custom voice for %s: %s", lang, custom_path)
+            else:
+                # Stock voice: download if needed via piper_download
+                model_path = self._ensure_voice_downloaded(voice_spec)
+                voice = PiperVoice.load(model_path)
+                logger.info("  Loaded stock voice for %s: %s", lang, voice_spec)
+            self._voices[lang] = voice
+
+        self._loaded = True
+        logger.info("Piper TTS ready (%d voices, %.1fs)", len(self._voices), time.time() - t0)
+
+    def synthesize(self, text: str, *, language: str = "es") -> TTSResult:
+        """Synthesize text to float32 audio array using the voice for *language*."""
+        if not self._loaded:
+            raise RuntimeError("Engine not loaded -- call load() first")
+
+        if language not in self._voices:
+            raise ValueError(f"No voice loaded for language '{language}'. Available: {list(self._voices.keys())}")
+
+        import io
+        import wave
+
+        voice = self._voices[language]
+
+        t0 = time.perf_counter()
+
+        # Synthesize to in-memory WAV
+        wav_buffer = io.BytesIO()
+        with wave.open(wav_buffer, "wb") as wav_file:
+            voice.synthesize_wav(text, wav_file)
+
+        latency_ms = (time.perf_counter() - t0) * 1000
+
+        # Extract raw PCM from WAV and convert int16 -> float32
+        wav_buffer.seek(0)
+        with wave.open(wav_buffer, "rb") as wav_file:
+            sample_rate = wav_file.getframerate()
+            n_frames = wav_file.getnframes()
+            raw_bytes = wav_file.readframes(n_frames)
+
+        audio_int16 = np.frombuffer(raw_bytes, dtype=np.int16)
+        audio_float32 = audio_int16.astype(np.float32) / 32768.0
+
+        return TTSResult(
+            audio=audio_float32,
+            sample_rate=sample_rate,
+            latency_ms=latency_ms,
+            text=text,
+        )
+
+    def unload(self) -> None:
+        """Release voice models from memory."""
+        self._voices.clear()
+        self._loaded = False
+        logger.info("PiperTTSEngine unloaded")
+
+    @property
+    def model_id(self) -> str:
+        return f"piper:{','.join(f'{k}={v}' for k, v in self._voice_specs.items())}"
+
+    @property
+    def backend(self) -> str:
+        return "onnx"
+
+    @staticmethod
+    def _ensure_voice_downloaded(voice_name: str) -> str:
+        """Download a Piper voice if not already cached, return path to .onnx file.
+
+        Uses piper_download to fetch from HuggingFace rhasspy/piper-voices.
+        """
+        from pathlib import Path
+
+        # Piper voices cache in ~/.local/share/piper_tts/ by convention
+        cache_dir = Path.home() / ".local" / "share" / "piper_tts"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Check if already downloaded
+        onnx_path = cache_dir / f"{voice_name}.onnx"
+        if onnx_path.exists():
+            return str(onnx_path)
+
+        # Download via huggingface_hub
+        from huggingface_hub import hf_hub_download
+
+        # Piper voice naming: language_REGION-name-quality
+        # e.g., es_ES-carlfm-high -> es/es_ES/carlfm/high/
+        parts = voice_name.split("-")
+        lang_region = parts[0]  # es_ES
+        lang = lang_region.split("_")[0]  # es
+        name = parts[1] if len(parts) > 1 else "default"
+        quality = parts[2] if len(parts) > 2 else "medium"
+
+        repo_id = "rhasspy/piper-voices"
+        model_file = f"{lang}/{lang_region}/{name}/{quality}/{voice_name}.onnx"
+        config_file = f"{lang}/{lang_region}/{name}/{quality}/{voice_name}.onnx.json"
+
+        logger.info("Downloading Piper voice: %s", voice_name)
+        onnx_local = hf_hub_download(repo_id=repo_id, filename=model_file, cache_dir=str(cache_dir))
+        hf_hub_download(repo_id=repo_id, filename=config_file, cache_dir=str(cache_dir))
+
+        return onnx_local

@@ -27,6 +27,7 @@ Real-time mic input, fully on-device transcription and translation, displayed in
             └─ FINAL (on silence gap or 8s max utterance)
             │    Whisper Large-V3-Turbo STT (~300ms, word timestamps)
             │    TranslateGemma 4B EN↔ES (~350ms)          ← replaces partial
+            │    ├─ Piper TTS (~150ms, --tts)              ← audio output
             │    TranslateGemma 12B EN↔ES (~800ms, --ab)   ← side-by-side
             │    Total: ~650ms (4B) / ~1.1s (A/B)
             │
@@ -113,6 +114,8 @@ python dry_run_ab.py --backend=cuda --no-ab
 | `--gain` | auto | Mic gain multiplier (auto-calibrates by default) |
 | `--device` | auto | Audio input device index |
 | `--chunk-duration` | 2.0 | Seconds of speech to accumulate |
+| `--tts` | off | Enable Piper TTS audio synthesis for translated text |
+| `--tts-output` | ws | TTS output mode: ws (WebSocket), wav (file), both |
 
 ## Testing
 
@@ -139,6 +142,8 @@ Tests run on CI (Ubuntu, Python 3.11 + 3.12) without GPU or model downloads. Hea
 | Translate (partials) | MarianMT opus-mt-en-es / es-en | PyTorch (CPU, ~80ms) | ~298 MB | ~80ms |
 | Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~350ms |
 | Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~800ms |
+| TTS (EN) | Piper en_US-lessac-high | ONNX Runtime | ~63 MB | ~40ms/word |
+| TTS (ES) | Piper es_MX-claude-high | ONNX Runtime | ~63 MB | ~8ms/word |
 
 CUDA variants: bitsandbytes 4-bit for TranslateGemma, faster-whisper INT8 for STT.
 
@@ -164,6 +169,9 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 - **Hardware profiling** -- per-session CPU/RAM/GPU snapshots for portability planning
 - **LAN serving** -- HTTP server + WebSocket on `0.0.0.0` so phones connect over local network
 - **229-term theological glossary** -- covers 66 books, 31 proper names, theological concepts, liturgical terms
+- **Piper TTS audio synthesis** -- `--tts` flag enables text-to-speech for translated text (EN + ES voices, ONNX, thread-safe)
+- **End-to-end roundtrip quality testing** -- `tools/roundtrip_test.py` measures STT WER and roundtrip translation accuracy
+- **Post-session validation pipeline** -- YouTube WER comparison with text-anchor alignment (`tools/validate_session.py`)
 - **Dual-target inference** -- runs on Apple Silicon (MLX) or NVIDIA GPUs (CUDA) from a single codebase
 - **Unified configuration** -- pydantic-settings with STARK_ env prefix, .env file support
 - **STT fallback** -- automatic retry with fallback model on low-confidence or hallucinated segments
@@ -212,11 +220,11 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 ├── requirements-mac.txt       # Mac/MLX pip dependencies
 ├── requirements-nvidia.txt    # NVIDIA/CUDA inference dependencies
 │
-├── engines/                   # STT + translation engine abstraction (MLX + CUDA)
-│   ├── base.py                # ABCs: STTEngine, TranslationEngine, result dataclasses
-│   ├── mlx_engine.py          # MLXWhisperEngine, MLXGemmaEngine, MarianEngine
+├── engines/                   # STT + translation + TTS engine abstraction (MLX + CUDA)
+│   ├── base.py                # ABCs: STTEngine, TranslationEngine, TTSEngine, result dataclasses
+│   ├── mlx_engine.py          # MLXWhisperEngine, MLXGemmaEngine, MarianEngine, PiperTTSEngine
 │   ├── cuda_engine.py         # FasterWhisperEngine, CUDAGemmaEngine
-│   ├── factory.py             # create_stt_engine(), create_translation_engine(), auto-detect
+│   ├── factory.py             # create_stt_engine(), create_translation_engine(), create_tts_engine()
 │   └── active_learning.py     # Fallback event JSONL logger
 │
 ├── displays/
@@ -246,6 +254,10 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 │   ├── translation_qe.py      # Reference-free translation QE
 │   ├── benchmark_latency.py   # End-to-end latency profiling
 │   ├── stt_benchmark.py       # STT-only benchmarking
+│   ├── roundtrip_test.py      # End-to-end STT + translation roundtrip quality test
+│   ├── validate_session.py    # Post-session validation vs YouTube captions
+│   ├── prepare_finetune_data.py # Fine-tuning data export from live sessions
+│   ├── download_roundtrip_texts.py # Download test texts for roundtrip testing
 │   ├── convert_models_to_both.py # Model format conversion (MLX ↔ CUDA)
 │   └── test_adaptive_model.py # Adaptive model selection testing
 │
@@ -297,7 +309,10 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 - `settings.py`: pydantic-settings unified config (`STARK_` env prefix, `.env` support)
 - Backend selection (`--backend auto|mlx|cuda`) with CUDA fallback paths
 - STT fallback logic (lazy-load fallback model on low confidence / hallucination)
-- Validation pipeline (`tools/validate_session.py`) for post-session quality analysis
+- Piper TTS engine integration (`--tts` flag, WebSocket + WAV output, EN + ES voices)
+- Validation pipeline (`tools/validate_session.py`) with text-based anchor alignment (19.6% WER on live session)
+- Roundtrip quality test: STT WER 3.8-8.8%, roundtrip WER ~56%, ~134ms/word (`tools/roundtrip_test.py`)
+- Fine-tuning data prep tools (review queue + dataset export)
 - Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
 - CI/CD pipeline: 7 GitHub Actions workflows (lint, test, security, release, label, commitlint, stale) + Codecov
 - 450+ tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
