@@ -46,14 +46,14 @@ class TestInitCsv:
         d.init_csv()
         assert open(d.CSV_PATH).read() != ""
 
-    def test_header_has_19_columns(self):
+    def test_header_has_expected_columns(self):
         import dry_run_ab as d
 
         d.init_csv()
         with open(d.CSV_PATH, newline="") as f:
             reader = csv.reader(f)
             header = next(reader)
-        assert len(header) == 20
+        assert len(header) == 22
 
     def test_creates_parent_dirs(self, tmp_path):
         import dry_run_ab as d
@@ -113,8 +113,8 @@ class TestWriteCsvRow:
         d.write_csv_row(self._make_data(cid=1))
         with open(d.CSV_PATH, newline="") as f:
             rows = list(csv.reader(f))
-        # homophone_flags column (index 15)
-        assert "rain->reign" in rows[1][15]
+        # homophone_flags column (index 16, after true_e2e_ms at 9)
+        assert "rain->reign" in rows[1][16]
 
     def test_includes_bad_split_flag(self):
         import dry_run_ab as d
@@ -124,8 +124,8 @@ class TestWriteCsvRow:
         d.write_csv_row(self._make_data(cid=1))
         with open(d.CSV_PATH, newline="") as f:
             rows = list(csv.reader(f))
-        # bad_split column (index 17, after near_miss_flags at 16)
-        assert rows[1][17] == "Y"
+        # bad_split column (index 18, after near_miss_flags at 17)
+        assert rows[1][18] == "Y"
 
 
 # ===================================================================

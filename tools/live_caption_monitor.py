@@ -543,10 +543,7 @@ def find_global_offset_by_text(
 
     # --- Step 1: Pick anchor segments evenly spaced through local session ---
     # Filter to segments with enough words to be distinctive
-    viable = [
-        s for s in local_segments
-        if len(normalize_text(s.text).split()) >= 4
-    ]
+    viable = [s for s in local_segments if len(normalize_text(s.text).split()) >= 4]
     if not viable:
         return 0.0, 0.0
 
@@ -599,9 +596,7 @@ def find_global_offset_by_text(
             if sim > best_sim:
                 best_sim = sim
                 # Use midpoint of matched window
-                best_yt_time = (
-                    yt_words[i][1] + yt_words[i + window_len - 1][1]
-                ) / 2.0
+                best_yt_time = (yt_words[i][1] + yt_words[i + window_len - 1][1]) / 2.0
 
         if best_sim > 0.6:
             candidate_offsets.append(anchor_time - best_yt_time)

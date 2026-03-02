@@ -586,9 +586,7 @@ def compare_stt_aligned(
     local_end = max(s.end for s in all_local_segments)
 
     # Always compute text-based anchor offset (cheap, <1s)
-    text_offset, text_confidence = find_global_offset_by_text(
-        all_local_segments, yt_timed
-    )
+    text_offset, text_confidence = find_global_offset_by_text(all_local_segments, yt_timed)
     logger.info(
         "Text-anchor alignment: offset=%.1fs (confidence=%.0f%%)",
         text_offset,
@@ -596,12 +594,12 @@ def compare_stt_aligned(
     )
 
     # Try narrow ±5s search (works when timelines already close)
-    _offset, _wer, _lt, _yt, _uncertain = find_best_offset(
-        all_local_segments, yt_timed, 0.0, min(local_end, 60.0)
-    )
+    _offset, _wer, _lt, _yt, _uncertain = find_best_offset(all_local_segments, yt_timed, 0.0, min(local_end, 60.0))
     logger.info(
         "Narrow ±5s search: offset=%.1fs, WER=%s, uncertain=%s",
-        _offset, _wer, _uncertain,
+        _offset,
+        _wer,
+        _uncertain,
     )
 
     # Decide which offset to use
@@ -616,17 +614,25 @@ def compare_stt_aligned(
         # WER using narrow offset (YouTube shifted by narrow offset)
         yt_narrow = [TimedSegment(s.start + _offset, s.end + _offset, s.text) for s in yt_timed]
         _, wer_n, _, _, _ = find_best_offset(
-            all_local_segments, yt_narrow, sample_start, sample_end,
+            all_local_segments,
+            yt_narrow,
+            sample_start,
+            sample_end,
         )
         # WER using text-anchor offset (YouTube shifted by text offset)
         yt_text = [TimedSegment(s.start + text_offset, s.end + text_offset, s.text) for s in yt_timed]
         _, wer_t, _, _, _ = find_best_offset(
-            all_local_segments, yt_text, sample_start, sample_end,
+            all_local_segments,
+            yt_text,
+            sample_start,
+            sample_end,
         )
         logger.info(
             "Offset conflict: narrow=%.1fs (mid-WER=%s), text=%.1fs (mid-WER=%s)",
-            _offset, f"{wer_n*100:.0f}%" if wer_n is not None else "N/A",
-            text_offset, f"{wer_t*100:.0f}%" if wer_t is not None else "N/A",
+            _offset,
+            f"{wer_n * 100:.0f}%" if wer_n is not None else "N/A",
+            text_offset,
+            f"{wer_t * 100:.0f}%" if wer_t is not None else "N/A",
         )
         if wer_t is not None and (wer_n is None or wer_t < wer_n):
             _offset = text_offset
@@ -1260,6 +1266,66 @@ def match_screenshots_to_chunks(
 
 
 # ---------------------------------------------------------------------------
+# KPI scorecard integration
+# ---------------------------------------------------------------------------
+
+
+def _generate_kpi_section(csv_paths: list[str]) -> str | None:
+    """Generate a KPI scorecard section for the validation report.
+
+    Imports kpi_report lazily so the validation pipeline doesn't fail if
+    the module has issues. Returns markdown string or None on failure.
+    """
+    try:
+        from tools.kpi_report import (
+            compute_latency_kpis,
+            compute_reliability_kpis,
+            compute_stability_kpis,
+            compute_translation_kpis,
+            compute_wer_kpis,
+            find_diagnostics_for_csv,
+            generate_scorecard,
+            load_csv,
+            load_diagnostics,
+        )
+    except ImportError:
+        logger.warning("Could not import kpi_report, skipping KPI scorecard")
+        return None
+
+    try:
+        all_rows: list[dict] = []
+        all_diag: list[dict] = []
+        for path in csv_paths:
+            all_rows.extend(load_csv(path))
+            diag_path = find_diagnostics_for_csv(path)
+            if diag_path:
+                all_diag.extend(load_diagnostics(diag_path))
+
+        if not all_rows:
+            return None
+
+        latency = compute_latency_kpis(all_rows)
+        wer = compute_wer_kpis(all_rows, all_diag)
+        translation = compute_translation_kpis(all_rows)
+        stability = compute_stability_kpis(all_rows, all_diag)
+        reliability = compute_reliability_kpis(all_rows, all_diag)
+        scorecard = generate_scorecard(latency, wer, translation, stability, reliability)
+
+        lines = [
+            "---",
+            "",
+            "## KPI Scorecard",
+            "",
+            scorecard,
+            "",
+        ]
+        return "\n".join(lines)
+    except Exception:
+        logger.warning("KPI scorecard generation failed", exc_info=True)
+        return None
+
+
+# ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
 
@@ -1441,6 +1507,12 @@ def run_validation(
         else:
             session_name = Path(csv_paths[0]).stem.replace("ab_metrics_", "")
             output = f"metrics/validation_{session_name}.md"
+
+    # --- KPI Scorecard ---
+    logger.info("Generating KPI scorecard...")
+    kpi_section = _generate_kpi_section(csv_paths)
+    if kpi_section:
+        report += "\n" + kpi_section
 
     os.makedirs(os.path.dirname(output) or ".", exist_ok=True)
     with open(output, "w", encoding="utf-8") as f:

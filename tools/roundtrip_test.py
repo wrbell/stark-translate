@@ -316,9 +316,7 @@ def run_roundtrip(
 
     stt_engine = create_stt_engine(backend="mlx")
     gemma_engine = create_translation_engine(backend="mlx", engine_type="gemma")
-    tts_engine = create_tts_engine(
-        voices={"en": "en_US-lessac-high", "es": "es_MX-claude-high"}
-    )
+    tts_engine = create_tts_engine(voices={"en": "en_US-lessac-high", "es": "es_MX-claude-high"})
 
     logger.info("Loading STT engine...")
     stt_engine.load()
