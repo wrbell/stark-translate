@@ -3,9 +3,9 @@
 A fully on-device, live bidirectional speech-to-text system (English/Spanish) for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Supports `--lang en` (EN→ES) and `--lang es` (ES→EN). Includes Piper TTS (`--tts`). All Python, MLX on Apple Silicon for inference, CUDA on NVIDIA for training.
 
 **Two-pass pipeline** for fast partials and high-quality finals:
-- **Partials (while speaking):** mlx-whisper STT + MarianMT PyTorch (~380ms) — displayed in italics
-- **Finals (on silence):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit (~1.3s / ~1.9s) — replaces partial
-- **A/B comparison:** 4B (~650ms translation) vs 12B (~1.4s), with 4B as speculative draft for 12B
+- **Partials (while speaking):** mlx-whisper STT + MarianMT PyTorch (~750ms) — displayed in italics
+- **Finals (on silence):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit (~1.1s / ~2.6s) — replaces partial
+- **A/B comparison:** 4B (~550ms translation) vs 12B (~2.1s), with 4B as speculative draft for 12B
 
 ---
 

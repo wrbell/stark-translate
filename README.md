@@ -15,24 +15,24 @@ Real-time mic input, fully on-device transcription and translation, displayed in
                               Two-Pass Pipeline
                               ================
 
-  Mic (48kHz) ──> Resample 16kHz ──> Silero VAD ──┐
-                                                    │
-            ┌───────────────────────────────────────┘
+  Mic (48kHz) ──> Resample 16kHz (<1ms) ──> Silero VAD (<1ms) ──┐
+                                                                  │
+            ┌─────────────────────────────────────────────────────┘
             │
-            ├─ PARTIAL (on 0.6s of new speech, while speaker is talking)
-            │    Whisper Large-V3-Turbo STT (~300ms)
-            │    MarianMT EN↔ES PyTorch (~80ms)             ← italic in UI
-            │    Total: ~380ms
+            ├─ PARTIAL (every 0.6s of new speech, while speaker is talking)
+            │    Whisper Large-V3-Turbo STT (~500ms)
+            │    MarianMT EN↔ES PyTorch (~250ms)             ← italic in UI
+            │    Total: ~750ms
             │
-            └─ FINAL (on silence gap or 8s max utterance)
-            │    Whisper Large-V3-Turbo STT (~300ms, word timestamps)
-            │    TranslateGemma 4B EN↔ES (~350ms)          ← replaces partial
-            │    ├─ Piper TTS (~150ms, --tts)              ← audio output
-            │    TranslateGemma 12B EN↔ES (~800ms, --ab)   ← side-by-side
-            │    Total: ~650ms (4B) / ~1.1s (A/B)
-            │
-            │    Pipeline overlap (6C): translation runs on utterance N
-            │    while STT runs on utterance N+1, hiding translation latency.
+            └─ FINAL (on 0.5s silence gap or 8s max utterance)
+                 Whisper Large-V3-Turbo STT (~500ms)
+                 TranslateGemma 4B EN↔ES (~550ms)            ← replaces partial
+                 ├─ Piper TTS (~40ms/word EN, --tts)         ← audio output
+                 TranslateGemma 12B EN↔ES (~2.1s, --ab)      ← side-by-side
+                 Total: ~1.1s (4B) / ~2.6s (A/B sequential)
+
+                 Pipeline overlap: translation runs on utterance N
+                 while STT runs on utterance N+1, hiding translation latency.
                                      │
                                      ▼
                           WebSocket (0.0.0.0:8765)
@@ -136,13 +136,13 @@ Tests run on CI (Ubuntu, Python 3.11 + 3.12) without GPU or model downloads. Hea
 
 ## Models
 
-| Component | Model | Framework | Size | Latency |
-|-----------|-------|-----------|------|---------|
+| Component | Model | Framework | Size | Latency (typical) |
+|-----------|-------|-----------|------|--------------------|
 | VAD | Silero VAD | PyTorch | ~2 MB | <1ms |
-| STT | Whisper Large-V3-Turbo | mlx-whisper / faster-whisper | ~1.5 GB | ~300ms |
-| Translate (partials) | MarianMT opus-mt-en-es / es-en | PyTorch (CPU, ~80ms) | ~298 MB | ~80ms |
-| Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~350ms |
-| Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~800ms |
+| STT | Whisper Large-V3-Turbo | mlx-whisper / faster-whisper | ~1.5 GB | ~500ms |
+| Translate (partials) | MarianMT opus-mt-en-es / es-en | PyTorch (CPU) | ~298 MB | ~250ms |
+| Translate A (finals) | TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB | ~550ms |
+| Translate B (finals) | TranslateGemma 12B 4-bit | mlx-lm | ~7 GB | ~2.1s |
 | TTS (EN) | Piper en_US-lessac-high | ONNX Runtime | ~63 MB | ~40ms/word |
 | TTS (ES) | Piper es_MX-claude-high | ONNX Runtime | ~63 MB | ~8ms/word |
 
@@ -153,7 +153,7 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 ## Features
 
 - **Bidirectional language support** -- `--lang en` (English→Spanish, default) or `--lang es` (Spanish→English) with automatic model selection
-- **Two-pass STT pipeline** -- fast italic partials (MarianMT, ~380ms) replaced by high-quality finals (TranslateGemma, ~650ms) on silence detection
+- **Two-pass STT pipeline** -- fast italic partials (MarianMT, ~750ms) replaced by high-quality finals (TranslateGemma, ~1.1s) on silence detection
 - **Pipeline overlap** -- translation runs concurrently with next utterance's STT, hiding translation latency
 - **A/B translation comparison** -- 4B and 12B TranslateGemma run in parallel via `run_in_executor`, logged to CSV
 - **Theological Whisper prompt** -- biases STT toward church vocabulary (atonement, propitiation, mediator, etc.) to reduce homophone errors
