@@ -24,7 +24,7 @@ mlx-lm==0.30.7
 mlx-metal==0.31.0
 mlx-whisper>=0.4.3                    # Turbo: mlx-community/whisper-large-v3-turbo
 more-itertools==10.8.0
-mpmath==1.3.0
+mpmath==1.4.0
 networkx==3.6.1
 numba==0.64.0
 numpy==2.3.5
