@@ -7,10 +7,19 @@ jiwer is the only external dependency and is installed in CI.
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+
 # jiwer is a real dependency for these tests (installed in CI).
 # Remove the mock so the real jiwer is used.
 if "jiwer" in sys.modules and isinstance(sys.modules["jiwer"], MagicMock):
     del sys.modules["jiwer"]
+
+_has_jiwer = True
+try:
+    import jiwer  # noqa: F401
+except ImportError:
+    _has_jiwer = False
+requires_jiwer = pytest.mark.skipif(not _has_jiwer, reason="jiwer not installed")
 
 from tools.live_caption_monitor import (
     STOPWORDS,
@@ -132,6 +141,7 @@ class TestDetectYoutubeRepetition:
 # ---------------------------------------------------------------------------
 
 
+@requires_jiwer
 class TestComputeWerCer:
     def test_identical_strings(self):
         wer, cer, ops = compute_wer_cer("hello world", "hello world")

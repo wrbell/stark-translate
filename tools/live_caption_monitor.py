@@ -56,8 +56,7 @@ import numpy as np
 try:
     import jiwer
 except ImportError:
-    print("ERROR: jiwer is required. Install with: pip install jiwer", file=sys.stderr)
-    sys.exit(1)
+    jiwer = None  # deferred error — raised when actually needed
 
 # ---------------------------------------------------------------------------
 # Optional dependencies with helpful error messages
@@ -388,6 +387,9 @@ def compute_wer_cer(reference, hypothesis):
         # All deletions
         n_words = len(reference.split())
         return 1.0, 1.0, {"substitutions": 0, "deletions": n_words, "insertions": 0, "hits": 0}
+
+    if jiwer is None:
+        raise ImportError("jiwer is required. Install with: pip install jiwer")
 
     wer_result = jiwer.process_words(reference, hypothesis)
     wer = wer_result.wer
@@ -1595,6 +1597,10 @@ def run_report():
 
 def main():
     global WINDOW_SECONDS, JSONL_PATH
+
+    if jiwer is None:
+        print("ERROR: jiwer is required. Install with: pip install jiwer", file=sys.stderr)
+        sys.exit(1)
 
     parser = argparse.ArgumentParser(
         description="YouTube Caption Comparison System (Layer 4)",

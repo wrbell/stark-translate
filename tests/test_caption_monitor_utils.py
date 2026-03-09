@@ -21,6 +21,13 @@ import pytest
 if "jiwer" in sys.modules and isinstance(sys.modules["jiwer"], MagicMock):
     del sys.modules["jiwer"]
 
+_has_jiwer = True
+try:
+    import jiwer  # noqa: F401
+except ImportError:
+    _has_jiwer = False
+requires_jiwer = pytest.mark.skipif(not _has_jiwer, reason="jiwer not installed")
+
 from tools.live_caption_monitor import (
     TimedSegment,
     compute_wer_cer,
@@ -111,6 +118,7 @@ class TestInterpretWerBoundaries:
 # ===================================================================
 
 
+@requires_jiwer
 class TestComputeWerCerExtra:
     """Additional WER/CER scenarios using real jiwer."""
 

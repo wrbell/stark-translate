@@ -350,13 +350,16 @@ def _mock_compute_wer_cer(ref, hyp):
     return 0.15, 0.10, {"substitutions": 1, "deletions": 0, "insertions": 0, "hits": 5}
 
 
-# Patch path for compute_wer_cer as used inside live_caption_monitor
-_PATCH_WER = "tools.live_caption_monitor.compute_wer_cer"
+# Patch compute_wer_cer in both modules: validate_session (direct call)
+# and live_caption_monitor (called by find_best_offset/find_global_offset_by_text).
+_PATCH_WER_VS = "tools.validate_session.compute_wer_cer"
+_PATCH_WER_LCM = "tools.live_caption_monitor.compute_wer_cer"
 
 
 class TestCompareSTTAligned:
-    @patch(_PATCH_WER, side_effect=_mock_compute_wer_cer)
-    def test_single_speaker_with_timing(self, mock_wer):
+    @patch(_PATCH_WER_LCM, side_effect=_mock_compute_wer_cer)
+    @patch(_PATCH_WER_VS, side_effect=_mock_compute_wer_cer)
+    def test_single_speaker_with_timing(self, mock_wer_vs, mock_wer_lcm):
         """Single speaker with timed YT segments produces aligned comparison."""
         rows = [
             _sample_row(
@@ -391,8 +394,9 @@ class TestCompareSTTAligned:
         assert result["live_word_count"] > 0
         assert result["yt_word_count"] > 0
 
-    @patch(_PATCH_WER, side_effect=_mock_compute_wer_cer)
-    def test_multi_speaker(self, mock_wer):
+    @patch(_PATCH_WER_LCM, side_effect=_mock_compute_wer_cer)
+    @patch(_PATCH_WER_VS, side_effect=_mock_compute_wer_cer)
+    def test_multi_speaker(self, mock_wer_vs, mock_wer_lcm):
         """Two speakers produce per-speaker WER entries."""
         sp1_rows = [
             _sample_row(
