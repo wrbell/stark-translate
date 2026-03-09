@@ -29,6 +29,7 @@ networkx==3.6.1
 numba==0.64.0
 numpy==2.3.5
 onnxruntime==1.24.2
+openpyxl
 packaging==26.0
 pandas==3.0.1
 pillow==12.1.1

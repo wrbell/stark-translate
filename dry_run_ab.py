@@ -44,6 +44,7 @@ import copy
 import csv
 import http.server
 import json
+import logging
 import multiprocessing
 import platform
 import queue as queue_module
@@ -62,6 +63,19 @@ import torch
 import websockets
 
 from settings import settings
+
+# ---------------------------------------------------------------------------
+# Structured logging — logger used for VAD diagnostics, pipeline events,
+# and WS tracking.  User-facing translation output still uses print().
+# File handler is added in main() after SESSION_ID/log-level are resolved.
+# ---------------------------------------------------------------------------
+logger = logging.getLogger("stark")
+logger.setLevel(logging.DEBUG)  # handler levels control actual output
+# Console handler (default INFO, overridden by --log-level)
+_console_handler = logging.StreamHandler(sys.stdout)
+_console_handler.setLevel(logging.INFO)
+_console_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"))
+logger.addHandler(_console_handler)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -1325,7 +1339,13 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
 
     if use_cache:
         # [P7-2B] Deep-copy the pre-computed KV cache so we don't mutate the template
+        _dc_t0 = time.perf_counter()
         cached = copy.deepcopy(prompt_cache_template)
+        _dc_ms = (time.perf_counter() - _dc_t0) * 1000
+        if _dc_ms > 20:
+            logger.warning("prompt_cache deep-copy took %.1fms (>20ms threshold)", _dc_ms)
+        else:
+            logger.debug("prompt_cache deep-copy: %.1fms", _dc_ms)
         # [P7-3B] Build only the dynamic part of the prompt: English text + suffix
         text_tokens = tokenizer.encode(text, add_special_tokens=False)
         dynamic_tokens = text_tokens + suffix_tokens
@@ -1471,7 +1491,13 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
     use_cache = prompt_cache_template is not None and suffix_tokens is not None
 
     if use_cache:
+        _dc_t0 = time.perf_counter()
         cached = copy.deepcopy(prompt_cache_template)
+        _dc_ms = (time.perf_counter() - _dc_t0) * 1000
+        if _dc_ms > 20:
+            logger.warning("prompt_cache deep-copy (stream) took %.1fms (>20ms threshold)", _dc_ms)
+        else:
+            logger.debug("prompt_cache deep-copy (stream): %.1fms", _dc_ms)
         text_tokens = tokenizer.encode(text, add_special_tokens=False)
         dynamic_tokens = text_tokens + suffix_tokens
         gen_kwargs = dict(
@@ -1547,6 +1573,8 @@ async def stream_token_broadcaster():
 # Called once when transitioning from speech to silence — prevents cold-start
 # latency when speech resumes after a pause.
 _warmup_pending = False  # flag to avoid repeated warmups during sustained silence
+_last_warmup_time = 0.0  # perf_counter of last warmup — for periodic re-warming
+_WARMUP_INTERVAL = 4.0  # seconds between periodic warmups during sustained silence
 
 
 def warmup_translation_models():
@@ -1556,10 +1584,11 @@ def warmup_translation_models():
     a few seconds of inactivity, causing cold-start latency on next call.
     CUDA does not have this issue.
     """
-    global _warmup_pending
+    global _warmup_pending, _last_warmup_time
     if not _warmup_pending:
         return
     _warmup_pending = False
+    _last_warmup_time = time.perf_counter()
     if BACKEND != "mlx":
         return  # warmup only needed for Metal GPU
     try:
@@ -1864,6 +1893,7 @@ async def process_partial(audio_data, utterance_id):
         partial_translations[utterance_id] = spanish
         partial_latencies[utterance_id] = {
             "pt_ms": round(marian_latency, 1),
+            "stt_ms": round(stt_latency, 1),
         }
 
         print(f"  partial ({total:.0f}ms, Marian:{marian_latency:.0f}ms): {english} | {spanish}          ", end="\r")
@@ -2061,7 +2091,16 @@ def _run_stt_faster_whisper(audio_data, whisper_prompt):
 
 
 async def _pipeline_translate_and_finalize(
-    cid, english, stt_latency, stt_confidence, segment_meta, low_conf_words, audio_data, e2e_start, utterance_start=None
+    cid,
+    english,
+    stt_latency,
+    stt_confidence,
+    segment_meta,
+    low_conf_words,
+    audio_data,
+    e2e_start,
+    utterance_start=None,
+    queue_wait_ms=None,
 ):
     """[P7-6C] Run translation and finalization for a chunk.
 
@@ -2183,6 +2222,7 @@ async def _pipeline_translate_and_finalize(
         now = time.perf_counter()
         e2e_latency = (now - e2e_start) * 1000
         true_e2e_ms = round((now - utterance_start) * 1000, 1) if utterance_start is not None else None
+        silence_delay_ms = round((e2e_start - utterance_start) * 1000, 1) if utterance_start is not None else None
 
         # --- Diagnostics ---
         utterance_dur = len(audio_data) / SAMPLE_RATE
@@ -2238,6 +2278,8 @@ async def _pipeline_translate_and_finalize(
             "latency_b_ms": round(lat_b, 1),
             "e2e_latency_ms": round(e2e_latency, 1),
             "true_e2e_ms": true_e2e_ms,
+            "silence_delay_ms": silence_delay_ms,
+            "queue_wait_ms": queue_wait_ms,
             "stt_confidence": stt_confidence,
             "tps_a": round(tps_a, 1),
             "tps_b": round(tps_b, 1),
@@ -2294,6 +2336,7 @@ async def _pipeline_translate_and_finalize(
         _io_pool.submit(_save_io)
 
     except Exception as e:
+        logger.error("Translation error chunk #%d: %s", cid, e, exc_info=True)
         print(f"\n  ERROR in chunk #{cid} translation: {e}", file=sys.stderr)
 
 
@@ -2330,6 +2373,8 @@ async def _pipeline_coordinator():
             break
 
         audio_data, e2e_start, utterance_start = item
+        dequeue_time = time.perf_counter()
+        queue_wait_ms = round((dequeue_time - e2e_start) * 1000, 1)
         chunk_id += 1
         cid = chunk_id
         _pipeline_total += 1
@@ -2441,6 +2486,7 @@ async def _pipeline_coordinator():
                     audio_data,
                     e2e_start,
                     utterance_start=utterance_start,
+                    queue_wait_ms=queue_wait_ms,
                 )
             )
 
@@ -2504,9 +2550,17 @@ async def process_final(audio_data, finalized_utterance_id=None):
 # ---------------------------------------------------------------------------
 
 
+_ws_total_connections = 0
+_ws_total_disconnections = 0
+_ws_send_failures = 0
+
+
 async def ws_handler(websocket, path=None):
     """Handle new WebSocket connections."""
+    global _ws_total_connections
     ws_clients.add(websocket)
+    _ws_total_connections += 1
+    logger.info("ws_connect clients=%d total_connections=%d", len(ws_clients), _ws_total_connections)
     print(f"  Browser connected ({len(ws_clients)} client(s))")
     # Send language config so displays can swap their labels
     try:
@@ -2530,7 +2584,10 @@ async def ws_handler(websocket, path=None):
     except websockets.ConnectionClosed:
         pass
     finally:
+        global _ws_total_disconnections
         ws_clients.discard(websocket)
+        _ws_total_disconnections += 1
+        logger.info("ws_disconnect clients=%d total_disconnections=%d", len(ws_clients), _ws_total_disconnections)
         print(f"  Browser disconnected ({len(ws_clients)} client(s))")
 
 
@@ -2548,6 +2605,9 @@ async def broadcast(data):
     )
     for client, result in zip(clients, results):
         if isinstance(result, Exception):
+            global _ws_send_failures
+            _ws_send_failures += 1
+            logger.warning("ws_send_failure: %s", result)
             print(f"  [ws] Send failed: {result}")
             dead.add(client)
     ws_clients.difference_update(dead)
@@ -2773,6 +2833,8 @@ def init_csv():
                 "latency_b_ms",
                 "e2e_latency_ms",
                 "true_e2e_ms",
+                "silence_delay_ms",
+                "queue_wait_ms",
                 "stt_confidence",
                 "tps_a",
                 "tps_b",
@@ -2784,6 +2846,7 @@ def init_csv():
                 "bad_split",
                 "marian_similarity",
                 "marian_pt_ms",
+                "partial_stt_ms",
                 "word_stability_pct",
             ]
         )
@@ -2820,6 +2883,8 @@ def write_csv_row(data, marian_lat=None):
                 data["latency_b_ms"],
                 data["e2e_latency_ms"],
                 data.get("true_e2e_ms", ""),
+                data.get("silence_delay_ms", ""),
+                data.get("queue_wait_ms", ""),
                 data.get("stt_confidence", ""),
                 data.get("tps_a", ""),
                 data.get("tps_b", ""),
@@ -2831,6 +2896,7 @@ def write_csv_row(data, marian_lat=None):
                 "Y" if bad_sp else "",
                 marian_sim,
                 marian_lat["pt_ms"] if marian_lat else "",
+                marian_lat["stt_ms"] if marian_lat and "stt_ms" in marian_lat else "",
                 data.get("word_stability_pct", ""),
             ]
         )
@@ -2888,6 +2954,11 @@ def print_summary():
     print(f"{'=' * 60}")
     print_diagnostics()
 
+    # WebSocket stats
+    print(
+        f"  WS stats:    connections={_ws_total_connections} disconnections={_ws_total_disconnections} send_failures={_ws_send_failures}"
+    )
+
     # Write session summary to diagnostics JSONL for KPI report tool
     summary_record = {
         "event": "session_summary",
@@ -2898,6 +2969,9 @@ def print_summary():
         "chunks_empty_stt": _chunks_empty_stt,
         "chunks_hallucination": _chunks_hallucination,
         "chunks_dedup": _chunks_dedup,
+        "ws_total_connections": _ws_total_connections,
+        "ws_total_disconnections": _ws_total_disconnections,
+        "ws_send_failures": _ws_send_failures,
     }
     _io_pool.submit(_write_jsonl_record, summary_record)
 
@@ -3010,6 +3084,7 @@ async def audio_loop():
                             _utterance_start_times[utterance_id] = time.perf_counter()
                             last_partial_len = 0
                             last_silence_boundary = 0
+                            logger.debug("vad_speech_start utterance_id=%d frame=%d", utterance_id, frame_count)
                         speech_buffer = np.concatenate([speech_buffer, audio_frame])
                         silence_frames = 0
                         speech_frame_count += 1
@@ -3055,7 +3130,13 @@ async def audio_loop():
 
                     if (silence_triggered or force_cut_triggered) and buffer_duration >= 0.7:
                         print()  # newline after partial line
-
+                        if silence_triggered:
+                            logger.debug(
+                                "vad_silence_trigger utterance_id=%d buf=%.2fs silence_frames=%d",
+                                utterance_id,
+                                buffer_duration,
+                                silence_frames,
+                            )
                         if force_cut_triggered and not silence_triggered:
                             # Speaker hasn't paused — try to cut at last silence boundary
                             cut_type, split_pos = _compute_force_cut(
@@ -3064,6 +3145,13 @@ async def audio_loop():
                             cut_dur = len(speech_buffer) / SAMPLE_RATE
                             cut_pos_s = split_pos / SAMPLE_RATE
                             diag_force_cuts.append((utterance_id, cut_type, round(cut_dur, 2), round(cut_pos_s, 2)))
+                            logger.debug(
+                                "vad_force_cut utterance_id=%d type=%s dur=%.2fs pos=%.2fs",
+                                utterance_id,
+                                cut_type,
+                                cut_dur,
+                                cut_pos_s,
+                            )
                             print(
                                 f"  [{cut_type.upper()}-CUT] #{utterance_id}: {cut_pos_s:.1f}s of {cut_dur:.1f}s buffer"
                             )
@@ -3101,8 +3189,15 @@ async def audio_loop():
                             _warmup_pending = True
 
                     # [P7-4A] Pre-warm during silence: run dummy forward pass
-                    # once after speech→silence transition to keep Metal GPU hot
-                    if len(speech_buffer) == 0 and silence_frames > 0 and _warmup_pending:
+                    # after speech→silence transition to keep Metal GPU hot.
+                    # Re-trigger every _WARMUP_INTERVAL seconds of sustained silence
+                    # to prevent Metal GPU from re-idling during long pauses.
+                    if (
+                        len(speech_buffer) == 0
+                        and silence_frames > 0
+                        and (_warmup_pending or (time.perf_counter() - _last_warmup_time >= _WARMUP_INTERVAL))
+                    ):
+                        _warmup_pending = True
                         loop = asyncio.get_event_loop()
                         loop.run_in_executor(_pipeline_pool, warmup_translation_models)
 
@@ -3116,6 +3211,36 @@ async def audio_loop():
                 except asyncio.QueueEmpty:
                     break
             await asyncio.sleep(2)
+
+
+_ROLLING_STATS_INTERVAL = 300  # 5 minutes
+
+
+async def _rolling_stats_task():
+    """Print and broadcast rolling session stats every 5 minutes."""
+    while True:
+        await asyncio.sleep(_ROLLING_STATS_INTERVAL)
+        n = len(all_results)
+        if n == 0:
+            continue
+        stt_lats = [r["stt_latency_ms"] for r in all_results]
+        a_lats = [r["latency_a_ms"] for r in all_results]
+        true_e2es = [r["true_e2e_ms"] for r in all_results if r.get("true_e2e_ms") is not None]
+        msg = f"[ROLLING {n} chunks] STT avg={np.mean(stt_lats):.0f}ms | A avg={np.mean(a_lats):.0f}ms"
+        if true_e2es:
+            msg += f" | True E2E avg={np.mean(true_e2es):.0f}ms"
+        print(f"\n  {msg}")
+        logger.info(msg)
+        # Broadcast to operator displays
+        stats_data = {
+            "type": "rolling_stats",
+            "chunks": n,
+            "stt_avg_ms": round(float(np.mean(stt_lats)), 1),
+            "a_avg_ms": round(float(np.mean(a_lats)), 1),
+            "true_e2e_avg_ms": round(float(np.mean(true_e2es)), 1) if true_e2es else None,
+            "timestamp": datetime.now().isoformat(),
+        }
+        await broadcast(stats_data)
 
 
 async def main_async(args):
@@ -3305,12 +3430,16 @@ async def main_async(args):
     else:
         print("  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
 
+    # Rolling stats task — prints averages every 5 minutes
+    rolling_task = asyncio.create_task(_rolling_stats_task())
+
     # Run audio loop
     try:
         await audio_loop()
     except KeyboardInterrupt:
         pass
     finally:
+        rolling_task.cancel()
         # [P7-6C] Stop pipeline coordinator — send poison pill and wait
         if _pipeline_chunk_queue is not None:
             await _pipeline_chunk_queue.put(None)
@@ -3422,6 +3551,12 @@ def main():
         default="ws",
         help="TTS output mode: ws (WebSocket stream), wav (file), both (default: ws)",
     )
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Logging level for console and file output (default: INFO)",
+    )
     args = parser.parse_args()
 
     # --- Resolve backend ---
@@ -3467,6 +3602,19 @@ def main():
     CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
     AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"
     DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"
+
+    # --- Configure structured logging ---
+    log_level = getattr(logging, args.log_level, logging.INFO)
+    _console_handler.setLevel(log_level)
+    LOG_PATH = f"metrics/session_{SESSION_ID}.log"
+    os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+    _file_handler = logging.FileHandler(LOG_PATH)
+    _file_handler.setLevel(logging.DEBUG)  # file always captures everything
+    _file_handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    )
+    logger.addHandler(_file_handler)
+    logger.info("Session %s started — log file: %s", SESSION_ID, LOG_PATH)
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
     global WORD_TIMESTAMPS, BEAM_SIZE, MULTIPROCESS, MUSIC_THRESHOLD, MUSIC_HOLDOFF

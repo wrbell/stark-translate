@@ -69,19 +69,19 @@ class VADSettings(BaseSettings):
     """Voice Activity Detection (Silero VAD) configuration."""
 
     threshold: float = Field(
-        default=0.42,
-        description="Speech probability threshold (0-1). Lower = more sensitive.",
+        default=0.3,
+        description="Speech probability threshold (0-1). Lower = more sensitive. Matches --vad-threshold argparse default.",
     )
     silence_trigger: float = Field(
-        default=0.8,
-        description="Seconds of silence before final STT/translation is triggered",
+        default=0.5,
+        description="Seconds of silence before final STT/translation is triggered. Tunable via STARK_VAD__SILENCE_TRIGGER.",
     )
     max_utterance: float = Field(
         default=8.0,
         description="Force-process utterance if speaker doesn't pause (seconds)",
     )
     partial_interval: float = Field(
-        default=1.0,
+        default=0.6,
         description="Seconds between partial STT updates while speaking",
     )
 

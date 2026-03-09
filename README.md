@@ -19,7 +19,7 @@ Real-time mic input, fully on-device transcription and translation, displayed in
                                                     │
             ┌───────────────────────────────────────┘
             │
-            ├─ PARTIAL (on 1s of new speech, while speaker is talking)
+            ├─ PARTIAL (on 0.6s of new speech, while speaker is talking)
             │    Whisper Large-V3-Turbo STT (~300ms)
             │    MarianMT EN↔ES PyTorch (~80ms)             ← italic in UI
             │    Total: ~380ms
@@ -116,11 +116,12 @@ python dry_run_ab.py --backend=cuda --no-ab
 | `--chunk-duration` | 2.0 | Seconds of speech to accumulate |
 | `--tts` | off | Enable Piper TTS audio synthesis for translated text |
 | `--tts-output` | ws | TTS output mode: ws (WebSocket), wav (file), both |
+| `--log-level` | WARNING | Logging level: DEBUG, INFO, WARNING, ERROR |
 
 ## Testing
 
 ```bash
-# Run full test suite (450+ tests, no GPU required)
+# Run full test suite (600+ tests, no GPU required)
 pytest tests/ -v
 
 # With coverage report
@@ -279,7 +280,7 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 │   └── ...                    # 18 docs total
 │
 ├── stark_data/                # Church audio + transcripts + corrections
-├── bible_data/                # Biblical parallel text corpus (269K pairs)
+├── bible_data/                # Biblical parallel text corpus (155K pairs)
 └── metrics/                   # CSV logs, diagnostics JSONL, hardware profiles
 ```
 
@@ -287,7 +288,7 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 
 | Doc | Contents |
 |-----|----------|
-| [`CLAUDE.md`](./CLAUDE.md) | Full project overview, 6-layer architecture, fine-tuning strategy, compute timeline |
+| [`CLAUDE.md`](./CLAUDE.md) | Project overview, 6-layer architecture summary, CI/CD, phase checklist |
 | [`CLAUDE-macbook.md`](./CLAUDE-macbook.md) | Mac inference environment setup |
 | [`CLAUDE-windows.md`](./CLAUDE-windows.md) | Windows/WSL training environment setup |
 | [`docs/optimized.md`](./docs/optimized.md) | NVIDIA C++ inference optimization plan (llama.cpp / exllamav2) |
@@ -299,6 +300,11 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 | [`docs/multi_lingual.md`](./docs/multi_lingual.md) | Hindi & Chinese actionable todo list |
 | [`docs/macos_libomp_fix.md`](./docs/macos_libomp_fix.md) | macOS libomp conflict diagnosis and fix |
 | [`docs/todo.md`](./docs/todo.md) | Phased task list |
+| [`engines/CLAUDE.md`](./engines/CLAUDE.md) | Engine layer: MLX thread safety, model IDs, confidence thresholds, critical fixes |
+| [`training/CLAUDE.md`](./training/CLAUDE.md) | Fine-tuning: audio preprocessing, Bible corpus, LoRA/QLoRA configs, compute timeline |
+| [`tools/CLAUDE.md`](./tools/CLAUDE.md) | Monitoring: YouTube comparison, text-anchor alignment, translation QE tiers |
+| [`displays/CLAUDE.md`](./displays/CLAUDE.md) | Browser displays: WebSocket protocol, HTTP serving, display modes |
+| [`features/CLAUDE.md`](./features/CLAUDE.md) | Post-processing: diarization, sermon summary, verse extraction |
 
 ## Development Status
 
@@ -315,8 +321,13 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 - Fine-tuning data prep tools (review queue + dataset export)
 - Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
 - CI/CD pipeline: 7 GitHub Actions workflows (lint, test, security, release, label, commitlint, stale) + Codecov
-- 450+ tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
+- 600+ tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
 - Dependabot for automated dependency updates
+- Structured logging (`--log-level`, session log files, VAD event logging)
+- Rolling session stats (5-min averages broadcast to operator displays)
+- Periodic GPU warmup during sustained silence
+- New CSV columns: `silence_delay_ms`, `queue_wait_ms`, `partial_stt_ms`
+- Reduced silence trigger (0.8s→0.5s) and partial interval (1.0s→0.6s)
 
 **What's next:**
 - NVIDIA C++ inference optimization — llama.cpp/exllamav2 for sub-1s translation ([plan](./docs/optimized.md))
