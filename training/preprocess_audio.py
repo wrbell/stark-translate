@@ -20,7 +20,14 @@ import os
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
+
+# Suppress TensorFlow/ABSL noise before any TF imports (inaSpeechSegmenter uses Keras)
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # ERROR only
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+os.environ["GRPC_VERBOSITY"] = "ERROR"
+warnings.filterwarnings("ignore", category=UserWarning, module="keras")
 
 import numpy as np
 import soundfile as sf
@@ -210,13 +217,15 @@ def denoise_audio(audio, sr=16000):
     """
     import noisereduce as nr
 
-    return nr.reduce_noise(
-        y=audio,
-        sr=sr,
-        prop_decrease=0.7,  # Conservative: 0.6-0.8
-        n_fft=512,
-        stationary=False,  # Non-stationary for church reverb
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        return nr.reduce_noise(
+            y=audio,
+            sr=sr,
+            prop_decrease=0.7,  # Conservative: 0.6-0.8
+            n_fft=512,
+            stationary=False,  # Non-stationary for church reverb
+        )
 
 
 # ---------------------------------------------------------------------------

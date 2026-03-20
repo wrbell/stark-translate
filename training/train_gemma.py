@@ -5,8 +5,12 @@ train_gemma.py — TranslateGemma QLoRA Fine-Tuning on Biblical Text
 QLoRA fine-tuning for TranslateGemma 4B/12B on Bible verse pairs
 plus theological glossary pairs. Runs on Windows/WSL with A2000 Ada 16GB VRAM.
 
-Config: r=16, alpha=16, 4-bit NF4, target all-linear, paged AdamW
+Config: r=16, alpha=32, 4-bit NF4, target all-linear, paged AdamW 8-bit
 VRAM: ~10-12 GB (4B) | ~14-15 GB (12B)
+
+Tuning knobs:
+  - lora_alpha: currently set to r (conservative). Try alpha=2*r for
+    stronger adaptation if underfitting theological terms.
 
 Data Scaling Strategy:
   TranslateGemma already has strong translation capability — fine-tuning is
@@ -14,7 +18,7 @@ Data Scaling Strategy:
   shows diminishing returns beyond 10K-30K pairs for LLM translation FT.
   Start small (--max-pairs 20000), scale up only if improvement plateaus.
 
-  --max-pairs 20000   Start here (default). ~3-4 GPU hrs for 4B.
+  --max-pairs 20000   Start here (default). ~1-2 GPU hrs for 4B.
   --max-pairs 50000   Scale up if BLEU improvement < +2 at 20K.
   --max-pairs 0       Use full corpus (155K+). Risk of register overfitting.
 
@@ -28,7 +32,7 @@ Usage:
     python train_gemma.py A --max-pairs 50000  # Scale up after plateau
     python train_gemma.py A --max-pairs 0      # Full corpus (not recommended first run)
     python train_gemma.py A --sermon-data stark_data/live_sessions/sermon_pairs.jsonl
-    python train_gemma.py A --epochs 5 --lr 1e-4
+    python train_gemma.py A --lr 5e-6          # If 1e-5 still slightly degrades
     python train_gemma.py A --resume           # Resume from checkpoint
 """
 
@@ -39,10 +43,17 @@ import os
 import random
 import sys
 
+os.environ["USE_TF"] = "0"  # Prevent transformers from importing TF/Keras (not needed for PyTorch training)
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"  # Reduce VRAM fragmentation
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")  # Default to GPU 0 if not set by user/shell
+
 import torch
+
+torch.set_float32_matmul_precision("high")  # Enable TF32 on Ada — ~2x matmul throughput
+
 from datasets import Dataset
 from peft import LoraConfig
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TrainerCallback
 from trl import SFTConfig, SFTTrainer
 
 logging.basicConfig(
@@ -62,8 +73,47 @@ MODERN_TRANSLATIONS = {"web", "espanol_sencillo", "bbe"}  # modern/accessible
 ARCHAIC_TRANSLATIONS = {"kjv", "rvr1909", "asv", "ylt"}  # formal/archaic
 
 # Glossary oversampling factor — ensures theological terms are well-represented
-# even in small training runs. 229 terms * 2 pairs/term * 15x = ~6,870 pairs.
-GLOSSARY_OVERSAMPLE = 15
+# even in small training runs. 229 terms * 2 pairs/term * 3x = ~1,374 pairs.
+# With packing enabled, higher values create duplicate-heavy sequences that
+# reduce effective batch diversity.
+GLOSSARY_OVERSAMPLE = 3
+
+# Memory caps — allow shared GPU memory but prevent runaway allocation.
+# A2000 Ada has 16GB VRAM; Windows shares additional system RAM as GPU memory.
+VRAM_CAP = "15GiB"  # Leave ~1GB headroom for OS/display
+SHARED_MEM_CAP = "24GiB"  # Use ~80% of available 30GB shared system RAM
+VRAM_WARN_PERCENT = 85  # Log warning when VRAM usage exceeds this %
+
+
+class VRAMMonitorCallback(TrainerCallback):
+    """Logs GPU + shared memory usage periodically during training."""
+
+    def on_log(self, args, state, control, **kwargs):
+        if not torch.cuda.is_available():
+            return
+        allocated = torch.cuda.memory_allocated() / 1e9
+        reserved = torch.cuda.memory_reserved() / 1e9
+        total = torch.cuda.get_device_properties(0).total_memory / 1e9
+        pct = (reserved / total) * 100
+        level = logging.WARNING if pct > VRAM_WARN_PERCENT else logging.INFO
+        logger.log(
+            level, f"[VRAM] {allocated:.1f}GB alloc / {reserved:.1f}GB reserved / {total:.1f}GB total ({pct:.0f}%)"
+        )
+        if torch.cuda.max_memory_allocated() > 0:
+            peak = torch.cuda.max_memory_allocated() / 1e9
+            logger.log(level, f"[VRAM] Peak allocated: {peak:.1f}GB")
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if state.global_step % 10 != 0 or not torch.cuda.is_available():
+            return
+        allocated = torch.cuda.memory_allocated() / 1e9
+        reserved = torch.cuda.memory_reserved() / 1e9
+        total = torch.cuda.get_device_properties(0).total_memory / 1e9
+        pct = (reserved / total) * 100
+        if pct > VRAM_WARN_PERCENT:
+            logger.warning(
+                f"[VRAM] Step {state.global_step}: {allocated:.1f}GB alloc / {reserved:.1f}GB reserved ({pct:.0f}%)"
+            )
 
 
 def _subsample_bible_pairs(pairs, max_pairs, seed=42):
@@ -129,9 +179,9 @@ def fine_tune_gemma(
     sermon_data=None,
     output_dir=None,
     lora_r=16,
-    lora_alpha=16,
-    epochs=3,
-    lr=2e-4,
+    lora_alpha=32,
+    epochs=1,
+    lr=1e-5,
     max_seq_length=512,
     max_pairs=20000,
     resume_from_checkpoint=None,
@@ -142,7 +192,7 @@ def fine_tune_gemma(
     - r=16 for domain adaptation
     - target "all-linear" for best quality per QLoRA findings
     - 4-bit NF4 quantization via bitsandbytes
-    - Paged AdamW 32-bit optimizer
+    - Paged AdamW 8-bit optimizer
     - Sequence packing for short Bible verses
 
     Data scaling (arXiv:2409.03454, ALMA-R):
@@ -151,16 +201,15 @@ def fine_tune_gemma(
     - Scale up to 50K only if BLEU improvement < +2 points at 20K.
     - Using all 155K risks memorizing biblical phrasing over generalizable
       theological patterns. ALMA-R matched GPT-4 with only 22K pairs.
-    - Glossary pairs are always fully included with 15x oversampling.
-    - Sermon pairs (from live sessions) are always fully included at 2x weight.
+    - Glossary pairs are always fully included with 3x oversampling.
+    - Sermon pairs (from live sessions) are always fully included at 1x (no oversampling).
     """
     model_name = "google/translategemma-4b-it" if approach == "A" else "google/translategemma-12b-it"
     if output_dir is None:
         output_dir = f"fine_tuned_gemma_mi_{approach}"
 
-    is_12b = "12b" in model_name
-    batch_size = 1 if is_12b else 2
-    grad_accum = 8 if is_12b else 4
+    batch_size = 2
+    grad_accum = 4
 
     logger.info(f"Fine-tuning {model_name} (Approach {approach})")
     logger.info(f"  LoRA: r={lora_r}, alpha={lora_alpha}")
@@ -168,7 +217,7 @@ def fine_tune_gemma(
     logger.info(f"  Max pairs: {max_pairs if max_pairs > 0 else 'unlimited'}")
     logger.info(f"  Output: {output_dir}")
 
-    # 4-bit quantization config
+    # 4-bit quantization config — BF16 compute for torch.compile compatibility
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_use_double_quant=True,
@@ -180,13 +229,17 @@ def fine_tune_gemma(
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+        tokenizer.pad_token_id = tokenizer.eos_token_id
 
     logger.info("Loading model in 4-bit...")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         quantization_config=bnb_config,
         device_map="auto",
+        torch_dtype=torch.bfloat16,
+        max_memory={0: VRAM_CAP, "cpu": SHARED_MEM_CAP},
     )
+    model.config.pad_token_id = tokenizer.pad_token_id
 
     # QLoRA config — target all linear layers for best domain adaptation
     peft_config = LoraConfig(
@@ -195,12 +248,11 @@ def fine_tune_gemma(
         lora_dropout=0.05,
         target_modules="all-linear",
         task_type="CAUSAL_LM",
-        modules_to_save=["lm_head", "embed_tokens"],
     )
 
     # Load training data with scaling strategy:
     #   1. Bible pairs: subsampled to max_pairs, modern translations prioritized
-    #   2. Glossary pairs: always fully included, oversampled 15x
+    #   2. Glossary pairs: always fully included, oversampled 5x
     #   3. Sermon pairs: always fully included (real-domain, highest value)
     logger.info("Loading training data...")
     all_pairs = []
@@ -234,11 +286,8 @@ def fine_tune_gemma(
     if sermon_data and os.path.exists(sermon_data):
         with open(sermon_data) as f:
             sermon_pairs = [json.loads(line) for line in f]
-        # Include sermon pairs twice — real-domain data is more valuable
-        # than bulk Bible pairs for generalization to spoken register
-        doubled = sermon_pairs * 2
-        logger.info(f"  Sermon pairs: {len(sermon_pairs)} x 2 = {len(doubled)} (real-domain, 2x weighted)")
-        all_pairs.extend(doubled)
+        logger.info(f"  Sermon pairs: {len(sermon_pairs)} (real-domain, included 1x)")
+        all_pairs.extend(sermon_pairs)
     elif sermon_data:
         logger.info(f"  Sermon data not found at {sermon_data} (skipping)")
 
@@ -270,8 +319,9 @@ def fine_tune_gemma(
         ]
         try:
             formatted = tokenizer.apply_chat_template(messages, tokenize=False)
-        except Exception:
+        except (TypeError, KeyError, ValueError) as e:
             # Fallback: simple prompt format if chat template fails
+            logger.warning(f"Chat template failed ({e}), using fallback format")
             formatted = (
                 f"<start_of_turn>user\n"
                 f"Translate from English to Spanish:\n{example['en']}"
@@ -280,48 +330,97 @@ def fine_tune_gemma(
             )
         return {"text": formatted}
 
-    full_ds = full_ds.map(format_for_translategemma, remove_columns=full_ds.column_names)
+    # Verify which formatting path fires (critical — wrong template = guaranteed regression)
+    _test_msg = [
+        {
+            "role": "user",
+            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": "test"}],
+        },
+        {"role": "assistant", "content": "prueba"},
+    ]
+    try:
+        _test_result = tokenizer.apply_chat_template(_test_msg, tokenize=False)
+        logger.info(f"  Chat template OK. Sample: {_test_result[:120]}...")
+    except Exception as e:
+        logger.warning(f"  Chat template FAILED ({e}) — all examples will use fallback format!")
+        logger.warning("  This likely means training data format won't match the model's expected input.")
+
+    full_ds = full_ds.map(
+        format_for_translategemma,
+        remove_columns=full_ds.column_names,
+        num_proc=min(4, os.cpu_count() or 1),
+        desc="Formatting for TranslateGemma",
+    )
+
+    # Truncation length validation
+    lengths = [len(tokenizer.encode(ex["text"])) for ex in full_ds]
+    max_len = max(lengths)
+    median_len = sorted(lengths)[len(lengths) // 2]
+    over_limit = sum(1 for l in lengths if l > max_seq_length)
+    logger.info(f"  Token lengths: max={max_len}, median={median_len}")
+    if over_limit > 0:
+        logger.warning(f"  {over_limit} examples exceed max_seq_length={max_seq_length} and will be truncated!")
+
+    # Split 5% for eval (overfitting detection + early stopping)
+    split = full_ds.train_test_split(test_size=0.05, seed=42)
+    train_ds = split["train"]
+    eval_ds = split["test"]
+    logger.info(f"  Train/eval split: {len(train_ds)} train, {len(eval_ds)} eval")
 
     # Training config — optimized for A2000 Ada 16GB
     training_args = SFTConfig(
         output_dir=output_dir,
+        num_train_epochs=epochs,
         per_device_train_batch_size=batch_size,
         gradient_accumulation_steps=grad_accum,
         learning_rate=lr,
-        num_train_epochs=epochs,
-        gradient_checkpointing=True,
-        bf16=True,
-        max_seq_length=max_seq_length,
-        packing=True,  # Pack multiple short verses per sequence
-        optim="paged_adamw_32bit",
-        warmup_ratio=0.03,
-        max_grad_norm=0.3,
+        warmup_ratio=0.1,
         lr_scheduler_type="cosine",
+        max_grad_norm=0.5,
+        optim="paged_adamw_8bit",
+        bf16=True,
+        max_length=max_seq_length,
+        packing=False,
+        gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
         logging_steps=50,
-        save_steps=500,
+        eval_strategy="steps",
+        eval_steps=200,
+        save_strategy="steps",
+        save_steps=400,
         save_total_limit=3,
         dataloader_num_workers=4,
+        dataloader_prefetch_factor=2,
+        seed=42,
         report_to="none",
     )
+
+    torch.cuda.empty_cache()
 
     trainer = SFTTrainer(
         model=model,
         args=training_args,
-        train_dataset=full_ds,
+        train_dataset=train_ds,
+        eval_dataset=eval_ds,
         peft_config=peft_config,
         processing_class=tokenizer,
+        callbacks=[VRAMMonitorCallback()],
     )
 
     logger.info("Starting training...")
+    logger.info(f"[VRAM] Memory caps: GPU={VRAM_CAP}, shared={SHARED_MEM_CAP}")
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
-    # Save final model + tokenizer
-    model.save_pretrained(output_dir)
+    # Save final LoRA adapters + tokenizer
+    trainer.save_model(output_dir)
     tokenizer.save_pretrained(output_dir)
     logger.info(f"TranslateGemma QLoRA adapters ({approach}) saved to {output_dir}")
 
     # Save training metrics
-    trainer.save_metrics("train", trainer.state.log_history[-1] if trainer.state.log_history else {})
+    if trainer.state.log_history:
+        trainer.save_metrics("train", trainer.state.log_history[-1])
+    else:
+        logger.warning("No training metrics to save.")
 
 
 def main():
@@ -336,9 +435,9 @@ def main():
     parser.add_argument("--sermon-data", default=None, help="Path to sermon pairs JSONL (from live sessions)")
     parser.add_argument("--output", "-o", help="Output directory for QLoRA adapters")
     parser.add_argument("--lora-r", type=int, default=16)
-    parser.add_argument("--lora-alpha", type=int, default=16)
-    parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--lr", type=float, default=2e-4)
+    parser.add_argument("--lora-alpha", type=int, default=32)
+    parser.add_argument("--epochs", type=int, default=1)
+    parser.add_argument("--lr", type=float, default=1e-5)
     parser.add_argument("--max-seq-length", type=int, default=512)
     parser.add_argument(
         "--max-pairs",
@@ -352,6 +451,13 @@ def main():
     args = parser.parse_args()
 
     resume = True if args.resume else None
+    if resume:
+        out = args.output or f"fine_tuned_gemma_mi_{args.approach}"
+        if not os.path.isdir(out) or not any(
+            d.startswith("checkpoint-") for d in os.listdir(out) if os.path.isdir(os.path.join(out, d))
+        ):
+            logger.warning("--resume passed but no checkpoints found in %s. Starting fresh.", out)
+            resume = None
 
     fine_tune_gemma(
         approach=args.approach,

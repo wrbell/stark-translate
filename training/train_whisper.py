@@ -21,7 +21,10 @@ Usage:
 
 import argparse
 import logging
+import os
 from collections import Counter
+
+os.environ["USE_TF"] = "0"  # Prevent transformers from importing TF/Keras (not needed for PyTorch training)
 
 import numpy as np
 import torch
@@ -60,10 +63,9 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
     logger.info(f"Loading general-domain replay data (ratio={replay_ratio})...")
     try:
         general = load_dataset(
-            "mozilla-foundation/common_voice_16_1",
-            "en",
-            split="train[:2000]",
-            trust_remote_code=True,
+            "openslr/librispeech_asr",
+            "clean",
+            split="train.100[:2000]",
         )
         general = general.cast_column("audio", Audio(sampling_rate=16000))
     except Exception as e:
@@ -75,8 +77,8 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
     def prepare_general(batch):
         audio = batch["audio"]
         batch["input_features"] = processor(audio["array"], sampling_rate=audio["sampling_rate"]).input_features[0]
-        # Common Voice uses "sentence" column
-        text = batch.get("text") or batch.get("sentence", "")
+        # LibriSpeech uses "text" column
+        text = batch.get("text", "")
         batch["labels"] = processor.tokenizer(text).input_ids
         return batch
 

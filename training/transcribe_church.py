@@ -155,6 +155,7 @@ def transcribe_with_faster_whisper(data_dir, output_dir, model_name, batch_size,
         "distil-whisper/distil-large-v3.5": "distil-large-v3.5",
         "distil-whisper/distil-large-v3": "distil-large-v3",
         "openai/whisper-large-v3": "large-v3",
+        "openai/whisper-large-v3-turbo": "large-v3-turbo",
         "openai/whisper-large-v2": "large-v2",
         "openai/whisper-medium": "medium",
     }
