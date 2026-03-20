@@ -8,7 +8,7 @@
 #   - yt-dlp (via apt or pip)
 #
 # PyTorch must be installed separately FIRST with CUDA:
-#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 #
 # FlashAttention-2 (optional, for faster training on Ada GPUs):
 #   pip install flash-attn --no-build-isolation
@@ -18,13 +18,15 @@ transformers>=4.45
 accelerate>=0.34
 peft>=0.13                        # LoRA / QLoRA adapters
 trl>=0.12                         # SFTTrainer for QLoRA fine-tuning
-datasets>=3.0                     # HuggingFace datasets
+datasets>=3.0,<4.0                # HuggingFace datasets (4.x requires torchcodec)
 bitsandbytes>=0.44                # 4-bit quantization (QLoRA) + 8-bit optimizers
 sentencepiece
 protobuf
 
 # Audio Preprocessing
+librosa                           # Audio resampling (datasets audio decoding)
 soundfile                         # WAV file I/O
+sounddevice==0.5.5                # Audio playback for quality review
 noisereduce                       # Spectral noise reduction
 pyloudnorm                        # EBU R128 loudness normalization
 pydub                             # Audio manipulation utilities

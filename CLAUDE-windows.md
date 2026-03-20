@@ -21,7 +21,7 @@ nvidia-smi  # Verify GPU is visible (A2000 Ada, 16GB)
 wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt-get update
-sudo apt-get -y install cuda-toolkit-12-4
+sudo apt-get -y install cuda-toolkit-12-6
 
 # Verify
 nvcc --version
@@ -30,50 +30,61 @@ nvcc --version
 ### Python Environment
 
 ```bash
-sudo apt-get install python3.12 python3.12-venv ffmpeg
+sudo apt-get install python3.12 python3.12-venv ffmpeg pkg-config \
+  libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev \
+  libswscale-dev libswresample-dev libavfilter-dev
 
-python3.12 -m venv stt_train_env
-source stt_train_env/bin/activate
+python3.12 -m venv ~/stt_train_env
+source ~/stt_train_env/bin/activate
 
-# PyTorch with CUDA
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# PyTorch with CUDA (must install FIRST — other packages depend on it)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 
-# Training libs
-pip install transformers accelerate
-pip install peft                        # LoRA
-pip install trl                         # SFTTrainer for QLoRA fine-tuning
-pip install datasets                    # HuggingFace datasets
-pip install bitsandbytes                # 4-bit quantization (QLoRA) + 8-bit optimizers
-pip install sentencepiece protobuf
+# All training/preprocessing deps
+pip install -r requirements-windows.txt
 
-# Audio preprocessing
-pip install noisereduce pyloudnorm pydub
-pip install demucs                      # Source separation (CUDA-accelerated)
-pip install silero-vad
-pip install pyannote-audio              # Speaker diarization (CUDA)
-pip install inaSpeechSegmenter          # Speech/music classification
+# Dev tools
+pip install ruff mypy pytest pytest-cov pytest-timeout pre-commit bandit vulture
 
-# Evaluation
-pip install jiwer sacrebleu
-pip install unbabel-comet               # COMET translation quality metric
-
-# Data collection
-sudo apt install yt-dlp
+# FlashAttention-2 (optional, speeds up training on Ada GPUs)
+pip install ninja && pip install flash-attn --no-build-isolation
 ```
 
-### Shared Folder for Model Transfer
+**Note:** If pip hits `setuptools` build errors (`pkg_resources` missing), constrain with `PIP_CONSTRAINT` file containing `setuptools<81`.
 
-WSL mounts Windows drives at `/mnt/c/`. Set up a shared project folder:
+### Data & Model Storage
+
+All training data and HF model cache lives on **D:\\Data\\stt-data** (`/mnt/d/Data/stt-data` in WSL, 3.7 TB free):
 
 ```bash
-# Create shared directory (accessible from both Windows and WSL)
-mkdir -p /mnt/c/Users/YourName/Projects/stt_bilingual
+# Directory structure
+/mnt/d/Data/stt-data/
+├── stark_data/{raw,cleaned,transcripts,live_sessions}
+├── bible_data/{scrollmapper,aligned,glossary}
+├── models/{whisper,gemma,adapters}
+└── cache/                              # HF_HOME — all downloaded models
 
-# Symlink for convenience inside WSL
-ln -s /mnt/c/Users/YourName/Projects/stt_bilingual ~/stt_project
+# Symlink for convenience
+ln -sf /mnt/d/Data/stt-data ~/stt_data
 ```
 
-All fine-tuned model outputs go to this shared folder. Copy LoRA adapter folders to the Mac via USB, AirDrop, or network share.
+### Shell Environment (`~/.bashrc`)
+
+```bash
+# === stark-translate training environment ===
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH}
+export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+export HF_HOME=/mnt/d/Data/stt-data/cache
+export CUDA_VISIBLE_DEVICES=0
+alias stt='source ~/stt_train_env/bin/activate && cd /mnt/e/Code/stark-translate'
+```
+
+Quick start: type `stt` in any terminal to activate venv + cd to project.
+
+### Model Transfer to Mac
+
+Copy LoRA adapter folders to the Mac via USB, AirDrop, or network share. Adapters are saved to `/mnt/d/Data/stt-data/models/adapters/`.
 
 ---
 
@@ -599,11 +610,11 @@ def create_multi_reference_pairs(scrollmapper_pairs):
     """Group by verse_id, create (en_variant, es) pairs for all combinations."""
     from collections import defaultdict
     by_verse = defaultdict(lambda: {"en": set(), "es": set()})
-    
+
     for p in scrollmapper_pairs:
         by_verse[p["verse_id"]]["en"].add(p["en"])
         by_verse[p["verse_id"]]["es"].add(p["es"])
-    
+
     expanded = []
     for vid, texts in by_verse.items():
         for en in texts["en"]:
@@ -714,7 +725,7 @@ import torch
 def fine_tune_whisper(dataset_path="stark_data/cleaned",
                       output_dir="/mnt/c/Users/YourName/Projects/fine_tuned_whisper_mi"):
     """LoRA fine-tuning on A2000 Ada 16GB VRAM.
-    
+
     Research-validated config:
     - r=32, α=64 (most commonly validated; ATC paper found α=256 worth exploring)
     - Both encoder + decoder (encoder for acoustic adaptation, decoder for vocab)
@@ -815,14 +826,14 @@ def fine_tune_gemma(approach='A',
                     glossary_data="bible_data/glossary/glossary_pairs.jsonl",
                     output_base="/mnt/c/Users/YourName/Projects"):
     """QLoRA fine-tuning for TranslateGemma on biblical text.
-    
+
     Research-validated config (arXiv:2402.15061 — Domain-specific MT with LLMs):
     - r=16 for domain adaptation (validated in paper)
     - target "all-linear" for best quality per QLoRA findings
     - 4-bit NF4 quantization via bitsandbytes
     - Paged AdamW 32-bit optimizer
     - Sequence packing for short Bible verses
-    
+
     VRAM: ~10-12 GB for 4B, ~14-15 GB for 12B (tight on A2000 Ada)
     """
     model_name = "google/translategemma-4b-it" if approach == 'A' else "google/translategemma-12b-it"
@@ -1083,7 +1094,7 @@ def evaluate_biblical_translation(
     base_model="google/translategemma-4b-it",
 ):
     """Evaluate fine-tuned TranslateGemma on holdout Bible verses.
-    
+
     Metrics:
     - SacreBLEU: n-gram precision (standard MT metric)
     - chrF++: character-level n-grams (better for Spanish morphology)
@@ -1097,7 +1108,7 @@ def evaluate_biblical_translation(
 
     # Load test set
     test = [json.loads(line) for line in open(test_data)]
-    
+
     sources, references, hypotheses = [], [], []
     for example in test:
         messages = [{"role": "user", "content": [
@@ -1106,11 +1117,11 @@ def evaluate_biblical_translation(
         ]}]
         input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
-        
+
         with torch.no_grad():
             output = model.generate(**inputs, max_new_tokens=256)
         translation = tokenizer.decode(output[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
-        
+
         sources.append(example["en"])
         references.append(example["es"])
         hypotheses.append(translation.strip())
@@ -1126,7 +1137,7 @@ def evaluate_biblical_translation(
     # COMET (neural, highest human correlation)
     comet_path = download_model("Unbabel/wmt22-comet-da")
     comet_model = load_from_checkpoint(comet_path)
-    comet_input = [{"src": s, "mt": h, "ref": r} 
+    comet_input = [{"src": s, "mt": h, "ref": r}
                    for s, h, r in zip(sources, hypotheses, references)]
     comet_score = comet_model.predict(comet_input, batch_size=8)
     print(f"COMET: {comet_score.system_score:.4f}")
@@ -1142,7 +1153,7 @@ def evaluate_biblical_translation(
         "apocalyptic": range(66, 67),  # Revelation
     }
     for genre, book_range in genres.items():
-        genre_hyps = [h for h, ex in zip(hypotheses, test) 
+        genre_hyps = [h for h, ex in zip(hypotheses, test)
                       if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range]
         genre_refs = [r for r, ex in zip(references, test)
                       if int(str(ex.get("verse_id", "01001001"))[:2]) in book_range]
@@ -1182,7 +1193,7 @@ def evaluate_theological_terms(
         ]}]
         input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
-        
+
         with torch.no_grad():
             output = model.generate(**inputs, max_new_tokens=128)
         translation = tokenizer.decode(output[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
