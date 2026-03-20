@@ -60,6 +60,7 @@ ignore = [
     "RUF012", # mutable class variable (Pydantic model_config)
     "RUF013", # implicit Optional — existing codebase convention
     "RUF034", # useless if-else (intentional for clarity in config)
+    "RUF059", # unused unpacked variable — false positives with API returns
 ]
 
 [tool.ruff.lint.isort]
