@@ -33,7 +33,12 @@ Usage:
     python train_gemma.py A --max-pairs 0      # Full corpus (not recommended first run)
     python train_gemma.py A --sermon-data stark_data/live_sessions/sermon_pairs.jsonl
     python train_gemma.py A --lr 5e-6          # If 1e-5 still slightly degrades
-    python train_gemma.py A --resume           # Resume from checkpoint
+    python train_gemma.py A --max-steps 150    # Stop after 150 gradient steps
+    python train_gemma.py A --neftune 5        # NEFTune noise injection (alpha=5)
+    python train_gemma.py A --replay-ratio 0.2 # Mix 20% general EN→ES pairs
+    python train_gemma.py A --lora-dropout 0           # Disable LoRA dropout
+    python train_gemma.py A --glossary-oversample 3    # Increase glossary oversampling
+    python train_gemma.py A --resume                   # Resume from checkpoint
 """
 
 import argparse
@@ -72,11 +77,10 @@ logger = logging.getLogger(__name__)
 MODERN_TRANSLATIONS = {"web", "espanol_sencillo", "bbe"}  # modern/accessible
 ARCHAIC_TRANSLATIONS = {"kjv", "rvr1909", "asv", "ylt"}  # formal/archaic
 
-# Glossary oversampling factor — ensures theological terms are well-represented
-# even in small training runs. 229 terms * 2 pairs/term * 3x = ~1,374 pairs.
-# With packing enabled, higher values create duplicate-heavy sequences that
-# reduce effective batch diversity.
-GLOSSARY_OVERSAMPLE = 3
+# Glossary oversampling default — ensures theological terms are well-represented
+# even in small training runs. 229 terms * 2 pairs/term * 2x = ~916 pairs.
+# Higher values increase theological term weight but reduce batch diversity.
+GLOSSARY_OVERSAMPLE_DEFAULT = 2
 
 # Memory caps — allow shared GPU memory but prevent runaway allocation.
 # A2000 Ada has 16GB VRAM; Windows shares additional system RAM as GPU memory.
@@ -172,6 +176,57 @@ def _subsample_bible_pairs(pairs, max_pairs, seed=42):
     return result
 
 
+def _load_replay_pairs(ratio, domain_count, seed=42):
+    """Load general-domain EN→ES pairs from Helsinki-NLP/opus-100 for replay.
+
+    Replay data anchors general translation ability during domain adaptation,
+    preventing catastrophic forgetting (mirrors Whisper's 30% LibriSpeech approach).
+
+    Args:
+        ratio: fraction of domain data to add as replay (e.g. 0.2 = 20%)
+        domain_count: number of domain-specific training pairs
+        seed: random seed for reproducibility
+
+    Returns:
+        list of dicts with 'en' and 'es' keys
+    """
+    replay_count = int(domain_count * ratio)
+    if replay_count <= 0:
+        return []
+
+    logger.info(f"  Loading {replay_count} general EN→ES replay pairs from opus-100...")
+    try:
+        from datasets import load_dataset
+
+        ds = load_dataset(
+            "Helsinki-NLP/opus-100",
+            "en-es",
+            split="train",
+            streaming=True,
+        )
+        pairs = []
+        rng = random.Random(seed)
+        # Reservoir sampling to get a random subset without loading entire dataset
+        for i, example in enumerate(ds):
+            pair = {"en": example["translation"]["en"], "es": example["translation"]["es"]}
+            if len(pairs) < replay_count:
+                pairs.append(pair)
+            else:
+                j = rng.randint(0, i)
+                if j < replay_count:
+                    pairs[j] = pair
+            # Stop early once we've seen enough candidates for good sampling
+            if i >= replay_count * 10:
+                break
+
+        logger.info(f"  Loaded {len(pairs)} general replay pairs")
+        return pairs
+    except Exception as e:
+        logger.warning(f"  Failed to load replay data: {e}")
+        logger.warning("  Continuing without replay buffer.")
+        return []
+
+
 def fine_tune_gemma(
     approach="A",
     bible_data="bible_data/aligned/verse_pairs_train.jsonl",
@@ -184,6 +239,11 @@ def fine_tune_gemma(
     lr=1e-5,
     max_seq_length=512,
     max_pairs=20000,
+    max_steps=-1,
+    neftune_alpha=None,
+    lora_dropout=0.05,
+    replay_ratio=0.0,
+    glossary_oversample=GLOSSARY_OVERSAMPLE_DEFAULT,
     resume_from_checkpoint=None,
 ):
     """QLoRA fine-tuning for TranslateGemma on biblical text.
@@ -201,7 +261,7 @@ def fine_tune_gemma(
     - Scale up to 50K only if BLEU improvement < +2 points at 20K.
     - Using all 155K risks memorizing biblical phrasing over generalizable
       theological patterns. ALMA-R matched GPT-4 with only 22K pairs.
-    - Glossary pairs are always fully included with 3x oversampling.
+    - Glossary pairs are always fully included with oversampling (--glossary-oversample).
     - Sermon pairs (from live sessions) are always fully included at 1x (no oversampling).
     """
     model_name = "google/translategemma-4b-it" if approach == "A" else "google/translategemma-12b-it"
@@ -215,6 +275,12 @@ def fine_tune_gemma(
     logger.info(f"  LoRA: r={lora_r}, alpha={lora_alpha}")
     logger.info(f"  Batch: {batch_size} x {grad_accum} = {batch_size * grad_accum} effective")
     logger.info(f"  Max pairs: {max_pairs if max_pairs > 0 else 'unlimited'}")
+    if max_steps > 0:
+        logger.info(f"  Max steps: {max_steps}")
+    if neftune_alpha is not None:
+        logger.info(f"  NEFTune noise alpha: {neftune_alpha}")
+    if replay_ratio > 0:
+        logger.info(f"  Replay ratio: {replay_ratio:.0%} general EN→ES")
     logger.info(f"  Output: {output_dir}")
 
     # 4-bit quantization config — BF16 compute for torch.compile compatibility
@@ -245,14 +311,14 @@ def fine_tune_gemma(
     peft_config = LoraConfig(
         r=lora_r,
         lora_alpha=lora_alpha,
-        lora_dropout=0.05,
+        lora_dropout=lora_dropout,
         target_modules="all-linear",
         task_type="CAUSAL_LM",
     )
 
     # Load training data with scaling strategy:
     #   1. Bible pairs: subsampled to max_pairs, modern translations prioritized
-    #   2. Glossary pairs: always fully included, oversampled 5x
+    #   2. Glossary pairs: always fully included, oversampled by --glossary-oversample factor
     #   3. Sermon pairs: always fully included (real-domain, highest value)
     logger.info("Loading training data...")
     all_pairs = []
@@ -276,8 +342,8 @@ def fine_tune_gemma(
     if glossary_data and os.path.exists(glossary_data):
         with open(glossary_data) as f:
             glossary_pairs = [json.loads(line) for line in f]
-        oversampled = glossary_pairs * GLOSSARY_OVERSAMPLE
-        logger.info(f"  Glossary pairs: {len(glossary_pairs)} x {GLOSSARY_OVERSAMPLE} = {len(oversampled)}")
+        oversampled = glossary_pairs * glossary_oversample
+        logger.info(f"  Glossary pairs: {len(glossary_pairs)} x {glossary_oversample} = {len(oversampled)}")
         all_pairs.extend(oversampled)
     else:
         logger.info("  No glossary data (skipping)")
@@ -290,6 +356,13 @@ def fine_tune_gemma(
         all_pairs.extend(sermon_pairs)
     elif sermon_data:
         logger.info(f"  Sermon data not found at {sermon_data} (skipping)")
+
+    # --- General-domain replay buffer (prevents catastrophic forgetting) ---
+    if replay_ratio > 0:
+        replay_pairs = _load_replay_pairs(replay_ratio, len(all_pairs))
+        if replay_pairs:
+            logger.info(f"  Replay pairs: {len(replay_pairs)} ({replay_ratio:.0%} of {len(all_pairs)} domain pairs)")
+            all_pairs.extend(replay_pairs)
 
     if not all_pairs:
         logger.error("No training data found!")
@@ -368,7 +441,7 @@ def fine_tune_gemma(
     logger.info(f"  Train/eval split: {len(train_ds)} train, {len(eval_ds)} eval")
 
     # Training config — optimized for A2000 Ada 16GB
-    training_args = SFTConfig(
+    sft_kwargs = dict(
         output_dir=output_dir,
         num_train_epochs=epochs,
         per_device_train_batch_size=batch_size,
@@ -394,6 +467,11 @@ def fine_tune_gemma(
         seed=42,
         report_to="none",
     )
+    if max_steps > 0:
+        sft_kwargs["max_steps"] = max_steps
+    if neftune_alpha is not None:
+        sft_kwargs["neftune_noise_alpha"] = neftune_alpha
+    training_args = SFTConfig(**sft_kwargs)
 
     torch.cuda.empty_cache()
 
@@ -447,6 +525,38 @@ def main():
         "Start at 20K, scale to 50K if BLEU < +2. "
         "Glossary and sermon pairs are always fully included.",
     )
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=-1,
+        help="Stop after N gradient steps (overrides --epochs). -1 = use epochs.",
+    )
+    parser.add_argument(
+        "--neftune",
+        type=float,
+        default=None,
+        help="NEFTune noise alpha (e.g. 5). Adds noise to embeddings during training for regularization.",
+    )
+    parser.add_argument(
+        "--replay-ratio",
+        type=float,
+        default=0.0,
+        help="Fraction of general EN→ES pairs to mix in (e.g. 0.2 = 20%%). "
+        "Loads from Helsinki-NLP/opus-100 to prevent catastrophic forgetting.",
+    )
+    parser.add_argument(
+        "--lora-dropout",
+        type=float,
+        default=0.05,
+        help="LoRA dropout rate (default 0.05). Set to 0 to disable.",
+    )
+    parser.add_argument(
+        "--glossary-oversample",
+        type=int,
+        default=GLOSSARY_OVERSAMPLE_DEFAULT,
+        help="Glossary pair oversampling factor (default 2). Higher values increase "
+        "theological term representation at cost of batch diversity.",
+    )
     parser.add_argument("--resume", action="store_true", help="Resume training from the latest checkpoint")
     args = parser.parse_args()
 
@@ -467,10 +577,15 @@ def main():
         output_dir=args.output,
         lora_r=args.lora_r,
         lora_alpha=args.lora_alpha,
+        lora_dropout=args.lora_dropout,
         epochs=args.epochs,
         lr=args.lr,
         max_seq_length=args.max_seq_length,
         max_pairs=args.max_pairs,
+        max_steps=args.max_steps,
+        neftune_alpha=args.neftune,
+        replay_ratio=args.replay_ratio,
+        glossary_oversample=args.glossary_oversample,
         resume_from_checkpoint=resume,
     )
 

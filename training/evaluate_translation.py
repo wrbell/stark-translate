@@ -9,7 +9,7 @@ Runs on both WSL (after training) and Mac (post-transfer verification).
 
 Usage:
     python evaluate_translation.py
-    python evaluate_translation.py --adapter fine_tuned_gemma_mi_A --test bible_data/holdout/verse_pairs_test.jsonl
+    python evaluate_translation.py --adapter fine_tuned_gemma_mi_A --test bible_data/aligned/verse_pairs_test.jsonl
     python evaluate_translation.py --spot-check-only
     python evaluate_translation.py --base-model google/translategemma-12b-it --adapter fine_tuned_gemma_mi_B
     python evaluate_translation.py --output-file metrics/translation_eval.json
@@ -108,7 +108,7 @@ def translate_marian(model, tokenizer, text):
 
 def evaluate_biblical_translation(
     adapter_dir="fine_tuned_gemma_mi_A",
-    test_data="bible_data/holdout/verse_pairs_test.jsonl",
+    test_data="bible_data/aligned/verse_pairs_test.jsonl",
     base_model="google/translategemma-4b-it",
     max_samples=None,
     output_file=None,
@@ -148,7 +148,7 @@ def evaluate_biblical_translation(
             logger.warning(f"Translation failed for example {i}: {e}")
             translation = ""
         sources.append(example["en"])
-        references.append(example["es"])
+        references.append(example.get("es", ""))
         hypotheses.append(translation)
 
         if (i + 1) % 100 == 0:
@@ -160,12 +160,35 @@ def evaluate_biblical_translation(
     elapsed = time.time() - start_time
     logger.info(f"Translation complete in {elapsed:.0f}s ({len(test) / elapsed:.1f} verse/s)")
 
+    # Filter to examples with references for metric computation
+    has_refs = [bool(r) for r in references]
+    if not any(has_refs):
+        logger.warning("No reference translations found — skipping BLEU/chrF++/COMET metrics")
+        scores = {
+            "bleu": None,
+            "chrf": None,
+            "comet": None,
+            "genres": {},
+            "num_verses": len(test),
+            "elapsed_s": round(elapsed, 1),
+        }
+        if output_file:
+            os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
+            with open(output_file, "w") as f:
+                json.dump(scores, f, indent=2)
+            logger.info(f"\nMetrics saved to {output_file}")
+        return scores
+
+    ref_hyp = [(r, h) for r, h, hr in zip(references, hypotheses, has_refs) if hr]
+    ref_filtered = [r for r, _ in ref_hyp]
+    hyp_filtered = [h for _, h in ref_hyp]
+
     # SacreBLEU
-    bleu = sacrebleu.corpus_bleu(hypotheses, [references])
+    bleu = sacrebleu.corpus_bleu(hyp_filtered, [ref_filtered])
     logger.info(f"\nSacreBLEU: {bleu.score:.1f}")
 
     # chrF++
-    chrf = sacrebleu.corpus_chrf(hypotheses, [references], word_order=2)
+    chrf = sacrebleu.corpus_chrf(hyp_filtered, [ref_filtered], word_order=2)
     logger.info(f"chrF++: {chrf.score:.1f}")
 
     # COMET (neural, highest human correlation)
@@ -175,7 +198,8 @@ def evaluate_biblical_translation(
 
         comet_path = download_model("Unbabel/wmt22-comet-da")
         comet_model = load_from_checkpoint(comet_path)
-        comet_input = [{"src": s, "mt": h, "ref": r} for s, h, r in zip(sources, hypotheses, references)]
+        src_filtered = [s for s, hr in zip(sources, has_refs) if hr]
+        comet_input = [{"src": s, "mt": h, "ref": r} for s, h, r in zip(src_filtered, hyp_filtered, ref_filtered)]
         comet_score = comet_model.predict(comet_input, batch_size=8)
         comet_val = comet_score.system_score
         logger.info(f"COMET: {comet_val:.4f}")
@@ -288,7 +312,7 @@ def main():
         "--adapter", default="fine_tuned_gemma_mi_A", help="Path to QLoRA adapter directory (for TranslateGemma)"
     )
     parser.add_argument("--base-model", default="google/translategemma-4b-it", help="Base TranslateGemma model")
-    parser.add_argument("--test", default="bible_data/holdout/verse_pairs_test.jsonl", help="Path to test JSONL")
+    parser.add_argument("--test", default="bible_data/aligned/verse_pairs_test.jsonl", help="Path to test JSONL")
     parser.add_argument(
         "--max-samples", type=int, default=None, help="Limit evaluation to N samples (useful for quick checks)"
     )
@@ -299,10 +323,12 @@ def main():
     parser.add_argument("--marian", default=None, help="Evaluate MarianMT model instead (path to fine-tuned dir)")
     args = parser.parse_args()
 
+    adapter = None if args.adapter.lower() == "none" else args.adapter
+
     if not args.spot_check_only:
         logger.info("=== Corpus-level metrics ===")
         evaluate_biblical_translation(
-            adapter_dir=args.adapter,
+            adapter_dir=adapter,
             test_data=args.test,
             base_model=args.base_model,
             max_samples=args.max_samples,
@@ -312,7 +338,7 @@ def main():
 
     logger.info("\n=== Theological term spot-check ===")
     evaluate_theological_terms(
-        adapter_dir=args.adapter,
+        adapter_dir=adapter,
         base_model=args.base_model,
         marian_dir=args.marian,
     )
