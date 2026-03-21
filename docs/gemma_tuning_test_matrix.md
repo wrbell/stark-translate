@@ -92,13 +92,13 @@ Uses `Helsinki-NLP/opus-100` EN→ES split from HuggingFace (~1M pairs). The `--
 
 | Run | BLEU | chrF++ | COMET | Steps | LR | Rank | Notes |
 |-----|------|--------|-------|-------|----|------|-------|
-| Base (no FT) | 19.7 | — | — | — | — | 16 | Reference |
+| Base (no FT) | 19.7 | — | **0.7516** | — | — | 16 | Reference |
 | **A1 (50 steps)** | **20.4** | **45.2** | **0.752** | 50 | 1e-5 | 16 | Best COMET, 5 min train |
 | A2 (150 steps) | 12.3 | 28.9 | 0.560 | 150 | 1e-5 | 16 | Forgetting cliff confirmed |
 | A3 (lr=5e-6, full) | 8.4 | 27.0 | 0.533 | ~1114 | 5e-6 | 16 | Halving lr not enough |
 | **A4 (lr=1e-6, full)** | **20.7** | **44.9** | **0.740** | ~1114 | 1e-6 | 16 | Best BLEU, survives full epoch |
 | A5 (rank=4, full) | 10.0 | 29.1 | 0.551 | ~1114 | 1e-5 | 4 | Rank reduction doesn't prevent forgetting |
-| A6 (replay 20%) | TBD | TBD | TBD | ~1114 | 1e-5 | 16 | Pending — does replay anchor general ability? |
+| A6 (replay 20%) | 8.5 | 28.0 | 0.541 | ~1114 | 1e-5 | 16 | Replay at lr=1e-5 → catastrophic forgetting (4/8 theo) |
 
 ### Key findings
 
@@ -111,6 +111,8 @@ Uses `Helsinki-NLP/opus-100` EN→ES split from HuggingFace (~1M pairs). The `--
    or did it just barely avoid breaking?
 4. **Rank reduction doesn't help.** A5 (rank=4) still forgot at lr=1e-5. Adapter capacity isn't
    the bottleneck — learning rate is.
+5. **Replay at lr=1e-5 doesn't help.** A6 (replay 20%) still forgot — BLEU 8.5, worse than base.
+   Replay can't compensate for an lr that's too high.
 
 ---
 
@@ -167,28 +169,57 @@ for d in ablation/B*/; do
 done
 ```
 
-### Decision logic
+### B-Series Results (2026-03-21)
 
-| Result | Interpretation | Next step |
-|--------|---------------|-----------|
-| B2 > A1 and A4 | lr=1e-6 + 150 steps is the sweet spot | Lock config, proceed to scale-up |
-| B1 ≈ A1, B2 ≈ A4 | lr=1e-6 doesn't help at low steps, marginal at moderate | A1 may be optimal; test B3/B4 for regularization gains |
-| B3 or B4 > A4 | Regularization pushes quality beyond safe-lr baseline | Combine winning regularization with B2's step count |
-| B5 > A4 (and A6 worked) | Replay + safe lr compounds | Include replay in final config |
-| Nothing beats A1 significantly | Minimal updates genuinely optimal for this model | Lock A1 config, scale-up runs test more diverse data in 50 steps |
+| Run | BLEU | chrF++ | COMET | Steps | LR | Extras | Theo | Train |
+|-----|------|--------|-------|-------|----|--------|------|-------|
+| B1 (lr=1e-6, 50 steps) | 19.6 | 44.5 | 0.750 | 50 | 1e-6 | — | 5/8 | 4 min |
+| B2 (lr=1e-6, 150 steps) | 20.0 | 44.7 | 0.751 | 150 | 1e-6 | — | 5/8 | 10 min |
+| B3 (lr=1e-6, dropout=0) | 20.4 | 45.2 | 0.742 | ~1114 | 1e-6 | dropout=0 | 5/8 | 60 min |
+| **B4 (lr=1e-6, neftune=5)** | **21.2** | **45.3** | 0.742 | ~1114 | 1e-6 | neftune=5 | **5/8** | **63 min** |
+| B5 (lr=1e-6, replay 20%) | 20.5 | 44.5 | 0.735 | ~1114 | 1e-6 | replay=20% | 5/8 | 77 min |
 
-### Time estimates
+### B-Series Key Findings
 
-| Run | Train time | Eval time | Total |
-|-----|-----------|-----------|-------|
-| B1 (50 steps) | ~3 min | ~47 min | ~50 min |
-| B2 (150 steps) | ~10 min | ~47 min | ~57 min |
-| B3 (full, ~1114 steps) | ~74 min | ~47 min | ~121 min |
-| B4 (full, ~1114 steps) | ~74 min | ~47 min | ~121 min |
-| B5 (full, ~1114 steps) | ~74 min | ~47 min | ~121 min |
-| **Total** | | | **~7.8 hrs** |
+1. **B4 (neftune=5) is the overall BLEU winner at 21.2** — the only run to clearly beat A4 (20.7).
+   NEFTune noise regularization provides a consistent +0.5 BLEU over the dropout=0 baseline (B3).
+2. **COMET peaked at A1 (0.752), not B4 (0.742).** The neural quality metric suggests A1's
+   translations are slightly more semantically accurate. B4 trained 12x longer and may have
+   subtly overfit to Bible phrasing patterns that boost BLEU but not semantic quality.
+3. **Replay didn't help at safe lr.** B5 (+0.5 over base) was marginal and worse than B4.
+   Combined with A6's catastrophic forgetting at lr=1e-5, replay is not worth the complexity.
+4. **Theological terms hit a hard wall at 5/8 (62%).** Every working run scores exactly 5/8.
+   The same 3 terms fail every time — these are **data problems**, not hyperparameter problems:
+   - **James (epistle) → Santiago:** Bible data has 0 Santiago, 155 Jacobo. 6 glossary pairs overwhelmed.
+   - **James (apostle) → Jacobo:** Model doesn't disambiguate — needs contextual signal it never learned.
+   - **Propitiation → propiciación:** Model prefers the synonym "expiación" (more common in training data). Only 2 glossary pairs.
+5. **The improvement ceiling is low.** Best BLEU 21.2 = only +1.5 over base (19.7). Across all
+   11 runs, the working range is 19.6–21.2 — a spread of 1.6 BLEU, within the noise floor.
 
-B1 + B2 finish in ~1.8 hrs and give early signal. B3-B5 can be skipped if B2 clearly wins.
+### Dual Assessment: BLEU vs COMET
+
+When sorted by COMET (semantic quality), the picture is different from BLEU:
+
+| Run | COMET | BLEU | Steps | Config |
+|-----|-------|------|-------|--------|
+| Base (no FT) | **0.7516** | 19.7 | — | — |
+| A1 (50 steps) | **0.752** | 20.4 | 50 | lr=1e-5 |
+| B2 (150 steps) | 0.751 | 20.0 | 150 | lr=1e-6 |
+| B1 (50 steps) | 0.750 | 19.6 | 50 | lr=1e-6 |
+| B4 (neftune=5) | 0.742 | **21.2** | ~1114 | lr=1e-6, neftune=5 |
+| A4 (lr=1e-6) | 0.740 | 20.7 | ~1114 | lr=1e-6 |
+
+**No fine-tuned model meaningfully improves COMET over base (0.7516).** A1 is +0.0006 — within
+noise. B4 (the BLEU "winner") is actually a 1% COMET regression. More training steps = worse
+COMET. Fine-tuning learns Bible n-gram patterns that boost BLEU but degrade semantic quality.
+
+- **BLEU winner: B4** (21.2) — but COMET 0.742, below base
+- **COMET winner: A1** (0.752) — but within noise of base (0.7516)
+- **Both go to Phase 2.5 sermon smoke test to settle it**
+
+### Metric hierarchy
+
+COMET > COMET proximity to 12B > glossary regressions > chrF++ > BLEU (reported only)
 
 ---
 
@@ -219,7 +250,7 @@ useless — it would actively harm the live demo.
 Translate every test input with **three models**:
 
 1. **4B base** (no adapter) — current production quality
-2. **4B + adapter** (Phase 2 winner) — what we're testing
+2. **4B + adapter** (A1 and B4 tested separately) — what we're testing
 3. **12B base** (no adapter) — quality ceiling / pseudo-reference
 
 12B serves as a quality anchor. In production, 12B replaces 4B output on silence detection,
@@ -271,18 +302,29 @@ Transcribe with Whisper, translate full segment with all 3 models. Tests registe
 sustained context — individual chunks might look fine, but does the adapter shift register
 across a full sermon passage?
 
+### Step 0: Generate + cache 12B translations (~1-2 hrs GPU, do once)
+
+Generate 12B translations for ALL sermon chunks up front. This cache serves both
+Phase 2.5 evaluation (as pseudo-references) and Phase 3a distillation data.
+
+1. Transcribe sermon WAVs from `stark_data/raw/midwest/` with Whisper large-v3
+2. Translate ALL chunks with 12B (both ~20 test chunks AND ~500-1000 full-corpus chunks)
+3. Cache to `ablation/sermon_12b_translations.json`
+
+This is the most expensive step but feeds both Phase 2.5 eval and Phase 3a data generation.
+
 ### Automated metrics (run first, ~5 min GPU)
 
 These run before human review. If any automated kill switch triggers, stop immediately.
 
 **1. 12B proximity gain (primary quantitative signal)**
 
-Use 12B translations as pseudo-references. Compute chrF++ between each 4B variant and 12B:
+Use 12B translations as pseudo-references. Compute COMET between each 4B variant and 12B:
 
 ```
-D_base    = chrF++(4B_base_output, 12B_output)     # how far 4B base is from 12B
-D_adapter = chrF++(4B_adapter_output, 12B_output)   # how far 4B adapter is from 12B
-proximity_gain = D_adapter - D_base                  # positive = adapter moved toward 12B
+D_base    = COMET(4B_base_output, 12B_output)       # how far 4B base is from 12B
+D_adapter = COMET(4B_adapter_output, 12B_output)     # how far 4B adapter is from 12B
+proximity_gain = D_adapter - D_base                   # positive = adapter moved toward 12B
 ```
 
 Computed on clean chunks only (STT confidence > 0.7). Noisy chunks excluded — 12B may also
@@ -290,8 +332,8 @@ struggle with garbled input, making it a poor reference.
 
 | Proximity gain | Interpretation |
 |----------------|---------------|
-| > +2 chrF++ points | Adapter clearly moved 4B toward 12B quality |
-| 0 to +2 | Marginal — proceed with caution, check human review |
+| > +0.005 COMET | Adapter clearly moved 4B toward 12B quality |
+| 0 to +0.005 | Marginal — proceed with caution, check human review |
 | < 0 | **Kill switch: adapter moved AWAY from 12B.** Do not scale up. |
 
 **2. Hallucination ratio (safety check)**
@@ -367,18 +409,24 @@ with open('ablation/sermon_test_chunks.json', 'w') as f:
 print(f'Exported {len(chunks)} chunks')
 "
 
-# --- Translate with all 3 models ---
-# Script: training/evaluate_sermon.py (to be written — loads each model,
-# translates all chunks + sermon-style sentences, outputs comparison JSON
-# with automated metrics)
+# Step 0: Generate 12B translation cache (do once)
+python training/generate_12b_cache.py \
+    --chunks ablation/sermon_test_chunks.json \
+    --output ablation/sermon_12b_translations.json
 
+# Run sermon eval for A1 (COMET-optimal)
 python training/evaluate_sermon.py \
     --chunks ablation/sermon_test_chunks.json \
-    --adapter ablation/${WINNER} \
-    --base-model google/translategemma-4b-it \
-    --ceiling-model google/translategemma-12b-it \
-    --segment ablation/sermon_segment.txt \
-    --output ablation/sermon_eval_results.json
+    --adapter ablation/A1_steps50 \
+    --ceiling-cache ablation/sermon_12b_translations.json \
+    --output ablation/sermon_eval_A1.json
+
+# Run sermon eval for B4 (BLEU-optimal)
+python training/evaluate_sermon.py \
+    --chunks ablation/sermon_test_chunks.json \
+    --adapter ablation/B4_lr1e6_neftune \
+    --ceiling-cache ablation/sermon_12b_translations.json \
+    --output ablation/sermon_eval_B4.json
 
 # --- Tier 3: Full sermon segment (optional but recommended) ---
 # Pick a conference sermon with good audio
@@ -409,17 +457,27 @@ print(f'Extracted {len(segments)} segments, {len(text.split())} words')
 
 | Gate | Threshold | What it catches |
 |------|-----------|-----------------|
-| Proximity gain | < 0 on clean chunks | Adapter moved away from 12B quality |
-| Hallucination ratio | > 1.5x base on low-conf chunks | Adapter fabricates content on noisy input |
-| Archaic register | > 2x 12B on all outputs | Biblical verse training contaminated spoken register |
+| COMET proximity gain | < -0.01 | KILL: adapter degrades sermon quality |
+| COMET proximity gain | < 0.005 | WARN: marginal improvement |
+| Hallucination ratio | > 1.5x base on low-conf chunks | KILL: adapter fabricates content |
+| Archaic register | > 2x 12B on all outputs | KILL: biblical training contaminated register |
 
-**Quantitative gates (all must pass):**
+### Decision tree
 
-| Gate | Threshold | What it measures |
-|------|-----------|-----------------|
-| Proximity gain | > 0 on clean chunks | Adapter moved toward 12B quality |
-| Sermon-style theo terms | ≥ formal accuracy - 1 | Theological terms transfer to casual register |
-| Hallucination ratio | ≤ base × 1.2 | No meaningful hallucination increase |
+```
+├── OUTCOME A: COMET proximity gain > 0.005
+│     ├── Lock winner (A1 or B4)
+│     └── Proceed to Phase 3 with synthetic sermon data
+│
+├── OUTCOME B: Both in noise range (COMET gain ±0.005)
+│     ├── Verse pair FT doesn't help on sermons
+│     ├── 12B translations already cached → go straight to Phase 3a
+│     └── Try synthetic sermon data before giving up
+│
+└── OUTCOME C: COMET proximity < -0.01
+      ├── KILL: Bible verse FT actively harms sermon quality
+      └── Deploy base model, try Phase 3 with distilled data
+```
 
 **Human review (for borderline cases):**
 
@@ -433,39 +491,77 @@ print(f'Extracted {len(segments)} segments, {len(text.split())} words')
 
 | Task | Time | Type |
 |------|------|------|
-| Translate 20 chunks × 3 models | ~6 min | GPU (sequential model loading) |
+| Generate 12B cache (Step 0) | ~1-2 hrs | GPU (one-time) |
+| Translate 20 chunks × 3 models × 2 adapters | ~12 min | GPU (sequential model loading) |
 | Translate 8 sermon-style sentences × 3 models | ~2 min | GPU |
 | Transcribe + translate sermon segment × 3 | ~10 min | GPU |
 | Automated metrics computation | ~1 min | CPU |
 | Human review (targeted, ~18 chunks + segment) | ~30 min | Human |
-| **Total** | **~50 min** | ~20 min GPU + ~30 min human |
+| **Total** | **~40 min GPU + ~30 min human** | (excl. Step 0 cache) |
 
 If any automated kill switch fires, human review is skipped — saving 30 minutes.
 Total cost is trivial compared to 3-20+ hours of scale-up.
 
 ---
 
-## Phase 3 — Validation & Scale (2-4 runs, ~3-20 hrs)
+## Phase 3 — Synthetic Sermon Data + COMET-Primary Gates
 
-Once Phase 2 locks the winning config and Phase 2.5 confirms it works on sermon content,
-scale up data. See `docs/scale_run.md` for the full scale-up test matrix with time
-estimates and decision gates.
+**Status: Planned (after Phase 2.5).** Plain verse pairs are a weak signal — see
+`docs/more_data.md`. The new path is 12B-distilled sermon data.
 
-| ID | Config | Rationale |
-|----|--------|-----------|
-| S1a | Best Phase 2 config at 20K pairs, same steps | Test if more data diversity helps at same compute |
-| S1b | Best Phase 2 config at 20K pairs, proportional steps | Test if more training on more data compounds |
-| S2a | 50K pairs, same steps (conditional) | Only if S1 BLEU > Phase 2 best + 2 |
-| S2b | 50K pairs, proportional steps (conditional) | Only if S2a shows continued scaling |
+**Pre-gate:** Phase 2.5 must show COMET proximity gain > 0.005 on at least one adapter
+before proceeding. If Bible verse FT can't improve sermon COMET at all, synthetic data
+is the only path worth trying.
 
-### Go/No-Go gates
+### Phase 3a: Synthetic sermon data via 12B distillation (~2-3 hrs GPU)
+
+1. Transcribe 10-15 sermon WAVs from `stark_data/raw/midwest/` with Whisper large-v3
+2. Segment into natural chunks (sentence/paragraph level)
+3. Translate each chunk with TranslateGemma 12B (the quality ceiling)
+4. Score each pair with COMET (filter threshold > 0.75)
+5. Output as JSONL compatible with `train_gemma.py --sermon-data`
+
+**Why 12B, not 4B:** This is knowledge distillation. Training 4B on "what 12B would say"
+directly teaches 4B to produce 12B-like outputs → higher speculative draft acceptance
+rate → lower latency for the congregation.
+
+12B 4-bit (~7GB) fits on A2000 Ada 16GB. Cost: ~2.1s/chunk × 1000 chunks ≈ 35 min.
+Expected yield: ~500-1000 high-quality sermon EN→ES pairs.
+
+### Phase 3b: Retrain with distilled + verse + glossary mix
+
+| ID | Config | Data mix | Rationale |
+|----|--------|----------|-----------|
+| S1 | Winner config, verse + sermon (65/35) | ~8K verse + ~500 sermon | Test if sermon data improves COMET |
+| S2 | Winner config, verse + sermon (50/50) | ~4K verse + ~1K sermon | Higher sermon fraction |
+| S3 | Winner config, sermon only | ~1K sermon pairs | Does removing verse pairs help? |
+
+Each run uses `--sermon-data` flag in train_gemma.py (already implemented).
+
+### Phase 3c: Evaluate with COMET-primary gates
+
+| Metric | Floor | Minimum | Target |
+|--------|-------|---------|--------|
+| COMET | > 0.740 | > 0.752 | > 0.770 |
+| Glossary regressions | < 10 lost | < 5 lost | 0 lost |
+| chrF++ | > 40.0 | > 45.0 | > 48.0 |
+| BLEU | > 17.7 (sanity) | — | — |
+
+Re-run Phase 2.5 sermon smoke test on the new adapter.
+
+### Phase 4 (future, if Phase 3 works)
+
+CPT → Light SFT (method #1 from `more_data.md`). Raw monolingual sermon text + Bible text
+for continued pretraining, then light SFT. Expected +0.08-0.15 COMET.
+
+### Go/No-Go gates (COMET-primary)
 
 | Metric | Floor (reject) | Minimum | Target |
 |--------|---------------|---------|--------|
-| BLEU | > 17.7 (-10% base) | > 20.7 (beat A4) | > 22.7 (+3 over base) |
+| COMET | > 0.740 | > 0.752 (beat A1) | > 0.770 |
+| Glossary regressions | < 10 lost | < 5 lost | 0 lost |
 | chrF++ | > 40.0 | > 45.0 | > 48.0 |
-| COMET | > 0.720 | > 0.740 (match A4) | > 0.770 |
-| Theological terms | > 3/8 (37%) | > 5/8 (62%) | > 7/8 (87%) |
+| BLEU | > 17.7 (sanity) | — | — |
 
 ---
 
@@ -473,15 +569,15 @@ estimates and decision gates.
 
 | Phase | Runs | Wall Clock | Human Time | Status |
 |-------|------|-----------|------------|--------|
-| 0: Diagnostic | 1 | 47 min | 5 min | Done (BLEU 9.7) |
-| 1: Ablation | 6 | ~9.5 hrs | 30 min | Running (5/6 done) |
-| 2: Combine | 5 | ~7.8 hrs | 20 min | Planned |
-| 2.5: Sermon smoke test | 1 | ~5 min GPU | ~45 min human | Planned |
-| 3: Scale-up | 2-4 | ~3-20 hrs | 10 min | Planned (see scale_run.md) |
-| **Total** | **15-17** | **~21-38 hrs** | **~2 hrs** |
+| 0: Diagnostic | 1 | 47 min | 5 min | **Done** (BLEU 9.7) |
+| 1: Ablation | 6 | ~9.5 hrs | 30 min | **Done** (A1-A6 complete) |
+| 2: Combine | 5 | ~5.5 hrs | 20 min | **Done** (B1-B5 complete) |
+| 2.5: Sermon smoke test (A1 + B4) | 2 | ~40 min GPU | ~45 min human | **Next** |
+| 3: Synthetic sermon data + retrain | 3 | ~3-5 hrs GPU | ~30 min | Planned (after 2.5) |
+| **Total (completed)** | **12** | **~15.5 hrs** | **~55 min** |
 
-Can be spread across 3-4 sessions. Phase 2 B1+B2 give early signal in ~1.8 hrs.
-Phase 2.5 is mostly human review time — GPU cost is trivial (20 chunks).
+Phase 2.5 is the next gate — tests both A1 (COMET-optimal) and B4 (BLEU-optimal) on real
+sermon content with COMET-primary evaluation.
 
 ---
 

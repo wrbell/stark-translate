@@ -1,229 +1,246 @@
-# TranslateGemma QLoRA — Scale-Up Test Matrix
+# TranslateGemma QLoRA — Scale-Up: Synthetic Sermon Data Strategy
 
 ## Context
 
-Phase 1 ablation (6 runs at 8K pairs) identifies the dominant hyperparameters.
-Phase 2 B-series (2-3 runs) combines winners. These **scale-up runs** test whether
-more training data improves quality once the config is locked.
+Phase 1 ablation (6 runs at 8K pairs) and Phase 2 B-series (5 runs) are complete.
+**Plain verse pairs are a weak training signal** for an already-instruction-tuned model
+like TranslateGemma (see `docs/more_data.md`). They cause overfitting to Bible phrasing
+(BLEU up) without improving semantic quality (COMET flat/down).
 
-TranslateGemma already translates EN→ES well. Fine-tuning is domain adaptation
-(theological vocabulary, biblical register), not re-learning translation. Research
-(ALMA-R, arXiv:2409.03454) shows diminishing returns beyond 10K-30K pairs for
-LLM translation FT — ALMA-R matched GPT-4 with only 22K pairs.
+The new path: **12B-distilled sermon data** — translate real sermon content with 12B,
+filter with COMET, and use as training data for 4B. This is knowledge distillation
+that directly teaches 4B to produce 12B-like outputs → higher speculative draft
+acceptance rate → lower latency.
 
-### Baselines
+> **STATUS (2026-03-21): Planned (after Phase 2.5).** Phase 2.5 sermon smoke test must
+> show COMET proximity gain > 0.005 on at least one adapter (A1 or B4) before proceeding.
 
-| Run | BLEU | chrF++ | COMET | Theo terms | Pairs | Steps |
-|-----|------|--------|-------|------------|-------|-------|
-| Base model (no FT) | 19.7 | — | — | — | — | — |
-| Nopack D0 (forgetting) | 9.7 | 29.5 | 0.559 | 2/8 (25%) | 8K | 1114 |
-| A1 (50 steps) | 20.4 | 45.2 | 0.752 | TBD | 8K | 50 |
-| Best ablation (TBD) | TBD | TBD | TBD | TBD | 8K | TBD |
-| Best B-series (TBD) | TBD | TBD | TBD | TBD | 8K | TBD |
+### Baselines (complete)
+
+| Run | COMET | BLEU | chrF++ | Theo terms | Pairs | Steps |
+|-----|-------|------|--------|------------|-------|-------|
+| Base model (no FT) | **0.7516** | 19.7 | — | — | — | — |
+| A1 (COMET-optimal) | **0.752** | 20.4 | 45.2 | 5/8 | 8K | 50 |
+| A4 (lr=1e-6, full) | 0.740 | 20.7 | 44.9 | 5/8 | 8K | ~1114 |
+| B4 (BLEU-optimal) | 0.742 | **21.2** | **45.3** | **5/8** | 8K | ~1114 |
+
+**No fine-tuned model meaningfully improves COMET over base (0.7516).** Fine-tuning
+learns Bible n-gram patterns that boost BLEU but degrade semantic quality.
 
 ### Available Data
 
 | Dataset | Count | Notes |
 |---------|-------|-------|
 | Bible verse pairs (train) | 242,091 | Modern-register prioritized by subsampler |
-| Glossary pairs | 458 | 229 terms × 2 phrasing variants |
-| Test holdout | 27,130 | Stratified by genre (eval samples from this) |
+| Glossary pairs | 507 | 229 terms × sentence + bare pairs |
+| Sermon WAVs | ~35 | `stark_data/raw/midwest/` (~35 hrs audio) |
+| Test holdout | 27,130 | Stratified by genre |
 
 ---
 
-## Metrics & Goals
+## Metrics & Goals (COMET-Primary)
 
-All runs evaluated on the same 500-verse holdout sample for direct comparison to ablation.
-Final winner gets full 27K-verse holdout eval + theological spot-check.
+All runs evaluated on the same 500-verse holdout sample + Phase 2.5 sermon smoke test.
 
-| Metric | Floor (no-go below) | Minimum | Target | Stretch |
-|--------|---------------------|---------|--------|---------|
-| BLEU | 17.7 (-10% of base) | > ablation best | ablation best + 2 | ablation best + 4 |
-| chrF++ | 40.0 | > ablation best | > 48.0 | > 52.0 |
-| COMET | 0.720 | > ablation best | > 0.770 | > 0.800 |
-| Theo terms | 3/8 (37%) | > 5/8 (62%) | > 6/8 (75%) | > 7/8 (87%) |
-
-**Regression test:** Any run scoring below the floor on ANY metric is rejected — it means
-more data caused forgetting and the config needs adjustment before scaling further.
+| Metric | Floor (no-go below) | Minimum | Target |
+|--------|---------------------|---------|--------|
+| COMET | > 0.740 | > 0.752 (beat A1) | > 0.770 |
+| Glossary regressions | < 10 lost | < 5 lost | 0 lost |
+| chrF++ | > 40.0 | > 45.0 | > 48.0 |
+| BLEU | > 17.7 (sanity) | — | — |
 
 ---
 
-## Stepping Math
+## Pre-Gate: Phase 2.5
 
-Training step count depends on data size. Effective batch size = 2 × 4 grad_accum = **8**.
+Phase 2.5 runs both A1 and B4 through the sermon smoke test using cached 12B translations.
+COMET proximity to 12B on clean sermon chunks is the primary signal.
 
-| Pairs | Glossary (2x) | Total | After 5% eval split | Steps/epoch |
-|-------|---------------|-------|---------------------|-------------|
-| 8K | 687 (3x*) | 8,687 | ~8,253 | ~1,032 |
-| 20K | 916 (2x) | 20,916 | ~19,870 | **~2,484** |
-| 50K | 916 (2x) | 50,916 | ~48,370 | **~6,046** |
-
-*Ablation used 3x (old default). Scale-up uses 2x (new default via `--glossary-oversample`).
-
-Observed training speed: **~4s/step** (nopack, A2000 Ada).
+| Outcome | Meaning | Action |
+|---------|---------|--------|
+| COMET proximity gain > 0.005 | Adapter helps on sermons | Lock winner → proceed to synthetic data runs |
+| COMET gain ±0.005 | Noise range | 12B cache ready → go straight to synthetic data |
+| COMET proximity < -0.01 | Adapter hurts sermons | KILL adapter, deploy base, still try synthetic data |
 
 ---
 
-## Scale-Up Phase — Test Matrix (4 runs, conditional)
+## Synthetic Data Generation Pipeline
 
-All runs use the **winning config from ablation/B-series** (lr, rank, replay, dropout, neftune — TBD).
-The only variable is data size and training duration. Glossary oversampling reduced from 3x → 2x.
+### Step 1: Transcribe sermon audio
 
-**Controls held constant:** packing=False, bf16, cosine scheduler, warmup=0.1, max_grad_norm=0.5, seed=42, all winning ablation hyperparams.
+```bash
+# Transcribe 10-15 sermons with Whisper large-v3
+for wav in stark_data/raw/midwest/*.wav; do
+    python -c "
+import whisper, json, os
+model = whisper.load_model('large-v3')
+result = model.transcribe('$wav', language='en', word_timestamps=True)
+name = os.path.splitext(os.path.basename('$wav'))[0]
+chunks = [{'en': s['text'].strip(), 'start': s['start'], 'end': s['end'],
+           'source': name} for s in result['segments'] if len(s['text'].split()) > 4]
+with open(f'ablation/sermon_chunks_{name}.json', 'w') as f:
+    json.dump(chunks, f, indent=2)
+print(f'{name}: {len(chunks)} chunks')
+"
+done
+```
 
-| ID | Variable | Value | Rationale |
-|----|----------|-------|-----------|
-| S1a | pairs=20K, steps=N | Same steps as ablation winner | More data at same compute — tests if data diversity alone helps |
-| S1b | pairs=20K, steps=~2.5N | Proportional to epoch fraction | Same epoch fraction at 20K — tests if more training on more data compounds |
-| S2a | pairs=50K, steps=best(S1) | Same steps as S1 winner | More data, same compute — tests diminishing returns |
-| S2b | pairs=50K, steps=~6N | Proportional to epoch fraction | Full epoch at 50K — max data + max training |
+### Step 2: Translate with 12B (distillation source)
 
-S2a and S2b are **conditional** — only run if S1 shows BLEU improvement > +2 over ablation best.
+```bash
+# Translate all chunks with TranslateGemma 12B (~2.1s/chunk)
+python training/generate_12b_cache.py \
+    --chunks ablation/sermon_chunks_*.json \
+    --output ablation/sermon_12b_translations.json
+```
+
+12B 4-bit (~7GB) fits on A2000 Ada 16GB. Cost: ~2.1s/chunk × 1000 chunks ≈ 35 min.
+
+### Step 3: COMET filter
+
+```bash
+# Score each EN→ES pair with COMET, keep > 0.75
+python training/filter_by_comet.py \
+    --input ablation/sermon_12b_translations.json \
+    --threshold 0.75 \
+    --output ablation/sermon_distilled_pairs.jsonl
+```
+
+Expected yield: ~500-1000 high-quality sermon EN→ES pairs from ~10 hrs of audio.
+These are in the right register (spoken, informal, theological-in-context) AND
+represent 12B's translation preferences (the distillation target).
+
+---
+
+## Scale-Up Phase — Synthetic Data Test Matrix (3 runs)
+
+All runs use the Phase 2.5 winning config. The variable is data mix ratio.
+Glossary oversampling at 2x.
+
+| ID | Data Mix | Verse Pairs | Sermon Pairs | Glossary | Rationale |
+|----|----------|-------------|--------------|----------|-----------|
+| S1 | verse 65% + sermon 30% + glossary 5% | ~8K | ~500 | 2x | Conservative mix, test if sermon data improves COMET |
+| S2 | verse 50% + sermon 45% + glossary 5% | ~4K | ~1K | 2x | Higher sermon fraction |
+| S3 | sermon only + glossary | 0 | ~1K | 2x | Does removing verse pairs help? |
+
+Each run uses `--sermon-data` flag in train_gemma.py (already implemented).
 
 ### Commands
 
 ```bash
-# --- S1a: 20K pairs, same steps as ablation winner ---
-python training/train_gemma.py A --max-pairs 20000 --glossary-oversample 2 \
-    --max-steps ${BEST_STEPS} ${WINNING_ARGS} \
-    -o scale_runs/S1a_20k_same_steps
+# --- Config: Phase 2.5 determines winner ---
+# IF A1 wins (COMET-optimal):
+# WINNING_LR="1e-5"; WINNING_STEPS="50"; WINNING_EXTRAS=""
+# IF B4 wins (BLEU-optimal):
+WINNING_LR="1e-6"
+WINNING_STEPS="1114"
+WINNING_EXTRAS="--neftune 5"
 
-python training/evaluate_translation.py --adapter scale_runs/S1a_20k_same_steps \
-    --max-samples 500 --output-file scale_runs/S1a_metrics.json
+# --- S1: verse 65% + sermon 30% + glossary 5% ---
+python training/train_gemma.py A --max-pairs 8000 --glossary-oversample 2 \
+    --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS \
+    --sermon-data ablation/sermon_distilled_pairs.jsonl \
+    -o scale_runs/S1_verse65_sermon30
 
-# --- S1b: 20K pairs, proportional steps ---
-python training/train_gemma.py A --max-pairs 20000 --glossary-oversample 2 \
-    --max-steps ${SCALED_STEPS_20K} ${WINNING_ARGS} \
-    -o scale_runs/S1b_20k_scaled
+python training/evaluate_translation.py --adapter scale_runs/S1_verse65_sermon30 \
+    --max-samples 500 --output-file scale_runs/S1_metrics.json \
+    --compare-base
 
-python training/evaluate_translation.py --adapter scale_runs/S1b_20k_scaled \
-    --max-samples 500 --output-file scale_runs/S1b_metrics.json
+# --- S2: verse 50% + sermon 45% + glossary 5% ---
+python training/train_gemma.py A --max-pairs 4000 --glossary-oversample 2 \
+    --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS \
+    --sermon-data ablation/sermon_distilled_pairs.jsonl \
+    -o scale_runs/S2_verse50_sermon45
 
-# --- S2a: 50K pairs, same steps as S1 winner (conditional) ---
-python training/train_gemma.py A --max-pairs 50000 --glossary-oversample 2 \
-    --max-steps ${S1_BEST_STEPS} ${WINNING_ARGS} \
-    -o scale_runs/S2a_50k_same_steps
+python training/evaluate_translation.py --adapter scale_runs/S2_verse50_sermon45 \
+    --max-samples 500 --output-file scale_runs/S2_metrics.json \
+    --compare-base
 
-python training/evaluate_translation.py --adapter scale_runs/S2a_50k_same_steps \
-    --max-samples 500 --output-file scale_runs/S2a_metrics.json
+# --- S3: sermon only + glossary ---
+python training/train_gemma.py A --max-pairs 0 --glossary-oversample 2 \
+    --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS \
+    --sermon-data ablation/sermon_distilled_pairs.jsonl \
+    -o scale_runs/S3_sermon_only
 
-# --- S2b: 50K pairs, proportional steps (conditional) ---
-python training/train_gemma.py A --max-pairs 50000 --glossary-oversample 2 \
-    --max-steps ${SCALED_STEPS_50K} ${WINNING_ARGS} \
-    -o scale_runs/S2b_50k_scaled
+python training/evaluate_translation.py --adapter scale_runs/S3_sermon_only \
+    --max-samples 500 --output-file scale_runs/S3_metrics.json \
+    --compare-base
 
-python training/evaluate_translation.py --adapter scale_runs/S2b_50k_scaled \
-    --max-samples 500 --output-file scale_runs/S2b_metrics.json
-
-# --- Final: full holdout eval on winner ---
-python training/evaluate_translation.py --adapter scale_runs/${WINNER} \
-    --output-file scale_runs/${WINNER}_full_metrics.json
-# (no --max-samples → runs all 27,130 test verses)
+# --- Re-run sermon smoke test on best ---
+python training/evaluate_sermon.py \
+    --chunks ablation/sermon_test_chunks.json \
+    --adapter scale_runs/${BEST} \
+    --ceiling-cache ablation/sermon_12b_translations.json \
+    --output scale_runs/${BEST}_sermon_eval.json
 ```
-
-### Replay buffer at 50K
-
-If ablation A6 showed replay helps, increase replay ratio at 50K to counterbalance
-archaic pair dilution:
-
-| Data scale | Replay ratio | Replay pairs | Rationale |
-|------------|-------------|--------------|-----------|
-| 8K | 20% | ~1,600 | Ablation default |
-| 20K | 20% | ~4,000 | Same ratio, more absolute pairs |
-| 50K | **30%** | ~15,000 | Extra anchoring — archaic pairs now dominate |
 
 ---
 
 ## Time Estimates
 
-Based on observed ~4s/step training, ~5.4s/verse eval (500 verses ≈ 47 min).
+Based on observed ~4s/step training, ~5.4s/verse eval.
 
-### If ablation winner is ~50 steps (A1 scenario)
-
-| Run | Train steps | Train time | Eval time | Total |
-|-----|-------------|-----------|-----------|-------|
-| S1a (20K, 50 steps) | 50 | ~3 min | 47 min | ~50 min |
-| S1b (20K, ~120 steps) | 120 | ~8 min | 47 min | ~55 min |
-| S2a (50K, 50 steps) | 50 | ~3 min | 47 min | ~50 min |
-| S2b (50K, ~290 steps) | 290 | ~19 min | 47 min | ~66 min |
-| Full holdout (winner) | — | — | ~41 hrs | ~41 hrs |
-| **S1 only** | | | | **~1.7 hrs** |
-| **All + full holdout** | | | | **~45 hrs** |
-
-### If ablation winner is ~150 steps (A2 scenario)
-
-| Run | Train steps | Train time | Eval time | Total |
-|-----|-------------|-----------|-----------|-------|
-| S1a (20K, 150 steps) | 150 | ~10 min | 47 min | ~57 min |
-| S1b (20K, ~360 steps) | 360 | ~24 min | 47 min | ~71 min |
-| S2a (50K, 150 steps) | 150 | ~10 min | 47 min | ~57 min |
-| S2b (50K, ~880 steps) | 880 | ~59 min | 47 min | ~106 min |
-| Full holdout (winner) | — | — | ~41 hrs | ~41 hrs |
-| **S1 only** | | | | **~2.1 hrs** |
-| **All + full holdout** | | | | **~46 hrs** |
-
-### If ablation winner is full-epoch (~1114 steps, A3/A4/A5/A6 scenario)
-
-| Run | Train steps | Train time | Eval time | Total |
-|-----|-------------|-----------|-----------|-------|
-| S1a (20K, 1114 steps) | 1114 | ~74 min | 47 min | ~121 min |
-| S1b (20K, ~2484 steps) | 2484 | ~166 min | 47 min | ~213 min |
-| S2a (50K, 1114 steps) | 1114 | ~74 min | 47 min | ~121 min |
-| S2b (50K, ~6046 steps) | 6046 | ~403 min | 47 min | ~450 min |
-| Full holdout (winner) | — | — | ~41 hrs | ~41 hrs |
-| **S1 only** | | | | **~5.6 hrs** |
-| **All + full holdout** | | | | **~56 hrs** |
-
-**Note:** Full holdout eval (27,130 verses at 5.4s/verse) is ~41 hours. Consider reducing
-to 3,100 verses (10% stratified sample) for ~4.7 hrs, or keeping 500 verses if genre
-breakdown at 500 is sufficient. The 500-verse eval has been stable across ablation runs.
-
----
-
-## Code Changes Required
-
-| Change | File | Effort |
-|--------|------|--------|
-| ~~Add `--glossary-oversample` CLI flag~~ | `training/train_gemma.py` | **DONE** — default 2, CLI-configurable |
-| ~~Create `training/run_scale.sh`~~ | `training/run_scale.sh` | **DONE** — template with TBD placeholders |
-| Fill in `${WINNING_ARGS}` placeholders | `training/run_scale.sh` | After B-series results are in |
+| Task | Time |
+|------|------|
+| Whisper transcription (~10 sermons) | ~2-3 hrs |
+| 12B translation (~1000 chunks) | ~35 min |
+| COMET filtering | ~15 min |
+| S1 training + eval | ~2-3 hrs |
+| S2 training + eval | ~2-3 hrs |
+| S3 training + eval | ~1-2 hrs |
+| Sermon smoke test (winner) | ~20 min |
+| **Total** | **~8-12 hrs** |
 
 ---
 
 ## Decision Logic
 
-### S1a → S1b gate
-
-| S1a Result vs Ablation Best | Interpretation | Next |
-|-----------------------------|---------------|------|
-| BLEU > ablation + 2 | Data helps at same compute | Run S1b to test if more steps also help |
-| BLEU within ±2 | Data diversity alone doesn't help | Run S1b anyway — maybe needs more steps |
-| BLEU < ablation - 2 | More data hurts (register dilution?) | Check archaic/modern ratio, investigate |
-
 ### S1 → S2 gate
 
-| Best S1 vs Ablation Best | Interpretation | Next |
-|--------------------------|---------------|------|
-| BLEU > ablation + 2 | Data scaling works | Run S2a/S2b at 50K |
-| BLEU within ±2 | Saturated at 8K-20K | Skip S2, lock best config |
-| Theo terms improved even if BLEU flat | Vocab coverage growing | Run S2a (more terms to learn) |
-
-### S2 → Final gate
-
-| Best S2 vs Best S1 | Interpretation | Next |
-|---------------------|---------------|------|
-| BLEU > S1 + 2 | Still scaling (unlikely) | Consider 100K, but probably stop |
-| BLEU within ±2 | Saturated | Lock S1 config (simpler, faster) |
-| BLEU < S1 | Archaic dilution confirmed | Revert to S1, increase replay if retrying |
+| S1 Result vs Ablation Best | Interpretation | Next |
+|-----------------------------|---------------|------|
+| COMET > 0.752 | Sermon data helps | Run S2 and S3 to find optimal mix |
+| COMET 0.740-0.752 | Marginal | Run S2 (higher sermon fraction might help) |
+| COMET < 0.740 | Sermon data at this mix hurts | Skip S2, try S3 (sermon-only, no verse dilution) |
 
 ### Final acceptance gate
 
 | Metric | Threshold | Action if below |
 |--------|-----------|-----------------|
-| BLEU | > 17.7 | Adapter is worse than base — reject, investigate |
-| BLEU | > 19.7 | No improvement over base — skip adapter deployment |
-| COMET | > 0.720 | Semantic quality degraded — reject |
-| Theo terms | > 5/8 | Theological vocabulary not learned — add glossary data or increase oversample |
+| COMET | > 0.752 | No improvement over A1 — investigate data quality |
+| COMET | > 0.740 | Semantic quality degraded — reject |
+| Glossary regressions | < 5 | Too many terms lost — increase glossary oversample |
+| BLEU | > 17.7 | Sanity check — model broken if below |
+
+---
+
+## Decision Tree Summary
+
+```
+Phase 2.5: Sermon smoke test (A1 + B4, ~40 min GPU)
+  │
+  ├── Lock winner config
+  │
+  ├── Generate 12B translation cache (already done in Phase 2.5 Step 0)
+  │
+  ├── COMET-filter cached translations → distilled pairs
+  │     Filter: keep pairs with COMET > 0.75
+  │     Output: ~500-1000 sermon EN→ES pairs (12B quality, sermon register)
+  │
+  ├── S1: verse 65% + sermon 30% + glossary 5%
+  │     ├── COMET > 0.752 → proceed to S2/S3
+  │     └── COMET < 0.740 → skip S2, try S3
+  │
+  ├── S2: verse 50% + sermon 45% + glossary 5%
+  ├── S3: sermon only + glossary (no verse pairs)
+  │
+  ├── Winner: sermon smoke test + full glossary eval
+  │     ├── COMET > 0.752, regressions < 5 → export adapter
+  │     └── Still no gain → deploy base model, consider CPT (more_data.md #1)
+  │
+  └── Phase 4 (future): CPT → Light SFT
+        Expected +0.08-0.15 COMET from continued pretraining
+```
 
 ---
 
@@ -231,40 +248,8 @@ breakdown at 500 is sufficient. The 500-verse eval has been stable across ablati
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
-| Archaic register dilution at 50K | Medium | Model produces formal/archaic Spanish | Prioritize modern translations in subsampler (already implemented), increase replay |
-| Full holdout eval too slow (~41 hrs) | High | Blocks next iteration | Use 3,100 stratified sample (~4.7 hrs) or stay at 500 verses |
-| Glossary underweight at 20K+ (2.2%) | Low | Theological terms regress | Monitor spot-check, increase oversample back to 3x if needed |
-| Winning config doesn't transfer to larger data | Medium | Ablation hyperparams overfit to 8K regime | S1a tests this directly — if it fails, re-tune at 20K |
-| GPU contention with Whisper pipeline | Low | OOM or slowdown | Run scale-up on dedicated GPU time (overnight) |
-
----
-
-## Decision Tree Summary
-
-```
-Ablation + B-series complete → lock winning config
-  │
-  ├── Add --glossary-oversample flag (reduce 3x → 2x)
-  ├── Create run_scale.sh
-  │
-  ├── S1a: 20K, same steps
-  │     ├── BLEU > ablation + 2 → data helps
-  │     └── BLEU flat → still run S1b (different test)
-  │
-  ├── S1b: 20K, proportional steps
-  │     ├── S1b > S1a → more training on more data compounds
-  │     └── S1b ≤ S1a → diminishing returns from more steps
-  │
-  ├── Gate: best S1 vs ablation
-  │     ├── Improved > +2 → proceed to S2
-  │     └── Flat/worse → STOP, lock ablation config
-  │
-  ├── S2a: 50K, same steps as S1 winner (conditional)
-  ├── S2b: 50K, proportional steps (conditional)
-  │     ├── S2 > S1 + 2 → consider 100K (unlikely to be needed)
-  │     └── S2 ≤ S1 → lock S1 config
-  │
-  └── Winner: full holdout eval (3,100 verses) + theological spot-check
-        ├── Passes acceptance gate → export adapter, transfer to Mac
-        └── Fails → back to Phase 2 B-series or investigate data quality
-```
+| Sermon audio quality varies | Medium | Noisy transcriptions → bad training pairs | COMET filter removes low-quality pairs |
+| 12B translations inconsistent | Low | Distillation teaches bad habits | COMET > 0.75 threshold gates quality |
+| Sermon-only training loses Bible knowledge | Medium | COMET on Bible holdout drops | S1 tests conservative mix; glossary preserved |
+| Winning config doesn't transfer to new data | Medium | Need to re-tune hyperparameters | S1 tests this directly |
+| GPU time for 12B translation | Low | ~35 min is manageable | Already cached from Phase 2.5 Step 0 |
