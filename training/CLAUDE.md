@@ -55,7 +55,7 @@ Before fine-tuning, establish a baseline on 50–100 stratified segments:
 
 **COPYRIGHT WARNING:** Do NOT use ESV, NASB, NIV, NLT, NVI, LBLA, RVR1960, or DHH. Fair use caps at ~500 verses — not bulk ML training. Stick to pre-1923 or public-domain translations.
 
-**Supplementary data:** 229-term theological glossary, bilingual catechism excerpts, bilingual sermon transcripts.
+**Supplementary data:** Tiered theological glossary (50 boost + 229 master terms), bilingual catechism excerpts, bilingual sermon transcripts, hybrid synthetic translations (60% 12B + 40% DeepL glossary-enforced).
 
 ## Sermon Audio via Pseudo-Labeling
 
@@ -67,6 +67,39 @@ Before fine-tuning, establish a baseline on 50–100 stratified segments:
 6. Format as HuggingFace Dataset (`audio` + `sentence` columns)
 
 **Data volume thresholds:** 5–10h = vocabulary improvement, 20–50h = strong adaptation (sweet spot), 50–100h+ = production-grade.
+
+## Deepgram Oracle Transcription
+
+Deepgram Nova-3 serves as ground-truth label source for Whisper fine-tuning (replacing pseudo-labels from Distil-Whisper).
+
+- **Script:** `training/transcribe_with_deepgram.py` — async, resume support, 300s timeout for large files (40–160 MB)
+- **Boosted terms:** 50 Tier 1 theological keyterms from `bible_data/glossary/tier1_boost.json` passed via Deepgram `keyterm` parameter
+- **Output:** `.deepgram.json` per sermon with word-level timestamps + confidence scores
+- **Cost:** ~$0.0043/min, ~$9 for 35 hours of audio
+- **Env var:** `STARK_DEEPGRAM__API_KEY`
+
+## Tiered Glossary System
+
+Two-tier glossary replaces the flat 229-term list:
+
+| Tier | Count | Token Budget | Purpose |
+|------|-------|-------------|---------|
+| Tier 1 (Boost) | 50 terms | <420 tokens | Deepgram `keyterm` parameter for STT boosting |
+| Tier 2 (Master) | 229 terms | — | Normalization, active learning, translation glossary enforcement |
+
+- **Script:** `tools/glossary.py` — `load_tier()`, `validate_boost()`, `build_and_save_tiers()`
+- **Build:** `python build_glossary.py --build-tiers`
+- **Files:** `bible_data/glossary/tier1_boost.json`, `bible_data/glossary/tier2_master.json`
+
+## Data Organization
+
+Training data is split by a fixed cutoff date for reproducible evaluation.
+
+- **Cutoff:** 2026-03-14 (train on historical sermons, eval on future)
+- **Sort script:** `tools/sort_sermons.py --output-dir stt-data --catalog stark_data/playlist_catalog.json`
+- **Directory structure:** `stt-data/{type}/{year}/` — types: `gospel`, `ministry`, `conference`, `throwback`
+- **Manifest:** `stt-data/manifest.json`
+- **Catalog:** 333 total sermons (35 local + 298 from playlist catalog)
 
 ## Whisper LoRA Configuration
 
@@ -86,6 +119,25 @@ Target `q_proj` + `v_proj` (minimum); expand to `k_proj`, `out_proj`, `fc1`, `fc
 | VRAM usage | ~8–10 GB | Comfortable on A2000 Ada |
 
 Mix 70–80% domain data with 20–30% general English (LibriSpeech/Common Voice) for catastrophic forgetting safety.
+
+### Deepgram-Whisper Alignment
+
+- **Script:** `training/align_deepgram_chunks.py` — aligns faster-whisper chunk boundaries with Deepgram word timestamps
+- **Output:** HuggingFace audiofolder dataset for Whisper fine-tuning
+- **Dataset prep:** `prepare_whisper_dataset.py --gt-source deepgram` for direct Deepgram transcript loading (bypasses pseudo-labeling)
+
+### Whisper LoRA Ablation Design (W0–W9)
+
+Full test matrix defined in `docs/whisper_tuning_test_matrix.md`.
+
+| Run | Purpose |
+|-----|---------|
+| W0 | Baseline (no fine-tuning) |
+| W1–W6 | Ablation: learning rate, target modules, replay ratio, data size |
+| W7–W9 | Scale winner: epochs, rank |
+
+- **Script:** `training/run_whisper_ablation.sh`
+- **Eval metrics:** overall WER, theological term WER, accent fairness gap, general English regression
 
 ## TranslateGemma QLoRA Configuration
 
@@ -107,6 +159,20 @@ Mix 70–80% domain data with 20–30% general English (LibriSpeech/Common Voice
 
 **MarianMT** (`Helsinki-NLP/opus-mt-en-es`, ~298MB, ~80ms) supports full fine-tuning without LoRA — lower quality ceiling but faster iteration.
 
+### TranslateGemma S1–S6 Results Summary
+
+Two-phase sweep to find optimal QLoRA configuration:
+
+**Phase 1 — Config sweep (S1–S3):** Learning rate, steps, NEFTune noise. **S1 won** (lr=1e-5, 50 steps).
+
+**Phase 2 — Ratio sweep (S4–S6):** Verse/sermon mix ratio. **S6 won** (balanced 1:1 verse/sermon, COMET proximity to 12B baseline = -0.0002).
+
+**Key finding:** Verse pairs are NOT harmful — balanced ratio + more data is the formula.
+
+**Hybrid data composition:** 60% TranslateGemma 12B translations + 40% DeepL glossary-enforced translations.
+
+**Next:** S7 scaled run with 5,000 chunks (from 24,595 expanded pool).
+
 ## Theological Vocabulary Challenges
 
 | English | Spanish Options | Context Rule |
@@ -119,7 +185,7 @@ Mix 70–80% domain data with 20–30% general English (LibriSpeech/Common Voice
 | Sanctification | *santificación* | Consistent |
 | Grace | *gracia* | Also "humor/charm" — theological context needed |
 
-**Mitigation:** 229-term glossary for soft constraint training, dictionary augmentation, and spot-checking.
+**Mitigation:** Tiered glossary system (50 Tier 1 boost terms + 229 Tier 2 master terms) for soft constraint training, Deepgram keyterm boosting, dictionary augmentation, and spot-checking. See **Tiered Glossary System** section above.
 
 ## Evaluation Strategy
 
@@ -157,6 +223,10 @@ Total estimate: **~48–73 GPU-hrs**, **~33–53 human-hrs** over ~5 weeks.
 | Distil-Whisper LoRA (50h audio) | ~11–15 hrs | ~8–10 GB |
 | TranslateGemma 4B QLoRA | ~8–12 hrs | ~10–12 GB |
 | TranslateGemma 12B QLoRA | ~18–27 hrs | ~14–15 GB |
+| Deepgram Oracle transcription (35h) | ~70 min | API (no GPU) |
+| Whisper ablation W1–W6 (6 runs) | ~6–10 hrs | ~8–10 GB |
+| Whisper scale W7–W9 (3 runs) | ~4–8 hrs | ~8–10 GB |
+| TranslateGemma S7 scaled (5K chunks) | ~4–6 hrs | ~10–12 GB |
 | Evaluation (BLEU/WER/COMET) | ~30–60 min | ~6 GB |
 
 **Cycle timing:** Cycle 1 ~40–62 hrs (includes data prep). Cycles 2–5 ~17–30 hrs each.
@@ -179,6 +249,8 @@ Actual wall-clock times from ablation runs (2026-03-20/21).
 | evaluate_sermon.py (28 inputs, 3 models) | ~20-30 min | ~8 GB peak | Sequential model loading |
 | A1 training (50 steps) | ~5 min | ~10 GB | |
 | B4 training (1114 steps) | ~63 min | ~10 GB | |
+| Deepgram Nova-3 API (per sermon) | ~2 min / 60-min sermon | API | ~$0.0043/min, 300s timeout for 40–160 MB files |
+| faster-whisper large-v3 batch (33 files) | ~191 min total | ~5 GB peak | Batch transcription pipeline |
 
 ## Related Work
 
