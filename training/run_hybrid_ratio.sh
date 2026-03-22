@@ -6,8 +6,15 @@
 #
 # Data mix (all use 1800 sermon pairs from expanded hybrid generation):
 #   S4: 0 verse + 507 glossary + 1800 sermon = ~2,307 (78% sermon)
+#       Hypothesis: If verse pairs are the poison, removing them entirely
+#       should unlock the sermon signal. S1's +0.0019 DeepL gain with only
+#       11.5% sermon → what happens at 78%?
 #   S5: 500 verse + 507 glossary + 1800 sermon = ~2,807 (64% sermon)
+#       Hypothesis: A small verse anchor prevents catastrophic forgetting
+#       of general translation patterns while keeping sermon dominant.
 #   S6: 1800 verse + 507 glossary + 1800 sermon = ~4,107 (44% sermon)
+#       Hypothesis: Control — equal ratio. If this matches S1/S2, ratio
+#       doesn't matter and we just need more sermon data.
 #
 # Requires: DEEPL_KEY env var, S1/S2/S3 winner config set below
 #
@@ -34,11 +41,12 @@ CACHE="ablation/sermon_12b_translations_v2.json"
 
 mkdir -p "$HYBRID_DIR"
 
-# --- S1/S2/S3 WINNER CONFIG (fill after results) ---
-# Update these values with the winning config from run_hybrid_scale.sh
-WINNING_LR="TBD"       # e.g., "1e-5", "3e-6", "1e-6"
-WINNING_STEPS="TBD"    # e.g., "50", "100", "-1" (full epoch)
-WINNING_EXTRAS=""       # e.g., "--neftune 5" if S3 won
+# --- S1/S2/S3 WINNER CONFIG ---
+# S1 won: COMET prox 12B=-0.0036 (WARN), DeepL=+0.0019 (best of 3)
+# S2 tied on 12B but lost theo_terms (4/8 vs 5/8). S3 KILL on both ceilings.
+WINNING_LR="1e-5"
+WINNING_STEPS="50"
+WINNING_EXTRAS=""
 
 # --- Validate ---
 if [[ -z "${DEEPL_KEY:-}" ]]; then
@@ -114,9 +122,11 @@ fi
 
 # ============================================================
 # Step 2: Train S4 — sermon-only (0 verse pairs, 78% sermon)
+# Hypothesis: verse pairs are poison → removing them unlocks sermon signal
 # ============================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" | tee -a "$LOG"
 echo "[Step 2/5] Train S4 — sermon-only (0 verse, 78% sermon) — $(date)" | tee -a "$LOG"
+echo "  Hypothesis: verse pairs are poison; pure sermon should unlock signal" | tee -a "$LOG"
 echo "  Args: --max-pairs 0 --glossary-oversample 1 $TRAIN_ARGS" | tee -a "$LOG"
 echo "" | tee -a "$LOG"
 
@@ -134,9 +144,11 @@ echo "" | tee -a "$LOG"
 
 # ============================================================
 # Step 3: Train S5 — sermon-heavy (500 verse, 64% sermon)
+# Hypothesis: small verse anchor prevents catastrophic forgetting while sermon stays dominant
 # ============================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" | tee -a "$LOG"
 echo "[Step 3/5] Train S5 — sermon-heavy (500 verse, 64% sermon) — $(date)" | tee -a "$LOG"
+echo "  Hypothesis: small verse anchor prevents catastrophic forgetting" | tee -a "$LOG"
 echo "  Args: --max-pairs 500 --glossary-oversample 1 $TRAIN_ARGS" | tee -a "$LOG"
 echo "" | tee -a "$LOG"
 
@@ -154,9 +166,11 @@ echo "" | tee -a "$LOG"
 
 # ============================================================
 # Step 4: Train S6 — balanced (1800 verse, 44% sermon)
+# Hypothesis: control — if this matches S1/S2, ratio doesn't matter; need more data
 # ============================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" | tee -a "$LOG"
 echo "[Step 4/5] Train S6 — balanced (1800 verse, 44% sermon) — $(date)" | tee -a "$LOG"
+echo "  Hypothesis: control — equal ratio; if ~S1/S2, need more data not ratio change" | tee -a "$LOG"
 echo "  Args: --max-pairs 1800 --glossary-oversample 1 $TRAIN_ARGS" | tee -a "$LOG"
 echo "" | tee -a "$LOG"
 

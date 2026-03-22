@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# run_scale.sh — Phase 3 Scale-Up: Test data scaling with winning config
+# run_scale.sh — Phase 3 Scale-Up: Synthetic sermon data + COMET-primary gates
 #
-# 4 runs (S2a/S2b conditional), testing 20K and 50K pairs with the winning
-# ablation/B-series config. Fill in placeholders after B-series completes.
+# 3 runs (S1/S2/S3), testing different verse/sermon data mix ratios with the
+# Phase 2.5 winning config. Uses 12B-distilled sermon data via --sermon-data.
 #
 # Usage:
 #   bash training/run_scale.sh          # from project root
@@ -18,46 +18,49 @@ cd "$PROJECT_DIR"
 VENV="/home/wbell/stt_train_env/bin/activate"
 SCALE_DIR="scale_runs"
 LOG="$SCALE_DIR/scale_log.txt"
+SERMON_DATA="ablation/sermon_distilled_pairs.jsonl"
 
 source "$VENV"
 mkdir -p "$SCALE_DIR"
 
 # ============================================================
-# FILL IN AFTER B-SERIES COMPLETES
+# CONFIG: Phase 2.5 determines winner (A1 or B4)
 # ============================================================
+# --- IF Phase 2.5 selects A1 (COMET-optimal) ---
+# WINNING_LR="1e-5"
+# WINNING_STEPS="50"
+# WINNING_EXTRAS=""
+# --- IF Phase 2.5 selects B4 (BLEU-optimal) ---
 WINNING_LR="1e-6"
-WINNING_STEPS="TBD"           # e.g., 150 or 1114
-SCALED_STEPS_20K="TBD"        # proportional to 20K epoch fraction
-SCALED_STEPS_50K="TBD"        # proportional to 50K epoch fraction
-WINNING_EXTRAS=""              # e.g., "--neftune 5 --lora-dropout 0"
+WINNING_STEPS="1114"
+WINNING_EXTRAS="--neftune 5"
 # ============================================================
 
-# Validate placeholders are filled in
-if [[ "$WINNING_STEPS" == "TBD" ]]; then
-    echo "ERROR: WINNING_STEPS is still TBD. Fill in placeholders after B-series completes." >&2
+# Validate sermon data exists
+if [[ ! -f "$SERMON_DATA" ]]; then
+    echo "ERROR: Sermon data not found at $SERMON_DATA" >&2
+    echo "Run the synthetic data pipeline first (see docs/scale_run.md)." >&2
     exit 1
 fi
 
-echo "=== Phase 3 Scale-Up — $(date) ===" | tee "$LOG"
+echo "=== Phase 3 Scale-Up: Synthetic Sermon Data — $(date) ===" | tee "$LOG"
 echo "Project dir: $PROJECT_DIR" | tee -a "$LOG"
 echo "Python: $(which python)" | tee -a "$LOG"
 echo "Winning config: lr=$WINNING_LR, steps=$WINNING_STEPS, extras='$WINNING_EXTRAS'" | tee -a "$LOG"
+echo "Sermon data: $SERMON_DATA" | tee -a "$LOG"
 echo "" | tee -a "$LOG"
 
 # --- Run definitions ---
 declare -a RUNS=(
-    "S1a_20k_same_steps"
-    "S1b_20k_scaled"
-    # Uncomment S2 runs if S1 shows BLEU improvement > +2 over ablation best
-    # "S2a_50k_same_steps"
-    # "S2b_50k_scaled"
+    "S1_verse65_sermon30"
+    "S2_verse50_sermon45"
+    "S3_sermon_only"
 )
 
 declare -A TRAIN_ARGS
-TRAIN_ARGS[S1a_20k_same_steps]="--max-pairs 20000 --glossary-oversample 2 --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS"
-TRAIN_ARGS[S1b_20k_scaled]="--max-pairs 20000 --glossary-oversample 2 --lr $WINNING_LR --max-steps $SCALED_STEPS_20K $WINNING_EXTRAS"
-TRAIN_ARGS[S2a_50k_same_steps]="--max-pairs 50000 --glossary-oversample 2 --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS"
-TRAIN_ARGS[S2b_50k_scaled]="--max-pairs 50000 --glossary-oversample 2 --lr $WINNING_LR --max-steps $SCALED_STEPS_50K $WINNING_EXTRAS"
+TRAIN_ARGS[S1_verse65_sermon30]="--max-pairs 8000 --glossary-oversample 2 --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS --sermon-data $SERMON_DATA"
+TRAIN_ARGS[S2_verse50_sermon45]="--max-pairs 4000 --glossary-oversample 2 --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS --sermon-data $SERMON_DATA"
+TRAIN_ARGS[S3_sermon_only]="--max-pairs 0 --glossary-oversample 2 --lr $WINNING_LR --max-steps $WINNING_STEPS $WINNING_EXTRAS --sermon-data $SERMON_DATA"
 
 PASSED=0
 FAILED=0
@@ -87,11 +90,12 @@ for RUN in "${RUNS[@]}"; do
         continue
     fi
 
-    # --- Evaluation ---
+    # --- Evaluation (corpus metrics + glossary with regression detection) ---
     EVAL_START=$(date +%s)
     if python training/evaluate_translation.py \
         --adapter "$OUTDIR" --max-samples 500 \
-        --output-file "$METRICS" 2>&1 | tee -a "$LOG"; then
+        --output-file "$METRICS" \
+        --compare-base 2>&1 | tee -a "$LOG"; then
         EVAL_END=$(date +%s)
         EVAL_ELAPSED=$(( EVAL_END - EVAL_START ))
         echo "[$RUN] Eval complete in ${EVAL_ELAPSED}s" | tee -a "$LOG"
@@ -113,27 +117,27 @@ echo "=== SCALE-UP SUMMARY — $(date) ===" | tee -a "$LOG"
 echo "Passed: $PASSED / ${#RUNS[@]}   Failed: $FAILED" | tee -a "$LOG"
 echo "" | tee -a "$LOG"
 
-# Print results table
-printf "%-25s %8s %8s %8s\n" "Run" "BLEU" "chrF++" "COMET" | tee -a "$LOG"
-printf "%-25s %8s %8s %8s\n" "---" "----" "------" "-----" | tee -a "$LOG"
+# Print results table (COMET-first)
+printf "%-25s %8s %8s %8s\n" "Run" "COMET" "chrF++" "BLEU" | tee -a "$LOG"
+printf "%-25s %8s %8s %8s\n" "---" "-----" "------" "----" | tee -a "$LOG"
 
 for RUN in "${RUNS[@]}"; do
     METRICS="$SCALE_DIR/${RUN}_metrics.json"
     if [[ -f "$METRICS" ]]; then
-        BLEU=$(python -c "import json; d=json.load(open('$METRICS')); print(f\"{d['bleu']:.1f}\")")
-        CHRF=$(python -c "import json; d=json.load(open('$METRICS')); print(f\"{d['chrf']:.1f}\")")
         COMET=$(python -c "import json; d=json.load(open('$METRICS')); c=d.get('comet'); print(f'{c:.3f}' if c else 'N/A')")
-        printf "%-25s %8s %8s %8s\n" "$RUN" "$BLEU" "$CHRF" "$COMET" | tee -a "$LOG"
+        CHRF=$(python -c "import json; d=json.load(open('$METRICS')); print(f\"{d['chrf']:.1f}\")")
+        BLEU=$(python -c "import json; d=json.load(open('$METRICS')); print(f\"{d['bleu']:.1f}\")")
+        printf "%-25s %8s %8s %8s\n" "$RUN" "$COMET" "$CHRF" "$BLEU" | tee -a "$LOG"
     else
         printf "%-25s %8s %8s %8s\n" "$RUN" "FAIL" "FAIL" "FAIL" | tee -a "$LOG"
     fi
 done
 
 echo "" | tee -a "$LOG"
-echo "Acceptance gates:" | tee -a "$LOG"
-echo "  Floor:   BLEU > 17.7, COMET > 0.720" | tee -a "$LOG"
-echo "  Minimum: BLEU > ablation best, COMET > 0.740" | tee -a "$LOG"
-echo "  Target:  BLEU > ablation best + 2, COMET > 0.770" | tee -a "$LOG"
+echo "Acceptance gates (COMET-primary):" | tee -a "$LOG"
+echo "  Floor:   COMET > 0.740" | tee -a "$LOG"
+echo "  Minimum: COMET > 0.752 (beat A1)" | tee -a "$LOG"
+echo "  Target:  COMET > 0.770" | tee -a "$LOG"
 echo "Metrics files: $SCALE_DIR/*_metrics.json" | tee -a "$LOG"
 echo "Full log: $LOG" | tee -a "$LOG"
 echo "=== Done ===" | tee -a "$LOG"

@@ -312,7 +312,19 @@ def main():
     parser.add_argument(
         "--resume", action="store_true", help="Skip files that already have transcripts in the output dir"
     )
+    parser.add_argument(
+        "--oracle",
+        choices=["whisper", "deepgram"],
+        default="whisper",
+        help="Transcription oracle: whisper (local GPU) or deepgram (Nova-3 API)",
+    )
     args = parser.parse_args()
+
+    if args.oracle == "deepgram":
+        from training.transcribe_with_deepgram import transcribe_deepgram
+
+        transcribe_deepgram(args.input, args.output, resume=args.resume)
+        return
 
     if args.backend == "faster-whisper":
         transcribe_with_faster_whisper(args.input, args.output, args.model, args.batch_size, args.resume)

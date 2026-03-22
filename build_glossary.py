@@ -378,6 +378,13 @@ def main():
     parser.add_argument("--output", "-o", default="bible_data/glossary", help="Output directory")
     parser.add_argument("--augment", help="Path to verse pairs JSONL to augment with soft constraints")
     parser.add_argument("--augment-output", help="Output path for augmented pairs (default: <input>_augmented.jsonl)")
+    parser.add_argument(
+        "--build-tiers",
+        action="store_true",
+        help="Build Tier 1 (boost) and Tier 2 (master) glossary files for Deepgram keyterms",
+    )
+    parser.add_argument("--boost-size", type=int, default=50, help="Number of Tier 1 boost terms (default: 50)")
+    parser.add_argument("--master-size", type=int, default=1000, help="Number of Tier 2 master terms (default: 1000)")
     args = parser.parse_args()
 
     # Export glossary
@@ -387,6 +394,13 @@ def main():
     if args.augment:
         aug_output = args.augment_output or args.augment.replace(".jsonl", "_augmented.jsonl")
         augment_with_soft_constraints(args.augment, output_path=aug_output)
+
+    # Optionally build tiered glossary for Deepgram
+    if args.build_tiers:
+        from tools.glossary import build_tiers, save_tiers
+
+        tiers = build_tiers(THEOLOGICAL_GLOSSARY, boost_size=args.boost_size, master_size=args.master_size)
+        save_tiers(tiers, output_dir=args.output)
 
 
 if __name__ == "__main__":

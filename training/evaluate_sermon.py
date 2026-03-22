@@ -30,6 +30,14 @@ Usage:
         --ceiling-model google/translategemma-12b-it \\
         --segment ablation/sermon_segment.txt \\
         --output ablation/sermon_eval_results.json
+
+    # Dual ceiling (12B + DeepL):
+    python training/evaluate_sermon.py \\
+        --chunks ablation/sermon_test_chunks_v2.json \\
+        --adapter hybrid_runs/S1_lr1e5_50steps \\
+        --ceiling-cache ablation/sermon_12b_translations_v2.json \\
+        --deepl-key "$DEEPL_KEY" \\
+        --output hybrid_runs/S1_sermon_eval.json
 """
 
 import argparse
@@ -150,10 +158,15 @@ def evaluate_sermon(
     ceiling_model="google/translategemma-12b-it",
     segment_path=None,
     output_file=None,
+    ceiling_cache=None,
+    deepl_key=None,
+    deepl_glossary=None,
 ):
-    """Run three-model sermon evaluation.
+    """Run three-model sermon evaluation with optional DeepL ceiling.
 
     Loads models sequentially: 4B base → 4B+adapter → 12B base.
+    If ceiling_cache is provided, loads 12B translations from cache instead of running the model.
+    If deepl_key is provided, adds DeepL as a second quality ceiling with glossary enforcement.
     """
     # --- Load test data ---
     all_inputs = []
@@ -214,11 +227,125 @@ def evaluate_sermon(
     results["adapter"] = _translate_all(model, tokenizer, all_inputs)
     _unload_model(model, tokenizer)
 
-    # Model 3: 12B base (quality ceiling)
-    logger.info(f"\n=== Model 3/3: 12B ceiling ({ceiling_model}) ===")
-    model, tokenizer = load_gemma_model(ceiling_model, adapter_dir=None)
-    results["ceiling"] = _translate_all(model, tokenizer, all_inputs)
-    _unload_model(model, tokenizer)
+    # Model 3: 12B base (quality ceiling) — or load from cache
+    if ceiling_cache:
+        logger.info(f"\n=== Model 3/3: 12B ceiling loaded from cache ({ceiling_cache}) ===")
+        with open(ceiling_cache) as f:
+            cache_data = json.load(f)
+        # Build lookup by English text
+        cache_lookup = {entry["en"]: entry["es_12b"] for entry in cache_data}
+        ceiling_translations = []
+        for text in all_inputs:
+            if text in cache_lookup:
+                ceiling_translations.append(cache_lookup[text])
+            else:
+                logger.warning(f"Cache miss for input text: {text[:60]}...")
+                ceiling_translations.append("")
+        results["ceiling"] = ceiling_translations
+        logger.info(
+            f"  Loaded {sum(1 for t in ceiling_translations if t)} / {len(all_inputs)} ceiling translations from cache"
+        )
+    else:
+        logger.info(f"\n=== Model 3/3: 12B ceiling ({ceiling_model}) ===")
+        model, tokenizer = load_gemma_model(ceiling_model, adapter_dir=None)
+        results["ceiling"] = _translate_all(model, tokenizer, all_inputs)
+        _unload_model(model, tokenizer)
+
+    # --- DeepL ceiling (optional, second quality reference) ---
+    if deepl_key:
+        logger.info("\n=== DeepL ceiling (glossary-enforced) ===")
+        try:
+            import deepl
+
+            translator = deepl.Translator(deepl_key)
+
+            # Check ceiling_cache for pre-computed DeepL translations
+            deepl_from_cache = False
+            if ceiling_cache:
+                try:
+                    with open(ceiling_cache) as f:
+                        cache_data_deepl = json.load(f)
+                    if cache_data_deepl and "es_deepl" in cache_data_deepl[0]:
+                        cache_lookup_deepl = {
+                            entry["en"]: entry["es_deepl"] for entry in cache_data_deepl if entry.get("es_deepl")
+                        }
+                        ceiling_deepl = []
+                        for text in all_inputs:
+                            ceiling_deepl.append(cache_lookup_deepl.get(text, ""))
+                        hits = sum(1 for t in ceiling_deepl if t)
+                        if hits > 0:
+                            deepl_from_cache = True
+                            logger.info(f"  Loaded {hits}/{len(all_inputs)} DeepL translations from cache")
+                except Exception:
+                    pass
+
+            if not deepl_from_cache:
+                # Build glossary for DeepL
+                glossary = None
+                glossary_path = deepl_glossary or "bible_data/glossary/glossary_pairs.jsonl"
+                try:
+                    import os as _os
+
+                    if _os.path.exists(glossary_path):
+                        with open(glossary_path, encoding="utf-8") as f:
+                            all_entries = [json.loads(line) for line in f]
+                        bare_terms = {
+                            entry["en"]: entry["es"] for entry in all_entries if len(entry["en"].split()) <= 2
+                        }
+                        if bare_terms:
+                            glossary = translator.create_glossary(
+                                "sermon-eval-theological",
+                                source_lang="en",
+                                target_lang="es",
+                                entries=bare_terms,
+                            )
+                            logger.info(f"  Created DeepL glossary ({len(bare_terms)} terms)")
+                except Exception as e:
+                    logger.warning(f"  Could not create DeepL glossary: {e}")
+
+                # Translate all inputs with DeepL
+                ceiling_deepl = []
+                for i, text in enumerate(all_inputs):
+                    try:
+                        kwargs = {"text": text, "target_lang": "ES", "source_lang": "EN"}
+                        if glossary:
+                            kwargs["glossary"] = glossary
+                        result = translator.translate_text(**kwargs)
+                        ceiling_deepl.append(result.text)
+                    except Exception as e:
+                        logger.warning(f"  DeepL translation failed for input {i}: {e}")
+                        ceiling_deepl.append("")
+
+                logger.info(f"  Translated {sum(1 for t in ceiling_deepl if t)}/{len(all_inputs)} inputs with DeepL")
+
+                # Clean up glossary
+                if glossary:
+                    try:
+                        translator.delete_glossary(glossary)
+                    except Exception:
+                        pass
+
+                # Update ceiling cache with DeepL translations if cache exists
+                if ceiling_cache:
+                    try:
+                        with open(ceiling_cache) as f:
+                            existing_cache = json.load(f)
+                        cache_by_en = {entry["en"]: entry for entry in existing_cache}
+                        for text, deepl_t in zip(all_inputs, ceiling_deepl):
+                            if text in cache_by_en and deepl_t:
+                                cache_by_en[text]["es_deepl"] = deepl_t
+                        updated_cache = list(cache_by_en.values())
+                        with open(ceiling_cache, "w") as f:
+                            json.dump(updated_cache, f, indent=2, ensure_ascii=False)
+                        logger.info("  Updated ceiling cache with DeepL translations")
+                    except Exception as e:
+                        logger.warning(f"  Could not update ceiling cache: {e}")
+
+            results["ceiling_deepl"] = ceiling_deepl
+        except ImportError:
+            logger.warning("DeepL package not installed (pip install deepl). Skipping DeepL ceiling.")
+        except Exception as e:
+            logger.warning(f"DeepL ceiling error: {e}")
 
     # --- Compute metrics ---
     logger.info("\n=== Computing metrics ===")
@@ -234,22 +361,132 @@ def evaluate_sermon(
 
     # --- Metric 1: 12B proximity gain (clean chunks only, confidence > 0.7) ---
     clean_indices = [i for i, c in enumerate(chunk_data) if float(c.get("confidence", 0)) > 0.7]
-    proximity_gain = None
+    chrf_proximity_gain = None
+    chrf_base_vs_ceiling = None
+    chrf_adapter_vs_ceiling = None
+    comet_proximity_gain = None
+    comet_base_score = None
+    comet_adapter_score = None
     if clean_indices and ceiling_chunks:
         clean_base = [base_chunks[i] for i in clean_indices]
         clean_adapter = [adapter_chunks[i] for i in clean_indices]
         clean_ceiling = [ceiling_chunks[i] for i in clean_indices]
 
+        # chrF++ proximity
         chrf_base_vs_ceiling = sacrebleu.corpus_chrf(clean_base, [clean_ceiling], word_order=2).score
         chrf_adapter_vs_ceiling = sacrebleu.corpus_chrf(clean_adapter, [clean_ceiling], word_order=2).score
-        proximity_gain = chrf_adapter_vs_ceiling - chrf_base_vs_ceiling
+        chrf_proximity_gain = chrf_adapter_vs_ceiling - chrf_base_vs_ceiling
 
-        logger.info(f"  12B proximity gain: {proximity_gain:+.1f} chrF++ points")
+        logger.info(f"  chrF++ proximity gain: {chrf_proximity_gain:+.1f} chrF++ points")
         logger.info(f"    Base vs 12B:    chrF++ {chrf_base_vs_ceiling:.1f}")
         logger.info(f"    Adapter vs 12B: chrF++ {chrf_adapter_vs_ceiling:.1f}")
         logger.info(f"    Clean chunks used: {len(clean_indices)}")
+
+        # COMET proximity (using 12B output as pseudo-reference)
+        try:
+            from comet import download_model, load_from_checkpoint
+
+            comet_path = download_model("Unbabel/wmt22-comet-da")
+            comet_model = load_from_checkpoint(comet_path)
+
+            clean_sources = [chunk_texts[i] for i in clean_indices]
+            comet_input_base = [
+                {"src": clean_sources[j], "mt": clean_base[j], "ref": clean_ceiling[j]}
+                for j in range(len(clean_indices))
+            ]
+            comet_input_adapter = [
+                {"src": clean_sources[j], "mt": clean_adapter[j], "ref": clean_ceiling[j]}
+                for j in range(len(clean_indices))
+            ]
+
+            comet_base_score = comet_model.predict(comet_input_base, batch_size=8).system_score
+            comet_adapter_score = comet_model.predict(comet_input_adapter, batch_size=8).system_score
+            comet_proximity_gain = comet_adapter_score - comet_base_score
+
+            logger.info(f"  COMET proximity gain: {comet_proximity_gain:+.4f}")
+            logger.info(f"    Base vs 12B:    COMET {comet_base_score:.4f}")
+            logger.info(f"    Adapter vs 12B: COMET {comet_adapter_score:.4f}")
+
+            del comet_model
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except ImportError:
+            logger.warning("COMET unavailable (install unbabel-comet). Skipping COMET proximity.")
+        except Exception as e:
+            logger.warning(f"COMET proximity error: {e}")
     else:
         logger.warning("  No clean chunks (confidence > 0.7) for proximity gain")
+
+    # --- Metric 1b: DeepL proximity gain (if DeepL ceiling available) ---
+    ceiling_deepl_chunks = None
+    chrf_deepl_proximity_gain = None
+    chrf_deepl_base_vs_ceiling = None
+    chrf_deepl_adapter_vs_ceiling = None
+    comet_proximity_gain_deepl = None
+    comet_deepl_base_score = None
+    comet_deepl_adapter_score = None
+
+    if "ceiling_deepl" in results:
+        ceiling_deepl_chunks = results["ceiling_deepl"][:n_chunks]
+
+        if clean_indices and ceiling_deepl_chunks:
+            clean_base = [base_chunks[i] for i in clean_indices]
+            clean_adapter = [adapter_chunks[i] for i in clean_indices]
+            clean_ceiling_deepl = [ceiling_deepl_chunks[i] for i in clean_indices]
+
+            # Only use indices where DeepL produced output
+            valid_deepl = [j for j, t in enumerate(clean_ceiling_deepl) if t]
+            if valid_deepl:
+                vd_base = [clean_base[j] for j in valid_deepl]
+                vd_adapter = [clean_adapter[j] for j in valid_deepl]
+                vd_ceiling = [clean_ceiling_deepl[j] for j in valid_deepl]
+
+                # chrF++ proximity to DeepL
+                chrf_deepl_base_vs_ceiling = sacrebleu.corpus_chrf(vd_base, [vd_ceiling], word_order=2).score
+                chrf_deepl_adapter_vs_ceiling = sacrebleu.corpus_chrf(vd_adapter, [vd_ceiling], word_order=2).score
+                chrf_deepl_proximity_gain = chrf_deepl_adapter_vs_ceiling - chrf_deepl_base_vs_ceiling
+
+                logger.info(f"  chrF++ proximity gain (DeepL): {chrf_deepl_proximity_gain:+.1f} points")
+                logger.info(f"    Base vs DeepL:    chrF++ {chrf_deepl_base_vs_ceiling:.1f}")
+                logger.info(f"    Adapter vs DeepL: chrF++ {chrf_deepl_adapter_vs_ceiling:.1f}")
+
+                # COMET proximity to DeepL
+                try:
+                    from comet import download_model, load_from_checkpoint
+
+                    comet_path = download_model("Unbabel/wmt22-comet-da")
+                    comet_model = load_from_checkpoint(comet_path)
+
+                    vd_sources = [chunk_texts[clean_indices[j]] for j in valid_deepl]
+                    comet_input_base_deepl = [
+                        {"src": vd_sources[k], "mt": vd_base[k], "ref": vd_ceiling[k]} for k in range(len(valid_deepl))
+                    ]
+                    comet_input_adapter_deepl = [
+                        {"src": vd_sources[k], "mt": vd_adapter[k], "ref": vd_ceiling[k]}
+                        for k in range(len(valid_deepl))
+                    ]
+
+                    comet_deepl_base_score = comet_model.predict(comet_input_base_deepl, batch_size=8).system_score
+                    comet_deepl_adapter_score = comet_model.predict(
+                        comet_input_adapter_deepl, batch_size=8
+                    ).system_score
+                    comet_proximity_gain_deepl = comet_deepl_adapter_score - comet_deepl_base_score
+
+                    logger.info(f"  COMET proximity gain (DeepL): {comet_proximity_gain_deepl:+.4f}")
+                    logger.info(f"    Base vs DeepL:    COMET {comet_deepl_base_score:.4f}")
+                    logger.info(f"    Adapter vs DeepL: COMET {comet_deepl_adapter_score:.4f}")
+
+                    del comet_model
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                except ImportError:
+                    logger.warning("COMET unavailable. Skipping DeepL COMET proximity.")
+                except Exception as e:
+                    logger.warning(f"DeepL COMET proximity error: {e}")
+            else:
+                logger.warning("  No valid DeepL ceiling translations for proximity gain")
 
     # --- Metric 2: Hallucination ratio ---
     low_conf_indices = [i for i, c in enumerate(chunk_data) if float(c.get("confidence", 1.0)) < 0.5]
@@ -320,16 +557,38 @@ def evaluate_sermon(
     # --- Kill switch verdicts ---
     verdicts = {}
 
-    # Proximity gain kill switch
-    if proximity_gain is not None:
-        if proximity_gain < 0:
-            verdicts["proximity_gain"] = "KILL — adapter moved AWAY from 12B"
-        elif proximity_gain < 2:
-            verdicts["proximity_gain"] = "WARN — marginal gain, check human review"
+    # COMET proximity gain kill switch (primary)
+    if comet_proximity_gain is not None:
+        if comet_proximity_gain < -0.01:
+            verdicts["proximity_gain"] = "KILL — adapter moved AWAY from 12B (COMET)"
+        elif comet_proximity_gain < 0.005:
+            verdicts["proximity_gain"] = "WARN — marginal COMET gain, check human review"
         else:
             verdicts["proximity_gain"] = "PASS"
     else:
         verdicts["proximity_gain"] = "SKIP — no clean chunks"
+
+    # COMET DeepL proximity gain kill switch
+    if comet_proximity_gain_deepl is not None:
+        if comet_proximity_gain_deepl < -0.01:
+            verdicts["proximity_gain_deepl"] = "KILL — adapter moved AWAY from DeepL (COMET)"
+        elif comet_proximity_gain_deepl < 0.005:
+            verdicts["proximity_gain_deepl"] = "WARN — marginal DeepL COMET gain, check human review"
+        else:
+            verdicts["proximity_gain_deepl"] = "PASS"
+    else:
+        verdicts["proximity_gain_deepl"] = "SKIP — no DeepL ceiling"
+
+    # chrF++ proximity gain (secondary, logged only)
+    if chrf_proximity_gain is not None:
+        if chrf_proximity_gain < 0:
+            verdicts["chrf_proximity_gain"] = "KILL — adapter moved AWAY from 12B (chrF++)"
+        elif chrf_proximity_gain < 2:
+            verdicts["chrf_proximity_gain"] = "WARN — marginal chrF++ gain, check human review"
+        else:
+            verdicts["chrf_proximity_gain"] = "PASS"
+    else:
+        verdicts["chrf_proximity_gain"] = "SKIP — no clean chunks"
 
     # Hallucination kill switch
     if hallucination_result and hallucination_result["ratio_increase"] is not None:
@@ -380,6 +639,8 @@ def evaluate_sermon(
         logger.info(f"{chunk_id:>4}  {conf:5.2f}  {'base':>8}  {base_chunks[i][:80]}")
         logger.info(f"{'':>4}  {'':>5}  {'adapter':>8}  {adapter_chunks[i][:80]}")
         logger.info(f"{'':>4}  {'':>5}  {'12B':>8}  {ceiling_chunks[i][:80]}")
+        if ceiling_deepl_chunks:
+            logger.info(f"{'':>4}  {'':>5}  {'DeepL':>8}  {ceiling_deepl_chunks[i][:80]}")
         logger.info("")
 
     logger.info("\n=== SERMON-STYLE THEOLOGICAL TERMS ===")
@@ -394,9 +655,19 @@ def evaluate_sermon(
     # --- Build output ---
     output = {
         "metrics": {
-            "proximity_gain": proximity_gain,
-            "proximity_base_vs_ceiling": chrf_base_vs_ceiling if proximity_gain is not None else None,
-            "proximity_adapter_vs_ceiling": chrf_adapter_vs_ceiling if proximity_gain is not None else None,
+            "proximity_gain": comet_proximity_gain,
+            "comet_proximity_gain": comet_proximity_gain,
+            "comet_base_vs_ceiling": comet_base_score,
+            "comet_adapter_vs_ceiling": comet_adapter_score,
+            "chrf_proximity_gain": chrf_proximity_gain,
+            "chrf_base_vs_ceiling": chrf_base_vs_ceiling,
+            "chrf_adapter_vs_ceiling": chrf_adapter_vs_ceiling,
+            "comet_proximity_gain_deepl": comet_proximity_gain_deepl,
+            "comet_deepl_base_vs_ceiling": comet_deepl_base_score,
+            "comet_deepl_adapter_vs_ceiling": comet_deepl_adapter_score,
+            "chrf_deepl_proximity_gain": chrf_deepl_proximity_gain,
+            "chrf_deepl_base_vs_ceiling": chrf_deepl_base_vs_ceiling,
+            "chrf_deepl_adapter_vs_ceiling": chrf_deepl_adapter_vs_ceiling,
             "clean_chunks_used": len(clean_indices),
             "hallucination": hallucination_result,
             "theological_terms": {
@@ -421,6 +692,7 @@ def evaluate_sermon(
                 "base": base_chunks[i],
                 "adapter": adapter_chunks[i],
                 "ceiling": ceiling_chunks[i],
+                **({"ceiling_deepl": ceiling_deepl_chunks[i]} if ceiling_deepl_chunks else {}),
             }
             for i, chunk in enumerate(chunk_data)
         ],
@@ -474,9 +746,24 @@ def main():
         help="Path to full sermon segment text file (Tier 3, optional)",
     )
     parser.add_argument(
+        "--ceiling-cache",
+        default=None,
+        help="Path to pre-computed 12B translations JSON (skip 12B inference)",
+    )
+    parser.add_argument(
         "--output",
         default=None,
         help="Save results to JSON file (e.g., ablation/sermon_eval_results.json)",
+    )
+    parser.add_argument(
+        "--deepl-key",
+        default=None,
+        help="DeepL Pro API key (enables DeepL as second quality ceiling)",
+    )
+    parser.add_argument(
+        "--deepl-glossary",
+        default=None,
+        help="Path to glossary JSONL for DeepL (default: bible_data/glossary/glossary_pairs.jsonl)",
     )
     args = parser.parse_args()
 
@@ -487,6 +774,9 @@ def main():
         ceiling_model=args.ceiling_model,
         segment_path=args.segment,
         output_file=args.output,
+        ceiling_cache=args.ceiling_cache,
+        deepl_key=args.deepl_key,
+        deepl_glossary=args.deepl_glossary,
     )
 
 

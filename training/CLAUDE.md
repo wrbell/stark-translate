@@ -163,6 +163,23 @@ Total estimate: **~48–73 GPU-hrs**, **~33–53 human-hrs** over ~5 weeks.
 
 **Key bottlenecks:** Human correction dominates cycle 1. TranslateGemma 12B tight on VRAM (~14–15 GB peak). Demucs is the data-prep GPU bottleneck — run overnight.
 
+## Observed Benchmarks (A2000 Ada 16GB, WSL2)
+
+Actual wall-clock times from ablation runs (2026-03-20/21).
+
+| Task | Time | VRAM | Notes |
+|------|------|------|-------|
+| faster-whisper large-v3 (word timestamps, fp16) | ~8x real-time | ~5 GB | 146 min audio = 19 min (614s + 513s) |
+| TranslateGemma 4B load (4-bit QLoRA) | ~3-5 min | ~6-8 GB | |
+| TranslateGemma 12B load (4-bit) | ~5-8 min | ~7 GB | Fits comfortably on 16GB |
+| TranslateGemma translation (4B or 12B) | ~2-3s/input | — | Same speed for both |
+| COMET scoring (wmt22-comet-da) | ~3-5 min / 200 pairs | ~2-3 GB | |
+| train_gemma.py (per step) | ~4s | ~10-12 GB | |
+| evaluate_translation.py (500 verses) | ~47 min | ~6-8 GB | ~5.4s/verse |
+| evaluate_sermon.py (28 inputs, 3 models) | ~20-30 min | ~8 GB peak | Sequential model loading |
+| A1 training (50 steps) | ~5 min | ~10 GB | |
+| B4 training (1114 steps) | ~63 min | ~10 GB | |
+
 ## Related Work
 
 - eBible Corpus (2023): NLLB-600M outperformed SMT and OpenNMT on Bible translation
