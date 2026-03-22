@@ -1,0 +1,27 @@
+{
+  "created_at": "2026-03-22T16:24:15",
+  "eval_sets": [
+    {
+      "type": "translation_holdout",
+      "count": 500,
+      "source": "bible_data/aligned/verse_pairs_train.jsonl",
+      "output": "bible_data/aligned/verse_pairs_test.jsonl",
+      "original_train_count": 242091,
+      "remaining_train_count": 241591,
+      "seed": 42,
+      "sha256": "e314def9a9383f3d6a953c7788705744caadb664471555c30f34c125f9bbc0b8",
+      "created_at": "2026-03-22T16:24:15"
+    },
+    {
+      "type": "sermon_eval",
+      "count": 422,
+      "source": "ablation/sermon_whisper_chunks_expanded.json",
+      "output": "ablation/sermon_eval_chunks.json",
+      "sources": {
+        "Gospel_Message_(3_15_26)_F1-ZLv-pMMg": 422
+      },
+      "sha256": "b97318e1eaa9766dcf2d90282f6e8811f5403a109c7339e0bed6d882a002f837",
+      "created_at": "2026-03-22T16:24:15"
+    }
+  ]
+}

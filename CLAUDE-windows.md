@@ -54,6 +54,8 @@ pip install ninja && pip install flash-attn --no-build-isolation
 
 ### Data & Model Storage
 
+**Data storage:** Audio data lives on D: drive (`/mnt/d/Data/stt-data/`) for capacity (3.7 TB). The `stark_data/` and `stt-data/` directories in the project root are symlinks to D:.
+
 All training data and HF model cache lives on **D:\\Data\\stt-data** (`/mnt/d/Data/stt-data` in WSL, 3.7 TB free):
 
 ```bash
@@ -394,6 +396,20 @@ def transcribe_all(data_dir="stark_data/cleaned", output_dir="stark_data/transcr
 if __name__ == "__main__":
     transcribe_all()
 ```
+
+### Deepgram Oracle Transcription
+
+Ground-truth labels via Deepgram Nova-3 with 50 theological keyterms (Tier 1 boost):
+
+```bash
+export STARK_DEEPGRAM__API_KEY="your-key"
+python training/transcribe_with_deepgram.py \
+    --input stark_data/raw/midwest \
+    --output stark_data/deepgram_transcripts \
+    --resume
+```
+
+Cost: ~$0.0043/min (~$9 for 35 hours). Output: `.deepgram.json` with word-level timestamps + confidence.
 
 ---
 
@@ -1212,6 +1228,12 @@ if __name__ == "__main__":
     print(f"\n=== Theological term spot-check ===")
     evaluate_theological_terms()
 ```
+
+### Data Integrity
+
+- **Lockfile:** `python tools/lock_data.py verify` checks SHA-256 hashes of all training data before runs
+- **Training manifests:** `train_gemma.py` saves `training_manifest.json` with full CLI args, data file hashes, and metrics
+- **Eval sets:** 500 stratified verse holdout + 422 sermon eval chunks (post-2026-03-14 cutoff)
 
 ---
 

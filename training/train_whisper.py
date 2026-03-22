@@ -20,9 +20,12 @@ Usage:
 """
 
 import argparse
+import hashlib
+import json
 import logging
 import os
 from collections import Counter
+from datetime import UTC, datetime
 
 os.environ["USE_TF"] = "0"  # Prevent transformers from importing TF/Keras (not needed for PyTorch training)
 
@@ -173,6 +176,76 @@ def build_accent_sampler(accent_labels):
         num_samples=total,
         replacement=True,
     )
+
+
+def _save_training_manifest(
+    output_dir,
+    model_name,
+    dataset_path,
+    target_modules,
+    lora_r,
+    lora_alpha,
+    batch_size,
+    grad_accum,
+    epochs,
+    lr,
+    replay_ratio,
+    accent_balance,
+    accent_distribution,
+    trainer,
+    eval_metrics=None,
+):
+    """Save a training manifest for reproducibility and provenance tracking."""
+
+    def _file_hash(path):
+        if not path or not os.path.exists(path):
+            return None
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(8192), b""):
+                h.update(chunk)
+        return h.hexdigest()
+
+    manifest = {
+        "run_id": os.path.basename(output_dir),
+        "timestamp": datetime.now(UTC).isoformat(),
+        "model": model_name,
+        "config": {
+            "lora_r": lora_r,
+            "lora_alpha": lora_alpha,
+            "target_modules": target_modules,
+            "batch_size": batch_size,
+            "grad_accum": grad_accum,
+            "effective_batch_size": batch_size * grad_accum,
+            "epochs": epochs,
+            "lr": lr,
+            "replay_ratio": replay_ratio,
+            "accent_balance": accent_balance,
+        },
+        "data": {
+            "dataset_path": dataset_path,
+            "accent_distribution": accent_distribution or {},
+        },
+        "results": {},
+    }
+
+    # Extract final metrics from trainer
+    if trainer.state.log_history:
+        last = trainer.state.log_history[-1]
+        manifest["results"] = {k: v for k, v in last.items() if isinstance(v, int | float) and k != "epoch"}
+
+    # Include eval WER if available
+    if eval_metrics:
+        manifest["results"]["eval"] = {k: v for k, v in eval_metrics.items() if isinstance(v, int | float)}
+
+    # Save adapter hash
+    adapter_path = os.path.join(output_dir, "adapter_model.safetensors")
+    manifest["adapter_sha256"] = _file_hash(adapter_path)
+
+    manifest_path = os.path.join(output_dir, "training_manifest.json")
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+    logger.info(f"Training manifest saved to {manifest_path}")
 
 
 def fine_tune_whisper(
@@ -386,10 +459,35 @@ def fine_tune_whisper(
     # Log final metrics
     # TODO: Use --eval-chunked flag to test chunked vs sequential Turbo inference modes
     # Chunked mode is faster but may introduce stitching artifacts at chunk boundaries
+    eval_metrics = None
     if eval_dataset:
-        metrics = trainer.evaluate()
-        logger.info(f"Final eval metrics: {metrics}")
-        trainer.save_metrics("eval", metrics)
+        eval_metrics = trainer.evaluate()
+        logger.info(f"Final eval metrics: {eval_metrics}")
+        trainer.save_metrics("eval", eval_metrics)
+
+    # Build accent distribution for manifest
+    accent_distribution = None
+    if train_accent_labels:
+        accent_distribution = dict(Counter(train_accent_labels))
+
+    # Save training manifest for reproducibility
+    _save_training_manifest(
+        output_dir=output_dir,
+        model_name=model_name,
+        dataset_path=dataset_path,
+        target_modules=target_modules,
+        lora_r=lora_r,
+        lora_alpha=lora_alpha,
+        batch_size=batch_size,
+        grad_accum=grad_accum,
+        epochs=epochs,
+        lr=lr,
+        replay_ratio=replay_ratio,
+        accent_balance=accent_balance,
+        accent_distribution=accent_distribution,
+        trainer=trainer,
+        eval_metrics=eval_metrics,
+    )
 
 
 def main():

@@ -171,7 +171,15 @@ Two-phase sweep to find optimal QLoRA configuration:
 
 **Hybrid data composition:** 60% TranslateGemma 12B translations + 40% DeepL glossary-enforced translations.
 
-**Next:** S7 scaled run with 5,000 chunks (from 24,595 expanded pool).
+**S8 (pure DeepL, eval running):** 5,000 sermon pairs via 100% DeepL glossary-enforced translations + 5,000 verse pairs. Tests whether 12B adds value or if DeepL alone suffices. If S8 matches S6, we can drop 12B inference entirely for data generation (~4.5 GPU-hrs saved per batch).
+
+**S7 (planned):** Same 5,000 chunks but 60/40 12B/DeepL hybrid. Control for S8.
+
+**S9 (planned):** 10,000 sermon pairs, 100% DeepL. Tests diminishing returns at 2× scale.
+
+**Data provenance:** All runs tracked in `hybrid_runs/data_provenance.md` with per-sermon chunk breakdowns. `generate_hybrid_synthetic.py` now saves `_provenance.json` sidecars and supports `--train-only` to prevent eval data leakage.
+
+See `docs/whisper_tuning_test_matrix.md` for the Whisper LoRA W0–W9 ablation design.
 
 ## Theological Vocabulary Challenges
 

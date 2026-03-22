@@ -16,6 +16,12 @@
 | `test_adaptive_model.py` | Adaptive model selection testing |
 | `batch_translate.py` | Batch translation processing |
 | `export_review.py` | Export review queue data |
+| `glossary.py` | Tiered glossary: Tier 1 (50 boost for Deepgram) + Tier 2 (229 master) |
+| `sort_sermons.py` | Sermon cataloging by type/year with manifest + training cutoff |
+| `lock_data.py` | SHA-256 data lockfile for training data versioning |
+| `build_eval_sets.py` | Stratified eval set builder (500 verse holdout + sermon eval) |
+| `health_check.py` | Adapter health verification (5 canary sentences) |
+| `manage_adapters.py` | Adapter lifecycle: register, activate, rollback, export |
 
 ## YouTube Caption Comparison (Layer 4)
 
@@ -95,6 +101,72 @@ Cross-tool data flow for the flag → correct → retrain cycle (Phases 7–8):
 7. **Composite quality score**: `0.45 * neural_qe + 0.35 * stt_confidence + 0.20 * marian_agreement` — used to prioritize segments for review
 
 **Target**: 3–5 cycles. First cycle yields 20–40% relative WER reduction. Stop when improvement < 2% relative for 2 consecutive cycles.
+
+## Data Integrity & Adapter Management
+
+### Data Lockfile (`tools/lock_data.py`)
+
+Records SHA-256 hashes of all training data files. Run before training to snapshot, before eval to verify no drift.
+
+```bash
+python tools/lock_data.py generate   # Create/update lockfile
+python tools/lock_data.py verify     # Check files match lockfile
+```
+
+Output: `bible_data/data_lockfile.json`
+
+### Sermon Sorting (`tools/sort_sermons.py`)
+
+Classifies sermons by type (gospel/ministry/conference/throwback) and date from metadata JSONs. Produces `stt-data/manifest.json` and organizes WAVs into `stt-data/{type}/{year}/`.
+
+```bash
+python tools/sort_sermons.py --input stark_data/raw/midwest --output-dir stt-data --cutoff 2026-03-14
+```
+
+Training cutoff: 2026-03-14. Data before = train, on/after = eval.
+
+### Tiered Glossary (`tools/glossary.py`)
+
+Two-tier glossary for Deepgram keyterm boosting and training normalization:
+- **Tier 1 (Boost):** 50 terms, <420 tokens, for Deepgram `keyterm` parameter
+- **Tier 2 (Master):** 229 terms, full EN→ES theological glossary
+
+```bash
+python build_glossary.py --build-tiers  # Generates tier1_boost.json + tier2_master.json
+```
+
+### Adapter Management (`tools/manage_adapters.py`)
+
+Lifecycle management with manifest at `adapters/manifest.json`:
+
+```bash
+python tools/manage_adapters.py register --adapter hybrid_runs/S8_deepl_only --model gemma_4b
+python tools/manage_adapters.py activate --model gemma_4b --version S8_deepl_only  # runs health check first
+python tools/manage_adapters.py rollback --model gemma_4b
+python tools/manage_adapters.py list --model gemma_4b
+```
+
+### Health Check (`tools/health_check.py`)
+
+Verifies adapter produces sane translations before deployment. 5 canary sentences covering theological terms (atonement, James/Santiago, propitiation, breaking of bread, resurrection).
+
+```bash
+python tools/health_check.py --adapter hybrid_runs/S8_deepl_only
+```
+
+Exit code 0 = pass, 1 = fail. Used automatically by `manage_adapters.py activate`.
+
+### Evaluation Sets (`tools/build_eval_sets.py`)
+
+Builds proper evaluation sets with stratification and provenance:
+- 500 verse pairs stratified by genre (Pentateuch/History/Poetry/Prophets/Gospels/Epistles)
+- Sermon eval chunks filtered to post-cutoff sermons only
+- Registry at `bible_data/eval_registry.json`
+
+```bash
+python tools/build_eval_sets.py --dry-run   # Preview
+python tools/build_eval_sets.py             # Build (modifies verse_pairs_train.jsonl)
+```
 
 ## Per-Tool Quick Reference
 

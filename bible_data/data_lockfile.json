@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-03-22T16:17:28",
+  "generated_at": "2026-03-22T16:24:58",
   "files": {
     "verse_pairs_train": {
       "path": "bible_data/aligned/verse_pairs_train.jsonl",
-      "sha256": "fb4737ab61b3b4626e6d53e230b5ff975085e792db3569a899c4c13e10d8d8e3",
-      "size_bytes": 83027669,
-      "lines": 242091
+      "sha256": "17d7d6fdcad45d85891c118988c601dba7c2d35d0ce8f57e317b48653820dd45",
+      "size_bytes": 82858033,
+      "lines": 241591
     },
     "verse_pairs_test": {
       "path": "bible_data/aligned/verse_pairs_test.jsonl",
-      "sha256": "f0f313d2565b0f7ddfed43b698ac35424ab856ede8c51fa6d193b606e13609c0",
-      "size_bytes": 145,
-      "lines": 2
+      "sha256": "e314def9a9383f3d6a953c7788705744caadb664471555c30f34c125f9bbc0b8",
+      "size_bytes": 169636,
+      "lines": 500
     },
     "glossary_pairs": {
       "path": "bible_data/glossary/glossary_pairs.jsonl",
