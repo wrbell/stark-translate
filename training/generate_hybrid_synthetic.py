@@ -65,6 +65,20 @@ def load_whisper_chunks(path, min_chars=20):
     return deduped
 
 
+def filter_train_only(chunks):
+    """Remove eval/unknown chunks — only keep chunks tagged split='train'.
+
+    Prevents data leakage from post-cutoff sermons into training data.
+    Chunks without a 'split' field are kept (backward compat with untagged data).
+    """
+    train = [c for c in chunks if c.get("split", "train") == "train"]
+    removed = len(chunks) - len(train)
+    if removed:
+        eval_sources = {c.get("source", "?") for c in chunks if c.get("split") == "eval"}
+        logger.info(f"  Removed {removed} non-train chunks (eval sources: {eval_sources})")
+    return train
+
+
 def load_12b_cache(cache_path):
     """Load existing 12B translations as {en_text: es_text} dict.
 
@@ -143,7 +157,16 @@ def translate_with_12b(chunks, cache, base_model):
     for c in chunks:
         text = c["en"]
         if text in cache:
-            results.append({"en": text, "es": cache[text], "source": "12b"})
+            results.append(
+                {
+                    "en": text,
+                    "es": cache[text],
+                    "source": "12b",
+                    "chunk_source": c.get("source", ""),
+                    "chunk_start": c.get("start"),
+                    "chunk_end": c.get("end"),
+                }
+            )
         else:
             uncached.append(c)
 
@@ -161,7 +184,16 @@ def translate_with_12b(chunks, cache, base_model):
             except Exception as e:
                 logger.warning(f"12B translation failed for chunk {i}: {e}")
                 translation = ""
-            results.append({"en": c["en"], "es": translation, "source": "12b"})
+            results.append(
+                {
+                    "en": c["en"],
+                    "es": translation,
+                    "source": "12b",
+                    "chunk_source": c.get("source", ""),
+                    "chunk_start": c.get("start"),
+                    "chunk_end": c.get("end"),
+                }
+            )
 
             if (i + 1) % 50 == 0:
                 logger.info(f"  12B progress: {i + 1}/{len(uncached)}")
@@ -201,7 +233,16 @@ def translate_with_deepl(chunks, translator, glossary):
             logger.warning(f"DeepL translation failed for chunk {i}: {e}")
             translation = ""
 
-        results.append({"en": text, "es": translation, "source": "deepl"})
+        results.append(
+            {
+                "en": text,
+                "es": translation,
+                "source": "deepl",
+                "chunk_source": c.get("source", ""),
+                "chunk_start": c.get("start"),
+                "chunk_end": c.get("end"),
+            }
+        )
 
         if (i + 1) % 50 == 0:
             logger.info(f"  DeepL progress: {i + 1}/{len(chunks)}")
@@ -267,10 +308,18 @@ def main():
         default=42,
         help="Random seed for reproducible splitting",
     )
+    parser.add_argument(
+        "--train-only",
+        action="store_true",
+        help="Filter out eval/non-train chunks (prevents data leakage from post-cutoff sermons)",
+    )
     args = parser.parse_args()
 
     # --- Load and filter chunks ---
     chunks = load_whisper_chunks(args.whisper_chunks, min_chars=args.min_chars)
+
+    if args.train_only:
+        chunks = filter_train_only(chunks)
 
     if args.max_chunks and len(chunks) > args.max_chunks:
         rng = random.Random(args.seed)
@@ -319,6 +368,27 @@ def main():
     n_12b = sum(1 for r in valid if r["source"] == "12b")
     n_deepl = sum(1 for r in valid if r["source"] == "deepl")
     logger.info(f"  12B: {n_12b} pairs, DeepL: {n_deepl} pairs")
+
+    # --- Save chunk provenance manifest ---
+    from collections import Counter
+
+    manifest_path = args.output.replace(".jsonl", "_provenance.json")
+    chunk_sources = Counter(r.get("chunk_source", "unknown") for r in valid)
+    provenance = {
+        "output_file": args.output,
+        "total_pairs": len(valid),
+        "n_12b": n_12b,
+        "n_deepl": n_deepl,
+        "max_chunks": args.max_chunks,
+        "ratio_deepl": args.ratio_deepl,
+        "seed": args.seed,
+        "whisper_chunks_file": args.whisper_chunks,
+        "sermon_sources": dict(chunk_sources),
+        "sermon_source_count": len(chunk_sources),
+    }
+    with open(manifest_path, "w") as f:
+        json.dump(provenance, f, indent=2)
+    logger.info(f"  Provenance manifest: {manifest_path}")
 
     # Clean up DeepL glossary
     if glossary:

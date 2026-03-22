@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-03-22T16:17:28",
+  "files": {
+    "verse_pairs_train": {
+      "path": "bible_data/aligned/verse_pairs_train.jsonl",
+      "sha256": "fb4737ab61b3b4626e6d53e230b5ff975085e792db3569a899c4c13e10d8d8e3",
+      "size_bytes": 83027669,
+      "lines": 242091
+    },
+    "verse_pairs_test": {
+      "path": "bible_data/aligned/verse_pairs_test.jsonl",
+      "sha256": "f0f313d2565b0f7ddfed43b698ac35424ab856ede8c51fa6d193b606e13609c0",
+      "size_bytes": 145,
+      "lines": 2
+    },
+    "glossary_pairs": {
+      "path": "bible_data/glossary/glossary_pairs.jsonl",
+      "sha256": "da8714143d5d64ad938af76cf4cbf0d59d0ae9d3b5a7de505f034e8f95f58d9b",
+      "size_bytes": 37965,
+      "lines": 458
+    },
+    "tier1_boost": {
+      "path": "bible_data/glossary/tier1_boost.json",
+      "sha256": "ded65d2013b59119f038f8255b5889d35064fb435723beaef52b7da38a2fd88b",
+      "size_bytes": 974,
+      "element_count": 50
+    },
+    "tier2_master": {
+      "path": "bible_data/glossary/tier2_master.json",
+      "sha256": "dd0b5f84797b5e9c8ce7af86ca8e3b70d1c17301108b4993f3caa9e40f405196",
+      "size_bytes": 6505,
+      "element_count": 229
+    },
+    "sermon_whisper_chunks": {
+      "path": "ablation/sermon_whisper_chunks_expanded.json",
+      "sha256": "def1d1dbf76cf2387efe9a6ee28ea3af9e2c81c155bbb633c938ff01e81efde2",
+      "size_bytes": 6927074,
+      "element_count": 24595
+    }
+  }
+}

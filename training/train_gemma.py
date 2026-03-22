@@ -227,6 +227,94 @@ def _load_replay_pairs(ratio, domain_count, seed=42):
         return []
 
 
+def _save_training_manifest(
+    output_dir,
+    approach,
+    model_name,
+    bible_data,
+    glossary_data,
+    sermon_data,
+    max_pairs,
+    glossary_oversample,
+    lr,
+    max_steps,
+    lora_r,
+    lora_alpha,
+    neftune_alpha,
+    replay_ratio,
+    trainer,
+):
+    """Save a training manifest for reproducibility and provenance tracking."""
+    import hashlib
+    from datetime import UTC, datetime
+
+    def _file_hash(path):
+        if not path or not os.path.exists(path):
+            return None
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(8192), b""):
+                h.update(chunk)
+        return h.hexdigest()
+
+    def _file_lines(path):
+        if not path or not os.path.exists(path):
+            return 0
+        with open(path) as f:
+            return sum(1 for _ in f)
+
+    manifest = {
+        "run_id": os.path.basename(output_dir),
+        "timestamp": datetime.now(UTC).isoformat(),
+        "model": model_name,
+        "approach": approach,
+        "config": {
+            "lr": lr,
+            "max_steps": max_steps,
+            "max_pairs": max_pairs,
+            "lora_r": lora_r,
+            "lora_alpha": lora_alpha,
+            "neftune_alpha": neftune_alpha,
+            "replay_ratio": replay_ratio,
+            "glossary_oversample": glossary_oversample,
+        },
+        "data": {
+            "bible_pairs": {
+                "file": bible_data,
+                "count": _file_lines(bible_data),
+                "used": min(max_pairs, _file_lines(bible_data)) if max_pairs > 0 else _file_lines(bible_data),
+                "sha256": _file_hash(bible_data),
+            },
+            "glossary_pairs": {
+                "file": glossary_data,
+                "count": _file_lines(glossary_data),
+                "oversample": glossary_oversample,
+                "sha256": _file_hash(glossary_data),
+            },
+            "sermon_pairs": {
+                "file": sermon_data,
+                "count": _file_lines(sermon_data) if sermon_data else 0,
+                "sha256": _file_hash(sermon_data),
+            },
+        },
+        "results": {},
+    }
+
+    # Extract final metrics from trainer
+    if trainer.state.log_history:
+        last = trainer.state.log_history[-1]
+        manifest["results"] = {k: v for k, v in last.items() if isinstance(v, int | float) and k != "epoch"}
+
+    # Save adapter hash
+    adapter_path = os.path.join(output_dir, "adapter_model.safetensors")
+    manifest["adapter_sha256"] = _file_hash(adapter_path)
+
+    manifest_path = os.path.join(output_dir, "training_manifest.json")
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+    logger.info(f"Training manifest saved to {manifest_path}")
+
+
 def fine_tune_gemma(
     approach="A",
     bible_data="bible_data/aligned/verse_pairs_train.jsonl",
@@ -499,6 +587,25 @@ def fine_tune_gemma(
         trainer.save_metrics("train", trainer.state.log_history[-1])
     else:
         logger.warning("No training metrics to save.")
+
+    # Save training manifest for reproducibility
+    _save_training_manifest(
+        output_dir=output_dir,
+        approach=approach,
+        model_name=model_name,
+        bible_data=bible_data,
+        glossary_data=glossary_data,
+        sermon_data=sermon_data,
+        max_pairs=max_pairs,
+        glossary_oversample=glossary_oversample,
+        lr=lr,
+        max_steps=max_steps,
+        lora_r=lora_r,
+        lora_alpha=lora_alpha,
+        neftune_alpha=neftune_alpha,
+        replay_ratio=replay_ratio,
+        trainer=trainer,
+    )
 
 
 def main():
