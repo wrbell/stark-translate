@@ -1,12 +1,19 @@
 """CUDA backend engines for NVIDIA GPU inference.
 
 Provides:
-  - FasterWhisperEngine  -- STT via faster-whisper (CTranslate2 backend)
-  - CUDAGemmaEngine      -- Translation via transformers + bitsandbytes 4-bit
+  - FasterWhisperEngine        -- STT via faster-whisper (CTranslate2 backend)
+  - CUDAGemmaEngine            -- Translation via transformers + bitsandbytes 4-bit (basic)
+  - CUDAGemmaStreamingEngine   -- Enhanced: streaming, prompt cache, speculative decoding
+  - detect_vram_tier()         -- Auto-detect GPU tier (full_ab / 4b_only / marian)
 """
 
+from __future__ import annotations
+
+import copy
 import logging
 import time
+from collections.abc import Callable
+from threading import Thread
 
 import numpy as np
 
@@ -503,6 +510,466 @@ class CUDAGemmaEngine(TranslationEngine):
         if TORCH_AVAILABLE and torch.cuda.is_available():
             torch.cuda.empty_cache()
         logger.info("CUDAGemmaEngine unloaded (%s)", self._model_id_str)
+
+    @property
+    def model_id(self) -> str:
+        return self._model_id_str
+
+    @property
+    def backend(self) -> str:
+        return "cuda"
+
+
+# ---------------------------------------------------------------------------
+# VRAM tier detection
+# ---------------------------------------------------------------------------
+
+# Thresholds in MB
+_VRAM_FULL_AB_MB = 15_000  # >=15 GB → 4B + 12B + Whisper
+_VRAM_4B_ONLY_MB = 5_500  # >=5.5 GB → 4B + Whisper
+# Below 5.5 GB → MarianMT only
+
+
+def detect_vram_tier() -> tuple[str, int]:
+    """Auto-detect GPU VRAM and determine inference configuration tier.
+
+    Returns:
+        (tier_name, vram_mb) where tier_name is one of:
+        - ``"full_ab"``  (≥15 GB): Whisper + 4B + 12B (A/B comparison)
+        - ``"4b_only"``  (≥5.5 GB): Whisper + 4B
+        - ``"marian"``   (<5.5 GB): MarianMT only (no Gemma)
+        - ``"none"``     (no CUDA): CPU fallback
+    """
+    if not TORCH_AVAILABLE or not torch.cuda.is_available():
+        return ("none", 0)
+
+    props = torch.cuda.get_device_properties(0)
+    vram_mb = props.total_mem // (1024 * 1024)
+    gpu_name = props.name
+
+    if vram_mb >= _VRAM_FULL_AB_MB:
+        tier = "full_ab"
+    elif vram_mb >= _VRAM_4B_ONLY_MB:
+        tier = "4b_only"
+    else:
+        tier = "marian"
+
+    logger.info(
+        "VRAM tier: %s (%s, %d MB)",
+        tier,
+        gpu_name,
+        vram_mb,
+    )
+    return (tier, vram_mb)
+
+
+# ---------------------------------------------------------------------------
+# KV cache utilities
+# ---------------------------------------------------------------------------
+
+
+def _clone_past_key_values(
+    past_key_values: tuple[tuple[object, ...], ...],
+) -> tuple[tuple[object, ...], ...]:
+    """Deep-clone ``past_key_values`` using tensor ``.clone()`` (fast GPU copy).
+
+    ``copy.deepcopy()`` on GPU tensors goes through pickle and is slow.
+    This traverses the nested tuple structure and clones each tensor in-place.
+    """
+    if past_key_values is None:
+        return None  # type: ignore[return-value]
+
+    # past_key_values is a tuple of layer tuples, each containing (key, value) tensors.
+    # Some model implementations use DynamicCache objects instead of raw tuples.
+    # Handle both cases.
+    if hasattr(past_key_values, "key_cache"):
+        # DynamicCache — use copy.deepcopy which calls __deepcopy__ on the cache
+        return copy.deepcopy(past_key_values)
+
+    return tuple(
+        tuple(t.clone() if hasattr(t, "clone") else t for t in layer)
+        for layer in past_key_values
+    )
+
+
+# ---------------------------------------------------------------------------
+# Enhanced CUDA TranslateGemma (streaming + prompt cache + speculative)
+# ---------------------------------------------------------------------------
+
+
+class CUDAGemmaStreamingEngine(TranslationEngine):
+    """Enhanced CUDA TranslateGemma with streaming, prompt caching, and speculative decoding.
+
+    Provides full feature parity with the MLX inference path:
+
+    - **Prompt cache**: Pre-computes KV cache for the fixed chat template prefix,
+      saving ~50-80ms per translation by skipping re-prefilling ~30-40 template tokens.
+    - **Streaming**: Token-by-token output via ``TextIteratorStreamer``, with configurable
+      batching (default: every 3 tokens) for WebSocket broadcast.
+    - **Speculative decoding**: Optional assistant (draft) model for faster 12B generation.
+
+    Constructor args:
+        model_id:            HuggingFace repo (default: ``"google/translategemma-4b-it"``).
+        use_prompt_cache:    Pre-compute KV cache for fixed prefix (default: True).
+        assistant_model_id:  Optional 4B model repo for speculative decoding (12B only).
+        streaming_batch_size: Tokens per WebSocket batch during streaming (default: 3).
+    """
+
+    def __init__(
+        self,
+        model_id: str = "google/translategemma-4b-it",
+        use_prompt_cache: bool = True,
+        assistant_model_id: str | None = None,
+        streaming_batch_size: int = 3,
+    ):
+        if not TORCH_AVAILABLE:
+            raise RuntimeError("PyTorch is not installed.")
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA is not available.")
+        self._model_id_str = model_id
+        self._use_prompt_cache = use_prompt_cache
+        self._assistant_model_id = assistant_model_id
+        self._streaming_batch_size = streaming_batch_size
+
+        self._model = None
+        self._tokenizer = None
+        self._assistant_model = None
+        self._prompt_cache_pkv = None  # past_key_values template
+        self._suffix_tokens: list[int] = []
+        self._loaded = False
+
+    # -- public interface ----------------------------------------------------
+
+    def load(self) -> None:
+        """Load model with bitsandbytes 4-bit, apply EOS fix, build prompt cache."""
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+
+        if not BITSANDBYTES_AVAILABLE:
+            raise RuntimeError(
+                "bitsandbytes is not installed. Required for 4-bit quantization."
+            )
+
+        logger.info("Loading %s (CUDA 4-bit, streaming)...", self._model_id_str)
+        t0 = time.time()
+
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_id_str)
+        self._model = AutoModelForCausalLM.from_pretrained(
+            self._model_id_str,
+            load_in_4bit=True,
+            torch_dtype=torch.bfloat16,
+            device_map="cuda",
+        )
+        self._model.eval()
+
+        # -- EOS fix --
+        eot_id = self._tokenizer.convert_tokens_to_ids("<end_of_turn>")
+        default_eos = self._tokenizer.eos_token_id
+        if hasattr(self._tokenizer, "_eos_token_ids"):
+            self._tokenizer._eos_token_ids.add(eot_id)
+        else:
+            self._tokenizer._eos_token_ids = {default_eos, eot_id}
+        logger.info("EOS fix applied: added <end_of_turn> (id=%d)", eot_id)
+
+        # -- Prompt cache --
+        if self._use_prompt_cache:
+            self._prompt_cache_pkv, self._suffix_tokens = self._build_prompt_cache()
+
+        # -- Optional assistant model for speculative decoding --
+        if self._assistant_model_id:
+            logger.info(
+                "Loading assistant model %s for speculative decoding...",
+                self._assistant_model_id,
+            )
+            self._assistant_model = AutoModelForCausalLM.from_pretrained(
+                self._assistant_model_id,
+                load_in_4bit=True,
+                torch_dtype=torch.bfloat16,
+                device_map="cuda",
+            )
+            self._assistant_model.eval()
+            logger.info("Assistant model ready")
+
+        logger.info(
+            "CUDAGemmaStreamingEngine ready (%.1fs, cache=%s, assistant=%s)",
+            time.time() - t0,
+            self._prompt_cache_pkv is not None,
+            self._assistant_model_id or "none",
+        )
+        self._loaded = True
+
+    def translate(
+        self,
+        text: str,
+        *,
+        source_lang: str = "en",
+        target_lang: str = "es",
+    ) -> TranslationResult:
+        """Translate *text* using prompt cache for speed.
+
+        If speculative decoding is configured, uses the assistant model.
+        """
+        if not self._loaded:
+            raise RuntimeError("Engine not loaded -- call load() first")
+
+        input_words = len(text.split())
+        max_tok = max(32, int(input_words * 1.8))
+
+        t0 = time.perf_counter()
+
+        if self._prompt_cache_pkv is not None and self._suffix_tokens:
+            # -- Cached path: prefix KV already computed --
+            text_ids = self._tokenizer.encode(text, add_special_tokens=False)
+            dynamic_ids = text_ids + self._suffix_tokens
+            input_ids = torch.tensor([dynamic_ids], device="cuda")
+            cached_pkv = _clone_past_key_values(self._prompt_cache_pkv)
+
+            gen_kwargs: dict = dict(
+                input_ids=input_ids,
+                past_key_values=cached_pkv,
+                max_new_tokens=max_tok,
+                do_sample=False,
+            )
+        else:
+            # -- Full prompt fallback --
+            input_ids = self._build_full_prompt(text, source_lang, target_lang)
+            gen_kwargs = dict(
+                input_ids=input_ids,
+                max_new_tokens=max_tok,
+                do_sample=False,
+            )
+
+        if self._assistant_model is not None:
+            gen_kwargs["assistant_model"] = self._assistant_model
+
+        with torch.no_grad():
+            output = self._model.generate(**gen_kwargs)
+
+        generated = output[0][input_ids.shape[1]:]
+        result = self._tokenizer.decode(generated, skip_special_tokens=False)
+        latency_ms = (time.perf_counter() - t0) * 1000
+
+        clean = result.split("<end_of_turn>")[0].strip()
+        out_tokens = len(generated)
+        gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
+
+        return TranslationResult(
+            text=clean,
+            latency_ms=latency_ms,
+            tokens_per_second=gen_tps,
+        )
+
+    def translate_streaming(
+        self,
+        text: str,
+        *,
+        source_lang: str = "en",
+        target_lang: str = "es",
+        token_callback: Callable[[str, int], None] | None = None,
+    ) -> TranslationResult:
+        """Translate with token-by-token streaming via ``TextIteratorStreamer``.
+
+        Args:
+            text: Source text to translate.
+            source_lang: Source language code (default: ``"en"``).
+            target_lang: Target language code (default: ``"es"``).
+            token_callback: Called with ``(accumulated_text, tokens_so_far)``
+                every ``streaming_batch_size`` tokens. Used to push partial
+                translations to the WebSocket broadcaster.
+
+        Returns:
+            Final ``TranslationResult`` with complete translation.
+        """
+        if not self._loaded:
+            raise RuntimeError("Engine not loaded -- call load() first")
+
+        from transformers import TextIteratorStreamer
+
+        input_words = len(text.split())
+        max_tok = max(32, int(input_words * 1.8))
+
+        if self._prompt_cache_pkv is not None and self._suffix_tokens:
+            text_ids = self._tokenizer.encode(text, add_special_tokens=False)
+            dynamic_ids = text_ids + self._suffix_tokens
+            input_ids = torch.tensor([dynamic_ids], device="cuda")
+            cached_pkv = _clone_past_key_values(self._prompt_cache_pkv)
+            gen_kwargs: dict = dict(
+                input_ids=input_ids,
+                past_key_values=cached_pkv,
+                max_new_tokens=max_tok,
+                do_sample=False,
+            )
+        else:
+            input_ids = self._build_full_prompt(text, source_lang, target_lang)
+            gen_kwargs = dict(
+                input_ids=input_ids,
+                max_new_tokens=max_tok,
+                do_sample=False,
+            )
+
+        # Note: speculative decoding is incompatible with TextIteratorStreamer
+        # (assistant_model generates tokens internally, streamer can't intercept).
+        # Streaming mode always uses standard generation.
+
+        streamer = TextIteratorStreamer(
+            self._tokenizer,
+            skip_special_tokens=False,
+            skip_prompt=True,
+        )
+        gen_kwargs["streamer"] = streamer
+
+        t0 = time.perf_counter()
+        gen_thread = Thread(
+            target=self._generate_no_grad,
+            kwargs=gen_kwargs,
+            daemon=True,
+        )
+        gen_thread.start()
+
+        accumulated = ""
+        tokens_generated = 0
+        batch_size = self._streaming_batch_size
+
+        for token_text in streamer:
+            accumulated += token_text
+            tokens_generated += 1
+
+            if token_callback and tokens_generated % batch_size == 0:
+                partial = accumulated.split("<end_of_turn>")[0].strip()
+                token_callback(partial, tokens_generated)
+
+        gen_thread.join(timeout=5.0)
+        latency_ms = (time.perf_counter() - t0) * 1000
+
+        clean = accumulated.split("<end_of_turn>")[0].strip()
+        gen_tps = tokens_generated / (latency_ms / 1000) if latency_ms > 0 else 0.0
+
+        return TranslationResult(
+            text=clean,
+            latency_ms=latency_ms,
+            tokens_per_second=gen_tps,
+        )
+
+    # -- internal helpers ----------------------------------------------------
+
+    def _generate_no_grad(self, **kwargs: object) -> None:
+        """Run ``model.generate()`` inside ``torch.no_grad()`` (thread target)."""
+        with torch.no_grad():
+            self._model.generate(**kwargs)
+
+    def _build_full_prompt(
+        self,
+        text: str,
+        source_lang: str,
+        target_lang: str,
+    ) -> object:
+        """Build the full chat template prompt as input_ids tensor on CUDA."""
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "source_lang_code": source_lang,
+                        "target_lang_code": target_lang,
+                        "text": text,
+                    }
+                ],
+            }
+        ]
+        prompt = self._tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            return_tensors="pt",
+        )
+        return prompt.to("cuda")
+
+    def _build_prompt_cache(self) -> tuple[object | None, list[int]]:
+        """Pre-compute KV cache for the fixed TranslateGemma chat template prefix.
+
+        Uses the same SPLIT_HERE marker technique as the MLX ``_build_prompt_cache``:
+        1. Build prompt with marker text in place of user input
+        2. Tokenize and locate marker tokens in the sequence
+        3. Run a forward pass on prefix tokens to generate ``past_key_values``
+        4. Store as reusable template (cloned per request)
+
+        Returns:
+            ``(past_key_values, suffix_token_ids)`` or ``(None, [])`` on failure.
+        """
+        marker = "SPLIT_HERE"
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "source_lang_code": "en",
+                        "target_lang_code": "es",
+                        "text": marker,
+                    }
+                ],
+            }
+        ]
+
+        full_prompt = self._tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True
+        )
+        if isinstance(full_prompt, str):
+            full_tokens = self._tokenizer.encode(full_prompt, add_special_tokens=False)
+        else:
+            full_tokens = list(full_prompt)
+
+        marker_tokens = self._tokenizer.encode(marker, add_special_tokens=False)
+        marker_len = len(marker_tokens)
+
+        # Locate marker in token sequence
+        prefix_end = None
+        for i in range(len(full_tokens) - marker_len + 1):
+            if full_tokens[i: i + marker_len] == marker_tokens:
+                prefix_end = i
+                break
+
+        if prefix_end is None:
+            logger.warning("Could not locate marker in prompt, skipping cache")
+            return (None, [])
+
+        prefix_tokens = full_tokens[:prefix_end]
+        suffix_tokens = full_tokens[prefix_end + marker_len:]
+
+        if len(prefix_tokens) < 3:
+            logger.warning(
+                "Prefix too short (%d tokens), skipping cache",
+                len(prefix_tokens),
+            )
+            return (None, suffix_tokens)
+
+        # Forward pass on prefix to generate past_key_values
+        prefix_ids = torch.tensor([prefix_tokens], device="cuda")
+        with torch.no_grad():
+            outputs = self._model(prefix_ids, use_cache=True)
+
+        pkv = outputs.past_key_values
+        logger.info(
+            "Prompt cache built: %d prefix tokens cached, %d suffix tokens",
+            len(prefix_tokens),
+            len(suffix_tokens),
+        )
+        return (pkv, suffix_tokens)
+
+    def unload(self) -> None:
+        """Release all models and caches from GPU memory."""
+        del self._model
+        del self._tokenizer
+        del self._assistant_model
+        del self._prompt_cache_pkv
+        self._model = None
+        self._tokenizer = None
+        self._assistant_model = None
+        self._prompt_cache_pkv = None
+        self._suffix_tokens = []
+        self._loaded = False
+        if TORCH_AVAILABLE and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        logger.info("CUDAGemmaStreamingEngine unloaded (%s)", self._model_id_str)
 
     @property
     def model_id(self) -> str:

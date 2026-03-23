@@ -113,11 +113,11 @@ TARGET_LANG = "es"
 WHISPER_MODEL_TURBO = "mlx-community/whisper-large-v3-turbo"  # Default: faster, 4 decoder layers
 WHISPER_MODEL_DISTIL = "wbell7/distil-whisper-large-v3.5-mlx"  # Fallback: if Turbo regresses
 
-# Pipeline thread pool for MLX inference. MUST be max_workers=1 because MLX's
-# Metal backend is not thread-safe for concurrent GPU operations — running
-# Whisper STT and TranslateGemma translation on separate threads causes SIGSEGV.
-# All MLX calls are serialized through this single worker thread.
-_pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
+# Pipeline thread pool for GPU inference. Initialized in main_async() after
+# backend detection:
+#   - MLX:  max_workers=1 (Metal is NOT thread-safe — SIGSEGV on concurrent calls)
+#   - CUDA: max_workers=2 (thread-safe — enables true STT/Translation overlap)
+_pipeline_pool = None  # type: ThreadPoolExecutor | None
 
 # Separate pool for PyTorch-only work (MarianMT). Runs concurrently with the
 # MLX pipeline pool — safe because MarianMT uses PyTorch/CPU, not Metal GPU.
@@ -1084,42 +1084,71 @@ def load_marian():
     return model, tokenizer
 
 
-def load_cuda_translation_models(load_gemma=True):
-    """Load translation models for CUDA backend.
+def load_cuda_translation_models(load_gemma=True, load_b=False):
+    """Load translation models for CUDA backend with VRAM-aware tier detection.
 
-    Uses transformers + bitsandbytes for 4-bit quantized TranslateGemma.
-    Returns (gemma_model, gemma_tokenizer, None, None) — no 12B on CUDA
-    (single GPU VRAM constraint).
+    Uses ``CUDAGemmaStreamingEngine`` for streaming + prompt cache support.
+    Auto-detects VRAM tier and loads models accordingly:
+      - ``full_ab`` (≥15 GB): 4B + 12B (A/B comparison)
+      - ``4b_only`` (≥5.5 GB): 4B only
+      - ``marian``  (<5.5 GB): MarianMT only
+
+    Returns (model_a, tokenizer_a, model_b, tokenizer_b).
+    For the streaming engine path, model_a/model_b are CUDAGemmaStreamingEngine
+    instances (not raw HF models).
     """
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from engines.cuda_engine import CUDAGemmaStreamingEngine, detect_vram_tier
 
-    gemma_model, gemma_tokenizer = None, None
-    if load_gemma:
-        print("[3/6] Loading TranslateGemma 4B (CUDA 4-bit)...")
+    tier, vram = detect_vram_tier()
+    print(f"  CUDA VRAM tier: {tier} ({vram} MB)")
+
+    gemma_a, tok_a, gemma_b, tok_b = None, None, None, None
+
+    if not load_gemma or tier == "marian":
+        if tier == "marian":
+            print("  Low VRAM — MarianMT-only mode (no TranslateGemma)")
+        return gemma_a, tok_a, gemma_b, tok_b
+
+    # --- Load 4B (always, unless marian tier) ---
+    model_4b_id = settings.translation.cuda_model_4b
+
+    print(f"[3/6] Loading TranslateGemma 4B (CUDA streaming, cache={settings.cuda.use_prompt_cache})...")
+    try:
+        engine_a = CUDAGemmaStreamingEngine(
+            model_id=model_4b_id,
+            use_prompt_cache=settings.cuda.use_prompt_cache,
+            streaming_batch_size=settings.cuda.streaming_batch_size,
+        )
+        engine_a.load()
+        gemma_a = engine_a
+        tok_a = engine_a._tokenizer
+        print("  TranslateGemma 4B (CUDA streaming) ready")
+    except Exception as e:
+        print(f"  Gemma 4B load failed: {e}")
+        print("  Falling back to MarianMT-only mode")
+        return None, None, None, None
+
+    # --- Load 12B if A/B mode and sufficient VRAM ---
+    if load_b and tier == "full_ab":
+        model_12b_id = settings.translation.cuda_model_12b
+        use_spec = settings.cuda.use_speculative
+        print(f"[3b/6] Loading TranslateGemma 12B (CUDA, speculative={use_spec})...")
         try:
-            gemma_tokenizer = AutoTokenizer.from_pretrained("google/translategemma-4b-it")
-            gemma_model = AutoModelForCausalLM.from_pretrained(
-                "google/translategemma-4b-it",
-                load_in_4bit=True,
-                torch_dtype=torch.bfloat16,
-                device_map="cuda",
+            engine_b = CUDAGemmaStreamingEngine(
+                model_id=model_12b_id,
+                use_prompt_cache=settings.cuda.use_prompt_cache,
+                assistant_model_id=model_4b_id if use_spec else None,
+                streaming_batch_size=settings.cuda.streaming_batch_size,
             )
-            gemma_model.eval()
-            # Apply same EOS fix as MLX path — TranslateGemma uses <end_of_turn>
-            # (id=106) as its actual EOS, but default EOS is <eos> (id=1).
-            eot_id = gemma_tokenizer.convert_tokens_to_ids("<end_of_turn>")
-            default_eos = gemma_tokenizer.eos_token_id
-            if hasattr(gemma_tokenizer, "_eos_token_ids"):
-                gemma_tokenizer._eos_token_ids.add(eot_id)
-            else:
-                gemma_tokenizer._eos_token_ids = {default_eos, eot_id}
-            print(f"  EOS fix applied: added <end_of_turn> (id={eot_id})")
-            print("  TranslateGemma 4B (CUDA) ready")
+            engine_b.load()
+            gemma_b = engine_b
+            tok_b = engine_b._tokenizer
+            print("  TranslateGemma 12B (CUDA) ready")
         except Exception as e:
-            print(f"  Gemma 4B load failed: {e}")
-            print("  Falling back to MarianMT-only mode")
+            print(f"  Gemma 12B load failed: {e}")
+            print("  Continuing with 4B-only mode")
 
-    return gemma_model, gemma_tokenizer, None, None  # no 12B on CUDA
+    return gemma_a, tok_a, gemma_b, tok_b
 
 
 # ---------------------------------------------------------------------------
@@ -1432,6 +1461,43 @@ def translate_cuda_gemma(model, tokenizer, text):
     out_tokens = len(generated)
     gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
     return clean, latency_ms, gen_tps
+
+
+def _translate_cuda_b(engine, text):
+    """Translate using a CUDAGemmaStreamingEngine (12B), returning a 3-tuple.
+
+    Used for the B column in A/B mode. Uses non-streaming ``translate()``
+    which may include speculative decoding if an assistant model was configured.
+    """
+    result = engine.translate(text, source_lang=SOURCE_LANG, target_lang=TARGET_LANG)
+    return result.text, result.latency_ms, result.tokens_per_second
+
+
+def translate_cuda_gemma_streaming(engine, text, chunk_id):
+    """Translate using CUDAGemmaStreamingEngine with token streaming.
+
+    Pushes partial translations to ``_stream_token_queue`` via the existing
+    ``_enqueue_stream_token()`` mechanism (shared with MLX streaming path).
+
+    Args:
+        engine:    A ``CUDAGemmaStreamingEngine`` instance (loaded).
+        text:      Source text to translate.
+        chunk_id:  Chunk ID for WebSocket broadcast correlation.
+
+    Returns:
+        ``(translation, latency_ms, generation_tps)``.
+    """
+
+    def _token_callback(partial_text, tokens_so_far):
+        _enqueue_stream_token(("token", chunk_id, partial_text, tokens_so_far))
+
+    result = engine.translate_streaming(
+        text,
+        source_lang=SOURCE_LANG,
+        target_lang=TARGET_LANG,
+        token_callback=_token_callback,
+    )
+    return result.text, result.latency_ms, result.tokens_per_second
 
 
 # ---------------------------------------------------------------------------
@@ -1809,6 +1875,22 @@ async def process_partial(audio_data, utterance_id):
         print("  [FIX] partial skipped (final pending)", end="\r")
         return
 
+    # [FIX] Skip partial when the pipeline is falling behind.
+    # Partials and finals share the same max_workers=1 MLX pool — every partial
+    # that runs while finals are queued adds ~400ms of delay, compounding over
+    # time into multi-second queue starvation.
+    # Threshold of >1: queue=0 (idle) and queue=1 (next chunk just arrived) are
+    # normal — partials still run for live UX feedback.  queue>=2 means the
+    # pipeline is behind — shed partials so finals can drain the backlog.
+    if _pipeline_chunk_queue is not None and _pipeline_chunk_queue.qsize() > 1:
+        return
+
+    # [FIX] At most one partial in flight on the pool — a second partial
+    # queued behind the first just adds latency with no UX benefit (the
+    # first partial's text is already on screen).
+    if _active_partial_future is not None and not _active_partial_future.done():
+        return
+
     # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
     speech_rms = float(np.sqrt(np.mean(audio_data**2)))
     if speech_rms < 0.008:
@@ -2115,8 +2197,6 @@ async def _pipeline_translate_and_finalize(
     global _chunks_completed
     try:
         async with _pipeline_translation_lock:
-            # --- Translate ---
-            spanish_b, lat_b, tps_b, qe_b = None, 0.0, 0.0, None
 
             loop = asyncio.get_event_loop()
 
@@ -2148,18 +2228,61 @@ async def _pipeline_translate_and_finalize(
                 qe_a = qe_score(english, spanish_a)
                 print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
             elif BACKEND == "cuda":
-                # CUDA backend: use translate_cuda_gemma (no streaming, no A/B)
-                if mlx_a_model is not None:
-                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                        _pipeline_pool, lambda: translate_cuda_gemma(mlx_a_model, mlx_a_tokenizer, english)
-                    )
-                else:
-                    # Low-VRAM mode: MarianMT only
+                # CUDA backend: full feature parity — streaming, A/B, adaptive routing.
+                # CUDA is thread-safe, so task_a and task_b run truly concurrently
+                # on the 2-worker pipeline pool (unlike MLX which serializes).
+                if (
+                    mlx_b_model is None
+                    and mlx_a_model is not None
+                    and should_use_marian_only(english, stt_confidence)
+                ):
+                    # Adaptive routing: simple utterance, skip Gemma
                     spanish_a, lat_a = translate_marian(english)
                     tps_a = 0.0
-                qe_a = qe_score(english, spanish_a)
-                # TODO: Add CUDA A/B mode when multi-GPU or sufficient VRAM
-                # TODO: Add CUDA streaming translation support
+                    qe_a = qe_score(english, spanish_a)
+                    print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
+                elif mlx_b_model is not None and mlx_a_model is not None:
+                    # A/B mode: stream 4B + speculative-decode 12B (truly concurrent)
+                    task_a = loop.run_in_executor(
+                        _pipeline_pool,
+                        lambda: translate_cuda_gemma_streaming(mlx_a_model, english, cid),
+                    )
+                    task_b = loop.run_in_executor(
+                        _pipeline_pool,
+                        lambda: _translate_cuda_b(mlx_b_model, english),
+                    )
+                    spanish_a, lat_a, tps_a = await task_a
+                    qe_a = qe_score(english, spanish_a)
+                    await broadcast(
+                        {
+                            "type": "translation",
+                            "stage": "translation_a",
+                            "chunk_id": cid,
+                            "english": english,
+                            "spanish_a": spanish_a,
+                            "spanish_b": None,
+                            "stt_latency_ms": round(stt_latency, 1),
+                            "latency_a_ms": round(lat_a, 1),
+                            "stt_confidence": stt_confidence,
+                            "tps_a": round(tps_a, 1),
+                            "qe_a": qe_a,
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                    )
+                    spanish_b, lat_b, tps_b = await task_b
+                    qe_b = qe_score(english, spanish_b) if spanish_b else None
+                elif mlx_a_model is not None:
+                    # 4B-only: streaming translation
+                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
+                        _pipeline_pool,
+                        lambda: translate_cuda_gemma_streaming(mlx_a_model, english, cid),
+                    )
+                    qe_a = qe_score(english, spanish_a)
+                else:
+                    # Low-VRAM: MarianMT only
+                    spanish_a, lat_a = translate_marian(english)
+                    tps_a = 0.0
+                    qe_a = qe_score(english, spanish_a)
 
             elif mlx_b_model is not None:
                 # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
@@ -2468,9 +2591,9 @@ async def _pipeline_coordinator():
             )
 
             # --- Wait for previous translation to finish before starting new one ---
-            # We don't want two translations running at once (Metal GPU contention),
-            # but STT can freely overlap with translation.
-            if active_translation_task is not None:
+            # On MLX: Metal GPU thrashes with concurrent translations — must serialize.
+            # On CUDA: thread-safe, concurrent translations run on separate streams.
+            if BACKEND != "cuda" and active_translation_task is not None:
                 await active_translation_task
 
             # --- Start translation as a fire-and-forget task ---
@@ -3292,7 +3415,9 @@ async def main_async(args):
         elif BACKEND == "mlx":
             mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_translation_models(load_b=args.run_ab)
         elif BACKEND == "cuda":
-            mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_cuda_translation_models(load_gemma=True)
+            mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_cuda_translation_models(
+                load_gemma=not args.low_vram, load_b=args.run_ab
+            )
         else:
             # CPU fallback: no Gemma, MarianMT only
             mlx_a_model, mlx_a_tokenizer = None, None
@@ -3330,7 +3455,14 @@ async def main_async(args):
                 suffix_tokens=mlx_a_suffix_tokens,
             )
         elif BACKEND == "cuda" and mlx_a_model is not None:
-            spanish, lat, tps = translate_cuda_gemma(mlx_a_model, mlx_a_tokenizer, args.dry_run_text)
+            # mlx_a_model is a CUDAGemmaStreamingEngine when using streaming path
+            if hasattr(mlx_a_model, "translate_streaming"):
+                result = mlx_a_model.translate(
+                    args.dry_run_text, source_lang=SOURCE_LANG, target_lang=TARGET_LANG
+                )
+                spanish, lat, tps = result.text, result.latency_ms, result.tokens_per_second
+            else:
+                spanish, lat, tps = translate_cuda_gemma(mlx_a_model, mlx_a_tokenizer, args.dry_run_text)
         else:
             spanish, lat = translate_marian(args.dry_run_text)
             tps = 0.0
@@ -3585,10 +3717,26 @@ def main():
     # --no-ab overrides --ab
     if args.no_ab:
         args.run_ab = False
-    # CUDA backend: A/B not supported (single GPU VRAM constraint)
+    # CUDA backend: A/B requires >=15 GB VRAM (4B + 12B + Whisper)
     if BACKEND == "cuda" and args.run_ab:
-        print("WARNING: A/B mode not supported on CUDA (single GPU VRAM). Disabling 12B.", file=sys.stderr)
-        args.run_ab = False
+        from engines.cuda_engine import detect_vram_tier
+
+        _tier, _vram = detect_vram_tier()
+        if _tier != "full_ab":
+            print(
+                f"WARNING: A/B mode requires >=15 GB VRAM ({_vram} MB detected). Disabling 12B.",
+                file=sys.stderr,
+            )
+            args.run_ab = False
+
+    # --- Create pipeline thread pool (backend-dependent) ---
+    global _pipeline_pool
+    if BACKEND == "cuda":
+        # CUDA is thread-safe: 2 workers enable true STT/Translation overlap
+        _pipeline_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="cuda-pipeline")
+    else:
+        # MLX Metal is NOT thread-safe: must serialize all GPU work
+        _pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
 
     # --- Resolve language direction ---
     global SOURCE_LANG, TARGET_LANG, WHISPER_PROMPT

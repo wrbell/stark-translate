@@ -6,6 +6,36 @@
 
 **Callers must call `.load()` before `.transcribe()` or `.translate()`** — `create_stt_engine()` does not auto-load.
 
+## CUDA Inference Runtime
+
+`CUDAGemmaStreamingEngine` provides full feature parity with the MLX path:
+
+- **Streaming**: Token-by-token output via `TextIteratorStreamer`, batched every 3 tokens
+- **Prompt cache**: Pre-computed `past_key_values` for fixed chat template prefix (~50-80ms savings)
+- **Speculative decoding**: `assistant_model=` parameter for 4B drafting 12B tokens
+- **VRAM tier detection**: `detect_vram_tier()` auto-selects `full_ab` / `4b_only` / `marian`
+
+### CUDA Thread Model
+
+CUDA **is** thread-safe (unlike MLX). The pipeline uses `ThreadPoolExecutor(max_workers=2)` to enable true STT/Translation overlap — STT(N) runs concurrently with Translation(N-1) on separate CUDA streams. No translation lock needed on CUDA.
+
+### VRAM Tiers
+
+| Tier | VRAM | Config |
+|------|------|--------|
+| `full_ab` | ≥15 GB | Whisper + 4B + 12B (~12 GB) |
+| `4b_only` | ≥5.5 GB | Whisper + 4B (~4.7 GB) |
+| `marian` | <5.5 GB | MarianMT only (~1.3 GB) |
+
+### CUDA Model IDs
+
+| Role | Model ID | Size (NF4) |
+|------|----------|------------|
+| CUDA Translation A | `google/translategemma-4b-it` | ~3 GB |
+| CUDA Translation B | `google/translategemma-12b-it` | ~7 GB |
+
+Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `STARK_CUDA__*`.
+
 ## MLX Thread Safety (CRITICAL)
 
 Metal is NOT thread-safe. All MLX inference (Whisper STT + TranslateGemma translation) must run on a **single thread** via `ThreadPoolExecutor(max_workers=1)`. Concurrent MLX on different threads causes SIGSEGV.

@@ -174,6 +174,10 @@ class TranslationSettings(BaseSettings):
         default="google/translategemma-4b-it",
         description="TranslateGemma 4B for CUDA (loaded with bitsandbytes 4-bit)",
     )
+    cuda_model_12b: str = Field(
+        default="google/translategemma-12b-it",
+        description="TranslateGemma 12B for CUDA A/B mode (loaded with bitsandbytes 4-bit)",
+    )
     # MarianMT (all backends — CPU inference, lightweight)
     marian_model: str = Field(
         default="Helsinki-NLP/opus-mt-en-es",
@@ -251,6 +255,37 @@ class TTSSettings(BaseSettings):
 # ---------------------------------------------------------------------------
 
 
+class CUDASettings(BaseSettings):
+    """CUDA/NVIDIA-specific inference configuration."""
+
+    vram_tier: Literal["auto", "full_ab", "4b_only", "marian"] = Field(
+        default="auto",
+        description="VRAM tier: auto (detect GPU), full_ab (>=15GB), 4b_only (>=5.5GB), marian (<5.5GB)",
+    )
+    use_prompt_cache: bool = Field(
+        default=True,
+        description="Pre-compute KV cache for TranslateGemma prompt prefix (~50-80ms savings/call)",
+    )
+    use_speculative: bool = Field(
+        default=True,
+        description="Use 4B as speculative draft model for 12B verification (A/B mode only)",
+    )
+    pipeline_workers: int = Field(
+        default=2,
+        description="Thread pool workers for CUDA pipeline (2 = STT/Translation overlap)",
+    )
+    streaming_batch_size: int = Field(
+        default=3,
+        description="Tokens per WebSocket batch during streaming translation",
+    )
+    compute_type: str = Field(
+        default="int8",
+        description="faster-whisper CTranslate2 compute type: int8, float16, float32",
+    )
+
+    model_config = {"env_prefix": "STARK_CUDA_"}
+
+
 class PipelineSettings(BaseSettings):
     """Top-level pipeline configuration.
 
@@ -294,6 +329,7 @@ class PipelineSettings(BaseSettings):
     translation: TranslationSettings = Field(default_factory=TranslationSettings)
     server: ServerSettings = Field(default_factory=ServerSettings)
     tts: TTSSettings = Field(default_factory=TTSSettings)
+    cuda: CUDASettings = Field(default_factory=CUDASettings)
 
     model_config = {
         "env_prefix": "STARK_",
