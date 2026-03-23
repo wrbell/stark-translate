@@ -78,15 +78,21 @@ def create_translation_engine(
     backend: str = "auto",
     model_id: str | None = None,
     engine_type: str = "gemma",
+    streaming: bool = False,
+    assistant_model_id: str | None = None,
     **kwargs: Any,
 ) -> TranslationEngine:
     """Create a translation engine.
 
     Args:
-        backend:     "mlx", "cuda", "cpu", or "auto" (detect best available).
-        model_id:    Override the default model identifier.
-        engine_type: "gemma" for TranslateGemma, "marian" for MarianMT.
-        **kwargs:    Forwarded to the engine constructor.
+        backend:             "mlx", "cuda", "cpu", or "auto" (detect best available).
+        model_id:            Override the default model identifier.
+        engine_type:         "gemma" for TranslateGemma, "marian" for MarianMT.
+        streaming:           Use streaming engine (CUDA only — enables token-by-token
+                             output via TextIteratorStreamer).
+        assistant_model_id:  Optional 4B model repo for speculative decoding
+                             (CUDA only, used when 12B is the primary model).
+        **kwargs:            Forwarded to the engine constructor.
 
     Returns:
         An *unloaded* ``TranslationEngine`` instance.  Call ``.load()`` first.
@@ -110,6 +116,14 @@ def create_translation_engine(
             **kwargs,
         )
     elif backend == "cuda":
+        if streaming:
+            from engines.cuda_engine import CUDAGemmaStreamingEngine
+
+            return CUDAGemmaStreamingEngine(
+                model_id=model_id or "google/translategemma-4b-it",
+                assistant_model_id=assistant_model_id,
+                **kwargs,
+            )
         from engines.cuda_engine import CUDAGemmaEngine
 
         return CUDAGemmaEngine(

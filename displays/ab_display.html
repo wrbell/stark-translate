@@ -108,7 +108,6 @@
     padding-bottom: 40vh;
     font-size: 17px;
     line-height: 1.5;
-    scroll-behavior: smooth;
   }
 
   .cell-content::-webkit-scrollbar { width: 4px; }
@@ -421,7 +420,11 @@
 
       // [P7-P3-6A] Handle streaming translation messages
       if (data.type === 'translation_start') {
-        // STT completed — show English in A column with streaming placeholder
+        // STT completed — clean up ALL orphaned partials (IDs don't match:
+        // partials use utterance_id, finals use chunk_id)
+        Object.values(panels).forEach(p => {
+          p.querySelectorAll('.chunk.partial, .chunk.streaming').forEach(el => el.remove());
+        });
         const en = filterText(data.english || '');
         const conf = data.stt_confidence;
         const confDot = conf !== undefined
@@ -506,10 +509,12 @@
         updateLabels();
       }
 
-      // Remove partial and streaming rows from all columns
-      const pid = 'p-' + data.chunk_id;
-      const sid = 'stream-' + data.chunk_id;
-      Object.values(panels).forEach(p => { removeChunk(p, pid); removeChunk(p, sid); });
+      // Remove ALL partial and streaming rows from all columns.
+      // (Partials use utterance_id, finals use chunk_id — IDs never match,
+      // so ID-based removal leaves orphaned partials that duplicate text.)
+      Object.values(panels).forEach(p => {
+        p.querySelectorAll('.chunk.partial, .chunk.streaming').forEach(el => el.remove());
+      });
 
       const en = filterText(data.english || '');
       const esA = filterText(data.spanish_a || '');
@@ -611,7 +616,7 @@
     // [P7-P3-6A] Add streaming cursor for actively streaming text
     const cursor = isStreaming ? '<span class="streaming-cursor"></span>' : '';
     div.innerHTML = (prefix || '') + label + escapeHtml(text) + cursor;
-    panel.scrollTop = panel.scrollHeight;
+    div.scrollIntoView({ block: 'end' });
   }
 
   function removeChunk(panel, id) {
