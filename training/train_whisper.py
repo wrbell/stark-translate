@@ -29,14 +29,12 @@ from datetime import UTC, datetime
 
 os.environ["USE_TF"] = "0"  # Prevent transformers from importing TF/Keras (not needed for PyTorch training)
 
-import numpy as np
 import torch
 from datasets import Audio, load_dataset
 from peft import LoraConfig, get_peft_model
 from torch.utils.data import WeightedRandomSampler
 from transformers import (
     BitsAndBytesConfig,
-    DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
     WhisperForConditionalGeneration,
@@ -88,13 +86,21 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
     general = general.map(
         prepare_general,
         remove_columns=general.column_names,
-        num_proc=4,
+        num_proc=1,  # single-process: avoids deadlock on HDD/symlink I/O
     )
 
     # Calculate mix sizes
     church_size = len(church_dataset)
     replay_size = int(church_size * replay_ratio / (1 - replay_ratio))
     replay_subset = general.select(range(min(replay_size, len(general))))
+
+    # Ensure replay subset has ONLY input_features + labels (match church dataset columns)
+    church_cols = set(church_dataset.column_names)
+    replay_cols = set(replay_subset.column_names)
+    extra_cols = replay_cols - church_cols
+    if extra_cols:
+        logger.info(f"  Dropping extra replay columns: {extra_cols}")
+        replay_subset = replay_subset.remove_columns(list(extra_cols))
 
     logger.info(f"  Church: {church_size}, Replay: {len(replay_subset)}")
     mixed = concatenate_datasets([church_dataset, replay_subset])
@@ -154,10 +160,10 @@ class AccentBalancedTrainer(Seq2SeqTrainer):
         super().__init__(*args, **kwargs)
         self._accent_sampler = accent_sampler
 
-    def _get_train_sampler(self):
+    def _get_train_sampler(self, dataset=None):
         if self._accent_sampler is not None:
             return self._accent_sampler
-        return super()._get_train_sampler()
+        return super()._get_train_sampler(dataset)
 
 
 def build_accent_sampler(accent_labels):
@@ -287,17 +293,32 @@ def fine_tune_whisper(
     )
 
     # LoRA config — encoder + decoder
-    # S2-LoRA paper: v_proj and out_proj capture the most important adaptations
+    # CRITICAL: Do NOT set task_type. PEFT's SEQ_2_SEQ_LM and CAUSAL_LM wrappers
+    # both inject input_ids into forward(), which Whisper doesn't accept (it uses
+    # input_features). Omitting task_type creates a base PeftModel that passes
+    # through to WhisperForConditionalGeneration.forward() cleanly.
     lora_config = LoraConfig(
         r=lora_r,
         lora_alpha=lora_alpha,
         target_modules=target_modules,
         lora_dropout=0.05,
         bias="none",
-        task_type="SEQ_2_SEQ_LM",
     )
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
+
+    # Enable gradient flow through quantized + LoRA layers.
+    # enable_input_require_grads() hooks the decoder token embedding, but Whisper's
+    # encoder input is mel spectrograms via conv1, not token embeddings. We need to
+    # explicitly hook the encoder conv1 layer so gradient checkpointing can propagate
+    # gradients through the frozen encoder to the LoRA-adapted attention layers.
+    model.enable_input_require_grads()
+
+    def _make_inputs_require_grad(module, input, output):
+        output.requires_grad_(True)
+
+    # Hook encoder conv1 (first layer that processes mel spectrograms)
+    model.base_model.model.model.encoder.conv1.register_forward_hook(_make_inputs_require_grad)
 
     # Turbo has only 4 decoder layers (vs 32 in large-v3), so LoRA adapts faster
     # but the decoder has less capacity — monitor theological term accuracy closely
@@ -305,67 +326,65 @@ def fine_tune_whisper(
         logger.info("Turbo model detected — 4 decoder layers, faster training expected")
         logger.info("Monitor theological term accuracy (lighter decoder = less vocabulary capacity)")
 
-    # Load dataset (expects audiofolder format with audio + transcription columns)
-    logger.info(f"Loading dataset from {dataset_path}...")
-    dataset = load_dataset("audiofolder", data_dir=dataset_path)
-    dataset = dataset.cast_column("audio", Audio(sampling_rate=16000))
+    # Load dataset — use preprocessed cache if available (skips slow audiofolder scan)
+    cache_dir = os.path.join(dataset_path, ".preprocessed_cache")
+    if os.path.exists(cache_dir):
+        logger.info(f"Loading preprocessed dataset from cache: {cache_dir}")
+        from datasets import DatasetDict
 
-    # Detect text column name (audiofolder uses "transcription", older format uses "text")
-    sample_cols = dataset.column_names["train"]
-    text_col = "transcription" if "transcription" in sample_cols else "text"
-    has_accent = "accent" in sample_cols
-    if has_accent:
-        logger.info("Accent labels detected in dataset")
+        dataset = DatasetDict.load_from_disk(cache_dir)
+        logger.info(f"  Loaded: {dataset}")
+    else:
+        logger.info(f"Loading dataset from {dataset_path} (first run — will cache for next time)...")
+        dataset = load_dataset("audiofolder", data_dir=dataset_path)
+        dataset = dataset.cast_column("audio", Audio(sampling_rate=16000))
 
-    # Extract accent labels before processing (needed for sampler + eval)
+        # Detect text column name
+        sample_cols = dataset.column_names["train"]
+        text_col = "transcription" if "transcription" in sample_cols else "text"
+        remove_cols = [c for c in sample_cols if c not in ("input_features", "labels")]
+
+        def prepare_dataset(batch):
+            audio = batch["audio"]
+            batch["input_features"] = processor(audio["array"], sampling_rate=audio["sampling_rate"]).input_features[0]
+            batch["labels"] = processor.tokenizer(batch[text_col]).input_ids
+            return batch
+
+        logger.info("Preprocessing dataset (mapping audio → mel spectrograms)...")
+        dataset = dataset.map(
+            prepare_dataset,
+            remove_columns=remove_cols,
+            num_proc=1,
+        )
+        dataset.save_to_disk(cache_dir)
+        logger.info(f"Saved preprocessed dataset to cache: {cache_dir}")
+
+    # Accent labels not tracked in preprocessed cache — skip per-accent metrics
     train_accent_labels = None
     eval_accent_labels = None
-    if has_accent:
-        train_accent_labels = dataset["train"]["accent"]
-
-    # Determine columns to remove (keep accent out of model inputs but save it first)
-    remove_cols = [c for c in sample_cols if c not in ("input_features", "labels")]
-
-    def prepare_dataset(batch):
-        audio = batch["audio"]
-        batch["input_features"] = processor(audio["array"], sampling_rate=audio["sampling_rate"]).input_features[0]
-        batch["labels"] = processor.tokenizer(batch[text_col]).input_ids
-        return batch
-
-    dataset = dataset.map(
-        prepare_dataset,
-        remove_columns=remove_cols,
-        num_proc=4,
-    )
 
     # Split into train/eval if no eval split exists
-    if "test" not in dataset and "validation" not in dataset:
+    available_splits = list(dataset.keys())
+    eval_split_name = (
+        "eval"
+        if "eval" in available_splits
+        else ("test" if "test" in available_splits else ("validation" if "validation" in available_splits else None))
+    )
+
+    if eval_split_name is None:
         logger.info("No eval split found, creating 95/5 train/eval split...")
         split = dataset["train"].train_test_split(test_size=0.05, seed=42)
         train_dataset = split["train"]
         eval_dataset = split["test"]
-        # Split accent labels correspondingly
-        if train_accent_labels:
-            all_labels = np.array(train_accent_labels)
-            train_indices = split["train"]._indices
-            test_indices = split["test"]._indices
-            if train_indices is not None:
-                train_accent_labels = all_labels[train_indices.column(0).to_pylist()].tolist()
-                eval_accent_labels = all_labels[test_indices.column(0).to_pylist()].tolist()
-            else:
-                # Fallback: indices not available, skip per-accent eval
-                train_accent_labels = None
-                eval_accent_labels = None
+        # Accent labels: skip per-accent tracking for auto-split (too fragile with _indices)
+        train_accent_labels = None
+        eval_accent_labels = None
     else:
         train_dataset = dataset["train"]
-        eval_dataset = dataset.get("test") or dataset.get("validation")
-        # For pre-split datasets with accent column, extract eval accent labels
-        if has_accent and eval_dataset is not None:
-            eval_split_name = "test" if "test" in dataset else "validation"
-            # Re-load just to get accent labels before columns were removed
-            raw_dataset = load_dataset("audiofolder", data_dir=dataset_path)
-            if eval_split_name in raw_dataset:
-                eval_accent_labels = raw_dataset[eval_split_name]["accent"]
+        eval_dataset = dataset[eval_split_name]
+        logger.info(f"Using pre-split eval set: '{eval_split_name}' ({len(eval_dataset)} examples)")
+        # Accent labels not available after column removal — skip
+        eval_accent_labels = None
 
     # Optionally mix with general-domain data
     if replay_ratio > 0:
@@ -405,29 +424,58 @@ def fine_tune_whisper(
         per_device_train_batch_size=batch_size,
         gradient_accumulation_steps=grad_accum,
         gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={
+            "use_reentrant": False
+        },  # non-reentrant: compatible with conv1 requires_grad hook
         num_train_epochs=epochs,
         learning_rate=lr,
         bf16=True,
         optim="adamw_bnb_8bit",
         dataloader_pin_memory=True,
-        dataloader_num_workers=4,
+        dataloader_num_workers=0,  # in-process: avoids fork-based memory duplication that causes OOM on 17K dataset
         logging_steps=10,
         save_steps=500,
         save_total_limit=3,
-        eval_strategy="steps" if eval_dataset else "no",
-        eval_steps=500 if eval_dataset else None,
-        predict_with_generate=True,
+        eval_strategy="no",  # eval at end only — mid-training eval crashes on 8bit+bf16 dtype mismatch
+        eval_steps=None,
+        predict_with_generate=False,  # disable generation during training — eval WER computed post-training
         generation_max_length=225,
         warmup_steps=500,
-        remove_unused_columns=False,
+        remove_unused_columns=False,  # keep input_features — Whisper needs it but patched forward hides it
         report_to="none",
-        load_best_model_at_end=True if eval_dataset else False,
+        load_best_model_at_end=False,  # no mid-training eval, so no "best" to pick
     )
 
-    data_collator = DataCollatorForSeq2Seq(
-        tokenizer=processor.tokenizer,
-        model=model,
-    )
+    # Whisper needs a custom data collator that handles input_features (mel spectrograms)
+    # + labels (token IDs), NOT the standard Seq2Seq collator which expects input_ids
+    import dataclasses
+
+    @dataclasses.dataclass
+    class WhisperDataCollator:
+        processor: WhisperProcessor
+
+        def __call__(self, features):
+            # Pad input features (mel spectrograms)
+            input_features = [{"input_features": f["input_features"]} for f in features]
+            batch = self.processor.feature_extractor.pad(input_features, return_tensors="pt")
+            # Cast to bfloat16 to match 8-bit quantized model's conv layer dtypes
+            batch["input_features"] = batch["input_features"].to(torch.bfloat16)
+
+            # Pad labels (token IDs)
+            label_features = [{"input_ids": f["labels"]} for f in features]
+            labels_batch = self.processor.tokenizer.pad(label_features, return_tensors="pt")
+            labels = labels_batch["input_ids"].masked_fill(labels_batch.attention_mask.ne(1), -100)
+
+            # Remove BOS token if present (Whisper doesn't use it as a prefix)
+            if (labels[:, 0] == self.processor.tokenizer.bos_token_id).all():
+                labels = labels[:, 1:]
+
+            batch["labels"] = labels
+            # Ensure no input_ids key — Whisper uses input_features, not input_ids
+            batch.pop("input_ids", None)
+            return batch
+
+    data_collator = WhisperDataCollator(processor=processor)
 
     # Build compute_metrics with per-accent WER
     metrics_fn = None
@@ -459,11 +507,11 @@ def fine_tune_whisper(
     # Log final metrics
     # TODO: Use --eval-chunked flag to test chunked vs sequential Turbo inference modes
     # Chunked mode is faster but may introduce stitching artifacts at chunk boundaries
+    # NOTE: Post-training eval is DISABLED inside the trainer. The trainer's evaluate()
+    # causes system RAM OOM (31 GB RSS on 17K dataset) when it builds prediction tensors.
+    # Use the standalone eval script instead:
+    #   python training/eval_whisper_wer.py --adapter <output_dir> --eval-set <dataset>
     eval_metrics = None
-    if eval_dataset:
-        eval_metrics = trainer.evaluate()
-        logger.info(f"Final eval metrics: {eval_metrics}")
-        trainer.save_metrics("eval", eval_metrics)
 
     # Build accent distribution for manifest
     accent_distribution = None
