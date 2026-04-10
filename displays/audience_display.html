@@ -280,7 +280,9 @@
   // Pause auto-scroll when user scrolls up, resume at bottom
   function setupAutoScroll(el, setter) {
     el.addEventListener('scroll', () => {
-      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+      // Account for padding-bottom: 40vh when detecting "at bottom"
+      const padSlack = window.innerHeight * 0.4 + 40;
+      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < padSlack;
       setter(atBottom);
     });
   }
@@ -312,8 +314,8 @@
       return '<span class="' + cls + '">' + esc(s.spanish) + ' </span>';
     }).join('');
 
-    if (autoScrollEn) englishEl.scrollTop = englishEl.scrollHeight;
-    if (autoScrollEs) spanishEl.scrollTop = spanishEl.scrollHeight;
+    if (autoScrollEn && englishEl.lastElementChild) englishEl.lastElementChild.scrollIntoView({ block: 'end' });
+    if (autoScrollEs && spanishEl.lastElementChild) spanishEl.lastElementChild.scrollIntoView({ block: 'end' });
   }
 
   function esc(str) {
@@ -358,22 +360,22 @@
 
       // [P7-P3-6A] Handle streaming translation tokens
       if (data.type === 'translation_start') {
-        // STT completed — update English, keep MarianMT Spanish visible until Gemma streams in
+        // STT completed — convert last partial to streaming, or create fresh.
+        // Remove ALL partials/streaming (IDs don't match: partials use utterance_id,
+        // finals use chunk_id — so ID-based matching fails).
         const en = filter(data.english || '');
-        const partialId = 'p-' + data.chunk_id;
-        const existing = sentences.find(s => s.id === partialId);
-        if (existing) {
-          // Convert partial in-place — MarianMT Spanish stays visible (no blank flash)
-          existing.id = 'stream-' + data.chunk_id;
-          existing.english = en;
-          existing.partial = false;
-          existing.streaming = true;
+        const lastPartial = sentences.filter(s => s.partial).pop();
+        sentences = sentences.filter(s => !s.partial && !s.streaming);
+        if (lastPartial) {
+          // Keep MarianMT Spanish visible until Gemma streams in (no blank flash)
+          sentences.push({
+            id: 'stream-' + data.chunk_id,
+            english: en,
+            spanish: lastPartial.spanish,
+            partial: false,
+            streaming: true,
+          });
         } else {
-          // No partial existed (e.g. speaker paused without partials) — create fresh
-          // Only clear partials/streaming for THIS chunk, keep partials for other utterances
-          sentences = sentences.filter(s =>
-            s.id !== 'p-' + data.chunk_id && s.id !== 'stream-' + data.chunk_id
-          );
           sentences.push({
             id: 'stream-' + data.chunk_id,
             english: en,
@@ -413,12 +415,10 @@
           sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, partial: true, streaming: false });
         }
       } else {
-        // Final translation — remove partials and streaming for THIS chunk only,
-        // keep partials for the next utterance (eliminates gap between final and next partial)
-        sentences = sentences.filter(s =>
-          (!s.partial && !s.streaming) ||
-          (s.id !== 'p-' + data.chunk_id && s.id !== 'stream-' + data.chunk_id)
-        );
+        // Final translation — remove ALL partials and streaming entries.
+        // (Partials use utterance_id, finals use chunk_id — IDs never match,
+        // so ID-based filtering leaves orphaned partials that duplicate text.)
+        sentences = sentences.filter(s => !s.partial && !s.streaming);
 
         const existing = sentences.find(s => s.id === data.chunk_id);
         if (existing) {
