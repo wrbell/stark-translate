@@ -58,7 +58,7 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
     if replay_ratio <= 0:
         return church_dataset
 
-    from datasets import concatenate_datasets
+    from datasets import interleave_datasets
 
     # Load general English ASR as replay buffer
     logger.info(f"Loading general-domain replay data (ratio={replay_ratio})...")
@@ -89,22 +89,32 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
         num_proc=1,  # single-process: avoids deadlock on HDD/symlink I/O
     )
 
-    # Calculate mix sizes
-    church_size = len(church_dataset)
-    replay_size = int(church_size * replay_ratio / (1 - replay_ratio))
-    replay_subset = general.select(range(min(replay_size, len(general))))
-
     # Ensure replay subset has ONLY input_features + labels (match church dataset columns)
     church_cols = set(church_dataset.column_names)
-    replay_cols = set(replay_subset.column_names)
+    replay_cols = set(general.column_names)
     extra_cols = replay_cols - church_cols
     if extra_cols:
         logger.info(f"  Dropping extra replay columns: {extra_cols}")
-        replay_subset = replay_subset.remove_columns(list(extra_cols))
+        general = general.remove_columns(list(extra_cols))
 
-    logger.info(f"  Church: {church_size}, Replay: {len(replay_subset)}")
-    mixed = concatenate_datasets([church_dataset, replay_subset])
-    return mixed.shuffle(seed=42)
+    # Use interleave_datasets instead of concatenate_datasets to avoid RAM OOM.
+    # concatenate_datasets materializes both datasets into RAM (~1 MB per chunk).
+    # At 100K chunks that's 100 GB — instant OOM.
+    # interleave_datasets creates index mappings without copying data.
+    #
+    # CRITICAL: Use "all_exhausted" so the replay buffer cycles and ALL church data
+    # is seen. "first_exhausted" stops when the smaller dataset (2K replay) runs out,
+    # which at 198K church data means only 2.5% of training data is used.
+    church_prob = 1.0 - replay_ratio
+    logger.info(f"  Church: {len(church_dataset)} ({church_prob:.0%}), Replay: {len(general)} ({replay_ratio:.0%})")
+    logger.info("  Using interleave_datasets (memory-safe, all_exhausted)")
+    mixed = interleave_datasets(
+        [church_dataset, general],
+        probabilities=[church_prob, replay_ratio],
+        seed=42,
+        stopping_strategy="all_exhausted",
+    )
+    return mixed
 
 
 def make_compute_metrics(processor, eval_accent_labels):
@@ -268,6 +278,7 @@ def fine_tune_whisper(
     replay_ratio=0.3,
     resume_from_checkpoint=False,
     accent_balance=True,
+    init_from_adapter=None,
 ):
     """LoRA fine-tuning for Whisper on church audio.
 
@@ -305,6 +316,22 @@ def fine_tune_whisper(
         bias="none",
     )
     model = get_peft_model(model, lora_config)
+
+    # Curriculum learning: load pre-trained adapter weights with fresh optimizer state.
+    # Unlike --resume (which restores optimizer momentum/velocity), this only loads the
+    # LoRA A/B matrices — the optimizer starts from scratch for a new learning trajectory.
+    if init_from_adapter:
+        from safetensors.torch import load_file
+
+        weights_path = os.path.join(init_from_adapter, "adapter_model.safetensors")
+        if not os.path.exists(weights_path):
+            raise FileNotFoundError(f"Adapter weights not found: {weights_path}")
+        adapter_weights = load_file(weights_path)
+        incompatible = model.load_state_dict(adapter_weights, strict=False)
+        if incompatible.unexpected_keys:
+            logger.warning("Unexpected keys in init-from adapter: %s", incompatible.unexpected_keys)
+        logger.info("Initialized adapter from %s (%d keys loaded)", init_from_adapter, len(adapter_weights))
+
     model.print_trainable_parameters()
 
     # Enable gradient flow through quantized + LoRA layers.
@@ -575,6 +602,12 @@ def main():
     )
     parser.add_argument("--resume", action="store_true", help="Resume training from the latest checkpoint")
     parser.add_argument(
+        "--init-from",
+        type=str,
+        default=None,
+        help="Initialize adapter weights from a pre-trained adapter (fresh optimizer). For curriculum learning.",
+    )
+    parser.add_argument(
         "--eval-chunked",
         action="store_true",
         help="Use chunked inference during evaluation (faster but may have stitching artifacts)",
@@ -598,6 +631,7 @@ def main():
         replay_ratio=args.replay_ratio,
         resume_from_checkpoint=resume,
         accent_balance=args.accent_balance,
+        init_from_adapter=args.init_from,
     )
 
 

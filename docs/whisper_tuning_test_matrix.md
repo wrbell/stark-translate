@@ -235,11 +235,14 @@ All WER normalized (lowercase, cleaned). Eval: 251 chunks from 1 held-out sermon
 
 **W8 overfits.** Lower training loss (0.10) but higher eval WER (7.96%). 5 epochs memorizes the 17K training chunks without improving generalization. **3 epochs is the sweet spot for this dataset size.**
 
-### W9 (running)
+### W9 Result (2026-03-28)
 
-| Run | Config | Steps | ETA | What it answers |
-|-----|--------|-------|-----|-----------------|
-| **W9** | W7 + **r=64, alpha=128** | 3,555 | ~Sat Mar 28 AM | Is LoRA capacity the bottleneck? 13M params (2× W7). |
+| Run | Config | WER(norm) | Loss | vs W7 |
+|-----|--------|-----------|------|-------|
+| **W7** | 3 epochs, r=32 | **5.63%** | 0.12 | — |
+| **W9** | 3 epochs, **r=64, alpha=128** | **8.26%** | — | **+47% worse** |
+
+**W9 overfits worse than W8.** Doubling rank to 64 (13M params) provides too much capacity for 17K chunks. The model memorizes rather than generalizes. **r=32 is optimal at this data scale.**
 
 ### Key Insight: Data is the Bottleneck
 
@@ -314,36 +317,198 @@ Before claiming further improvements, strengthen eval:
 | Decoder-only targets (W10) | Tests vocabulary vs acoustic adaptation | After W9 results |
 | No replay + more church data (W11) | Replace LibriSpeech with domain data | After data scaling |
 
-### Decision Tree
+### W12 Result (2026-04-03) — UNEXPECTED REGRESSION
 
-```
-W9 result?
-├── W9 >> W7 → r=64 helps, use r=64 for all future runs
-├── W9 ≈ W7 → r=32 is sufficient, ship W7 config
-│
-Then: scale with data
-├── Deepgram transcribe 332 sermons ($93 API)
-├── Align + train W12 (W7 config, 100K+ chunks, 1 epoch)
-├── Expected: 2-3% WER
-│
-Optional: augmentation
-├── Add SpecAugment + speed perturbation to collator
-├── Retrain with augmentation → W13
-├── Expected: additional 5-10% relative improvement
-```
+| Run | Config | Data | Steps | Wall time | Train loss | Fresh eval WER(norm) |
+|-----|--------|------|-------|-----------|------------|----------------------|
+| **W7** | lr=1e-4, r=32, qv, replay=0.3, **3 epochs** | **17K midwest** | 1,248 | ~25 hrs | 0.12 | **7.26%** |
+| **W12** | lr=1e-4, r=32, qv, replay=0.3, **1 epoch** | **198K stt-data** | 16,811 | ~59 hrs | **0.073** | **9.05%** |
+
+**W12 LOST to W7 by +1.79% absolute on the same fresh eval set (4 post-cutoff sermons, 2,706 examples).** 12× more data + 13× more sample views did NOT help.
+
+Critically: W12's training loss (0.073) is **lower** than W7's (0.12), but eval WER is **higher**. Classic overfitting signature — at 198K scale.
+
+**Pipeline (completed):**
+- 328/332 Deepgram oracle transcripts (`/mnt/d/Data/stt-data/deepgram_transcripts/`)
+- 252K whisper chunks aligned → 198K matched with Deepgram ground truth
+- Preprocessed Arrow cache (198 shards, ~290GB, `/mnt/d/Data/stt-data/whisper_dataset_sttdata/`)
+- Fresh eval set built (4 post-cutoff sermons, 2,706 Deepgram-aligned examples)
+
+**Bugs caught and fixed during W12 pipeline:**
+1. `_build_preprocessed_cache` OOM on 198K rows — fixed with sharded Arrow writes (5 GB peak vs 190 GB)
+2. `find_audio_file` didn't recurse into nested dirs — fixed with `rglob` + cache
+3. `concatenate_datasets` on 198 shards used too much RAM — fixed with streaming generator
+4. `interleave_datasets(stopping_strategy="first_exhausted")` truncated training to 2.5% of church data — fixed to `"all_exhausted"` (this same bug affected W1-W9 silently)
+
+**Why W12 underperformed (hypotheses, ranked by likelihood):**
+
+1. **Data quality dilution.** YouTube sermons have variable audio quality (background noise, mic distance, room acoustics). Many chunks have correct Deepgram text but poor audio — the model learns the wrong audio→text mappings.
+
+2. **W7's "first_exhausted" bug accidentally curated data.** The bug truncated W7 to ~4.7K church samples seen 3× — a tight, repetitive curriculum. W12 with the fix sees all 188K samples once — a noisy, sparse curriculum.
+
+3. **Boundary errors compound at scale.** Whisper chunk boundaries can include silence or cross-talk. At 198K chunks, even 1-2% boundary errors = ~3K bad training examples.
+
+4. **Single epoch is undertrained for ASR LoRA.** Whisper LoRA literature recommends 3+ epochs. But more epochs at 198K means more memorization risk.
 
 ---
 
-## Estimated Runtime
+## Phase W5 — Recovery Plan (W13-W15)
 
-| Step | Time | VRAM |
-|------|------|------|
-| W1-W6: Ablation (6 runs) | ~30 hrs actual | ~9.5 GB |
-| W7: 3 epochs | ~25 hrs | ~9.5 GB |
-| W8: 5 epochs | ~25 hrs | ~9.5 GB |
-| W9: r=64, 3 epochs | ~17 hrs | ~10 GB |
-| WER eval per run | ~2 min | ~3 GB (fp16) |
-| **Total (W1-W9)** | **~97 hrs** | |
+W12 fell to W7 on the fresh eval. The next 3 runs are designed to **diagnose** the regression and **recover** (or beat) W7's 7.26% on the fresh eval set. Ordered fastest-to-slowest so cheap signals come first.
+
+**Calibration data (from W12, A2000 Ada 16GB, dataset on D: HDD):**
+- Effective batch size: 16 (bs=4 × grad_accum=4)
+- Step time: ~14.5 s/step
+- Sample throughput: ~1.1 samples/sec
+- Eval pass: ~17 min for 2,706 examples
+
+### W13: Same-size midwest replication (data quality test)
+
+| Run | Config | Data | What it answers |
+|-----|--------|------|-----------------|
+| **W13** | W7 config (lr=1e-4, r=32, qv, replay=0.3, **3 epochs**) | **Top 17K stt-data chunks by confidence** | Is YouTube data quality the problem? Match W7's data SIZE and TRAINING RECIPE exactly, only the SOURCE differs. |
+
+**Rationale:** W7 trained on 17K midwest chunks for 3 epochs. W13 trains on 17K stt-data chunks (filtered by faster-whisper `confidence ≥ p80`) for 3 epochs. Same recipe, same scale, different audio source. If W13 ≈ W7 → data is fine, blame W12 epochs. If W13 << W7 → YouTube data is the bottleneck.
+
+**Sample math:**
+- 17K church × 3 epochs = 51K church samples
+- + replay (`all_exhausted`): 51K / 0.7 = 72,857 total draws
+- Steps: 72,857 / 16 = **4,553 steps**
+- Wall time: 4,553 × 14.5s = **~18.3 hrs**
+- Eval: ~17 min
+- **Total: ~18.6 hrs**
+
+```bash
+# Step 1: Build filtered subset (one-time, ~5 min)
+python training/filter_chunks_by_confidence.py \
+    --input /mnt/d/Data/stt-data/whisper_dataset_sttdata \
+    --output /mnt/d/Data/stt-data/whisper_dataset_sttdata_top17k \
+    --target-size 17000 --metric confidence
+
+# Step 2: Train W13
+python training/train_whisper.py \
+    --dataset /mnt/d/Data/stt-data/whisper_dataset_sttdata_top17k \
+    --lr 1e-4 --epochs 3 \
+    --target-modules q_proj v_proj --lora-r 32 --lora-alpha 64 \
+    --replay-ratio 0.3 \
+    -o whisper_ablation/W13_top17k_3ep
+```
+
+### W14: Combined dataset (best of both worlds)
+
+| Run | Config | Data | What it answers |
+|-----|--------|------|-----------------|
+| **W14** | W7 config (lr=1e-4, r=32, qv, replay=0.3, **3 epochs**) | **17K midwest + top 33K stt-data = 50K combined** | Does adding diverse high-quality data on top of the W7 recipe help? Tests scaling with curated data. |
+
+**Rationale:** Keep the proven 17K midwest base. Add the cleanest 33K from stt-data (top 17.5% by confidence). 3× the data of W7 but still within the "tight curriculum" range. Replay still 30%.
+
+**Sample math:**
+- 50K church × 3 epochs = 150K samples
+- + replay: 150K / 0.7 = 214,286 draws
+- Steps: 214,286 / 16 = **13,393 steps**
+- Wall time: 13,393 × 14.5s = **~53.9 hrs**
+- Eval: ~17 min
+- **Total: ~54 hrs (~2.3 days)**
+
+```bash
+# Step 1: Build combined dataset
+python training/merge_datasets.py \
+    --inputs stark_data/whisper_dataset_deepgram \
+             /mnt/d/Data/stt-data/whisper_dataset_sttdata \
+    --filter-confidence 0.85 \
+    --target-size 50000 \
+    --output /mnt/d/Data/stt-data/whisper_dataset_combined_50k
+
+# Step 2: Train W14
+python training/train_whisper.py \
+    --dataset /mnt/d/Data/stt-data/whisper_dataset_combined_50k \
+    --lr 1e-4 --epochs 3 \
+    --target-modules q_proj v_proj --lora-r 32 --lora-alpha 64 \
+    --replay-ratio 0.3 \
+    -o whisper_ablation/W14_combined50k_3ep
+```
+
+### W15: Hard example mining on W7 (curriculum learning)
+
+| Run | Config | Data | What it answers |
+|-----|--------|------|-----------------|
+| **W15** | Continue W7 adapter + 1 epoch | **Hard chunks where W7 WER > 15%** (mined from full 215K pool) | Does targeted training on W7's failure cases close the gap on hard examples without breaking general accuracy? |
+
+**Rationale:** Don't fight the W7 winner — extend it. Run W7 inference over all 215K available chunks (17K midwest + 198K stt-data), find the ~5-10K where W7 still fails, fine-tune on just those. This is curriculum learning from a strong base, lower risk of overfitting.
+
+**Sample math:**
+- Mining: 215K samples × ~0.4 s/sample (eval mode) = ~24 hrs
+- Hard subset: ~7K chunks (estimate based on 3-5% failure rate)
+- Training: 7K × 1 epoch / 0.7 (replay) = 10K draws / 16 = 625 steps
+- Wall time: 625 × 14.5s = **~2.5 hrs**
+- Eval: ~17 min
+- **Total: ~27 hrs (24 mine + 3 train+eval)**
+
+```bash
+# Step 1: Mine hard examples (~24 hrs on A2000)
+python training/mine_hard_examples.py \
+    --adapter whisper_ablation/W7_3epochs \
+    --datasets stark_data/whisper_dataset_deepgram \
+               /mnt/d/Data/stt-data/whisper_dataset_sttdata \
+    --wer-threshold 0.15 \
+    --output /mnt/d/Data/stt-data/whisper_hard_w7
+
+# Step 2: Fine-tune W7 on hard examples (~3 hrs)
+python training/train_whisper.py \
+    --dataset /mnt/d/Data/stt-data/whisper_hard_w7 \
+    --lr 5e-5 --epochs 1 \
+    --target-modules q_proj v_proj --lora-r 32 --lora-alpha 64 \
+    --replay-ratio 0.5 \
+    --init-from whisper_ablation/W7_3epochs \
+    -o whisper_ablation/W15_hard_w7
+```
+
+### W13-W15 Decision Logic
+
+```
+W13 result (~18 hrs)?
+├── W13 ≈ W7 (within 0.5% absolute)
+│   → YouTube data quality is FINE. W12's loss was the 1-epoch undertraining + replay bug interaction.
+│   → Run W14 next: scale up with curated combined data.
+│
+├── W13 worse than W7 by 1-2%
+│   → YouTube data is slightly noisier but usable.
+│   → Run W14 with HIGHER confidence threshold (top 30K, not top 50K).
+│   → Skip W12-style large-scale runs entirely.
+│
+└── W13 much worse than W7 (>3%)
+    → YouTube data is too noisy even at 17K. Quality > Quantity.
+    → Skip W14. Go straight to W15 (hard mining on W7).
+    → Add audio quality gating (SNR, F0 variance) to chunk filtering.
+
+W14 result (~54 hrs)?
+├── W14 < W7
+│   → SHIP W14. Combined dataset wins. Repeat at 100K next.
+├── W14 ≈ W7
+│   → Diminishing returns at this scale. Try W15 (hard mining) for the last gains.
+└── W14 > W7
+    → Combination hurts. Stick with W7 + W15.
+
+W15 result (~27 hrs)?
+├── Hard WER drops + general holds → SHIP W15 (W7 + curriculum)
+├── Hard WER drops + general regresses slightly → keep W7, tune mining threshold
+└── Hard WER unchanged → mining failed, hard examples are unlearnable
+```
+
+### Estimated Runtime (W13-W15)
+
+| Step | Time | VRAM | Disk |
+|------|------|------|------|
+| W13: filter 17K subset | ~5 min | CPU | ~3 GB |
+| W13: train (3 ep, 17K stt-data) | **~18 hrs** | ~9.5 GB | ~2 GB adapter |
+| W14: build combined 50K | ~10 min | CPU | ~7 GB |
+| W14: train (3 ep, 50K combined) | **~54 hrs** | ~9.5 GB | ~2 GB adapter |
+| W15: mine hard examples (215K) | ~24 hrs | ~5 GB | ~1 GB list |
+| W15: train (1 ep, ~7K hard) | **~3 hrs** | ~9.5 GB | ~2 GB adapter |
+| WER eval per run | ~17 min | ~3 GB | — |
+| **Total (W13-W15)** | **~100 hrs (~4.2 days)** | | |
+
+**Critical path:** W13 (18 hrs) → decision → W14 OR W15 → final eval. If W13 is decisive, total is ~75 hrs (~3 days).
 
 ---
 
@@ -351,10 +516,14 @@ Optional: augmentation
 
 | Item | Path | Status |
 |------|------|--------|
-| Deepgram oracle transcripts (35 sermons) | `stark_data/deepgram_transcripts/*.deepgram.json` | **Done** |
-| Aligned chunks dataset (17K train, 251 eval) | `stark_data/whisper_dataset_deepgram/.preprocessed_cache/` | **Done** |
+| Deepgram oracle transcripts (35 midwest) | `stark_data/deepgram_transcripts/*.deepgram.json` | **Done** |
+| Deepgram oracle transcripts (328 YouTube) | `/mnt/d/Data/stt-data/deepgram_transcripts/*.deepgram.json` | **Done** |
+| Aligned chunks (17K train, 251 eval) | `stark_data/whisper_dataset_deepgram/.preprocessed_cache/` | **Done** |
+| Aligned chunks (198K train, stt-data) | `/mnt/d/Data/stt-data/whisper_dataset_sttdata/.preprocessed_cache/` | **Building** (ETA ~20:50 2026-03-30) |
 | 5K subset (for W6) | `stark_data/whisper_dataset_deepgram_5k/.preprocessed_cache/` | **Done** |
 | Tier 1 boost terms | `bible_data/glossary/tier1_boost.json` | **Done** (50 terms) |
 | LibriSpeech replay | Auto-downloaded by train_whisper.py | Available via HuggingFace |
 | Merged W1 model (for live test) | `models/whisper-turbo-w1-merged/` | **Done** (1.5 GB) |
-| 332 YouTube sermons (for W12) | `stt-data/` sorted by type/year | **Downloaded**, not yet transcribed |
+| 332 YouTube sermons | `stt-data/` sorted by type/year | **Done** |
+| Whisper chunks (252K, 332 sermons) | `ablation/sermon_whisper_chunks_sttdata.json` | **Done** |
+| Eval cutoff | 2026-03-14 (train before, eval after) | **Enforced** via `stt-data/manifest.json` split field |

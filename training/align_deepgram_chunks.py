@@ -21,9 +21,11 @@ Usage:
 
 import argparse
 import csv
+import gc
 import json
 import logging
 import os
+import shutil
 import subprocess
 import sys
 from collections import defaultdict
@@ -138,20 +140,42 @@ def extract_audio_chunk(source_wav: Path, output_wav: Path, start: float, end: f
     return True
 
 
+_audio_file_cache: dict[str, Path | None] = {}
+
+
 def find_audio_file(audio_dir: Path, source: str) -> Path | None:
-    """Find the WAV file for a given source stem."""
+    """Find the WAV file for a given source stem.
+
+    Searches flat directory first, then falls back to recursive search.
+    Results are cached to avoid repeated rglob calls.
+    """
+    if source in _audio_file_cache:
+        return _audio_file_cache[source]
+
+    # Fast path: flat directory
     candidates = [
         audio_dir / f"{source}.wav",
         audio_dir / f"{source}.WAV",
     ]
     for c in candidates:
         if c.exists():
+            _audio_file_cache[source] = c
             return c
-    # Glob fallback
+
+    # Glob fallback (flat)
     matches = list(audio_dir.glob(f"{source}.*"))
     wav_matches = [m for m in matches if m.suffix.lower() == ".wav"]
     if wav_matches:
+        _audio_file_cache[source] = wav_matches[0]
         return wav_matches[0]
+
+    # Recursive fallback for nested directory structures (e.g., stt-data/{type}/{year}/)
+    rmatches = list(audio_dir.rglob(f"{source}.wav"))
+    if rmatches:
+        _audio_file_cache[source] = rmatches[0]
+        return rmatches[0]
+
+    _audio_file_cache[source] = None
     return None
 
 
@@ -195,6 +219,264 @@ def write_metadata_csv(output_dir: Path, rows: list[dict]) -> None:
     logger.info("Wrote %d rows to %s", len(rows), csv_path)
 
 
+def _generate_examples(rows, grouped_chunks, audio_dir, processor):
+    """Yield preprocessed examples one at a time from source audio + Deepgram text.
+
+    Each example contains a mel spectrogram (~960KB) and tokenized labels.
+    Yielding (not accumulating) keeps memory flat regardless of dataset size.
+    """
+    import soundfile as sf
+
+    for i, row in enumerate(rows):
+        fname = row["file_name"]
+        text = row["transcription"]
+
+        # Parse source and chunk index from filename: {source}_{index:05d}.wav
+        parts = fname.rsplit("_", 1)
+        if len(parts) != 2:
+            continue
+        source = parts[0]
+        chunk_idx = int(parts[1].replace(".wav", ""))
+
+        # Find the chunk to get start/end timestamps
+        source_chunks = grouped_chunks.get(source, [])
+        if chunk_idx >= len(source_chunks):
+            continue
+        chunk = source_chunks[chunk_idx]
+        start = chunk.get("start", 0.0)
+        end = chunk.get("end", 0.0)
+
+        # Find source audio
+        audio_path = find_audio_file(audio_dir, source)
+        if audio_path is None:
+            continue
+
+        # Read audio segment directly (no ffmpeg, no temp file)
+        try:
+            info = sf.info(str(audio_path))
+            sr = info.samplerate
+            start_frame = int(start * sr)
+            end_frame = int(end * sr)
+            audio_data, _ = sf.read(str(audio_path), start=start_frame, stop=end_frame, dtype="float32")
+
+            # Resample to 16kHz if needed
+            if sr != 16000:
+                import librosa
+
+                audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=16000)
+
+            # Compute mel spectrogram
+            input_features = processor(audio_data, sampling_rate=16000).input_features[0]
+
+            # Tokenize transcription
+            labels = processor.tokenizer(text).input_ids
+
+            yield {
+                "input_features": input_features,
+                "labels": labels,
+            }
+        except Exception as e:
+            logger.warning("Failed to process %s chunk %d: %s", source, chunk_idx, e)
+            continue
+
+
+def _get_rss_gb():
+    """Return current process RSS in GB, or None if psutil unavailable."""
+    try:
+        import psutil
+
+        return psutil.Process().memory_info().rss / 1e9
+    except ImportError:
+        return None
+
+
+# Number of rows per Arrow shard — caps peak RAM at ~960MB of mel data
+_SHARD_SIZE = 1000
+
+
+def _build_split_sharded(rows, split_name, grouped_chunks, audio_dir, processor, cache_dir):
+    """Build one split (train or test) via batched Arrow shards.
+
+    Processes rows in batches of _SHARD_SIZE, saves each batch as an Arrow
+    shard to disk. Then streams all shards through a generator into the final
+    dataset — never holding more than one shard in memory.
+
+    Completed shards are skipped on re-run (crash-resume support).
+    """
+    from datasets import Dataset
+
+    if not rows:
+        return Dataset.from_dict({"input_features": [], "labels": []})
+
+    shard_dir = cache_dir / f"_shards_{split_name}"
+    shard_dir.mkdir(parents=True, exist_ok=True)
+
+    total_shards = (len(rows) + _SHARD_SIZE - 1) // _SHARD_SIZE
+    logger.info(
+        "  [%s] %d rows -> %d shards of %d",
+        split_name,
+        len(rows),
+        total_shards,
+        _SHARD_SIZE,
+    )
+
+    for batch_start in range(0, len(rows), _SHARD_SIZE):
+        shard_idx = batch_start // _SHARD_SIZE
+        shard_path = shard_dir / f"shard_{batch_start:06d}"
+
+        # Resume: skip already-completed shards
+        if shard_path.exists():
+            logger.info(
+                "  [%s] Shard %d/%d already exists, skipping",
+                split_name,
+                shard_idx + 1,
+                total_shards,
+            )
+            continue
+
+        batch_rows = rows[batch_start : batch_start + _SHARD_SIZE]
+
+        shard_ds = Dataset.from_generator(
+            _generate_examples,
+            gen_kwargs={
+                "rows": batch_rows,
+                "grouped_chunks": grouped_chunks,
+                "audio_dir": audio_dir,
+                "processor": processor,
+            },
+        )
+        shard_ds.save_to_disk(str(shard_path))
+
+        rss = _get_rss_gb()
+        rss_str = f" | RSS: {rss:.1f} GB" if rss is not None else ""
+        logger.info(
+            "  [%s] Shard %d/%d saved (%d examples)%s",
+            split_name,
+            shard_idx + 1,
+            total_shards,
+            len(shard_ds),
+            rss_str,
+        )
+
+        # Free shard from memory before next batch
+        del shard_ds
+        gc.collect()
+
+    # Merge shards by streaming one at a time — hard memory cap.
+    # Never loads more than one shard into memory at once.
+    shard_paths = sorted(shard_dir.iterdir())
+    if not shard_paths:
+        return Dataset.from_dict({"input_features": [], "labels": []})
+
+    # Capture features from the first shard so Dataset.from_generator preserves
+    # the original Arrow types (float32 mel spectrograms, not float64 default).
+    # Without this, train_whisper.py's interleave_datasets() crashes on dtype
+    # mismatch with the LibriSpeech replay buffer.
+    first_shard = Dataset.load_from_disk(str(shard_paths[0]))
+    shard_features = first_shard.features
+    del first_shard
+    gc.collect()
+
+    def _stream_from_shards():
+        """Yield examples from each shard sequentially, loading one at a time."""
+        for i, sp in enumerate(shard_paths):
+            shard = Dataset.load_from_disk(str(sp))
+            yield from shard
+            del shard
+            gc.collect()
+            if (i + 1) % 10 == 0:
+                rss = _get_rss_gb()
+                rss_str = f" | RSS: {rss:.1f} GB" if rss is not None else ""
+                logger.info(
+                    "  [%s] Streamed %d/%d shards%s",
+                    split_name,
+                    i + 1,
+                    len(shard_paths),
+                    rss_str,
+                )
+
+    logger.info("  [%s] Streaming %d shards into final dataset...", split_name, len(shard_paths))
+    final_ds = Dataset.from_generator(_stream_from_shards, features=shard_features)
+    logger.info("  [%s] Final dataset: %d examples", split_name, len(final_ds))
+
+    return final_ds
+
+
+def _build_preprocessed_cache(
+    train_rows,
+    eval_rows,
+    grouped_chunks,
+    deepgram_dir,
+    audio_dir,
+    output_dir,
+    whisper_model,
+    min_chars,
+):
+    """Build preprocessed Arrow cache directly from source audio + Deepgram text.
+
+    Instead of extracting 75K+ small WAV files to HDD (slow, painful audiofolder scan),
+    this reads audio segments directly from source WAVs, computes mel spectrograms,
+    and saves as Arrow format that train_whisper.py can load instantly.
+
+    Processes rows in batches of 1000 to cap peak RAM at ~1-2 GB regardless of
+    dataset size. Completed shards are skipped on re-run for crash-resume support.
+
+    Hard memory cap: 12 GB RSS. Process aborts cleanly if exceeded.
+    """
+    import resource
+
+    # Hard cap at 12 GB virtual memory to prevent OOM-kill.
+    # Sharded streaming should stay under 5 GB; 12 GB gives headroom.
+    _HARD_MEM_CAP_GB = 12
+    _hard_bytes = _HARD_MEM_CAP_GB * 1024 * 1024 * 1024
+    try:
+        soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+        resource.setrlimit(resource.RLIMIT_AS, (_hard_bytes, hard))
+        logger.info("Set hard memory cap: %d GB virtual", _HARD_MEM_CAP_GB)
+    except (ValueError, OSError) as e:
+        logger.warning("Could not set memory cap: %s", e)
+
+    os.environ["USE_TF"] = "0"
+    from datasets import DatasetDict
+    from transformers import WhisperProcessor
+
+    processor = WhisperProcessor.from_pretrained(whisper_model)
+    logger.info("Loaded WhisperProcessor from %s", whisper_model)
+
+    cache_dir = output_dir / ".preprocessed_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    logger.info("Processing train split (%d rows)...", len(train_rows))
+    train_ds = _build_split_sharded(train_rows, "train", grouped_chunks, audio_dir, processor, cache_dir)
+
+    logger.info("Processing eval split (%d rows)...", len(eval_rows))
+    eval_ds = _build_split_sharded(eval_rows, "test", grouped_chunks, audio_dir, processor, cache_dir)
+
+    # Save final DatasetDict
+    ds = DatasetDict({"train": train_ds, "test": eval_ds})
+    logger.info("Built DatasetDict: %s", ds)
+    ds.save_to_disk(str(cache_dir))
+    logger.info("Saved preprocessed cache to %s", cache_dir)
+
+    # Clean up temporary shard directories
+    for shard_dir in cache_dir.glob("_shards_*"):
+        shutil.rmtree(shard_dir)
+        logger.info("Cleaned up shard dir: %s", shard_dir)
+
+    # Also write JSONL metadata for compatibility
+    jsonl_dir = output_dir / "train"
+    jsonl_dir.mkdir(parents=True, exist_ok=True)
+    with open(jsonl_dir / "metadata.jsonl", "w") as f:
+        for row in train_rows:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    eval_jsonl_dir = output_dir / "eval"
+    eval_jsonl_dir.mkdir(parents=True, exist_ok=True)
+    with open(eval_jsonl_dir / "metadata.jsonl", "w") as f:
+        for row in eval_rows:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Align Whisper chunks with Deepgram word timestamps to build a Whisper fine-tuning dataset."
@@ -234,6 +516,17 @@ def main():
         type=str,
         default=None,
         help="Comma-separated source stems to hold out for eval (default: auto-detect from chunks with split=='eval')",
+    )
+    parser.add_argument(
+        "--preprocess-cache",
+        action="store_true",
+        help="Build preprocessed Arrow cache directly (skips WAV extraction + audiofolder scan). Much faster for large datasets.",
+    )
+    parser.add_argument(
+        "--whisper-model",
+        type=str,
+        default="openai/whisper-large-v3-turbo",
+        help="Whisper model for processor (mel spectrogram extraction). Only used with --preprocess-cache.",
     )
     args = parser.parse_args()
 
@@ -307,29 +600,29 @@ def main():
                 stats["skipped_short"] += 1
                 continue
 
-            # Output WAV filename
+            # Output WAV filename (used as ID even in cache mode)
             wav_name = f"{source}_{i:05d}.wav"
-            out_dir = args.output / split_name
-            out_wav = out_dir / wav_name
-
-            # Idempotency — skip if already extracted
-            if out_wav.exists():
-                stats["skipped_existing"] += 1
-                row = {"file_name": wav_name, "transcription": text}
-                if is_eval:
-                    eval_rows.append(row)
-                else:
-                    train_rows.append(row)
-                continue
-
-            # Extract audio chunk
-            ok = extract_audio_chunk(audio_path, out_wav, chunk_start, chunk_end)
-            if not ok:
-                stats["ffmpeg_errors"] += 1
-                continue
-
             stats["matched"] += 1
             row = {"file_name": wav_name, "transcription": text}
+
+            # Extract WAV only if not in preprocess-cache mode
+            if not args.preprocess_cache:
+                out_dir = args.output / split_name
+                out_wav = out_dir / wav_name
+
+                if out_wav.exists():
+                    stats["skipped_existing"] += 1
+                    if is_eval:
+                        eval_rows.append(row)
+                    else:
+                        train_rows.append(row)
+                    continue
+
+                ok = extract_audio_chunk(audio_path, out_wav, chunk_start, chunk_end)
+                if not ok:
+                    stats["ffmpeg_errors"] += 1
+                    stats["matched"] -= 1
+                    continue
             if is_eval:
                 eval_rows.append(row)
             else:
@@ -345,11 +638,25 @@ def main():
                     stats["skipped_existing"],
                 )
 
-    # Write metadata CSVs
-    if train_rows:
-        write_metadata_csv(args.output / "train", train_rows)
-    if eval_rows:
-        write_metadata_csv(args.output / "eval", eval_rows)
+    # Output mode: either WAV files + metadata.csv, or preprocessed Arrow cache
+    if args.preprocess_cache:
+        logger.info("Building preprocessed Arrow cache directly (no WAV extraction)...")
+        _build_preprocessed_cache(
+            train_rows,
+            eval_rows,
+            grouped,
+            args.deepgram_dir,
+            args.audio_dir,
+            args.output,
+            args.whisper_model,
+            args.min_chars,
+        )
+    else:
+        # Write metadata CSVs (original audiofolder mode)
+        if train_rows:
+            write_metadata_csv(args.output / "train", train_rows)
+        if eval_rows:
+            write_metadata_csv(args.output / "eval", eval_rows)
 
     # Summary
     logger.info("=" * 60)
