@@ -41,6 +41,7 @@ _MOCK_MODULES = [
     "sentence_transformers",
     "streamlink",
     "soundfile",
+    "deepgram",
 ]
 
 # ---------------------------------------------------------------------------

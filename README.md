@@ -121,7 +121,7 @@ python dry_run_ab.py --backend=cuda --no-ab
 ## Testing
 
 ```bash
-# Run full test suite (600+ tests, no GPU required)
+# Run full test suite (754 tests, no GPU required)
 pytest tests/ -v
 
 # With coverage report
@@ -173,6 +173,10 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 - **Piper TTS audio synthesis** -- `--tts` flag enables text-to-speech for translated text (EN + ES voices, ONNX, thread-safe)
 - **End-to-end roundtrip quality testing** -- `tools/roundtrip_test.py` measures STT WER and roundtrip translation accuracy
 - **Post-session validation pipeline** -- YouTube WER comparison with text-anchor alignment (`tools/validate_session.py`)
+- **Deepgram Nova-3 oracle transcription** -- ground-truth labeling with 50 theological keyterm boosting
+- **Tiered glossary system** -- Tier 1 (50 boost terms for Deepgram) + Tier 2 (229 master terms for training)
+- **Data integrity pipeline** -- SHA-256 lockfile, stratified eval sets, adapter health checks
+- **TranslateGemma fine-tuning** -- S1-S8 ablation sweep (S6 winner: balanced ratio), Whisper W0-W9 design
 - **Dual-target inference** -- runs on Apple Silicon (MLX) or NVIDIA GPUs (CUDA) from a single codebase
 - **Unified configuration** -- pydantic-settings with STARK_ env prefix, .env file support
 - **STT fallback** -- automatic retry with fallback model on low-confidence or hallucinated segments
@@ -321,7 +325,7 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 - Fine-tuning data prep tools (review queue + dataset export)
 - Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
 - CI/CD pipeline: 7 GitHub Actions workflows (lint, test, security, release, label, commitlint, stale) + Codecov
-- 600+ tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
+- 754 tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
 - Dependabot for automated dependency updates
 - Structured logging (`--log-level`, session log files, VAD event logging)
 - Rolling session stats (5-min averages broadcast to operator displays)

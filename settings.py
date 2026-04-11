@@ -250,6 +250,60 @@ class TTSSettings(BaseSettings):
     model_config = {"env_prefix": "STARK_TTS_"}
 
 
+class GlossarySettings(BaseSettings):
+    """Tiered glossary configuration for Deepgram keyterms and normalization."""
+
+    boost_size: int = Field(
+        default=50,
+        description="Number of Tier 1 boost terms for Deepgram keyterms (max ~80)",
+    )
+    master_size: int = Field(
+        default=1000,
+        description="Number of Tier 2 master terms for normalization and active learning",
+    )
+    boost_path: str = Field(
+        default="bible_data/glossary/tier1_boost.json",
+        description="Path to Tier 1 boost terms JSON (list of EN strings)",
+    )
+    master_path: str = Field(
+        default="bible_data/glossary/tier2_master.json",
+        description="Path to Tier 2 master glossary JSON (EN→ES dict)",
+    )
+
+    model_config = {"env_prefix": "STARK_GLOSSARY_"}
+
+
+class DeepgramSettings(BaseSettings):
+    """Deepgram Nova-3 oracle transcription configuration."""
+
+    api_key: str = Field(
+        default="",
+        description="Deepgram API key (or set STARK_DEEPGRAM__API_KEY env var)",
+    )
+    model: str = Field(
+        default="nova-3",
+        description="Deepgram model name",
+    )
+    language: str = Field(
+        default="en",
+        description="Transcription language (en or es)",
+    )
+    smart_format: bool = Field(
+        default=True,
+        description="Enable Deepgram smart formatting (punctuation, casing)",
+    )
+    diarize: bool = Field(
+        default=False,
+        description="Enable speaker diarization",
+    )
+    mip_opt_out: bool = Field(
+        default=True,
+        description="Opt out of Deepgram model improvement program",
+    )
+
+    model_config = {"env_prefix": "STARK_DEEPGRAM_"}
+
+
 # ---------------------------------------------------------------------------
 # Top-level pipeline settings
 # ---------------------------------------------------------------------------
@@ -329,6 +383,8 @@ class PipelineSettings(BaseSettings):
     translation: TranslationSettings = Field(default_factory=TranslationSettings)
     server: ServerSettings = Field(default_factory=ServerSettings)
     tts: TTSSettings = Field(default_factory=TTSSettings)
+    glossary: GlossarySettings = Field(default_factory=GlossarySettings)
+    deepgram: DeepgramSettings = Field(default_factory=DeepgramSettings)
     cuda: CUDASettings = Field(default_factory=CUDASettings)
 
     model_config = {

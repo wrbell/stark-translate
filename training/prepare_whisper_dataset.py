@@ -62,8 +62,11 @@ def find_accent_for_chunk(chunk_path, transcripts_dir):
     return parent
 
 
-def load_transcripts(transcripts_dir, chunks_dir):
+def load_transcripts(transcripts_dir, chunks_dir, gt_source="whisper"):
     """Load all transcript JSONs and pair with audio chunks.
+
+    Args:
+        gt_source: "whisper" for *.json, "deepgram" for *.deepgram.json
 
     Returns list of dicts: {audio_path, text, accent, segments_meta}
     """
@@ -71,9 +74,13 @@ def load_transcripts(transcripts_dir, chunks_dir):
     chunks_path = Path(chunks_dir)
     entries = []
 
-    # Collect all transcript JSONs (including in accent subdirs)
-    json_files = sorted(transcripts_path.glob("*.json"))
-    json_files += sorted(transcripts_path.glob("*/*.json"))
+    # Collect transcript JSONs based on ground-truth source
+    if gt_source == "deepgram":
+        json_files = sorted(transcripts_path.glob("*.deepgram.json"))
+        json_files += sorted(transcripts_path.glob("*/*.deepgram.json"))
+    else:
+        json_files = sorted(transcripts_path.glob("*.json"))
+        json_files += sorted(transcripts_path.glob("*/*.json"))
     # Exclude summary/meta files
     json_files = [f for f in json_files if not f.name.startswith("_")]
 
@@ -94,7 +101,11 @@ def load_transcripts(transcripts_dir, chunks_dir):
         audio_path_str = transcript.get("audio_path", "")
         if not audio_path_str:
             # Try to reconstruct from filename
-            wav_name = json_path.stem + ".wav"
+            # Handle .deepgram.json double suffix
+            stem = json_path.stem
+            if stem.endswith(".deepgram"):
+                stem = stem[: -len(".deepgram")]
+            wav_name = stem + ".wav"
             # Search in chunks dir and accent subdirs
             candidates = list(chunks_path.glob(f"*/{wav_name}"))
             candidates += list(chunks_path.glob(wav_name))
@@ -358,6 +369,12 @@ def main():
     parser.add_argument("--no-filter", action="store_true", help="Skip confidence-based filtering")
     parser.add_argument("--copy", action="store_true", help="Copy WAV files instead of symlinking")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
+    parser.add_argument(
+        "--gt-source",
+        choices=["whisper", "deepgram"],
+        default="whisper",
+        help="Ground-truth transcript source: whisper (*.json) or deepgram (*.deepgram.json)",
+    )
     args = parser.parse_args()
 
     # Resolve paths relative to project root
@@ -374,7 +391,7 @@ def main():
 
     # Step 1: Load transcripts and pair with audio
     logger.info("Loading transcripts...")
-    entries = load_transcripts(str(transcripts_dir), str(chunks_dir))
+    entries = load_transcripts(str(transcripts_dir), str(chunks_dir), gt_source=args.gt_source)
     logger.info(f"Loaded {len(entries)} transcript-audio pairs")
 
     if not entries:
