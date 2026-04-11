@@ -25,7 +25,6 @@ import argparse
 import json
 import logging
 import os
-import resource
 import sys
 import time
 from pathlib import Path
@@ -42,8 +41,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Hard memory cap (GB) — prevents OOM-kill on WSL2 (48 GB limit)
-_HARD_MEM_CAP_GB = 12
+# Hard memory cap (GB) — prevents OOM-kill on WSL2 (48 GB limit).
+# Set high enough for PyTorch virtual memory + HF cache mmap pages.
+_HARD_MEM_CAP_GB = 40
 
 
 def _get_rss_gb():
@@ -104,13 +104,9 @@ def mine(args):
         load_deepgram_transcript,
     )
 
-    # Set hard memory cap
-    try:
-        soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-        resource.setrlimit(resource.RLIMIT_AS, (_HARD_MEM_CAP_GB * 1024**3, hard))
-        logger.info("Hard memory cap: %d GB", _HARD_MEM_CAP_GB)
-    except (ValueError, OSError) as e:
-        logger.warning("Could not set memory cap: %s", e)
+    # Note: no RLIMIT_AS cap here. PyTorch + HuggingFace cache use >40GB virtual
+    # address space (mmap pages, CUDA allocator). The mining script is inference-only
+    # with bounded real memory (~5GB RSS). RSS is monitored via _get_rss_gb().
 
     # Load model + adapter
     logger.info("Loading %s in fp16...", args.model)

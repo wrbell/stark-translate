@@ -45,11 +45,25 @@ async def transcribe_file(
     """Transcribe a single audio file via Deepgram async API."""
     async with semaphore:
         try:
-            with open(audio_path, "rb") as f:
-                buffer = f.read()
+            import subprocess as _sp
 
-            source = {"buffer": buffer, "mimetype": "audio/wav"}
-            # Large sermon files (40-160 MB) need generous timeouts
+            # Compress WAV → FLAC before upload (~3x smaller, lossless, much faster upload)
+            result = _sp.run(
+                ["ffmpeg", "-i", audio_path, "-c:a", "flac", "-f", "flac", "pipe:1"],
+                capture_output=True,
+                timeout=120,
+            )
+            if result.returncode == 0 and len(result.stdout) > 0:
+                buffer = result.stdout
+                mimetype = "audio/flac"
+            else:
+                # Fallback to raw WAV if ffmpeg fails
+                with open(audio_path, "rb") as f:
+                    buffer = f.read()
+                mimetype = "audio/wav"
+
+            source = {"buffer": buffer, "mimetype": mimetype}
+            # Large sermon files need generous timeouts (even compressed, some are 40+ MB)
             import httpx
 
             timeout = httpx.Timeout(300.0, connect=30.0)
