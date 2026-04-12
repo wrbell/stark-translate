@@ -5,13 +5,27 @@ on:
     - cron: "0 8 * * 1"  # Monday 8AM UTC
   push:
     branches: [main]
-    paths: ["requirements*.txt"]
   pull_request:
     branches: [main]
-    paths: ["requirements*.txt"]
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      requirements_changed: ${{ steps.filter.outputs.requirements }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            requirements:
+              - 'requirements*.txt'
+
   audit:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.requirements_changed == 'true' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -58,3 +72,18 @@ jobs:
           echo "Auditing packages:"
           cat /tmp/audit-reqs.txt
           pip-audit -r /tmp/audit-reqs.txt --desc --no-deps
+
+  security:
+    # Gate job: always runs, required for branch protection.
+    # Passes if audit was skipped (no requirements changes) or all audits passed.
+    needs: [detect-changes, audit]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check audit results
+        run: |
+          if [ "${{ needs.audit.result }}" = "failure" ] || [ "${{ needs.audit.result }}" = "cancelled" ]; then
+            echo "Security audit failed or was cancelled"
+            exit 1
+          fi
+          echo "Security gate passed (audit result: ${{ needs.audit.result }})"
