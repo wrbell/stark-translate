@@ -2197,7 +2197,6 @@ async def _pipeline_translate_and_finalize(
     global _chunks_completed
     try:
         async with _pipeline_translation_lock:
-
             loop = asyncio.get_event_loop()
 
             # --- Multiprocess path: dispatch to translation worker process ---
@@ -2231,11 +2230,7 @@ async def _pipeline_translate_and_finalize(
                 # CUDA backend: full feature parity — streaming, A/B, adaptive routing.
                 # CUDA is thread-safe, so task_a and task_b run truly concurrently
                 # on the 2-worker pipeline pool (unlike MLX which serializes).
-                if (
-                    mlx_b_model is None
-                    and mlx_a_model is not None
-                    and should_use_marian_only(english, stt_confidence)
-                ):
+                if mlx_b_model is None and mlx_a_model is not None and should_use_marian_only(english, stt_confidence):
                     # Adaptive routing: simple utterance, skip Gemma
                     spanish_a, lat_a = translate_marian(english)
                     tps_a = 0.0
@@ -3457,9 +3452,7 @@ async def main_async(args):
         elif BACKEND == "cuda" and mlx_a_model is not None:
             # mlx_a_model is a CUDAGemmaStreamingEngine when using streaming path
             if hasattr(mlx_a_model, "translate_streaming"):
-                result = mlx_a_model.translate(
-                    args.dry_run_text, source_lang=SOURCE_LANG, target_lang=TARGET_LANG
-                )
+                result = mlx_a_model.translate(args.dry_run_text, source_lang=SOURCE_LANG, target_lang=TARGET_LANG)
                 spanish, lat, tps = result.text, result.latency_ms, result.tokens_per_second
             else:
                 spanish, lat, tps = translate_cuda_gemma(mlx_a_model, mlx_a_tokenizer, args.dry_run_text)

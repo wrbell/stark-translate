@@ -586,10 +586,7 @@ def _clone_past_key_values(
         # DynamicCache — use copy.deepcopy which calls __deepcopy__ on the cache
         return copy.deepcopy(past_key_values)
 
-    return tuple(
-        tuple(t.clone() if hasattr(t, "clone") else t for t in layer)
-        for layer in past_key_values
-    )
+    return tuple(tuple(t.clone() if hasattr(t, "clone") else t for t in layer) for layer in past_key_values)
 
 
 # ---------------------------------------------------------------------------
@@ -645,9 +642,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         if not BITSANDBYTES_AVAILABLE:
-            raise RuntimeError(
-                "bitsandbytes is not installed. Required for 4-bit quantization."
-            )
+            raise RuntimeError("bitsandbytes is not installed. Required for 4-bit quantization.")
 
         logger.info("Loading %s (CUDA 4-bit, streaming)...", self._model_id_str)
         t0 = time.time()
@@ -744,7 +739,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         with torch.no_grad():
             output = self._model.generate(**gen_kwargs)
 
-        generated = output[0][input_ids.shape[1]:]
+        generated = output[0][input_ids.shape[1] :]
         result = self._tokenizer.decode(generated, skip_special_tokens=False)
         latency_ms = (time.perf_counter() - t0) * 1000
 
@@ -910,9 +905,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
             }
         ]
 
-        full_prompt = self._tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True
-        )
+        full_prompt = self._tokenizer.apply_chat_template(messages, add_generation_prompt=True)
         if isinstance(full_prompt, str):
             full_tokens = self._tokenizer.encode(full_prompt, add_special_tokens=False)
         else:
@@ -924,7 +917,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         # Locate marker in token sequence
         prefix_end = None
         for i in range(len(full_tokens) - marker_len + 1):
-            if full_tokens[i: i + marker_len] == marker_tokens:
+            if full_tokens[i : i + marker_len] == marker_tokens:
                 prefix_end = i
                 break
 
@@ -933,7 +926,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
             return (None, [])
 
         prefix_tokens = full_tokens[:prefix_end]
-        suffix_tokens = full_tokens[prefix_end + marker_len:]
+        suffix_tokens = full_tokens[prefix_end + marker_len :]
 
         if len(prefix_tokens) < 3:
             logger.warning(
