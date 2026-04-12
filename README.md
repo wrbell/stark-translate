@@ -121,7 +121,7 @@ python dry_run_ab.py --backend=cuda --no-ab
 ## Testing
 
 ```bash
-# Run full test suite (754 tests, no GPU required)
+# Run full test suite (806 tests, no GPU required)
 pytest tests/ -v
 
 # With coverage report
@@ -176,7 +176,9 @@ Pipeline overlap (P7-6C) hides translation latency by running translation on utt
 - **Deepgram Nova-3 oracle transcription** -- ground-truth labeling with 50 theological keyterm boosting
 - **Tiered glossary system** -- Tier 1 (50 boost terms for Deepgram) + Tier 2 (229 master terms for training)
 - **Data integrity pipeline** -- SHA-256 lockfile, stratified eval sets, adapter health checks
-- **TranslateGemma fine-tuning** -- S1-S8 ablation sweep (S6 winner: balanced ratio), Whisper W0-W9 design
+- **TranslateGemma fine-tuning** -- S1-S9 ablation sweep (S6 winner: balanced ratio, COMET prox 12B = -0.0002)
+- **Whisper LoRA fine-tuning** -- W12 data scaling (198K chunks, 21.41% baseline WER) + W15 hard example mining with curriculum learning
+- **Hard example mining** -- mine → filter by WER bounds → stratified caps → curriculum train with `--init-from`
 - **Dual-target inference** -- runs on Apple Silicon (MLX) or NVIDIA GPUs (CUDA) from a single codebase
 - **Unified configuration** -- pydantic-settings with STARK_ env prefix, .env file support
 - **STT fallback** -- automatic retry with fallback model on low-confidence or hallucinated segments
@@ -242,13 +244,20 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 ├── training/                  # Windows/WSL training scripts (CUDA)
 │   ├── preprocess_audio.py    # 10-step audio cleaning pipeline (accent-aware)
 │   ├── transcribe_church.py   # Whisper large-v3 pseudo-labeling
+│   ├── transcribe_with_deepgram.py # Deepgram Nova-3 oracle transcription
+│   ├── align_deepgram_chunks.py # Align Deepgram words to Whisper chunk boundaries
 │   ├── prepare_bible_corpus.py # Bible verse pair alignment
 │   ├── prepare_whisper_dataset.py # Accent-balanced audiofolder builder
 │   ├── prepare_piper_dataset.py # LJSpeech format conversion for Piper TTS
-│   ├── train_whisper.py       # Whisper LoRA fine-tuning (accent-balanced + per-accent WER)
+│   ├── train_whisper.py       # Whisper LoRA fine-tuning (curriculum learning, --init-from)
 │   ├── train_gemma.py         # TranslateGemma QLoRA fine-tuning
 │   ├── train_marian.py        # MarianMT full fine-tune
 │   ├── train_piper.py         # Piper TTS voice fine-tuning
+│   ├── mine_hard_examples.py  # Hard example mining (batched fp16, per-chunk WER, Tier 1)
+│   ├── build_hard_subset.py   # WER-bounded filtering with stratified caps
+│   ├── filter_chunks_by_confidence.py # Quality-ranked chunk selection
+│   ├── recover_shards.py      # Rebuild DatasetDict from Arrow shards after OOM
+│   ├── benchmark_gemma4.py    # TranslateGemma vs Gemma 4 comparison benchmark
 │   ├── export_piper_onnx.py   # Piper TTS model export to ONNX
 │   ├── evaluate_translation.py # SacreBLEU/chrF++/COMET scoring
 │   ├── evaluate_piper.py      # Piper TTS quality assessment
@@ -316,30 +325,33 @@ Training data: church audio via yt-dlp + Bible parallel corpus (KJV/ASV/WEB/BBE/
 - Bidirectional language support: `--lang en` (EN→ES) and `--lang es` (ES→EN) with automatic model selection
 - Wholesale swap to Whisper Large-V3-Turbo (both partials and finals)
 - `engines/` package: MLX + CUDA engine implementations with factory auto-detection
-- `settings.py`: pydantic-settings unified config (`STARK_` env prefix, `.env` support)
+- CUDA streaming inference runtime: `CUDAGemmaStreamingEngine` with prompt cache, speculative decoding, VRAM tier auto-detection
+- `settings.py`: pydantic-settings unified config (`STARK_` env prefix, `.env` support, `CUDASettings`)
 - Backend selection (`--backend auto|mlx|cuda`) with CUDA fallback paths
 - STT fallback logic (lazy-load fallback model on low confidence / hallucination)
 - Piper TTS engine integration (`--tts` flag, WebSocket + WAV output, EN + ES voices)
 - Validation pipeline (`tools/validate_session.py`) with text-based anchor alignment (19.6% WER on live session)
 - Roundtrip quality test: STT WER 3.8-8.8%, roundtrip WER ~56%, ~134ms/word (`tools/roundtrip_test.py`)
+- TranslateGemma S1-S9 ablation: S6 winner (balanced 1:1, COMET prox 12B = -0.0002)
+- Whisper W12 data scaling: 198K chunks from 328 sermons, 21.41% baseline WER
+- W15 hard example mining: curriculum learning pipeline (mine → filter → train with `--init-from`)
+- Deepgram Nova-3 oracle: 35 sermons transcribed with 50 theological keyterms
+- Alignment hardening: sharded Arrow writes (1000 rows/shard), 12GB memory cap, crash recovery
+- Data integrity: SHA-256 lockfile, stratified eval sets, adapter health checks, training manifests
 - Fine-tuning data prep tools (review queue + dataset export)
-- Piper TTS training scripts: dataset prep, training, ONNX export, evaluation
 - CI/CD pipeline: 7 GitHub Actions workflows (lint, test, security, release, label, commitlint, stale) + Codecov
-- 754 tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
+- 806 tests with coverage threshold (≥18%), pre-commit hooks, CalVer versioning
 - Dependabot for automated dependency updates
 - Structured logging (`--log-level`, session log files, VAD event logging)
 - Rolling session stats (5-min averages broadcast to operator displays)
-- Periodic GPU warmup during sustained silence
-- New CSV columns: `silence_delay_ms`, `queue_wait_ms`, `partial_stt_ms`
-- Reduced silence trigger (0.8s→0.5s) and partial interval (1.0s→0.6s)
 
 **What's next:**
-- NVIDIA C++ inference optimization — llama.cpp/exllamav2 for sub-1s translation ([plan](./docs/optimized.md))
-- Automated adapter deployment with health checks and rollback ([plan](./docs/deploy.md))
-- Fine-tune Whisper + TranslateGemma on church audio (Phase 2-6)
-- Active learning feedback loop: flag → correct → retrain
+- Whisper curriculum learning: continue W15 mine → filter → train cycles to drive WER below 10%
+- Gemma 4 benchmark: evaluate E2B/E4B vs TranslateGemma on theological translation
+- Adapter evaluation & transfer: deploy best adapters to Mac, re-run A/B comparison
+- Active learning feedback loop: flag → correct → retrain (3-5 cycles)
 - Hindi & Chinese translation adapters
-- See [`docs/todo.md`](./docs/todo.md) for full task list
+- See [`docs/roadmap.md`](./docs/roadmap.md) for full project roadmap
 
 ## License
 

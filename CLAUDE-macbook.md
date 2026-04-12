@@ -176,11 +176,11 @@ Logs approach, latency (STT/translate/E2E), tokens/sec, confidence scores, WER, 
 
 The Mac loads LoRA/QLoRA adapters trained on the Windows desktop. These are small (~60–120 MB) parameter patches that customize the base models for church content without modifying the original weights.
 
-**Whisper LoRA adapter** (`fine_tuned_whisper_mi/`): Trained on 20–50 hours of church sermon audio via pseudo-labeling. Adapts both encoder (reverberant church acoustics, PA system artifacts) and decoder (theological vocabulary: "sanctification," "propitiation," biblical proper names). Expected WER reduction: 10–30% relative on church audio.
+**Whisper LoRA adapter** (`whisper_ablation/W12_198k/` or `W15_hard/`): Trained on 198K Deepgram-aligned chunks from 328 sermons (W12 data scaling) with curriculum learning via hard example mining (W15). Adapts both encoder (reverberant church acoustics, PA system artifacts) and decoder (theological vocabulary: "sanctification," "propitiation," biblical proper names). W12 baseline WER on fresh eval: 21.41%.
 
-**TranslateGemma QLoRA adapter** (`fine_tuned_gemma_mi_A/` or `_B/`): Trained on ~155K Bible verse pairs from public-domain translations (KJV/ASV/WEB/BBE/YLT ↔ RVR1909/Español Sencillo) plus a 229-term theological glossary. Improves translation of biblical terminology, proper name conventions (James→Santiago for the epistle, James→Jacobo for the apostle), and religious register. Expected improvement: +3–8 SacreBLEU points on biblical text.
+**TranslateGemma QLoRA adapter** (`hybrid_runs/S6_balanced/`): S1-S9 ablation winner. Trained on balanced 1:1 verse/sermon data (60% 12B + 40% DeepL glossary-enforced translations). COMET proximity to 12B base = -0.0002 (effectively tied). Improves translation of biblical terminology, proper name conventions (James→Santiago for the epistle, James→Jacobo for the apostle), and religious register.
 
-Both adapters are produced by the training pipeline documented in [`CLAUDE-windows.md`](./CLAUDE-windows.md). The full fine-tuning strategy, data sources, and research basis are in [`CLAUDE.md`](./CLAUDE.md) under "Fine-Tuning Strategy."
+Both adapters are produced by the training pipeline documented in [`CLAUDE-windows.md`](./CLAUDE-windows.md). The full fine-tuning strategy, data sources, and research basis are in [`training/CLAUDE.md`](./training/CLAUDE.md).
 
 **Toggling adapters:** You can instantly compare fine-tuned vs. base model performance:
 
@@ -389,7 +389,7 @@ def compare_window(local_text, youtube_text):
         jiwer.RemoveMultipleSpaces(),
         jiwer.Strip(),
     ])
-    result = jiwer.process_words(youtube_text, local_text, 
+    result = jiwer.process_words(youtube_text, local_text,
                                   reference_transform=transforms,
                                   hypothesis_transform=transforms)
     return {

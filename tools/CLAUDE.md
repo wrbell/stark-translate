@@ -162,10 +162,20 @@ Builds proper evaluation sets with stratification and provenance:
 - 500 verse pairs stratified by genre (Pentateuch/History/Poetry/Prophets/Gospels/Epistles)
 - Sermon eval chunks filtered to post-cutoff sermons only
 - Registry at `bible_data/eval_registry.json`
+- **Fresh eval set:** 4 post-cutoff sermons (Gospel+Teaching 3/22 and 3/29), 2,706 examples — used for W12+ Whisper ablation evaluation
 
 ```bash
 python tools/build_eval_sets.py --dry-run   # Preview
 python tools/build_eval_sets.py             # Build (modifies verse_pairs_train.jsonl)
+```
+
+### Gemma 4 Benchmark (`training/benchmark_gemma4.py`)
+
+Compares TranslateGemma 4B/12B vs Gemma 4 E2B/E4B on EN→ES translation. Three evaluation tiers: Bible verse holdout (BLEU/chrF++/COMET), Deepgram sermon chunks (COMET-QE + hallucination ratio), 8 theological canary sentences (term accuracy).
+
+```bash
+python training/benchmark_gemma4.py --models tg4b,e2b --max-samples 50 --skip-comet
+python training/benchmark_gemma4.py --models all  # Full 4-model comparison
 ```
 
 ## Per-Tool Quick Reference
