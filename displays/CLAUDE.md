@@ -47,6 +47,11 @@ All display clients auto-reconnect on WebSocket drop. No manual refresh needed.
 - Test changes by opening files directly or via the HTTP server.
 - WebSocket message format is defined in `dry_run_ab.py` (`broadcast_translation()` and related functions).
 
+### Recent Fixes
+
+- **Scroll behavior**: Changed from `scrollTop` assignment to `scrollIntoView()` for reliable auto-scroll. Removed CSS `scroll-behavior: smooth` which caused animation conflicts with rapid updates.
+- **Orphaned partials**: Fixed via CSS class targeting instead of ID mismatch — partial elements now correctly replaced by finals.
+
 ---
 
 ## Multi-Language Protocol Extension

@@ -1229,11 +1229,41 @@ if __name__ == "__main__":
     evaluate_theological_terms()
 ```
 
+### W12 Data Scaling & W15 Hard Example Mining
+
+**W12** — Full Deepgram-aligned dataset with W7 config (lr=1e-4, r=32, q_proj+v_proj, replay=0.3, 1 epoch):
+- Training data: 198K chunks from 328 sermons at `/mnt/d/Data/stt-data/whisper_dataset_sttdata/.preprocessed_cache/` (~290 GB Arrow)
+- Fresh eval set: 4 post-cutoff sermons (2,706 examples) at `stark_data/eval_fresh_dataset/.preprocessed_cache/`
+- Baseline WER on fresh eval: **21.41%** (normalized)
+
+**W15** — Hard example mining for curriculum learning:
+```bash
+# 1. Mine — score chunks by WER against Deepgram ground truth
+python training/mine_hard_examples.py --adapter whisper_ablation/W12_198k \
+  --chunks-json ablation/sermon_whisper_chunks_w14_combined.json \
+  --deepgram-dir /mnt/d/Data/stt-data/deepgram_transcripts \
+  --audio-dir /mnt/d/Data/stt-data --output w15_mined.jsonl --resume
+
+# 2. Filter — select hard chunks (WER 0.15-0.80), include theological terms
+python training/build_hard_subset.py --mined w15_mined.jsonl \
+  --chunks-json ablation/sermon_whisper_chunks_w14_combined.json \
+  --output w15_hard_subset.json --wer-min 0.15 --wer-max 0.80 --include-tier1
+
+# 3. Train — initialize from W12 adapter with fresh optimizer
+python training/train_whisper.py -d /path/to/hard_subset_dataset \
+  -o whisper_ablation/W15_hard --init-from whisper_ablation/W12_198k
+```
+
+**Alignment hardening** (in `align_deepgram_chunks.py`):
+- Sharded Arrow writes: 1000 rows/shard to disk, peak RAM ~960 MB vs 190 GB unbatched
+- 12 GB hard virtual memory cap via `resource.setrlimit(RLIMIT_AS)`
+- Crash recovery: `training/recover_shards.py` rebuilds DatasetDict from completed shards
+
 ### Data Integrity
 
 - **Lockfile:** `python tools/lock_data.py verify` checks SHA-256 hashes of all training data before runs
 - **Training manifests:** `train_gemma.py` saves `training_manifest.json` with full CLI args, data file hashes, and metrics
-- **Eval sets:** 500 stratified verse holdout + 422 sermon eval chunks (post-2026-03-14 cutoff)
+- **Eval sets:** 500 stratified verse holdout + 422 sermon eval chunks (post-2026-03-14 cutoff) + fresh eval (4 sermons, 2,706 examples)
 
 ---
 

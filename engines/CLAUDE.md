@@ -36,6 +36,25 @@ CUDA **is** thread-safe (unlike MLX). The pipeline uses `ThreadPoolExecutor(max_
 
 Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `STARK_CUDA__*`.
 
+### CUDASettings (`STARK_CUDA_` env prefix)
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `vram_tier` | `auto` | `auto` / `full_ab` / `4b_only` / `marian` |
+| `use_prompt_cache` | `True` | Pre-compute KV cache (~50-80ms savings/call) |
+| `use_speculative` | `True` | 4B drafts 12B tokens (A/B mode only) |
+| `pipeline_workers` | `2` | Thread pool workers (2 = STT/Translation overlap) |
+| `streaming_batch_size` | `3` | Tokens per WebSocket batch during streaming |
+| `compute_type` | `int8` | faster-whisper CTranslate2 compute type |
+
+### CUDA Engine Classes
+
+| Class | Role |
+|-------|------|
+| `FasterWhisperEngine` | STT via faster-whisper (CUDA/CPU), quality-based fallback retry |
+| `CUDAGemmaEngine` | Basic translation with bitsandbytes 4-bit, no streaming |
+| `CUDAGemmaStreamingEngine` | Full-featured: streaming, prompt cache, speculative decoding |
+
 ## MLX Thread Safety (CRITICAL)
 
 Metal is NOT thread-safe. All MLX inference (Whisper STT + TranslateGemma translation) must run on a **single thread** via `ThreadPoolExecutor(max_workers=1)`. Concurrent MLX on different threads causes SIGSEGV.

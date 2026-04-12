@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # detect_vram_tier
 # ---------------------------------------------------------------------------
@@ -163,9 +162,11 @@ class TestCUDAGemmaStreamingEngine:
     def test_init_requires_torch(self):
         from engines.cuda_engine import CUDAGemmaStreamingEngine
 
-        with patch("engines.cuda_engine.TORCH_AVAILABLE", False):
-            with pytest.raises(RuntimeError, match="PyTorch is not installed"):
-                CUDAGemmaStreamingEngine()
+        with (
+            patch("engines.cuda_engine.TORCH_AVAILABLE", False),
+            pytest.raises(RuntimeError, match="PyTorch is not installed"),
+        ):
+            CUDAGemmaStreamingEngine()
 
     def test_init_requires_cuda(self):
         from engines.cuda_engine import CUDAGemmaStreamingEngine
@@ -261,34 +262,40 @@ class TestFactoryStreamingParam:
     def test_cuda_streaming_true_returns_streaming_engine(self):
         from engines.factory import create_translation_engine
 
-        with patch("engines.factory._detect_backend", return_value="cuda"):
-            with patch("engines.cuda_engine.CUDAGemmaStreamingEngine") as mock_cls:
-                mock_cls.return_value = MagicMock()
-                engine = create_translation_engine(backend="cuda", streaming=True)
-                mock_cls.assert_called_once()
+        with (
+            patch("engines.factory._detect_backend", return_value="cuda"),
+            patch("engines.cuda_engine.CUDAGemmaStreamingEngine") as mock_cls,
+        ):
+            mock_cls.return_value = MagicMock()
+            create_translation_engine(backend="cuda", streaming=True)
+            mock_cls.assert_called_once()
 
     def test_cuda_streaming_false_returns_basic_engine(self):
         from engines.factory import create_translation_engine
 
-        with patch("engines.factory._detect_backend", return_value="cuda"):
-            with patch("engines.cuda_engine.CUDAGemmaEngine") as mock_cls:
-                mock_cls.return_value = MagicMock()
-                engine = create_translation_engine(backend="cuda", streaming=False)
-                mock_cls.assert_called_once()
+        with (
+            patch("engines.factory._detect_backend", return_value="cuda"),
+            patch("engines.cuda_engine.CUDAGemmaEngine") as mock_cls,
+        ):
+            mock_cls.return_value = MagicMock()
+            create_translation_engine(backend="cuda", streaming=False)
+            mock_cls.assert_called_once()
 
     def test_assistant_model_forwarded(self):
         from engines.factory import create_translation_engine
 
-        with patch("engines.factory._detect_backend", return_value="cuda"):
-            with patch("engines.cuda_engine.CUDAGemmaStreamingEngine") as mock_cls:
-                mock_cls.return_value = MagicMock()
-                create_translation_engine(
-                    backend="cuda",
-                    streaming=True,
-                    assistant_model_id="google/translategemma-4b-it",
-                )
-                _, kwargs = mock_cls.call_args
-                assert kwargs["assistant_model_id"] == "google/translategemma-4b-it"
+        with (
+            patch("engines.factory._detect_backend", return_value="cuda"),
+            patch("engines.cuda_engine.CUDAGemmaStreamingEngine") as mock_cls,
+        ):
+            mock_cls.return_value = MagicMock()
+            create_translation_engine(
+                backend="cuda",
+                streaming=True,
+                assistant_model_id="google/translategemma-4b-it",
+            )
+            _, kwargs = mock_cls.call_args
+            assert kwargs["assistant_model_id"] == "google/translategemma-4b-it"
 
 
 # ---------------------------------------------------------------------------

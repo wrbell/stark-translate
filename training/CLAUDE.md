@@ -125,8 +125,11 @@ Mix 70–80% domain data with 20–30% general English (LibriSpeech/Common Voice
 - **Script:** `training/align_deepgram_chunks.py` — aligns faster-whisper chunk boundaries with Deepgram word timestamps
 - **Output:** HuggingFace audiofolder dataset for Whisper fine-tuning
 - **Dataset prep:** `prepare_whisper_dataset.py --gt-source deepgram` for direct Deepgram transcript loading (bypasses pseudo-labeling)
+- **Sharded Arrow writes:** `--preprocess-cache` mode streams rows in batches of 1,000 to Arrow shards on disk (`_shards_train/`, `_shards_test/`). Peak RAM ~960 MB of mel data per shard vs 190 GB unbatched. Crash-resume: skips completed shards on re-run.
+- **Memory cap:** 12 GB hard virtual memory limit via `resource.setrlimit(RLIMIT_AS)` — prevents OOM-kill on 75K+ chunk datasets
+- **Crash recovery:** `training/recover_shards.py` rebuilds DatasetDict from completed shards, streaming one shard at a time (never more than one in memory)
 
-### Whisper LoRA Ablation Design (W0–W9)
+### Whisper LoRA Ablation Design (W0–W9) & Scaling (W12–W15)
 
 Full test matrix defined in `docs/whisper_tuning_test_matrix.md`.
 
@@ -138,6 +141,27 @@ Full test matrix defined in `docs/whisper_tuning_test_matrix.md`.
 
 - **Script:** `training/run_whisper_ablation.sh`
 - **Eval metrics:** overall WER, theological term WER, accent fairness gap, general English regression
+
+### W12 Data Scaling Run
+
+W7 config (lr=1e-4, r=32, q_proj+v_proj, replay=0.3, 1 epoch) on the full Deepgram-aligned dataset:
+
+- **Training data:** 198K chunks from 328 sermons (~290 GB Arrow cache at `/mnt/d/Data/stt-data/whisper_dataset_sttdata/.preprocessed_cache/`)
+- **Fresh eval set:** 4 post-cutoff sermons (2,706 examples, test split) — Gospel+Teaching from 3/22/26 and 3/29/26
+- **Baseline WER on fresh eval:** **21.41%** (normalized)
+- **DO NOT TRAIN ON:** `4Es8SrciqV0`, `vRT5RswIHu8`, `FOVTvZednUQ`, `yOzWGOTvTaA`
+
+### W15 Hard Example Mining & Curriculum Learning
+
+Curriculum learning pipeline for targeted Whisper adaptation:
+
+1. **Mine** — `training/mine_hard_examples.py`: batched fp16 inference over chunk pool, per-chunk WER against Deepgram ground truth, Tier 1 theological term detection, resume support, JSONL output
+   - Key flags: `--adapter`, `--chunks-json`, `--deepgram-dir`, `--audio-dir`, `--output`, `--batch-size`, `--resume`
+2. **Filter** — `training/build_hard_subset.py`: WER-bounded selection (default 0.15–0.80), stratified per-source caps, optional `--include-tier1` to always keep theological chunks
+   - Key flags: `--wer-min`, `--wer-max`, `--target-size`, `--max-per-source`, `--include-tier1`
+3. **Quality rank** — `training/filter_chunks_by_confidence.py`: top-N selection by `logprob`, `confidence`, or `combined` metric, with min/max duration filtering
+4. **Train** — `training/train_whisper.py --init-from <adapter>`: load pre-trained adapter weights with fresh optimizer state (new learning trajectory, no momentum carry-over)
+5. **Repeat** — Re-mine on the updated adapter, filter harder examples, train again. 2–4 cycles typical for convergence.
 
 ## TranslateGemma QLoRA Configuration
 
@@ -159,27 +183,41 @@ Full test matrix defined in `docs/whisper_tuning_test_matrix.md`.
 
 **MarianMT** (`Helsinki-NLP/opus-mt-en-es`, ~298MB, ~80ms) supports full fine-tuning without LoRA — lower quality ceiling but faster iteration.
 
-### TranslateGemma S1–S6 Results Summary
+### TranslateGemma S1–S9 Results Summary
 
-Two-phase sweep to find optimal QLoRA configuration:
+Three-phase sweep to find optimal QLoRA configuration:
 
 **Phase 1 — Config sweep (S1–S3):** Learning rate, steps, NEFTune noise. **S1 won** (lr=1e-5, 50 steps).
 
 **Phase 2 — Ratio sweep (S4–S6):** Verse/sermon mix ratio. **S6 won** (balanced 1:1 verse/sermon, COMET proximity to 12B baseline = -0.0002).
 
+**Phase 3 — Scale-up (S7–S9):** Data scaling from 1,800 to 10,000 sermon pairs.
+
+| Run | Data | Key Result |
+|-----|------|------------|
+| S6 | 1,800 verse + 1,800 sermon (balanced) | **Winner** — COMET prox 12B = -0.0002 |
+| S7 | 5,000 60/40 hybrid | Control for S8 |
+| S8 | 5,000 100% DeepL | Tests if 12B adds value |
+| S9 | 10,000 100% DeepL | Diminishing returns test |
+
 **Key finding:** Verse pairs are NOT harmful — balanced ratio + more data is the formula.
 
 **Hybrid data composition:** 60% TranslateGemma 12B translations + 40% DeepL glossary-enforced translations.
 
-**S8 (pure DeepL, eval running):** 5,000 sermon pairs via 100% DeepL glossary-enforced translations + 5,000 verse pairs. Tests whether 12B adds value or if DeepL alone suffices. If S8 matches S6, we can drop 12B inference entirely for data generation (~4.5 GPU-hrs saved per batch).
+**Data provenance:** All runs tracked in `hybrid_runs/data_provenance.md` with per-sermon chunk breakdowns. `generate_hybrid_synthetic.py` saves `_provenance.json` sidecars and supports `--train-only` to prevent eval data leakage.
 
-**S7 (planned):** Same 5,000 chunks but 60/40 12B/DeepL hybrid. Control for S8.
+### Gemma 4 Benchmark
 
-**S9 (planned):** 10,000 sermon pairs, 100% DeepL. Tests diminishing returns at 2× scale.
+`training/benchmark_gemma4.py` compares next-gen models against current TranslateGemma:
 
-**Data provenance:** All runs tracked in `hybrid_runs/data_provenance.md` with per-sermon chunk breakdowns. `generate_hybrid_synthetic.py` now saves `_provenance.json` sidecars and supports `--train-only` to prevent eval data leakage.
+| Shortname | Model | Prompt Type |
+|-----------|-------|-------------|
+| `tg4b` | `google/translategemma-4b-it` | translategemma |
+| `tg12b` | `google/translategemma-12b-it` | translategemma |
+| `e2b` | `google/gemma-4-e2b-it` | gemma4_instruct |
+| `e4b` | `google/gemma-4-e4b-it` | gemma4_instruct |
 
-See `docs/whisper_tuning_test_matrix.md` for the Whisper LoRA W0–W9 ablation design.
+Three evaluation tiers: Tier 1 (Bible verse holdout, BLEU/chrF++/COMET), Tier 2 (Deepgram sermon chunks, COMET-QE + hallucination ratio), Tier 3 (8 theological canary sentences, term accuracy).
 
 ## Theological Vocabulary Challenges
 
