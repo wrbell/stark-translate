@@ -19,7 +19,7 @@ class TestDetectVramTier:
         from engines.cuda_engine import detect_vram_tier
 
         mock_props = MagicMock()
-        mock_props.total_mem = 24 * 1024 * 1024 * 1024  # 24 GB
+        mock_props.total_memory = 24 * 1024 * 1024 * 1024  # 24 GB
         mock_props.name = "NVIDIA GeForce RTX 3090 Ti"
 
         with (
@@ -37,7 +37,7 @@ class TestDetectVramTier:
         from engines.cuda_engine import detect_vram_tier
 
         mock_props = MagicMock()
-        mock_props.total_mem = 16 * 1024 * 1024 * 1024
+        mock_props.total_memory = 16 * 1024 * 1024 * 1024
         mock_props.name = "NVIDIA RTX A2000 Ada"
 
         with (
@@ -54,7 +54,7 @@ class TestDetectVramTier:
         from engines.cuda_engine import detect_vram_tier
 
         mock_props = MagicMock()
-        mock_props.total_mem = 8 * 1024 * 1024 * 1024
+        mock_props.total_memory = 8 * 1024 * 1024 * 1024
         mock_props.name = "NVIDIA GeForce RTX 3070 Ti"
 
         with (
@@ -71,7 +71,7 @@ class TestDetectVramTier:
         from engines.cuda_engine import detect_vram_tier
 
         mock_props = MagicMock()
-        mock_props.total_mem = 4 * 1024 * 1024 * 1024
+        mock_props.total_memory = 4 * 1024 * 1024 * 1024
         mock_props.name = "NVIDIA GeForce GTX 1650"
 
         with (

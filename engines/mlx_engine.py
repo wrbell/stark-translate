@@ -399,6 +399,9 @@ class MLXGemmaEngine(TranslationEngine):
         model_id: str = "mlx-community/translategemma-4b-it-4bit",
         cache_limit_mb: int = 256,
         use_prompt_cache: bool = True,
+        use_turboquant: bool = False,
+        turboquant_key_bits: int = 3,
+        turboquant_val_bits: int = 4,
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
@@ -407,6 +410,9 @@ class MLXGemmaEngine(TranslationEngine):
         self._model_id = model_id
         self._cache_limit_mb = cache_limit_mb
         self._use_prompt_cache = use_prompt_cache
+        self._use_turboquant = use_turboquant
+        self._turboquant_key_bits = turboquant_key_bits
+        self._turboquant_val_bits = turboquant_val_bits
 
         self._model = None
         self._tokenizer = None
@@ -444,6 +450,30 @@ class MLXGemmaEngine(TranslationEngine):
 
         elapsed = time.time() - t0
         logger.info("%s loaded (%.1fs)", self._model_id, elapsed)
+
+        # -- TurboQuant KV cache compression (mlx-optiq) ----------------------
+        # Replaces the default KV cache with a quantized version that uses
+        # 4.6x less memory.  Near-lossless at key_bits=3, val_bits=4.
+        # Enables 12B on 8GB Macs and reduces memory pressure on 18GB.
+        if self._use_turboquant:
+            try:
+                from mlx_optiq import TurboQuantKVCache
+
+                self._model.kv_cache = TurboQuantKVCache(
+                    self._model,
+                    key_bits=self._turboquant_key_bits,
+                    val_bits=self._turboquant_val_bits,
+                    rotate=True,
+                )
+                logger.info(
+                    "TurboQuant KV cache enabled (key=%d-bit, val=%d-bit, rotate=True)",
+                    self._turboquant_key_bits,
+                    self._turboquant_val_bits,
+                )
+            except ImportError:
+                logger.warning("TurboQuant requested but mlx-optiq not installed. Install with: pip install mlx-optiq")
+            except Exception as exc:
+                logger.warning("TurboQuant initialization failed: %s", exc)
 
         # -- prompt cache (mirrors dry_run_ab._build_prompt_cache) ------------
         if self._use_prompt_cache:

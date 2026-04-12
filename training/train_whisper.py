@@ -328,9 +328,29 @@ def fine_tune_whisper(
             raise FileNotFoundError(f"Adapter weights not found: {weights_path}")
         adapter_weights = load_file(weights_path)
         incompatible = model.load_state_dict(adapter_weights, strict=False)
+        if incompatible.missing_keys:
+            # Filter to only LoRA keys — base model keys are expected to be "missing"
+            # since we only load the adapter weights, not the full model.
+            lora_missing = [k for k in incompatible.missing_keys if "lora_" in k]
+            if lora_missing:
+                raise ValueError(
+                    f"LoRA keys missing when loading adapter from {init_from_adapter}: {lora_missing}. "
+                    f"Check that lora_r and target_modules match the source adapter."
+                )
         if incompatible.unexpected_keys:
             logger.warning("Unexpected keys in init-from adapter: %s", incompatible.unexpected_keys)
-        logger.info("Initialized adapter from %s (%d keys loaded)", init_from_adapter, len(adapter_weights))
+        # Verify at least some LoRA weights were loaded
+        lora_loaded = [k for k in adapter_weights if "lora_" in k]
+        if not lora_loaded:
+            raise ValueError(
+                f"No LoRA weights found in {weights_path}. File contains keys: {list(adapter_weights.keys())[:5]}"
+            )
+        logger.info(
+            "Initialized adapter from %s (%d LoRA tensors loaded: %s)",
+            init_from_adapter,
+            len(lora_loaded),
+            ", ".join(lora_loaded[:4]),
+        )
 
     model.print_trainable_parameters()
 

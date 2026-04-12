@@ -544,7 +544,7 @@ def detect_vram_tier() -> tuple[str, int]:
         return ("none", 0)
 
     props = torch.cuda.get_device_properties(0)
-    vram_mb = props.total_mem // (1024 * 1024)
+    vram_mb = props.total_memory // (1024 * 1024)
     gpu_name = props.name
 
     if vram_mb >= _VRAM_FULL_AB_MB:
