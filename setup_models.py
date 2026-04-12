@@ -32,7 +32,7 @@ def get_device_info():
     if info["cuda"]:
         info["device"] = "cuda"
         info["gpu_name"] = torch.cuda.get_device_name(0)
-        info["gpu_mem_gb"] = torch.cuda.get_device_properties(0).total_mem / 1024**3
+        info["gpu_mem_gb"] = torch.cuda.get_device_properties(0).total_memory / 1024**3
     elif info["mps"]:
         info["device"] = "mps"
         info["gpu_name"] = "Apple Silicon (MPS)"

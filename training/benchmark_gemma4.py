@@ -264,7 +264,7 @@ def run_benchmark(args):
     # Record GPU info
     if torch.cuda.is_available():
         gpu_name = torch.cuda.get_device_name(0)
-        gpu_vram = torch.cuda.get_device_properties(0).total_mem / 1024**3
+        gpu_vram = torch.cuda.get_device_properties(0).total_memory / 1024**3
         logger.info("GPU: %s (%.1f GB)", gpu_name, gpu_vram)
     else:
         gpu_name = "CPU"
