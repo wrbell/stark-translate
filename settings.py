@@ -195,6 +195,19 @@ class TranslationSettings(BaseSettings):
         default="es",
         description="Target language code for TranslateGemma chat template",
     )
+    # TurboQuant KV cache compression (MLX only, via mlx-optiq)
+    turboquant: bool = Field(
+        default=False,
+        description="Enable TurboQuant KV cache compression (4.6x, MLX only, requires mlx-optiq)",
+    )
+    turboquant_key_bits: int = Field(
+        default=3,
+        description="TurboQuant key quantization bits (3 = near-lossless)",
+    )
+    turboquant_val_bits: int = Field(
+        default=4,
+        description="TurboQuant value quantization bits (4 = near-lossless)",
+    )
 
     model_config = {"env_prefix": "STARK_TRANSLATE_"}
 
