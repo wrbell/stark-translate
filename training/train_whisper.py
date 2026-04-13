@@ -327,6 +327,36 @@ def fine_tune_whisper(
         if not os.path.exists(weights_path):
             raise FileNotFoundError(f"Adapter weights not found: {weights_path}")
         adapter_weights = load_file(weights_path)
+
+        # Handle PEFT version differences in key naming.
+        # Older PEFT: lora_A.weight / lora_B.weight
+        # Newer PEFT: lora_A.default.weight / lora_B.default.weight
+        # Detect which convention the current model uses and remap if needed.
+        model_keys = set(model.state_dict().keys())
+        model_has_default = any(".lora_A.default." in k for k in model_keys)
+        file_has_default = any(".lora_A.default." in k for k in adapter_weights)
+
+        if model_has_default and not file_has_default:
+            # Remap old-style keys to new-style: lora_A.weight → lora_A.default.weight
+            remapped = {}
+            for k, v in adapter_weights.items():
+                new_key = k.replace(".lora_A.weight", ".lora_A.default.weight").replace(
+                    ".lora_B.weight", ".lora_B.default.weight"
+                )
+                remapped[new_key] = v
+            logger.info("Remapped %d adapter keys: old PEFT (no .default) → new PEFT (.default)", len(remapped))
+            adapter_weights = remapped
+        elif not model_has_default and file_has_default:
+            # Remap new-style keys to old-style: lora_A.default.weight → lora_A.weight
+            remapped = {}
+            for k, v in adapter_weights.items():
+                new_key = k.replace(".lora_A.default.weight", ".lora_A.weight").replace(
+                    ".lora_B.default.weight", ".lora_B.weight"
+                )
+                remapped[new_key] = v
+            logger.info("Remapped %d adapter keys: new PEFT (.default) → old PEFT (no .default)", len(remapped))
+            adapter_weights = remapped
+
         incompatible = model.load_state_dict(adapter_weights, strict=False)
         if incompatible.missing_keys:
             # Filter to only LoRA keys — base model keys are expected to be "missing"
