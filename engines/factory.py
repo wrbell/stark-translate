@@ -22,6 +22,8 @@ def create_stt_engine(
     fallback_threshold: float | None = None,
     hallucination_threshold: float | None = None,
     fallback_on_low_conf: bool | None = None,
+    spec_decode: bool = False,
+    draft_model_id: str | None = None,
     **kwargs: Any,
 ) -> STTEngine:
     """Create an STT engine for the given backend.
@@ -35,6 +37,10 @@ def create_stt_engine(
                                  ``None`` uses the engine default (2.4).
         fallback_on_low_conf:    Enable/disable quality-based fallback retry.
                                  ``None`` uses the engine default (True).
+        spec_decode:             Use HF transformers Whisper with speculative
+                                 decoding via assistant_model (1.5-2x faster).
+        draft_model_id:          Draft model for spec decode (default:
+                                 distil-whisper/distil-large-v3.5).
         **kwargs:                Forwarded to the engine constructor.
 
     Returns:
@@ -54,6 +60,17 @@ def create_stt_engine(
         threshold_kwargs["fallback_on_low_conf"] = fallback_on_low_conf
 
     merged_kwargs = {**threshold_kwargs, **kwargs}
+
+    # Speculative decoding requires HF transformers Whisper (not mlx-whisper or faster-whisper)
+    if spec_decode:
+        from engines.hf_whisper_engine import HFWhisperEngine
+
+        return HFWhisperEngine(
+            model_id=model_id or "openai/whisper-large-v3-turbo",
+            draft_model_id=draft_model_id or "distil-whisper/distil-large-v3.5",
+            device=backend if backend in ("cuda", "cpu") else None,
+            **kwargs,
+        )
 
     if backend == "mlx":
         from engines.mlx_engine import MLXWhisperEngine

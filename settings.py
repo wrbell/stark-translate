@@ -154,6 +154,15 @@ class STTSettings(BaseSettings):
         ),
     )
 
+    spec_decode: bool = Field(
+        default=False,
+        description="Use HF transformers Whisper with speculative decoding (1.5-2x faster, uses more VRAM)",
+    )
+    draft_model: str = Field(
+        default="distil-whisper/distil-large-v3.5",
+        description="Draft model for STT speculative decoding (shares encoder with target)",
+    )
+
     model_config = {"env_prefix": "STARK_STT_"}
 
 
