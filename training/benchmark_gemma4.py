@@ -100,9 +100,13 @@ def load_model_nf4(model_id):
         bnb_4bit_compute_dtype=torch.bfloat16,
     )
     tokenizer = AutoTokenizer.from_pretrained(model_id)
+    # Use device_map="cuda" instead of "auto" to prevent CPU offloading.
+    # Gemma 4 E2B/E4B use Per-Layer Embeddings (PLE) with large embedding
+    # tables that device_map="auto" incorrectly offloads to CPU, causing
+    # "modules dispatched on CPU" errors despite the model fitting in VRAM.
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        device_map="auto",
+        device_map={"": "cuda"},
         torch_dtype=torch.bfloat16,
         quantization_config=bnb_config,
     )
