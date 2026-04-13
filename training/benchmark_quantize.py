@@ -200,11 +200,14 @@ try:
             },
             {"role": "assistant", "content": ""},
         ]
-        test_input = tokenizer.apply_chat_template(test_msg, tokenize=True, return_tensors="pt").to(model.device)
-        test_mask = torch.ones_like(test_input)
+        test_ids = tokenizer.apply_chat_template(test_msg, tokenize=True, return_tensors="pt")
+        if hasattr(test_ids, "input_ids"):
+            test_ids = test_ids.input_ids
+        test_ids = test_ids.to(model.device)
+        test_mask = torch.ones_like(test_ids)
         with torch.no_grad():
-            out = model.generate(test_input, attention_mask=test_mask, max_new_tokens=64, do_sample=False)
-        print(f"  Test: {tokenizer.decode(out[0][test_input.shape[1] :], skip_special_tokens=True)[:100]}")
+            out = model.generate(test_ids, attention_mask=test_mask, max_new_tokens=64, do_sample=False)
+        print(f"  Test: {tokenizer.decode(out[0][test_ids.shape[1] :], skip_special_tokens=True)[:100]}")
 
         del model, tokenizer
         gc.collect()
