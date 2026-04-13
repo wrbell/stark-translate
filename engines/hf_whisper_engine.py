@@ -20,6 +20,7 @@ Usage:
 
 import logging
 import time
+from typing import Any
 
 import numpy as np
 
@@ -67,9 +68,9 @@ class HFWhisperEngine(STTEngine):
         else:
             self._torch_dtype = getattr(torch, torch_dtype)
 
-        self._model = None
-        self._draft_model = None
-        self._processor = None
+        self._model: Any = None
+        self._draft_model: Any = None
+        self._processor: Any = None
         self._loaded = False
 
     def load(self) -> None:
