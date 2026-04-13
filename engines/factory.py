@@ -125,6 +125,14 @@ def create_translation_engine(
             **kwargs,
         )
 
+    if engine_type == "llamacpp":
+        from engines.llamacpp_engine import LlamaCppEngine
+
+        return LlamaCppEngine(
+            server_url=model_id or "http://127.0.0.1:8090",
+            **kwargs,
+        )
+
     if backend == "mlx":
         from engines.mlx_engine import MLXGemmaEngine
 
