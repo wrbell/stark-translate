@@ -69,7 +69,7 @@ class LlamaCppEngine(TranslationEngine):
         try:
             url = f"{self._server_url}/health"
             req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(req, timeout=5) as resp:
+            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310
                 data = json.loads(resp.read())
                 status = data.get("status", "unknown")
             if status != "ok":
@@ -86,7 +86,7 @@ class LlamaCppEngine(TranslationEngine):
         try:
             url = f"{self._server_url}/props"
             req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(req, timeout=5) as resp:
+            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310
                 props = json.loads(resp.read())
             self._model_id_str = props.get("default_generation_settings", {}).get("model", "llama.cpp")
             logger.info("llama-server model: %s", self._model_id_str)
@@ -140,7 +140,7 @@ class LlamaCppEngine(TranslationEngine):
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=self._timeout_s) as resp:
+            with urllib.request.urlopen(req, timeout=self._timeout_s) as resp:  # nosec B310
                 result = json.loads(resp.read())
         except urllib.error.URLError as exc:
             logger.error("llama-server request failed: %s", exc)
