@@ -618,6 +618,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         use_prompt_cache: bool = True,
         assistant_model_id: str | None = None,
         streaming_batch_size: int = 3,
+        model_family: str = "translategemma",
     ):
         if not TORCH_AVAILABLE:
             raise RuntimeError("PyTorch is not installed.")
@@ -627,6 +628,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         self._use_prompt_cache = use_prompt_cache
         self._assistant_model_id = assistant_model_id
         self._streaming_batch_size = streaming_batch_size
+        self._model_family = model_family
 
         self._model = None
         self._tokenizer = None
@@ -744,6 +746,12 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         latency_ms = (time.perf_counter() - t0) * 1000
 
         clean = result.split("<end_of_turn>")[0].strip()
+        # Gemma 4 instruct may prepend preamble like "Here is the translation:"
+        if self._model_family == "gemma4":
+            for prefix in ("Here is the translation:\n", "Here is the translation:"):
+                if clean.startswith(prefix):
+                    clean = clean[len(prefix) :].strip()
+                    break
         out_tokens = len(generated)
         gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
 
@@ -858,19 +866,33 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         target_lang: str,
     ) -> object:
         """Build the full chat template prompt as input_ids tensor on CUDA."""
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "source_lang_code": source_lang,
-                        "target_lang_code": target_lang,
-                        "text": text,
-                    }
-                ],
-            }
-        ]
+        if self._model_family == "gemma4":
+            # Gemma 4 instruct: plain text translation instruction
+            lang_names = {"en": "English", "es": "Spanish", "hi": "Hindi", "zh": "Chinese"}
+            src_name = lang_names.get(source_lang, source_lang)
+            tgt_name = lang_names.get(target_lang, target_lang)
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"Translate the following {src_name} text to {tgt_name}. "
+                    f"Output only the translation, nothing else.\n\n{text}",
+                }
+            ]
+        else:
+            # TranslateGemma: structured content with lang codes
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "source_lang_code": source_lang,
+                            "target_lang_code": target_lang,
+                            "text": text,
+                        }
+                    ],
+                }
+            ]
         prompt = self._tokenizer.apply_chat_template(
             messages,
             add_generation_prompt=True,

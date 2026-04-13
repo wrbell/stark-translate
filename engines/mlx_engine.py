@@ -402,6 +402,7 @@ class MLXGemmaEngine(TranslationEngine):
         use_turboquant: bool = False,
         turboquant_key_bits: int = 3,
         turboquant_val_bits: int = 4,
+        model_family: str = "translategemma",
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
@@ -413,6 +414,7 @@ class MLXGemmaEngine(TranslationEngine):
         self._use_turboquant = use_turboquant
         self._turboquant_key_bits = turboquant_key_bits
         self._turboquant_val_bits = turboquant_val_bits
+        self._model_family = model_family
 
         self._model = None
         self._tokenizer = None
@@ -508,12 +510,13 @@ class MLXGemmaEngine(TranslationEngine):
         input_words = len(text.split())
         max_tok = max(64, int(input_words * 3.0))
 
-        # Prompt cache is pre-built for en→es only; skip it for other directions
+        # Prompt cache is pre-built for en→es translategemma only; skip for other configs
         use_cache = (
             self._prompt_cache_template is not None
             and self._suffix_tokens is not None
             and source_lang == "en"
             and target_lang == "es"
+            and self._model_family == "translategemma"
         )
 
         if use_cache:
@@ -528,14 +531,31 @@ class MLXGemmaEngine(TranslationEngine):
                 prompt_cache=cached,
             )
         else:
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "source_lang_code": source_lang, "target_lang_code": target_lang, "text": text}
-                    ],
-                }
-            ]
+            if self._model_family == "gemma4":
+                lang_names = {"en": "English", "es": "Spanish", "hi": "Hindi", "zh": "Chinese"}
+                src_name = lang_names.get(source_lang, source_lang)
+                tgt_name = lang_names.get(target_lang, target_lang)
+                messages = [
+                    {
+                        "role": "user",
+                        "content": f"Translate the following {src_name} text to {tgt_name}. "
+                        f"Output only the translation, nothing else.\n\n{text}",
+                    }
+                ]
+            else:
+                messages = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "source_lang_code": source_lang,
+                                "target_lang_code": target_lang,
+                                "text": text,
+                            }
+                        ],
+                    }
+                ]
             prompt = self._tokenizer.apply_chat_template(
                 messages,
                 add_generation_prompt=True,
@@ -551,6 +571,12 @@ class MLXGemmaEngine(TranslationEngine):
         latency_ms = (time.perf_counter() - t0) * 1000
 
         clean = result.split("<end_of_turn>")[0].strip()
+        # Gemma 4 instruct may prepend preamble before translation
+        if self._model_family == "gemma4":
+            for prefix in ("Here is the translation:\n", "Here is the translation:"):
+                if clean.startswith(prefix):
+                    clean = clean[len(prefix) :].strip()
+                    break
         out_tokens = len(self._tokenizer.encode(clean))
         gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
 

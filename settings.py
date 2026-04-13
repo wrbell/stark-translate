@@ -183,13 +183,17 @@ class TranslationSettings(BaseSettings):
         default="Helsinki-NLP/opus-mt-en-es",
         description="MarianMT model for fast partial translations (~80ms PyTorch)",
     )
+    model_family: str = Field(
+        default="translategemma",
+        description="Translation model family: 'translategemma' (structured lang codes) or 'gemma4' (instruct prompt)",
+    )
     num_draft_tokens: int = Field(
         default=3,
         description="Speculative decoding: tokens drafted by 4B for 12B to verify",
     )
     default_source_lang: str = Field(
         default="en",
-        description="Source language code for TranslateGemma chat template",
+        description="Source language code for translation chat template",
     )
     default_target_lang: str = Field(
         default="es",
