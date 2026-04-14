@@ -72,7 +72,8 @@ htmlcov/
 # Training runs & ablation results (large, machine-specific)
 ablation/
 whisper_ablation/
-hybrid_runs/
+hybrid_runs/*
+!hybrid_runs/data_provenance.md
 fine_tuned_gemma_mi_A/
 fine_tuned_gemma_mi_A_nopack/
 
@@ -80,6 +81,8 @@ fine_tuned_gemma_mi_A_nopack/
 bible_data/synthetic/*.jsonl
 bible_data/synthetic/*_provenance.json
 bible_data/synthetic/*.log
+!bible_data/synthetic/deepl_sermon_benchmark_500.jsonl
+!bible_data/synthetic/deepl_sermon_pairs_5000_provenance.json
 
 # Audio data directories
 stark_data/captions
