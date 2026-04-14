@@ -62,12 +62,23 @@ def evaluate_adapter(
     )
 
     if adapter_path and os.path.exists(adapter_path):
-        from peft import PeftModel
+        # Temporarily hide gptqmodel from PEFT to avoid version check errors.
+        # PEFT 0.18+ requires gptqmodel >= 2.0 but we have 1.9.x (torch 2.6
+        # can't build 2.0+). Whisper LoRA adapters don't use GPTQ, so the
+        # check is irrelevant here.
+        import sys
 
-        logger.info(f"Loading adapter from {adapter_path}...")
-        model = PeftModel.from_pretrained(model, adapter_path)
-        model = model.merge_and_unload()  # merge LoRA into base for clean inference
-        logger.info("Adapter merged into base model")
+        _gptq_mod = sys.modules.pop("gptqmodel", None)
+        try:
+            from peft import PeftModel
+
+            logger.info(f"Loading adapter from {adapter_path}...")
+            model = PeftModel.from_pretrained(model, adapter_path)
+            model = model.merge_and_unload()  # merge LoRA into base for clean inference
+            logger.info("Adapter merged into base model")
+        finally:
+            if _gptq_mod is not None:
+                sys.modules["gptqmodel"] = _gptq_mod
 
     model.eval()
 

@@ -8,7 +8,8 @@
 #   - yt-dlp (via apt or pip)
 #
 # PyTorch must be installed separately FIRST with CUDA:
-#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+#   pip install torch==2.9.1 torchvision==0.24.1 torchaudio==2.9.1 --index-url https://download.pytorch.org/whl/cu126
+#   pip install flash-attn --no-build-isolation
 #
 # FlashAttention-2 (optional, for faster training on Ada GPUs):
 #   pip install flash-attn --no-build-isolation
