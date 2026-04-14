@@ -171,7 +171,14 @@ The encoder is shared between target and draft (identical weights, loaded once).
 
 ### Recommendation
 
-**Do Whisper spec decode (Distil-v3.5 → Turbo).** Low risk, proven pattern, minimal VRAM overhead (~100 MB for 2 extra decoder layers), 1.5-2x STT speedup. Implement in `MLXWhisperEngine` and `FasterWhisperEngine`.
+**~~Do Whisper spec decode (Distil-v3.5 → Turbo).~~** TESTED 2026-04-13: **Does not work.** Distil-v3.5 was distilled from large-v3 (32 decoder layers), not from Turbo (4 layers). The decoder architectures are incompatible — spec decode produces 10x slower inference with hallucinated repetitions ("you. You. You. You...").
+
+**Valid Whisper spec decode pair:** large-v3 (target, 32 layers) + distil-v3.5 (draft, 2 layers) — but this gives ~500-600ms total, slower than Turbo standalone at ~300ms.
+
+**Correct STT acceleration for Turbo:**
+- **Mac:** `lightning-whisper-mlx` — 4x faster than mlx-whisper, Turbo supported
+- **CUDA:** `torch.compile` on decoder loop — 4.5-6x speedup on Ada architecture
+- Both documented in `docs/turbo_inference.md` Phase 3
 
 ## Summary
 
@@ -179,8 +186,10 @@ The encoder is shared between target and draft (identical weights, loaded once).
 |----------|-----------|-------------|------|----------|
 | E2B ↔ TG 4B | Yes (UAG) | **No** — E2B already wins | Low | Skip |
 | E2B → E4B (via GGUF) | Yes (same tokenizer) | **Maybe** — if E4B fits at lower VRAM | Medium | Defer to Pillar 1 |
-| Distil-v3.5 → Turbo (STT) | **Yes** (proven) | **Yes** — 1.5-2x STT speedup, trivial VRAM | **Low** | **High** |
-| Turbo → Large-V3 (STT fallback) | Yes (proven) | Maybe — only if we use Large-V3 | Low | Low |
+| Distil-v3.5 → Turbo (STT) | **No** (tested, failed) | **No** — incompatible decoder architectures, 10x slower | N/A | **Skip** |
+| Turbo → Large-V3 (STT fallback) | Yes (proven) | **No** — large-v3 + spec decode slower than Turbo standalone | Low | Skip |
+| lightning-whisper-mlx (Mac STT) | Yes (shipped) | **Yes** — 4x faster Turbo on MLX | **Low** | **High** |
+| torch.compile (CUDA STT) | Yes | **Yes** — 4.5-6x decoder speedup on Ada | Medium | **High** |
 
 ## What This Addresses in 2026.5
 
