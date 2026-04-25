@@ -20,6 +20,36 @@
     <p class="meta" id="preflight-meta"></p>
   </section>
 
+  <section class="card observability" id="metrics-card">
+    <h2>Live observability</h2>
+    <p class="hint">Streamed at 1 Hz from <code>/ws/control</code>. Empty until a pipeline starts feeding events.</p>
+    <div class="metric-row">
+      <div class="metric">
+        <div class="metric-label">VRAM (MiB)</div>
+        <div class="metric-value" id="metric-vram">—</div>
+        <canvas class="sparkline" id="spark-vram" width="220" height="40"></canvas>
+      </div>
+      <div class="metric">
+        <div class="metric-label">CPU (%)</div>
+        <div class="metric-value" id="metric-cpu">—</div>
+        <canvas class="sparkline" id="spark-cpu" width="220" height="40"></canvas>
+      </div>
+    </div>
+    <div class="metric-row">
+      <div class="metric">
+        <div class="metric-label">Latency p50 / p95 (ms)</div>
+        <div class="metric-value" id="metric-latency">— / —</div>
+        <canvas class="sparkline" id="spark-latency" width="220" height="40"></canvas>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Confidence mean</div>
+        <div class="metric-value" id="metric-confidence">—</div>
+        <canvas class="sparkline" id="spark-confidence" width="220" height="40"></canvas>
+      </div>
+    </div>
+    <p class="meta" id="metrics-meta">disconnected</p>
+  </section>
+
   <section class="card" id="session-card">
     <h2>Session</h2>
     <form id="config-form">
@@ -64,6 +94,7 @@
   </section>
 </main>
 
+<script src="widgets/sparkline.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

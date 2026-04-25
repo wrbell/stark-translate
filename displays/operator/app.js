@@ -157,10 +157,81 @@
     }
   });
 
+  // ---- live metrics over /ws/control ----
+  const vramSpark = document.getElementById("spark-vram");
+  const cpuSpark = document.getElementById("spark-cpu");
+  const latencySpark = document.getElementById("spark-latency");
+  const confidenceSpark = document.getElementById("spark-confidence");
+  const metricsMeta = document.getElementById("metrics-meta");
+  const metricVramEl = document.getElementById("metric-vram");
+  const metricCpuEl = document.getElementById("metric-cpu");
+  const metricLatencyEl = document.getElementById("metric-latency");
+  const metricConfidenceEl = document.getElementById("metric-confidence");
+
+  const latencyHistory = [];
+  const confidenceHistory = [];
+
+  function renderMetrics(snap) {
+    const r = snap.resources || {};
+    const lat = snap.latency || {};
+
+    const vramSeries = r.vram_mib_recent || [];
+    const cpuSeries = r.cpu_percent_recent || [];
+    drawSparkline(vramSpark, vramSeries, { color: "#2563aa", fill: "rgba(37,99,170,0.08)" });
+    drawSparkline(cpuSpark, cpuSeries, { color: "#c89a16", fill: "rgba(200,154,22,0.08)", min: 0, max: 100 });
+
+    metricVramEl.textContent = r.vram_mib_current ? Math.round(r.vram_mib_current) : "—";
+    metricCpuEl.textContent = r.cpu_percent_current != null ? r.cpu_percent_current.toFixed(1) : "—";
+
+    if (lat.n) {
+      latencyHistory.push(lat.total_ms_p50);
+      if (latencyHistory.length > 60) latencyHistory.shift();
+      confidenceHistory.push(lat.confidence_mean);
+      if (confidenceHistory.length > 60) confidenceHistory.shift();
+      metricLatencyEl.textContent = `${Math.round(lat.total_ms_p50)} / ${Math.round(lat.total_ms_p95)}`;
+      metricConfidenceEl.textContent = lat.confidence_mean.toFixed(2);
+    } else {
+      metricLatencyEl.textContent = "— / —";
+      metricConfidenceEl.textContent = "—";
+    }
+    drawSparkline(latencySpark, latencyHistory, { color: "#2f6b1a", fill: "rgba(47,107,26,0.08)" });
+    drawSparkline(confidenceSpark, confidenceHistory, { color: "#8a4500", min: 0, max: 1 });
+
+    metricsMeta.textContent = `uptime ${Math.round(snap.uptime_s || 0)}s · queue ${snap.queue_depth} · errors ${snap.error_count}`;
+  }
+
+  let metricsWs = null;
+  let metricsBackoff = 1000;
+  function connectMetrics() {
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    const url = `${proto}://${location.host}/ws/control`;
+    metricsWs = new WebSocket(url);
+    metricsWs.onopen = () => {
+      metricsBackoff = 1000;
+      metricsMeta.textContent = "connected";
+    };
+    metricsWs.onmessage = (event) => {
+      try {
+        renderMetrics(JSON.parse(event.data));
+      } catch (e) {
+        // ignore malformed frames
+      }
+    };
+    metricsWs.onclose = () => {
+      metricsMeta.textContent = `disconnected — retrying in ${metricsBackoff}ms`;
+      setTimeout(connectMetrics, metricsBackoff);
+      metricsBackoff = Math.min(metricsBackoff * 2, 15000);
+    };
+    metricsWs.onerror = () => {
+      try { metricsWs.close(); } catch (e) {}
+    };
+  }
+
   // ---- bootstrap ----
   refreshPreflight();
   refreshDevices();
   refreshStatus();
+  connectMetrics();
   setInterval(refreshPreflight, PREFLIGHT_INTERVAL_MS);
   setInterval(refreshStatus, STATUS_INTERVAL_MS);
 })();
