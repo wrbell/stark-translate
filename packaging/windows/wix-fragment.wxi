@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  WiX fragment for the stark-translate Windows MSI.
+
+  Briefcase 0.3.25 takes the PyApp-built stark-translate.exe and wraps it
+  with this fragment to produce the final MSI. The fragment adds:
+
+    - Start Menu shortcut "Stark Translate" pointing at the launcher
+    - Custom action that detects NVIDIA GPU and sets STARK_INSTALL_EXTRAS
+    - First-run welcome message documenting the SmartScreen click-through
+      (the unsigned MSI flow for v2026.7.2; signing is the v2026.7.2.1
+      follow-up)
+    - Mic permission opt-in dialog (Win11 microphone access prompt does not
+      pre-fire for command-line apps; we surface the OS settings link)
+-->
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <!-- Start Menu shortcut -->
+  <Component Id="StarkStartMenuShortcut" Guid="*" Directory="ProgramMenuFolder">
+    <Shortcut Id="StarkOperatorShortcut"
+              Name="Stark Translate"
+              Description="Launch the stark-translate operator UI"
+              Target="[INSTALLFOLDER]stark-translate.exe"
+              WorkingDirectory="INSTALLFOLDER"
+              Icon="StarkIcon.ico"
+              Advertise="no" />
+    <RegistryValue Root="HKCU"
+                   Key="Software\Stark Road Gospel Hall\stark-translate"
+                   Name="StartMenuShortcutInstalled"
+                   Type="integer"
+                   Value="1"
+                   KeyPath="yes" />
+  </Component>
+
+  <!-- CUDA detection at install time
+       Sets STARK_INSTALL_EXTRAS=[cuda] when an NVIDIA GPU is present, [cpu] otherwise.
+       PyApp reads this on first launch and pip-installs the right extras. -->
+  <CustomAction Id="DetectNVIDIA"
+                Directory="INSTALLFOLDER"
+                ExeCommand='powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "if (Get-WmiObject Win32_VideoController | Where-Object { $_.Name -match \"NVIDIA\" }) { [Environment]::SetEnvironmentVariable(\"STARK_INSTALL_EXTRAS\", \"[cuda]\", \"User\") } else { [Environment]::SetEnvironmentVariable(\"STARK_INSTALL_EXTRAS\", \"[cpu]\", \"User\") }"'
+                Execute="deferred"
+                Return="ignore"
+                Impersonate="no" />
+
+  <InstallExecuteSequence>
+    <Custom Action="DetectNVIDIA" After="InstallFiles">NOT REMOVE</Custom>
+  </InstallExecuteSequence>
+
+  <!-- Icon table entry -->
+  <Icon Id="StarkIcon.ico" SourceFile="packaging/windows/icon.ico" />
+  <Property Id="ARPPRODUCTICON" Value="StarkIcon.ico" />
+
+  <!-- ARP (Add/Remove Programs) metadata -->
+  <Property Id="ARPHELPLINK" Value="https://github.com/wrbell/stark-translate" />
+  <Property Id="ARPURLINFOABOUT" Value="https://github.com/wrbell/stark-translate" />
+  <Property Id="ARPNOMODIFY" Value="1" />
+  <Property Id="ARPNOREPAIR" Value="1" />
+
+</Include>

@@ -1,0 +1,87 @@
+name: Windows MSI Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Override version tag (defaults to git ref)"
+        type: string
+        required: false
+
+permissions:
+  contents: write          # gh release upload
+  id-token: write          # for future cosign keyless signing
+
+jobs:
+  build-msi:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Read version from pyproject.toml
+        id: version
+        shell: pwsh
+        run: |
+          $cfg = Get-Content pyproject.toml -Raw
+          if ($cfg -match 'version\s*=\s*"([^"]+)"') {
+              $v = $matches[1]
+          } else {
+              throw "version not found in pyproject.toml"
+          }
+          if ("${{ inputs.tag }}" -ne "") { $v = "${{ inputs.tag }}".TrimStart('v') }
+          "value=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Building stark-translate==$v"
+
+      # --- PyApp launcher ----------------------------------------------------
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install PyApp
+        run: cargo install pyapp --version 0.27 --root packaging/windows/pyapp-build
+
+      - name: Build launcher
+        shell: pwsh
+        env:
+          PYAPP_PROJECT_NAME: stark-translate
+          PYAPP_PROJECT_VERSION: ${{ steps.version.outputs.value }}
+          PYAPP_PYTHON_VERSION: "3.12"
+          PYAPP_EXEC_SPEC: operator_app.cli:main
+          PYAPP_PIP_EXTERNAL: "true"
+        run: |
+          cd packaging/windows/pyapp-build
+          cargo build --release --bin pyapp
+          # PyApp produces target/release/pyapp.exe — rename to stark-translate.exe
+          Copy-Item target/release/pyapp.exe ../stark-translate.exe -Force
+
+      # --- Briefcase MSI wrapper --------------------------------------------
+      - name: Install Briefcase
+        run: pip install briefcase==0.3.25
+
+      - name: Build MSI (unsigned for v2026.7.2.x)
+        shell: pwsh
+        run: |
+          briefcase package windows --no-sign
+          # MSI lands at dist/stark-translate-<version>.msi
+          Get-ChildItem dist/
+
+      # --- Upload + release --------------------------------------------------
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stark-translate-${{ steps.version.outputs.value }}-win.msi
+          path: dist/*.msi
+
+      - name: Attach MSI to GitHub Release
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $msi = Get-ChildItem dist/*.msi | Select-Object -First 1
+          # `gh release upload` is idempotent with --clobber when re-running.
+          gh release upload "${{ github.ref_name }}" $msi.FullName --clobber

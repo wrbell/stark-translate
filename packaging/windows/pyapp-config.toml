@@ -1,0 +1,47 @@
+# PyApp configuration for the stark-translate Windows launcher.
+#
+# PyApp (https://github.com/ofek/pyapp) is a small Rust launcher that
+# downloads a pinned python-build-standalone interpreter on first run and
+# pip-installs the configured wheel into %LOCALAPPDATA%\stark-translate.
+#
+# Build with:
+#   cargo install pyapp --root packaging/windows/pyapp-build
+#   PYAPP_PROJECT_NAME=stark-translate \
+#   PYAPP_PROJECT_VERSION=2026.7.2.0 \
+#   PYAPP_PYTHON_VERSION=3.12 \
+#   PYAPP_EXEC_SPEC=stark-translate.cli:main \
+#   PYAPP_PIP_EXTERNAL=true \
+#   cargo build --release
+#
+# The resulting stark-translate.exe is then wrapped into an MSI by Briefcase
+# (see release-win.yml).
+
+[project]
+name = "stark-translate"
+# CalVer matching pyproject.toml. Kept in lockstep — the release workflow
+# reads pyproject.toml and overrides this via PYAPP_PROJECT_VERSION env.
+version = "2026.7.2.0"
+
+[python]
+# Pinned to 3.12 — matches the pypi build target. python-build-standalone
+# 3.12 has the smallest cold-start of the supported versions.
+version = "3.12"
+
+[install]
+# Extras are decided at install time by the WiX launch action, which sets
+# STARK_INSTALL_EXTRAS based on `Get-WmiObject Win32_VideoController` —
+# `[cuda]` if NVIDIA detected, `[cpu]` otherwise.
+spec = "stark-translate"
+extras_env_var = "STARK_INSTALL_EXTRAS"
+
+# Always pull the latest patch within the same minor — operators get bug
+# fixes without re-running the MSI installer. WinSparkle handles cross-minor
+# updates separately via the appcast.
+upgrade_strategy = "minor"
+
+[exec]
+# The PyApp launcher invokes this Python entry point after install. It
+# matches the [project.scripts] entry in pyproject.toml.
+spec = "operator_app.cli:main"
+# Default args when the user double-clicks the Start Menu shortcut.
+args = ["operator"]
