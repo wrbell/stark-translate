@@ -27,12 +27,28 @@ CUDA **is** thread-safe (unlike MLX). The pipeline uses `ThreadPoolExecutor(max_
 | `4b_only` | ≥5.5 GB | Whisper + 4B (~4.7 GB) |
 | `marian` | <5.5 GB | MarianMT only (~1.3 GB) |
 
-### CUDA Model IDs
+> **Tier breakpoints above were derived from `torch.cuda.max_memory_allocated()` — that metric undercounts on Gemma 4 by ~2× (misses bnb scratch + bf16 PLE embeddings). For accurate VRAM budgeting use the nvidia-smi-measured numbers in `docs/april_squeeze/BENCHMARK.md`. The `detect_vram_tier()` helper still works on its own thresholds, but those thresholds must be raised when serving Gemma 4 via HF NF4 — E2B alone occupies ~14 GB total.**
 
-| Role | Model ID | Size (NF4) |
-|------|----------|------------|
-| CUDA Translation A | `google/translategemma-4b-it` | ~3 GB |
-| CUDA Translation B | `google/translategemma-12b-it` | ~7 GB |
+### CUDA Model IDs (NF4 via bitsandbytes — measured peak VRAM)
+
+| Role | Model ID | Peak VRAM (nvidia-smi) | Notes |
+|------|----------|------------------------|-------|
+| CUDA Translation (Gemma 4 E2B, post-#46) | `google/gemma-4-e2b-it` | **~14.2 GB** | PLE keeps embeddings in bf16; large vs param count |
+| CUDA Translation (Gemma 4 E4B) | `google/gemma-4-e4b-it` | **~15.6 GB** | Best HF quality; tight on 16 GB |
+| CUDA Translation (TG4B legacy) | `google/translategemma-4b-it` | ~7.2 GB | Pre-#46; lower canary score (5/8) |
+| CUDA Translation (TG12B legacy) | `google/translategemma-12b-it` | ~15.6 GB | Largest; same canary as E2B (6/8) |
+
+> **For deployment on RTX 3060 12 GB, all HF NF4 configs except TG4B are too big.** Use `engines/llamacpp_engine.py` instead — Gemma 4 E2B Q4_K_M peaks at ~3.5 GB, E4B Q4_K_M at ~4.9 GB. See `docs/april_squeeze/BENCHMARK.md` Phase 1A results.
+
+### llama.cpp engine (recommended for CUDA, v2026.5+)
+
+| Role | GGUF | Peak VRAM | tok/s on A2000 Ada |
+|------|------|-----------|---------------------|
+| Gemma 4 E2B Q4_K_M | `models/gemma-4-e2b-it-q4km.gguf` (3.2 GB on disk) | **3.5 GB** | **66 tok/s** (canary 6/8) |
+| Gemma 4 E4B Q4_K_M | `models/gemma-4-e4b-it-q4km.gguf` (5.0 GB on disk) | **4.9 GB** | **41 tok/s** (canary 7/8) |
+| E4B + E2B draft (spec decode) | both | 8.5 GB | 36 tok/s — slower than E4B alone on single GPU |
+
+Caller starts `llama-server` (see `start_server.sh`), then constructs via `create_translation_engine(engine_type="llamacpp")`. Must pass `chat_template_kwargs: {"enable_thinking": false}` for Gemma 4 — already handled inside `LlamaCppEngine`.
 
 Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `STARK_CUDA__*`.
 
