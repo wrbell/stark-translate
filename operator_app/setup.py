@@ -210,6 +210,74 @@ def _verify_sha256(path: Path, expected_hex: str) -> str:
     return actual
 
 
+# -- URL reachability check (no downloads) -----------------------------------
+
+
+def check_lockfile_urls(
+    project_root: Path | None = None,
+    timeout_s: float = 10.0,
+) -> dict:
+    """HEAD every URL in the lockfile and return a dict of results.
+
+    Direct entries are HEAD'd against the configured URL. HF snapshots are
+    HEAD'd against the public ``/api/models/<repo_id>`` endpoint, which
+    returns 200 for public repos and 401 for private/missing repos.
+
+    Returns ``{"ok": bool, "checks": [{"name", "url", "status", "detail"}, ...]}``.
+    Use to validate ``models.lock.json`` before a release tag.
+    """
+    try:
+        lockfile = load_lockfile(project_root=project_root)
+    except FileNotFoundError as exc:
+        return {"ok": False, "error": str(exc), "checks": []}
+
+    checks = []
+    for key, entry in lockfile.get("models", {}).items():
+        kind = entry.get("type", "direct")
+        if kind == "direct":
+            url = entry["url"]
+        elif kind == "hf-snapshot":
+            url = f"https://huggingface.co/api/models/{entry['repo_id']}"
+        else:
+            checks.append({"name": key, "url": "", "status": "fail", "detail": f"unknown type {kind!r}"})
+            continue
+
+        status, detail = _head_url(url, timeout_s=timeout_s)
+        checks.append({"name": key, "url": url, "status": status, "detail": detail})
+
+    ok = all(c["status"] == "pass" for c in checks)
+    return {"ok": ok, "checks": checks}
+
+
+def _head_url(url: str, timeout_s: float) -> tuple[str, str]:
+    """Issue a HEAD against ``url``. Returns (status, detail).
+
+    HF Hub blocks HEAD for some asset URLs but accepts them with a Range
+    header that asks for byte 0; we fall back to that on 405.
+    """
+    req = urllib.request.Request(url, method="HEAD")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+            return ("pass", f"HTTP {resp.status}")
+    except urllib.error.HTTPError as exc:
+        if exc.code == 405:
+            # Some HF buckets reject HEAD; try a tiny GET with Range: bytes=0-0.
+            try:
+                req2 = urllib.request.Request(url)
+                req2.add_header("Range", "bytes=0-0")
+                with urllib.request.urlopen(req2, timeout=timeout_s) as resp:
+                    if resp.status in (200, 206):
+                        return ("pass", f"HTTP {resp.status} (range)")
+                    return ("fail", f"HTTP {resp.status}")
+            except urllib.error.HTTPError as exc2:
+                return ("fail", f"HTTP {exc2.code} {exc2.reason}")
+            except Exception as exc2:
+                return ("fail", f"{type(exc2).__name__}: {exc2}")
+        return ("fail", f"HTTP {exc.code} {exc.reason}")
+    except Exception as exc:
+        return ("fail", f"{type(exc).__name__}: {exc}")
+
+
 # -- public API --------------------------------------------------------------
 
 

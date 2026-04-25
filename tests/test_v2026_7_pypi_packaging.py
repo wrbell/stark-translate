@@ -288,3 +288,113 @@ class TestSetupModule:
             rc = setup.bootstrap_models(models_dir=tmp_path / "models", project_root=tmp_path)
 
         assert rc == 1  # SHA mismatch → failure
+
+
+# -- check_lockfile_urls (no-download reachability check) --------------------
+
+
+class TestCheckLockfileUrls:
+    def test_returns_one_check_per_entry(self, tmp_path):
+        from operator_app import setup
+
+        (tmp_path / "models.lock.json").write_text(
+            json.dumps(
+                {
+                    "version": "t",
+                    "models": {
+                        "direct-a": {
+                            "type": "direct",
+                            "url": "http://example.invalid/a.bin",
+                            "filename": "a.bin",
+                            "sha256": "0" * 64,
+                            "size_bytes": 1,
+                            "required_for": ["cuda"],
+                        },
+                        "snapshot-b": {
+                            "type": "hf-snapshot",
+                            "repo_id": "openai/whisper-large-v3-turbo",
+                            "subdir": "b",
+                            "required_for": ["cuda"],
+                        },
+                    },
+                }
+            )
+        )
+
+        with patch("operator_app.setup._head_url", return_value=("pass", "HTTP 200")):
+            result = setup.check_lockfile_urls(project_root=tmp_path)
+
+        assert result["ok"] is True
+        assert len(result["checks"]) == 2
+        names = {c["name"] for c in result["checks"]}
+        assert names == {"direct-a", "snapshot-b"}
+
+    def test_hf_snapshots_check_api_endpoint(self, tmp_path):
+        """HF snapshots resolve to the public /api/models/<repo_id> URL."""
+        from operator_app import setup
+
+        (tmp_path / "models.lock.json").write_text(
+            json.dumps(
+                {
+                    "version": "t",
+                    "models": {
+                        "snap": {
+                            "type": "hf-snapshot",
+                            "repo_id": "Helsinki-NLP/opus-mt-en-es",
+                            "subdir": "snap",
+                            "required_for": ["cuda"],
+                        }
+                    },
+                }
+            )
+        )
+
+        captured: list[str] = []
+
+        def capture_url(url: str, timeout_s: float):
+            captured.append(url)
+            return ("pass", "HTTP 200")
+
+        with patch("operator_app.setup._head_url", side_effect=capture_url):
+            setup.check_lockfile_urls(project_root=tmp_path)
+
+        assert captured == ["https://huggingface.co/api/models/Helsinki-NLP/opus-mt-en-es"]
+
+    def test_failure_propagates_to_ok_false(self, tmp_path):
+        from operator_app import setup
+
+        (tmp_path / "models.lock.json").write_text(
+            json.dumps(
+                {
+                    "version": "t",
+                    "models": {
+                        "private-gguf": {
+                            "type": "direct",
+                            "url": "http://example.invalid/x.gguf",
+                            "filename": "x.gguf",
+                            "sha256": "0" * 64,
+                            "size_bytes": 1,
+                            "required_for": ["cuda"],
+                        }
+                    },
+                }
+            )
+        )
+
+        with patch("operator_app.setup._head_url", return_value=("fail", "HTTP 401 Unauthorized")):
+            result = setup.check_lockfile_urls(project_root=tmp_path)
+
+        assert result["ok"] is False
+        assert result["checks"][0]["status"] == "fail"
+        assert "401" in result["checks"][0]["detail"]
+
+    def test_missing_lockfile_returns_error(self, tmp_path):
+        from operator_app import setup
+
+        with patch(
+            "operator_app.setup.load_lockfile",
+            side_effect=FileNotFoundError("not found"),
+        ):
+            result = setup.check_lockfile_urls(project_root=tmp_path)
+        assert result["ok"] is False
+        assert "error" in result

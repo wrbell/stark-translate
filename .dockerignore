@@ -1,0 +1,86 @@
+# Build-context exclusions for the stark-translate Dockerfile.
+#
+# Keep this list aggressive — without it, `docker buildx build` would copy
+# ~60 GB of training data, model weights, and cached venvs into the
+# context tarball before COPY can pick the few directories we actually
+# want. That blows up GHCR build times and hits the 10 GB context limit
+# on hosted runners.
+#
+# Anything we genuinely need is named in the Dockerfile's COPY directives:
+#   pyproject.toml README.md operator_app/ engines/ tools/ features/
+#   displays/ scripts/ settings.py dry_run_ab.py models.lock.json
+#   start_server.sh run_operator.sh docker/
+
+# --- Training data + outputs (none of this belongs in the runtime image) ---
+stt-data/
+stark_data/
+bible_data/
+whisper_ablation/
+hybrid_runs/
+ablation/
+metrics/
+
+# --- Bundled model weights — bind-mounted at runtime, never baked ---
+models/
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.ckpt
+
+# --- Python virtual envs + caches ---
+.venv/
+venv/
+stt_env/
+stt_train_env/
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+coverage.json
+htmlcov/
+
+# --- Build artefacts ---
+build/
+dist/
+*.whl
+*.tar.gz
+
+# --- Editor / OS ---
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# --- Git + CI ---
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# --- Secrets / local config ---
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+docker/.env
+
+# --- Docs (not needed at runtime; readme is force-included via Dockerfile) ---
+docs/
+CLAUDE*.md
+*.md
+!README.md
+
+# --- Other ---
+node_modules/
+*.log
+*.csv
+*.jsonl
+!models.lock.json

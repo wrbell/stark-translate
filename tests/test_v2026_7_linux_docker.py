@@ -18,6 +18,30 @@ ROOT = Path(__file__).parent.parent
 
 
 # ---------------------------------------------------------------------------
+# .dockerignore (build context size guard)
+# ---------------------------------------------------------------------------
+
+
+class TestDockerignore:
+    def test_present(self):
+        assert (ROOT / ".dockerignore").exists(), (
+            "Without .dockerignore the build context exceeds 60 GB on this repo "
+            "(stark_data alone is 43 GB). Required before first GHCR build."
+        )
+
+    def test_excludes_heavy_dirs(self):
+        text = (ROOT / ".dockerignore").read_text()
+        for path in ("stark_data/", "models/", "whisper_ablation/", ".venv/", ".git/"):
+            assert path in text, f".dockerignore must exclude {path}"
+
+    def test_keeps_models_lock_json(self):
+        # The Dockerfile COPY copies models.lock.json by name. If a wildcard
+        # excludes it, the build breaks. Defend against future regressions.
+        text = (ROOT / ".dockerignore").read_text()
+        assert "!models.lock.json" in text
+
+
+# ---------------------------------------------------------------------------
 # Dockerfile shape
 # ---------------------------------------------------------------------------
 
