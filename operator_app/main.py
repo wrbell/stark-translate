@@ -9,8 +9,10 @@ The HTML/JS frontend is served from ``displays/operator/`` at ``/operator/``.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
+import logging.handlers
 import os
 from pathlib import Path
 
@@ -36,10 +38,62 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
 
 
+def _configure_logging() -> None:
+    """Wire a rotating file handler so multi-day sessions don't grow unbounded.
+
+    Honors STARK_OPERATOR_LOG_DIR if set; otherwise writes under metrics/.
+    Rotates at 100 MiB, keeps 5 backups. The console handler stays at the
+    root logger's existing level (defaults to WARNING).
+    """
+    log_dir = Path(os.environ.get("STARK_OPERATOR_LOG_DIR", str(PROJECT_ROOT / "metrics")))
+    try:
+        log_dir.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return
+    handler = logging.handlers.RotatingFileHandler(
+        log_dir / "operator.log",
+        maxBytes=100 * 1024 * 1024,
+        backupCount=5,
+        encoding="utf-8",
+    )
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    )
+    root = logging.getLogger()
+    if not any(getattr(h, "baseFilename", "").endswith("operator.log") for h in root.handlers):
+        root.addHandler(handler)
+    if root.level > logging.INFO:
+        root.setLevel(logging.INFO)
+
+
+_configure_logging()
+
+
+@contextlib.asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """Graceful startup + shutdown.
+
+    On shutdown we stop any running pipeline subprocess so SIGTERM/SIGINT
+    (the systemd ``Restart=always`` flow) doesn't leave orphaned children
+    or partially-flushed CSVs.
+    """
+    logger.info("operator app starting up")
+    yield
+    logger.info("operator app shutting down — stopping pipeline if running")
+    try:
+        runner = get_runner()
+        if runner.status().state != "idle":
+            runner.stop(timeout_s=10.0)
+    except Exception as exc:
+        logger.warning("graceful pipeline stop failed: %s", exc)
+
+
 app = FastAPI(
     title="stark-translate operator",
     version="0.1.0",
-    description="Live pipeline control plane (Phase 9.1).",
+    description="Live pipeline control plane (Phase 9).",
+    lifespan=_lifespan,
 )
 
 
