@@ -126,7 +126,7 @@
         opt.textContent = `${d.index}: ${d.name} (${d.channels}ch)`;
         micSelect.appendChild(opt);
       }
-      // outputs (preview only — wiring to PiperTTSEngine is deferred to 9.4.1)
+      // outputs (Phase 9.4.1: wired through to PiperTTSEngine via --tts-output local --tts-device N)
       if (outputSelect) {
         outputSelect.innerHTML = '<option value="">system default</option>';
         for (const d of data.outputs || []) {
@@ -177,6 +177,10 @@
     };
     const mic = fd.get("mic_device");
     if (mic) body.mic_device = Number(mic);
+    const ttsMode = fd.get("tts_output_mode");
+    if (ttsMode) body.tts_output_mode = ttsMode;
+    const ttsDevice = fd.get("output_device");
+    if (ttsDevice) body.tts_device = Number(ttsDevice);
     return body;
   }
 

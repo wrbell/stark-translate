@@ -264,13 +264,23 @@ class TTSSettings(BaseSettings):
         },
         description="Piper voice names keyed by language code",
     )
-    output_mode: Literal["ws", "wav", "both"] = Field(
+    output_mode: Literal["ws", "wav", "both", "local"] = Field(
         default="ws",
-        description="TTS output: 'ws' for WebSocket stream, 'wav' for file, 'both' for both",
+        description=(
+            "TTS output: 'ws' for WebSocket stream, 'wav' for file, 'both' for both, "
+            "'local' for sounddevice playback to output_device (Phase 9.4.1)"
+        ),
     )
     audio_ws_port: int = Field(
         default=8766,
         description="WebSocket port for TTS audio streaming (separate from text WS on 8765)",
+    )
+    output_device: int | None = Field(
+        default=None,
+        description=(
+            "sounddevice output device index for output_mode='local'. None = system default. "
+            "Get the index from /api/devices or `python -m sounddevice`."
+        ),
     )
 
     model_config = {"env_prefix": "STARK_TTS_"}
