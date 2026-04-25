@@ -183,7 +183,16 @@ Expect a 200 with JSON containing `"status": "ok"`. If that fails, the operator 
 
 ## Pre-event dry-run
 
-Run this once a week before a real event, not the day of:
+Run this once a week before a real event, not the day of.
+
+**Automated** (preferred): run the rehearsal script, which walks every endpoint
+and exits 0 on green, 1 on any red:
+
+```
+./scripts/dry_run_rehearsal.sh
+```
+
+**Manual**:
 
 1. Open the operator UI.
 2. All five pre-flight checks should be green or yellow (no red).
