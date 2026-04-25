@@ -267,6 +267,22 @@
     if (snap.audio && typeof snap.audio.change_seq === "number" && snap.audio.change_seq > knownChangeSeq) {
       refreshDevices(true);
     }
+
+    // Live diarization (Phase 9.6.1) — current speaker pill.
+    const speakerEl = document.getElementById("metric-speaker");
+    const speakerDetailEl = document.getElementById("metric-speaker-detail");
+    const diar = (snap.audio && snap.audio.diarization) || null;
+    if (speakerEl && speakerDetailEl) {
+      if (diar && diar.current_speaker) {
+        speakerEl.textContent = diar.current_speaker;
+        const transitions = diar.transitions || 0;
+        const recent = (diar.recent || []).length;
+        speakerDetailEl.textContent = `${transitions} transitions · ${recent} recent labels`;
+      } else {
+        speakerEl.textContent = "—";
+        speakerDetailEl.textContent = "no diarization data yet";
+      }
+    }
   }
 
   let metricsWs = null;
