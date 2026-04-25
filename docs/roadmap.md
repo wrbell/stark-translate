@@ -3,7 +3,7 @@
 > Living document tracking the full project trajectory from Mac prototype
 > through Windows training to production deployment.
 >
-> **Last updated:** 2026-04-11
+> **Last updated:** 2026-04-25
 
 ---
 
@@ -19,12 +19,16 @@ Mac (M3 Pro 18GB, MLX)                Windows (A2000 Ada 16GB, CUDA/WSL2)
   Piper TTS (EN + ES, --tts)             Deepgram Nova-3 oracle (35 sermons)
   Pipeline overlap (STT N+1 ∥ TT N)     Tiered glossary (50 boost + 229 master)
   5 display modes (WebSocket)            12GB memory-capped alignment pipeline
-  806 tests, 7 CI workflows              benchmark_gemma4.py (Gemma 4 comparison)
+  935 tests, 7 CI workflows              benchmark_gemma4.py (Gemma 4 comparison)
+  v2026.6 operator UI shipped            llama.cpp E4B Q4_K_M = production CUDA default
 
 Production Endpoints (implemented):
   1. Mac M-series (8-18 GB) — MLX, --backend=mlx
-  2. NVIDIA GPU (6-16 GB VRAM) — CUDA, --backend=cuda
-  3. Dev M3 Pro 18 GB — full A/B (4B + 12B)
+  2. NVIDIA GPU (6-16 GB VRAM) — CUDA via llama.cpp (--engine auto|llamacpp|hf)
+  3. Operator control plane — FastAPI + vanilla JS at http://host:9000/operator/
+
+See `docs/operator_runbook.md` for the day-of-event workflow and `bootstrap.sh`
+for first-time church PC setup.
 ```
 
 ---
@@ -106,12 +110,20 @@ Continue W15 hard mining pipeline: mine → filter → build subset → train wi
 - Retrain on corrected data (repeat 2-4 cycles)
 - Target: 20-40% relative WER reduction per cycle
 
-### Phase 7: Live Demo Deployment
+### Phase 7: Live Demo Deployment ✅ shipped as v2026.6
 
-- Streamlit dashboard for Farmington Hills coffee shop outreach event
-- macOS Shortcuts for voice-command triggers
-- OBS/NDI integration for projection system
-- Operator tablet controls
+- ✅ FastAPI + vanilla JS operator control plane (replaced the original Streamlit sketch)
+- ✅ Pre-flight gating (GPU / models / mic / adapter manifest / llama-server)
+- ✅ Mid-session controls (pause / resume / lang_flip / vad / fallback)
+- ✅ Live observability sparklines (VRAM, CPU, latency p50/p95, confidence)
+- ✅ Audio device enumeration + USB hotplug toast
+- ✅ Verse highlights + post-session summary trigger
+- ✅ systemd unit + launchd plist + bootstrap.sh for church PC install
+- See [`operator_runbook.md`](./operator_runbook.md) for the day-of-event workflow
+
+**Deferred patches** (will ship as v2026.6.x): multi-channel TTS routing (9.4.1),
+live diarization on a rolling audio buffer (9.6.1), macOS Shortcuts for
+voice-command triggers (10).
 
 ### Phase 8: Multilingual Expansion (Hindi & Chinese)
 
@@ -135,9 +147,12 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 
 ### Phase 10: Production Polish
 
-- Dedicated hardware at church (auto-start on boot)
-- Continuous improvement loop: live inference → log diagnostics → retrain monthly
-- Post-sermon summary, verse extraction, diarization integration
+- ✅ Dedicated hardware auto-start (Phase 9.5 — systemd unit + launchd plist + bootstrap.sh)
+- ✅ Post-sermon summary trigger (Phase 9.6 — `/api/features/summary`)
+- ✅ Verse extraction wired into the live operator UI (Phase 9.6 — `/api/features/verses`)
+- 9.4.1 — Multi-channel TTS routing (UI is ready, output dropdown disabled / preview-only; needs PiperTTSEngine output-device support + `--tts-output local` mode)
+- 9.6.1 — Live diarization on a rolling audio buffer (UI surface deferred; existing `features/diarize.py` is offline-only)
+- Continuous improvement loop: live inference → log diagnostics → retrain monthly (depends on Phase 6/8 active learning)
 
 ---
 

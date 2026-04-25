@@ -171,15 +171,16 @@ features/                      Post-processing (not yet integrated with live pip
 | [`engines/CLAUDE.md`](./engines/CLAUDE.md) | Engine layer: MLX thread safety, CUDA streaming, VRAM tiers |
 | [`training/CLAUDE.md`](./training/CLAUDE.md) | Fine-tuning: data pipeline, LoRA/QLoRA configs, ablation results |
 | [`tools/CLAUDE.md`](./tools/CLAUDE.md) | Monitoring: YouTube comparison, translation QE, adapter deployment |
-| [`displays/CLAUDE.md`](./displays/CLAUDE.md) | Display modes, WebSocket protocol |
+| [`displays/CLAUDE.md`](./displays/CLAUDE.md) | Display modes, WebSocket protocol, operator SPA |
 | [`features/CLAUDE.md`](./features/CLAUDE.md) | Diarization, sermon summary, verse extraction |
+| [`docs/operator_runbook.md`](./docs/operator_runbook.md) | Day-of-event workflow for non-technical operators |
 | [`docs/roadmap.md`](./docs/roadmap.md) | Full project roadmap and metrics |
 
 ## Status
 
-**Done:** Bidirectional EN/ES inference (MLX + CUDA), two-pass pipeline with overlap, 5 display modes, Piper TTS, TranslateGemma S1-S9 ablation (S6 winner), Whisper W12 data scaling (198K chunks), W15 hard mining pipeline, W16 corrective run (7.25% WER), CUDA streaming runtime with prompt cache + speculative decoding, Deepgram oracle (35 sermons), data integrity pipeline, **v2026.5: llama.cpp engine (5–9× faster CUDA, 4× less VRAM), Gemma 4 E2B/E4B as production default, Phase 1A benchmark with full 4-model matrix**, 855 tests, 7 CI workflows.
+**Done:** Bidirectional EN/ES inference (MLX + CUDA), two-pass pipeline with overlap, 5 audience display modes, Piper TTS, TranslateGemma S1-S9 ablation (S6 winner), Whisper W12 data scaling (198K chunks), W15 hard mining pipeline, W16 corrective run (7.25% WER), Deepgram oracle (35 sermons), data integrity pipeline. **v2026.5:** llama.cpp engine (5–9× faster CUDA, 4× less VRAM), Gemma 4 E4B Q4_K_M as production default, Phase 1D wired into `dry_run_ab.py`. **v2026.6:** Operator control plane at `http://host:9000/operator/` — FastAPI + vanilla JS, pre-flight gating, mid-session controls, live observability sparklines, audio device hotplug, verse highlights, summary trigger, systemd/launchd/bootstrap.sh. **935 tests, 7 CI workflows.**
 
-**Next:** Wire llama.cpp engine into `dry_run_ab.py` (Phase 1D), Whisper W18+ continuing curriculum, deploy v2026.5 adapters to Mac for live A/B, active learning feedback loop (3–5 cycles), Hindi & Chinese adapters. Phase 1C EAGLE-3 deferred — single-GPU spec decode showed no benefit on this hardware.
+**Next:** Deferred patches 9.4.1 (multi-channel TTS routing) and 9.6.1 (live diarization). Then: deploy v2026.6 adapters to Mac for live A/B (Phase 5/7), active learning feedback loop (Phase 6/8), Hindi & Chinese adapters (Phase 8). Phase 1C EAGLE-3 deferred — single-GPU spec decode showed no benefit on this hardware.
 
 ## License
 

@@ -33,8 +33,10 @@ Model transfer: WSL → copy LoRA adapters to Mac project root.
 
 ---
 
-## Recent Additions (2026-04-25, v2026.5)
+## Recent Additions (2026-04-25)
 
+- **v2026.6 — Phase 9 operator control plane** (PRs #60–#66, tags `v2026.6.0.0` and `v2026.6.1.0`). FastAPI app at `uvicorn operator_app.main:app --port 9000` + vanilla-JS SPA at `/operator/`. Replaces the developer-grade run_church.sh + 5-tab workflow with a single browser UI a non-technical volunteer can drive. Pre-flight gates the Start button; mid-session controls (pause/resume/lang_flip/vad/fallback); live observability sparklines (VRAM/CPU/latency/confidence) over `/ws/control`; audio device enumeration with USB hotplug toast; live verse highlights + post-session summary trigger; systemd unit + launchd plist + bootstrap.sh for first-time install. Operator runbook at [`docs/operator_runbook.md`](./docs/operator_runbook.md).
+- **Phase 1D — llama.cpp wired into the live pipeline** (PR #59). `dry_run_ab.py --backend cuda` auto-prefers `LlamaCppEngine` when a llama-server is reachable. `--engine {auto,llamacpp,hf}` and `--llamacpp-url` for explicit control. Repurposed `--ab` mode loads E4B (8090) + E2B (8091) under llama.cpp.
 - **v2026.5 release — Phase 1A complete** (`docs/april_squeeze/BENCHMARK.md`): Gate 1A passes by 8.9×. llama.cpp-served Gemma 4 GGUF replaces HF NF4 as production CUDA path. T3 (E4B Q4_K_M) is default at 41 tok/s + 7/8 canary in 4.9 GB VRAM. T2 (E2B Q4_K_M) low-VRAM fallback at 66 tok/s in 3.5 GB. Spec decode (T4) deferred — single-GPU loss on this hardware.
 - **Production bug fix** — `engines/llamacpp_engine.py` now passes `chat_template_kwargs: {"enable_thinking": false}` for Gemma 4. Without it the model emits chain-of-thought into `reasoning_content` and leaves `content` empty until max_tokens. 14× latency improvement.
 - **VRAM accounting corrected** — prior `metrics/gemma4_benchmark/comparison.json` undercounted by 2× because `torch.cuda.max_memory_allocated()` misses bnb scratch + bf16 PLE. New benchmark uses continuous nvidia-smi sampling (`bench_translate_t1_t4.VramSampler`). HF E2B NF4 actually peaks at 14 GB, not 6 GB.
@@ -129,5 +131,5 @@ CalVer: `YYYY.M.W.PATCH` (e.g., `2026.5.0.0`). Single source of truth in `pyproj
 - [x] **Phase 6 — Fine-tune (round 1):** TranslateGemma S1-S9 complete (S6 winner: balanced ratio), Whisper W12 data scaling (198K chunks, 21.41% baseline WER), W15 hard mining bug fixed, **W16 corrective run = 7.25% fresh-eval WER**, **v2026.5 Phase 1A: Gemma 4 E4B Q4_K_M wins production default (5–9× speedup, 4× less VRAM)**
 - [ ] **Phase 7 — Evaluate:** Transfer adapters to Mac, re-run A/B with fine-tuned models + live YT comparison
 - [ ] **Phase 8 — Feedback loop:** Route flagged segments to correction → retrain (repeat 2–4 more cycles)
-- [ ] **Phase 9 — Demo:** Deploy Streamlit dashboard for Farmington Hills coffee shop outreach event
-- [ ] **Phase 10 — Integrate:** macOS Shortcuts for voice-command triggers, `streamlit-webrtc` for true live mic
+- [x] **Phase 9 — Demo:** **Shipped as v2026.6 operator control plane** (FastAPI + vanilla JS, not Streamlit as originally sketched). Pre-flight, mid-session controls, live observability, audio hotplug, verse highlights, summary trigger, systemd/launchd, bootstrap.sh. See [`docs/operator_runbook.md`](./docs/operator_runbook.md).
+- [ ] **Phase 10 — Integrate & polish:** Deferred 9.4.1 (multi-channel TTS routing) and 9.6.1 (live diarization on rolling buffer). Continuous improvement loop (live → log → retrain monthly). macOS Shortcuts for voice-command triggers if useful. systemd auto-start at the church PC is already in place via Phase 9.5.
