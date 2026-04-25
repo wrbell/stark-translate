@@ -49,12 +49,8 @@ if [ ! -f "$TARGET" ]; then
     exit 1
 fi
 
-# Build command
-CMD="$SERVER -m $TARGET --host $HOST --port $PORT -ngl 999 -c 512 -ctk q8_0"
-
 if [ "$NO_DRAFT" = false ] && [ -f "$DRAFT" ]; then
-    CMD="$CMD -md $DRAFT --draft 16 --draft-min 5"
-    echo "Starting llama-server: E4B + E2B draft (spec decode)"
+    echo "Starting llama-server: target + draft (spec decode)"
 elif [ "$NO_DRAFT" = false ] && [ ! -f "$DRAFT" ]; then
     echo "WARNING: Draft model not found at $DRAFT — running without spec decode"
     echo "Starting llama-server: target only"
@@ -67,4 +63,36 @@ echo "  Target: $TARGET"
 echo "  URL:    http://$HOST:$PORT"
 echo ""
 
-exec $CMD
+# Pre-flight: refuse to start if port is already in use. /dev/tcp is bash-built-in
+# so no extra dependency. Honors HOST so we can run two servers on different ports.
+if (timeout 2 bash -c "exec 3<>/dev/tcp/$HOST/$PORT" 2>/dev/null); then
+    echo "ERROR: $HOST:$PORT is already in use — another llama-server (or other process)" >&2
+    echo "       is bound there. Stop it first: pkill -f 'llama-server.*--port $PORT'" >&2
+    exit 2
+fi
+
+# Launch llama-server in the background and emit READY when it answers /health.
+# Caller scripts can `until grep -q READY <log>` to gate startup. SIGINT/SIGTERM
+# in the foreground kill the child so Ctrl-C still works as expected.
+"$SERVER" -m "$TARGET" --host "$HOST" --port "$PORT" -ngl 999 -c 512 -ctk q8_0 \
+    $([ "$NO_DRAFT" = false ] && [ -f "$DRAFT" ] && echo "-md $DRAFT --draft 16 --draft-min 5") &
+SERVER_PID=$!
+trap 'kill -TERM $SERVER_PID 2>/dev/null; wait $SERVER_PID 2>/dev/null; exit 0' INT TERM
+
+# Wait up to 120s for /health to return ok (E4B cold-load takes ~30-90s on 16GB).
+for _ in $(seq 1 120); do
+    sleep 1
+    if curl -s --max-time 1 "http://$HOST:$PORT/health" 2>/dev/null | grep -q '"status":"ok"'; then
+        echo "READY"
+        wait $SERVER_PID
+        exit $?
+    fi
+    if ! kill -0 $SERVER_PID 2>/dev/null; then
+        echo "ERROR: llama-server died before reaching ready state" >&2
+        exit 3
+    fi
+done
+
+echo "ERROR: llama-server did not become healthy within 120s" >&2
+kill -TERM $SERVER_PID 2>/dev/null
+exit 4
