@@ -48,6 +48,8 @@ bible_data/holdout/*.jsonl
 metrics/*.csv
 metrics/*.jsonl
 metrics/*.json
+metrics/*.log
+metrics/operator.log*
 
 # Assessment files
 assessment_sample.jsonl
