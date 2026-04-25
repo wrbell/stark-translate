@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+launchd agent for the stark-translate operator on macOS.
+
+Install:
+    cp launchd/com.starkroad.translate.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.starkroad.translate.plist
+
+Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.starkroad.translate.plist
+    rm ~/Library/LaunchAgents/com.starkroad.translate.plist
+
+Edit the WorkingDirectory + ProgramArguments venv path to match your install
+location. bootstrap.sh (Phase 9.7) generates a copy with correct paths.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.starkroad.translate</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/stark/stark-translate/venv/bin/uvicorn</string>
+        <string>operator_app.main:app</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>9000</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/stark/stark-translate</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>STARK_PROJECT_ROOT</key>
+        <string>/Users/stark/stark-translate</string>
+        <key>STARK_OPERATOR_LOG_DIR</key>
+        <string>/Users/stark/stark-translate/metrics</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/stark/stark-translate/metrics/launchd-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/stark/stark-translate/metrics/launchd-stderr.log</string>
+
+    <key>ThrottleInterval</key>
+    <integer>5</integer>
+</dict>
+</plist>

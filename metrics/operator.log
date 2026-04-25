@@ -1,0 +1,42 @@
+2026-04-25 12:57:35 [INFO] httpx: HTTP Request: GET http://testserver/healthz "HTTP/1.1 200 OK"
+2026-04-25 12:57:35 [INFO] httpx: HTTP Request: GET http://testserver/api/preflight "HTTP/1.1 200 OK"
+2026-04-25 12:57:35 [INFO] httpx: HTTP Request: GET http://testserver/api/session/status "HTTP/1.1 200 OK"
+2026-04-25 12:57:35 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /mnt/e/code/stark-translate/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:35 [INFO] httpx: HTTP Request: POST http://testserver/api/session/start "HTTP/1.1 200 OK"
+2026-04-25 12:57:35 [INFO] httpx: HTTP Request: GET http://testserver/api/session/status "HTTP/1.1 200 OK"
+2026-04-25 12:57:36 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /mnt/e/code/stark-translate/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:36 [INFO] httpx: HTTP Request: POST http://testserver/api/session/start "HTTP/1.1 200 OK"
+2026-04-25 12:57:36 [INFO] httpx: HTTP Request: POST http://testserver/api/session/start "HTTP/1.1 409 Conflict"
+2026-04-25 12:57:36 [INFO] httpx: HTTP Request: POST http://testserver/api/session/start "HTTP/1.1 422 Unprocessable Entity"
+2026-04-25 12:57:36 [INFO] httpx: HTTP Request: POST http://testserver/api/session/start "HTTP/1.1 422 Unprocessable Entity"
+2026-04-25 12:57:36 [INFO] httpx: HTTP Request: POST http://testserver/api/session/stop "HTTP/1.1 200 OK"
+2026-04-25 12:57:36 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /mnt/e/code/stark-translate/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:36 [INFO] httpx: HTTP Request: POST http://testserver/api/session/start "HTTP/1.1 200 OK"
+2026-04-25 12:57:36 [INFO] httpx: HTTP Request: GET http://testserver/api/session/status "HTTP/1.1 200 OK"
+2026-04-25 12:57:37 [INFO] httpx: HTTP Request: POST http://testserver/api/session/stop "HTTP/1.1 200 OK"
+2026-04-25 12:57:37 [INFO] httpx: HTTP Request: GET http://testserver/api/devices "HTTP/1.1 200 OK"
+2026-04-25 12:57:37 [INFO] operator_app.audio: audio device set changed (seq=1): 2 inputs, 0 outputs
+2026-04-25 12:57:37 [INFO] httpx: HTTP Request: GET http://testserver/api/devices "HTTP/1.1 200 OK"
+2026-04-25 12:57:37 [INFO] httpx: HTTP Request: GET http://testserver/healthz "HTTP/1.1 200 OK"
+2026-04-25 12:57:37 [INFO] httpx: HTTP Request: GET http://testserver/api/metrics "HTTP/1.1 200 OK"
+2026-04-25 12:57:37 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /tmp/pytest-of-wbell/pytest-14/test_start_spawns_subprocess_a0/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:37 [INFO] operator_app.audio: audio device set changed (seq=2): 0 inputs, 0 outputs
+2026-04-25 12:57:37 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /tmp/pytest-of-wbell/pytest-14/test_stop_terminates_subproces0/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:38 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /tmp/pytest-of-wbell/pytest-14/test_double_start_returns_erro0/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:38 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /tmp/pytest-of-wbell/pytest-14/test_pause_resume_flow0/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/control/pause "HTTP/1.1 409 Conflict"
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/control/lang_flip "HTTP/1.1 409 Conflict"
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/control/vad "HTTP/1.1 409 Conflict"
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/control/fallback "HTTP/1.1 422 Unprocessable Entity"
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/control/vad "HTTP/1.1 422 Unprocessable Entity"
+2026-04-25 12:57:38 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /tmp/pytest-of-wbell/pytest-14/test_pause_resume_full_cycle0/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/session/start "HTTP/1.1 200 OK"
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: GET http://testserver/api/session/status "HTTP/1.1 200 OK"
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/control/pause "HTTP/1.1 200 OK"
+2026-04-25 12:57:38 [INFO] httpx: HTTP Request: POST http://testserver/api/control/resume "HTTP/1.1 200 OK"
+2026-04-25 12:57:39 [INFO] httpx: HTTP Request: POST http://testserver/api/session/stop "HTTP/1.1 200 OK"
+2026-04-25 12:57:39 [INFO] operator_app.pipeline_manager: spawning pipeline: /home/wbell/stt_train_env/bin/python3.12 -u /tmp/pytest-of-wbell/pytest-14/test_segments_recorded_via_csv0/dry_run_ab.py --lang en --backend auto --vad-threshold 0.3 --log-level INFO --no-ab
+2026-04-25 12:57:40 [INFO] operator_app.audio: audio device set changed (seq=1): 2 inputs, 0 outputs
+2026-04-25 12:57:40 [INFO] httpx: HTTP Request: GET http://testserver/api/devices "HTTP/1.1 200 OK"
+2026-04-25 12:57:40 [INFO] httpx: HTTP Request: GET http://testserver/api/devices "HTTP/1.1 503 Service Unavailable"
+2026-04-25 12:57:40 [INFO] operator_app.audio: audio device set changed (seq=1): 2 inputs, 0 outputs

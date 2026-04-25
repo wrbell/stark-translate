@@ -1,0 +1,38 @@
+[Unit]
+Description=stark-translate operator control plane
+Documentation=https://github.com/wrbell/stark-translate
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adjust User/WorkingDirectory for the actual install location.
+# bootstrap.sh (Phase 9.7) generates a drop-in with the correct values.
+User=stark
+Group=stark
+WorkingDirectory=/opt/stark-translate
+Environment=STARK_PROJECT_ROOT=/opt/stark-translate
+Environment=STARK_OPERATOR_LOG_DIR=/var/log/stark-translate
+# venv path — bootstrap.sh sets this up next to the repo
+ExecStart=/opt/stark-translate/venv/bin/uvicorn operator_app.main:app \
+    --host 0.0.0.0 --port 9000 --log-config /opt/stark-translate/systemd/uvicorn-log.json
+ExecStop=/bin/kill -SIGTERM $MAINPID
+
+# Auto-restart on crash; small backoff so a busted config doesn't pin the CPU.
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+# Process hygiene
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+PrivateTmp=true
+NoNewPrivileges=true
+
+# Allow it to spawn dry_run_ab.py + llama-server children
+TasksMax=4096
+
+[Install]
+WantedBy=multi-user.target
