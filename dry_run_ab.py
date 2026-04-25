@@ -2887,6 +2887,10 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
                 loop,
             )
 
+        # Local sounddevice playback (Phase 9.4.1)
+        if output_mode == "local":
+            engine.play(tts_result.audio, tts_result.sample_rate, device=settings.tts.output_device)
+
         # Log TTS latency
         tts_e2e_ms = tts_result.latency_ms
         print(
@@ -3509,7 +3513,10 @@ async def main_async(args):
             _tts_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="tts")
             settings.tts.enabled = True
             settings.tts.output_mode = args.tts_output
-            print(f"  TTS enabled: {TARGET_LANG} voice ({tts_voice}), output={args.tts_output}")
+            if args.tts_device is not None:
+                settings.tts.output_device = args.tts_device
+            device_suffix = f", device={settings.tts.output_device}" if args.tts_output == "local" else ""
+            print(f"  TTS enabled: {TARGET_LANG} voice ({tts_voice}), output={args.tts_output}{device_suffix}")
         else:
             print(f"  WARNING: No TTS voice configured for {TARGET_LANG}, TTS disabled", file=sys.stderr)
 
@@ -3770,9 +3777,22 @@ def main():
     )
     parser.add_argument(
         "--tts-output",
-        choices=["ws", "wav", "both"],
+        choices=["ws", "wav", "both", "local"],
         default="ws",
-        help="TTS output mode: ws (WebSocket stream), wav (file), both (default: ws)",
+        help=(
+            "TTS output mode: ws (WebSocket stream), wav (file), both, "
+            "local (sounddevice playback to --tts-device). default: ws"
+        ),
+    )
+    parser.add_argument(
+        "--tts-device",
+        type=int,
+        default=None,
+        help=(
+            "sounddevice output device index for --tts-output local. "
+            "Get the index from /api/devices or `python -m sounddevice`. "
+            "Defaults to system default output."
+        ),
     )
     parser.add_argument(
         "--log-level",

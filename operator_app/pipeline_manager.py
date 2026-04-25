@@ -49,6 +49,9 @@ class SessionConfig:
     mic_device: int | None = None
     mic_gain: float | None = None
     log_level: str = "INFO"
+    # Phase 9.4.1: TTS output device routing
+    tts_output_mode: str = "ws"  # "ws" | "wav" | "both" | "local"
+    tts_device: int | None = None
 
 
 @dataclass
@@ -238,6 +241,9 @@ class PipelineRunner:
             argv += ["--no-ab"]
         if config.tts:
             argv += ["--tts"]
+            argv += ["--tts-output", config.tts_output_mode]
+            if config.tts_device is not None:
+                argv += ["--tts-device", str(config.tts_device)]
         if config.mic_device is not None:
             argv += ["--device", str(config.mic_device)]
         if config.mic_gain is not None:
