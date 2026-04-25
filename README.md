@@ -53,7 +53,7 @@ brew install ffmpeg portaudio
 python3.11 -m venv stt_env && source stt_env/bin/activate
 pip install -r requirements-mac.txt
 huggingface-cli login          # Required for TranslateGemma
-python setup_models.py         # Download all models
+stark-translate setup           # Download all models
 python dry_run_ab.py           # 4B only (~4.3 GB), or --ab for A/B (~11.3 GB)
 
 # NVIDIA
@@ -126,7 +126,7 @@ Seven CI workflows: lint, test (3.11 + 3.12), security (pip-audit), release, lab
 ```
 dry_run_ab.py                  Main pipeline: mic → VAD → STT → translate → display
 settings.py                    Unified config (pydantic-settings, STARK_ prefix)
-setup_models.py                One-command model download
+(deleted in v2026.7 cleanup; replaced by `stark-translate setup`)
 
 engines/                       STT + translation + TTS engine layer
   base.py                      ABCs and result dataclasses

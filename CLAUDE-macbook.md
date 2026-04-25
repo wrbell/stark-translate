@@ -73,7 +73,7 @@ pip install -r requirements-mac.txt
 huggingface-cli login
 
 # Download all models
-python setup_models.py
+stark-translate setup
 ```
 
 The `requirements-mac.txt` file includes all dependencies. Key packages:
@@ -108,7 +108,7 @@ youtube-transcript-api streamlink innertube
 
 ### First-Run Model Downloads
 
-Run `python setup_models.py` to download and verify all models. Uses Wi-Fi — total ~12 GB for A/B mode:
+Run `stark-translate setup` to download and verify all models. Uses Wi-Fi — total ~12 GB for A/B mode:
 
 | Model | Framework | Size | Purpose |
 |-------|-----------|------|---------|

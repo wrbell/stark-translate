@@ -88,7 +88,7 @@ Two-tier glossary replaces the flat 229-term list:
 | Tier 2 (Master) | 229 terms | — | Normalization, active learning, translation glossary enforcement |
 
 - **Script:** `tools/glossary.py` — `load_tier()`, `validate_boost()`, `build_and_save_tiers()`
-- **Build:** `python build_glossary.py --build-tiers`
+- **Build:** `python build_glossary.py --build-tiers   # in training/`
 - **Files:** `bible_data/glossary/tier1_boost.json`, `bible_data/glossary/tier2_master.json`
 
 ## Data Organization
@@ -331,7 +331,7 @@ When adding Hindi or Chinese translation training (see `docs/archive/research/mu
 
 1. **Find aligned verse pairs** — `bible-nlp/biblenlp-corpus` has 833 languages (CC-BY-4.0). Hindi IRV: `hin2017` (~31K verses). Chinese CUV-S: `cmn-cu89s` (~31K verses, public domain).
 2. **Prepare with `prepare_bible_corpus.py`** — input: two translation dirs, output: JSONL pairs with `source_lang_code`, `target_lang_code`, `source_text`, `target_text`, `verse_id`.
-3. **Build theological glossary** (100–150 terms minimum) using `build_glossary.py` as template. Include honorifics (Hindi तू for divine address) and denomination-specific terms (Chinese 圣灵 not 圣神).
+3. **Build theological glossary** (100–150 terms minimum) using `training/build_glossary.py` as template. Include honorifics (Hindi तू for divine address) and denomination-specific terms (Chinese 圣灵 not 圣神).
 4. **QLoRA config**: Same as Spanish but **r=32** (new language direction needs higher rank). `max_seq_length=768` for Hindi (2.5–3.5x token fertility), 512 for Chinese.
 5. **Evaluation**: chrF++ (primary — handles morphology and no-space scripts), COMET, theological term accuracy. Use `--tokenize zh` for Chinese SacreBLEU.
 6. **Copyright**: Same rules apply — only pre-1923 or explicitly public domain translations. No ESV, NASB, NIV, NLT, NVI, LBLA, RVR1960, DHH.
