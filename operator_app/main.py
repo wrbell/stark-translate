@@ -19,6 +19,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from operator_app.audio import get_watcher
 from operator_app.metrics import get_collector, healthz_snapshot
 from operator_app.pipeline_manager import (
     InvalidStateError,
@@ -76,26 +77,17 @@ def api_preflight() -> dict:
 
 @app.get("/api/devices")
 def api_devices() -> dict:
-    """Enumerate input audio devices via sounddevice."""
-    try:
-        import sounddevice as sd
+    """Enumerate input + output audio devices, plus the change_seq counter.
 
-        raw = sd.query_devices()
-    except Exception as exc:
-        return JSONResponse(status_code=503, content={"error": f"sounddevice unavailable: {exc}"})
-
-    devices = []
-    for idx, d in enumerate(raw):
-        if d.get("max_input_channels", 0) > 0:
-            devices.append(
-                {
-                    "index": idx,
-                    "name": d.get("name", "?"),
-                    "channels": d.get("max_input_channels", 0),
-                    "default_sample_rate": d.get("default_samplerate", 0),
-                }
-            )
-    return {"inputs": devices}
+    Frontend reads ``change_seq`` from the metrics WS frame and re-fetches
+    this endpoint when it bumps; that's the USB-hotplug toast trigger.
+    """
+    listing = get_watcher().force_poll()
+    body = listing.to_dict()
+    body["change_seq"] = get_watcher().snapshot()["change_seq"]
+    if listing.error:
+        return JSONResponse(status_code=503, content=body)
+    return body
 
 
 @app.get("/api/session/status")

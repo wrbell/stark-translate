@@ -97,10 +97,28 @@
     }
   }
 
-  // ---- mic devices ----
-  async function refreshDevices() {
+  // ---- mic + output devices ----
+  const outputSelect = document.getElementById("output-device");
+  const toastEl = document.getElementById("toast");
+  let knownChangeSeq = 0;
+  let toastTimer = null;
+
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    toastEl.classList.remove("fade");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.add("fade");
+      setTimeout(() => { toastEl.hidden = true; }, 220);
+    }, 4500);
+  }
+
+  async function refreshDevices(showChangeToast) {
     try {
       const data = await getJson("/api/devices");
+      // mic
       micSelect.innerHTML = '<option value="">auto-detect</option>';
       for (const d of data.inputs || []) {
         const opt = document.createElement("option");
@@ -108,6 +126,21 @@
         opt.textContent = `${d.index}: ${d.name} (${d.channels}ch)`;
         micSelect.appendChild(opt);
       }
+      // outputs (preview only — wiring to PiperTTSEngine is deferred to 9.4.1)
+      if (outputSelect) {
+        outputSelect.innerHTML = '<option value="">system default</option>';
+        for (const d of data.outputs || []) {
+          const opt = document.createElement("option");
+          opt.value = d.index;
+          opt.textContent = `${d.index}: ${d.name} (${d.channels}ch)`;
+          outputSelect.appendChild(opt);
+        }
+      }
+      if (showChangeToast) {
+        const counts = `${(data.inputs || []).length} in / ${(data.outputs || []).length} out`;
+        showToast(`Audio devices changed — ${counts}. Confirm your mic is still selected.`);
+      }
+      knownChangeSeq = data.change_seq || knownChangeSeq;
     } catch (e) {
       // 503 if sounddevice unavailable — leave the placeholder option
     }
@@ -224,6 +257,12 @@
     drawSparkline(confidenceSpark, confidenceHistory, { color: "#8a4500", min: 0, max: 1 });
 
     metricsMeta.textContent = `uptime ${Math.round(snap.uptime_s || 0)}s · queue ${snap.queue_depth} · errors ${snap.error_count}`;
+
+    // Audio hotplug detection — re-fetch device list when the watcher's
+    // change_seq counter advances.
+    if (snap.audio && typeof snap.audio.change_seq === "number" && snap.audio.change_seq > knownChangeSeq) {
+      refreshDevices(true);
+    }
   }
 
   let metricsWs = null;
@@ -255,7 +294,7 @@
 
   // ---- bootstrap ----
   refreshPreflight();
-  refreshDevices();
+  refreshDevices(false);
   refreshStatus();
   connectMetrics();
   setInterval(refreshPreflight, PREFLIGHT_INTERVAL_MS);

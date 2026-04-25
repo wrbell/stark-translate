@@ -142,6 +142,19 @@ class MetricsCollector:
         else:
             latency = {"n": 0}
 
+        # Audio device change signal (Phase 9.4) — pulled lazily so this
+        # module stays decoupled from the watcher singleton.
+        try:
+            from operator_app.audio import get_watcher
+
+            audio_state = get_watcher().snapshot()
+            audio_summary = {
+                "change_seq": audio_state.get("change_seq", 0),
+                "last_change_ts": audio_state.get("last_change_ts"),
+            }
+        except Exception:
+            audio_summary = {"change_seq": 0, "last_change_ts": None}
+
         return {
             "ts": time.time(),
             "uptime_s": round(time.time() - started_at, 1) if started_at else 0.0,
@@ -154,6 +167,7 @@ class MetricsCollector:
                 "vram_mib_current": vram[-1].value if vram else 0.0,
                 "cpu_percent_current": cpu[-1].value if cpu else 0.0,
             },
+            "audio": audio_summary,
             "segments_recent": [
                 {
                     "chunk_id": s.chunk_id,

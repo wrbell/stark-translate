@@ -8,9 +8,10 @@
 </head>
 <body>
 <header class="topbar">
-  <h1>stark-translate <span class="version">operator (Phase 9.1)</span></h1>
+  <h1>stark-translate <span class="version">operator</span></h1>
   <div class="state-pill" id="state-pill">…</div>
 </header>
+<div class="toast" id="toast" hidden></div>
 
 <main>
   <section class="card" id="preflight-card">
@@ -75,6 +76,9 @@
       </label>
       <label>Mic
         <select name="mic_device" id="mic-device"><option value="">auto-detect</option></select>
+      </label>
+      <label>Output (TTS) — preview only
+        <select name="output_device" id="output-device" disabled><option value="">system default</option></select>
       </label>
       <label>VAD threshold
         <input type="number" name="vad_threshold" min="0" max="1" step="0.05" value="0.3">
