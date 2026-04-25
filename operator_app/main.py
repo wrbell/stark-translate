@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from operator_app.metrics import get_collector, healthz_snapshot
 from operator_app.pipeline_manager import (
+    InvalidStateError,
     PipelineRunner,
     SessionAlreadyRunningError,
     SessionConfig,
@@ -116,6 +117,70 @@ def api_session_start(req: StartRequest, runner: PipelineRunner = Depends(get_ru
 def api_session_stop(runner: PipelineRunner = Depends(get_runner)) -> dict:
     snap = runner.stop()
     return snap.to_dict()
+
+
+# -- mid-session controls (Phase 9.3) -----------------------------------------
+
+
+class VadRequest(BaseModel):
+    threshold: float = Field(ge=0.0, le=1.0)
+
+
+class FallbackRequest(BaseModel):
+    """Switch the live engine. Restarts the subprocess with new args."""
+
+    engine: str = Field(pattern="^(auto|llamacpp|hf)$")
+
+
+@app.post("/api/control/pause")
+def api_control_pause(runner: PipelineRunner = Depends(get_runner)) -> dict:
+    try:
+        snap = runner.pause()
+    except InvalidStateError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return snap.to_dict()
+
+
+@app.post("/api/control/resume")
+def api_control_resume(runner: PipelineRunner = Depends(get_runner)) -> dict:
+    try:
+        snap = runner.resume()
+    except InvalidStateError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return snap.to_dict()
+
+
+@app.post("/api/control/lang_flip")
+def api_control_lang_flip(runner: PipelineRunner = Depends(get_runner)) -> dict:
+    """Flip EN↔ES. Stop+restart with the inverted lang field."""
+    snap = runner.status()
+    if snap.state == "idle" or snap.config is None:
+        raise HTTPException(status_code=409, detail="no active session to flip")
+    cfg = SessionConfig(**snap.config)
+    cfg.lang = "es" if cfg.lang == "en" else "en"
+    return runner.restart_with(cfg).to_dict()
+
+
+@app.post("/api/control/vad")
+def api_control_vad(req: VadRequest, runner: PipelineRunner = Depends(get_runner)) -> dict:
+    """Update VAD threshold. Stop+restart with new threshold."""
+    snap = runner.status()
+    if snap.state == "idle" or snap.config is None:
+        raise HTTPException(status_code=409, detail="no active session to retune")
+    cfg = SessionConfig(**snap.config)
+    cfg.vad_threshold = req.threshold
+    return runner.restart_with(cfg).to_dict()
+
+
+@app.post("/api/control/fallback")
+def api_control_fallback(req: FallbackRequest, runner: PipelineRunner = Depends(get_runner)) -> dict:
+    """Emergency engine swap (e.g. llamacpp → hf if llama-server crashed)."""
+    snap = runner.status()
+    if snap.state == "idle" or snap.config is None:
+        raise HTTPException(status_code=409, detail="no active session to swap")
+    cfg = SessionConfig(**snap.config)
+    cfg.engine = req.engine
+    return runner.restart_with(cfg).to_dict()
 
 
 @app.get("/api/metrics")

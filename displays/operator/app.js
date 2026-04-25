@@ -45,10 +45,21 @@
     statePillEl.className = "state-pill " + state;
   }
 
+  const pauseBtn = document.getElementById("pause-btn");
+  const resumeBtn = document.getElementById("resume-btn");
+  const flipBtn = document.getElementById("flip-btn");
+  const fallbackBtn = document.getElementById("fallback-btn");
+
   function updateButtonsForState(state) {
     const isIdle = state === "idle";
+    const isRunning = state === "running";
+    const isPaused = state === "paused";
     startBtn.disabled = !isIdle || !preflightOk;
     stopBtn.disabled = isIdle || state === "stopping";
+    pauseBtn.disabled = !isRunning;
+    resumeBtn.disabled = !isPaused;
+    flipBtn.disabled = !isRunning;
+    fallbackBtn.disabled = !isRunning;
   }
 
   // ---- preflight ----
@@ -156,6 +167,21 @@
       statusDetailEl.textContent = `stop error: ${e.message}`;
     }
   });
+
+  async function controlClick(url, body, btn) {
+    btn.disabled = true;
+    try {
+      const snap = await postJson(url, body);
+      renderStatus(snap);
+    } catch (e) {
+      statusDetailEl.textContent = `${url} error: ${e.message}`;
+    }
+  }
+
+  pauseBtn.addEventListener("click", () => controlClick("/api/control/pause", null, pauseBtn));
+  resumeBtn.addEventListener("click", () => controlClick("/api/control/resume", null, resumeBtn));
+  flipBtn.addEventListener("click", () => controlClick("/api/control/lang_flip", null, flipBtn));
+  fallbackBtn.addEventListener("click", () => controlClick("/api/control/fallback", { engine: "hf" }, fallbackBtn));
 
   // ---- live metrics over /ws/control ----
   const vramSpark = document.getElementById("spark-vram");

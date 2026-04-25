@@ -135,6 +135,9 @@ button.primary { background: var(--primary); color: #fff; }
 button.primary:hover:not(:disabled) { background: var(--primary-hover); }
 button.danger { background: var(--danger); color: #fff; }
 button.danger:hover:not(:disabled) { background: var(--danger-hover); }
+button.ghost { background: #fff; color: var(--text); border: 1px solid var(--border); }
+button.ghost:hover:not(:disabled) { background: #f0f0ee; }
+.actions.controls { margin-top: 8px; flex-wrap: wrap; }
 
 .status {
   margin-top: 14px;
