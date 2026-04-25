@@ -121,7 +121,7 @@ class LlamaCppEngine(TranslationEngine):
             # content blocks, fall back to plain text instruction
             user_content = f"Translate from {source_lang} to {target_lang}: {text}"
 
-        payload = {
+        payload: dict = {
             "messages": [
                 {"role": "user", "content": user_content},
             ],
@@ -129,6 +129,13 @@ class LlamaCppEngine(TranslationEngine):
             "temperature": 0.0,
             "stream": False,
         }
+        if self._model_family == "gemma4":
+            # Gemma 4's default chat template enables chain-of-thought "reasoning"
+            # mode, which puts the answer in `reasoning_content` and leaves
+            # `content` empty until the model finishes thinking. For translation
+            # we want a direct answer — disable thinking via the kwarg llama.cpp
+            # forwards into the chat template.
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
 
         body = json.dumps(payload).encode("utf-8")
         url = f"{self._server_url}/v1/chat/completions"

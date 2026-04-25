@@ -24,10 +24,10 @@ Fully on-device, live bilingual speech-to-text for church outreach at Stark Road
             │
             └─ FINAL (on 0.5s silence gap or 8s max utterance)
                  Whisper Large-V3-Turbo STT (~500ms)
-                 TranslateGemma 4B EN↔ES (~550ms)            ← replaces partial
+                 Gemma 4 E4B Q4_K_M via llama.cpp (~470ms)   ← replaces partial
                  ├─ Piper TTS (~40ms/word EN, --tts)         ← audio output
-                 TranslateGemma 12B EN↔ES (~2.1s, --ab)      ← side-by-side
-                 Total: ~1.1s (4B) / ~2.6s (A/B sequential)
+                 Gemma 4 E2B Q4_K_M via llama.cpp (~280ms)   ← low-VRAM fallback
+                 Total: ~1.0s (E4B) / ~0.8s (E2B)
 
                  Pipeline overlap: translation runs on utterance N
                  while STT runs on utterance N+1, hiding translation latency.
@@ -65,16 +65,17 @@ Key flags: `--lang es` (Spanish speaker mode), `--tts` (audio output), `--ab` (A
 
 ## Models
 
-| Component | Model | Size | Latency |
-|-----------|-------|------|---------|
+| Component | Model | Size | Latency (CUDA) |
+|-----------|-------|------|----------------|
 | STT | Whisper Large-V3-Turbo | ~1.5 GB | ~500ms |
 | Translation (partials) | MarianMT opus-mt-en-es / es-en | ~298 MB | ~250ms |
-| Translation A (finals) | TranslateGemma 4B 4-bit | ~2.5 GB | ~550ms |
-| Translation B (finals) | TranslateGemma 12B 4-bit | ~7 GB | ~2.1s |
+| **Translation default** (CUDA, finals) | **Gemma 4 E4B Q4_K_M (llama.cpp)** | **5.0 GB GGUF / 4.9 GB VRAM** | **~470ms** |
+| Translation low-VRAM (CUDA, finals) | Gemma 4 E2B Q4_K_M (llama.cpp) | 3.2 GB GGUF / 3.5 GB VRAM | ~280ms |
+| Translation (Mac MLX) | TranslateGemma 4B / 12B 4-bit | ~2.5 GB / ~7 GB | ~550ms / ~2.1s |
 | TTS | Piper EN/ES (ONNX) | ~63 MB | ~40ms/word |
 | VAD | Silero VAD | ~2 MB | <1ms |
 
-CUDA variants: bitsandbytes NF4 for TranslateGemma, faster-whisper INT8 for STT. Pipeline overlap hides translation latency by running translation(N) concurrent with STT(N+1).
+CUDA path now uses **llama.cpp via `engines/llamacpp_engine.py`** (v2026.5+) for ~5–9× speedup and ~4× VRAM reduction vs HF NF4. Caller starts `llama-server` (see `start_server.sh`). MLX/Mac path unchanged. Pipeline overlap hides translation latency by running translation(N) concurrent with STT(N+1). See [`docs/april_squeeze/BENCHMARK.md`](./docs/april_squeeze/BENCHMARK.md) for the full Phase 1A benchmark across TG4B/TG12B/E2B/E4B × HF/GGUF.
 
 ## Displays
 
@@ -83,7 +84,7 @@ Five browser-based displays served over LAN. Phones connect via QR code on the a
 | Display | Purpose |
 |---------|---------|
 | `audience_display.html` | Projector: EN/ES side-by-side, fading context, fullscreen, QR overlay |
-| `ab_display.html` | Operator: 4B / MarianMT / 12B comparison with latency stats |
+| `ab_display.html` | Operator: A (default) / MarianMT / B comparison with latency stats |
 | `mobile_display.html` | Phone/tablet: responsive, model toggle, Spanish-only mode |
 | `church_display.html` | Simplified church layout |
 | `obs_overlay.html` | Transparent overlay for OBS Studio streaming |
@@ -102,16 +103,18 @@ Fine-tuning runs on Windows/WSL (A2000 Ada 16GB). Adapters transfer to Mac for i
 
 | Target | RAM/VRAM | Config |
 |--------|----------|--------|
-| Mac (M1-M4) 8 GB+ | ~4.3 GB | 4B-only (`--no-ab`) |
+| Mac (M1-M4) 8 GB+ | ~4.3 GB | TranslateGemma 4B-only (`--no-ab`) |
 | Mac (M1-M4) 18 GB+ | ~11.3 GB | Full A/B (`--ab`) |
-| NVIDIA 6 GB+ | ~4.7 GB | 4B + Whisper (`--backend cuda`) |
-| NVIDIA 15 GB+ | ~12 GB | Full A/B on CUDA |
+| **NVIDIA 6 GB+** (RTX 3060/4060) | **~5 GB** | **Whisper + Gemma 4 E2B Q4_K_M (llama.cpp)** |
+| NVIDIA 8 GB+ | ~6 GB | Whisper + Gemma 4 E4B Q4_K_M (llama.cpp) |
 | Training (A2000 Ada 16GB) | ~8-12 GB | LoRA/QLoRA fine-tuning |
+
+> **CUDA HF NF4 not recommended:** Gemma 4 E2B/E4B HF NF4 occupy 14–15 GB on GPU due to bf16 Per-Layer Embeddings. Use llama.cpp Q4_K_M instead (4× less VRAM). See [`docs/april_squeeze/BENCHMARK.md`](./docs/april_squeeze/BENCHMARK.md).
 
 ## Testing & CI
 
 ```bash
-pytest tests/ -v                    # 806 tests, no GPU required
+pytest tests/ -v                    # 855 tests, no GPU required
 ruff check . && ruff format --check .
 mypy engines/ settings.py
 ```
@@ -128,8 +131,10 @@ setup_models.py                One-command model download
 engines/                       STT + translation + TTS engine layer
   base.py                      ABCs and result dataclasses
   mlx_engine.py                Apple Silicon (MLX) implementations
-  cuda_engine.py               NVIDIA CUDA implementations (streaming, prompt cache)
+  cuda_engine.py               NVIDIA CUDA HF implementations (streaming, prompt cache)
+  llamacpp_engine.py           NVIDIA CUDA via llama.cpp HTTP (recommended for production, v2026.5+)
   factory.py                   Auto-detect backend and create engines
+start_server.sh                Launch llama-server with default Gemma 4 GGUFs
 
 displays/                      5 browser display modes (static HTML/CSS/JS)
 
@@ -139,7 +144,8 @@ training/                      Windows/WSL training scripts
   align_deepgram_chunks.py     Deepgram-Whisper alignment (sharded Arrow)
   mine_hard_examples.py        Hard example mining (batched fp16, Tier 1 detection)
   build_hard_subset.py         WER-bounded filtering with stratified caps
-  benchmark_gemma4.py          TranslateGemma vs Gemma 4 comparison
+  benchmark_gemma4.py          TranslateGemma vs Gemma 4 comparison (HF only)
+bench_translate_t1_t4.py       Phase 1A benchmark: HF vs llama.cpp, all 4 models, VRAM sampler
 
 tools/                         Monitoring & validation
   live_caption_monitor.py      YouTube caption comparison
@@ -171,9 +177,9 @@ features/                      Post-processing (not yet integrated with live pip
 
 ## Status
 
-**Done:** Bidirectional EN/ES inference (MLX + CUDA), two-pass pipeline with overlap, 5 display modes, Piper TTS, TranslateGemma S1-S9 ablation (S6 winner), Whisper W12 data scaling (198K chunks), W15 hard mining pipeline, CUDA streaming runtime with prompt cache + speculative decoding, Deepgram oracle (35 sermons), data integrity pipeline, 806 tests, 7 CI workflows.
+**Done:** Bidirectional EN/ES inference (MLX + CUDA), two-pass pipeline with overlap, 5 display modes, Piper TTS, TranslateGemma S1-S9 ablation (S6 winner), Whisper W12 data scaling (198K chunks), W15 hard mining pipeline, W16 corrective run (7.25% WER), CUDA streaming runtime with prompt cache + speculative decoding, Deepgram oracle (35 sermons), data integrity pipeline, **v2026.5: llama.cpp engine (5–9× faster CUDA, 4× less VRAM), Gemma 4 E2B/E4B as production default, Phase 1A benchmark with full 4-model matrix**, 855 tests, 7 CI workflows.
 
-**Next:** Continue Whisper curriculum learning (target WER <10%), evaluate Gemma 4 models, deploy adapters to Mac for live A/B, active learning feedback loop (3-5 cycles), Hindi & Chinese adapters.
+**Next:** Wire llama.cpp engine into `dry_run_ab.py` (Phase 1D), Whisper W18+ continuing curriculum, deploy v2026.5 adapters to Mac for live A/B, active learning feedback loop (3–5 cycles), Hindi & Chinese adapters. Phase 1C EAGLE-3 deferred — single-GPU spec decode showed no benefit on this hardware.
 
 ## License
 

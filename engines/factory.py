@@ -103,12 +103,20 @@ def create_translation_engine(
 
     Args:
         backend:             "mlx", "cuda", "cpu", or "auto" (detect best available).
-        model_id:            Override the default model identifier.
-        engine_type:         "gemma" for TranslateGemma, "marian" for MarianMT.
-        streaming:           Use streaming engine (CUDA only — enables token-by-token
-                             output via TextIteratorStreamer).
-        assistant_model_id:  Optional 4B model repo for speculative decoding
-                             (CUDA only, used when 12B is the primary model).
+        model_id:            Override the default model identifier (or for
+                             ``engine_type="llamacpp"``, the llama-server URL).
+        engine_type:         "gemma" for HF TranslateGemma/Gemma 4 (default),
+                             "marian" for MarianMT, "llamacpp" for llama.cpp via
+                             HTTP. **For CUDA deployment, prefer "llamacpp"** —
+                             v2026.5 Phase 1A benchmark shows 5–9× speedup and
+                             4× VRAM reduction vs HF NF4 (see
+                             ``docs/april_squeeze/BENCHMARK.md``). Caller is
+                             responsible for starting llama-server first; see
+                             ``start_server.sh``.
+        streaming:           Use streaming engine (CUDA HF only).
+        assistant_model_id:  Optional draft model for HF spec decode (CUDA only).
+                             For llama.cpp spec decode, pass ``-md`` to llama-server
+                             instead.
         **kwargs:            Forwarded to the engine constructor.
 
     Returns:
