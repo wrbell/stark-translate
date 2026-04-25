@@ -498,7 +498,7 @@ if __name__ == "__main__":
     export_training_jsonl(pairs)
 ```
 
-### Theological Glossary (`build_glossary.py`)
+### Theological Glossary (`training/build_glossary.py`)
 
 ```python
 """
@@ -828,7 +828,7 @@ if __name__ == "__main__":
 
 TranslateGemma (Jan 2026, built on Gemma 3) supports 55 languages / ~500 pairs including EN→ES. The 4B variant loads at ~2.6 GB in 4-bit via bitsandbytes. Must follow its exact chat template with `source_lang_code` / `target_lang_code` fields.
 
-**Data:** ~155K Bible verse pairs from `training/prepare_bible_corpus.py` + ~1K theological glossary pairs from `build_glossary.py`. With sequence packing, Bible verses (rarely >200 tokens) pack efficiently.
+**Data:** ~155K Bible verse pairs from `training/prepare_bible_corpus.py` + ~1K theological glossary pairs from `training/build_glossary.py`. With sequence packing, Bible verses (rarely >200 tokens) pack efficiently.
 
 ```python
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
@@ -1185,7 +1185,7 @@ def evaluate_theological_terms(
     base_model="google/translategemma-4b-it",
 ):
     """Spot-check critical theological term translations."""
-    from build_glossary import THEOLOGICAL_GLOSSARY
+    from training.build_glossary import THEOLOGICAL_GLOSSARY
 
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     base = AutoModelForCausalLM.from_pretrained(

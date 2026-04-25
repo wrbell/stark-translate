@@ -132,7 +132,7 @@ Two-tier glossary for Deepgram keyterm boosting and training normalization:
 - **Tier 2 (Master):** 229 terms, full EN→ES theological glossary
 
 ```bash
-python build_glossary.py --build-tiers  # Generates tier1_boost.json + tier2_master.json
+python training/build_glossary.py --build-tiers  # Generates tier1_boost.json + tier2_master.json
 ```
 
 ### Adapter Management (`tools/manage_adapters.py`)

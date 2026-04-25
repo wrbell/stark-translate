@@ -9,8 +9,8 @@ import importlib
 import pytest
 
 # Modules to import as dotted paths.
-# Root scripts (dry_run_ab.py, download_sermons.py) are skipped — they have
-# top-level side effects. training/ is skipped — CUDA-only, different env.
+# dry_run_ab.py at the root is skipped — it has top-level side effects.
+# training/ is skipped — CUDA-only, different env.
 ENGINE_MODULES = [
     "engines.base",
     "engines.factory",
