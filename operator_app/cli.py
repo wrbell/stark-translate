@@ -83,7 +83,23 @@ def cmd_operator(args: argparse.Namespace) -> int:
 
 
 def cmd_setup(args: argparse.Namespace) -> int:
-    """Bootstrap models from models.lock.json."""
+    """Bootstrap models from models.lock.json (or just check URLs with --check)."""
+    if args.check:
+        from operator_app.setup import check_lockfile_urls
+
+        result = check_lockfile_urls()
+        if args.json:
+            print(json.dumps(result, indent=2))
+        else:
+            if "error" in result:
+                print(f"setup --check: {result['error']}", file=sys.stderr)
+                return 2
+            print(f"Lockfile URL check: {len(result['checks'])} entries")
+            for c in result["checks"]:
+                glyph = "✓" if c["status"] == "pass" else "✗"
+                print(f"  {glyph} {c['name']:36s} {c['detail']:24s} {c['url']}")
+        return 0 if result.get("ok") else 1
+
     from operator_app.setup import bootstrap_models
 
     models_dir = Path(args.models_dir) if args.models_dir else None
@@ -153,6 +169,17 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         metavar="PATTERN",
         help="Glob pattern(s) for HF snapshots (passed to allow_patterns)",
+    )
+    p_setup.add_argument(
+        "--check",
+        action="store_true",
+        help="HEAD every URL in models.lock.json and report reachability "
+        "without downloading. Useful before cutting a release tag.",
+    )
+    p_setup.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit JSON instead of human-readable output (with --check)",
     )
     p_setup.set_defaults(func=cmd_setup)
 
