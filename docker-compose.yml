@@ -73,8 +73,10 @@ services:
     container_name: stark-audio-bridge
     profiles: ["audio-bridge"]
     environment:
+      # tools/audio_bridge.py connects here and posts PCM frames to /ws/audio/ingest.
       STARK_OPERATOR_URL: http://operator:9000
-      STARK_TRANSCRIPT_WS: ws://operator:8765/audio
+      # Optional sounddevice index; otherwise the system default mic is used.
+      STARK_MIC_DEVICE: ${STARK_MIC_DEVICE:-}
     devices:
       # Bridge needs no GPU; sounddevice still wants /dev/snd if you mount it
       - /dev/snd:/dev/snd
