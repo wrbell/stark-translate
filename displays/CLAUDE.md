@@ -5,17 +5,24 @@
 | File | Use Case | Key Features |
 |------|----------|--------------|
 | `audience_display.html` | Projector | EN/ES side-by-side, fading context, fullscreen toggle, QR code overlay |
-| `ab_display.html` | Operator | Gemma 4B / MarianMT / 12B comparison with latency stats, rolling averages |
+| `ab_display.html` | Operator (legacy A/B view) | Gemma 4B / MarianMT / 12B comparison with latency stats, rolling averages |
 | `mobile_display.html` | Phones/tablets | Responsive, model toggle, Spanish-only mode, accessible via LAN QR |
 | `church_display.html` | Church | Simplified layout for non-technical environments |
 | `obs_overlay.html` | Streaming | Transparent overlay for OBS Studio integration |
+| `operator/` (v2026.6+) | Operator control plane | Single-page app served by FastAPI at `http://host:9000/operator/`. Pre-flight gating, mid-session controls (pause/resume/lang_flip/vad/fallback), live VRAM/CPU/latency sparklines, audio device hotplug toast, verse highlights, post-session summary trigger. Driven by `operator_app/main.py`. |
+
+The `operator/` SPA is the primary operator-facing surface as of v2026.6. The
+older `ab_display.html` is preserved for development debugging but isn't part
+of the day-of-event workflow.
 
 ## Serving
 
-- **HTTP**: `0.0.0.0:8080` serves static HTML. Phones connect via LAN IP (QR code on audience display).
+- **Audience displays** (audience / mobile / church / OBS): `0.0.0.0:8080` serves static HTML. Phones connect via LAN IP (QR code on audience display).
+- **Operator SPA** (v2026.6+): `0.0.0.0:9000` serves `displays/operator/` via the FastAPI app at `/operator/`. Same host can run both ports simultaneously.
 - **WebSocket (text)**: `0.0.0.0:8765` for transcription/translation data.
 - **WebSocket (TTS audio)**: `0.0.0.0:8766` for binary PCM audio when `--tts` is enabled.
-- **URL parameters**: `?port=` overrides the default WebSocket port.
+- **WebSocket (operator metrics)**: `ws://host:9000/ws/control` streams the metrics frame at 1 Hz.
+- **URL parameters**: `?port=` overrides the default WebSocket port for audience displays.
 
 ## WebSocket Protocol
 
