@@ -128,6 +128,7 @@ class TestCli:
 
         We mock uvicorn so the test doesn't actually start a server.
         """
+        pytest.importorskip("uvicorn")
         from operator_app import cli
 
         with patch("uvicorn.run") as mock_run:
