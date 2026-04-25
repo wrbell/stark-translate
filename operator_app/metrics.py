@@ -155,6 +155,17 @@ class MetricsCollector:
         except Exception:
             audio_summary = {"change_seq": 0, "last_change_ts": None}
 
+        # Live diarization signal (Phase 9.6.1) — pulled lazily.
+        try:
+            from operator_app.features import get_diarize_watcher
+
+            diarize = get_diarize_watcher()
+            audio_summary["diarization"] = (
+                diarize.snapshot() if diarize is not None else {"current_speaker": None, "transitions": 0, "recent": []}
+            )
+        except Exception:
+            audio_summary["diarization"] = {"current_speaker": None, "transitions": 0, "recent": []}
+
         return {
             "ts": time.time(),
             "uptime_s": round(time.time() - started_at, 1) if started_at else 0.0,
