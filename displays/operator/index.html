@@ -21,6 +21,23 @@
     <p class="meta" id="preflight-meta"></p>
   </section>
 
+  <section class="card features" id="features-card">
+    <h2>Features</h2>
+    <div class="feature-row">
+      <div class="feature-block">
+        <h3>Recent verses</h3>
+        <p class="hint">Bible references detected in the live transcript.</p>
+        <ul class="verses" id="verses-list"><li class="empty">none yet</li></ul>
+      </div>
+      <div class="feature-block">
+        <h3>Post-session summary</h3>
+        <p class="hint">Runs <code>features/summarize_sermon.py</code> as a subprocess; outputs a 5-sentence EN/ES summary.</p>
+        <button id="summary-btn" class="ghost">Generate summary</button>
+        <pre class="status" id="summary-status">no task yet</pre>
+      </div>
+    </div>
+  </section>
+
   <section class="card observability" id="metrics-card">
     <h2>Live observability</h2>
     <p class="hint">Streamed at 1 Hz from <code>/ws/control</code>. Empty until a pipeline starts feeding events.</p>

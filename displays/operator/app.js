@@ -292,11 +292,83 @@
     };
   }
 
+  // ---- features (Phase 9.6) ----
+  const versesListEl = document.getElementById("verses-list");
+  const summaryBtn = document.getElementById("summary-btn");
+  const summaryStatusEl = document.getElementById("summary-status");
+  let lastVerseChunk = -1;
+  let summaryPollTimer = null;
+
+  function renderVerses(highlights) {
+    if (!versesListEl) return;
+    if (!highlights || highlights.length === 0) {
+      versesListEl.innerHTML = '<li class="empty">none yet</li>';
+      return;
+    }
+    versesListEl.innerHTML = "";
+    for (const h of highlights.slice(-25).reverse()) {
+      const li = document.createElement("li");
+      const ref = document.createElement("span");
+      ref.className = "ref";
+      ref.textContent = h.reference;
+      const ctx = document.createElement("span");
+      ctx.className = "ctx";
+      ctx.textContent = h.context || "";
+      li.appendChild(ref);
+      li.appendChild(ctx);
+      versesListEl.appendChild(li);
+      lastVerseChunk = Math.max(lastVerseChunk, h.chunk_id || 0);
+    }
+  }
+
+  async function refreshVerses() {
+    try {
+      const data = await getJson("/api/features/verses");
+      renderVerses(data.highlights || []);
+    } catch (e) {
+      // ignore errors during idle state
+    }
+  }
+
+  async function pollSummary(taskId) {
+    try {
+      const task = await getJson(`/api/features/summary/${taskId}`);
+      summaryStatusEl.textContent = JSON.stringify({
+        state: task.state,
+        return_code: task.return_code,
+        error: task.error,
+        result_keys: task.result ? Object.keys(task.result) : null,
+      }, null, 2);
+      if (task.state === "done" || task.state === "error") {
+        if (summaryPollTimer) { clearInterval(summaryPollTimer); summaryPollTimer = null; }
+        summaryBtn.disabled = false;
+      }
+    } catch (e) {
+      summaryStatusEl.textContent = `poll error: ${e.message}`;
+    }
+  }
+
+  summaryBtn.addEventListener("click", async () => {
+    summaryBtn.disabled = true;
+    summaryStatusEl.textContent = "submitting…";
+    try {
+      const task = await postJson("/api/features/summary", {});
+      summaryStatusEl.textContent = `task ${task.task_id} submitted (state=${task.state})`;
+      if (summaryPollTimer) clearInterval(summaryPollTimer);
+      summaryPollTimer = setInterval(() => pollSummary(task.task_id), 2000);
+    } catch (e) {
+      summaryStatusEl.textContent = `error: ${e.message}`;
+      summaryBtn.disabled = false;
+    }
+  });
+
   // ---- bootstrap ----
   refreshPreflight();
   refreshDevices(false);
   refreshStatus();
+  refreshVerses();
   connectMetrics();
   setInterval(refreshPreflight, PREFLIGHT_INTERVAL_MS);
   setInterval(refreshStatus, STATUS_INTERVAL_MS);
+  setInterval(refreshVerses, 5000);
 })();

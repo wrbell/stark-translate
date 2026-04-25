@@ -22,6 +22,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from operator_app.audio import get_watcher
+from operator_app.features import get_summary_runner, get_verse_watcher
 from operator_app.metrics import get_collector, healthz_snapshot
 from operator_app.pipeline_manager import (
     InvalidStateError,
@@ -227,6 +228,67 @@ def api_control_fallback(req: FallbackRequest, runner: PipelineRunner = Depends(
     cfg = SessionConfig(**snap.config)
     cfg.engine = req.engine
     return runner.restart_with(cfg).to_dict()
+
+
+# -- features (Phase 9.6) -----------------------------------------------------
+
+
+class SummaryRequest(BaseModel):
+    csv_path: str | None = None
+    output_path: str | None = None
+
+
+@app.get("/api/features/verses")
+def api_features_verses(
+    since_chunk: int | None = None,
+    runner: PipelineRunner = Depends(get_runner),
+) -> dict:
+    """Verse references found in the live transcript so far.
+
+    Binds the watcher lazily to whichever session CSV is current. When no
+    session is active and no historical watcher exists, returns an empty
+    list rather than 404.
+    """
+    snap = runner.status()
+    csv_path = snap.csv_path
+    if csv_path:
+        watcher = get_verse_watcher(csv_path=csv_path, project_root=PROJECT_ROOT)
+    else:
+        watcher = get_verse_watcher()
+    if watcher is None:
+        return {"highlights": [], "since_chunk": since_chunk}
+    highlights = watcher.snapshot(since_chunk=since_chunk)
+    return {"highlights": highlights, "since_chunk": since_chunk}
+
+
+@app.post("/api/features/summary")
+def api_features_summary(
+    req: SummaryRequest,
+    runner: PipelineRunner = Depends(get_runner),
+) -> dict:
+    """Trigger the post-session summary subprocess.
+
+    Defaults csv_path to the current session's CSV (whether running or
+    just-finished) and output_path to a sibling JSON. Returns immediately
+    with a task_id; poll ``GET /api/features/summary/{id}``.
+    """
+    snap = runner.status()
+    csv_path = req.csv_path or snap.csv_path
+    if not csv_path:
+        raise HTTPException(status_code=400, detail="no csv_path available — pass one or start a session first")
+    if not Path(csv_path).exists():
+        raise HTTPException(status_code=404, detail=f"csv_path does not exist: {csv_path}")
+    task = get_summary_runner(project_root=PROJECT_ROOT).submit(csv_path=csv_path, output_path=req.output_path)
+    return task.to_dict()
+
+
+@app.get("/api/features/summary/{task_id}")
+def api_features_summary_status(task_id: str) -> dict:
+    runner = get_summary_runner(project_root=PROJECT_ROOT)
+    task = runner.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail=f"task {task_id} not found")
+    return task.to_dict()
 
 
 @app.get("/api/metrics")
