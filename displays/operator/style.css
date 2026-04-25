@@ -153,6 +153,23 @@ button.ghost:hover:not(:disabled) { background: #f0f0ee; }
 }
 
 .observability { grid-column: 1 / -1; }
+.toast {
+  position: fixed;
+  top: 70px;
+  right: 24px;
+  background: #fff;
+  color: var(--text);
+  border-left: 4px solid var(--warn);
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  font-size: 14px;
+  max-width: 360px;
+  z-index: 1000;
+  transition: opacity 0.2s;
+}
+.toast.fade { opacity: 0; }
 .metric-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 12px; }
 .metric { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; background: #fafaf9; }
 .metric-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
