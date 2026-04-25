@@ -46,9 +46,9 @@ case "$cmd" in
         ;;
 
     audio-bridge)
-        echo "[entrypoint] audio-bridge profile is a Phase 9.4.2 stub; nothing to run yet."
-        # Stay alive so docker compose treats this as healthy until 9.4.2 lands.
-        exec sleep infinity
+        : "${STARK_OPERATOR_URL:=http://operator:9000}"
+        echo "[entrypoint] launching audio-bridge → ${STARK_OPERATOR_URL}/ws/audio/ingest"
+        exec /opt/venv/bin/python -m tools.audio_bridge --operator "${STARK_OPERATOR_URL}" "$@"
         ;;
 
     bash|sh)

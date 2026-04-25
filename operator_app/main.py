@@ -22,6 +22,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from operator_app.audio import get_watcher
+from operator_app.audio_ingest import get_bus as get_audio_bus
+from operator_app.audio_ingest import handle_audio_ingest
 from operator_app.features import get_summary_runner, get_verse_watcher
 from operator_app.metrics import get_collector, healthz_snapshot
 from operator_app.pipeline_manager import (
@@ -364,6 +366,23 @@ def _render_prometheus(snap: dict) -> str:
     )
 
     return "\n".join(lines) + "\n"
+
+
+@app.get("/api/audio_ingest")
+def api_audio_ingest_status() -> dict:
+    """Stats on the /ws/audio/ingest endpoint — useful for the operator UI
+    to show whether the audio-bridge container is live."""
+    return get_audio_bus().snapshot()
+
+
+@app.websocket("/ws/audio/ingest")
+async def ws_audio_ingest(websocket: WebSocket) -> None:
+    """Receive PCM audio frames from a remote audio-bridge container.
+
+    See operator_app.audio_ingest for the wire protocol. The pipeline
+    subprocess pulls from the same AudioBus when STARK_AUDIO_SOURCE=ws.
+    """
+    await handle_audio_ingest(websocket)
 
 
 @app.websocket("/ws/control")
