@@ -30,11 +30,11 @@ The live bilingual pipeline is functionally complete — STT ~600ms, Gemma 4B ~7
 - Corrections logged to diagnostics JSONL and session summary
 - Inline console output: `>> STT CORRECTED (homophone): 'rain' → 'reign'`
 
-### 3. Launch Script (`run_church.sh`)
+### 3. Launch Script (`run_operator.sh`)
 
-- One-command start: `./run_church.sh`
-- Activates virtualenv, prints display URLs with LAN IP
-- Passes all CLI args through to dry_run_ab.py
+- One-command start: `./run_operator.sh`
+- Activates virtualenv, prints operator UI URL + display URLs with LAN IP
+- Replaces the pre-Phase-9 `run_church.sh` (retired in v2026.7 cleanup)
 
 ### 4. Church Environment (`.env.church`)
 
@@ -47,7 +47,7 @@ The live bilingual pipeline is functionally complete — STT ~600ms, Gemma 4B ~7
 ## Pre-Service Checklist
 
 1. `cp .env.church .env`
-2. `./run_church.sh`
+2. `./run_operator.sh`
 3. Open `http://localhost:8080/displays/audience_display.html` on projector
 4. Open `http://localhost:8080/displays/ab_display.html` on operator laptop
 5. Verify WebSocket connected (green dot)
@@ -59,7 +59,7 @@ The live bilingual pipeline is functionally complete — STT ~600ms, Gemma 4B ~7
 1. **Music muting:** Play a hymn/music into mic — verify no garbage, pipeline resumes on speech
 2. **STT correction:** Say "the media between God and man" — verify "mediator" in translation input
 3. **STT correction safety:** Say "check the media for updates" — verify "media" is NOT corrected (no theological context)
-4. **Launch script:** `./run_church.sh` starts correctly
+4. **Launch script:** `./run_operator.sh` starts correctly
 5. **Full dry run:** 5+ minutes of mixed speech — clean output
 6. **Tests:** `pytest tests/ -v` — all pass
 7. **Lint:** `ruff check . && ruff format --check .` — clean
