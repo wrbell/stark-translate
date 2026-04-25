@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -298,6 +298,72 @@ def api_features_summary_status(task_id: str) -> dict:
 def api_metrics() -> dict:
     """Pull-mode metrics snapshot. Same shape as /ws/control frames."""
     return get_collector().snapshot()
+
+
+@app.get("/metrics", response_class=PlainTextResponse)
+def metrics_prometheus() -> str:
+    """Prometheus exposition format. Wraps the same snapshot the WS frame uses."""
+    return _render_prometheus(get_collector().snapshot())
+
+
+def _render_prometheus(snap: dict) -> str:
+    """Translate the operator metrics snapshot into Prometheus text format.
+
+    Kept inline (no prometheus_client dep) — the schema is small and stable,
+    and we don't want to pull a 300 KB lib for ~10 gauges.
+    """
+    lines: list[str] = []
+
+    def gauge(name: str, help_text: str, value: float) -> None:
+        lines.append(f"# HELP {name} {help_text}")
+        lines.append(f"# TYPE {name} gauge")
+        lines.append(f"{name} {value}")
+
+    def counter(name: str, help_text: str, value: float) -> None:
+        lines.append(f"# HELP {name} {help_text}")
+        lines.append(f"# TYPE {name} counter")
+        lines.append(f"{name} {value}")
+
+    gauge("stark_uptime_seconds", "Operator process uptime in seconds.", float(snap.get("uptime_s") or 0))
+    gauge("stark_queue_depth", "Pending inference jobs queued at last sample.", float(snap.get("queue_depth") or 0))
+    counter("stark_errors_total", "Total pipeline errors since process start.", float(snap.get("error_count") or 0))
+
+    res = snap.get("resources", {}) or {}
+    gauge("stark_vram_mib", "Current GPU 0 VRAM usage in MiB (nvidia-smi).", float(res.get("vram_mib_current") or 0))
+    gauge(
+        "stark_cpu_percent",
+        "Whole-system CPU percent (psutil, last interval).",
+        float(res.get("cpu_percent_current") or 0),
+    )
+
+    lat = snap.get("latency", {}) or {}
+    gauge(
+        "stark_latency_total_ms_p50",
+        "Median end-to-end segment latency (recent ring).",
+        float(lat.get("total_ms_p50") or 0),
+    )
+    gauge(
+        "stark_latency_total_ms_p95",
+        "p95 end-to-end segment latency (recent ring).",
+        float(lat.get("total_ms_p95") or 0),
+    )
+    gauge("stark_latency_stt_ms_p50", "Median STT latency (recent ring).", float(lat.get("stt_ms_p50") or 0))
+    gauge(
+        "stark_latency_translate_ms_p50",
+        "Median translate latency (recent ring).",
+        float(lat.get("translate_ms_p50") or 0),
+    )
+    gauge("stark_confidence_mean", "Mean confidence over recent segments.", float(lat.get("confidence_mean") or 0))
+    gauge("stark_segments_recent", "Number of segments in the recent ring buffer.", float(lat.get("n") or 0))
+
+    audio = snap.get("audio", {}) or {}
+    counter(
+        "stark_audio_device_change_seq",
+        "Monotonic counter of audio device topology changes (USB hotplug etc.).",
+        float(audio.get("change_seq") or 0),
+    )
+
+    return "\n".join(lines) + "\n"
 
 
 @app.websocket("/ws/control")
