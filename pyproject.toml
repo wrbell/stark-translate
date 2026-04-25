@@ -233,3 +233,43 @@ markers = [
     "slow: marks tests that take >10s (deselect with '-m \"not slow\"')",
     "gpu: marks tests requiring GPU/model downloads (deselect with '-m \"not gpu\"')",
 ]
+
+# ---------------------------------------------------------------------------
+# Briefcase — Windows MSI packaging (Track 3, v2026.7.2.0+)
+# ---------------------------------------------------------------------------
+# Briefcase wraps the PyApp launcher (built by .github/workflows/release-win.yml)
+# into a WiX MSI. The fragment at packaging/windows/wix-fragment.wxi is composed
+# in. Code signing is deferred to v2026.7.2.1 (Sectigo/DigiCert cert procurement);
+# v2026.7.2.0 ships unsigned with documented SmartScreen click-through.
+[tool.briefcase]
+project_name = "Stark Translate"
+bundle = "com.starkroad"
+version = "2026.7.0.0"
+url = "https://github.com/wrbell/stark-translate"
+license.file = "LICENSE"
+
+[tool.briefcase.app.stark-translate]
+formal_name = "Stark Translate"
+description = "Live bilingual speech-to-text + translation for church outreach."
+long_description = """
+A fully on-device live English/Spanish speech-to-text and translation system,
+built for non-technical volunteers. Runs the operator control plane on
+http://localhost:9000/ and audience displays on :8080. Detects NVIDIA GPUs at
+install time and pip-installs either the [cuda] or [cpu] extras of
+stark-translate accordingly.
+"""
+sources = ["operator_app", "engines", "tools", "features"]
+icon = "packaging/windows/icon"
+# The actual launcher binary is PyApp (see packaging/windows/pyapp-config.toml).
+# Briefcase's "external app packaging" mode wraps that pre-built .exe instead
+# of running its standard Python-stub builder.
+external_package_path = "packaging/windows/stark-translate.exe"
+
+[tool.briefcase.app.stark-translate.windows]
+use_full_install_path = true
+template_branch = "v0.3.25"
+# Custom WiX fragment adds Start Menu shortcut, NVIDIA detection custom action,
+# ARP metadata. See packaging/windows/wix-fragment.wxi.
+template_extra_includes = ["packaging/windows/wix-fragment.wxi"]
+# Versioning aligned with CalVer; Briefcase requires four numeric components.
+target_version = "2026.7.2.0"

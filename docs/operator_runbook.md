@@ -100,6 +100,63 @@ After **Stop**, you can click **Generate summary** under Features. This kicks of
 
 ---
 
+## First-time install on Windows (operator only)
+
+If you got the church PC handed to you with stark-translate already running,
+**skip this section** — go to "Before the event" above. This is for the
+operator (or the dev who set up the PC) installing fresh.
+
+### Download the installer
+
+Get the latest `stark-translate-<version>-win.msi` from
+<https://github.com/wrbell/stark-translate/releases>. Double-click it.
+
+### SmartScreen warning ("Windows protected your PC")
+
+The first time you run the installer, Windows shows:
+
+> *Windows protected your PC*
+>
+> Microsoft Defender SmartScreen prevented an unrecognized app from starting.
+> Running this app might put your PC at risk.
+
+This is **expected** and not a virus warning. The MSI is unsigned for now —
+code-signing certs cost ~\$300/year and are deferred until volunteer headcount
+justifies the line item. SmartScreen learns to trust the binary after about
+30 unique installs and a few weeks of dwell time.
+
+To get past it:
+
+1. Click **More info** (small link below the message).
+2. Click **Run anyway** (button that appears).
+3. Walk through the rest of the installer normally.
+
+You only have to do this **once** per machine. After install, launching
+stark-translate from the Start Menu doesn't trigger the warning again.
+
+If your IT department blocks unsigned MSIs entirely, ask them to whitelist
+the file's SHA-256 (printed in the GitHub release page) — that's the
+common compromise.
+
+### After install
+
+- A **Stark Translate** entry appears in the Start Menu. Click it.
+- The first launch downloads ~10 GB of model files (Gemma 4 GGUFs, Whisper
+  Turbo, MarianMT, Piper voices) into `%LOCALAPPDATA%\stark-translate\models`.
+  Plan for 30–60 minutes on a 100 Mbps connection.
+- Once setup completes, the operator UI opens at <http://localhost:9000/operator/>.
+- NVIDIA GPU presence is detected at install time. NVIDIA → CUDA path. No
+  GPU → CPU fallback (slower; not recommended for live events with >5 min
+  of speech).
+
+### Mic permission
+
+Windows 11 prompts for microphone access on first session start, not on
+install. If you click **Block** by accident, fix it under
+**Settings → Privacy & security → Microphone → "Stark Translate"**.
+
+---
+
 ## When something goes wrong
 
 ### Audience display says "Disconnecting" / no subtitles
