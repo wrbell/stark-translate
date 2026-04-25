@@ -36,17 +36,17 @@ The live bilingual pipeline is functionally complete — STT ~600ms, Gemma 4B ~7
 - Activates virtualenv, prints operator UI URL + display URLs with LAN IP
 - Replaces the pre-Phase-9 `run_church.sh` (retired in v2026.7 cleanup)
 
-### 4. Church Environment (`.env.church`)
+### 4. Church Environment (`.env.church.example`)
 
 - Pre-configured settings for church service:
   - `STARK_VAD_THRESHOLD=0.25` (slightly more sensitive)
   - `STARK_VAD_SILENCE_TRIGGER=1.0` (longer pause before final)
   - `STARK_AUDIO_CHUNK_DURATION=3.0` (more context per chunk)
-- Usage: `cp .env.church .env` before service
+- Usage: `cp .env.church.example .env` before service
 
 ## Pre-Service Checklist
 
-1. `cp .env.church .env`
+1. `cp .env.church.example .env`
 2. `./run_operator.sh`
 3. Open `http://localhost:8080/displays/audience_display.html` on projector
 4. Open `http://localhost:8080/displays/ab_display.html` on operator laptop
