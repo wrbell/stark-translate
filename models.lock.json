@@ -1,0 +1,65 @@
+{
+  "$schema_comment": "Manifest of model files stark-translate setup downloads + verifies. Decoupled from app version. Bump when an adapter or model id changes.",
+  "version": "2026.7.0",
+  "updated": "2026-04-25",
+  "models": {
+    "gemma-4-e2b-it-q4km.gguf": {
+      "type": "direct",
+      "url": "https://huggingface.co/wrbell/stark-translate-models/resolve/main/gemma-4-e2b-it-q4km.gguf",
+      "size_bytes": 3427877920,
+      "sha256": "62adb571af12205e1e6ce0f2a4bd2835441f3e9a47d782af1539c0bc8831107f",
+      "required_for": ["cuda", "cpu"],
+      "filename": "gemma-4-e2b-it-q4km.gguf",
+      "comment": "Gemma 4 E2B Q4_K_M GGUF — production translation model (low-VRAM fallback)"
+    },
+    "gemma-4-e4b-it-q4km.gguf": {
+      "type": "direct",
+      "url": "https://huggingface.co/wrbell/stark-translate-models/resolve/main/gemma-4-e4b-it-q4km.gguf",
+      "size_bytes": 5335289984,
+      "sha256": "82a735b9e9d4fd26ab2c3d31a01b9b49b171144e1c8b114003dc09baebc867ca",
+      "required_for": ["cuda"],
+      "filename": "gemma-4-e4b-it-q4km.gguf",
+      "comment": "Gemma 4 E4B Q4_K_M GGUF — production default (best quality 7/8 canary)"
+    },
+    "whisper-large-v3-turbo": {
+      "type": "hf-snapshot",
+      "repo_id": "openai/whisper-large-v3-turbo",
+      "revision": "main",
+      "subdir": "whisper-large-v3-turbo",
+      "required_for": ["cuda", "cpu", "mlx"],
+      "comment": "STT model. mlx path uses mlx-community/whisper-large-v3-turbo (separate snapshot below)."
+    },
+    "mlx-whisper-large-v3-turbo": {
+      "type": "hf-snapshot",
+      "repo_id": "mlx-community/whisper-large-v3-turbo",
+      "revision": "main",
+      "subdir": "mlx-whisper-large-v3-turbo",
+      "required_for": ["mlx"],
+      "comment": "MLX-converted Whisper Turbo for Apple Silicon."
+    },
+    "translategemma-4b-it-mlx": {
+      "type": "hf-snapshot",
+      "repo_id": "mlx-community/translategemma-4b-it-4bit",
+      "revision": "main",
+      "subdir": "translategemma-4b-it-mlx",
+      "required_for": ["mlx"],
+      "comment": "MLX 4-bit TranslateGemma 4B — Mac translation A model (E2B/E4B GGUF is CUDA-only)."
+    },
+    "marian-en-es": {
+      "type": "hf-snapshot",
+      "repo_id": "Helsinki-NLP/opus-mt-en-es",
+      "revision": "main",
+      "subdir": "marian-en-es",
+      "required_for": ["cuda", "cpu", "mlx"],
+      "comment": "MarianMT for fast EN→ES partials."
+    },
+    "marian-es-en": {
+      "type": "hf-snapshot",
+      "repo_id": "Helsinki-NLP/opus-mt-es-en",
+      "revision": "main",
+      "subdir": "marian-es-en",
+      "required_for": ["cuda", "cpu", "mlx"],
+      "comment": "MarianMT for fast ES→EN partials."
+    }
+  }
+}
