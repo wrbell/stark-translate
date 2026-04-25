@@ -362,6 +362,22 @@ class CUDASettings(BaseSettings):
         default="int8",
         description="faster-whisper CTranslate2 compute type: int8, float16, float32",
     )
+    engine: Literal["auto", "llamacpp", "hf"] = Field(
+        default="auto",
+        description=(
+            "Translation engine selection on CUDA. 'auto' probes for a running "
+            "llama-server + GGUF files in models/ and prefers llamacpp when "
+            "available; falls back to HF NF4. 'llamacpp' / 'hf' force one path."
+        ),
+    )
+    llamacpp_url: str = Field(
+        default="http://127.0.0.1:8090",
+        description="Primary llama-server URL (engine A). See start_server.sh.",
+    )
+    llamacpp_url_b: str = Field(
+        default="http://127.0.0.1:8091",
+        description="Secondary llama-server URL for --ab mode (engine B, e.g. E2B).",
+    )
 
     model_config = {"env_prefix": "STARK_CUDA_"}
 

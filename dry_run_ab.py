@@ -1084,32 +1084,109 @@ def load_marian():
     return model, tokenizer
 
 
+def _probe_llamacpp_server(url):
+    """Return True if a llama-server is reachable at ``url`` and reports healthy."""
+    from engines.llamacpp_engine import LlamaCppEngine
+
+    try:
+        probe = LlamaCppEngine(server_url=url)
+        probe.load()  # raises RuntimeError if unreachable / unhealthy
+        probe.unload()
+        return True
+    except Exception:
+        return False
+
+
+def _resolve_cuda_engine_choice():
+    """Decide whether to use ``llamacpp`` or ``hf`` on CUDA.
+
+    Honors ``settings.cuda.engine`` if set to a forced value. When ``"auto"``
+    (default), probes the configured llama-server URL and prefers llamacpp
+    when it answers, falls back to HF otherwise. Returns ``"llamacpp"`` or
+    ``"hf"``.
+    """
+    forced = settings.cuda.engine
+    if forced == "llamacpp":
+        return "llamacpp"
+    if forced == "hf":
+        return "hf"
+    # auto: probe primary URL
+    primary = settings.cuda.llamacpp_url
+    if _probe_llamacpp_server(primary):
+        return "llamacpp"
+    return "hf"
+
+
 def load_cuda_translation_models(load_gemma=True, load_b=False):
     """Load translation models for CUDA backend with VRAM-aware tier detection.
 
-    Uses ``CUDAGemmaStreamingEngine`` for streaming + prompt cache support.
-    Auto-detects VRAM tier and loads models accordingly:
+    On CUDA, the engine selection follows ``settings.cuda.engine``:
+      - ``llamacpp`` (or ``auto`` + reachable server): instantiate
+        ``LlamaCppEngine`` against ``settings.cuda.llamacpp_url`` (and
+        ``llamacpp_url_b`` for engine B in A/B mode). Production default
+        post-v2026.5; ~5–9× faster than HF NF4 with 4× less VRAM.
+      - ``hf`` (or ``auto`` with no server): fall back to
+        ``CUDAGemmaStreamingEngine`` (HF + bnb NF4). Requires ~14 GB VRAM
+        for Gemma 4 E2B; only fits on 16 GB+ cards.
+
+    HF VRAM tier detection still applies on the HF path:
       - ``full_ab`` (≥15 GB): 4B + 12B (A/B comparison)
       - ``4b_only`` (≥5.5 GB): 4B only
       - ``marian``  (<5.5 GB): MarianMT only
 
-    Returns (model_a, tokenizer_a, model_b, tokenizer_b).
-    For the streaming engine path, model_a/model_b are CUDAGemmaStreamingEngine
-    instances (not raw HF models).
+    Returns (model_a, tokenizer_a, model_b, tokenizer_b). For both engine
+    paths, model_a/model_b are engine instances (not raw HF models). On the
+    llamacpp path, the tokenizers are ``None`` — llama-server tokenizes
+    server-side and ``LlamaCppEngine.translate_streaming`` does not require
+    a client tokenizer.
     """
+    gemma_a, tok_a, gemma_b, tok_b = None, None, None, None
+
+    if not load_gemma:
+        return gemma_a, tok_a, gemma_b, tok_b
+
+    engine_choice = _resolve_cuda_engine_choice()
+    print(f"  CUDA translation engine: {engine_choice}")
+
+    if engine_choice == "llamacpp":
+        from engines.llamacpp_engine import LlamaCppEngine
+
+        primary_url = settings.cuda.llamacpp_url
+        print(f"[3/6] Loading llama.cpp primary engine ({primary_url})...")
+        try:
+            engine_a = LlamaCppEngine(server_url=primary_url, model_family="gemma4")
+            engine_a.load()
+            gemma_a = engine_a
+            print(f"  llama.cpp primary ready (model={engine_a.model_id})")
+        except Exception as e:
+            print(f"  llama.cpp primary load failed: {e}")
+            print("  Falling back to MarianMT-only mode")
+            return None, None, None, None
+
+        if load_b:
+            secondary_url = settings.cuda.llamacpp_url_b
+            print(f"[3b/6] Loading llama.cpp secondary engine ({secondary_url})...")
+            try:
+                engine_b = LlamaCppEngine(server_url=secondary_url, model_family="gemma4")
+                engine_b.load()
+                gemma_b = engine_b
+                print(f"  llama.cpp secondary ready (model={engine_b.model_id})")
+            except Exception as e:
+                print(f"  llama.cpp secondary load failed: {e}")
+                print("  Continuing with primary-only mode (no A/B)")
+
+        return gemma_a, tok_a, gemma_b, tok_b
+
+    # HF fallback path
     from engines.cuda_engine import CUDAGemmaStreamingEngine, detect_vram_tier
 
     tier, vram = detect_vram_tier()
     print(f"  CUDA VRAM tier: {tier} ({vram} MB)")
 
-    gemma_a, tok_a, gemma_b, tok_b = None, None, None, None
-
-    if not load_gemma or tier == "marian":
-        if tier == "marian":
-            print("  Low VRAM — MarianMT-only mode (no TranslateGemma)")
+    if tier == "marian":
+        print("  Low VRAM — MarianMT-only mode (no TranslateGemma)")
         return gemma_a, tok_a, gemma_b, tok_b
 
-    # --- Load 4B (always, unless marian tier) ---
     model_4b_id = settings.translation.cuda_model_4b
 
     print(f"[3/6] Loading TranslateGemma 4B (CUDA streaming, cache={settings.cuda.use_prompt_cache})...")
@@ -1128,7 +1205,6 @@ def load_cuda_translation_models(load_gemma=True, load_b=False):
         print("  Falling back to MarianMT-only mode")
         return None, None, None, None
 
-    # --- Load 12B if A/B mode and sufficient VRAM ---
     if load_b and tier == "full_ab":
         model_12b_id = settings.translation.cuda_model_12b
         use_spec = settings.cuda.use_speculative
@@ -3602,6 +3678,28 @@ def main():
         default="auto",
         help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA)",
     )
+    parser.add_argument(
+        "--engine",
+        choices=["auto", "llamacpp", "hf"],
+        default=None,
+        help=(
+            "CUDA translation engine. 'auto' (default) probes the configured "
+            "llama-server URL and prefers llamacpp when reachable, else HF NF4. "
+            "'llamacpp' / 'hf' force one path. Has no effect on MLX/CPU backends."
+        ),
+    )
+    parser.add_argument(
+        "--llamacpp-url",
+        type=str,
+        default=None,
+        help="Primary llama-server URL (default: http://127.0.0.1:8090). See start_server.sh.",
+    )
+    parser.add_argument(
+        "--llamacpp-url-b",
+        type=str,
+        default=None,
+        help="Secondary llama-server URL for --ab mode (default: http://127.0.0.1:8091).",
+    )
     parser.add_argument("--no-ab", action="store_true", help="Skip 12B model, use 4B only (for low-VRAM devices)")
     parser.add_argument(
         "--low-vram", action="store_true", help="Minimal VRAM mode: MarianMT-only translation, no Gemma"
@@ -3685,6 +3783,14 @@ def main():
     args = parser.parse_args()
 
     # --- Resolve backend ---
+    # CUDA engine selection: CLI --engine wins over env vars/defaults in settings.
+    if args.engine is not None:
+        settings.cuda.engine = args.engine
+    if args.llamacpp_url is not None:
+        settings.cuda.llamacpp_url = args.llamacpp_url
+    if args.llamacpp_url_b is not None:
+        settings.cuda.llamacpp_url_b = args.llamacpp_url_b
+
     global BACKEND
     if args.backend == "auto":
         if MLX_AVAILABLE:
@@ -3710,14 +3816,15 @@ def main():
     # --no-ab overrides --ab
     if args.no_ab:
         args.run_ab = False
-    # CUDA backend: A/B requires >=15 GB VRAM (4B + 12B + Whisper)
-    if BACKEND == "cuda" and args.run_ab:
+    # CUDA backend: A/B VRAM gate only applies to the HF NF4 path. The llamacpp
+    # path runs E4B (~5 GB) + E2B (~3.5 GB) = ~9 GB total, fits on 12 GB cards.
+    if BACKEND == "cuda" and args.run_ab and settings.cuda.engine == "hf":
         from engines.cuda_engine import detect_vram_tier
 
         _tier, _vram = detect_vram_tier()
         if _tier != "full_ab":
             print(
-                f"WARNING: A/B mode requires >=15 GB VRAM ({_vram} MB detected). Disabling 12B.",
+                f"WARNING: A/B mode (HF) requires >=15 GB VRAM ({_vram} MB detected). Disabling 12B.",
                 file=sys.stderr,
             )
             args.run_ab = False

@@ -181,6 +181,98 @@ class LlamaCppEngine(TranslationEngine):
             tokens_per_second=gen_tps,
         )
 
+    def translate_streaming(
+        self,
+        text: str,
+        *,
+        source_lang: str = "en",
+        target_lang: str = "es",
+        token_callback=None,
+    ) -> TranslationResult:
+        """Streaming translation via llama-server SSE.
+
+        Pushes accumulated translation text to ``token_callback`` as the server
+        emits chunks. Falls back to non-streaming ``translate()`` and a single
+        terminal callback if SSE parsing fails.
+
+        Signature mirrors ``CUDAGemmaStreamingEngine.translate_streaming`` so
+        ``dry_run_ab.translate_cuda_gemma_streaming`` can drive either engine.
+        """
+        if not self._loaded:
+            raise RuntimeError("Engine not loaded -- call load() first")
+
+        # Build user prompt the same way translate() does.
+        if self._model_family == "gemma4":
+            src_name = _LANG_NAMES.get(source_lang, source_lang)
+            tgt_name = _LANG_NAMES.get(target_lang, target_lang)
+            user_content = (
+                f"Translate the following {src_name} text to {tgt_name}. "
+                f"Output only the translation, nothing else.\n\n{text}"
+            )
+        else:
+            user_content = f"Translate from {source_lang} to {target_lang}: {text}"
+
+        payload: dict = {
+            "messages": [{"role": "user", "content": user_content}],
+            "max_tokens": self._max_tokens,
+            "temperature": 0.0,
+            "stream": True,
+        }
+        if self._model_family == "gemma4":
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
+
+        body = json.dumps(payload).encode("utf-8")
+        url = f"{self._server_url}/v1/chat/completions"
+        req = urllib.request.Request(
+            url,
+            data=body,
+            headers={"Content-Type": "application/json", "Accept": "text/event-stream"},
+            method="POST",
+        )
+
+        t0 = time.perf_counter()
+        accumulated = ""
+        completion_tokens = 0
+        try:
+            with urllib.request.urlopen(req, timeout=self._timeout_s) as resp:  # nosec B310
+                for raw_line in resp:
+                    line = raw_line.decode("utf-8", errors="replace").strip()
+                    if not line.startswith("data: "):
+                        continue
+                    data_str = line[6:]
+                    if data_str == "[DONE]":
+                        break
+                    try:
+                        chunk = json.loads(data_str)
+                    except json.JSONDecodeError:
+                        continue
+                    choices = chunk.get("choices", [])
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta", {})
+                    piece = delta.get("content", "")
+                    if not piece:
+                        continue
+                    accumulated += piece
+                    completion_tokens += 1  # approximate — server tokens != client tokens
+                    if token_callback is not None:
+                        token_callback(accumulated, completion_tokens)
+        except urllib.error.URLError as exc:
+            logger.error("llama-server stream failed: %s — falling back to non-streaming", exc)
+            return self.translate(text, source_lang=source_lang, target_lang=target_lang)
+
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+
+        clean = accumulated.strip()
+        if self._model_family == "gemma4":
+            for prefix in ("Here is the translation:\n", "Here is the translation:"):
+                if clean.startswith(prefix):
+                    clean = clean[len(prefix) :].strip()
+                    break
+
+        gen_tps = completion_tokens / (latency_ms / 1000) if latency_ms > 0 and completion_tokens else 0.0
+        return TranslationResult(text=clean, latency_ms=latency_ms, tokens_per_second=gen_tps)
+
     def unload(self) -> None:
         """Mark as unloaded (server keeps running independently)."""
         self._loaded = False
