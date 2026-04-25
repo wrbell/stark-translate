@@ -4,8 +4,10 @@ A fully on-device, live bidirectional speech-to-text system (English/Spanish) fo
 
 **Two-pass pipeline** for fast partials and high-quality finals:
 - **Partials (while speaking):** mlx-whisper STT + MarianMT PyTorch (~750ms) — displayed in italics
-- **Finals (on silence):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit (~1.1s / ~2.6s) — replaces partial
-- **A/B comparison:** 4B (~550ms translation) vs 12B (~2.1s), with 4B as speculative draft for 12B
+- **Finals (on silence):**
+  - **Mac (MLX):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit (~1.1s / ~2.6s) — replaces partial
+  - **CUDA (v2026.5+):** faster-whisper + Gemma 4 E4B Q4_K_M via llama.cpp (~1.0s) — production default
+- **CUDA model options:** Gemma 4 E2B Q4_K_M (3.5 GB VRAM, ~280ms) for low-VRAM, E4B Q4_K_M (4.9 GB, ~470ms, 7/8 canary) for best quality
 
 ---
 
@@ -31,7 +33,14 @@ Model transfer: WSL → copy LoRA adapters to Mac project root.
 
 ---
 
-## Recent Additions (2026-04-11)
+## Recent Additions (2026-04-25, v2026.5)
+
+- **v2026.5 release — Phase 1A complete** (`docs/april_squeeze/BENCHMARK.md`): Gate 1A passes by 8.9×. llama.cpp-served Gemma 4 GGUF replaces HF NF4 as production CUDA path. T3 (E4B Q4_K_M) is default at 41 tok/s + 7/8 canary in 4.9 GB VRAM. T2 (E2B Q4_K_M) low-VRAM fallback at 66 tok/s in 3.5 GB. Spec decode (T4) deferred — single-GPU loss on this hardware.
+- **Production bug fix** — `engines/llamacpp_engine.py` now passes `chat_template_kwargs: {"enable_thinking": false}` for Gemma 4. Without it the model emits chain-of-thought into `reasoning_content` and leaves `content` empty until max_tokens. 14× latency improvement.
+- **VRAM accounting corrected** — prior `metrics/gemma4_benchmark/comparison.json` undercounted by 2× because `torch.cuda.max_memory_allocated()` misses bnb scratch + bf16 PLE. New benchmark uses continuous nvidia-smi sampling (`bench_translate_t1_t4.VramSampler`). HF E2B NF4 actually peaks at 14 GB, not 6 GB.
+- **W16 corrective Whisper run** — fresh-eval WER 7.25% (better than W7's 7.61%). W15 hard-only curriculum failure rooted in `--init-from` silently failing to load weights (now fixed).
+
+## Earlier Additions (2026-04-11)
 
 - **Hard Example Mining (W15)** — Curriculum learning pipeline: `mine_hard_examples.py` (batched fp16, per-chunk WER, Tier 1 detection), `build_hard_subset.py` (WER-bounded filtering, stratified caps), `--init-from` in `train_whisper.py` for adapter weight initialization
 - **CUDA Streaming Runtime** — `CUDAGemmaStreamingEngine` with TextIteratorStreamer, prompt cache (~50-80ms savings), speculative decoding (4B drafts 12B), VRAM tier auto-detection
@@ -43,7 +52,7 @@ Model transfer: WSL → copy LoRA adapters to Mac project root.
 - **Data Integrity** — SHA-256 lockfile (`tools/lock_data.py`), stratified eval sets (`tools/build_eval_sets.py`), training manifests
 - **Adapter Management** — Health checks (`tools/health_check.py`), version tracking (`tools/manage_adapters.py`)
 - **TranslateGemma Results** — S1-S9 sweep: S6 won (balanced 1:1 verse/sermon, COMET prox 12B = -0.0002)
-- **Gemma 4 Benchmark** — 4-model comparison tool (`training/benchmark_gemma4.py`): TranslateGemma 4B/12B vs Gemma 4 E2B/E4B across Bible, sermon, and canary tiers
+- **Gemma 4 Benchmark** — 4-model comparison tool (`training/benchmark_gemma4.py`): TranslateGemma 4B/12B vs Gemma 4 E2B/E4B across Bible, sermon, and canary tiers (note: VRAM numbers in result file are PyTorch-only; see Phase 1A for corrected values)
 
 ---
 
@@ -78,7 +87,7 @@ Seven GitHub Actions workflows:
 | Workflow | Trigger | What it does |
 |----------|---------|-------------|
 | **Lint** (`lint.yml`) | push / PR | Ruff check + format, mypy, bandit, vulture (advisory), HTML tidy |
-| **Test** (`test.yml`) | push / PR | pytest (806 tests, Python 3.11 + 3.12), coverage ≥18%, Codecov, PR comment |
+| **Test** (`test.yml`) | push / PR | pytest (855 tests, Python 3.11 + 3.12), coverage ≥18%, Codecov, PR comment |
 | **Release** (`release.yml`) | `v*` tag | Creates GitHub Release |
 | **Security** (`security.yml`) | push / PR / weekly | pip-audit on both requirements files |
 | **Label** (`label.yml`) | PR | Auto-labels by changed paths |
@@ -102,7 +111,7 @@ pre-commit run --all-files
 
 ### Version Numbering
 
-CalVer: `YYYY.M.W.PATCH` (e.g., `2026.2.4.0`). Single source of truth in `pyproject.toml`.
+CalVer: `YYYY.M.W.PATCH` (e.g., `2026.5.0.0`). Single source of truth in `pyproject.toml`.
 
 ---
 
@@ -117,7 +126,7 @@ CalVer: `YYYY.M.W.PATCH` (e.g., `2026.2.4.0`). Single source of truth in `pyproj
 - [x] **Phase 3 — Quality assessment:** Manually transcribe 50–100 sample segments, compute baseline WER — 500 stratified verse holdout + 422 sermon eval chunks built
 - [ ] **Phase 4 — Preprocessing:** Run the 10-step audio cleaning pipeline on all collected data
 - [x] **Phase 5 — Re-transcribe:** Generate clean labels with Whisper large-v3 (not YouTube auto-captions) — Deepgram Nova-3 with 50 theological keyterms (35 sermons)
-- [ ] **Phase 6 — Fine-tune (round 1):** TranslateGemma S1-S9 complete (S6 winner: balanced ratio), Whisper W12 data scaling (198K chunks, 21.41% baseline WER) + W15 hard mining in progress
+- [x] **Phase 6 — Fine-tune (round 1):** TranslateGemma S1-S9 complete (S6 winner: balanced ratio), Whisper W12 data scaling (198K chunks, 21.41% baseline WER), W15 hard mining bug fixed, **W16 corrective run = 7.25% fresh-eval WER**, **v2026.5 Phase 1A: Gemma 4 E4B Q4_K_M wins production default (5–9× speedup, 4× less VRAM)**
 - [ ] **Phase 7 — Evaluate:** Transfer adapters to Mac, re-run A/B with fine-tuned models + live YT comparison
 - [ ] **Phase 8 — Feedback loop:** Route flagged segments to correction → retrain (repeat 2–4 more cycles)
 - [ ] **Phase 9 — Demo:** Deploy Streamlit dashboard for Farmington Hills coffee shop outreach event

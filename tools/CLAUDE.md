@@ -171,12 +171,34 @@ python tools/build_eval_sets.py             # Build (modifies verse_pairs_train.
 
 ### Gemma 4 Benchmark (`training/benchmark_gemma4.py`)
 
-Compares TranslateGemma 4B/12B vs Gemma 4 E2B/E4B on EN→ES translation. Three evaluation tiers: Bible verse holdout (BLEU/chrF++/COMET), Deepgram sermon chunks (COMET-QE + hallucination ratio), 8 theological canary sentences (term accuracy).
+Compares TranslateGemma 4B/12B vs Gemma 4 E2B/E4B on EN→ES translation (HF NF4 only). Three evaluation tiers: Bible verse holdout (BLEU/chrF++/COMET), Deepgram sermon chunks (COMET-QE + hallucination ratio), 8 theological canary sentences (term accuracy).
 
 ```bash
 python training/benchmark_gemma4.py --models tg4b,e2b --max-samples 50 --skip-comet
 python training/benchmark_gemma4.py --models all  # Full 4-model comparison
 ```
+
+> **Note (v2026.5):** the VRAM column in `metrics/gemma4_benchmark/comparison.json` uses `torch.cuda.max_memory_allocated()`, which undercounts Gemma 4 by ~2×. For accurate VRAM and a head-to-head with llama.cpp Q4_K_M, see Phase 1A below.
+
+### Phase 1A llama.cpp Benchmark (`bench_translate_t1_t4.py`)
+
+Extends the Gemma 4 comparison with three llama.cpp/GGUF configs (T2 E2B, T3 E4B, T4 E4B+E2B spec decode), continuous `nvidia-smi` VRAM sampling (drop-in replacement for the broken PyTorch counter), and server-side timing parser. Output JSON is shape-compatible with `gemma4_benchmark/comparison.json`. Gate 1A: best llama.cpp config tok/s ≥ 1.30× HF baseline AND canary ≥ 6/8.
+
+```bash
+# T1 (HF E2B baseline) and other HF configs
+python bench_translate_t1_t4.py --config t1 --n-sermon 125 --out metrics/phase1a_t1.json
+python bench_translate_t1_t4.py --config tg4b_hf --out metrics/phase1a_tg4b_hf.json    # add tg12b_hf, e4b_hf
+
+# T2/T3/T4 — start llama-server first
+./start_server.sh --model models/gemma-4-e2b-it-q4km.gguf --no-draft &
+python bench_translate_t1_t4.py --config t2 --server-log /tmp/llama_t2.log --out metrics/phase1a_t2.json
+pkill -f llama-server
+
+# Merge full 7-config matrix
+python bench_translate_t1_t4.py --config merge --inputs metrics/phase1a_t*.json metrics/phase1a_*_hf.json --out metrics/phase1a_benchmark.json
+```
+
+Result: T2 (E2B GGUF) 8.89× T1, T3 (E4B GGUF) 5.46× T1 with 7/8 canary. See `docs/april_squeeze/BENCHMARK.md`.
 
 ## Per-Tool Quick Reference
 
