@@ -59,5 +59,7 @@ typer-slim==0.24.0
 typing_extensions==4.15.0
 urllib3==2.6.3
 websockets==16.0
+fastapi>=0.115                        # Operator control plane (Phase 9.1)
+uvicorn[standard]>=0.30               # ASGI server for FastAPI
 piper-tts                             # Piper TTS inference (ONNX-based, lightweight)
 loguru==0.7.3                         # Structured logging

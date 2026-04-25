@@ -1,0 +1,154 @@
+/* Operator UI — Phase 9.1.
+   Visual language matches existing displays: Calibri, light bg, muted accents.
+   Single-page layout: pre-flight on the left, session controls on the right. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #f8f8f7;
+  --card-bg: #fff;
+  --text: #2a2a2a;
+  --text-dim: #777;
+  --border: #d8d8d6;
+  --pass: #2f8a3a;
+  --warn: #c89a16;
+  --fail: #c43a3a;
+  --primary: #2563aa;
+  --primary-hover: #1c4d8a;
+  --danger: #c43a3a;
+  --danger-hover: #9b2a2a;
+}
+
+body {
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.topbar h1 { font-size: 18px; font-weight: 600; }
+.topbar .version { color: var(--text-dim); font-weight: 400; font-size: 13px; }
+
+.state-pill {
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: #eee;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.state-pill.running { background: #d6e8c7; color: #2f6b1a; }
+.state-pill.starting { background: #fff3c4; color: #8a6f00; }
+.state-pill.stopping { background: #fce0c4; color: #8a4500; }
+.state-pill.error { background: #f7cfcf; color: #8a1c1c; }
+
+main {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+}
+.card h2 { font-size: 16px; margin-bottom: 6px; }
+.card .hint { color: var(--text-dim); font-size: 13px; margin-bottom: 14px; }
+
+.checks { list-style: none; }
+.checks li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  gap: 10px;
+}
+.checks li:last-child { border-bottom: none; }
+.checks .dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: #ccc;
+}
+.checks .dot.pass { background: var(--pass); }
+.checks .dot.warn { background: var(--warn); }
+.checks .dot.fail { background: var(--fail); }
+.checks .name { font-weight: 600; font-size: 14px; }
+.checks .detail { color: var(--text-dim); font-size: 13px; }
+
+.meta { font-size: 12px; color: var(--text-dim); margin-top: 12px; }
+
+#config-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+#config-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: var(--text-dim);
+  gap: 4px;
+}
+#config-form label.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+#config-form select, #config-form input[type="number"] {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.actions { display: flex; gap: 12px; margin-top: 8px; }
+button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { background: var(--primary); color: #fff; }
+button.primary:hover:not(:disabled) { background: var(--primary-hover); }
+button.danger { background: var(--danger); color: #fff; }
+button.danger:hover:not(:disabled) { background: var(--danger-hover); }
+
+.status {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: #f0f0ee;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-dim);
+}
+
+@media (max-width: 800px) {
+  main { grid-template-columns: 1fr; }
+}
