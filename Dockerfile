@@ -32,8 +32,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
 # --- llama.cpp build ---------------------------------------------------------
+# The GHCR builder has no GPU, so we link against the CUDA driver stubs that
+# ship inside the nvidia/cuda:devel image. Without this, ld(1) bails on
+# `cuMemMap`/`cuGetErrorString`/etc. The stub is replaced by the real
+# /usr/lib/x86_64-linux-gnu/libcuda.so.1 at container runtime via the NVIDIA
+# Container Toolkit's library injection.
 WORKDIR /opt
-RUN git clone https://github.com/ggml-org/llama.cpp.git \
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH}
+RUN ln -sf /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
+ && git clone https://github.com/ggml-org/llama.cpp.git \
  && cd llama.cpp \
  && git checkout ${LLAMA_CPP_REF} \
  && cmake -B build \
@@ -41,6 +48,8 @@ RUN git clone https://github.com/ggml-org/llama.cpp.git \
         -DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHS} \
         -DCMAKE_BUILD_TYPE=Release \
         -DLLAMA_BUILD_SERVER=ON \
+        -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/cuda/lib64/stubs" \
+        -DCMAKE_SHARED_LINKER_FLAGS="-L/usr/local/cuda/lib64/stubs" \
  && cmake --build build --config Release -j"$(nproc)" --target llama-server
 
 # --- Python venv with stark-translate[cuda] ----------------------------------
