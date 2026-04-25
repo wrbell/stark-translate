@@ -31,6 +31,8 @@ loguru                                # Structured logging
 
 # Networking
 websockets>=16.0
+fastapi>=0.115                        # Operator control plane (Phase 9.1)
+uvicorn[standard]>=0.30               # ASGI server for FastAPI
 
 # Evaluation
 jiwer>=3.0.0
