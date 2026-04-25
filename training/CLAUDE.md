@@ -131,7 +131,7 @@ Mix 70–80% domain data with 20–30% general English (LibriSpeech/Common Voice
 
 ### Whisper LoRA Ablation Design (W0–W9) & Scaling (W12–W15)
 
-Full test matrix defined in `docs/whisper_tuning_test_matrix.md`.
+Full test matrix defined in `docs/archive/training/whisper_tuning_test_matrix.md`.
 
 | Run | Purpose |
 |-----|---------|
@@ -219,11 +219,11 @@ Three-phase sweep to find optimal QLoRA configuration:
 
 Three evaluation tiers: Tier 1 (Bible verse holdout, BLEU/chrF++/COMET), Tier 2 (Deepgram sermon chunks, COMET-QE + hallucination ratio), Tier 3 (8 theological canary sentences, term accuracy).
 
-> **VRAM caveat (v2026.5):** the result file `metrics/gemma4_benchmark/comparison.json` reports VRAM via `torch.cuda.max_memory_allocated()`, which undercounts on Gemma 4 by ~2× (misses bnb scratch buffers + bf16 PLE embeddings). Treat those numbers as PyTorch-allocator lower bounds, not actual card usage. For accurate per-model VRAM see `docs/april_squeeze/BENCHMARK.md` Phase 1A (continuous nvidia-smi sampling).
+> **VRAM caveat (v2026.5):** the result file `metrics/gemma4_benchmark/comparison.json` reports VRAM via `torch.cuda.max_memory_allocated()`, which undercounts on Gemma 4 by ~2× (misses bnb scratch buffers + bf16 PLE embeddings). Treat those numbers as PyTorch-allocator lower bounds, not actual card usage. For accurate per-model VRAM see `docs/archive/v2026.5/BENCHMARK.md` Phase 1A (continuous nvidia-smi sampling).
 
 ### Phase 1A — llama.cpp vs HF (v2026.5, 2026-04-25)
 
-`bench_translate_t1_t4.py` extends the Gemma 4 benchmark with three **GGUF/llama.cpp** configs (T2: E2B Q4_K_M, T3: E4B Q4_K_M, T4: E4B + E2B speculative) plus the four HF NF4 configs above. **Result: GGUF wins by 5–9× speedup AND 4× VRAM reduction.** T3 (E4B Q4_K_M) is the new production default for CUDA. T4 spec decode is a single-GPU loss — bookkeeping overhead eats the speedup at α=0.65 acceptance. Full matrix + per-canary disambiguation table in `docs/april_squeeze/BENCHMARK.md`.
+`bench_translate_t1_t4.py` extends the Gemma 4 benchmark with three **GGUF/llama.cpp** configs (T2: E2B Q4_K_M, T3: E4B Q4_K_M, T4: E4B + E2B speculative) plus the four HF NF4 configs above. **Result: GGUF wins by 5–9× speedup AND 4× VRAM reduction.** T3 (E4B Q4_K_M) is the new production default for CUDA. T4 spec decode is a single-GPU loss — bookkeeping overhead eats the speedup at α=0.65 acceptance. Full matrix + per-canary disambiguation table in `docs/archive/v2026.5/BENCHMARK.md`.
 
 ## Theological Vocabulary Challenges
 
@@ -327,7 +327,7 @@ After training, LoRA adapters must be transferred to inference machines:
 
 ## Adding a New Language Corpus
 
-When adding Hindi or Chinese translation training (see `docs/multi_lingual.md`):
+When adding Hindi or Chinese translation training (see `docs/archive/research/multi_lingual.md`):
 
 1. **Find aligned verse pairs** — `bible-nlp/biblenlp-corpus` has 833 languages (CC-BY-4.0). Hindi IRV: `hin2017` (~31K verses). Chinese CUV-S: `cmn-cu89s` (~31K verses, public domain).
 2. **Prepare with `prepare_bible_corpus.py`** — input: two translation dirs, output: JSONL pairs with `source_lang_code`, `target_lang_code`, `source_text`, `target_text`, `verse_id`.
@@ -338,7 +338,7 @@ When adding Hindi or Chinese translation training (see `docs/multi_lingual.md`):
 
 ## Go/No-Go Gates
 
-Quick reference for training convergence criteria (from `docs/accent_tuning_plan.md` and evaluation strategy above):
+Quick reference for training convergence criteria (from `docs/archive/research/accent_tuning_plan.md` and evaluation strategy above):
 
 - **WER improvement**: > 10% relative (minimum), > 20% relative (target)
 - **BLEU improvement**: > +2 points (minimum), > +4 points (target)

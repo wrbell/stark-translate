@@ -63,7 +63,7 @@ All display clients auto-reconnect on WebSocket drop. No manual refresh needed.
 
 ## Multi-Language Protocol Extension
 
-Planned WebSocket protocol changes for Hindi/Chinese support (full spec in `docs/multi_lingual.md`):
+Planned WebSocket protocol changes for Hindi/Chinese support (full spec in `docs/archive/research/multi_lingual.md`):
 
 **Current format** (hardcoded EN/ES):
 ```json
