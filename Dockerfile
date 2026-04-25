@@ -14,9 +14,10 @@ ARG CUDA_ARCHS=89
 FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION} AS builder
 
 ARG CUDA_ARCHS
-# Pin llama.cpp to a known-working commit; bump intentionally with a Dockerfile
-# change so we can reason about behavior across releases.
-ARG LLAMA_CPP_REF=b8782
+# Pin llama.cpp to a known-working release tag; bump intentionally with a
+# Dockerfile change so we can reason about behavior across releases.
+# (b8782 was skipped in llama.cpp's tag sequence — sequence jumps b8781→b8783.)
+ARG LLAMA_CPP_REF=b8783
 
 ENV DEBIAN_FRONTEND=noninteractive
 
