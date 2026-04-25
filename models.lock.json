@@ -1,25 +1,25 @@
 {
-  "$schema_comment": "Manifest of model files stark-translate setup downloads + verifies. Decoupled from app version. Bump when an adapter or model id changes.",
+  "$schema_comment": "Manifest of model files stark-translate setup downloads + verifies. Decoupled from app version. Bump when an adapter or model id changes. URLs pin to specific HF commit SHAs for full reproducibility — never resolve/main/.",
   "version": "2026.7.0",
   "updated": "2026-04-25",
   "models": {
     "gemma-4-e2b-it-q4km.gguf": {
       "type": "direct",
-      "url": "https://huggingface.co/wrbell/stark-translate-models/resolve/main/gemma-4-e2b-it-q4km.gguf",
+      "url": "https://huggingface.co/wbell7/stark-translate-models/resolve/053575db60e30a0c2152233fda33d1a620e97ce5/gemma-4-e2b-it-q4km-v2026.7-base.gguf",
       "size_bytes": 3427877920,
       "sha256": "62adb571af12205e1e6ce0f2a4bd2835441f3e9a47d782af1539c0bc8831107f",
       "required_for": ["cuda", "cpu"],
       "filename": "gemma-4-e2b-it-q4km.gguf",
-      "comment": "Gemma 4 E2B Q4_K_M GGUF — production translation model (low-VRAM fallback)"
+      "comment": "Gemma 4 E2B Q4_K_M GGUF — production translation model (low-VRAM fallback). v2026.7 base — no fine-tuning. Custom quant with bf16 PLE preserved."
     },
     "gemma-4-e4b-it-q4km.gguf": {
       "type": "direct",
-      "url": "https://huggingface.co/wrbell/stark-translate-models/resolve/main/gemma-4-e4b-it-q4km.gguf",
+      "url": "https://huggingface.co/wbell7/stark-translate-models/resolve/9d19661c8e62ae76e3443ee42b3fddaca72b2496/gemma-4-e4b-it-q4km-v2026.7-base.gguf",
       "size_bytes": 5335289984,
       "sha256": "82a735b9e9d4fd26ab2c3d31a01b9b49b171144e1c8b114003dc09baebc867ca",
       "required_for": ["cuda"],
       "filename": "gemma-4-e4b-it-q4km.gguf",
-      "comment": "Gemma 4 E4B Q4_K_M GGUF — production default (best quality 7/8 canary)"
+      "comment": "Gemma 4 E4B Q4_K_M GGUF — production default (best quality 7/8 canary). v2026.7 base — no fine-tuning. Custom quant with bf16 PLE preserved."
     },
     "whisper-large-v3-turbo": {
       "type": "hf-snapshot",
