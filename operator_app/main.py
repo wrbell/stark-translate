@@ -113,6 +113,9 @@ class StartRequest(BaseModel):
     mic_device: int | None = None
     mic_gain: float | None = None
     log_level: str = Field(default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR)$")
+    # Phase 9.4.1: TTS output device routing
+    tts_output_mode: str = Field(default="ws", pattern="^(ws|wav|both|local)$")
+    tts_device: int | None = None
 
 
 # -- endpoints ----------------------------------------------------------------

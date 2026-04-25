@@ -873,6 +873,30 @@ class PiperTTSEngine(TTSEngine):
             text=text,
         )
 
+    def play(self, audio_float32: np.ndarray, sample_rate: int, device: int | None = None) -> None:
+        """Play synthesized audio to a sounddevice output device.
+
+        Used by ``--tts-output local`` mode (Phase 9.4.1) so the operator
+        can route the translated audio to a chosen speaker / monitor without
+        going through the WebSocket clients.
+
+        Args:
+            audio_float32:  PCM as returned by ``synthesize().audio``.
+            sample_rate:    Hz, also from the ``TTSResult``.
+            device:         sounddevice output device index, or ``None`` for
+                            system default. Get the index from
+                            ``operator_app.audio.list_devices()`` outputs.
+
+        Returns immediately after the audio is queued; the playback runs on
+        sounddevice's own thread.
+        """
+        try:
+            import sounddevice as sd
+
+            sd.play(audio_float32, samplerate=sample_rate, device=device)
+        except Exception as exc:
+            logger.warning("PiperTTSEngine.play failed (device=%s): %s", device, exc)
+
     def unload(self) -> None:
         """Release voice models from memory."""
         self._voices.clear()
