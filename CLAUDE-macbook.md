@@ -66,8 +66,10 @@ brew install ffmpeg portaudio
 python3.11 -m venv stt_env
 source stt_env/bin/activate
 
-# Install all dependencies from requirements file
-pip install -r requirements-mac.txt
+# Install via the v2026.7 PyPI extras (preferred):
+pip install '.[mlx]'        # or `uv tool install 'stark-translate[mlx]'` for tool install
+# Legacy frozen-version path (deprecated; for reproducing v2026.6 behavior):
+# pip install -r requirements-mac.txt
 
 # HuggingFace login (required for TranslateGemma model access)
 huggingface-cli login
@@ -76,7 +78,7 @@ huggingface-cli login
 stark-translate setup
 ```
 
-The `requirements-mac.txt` file includes all dependencies. Key packages:
+The `requirements-mac.txt` file is the frozen-version snapshot; key packages:
 
 ```
 # Core inference (MLX-based, NOT PyTorch for main inference)
