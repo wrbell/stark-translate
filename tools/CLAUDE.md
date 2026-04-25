@@ -132,7 +132,7 @@ Two-tier glossary for Deepgram keyterm boosting and training normalization:
 - **Tier 2 (Master):** 229 terms, full EN→ES theological glossary
 
 ```bash
-python build_glossary.py --build-tiers  # Generates tier1_boost.json + tier2_master.json
+python training/build_glossary.py --build-tiers  # Generates tier1_boost.json + tier2_master.json
 ```
 
 ### Adapter Management (`tools/manage_adapters.py`)
@@ -198,7 +198,7 @@ pkill -f llama-server
 python bench_translate_t1_t4.py --config merge --inputs metrics/phase1a_t*.json metrics/phase1a_*_hf.json --out metrics/phase1a_benchmark.json
 ```
 
-Result: T2 (E2B GGUF) 8.89× T1, T3 (E4B GGUF) 5.46× T1 with 7/8 canary. See `docs/april_squeeze/BENCHMARK.md`.
+Result: T2 (E2B GGUF) 8.89× T1, T3 (E4B GGUF) 5.46× T1 with 7/8 canary. See `docs/archive/v2026.5/BENCHMARK.md`.
 
 ## Per-Tool Quick Reference
 

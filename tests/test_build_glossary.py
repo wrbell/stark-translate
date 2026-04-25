@@ -1,6 +1,11 @@
-"""Tests for build_glossary.py — theological glossary and training pairs."""
+"""Tests for training/build_glossary.py — theological glossary and training pairs."""
 
 import json
+import sys
+from pathlib import Path
+
+# training/ is not a package on disk; add it to sys.path for the import.
+sys.path.insert(0, str(Path(__file__).parent.parent / "training"))
 
 from build_glossary import (
     THEOLOGICAL_GLOSSARY,

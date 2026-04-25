@@ -243,7 +243,7 @@ def load_tier(tier: Literal["boost", "master"], path: str | None = None) -> dict
         raise ValueError(f"Unknown tier: {tier!r}. Use 'boost' or 'master'.")
 
     if not p.exists():
-        logger.warning(f"Tier {tier!r} file not found at {p}. Run: python build_glossary.py --build-tiers")
+        logger.warning(f"Tier {tier!r} file not found at {p}. Run: python training/build_glossary.py --build-tiers")
         return [] if tier == "boost" else {}
 
     data = json.loads(p.read_text())

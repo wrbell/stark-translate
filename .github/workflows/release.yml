@@ -38,8 +38,8 @@ jobs:
       - name: Bundle Mac (inference)
         run: |
           zip -r "stark-translate-${{ steps.tag.outputs.TAG }}-mac.zip" \
-            dry_run_ab.py setup_models.py build_glossary.py settings.py \
-            engines/ features/ displays/ \
+            dry_run_ab.py settings.py models.lock.json pyproject.toml \
+            operator_app/ engines/ features/ displays/ \
             requirements-mac.txt \
             -x "**/__pycache__/*" "**/*.pyc"
 

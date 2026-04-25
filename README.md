@@ -53,7 +53,7 @@ brew install ffmpeg portaudio
 python3.11 -m venv stt_env && source stt_env/bin/activate
 pip install -r requirements-mac.txt
 huggingface-cli login          # Required for TranslateGemma
-python setup_models.py         # Download all models
+stark-translate setup           # Download all models
 python dry_run_ab.py           # 4B only (~4.3 GB), or --ab for A/B (~11.3 GB)
 
 # NVIDIA
@@ -75,7 +75,7 @@ Key flags: `--lang es` (Spanish speaker mode), `--tts` (audio output), `--ab` (A
 | TTS | Piper EN/ES (ONNX) | ~63 MB | ~40ms/word |
 | VAD | Silero VAD | ~2 MB | <1ms |
 
-CUDA path now uses **llama.cpp via `engines/llamacpp_engine.py`** (v2026.5+) for ~5–9× speedup and ~4× VRAM reduction vs HF NF4. Caller starts `llama-server` (see `start_server.sh`). MLX/Mac path unchanged. Pipeline overlap hides translation latency by running translation(N) concurrent with STT(N+1). See [`docs/april_squeeze/BENCHMARK.md`](./docs/april_squeeze/BENCHMARK.md) for the full Phase 1A benchmark across TG4B/TG12B/E2B/E4B × HF/GGUF.
+CUDA path now uses **llama.cpp via `engines/llamacpp_engine.py`** (v2026.5+) for ~5–9× speedup and ~4× VRAM reduction vs HF NF4. Caller starts `llama-server` (see `start_server.sh`). MLX/Mac path unchanged. Pipeline overlap hides translation latency by running translation(N) concurrent with STT(N+1). See [`docs/archive/v2026.5/BENCHMARK.md`](./docs/archive/v2026.5/BENCHMARK.md) for the full Phase 1A benchmark across TG4B/TG12B/E2B/E4B × HF/GGUF.
 
 ## Displays
 
@@ -109,7 +109,7 @@ Fine-tuning runs on Windows/WSL (A2000 Ada 16GB). Adapters transfer to Mac for i
 | NVIDIA 8 GB+ | ~6 GB | Whisper + Gemma 4 E4B Q4_K_M (llama.cpp) |
 | Training (A2000 Ada 16GB) | ~8-12 GB | LoRA/QLoRA fine-tuning |
 
-> **CUDA HF NF4 not recommended:** Gemma 4 E2B/E4B HF NF4 occupy 14–15 GB on GPU due to bf16 Per-Layer Embeddings. Use llama.cpp Q4_K_M instead (4× less VRAM). See [`docs/april_squeeze/BENCHMARK.md`](./docs/april_squeeze/BENCHMARK.md).
+> **CUDA HF NF4 not recommended:** Gemma 4 E2B/E4B HF NF4 occupy 14–15 GB on GPU due to bf16 Per-Layer Embeddings. Use llama.cpp Q4_K_M instead (4× less VRAM). See [`docs/archive/v2026.5/BENCHMARK.md`](./docs/archive/v2026.5/BENCHMARK.md).
 
 ## Testing & CI
 
@@ -126,7 +126,7 @@ Seven CI workflows: lint, test (3.11 + 3.12), security (pip-audit), release, lab
 ```
 dry_run_ab.py                  Main pipeline: mic → VAD → STT → translate → display
 settings.py                    Unified config (pydantic-settings, STARK_ prefix)
-setup_models.py                One-command model download
+(deleted in v2026.7 cleanup; replaced by `stark-translate setup`)
 
 engines/                       STT + translation + TTS engine layer
   base.py                      ABCs and result dataclasses

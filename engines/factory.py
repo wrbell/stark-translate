@@ -110,7 +110,7 @@ def create_translation_engine(
                              HTTP. **For CUDA deployment, prefer "llamacpp"** —
                              v2026.5 Phase 1A benchmark shows 5–9× speedup and
                              4× VRAM reduction vs HF NF4 (see
-                             ``docs/april_squeeze/BENCHMARK.md``). Caller is
+                             ``docs/archive/v2026.5/BENCHMARK.md``). Caller is
                              responsible for starting llama-server first; see
                              ``start_server.sh``.
         streaming:           Use streaming engine (CUDA HF only).
