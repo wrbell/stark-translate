@@ -27,7 +27,7 @@ CUDA **is** thread-safe (unlike MLX). The pipeline uses `ThreadPoolExecutor(max_
 | `4b_only` | ≥5.5 GB | Whisper + 4B (~4.7 GB) |
 | `marian` | <5.5 GB | MarianMT only (~1.3 GB) |
 
-> **Tier breakpoints above were derived from `torch.cuda.max_memory_allocated()` — that metric undercounts on Gemma 4 by ~2× (misses bnb scratch + bf16 PLE embeddings). For accurate VRAM budgeting use the nvidia-smi-measured numbers in `docs/april_squeeze/BENCHMARK.md`. The `detect_vram_tier()` helper still works on its own thresholds, but those thresholds must be raised when serving Gemma 4 via HF NF4 — E2B alone occupies ~14 GB total.**
+> **Tier breakpoints above were derived from `torch.cuda.max_memory_allocated()` — that metric undercounts on Gemma 4 by ~2× (misses bnb scratch + bf16 PLE embeddings). For accurate VRAM budgeting use the nvidia-smi-measured numbers in `docs/archive/v2026.5/BENCHMARK.md`. The `detect_vram_tier()` helper still works on its own thresholds, but those thresholds must be raised when serving Gemma 4 via HF NF4 — E2B alone occupies ~14 GB total.**
 
 ### CUDA Model IDs (NF4 via bitsandbytes — measured peak VRAM)
 
@@ -38,7 +38,7 @@ CUDA **is** thread-safe (unlike MLX). The pipeline uses `ThreadPoolExecutor(max_
 | CUDA Translation (TG4B legacy) | `google/translategemma-4b-it` | ~7.2 GB | Pre-#46; lower canary score (5/8) |
 | CUDA Translation (TG12B legacy) | `google/translategemma-12b-it` | ~15.6 GB | Largest; same canary as E2B (6/8) |
 
-> **For deployment on RTX 3060 12 GB, all HF NF4 configs except TG4B are too big.** Use `engines/llamacpp_engine.py` instead — Gemma 4 E2B Q4_K_M peaks at ~3.5 GB, E4B Q4_K_M at ~4.9 GB. See `docs/april_squeeze/BENCHMARK.md` Phase 1A results.
+> **For deployment on RTX 3060 12 GB, all HF NF4 configs except TG4B are too big.** Use `engines/llamacpp_engine.py` instead — Gemma 4 E2B Q4_K_M peaks at ~3.5 GB, E4B Q4_K_M at ~4.9 GB. See `docs/archive/v2026.5/BENCHMARK.md` Phase 1A results.
 
 ### llama.cpp engine (recommended for CUDA, v2026.5+)
 
@@ -147,7 +147,7 @@ Follow this 4-step pattern (derived from `base.py`, `mlx_engine.py`, `factory.py
 
 **Example — llama.cpp translation engine:**
 - Create `LlamaCppGemmaEngine(TranslationEngine)` in `engines/llamacpp_engine.py`
-- Register as `engine_type == "llamacpp"` in `create_translation_engine()` (see `docs/optimized.md` for full implementation plan)
+- Register as `engine_type == "llamacpp"` in `create_translation_engine()` (see `docs/archive/research/optimized.md` for full implementation plan)
 - Add `"llama_cpp"` to `_MOCK_MODULES` in `tests/conftest.py`
 
 ## Adding a New Language
@@ -158,7 +158,7 @@ The engine interfaces already support new languages — no ABC changes needed:
 - **MarianMT**: Install the right `opus-mt-{src}-{tgt}` model via `create_translation_engine(engine_type="marian", model_id="Helsinki-NLP/opus-mt-en-hi")`. Each language direction is a separate model.
 - **TTS**: Add a voice entry to `settings.tts.voices` dict (already has `hi` and `zh` defaults in the settings schema).
 - **Whisper prompt**: Create a language-specific initial prompt (e.g., `whisper_prompt_hi`) in settings, or pass via `initial_prompt=` to `transcribe()`.
-- **Hindi partial caveat**: Hindi is SOV — partials will be garbled. Show English partial + Hindi final only (no Hindi partial). See `docs/multi_lingual.md` Phase 4B.
+- **Hindi partial caveat**: Hindi is SOV — partials will be garbled. Show English partial + Hindi final only (no Hindi partial). See `docs/archive/research/multi_lingual.md` Phase 4B.
 
 ## Adapter Loading
 
