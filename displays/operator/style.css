@@ -153,6 +153,18 @@ button.ghost:hover:not(:disabled) { background: #f0f0ee; }
 }
 
 .observability { grid-column: 1 / -1; }
+.features { grid-column: 1 / -1; }
+.feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.feature-block { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; background: #fafaf9; }
+.feature-block h3 { font-size: 14px; margin-bottom: 4px; }
+.verses { list-style: none; max-height: 220px; overflow-y: auto; padding-right: 8px; }
+.verses li { padding: 6px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+.verses li.empty { color: var(--text-dim); font-style: italic; border-bottom: none; }
+.verses .ref { font-weight: 600; color: var(--primary); }
+.verses .ctx { display: block; color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+@media (max-width: 800px) {
+  .feature-row { grid-template-columns: 1fr; }
+}
 .toast {
   position: fixed;
   top: 70px;
