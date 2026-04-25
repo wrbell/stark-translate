@@ -1,0 +1,86 @@
+# stark-translate Linux/CUDA stack (v2026.7+).
+#
+# Three services on one network:
+#   - operator      → FastAPI control plane on :9000 + audience HTTP/:8080 + WS/:8765/:8766
+#   - llama-server  → llama.cpp HTTP API on :8090 (wrapped by start_server.sh)
+#   - audio-bridge  → opt-in profile when host PulseAudio passthrough doesn't work
+#
+# Quick start:
+#   docker compose pull
+#   STARK_MODELS_DIR=$HOME/.cache/stark-translate/models docker compose up
+#   open http://localhost:9000/operator/
+#
+# GPU access uses CDI mode (NVIDIA Container Toolkit ≥1.18). For older toolkits,
+# replace `devices:` with `runtime: nvidia` + `environment: NVIDIA_VISIBLE_DEVICES=all`.
+
+services:
+  operator:
+    image: ghcr.io/wrbell/stark-translate:${TAG:-latest}
+    container_name: stark-operator
+    devices:
+      - "nvidia.com/gpu=all"   # CDI mode (2025 default)
+    environment:
+      STARK_PROJECT_ROOT: /app
+      STARK_OPERATOR_LOG_DIR: /app/metrics
+      STARK_CUDA__LLAMACPP_URL: http://llama-server:8090
+      STARK_CUDA__ENGINE: ${STARK_ENGINE:-auto}
+      # Pulse passthrough — disable by setting STARK_NO_PULSE=1
+      PULSE_SERVER: ${PULSE_SERVER:-unix:/run/user/1000/pulse/native}
+    ports:
+      - "9000:9000"   # operator UI + REST + /ws/control
+      - "8080:8080"   # audience displays HTTP
+      - "8765:8765"   # transcript WebSocket
+      - "8766:8766"   # TTS audio WebSocket
+    volumes:
+      - ${STARK_MODELS_DIR:-./models}:/app/models:ro
+      - ${STARK_DATA_DIR:-./stark_data}:/app/stark_data
+      - operator-metrics:/app/metrics
+      # Host PulseAudio socket — comment out + set STARK_NO_PULSE=1 if absent
+      - /run/user/1000/pulse:/run/user/1000/pulse:ro
+      - ${HOME}/.config/pulse/cookie:/root/.config/pulse/cookie:ro
+    depends_on:
+      llama-server:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["operator"]
+
+  llama-server:
+    image: ghcr.io/wrbell/stark-translate:${TAG:-latest}
+    container_name: stark-llama-server
+    devices:
+      - "nvidia.com/gpu=all"
+    environment:
+      MODEL_DIR: /app/models
+      LLAMA_PORT: "8090"
+    volumes:
+      - ${STARK_MODELS_DIR:-./models}:/app/models:ro
+    ports:
+      - "8090:8090"   # local development; remove for prod-only intra-compose access
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8090/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 120s   # cold E4B load on first run
+      retries: 5
+    restart: unless-stopped
+    command: ["llama-server"]
+
+  # Optional. Run with: `docker compose --profile audio-bridge up`
+  # Use when host PulseAudio passthrough doesn't work (e.g. Wayland-only host
+  # without a pulse socket, Windows WSL2 without WSLg audio, remote head).
+  audio-bridge:
+    image: ghcr.io/wrbell/stark-translate:${TAG:-latest}
+    container_name: stark-audio-bridge
+    profiles: ["audio-bridge"]
+    environment:
+      STARK_OPERATOR_URL: http://operator:9000
+      STARK_TRANSCRIPT_WS: ws://operator:8765/audio
+    devices:
+      # Bridge needs no GPU; sounddevice still wants /dev/snd if you mount it
+      - /dev/snd:/dev/snd
+    depends_on: [operator]
+    command: ["audio-bridge"]
+    restart: unless-stopped
+
+volumes:
+  operator-metrics:
