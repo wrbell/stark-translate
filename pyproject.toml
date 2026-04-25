@@ -1,10 +1,85 @@
 [project]
 name = "stark-translate"
-version = "2026.6.2.0"
-requires-python = ">=3.11"
+version = "2026.7.0.0"
+requires-python = ">=3.11,<3.13"
 description = "Live bilingual speech-to-text for church outreach"
+readme = "README.md"
+license = { text = "Proprietary" }
+authors = [{ name = "Willem Bell" }]
+keywords = ["speech-to-text", "translation", "whisper", "llama.cpp", "live-subtitling"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+
+# Base dependencies — shared by every channel (operator UI, displays, settings).
+# Heavy ML deps go behind the [cuda] / [mlx] / [cpu] extras so a slim install is possible.
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "websockets>=16.0",
+    "psutil>=5.9",
+    "loguru>=0.7",
+    "numpy>=1.26",
+    "huggingface_hub>=0.24",
+    "sounddevice>=0.5",
+]
+
+[project.scripts]
+stark-translate = "operator_app.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/wrbell/stark-translate"
+Documentation = "https://github.com/wrbell/stark-translate/blob/main/docs/operator_runbook.md"
+Issues = "https://github.com/wrbell/stark-translate/issues"
 
 [project.optional-dependencies]
+# --------------------------------------------------------------------------
+# Hardware-backend extras — pick exactly one for your platform.
+# --------------------------------------------------------------------------
+# CUDA / NVIDIA. Pin notes:
+#   - ctranslate2 ≥4.5 needs CUDA 12.3+ / cuDNN 9. Older toolchains:
+#       CUDA 11 + cuDNN 8 → pin "ctranslate2<=3.24.0"
+#       CUDA 12 + cuDNN 8 → pin "ctranslate2<=4.4.0"
+#     Document explicitly in docs/packaging/pypi.md per platform.
+cuda = [
+    "torch>=2.6,<3",
+    "transformers>=5.5",
+    "ctranslate2>=4.5",
+    "faster-whisper>=1.1",
+    "bitsandbytes>=0.43",
+    "scipy>=1.13",
+    "piper-tts",
+]
+
+# MLX / Apple Silicon. arm64 only.
+mlx = [
+    "mlx>=0.31",
+    "mlx-whisper>=0.4",
+    "mlx-lm>=0.30",
+    "transformers>=5.5",
+    "scipy>=1.13",
+    "piper-tts",
+]
+
+# CPU fallback — no GPU acceleration. Slow but works on any machine.
+cpu = [
+    "torch>=2.6,<3",
+    "transformers>=5.5",
+    "ctranslate2>=4.5",
+    "faster-whisper>=1.1",
+    "scipy>=1.13",
+    "piper-tts",
+]
+
+# Developer tools — lint, test, build.
 dev = [
     "ruff>=0.9",
     "mypy>=1.14",
@@ -13,6 +88,58 @@ dev = [
     "pre-commit>=4.0",
     "bandit>=1.7",
     "vulture>=2.11",
+    "httpx>=0.28",                        # for fastapi.testclient
+    "build>=1.2",                         # python -m build
+]
+
+# ---------------------------------------------------------------------------
+# Build system — hatchling with explicit package + data inclusion
+# ---------------------------------------------------------------------------
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["operator_app", "engines", "tools", "features"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"settings.py" = "settings.py"
+"dry_run_ab.py" = "dry_run_ab.py"
+"models.lock.json" = "models.lock.json"
+"displays" = "displays"
+"scripts/dry_run_rehearsal.sh" = "scripts/dry_run_rehearsal.sh"
+"start_server.sh" = "start_server.sh"
+"run_operator.sh" = "run_operator.sh"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "operator_app",
+    "engines",
+    "tools",
+    "features",
+    "displays",
+    "scripts",
+    "tests",
+    "settings.py",
+    "dry_run_ab.py",
+    "models.lock.json",
+    "pyproject.toml",
+    "README.md",
+    "CLAUDE.md",
+    "*.sh",
+]
+exclude = [
+    "stt-data",
+    "stark_data",
+    "whisper_ablation",
+    "hybrid_runs",
+    "ablation",
+    "metrics/*.csv",
+    "metrics/*.jsonl",
+    "metrics/*.log",
+    "models/*.gguf",
+    ".venv",
+    "venv",
 ]
 
 # ---------------------------------------------------------------------------
