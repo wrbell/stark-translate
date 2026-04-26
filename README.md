@@ -149,7 +149,7 @@ training/                      Windows/WSL training scripts
   mine_hard_examples.py        Hard example mining (batched fp16, Tier 1 detection)
   build_hard_subset.py         WER-bounded filtering with stratified caps
   benchmark_gemma4.py          TranslateGemma vs Gemma 4 comparison (HF only)
-bench_translate_t1_t4.py       Phase 1A benchmark: HF vs llama.cpp, all 4 models, VRAM sampler
+scripts/benchmarks/bench_translate_t1_t4.py       Phase 1A benchmark: HF vs llama.cpp, all 4 models, VRAM sampler
 
 tools/                         Monitoring & validation
   live_caption_monitor.py      YouTube caption comparison

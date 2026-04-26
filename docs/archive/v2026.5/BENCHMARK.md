@@ -170,7 +170,7 @@ The headline speedup math (assumes parallel draft+verify on multi-GPU): `1 / (1/
 
 **Fix:** add `chat_template_kwargs: {"enable_thinking": False}` to the request payload when `model_family == "gemma4"`. Verified: response goes from `finish_reason="length"` + 256 tokens + empty content to `finish_reason="stop"` + 18 tokens + clean Spanish. **14× latency improvement** for the affected canary alone.
 
-**This was a real production bug**, not a benchmark artifact. Patched in `engines/llamacpp_engine.py:124-138` and `bench_translate_t1_t4.py`.
+**This was a real production bug**, not a benchmark artifact. Patched in `engines/llamacpp_engine.py:124-138` and `scripts/benchmarks/bench_translate_t1_t4.py`.
 
 ### 2. VRAM measurement — `torch.cuda.max_memory_allocated` undercounts on Gemma 4
 
@@ -181,7 +181,7 @@ The headline speedup math (assumes parallel draft+verify on multi-GPU): `1 / (1/
 - Gemma 4's Per-Layer Embeddings (PLE) staying in bf16 even under NF4 quantization
 - PyTorch caching allocator's reserved-but-unallocated pool
 
-**Fix:** continuous `nvidia-smi` sampler thread (poll `memory.used` every 0.5 s, track running max). Works for out-of-process llama-server too. Implementation in `bench_translate_t1_t4.py:VramSampler`.
+**Fix:** continuous `nvidia-smi` sampler thread (poll `memory.used` every 0.5 s, track running max). Works for out-of-process llama-server too. Implementation in `scripts/benchmarks/bench_translate_t1_t4.py:VramSampler`.
 
 **Implication:** all prior VRAM numbers in `metrics/gemma4_benchmark/comparison.json` should be considered lower bounds, not actual usage. **Update the file or annotate it.** (See action items.)
 
@@ -220,17 +220,17 @@ The supposed "post-#46 default" T1 (E2B HF NF4) occupies 14.23 GB peak. On the 1
 source /home/wbell/stt_train_env/bin/activate
 
 # T1 (HF E2B baseline) and other HF configs — no llama-server needed
-python bench_translate_t1_t4.py --config t1 --n-sermon 125 --out metrics/phase1a_t1.json
-python bench_translate_t1_t4.py --config tg4b_hf --n-sermon 125 --out metrics/phase1a_tg4b_hf.json
-python bench_translate_t1_t4.py --config tg12b_hf --n-sermon 125 --out metrics/phase1a_tg12b_hf.json
-python bench_translate_t1_t4.py --config e4b_hf --n-sermon 125 --out metrics/phase1a_e4b_hf.json
+python scripts/benchmarks/bench_translate_t1_t4.py --config t1 --n-sermon 125 --out metrics/phase1a_t1.json
+python scripts/benchmarks/bench_translate_t1_t4.py --config tg4b_hf --n-sermon 125 --out metrics/phase1a_tg4b_hf.json
+python scripts/benchmarks/bench_translate_t1_t4.py --config tg12b_hf --n-sermon 125 --out metrics/phase1a_tg12b_hf.json
+python scripts/benchmarks/bench_translate_t1_t4.py --config e4b_hf --n-sermon 125 --out metrics/phase1a_e4b_hf.json
 
 # T2 (E2B GGUF)
 /home/wbell/llama.cpp/build/bin/llama-server \
   -m models/gemma-4-e2b-it-q4km.gguf \
   --host 127.0.0.1 --port 8090 -ngl 999 -c 512 -ctk q8_0 \
   > /tmp/llama_t2.log 2>&1 &
-python bench_translate_t1_t4.py --config t2 --server-log /tmp/llama_t2.log \
+python scripts/benchmarks/bench_translate_t1_t4.py --config t2 --server-log /tmp/llama_t2.log \
   --n-sermon 125 --out metrics/phase1a_t2.json
 pkill -f llama-server
 
@@ -239,7 +239,7 @@ pkill -f llama-server
   -m models/gemma-4-e4b-it-q4km.gguf \
   --host 127.0.0.1 --port 8090 -ngl 999 -c 512 -ctk q8_0 \
   > /tmp/llama_t3.log 2>&1 &
-python bench_translate_t1_t4.py --config t3 --server-log /tmp/llama_t3.log \
+python scripts/benchmarks/bench_translate_t1_t4.py --config t3 --server-log /tmp/llama_t3.log \
   --n-sermon 125 --out metrics/phase1a_t3.json
 pkill -f llama-server
 
@@ -250,12 +250,12 @@ pkill -f llama-server
   --draft 16 --draft-min 5 \
   --host 127.0.0.1 --port 8090 -ngl 999 -c 512 -ctk q8_0 \
   > /tmp/llama_t4.log 2>&1 &
-python bench_translate_t1_t4.py --config t4 --server-log /tmp/llama_t4.log \
+python scripts/benchmarks/bench_translate_t1_t4.py --config t4 --server-log /tmp/llama_t4.log \
   --n-sermon 125 --out metrics/phase1a_t4.json
 pkill -f llama-server
 
 # Final merge + table
-python bench_translate_t1_t4.py --config merge \
+python scripts/benchmarks/bench_translate_t1_t4.py --config merge \
   --inputs metrics/phase1a_t1.json metrics/phase1a_t2.json metrics/phase1a_t3.json \
            metrics/phase1a_t4.json metrics/phase1a_e4b_hf.json \
            metrics/phase1a_tg4b_hf.json metrics/phase1a_tg12b_hf.json \
