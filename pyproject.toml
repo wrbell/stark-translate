@@ -258,14 +258,14 @@ http://localhost:9000/ and audience displays on :8080. Detects NVIDIA GPUs at
 install time and pip-installs either the [cuda] or [cpu] extras of
 stark-translate accordingly.
 """
-sources = ["stark_translate", "operator_app", "engines", "tools", "features"]
 icon = "packaging/windows/icon"
 # The actual launcher binary is PyApp (see packaging/windows/pyapp-config.toml).
 # Briefcase's "external app packaging" mode wraps that pre-built .exe instead
-# of running its standard Python-stub builder. ``stark_translate/`` is a
-# 1-file shim that re-exports operator_app.cli:main — it exists only because
-# Briefcase 0.3.x validates that the app key's derived module name appears in
-# sources, even in external mode. The real entry points live in operator_app.
+# of running its standard Python-stub builder. External apps must NOT declare
+# a `sources` list — Briefcase 0.3.x rejects external + sources as
+# contradictory. The Python packages we ship via PyPI are configured under
+# [tool.hatch.build.targets.wheel] above; they have nothing to do with the
+# Windows MSI wrapping done by Briefcase here.
 external_package_path = "packaging/windows/stark-translate.exe"
 
 [tool.briefcase.app.stark-translate.windows]
