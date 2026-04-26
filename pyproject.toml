@@ -100,7 +100,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["operator_app", "engines", "tools", "features"]
+packages = ["stark_translate", "operator_app", "engines", "tools", "features"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "settings.py" = "settings.py"
@@ -258,11 +258,14 @@ http://localhost:9000/ and audience displays on :8080. Detects NVIDIA GPUs at
 install time and pip-installs either the [cuda] or [cpu] extras of
 stark-translate accordingly.
 """
-sources = ["operator_app", "engines", "tools", "features"]
+sources = ["stark_translate", "operator_app", "engines", "tools", "features"]
 icon = "packaging/windows/icon"
 # The actual launcher binary is PyApp (see packaging/windows/pyapp-config.toml).
 # Briefcase's "external app packaging" mode wraps that pre-built .exe instead
-# of running its standard Python-stub builder.
+# of running its standard Python-stub builder. ``stark_translate/`` is a
+# 1-file shim that re-exports operator_app.cli:main — it exists only because
+# Briefcase 0.3.x validates that the app key's derived module name appears in
+# sources, even in external mode. The real entry points live in operator_app.
 external_package_path = "packaging/windows/stark-translate.exe"
 
 [tool.briefcase.app.stark-translate.windows]
