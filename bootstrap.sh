@@ -5,7 +5,7 @@
 # from a checkout of the stark-translate repo. It does:
 #
 #   1. Verify prerequisites (Python 3.11+, ffmpeg, CUDA toolkit, etc.)
-#   2. Create a venv at ./venv and install requirements-nvidia.txt
+#   2. Create a venv at ./venv and install stark-translate[cuda|cpu] from pyproject
 #   3. Install systemd unit + drop-in with the actual install paths
 #   4. Run a one-shot pre-flight via /api/preflight
 #   5. Print final URLs the operator should bookmark
@@ -69,18 +69,20 @@ else
 fi
 
 # 2. venv + dependencies ------------------------------------------------------
+# Prefer the pyproject.toml extras (v2026.7+); fall back to the legacy
+# requirements files for environments that pin against the frozen versions.
 VENV="$ROOT/venv"
-REQS="requirements-nvidia.txt"
-[ ! -f "$REQS" ] && REQS="requirements-mac.txt"
+EXTRA="cuda"
+command -v nvidia-smi >/dev/null 2>&1 || EXTRA="cpu"
 
 if [ ! -d "$VENV" ]; then
     log "creating venv at $VENV"
     python3 -m venv "$VENV" || fail "venv creation failed" 3
 fi
 
-log "installing $REQS into venv (this may take 5–15 minutes)…"
+log "installing stark-translate[$EXTRA] into venv (this may take 5–15 minutes)…"
 "$VENV/bin/pip" install --upgrade pip wheel >/tmp/bootstrap-pip.log 2>&1 || true
-"$VENV/bin/pip" install -r "$REQS" >>/tmp/bootstrap-pip.log 2>&1 \
+"$VENV/bin/pip" install ".[$EXTRA]" >>/tmp/bootstrap-pip.log 2>&1 \
     || fail "dependency install failed (see /tmp/bootstrap-pip.log)" 3
 log "  pip install OK"
 

@@ -1,3 +1,7 @@
+# DEPRECATED in v2026.7 — use `pip install '.[cuda]'` instead.
+# See pyproject.toml [project.optional-dependencies]. This file is kept
+# only as a pip-cache key for CI workflows and as a frozen-version snapshot
+# for the WSL training environment per CLAUDE-windows.md.
 # requirements-nvidia.txt — NVIDIA/CUDA Inference Environment
 # This is for NVIDIA GPU inference machines (e.g., Jetson, desktop with RTX).
 # For WSL/Windows training, see requirements-windows.txt instead.

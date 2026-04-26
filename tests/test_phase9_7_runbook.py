@@ -57,7 +57,9 @@ class TestBootstrap:
         text = (ROOT / "bootstrap.sh").read_text()
         for step in (
             "venv",
-            "requirements-nvidia.txt",
+            # v2026.7+ installs via pyproject extras (`pip install '.[cuda|cpu]'`).
+            # Pre-v2026.7 used `pip install -r requirements-nvidia.txt`.
+            ".[$EXTRA]",
             "systemctl",
             "/api/preflight",
             "ExecStart=",

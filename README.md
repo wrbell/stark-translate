@@ -48,18 +48,22 @@ Runs on Apple Silicon (MLX) or NVIDIA GPUs (CUDA) via `--backend auto|mlx|cuda`.
 ## Quick Start
 
 ```bash
-# Mac
+# Mac (Apple Silicon)
 brew install ffmpeg portaudio
-python3.11 -m venv stt_env && source stt_env/bin/activate
-pip install -r requirements-mac.txt
-huggingface-cli login          # Required for TranslateGemma
-stark-translate setup           # Download all models
-python dry_run_ab.py           # 4B only (~4.3 GB), or --ab for A/B (~11.3 GB)
+uv tool install 'stark-translate[mlx]'        # or: pip install '.[mlx]'
+huggingface-cli login                          # Required for TranslateGemma
+stark-translate setup                          # Download all models
+stark-translate operator                       # Open the operator UI
 
-# NVIDIA
-pip install -r requirements-nvidia.txt
-python dry_run_ab.py --backend=cuda --no-ab
+# NVIDIA (Linux)
+uv tool install 'stark-translate[cuda]'        # or: pip install '.[cuda]'
+stark-translate setup
+stark-translate operator
 ```
+
+The legacy `requirements-mac.txt` / `requirements-nvidia.txt` install path is
+still supported for the WSL training environment but deprecated for inference;
+see `CLAUDE-windows.md` for training-side instructions.
 
 Key flags: `--lang es` (Spanish speaker mode), `--tts` (audio output), `--ab` (A/B comparison), `--dry-run-text "test"` (no mic), `--vad-threshold 0.3`, `--log-level DEBUG`.
 
