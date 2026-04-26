@@ -279,3 +279,155 @@ class TestEntrypointIntegration:
         # The old aspirational STARK_TRANSCRIPT_WS pointed at the wrong port
         # (8765 was outbound transcript broadcast). Make sure it's gone.
         assert "ws://operator:8765/audio" not in text
+
+
+# ---------------------------------------------------------------------------
+# /ws/audio/subscribe + AudioBus fan-out (Phase 9.4.2 follow-up #53)
+# ---------------------------------------------------------------------------
+
+
+class TestAudioBusSubscribers:
+    def test_push_frame_fan_out(self):
+        """A subscriber registered before push_frame receives the same bytes."""
+        import asyncio as aio
+
+        from operator_app.audio_ingest import AudioBus
+
+        bus = AudioBus()
+        q: aio.Queue[bytes] = aio.Queue(maxsize=10)
+        bus.add_subscriber(q)
+        bus.push_frame(b"\x01\x00\x02\x00")
+        # The producer (push_frame) is sync, the queue is asyncio — get_nowait works.
+        assert q.get_nowait() == b"\x01\x00\x02\x00"
+
+    def test_remove_subscriber_stops_fan_out(self):
+        import asyncio as aio
+
+        from operator_app.audio_ingest import AudioBus
+
+        bus = AudioBus()
+        q: aio.Queue[bytes] = aio.Queue(maxsize=10)
+        bus.add_subscriber(q)
+        bus.remove_subscriber(q)
+        bus.push_frame(b"\x01\x00")
+        assert q.empty()
+
+    def test_subscriber_count_reflects_state(self):
+        import asyncio as aio
+
+        from operator_app.audio_ingest import AudioBus
+
+        bus = AudioBus()
+        assert bus.subscriber_count() == 0
+        q1: aio.Queue[bytes] = aio.Queue()
+        q2: aio.Queue[bytes] = aio.Queue()
+        bus.add_subscriber(q1)
+        bus.add_subscriber(q2)
+        assert bus.subscriber_count() == 2
+        bus.remove_subscriber(q1)
+        assert bus.subscriber_count() == 1
+
+    def test_overflow_subscriber_drops_silently(self):
+        """Slow consumers must not block the producer."""
+        import asyncio as aio
+
+        from operator_app.audio_ingest import AudioBus
+
+        bus = AudioBus()
+        q: aio.Queue[bytes] = aio.Queue(maxsize=2)
+        bus.add_subscriber(q)
+        for i in range(5):
+            bus.push_frame(bytes([i, 0]))  # 5 frames into a 2-slot queue
+        # Producer never raised; queue is at maxsize
+        assert q.qsize() == 2
+
+    def test_snapshot_includes_subscriber_count(self):
+        import asyncio as aio
+
+        from operator_app.audio_ingest import AudioBus
+
+        bus = AudioBus()
+        bus.add_subscriber(aio.Queue())
+        assert bus.snapshot()["subscribers"] == 1
+
+
+class TestSubscribeEndpoint:
+    def test_subscribe_receives_pushed_frames(self, client):
+        """Bridge ingest → AudioBus.push_frame → subscribe WS forwards binary."""
+        from operator_app.audio_ingest import get_bus
+
+        # Use TestClient's parallel-WS pattern: open subscribe, then push via
+        # bus directly (avoids racing two TestClient WS connections).
+        with client.websocket_connect("/ws/audio/subscribe") as sub_ws:
+            get_bus().push_frame(b"\x05\x00\x06\x00")
+            data = sub_ws.receive_bytes()
+            assert data == b"\x05\x00\x06\x00"
+
+
+# ---------------------------------------------------------------------------
+# tools.audio_bridge_client (pipeline-side adapter)
+# ---------------------------------------------------------------------------
+
+
+class TestAudioBridgeClient:
+    def test_url_conversion(self):
+        from tools.audio_bridge_client import _operator_url_to_subscribe_ws
+
+        assert _operator_url_to_subscribe_ws("http://operator:9000") == "ws://operator:9000/ws/audio/subscribe"
+        assert (
+            _operator_url_to_subscribe_ws("https://stark.example.com") == "wss://stark.example.com/ws/audio/subscribe"
+        )
+        assert _operator_url_to_subscribe_ws("http://localhost:9000/foo") == "ws://localhost:9000/ws/audio/subscribe"
+
+    def test_open_audio_stream_picks_ws_when_env_set(self, monkeypatch):
+        """STARK_AUDIO_SOURCE=ws → returns a WebsocketAudioStream."""
+        monkeypatch.setenv("STARK_AUDIO_SOURCE", "ws")
+        monkeypatch.setenv("STARK_OPERATOR_URL", "http://test-host:9000")
+        from tools.audio_bridge_client import WebsocketAudioStream, open_audio_stream
+
+        stream = open_audio_stream(
+            callback=lambda *args: None,
+            samplerate=16000,
+            channels=1,
+            dtype="float32",
+            blocksize=512,
+            device=None,
+        )
+        assert isinstance(stream, WebsocketAudioStream)
+        assert stream.url == "ws://test-host:9000/ws/audio/subscribe"
+
+    def test_open_audio_stream_picks_sounddevice_by_default(self, monkeypatch):
+        """No env var → falls back to sd.InputStream import + call."""
+        monkeypatch.delenv("STARK_AUDIO_SOURCE", raising=False)
+        from unittest.mock import MagicMock, patch
+
+        from tools.audio_bridge_client import open_audio_stream
+
+        fake_sd = MagicMock()
+        fake_sd.InputStream = MagicMock(return_value="<sd_stream>")
+        with patch.dict("sys.modules", {"sounddevice": fake_sd}):
+            result = open_audio_stream(
+                callback=lambda *args: None,
+                samplerate=16000,
+                channels=1,
+                dtype="float32",
+                blocksize=512,
+                device=None,
+            )
+        assert result == "<sd_stream>"
+        fake_sd.InputStream.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Pipeline integration (Phase 9.4.2 follow-up #53)
+# ---------------------------------------------------------------------------
+
+
+class TestPipelineIntegration:
+    def test_dry_run_ab_uses_open_audio_stream_factory(self):
+        """dry_run_ab.py should call tools.audio_bridge_client.open_audio_stream."""
+        text = (ROOT / "dry_run_ab.py").read_text()
+        assert "from tools.audio_bridge_client import open_audio_stream" in text
+        assert "open_audio_stream(" in text
+        # Old direct sd.InputStream call site should be replaced
+        assert "stream = sd.InputStream(" not in text

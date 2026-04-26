@@ -3208,12 +3208,18 @@ async def audio_loop():
 
     while True:
         try:
-            stream = sd.InputStream(
+            # Phase 9.4.2: when STARK_AUDIO_SOURCE=ws, read frames from the
+            # operator's /ws/audio/subscribe endpoint instead of the local
+            # mic. The factory matches sd.InputStream's context-manager
+            # interface so the loop below is unchanged.
+            from tools.audio_bridge_client import open_audio_stream
+
+            stream = open_audio_stream(
+                callback=audio_callback,
                 samplerate=MIC_SAMPLE_RATE,
                 channels=1,
                 dtype="float32",
                 blocksize=int(MIC_SAMPLE_RATE * 0.032),  # ~32ms frames
-                callback=audio_callback,
                 device=MIC_DEVICE,
             )
 
