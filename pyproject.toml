@@ -259,20 +259,15 @@ install time and pip-installs either the [cuda] or [cpu] extras of
 stark-translate accordingly.
 """
 icon = "packaging/windows/icon"
-# The actual launcher binary is PyApp (see packaging/windows/pyapp-config.toml).
-# Briefcase's "external app packaging" mode wraps that pre-built .exe instead
-# of running its standard Python-stub builder. External apps must NOT declare
-# a `sources` list — Briefcase 0.3.x rejects external + sources as
-# contradictory. The Python packages we ship via PyPI are configured under
-# [tool.hatch.build.targets.wheel] above; they have nothing to do with the
-# Windows MSI wrapping done by Briefcase here.
-external_package_path = "packaging/windows/stark-translate.exe"
+# Briefcase 0.4+ external-app mode: external_package_path is a FOLDER (not a
+# file), and the actual executable's path *relative to that folder* is
+# specified per-platform via external_package_executable_path below. The
+# real launcher is built by PyApp (.github/workflows/release-win.yml) and
+# dropped at packaging/windows/stark-translate.exe before this packager runs.
+external_package_path = "packaging/windows"
 
 [tool.briefcase.app.stark-translate.windows]
-use_full_install_path = true
-template_branch = "v0.3.25"
+external_package_executable_path = "stark-translate.exe"
 # Custom WiX fragment adds Start Menu shortcut, NVIDIA detection custom action,
 # ARP metadata. See packaging/windows/wix-fragment.wxi.
 template_extra_includes = ["packaging/windows/wix-fragment.wxi"]
-# Versioning aligned with CalVer; Briefcase requires four numeric components.
-target_version = "2026.7.2.0"
