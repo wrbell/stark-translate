@@ -42,7 +42,11 @@ jobs:
       # --- PyApp launcher ----------------------------------------------------
       - uses: dtolnay/rust-toolchain@stable
       - name: Install PyApp
-        run: cargo install pyapp --version 0.27 --root packaging/windows/pyapp-build
+        # Cargo requires 3-component semver; the previous `--version 0.27`
+        # pin failed parsing. Let cargo pull the latest published PyApp —
+        # it's a stable binary and we'd rather track upstream than wedge on
+        # a stale version.
+        run: cargo install pyapp --root packaging/windows/pyapp-build
 
       - name: Build launcher
         shell: pwsh
