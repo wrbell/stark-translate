@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 
 from operator_app.audio import get_watcher
 from operator_app.audio_ingest import get_bus as get_audio_bus
-from operator_app.audio_ingest import handle_audio_ingest
+from operator_app.audio_ingest import handle_audio_ingest, handle_audio_subscribe
 from operator_app.features import get_summary_runner, get_verse_watcher
 from operator_app.metrics import get_collector, healthz_snapshot
 from operator_app.pipeline_manager import (
@@ -383,6 +383,16 @@ async def ws_audio_ingest(websocket: WebSocket) -> None:
     subprocess pulls from the same AudioBus when STARK_AUDIO_SOURCE=ws.
     """
     await handle_audio_ingest(websocket)
+
+
+@app.websocket("/ws/audio/subscribe")
+async def ws_audio_subscribe(websocket: WebSocket) -> None:
+    """Stream PCM frames to the pipeline subprocess (Phase 9.4.2).
+
+    Used when STARK_AUDIO_SOURCE=ws — the pipeline reads frames from this
+    endpoint instead of opening sd.InputStream locally.
+    """
+    await handle_audio_subscribe(websocket)
 
 
 @app.websocket("/ws/control")

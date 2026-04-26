@@ -100,11 +100,21 @@ class AudioBus:
         self._buf: collections.deque[np.ndarray] = collections.deque(maxlen=capacity)
         self._stats = _BusStats()
         self._sample_rate = DEFAULT_SAMPLE_RATE
+        # Subscriber queues for /ws/audio/subscribe fan-out. Each subscriber
+        # gets its own bounded queue so a slow consumer drops frames rather
+        # than back-pressuring the producer.
+        self._subscribers: list[asyncio.Queue[bytes]] = []
+        self._subscribers_lock = threading.Lock()
 
     # -- producer side --------------------------------------------------------
 
     def push_frame(self, pcm_int16: bytes, *, client: str | None = None) -> None:
-        """Convert raw int16 LE bytes into float32 [-1, 1] and enqueue."""
+        """Convert raw int16 LE bytes into float32 [-1, 1] and enqueue.
+
+        Also fan-outs the raw int16 bytes to all WS subscribers (the pipeline
+        consumes via ``/ws/audio/subscribe`` rather than reading the ring
+        directly — different processes, no shared memory).
+        """
         if not pcm_int16:
             return
         samples = np.frombuffer(pcm_int16, dtype=np.int16).astype(np.float32) / 32768.0
@@ -117,6 +127,31 @@ class AudioBus:
             self._stats.last_frame_ts = time.time()
             if client:
                 self._stats.last_client = client
+
+        # Fan-out to subscribers. put_nowait drops if full — bounded by
+        # subscriber queue size so a slow consumer can't OOM the operator.
+        with self._subscribers_lock:
+            subs = list(self._subscribers)
+        for q in subs:
+            try:
+                q.put_nowait(pcm_int16)
+            except asyncio.QueueFull:
+                pass
+
+    def add_subscriber(self, q: asyncio.Queue) -> None:
+        with self._subscribers_lock:
+            self._subscribers.append(q)
+
+    def remove_subscriber(self, q: asyncio.Queue) -> None:
+        with self._subscribers_lock:
+            try:
+                self._subscribers.remove(q)
+            except ValueError:
+                pass
+
+    def subscriber_count(self) -> int:
+        with self._subscribers_lock:
+            return len(self._subscribers)
 
     def record_handshake(self, sample_rate: int, client: str | None) -> None:
         with self._lock:
@@ -148,7 +183,7 @@ class AudioBus:
 
     def snapshot(self) -> dict:
         with self._lock:
-            return {
+            base = {
                 "frames_received": self._stats.frames_received,
                 "bytes_received": self._stats.bytes_received,
                 "frames_dropped": self._stats.frames_dropped,
@@ -159,6 +194,8 @@ class AudioBus:
                 "buffered_frames": len(self._buf),
                 "capacity_frames": self._buf.maxlen,
             }
+        base["subscribers"] = self.subscriber_count()
+        return base
 
 
 # Module-level singleton — same pattern as MetricsCollector and PipelineRunner.
@@ -252,6 +289,50 @@ async def handle_audio_ingest(websocket: WebSocket) -> None:
             pass
     finally:
         logger.info("audio-ingest: %s disconnected", client)
+
+
+async def handle_audio_subscribe(websocket: WebSocket) -> None:
+    """Stream PCM frames to a consumer (the pipeline subprocess).
+
+    No handshake required — the subscriber just opens the WS and receives
+    binary frames as they arrive on the AudioBus. Frame size + sample rate
+    match whatever the producing bridge negotiated; subscribers can read
+    ``GET /api/audio_ingest`` to learn the current rate.
+
+    Per-subscriber queue is bounded at 30 frames (~600 ms @ 20 ms/frame). A
+    consumer that falls behind drops oldest frames rather than back-pressuring
+    the producer.
+    """
+    await websocket.accept()
+    bus = get_bus()
+    client = websocket.client.host if websocket.client else "?"
+    logger.info("audio-subscribe: %s connected (subscribers=%d)", client, bus.subscriber_count() + 1)
+
+    q: asyncio.Queue[bytes] = asyncio.Queue(maxsize=30)
+    bus.add_subscriber(q)
+    try:
+        while True:
+            try:
+                frame = await asyncio.wait_for(q.get(), timeout=30.0)
+            except TimeoutError:
+                # Idle — send a tiny ping to keep the connection alive
+                try:
+                    await websocket.send_text(json.dumps({"keepalive": True}))
+                except Exception:
+                    break
+                continue
+            await websocket.send_bytes(frame)
+    except WebSocketDisconnect:
+        pass
+    except Exception as exc:
+        logger.warning("audio-subscribe: %s closed unexpectedly: %s", client, exc)
+    finally:
+        bus.remove_subscriber(q)
+        logger.info("audio-subscribe: %s disconnected (subscribers=%d)", client, bus.subscriber_count())
+        try:
+            await websocket.close()
+        except Exception:
+            pass
 
 
 def _validate_hello(hello: dict) -> bool:
