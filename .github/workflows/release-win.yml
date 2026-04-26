@@ -40,15 +40,12 @@ jobs:
           Write-Host "Building stark-translate==$v"
 
       # --- PyApp launcher ----------------------------------------------------
+      # PyApp's `cargo install` IS the build — its build.rs embeds the
+      # PYAPP_* env vars into the resulting binary at compile time. So all
+      # the env vars need to be set on the install step (not a separate
+      # build step), and there is no later `cargo build` to do.
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install PyApp
-        # Cargo requires 3-component semver; the previous `--version 0.27`
-        # pin failed parsing. Let cargo pull the latest published PyApp —
-        # it's a stable binary and we'd rather track upstream than wedge on
-        # a stale version.
-        run: cargo install pyapp --root packaging/windows/pyapp-build
-
-      - name: Build launcher
+      - name: Install PyApp (compiles the launcher)
         shell: pwsh
         env:
           PYAPP_PROJECT_NAME: stark-translate
@@ -57,10 +54,11 @@ jobs:
           PYAPP_EXEC_SPEC: operator_app.cli:main
           PYAPP_PIP_EXTERNAL: "true"
         run: |
-          cd packaging/windows/pyapp-build
-          cargo build --release --bin pyapp
-          # PyApp produces target/release/pyapp.exe — rename to stark-translate.exe
-          Copy-Item target/release/pyapp.exe ../stark-translate.exe -Force
+          cargo install pyapp --root packaging/windows/pyapp-build
+          # cargo installs the binary at <root>/bin/pyapp.exe — rename to
+          # stark-translate.exe so Briefcase finds the customized launcher.
+          Copy-Item packaging/windows/pyapp-build/bin/pyapp.exe `
+                    packaging/windows/stark-translate.exe -Force
 
       # --- Briefcase MSI wrapper --------------------------------------------
       - name: Install Briefcase
