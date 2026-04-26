@@ -18,7 +18,7 @@ v2026.7.2.1 code-signing follow-up.
 
 ```pwsh
 # 1. Install Briefcase
-pip install briefcase==0.3.25
+pip install briefcase==0.4.1
 
 # 2. Set PyApp env vars *before* cargo install — PyApp's build.rs embeds
 #    these into the resulting binary at compile time.

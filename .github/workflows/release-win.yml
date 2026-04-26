@@ -62,7 +62,7 @@ jobs:
 
       # --- Briefcase MSI wrapper --------------------------------------------
       - name: Install Briefcase
-        run: pip install briefcase==0.3.25
+        run: pip install briefcase==0.4.1
 
       - name: Build MSI (unsigned for v2026.7.2.x)
         shell: pwsh
