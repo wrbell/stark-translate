@@ -1,0 +1,69 @@
+PROPRIETARY LICENSE
+===================
+
+Copyright (c) 2024-2026 Stark Road Gospel Hall (Farmington Hills, MI)
+All rights reserved.
+
+This software (stark-translate) and its source code are the proprietary
+property of Stark Road Gospel Hall and Willem Bell. The software is
+distributed for the express purpose of facilitating live bilingual
+speech-to-text and translation at Stark Road Gospel Hall and affiliated
+gospel-outreach events.
+
+PERMITTED USES
+--------------
+
+1. Use of pre-built artifacts (PyPI wheels, GHCR Docker images, Windows
+   MSI installer, macOS application bundles) for personal, educational,
+   or research purposes.
+
+2. Modification of the source code for personal, educational, or
+   research purposes, provided that derivative works are not
+   redistributed without written permission.
+
+3. Use of the software for non-commercial gospel-outreach events at
+   houses of worship, religious gatherings, and similar venues.
+
+PROHIBITED USES
+---------------
+
+1. Redistribution of the source code or compiled artifacts in any form,
+   modified or unmodified, without prior written permission from the
+   copyright holders.
+
+2. Commercial use, including but not limited to sale, sublicensing,
+   integration into commercial products, or use in revenue-generating
+   activities, without prior written permission.
+
+3. Removal or modification of attribution, copyright, or license notices.
+
+THIRD-PARTY COMPONENTS
+----------------------
+
+This software incorporates several third-party open-source components
+under their own permissive licenses. See pyproject.toml for the full
+dependency manifest. Notable components include:
+
+- OpenAI Whisper (MIT)
+- Google Gemma (Gemma Terms of Use; not redistributed in source —
+  GGUF artifacts are provided via huggingface.co/wbell7/stark-translate-models
+  per the upstream Gemma license)
+- llama.cpp (MIT)
+- Helsinki-NLP MarianMT models (CC-BY-4.0)
+- Piper TTS (MIT)
+- FastAPI, uvicorn, pydantic, and the broader Python ecosystem (various
+  permissive licenses, primarily MIT and BSD)
+
+Use of those components is governed by their respective licenses, which
+are unchanged and unaffected by this proprietary notice.
+
+DISCLAIMER
+----------
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
