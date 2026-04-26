@@ -1,7 +1,7 @@
 [project]
 name = "stark-translate"
 version = "2026.7.0.0"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.11"
 description = "Live bilingual speech-to-text for church outreach"
 readme = "README.md"
 license = { text = "Proprietary" }
