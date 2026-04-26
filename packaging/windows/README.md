@@ -34,7 +34,7 @@ Copy-Item packaging\windows\pyapp-build\bin\pyapp.exe `
           packaging\windows\stark-translate.exe -Force
 
 # 4. Wrap into MSI
-briefcase package windows --no-sign
+briefcase package windows --adhoc-sign
 ```
 
 The resulting MSI lands at `dist\stark-translate-2026.7.2.0.msi`.

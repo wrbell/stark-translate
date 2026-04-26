@@ -67,7 +67,7 @@ class TestReleaseWorkflow:
         text = (ROOT / ".github" / "workflows" / "release-win.yml").read_text()
         assert "briefcase package windows" in text
         # v2026.7.2.0 ships unsigned; signing is the v2026.7.2.1 follow-up
-        assert "--no-sign" in text
+        assert "--adhoc-sign" in text
 
     def test_uploads_msi_artifact(self):
         text = (ROOT / ".github" / "workflows" / "release-win.yml").read_text()
