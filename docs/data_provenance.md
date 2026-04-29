@@ -2,6 +2,8 @@
 
 Tracks exactly which data files and counts went into each training run.
 
+> **⚠️ 2026-04-29 — Platense alignment bug discovered.** Every entry below that consumed `bible_data/aligned/verse_pairs_train.jsonl` was trained on a corpus where ~50% of verse pairs (`es_source == 'platense'`) were silently misaligned — the row-order `verse_id` did not map to the same canonical verse across Protestant- and Catholic-canon sources. The fix and full impact analysis are in [`docs/platense_alignment_bug.md`](./platense_alignment_bug.md). New training should pull from `bible_data/aligned/verse_pairs_train_v2.jsonl` instead.
+
 ## Source Files Reference
 
 | ID | File | Description | Count |

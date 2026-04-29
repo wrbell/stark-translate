@@ -1,0 +1,60 @@
+{
+  "output": "bible_data/aligned/verse_pairs_train_v2.jsonl",
+  "total_pairs_new": 251504,
+  "total_pairs_old": 241591,
+  "delta_total": 9913,
+  "per_combo": {
+    "kjv->platense": {
+      "new": 27258,
+      "old": 27886,
+      "delta": -628
+    },
+    "bbe->rvr1909": {
+      "new": 31049,
+      "old": 27876,
+      "delta": 3173
+    },
+    "asv->rvr1909": {
+      "new": 31068,
+      "old": 27871,
+      "delta": 3197
+    },
+    "web->rvr1909": {
+      "new": 10346,
+      "old": 9287,
+      "delta": 1059
+    },
+    "ylt->rvr1909": {
+      "new": 31084,
+      "old": 27894,
+      "delta": 3190
+    },
+    "asv->platense": {
+      "new": 27245,
+      "old": 27873,
+      "delta": -628
+    },
+    "bbe->platense": {
+      "new": 27230,
+      "old": 27853,
+      "delta": -623
+    },
+    "web->platense": {
+      "new": 7882,
+      "old": 9275,
+      "delta": -1393
+    },
+    "ylt->platense": {
+      "new": 27258,
+      "old": 27890,
+      "delta": -632
+    },
+    "kjv->rvr1909": {
+      "new": 31084,
+      "old": 27886,
+      "delta": 3198
+    }
+  },
+  "platense_source": "bible_data/es/platense_realigned.jsonl",
+  "scrollmapper_dir": "/mnt/d/Data/stt-data/bible_data/scrollmapper/formats/sqlite"
+}
