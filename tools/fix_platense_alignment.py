@@ -143,9 +143,12 @@ def jaccard(a: set[str], b: set[str]) -> float:
     return len(a & b) / len(a | b)
 
 
+# scrollmapper SQLite uses one table-name prefix per translation (SpaPlatense_verses,
+# SpaRV_verses, KJV_verses, etc.). The prefix is hardcoded by callers, never user
+# input — the f-string interpolation is safe but bandit cannot prove it. nosec B608.
 def load_books(con: sqlite3.Connection, table_prefix: str) -> dict[int, str]:
     """Returns {book_id: book_name}."""
-    rows = con.execute(f"SELECT id, name FROM {table_prefix}_books").fetchall()
+    rows = con.execute(f"SELECT id, name FROM {table_prefix}_books").fetchall()  # nosec B608
     return dict(rows)
 
 
@@ -153,7 +156,7 @@ def load_verses(con: sqlite3.Connection, table_prefix: str) -> list[dict]:
     """Returns [{id, book_id, chapter, verse, text}, ...]."""
     cols = "id, book_id, chapter, verse, text"
     rows = con.execute(
-        f"SELECT {cols} FROM {table_prefix}_verses WHERE text IS NOT NULL AND LENGTH(text) > 5"
+        f"SELECT {cols} FROM {table_prefix}_verses WHERE text IS NOT NULL AND LENGTH(text) > 5"  # nosec B608
     ).fetchall()
     return [{"id": r[0], "book_id": r[1], "chapter": r[2], "verse": r[3], "text": r[4].strip()} for r in rows]
 

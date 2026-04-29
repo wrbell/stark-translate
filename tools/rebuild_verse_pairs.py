@@ -46,13 +46,18 @@ ES_SQLITE_SOURCES = {
 
 
 def load_sqlite_verses(db_path: Path, table_prefix: str) -> dict[int, str]:
-    """Return {verse_id (canonical): text}."""
+    """Return {verse_id (canonical): text}.
+
+    The table_prefix is hardcoded by callers (KJV, ASV, BBE, OEB, YLT, SpaRV from
+    EN_SOURCES / ES_SQLITE_SOURCES — see top of file), never user input. The
+    f-string interpolation is safe but bandit cannot prove it. nosec B608.
+    """
     if not db_path.exists():
         log.warning("missing %s — skipping", db_path)
         return {}
     con = sqlite3.connect(str(db_path))
     rows = con.execute(
-        f"SELECT id, text FROM {table_prefix}_verses WHERE text IS NOT NULL AND LENGTH(text) > 5"
+        f"SELECT id, text FROM {table_prefix}_verses WHERE text IS NOT NULL AND LENGTH(text) > 5"  # nosec B608
     ).fetchall()
     con.close()
     return {r[0]: r[1].strip() for r in rows}
