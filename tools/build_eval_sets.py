@@ -57,6 +57,8 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 TRAIN_PATH = _PROJECT_ROOT / "bible_data" / "aligned" / "verse_pairs_train.jsonl"
 TEST_PATH = _PROJECT_ROOT / "bible_data" / "aligned" / "verse_pairs_test.jsonl"
+# CLI overrides — set by main() before any builder runs. Allow operating on the
+# v2 (post-platense-fix) corpus without touching the historical v1 file.
 SERMON_CHUNKS_PATH = _PROJECT_ROOT / "ablation" / "sermon_whisper_chunks_expanded.json"
 SERMON_EVAL_PATH = _PROJECT_ROOT / "ablation" / "sermon_eval_chunks.json"
 REGISTRY_PATH = _PROJECT_ROOT / "bible_data" / "eval_registry.json"
@@ -393,8 +395,32 @@ def main() -> int:
         action="store_true",
         help="Report what would be created WITHOUT modifying any files",
     )
+    parser.add_argument(
+        "--train-path",
+        type=Path,
+        default=None,
+        help="Override training corpus path (default: bible_data/aligned/verse_pairs_train.jsonl). "
+        "Use bible_data/aligned/verse_pairs_train_v2.jsonl for the post-platense-fix corpus.",
+    )
+    parser.add_argument(
+        "--test-path",
+        type=Path,
+        default=None,
+        help="Override holdout output path (default: bible_data/aligned/verse_pairs_test.jsonl). "
+        "Recommended companion to --train-path: verse_pairs_test_v2.jsonl",
+    )
 
     args = parser.parse_args()
+
+    # Apply CLI overrides — must happen before any builder runs since they read globals.
+    # Resolve to absolute paths (relative_to(_PROJECT_ROOT) requires it).
+    global TRAIN_PATH, TEST_PATH
+    if args.train_path is not None:
+        TRAIN_PATH = args.train_path.resolve()
+        logger.info("TRAIN_PATH overridden -> %s", TRAIN_PATH)
+    if args.test_path is not None:
+        TEST_PATH = args.test_path.resolve()
+        logger.info("TEST_PATH overridden -> %s", TEST_PATH)
 
     if args.dry_run:
         logger.info("=" * 60)
