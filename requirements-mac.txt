@@ -21,7 +21,7 @@ huggingface_hub==1.4.1
 idna==3.11
 jiwer>=3.0.0
 Jinja2==3.1.6
-llvmlite==0.46.0
+llvmlite==0.47.0
 MarkupSafe==3.0.3
 mlx==0.31.2
 mlx-lm==0.30.7
