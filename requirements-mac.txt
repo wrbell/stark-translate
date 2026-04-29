@@ -19,7 +19,7 @@ httpcore==1.0.9
 httpx==0.28.1
 huggingface_hub==1.4.1
 idna==3.11
-jiwer>=3.0.0
+jiwer>=4.0.0
 Jinja2==3.1.6
 llvmlite==0.46.0
 MarkupSafe==3.0.3

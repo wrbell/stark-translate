@@ -39,7 +39,7 @@ fastapi>=0.115                        # Operator control plane (Phase 9.1)
 uvicorn[standard]>=0.30               # ASGI server for FastAPI
 
 # Evaluation
-jiwer>=3.0.0
+jiwer>=4.0.0
 
 # Utilities
 numpy
