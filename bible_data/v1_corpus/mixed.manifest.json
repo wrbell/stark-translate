@@ -1,0 +1,16 @@
+{
+  "output": "bible_data/v1_corpus/mixed.jsonl",
+  "total_rows": 9233,
+  "composition": {
+    "bible_v2": 3586,
+    "glossary_tagged": 866,
+    "opus100_replay": 1195,
+    "sermon_kiwi85": 3586
+  },
+  "seed": 42,
+  "inputs": {
+    "sermon_path": "bible_data/synthetic/deepl_sermon_pairs_kiwi85.jsonl",
+    "train_path": "bible_data/aligned/verse_pairs_train_v2.jsonl",
+    "glossary_path": "bible_data/glossary/tier2_master.json"
+  }
+}
