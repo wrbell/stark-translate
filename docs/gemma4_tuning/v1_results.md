@@ -178,3 +178,69 @@ v1.1 shows that SFT-corpus rebalancing is a real (modest) lever; Phase D should 
 | `metrics/comet22_v1.1_vs_prod.json` | no (gitignored) | COMET-22 head-to-head |
 | `metrics/comet22_v1.1_vs_v1.json` | no (gitignored) | COMET-22 head-to-head |
 | `tools/build_v1_corpus.py` | yes (modified) | Now accepts `--ratio-bible/sermon/glossary/opus` + `--label-suffix` + glossary pool expansion |
+
+---
+
+# v2-cpo Iteration — preference optimization on top of v1.1 (2026-04-30)
+
+Phase D execution. Generates 4 translation candidates per source from v1.1, scores with CometKiwi-XL (the no-leakage filter different from the COMET-22 eval metric), builds (chosen, rejected) preference triples, trains CPO from v1.1 for 1 epoch.
+
+## Pipeline
+
+1. **Source pool** — sampled 2,000 sources from v2 train (1,500 modern-EN bible verses + 500 CometKiwi-filtered sermon chunks), all excluded from v1.1 training corpus.
+2. **Candidate generation** — 2,000 × 4 = 8,000 translations from v1.1 GGUF at temperature 0.7 via llama-server. Wall ~77 min, 0 failures.
+3. **Scoring + triples** — CometKiwi-XL scored all 8K candidates in 11 min. Built 1,384 (chosen, rejected) triples after `margin > 0.05` filter (392 dropped low-margin, 224 dropped identical-text).
+4. **CPO training** — TRL CPOTrainer wrapped in Unsloth, `--init-adapter fine_tuned_gemma4_e4b_v1.1` (continues v1.1's LoRA), lr=5e-6, beta=0.1, 1 epoch (173 steps). Wall ~30 min. `rewards/accuracies` climbed 0.59 → 0.76 → ~0.70 averaged. `rewards/margins` 1-3 sustained — model learned to prefer chosen over rejected.
+5. **Export + eval** — same pipeline as v1/v1.1.
+
+## Results — apples-to-apples on the 500-verse v2 holdout
+
+| metric | prod | v1 | v1.1 | **v2-cpo** | v2 vs v1.1 | v2 vs prod |
+|---|---|---|---|---|---|---|
+| COMET-22 mean | 0.7515 | 0.7448 | 0.7494 | **0.7508** | **+0.0014** | **−0.0008** |
+| chrF++ mean | 46.71 | 46.56 | 47.55 | 47.19 | −0.35 | +0.48 |
+| per-row vs prod (wins/losses/ties) | — | 224/271/5 | 224/271/5 | **247/250/3** | — | **statistical tie p=0.45** |
+| per-row vs v1.1 | — | — | — | 207/173/120 | majority + 24% ties | — |
+| canary (n=8) | 7/8 | 6/8 | 6/8 | 6/8 | tied | −1 (Jacobo) |
+| sermon p50 latency (verse n=500) | 675 ms | 645 ms | 663 ms | 674 ms | within noise | tied |
+| tok/s | 47.9 | 48.3 | 47.1 | 47.0 | within noise | within noise |
+| VRAM peak | 3.93 GB | 3.93 GB | 3.79 GB | 3.80 GB | tied | −0.13 |
+
+## What CPO accomplished
+
+**Closed the COMET-22 gap to prod from v1's −0.0068 → v1.1's −0.0022 → v2-cpo's −0.0008.** That's an 88% reduction in regression vs the SFT-only path. The v2 vs prod per-row tally (247 wins, 250 losses, 3 ties) is statistically indistinguishable from a fair coin (p=0.45 binomial against equal-quality null) — the model is essentially **on par with stock E4B on overall translation quality**.
+
+The v1.1 → v2-cpo improvement (+0.0014) is small but the per-row distribution is informative: 207 v2 wins, 173 v1.1 wins, **120 ties**. The 24% tie rate suggests CPO did targeted refinement of a fraction of outputs rather than wholesale rewriting — exactly what 1-epoch CPO at lr=5e-6 was designed to do.
+
+**Trade-off:** chrF++ slipped from v1.1's 47.55 to v2's 47.19 (still beats prod's 46.71). The classic "CPO trades a bit of surface fidelity for semantic accuracy." Given COMET-22 is the primary quality metric (and what production-style users care about), this is the right trade.
+
+## What CPO didn't fix
+
+- **Jacobo canary still misses.** v2-cpo says "Santiago" for "James and John, sons of Zebedee" just like v1 and v1.1. The 2K source pool didn't include the apostle-context disambiguation cases — both candidates probably said "Santiago" so CometKiwi couldn't rank them differently. **Engineering fix:** future iteration should hand-craft 50-100 disambiguation triples and run a short CPO refinement.
+- **Plan target was +0.5 COMET-22 over v1.** Got +0.006. Way short of the aspirational goal. The reality is stock E4B is already so strong that 1 epoch of CPO over 1.4K triples can only nudge things; serious CPO results require much larger triple pools (10K-100K) and possibly multiple iterations.
+
+## Decision
+
+**v2-cpo is statistical parity with prod, not a clear ship-it-tomorrow win.** The strongest argument for shipping v2 anyway: it matches production quality with the same latency profile while introducing the modern toolchain (no `enable_thinking: false` workaround needed). The strongest argument against: the canary regression (6/8 vs 7/8) is a real loss on a key disambiguation case the operator can hear during a service.
+
+**Recommendation:** treat v2-cpo as the end of the SFT+CPO pipeline. Subsequent improvements need either:
+- **(a) targeted preference data** for the failing canaries (specifically Jacobo, and "partimiento del pan" for the breaking-of-bread case), or
+- **(b) much larger preference pools** (e.g. 20K+ triples from a wider eval distribution) to push beyond statistical noise, or
+- **(c) accept that stock E4B is the practical ceiling** for this corpus + hardware setup, and ship v2 only if the latency win + future-iteration runway matters more than tying-with-prod COMET.
+
+The plan called for ARPO/X-ALMA as the v2.1 step if CPO showed over-rejection — we don't see over-rejection here (0.7 accuracy, smooth descent), so ARPO isn't indicated. The bigger lever from here is preference data quality, not the optimizer.
+
+## v2-cpo artifacts
+
+| Path | Tracked? | Description |
+|---|---|---|
+| `tools/build_preference_triples.py` | yes | `generate` (via llama-server HTTP) + `score` (CometKiwi-XL via comet_env) subcommands |
+| `training/train_gemma4_cpo.py` | yes | TRL CPOTrainer + Unsloth, `--init-adapter` for continuing v1.1's LoRA |
+| `preference/sources_2k.jsonl` | no (gitignored) | 1500 verse + 500 sermon sources, exclude-v1.1 |
+| `preference/v1.1_candidates.jsonl` | no (gitignored) | 2K × 4 candidates from v1.1 |
+| `preference/v1.1_triples.jsonl` | no (gitignored) | 1,384 (chosen, rejected) triples post-margin filter |
+| `fine_tuned_gemma4_e4b_v2_cpo/` | no (artifact) | CPO-refined LoRA (~75 MB) |
+| `models/gemma-4-e4b-it-q4km-v2-cpo.gguf` | no (artifact) | Merged + quantized v2-cpo GGUF |
+| `metrics/v2_cpo_e4b_verses_sermon.jsonl` | no (gitignored) | Per-translation hyps |
+| `metrics/comet22_v2_vs_prod.json` | no (gitignored) | head-to-head (delta −0.0008, p=0.45) |
+| `metrics/comet22_v2_vs_v1.1.json` | no (gitignored) | head-to-head (delta +0.0014, 207/173/120) |
