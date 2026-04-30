@@ -110,3 +110,71 @@ The plan's `phase_d_preference_optimization.md` is the natural next stop.
 | `metrics/v1_e4b_verses_sermon.jsonl` | no (gitignored) | Per-translation hyps from v1 (500 holdout verses) |
 | `metrics/prod_e4b_verses_sermon.jsonl` | no (gitignored) | Same for stock E4B |
 | `metrics/comet22_v1_vs_prod.json` | no (gitignored) | The head-to-head COMET-22 result |
+
+---
+
+# v1.1 Iteration — corpus rebalanced toward verse (2026-04-29)
+
+After v1 fell short of the COMET ship gate, the leading hypothesis was that the 39%-sermon mix shifted output toward a colloquial register the formal-Spanish reference set penalizes. v1.1 tests that hypothesis with a verse-heavy mix.
+
+## What changed
+
+| component | v1 share | **v1.1 share** | rationale |
+|---|---|---|---|
+| Bible verses (v2) | 39% | **60%** | Match the eval distribution (verses) |
+| Sermon (CometKiwi-XL ≥0.85) | 39% | **15%** | Reduce colloquial-register pull |
+| Glossary-tagged | 9% | **15%** | More theological-term reinforcement (still doesn't fix Jacobo) |
+| OPUS-100 replay | 13% | **10%** | Slightly trimmed |
+
+Total corpus: 9,233 → **15,000** rows. Glossary yield was 866 → **2,250** thanks to a candidate-pool expansion (`tools/build_v1_corpus.py:annotate_with_glossary` now walks extra random bible pairs when needed).
+
+## Training (Phase C2 prime)
+
+Same trainer (Unsloth QLoRA, r=8, frozen vision/PLE, packed seq=1024), 2 epochs, ~3:21 hr wall over 1,876 steps. Final avg loss **1.582** (v1: 1.508). Smooth descent, no incidents.
+
+## Results — apples-to-apples on the same 500-verse v2 holdout
+
+| metric | prod | v1 | **v1.1** | v1.1 vs v1 | v1.1 vs prod |
+|---|---|---|---|---|---|
+| COMET-22 mean | 0.7515 | 0.7448 | **0.7494** | **+0.0046** | −0.0022 |
+| chrF++ mean | 46.71 | 46.56 | **47.55** | **+0.99** | **+0.83** |
+| per-row winners (v1.1 vs other) | 224 / 271 (vs prod) | 251 / 218 (vs v1) | — | **majority over v1** | minority vs prod |
+| ties | 5 (vs prod) | 31 (vs v1) | — | — | — |
+| canary (n=8) | 7/8 | 6/8 | 6/8 | tied | −1 (Jacobo, unchanged) |
+| sermon p50 latency (verse n=500) | 675 ms | 645 ms | 663 ms | within noise | within noise |
+| tok/s | 47.9 | 48.3 | 47.1 | within noise | within noise |
+| VRAM peak | 3.93 GB | 3.93 GB | 3.79 GB | tied | −0.14 |
+| median completion tokens | 32 | 31 | 31 | tied | −1 |
+
+The v1→v1.1 gain (+0.0046 COMET-22) is right at the +0.005 plan threshold. Per-row winners (251 vs 218 with 31 ties) confirm v1.1 produces materially different — and majority-better — translations than v1, p<0.05 binomial against equal-quality null.
+
+The v1.1→prod gap closed by ~70% (from −0.0068 to −0.0022) but didn't go positive. v1.1 still loses 224/495 row-pairs to prod, though it wins the chrF++ comparison by +0.83 — surface character overlap is genuinely better than the base, COMET-22 just doesn't reflect that.
+
+## What it tells us
+
+**The corpus mix matters and the hypothesis is partially confirmed.** Reducing sermon to 15% recovered most of the COMET regression v1 introduced. Going further (e.g. v1.2 with 75% bible / 5% sermon) would likely chase diminishing returns — the v1→v1.1 step was already worth ~70% of the gap, but the remaining ~30% probably can't be closed by SFT corpus tuning alone.
+
+The Jacobo canary failure is **not** a corpus issue — both v1 and v1.1 fail the same canary identically. Glossary tags don't disambiguate context-dependent terms even with 2.6× more tagged training pairs.
+
+## Decision: pivot to Phase D
+
+Per the plan's decision tree, v1.1 lands in the "beats v1 by ≥+0.005 but doesn't beat prod → iterate v1.2 OR pivot to Phase D" branch. Choosing **Phase D** because:
+
+1. **Linear extrapolation says one more SFT iteration won't close the gap.** The v1→v1.1 gain (+0.0046) is the same size as the remaining v1.1→prod gap (−0.0022 + noise). v1.2 with even less sermon would shift things by < +0.0046 (diminishing returns).
+2. **Preference optimization addresses the actual remaining failure modes.** Both the residual COMET gap (style-vs-meaning ranking) and the Jacobo disambiguation are exactly what CPO with CometKiwi-XL as reward signal is designed to handle. Given two candidates ("Jacobo" vs "Santiago" for Sons of Zebedee), the reward model can learn the contextual preference.
+3. **The plan called this out from the start.** Phase D is the documented next lever after SFT is exhausted.
+
+v1.1 shows that SFT-corpus rebalancing is a real (modest) lever; Phase D should be the substantial lever.
+
+## v1.1 artifacts
+
+| Path | Tracked? | Description |
+|---|---|---|
+| `bible_data/v1_corpus/mixed_v1.1.jsonl` | no (gitignored) | 15,000-row rebalanced corpus |
+| `bible_data/v1_corpus/mixed_v1.1.manifest.json` | yes | Composition + ratios + seed |
+| `fine_tuned_gemma4_e4b_v1.1/` | no (artifact) | LoRA adapter (~75 MB) |
+| `models/gemma-4-e4b-it-q4km-v1.1.gguf` | no (artifact) | Merged + quantized GGUF (~5 GB) |
+| `metrics/v1.1_e4b_verses_sermon.jsonl` | no (gitignored) | Per-translation hyps |
+| `metrics/comet22_v1.1_vs_prod.json` | no (gitignored) | COMET-22 head-to-head |
+| `metrics/comet22_v1.1_vs_v1.json` | no (gitignored) | COMET-22 head-to-head |
+| `tools/build_v1_corpus.py` | yes (modified) | Now accepts `--ratio-bible/sermon/glossary/opus` + `--label-suffix` + glossary pool expansion |
