@@ -129,3 +129,6 @@ bible_data/es/platense_realigned.jsonl
 bible_data/v1_corpus/*.jsonl
 bible_data/synthetic/deepl_sermon_pairs_kiwi*.jsonl
 fine_tuned_gemma4_e4b_*/
+
+# Phase D: preference triples + candidates (regenerable from v1.1 GGUF)
+preference/*.jsonl
