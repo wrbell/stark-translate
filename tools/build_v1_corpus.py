@@ -89,12 +89,12 @@ def sample_bible(
     return chosen
 
 
-def to_training_row(pair: dict, source_label: str) -> dict:
+def to_training_row(pair: dict, source_label: str, label_suffix: str = "") -> dict:
     return {
         "en": pair["en"],
         "es": pair["es"],
         "_provenance": {
-            "source": source_label,
+            "source": f"{source_label}{label_suffix}",
             "verse_id": pair.get("verse_id"),
             "en_source": pair.get("en_source"),
             "es_source": pair.get("es_source"),
@@ -173,24 +173,34 @@ def annotate_with_glossary(
 def build(args: argparse.Namespace) -> None:
     rng = random.Random(args.seed)
 
+    # Validate ratios sum to 1.0 (within float epsilon).
+    ratio_sum = args.ratio_bible + args.ratio_sermon + args.ratio_glossary + args.ratio_opus
+    if abs(ratio_sum - 1.0) > 1e-6:
+        raise SystemExit(f"ratios must sum to 1.0, got {ratio_sum:.6f}")
+
     # Load sermon pool first (it's the bottleneck).
     log.info("loading sermon pool from %s", args.sermon_path)
     sermon = load_jsonl(args.sermon_path)
     log.info("  %d filtered sermon pairs available", len(sermon))
 
     # Decide target sizes. If --total-target is given, scale to it; else compute
-    # corpus around the sermon pool at 30% share.
+    # corpus around the sermon pool at its requested ratio.
     if args.total_target > 0:
         total = args.total_target
     else:
-        total = int(len(sermon) / 0.30)
-    n_sermon = min(int(total * 0.30), len(sermon))
-    n_bible = int(total * 0.30)
-    n_glossary = int(total * 0.30)
-    n_opus = int(total * 0.10)
+        total = int(len(sermon) / max(args.ratio_sermon, 1e-6))
+    n_sermon = min(int(total * args.ratio_sermon), len(sermon))
+    n_bible = int(total * args.ratio_bible)
+    n_glossary = int(total * args.ratio_glossary)
+    n_opus = int(total * args.ratio_opus)
     log.info(
-        "target corpus composition (~%d total): sermon=%d, bible=%d, glossary-tagged=%d, opus=%d",
+        "target corpus composition (~%d total, ratios bible=%.2f sermon=%.2f glossary=%.2f opus=%.2f): "
+        "sermon=%d, bible=%d, glossary-tagged=%d, opus=%d",
         total,
+        args.ratio_bible,
+        args.ratio_sermon,
+        args.ratio_glossary,
+        args.ratio_opus,
         n_sermon,
         n_bible,
         n_glossary,
@@ -203,18 +213,37 @@ def build(args: argparse.Namespace) -> None:
     bible_chosen = sample_bible(args.train_path, n_bible, rng)
 
     # Glossary tags: source from sermon + bible mix to maximize term coverage.
+    # If n_glossary is large relative to the chosen bible pool, expand by loading
+    # additional random bible pairs (yield is ~12% of examined, so we want the
+    # pool to be at least ~10x n_glossary).
     glossary_pool = sermon[n_sermon:] + bible_chosen.copy()
+    desired_pool_size = max(n_glossary * 12, len(glossary_pool))
+    if desired_pool_size > len(glossary_pool):
+        extra_needed = desired_pool_size - len(glossary_pool)
+        log.info(
+            "expanding glossary pool by %d extra bible pairs (current pool %d, target ~12x n_glossary=%d)",
+            extra_needed,
+            len(glossary_pool),
+            n_glossary,
+        )
+        # Re-load the bible corpus and pull a separate random subset (not overlapping bible_chosen).
+        all_bible = load_jsonl(args.train_path)
+        chosen_ens = {p["en"] for p in bible_chosen}
+        extra_pool = [p for p in all_bible if p["en"] not in chosen_ens]
+        rng.shuffle(extra_pool)
+        glossary_pool.extend(extra_pool[:extra_needed])
     rng.shuffle(glossary_pool)
     glossary_tagged = annotate_with_glossary(glossary_pool, args.glossary_path, rng, n_glossary)
 
     opus_chosen = sample_opus(n_opus, rng)
 
     # Wrap with provenance.
+    suf = args.label_suffix
     rows: list[dict] = []
-    rows.extend(to_training_row(p, "sermon_kiwi85") for p in sermon_chosen)
-    rows.extend(to_training_row(p, "bible_v2") for p in bible_chosen)
-    rows.extend(to_training_row(p, "glossary_tagged") for p in glossary_tagged)
-    rows.extend(to_training_row(p, "opus100_replay") for p in opus_chosen)
+    rows.extend(to_training_row(p, "sermon_kiwi85", suf) for p in sermon_chosen)
+    rows.extend(to_training_row(p, "bible_v2", suf) for p in bible_chosen)
+    rows.extend(to_training_row(p, "glossary_tagged", suf) for p in glossary_tagged)
+    rows.extend(to_training_row(p, "opus100_replay", suf) for p in opus_chosen)
 
     rng.shuffle(rows)
 
@@ -251,7 +280,16 @@ def main(argv: list[str] | None = None) -> int:
         "--total-target",
         type=int,
         default=0,
-        help="Target total row count. 0 = compute as 3.33x sermon pool (sermon at 30%%).",
+        help="Target total row count. 0 = compute as sermon_pool / ratio_sermon (sermon at its ratio).",
+    )
+    p.add_argument("--ratio-bible", type=float, default=0.30, help="Bible verses share (default 0.30 = v1)")
+    p.add_argument("--ratio-sermon", type=float, default=0.30, help="Sermon share (default 0.30 = v1)")
+    p.add_argument("--ratio-glossary", type=float, default=0.30, help="Glossary-tagged share (default 0.30 = v1)")
+    p.add_argument("--ratio-opus", type=float, default=0.10, help="OPUS-100 replay share (default 0.10 = v1)")
+    p.add_argument(
+        "--label-suffix",
+        default="",
+        help="Suffix appended to _provenance.source labels (e.g. '_v1.1') so iterations are distinguishable",
     )
     p.add_argument("--seed", type=int, default=42)
     args = p.parse_args(argv)
