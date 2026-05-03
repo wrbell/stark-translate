@@ -9,11 +9,29 @@ before using ``.transcribe()`` or ``.translate()``.
 """
 
 import logging
+from pathlib import Path
 from typing import Any
 
 from engines.base import STTEngine, TranslationEngine, TTSEngine
 
 logger = logging.getLogger(__name__)
+
+# Adapter registry slot for the merged + CT2-converted Whisper fine-tune.
+# When this directory exists at create_stt_engine() time and the caller did not
+# pass an explicit model_id, the cuda/cpu branch loads from here instead of the
+# off-the-shelf large-v3-turbo. The user can always override via the explicit
+# model_id kwarg or STARK_STT__WHISPER_CUDA_MODEL env var.
+_WHISPER_CT2_ACTIVE_PATH = Path("adapters/whisper_turbo_ct2/active")
+
+
+def _resolve_ct2_whisper_model(explicit_model_id: str | None) -> str:
+    """Pick the local merged W16 CT2 dir when present, else fall back to the off-the-shelf id."""
+    if explicit_model_id is not None:
+        return explicit_model_id
+    if _WHISPER_CT2_ACTIVE_PATH.exists() and (_WHISPER_CT2_ACTIVE_PATH / "model.bin").exists():
+        logger.info("STT: using local CT2 fine-tune at %s", _WHISPER_CT2_ACTIVE_PATH)
+        return str(_WHISPER_CT2_ACTIVE_PATH)
+    return "large-v3-turbo"
 
 
 def create_stt_engine(
@@ -24,12 +42,19 @@ def create_stt_engine(
     fallback_on_low_conf: bool | None = None,
     spec_decode: bool = False,
     draft_model_id: str | None = None,
+    stt_backend: str = "auto",
     **kwargs: Any,
 ) -> STTEngine:
     """Create an STT engine for the given backend.
 
     Args:
-        backend:                 "mlx", "cuda", "cpu", or "auto" (detect best).
+        backend:                 Hardware tier: "mlx", "cuda", "cpu", or "auto"
+                                 (detect best). Decides which engine *families*
+                                 are available.
+        stt_backend:             Whisper implementation choice within a hardware
+                                 tier: "auto" (default), "faster-whisper", "hf",
+                                 or "mlx". On cuda/cpu, "auto" → "faster-whisper".
+                                 On mlx hardware, "auto" → "mlx".
         model_id:                Override the default model identifier.
         fallback_threshold:      avg_logprob below which to retry with fallback
                                  model.  ``None`` uses the engine default (-1.2).
@@ -37,10 +62,22 @@ def create_stt_engine(
                                  ``None`` uses the engine default (2.4).
         fallback_on_low_conf:    Enable/disable quality-based fallback retry.
                                  ``None`` uses the engine default (True).
-        spec_decode:             Use HF transformers Whisper with speculative
-                                 decoding via assistant_model (1.5-2x faster).
-        draft_model_id:          Draft model for spec decode (default:
-                                 distil-whisper/distil-large-v3.5).
+        spec_decode:             Legacy shortcut for ``stt_backend="hf"``. NO
+                                 default draft is attached — see the note on
+                                 ``draft_model_id`` below. Useful only when the
+                                 caller has a verified-compatible draft.
+        draft_model_id:          Draft model for spec decode. **No default** —
+                                 callers must supply a verified-compatible draft.
+                                 The 2026-04-13 test (see
+                                 ``docs/archive/v2026.5/spec_decode_research.md``)
+                                 found that distil-large-v3.5 → whisper-large-v3-turbo
+                                 produces 10× slower inference with hallucinated
+                                 repetitions because they have incompatible
+                                 decoder architectures (distil-v3.5 was distilled
+                                 from large-v3's 32-layer decoder, turbo has 4).
+                                 Valid pairing: turbo (draft, 4 layers) → large-v3
+                                 (target, 32 layers), but that path costs latency
+                                 for quality so it isn't wired as a default.
         **kwargs:                Forwarded to the engine constructor.
 
     Returns:
@@ -48,6 +85,22 @@ def create_stt_engine(
     """
     if backend == "auto":
         backend = _detect_backend()
+
+    # Resolve stt_backend (Whisper implementation choice).
+    if spec_decode and stt_backend == "faster-whisper":
+        raise ValueError(
+            "stt_backend='faster-whisper' is incompatible with spec_decode=True; "
+            "use stt_backend='hf' (the spec-decode path is HF-only)"
+        )
+    if spec_decode:
+        stt_backend = "hf"
+    if stt_backend == "auto":
+        stt_backend = "mlx" if backend == "mlx" else "faster-whisper"
+    if stt_backend == "hf" and backend == "cuda" and not spec_decode:
+        logger.warning(
+            "stt_backend='hf' on CUDA without spec_decode: gives up CTranslate2 perf "
+            "for no obvious gain. Use stt_backend='faster-whisper' or pass spec_decode=True."
+        )
 
     # Build threshold kwargs, only including non-None values so engine
     # defaults are preserved when callers don't specify overrides.
@@ -61,34 +114,53 @@ def create_stt_engine(
 
     merged_kwargs = {**threshold_kwargs, **kwargs}
 
-    # Speculative decoding requires HF transformers Whisper (not mlx-whisper or faster-whisper)
-    if spec_decode:
+    if stt_backend == "hf":
         from engines.hf_whisper_engine import HFWhisperEngine
 
+        # Extract HF-specific kwargs so we can forward only what the engine accepts
+        hf_only_kwargs = {}
+        for k in ("compile_mode", "warmup_seconds", "torch_dtype"):
+            if k in kwargs:
+                hf_only_kwargs[k] = kwargs.pop(k)
+        if spec_decode and draft_model_id is None:
+            # Refuse to silently attach distil-v3.5 — that pairing is broken with
+            # whisper-large-v3-turbo (see docs/archive/v2026.5/spec_decode_research.md).
+            raise ValueError(
+                "spec_decode=True requires an explicit draft_model_id. "
+                "The legacy default (distil-whisper/distil-large-v3.5) is "
+                "incompatible with whisper-large-v3-turbo's 4-layer decoder "
+                "(distil-v3.5 was distilled from large-v3's 32-layer decoder). "
+                "See docs/archive/v2026.5/spec_decode_research.md for verified pairings."
+            )
         return HFWhisperEngine(
             model_id=model_id or "openai/whisper-large-v3-turbo",
-            draft_model_id=draft_model_id or "distil-whisper/distil-large-v3.5",
+            draft_model_id=draft_model_id,
             device=backend if backend in ("cuda", "cpu") else None,
+            **hf_only_kwargs,
             **kwargs,
         )
 
-    if backend == "mlx":
+    if stt_backend == "mlx":
         from engines.mlx_engine import MLXWhisperEngine
 
         return MLXWhisperEngine(
             model_id=model_id or "mlx-community/whisper-large-v3-turbo",
             **merged_kwargs,
         )
-    elif backend in ("cuda", "cpu"):
+
+    if stt_backend == "faster-whisper":
+        if backend not in ("cuda", "cpu"):
+            raise ValueError(f"stt_backend='faster-whisper' requires backend='cuda' or 'cpu' (got {backend!r})")
         from engines.cuda_engine import FasterWhisperEngine
 
+        resolved_model_id = _resolve_ct2_whisper_model(model_id)
         return FasterWhisperEngine(
-            model_id=model_id or "large-v3-turbo",
+            model_id=resolved_model_id,
             device=backend,
             **merged_kwargs,
         )
-    else:
-        raise ValueError(f"Unsupported STT backend: {backend!r}")
+
+    raise ValueError(f"Unsupported stt_backend: {stt_backend!r}")
 
 
 def create_translation_engine(

@@ -18,16 +18,22 @@ Fully on-device, live bilingual speech-to-text for church outreach at Stark Road
             ┌─────────────────────────────────────────────────────┘
             │
             ├─ PARTIAL (every 0.6s of new speech, while speaker is talking)
-            │    Whisper Large-V3-Turbo STT (~500ms)
+            │    Whisper Turbo + W16 LoRA via CT2 (~353ms p50 / ~413ms p95)
             │    MarianMT EN↔ES PyTorch (~250ms)             ← italic in UI
-            │    Total: ~750ms
+            │    Total: ~600ms p50 / ~660ms p95
             │
             └─ FINAL (on 0.5s silence gap or 8s max utterance)
-                 Whisper Large-V3-Turbo STT (~500ms)
+                 Whisper Turbo + W16 LoRA via CT2 (~353ms p50 / ~413ms p95)
                  Gemma 4 E4B Q4_K_M via llama.cpp (~470ms)   ← replaces partial
                  ├─ Piper TTS (~40ms/word EN, --tts)         ← audio output
                  Gemma 4 E2B Q4_K_M via llama.cpp (~280ms)   ← low-VRAM fallback
-                 Total: ~1.0s (E4B) / ~0.8s (E2B)
+                 Total: ~820ms (E4B) / ~630ms (E2B)
+
+    STT measurements: A2000 Ada Mobile (165 GB/s BW), beam_size=1, 41-clip
+    bench on 1-15s utterances. WER 11.00% overall / 8.70% on theological
+    terms (W16 fine-tune drops WER 19% / 43% relative vs off-the-shelf).
+    Full bench: docs/archive/v2026.7/STT_BENCHMARK.md.
+    Faster GPUs scale ~linearly with memory bandwidth (RTX 3060 12GB ≈ ~190ms p95).
 
                  Pipeline overlap: translation runs on utterance N
                  while STT runs on utterance N+1, hiding translation latency.
@@ -71,7 +77,9 @@ Key flags: `--lang es` (Spanish speaker mode), `--tts` (audio output), `--ab` (A
 
 | Component | Model | Size | Latency (CUDA) |
 |-----------|-------|------|----------------|
-| STT | Whisper Large-V3-Turbo | ~1.5 GB | ~500ms |
+| **STT default** (v2026.7) | **Whisper Large-V3-Turbo + W16 LoRA → CTranslate2 int8_float16** | **~1.5 GB** | **see `docs/archive/v2026.7/STT_BENCHMARK.md`** |
+| STT (off-the-shelf fallback) | faster-whisper large-v3-turbo (CT2) | ~1.5 GB | ~500ms (pre-W16) |
+| STT (alt path) | HF Whisper + distil-large-v3.5 spec decode | ~3 GB | varies |
 | Translation (partials) | MarianMT opus-mt-en-es / es-en | ~298 MB | ~250ms |
 | **Translation default** (CUDA, finals) | **Gemma 4 E4B Q4_K_M (llama.cpp)** | **5.0 GB GGUF / 4.9 GB VRAM** | **~470ms** |
 | Translation low-VRAM (CUDA, finals) | Gemma 4 E2B Q4_K_M (llama.cpp) | 3.2 GB GGUF / 3.5 GB VRAM | ~280ms |

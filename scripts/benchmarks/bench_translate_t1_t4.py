@@ -294,63 +294,10 @@ class LlamaCppRunner:
 # ── Benchmark loop ──────────────────────────────────────────────────────────
 
 
-def _nvidia_smi_used_mib() -> int:
-    """Total VRAM used on GPU 0 per nvidia-smi (works for both PyTorch and llama-server)."""
-    import subprocess
-
-    try:
-        out = subprocess.check_output(
-            ["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits", "-i", "0"],
-            stderr=subprocess.DEVNULL,
-            timeout=5,
-        )
-        return int(out.decode().strip().splitlines()[0])
-    except Exception:
-        return 0
-
-
-class VramSampler:
-    """Background thread that polls nvidia-smi at fixed interval and tracks running max.
-
-    PyTorch's max_memory_allocated() misses bnb scratch + bf16 PLE on Gemma 4, and
-    is useless for out-of-process llama-server. End-of-run nvidia-smi misses
-    transient KV-cache peaks that shrink back. Continuous sampling catches both.
-    """
-
-    def __init__(self, interval_s: float = 1.0):
-        import threading
-
-        self._interval = interval_s
-        self._max_mib = 0
-        self._samples: list[int] = []
-        self._stop = threading.Event()
-        self._thread: threading.Thread | None = None
-
-    def start(self) -> None:
-        import threading
-
-        def _loop() -> None:
-            while not self._stop.is_set():
-                m = _nvidia_smi_used_mib()
-                if m > 0:
-                    self._samples.append(m)
-                    if m > self._max_mib:
-                        self._max_mib = m
-                self._stop.wait(self._interval)
-
-        self._thread = threading.Thread(target=_loop, daemon=True)
-        self._thread.start()
-
-    def stop(self) -> dict:
-        self._stop.set()
-        if self._thread is not None:
-            self._thread.join(timeout=2.0)
-        return {
-            "max_mib": self._max_mib,
-            "max_gb": round(self._max_mib / 1024, 2),
-            "n_samples": len(self._samples),
-            "median_mib": int(statistics.median(self._samples)) if self._samples else 0,
-        }
+# VramSampler lives in scripts/benchmarks/vram_sampler.py — re-export for
+# backward compatibility with callers / tests that imported from this module.
+from scripts.benchmarks.vram_sampler import VramSampler
+from scripts.benchmarks.vram_sampler import nvidia_smi_used_mib as _nvidia_smi_used_mib
 
 
 def parse_server_timings(log_path: str | Path) -> dict:

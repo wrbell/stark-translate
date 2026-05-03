@@ -3752,6 +3752,35 @@ def main():
         help="Whisper beam search width: 1=greedy (fastest), 5=default beam search (default: 1)",
     )
     parser.add_argument(
+        "--stt-backend",
+        type=str,
+        default="auto",
+        choices=["auto", "faster-whisper", "hf", "mlx"],
+        help=(
+            "Whisper implementation within the chosen --backend hardware tier. "
+            "'auto' (default): faster-whisper on cuda/cpu, mlx on Apple. "
+            "'hf' enables torch.compile + spec decode. "
+            "Also settable via STARK_STT__BACKEND env var."
+        ),
+    )
+    parser.add_argument(
+        "--compile-mode",
+        type=str,
+        default=None,
+        choices=[None, "default", "reduce-overhead", "max-autotune"],
+        help=(
+            "torch.compile mode for HF Whisper (no effect on faster-whisper). "
+            "'reduce-overhead' enables CUDA graphs for best steady-state speed but "
+            "recompiles on each new audio shape (~5-10s first call after a shape change)."
+        ),
+    )
+    parser.add_argument(
+        "--warmup-seconds",
+        type=int,
+        default=1,
+        help="Seconds of silence to push through the STT engine after load to drive JIT/CUDA-graph capture (0 disables; default: 1)",
+    )
+    parser.add_argument(
         "--multiprocess",
         action="store_true",
         default=False,
@@ -3902,6 +3931,13 @@ def main():
     WORD_TIMESTAMPS = args.word_timestamps
     BEAM_SIZE = args.beam_size
     MULTIPROCESS = args.multiprocess
+
+    # Propagate STT engine knobs into settings so any code path constructing an
+    # HFWhisperEngine via engines.factory.create_stt_engine() picks them up.
+    if args.compile_mode is not None:
+        settings.stt.compile_mode = args.compile_mode
+    settings.stt.warmup_seconds = args.warmup_seconds
+    settings.stt.backend = args.stt_backend
     MUSIC_THRESHOLD = args.music_threshold
     MUSIC_HOLDOFF = args.music_holdoff
 
