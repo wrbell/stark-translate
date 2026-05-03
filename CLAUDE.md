@@ -3,10 +3,10 @@
 A fully on-device, live bidirectional speech-to-text system (English/Spanish) for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Supports `--lang en` (EN→ES) and `--lang es` (ES→EN). Includes Piper TTS (`--tts`). All Python, MLX on Apple Silicon for inference, CUDA on NVIDIA for training.
 
 **Two-pass pipeline** for fast partials and high-quality finals:
-- **Partials (while speaking):** mlx-whisper STT + MarianMT PyTorch (~750ms) — displayed in italics
-- **Finals (on silence):**
-  - **Mac (MLX):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit (~1.1s / ~2.6s) — replaces partial
-  - **CUDA (v2026.5+):** faster-whisper + Gemma 4 E4B Q4_K_M via llama.cpp (~1.0s) — production default
+- **Partials (while speaking):** Whisper STT + MarianMT PyTorch — italicised in UI
+- **Finals (on silence):** Whisper STT + Gemma 4 translation — replaces partial
+- **Mac (MLX):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit (~1.1s / ~2.6s)
+- **CUDA (v2026.7+):** faster-whisper + W16 LoRA via CT2 (~353ms p50 / ~413ms p95 STT, A2000 Ada) + Gemma 4 E4B Q4_K_M via llama.cpp (~470ms) — total ~820ms final p50. W16 fine-tune drops STT WER 19% relative overall and 43% on theological terms vs off-the-shelf. See [`docs/archive/v2026.7/STT_BENCHMARK.md`](./docs/archive/v2026.7/STT_BENCHMARK.md).
 - **CUDA model options:** Gemma 4 E2B Q4_K_M (3.5 GB VRAM, ~280ms) for low-VRAM, E4B Q4_K_M (4.9 GB, ~470ms, 7/8 canary) for best quality
 
 ---
@@ -33,7 +33,11 @@ Model transfer: WSL → copy LoRA adapters to Mac project root.
 
 ---
 
-## Recent Additions (2026-04-25)
+## Recent Additions (2026-05-03)
+
+- **v2026.7 — Whisper STT latency optimization** (`docs/archive/v2026.7/STT_BENCHMARK.md`). Wires the W16 fine-tune (7.25% fresh-eval WER) into the production CUDA path via `training/export_ct2.py` (LoRA merge → CTranslate2 conversion). `engines/factory.py` auto-prefers `adapters/whisper_turbo_ct2/active/` when present, falls back to off-the-shelf `large-v3-turbo` otherwise. **Bench result on A2000 Ada:** WER drops 19% relative overall (13.55% → 11.00%) and 43% relative on theological terms (15.22% → 8.70%) at ~zero latency cost (p95 96% of baseline). Default `compute_type` bumped from `int8` → `int8_float16` (CTranslate2 docs recommend it for Ampere/Ada; bench saw 0% latency / 0% VRAM delta — escape hatch via `STARK_CUDA__COMPUTE_TYPE=int8`). New `--stt-backend {auto,faster-whisper,hf,mlx}` CLI flag + `STARK_STT__BACKEND` env var; `HFWhisperEngine` gained `compile_mode` + `warmup_seconds` constructor args. **Spec-decode default draft removed** — distil-large-v3.5 + whisper-turbo is broken (different decoder layer counts → 10× slower with hallucinated output, see `docs/archive/v2026.5/spec_decode_research.md`); factory now raises `ValueError` instead of silently producing garbage. New `tools/benchmark_stt_engines.py` benchmark harness using the 41-clip manifest at `tools/stt_bench_manifest.json` and reusing `scripts/benchmarks/vram_sampler.py` (extracted from `bench_translate_t1_t4.py`).
+
+## Earlier Additions (2026-04-25)
 
 - **v2026.6 — Phase 9 operator control plane** (PRs #60–#66, tags `v2026.6.0.0` and `v2026.6.1.0`). FastAPI app at `uvicorn operator_app.main:app --port 9000` + vanilla-JS SPA at `/operator/`. Replaces the developer-grade run_church.sh + 5-tab workflow with a single browser UI a non-technical volunteer can drive. Pre-flight gates the Start button; mid-session controls (pause/resume/lang_flip/vad/fallback); live observability sparklines (VRAM/CPU/latency/confidence) over `/ws/control`; audio device enumeration with USB hotplug toast; live verse highlights + post-session summary trigger; systemd unit + launchd plist + bootstrap.sh for first-time install. Operator runbook at [`docs/operator_runbook.md`](./docs/operator_runbook.md).
 - **Phase 1D — llama.cpp wired into the live pipeline** (PR #59). `dry_run_ab.py --backend cuda` auto-prefers `LlamaCppEngine` when a llama-server is reachable. `--engine {auto,llamacpp,hf}` and `--llamacpp-url` for explicit control. Repurposed `--ab` mode loads E4B (8090) + E2B (8091) under llama.cpp.

@@ -314,7 +314,18 @@ Actual wall-clock times from ablation runs (2026-03-20/21).
 
 ---
 
-## Adapter Export & Transfer
+## Adapter Export
+
+Two export tools, mirroring each other's CLI structure:
+
+| Tool | Purpose |
+|------|---------|
+| `training/export_gguf.py` | Gemma translation: merge LoRA → bf16 HF → GGUF f16 → Q4_K_M (via llama.cpp). Used by the v2026.5 `LlamaCppEngine` translation path. |
+| `training/export_ct2.py` (v2026.7) | Whisper STT: merge LoRA → bf16 HF → CTranslate2 (via `ct2-transformers-converter`). Output loads via `faster_whisper.WhisperModel` and slots into `FasterWhisperEngine` with no engine-side change. Default quantization `int8_float16` (Ampere/Ada sweet spot). Built-in sanity test runs 5 canary clips through the converted model and aborts if WER drift exceeds 0.30. |
+
+Run `python training/export_ct2.py --help` for the full CLI (mirrors `export_gguf.py`).
+
+## Adapter Transfer
 
 After training, LoRA adapters must be transferred to inference machines:
 

@@ -315,7 +315,7 @@ class TestCUDASettings:
         assert s.cuda.use_speculative is True
         assert s.cuda.pipeline_workers == 2
         assert s.cuda.streaming_batch_size == 3
-        assert s.cuda.compute_type == "int8"
+        assert s.cuda.compute_type == "int8_float16"
 
     def test_cuda_model_12b_in_translation(self):
         from settings import PipelineSettings

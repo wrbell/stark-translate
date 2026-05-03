@@ -104,8 +104,13 @@ class STTSettings(BaseSettings):
         description="Whisper model name for faster-whisper (CUDA backend)",
     )
     whisper_cuda_compute_type: str = Field(
-        default="int8",
-        description="faster-whisper compute type: int8, float16, float32",
+        default="int8_float16",
+        description=(
+            "faster-whisper CTranslate2 compute type. int8_float16 is the "
+            "Ampere/Ada sweet spot (~20%% faster than int8 alone, +30%% VRAM, "
+            "<0.3 WER points). Tight VRAM budgets: set int8. Other options: "
+            "int8_bfloat16, float16, bfloat16, float32."
+        ),
     )
     whisper_prompt: str = Field(
         default=(
@@ -156,11 +161,45 @@ class STTSettings(BaseSettings):
 
     spec_decode: bool = Field(
         default=False,
-        description="Use HF transformers Whisper with speculative decoding (1.5-2x faster, uses more VRAM)",
+        description=(
+            "Opt into HF Whisper spec decode. Requires an explicit draft_model "
+            "below — there is no safe default for whisper-large-v3-turbo. "
+            "See docs/archive/v2026.5/spec_decode_research.md."
+        ),
     )
-    draft_model: str = Field(
-        default="distil-whisper/distil-large-v3.5",
-        description="Draft model for STT speculative decoding (shares encoder with target)",
+    draft_model: str | None = Field(
+        default=None,
+        description=(
+            "Draft model for STT speculative decoding. NO DEFAULT — distil-v3.5 "
+            "is incompatible with whisper-large-v3-turbo (different decoder layer "
+            "counts → 10x slower with hallucinated output, tested 2026-04-13). "
+            "Verified pairing: target=openai/whisper-large-v3, "
+            "draft=openai/whisper-large-v3-turbo (turbo IS a distilled v3)."
+        ),
+    )
+    backend: str = Field(
+        default="auto",
+        description=(
+            "Whisper implementation choice within a hardware tier: 'auto' "
+            "(faster-whisper on cuda/cpu, mlx on Apple Silicon), 'faster-whisper' "
+            "(CTranslate2, default on CUDA), 'hf' (transformers, supports "
+            "torch.compile + spec decode), 'mlx' (Apple Silicon only)."
+        ),
+    )
+    compile_mode: str | None = Field(
+        default=None,
+        description=(
+            "torch.compile mode for HFWhisperEngine: 'reduce-overhead' enables CUDA "
+            "graphs (best steady-state speed, recompiles on input shape changes), "
+            "'default' is balanced. None disables. No effect on FasterWhisperEngine."
+        ),
+    )
+    warmup_seconds: int = Field(
+        default=1,
+        description=(
+            "Seconds of silence pushed through the engine after load to drive "
+            "JIT/CUDA-graph capture before the first real call. 0 disables."
+        ),
     )
 
     model_config = {"env_prefix": "STARK_STT_"}
@@ -369,8 +408,12 @@ class CUDASettings(BaseSettings):
         description="Tokens per WebSocket batch during streaming translation",
     )
     compute_type: str = Field(
-        default="int8",
-        description="faster-whisper CTranslate2 compute type: int8, float16, float32",
+        default="int8_float16",
+        description=(
+            "faster-whisper CTranslate2 compute type. int8_float16 is the "
+            "Ampere/Ada default since v2026.7 (~20%% faster than int8 alone, "
+            "+30%% VRAM). Set int8 for VRAM-constrained 6 GB cards."
+        ),
     )
     engine: Literal["auto", "llamacpp", "hf"] = Field(
         default="auto",

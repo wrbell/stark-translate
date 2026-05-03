@@ -79,7 +79,7 @@ class FasterWhisperEngine(STTEngine):
     def __init__(
         self,
         model_id: str = "large-v3-turbo",
-        compute_type: str = "int8",
+        compute_type: str = "int8_float16",
         device: str = "cuda",
         fallback_model_id: str = "large-v3",
         fallback_threshold: float = -1.2,

@@ -1,0 +1,409 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-05-03T20:23:07Z",
+  "source_dir_relative": "stark_data/whisper_dataset_deepgram/eval",
+  "source_metadata_relative": "stark_data/whisper_dataset_deepgram/eval/metadata.jsonl",
+  "tier_breaks_seconds": {
+    "short": [
+      1.0,
+      6.0
+    ],
+    "medium": [
+      6.0,
+      15.0
+    ],
+    "long": [
+      15.0,
+      30.0
+    ]
+  },
+  "counts_per_tier": {
+    "short": 30,
+    "medium": 20,
+    "long": 10
+  },
+  "total_clips": 41,
+  "tier1_clip_count": 5,
+  "notes": "Pre-chunked Deepgram-aligned eval split from W7-era dataset. Suitable for RELATIVE backend comparison (latency, RTF, WER deltas). For ABSOLUTE WER claims on out-of-domain audio, use the fresh-eval set described in CLAUDE.md (whisper_ablation/W16_mixed_w7 reports 7.25% on that set).",
+  "clips": [
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00133",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00133.wav",
+      "duration_s": 2.944,
+      "tier": "short",
+      "ground_truth": "And the Pharisees, these code",
+      "tier1_terms_present": [
+        "Pharisee"
+      ],
+      "audio_sha256": "6385d970cc6bb7e18a09a4d7424dd9d3a859282af927d51d8baea748c570d798"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00002",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00002.wav",
+      "duration_s": 4.352,
+      "tier": "short",
+      "ground_truth": "It is in the cross of Christ we trace his righteousness, his wondrous",
+      "tier1_terms_present": [
+        "the cross"
+      ],
+      "audio_sha256": "feecd31870954fa5d940be7b1218e8b2d8b09c16bd94d763fccfbc668e9be85e"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00004",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00004.wav",
+      "duration_s": 4.352,
+      "tier": "short",
+      "ground_truth": "but in the cross of Christ, we see how God can save yet righteous.",
+      "tier1_terms_present": [
+        "the cross"
+      ],
+      "audio_sha256": "b48a0d4e32dac341f550f55e462de472be7b73d8afd09279a734653ca0964d21"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00337",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00337.wav",
+      "duration_s": 1.92,
+      "tier": "short",
+      "ground_truth": "that the Presbyterian",
+      "tier1_terms_present": [
+        "presbyter"
+      ],
+      "audio_sha256": "8dbbe4593f7ff18d7e8d6b4fdf9cac42b041ee383955d9f051d4dcefbfb1b3a2"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00266",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00266.wav",
+      "duration_s": 2.176,
+      "tier": "short",
+      "ground_truth": "All our righteousness is",
+      "tier1_terms_present": [],
+      "audio_sha256": "df9440f212128648e1960061fda8610c48bddadc0d05706c30e02e3bbf47188f"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00362",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00362.wav",
+      "duration_s": 1.92,
+      "tier": "short",
+      "ground_truth": "And as he approached the",
+      "tier1_terms_present": [],
+      "audio_sha256": "af0074766b18ec10732b58fb33a1415eeb6dd9f855be8fc6dd419ca0940d04d0"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00253",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00253.wav",
+      "duration_s": 3.328,
+      "tier": "short",
+      "ground_truth": "And brother David has been",
+      "tier1_terms_present": [],
+      "audio_sha256": "746c3f4ed7579be3bc0a66088fa3190726dd1378c77b3faba25b20554b892b2c"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00178",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00178.wav",
+      "duration_s": 2.048,
+      "tier": "short",
+      "ground_truth": "And he was raised from the",
+      "tier1_terms_present": [],
+      "audio_sha256": "6a7f8db812481669429b5ab73dc4339096a75f71c5206614eb15e675650c4f6c"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00183",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00183.wav",
+      "duration_s": 2.56,
+      "tier": "short",
+      "ground_truth": "And if we die before that",
+      "tier1_terms_present": [],
+      "audio_sha256": "845d116f04b4f8dfe3de314a6abcb91fc121d530ec19d12d3f897d25e88b51f3"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00079",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00079.wav",
+      "duration_s": 2.816,
+      "tier": "short",
+      "ground_truth": "And perhaps you're small, you're",
+      "tier1_terms_present": [],
+      "audio_sha256": "7e123951e01d027bb70e03611543c9471c4ba9b5605a88dedfff2ebf367016e0"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00112",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00112.wav",
+      "duration_s": 3.2,
+      "tier": "short",
+      "ground_truth": "And repairing our relationship with God is not",
+      "tier1_terms_present": [],
+      "audio_sha256": "feeead76f7b789003974dd4218263bd5a6c2d24c539b6fca738c3880559cbba9"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00038",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00038.wav",
+      "duration_s": 4.992,
+      "tier": "short",
+      "ground_truth": "And so if you were to be thinking about buying a house,",
+      "tier1_terms_present": [],
+      "audio_sha256": "312e65e4f1140697806553180d1fc24145b38c77085e230eb528b3971d3b2655"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00054",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00054.wav",
+      "duration_s": 3.712,
+      "tier": "short",
+      "ground_truth": "And so that is a number one priority kind of",
+      "tier1_terms_present": [],
+      "audio_sha256": "7d724c088ef2d29b0a1875cdaf197c31c9d5cea9a1f4f28ea72d44ecf4e9db1a"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00010",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00010.wav",
+      "duration_s": 2.816,
+      "tier": "short",
+      "ground_truth": "And so, we pray for your help to present your",
+      "tier1_terms_present": [],
+      "audio_sha256": "37540d37d0a83821f44783f214a226fa56b4ee11eebece4d54d0145c48d41549"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00197",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00197.wav",
+      "duration_s": 2.688,
+      "tier": "short",
+      "ground_truth": "And they will live away from",
+      "tier1_terms_present": [],
+      "audio_sha256": "3522b1ce8f52e0e4ae9ffd91fc99a34d19270f5bbdbd2e753571d76631b0406a"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00184",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00184.wav",
+      "duration_s": 2.304,
+      "tier": "short",
+      "ground_truth": "And things will be right between us and",
+      "tier1_terms_present": [],
+      "audio_sha256": "da86233bacfe3682d0cf9459d9a33aff915ca94b090d6143cfa83e038f45c84f"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00087",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00087.wav",
+      "duration_s": 2.56,
+      "tier": "short",
+      "ground_truth": "And we as humans have no choice but to",
+      "tier1_terms_present": [],
+      "audio_sha256": "13801fa56a256b2ba041f7a7601d1d4171f261e926c2d56e91d2b975b443bb10"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00117",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00117.wav",
+      "duration_s": 3.072,
+      "tier": "short",
+      "ground_truth": "And with Christ, between Christ and the",
+      "tier1_terms_present": [],
+      "audio_sha256": "02cee9dc86fca0944cd1d20cf5de3f3d6392e5a71d6ed9a4bb4aa8dc71b7fddd"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00068",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00068.wav",
+      "duration_s": 3.712,
+      "tier": "short",
+      "ground_truth": "And you say, I'm gonna build my nice house, thank you very",
+      "tier1_terms_present": [],
+      "audio_sha256": "759afe07e0c0f64b78237d53fe461cbe712fe7de43aebdb10852f79d7cd253a7"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00063",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00063.wav",
+      "duration_s": 2.944,
+      "tier": "short",
+      "ground_truth": "And you're going to decide, now flipping the analogy a little",
+      "tier1_terms_present": [],
+      "audio_sha256": "be6bb4166092ce872a44de80ab77bcb01eb430497d2a5e4b238b1a16d7e4e6e3"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00056",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00056.wav",
+      "duration_s": 4.864,
+      "tier": "short",
+      "ground_truth": "And, you know, ignoring it, you're gonna get all sorts of issues that are coming",
+      "tier1_terms_present": [],
+      "audio_sha256": "a6fbcd7d0cbee6ced2490a787fa0ca6f9b350b0b90baf3acad60ffc79a1665fa"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00123",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00123.wav",
+      "duration_s": 3.456,
+      "tier": "short",
+      "ground_truth": "But I have had a massive influx of those home inspector",
+      "tier1_terms_present": [],
+      "audio_sha256": "8f4d7c9dcce4d490c3a0cde4c2725256cfd1985de266f2bcab2c732dd66ee30f"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00041",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00041.wav",
+      "duration_s": 1.792,
+      "tier": "short",
+      "ground_truth": "But if you were to be walking through a",
+      "tier1_terms_present": [],
+      "audio_sha256": "8036f431fd21949830970ae31559b1f54179463edd648abca56235841021103a"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00033",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00033.wav",
+      "duration_s": 1.664,
+      "tier": "short",
+      "ground_truth": "But when I think about",
+      "tier1_terms_present": [],
+      "audio_sha256": "c683677ffb23e7d38740dd14c0d3750124fc317811e0ad436a7dac60017432bd"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00149",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00149.wav",
+      "duration_s": 2.432,
+      "tier": "short",
+      "ground_truth": "Don't even go in there because there are",
+      "tier1_terms_present": [],
+      "audio_sha256": "38c66b438e769965fcfc14bcf8cbe4e8d0f283a5c3f16096dc89b04f7f77bd7c"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00128",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00128.wav",
+      "duration_s": 2.432,
+      "tier": "short",
+      "ground_truth": "Especially like the guy who's got the little plastic pointer",
+      "tier1_terms_present": [],
+      "audio_sha256": "873a749791a5cec95505859dcfc5d4b8c24115d6f49f709f1685e8824f0a3107"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00157",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00157.wav",
+      "duration_s": 2.816,
+      "tier": "short",
+      "ground_truth": "Even even if it's just a small break right",
+      "tier1_terms_present": [],
+      "audio_sha256": "aceeb94365795d66786c4194c848c2106ed74fa4d9d05a275c195011fc08aeab"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00016",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00016.wav",
+      "duration_s": 5.632,
+      "tier": "short",
+      "ground_truth": "For God so loved the world, he gave his only son that whosoever will believe shall everlasting life",
+      "tier1_terms_present": [],
+      "audio_sha256": "18ca938deeed238b178918e2ed2db898e64417f4d8332db4bcb731d7505396e9"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00019",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00019.wav",
+      "duration_s": 3.84,
+      "tier": "short",
+      "ground_truth": "For whosoever will believe shall everlasting life",
+      "tier1_terms_present": [],
+      "audio_sha256": "179b478ccc079f5dcafe560888b9eb5a9e80a7ab933b2ff0b84a6ecd83d30d1d"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00003",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00003.wav",
+      "duration_s": 4.096,
+      "tier": "short",
+      "ground_truth": "God could not pass the sinner by. His sins demand that he must",
+      "tier1_terms_present": [],
+      "audio_sha256": "d6822694652cb4a15b77ce30d99340d0b26f19a6a701e4b6166e0c4af1de4070"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00139",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00139.wav",
+      "duration_s": 8.064,
+      "tier": "medium",
+      "ground_truth": "And so when Christ went to the cross and died for",
+      "tier1_terms_present": [
+        "the cross"
+      ],
+      "audio_sha256": "7ecbc905a2c21a15a097bba9db3de2f982468678f27029bddd4e96812304a6f2"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00065",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00065.wav",
+      "duration_s": 6.912,
+      "tier": "medium",
+      "ground_truth": "And wise people told you it is not a good idea to build on that broken",
+      "tier1_terms_present": [],
+      "audio_sha256": "48fd5446e8afd17cedfbf313181b543fbfd55f6223e8ab71f88ec9eb875c3ebd"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00072",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00072.wav",
+      "duration_s": 7.04,
+      "tier": "medium",
+      "ground_truth": "If you knew that that house eventually was just going to crumble and be",
+      "tier1_terms_present": [],
+      "audio_sha256": "4118c5c4815b823b7cd5d5eb5ec0c45e9187bd307a613e83edf5f1336b21f20c"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00025",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00025.wav",
+      "duration_s": 7.808,
+      "tier": "medium",
+      "ground_truth": "John chapter three starting in verse 17 says",
+      "tier1_terms_present": [],
+      "audio_sha256": "b534b518e2256ea082c4bec06551c73ee9c631ee9e0f149fd09f17a7d41af347"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00143",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00143.wav",
+      "duration_s": 8.448,
+      "tier": "medium",
+      "ground_truth": "Now there comes a point if a structure is so",
+      "tier1_terms_present": [],
+      "audio_sha256": "4d344425327caf884ce9d4d1c7e67044de0d75eb6905bb5219fc7800ad04264b"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00073",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00073.wav",
+      "duration_s": 6.016,
+      "tier": "medium",
+      "ground_truth": "Our relationship with God, there's a foundation",
+      "tier1_terms_present": [],
+      "audio_sha256": "f2bfd349bf873cbb95cc7433a140b911d04dc08bc1a9370fb127dab1e5073965"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00071",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00071.wav",
+      "duration_s": 10.112,
+      "tier": "medium",
+      "ground_truth": "Right? But what would all of that be worth if the foundation is",
+      "tier1_terms_present": [],
+      "audio_sha256": "6f748d5f925bda2c247b1d5ad3fd62c80694966dc108ad51f6d74cd9f033ebc7"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00048",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00048.wav",
+      "duration_s": 6.016,
+      "tier": "medium",
+      "ground_truth": "So that would tell you something pretty important about that crack in the",
+      "tier1_terms_present": [],
+      "audio_sha256": "33e1e14a7810e7a040db03f4f2567eddb635f4b82278d555b9da60a3d7b6db88"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00377",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00377.wav",
+      "duration_s": 6.656,
+      "tier": "medium",
+      "ground_truth": "The Lord Jesus is the only",
+      "tier1_terms_present": [],
+      "audio_sha256": "29e5b984f9cc4ab862fcea853f57b11045b5d6e82c149c267496327422f6f110"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00106",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00106.wav",
+      "duration_s": 6.144,
+      "tier": "medium",
+      "ground_truth": "We can't do anything to repair that relationship between and",
+      "tier1_terms_present": [],
+      "audio_sha256": "90a628fbce3d23e236e5b6f9dec7e8900d989f9520505902663c532422f7a1c1"
+    },
+    {
+      "id": "Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00007",
+      "audio_path_relative": "stark_data/whisper_dataset_deepgram/eval/Gospel_Message_(3_15_26)_F1-ZLv-pMMg_00007.wav",
+      "duration_s": 8.448,
+      "tier": "medium",
+      "ground_truth": "are fallen and sinners, and you who are a holy God who loves us dearly and wants to show",
+      "tier1_terms_present": [],
+      "audio_sha256": "13b534985ec27a41bc3bd27829f785f8457f2b667b07e8db1c51b11b6602fe7a"
+    }
+  ]
+}

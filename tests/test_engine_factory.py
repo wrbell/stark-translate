@@ -46,7 +46,7 @@ class TestDetectBackend:
 
 class TestCreateSTTEngine:
     def test_invalid_backend_raises(self):
-        with pytest.raises(ValueError, match="Unsupported STT backend"):
+        with pytest.raises(ValueError, match=r"(Unsupported|requires backend)"):
             create_stt_engine(backend="tpu")
 
     def test_mlx_backend_imports_correctly(self):

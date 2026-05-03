@@ -38,6 +38,9 @@ location. bootstrap.sh (Phase 9.7) generates a copy with correct paths.
         <string>/Users/stark/stark-translate</string>
         <key>STARK_OPERATOR_LOG_DIR</key>
         <string>/Users/stark/stark-translate/metrics</string>
+        <!-- STT engine selection (mlx is the auto-resolved value on Apple Silicon). -->
+        <key>STARK_STT__BACKEND</key>
+        <string>auto</string>
     </dict>
 
     <key>RunAtLoad</key>

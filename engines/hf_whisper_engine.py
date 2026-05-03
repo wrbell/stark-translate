@@ -1,18 +1,20 @@
-"""HuggingFace Transformers Whisper engine with speculative decoding support.
+"""HuggingFace Transformers Whisper engine.
 
-Uses ``WhisperForConditionalGeneration`` from transformers, enabling the
-``assistant_model`` parameter for speculative decoding with a distilled
-draft model (e.g., distil-whisper/distil-large-v3.5 drafting for
-openai/whisper-large-v3-turbo).
-
-This engine trades the speed optimizations of faster-whisper (CTranslate2)
-for access to HF's speculative decoding, which provides 1.5-2x speedup
-with mathematically identical output.
+Uses ``WhisperForConditionalGeneration`` from transformers. Optionally
+supports HF's `assistant_model` speculative decoding when caller supplies a
+verified-compatible draft (note: distil-large-v3.5 + whisper-large-v3-turbo
+is broken — see docs/archive/v2026.5/spec_decode_research.md). Trades the
+speed of faster-whisper (CTranslate2) for torch.compile + spec-decode
+flexibility.
 
 Usage:
+    # Vanilla (default — no spec decode, no draft)
+    engine = HFWhisperEngine(model_id="openai/whisper-large-v3-turbo")
+
+    # Spec decode against a verified-compatible draft (turbo drafts for v3)
     engine = HFWhisperEngine(
-        model_id="openai/whisper-large-v3-turbo",
-        draft_model_id="distil-whisper/distil-large-v3.5",
+        model_id="openai/whisper-large-v3",
+        draft_model_id="openai/whisper-large-v3-turbo",
     )
     engine.load()
     result = engine.transcribe(audio_array)
@@ -38,23 +40,40 @@ except ImportError:
 
 
 class HFWhisperEngine(STTEngine):
-    """HuggingFace Whisper STT engine with speculative decoding.
+    """HuggingFace Whisper STT engine.
 
     Constructor args:
-        model_id:        Target Whisper model (default: whisper-large-v3-turbo).
-        draft_model_id:  Draft model for speculative decoding (default: distil-large-v3.5).
-                         Set to None to disable spec decode.
-        device:          'cuda' or 'cpu' (default: auto-detect).
-        torch_dtype:     Model dtype (default: float16 for CUDA, float32 for CPU).
+        model_id:         Target Whisper model (default: whisper-large-v3-turbo).
+        draft_model_id:   Optional draft model for HF speculative decoding.
+                          Default: None (no spec decode). Caller must supply a
+                          verified-compatible draft — distil-large-v3.5 + turbo
+                          is broken (see docs/archive/v2026.5/spec_decode_research.md).
+        device:           'cuda' or 'cpu' (default: auto-detect).
+        torch_dtype:      Model dtype (default: float16 for CUDA, float32 for CPU).
+        compile_mode:     If set (e.g. 'reduce-overhead', 'default'), wraps the
+                          target + draft models in torch.compile after load. Note:
+                          'reduce-overhead' enables CUDA graphs which require
+                          fixed input shapes — Whisper's variable-length log-Mel
+                          recompiles on each new shape (~5–10 s first call).
+        warmup_seconds:   Seconds of silence to push through the model after load
+                          to drive any JIT/CUDA-graph capture before the first
+                          real call. 0 disables.
     """
 
     def __init__(
         self,
         model_id: str = "openai/whisper-large-v3-turbo",
-        draft_model_id: str | None = "distil-whisper/distil-large-v3.5",
+        draft_model_id: str | None = None,
         device: str | None = None,
         torch_dtype: str | None = None,
+        compile_mode: str | None = None,
+        warmup_seconds: int = 1,
     ):
+        # NOTE: draft_model_id default is None, NOT distil-large-v3.5. Distil-v3.5
+        # was distilled from whisper-large-v3 (32 decoder layers); whisper-large-v3-turbo
+        # has 4. Pairing them produces 10x slower inference with hallucinated
+        # repetitions (tested 2026-04-13, see docs/archive/v2026.5/spec_decode_research.md).
+        # Verified-compatible pairing: turbo (4 layers) drafts for large-v3 (32 layers).
         if not HF_WHISPER_AVAILABLE:
             raise RuntimeError("transformers and torch are required for HFWhisperEngine.")
         self._model_id = model_id
@@ -67,6 +86,8 @@ class HFWhisperEngine(STTEngine):
             self._torch_dtype = torch.float16 if self._device == "cuda" else torch.float32
         else:
             self._torch_dtype = getattr(torch, torch_dtype)
+        self._compile_mode = compile_mode
+        self._warmup_seconds = max(0, int(warmup_seconds))
 
         self._model: Any = None
         self._draft_model: Any = None
@@ -98,13 +119,33 @@ class HFWhisperEngine(STTEngine):
             self._draft_model.eval()
             logger.info("Draft model loaded (%.1fs)", time.time() - t1)
 
+        if self._compile_mode:
+            logger.info(
+                "torch.compile(mode=%r) on target%s...", self._compile_mode, " + draft" if self._draft_model else ""
+            )
+            t_c = time.time()
+            self._model = torch.compile(self._model, mode=self._compile_mode)
+            if self._draft_model is not None:
+                self._draft_model = torch.compile(self._draft_model, mode=self._compile_mode)
+            logger.info("compile graphs registered (%.2fs); first call still pays JIT cost", time.time() - t_c)
+
+        self._loaded = True
+
+        if self._warmup_seconds > 0:
+            logger.info("warmup pass on %ds of silence...", self._warmup_seconds)
+            t_w = time.time()
+            silence = np.zeros(16000 * self._warmup_seconds, dtype=np.float32)
+            self.transcribe(silence, language="en")
+            logger.info("warmup done (%.2fs)", time.time() - t_w)
+
         elapsed = time.time() - t0
         logger.info(
-            "HFWhisperEngine ready (%.1fs, spec_decode=%s)",
+            "HFWhisperEngine ready (%.1fs, spec_decode=%s, compile=%s, warmup=%ds)",
             elapsed,
             self._draft_model_id or "disabled",
+            self._compile_mode or "off",
+            self._warmup_seconds,
         )
-        self._loaded = True
 
     def transcribe(
         self,

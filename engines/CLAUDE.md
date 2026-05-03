@@ -61,13 +61,15 @@ Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `
 | `use_speculative` | `True` | 4B drafts 12B tokens (A/B mode only) |
 | `pipeline_workers` | `2` | Thread pool workers (2 = STT/Translation overlap) |
 | `streaming_batch_size` | `3` | Tokens per WebSocket batch during streaming |
-| `compute_type` | `int8` | faster-whisper CTranslate2 compute type |
+| `compute_type` | `int8_float16` | faster-whisper CTranslate2 compute type. Default bumped from `int8` in v2026.7 (CTranslate2 docs recommend `int8_float16` for Ampere/Ada; v2026.7 bench saw 0% latency / 0% VRAM delta on A2000 Ada — set back to `int8` if your hardware shows VRAM growth). |
+| `engine` | `auto` | Translation engine (auto / llamacpp / hf) |
 
 ### CUDA Engine Classes
 
 | Class | Role |
 |-------|------|
-| `FasterWhisperEngine` | STT via faster-whisper (CUDA/CPU), quality-based fallback retry |
+| `FasterWhisperEngine` | STT via faster-whisper (CUDA/CPU), quality-based fallback retry. Default `compute_type` since v2026.7 is `int8_float16` (~20% faster than `int8`, +30% VRAM). Auto-loads `adapters/whisper_turbo_ct2/active/` (W16 fine-tune, 7.25% fresh-eval WER) when present; off-the-shelf `large-v3-turbo` is the fallback model_id. |
+| `HFWhisperEngine` | STT via HF transformers Whisper. Supports `compile_mode` (torch.compile w/ CUDA graphs) + `warmup_seconds` constructor args (v2026.7) and `assistant_model` for spec decode. **Spec-decode default draft removed in v2026.7** — distil-large-v3.5 + whisper-turbo is broken (different decoder layer counts → 10× slower with hallucinated output, see `docs/archive/v2026.5/spec_decode_research.md`). Caller must supply a verified-compatible draft. Faster-whisper is the default everywhere else. |
 | `CUDAGemmaEngine` | Basic translation with bitsandbytes 4-bit, no streaming |
 | `CUDAGemmaStreamingEngine` | Full-featured: streaming, prompt cache, speculative decoding |
 
@@ -81,15 +83,19 @@ PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD ru
 
 | Role | Model ID | Size |
 |------|----------|------|
-| STT primary | `mlx-community/whisper-large-v3-turbo` | ~1.5 GB |
-| STT fallback | `wbell7/distil-whisper-large-v3.5-mlx` | ~1.5 GB |
+| STT primary (Mac) | `mlx-community/whisper-large-v3-turbo` | ~1.5 GB |
+| STT primary (CUDA, v2026.7) | merged W16 LoRA at `adapters/whisper_turbo_ct2/active/` (~777 MB CT2 int8_float16) — falls back to off-the-shelf `large-v3-turbo` (downloaded by faster-whisper into the cache) | ~777 MB |
+| STT fallback (Mac) | `wbell7/distil-whisper-large-v3.5-mlx` | ~1.5 GB |
+| STT fallback (CUDA) | off-the-shelf `large-v3` via faster-whisper, lazy-loaded by `FasterWhisperEngine` on low-confidence retry | ~3 GB |
 | Translation A | `mlx-community/translategemma-4b-it-4bit` | ~2.5 GB |
 | Translation B | `mlx-community/translategemma-12b-it-4bit` | ~7 GB |
 | Partial translate | `Helsinki-NLP/opus-mt-en-es` / `es-en` (MarianMT) | ~298 MB |
 | TTS (EN) | Piper `en_US-lessac-high` | ~63 MB |
 | TTS (ES) | Piper `es_MX-claude-high` | ~63 MB |
 
-**STT fallback note:** `wbell7/distil-whisper-large-v3.5-mlx` was self-converted from `distil-whisper/distil-large-v3.5` using `mlx-examples/whisper/convert.py` + rename `model.safetensors` → `weights.safetensors`. mlx-whisper can't auto-convert HF transformers format due to `_name_or_path` key in config.
+**STT fallback note (Mac):** `wbell7/distil-whisper-large-v3.5-mlx` was self-converted from `distil-whisper/distil-large-v3.5` using `mlx-examples/whisper/convert.py` + rename `model.safetensors` → `weights.safetensors`. mlx-whisper can't auto-convert HF transformers format due to `_name_or_path` key in config.
+
+**STT spec-decode caveat:** distil-large-v3.5 cannot draft for whisper-large-v3-turbo (target = 4 decoder layers, draft = 32). Tested 2026-04-13: 10× slower with hallucinated output. The factory raises `ValueError` when `spec_decode=True` is passed without an explicit `draft_model_id`. Verified-compatible pairing: turbo (4 layers) drafts for large-v3 (32 layers). See `docs/archive/v2026.5/spec_decode_research.md`.
 
 ## Memory Budget (M3 Pro 18GB)
 
@@ -165,7 +171,8 @@ The engine interfaces already support new languages — no ABC changes needed:
 Fine-tuned LoRA adapters integrate as follows:
 
 - **MLX**: `mlx_lm.load(model_path, adapter_path=)` — point `adapter_path` to `adapters/{model}/active/`
-- **CUDA**: Merge LoRA into base model offline, export GGUF/quantized, load merged model (no runtime adapter swapping)
+- **CUDA Whisper STT (v2026.7)**: Use `training/export_ct2.py` to merge the LoRA into Whisper bf16 and convert to CTranslate2. Output goes to `whisper_ct2/{run}/`; register via `tools/manage_adapters.py register --model whisper_turbo_ct2 --adapter whisper_ct2/{run}`. The factory auto-loads `adapters/whisper_turbo_ct2/active/` when present (no engine-side change required). Override via `model_id=` kwarg or set `STARK_STT__WHISPER_CUDA_MODEL`.
+- **CUDA Gemma**: Merge LoRA into base model offline, export GGUF/quantized, load merged model (no runtime adapter swapping)
 - **Hot-reload (Mac)**: Pipeline receives SIGUSR1, re-runs `load()` within the single-thread executor (Metal thread safety preserved). During reload (~2-3s), VAD + STT + MarianMT partials continue — only TranslateGemma finals pause.
 - **Directory convention**: `adapters/{model}/active/` (current) + `adapters/{model}/previous/` (one-step rollback). See `docs/deploy.md` for the full 6-phase deployment pipeline.
 

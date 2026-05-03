@@ -8,7 +8,8 @@
 | `translation_qe.py` | Reference-free translation quality estimation |
 | `validate_session.py` | Post-session validation vs YouTube captions |
 | `benchmark_latency.py` | End-to-end latency profiling |
-| `stt_benchmark.py` | STT-only benchmarking |
+| `stt_benchmark.py` | STT-only benchmarking (MLX backends: mlx-whisper vs lightning-whisper-mlx) |
+| `benchmark_stt_engines.py` | CUDA STT benchmark (v2026.7): faster-whisper int8 vs int8_float16, off-the-shelf vs merged W16 CT2, HF spec-decode w/wo torch.compile. Reuses `scripts/benchmarks/vram_sampler.py` for continuous nvidia-smi VRAM tracking. Reads the canonical manifest at `tools/stt_bench_manifest.json` (41 stratified Deepgram-aligned chunks). |
 | `roundtrip_test.py` | End-to-end STT + translation roundtrip quality test |
 | `prepare_finetune_data.py` | Fine-tuning data export from live sessions |
 | `download_roundtrip_texts.py` | Download test texts for roundtrip testing |
