@@ -53,7 +53,10 @@ class TestInitCsv:
         with open(d.CSV_PATH, newline="") as f:
             reader = csv.reader(f)
             header = next(reader)
-        assert len(header) == 25
+        # 26 columns since v2026.8: added `marian_backend` field so operators
+        # can see whether the CT2 or HF Marian path was hot.
+        assert len(header) == 26
+        assert "marian_backend" in header
 
     def test_creates_parent_dirs(self, tmp_path):
         import dry_run_ab as d

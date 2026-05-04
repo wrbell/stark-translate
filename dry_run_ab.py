@@ -123,10 +123,12 @@ _pipeline_pool = None  # type: ThreadPoolExecutor | None
 # MLX pipeline pool — safe because MarianMT uses PyTorch/CPU, not Metal GPU.
 _pytorch_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pytorch")
 
-# Lock for PyTorch calls. The VAD thread and pipeline thread both use PyTorch
-# (Silero VAD + MarianMT). Concurrent PyTorch from different threads causes
-# heap corruption on macOS. This lock serializes all PyTorch inference.
-_pytorch_lock = threading.Lock()
+# Shared PyTorch lock. Silero VAD and the HF MarianMT partial path both touch
+# PyTorch from different threads; concurrent calls cause Metal heap corruption
+# on macOS. Imported from engines._locks so MarianHFEngine and the VAD path
+# actually share serialization (separate locks before v2026.8).
+# CT2 path (MarianCT2Engine) is internally thread-safe and does NOT use this.
+from engines._locks import _pytorch_lock
 
 # --- Multiprocess worker state (only used when MULTIPROCESS is True) ---
 # When enabled, STT and Translation run in separate OS processes with their
@@ -848,8 +850,11 @@ mlx_a_model = None
 mlx_a_tokenizer = None
 mlx_b_model = None
 mlx_b_tokenizer = None
-marian_model = None
-marian_tokenizer = None
+# MarianMT partial translator (TranslationEngine instance). Either
+# MarianCT2Engine (CUDA, ~30-50ms) or MarianHFEngine (PyTorch fallback,
+# ~50-250ms). Selected by the factory at startup based on
+# settings.translation.marian_backend + adapters/marian_ct2/<dir>/active presence.
+_marian_engine = None
 
 # [P7-2B] Prompt caches: pre-computed KV caches for the fixed TranslateGemma
 # chat template prefix. Reused (via deep copy) on every translation call to
@@ -1064,24 +1069,37 @@ def load_translation_models(load_b=True):
 
 
 def load_marian():
-    """Load MarianMT (~298MB) for fast partial translations."""
-    from transformers import MarianMTModel, MarianTokenizer
+    """Load the MarianMT partial-translation engine (CT2 or HF fallback).
 
+    Picks ``MarianCT2Engine`` when ``adapters/marian_ct2/<dir>/active/model.bin``
+    exists and ctranslate2 imports — typically ~3-5× faster than the HF path.
+    Otherwise falls back to ``MarianHFEngine`` (PyTorch).
+
+    Backend choice and compute_type honor settings.translation.marian_backend
+    and STARK_TRANSLATE__MARIAN_COMPUTE_TYPE.
+    """
+    from engines.factory import create_translation_engine
+
+    # Direction is fixed per-session by SOURCE_LANG. Future flip support could
+    # cache both engines if settings.translation.marian_eager_both is True.
+    target_lang = "en" if SOURCE_LANG == "es" else "es"
     model_id = "Helsinki-NLP/opus-mt-es-en" if SOURCE_LANG == "es" else "Helsinki-NLP/opus-mt-en-es"
-    print(f"[4/6] Loading {model_id} (MarianMT PyTorch)...")
+    print(f"[4/6] Loading {model_id} (Marian partial translator)...")
     t0 = time.time()
-    tokenizer = MarianTokenizer.from_pretrained(model_id)
-    model = MarianMTModel.from_pretrained(model_id)
-    if BACKEND == "cuda" and torch.cuda.is_available():
-        model = model.to("cuda")
-    model.eval()
-    # Warm up
-    inputs = tokenizer("Hello", return_tensors="pt", padding=True)
-    if BACKEND == "cuda" and torch.cuda.is_available():
-        inputs = {k: v.to("cuda") for k, v in inputs.items()}
-    model.generate(**inputs, max_new_tokens=16)
-    print(f"  MarianMT ready ({time.time() - t0:.1f}s)")
-    return model, tokenizer
+    engine = create_translation_engine(
+        backend=BACKEND,
+        engine_type="marian",
+        model_id=model_id,
+        marian_backend=settings.translation.marian_backend,
+        compute_type=settings.translation.marian_compute_type,
+        max_new_tokens=settings.translation.marian_max_new_tokens,
+        warmup_passes=settings.translation.marian_warmup_passes,
+        source_lang=SOURCE_LANG,
+        target_lang=target_lang,
+    )
+    engine.load()
+    print(f"  Marian ready ({engine.backend}, {time.time() - t0:.1f}s)")
+    return engine
 
 
 def _probe_llamacpp_server(url):
@@ -1757,19 +1775,17 @@ def warmup_translation_models():
 
 
 def translate_marian(text):
-    """Fast English→Spanish via MarianMT PyTorch (~50-100ms). For partials."""
-    if marian_model is None or marian_tokenizer is None:
-        return "(MarianMT not loaded)", 0.0
+    """Fast partial translation via the configured Marian engine.
 
-    t0 = time.perf_counter()
-    inputs = marian_tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-    if BACKEND == "cuda" and torch.cuda.is_available():
-        inputs = {k: v.to("cuda") for k, v in inputs.items()}
-    with _pytorch_lock, torch.no_grad():
-        translated = marian_model.generate(**inputs, max_new_tokens=128)
-    result = marian_tokenizer.decode(translated[0], skip_special_tokens=True)
-    latency_ms = (time.perf_counter() - t0) * 1000
-    return result, latency_ms
+    Returns ``(text, latency_ms)`` to preserve the historical tuple contract
+    that ``process_partial`` and the dry-run path consume. Engine internally
+    handles CT2 vs HF, threading, lock acquisition.
+    """
+    if _marian_engine is None:
+        return "(MarianMT not loaded)", 0.0
+    target_lang = "en" if SOURCE_LANG == "es" else "es"
+    result = _marian_engine.translate(text, source_lang=SOURCE_LANG, target_lang=target_lang)
+    return result.text, result.latency_ms
 
 
 # ---------------------------------------------------------------------------
@@ -2991,6 +3007,7 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "near_miss_flags": near_misses,
         "bad_split": bad_sp,
         "marian_similarity": marian_sim,
+        "marian_backend": _marian_engine.backend if _marian_engine is not None else None,
         "review_priority": priority,
         "marian_backend_latency": marian_lat,
         "stt_latency_ms": data.get("stt_latency_ms"),
@@ -3045,6 +3062,7 @@ def init_csv():
                 "marian_similarity",
                 "marian_pt_ms",
                 "partial_stt_ms",
+                "marian_backend",
                 "word_stability_pct",
             ]
         )
@@ -3095,6 +3113,7 @@ def write_csv_row(data, marian_lat=None):
                 marian_sim,
                 marian_lat["pt_ms"] if marian_lat else "",
                 marian_lat["stt_ms"] if marian_lat and "stt_ms" in marian_lat else "",
+                _marian_engine.backend if _marian_engine is not None else "",
                 data.get("word_stability_pct", ""),
             ]
         )
@@ -3451,7 +3470,7 @@ async def main_async(args):
     """Start WebSocket server and audio loop."""
     global vad_model, vad_utils, stt_pipe
     global mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer
-    global marian_model, marian_tokenizer
+    global _marian_engine
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
     global _RUN_AB
@@ -3504,7 +3523,7 @@ async def main_async(args):
             mlx_a_model, mlx_a_tokenizer = None, None
             mlx_b_model, mlx_b_tokenizer = None, None
 
-    marian_model, marian_tokenizer = load_marian()
+    _marian_engine = load_marian()
 
     # --- TTS engine (optional, ONNX Runtime — thread-safe, separate pool) ---
     global tts_engine, _tts_pool
@@ -3662,7 +3681,9 @@ async def main_async(args):
         if _stream_token_queue is not None:
             await _stream_token_queue.put(None)
         stream_task.cancel()
-        # [FIX] Shut down the PyTorch pool (MarianMT partial translations)
+        # Release the Marian engine first, then shut down the PyTorch pool.
+        if _marian_engine is not None:
+            _marian_engine.unload()
         _pytorch_pool.shutdown(wait=False)
         # Shut down TTS pool if running
         if _tts_pool is not None:

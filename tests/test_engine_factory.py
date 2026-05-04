@@ -87,12 +87,55 @@ class TestCreateTranslationEngine:
         with pytest.raises(ValueError, match="Unsupported translation backend"):
             create_translation_engine(backend="tpu")
 
-    def test_marian_engine_type(self):
+    def test_marian_engine_type_defaults_to_hf_when_no_ct2(self, tmp_path, monkeypatch):
+        """With marian_backend='auto' and no CT2 model.bin, factory returns MarianHFEngine."""
+        # Repoint the resolver root at an empty tmp_path so the auto-resolver
+        # finds nothing.
+        monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+
         mock_engine = MagicMock()
-        with patch("engines.mlx_engine.MarianEngine", return_value=mock_engine) as mock_cls:
+        with patch("engines.marian_hf_engine.MarianHFEngine", return_value=mock_engine) as mock_cls:
             result = create_translation_engine(engine_type="marian")
             mock_cls.assert_called_once()
             assert result == mock_engine
+
+    def test_marian_engine_type_picks_ct2_when_present(self, tmp_path, monkeypatch):
+        """With CT2 model.bin present, auto picks MarianCT2Engine."""
+        # Materialize the active dir + model.bin so _resolve_ct2_marian_model finds it.
+        active_dir = tmp_path / "en-es" / "active"
+        active_dir.mkdir(parents=True)
+        (active_dir / "model.bin").write_bytes(b"fake CT2 weights")
+
+        monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+
+        mock_engine = MagicMock()
+        with patch("engines.cuda_engine.MarianCT2Engine", return_value=mock_engine) as mock_cls:
+            result = create_translation_engine(engine_type="marian", backend="cuda")
+            mock_cls.assert_called_once()
+            assert result == mock_engine
+
+    def test_marian_strict_ct2_raises_when_missing(self, tmp_path, monkeypatch):
+        """marian_backend='ct2' with no model.bin raises ValueError (no silent fallback)."""
+        monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+        with pytest.raises(ValueError, match="marian_backend='ct2' requested"):
+            create_translation_engine(engine_type="marian", marian_backend="ct2")
+
+    def test_marian_explicit_hf_skips_ct2_even_when_present(self, tmp_path, monkeypatch):
+        """marian_backend='hf' bypasses CT2 even when the model.bin is present."""
+        active_dir = tmp_path / "en-es" / "active"
+        active_dir.mkdir(parents=True)
+        (active_dir / "model.bin").write_bytes(b"fake CT2 weights")
+        monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+
+        mock_engine = MagicMock()
+        with patch("engines.marian_hf_engine.MarianHFEngine", return_value=mock_engine) as mock_cls:
+            result = create_translation_engine(engine_type="marian", marian_backend="hf")
+            mock_cls.assert_called_once()
+            assert result == mock_engine
+
+    def test_marian_invalid_backend_raises(self):
+        with pytest.raises(ValueError, match="marian_backend must be one of"):
+            create_translation_engine(engine_type="marian", marian_backend="bogus")
 
     def test_gemma_mlx_backend(self):
         mock_engine = MagicMock()

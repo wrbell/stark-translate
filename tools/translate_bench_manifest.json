@@ -1,0 +1,561 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-05-04T02:10:15Z",
+  "source_metadata_relative": "training/benchmark_gemma4.CANARY_SENTENCES + bible_data/synthetic/deepl_sermon_benchmark_500.jsonl",
+  "length_tiers_words": {
+    "short": [
+      3,
+      8
+    ],
+    "medium": [
+      9,
+      20
+    ],
+    "long": [
+      21,
+      999
+    ]
+  },
+  "counts_per_tier": {
+    "short": 0,
+    "medium": 37,
+    "long": 11
+  },
+  "directions": {
+    "en-es": 24,
+    "es-en": 24
+  },
+  "total_clips": 48,
+  "tier1_clip_count": 26,
+  "notes": "Canary clips have tier1_term_expected populated and an empty reference_text — scored by substring presence. Sermon clips have a non-empty reference_text — scored by chrF++ (and optionally CometKiwi).",
+  "clips": [
+    {
+      "id": "canary_en_es_000",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "And you know, when we think about the atonement — what Christ did for us on that cross...",
+      "reference_text": "",
+      "tier1_term_expected": "expiación",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "canary_en_es_001",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "God made a covenant with Abraham, and brothers, He keeps His promises.",
+      "reference_text": "",
+      "tier1_term_expected": "pacto",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "canary_en_es_002",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "It's only by grace, friends. We can't earn it — it's grace through faith.",
+      "reference_text": "",
+      "tier1_term_expected": "gracia",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "canary_en_es_003",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "And Paul writes about the righteousness of God here in Romans, and what does he mean by that?",
+      "reference_text": "",
+      "tier1_term_expected": "justicia",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "canary_en_es_004",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "Now, if you turn to the book of James — James has a lot to say about faith and works.",
+      "reference_text": "",
+      "tier1_term_expected": "Santiago",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "canary_en_es_005",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "You think about James and John, just regular fishermen on the Sea of Galilee.",
+      "reference_text": "",
+      "tier1_term_expected": "Jacobo",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "canary_en_es_006",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "The speaker tonight was talking about sanctification — what it means to be set apart.",
+      "reference_text": "",
+      "tier1_term_expected": "santificación",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "canary_en_es_007",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "Let us remember the Lord at the breaking of bread this morning.",
+      "reference_text": "",
+      "tier1_term_expected": "partimiento del pan",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "training.benchmark_gemma4.CANARY_SENTENCES"
+    },
+    {
+      "id": "sermon_en_es_008",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "so that we can go to college and get a good job.",
+      "reference_text": "para poder ir a la universidad y conseguir un buen Job.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(2_8_26)_BpIELcuh8O0"
+    },
+    {
+      "id": "sermon_en_es_009",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "don't know when, um, our, our time is up. We don't know when, I don't know, uh, the",
+      "reference_text": "no sabemos cuando, um, nuestro, nuestro tiempo se acaba. No sabemos cuándo, no sé, eh, la",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(12_14_25)_5D2rOMvkwrk"
+    },
+    {
+      "id": "sermon_en_es_010",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "Point one, done, salvation. Point two, there is no other name.",
+      "reference_text": "Punto uno, hecho, salvación. Punto dos, no hay otro nombre.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(9_7_25)_RyM-bwfZCBY"
+    },
+    {
+      "id": "sermon_en_es_011",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "They got, they shot one of, I don't mean to be crass, but they shot one of them dead.",
+      "reference_text": "Tienen, dispararon a uno de, no quiero ser grosero, pero dispararon a uno de ellos muerto.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(11_30_25)_nXfQMpYl0-k"
+    },
+    {
+      "id": "sermon_en_es_012",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "And then he talks about God providing him, the Lord providing him a table in the presence of",
+      "reference_text": "Y luego habla de que Dios le proporcionó, el Señor le proporcionó una mesa en presencia de",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(6_1_25)_ElGrjV3cQIQ"
+    },
+    {
+      "id": "sermon_en_es_013",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "See this message in that verse was not written for ones who thought they were great.",
+      "reference_text": "Ver este mensaje en ese verso no fue escrito para los que pensaban que eran grandes.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(8_17_25)_S6xuuPs4jxo"
+    },
+    {
+      "id": "sermon_en_es_014",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "And yet we are accountable to a God who cannot tolerate sin.",
+      "reference_text": "Y, sin embargo, somos responsables ante un Dios que no tolera el pecado.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(2_15_26)_yE4F7Zmnm6w"
+    },
+    {
+      "id": "sermon_en_es_015",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "Somebody might ask, where is a good place to live?",
+      "reference_text": "Alguien podría preguntar: ¿dónde es un buen lugar para vivir?",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_1_26)_UF0QFnoWZJ4"
+    },
+    {
+      "id": "sermon_en_es_016",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "i think kids can actually get now higher than a four point maybe maybe if i push myself and i put",
+      "reference_text": "Creo que los niños pueden llegar más alto que un cuatro tal vez si me empujo y me pongo",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_8_26)_rsZ5MkqBJPw"
+    },
+    {
+      "id": "sermon_en_es_017",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "A second reading that I'd like you to look at is found a few pages back in the Gospel of Luke.",
+      "reference_text": "Una segunda lectura que me gustaría que vieran se encuentra unas páginas más atrás, en el evangelio de Lucas.",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(10_16_25)_mhmT-c3WrNk"
+    },
+    {
+      "id": "sermon_en_es_018",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "But I think as some know, it was, I think it was the first or second night of that evening. It was around 1030.",
+      "reference_text": "Pero creo que como algunos saben, fue, creo que fue la primera o segunda noche de esa noche. Fue alrededor de las 1030.",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(8_17_25)_S6xuuPs4jxo"
+    },
+    {
+      "id": "sermon_en_es_019",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "about is he is savior. And this is where the Lord Jesus Christ comes in. It is the great news of the",
+      "reference_text": "es que es Salvador. Y aquí es donde entra el Señor Jesucristo. Es la gran noticia de la",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(12_28_25)_GIwpDvJBAHs"
+    },
+    {
+      "id": "sermon_en_es_020",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "christ come in he said behold the lamb of god which taketh away the sin of the world and i say",
+      "reference_text": "cristo vino dijo he aquí el cordero de dios que quita el pecado del mundo y yo digo",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_8_26)_rsZ5MkqBJPw"
+    },
+    {
+      "id": "sermon_en_es_021",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "good kid and i'm sure your your mom and dad and your family or or whoever uh is around is very",
+      "reference_text": "buen chico y estoy seguro que tu tu mama y tu papa y tu familia o o quien uh este cerca es muy",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_8_26)_rsZ5MkqBJPw"
+    },
+    {
+      "id": "sermon_en_es_022",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "Jesus and said, here is the lamb of God. Behold the lamb of God. And it says that they left John",
+      "reference_text": "Jesús y dijo: He aquí el cordero de Dios. He aquí el cordero de Dios. Y dice que dejaron a Juan",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(9_21_25)_oufT3k0oxEA"
+    },
+    {
+      "id": "sermon_en_es_023",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_text": "which was simon's he asked him to put out a little from the land and he sat down and taught the people",
+      "reference_text": "que era de simon le pidio que sacara un poco de la tierra y se sento y enseño al pueblo",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(9_7_25)_RyM-bwfZCBY"
+    },
+    {
+      "id": "canary_es_en_024",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "La expiación de Cristo en la cruz nos reconcilia con Dios.",
+      "reference_text": "",
+      "tier1_term_expected": "atonement",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "canary_es_en_025",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Dios hizo un pacto con Abraham y guarda sus promesas.",
+      "reference_text": "",
+      "tier1_term_expected": "covenant",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "canary_es_en_026",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Es solo por gracia, hermanos. No la podemos ganar.",
+      "reference_text": "",
+      "tier1_term_expected": "grace",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "canary_es_en_027",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Pablo escribe acerca de la justicia de Dios en Romanos.",
+      "reference_text": "",
+      "tier1_term_expected": "righteousness",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "canary_es_en_028",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Si abrimos el libro de Santiago, vemos mucho sobre la fe y las obras.",
+      "reference_text": "",
+      "tier1_term_expected": "James",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "canary_es_en_029",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Pensemos en Jacobo y Juan, pescadores del mar de Galilea.",
+      "reference_text": "",
+      "tier1_term_expected": "James",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "canary_es_en_030",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "El predicador habló sobre la santificación, ser apartados para Dios.",
+      "reference_text": "",
+      "tier1_term_expected": "sanctification",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "canary_es_en_031",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Recordemos al Señor en el partimiento del pan esta mañana.",
+      "reference_text": "",
+      "tier1_term_expected": "breaking of bread",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "convert_marian_ct2.CANARY_ES_TO_EN"
+    },
+    {
+      "id": "sermon_es_en_032",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "para poder ir a la universidad y conseguir un buen Job.",
+      "reference_text": "so that we can go to college and get a good job.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(2_8_26)_BpIELcuh8O0"
+    },
+    {
+      "id": "sermon_es_en_033",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "no sabemos cuando, um, nuestro, nuestro tiempo se acaba. No sabemos cuándo, no sé, eh, la",
+      "reference_text": "don't know when, um, our, our time is up. We don't know when, I don't know, uh, the",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(12_14_25)_5D2rOMvkwrk"
+    },
+    {
+      "id": "sermon_es_en_034",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Punto uno, hecho, salvación. Punto dos, no hay otro nombre.",
+      "reference_text": "Point one, done, salvation. Point two, there is no other name.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(9_7_25)_RyM-bwfZCBY"
+    },
+    {
+      "id": "sermon_es_en_035",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Tienen, dispararon a uno de, no quiero ser grosero, pero dispararon a uno de ellos muerto.",
+      "reference_text": "They got, they shot one of, I don't mean to be crass, but they shot one of them dead.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(11_30_25)_nXfQMpYl0-k"
+    },
+    {
+      "id": "sermon_es_en_036",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Y luego habla de que Dios le proporcionó, el Señor le proporcionó una mesa en presencia de",
+      "reference_text": "And then he talks about God providing him, the Lord providing him a table in the presence of",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(6_1_25)_ElGrjV3cQIQ"
+    },
+    {
+      "id": "sermon_es_en_037",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Ver este mensaje en ese verso no fue escrito para los que pensaban que eran grandes.",
+      "reference_text": "See this message in that verse was not written for ones who thought they were great.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(8_17_25)_S6xuuPs4jxo"
+    },
+    {
+      "id": "sermon_es_en_038",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Y, sin embargo, somos responsables ante un Dios que no tolera el pecado.",
+      "reference_text": "And yet we are accountable to a God who cannot tolerate sin.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(2_15_26)_yE4F7Zmnm6w"
+    },
+    {
+      "id": "sermon_es_en_039",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Alguien podría preguntar: ¿dónde es un buen lugar para vivir?",
+      "reference_text": "Somebody might ask, where is a good place to live?",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_1_26)_UF0QFnoWZJ4"
+    },
+    {
+      "id": "sermon_es_en_040",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Creo que los niños pueden llegar más alto que un cuatro tal vez si me empujo y me pongo",
+      "reference_text": "i think kids can actually get now higher than a four point maybe maybe if i push myself and i put",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_8_26)_rsZ5MkqBJPw"
+    },
+    {
+      "id": "sermon_es_en_041",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Una segunda lectura que me gustaría que vieran se encuentra unas páginas más atrás, en el evangelio de Lucas.",
+      "reference_text": "A second reading that I'd like you to look at is found a few pages back in the Gospel of Luke.",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(10_16_25)_mhmT-c3WrNk"
+    },
+    {
+      "id": "sermon_es_en_042",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Pero creo que como algunos saben, fue, creo que fue la primera o segunda noche de esa noche. Fue alrededor de las 1030.",
+      "reference_text": "But I think as some know, it was, I think it was the first or second night of that evening. It was around 1030.",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(8_17_25)_S6xuuPs4jxo"
+    },
+    {
+      "id": "sermon_es_en_043",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "es que es Salvador. Y aquí es donde entra el Señor Jesucristo. Es la gran noticia de la",
+      "reference_text": "about is he is savior. And this is where the Lord Jesus Christ comes in. It is the great news of the",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(12_28_25)_GIwpDvJBAHs"
+    },
+    {
+      "id": "sermon_es_en_044",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "cristo vino dijo he aquí el cordero de dios que quita el pecado del mundo y yo digo",
+      "reference_text": "christ come in he said behold the lamb of god which taketh away the sin of the world and i say",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_8_26)_rsZ5MkqBJPw"
+    },
+    {
+      "id": "sermon_es_en_045",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "buen chico y estoy seguro que tu tu mama y tu papa y tu familia o o quien uh este cerca es muy",
+      "reference_text": "good kid and i'm sure your your mom and dad and your family or or whoever uh is around is very",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(3_8_26)_rsZ5MkqBJPw"
+    },
+    {
+      "id": "sermon_es_en_046",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "Jesús y dijo: He aquí el cordero de Dios. He aquí el cordero de Dios. Y dice que dejaron a Juan",
+      "reference_text": "Jesus and said, here is the lamb of God. Behold the lamb of God. And it says that they left John",
+      "tier1_term_expected": "",
+      "length_tier": "long",
+      "tier1_terms_present": true,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(9_21_25)_oufT3k0oxEA"
+    },
+    {
+      "id": "sermon_es_en_047",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source_text": "que era de simon le pidio que sacara un poco de la tierra y se sento y enseño al pueblo",
+      "reference_text": "which was simon's he asked him to put out a little from the land and he sat down and taught the people",
+      "tier1_term_expected": "",
+      "length_tier": "medium",
+      "tier1_terms_present": false,
+      "source_origin": "deepl_sermon_benchmark_500:Gospel_Message_(9_7_25)_RyM-bwfZCBY"
+    }
+  ]
+}

@@ -231,6 +231,42 @@ class TranslationSettings(BaseSettings):
         default="Helsinki-NLP/opus-mt-en-es",
         description="MarianMT model for fast partial translations (~80ms PyTorch)",
     )
+    # MarianMT CT2 acceleration (v2026.8). Mirrors the v2026.7 STT pattern.
+    marian_backend: Literal["auto", "ct2", "hf"] = Field(
+        default="auto",
+        description=(
+            "Partial-translation backend: 'auto' picks ct2 when adapters/marian_ct2/"
+            "<dir>/active/model.bin is present and ctranslate2 imports, else 'hf'. "
+            "Force with 'ct2' (raises if no model.bin) or 'hf' (skip CT2 entirely)."
+        ),
+    )
+    marian_compute_type: str = Field(
+        default="int8_float16",
+        description=(
+            "CTranslate2 compute type for MarianMT. Defaults to int8_float16 (the "
+            "Ampere/Ada sweet spot, mirrored from v2026.7 STT). Override with "
+            "STARK_TRANSLATE__MARIAN_COMPUTE_TYPE=int8 on VRAM-constrained cards."
+        ),
+    )
+    marian_max_new_tokens: int = Field(
+        default=128,
+        description="Max decoding length for Marian partial translations.",
+    )
+    marian_warmup_passes: int = Field(
+        default=2,
+        description=(
+            "Warmup translations run at engine load() to capture kernel jitter. "
+            "Pass 1: 'Hello'; pass 2: 'Lord, have mercy on us.' (theological subword path)."
+        ),
+    )
+    marian_eager_both: bool = Field(
+        default=False,
+        description=(
+            "Pre-load both en-es and es-en directions at startup (only meaningful "
+            "with --allow-flip). Default lazy: load the second direction on first "
+            "language flip — adds a one-time spike to the first flipped partial."
+        ),
+    )
     model_family: str = Field(
         default="translategemma",
         description="Translation model family: 'translategemma' (structured lang codes) or 'gemma4' (instruct prompt)",

@@ -64,6 +64,16 @@ Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `
 | `compute_type` | `int8_float16` | faster-whisper CTranslate2 compute type. Default bumped from `int8` in v2026.7 (CTranslate2 docs recommend `int8_float16` for Ampere/Ada; v2026.7 bench saw 0% latency / 0% VRAM delta on A2000 Ada — set back to `int8` if your hardware shows VRAM growth). |
 | `engine` | `auto` | Translation engine (auto / llamacpp / hf) |
 
+### TranslationSettings (`STARK_TRANSLATE_` env prefix) — Marian (v2026.8)
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `marian_backend` | `auto` | `auto` (CT2 if `adapters/marian_ct2/<dir>/active/model.bin` present, else HF), `ct2` (force CT2; raises if missing), `hf` (force HF). Set via `STARK_TRANSLATE__MARIAN_BACKEND`. |
+| `marian_compute_type` | `int8_float16` | CT2 compute type for `MarianCT2Engine`. Mirrors v2026.7 STT default. Set `int8` for VRAM-constrained 6 GB cards (no measurable latency penalty). |
+| `marian_max_new_tokens` | `128` | Max decoding length. Marian rarely emits beyond ~80 tokens; 128 is a safe ceiling. |
+| `marian_warmup_passes` | `2` | Warmup translations at engine load. Pass 1: `"Hello"`; pass 2: `"Lord, have mercy on us."` (theological subword path). |
+| `marian_eager_both` | `False` | Pre-load both en-es and es-en at startup. Only meaningful with `--allow-flip`; lazy by default. |
+
 ### CUDA Engine Classes
 
 | Class | Role |
@@ -72,6 +82,8 @@ Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `
 | `HFWhisperEngine` | STT via HF transformers Whisper. Supports `compile_mode` (torch.compile w/ CUDA graphs) + `warmup_seconds` constructor args (v2026.7) and `assistant_model` for spec decode. **Spec-decode default draft removed in v2026.7** — distil-large-v3.5 + whisper-turbo is broken (different decoder layer counts → 10× slower with hallucinated output, see `docs/archive/v2026.5/spec_decode_research.md`). Caller must supply a verified-compatible draft. Faster-whisper is the default everywhere else. |
 | `CUDAGemmaEngine` | Basic translation with bitsandbytes 4-bit, no streaming |
 | `CUDAGemmaStreamingEngine` | Full-featured: streaming, prompt cache, speculative decoding |
+| `MarianCT2Engine` | Fast partial translator via CTranslate2 (v2026.8). 57 ms p50 / 116 ms p95 on A2000 Ada at `int8_float16` — 2.9× faster than the HF CUDA path with identical canary score and lower peak VRAM. Auto-loads `adapters/marian_ct2/{en-es,es-en}/active/` when present; CT2 `Translator` is internally thread-safe so this engine drops the historical `_pytorch_lock` (live pipeline can call `translate()` concurrently). See `docs/archive/v2026.8/MARIAN_BENCHMARK.md`. |
+| `MarianHFEngine` (in `engines/marian_hf_engine.py`) | Fast partial translator via HF transformers — fallback path when CT2 isn't available (Mac MLX, missing `ctranslate2`, or explicit `STARK_TRANSLATE__MARIAN_BACKEND=hf`). Acquires the shared `_pytorch_lock` from `engines/_locks.py` (Silero VAD uses the same lock — pre-v2026.8 they had separate locks, a latent thread-safety bug). |
 
 ## MLX Thread Safety (CRITICAL)
 

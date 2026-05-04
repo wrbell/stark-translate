@@ -65,6 +65,15 @@ stark-translate operator                       # Open the operator UI
 uv tool install 'stark-translate[cuda]'        # or: pip install '.[cuda]'
 stark-translate setup
 stark-translate operator
+
+# v2026.8 — one-time MarianMT CT2 conversion (CUDA only; ~30 s per direction).
+# Skips automatically if adapters/marian_ct2/<dir>/active/model.bin already exists.
+python scripts/convert_marian_ct2.py \
+    --model-id Helsinki-NLP/opus-mt-en-es \
+    --output adapters/marian_ct2/en-es/active
+python scripts/convert_marian_ct2.py \
+    --model-id Helsinki-NLP/opus-mt-es-en \
+    --output adapters/marian_ct2/es-en/active
 ```
 
 The legacy `requirements-mac.txt` / `requirements-nvidia.txt` install path is
@@ -80,7 +89,8 @@ Key flags: `--lang es` (Spanish speaker mode), `--tts` (audio output), `--ab` (A
 | **STT default** (v2026.7) | **Whisper Large-V3-Turbo + W16 LoRA → CTranslate2 int8_float16** | **~1.5 GB** | **see `docs/archive/v2026.7/STT_BENCHMARK.md`** |
 | STT (off-the-shelf fallback) | faster-whisper large-v3-turbo (CT2) | ~1.5 GB | ~500ms (pre-W16) |
 | STT (alt path) | HF Whisper + distil-large-v3.5 spec decode | ~3 GB | varies |
-| Translation (partials) | MarianMT opus-mt-en-es / es-en | ~298 MB | ~250ms |
+| **Translation default (partials, v2026.8)** | **MarianMT opus-mt-{en-es,es-en} → CTranslate2 int8_float16** | **~80 MB / dir** | **~57 ms p50 / ~116 ms p95 — see `docs/archive/v2026.8/MARIAN_BENCHMARK.md`** |
+| Translation (partials, HF fallback) | MarianMT opus-mt-{en-es,es-en} HF transformers | ~298 MB | ~167ms CUDA / ~360ms CPU |
 | **Translation default** (CUDA, finals) | **Gemma 4 E4B Q4_K_M (llama.cpp)** | **5.0 GB GGUF / 4.9 GB VRAM** | **~470ms** |
 | Translation low-VRAM (CUDA, finals) | Gemma 4 E2B Q4_K_M (llama.cpp) | 3.2 GB GGUF / 3.5 GB VRAM | ~280ms |
 | Translation (Mac MLX) | TranslateGemma 4B / 12B 4-bit | ~2.5 GB / ~7 GB | ~550ms / ~2.1s |

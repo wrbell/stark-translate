@@ -124,12 +124,17 @@ class TestPickBest:
 
 
 class TestMarianEngineInit:
-    """Tests for MarianEngine constructor and property methods."""
+    """Tests for MarianHFEngine constructor and property methods.
+
+    MarianHFEngine was extracted from engines.mlx_engine as part of v2026.8
+    when the CT2 path landed. ``backend`` now returns ``f"hf-{device}"`` to
+    disambiguate from MarianCT2Engine's ``f"ct2-{compute_type}"``.
+    """
 
     def _make_engine(self, model_id="Helsinki-NLP/opus-mt-en-es", device="auto"):
-        from engines.mlx_engine import MarianEngine
+        from engines.marian_hf_engine import MarianHFEngine
 
-        return MarianEngine(model_id=model_id, device=device)
+        return MarianHFEngine(model_id=model_id, device=device)
 
     def test_default_constructor_values(self):
         engine = self._make_engine()
@@ -166,14 +171,14 @@ class TestMarianEngineInit:
     def test_backend_property_defaults_to_cpu(self):
         engine = self._make_engine()
         # _device is None after construction
-        assert engine.backend == "cpu"
+        assert engine.backend == "hf-cpu"
 
     def test_backend_property_returns_device_when_set(self):
         engine = self._make_engine()
         engine._device = "mps"
-        assert engine.backend == "mps"
+        assert engine.backend == "hf-mps"
 
     def test_backend_property_returns_cuda_when_set(self):
         engine = self._make_engine()
         engine._device = "cuda"
-        assert engine.backend == "cuda"
+        assert engine.backend == "hf-cuda"
