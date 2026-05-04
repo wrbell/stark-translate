@@ -89,6 +89,21 @@ CONFIGS = {
         "expected_target": "gemma-4-e4b-it-q4km.gguf",
         "expected_draft": "gemma-4-e2b-it-q4km.gguf",
     },
+    # v2026.10 — IQ4_XS quantization sweep (PR3). No imatrix; head-to-head vs
+    # the existing Q4_K_M T2/T3 to test whether lower-bit quant gives latency
+    # without breaking the canary.
+    "t2-iq4xs": {
+        "engine": "llamacpp",
+        "label": "T2-IQ4_XS — llama.cpp E2B IQ4_XS",
+        "expected_target": "gemma-4-e2b-it-iq4xs.gguf",
+        "expected_draft": None,
+    },
+    "t3-iq4xs": {
+        "engine": "llamacpp",
+        "label": "T3-IQ4_XS — llama.cpp E4B IQ4_XS",
+        "expected_target": "gemma-4-e4b-it-iq4xs.gguf",
+        "expected_draft": None,
+    },
     # Extended HF configs for the 4-model matrix (TG4B vs TG12B vs E2B vs E4B):
     "tg4b_hf": {
         "engine": "hf",
