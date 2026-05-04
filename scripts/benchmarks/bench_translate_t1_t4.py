@@ -104,6 +104,34 @@ CONFIGS = {
         "expected_target": "gemma-4-e4b-it-iq4xs.gguf",
         "expected_draft": None,
     },
+    # v2026.11 — imatrix-calibrated quantization (PR4). Same Q4_K_M / IQ4_XS
+    # bit-widths as PR2/PR3 but quantized with --imatrix on a sermon corpus
+    # over-sampled with theological canaries. Goal: recover the canary
+    # regression IQ4_XS showed in PR3.
+    "t2-q4km-imatrix": {
+        "engine": "llamacpp",
+        "label": "T2-Q4_K_M-imatrix — llama.cpp E2B Q4_K_M (imatrix)",
+        "expected_target": "gemma-4-e2b-it-q4km-imatrix.gguf",
+        "expected_draft": None,
+    },
+    "t3-q4km-imatrix": {
+        "engine": "llamacpp",
+        "label": "T3-Q4_K_M-imatrix — llama.cpp E4B Q4_K_M (imatrix)",
+        "expected_target": "gemma-4-e4b-it-q4km-imatrix.gguf",
+        "expected_draft": None,
+    },
+    "t2-iq4xs-imatrix": {
+        "engine": "llamacpp",
+        "label": "T2-IQ4_XS-imatrix — llama.cpp E2B IQ4_XS (imatrix)",
+        "expected_target": "gemma-4-e2b-it-iq4xs-imatrix.gguf",
+        "expected_draft": None,
+    },
+    "t3-iq4xs-imatrix": {
+        "engine": "llamacpp",
+        "label": "T3-IQ4_XS-imatrix — llama.cpp E4B IQ4_XS (imatrix)",
+        "expected_target": "gemma-4-e4b-it-iq4xs-imatrix.gguf",
+        "expected_draft": None,
+    },
     # Extended HF configs for the 4-model matrix (TG4B vs TG12B vs E2B vs E4B):
     "tg4b_hf": {
         "engine": "hf",
