@@ -67,7 +67,7 @@ jobs:
       # Build the multi-stage CUDA image. linux/amd64 only — the image
       # depends on nvidia/cuda base images that don't ship arm64 variants.
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
