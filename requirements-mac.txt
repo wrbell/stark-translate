@@ -7,7 +7,7 @@ anyio==4.12.1
 
 certifi==2026.2.25
 cffi==2.0.0
-charset-normalizer==3.4.4
+charset-normalizer==3.4.7
 click==8.3.3
 youtube-transcript-api>=1.0.0
 filelock==3.25.1
