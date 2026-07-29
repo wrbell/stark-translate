@@ -38,7 +38,7 @@ inaSpeechSegmenter                # Speech/music classification
 
 # Transcription
 faster-whisper                    # CTranslate2 Whisper with confidence scores
-deepgram-sdk>=3.0,<4.0           # Deepgram Nova-3 oracle transcription
+deepgram-sdk>=7.6.0,<8.0           # Deepgram Nova-3 oracle transcription
 
 # Evaluation
 jiwer                             # WER/CER computation
