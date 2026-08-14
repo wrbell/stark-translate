@@ -9,7 +9,7 @@ updates:
       prefix: "chore(deps)"
     ignore:
       - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       # v3 PrerecordedOptions API is still used by training/transcribe_with_deepgram.py.
       # v4+ is a Fern rewrite; do not auto-open major bumps.
       - dependency-name: "deepgram-sdk"
@@ -25,3 +25,6 @@ updates:
     open-pull-requests-limit: 3
     commit-message:
       prefix: "ci(deps)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
