@@ -4,7 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    # Frozen requirements-*.txt snapshot is deprecated (v2026.7 extras).
+    # pip-audit CI is the security gate; do not keep opening version-update PRs.
+    open-pull-requests-limit: 0
     commit-message:
       prefix: "chore(deps)"
     ignore:
@@ -20,6 +22,9 @@ updates:
       # Training stack is on trl 0.29 / SFTTrainer 0.x; 1.x is a breaking rewrite.
       - dependency-name: "trl"
         versions: [">=1.0.0"]
+      # datasets 4.x+ needs torchcodec; training pin stays <4.0.
+      - dependency-name: "datasets"
+        versions: [">=4.0.0"]
 
   - package-ecosystem: github-actions
     directory: "/"
