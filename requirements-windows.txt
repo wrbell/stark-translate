@@ -38,7 +38,7 @@ inaSpeechSegmenter                # Speech/music classification
 
 # Transcription
 faster-whisper                    # CTranslate2 Whisper with confidence scores
-deepgram-sdk>=3.0,<4.0           # v3 API (PrerecordedOptions); v4+ is a breaking Fern rewrite
+deepgram-sdk>=3.11.0,<4.0           # v3 API (PrerecordedOptions); v4+ is a breaking Fern rewrite
 
 # Evaluation
 jiwer                             # WER/CER computation
