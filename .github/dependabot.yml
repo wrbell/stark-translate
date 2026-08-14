@@ -10,6 +10,13 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # v3 PrerecordedOptions API is still used by training/transcribe_with_deepgram.py.
+      # v4+ is a Fern rewrite; do not auto-open major bumps.
+      - dependency-name: "deepgram-sdk"
+        versions: [">=4.0.0"]
+      # sympy==1.14.0 (latest) requires mpmath<1.4; 1.4.1 has no compatible consumer yet.
+      - dependency-name: "mpmath"
+        versions: [">=1.4.0"]
 
   - package-ecosystem: github-actions
     directory: "/"

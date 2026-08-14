@@ -156,6 +156,9 @@ exclude = [
     "__pycache__",
     "build",
     "dist",
+    # Newer ruff formats fenced Python in Markdown; those docs are not source.
+    "docs",
+    "*.md",
 ]
 
 [tool.ruff.lint]
