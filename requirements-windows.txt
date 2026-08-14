@@ -17,7 +17,7 @@
 # Core ML / Training
 transformers>=4.45
 accelerate>=0.34
-peft>=0.13                        # LoRA / QLoRA adapters
+peft>=0.20.0                      # LoRA / QLoRA adapters
 trl>=0.12                         # SFTTrainer for QLoRA fine-tuning
 datasets>=3.0,<4.0                # HuggingFace datasets (4.x requires torchcodec)
 bitsandbytes>=0.44                # 4-bit quantization (QLoRA) + 8-bit optimizers
@@ -38,7 +38,7 @@ inaSpeechSegmenter                # Speech/music classification
 
 # Transcription
 faster-whisper                    # CTranslate2 Whisper with confidence scores
-deepgram-sdk>=3.0,<4.0           # Deepgram Nova-3 oracle transcription
+deepgram-sdk>=3.0,<4.0           # v3 API (PrerecordedOptions); v4+ is a breaking Fern rewrite
 
 # Evaluation
 jiwer                             # WER/CER computation
