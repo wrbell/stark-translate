@@ -19,7 +19,7 @@ transformers>=4.45
 accelerate>=0.34
 peft>=0.20.0                      # LoRA / QLoRA adapters
 trl>=0.12,<1.0                    # SFTTrainer 0.x; 1.x is a breaking rewrite
-datasets>=3.0,<4.0                # HuggingFace datasets (4.x requires torchcodec)
+datasets>=5.0.1,<6.0                # HuggingFace datasets (4.x requires torchcodec)
 bitsandbytes>=0.44                # 4-bit quantization (QLoRA) + 8-bit optimizers
 sentencepiece
 protobuf
