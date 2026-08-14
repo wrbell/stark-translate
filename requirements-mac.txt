@@ -34,8 +34,8 @@ numba==0.66.0
 numpy==2.4.4
 onnxruntime==1.24.4
 openpyxl==3.1.5
-packaging==26.2
-pandas==3.0.1
+packaging==26.3
+pandas==3.0.5
 pillow==12.3.0
 protobuf==6.33.6
 psutil==7.2.2
