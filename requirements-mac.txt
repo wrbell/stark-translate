@@ -7,10 +7,10 @@ anyio==4.12.1
 
 certifi==2026.2.25
 cffi==2.1.1
-charset-normalizer==3.4.4
+charset-normalizer==3.4.9
 click==8.3.3
 youtube-transcript-api>=1.0.0
-filelock==3.25.1
+filelock==3.25.2
 flatbuffers==25.12.19
 fsspec==2026.7.0
 h11==0.16.0
@@ -34,8 +34,8 @@ numba==0.66.0
 numpy==2.4.4
 onnxruntime==1.24.4
 openpyxl==3.1.5
-packaging==26.2
-pandas==3.0.1
+packaging==26.3
+pandas==3.0.5
 pillow==12.3.0
 protobuf==6.33.6
 psutil==7.2.2
@@ -46,7 +46,7 @@ regex==2026.7.19
 requests==2.34.2
 safetensors==0.8.0
 scipy==1.17.1
-sentencepiece==0.2.1
+sentencepiece==0.2.2
 shellingham==1.5.4
 silero-vad==6.2.1
 six==1.17.0

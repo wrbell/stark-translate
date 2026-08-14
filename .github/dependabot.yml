@@ -17,6 +17,9 @@ updates:
       # sympy==1.14.0 (latest) requires mpmath<1.4; 1.4.1 has no compatible consumer yet.
       - dependency-name: "mpmath"
         versions: [">=1.4.0"]
+      # Training stack is on trl 0.29 / SFTTrainer 0.x; 1.x is a breaking rewrite.
+      - dependency-name: "trl"
+        versions: [">=1.0.0"]
 
   - package-ecosystem: github-actions
     directory: "/"
