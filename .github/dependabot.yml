@@ -22,9 +22,7 @@ updates:
       # Training stack is on trl 0.29 / SFTTrainer 0.x; 1.x is a breaking rewrite.
       - dependency-name: "trl"
         versions: [">=1.0.0"]
-      # datasets 4.x+ needs torchcodec; training pin stays <4.0.
-      - dependency-name: "datasets"
-        versions: [">=4.0.0"]
+      # Training uses datasets[audio]>=5.0.1,<6.0 (torchcodec via [audio] extra).
 
   - package-ecosystem: github-actions
     directory: "/"

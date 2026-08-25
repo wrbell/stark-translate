@@ -19,7 +19,7 @@ transformers>=4.45
 accelerate>=0.34
 peft>=0.20.0                      # LoRA / QLoRA adapters
 trl>=0.29.1,<1.0                    # SFTTrainer 0.x; 1.x is a breaking rewrite
-datasets>=3.0,<4.0                # HuggingFace datasets (4.x requires torchcodec)
+datasets[audio]>=5.0.1,<6.0      # PYSEC-2026-3716 fix; [audio] pulls torchcodec (install PyTorch first)
 bitsandbytes>=0.44                # 4-bit quantization (QLoRA) + 8-bit optimizers
 sentencepiece
 protobuf
