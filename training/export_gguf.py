@@ -162,16 +162,113 @@ def verify_gguf_metadata(gguf_path: Path) -> dict:
 def sanity_test(merged_dir: Path, gguf_path: Path, port: int, n_sentences: int) -> None:
     """Compare merged-bf16 in-process outputs to Q4_K_M outputs via llama-server.
 
-    Runs N canary sentences through both, reports per-sentence cosine similarity
-    of generated text and a coarse exact-match count. A full COMET delta check
-    is left to the Phase B benchmark — this sanity test only catches gross
-    regressions (template mismatch, broken EOS, etc.).
+    Smoke gate: each canary must produce non-empty Q4 output with expected
+    theological substrings when possible. Gross failures (empty content,
+    thinking-only, broken EOS) abort the export.
     """
-    log.warning(
-        "sanity_test stub — runs both backends but only does string-similarity "
-        "comparison. Full COMET delta is in scripts/benchmarks/bench_translate_t1_t4.py."
-    )
-    raise NotImplementedError("sanity_test full implementation deferred to Phase B; use --no-sanity-test for now")
+    import json
+    import urllib.error
+    import urllib.request
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from training.theological_canaries import canary_sentences
+
+    canaries = canary_sentences(n_sentences)
+    log.info("sanity_test: %d canaries via llama-server :%d on %s", len(canaries), port, gguf_path)
+
+    # Start a temporary llama-server if one is not already listening.
+    llama_bin = Path(os.environ.get("LLAMA_CPP_DIR", str(Path.home() / "llama.cpp"))) / "build" / "bin" / "llama-server"
+    proc = None
+    if llama_bin.exists():
+        cmd = [
+            str(llama_bin),
+            "-m",
+            str(gguf_path),
+            "--port",
+            str(port),
+            "-ngl",
+            "99",
+            "--ctx-size",
+            "2048",
+        ]
+        log.info("starting temp llama-server: %s", " ".join(cmd))
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # Wait for readiness
+        deadline = time.time() + 120
+        ready = False
+        while time.time() < deadline:
+            try:
+                urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=2)
+                ready = True
+                break
+            except Exception:
+                time.sleep(1)
+        if not ready:
+            if proc:
+                proc.terminate()
+            raise RuntimeError(f"llama-server on :{port} did not become ready")
+    else:
+        log.warning("llama-server binary not found at %s — probing existing server on :%d", llama_bin, port)
+
+    failures: list[str] = []
+    try:
+        for i, test in enumerate(canaries, 1):
+            en = test["en"]
+            expected = test["expected_substrings"]
+            prompt = (
+                "<start_of_turn>user\n"
+                f"Translate the following text from English to Spanish.\n{en}"
+                "<end_of_turn>\n<start_of_turn>model\n"
+            )
+            body = json.dumps(
+                {
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": f"Translate the following text from English to Spanish.\n{en}",
+                        }
+                    ],
+                    "temperature": 0.0,
+                    "max_tokens": 128,
+                    "chat_template_kwargs": {"enable_thinking": False},
+                }
+            ).encode()
+            req = urllib.request.Request(
+                f"http://127.0.0.1:{port}/v1/chat/completions",
+                data=body,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    payload = json.loads(resp.read().decode())
+                content = payload["choices"][0]["message"].get("content") or ""
+            except (urllib.error.URLError, KeyError, IndexError, json.JSONDecodeError) as exc:
+                failures.append(f"canary {i}: request failed ({exc})")
+                continue
+
+            if not content.strip():
+                failures.append(f"canary {i}: empty content for {en!r}")
+                continue
+            content_l = content.lower()
+            missing = [s for s in expected if s.lower() not in content_l]
+            # Soft substring check — log miss but only hard-fail if majority missing
+            if len(missing) > len(expected) / 2:
+                failures.append(f"canary {i}: missing {missing} in {content!r}")
+            else:
+                log.info("canary %d OK (%d/%d substrings): %s", i, len(expected) - len(missing), len(expected), en)
+            _ = prompt  # reserved for future bf16 side-by-side
+    finally:
+        if proc is not None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+
+    if failures:
+        raise RuntimeError("sanity_test failed:\n  - " + "\n  - ".join(failures))
+    log.info("sanity_test PASSED (%d canaries)", len(canaries))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -199,7 +296,7 @@ def main(argv: list[str] | None = None) -> int:
         help="explicit merged-bf16 dir (default: temp dir; required with --skip-merge)",
     )
     p.add_argument("--keep-intermediate", action="store_true", help="keep merged bf16 dir + f16 GGUF for debugging")
-    p.add_argument("--sanity-test", action="store_true", help="(deferred) compare bf16 vs Q4_K_M outputs")
+    p.add_argument("--sanity-test", action="store_true", help="run 8-canary smoke gate via llama-server after quantize")
     p.add_argument("--sanity-port", type=int, default=8092, help="port for temp llama-server during sanity test")
     p.add_argument("--sanity-n", type=int, default=8, help="canary sentence count for sanity test")
     args = p.parse_args(argv)

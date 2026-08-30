@@ -143,10 +143,10 @@ class TestSaveChunkAudio:
 class TestShouldSuppress:
     """Tests for _should_suppress() hallucination filter."""
 
-    def _suppress(self, text, confidence=None, utterance_dur=None):
+    def _suppress(self, text, confidence=None, utterance_dur=None, **kwargs):
         from dry_run_ab import _should_suppress
 
-        return _should_suppress(text, confidence, utterance_dur)
+        return _should_suppress(text, confidence, utterance_dur, **kwargs)
 
     # --- Tier 1: Known hallucination phrases ---
 
@@ -160,8 +160,53 @@ class TestShouldSuppress:
     def test_thanks_for_watching_suppressed(self):
         assert self._suppress("Thanks for watching.", confidence=0.50) is not None
 
+    def test_thanks_for_watching_substring(self):
+        """Multi-word phantoms match as substrings."""
+        assert self._suppress("Um thanks for watching everyone.", confidence=0.50) is not None
+
     def test_bye_low_conf_suppressed(self):
         assert self._suppress("Bye.", confidence=0.30) is not None
+
+    def test_spanish_gracias_por_ver_suppressed(self):
+        assert self._suppress("Gracias por ver.", confidence=0.50) is not None
+
+    def test_spanish_suscribete_suppressed(self):
+        assert self._suppress("Suscríbete.", confidence=0.50) is not None
+
+    # --- Tier 0: metric hard-drops ---
+
+    def test_high_compression_ratio_hard_drop(self):
+        reason = self._suppress("Hello world.", confidence=0.95, compression_ratio=2.5)
+        assert reason is not None
+        assert "compression_ratio" in reason
+
+    def test_no_speech_prob_short_suppressed(self):
+        reason = self._suppress(
+            "Thank you for coming.",
+            confidence=0.90,
+            utterance_dur=1.0,
+            no_speech_prob=0.65,
+        )
+        assert reason is not None
+        assert "no_speech_prob" in reason
+
+    def test_no_speech_high_conf_long_kept(self):
+        """Long utterance + high conf + borderline no_speech can still pass tier 0b."""
+        assert (
+            self._suppress(
+                "For God so loved the world that he gave his only son.",
+                confidence=0.92,
+                utterance_dur=4.0,
+                no_speech_prob=0.65,
+            )
+            is None
+        )
+
+    def test_unique_token_ratio_suppressed(self):
+        text = "the the the the the the the the the the"
+        reason = self._suppress(text, confidence=0.90)
+        assert reason is not None
+        assert "unique-token" in reason
 
     # --- Tier 2: VAD-floor duration chunks ---
 
@@ -226,7 +271,7 @@ class TestShouldSuppress:
         assert self._suppress("", confidence=0.50) is None
 
     def test_none_confidence_defaults_safe(self):
-        """When confidence is None, defaults to 1.0 — no suppression."""
+        """When confidence is None, defaults to 1.0 — no suppression from conf tiers."""
         assert self._suppress("Thank you.", confidence=None) is None
 
 

@@ -21,8 +21,12 @@
 | `sort_sermons.py` | Sermon cataloging by type/year with manifest + training cutoff |
 | `lock_data.py` | SHA-256 data lockfile for training data versioning |
 | `build_eval_sets.py` | Stratified eval set builder (500 verse holdout + sermon eval) |
-| `health_check.py` | Adapter health verification (5 canary sentences) |
+| `health_check.py` | Adapter health verification (8 canary sentences) |
 | `manage_adapters.py` | Adapter lifecycle: register, activate, rollback, export |
+| `deploy_adapters.py` | Six-phase deploy to endpoints (dry-run / rollback) |
+| `merge_corrections.py` | Merge active-learning corrections into train sets |
+| `mine_hallucination_phrases.py` | Suggest new garbage-filter phrases from diagnostics |
+| `benchmark_parakeet_en.py` | EN-only Parakeet vs Whisper holdout bench |
 
 ## YouTube Caption Comparison (Layer 4)
 
@@ -96,10 +100,12 @@ Cross-tool data flow for the flag → correct → retrain cycle (Phases 7–8):
 1. **Capture**: `dry_run_ab.py` saves per-chunk WAVs + diagnostics JSONL during live session (confidence scores, latency, low-confidence words)
 2. **Extract**: `prepare_finetune_data.py` identifies low-confidence segments → `stark_data/corrections/review_queue_{date}.tsv`
 3. **Correct**: Human reviews in Label Studio (or TSV editor), saves corrections to `stark_data/corrections/{session_id}.jsonl`
-4. **Merge**: `merge_corrections.py` (planned) merges corrections into training dataset
+4. **Merge**: `tools/merge_corrections.py` merges corrections into training dataset
 5. **Retrain**: Transfer to WSL, retrain with corrected data mixed in (70/30 replay buffer to prevent forgetting)
-6. **Deploy**: Transfer adapters back to Mac via the deployment pipeline above
+6. **Deploy**: Transfer adapters back to Mac via `tools/deploy_adapters.py` (or `manage_adapters.py export`)
 7. **Composite quality score**: `0.45 * neural_qe + 0.35 * stt_confidence + 0.20 * marian_agreement` — used to prioritize segments for review
+
+**Hallucination phrase mining:** after sessions, run `python tools/mine_hallucination_phrases.py` to propose new `_HALLUCINATION_PHRASES` entries.
 
 **Target**: 3–5 cycles. First cycle yields 20–40% relative WER reduction. Stop when improvement < 2% relative for 2 consecutive cycles.
 
@@ -149,13 +155,34 @@ python tools/manage_adapters.py list --model gemma_4b
 
 ### Health Check (`tools/health_check.py`)
 
-Verifies adapter produces sane translations before deployment. 5 canary sentences covering theological terms (atonement, James/Santiago, propitiation, breaking of bread, resurrection).
+Verifies adapter produces sane translations before deployment. **8 canary sentences** covering theological terms (atonement, James/Santiago, propitiation, breaking of bread / *partimiento del pan*, resurrection, justification, Holy Spirit, grace/mercy). Shared list: `training/theological_canaries.py`.
 
 ```bash
-python tools/health_check.py --adapter hybrid_runs/S8_deepl_only
+python tools/health_check.py --adapter hybrid_runs/S8_deepl_only --n-canaries 8
 ```
 
 Exit code 0 = pass, 1 = fail. Used automatically by `manage_adapters.py activate`.
+
+### Deploy (`tools/deploy_adapters.py`)
+
+```bash
+python tools/deploy_adapters.py --cycle 1 --models whisper_turbo_ct2 --endpoints local --dry-run
+python tools/deploy_adapters.py --rollback --models whisper_turbo_ct2 --endpoints local
+```
+
+### Active-learning merge
+
+```bash
+python tools/merge_corrections.py translation --corrections stark_data/corrections/pairs.jsonl --train-jsonl bible_data/sermon_pairs_train.jsonl
+python tools/merge_corrections.py whisper --corrections stark_data/corrections/whisper_export --train-dir stark_data/whisper_dataset_deepgram/train
+```
+
+### Parakeet EN bench (optional)
+
+```bash
+python tools/benchmark_parakeet_en.py --limit 10
+# Activate only if mean_wer ≤ W16 and p95 ≤ Whisper; bilingual default stays Whisper.
+```
 
 ### Evaluation Sets (`tools/build_eval_sets.py`)
 

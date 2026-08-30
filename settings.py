@@ -183,8 +183,13 @@ class STTSettings(BaseSettings):
             "Whisper implementation choice within a hardware tier: 'auto' "
             "(faster-whisper on cuda/cpu, mlx on Apple Silicon), 'faster-whisper' "
             "(CTranslate2, default on CUDA), 'hf' (transformers, supports "
-            "torch.compile + spec decode), 'mlx' (Apple Silicon only)."
+            "torch.compile + spec decode), 'mlx' (Apple Silicon only), "
+            "'parakeet' (NVIDIA Parakeet TDT — EN-only accelerator, requires nemo)."
         ),
+    )
+    parakeet_model: str = Field(
+        default="nvidia/parakeet-tdt-0.6b-v3",
+        description="NeMo Parakeet model id when STARK_STT__BACKEND=parakeet",
     )
     compile_mode: str | None = Field(
         default=None,

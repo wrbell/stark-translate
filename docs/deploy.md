@@ -4,8 +4,8 @@
 > (WSL/CUDA) to inference endpoints (Mac + NVIDIA church machines). Includes health
 > checks, hot-reload, and automatic rollback.
 
-**Status:** Planning
-**Date:** 2026-03-01
+**Status:** Implemented (`tools/deploy_adapters.py` + `tools/manage_adapters.py` + 8-canary `health_check.py`). Remote rsync endpoints still need SSH keys configured per machine.
+**Date:** 2026-08-30
 
 ---
 

@@ -130,7 +130,7 @@ CalVer: `YYYY.M.W.PATCH` (e.g., `2026.5.0.0`). Single source of truth in `pyproj
 - [x] **Phase 1.7 — TTS & Roundtrip:** Piper TTS integration, roundtrip quality test, validation pipeline
 - [x] **Phase 2 — Data collection:** Download and sample 10–20 hours of Stark Road audio via `yt-dlp` — 333 sermons cataloged, 160+ downloaded, Deepgram oracle complete (35/35)
 - [x] **Phase 3 — Quality assessment:** Manually transcribe 50–100 sample segments, compute baseline WER — 500 stratified verse holdout + 422 sermon eval chunks built
-- [ ] **Phase 4 — Preprocessing:** Run the 10-step audio cleaning pipeline on all collected data
+- [ ] **Phase 4 — Preprocessing:** Run the 10-step audio cleaning pipeline on all collected data — orchestrator: `training/run_phase4_preprocess.sh` / `training/run_phase4_corpus.py` (writes `phase4_status.json`). Requires sermon WAVs on WSL.
 - [x] **Phase 5 — Re-transcribe:** Generate clean labels with Whisper large-v3 (not YouTube auto-captions) — Deepgram Nova-3 with 50 theological keyterms (35 sermons)
 - [x] **Phase 6 — Fine-tune (round 1):** TranslateGemma S1-S9 complete (S6 winner: balanced ratio), Whisper W12 data scaling (198K chunks, 21.41% baseline WER), W15 hard mining bug fixed, **W16 corrective run = 7.25% fresh-eval WER**, **v2026.5 Phase 1A: Gemma 4 E4B Q4_K_M wins production default (5–9× speedup, 4× less VRAM)**
 - [ ] **Phase 7 — Evaluate:** Transfer adapters to Mac, re-run A/B with fine-tuned models + live YT comparison

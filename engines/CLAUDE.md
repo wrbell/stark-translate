@@ -69,6 +69,7 @@ Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `
 | Class | Role |
 |-------|------|
 | `FasterWhisperEngine` | STT via faster-whisper (CUDA/CPU), quality-based fallback retry. Default `compute_type` since v2026.7 is `int8_float16` (~20% faster than `int8`, +30% VRAM). Auto-loads `adapters/whisper_turbo_ct2/active/` (W16 fine-tune, 7.25% fresh-eval WER) when present; off-the-shelf `large-v3-turbo` is the fallback model_id. |
+| `ParakeetEngine` | Optional EN-only STT via NVIDIA NeMo Parakeet TDT (`stt_backend="parakeet"`). Not bilingual — keep Whisper for ES. Requires `nemo_toolkit[asr]`. Bench with `tools/benchmark_parakeet_en.py` before adopting for `--lang en`. |
 | `HFWhisperEngine` | STT via HF transformers Whisper. Supports `compile_mode` (torch.compile w/ CUDA graphs) + `warmup_seconds` constructor args (v2026.7) and `assistant_model` for spec decode. **Spec-decode default draft removed in v2026.7** — distil-large-v3.5 + whisper-turbo is broken (different decoder layer counts → 10× slower with hallucinated output, see `docs/archive/v2026.5/spec_decode_research.md`). Caller must supply a verified-compatible draft. Faster-whisper is the default everywhere else. |
 | `CUDAGemmaEngine` | Basic translation with bitsandbytes 4-bit, no streaming |
 | `CUDAGemmaStreamingEngine` | Full-featured: streaming, prompt cache, speculative decoding |
@@ -121,7 +122,7 @@ Whisper exposes three segment-level quality signals:
 | `no_speech_prob` | < 0.1 | > 0.3 | > 0.6 (with low logprob) |
 | `compression_ratio` | < 1.8 | > 2.0 | > 2.4 (hallucination) |
 
-Flag any word with probability < 0.3. Route bottom 5–15% of segments to human review queue.
+Flag any word with probability < 0.5. Route bottom 5–15% of segments to human review queue.
 
 **Caveat:** Token confidence mixes language model and acoustic signals. High-frequency function words may score high even when misrecognized. Use segment-level aggregation over individual word scores.
 
