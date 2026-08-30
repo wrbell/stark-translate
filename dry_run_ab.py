@@ -131,6 +131,7 @@ def pipeline_pool_max_workers(backend: str) -> int:
         return 2
     return 1
 
+
 # Separate pool for PyTorch-only work (MarianMT). Runs concurrently with the
 # MLX pipeline pool — safe because MarianMT uses PyTorch/CPU, not Metal GPU.
 _pytorch_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pytorch")
