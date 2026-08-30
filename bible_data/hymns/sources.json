@@ -1,0 +1,77 @@
+{
+  "sources": [
+    {
+      "id": "hymnary",
+      "name": "Hymnary.org",
+      "url": "https://hymnary.org/",
+      "what_we_take": "Public-domain English hymn texts, author death years, meters, and evidence URLs for PD status. Established Spanish hymn texts when the page marks them public domain.",
+      "what_we_refuse": "Copyrighted modern texts, user-uploaded copyrighted scans treated as the New BHB compilation, full hymnal dumps.",
+      "license": "Individual hymn texts that are public domain; site terms govern scraping. We store only verified PD texts."
+    },
+    {
+      "id": "brethrenarchive_bhb",
+      "name": "Brethren Archive historic Believers Hymn Book scan",
+      "url": "https://www.brethrenarchive.org/",
+      "what_we_take": "Metadata confirmation that a first line appeared in classic BHB editions (1884-era / mid-20th-c. reprints). Classic book numbers when visible.",
+      "what_we_refuse": "Treating the scan as a training dump of the modern New Believers Hymn Book (2019) compilation or numbering system.",
+      "license": "Historic book scans; individual hymn texts remain PD by author death year. Compilation arrangement is not our training target."
+    },
+    {
+      "id": "pdhymns",
+      "name": "pdhymns.com / hymnstogod.org",
+      "url": "https://www.pdhymns.com/",
+      "what_we_take": "Public-domain English hymn texts for confirmation against Hymnary.",
+      "what_we_refuse": "Any text marked restricted or modern copyright.",
+      "license": "Public domain hymn texts."
+    },
+    {
+      "id": "cabrera_himnario",
+      "name": "Historic Spanish Protestant hymnals (e.g. Cabrera and pre-1929 himnarios)",
+      "url": "https://hymnary.org/person/Cabrera_JB",
+      "what_we_take": "Established Spanish translations of the same English original when the Spanish text is PD (translator died ≥70 years ago or published pre-1929).",
+      "what_we_refuse": "Metrical paraphrases presented as literal caption Spanish; modern copyrighted Spanish hymnals without clear reuse rights.",
+      "license": "Public domain Spanish hymn texts (e.g. Juan Bautista Cabrera, d. 1916)."
+    },
+    {
+      "id": "lutheran_bilingual",
+      "name": "Historic Lutheran / Protestant bilingual hymn lists",
+      "url": "https://hymnary.org/",
+      "what_we_take": "Same-original EN–ES pairs that are independently PD.",
+      "what_we_refuse": "Thematic-only pairs (same tune, different words) for training.",
+      "license": "Public domain only."
+    }
+  ],
+  "refused": [
+    {
+      "id": "new_bhb_2019",
+      "name": "New Believers Hymn Book (2019) / John Ritchie Ltd compilation",
+      "why": "Compilation copyright, numbering, and 2019-only added hymns are not free for wholesale training dumps. We may use classic first lines that also exist as independent PD texts."
+    },
+    {
+      "id": "bhb_plus_app",
+      "name": "BHB+ app database / Gospel Folio music edition",
+      "why": "Proprietary database and music edition; not a PD text source."
+    },
+    {
+      "id": "gospelriver_scrape",
+      "name": "Wholesale scrape of gospelriver.com as 'the book'",
+      "why": "Lookup of first lines for identification is fine; training text must be attributed to the PD hymn text, not 'New BHB #N'."
+    },
+    {
+      "id": "lec_himnos",
+      "name": "Himnos y Cánticos del Evangelio full official dump",
+      "why": "Requires LEC permission for full lyrics. First-line mappings only as metadata if from public indexes; no full lyrics in this corpus."
+    },
+    {
+      "id": "jw_org",
+      "name": "JW.org hymn / song texts",
+      "why": "Out of domain and copyrighted; forbidden."
+    },
+    {
+      "id": "ccli_modern",
+      "name": "CCLI-only modern worship",
+      "why": "Copyrighted contemporary songs; not PD hymn texts."
+    }
+  ],
+  "notes": "Training uses public-domain hymn *texts* only. The Believers Hymn Book / New BHB is a copyrighted compilation; classic first lines are identifiers, not a license to dump the book."
+}

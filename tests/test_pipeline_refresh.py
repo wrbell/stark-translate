@@ -8,15 +8,18 @@ import pytest
 
 
 class TestTheologicalCanaries:
-    def test_eight_canaries_including_partimiento(self):
+    def test_core_and_hymn_canaries_including_partimiento(self):
         from training.theological_canaries import THEOLOGICAL_CANARIES, canary_sentences
 
-        assert len(THEOLOGICAL_CANARIES) == 8
-        assert len(canary_sentences()) == 8
+        # Original 8 theological canaries retained; hymn-domain spice appended.
+        assert len(THEOLOGICAL_CANARIES) >= 16
+        assert len(canary_sentences()) == len(THEOLOGICAL_CANARIES)
         assert len(canary_sentences(5)) == 5
         joined = " ".join(c["en"].lower() for c in THEOLOGICAL_CANARIES)
         assert "breaking of bread" in joined
+        assert "mercy seat" in joined
         assert any("partimiento" in s for c in THEOLOGICAL_CANARIES for s in c["expected_substrings"])
+        assert any("propiciatorio" in s for c in THEOLOGICAL_CANARIES for s in c["expected_substrings"])
 
 
 class TestPhase4Corpus:

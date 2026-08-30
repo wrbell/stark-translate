@@ -373,6 +373,66 @@ def export_glossary(glossary=None, output_dir="bible_data/glossary"):
     return pairs_path
 
 
+def load_hymn_glossary_candidates(path):
+    """Load hymn glossary candidates or allowlist JSON.
+
+    Expected shape: ``{"candidates": [{"en": ..., "es": ..., ...}, ...]}``.
+    Does **not** merge into THEOLOGICAL_GLOSSARY — callers print a review table
+    or merge only an allowlist explicitly.
+    """
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    if isinstance(data, list):
+        return data
+    return list(data.get("candidates", []))
+
+
+def print_hymn_glossary_review(candidates, existing=None):
+    """Print a review table for hymn glossary candidates (no silent merge)."""
+    if existing is None:
+        existing = THEOLOGICAL_GLOSSARY
+    existing_lower = {k.lower(): k for k in existing}
+
+    print(f"{'EN':<28} {'ES':<28} {'in_gloss':<8} {'recommend':<10} rationale")
+    print("-" * 110)
+    for c in candidates:
+        en = c.get("en", "")
+        es = c.get("es", "")
+        in_g = en.lower() in existing_lower
+        rec = c.get("recommend_merge", not in_g)
+        rationale = (c.get("rationale") or "")[:40]
+        print(f"{en:<28} {es:<28} {in_g!s:<8} {rec!s:<10} {rationale}")
+    print(f"\n{len(candidates)} candidates reviewed (not auto-merged).")
+
+
+def merge_hymn_allowlist(allowlist_path, base=None):
+    """Merge allowlisted hymn terms into a copy of the glossary dict.
+
+    Skips exact-key duplicates (case-insensitive) already present in *base*.
+    """
+    if base is None:
+        base = dict(THEOLOGICAL_GLOSSARY)
+    else:
+        base = dict(base)
+    candidates = load_hymn_glossary_candidates(allowlist_path)
+    existing_lower = {k.lower(): k for k in base}
+    added = 0
+    skipped = 0
+    for c in candidates:
+        en = c.get("en")
+        es = c.get("es")
+        if not en or not es:
+            continue
+        if en.lower() in existing_lower:
+            skipped += 1
+            continue
+        base[en] = es
+        existing_lower[en.lower()] = en
+        added += 1
+    print(f"Merged hymn allowlist: +{added} terms, skipped {skipped} duplicates → {len(base)} total")
+    return base
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build EN→ES theological glossary for translation fine-tuning")
     parser.add_argument("--output", "-o", default="bible_data/glossary", help="Output directory")
@@ -385,21 +445,43 @@ def main():
     )
     parser.add_argument("--boost-size", type=int, default=50, help="Number of Tier 1 boost terms (default: 50)")
     parser.add_argument("--master-size", type=int, default=1000, help="Number of Tier 2 master terms (default: 1000)")
+    parser.add_argument(
+        "--from-hymns",
+        metavar="PATH",
+        help="Print review table for hymn glossary candidates JSON (no silent merge)",
+    )
+    parser.add_argument(
+        "--merge-hymn-allowlist",
+        metavar="PATH",
+        help="Merge curated allowlist JSON into export glossary (not candidates dump)",
+    )
     args = parser.parse_args()
 
+    if args.from_hymns:
+        candidates = load_hymn_glossary_candidates(args.from_hymns)
+        print_hymn_glossary_review(candidates)
+        # Review-only when no export/merge/augment/tiers requested
+        if not args.merge_hymn_allowlist and not args.augment and not args.build_tiers:
+            # Still allow explicit --output only when merging; bare --from-hymns is review-only
+            return
+
+    glossary = THEOLOGICAL_GLOSSARY
+    if args.merge_hymn_allowlist:
+        glossary = merge_hymn_allowlist(args.merge_hymn_allowlist)
+
     # Export glossary
-    export_glossary(output_dir=args.output)
+    export_glossary(glossary=glossary, output_dir=args.output)
 
     # Optionally augment verse pairs
     if args.augment:
         aug_output = args.augment_output or args.augment.replace(".jsonl", "_augmented.jsonl")
-        augment_with_soft_constraints(args.augment, output_path=aug_output)
+        augment_with_soft_constraints(args.augment, glossary=glossary, output_path=aug_output)
 
     # Optionally build tiered glossary for Deepgram
     if args.build_tiers:
         from tools.glossary import build_tiers, save_tiers
 
-        tiers = build_tiers(THEOLOGICAL_GLOSSARY, boost_size=args.boost_size, master_size=args.master_size)
+        tiers = build_tiers(glossary, boost_size=args.boost_size, master_size=args.master_size)
         save_tiers(tiers, output_dir=args.output)
 
 
