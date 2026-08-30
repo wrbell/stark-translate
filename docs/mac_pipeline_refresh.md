@@ -83,8 +83,10 @@ See [`mlx_cuda_parity.md`](./mlx_cuda_parity.md). Naïve uniform Gemma 4 MLX 4-b
 
 ### TurboQuant (optional KV compression)
 
+`--turboquant` is soft-disabled against **mlx-optiq 0.4.x**: that package imports as `optiq` and does not expose a drop-in `TurboQuantKVCache` for the `mlx_lm.generate` path (KV mixed-precision is serve/runtime-only). The flag remains for forward compatibility; the pipeline logs a warning and continues without TQ.
+
 ```bash
-pip install mlx-optiq   # if not already via '.[mlx]'
+# Will warn and continue without TQ on mlx-optiq 0.4.x:
 python dry_run_ab.py --ab --backend mlx --turboquant
 # or: export STARK_TRANSLATION__TURBOQUANT=true
 ```

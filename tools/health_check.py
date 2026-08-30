@@ -109,44 +109,27 @@ def _load_mlx(
         source_lang: str = "en",
         target_lang: str = "es",
     ) -> str:
-        if model_family == "gemma4":
-            lang_names = {"en": "English", "es": "Spanish", "hi": "Hindi", "zh": "Chinese"}
-            src_name = lang_names.get(source_lang, source_lang)
-            tgt_name = lang_names.get(target_lang, target_lang)
-            messages = [
-                {
-                    "role": "user",
-                    "content": (
-                        f"Translate the following {src_name} text to {tgt_name}. "
-                        f"Output only the translation, nothing else.\n\n{text}"
-                    ),
-                }
-            ]
-        else:
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "source_lang_code": source_lang,
-                            "target_lang_code": target_lang,
-                            "text": text,
-                        }
-                    ],
-                }
-            ]
-        prompt = _tokenizer.apply_chat_template(messages, add_generation_prompt=True)
-        input_words = len(text.split())
-        max_tok = max(64, int(input_words * 3.0))
+        from engines.translation_prompts import (
+            build_chat_messages,
+            chat_template_extra_kwargs,
+            clean_translation,
+            dynamic_max_tokens,
+        )
+
+        messages = build_chat_messages(
+            text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            model_family=model_family,
+        )
+        prompt = _tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            **chat_template_extra_kwargs(model_family=model_family),
+        )
+        max_tok = dynamic_max_tokens(text)
         result = generate(_model, _tokenizer, prompt=prompt, max_tokens=max_tok, verbose=False)
-        clean = result.split("<end_of_turn>")[0].strip()
-        if model_family == "gemma4":
-            for prefix in ("Here is the translation:\n", "Here is the translation:"):
-                if clean.startswith(prefix):
-                    clean = clean[len(prefix) :].strip()
-                    break
-        return clean
+        return clean_translation(result, model_family=model_family)
 
     return model, tokenizer, translate_fn
 

@@ -1081,20 +1081,28 @@ def load_mlx_gemma(model_id, label, adapter_path=None):
         # Already has it (e.g. from a newer tokenizer version)
         print(f"  [P7-2E] EOS tokens verified: {tokenizer._eos_token_ids}")
 
-    # TurboQuant KV cache compression (mlx-optiq) — same as MLXGemmaEngine
+    # TurboQuant KV cache compression — same resolver as MLXGemmaEngine
     if USE_TURBOQUANT:
         try:
-            from mlx_optiq import TurboQuantKVCache
-
-            model.kv_cache = TurboQuantKVCache(
-                model,
-                key_bits=TURBOQUANT_KEY_BITS,
-                val_bits=TURBOQUANT_VAL_BITS,
-                rotate=True,
+            from engines.mlx_engine import (
+                TURBOQUANT_UNAVAILABLE_MSG,
+                resolve_turboquant_kv_cache_cls,
             )
-            print(f"  TurboQuant KV cache enabled (key={TURBOQUANT_KEY_BITS}-bit, val={TURBOQUANT_VAL_BITS}-bit)")
-        except ImportError:
-            print("  WARNING: TurboQuant requested but mlx-optiq not installed (pip install mlx-optiq)")
+
+            turbo_cls = resolve_turboquant_kv_cache_cls()
+            if turbo_cls is None:
+                print(f"  WARNING: {TURBOQUANT_UNAVAILABLE_MSG}")
+            else:
+                model.kv_cache = turbo_cls(
+                    model,
+                    key_bits=TURBOQUANT_KEY_BITS,
+                    val_bits=TURBOQUANT_VAL_BITS,
+                    rotate=True,
+                )
+                print(
+                    f"  TurboQuant KV cache enabled "
+                    f"(key={TURBOQUANT_KEY_BITS}-bit, val={TURBOQUANT_VAL_BITS}-bit)"
+                )
         except Exception as exc:
             print(f"  WARNING: TurboQuant initialization failed: {exc}")
 
@@ -1616,6 +1624,7 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
 
     from engines.translation_prompts import (
         build_chat_messages,
+        chat_template_extra_kwargs,
         clean_translation,
         dynamic_max_tokens,
     )
@@ -1657,7 +1666,11 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
             target_lang=TARGET_LANG,
             model_family=family,
         )
-        prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+        prompt = tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            **chat_template_extra_kwargs(model_family=family),
+        )
         gen_kwargs = dict(
             prompt=prompt,
             max_tokens=max_tok,
@@ -1798,6 +1811,7 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
 
     from engines.translation_prompts import (
         build_chat_messages,
+        chat_template_extra_kwargs,
         clean_translation,
         dynamic_max_tokens,
     )
@@ -1832,7 +1846,11 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
             target_lang=TARGET_LANG,
             model_family=family,
         )
-        prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+        prompt = tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            **chat_template_extra_kwargs(model_family=family),
+        )
         gen_kwargs = dict(
             prompt=prompt,
             max_tokens=max_tok,
@@ -4097,7 +4115,8 @@ def main():
         action="store_true",
         default=None,
         help=(
-            "Enable TurboQuant KV cache compression on MLX (requires mlx-optiq). "
+            "Request TurboQuant KV cache on MLX (soft-disabled on mlx-optiq 0.4.x "
+            "with no drop-in TurboQuantKVCache for mlx_lm.generate). "
             "Overrides STARK_TRANSLATION__TURBOQUANT when set."
         ),
     )

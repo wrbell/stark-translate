@@ -12,10 +12,10 @@ after pipeline parallelism (#168) and the Gemma 4 CUDA cutover (v2026.5).
 |-----------|-------------|-----------|---------------|
 | Finals MT family | Gemma 4 E4B Q4_K_M (`LlamaCppEngine`, `model_family=gemma4`) | Default: TranslateGemma 4-bit; **opt-in** Gemma 4 OptiQ E4B | Prompt/cleanup shared; model flip pending soak |
 | Instruct prompt | `engines/translation_prompts.gemma4_user_content` | Same helper | **Aligned** |
-| Thinking flag | `chat_template_kwargs.enable_thinking=false` (llama.cpp) | N/A (mlx-lm) | Documented |
+| Thinking flag | `chat_template_kwargs.enable_thinking=false` (llama.cpp) | `apply_chat_template(..., enable_thinking=False)` via `chat_template_extra_kwargs` | **Aligned** |
 | EOS / preamble | Strip `<end_of_turn>` + “Here is the translation:” | Same `clean_translation()` | **Aligned** |
 | Spec / MTS | llama.cpp `-md` (bench: loss on single GPU) | Gemma-4 `-assistant` drafter via `--mts` (gamma=1) | Wired; measure on Mac |
-| TurboQuant KV | N/A (use `-ctk q8_0`) | `--turboquant` / mlx-optiq | MLX-only |
+| TurboQuant KV | N/A (use `-ctk q8_0`) | `--turboquant` requested → soft-disabled on mlx-optiq 0.4.x (no drop-in `TurboQuantKVCache` for `mlx_lm.generate`; OptiQ KV lives in serve/runtime) | Unavailable on Mac live path today |
 | STT model | W16 CT2 turbo (`adapters/whisper_turbo_ct2/active/`) | Stock `mlx-community/whisper-large-v3-turbo` | Same size family; **fine-tune CUDA-only** |
 | STT confidence | avg_logprob / compression_ratio / no_speech | Same on `MLXWhisperEngine` | **Aligned** |
 | Partials timestamps | `word_timestamps=False` | Same | **Aligned** |

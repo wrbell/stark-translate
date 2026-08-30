@@ -113,14 +113,34 @@ def clean_translation(
     *,
     model_family: str = "translategemma",
 ) -> str:
-    """Strip EOS markers and Gemma 4 preamble from a raw generation string."""
+    """Strip EOS markers and Gemma 4 preamble / thinking leakage from raw output."""
     clean = raw.split("<end_of_turn>")[0].strip()
     if model_family == "gemma4":
+        # Thinking / channel markers (Gemma 4 chat template) — keep text before them.
+        # Longer markers first so "<turn|><|channel>" wins over "<|channel>".
+        for marker in ("<turn|><|channel>", "<|channel>", "<|turn>thought"):
+            if marker in clean:
+                clean = clean.split(marker)[0].strip()
+                break
+        while clean.endswith("<turn|>"):
+            clean = clean[: -len("<turn|>")].strip()
         for prefix in GEMMA4_PREAMBLES:
             if clean.startswith(prefix):
                 clean = clean[len(prefix) :].strip()
                 break
     return clean
+
+
+def chat_template_extra_kwargs(*, model_family: str = "translategemma") -> dict[str, Any]:
+    """Extra kwargs for ``tokenizer.apply_chat_template`` (MLX / HF parity).
+
+    Gemma 4 defaults to chain-of-thought unless ``enable_thinking=False``.
+    llama.cpp passes the same via ``chat_template_kwargs``; mlx-lm accepts the
+    flag as a top-level ``apply_chat_template`` keyword.
+    """
+    if model_family == "gemma4":
+        return {"enable_thinking": False}
+    return {}
 
 
 def dynamic_max_tokens(
