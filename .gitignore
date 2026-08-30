@@ -109,9 +109,13 @@ training/run_overnight.sh
 
 # GGUF / GPTQ model exports
 models/
+training/imatrix_*.gguf  # v2026.11 — imatrix calibration files; reproducible via training/build_imatrix_corpus.py + llama-imatrix
 
 # Benchmark outputs
 metrics/gemma4_benchmark/
+metrics/translate_bench/
+metrics/stt_bench/
+metrics/gemma4_optim_phase2/
 
 # Misc logs & local notes
 training_monitor.log

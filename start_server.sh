@@ -74,7 +74,15 @@ fi
 # Launch llama-server in the background and emit READY when it answers /health.
 # Caller scripts can `until grep -q READY <log>` to gate startup. SIGINT/SIGTERM
 # in the foreground kill the child so Ctrl-C still works as expected.
-"$SERVER" -m "$TARGET" --host "$HOST" --port "$PORT" -ngl 999 -c 512 -ctk q8_0 \
+# v2026.9 flag set (see docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md):
+#   -ctk q8_0  — quantize K cache (kept from v2026.5)
+#   -ctv q8_0  — quantize V cache (added v2026.9: −3% p50, no canary loss)
+# Skipped: --flash-attn (regressed E4B by +56% on b8782; revisit on a future
+# llama.cpp version with Gemma 4 SWA-aware FA kernels). GGML_CUDA_GRAPH_OPT
+# is already compiled in (USE_GRAPHS=1 in build_info), no env-var needed.
+# llama.cpp pinned to commit d8794eecd / build b9022 (2026-05-04). Older
+# builds (b8782 / e97492369) work but lack 240 commits of upstream fixes.
+"$SERVER" -m "$TARGET" --host "$HOST" --port "$PORT" -ngl 999 -c 512 -ctk q8_0 -ctv q8_0 \
     $([ "$NO_DRAFT" = false ] && [ -f "$DRAFT" ] && echo "-md $DRAFT --draft 16 --draft-min 5") &
 SERVER_PID=$!
 trap 'kill -TERM $SERVER_PID 2>/dev/null; wait $SERVER_PID 2>/dev/null; exit 0' INT TERM
