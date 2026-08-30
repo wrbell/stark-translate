@@ -211,7 +211,7 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 | 12B on 16GB GPU | 4-bit fits at 7.3 GB; 8-bit OOM |
 | Separate venvs | Yes — `requirements-mac.txt` + `requirements-nvidia.txt` |
 | STT model | Whisper Large-V3-Turbo (both Mac + CUDA) |
-| Pipeline threading | MLX: 1 worker (Metal not thread-safe); CUDA: 2 workers |
+| Pipeline threading | MLX: 2 workers (mlx >= 0.31.2 thread-local streams); CUDA: 2 workers |
 | Training data alignment | Deepgram word timestamps + faster-whisper chunk boundaries |
 | OOM mitigation | Sharded Arrow writes (1000 rows), 12GB memory cap |
 

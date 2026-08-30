@@ -470,9 +470,10 @@ class PipelineSettings(BaseSettings):
     multiprocess: bool = Field(
         default=False,
         description=(
-            "Run STT and translation in separate OS processes for true GPU overlap. "
-            "Each process gets its own Metal context, avoiding the MLX thread-safety issue. "
-            "Improves throughput ~33% for consecutive utterances."
+            "Optional: run STT and translation in separate OS processes (separate Metal "
+            "contexts). Default Mac path already overlaps STT∥translation in-process "
+            "via MLX >= 0.31.2 thread-local streams (max_workers=2). Use this as an "
+            "escape hatch for debugging or older mlx builds."
         ),
     )
 

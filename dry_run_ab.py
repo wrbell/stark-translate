@@ -115,9 +115,22 @@ WHISPER_MODEL_DISTIL = "wbell7/distil-whisper-large-v3.5-mlx"  # Fallback: if Tu
 
 # Pipeline thread pool for GPU inference. Initialized in main_async() after
 # backend detection:
-#   - MLX:  max_workers=1 (Metal is NOT thread-safe — SIGSEGV on concurrent calls)
+#   - MLX:  max_workers=2 (MLX >= 0.31.2 thread-local streams — STT∥translation)
 #   - CUDA: max_workers=2 (thread-safe — enables true STT/Translation overlap)
 _pipeline_pool = None  # type: ThreadPoolExecutor | None
+
+
+def pipeline_pool_max_workers(backend: str) -> int:
+    """Return ThreadPoolExecutor size for STT/translation overlap.
+
+    CUDA has long been thread-safe (2 workers). As of MLX 0.31.2, independent
+    models may also run concurrently on separate threads (thread-local streams),
+    so Mac matches CUDA. CPU stays at 1.
+    """
+    if backend in ("cuda", "mlx"):
+        return 2
+    return 1
+
 
 # Separate pool for PyTorch-only work (MarianMT). Runs concurrently with the
 # MLX pipeline pool — safe because MarianMT uses PyTorch/CPU, not Metal GPU.
@@ -995,6 +1008,9 @@ def load_whisper(backend="mlx"):
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
             print(f"  Whisper Distil ready ({time.time() - t0:.1f}s)")
+        # Materialize cached Whisper weights for pool-thread use (MLX >= 0.31.2).
+        if hasattr(mx, "synchronize"):
+            mx.synchronize()
         return model_id  # mlx_whisper uses model_id per call, no persistent object
 
     elif backend in ("cuda", "cpu"):
@@ -1073,6 +1089,14 @@ def load_mlx_gemma(model_id, label, adapter_path=None):
             print(f"  WARNING: TurboQuant initialization failed: {exc}")
 
     elapsed = time.time() - t0
+    # Materialize weights on the load thread so pool workers can run
+    # independent inference (MLX >= 0.31.2 thread-local streams).
+    try:
+        from engines.mlx_engine import materialize_mlx_model
+
+        materialize_mlx_model(model)
+    except Exception as exc:
+        print(f"  WARNING: could not materialize MLX weights: {exc}")
     print(f"  {label} ready ({elapsed:.1f}s)")
     return model, tokenizer
 
@@ -2077,9 +2101,9 @@ async def process_partial(audio_data, utterance_id):
         return
 
     # [FIX] Skip partial when the pipeline is falling behind.
-    # Partials and finals share the same max_workers=1 MLX pool — every partial
-    # that runs while finals are queued adds ~400ms of delay, compounding over
-    # time into multi-second queue starvation.
+    # Partials and finals share the MLX/CUDA pipeline pool (max_workers=2).
+    # Every partial that runs while finals are queued still adds latency;
+    # shed when the chunk queue is already backed up.
     # Threshold of >1: queue=0 (idle) and queue=1 (next chunk just arrived) are
     # normal — partials still run for live UX feedback.  queue>=2 means the
     # pipeline is behind — shed partials so finals can drain the backlog.
@@ -2254,11 +2278,11 @@ async def process_partial(audio_data, utterance_id):
 #     3. When STT(N) completes → broadcast English → submit Translation(N)
 #     4. When Translation(N) completes → broadcast Spanish → log results
 #
-# NOTE: MLX Metal is NOT thread-safe for concurrent GPU operations.
-# The pipeline pool uses max_workers=1 to serialize all MLX calls.
-# The overlap benefit comes from the async architecture: while MLX
-# inference runs on the worker thread, the audio loop continues
-# capturing and the VAD thread keeps processing — no audio is dropped.
+# NOTE: MLX >= 0.31.2 supports independent concurrent GPU ops via thread-local
+# streams. The pipeline pool uses max_workers=2 on both MLX and CUDA so
+# STT(N) can overlap Translation(N-1). Weights are materialised on the load
+# thread (mx.eval / synchronize) before pool handoff. --multiprocess remains
+# an optional escape hatch (separate Metal contexts / processes).
 #
 # The audio loop never blocks on STT or translation, so VAD and audio
 # capture continue uninterrupted.
@@ -2828,14 +2852,10 @@ async def _pipeline_coordinator():
                 }
             )
 
-            # --- Wait for previous translation to finish before starting new one ---
-            # On MLX: Metal GPU thrashes with concurrent translations — must serialize.
-            # On CUDA: thread-safe, concurrent translations run on separate streams.
-            if BACKEND != "cuda" and active_translation_task is not None:
-                await active_translation_task
-
             # --- Start translation as a fire-and-forget task ---
-            # This task will run concurrently with the next chunk's STT
+            # STT(N+1) may overlap this translation on the 2-worker pool
+            # (CUDA and MLX >= 0.31.2). The translation lock still serializes
+            # translate-vs-translate on the same models.
             active_translation_task = asyncio.create_task(
                 _pipeline_translate_and_finalize(
                     cid,
@@ -3952,7 +3972,11 @@ def main():
         "--multiprocess",
         action="store_true",
         default=False,
-        help="Run STT and translation in separate OS processes for GPU overlap (~33%% throughput gain)",
+        help=(
+            "Optional: run STT and translation in separate OS processes (separate Metal "
+            "contexts). Default Mac path already overlaps in-process (MLX >= 0.31.2). "
+            "Escape hatch for debugging / older mlx."
+        ),
     )
     parser.add_argument(
         "--music-threshold",
@@ -4084,12 +4108,12 @@ def main():
 
     # --- Create pipeline thread pool (backend-dependent) ---
     global _pipeline_pool
-    if BACKEND == "cuda":
-        # CUDA is thread-safe: 2 workers enable true STT/Translation overlap
-        _pipeline_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="cuda-pipeline")
-    else:
-        # MLX Metal is NOT thread-safe: must serialize all GPU work
-        _pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
+    # Both CUDA and MLX (>=0.31.2) support independent concurrent inference.
+    _n_workers = pipeline_pool_max_workers(BACKEND)
+    _pipeline_pool = ThreadPoolExecutor(
+        max_workers=_n_workers,
+        thread_name_prefix=f"{BACKEND}-pipeline",
+    )
 
     # --- Resolve language direction ---
     global SOURCE_LANG, TARGET_LANG, WHISPER_PROMPT

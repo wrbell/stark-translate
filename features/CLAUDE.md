@@ -43,4 +43,4 @@ Features feed into and benefit from the active learning cycle:
 
 - **Diarization → fine-tuning**: Speaker-labeled segments improve per-speaker WER tracking. Enables targeted correction of worst-performing speaker segments.
 - **Verse extraction → quality checks**: If a verse reference is detected, spot-check the translation against glossary entries for that verse's key theological terms (e.g., "atonement" → "expiación").
-- **Summary generation → MLX thread safety**: Uses the same MLX single-threaded executor as translation. Must be queued after live session ends, not during — concurrent MLX inference causes SIGSEGV.
+- **Summary generation → MLX thread affinity**: Uses the same MLX pipeline pool as live translation. Prefer queuing summaries after the live session ends so they do not contend with STT∥translation overlap. MLX >= 0.31.2 allows independent concurrent eval, but session-end still keeps the live path predictable.
