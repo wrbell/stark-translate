@@ -96,31 +96,17 @@ class TestGemma4PreambleStripping:
     """Test that Gemma 4 preamble text is stripped from output."""
 
     def test_strips_preamble(self):
-        from engines.cuda_engine import CUDAGemmaStreamingEngine
+        from engines.translation_prompts import clean_translation
 
-        with (
-            patch("engines.cuda_engine.TORCH_AVAILABLE", True),
-            patch("engines.cuda_engine.torch") as mock_torch,
-        ):
-            mock_torch.cuda.is_available.return_value = True
-            CUDAGemmaStreamingEngine(model_family="gemma4")
-
-            # Simulate the preamble stripping logic
-            result = "Here is the translation:\nLa gracia de Dios es suficiente.<end_of_turn>"
-            clean = result.split("<end_of_turn>")[0].strip()
-            for prefix in ("Here is the translation:\n", "Here is the translation:"):
-                if clean.startswith(prefix):
-                    clean = clean[len(prefix) :].strip()
-                    break
-            assert clean == "La gracia de Dios es suficiente."
+        result = "Here is the translation:\nLa gracia de Dios es suficiente.<end_of_turn>"
+        clean = clean_translation(result, model_family="gemma4")
+        assert clean == "La gracia de Dios es suficiente."
 
     def test_no_strip_when_no_preamble(self):
+        from engines.translation_prompts import clean_translation
+
         result = "La gracia de Dios es suficiente.<end_of_turn>"
-        clean = result.split("<end_of_turn>")[0].strip()
-        for prefix in ("Here is the translation:\n", "Here is the translation:"):
-            if clean.startswith(prefix):
-                clean = clean[len(prefix) :].strip()
-                break
+        clean = clean_translation(result, model_family="gemma4")
         assert clean == "La gracia de Dios es suficiente."
 
 

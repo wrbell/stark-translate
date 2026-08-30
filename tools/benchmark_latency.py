@@ -1304,8 +1304,8 @@ Examples:
         "--only",
         type=str,
         default=None,
-        choices=["stt", "translate", "vad", "io", "resample", "metal", "e2e"],
-        help="Run only a specific benchmark category",
+        choices=["stt", "translate", "vad", "io", "resample", "metal", "e2e", "mlx-accel"],
+        help="Run only a specific benchmark category (mlx-accel = Gemma4 OptiQ/MTS/TQ matrix)",
     )
     parser.add_argument("--quick", action="store_true", help="Quick mode: fewer runs for faster results")
     parser.add_argument(
@@ -1412,6 +1412,18 @@ Examples:
         print("END-TO-END PIPELINE BENCHMARKS")
         print(f"{'=' * 70}")
         all_results["e2e"] = bench_e2e_suite(audio, n_runs, n_warmup)
+
+    # --- MLX Gemma4 / TG accel matrix (Mac Metal) ---
+    if args.only == "mlx-accel":
+        print(f"\n{'=' * 70}")
+        print("MLX ACCEL MATRIX (TG vs Gemma4 OptiQ ± MTS ± TurboQuant)")
+        print(f"{'=' * 70}")
+        from tools.benchmark_mlx_accel import bench_mlx_gemma4_accel
+
+        all_results["mlx_accel"] = bench_mlx_gemma4_accel(
+            runs=n_runs,
+            warmup=n_warmup,
+        )
 
     # --- Report ---
     generate_report(all_results)

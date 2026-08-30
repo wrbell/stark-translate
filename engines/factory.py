@@ -175,7 +175,7 @@ def create_stt_engine(
 
 
 def _mlx_gemma_settings_kwargs() -> dict[str, Any]:
-    """Pull TurboQuant / model_family defaults from settings for MLX Gemma.
+    """Pull TurboQuant / model_family / MTS defaults from settings for MLX Gemma.
 
     Returns an empty dict if settings cannot be imported (keeps factory usable
     in minimal test environments). Callers may still override via ``**kwargs``.
@@ -184,14 +184,55 @@ def _mlx_gemma_settings_kwargs() -> dict[str, Any]:
         from settings import settings as _settings
 
         ts = _settings.translation
-        return {
+        out: dict[str, Any] = {
             "use_turboquant": ts.turboquant,
             "turboquant_key_bits": ts.turboquant_key_bits,
             "turboquant_val_bits": ts.turboquant_val_bits,
             "model_family": ts.model_family,
+            "num_draft_tokens": ts.num_draft_tokens,
         }
+        # When Gemma 4 + MTS is enabled, attach the assistant drafter id.
+        if ts.model_family == "gemma4" and ts.mlx_mts and ts.mlx_drafter_gemma4:
+            out["draft_model_id"] = ts.mlx_drafter_gemma4
+            # Metal-optimal draft depth for Gemma-4 assistant is 1 (mlx-optiq).
+            out.setdefault("num_draft_tokens", 1)
+            if ts.num_draft_tokens == 3:
+                # Settings default is TG 4B→12B depth; override for MTS.
+                out["num_draft_tokens"] = 1
+        return out
     except Exception:
         return {}
+
+
+def resolve_mlx_translation_model_id(
+    model_id: str | None = None,
+    *,
+    model_family: str | None = None,
+    size: str = "e4b",
+) -> str:
+    """Pick the MLX translation model id for the active family.
+
+    ``size`` is ``e4b`` / ``e2b`` for Gemma 4, or ignored for TranslateGemma
+    (always returns the 4B TG default when model_id is None).
+    """
+    if model_id is not None:
+        return model_id
+    try:
+        from settings import settings as _settings
+
+        ts = _settings.translation
+        family = model_family or ts.model_family
+        if family == "gemma4":
+            if size.lower() in ("e2b", "2b", "small"):
+                return ts.mlx_model_gemma4_e2b
+            return ts.mlx_model_gemma4_e4b
+        return ts.mlx_model_4b
+    except Exception:
+        if model_family == "gemma4":
+            if size.lower() in ("e2b", "2b", "small"):
+                return "mlx-community/gemma-4-e2b-it-OptiQ-4bit"
+            return "mlx-community/gemma-4-e4b-it-OptiQ-4bit"
+        return "mlx-community/translategemma-4b-it-4bit"
 
 
 def create_translation_engine(
@@ -219,10 +260,12 @@ def create_translation_engine(
         streaming:           Use streaming engine (CUDA HF only).
         assistant_model_id:  Optional draft model for HF spec decode (CUDA only).
                              For llama.cpp spec decode, pass ``-md`` to llama-server
-                             instead.
+                             instead. For MLX Gemma-4 MTS, prefer
+                             ``draft_model_id=`` / ``STARK_TRANSLATE_MLX_MTS``.
         **kwargs:            Forwarded to the engine constructor. For MLX Gemma,
                              also accepts ``adapter_path``, ``use_turboquant``,
-                             and TurboQuant bit settings.
+                             ``draft_model_id``, ``num_draft_tokens``, and
+                             TurboQuant bit settings.
 
     Returns:
         An *unloaded* ``TranslationEngine`` instance.  Call ``.load()`` first.
@@ -252,8 +295,11 @@ def create_translation_engine(
         for key, value in _mlx_gemma_settings_kwargs().items():
             kwargs.setdefault(key, value)
 
+        family = kwargs.get("model_family", "translategemma")
+        resolved = resolve_mlx_translation_model_id(model_id, model_family=family)
+
         return MLXGemmaEngine(
-            model_id=model_id or "mlx-community/translategemma-4b-it-4bit",
+            model_id=resolved,
             **kwargs,
         )
     elif backend == "cuda":

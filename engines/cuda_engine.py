@@ -23,6 +23,11 @@ from engines.base import (
     TranslationEngine,
     TranslationResult,
 )
+from engines.translation_prompts import (
+    build_chat_messages,
+    clean_translation,
+    dynamic_max_tokens,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -464,14 +469,12 @@ class CUDAGemmaEngine(TranslationEngine):
         if self._model is None or self._tokenizer is None:
             return TranslationResult(text="(model not loaded)", latency_ms=0.0)
 
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "source_lang_code": source_lang, "target_lang_code": target_lang, "text": text}
-                ],
-            }
-        ]
+        messages = build_chat_messages(
+            text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            model_family="translategemma",
+        )
         prompt = self._tokenizer.apply_chat_template(
             messages,
             add_generation_prompt=True,
@@ -479,9 +482,7 @@ class CUDAGemmaEngine(TranslationEngine):
         )
         prompt = prompt.to("cuda")
 
-        # Dynamic max-tokens cap: Spanish is ~15-25% longer than English
-        input_words = len(text.split())
-        max_tok = max(32, int(input_words * 1.8))
+        max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
 
         t0 = time.perf_counter()
         with torch.no_grad():
@@ -490,7 +491,7 @@ class CUDAGemmaEngine(TranslationEngine):
         result = self._tokenizer.decode(generated, skip_special_tokens=False)
         latency_ms = (time.perf_counter() - t0) * 1000
 
-        clean = result.split("<end_of_turn>")[0].strip()
+        clean = clean_translation(result, model_family="translategemma")
         out_tokens = len(generated)
         gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
 
@@ -708,8 +709,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         if not self._loaded:
             raise RuntimeError("Engine not loaded -- call load() first")
 
-        input_words = len(text.split())
-        max_tok = max(32, int(input_words * 1.8))
+        max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
 
         t0 = time.perf_counter()
 
@@ -745,13 +745,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         result = self._tokenizer.decode(generated, skip_special_tokens=False)
         latency_ms = (time.perf_counter() - t0) * 1000
 
-        clean = result.split("<end_of_turn>")[0].strip()
-        # Gemma 4 instruct may prepend preamble like "Here is the translation:"
-        if self._model_family == "gemma4":
-            for prefix in ("Here is the translation:\n", "Here is the translation:"):
-                if clean.startswith(prefix):
-                    clean = clean[len(prefix) :].strip()
-                    break
+        clean = clean_translation(result, model_family=self._model_family)
         out_tokens = len(generated)
         gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
 
@@ -787,8 +781,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
 
         from transformers import TextIteratorStreamer
 
-        input_words = len(text.split())
-        max_tok = max(32, int(input_words * 1.8))
+        max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
 
         if self._prompt_cache_pkv is not None and self._suffix_tokens:
             text_ids = self._tokenizer.encode(text, add_special_tokens=False)
@@ -843,7 +836,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         gen_thread.join(timeout=5.0)
         latency_ms = (time.perf_counter() - t0) * 1000
 
-        clean = accumulated.split("<end_of_turn>")[0].strip()
+        clean = clean_translation(accumulated, model_family=self._model_family)
         gen_tps = tokens_generated / (latency_ms / 1000) if latency_ms > 0 else 0.0
 
         return TranslationResult(
@@ -866,33 +859,12 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         target_lang: str,
     ) -> object:
         """Build the full chat template prompt as input_ids tensor on CUDA."""
-        if self._model_family == "gemma4":
-            # Gemma 4 instruct: plain text translation instruction
-            lang_names = {"en": "English", "es": "Spanish", "hi": "Hindi", "zh": "Chinese"}
-            src_name = lang_names.get(source_lang, source_lang)
-            tgt_name = lang_names.get(target_lang, target_lang)
-            messages = [
-                {
-                    "role": "user",
-                    "content": f"Translate the following {src_name} text to {tgt_name}. "
-                    f"Output only the translation, nothing else.\n\n{text}",
-                }
-            ]
-        else:
-            # TranslateGemma: structured content with lang codes
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "source_lang_code": source_lang,
-                            "target_lang_code": target_lang,
-                            "text": text,
-                        }
-                    ],
-                }
-            ]
+        messages = build_chat_messages(
+            text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            model_family=self._model_family,
+        )
         prompt = self._tokenizer.apply_chat_template(
             messages,
             add_generation_prompt=True,

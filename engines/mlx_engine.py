@@ -22,6 +22,11 @@ from engines.base import (
     TTSEngine,
     TTSResult,
 )
+from engines.translation_prompts import (
+    build_chat_messages,
+    clean_translation,
+    dynamic_max_tokens,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -428,6 +433,10 @@ class MLXGemmaEngine(TranslationEngine):
         use_turboquant:  Enable TurboQuant KV cache (requires mlx-optiq).
         turboquant_key_bits / turboquant_val_bits: Quantization bits for TQ.
         model_family:    ``translategemma`` (structured lang codes) or ``gemma4``.
+        draft_model_id:  Optional mlx-lm draft / Gemma-4 ``-assistant`` model for
+                         speculative decoding (MTS). Loaded alongside the target.
+        num_draft_tokens: Tokens drafted per verify step (gamma). Default 1 — optimal
+                          on Metal for Gemma-4 assistant drafters per mlx-optiq.
     """
 
     def __init__(
@@ -440,6 +449,8 @@ class MLXGemmaEngine(TranslationEngine):
         turboquant_val_bits: int = 4,
         model_family: str = "translategemma",
         adapter_path: str | None = None,
+        draft_model_id: str | None = None,
+        num_draft_tokens: int = 1,
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
@@ -453,9 +464,12 @@ class MLXGemmaEngine(TranslationEngine):
         self._turboquant_val_bits = turboquant_val_bits
         self._model_family = model_family
         self._adapter_path = adapter_path
+        self._draft_model_id = draft_model_id
+        self._num_draft_tokens = num_draft_tokens
 
         self._model = None
         self._tokenizer = None
+        self._draft_model = None
         self._prompt_cache_template = None
         self._suffix_tokens = None
         self._loaded = False
@@ -495,6 +509,25 @@ class MLXGemmaEngine(TranslationEngine):
         elapsed = time.time() - t0
         logger.info("%s loaded (%.1fs)", self._model_id, elapsed)
 
+        # -- Optional draft / Gemma-4 assistant model for speculative decode --
+        # mlx-lm accepts draft_model= on generate(). For Gemma-4 OptiQ, pass the
+        # matching ``-assistant-bf16`` id (E4B only). TG A/B historically used
+        # 4B as draft for 12B via dry_run_ab; that path still works when
+        # draft_model_id points at a compatible mlx-lm checkpoint.
+        if self._draft_model_id:
+            logger.info(
+                "Loading draft/MTS model %s (num_draft_tokens=%d)...",
+                self._draft_model_id,
+                self._num_draft_tokens,
+            )
+            t1 = time.time()
+            self._draft_model, _draft_tok = mlx_load(self._draft_model_id)
+            logger.info("Draft model loaded (%.1fs)", time.time() - t1)
+            # Speculative decode is incompatible with prompt KV cache
+            if self._use_prompt_cache:
+                logger.info("Disabling prompt cache (incompatible with draft_model)")
+                self._use_prompt_cache = False
+
         # -- TurboQuant KV cache compression (mlx-optiq) ----------------------
         # Replaces the default KV cache with a quantized version that uses
         # 4.6x less memory.  Near-lossless at key_bits=3, val_bits=4.
@@ -526,6 +559,8 @@ class MLXGemmaEngine(TranslationEngine):
         # Materialize weights on the load thread so pool workers can run
         # independent inference (MLX >= 0.31.2 thread-local streams).
         materialize_mlx_model(self._model)
+        if self._draft_model is not None:
+            materialize_mlx_model(self._draft_model)
 
         self._loaded = True
 
@@ -549,12 +584,8 @@ class MLXGemmaEngine(TranslationEngine):
         if self._model is None or self._tokenizer is None:
             return TranslationResult(text="(model not loaded)", latency_ms=0.0)
 
-        # Dynamic max-tokens cap: Spanish averages ~1.3 words per English word,
-        # but subword tokenization adds ~1.5-2x overhead.  3.0x words-to-tokens
-        # gives comfortable headroom without increasing latency (generation
-        # stops at EOS regardless).
-        input_words = len(text.split())
-        max_tok = max(64, int(input_words * 3.0))
+        # Dynamic max-tokens cap via shared helper (same formula as CUDA Gemma path).
+        max_tok = dynamic_max_tokens(text)
 
         # Prompt cache is pre-built for en→es translategemma only; skip for other configs
         use_cache = (
@@ -577,31 +608,12 @@ class MLXGemmaEngine(TranslationEngine):
                 prompt_cache=cached,
             )
         else:
-            if self._model_family == "gemma4":
-                lang_names = {"en": "English", "es": "Spanish", "hi": "Hindi", "zh": "Chinese"}
-                src_name = lang_names.get(source_lang, source_lang)
-                tgt_name = lang_names.get(target_lang, target_lang)
-                messages = [
-                    {
-                        "role": "user",
-                        "content": f"Translate the following {src_name} text to {tgt_name}. "
-                        f"Output only the translation, nothing else.\n\n{text}",
-                    }
-                ]
-            else:
-                messages = [
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "source_lang_code": source_lang,
-                                "target_lang_code": target_lang,
-                                "text": text,
-                            }
-                        ],
-                    }
-                ]
+            messages = build_chat_messages(
+                text,
+                source_lang=source_lang,
+                target_lang=target_lang,
+                model_family=self._model_family,
+            )
             prompt = self._tokenizer.apply_chat_template(
                 messages,
                 add_generation_prompt=True,
@@ -612,17 +624,18 @@ class MLXGemmaEngine(TranslationEngine):
                 verbose=False,
             )
 
+        # Optional Gemma-4 assistant-drafter / mlx-lm draft_model speculative decode
+        if self._draft_model is not None and self._num_draft_tokens > 0:
+            gen_kwargs["draft_model"] = self._draft_model
+            gen_kwargs["num_draft_tokens"] = self._num_draft_tokens
+            # Prompt cache is incompatible with speculative decoding
+            gen_kwargs.pop("prompt_cache", None)
+
         t0 = time.perf_counter()
         result = generate(self._model, self._tokenizer, **gen_kwargs)
         latency_ms = (time.perf_counter() - t0) * 1000
 
-        clean = result.split("<end_of_turn>")[0].strip()
-        # Gemma 4 instruct may prepend preamble before translation
-        if self._model_family == "gemma4":
-            for prefix in ("Here is the translation:\n", "Here is the translation:"):
-                if clean.startswith(prefix):
-                    clean = clean[len(prefix) :].strip()
-                    break
+        clean = clean_translation(result, model_family=self._model_family)
         out_tokens = len(self._tokenizer.encode(clean))
         gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
 
@@ -636,6 +649,7 @@ class MLXGemmaEngine(TranslationEngine):
         """Release model and caches from memory."""
         self._model = None
         self._tokenizer = None
+        self._draft_model = None
         self._prompt_cache_template = None
         self._suffix_tokens = None
         self._loaded = False
