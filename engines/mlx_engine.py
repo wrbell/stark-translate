@@ -47,6 +47,7 @@ except ImportError:
     mlx_whisper = None
     MLX_AVAILABLE = False
 
+
 def materialize_mlx_model(model) -> None:
     """Eagerly evaluate model parameters for cross-thread use (MLX >= 0.31.2).
 
