@@ -4271,7 +4271,7 @@ def main():
         MLX_MODEL_A = settings.translation.mlx_model_4b
     MLX_MODEL_B = settings.translation.mlx_model_12b
 
-    # Gemma-4 MTS: prefer γ=1 on Metal unless user explicitly set --num-draft-tokens
+    # Gemma-4 MTS: prefer gamma=1 on Metal unless user explicitly set --num-draft-tokens
     if MODEL_FAMILY == "gemma4" and USE_MTS and args.num_draft_tokens == 3:
         NUM_DRAFT_TOKENS = 1
     ADAPTER_DIR_A = args.adapter_dir

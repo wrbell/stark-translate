@@ -32,7 +32,7 @@ after pipeline parallelism (#168) and the Gemma 4 CUDA cutover (v2026.5).
 # E4B OptiQ (CUDA parity candidate)
 python dry_run_ab.py --backend mlx --model-family gemma4 --gemma4-size e4b
 
-# + assistant-drafter MTS (γ=1 on Metal)
+# + assistant-drafter MTS (gamma=1 on Metal)
 python dry_run_ab.py --backend mlx --model-family gemma4 --mts
 
 # + TurboQuant
