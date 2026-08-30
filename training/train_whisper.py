@@ -279,14 +279,16 @@ def fine_tune_whisper(
     resume_from_checkpoint=False,
     accent_balance=True,
     init_from_adapter=None,
+    use_dora=False,
 ):
-    """LoRA fine-tuning for Whisper on church audio.
+    """LoRA/DoRA fine-tuning for Whisper on church audio.
 
     Research-validated config (LoRA-Whisper, Interspeech 2024):
     - r=32, alpha=64 (most commonly validated)
     - Both encoder + decoder (encoder for acoustic adaptation, decoder for vocab)
     - bf16 with gradient checkpointing on Ada architecture
     - ~6-8 GB VRAM (Turbo) / ~8-10 GB (Distil/large-v3), fits comfortably on A2000 Ada
+    - W17: expand target_modules + optional DoRA (~15-20% VRAM overhead)
     """
     if target_modules is None:
         target_modules = ["q_proj", "v_proj"]
@@ -303,18 +305,25 @@ def fine_tune_whisper(
         quantization_config=bnb_config,
     )
 
-    # LoRA config — encoder + decoder
+    # LoRA/DoRA config — encoder + decoder
     # CRITICAL: Do NOT set task_type. PEFT's SEQ_2_SEQ_LM and CAUSAL_LM wrappers
     # both inject input_ids into forward(), which Whisper doesn't accept (it uses
     # input_features). Omitting task_type creates a base PeftModel that passes
     # through to WhisperForConditionalGeneration.forward() cleanly.
-    lora_config = LoraConfig(
+    # DoRA (use_dora=True) decouples magnitude/direction — better domain shift
+    # adaptation per ICASSP/DoRA literature, at ~15-20% VRAM overhead on A2000.
+    # Default off for back-compat; W17 recipe enables via --use-dora.
+    lora_kwargs = dict(
         r=lora_r,
         lora_alpha=lora_alpha,
         target_modules=target_modules,
         lora_dropout=0.05,
         bias="none",
     )
+    if use_dora:
+        lora_kwargs["use_dora"] = True
+        logger.info("DoRA enabled (use_dora=True)")
+    lora_config = LoraConfig(**lora_kwargs)
     model = get_peft_model(model, lora_config)
 
     # Curriculum learning: load pre-trained adapter weights with fresh optimizer state.
@@ -662,6 +671,11 @@ def main():
         action="store_true",
         help="Use chunked inference during evaluation (faster but may have stitching artifacts)",
     )
+    parser.add_argument(
+        "--use-dora",
+        action="store_true",
+        help="Enable DoRA (magnitude/direction split). ~15-20%% VRAM overhead; used by W17 recipe.",
+    )
     args = parser.parse_args()
 
     # Resolve resume_from_checkpoint: True means auto-detect last checkpoint
@@ -682,6 +696,7 @@ def main():
         resume_from_checkpoint=resume,
         accent_balance=args.accent_balance,
         init_from_adapter=args.init_from,
+        use_dora=args.use_dora,
     )
 
 

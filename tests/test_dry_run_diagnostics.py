@@ -421,6 +421,11 @@ class TestIsGarbageText:
 
         assert _is_garbage_text("no no no no no") is False
 
+    def test_low_unique_token_ratio_garbage(self):
+        from dry_run_ab import _is_garbage_text
+
+        assert _is_garbage_text("the the the the the the the the the the") is True
+
     def test_empty_string(self):
         from dry_run_ab import _is_garbage_text
 

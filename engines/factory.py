@@ -53,7 +53,8 @@ def create_stt_engine(
                                  are available.
         stt_backend:             Whisper implementation choice within a hardware
                                  tier: "auto" (default), "faster-whisper", "hf",
-                                 or "mlx". On cuda/cpu, "auto" → "faster-whisper".
+                                 "mlx", or "parakeet" (EN-only NeMo accelerator).
+                                 On cuda/cpu, "auto" → "faster-whisper".
                                  On mlx hardware, "auto" → "mlx".
         model_id:                Override the default model identifier.
         fallback_threshold:      avg_logprob below which to retry with fallback
@@ -157,6 +158,16 @@ def create_stt_engine(
         return FasterWhisperEngine(
             model_id=resolved_model_id,
             device=backend,
+            **merged_kwargs,
+        )
+
+    if stt_backend == "parakeet":
+        # EN-only accelerator — do not use as bilingual default.
+        from engines.parakeet_engine import ParakeetEngine
+
+        return ParakeetEngine(
+            model_id=model_id,
+            device=backend if backend in ("cuda", "cpu") else "cuda",
             **merged_kwargs,
         )
 

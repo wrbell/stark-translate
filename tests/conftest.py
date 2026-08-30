@@ -42,6 +42,9 @@ _MOCK_MODULES = [
     "streamlink",
     "soundfile",
     "deepgram",
+    "nemo",
+    "nemo.collections",
+    "nemo.collections.asr",
 ]
 
 # ---------------------------------------------------------------------------

@@ -103,13 +103,14 @@ Training data is split by a fixed cutoff date for reproducible evaluation.
 
 ## Whisper LoRA Configuration
 
-Target `q_proj` + `v_proj` (minimum); expand to `k_proj`, `out_proj`, `fc1`, `fc2` for maximum adaptation.
+Target `q_proj` + `v_proj` (minimum); expand to `k_proj`, `o_proj`, `fc1`, `fc2` for maximum adaptation (W17 recipe).
 
 | Parameter | Value | Rationale |
 |-----------|-------|-----------|
 | Rank (r) | 32 | Most validated across Whisper LoRA studies |
 | Alpha | 64 | 2× rank, standard scaling |
-| Target modules | `q_proj`, `v_proj` | Minimum viable |
+| Target modules | `q_proj`, `v_proj` (W16); + `k_proj`, `o_proj`, `fc1`, `fc2` (W17) | Minimum viable → full acoustic+lexical |
+| DoRA | off (default); `--use-dora` for W17 | ~15–20% VRAM overhead; better domain shift |
 | Dropout | 0.05 | Light regularization |
 | Learning rate | 1e-4 | Standard LoRA |
 | Batch size | 4 (effective 16 via grad accum) | Conservative for 16GB VRAM |
@@ -117,6 +118,12 @@ Target `q_proj` + `v_proj` (minimum); expand to `k_proj`, `out_proj`, `fc1`, `fc
 | Gradient checkpointing | Enabled | Essential memory savings |
 | Max steps | 4,000 (or 3–5 epochs) | First cycle |
 | VRAM usage | ~8–10 GB | Comfortable on A2000 Ada |
+
+**W17 curriculum:** `training/run_w17_curriculum.sh` — mine hard examples → WER-bounded subset → train with `--init-from` W16 + `--use-dora` + expanded modules + `--replay-ratio 0.3` → `export_ct2.py` sanity gate. Do **not** hard-only (W15 lesson).
+
+**Gemma 4 E4B domain SFT:** `training/run_gemma4_e4b_domain_sft.sh` — Unsloth QLoRA on S6-style pairs → `export_gguf.py --sanity-test` (8 canaries).
+
+**Phase 4 corpus:** `training/run_phase4_preprocess.sh` wraps `preprocess_audio.py` and writes `stark_data/cleaned/phase4_status.json`.
 
 Mix 70–80% domain data with 20–30% general English (LibriSpeech/Common Voice) for catastrophic forgetting safety.
 

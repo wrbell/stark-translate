@@ -346,60 +346,131 @@ _SHORT_PHRASE_WHITELIST = frozenset(
         "okay",
         "good morning",
         "good evening",
+        "amén",
+        "gracias",
+        "aleluya",
+        "alabado sea dios",
+        "buenos días",
+        "buenas noches",
     }
 )
 
 # ---------------------------------------------------------------------------
 # Hallucination suppression — catches phantom text Whisper generates from
 # silence, breaths, mic pops, and ambient noise.  Data-driven from analysis
-# of March 1 2026 live sessions (49 hallucinations across 611 chunks).
+# of March 1 2026 live sessions (49 hallucinations across 611 chunks),
+# extended 2026-08 for ES phantoms + whisper-guard-style metric tiers.
 # ---------------------------------------------------------------------------
 
 # Phrases Whisper hallucinates from near-silence (its most common training
 # data phrases).  Suppressed when confidence is below the paired threshold.
+# Multi-word phrases also match as substrings of the full utterance.
 _HALLUCINATION_PHRASES: dict[str, float] = {
     "thank you": 0.70,
     "thanks for watching": 0.80,
     "please subscribe": 0.80,
     "bye": 0.50,
     "you": 0.40,
+    # Spanish YouTube / silence phantoms
+    "gracias": 0.70,
+    "gracias por ver": 0.80,
+    "gracias por ver este video": 0.80,
+    "suscríbete": 0.80,
+    "suscribete": 0.80,
+    "nos vemos": 0.70,
+    "hasta luego": 0.70,
+    "subtitulos": 0.80,
+    "subtítulos": 0.80,
 }
 
 # Minimum utterance duration (seconds).  Chunks at or below this are
 # nearly always VAD floor artifacts containing only breaths/clicks.
 _MIN_UTTERANCE_DUR = 0.80  # VAD floor is 0.77s; anything <= 0.80 is suspect
 
+# Metric-based hard-drop thresholds (aligned with engines + whisper-guard)
+_NO_SPEECH_SUPPRESS = 0.6
+_NO_SPEECH_SHORT_DUR = 1.6  # seconds — stricter when utterance is short
+_COMPRESSION_RATIO_HARD_DROP = 2.4
+_UNIQUE_TOKEN_RATIO_MIN = 0.35  # below → repetitive garbage (longer text only)
+_UNIQUE_TOKEN_MIN_WORDS = 8
+
+
+def _normalize_suppress_text(text: str) -> str:
+    """Lowercase + strip trailing punctuation for phrase matching."""
+    return text.strip().lower().rstrip(".,!?;:'\"")
+
+
+def _phrase_matches(normalized: str, phrase: str) -> bool:
+    """Exact match always; multi-word phrases also match as substrings."""
+    if normalized == phrase:
+        return True
+    if " " in phrase and phrase in normalized:
+        return True
+    return False
+
+
+def _max_segment_metric(segment_meta: list | None, key: str) -> float | None:
+    """Return the max numeric value of *key* across STT segment metadata."""
+    if not segment_meta:
+        return None
+    values = []
+    for seg in segment_meta:
+        if not isinstance(seg, dict):
+            continue
+        val = seg.get(key)
+        if val is not None:
+            try:
+                values.append(float(val))
+            except (TypeError, ValueError):
+                continue
+    return max(values) if values else None
+
 
 def _should_suppress(
     text: str,
     confidence: float | None,
     utterance_dur: float | None,
+    *,
+    no_speech_prob: float | None = None,
+    compression_ratio: float | None = None,
 ) -> str | None:
     """Check if STT output should be suppressed as a hallucination.
 
     Returns a reason string if suppressed, or None if the text should be kept.
 
-    Four tiers:
-      1. Known hallucination phrases at low confidence (exact match)
+    Tiers:
+      0. Hard-drop: compression_ratio > 2.4, or no_speech_prob ≥ 0.6
+      1. Known hallucination phrases at low confidence (exact / substring)
       2. Ultra-short VAD-floor chunks at low confidence
       3. Very short text (<=2 words) at very low confidence (<0.30)
       4. Short fragments (<=4 words) at low confidence (<0.50), not whitelisted
-         Catches nonsensical mic artifacts like "And this is my head alarm",
-         "I was blanking", "A continuous life" that are grammatically valid
-         but semantically garbage in sermon context.
+      5. Low unique-token ratio on longer repetitive text
     """
     t = text.strip()
     if not t:
         return None
 
-    t_lower = t.lower().rstrip(".,!?;:'\"")
+    t_lower = _normalize_suppress_text(t)
     word_count = len(t.split())
     conf = confidence if confidence is not None else 1.0
 
+    # Tier 0a: hard-drop after temperature fallback still left high CR
+    if compression_ratio is not None and compression_ratio > _COMPRESSION_RATIO_HARD_DROP:
+        return f"compression_ratio={compression_ratio:.2f} > {_COMPRESSION_RATIO_HARD_DROP}"
+
+    # Tier 0b: no_speech_prob — silence phantoms with healthy-looking text
+    if no_speech_prob is not None and no_speech_prob >= _NO_SPEECH_SUPPRESS:
+        short = utterance_dur is not None and utterance_dur < _NO_SPEECH_SHORT_DUR
+        if short or conf < 0.85:
+            return (
+                f"no_speech_prob={no_speech_prob:.2f} ≥ {_NO_SPEECH_SUPPRESS}"
+                + (f" (short dur={utterance_dur:.2f}s)" if short else f" (conf={conf:.2f})")
+            )
+
     # Tier 1: Known hallucination phrases below their confidence threshold
     for phrase, threshold in _HALLUCINATION_PHRASES.items():
-        if t_lower == phrase and conf < threshold:
-            return f"hallucination phrase {t_lower!r} (conf={conf:.2f} < {threshold})"
+        if _phrase_matches(t_lower, phrase) and conf < threshold:
+            return f"hallucination phrase {phrase!r} (conf={conf:.2f} < {threshold})"
 
     # Tier 2: VAD-floor duration chunks (<=0.80s) with low confidence
     # Every 0.77s chunk in March 1 data was a hallucination
@@ -415,6 +486,13 @@ def _should_suppress(
     # wasn't a known phrase ("Amen", "Good morning") was garbage text.
     if word_count <= 4 and conf < 0.50 and t_lower not in _SHORT_PHRASE_WHITELIST:
         return f"short fragment not whitelisted (words={word_count}, conf={conf:.2f})"
+
+    # Tier 5: unique-token ratio (whisper-guard L3) — repetitive fluent garbage
+    if word_count >= _UNIQUE_TOKEN_MIN_WORDS:
+        tokens = t_lower.split()
+        unique_ratio = len(set(tokens)) / len(tokens)
+        if unique_ratio < _UNIQUE_TOKEN_RATIO_MIN:
+            return f"low unique-token ratio ({unique_ratio:.2f} < {_UNIQUE_TOKEN_RATIO_MIN})"
 
     return None
 
@@ -1327,13 +1405,19 @@ def _run_stt_via_worker(audio_data, whisper_prompt):
 
 
 def _run_partial_stt_via_worker(audio_data):
-    """Send partial STT request to worker (blocking). Always greedy, no word timestamps."""
+    """Send partial STT request to worker (blocking). Always greedy, no word timestamps.
+
+    Returns (english, stt_lat, confidence, no_speech_prob, compression_ratio)
+    or None when STT produced empty text.
+    """
     _stt_worker_conn.send(("transcribe", audio_data, _whisper_prompt(), False, 1))
     result = _stt_worker_conn.recv()
-    english, stt_lat, _, _, _ = result
+    english, stt_lat, conf, segment_meta, _ = result
     if not english:
         return None
-    return english, stt_lat
+    no_speech = _max_segment_metric(segment_meta, "no_speech_prob")
+    cr = _max_segment_metric(segment_meta, "compression_ratio")
+    return english, stt_lat, conf, no_speech, cr
 
 
 def _translate_via_worker(english, run_ab=False):
@@ -1915,22 +1999,32 @@ def _is_garbage_text(text: str) -> bool:
     """Detect hallucinated/garbage STT output.
 
     Catches repetitive patterns like 'gagagagagaga' or 'aaaaaaa' that Whisper
-    sometimes emits.  Returns True if text looks like garbage.
+    sometimes emits, plus low unique-token-ratio loops on longer utterances.
+    Returns True if text looks like garbage.
     """
     t = text.strip()
     if len(t) < 6:
         return False
 
+    t_lower = t.lower()
+
     # Repeating single character runs (5+ of the same char in a row)
-    for ch in set(t.lower()):
-        if ch != " " and ch * 5 in t.lower():
+    for ch in set(t_lower):
+        if ch != " " and ch * 5 in t_lower:
             return True
 
     # Repeating 2-4 char n-gram patterns within individual words
     # (e.g. "gagagagaga").  Per-word check avoids false positives from
     # legitimate repeated words like "no no no no".
-    for word in t.lower().split():
+    words = t_lower.split()
+    for word in words:
         if _REPEATING_NGRAM_RE.search(word):
+            return True
+
+    # Unique-token ratio on longer text (whisper-guard L3)
+    if len(words) >= _UNIQUE_TOKEN_MIN_WORDS:
+        unique_ratio = len(set(words)) / len(words)
+        if unique_ratio < _UNIQUE_TOKEN_RATIO_MIN:
             return True
 
     return False
@@ -1979,6 +2073,9 @@ async def process_partial(audio_data, utterance_id):
         # --- Step 1: Whisper STT on the MLX pipeline pool ---
         def _partial_stt():
             t0 = time.perf_counter()
+            conf = None
+            no_speech = None
+            cr = None
             if BACKEND == "mlx":
                 result = mlx_whisper.transcribe(
                     audio_data,
@@ -1990,6 +2087,16 @@ async def process_partial(audio_data, utterance_id):
                 )
                 stt_lat = (time.perf_counter() - t0) * 1000
                 english = result["text"].strip()
+                segs = result.get("segments") or []
+                logprobs = [s["avg_logprob"] for s in segs if "avg_logprob" in s]
+                if logprobs:
+                    conf = round(min(1.0, max(0.0, 1.0 + (sum(logprobs) / len(logprobs)))), 2)
+                nsp = [s["no_speech_prob"] for s in segs if "no_speech_prob" in s]
+                if nsp:
+                    no_speech = max(nsp)
+                crs = [s["compression_ratio"] for s in segs if "compression_ratio" in s]
+                if crs:
+                    cr = max(crs)
             else:
                 # CUDA/CPU: faster-whisper
                 segments_gen, _ = stt_pipe.transcribe(
@@ -2002,9 +2109,21 @@ async def process_partial(audio_data, utterance_id):
                 segments_list = list(segments_gen)
                 stt_lat = (time.perf_counter() - t0) * 1000
                 english = " ".join(seg.text.strip() for seg in segments_list).strip()
+                logprobs = [getattr(seg, "avg_logprob", None) for seg in segments_list]
+                logprobs = [lp for lp in logprobs if lp is not None]
+                if logprobs:
+                    conf = round(min(1.0, max(0.0, 1.0 + (sum(logprobs) / len(logprobs)))), 2)
+                nsp = [getattr(seg, "no_speech_prob", None) for seg in segments_list]
+                nsp = [v for v in nsp if v is not None]
+                if nsp:
+                    no_speech = max(nsp)
+                crs = [getattr(seg, "compression_ratio", None) for seg in segments_list]
+                crs = [v for v in crs if v is not None]
+                if crs:
+                    cr = max(crs)
             if not english:
                 return None
-            return english, stt_lat
+            return english, stt_lat, conf, no_speech, cr
 
         # Submit STT and track the future so process_final can cancel it
         if MULTIPROCESS:
@@ -2024,16 +2143,27 @@ async def process_partial(audio_data, utterance_id):
             _log_stt_drop("partial", utterance_id, buf_dur)
             return
 
-        english, stt_latency = stt_result
+        # Worker path may still return (english, stt_lat) without metrics
+        if len(stt_result) == 2:
+            english, stt_latency = stt_result
+            stt_confidence = no_speech_prob = compression_ratio = None
+        else:
+            english, stt_latency, stt_confidence, no_speech_prob, compression_ratio = stt_result
 
         # [FILTER] Suppress garbage/hallucinated text
         if _is_garbage_text(english):
             print(f"  [FILTER] garbage partial suppressed: {english!r}")
             return
 
-        # [FILTER] Suppress phantom hallucinations (partials lack confidence, use dur+text only)
+        # [FILTER] Suppress phantom hallucinations (confidence plumbed from STT)
         utt_dur = len(audio_data) / SAMPLE_RATE
-        suppress_reason = _should_suppress(english, None, utt_dur)
+        suppress_reason = _should_suppress(
+            english,
+            stt_confidence,
+            utt_dur,
+            no_speech_prob=no_speech_prob,
+            compression_ratio=compression_ratio,
+        )
         if suppress_reason:
             print(f"  [FILTER] hallucination partial suppressed: {english!r} — {suppress_reason}")
             return
@@ -2621,7 +2751,13 @@ async def _pipeline_coordinator():
 
             # [FILTER] Suppress phantom hallucinations (thank you, VAD-floor, etc.)
             utt_dur = len(audio_data) / SAMPLE_RATE
-            suppress_reason = _should_suppress(english, stt_confidence, utt_dur)
+            suppress_reason = _should_suppress(
+                english,
+                stt_confidence,
+                utt_dur,
+                no_speech_prob=_max_segment_metric(segment_meta, "no_speech_prob"),
+                compression_ratio=_max_segment_metric(segment_meta, "compression_ratio"),
+            )
             if suppress_reason:
                 print(f"  [FILTER] hallucination suppressed: {english!r} — {suppress_reason}")
                 _chunks_hallucination += 1
@@ -3755,11 +3891,12 @@ def main():
         "--stt-backend",
         type=str,
         default="auto",
-        choices=["auto", "faster-whisper", "hf", "mlx"],
+        choices=["auto", "faster-whisper", "hf", "mlx", "parakeet"],
         help=(
             "Whisper implementation within the chosen --backend hardware tier. "
             "'auto' (default): faster-whisper on cuda/cpu, mlx on Apple. "
             "'hf' enables torch.compile + spec decode. "
+            "'parakeet' is EN-only (NeMo); keep Whisper for ES. "
             "Also settable via STARK_STT__BACKEND env var."
         ),
     )
