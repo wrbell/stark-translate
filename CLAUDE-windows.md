@@ -6,6 +6,22 @@
 
 ---
 
+## Pipeline refresh runbook
+
+When this machine is ready for the next training cycle, follow the ordered checklist in
+[`docs/wsl_pipeline_refresh.md`](./docs/wsl_pipeline_refresh.md):
+
+1. Phase 4 full audio preprocess → `phase4_status.json`
+2. Gemma 4 E4B domain SFT → GGUF (`run_gemma4_e4b_domain_sft.sh`)
+3. W17 Whisper DoRA + hard-mix → CT2 + STT bench gate
+4. Optional Parakeet EN-only bench (do not replace bilingual Whisper default)
+5. Mac transfer / Phase 7 A/B
+6. Phase 8 active-learning loop (`merge_corrections.py` → retrain → deploy)
+
+Env setup below must be green before that runbook.
+
+---
+
 ## Environment Setup
 
 ### WSL2 + CUDA Installation
