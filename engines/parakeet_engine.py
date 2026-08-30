@@ -67,10 +67,11 @@ class ParakeetEngine(STTEngine):
             ) from exc
 
         logger.info("Loading Parakeet model %s on %s", self._model_id, self._device)
-        self._model = nemo_asr.models.ASRModel.from_pretrained(model_name=self._model_id)
+        model = nemo_asr.models.ASRModel.from_pretrained(model_name=self._model_id)
         if self._device == "cuda":
-            self._model = self._model.cuda()
-        self._model.eval()
+            model = model.cuda()
+        model.eval()
+        self._model = model
         self._loaded = True
 
     def unload(self) -> None:
