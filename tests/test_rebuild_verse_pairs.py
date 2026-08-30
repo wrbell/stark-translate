@@ -36,7 +36,10 @@ class TestLoaders:
     def test_load_platense(self, tmp_path: Path):
         p = tmp_path / "plat.jsonl"
         p.write_text(
-            json.dumps({"verse_id": 1, "text": "En el principio"}) + "\n" + json.dumps({"verse_id": 2, "text": "Y dijo"}) + "\n"
+            json.dumps({"verse_id": 1, "text": "En el principio"})
+            + "\n"
+            + json.dumps({"verse_id": 2, "text": "Y dijo"})
+            + "\n"
         )
         assert rvp.load_realigned_platense(p) == {1: "En el principio", 2: "Y dijo"}
 
@@ -52,7 +55,7 @@ class TestBuild:
         plat.write_text(json.dumps({"verse_id": 1, "text": "En el comienzo Dios"}) + "\n")
         out = tmp_path / "pairs.jsonl"
         report = rvp.build(scroll, plat, out)
-        assert report["total_pairs_new"] >= 2  # KJV×2 ES + BBE×2 ES
+        assert report["total_pairs_new"] >= 2  # KJV x 2 ES + BBE x 2 ES
         rows = [json.loads(l) for l in out.read_text().splitlines()]
         assert all({"en", "es", "verse_id", "en_source", "es_source"} <= set(r) for r in rows)
 

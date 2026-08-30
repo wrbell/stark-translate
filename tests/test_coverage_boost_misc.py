@@ -231,6 +231,9 @@ class TestDownloadRoundtrip:
         fake.__exit__ = MagicMock(return_value=False)
         monkeypatch.setattr(drt, "urlopen", MagicMock(return_value=fake))
         # urlopen is imported into module from urllib.request
-        with patch("tools.download_roundtrip_texts.urlopen", MagicMock(return_value=MagicMock(read=MagicMock(return_value=raw)))):
+        with patch(
+            "tools.download_roundtrip_texts.urlopen",
+            MagicMock(return_value=MagicMock(read=MagicMock(return_value=raw))),
+        ):
             body = drt.fetch_gutenberg("https://example.com/x.txt")
         assert "body text" in body

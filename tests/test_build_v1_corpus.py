@@ -156,7 +156,11 @@ class TestBuildAndMain:
         ]
         bvc.write_jsonl(bible, rows)
         bvc.write_jsonl(sermon, rows[:15])
-        monkeypatch.setitem(sys.modules, "glossary_annotate", MagicMock(load_glossary=MagicMock(return_value={}), annotate_pair=MagicMock(return_value=("e", 0))))
+        monkeypatch.setitem(
+            sys.modules,
+            "glossary_annotate",
+            MagicMock(load_glossary=MagicMock(return_value={}), annotate_pair=MagicMock(return_value=("e", 0))),
+        )
         monkeypatch.setattr(bvc, "sample_opus", lambda n, rng: [])
         rc = bvc.main(
             [

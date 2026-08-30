@@ -19,7 +19,7 @@ _scipy_signal = MagicMock()
 _scipy_signal.resample = MagicMock(side_effect=lambda audio, n: np.ones(n, dtype=np.float32))
 sys.modules["scipy.signal"] = _scipy_signal
 
-from tools import roundtrip_test as rt  # noqa: E402
+from tools import roundtrip_test as rt
 
 # Drop the fake submodule so other tests (audio_bridge) can importorskip real scipy.
 del sys.modules["scipy.signal"]

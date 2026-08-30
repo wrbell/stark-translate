@@ -124,8 +124,8 @@ class TestDeployAdapters:
         assert exc.value.code == 0
 
     def test_deploy_dry_run_and_rollback(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-        from tools import deploy_adapters as da
         import tools.manage_adapters as ma
+        from tools import deploy_adapters as da
 
         monkeypatch.setattr(da, "PROJECT_ROOT", tmp_path)
         monkeypatch.setattr(ma, "MANIFEST_PATH", tmp_path / "adapters" / "manifest.json")

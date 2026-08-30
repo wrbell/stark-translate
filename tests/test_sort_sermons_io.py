@@ -8,8 +8,6 @@ import sys
 from datetime import date
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from tools.sort_sermons import (
@@ -56,7 +54,6 @@ class TestLoadCatalog:
         assert entries[3]["split"] == "train"  # 3/3/26 < cutoff 3/14/26
 
 
-
 class TestPrintSummaryAndSort:
     def test_print_summary(self, capsys):
         manifest = [
@@ -101,7 +98,7 @@ class TestPrintSummaryAndSort:
         # Need JSON sibling — sort_files looks for json next to wav
         n = sort_files(manifest, str(out), copy=True)
         assert n >= 0
-        assert (out / "gospel" / "2025").exists() or n == 0 or True
+        assert (out / "gospel" / "2025").exists() or (out / "gospel").exists()
 
 
 class TestTagChunks:
