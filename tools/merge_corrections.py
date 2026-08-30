@@ -23,9 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import random
 import shutil
-import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -125,14 +123,7 @@ def merge_whisper(
     train_meta = out_dir / "metadata.jsonl"
     existing = _load_jsonl(train_meta) if train_meta.exists() else []
     before = len(existing)
-
-    # Replay buffer: keep ~replay_ratio of existing when mixing
-    rng = random.Random(seed)
-    if replay_ratio < 1.0 and existing:
-        keep_n = max(1, int(len(existing) * (1.0 - min(max(replay_ratio, 0.0), 0.9))))
-        # Keep most of train; sample corrections in; actual mix = corrections + subsample if huge
-        # Simpler: append all corrections; optionally downsample existing only when requested via ratio>0 meaning replay share of *new* batch
-        _ = keep_n  # reserved for future stratified downsample
+    _ = seed, replay_ratio  # reserved for future stratified downsample of existing
 
     added = 0
     stamp = datetime.now(UTC).strftime("%Y%m%d")

@@ -118,10 +118,7 @@ def run_health_check(
         logger.info(f"  [{verdict}] Sentence {i}: {en}")
         if verbose:
             logger.info(f"         -> {translation}")
-        logger.info(
-            f"         latency={elapsed:.3f}s  ratio={ratio:.2f}  "
-            f"found={len(found)}/{len(expected)}{detail}"
-        )
+        logger.info(f"         latency={elapsed:.3f}s  ratio={ratio:.2f}  found={len(found)}/{len(expected)}{detail}")
 
     overall = "PASS" if all_pass else "FAIL"
     passed_count = sum(1 for r in results if r["pass"])

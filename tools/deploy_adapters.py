@@ -30,7 +30,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "tools"))
 
-from manage_adapters import (  # noqa: E402
+from manage_adapters import (
     _ensure_model_entry,
     _load_manifest,
     _save_manifest,

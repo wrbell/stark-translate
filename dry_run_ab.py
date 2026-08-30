@@ -462,9 +462,8 @@ def _should_suppress(
     if no_speech_prob is not None and no_speech_prob >= _NO_SPEECH_SUPPRESS:
         short = utterance_dur is not None and utterance_dur < _NO_SPEECH_SHORT_DUR
         if short or conf < 0.85:
-            return (
-                f"no_speech_prob={no_speech_prob:.2f} ≥ {_NO_SPEECH_SUPPRESS}"
-                + (f" (short dur={utterance_dur:.2f}s)" if short else f" (conf={conf:.2f})")
+            return f"no_speech_prob={no_speech_prob:.2f} ≥ {_NO_SPEECH_SUPPRESS}" + (
+                f" (short dur={utterance_dur:.2f}s)" if short else f" (conf={conf:.2f})"
             )
 
     # Tier 1: Known hallucination phrases below their confidence threshold
