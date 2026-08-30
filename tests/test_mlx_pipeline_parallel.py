@@ -6,8 +6,6 @@ CI-friendly: no Metal / Apple Silicon required.
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 class TestPipelinePoolMaxWorkers:
     def test_mlx_matches_cuda(self):
