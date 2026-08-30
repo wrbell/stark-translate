@@ -48,6 +48,8 @@ Every code change must include a measurable faster/better inference path (benchm
 
 ---
 
+> **Update (2026-08):** CUDA production is Gemma 4 E4B Q4_K_M via llama.cpp (~470 ms finals). Mac still defaults to TranslateGemma 4-bit; Gemma 4 OptiQ + MTS are opt-in — see [`docs/mlx_cuda_parity.md`](../mlx_cuda_parity.md) and `tools/benchmark_mlx_accel.py`. **lightning-whisper-mlx is rejected** for live STT (slower than mlx-whisper in independent benches) — see [`fast_stt_options.md`](./fast_stt_options.md). Prefer that doc over Phase 3 below for STT decisions.
+
 ## Technology Readiness Assessment
 
 Research conducted April 2026. Technologies graded by shipping status.

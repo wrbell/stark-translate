@@ -28,16 +28,9 @@ import urllib.error
 import urllib.request
 
 from engines.base import TranslationEngine, TranslationResult
+from engines.translation_prompts import clean_translation, llamacpp_user_content
 
 logger = logging.getLogger(__name__)
-
-# Language name mapping for Gemma 4 instruct prompt
-_LANG_NAMES = {
-    "en": "English",
-    "es": "Spanish",
-    "hi": "Hindi",
-    "zh": "Chinese",
-}
 
 
 class LlamaCppEngine(TranslationEngine):
@@ -108,18 +101,15 @@ class LlamaCppEngine(TranslationEngine):
 
         t0 = time.perf_counter()
 
-        # Build prompt based on model family
-        if self._model_family == "gemma4":
-            src_name = _LANG_NAMES.get(source_lang, source_lang)
-            tgt_name = _LANG_NAMES.get(target_lang, target_lang)
-            user_content = (
-                f"Translate the following {src_name} text to {tgt_name}. "
-                f"Output only the translation, nothing else.\n\n{text}"
-            )
-        else:
-            # TranslateGemma format — llama-server may not support structured
-            # content blocks, fall back to plain text instruction
-            user_content = f"Translate from {source_lang} to {target_lang}: {text}"
+        # Shared prompt contract (engines/translation_prompts.py) — same string
+        # as MLX/CUDA Gemma 4 paths. TranslateGemma falls back to plain text
+        # because llama-server does not support structured content blocks.
+        user_content = llamacpp_user_content(
+            text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            model_family=self._model_family,
+        )
 
         payload: dict = {
             "messages": [
@@ -161,14 +151,7 @@ class LlamaCppEngine(TranslationEngine):
             return TranslationResult(text="(no response from llama-server)", latency_ms=latency_ms)
 
         raw_text = choices[0].get("message", {}).get("content", "").strip()
-
-        # Clean preamble for Gemma 4
-        clean = raw_text
-        if self._model_family == "gemma4":
-            for prefix in ("Here is the translation:\n", "Here is the translation:"):
-                if clean.startswith(prefix):
-                    clean = clean[len(prefix) :].strip()
-                    break
+        clean = clean_translation(raw_text, model_family=self._model_family)
 
         # Calculate tokens per second
         usage = result.get("usage", {})
@@ -201,16 +184,12 @@ class LlamaCppEngine(TranslationEngine):
         if not self._loaded:
             raise RuntimeError("Engine not loaded -- call load() first")
 
-        # Build user prompt the same way translate() does.
-        if self._model_family == "gemma4":
-            src_name = _LANG_NAMES.get(source_lang, source_lang)
-            tgt_name = _LANG_NAMES.get(target_lang, target_lang)
-            user_content = (
-                f"Translate the following {src_name} text to {tgt_name}. "
-                f"Output only the translation, nothing else.\n\n{text}"
-            )
-        else:
-            user_content = f"Translate from {source_lang} to {target_lang}: {text}"
+        user_content = llamacpp_user_content(
+            text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            model_family=self._model_family,
+        )
 
         payload: dict = {
             "messages": [{"role": "user", "content": user_content}],
@@ -263,12 +242,7 @@ class LlamaCppEngine(TranslationEngine):
 
         latency_ms = (time.perf_counter() - t0) * 1000.0
 
-        clean = accumulated.strip()
-        if self._model_family == "gemma4":
-            for prefix in ("Here is the translation:\n", "Here is the translation:"):
-                if clean.startswith(prefix):
-                    clean = clean[len(prefix) :].strip()
-                    break
+        clean = clean_translation(accumulated.strip(), model_family=self._model_family)
 
         gen_tps = completion_tokens / (latency_ms / 1000) if latency_ms > 0 and completion_tokens else 0.0
         return TranslationResult(text=clean, latency_ms=latency_ms, tokens_per_second=gen_tps)

@@ -211,9 +211,10 @@ class STTSettings(BaseSettings):
 
 
 class TranslationSettings(BaseSettings):
-    """Translation model configuration (TranslateGemma + MarianMT)."""
+    """Translation model configuration (TranslateGemma + MarianMT + Gemma 4)."""
 
-    # MLX models (Apple Silicon)
+    # MLX models (Apple Silicon) — TranslateGemma remains the Mac default until
+    # Gemma 4 OptiQ canaries pass (see docs/mlx_cuda_parity.md).
     mlx_model_4b: str = Field(
         default="mlx-community/translategemma-4b-it-4bit",
         description="TranslateGemma 4B 4-bit MLX model (~2.2GB disk, ~2.5GB RAM)",
@@ -221,6 +222,31 @@ class TranslationSettings(BaseSettings):
     mlx_model_12b: str = Field(
         default="mlx-community/translategemma-12b-it-4bit",
         description="TranslateGemma 12B 4-bit MLX model (~6.6GB disk, ~7GB RAM)",
+    )
+    # Gemma 4 OptiQ / PLE-safe candidates for Mac accel matrix (opt-in via
+    # model_family=gemma4 + mlx_model_gemma4_*). Naïve mlx-community uniform
+    # 4-bit Gemma 4 quants are known-broken (PLE layers quantized → garbage).
+    mlx_model_gemma4_e4b: str = Field(
+        default="mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        description="Gemma 4 E4B OptiQ mixed-precision 4-bit (Mac; text-only)",
+    )
+    mlx_model_gemma4_e2b: str = Field(
+        default="mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+        description="Gemma 4 E2B OptiQ mixed-precision 4-bit (Mac low-VRAM / speed)",
+    )
+    mlx_drafter_gemma4: str = Field(
+        default="mlx-community/gemma-4-e4b-it-assistant-bf16",
+        description=(
+            "Gemma 4 E4B assistant drafter for MTS/speculative decode (mlx-optiq). "
+            "E2B has no published assistant; leave empty / unused for E2B."
+        ),
+    )
+    mlx_mts: bool = Field(
+        default=False,
+        description=(
+            "Enable Gemma-4 assistant-drafter MTS on MLX when model_family=gemma4. "
+            "Loads mlx_drafter_gemma4 alongside the target (gamma=num_draft_tokens)."
+        ),
     )
     # CUDA models (NVIDIA)
     cuda_model_4b: str = Field(
@@ -242,7 +268,10 @@ class TranslationSettings(BaseSettings):
     )
     num_draft_tokens: int = Field(
         default=3,
-        description="Speculative decoding: tokens drafted by 4B for 12B to verify",
+        description=(
+            "Speculative decoding draft depth. TG 4B->12B default 3; Gemma-4 "
+            "assistant MTS should use 1 (optimal on Metal per mlx-optiq)."
+        ),
     )
     default_source_lang: str = Field(
         default="en",

@@ -16,6 +16,7 @@
 | File-side AL | `mine_hallucination_phrases.py`, `prepare_finetune_data.py`, `merge_corrections.py`, `deploy_adapters.py --dry-run` |
 | Live A/B + operator UI | `dry_run_ab.py --ab`, `uvicorn operator_app.main:app --port 9000` |
 | TurboQuant + LoRA path | `--turboquant`, `--adapter-dir` (this Mac refresh) |
+| Gemma 4 OptiQ + MTS (opt-in) | `--model-family gemma4 [--mts] [--turboquant]` — see [`mlx_cuda_parity.md`](./mlx_cuda_parity.md) |
 | Phase 7 health gate on M3 | `tools/health_check.py --backend mlx` |
 
 ## Do **not** run on Mac
@@ -70,7 +71,15 @@ python dry_run_ab.py --backend mlx
 python dry_run_ab.py --ab --backend mlx
 ```
 
-Model IDs come from settings (`STARK_TRANSLATION__MLX_MODEL_4B` / `_12B`). Defaults remain community TranslateGemma 4-bit; do **not** assume Gemma 4 E4B MLX weights exist yet.
+Model IDs come from settings (`STARK_TRANSLATE_MLX_MODEL_4B` / `_12B`). Defaults remain community TranslateGemma 4-bit. For CUDA-parity Gemma 4 OptiQ (opt-in, do **not** flip default until canaries pass):
+
+```bash
+python dry_run_ab.py --backend mlx --model-family gemma4 --gemma4-size e4b
+python dry_run_ab.py --backend mlx --model-family gemma4 --mts --turboquant
+python tools/benchmark_mlx_accel.py --quick --configs tg4b,e4b,e4b_mts
+```
+
+See [`mlx_cuda_parity.md`](./mlx_cuda_parity.md). Naïve uniform Gemma 4 MLX 4-bit quants (PLE quantized) produce garbage — use OptiQ / PLE-safe builds only.
 
 ### TurboQuant (optional KV compression)
 
@@ -143,6 +152,8 @@ After a live or file session, use the YT comparison tools in [`tools/CLAUDE.md`]
 |------|---------|
 | Live 4B | `python dry_run_ab.py --backend mlx` |
 | Live A/B + TQ | `python dry_run_ab.py --ab --backend mlx --turboquant` |
+| Live Gemma 4 + MTS | `python dry_run_ab.py --backend mlx --model-family gemma4 --mts` |
+| Accel matrix | `python tools/benchmark_mlx_accel.py --quick` |
 | Live + LoRA | `python dry_run_ab.py --backend mlx --adapter-dir <path>` |
 | Health (MLX) | `python tools/health_check.py --backend mlx --n-canaries 8` |
 | Mine phantoms | `python tools/mine_hallucination_phrases.py` |

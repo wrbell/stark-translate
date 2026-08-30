@@ -179,6 +179,11 @@ ADAPTER_DIR_B = None  # 12B adapter path (optional)
 USE_TURBOQUANT = False
 TURBOQUANT_KEY_BITS = 3
 TURBOQUANT_VAL_BITS = 4
+# Gemma 4 OptiQ + MTS (assistant drafter) — opt-in via --model-family gemma4
+MODEL_FAMILY = "translategemma"
+MLX_DRAFT_MODEL_ID = None
+MLX_DRAFT_MODEL = None
+USE_MTS = False
 
 # [P7-1E] Whisper initial_prompt — capped at ~40 words to reduce prefill time.
 # Biases decoder toward theological vocabulary that Whisper otherwise
@@ -1173,25 +1178,56 @@ def _build_prompt_cache(model, tokenizer, label):
 
 
 def load_translation_models(load_b=True):
-    """Load TranslateGemma model(s) via MLX."""
+    """Load TranslateGemma or Gemma 4 model(s) via MLX.
+
+    When ``MODEL_FAMILY == "gemma4"``, loads OptiQ E4B (or CLI override) and
+    optionally the assistant drafter for MTS. TranslateGemma prompt cache is
+    skipped for Gemma 4 (different chat template).
+    """
     global mlx_a_prompt_cache, mlx_b_prompt_cache
     global mlx_a_suffix_tokens, mlx_b_suffix_tokens
+    global MLX_DRAFT_MODEL
 
-    print("[3/6] Loading TranslateGemma models (MLX 4-bit)...")
-    a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)", adapter_path=ADAPTER_DIR_A)
+    family_label = "Gemma 4" if MODEL_FAMILY == "gemma4" else "TranslateGemma"
+    print(f"[3/6] Loading {family_label} models (MLX)...")
+    a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, f"Approach A ({MLX_MODEL_A})", adapter_path=ADAPTER_DIR_A)
 
-    # [P7-2B] Build prompt cache for 4B model
-    mlx_a_prompt_cache, _, mlx_a_suffix_tokens = _build_prompt_cache(a_model, a_tok, "4B")
+    # Prompt cache is TranslateGemma-specific (structured lang codes)
+    if MODEL_FAMILY == "translategemma":
+        mlx_a_prompt_cache, _, mlx_a_suffix_tokens = _build_prompt_cache(a_model, a_tok, "4B")
+    else:
+        mlx_a_prompt_cache, mlx_a_suffix_tokens = None, None
+        print("  Prompt cache skipped (gemma4 instruct path)")
+
+    # Gemma-4 assistant-drafter MTS (loads alongside target; used as draft_model)
+    MLX_DRAFT_MODEL = None
+    if USE_MTS and MLX_DRAFT_MODEL_ID and MODEL_FAMILY == "gemma4":
+        try:
+            MLX_DRAFT_MODEL, _ = load_mlx_gemma(MLX_DRAFT_MODEL_ID, f"MTS drafter ({MLX_DRAFT_MODEL_ID})")
+            print(f"  MTS enabled: draft={MLX_DRAFT_MODEL_ID}, num_draft_tokens={NUM_DRAFT_TOKENS}")
+        except Exception as e:
+            print(f"  WARNING: MTS drafter load failed: {e}")
+            MLX_DRAFT_MODEL = None
 
     b_model, b_tok = None, None
-    if load_b:
+    if load_b and MODEL_FAMILY == "translategemma":
         try:
             b_model, b_tok = load_mlx_gemma(MLX_MODEL_B, "Approach B (12B)", adapter_path=ADAPTER_DIR_B)
-            # [P7-2B] Build prompt cache for 12B model
             mlx_b_prompt_cache, _, mlx_b_suffix_tokens = _build_prompt_cache(b_model, b_tok, "12B")
         except Exception as e:
             print(f"  12B load failed: {e}")
             print("  Running 4B only.")
+    elif load_b and MODEL_FAMILY == "gemma4":
+        # Gemma 4 A/B: optional E2B as secondary (not TG 12B)
+        try:
+            from engines.factory import resolve_mlx_translation_model_id
+
+            e2b_id = resolve_mlx_translation_model_id(model_family="gemma4", size="e2b")
+            b_model, b_tok = load_mlx_gemma(e2b_id, f"Approach B ({e2b_id})")
+            mlx_b_prompt_cache, mlx_b_suffix_tokens = None, None
+        except Exception as e:
+            print(f"  Gemma 4 E2B load failed: {e}")
+            print("  Running E4B only.")
 
     return a_model, a_tok, b_model, b_tok
 
@@ -1551,38 +1587,36 @@ def qe_score(source, translation):
 
 
 def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_template=None, suffix_tokens=None):
-    """Translate English to Spanish using TranslateGemma via MLX.
+    """Translate using TranslateGemma or Gemma 4 via MLX.
 
-    Args:
-        model: The MLX model to use for generation.
-        tokenizer: The tokenizer for the model.
-        text: English text to translate.
-        draft_model: Optional smaller model for speculative decoding.
-            When provided, the draft model proposes NUM_DRAFT_TOKENS tokens
-            at a time, and the main model verifies them in a single forward
-            pass. Speeds up generation when draft acceptance rate is high.
-        prompt_cache_template: [P7-2B] Pre-computed KV cache for the fixed
-            chat template prefix. Deep-copied and reused per call.
-        suffix_tokens: [P7-3B] Pre-tokenized suffix tokens (after where
-            the English text is inserted in the template).
+    Prompt format follows ``MODEL_FAMILY`` (``translategemma`` | ``gemma4``)
+    via ``engines.translation_prompts`` so Mac matches CUDA llama.cpp strings.
 
     Returns (translation, latency_ms, generation_tps).
     """
     from mlx_lm import generate
 
+    from engines.translation_prompts import (
+        build_chat_messages,
+        clean_translation,
+        dynamic_max_tokens,
+    )
+
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
 
-    # [P7-2C] Cap max_tokens proportional to input. Reduced from 2.5x to 1.8x —
-    # Spanish is typically 15-25% longer than English, so 1.8x is still generous.
-    input_words = len(text.split())
-    max_tok = max(32, int(input_words * 1.8))
+    family = globals().get("MODEL_FAMILY", "translategemma")
+    max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
 
-    # [P7-2B] Use prompt cache when available (not compatible with speculative decoding)
-    use_cache = prompt_cache_template is not None and suffix_tokens is not None and draft_model is None
+    # Prompt cache is TG-only and incompatible with speculative decoding
+    use_cache = (
+        prompt_cache_template is not None
+        and suffix_tokens is not None
+        and draft_model is None
+        and family == "translategemma"
+    )
 
     if use_cache:
-        # [P7-2B] Deep-copy the pre-computed KV cache so we don't mutate the template
         _dc_t0 = time.perf_counter()
         cached = copy.deepcopy(prompt_cache_template)
         _dc_ms = (time.perf_counter() - _dc_t0) * 1000
@@ -1590,7 +1624,6 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
             logger.warning("prompt_cache deep-copy took %.1fms (>20ms threshold)", _dc_ms)
         else:
             logger.debug("prompt_cache deep-copy: %.1fms", _dc_ms)
-        # [P7-3B] Build only the dynamic part of the prompt: English text + suffix
         text_tokens = tokenizer.encode(text, add_special_tokens=False)
         dynamic_tokens = text_tokens + suffix_tokens
         gen_kwargs = dict(
@@ -1600,15 +1633,12 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
             prompt_cache=cached,
         )
     else:
-        # Fallback: full prompt (used with speculative decoding or if cache unavailable)
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "source_lang_code": SOURCE_LANG, "target_lang_code": TARGET_LANG, "text": text}
-                ],
-            }
-        ]
+        messages = build_chat_messages(
+            text,
+            source_lang=SOURCE_LANG,
+            target_lang=TARGET_LANG,
+            model_family=family,
+        )
         prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
         gen_kwargs = dict(
             prompt=prompt,
@@ -1627,12 +1657,7 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
     )
     latency_ms = (time.perf_counter() - t0) * 1000
 
-    # generate returns the full text including prompt — extract just the generation
-    # [P7-2E] EOS early stopping is handled by stream_generate checking
-    # tokenizer.eos_token_ids (which includes <end_of_turn> id=106, set in
-    # load_mlx_gemma). Clean any residual end-of-turn marker just in case.
-    clean = result.split("<end_of_turn>")[0].strip()
-    # Estimate tps from output tokens and time
+    clean = clean_translation(result, model_family=family)
     out_tokens = len(tokenizer.encode(clean))
     gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
     return clean, latency_ms, gen_tps
@@ -1743,33 +1768,29 @@ def _enqueue_stream_token(item):
 
 
 def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_template=None, suffix_tokens=None):
-    """[P7-P3-6A] Translate English->Spanish with token streaming.
+    """Translate with token streaming (TranslateGemma or Gemma 4).
 
     Uses mlx_lm.stream_generate() to yield tokens as they're generated.
     Pushes intermediate results to _stream_token_queue for the async
     WebSocket broadcaster to pick up.
 
-    This is a synchronous function meant to run in a ThreadPoolExecutor.
-
-    Args:
-        model: The MLX model to use for generation.
-        tokenizer: The tokenizer for the model.
-        text: English text to translate.
-        chunk_id: Current chunk ID for WebSocket message correlation.
-        prompt_cache_template: Pre-computed KV cache for chat template prefix.
-        suffix_tokens: Pre-tokenized suffix tokens.
-
     Returns (translation, latency_ms, generation_tps).
     """
     from mlx_lm import stream_generate
 
+    from engines.translation_prompts import (
+        build_chat_messages,
+        clean_translation,
+        dynamic_max_tokens,
+    )
+
     if model is None or tokenizer is None:
         return "(model not loaded)", 0.0, 0.0
 
-    input_words = len(text.split())
-    max_tok = max(32, int(input_words * 1.8))
+    family = globals().get("MODEL_FAMILY", "translategemma")
+    max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
 
-    use_cache = prompt_cache_template is not None and suffix_tokens is not None
+    use_cache = prompt_cache_template is not None and suffix_tokens is not None and family == "translategemma"
 
     if use_cache:
         _dc_t0 = time.perf_counter()
@@ -1787,14 +1808,12 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
             prompt_cache=cached,
         )
     else:
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "source_lang_code": SOURCE_LANG, "target_lang_code": TARGET_LANG, "text": text}
-                ],
-            }
-        ]
+        messages = build_chat_messages(
+            text,
+            source_lang=SOURCE_LANG,
+            target_lang=TARGET_LANG,
+            model_family=family,
+        )
         prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
         gen_kwargs = dict(
             prompt=prompt,
@@ -1814,14 +1833,13 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
 
         # Batch tokens: only push to queue every STREAM_TOKEN_BATCH_SIZE tokens
         if tokens_generated - last_sent_tokens >= STREAM_TOKEN_BATCH_SIZE:
-            # Clean any end-of-turn markers from partial text
-            partial = accumulated_text.split("<end_of_turn>")[0].strip()
+            partial = clean_translation(accumulated_text, model_family=family)
             if partial:
                 _enqueue_stream_token(("token", chunk_id, partial, tokens_generated))
                 last_sent_tokens = tokens_generated
 
     latency_ms = (time.perf_counter() - t0) * 1000
-    clean = accumulated_text.split("<end_of_turn>")[0].strip()
+    clean = clean_translation(accumulated_text, model_family=family)
 
     return clean, latency_ms, gen_tps
 
@@ -2583,19 +2601,30 @@ async def _pipeline_translate_and_finalize(
                 spanish_b, lat_b, tps_b = await task_b
                 qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
             else:
-                # [P7-P3-6A] 4B-only mode: use streaming translation for
-                # progressive display (biggest perceived latency win: 300-500ms)
-                spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                    _pipeline_pool,
-                    lambda: translate_mlx_streaming(
-                        mlx_a_model,
-                        mlx_a_tokenizer,
-                        english,
-                        cid,
-                        prompt_cache_template=mlx_a_prompt_cache,
-                        suffix_tokens=mlx_a_suffix_tokens,
-                    ),
-                )
+                # 4B/E4B-only: stream unless Gemma-4 MTS draft is active
+                # (speculative decode is incompatible with streaming).
+                if MLX_DRAFT_MODEL is not None:
+                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
+                        _pipeline_pool,
+                        lambda: translate_mlx(
+                            mlx_a_model,
+                            mlx_a_tokenizer,
+                            english,
+                            draft_model=MLX_DRAFT_MODEL,
+                        ),
+                    )
+                else:
+                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
+                        _pipeline_pool,
+                        lambda: translate_mlx_streaming(
+                            mlx_a_model,
+                            mlx_a_tokenizer,
+                            english,
+                            cid,
+                            prompt_cache_template=mlx_a_prompt_cache,
+                            suffix_tokens=mlx_a_suffix_tokens,
+                        ),
+                    )
                 qe_a = qe_score(english, spanish_a)
 
         now = time.perf_counter()
@@ -4057,6 +4086,48 @@ def main():
         default=False,
         help="Disable TurboQuant even if enabled in settings.",
     )
+    parser.add_argument(
+        "--model-family",
+        choices=["translategemma", "gemma4"],
+        default=None,
+        help=(
+            "Translation model family. Default: translategemma (Mac) / settings. "
+            "Use gemma4 for OptiQ E4B (CUDA parity). Env: STARK_TRANSLATE_MODEL_FAMILY."
+        ),
+    )
+    parser.add_argument(
+        "--mlx-model",
+        type=str,
+        default=None,
+        help="Override primary MLX model id (e.g. mlx-community/gemma-4-e4b-it-OptiQ-4bit).",
+    )
+    parser.add_argument(
+        "--gemma4-size",
+        choices=["e4b", "e2b"],
+        default="e4b",
+        help="When --model-family gemma4 and --mlx-model unset, pick E4B or E2B OptiQ (default: e4b).",
+    )
+    parser.add_argument(
+        "--mts",
+        action="store_true",
+        default=None,
+        help=(
+            "Enable Gemma-4 assistant-drafter MTS (speculative decode) on MLX. "
+            "Requires --model-family gemma4. Env: STARK_TRANSLATE_MLX_MTS."
+        ),
+    )
+    parser.add_argument(
+        "--no-mts",
+        action="store_true",
+        default=False,
+        help="Disable MTS even if enabled in settings.",
+    )
+    parser.add_argument(
+        "--mlx-drafter",
+        type=str,
+        default=None,
+        help=("Gemma-4 assistant drafter model id for --mts (default: mlx-community/gemma-4-e4b-it-assistant-bf16)."),
+    )
     args = parser.parse_args()
 
     # --- Resolve backend ---
@@ -4163,11 +4234,41 @@ def main():
     MUSIC_THRESHOLD = args.music_threshold
     MUSIC_HOLDOFF = args.music_holdoff
 
-    # MLX translation: model IDs from settings, adapters + TurboQuant from CLI/settings
+    # MLX translation: model IDs from settings, adapters + TurboQuant + Gemma4/MTS
     global MLX_MODEL_A, MLX_MODEL_B, ADAPTER_DIR_A, ADAPTER_DIR_B
     global USE_TURBOQUANT, TURBOQUANT_KEY_BITS, TURBOQUANT_VAL_BITS
-    MLX_MODEL_A = settings.translation.mlx_model_4b
+    global MODEL_FAMILY, MLX_DRAFT_MODEL_ID, USE_MTS
+    MODEL_FAMILY = args.model_family or settings.translation.model_family
+    settings.translation.model_family = MODEL_FAMILY
+
+    if args.no_mts:
+        USE_MTS = False
+    elif args.mts is True:
+        USE_MTS = True
+    else:
+        USE_MTS = bool(settings.translation.mlx_mts)
+    settings.translation.mlx_mts = USE_MTS
+
+    if args.mlx_drafter:
+        MLX_DRAFT_MODEL_ID = args.mlx_drafter
+    elif MODEL_FAMILY == "gemma4" and USE_MTS:
+        MLX_DRAFT_MODEL_ID = settings.translation.mlx_drafter_gemma4
+    else:
+        MLX_DRAFT_MODEL_ID = None
+
+    if args.mlx_model:
+        MLX_MODEL_A = args.mlx_model
+    elif MODEL_FAMILY == "gemma4":
+        from engines.factory import resolve_mlx_translation_model_id
+
+        MLX_MODEL_A = resolve_mlx_translation_model_id(model_family="gemma4", size=args.gemma4_size)
+    else:
+        MLX_MODEL_A = settings.translation.mlx_model_4b
     MLX_MODEL_B = settings.translation.mlx_model_12b
+
+    # Gemma-4 MTS: prefer gamma=1 on Metal unless user explicitly set --num-draft-tokens
+    if MODEL_FAMILY == "gemma4" and USE_MTS and args.num_draft_tokens == 3:
+        NUM_DRAFT_TOKENS = 1
     ADAPTER_DIR_A = args.adapter_dir
     ADAPTER_DIR_B = args.adapter_dir_b
     if args.no_turboquant:
