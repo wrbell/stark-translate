@@ -4,6 +4,7 @@ Provides:
   - FasterWhisperEngine        -- STT via faster-whisper (CTranslate2 backend)
   - CUDAGemmaEngine            -- Translation via transformers + bitsandbytes 4-bit (basic)
   - CUDAGemmaStreamingEngine   -- Enhanced: streaming, prompt cache, speculative decoding
+  - MarianCT2Engine            -- Fast partial translation via MarianMT on CTranslate2 (v2026.8)
   - detect_vram_tier()         -- Auto-detect GPU tier (full_ab / 4b_only / marian)
 """
 
@@ -965,3 +966,166 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
     @property
     def backend(self) -> str:
         return "cuda"
+
+
+# ---------------------------------------------------------------------------
+# MarianMT on CTranslate2 (v2026.8 — partial-translation acceleration)
+# ---------------------------------------------------------------------------
+
+
+class MarianCT2Engine(TranslationEngine):
+    """Fast partial-translation engine wrapping MarianMT via CTranslate2.
+
+    Replaces the HF PyTorch path (``MarianHFEngine``) on CUDA. CT2 is internally
+    thread-safe per https://opennmt.net/CTranslate2/python/ctranslate2.Translator.html
+    so this engine does NOT acquire ``engines._locks._pytorch_lock``; the live
+    pipeline can call ``translate()`` from multiple threads concurrently. Silero
+    VAD on the same machine still uses the lock for its PyTorch path.
+
+    Constructor args:
+        model_dir:        Local CT2 directory containing ``model.bin`` plus the
+                          MarianTokenizer files (source.spm, target.spm, vocab.json,
+                          tokenizer_config.json) — produced by
+                          ``scripts/convert_marian_ct2.py``.
+        source_lang:      Source language code (default: "en"). Marian models
+                          are direction-locked, so this is informational only.
+        target_lang:      Target language code (default: "es").
+        device:           "cuda", "cpu", or "auto" (default: "auto").
+        compute_type:     CT2 compute type (default: "int8_float16" — Ampere/Ada
+                          sweet spot, mirrors v2026.7 Whisper).
+        max_new_tokens:   Max decoding length (default: 128).
+        warmup_passes:    Warmup translations performed at load() (default: 2).
+    """
+
+    def __init__(
+        self,
+        model_dir: str,
+        source_lang: str = "en",
+        target_lang: str = "es",
+        device: str = "auto",
+        compute_type: str = "int8_float16",
+        max_new_tokens: int = 128,
+        warmup_passes: int = 2,
+    ):
+        self._model_dir = model_dir
+        self._source_lang = source_lang
+        self._target_lang = target_lang
+        self._requested_device = device
+        self._device: str | None = None
+        self._compute_type = compute_type
+        self._max_new_tokens = max_new_tokens
+        self._warmup_passes = max(0, int(warmup_passes))
+        self._translator = None
+        self._tokenizer = None
+        self._loaded = False
+
+    # -- public interface ----------------------------------------------------
+
+    def load(self) -> None:
+        """Instantiate the CT2 Translator + HF MarianTokenizer and warm up."""
+        try:
+            import ctranslate2
+        except ImportError as exc:
+            raise RuntimeError("ctranslate2 is not installed. Install with: pip install 'ctranslate2>=4.5'") from exc
+        from transformers import MarianTokenizer
+
+        if self._requested_device == "auto":
+            if TORCH_AVAILABLE and torch.cuda.is_available():
+                self._device = "cuda"
+            else:
+                self._device = "cpu"
+        else:
+            self._device = self._requested_device
+
+        logger.info(
+            "Loading MarianMT-CT2 from %s (device=%s, compute=%s)...",
+            self._model_dir,
+            self._device,
+            self._compute_type,
+        )
+        t0 = time.time()
+        self._translator = ctranslate2.Translator(
+            self._model_dir,
+            device=self._device,
+            compute_type=self._compute_type,
+        )
+        # Tokenizer files were copied next to model.bin by the converter, so
+        # the tokenizer loads from the same directory as the CT2 weights.
+        self._tokenizer = MarianTokenizer.from_pretrained(self._model_dir)
+
+        # Warmup. "Lord, have mercy on us." exercises the theological-term
+        # SentencePiece subword path (tier1) — a reliably non-trivial codepath
+        # that catches kernel-launch jitter on the first real translation.
+        warmup_texts = ["Hello", "Lord, have mercy on us."]
+        for text in warmup_texts[: self._warmup_passes]:
+            self._translate_raw(text)
+
+        logger.info("MarianMT-CT2 ready (%.1fs)", time.time() - t0)
+        self._loaded = True
+
+    def translate(
+        self,
+        text: str,
+        *,
+        source_lang: str = "en",
+        target_lang: str = "es",
+    ) -> TranslationResult:
+        """Translate *text* via CT2.
+
+        Thread-safe — CT2 ``Translator`` is internally synchronised. No lock.
+        ``source_lang``/``target_lang`` are accepted for ABC compatibility but
+        ignored (each MarianMT model is one direction; the configured direction
+        wins).
+        """
+        if not self._loaded:
+            raise RuntimeError("Engine not loaded -- call load() first")
+
+        if self._translator is None or self._tokenizer is None:
+            return TranslationResult(text="(MarianMT-CT2 not loaded)", latency_ms=0.0)
+
+        t0 = time.perf_counter()
+        out_text = self._translate_raw(text)
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+
+        return TranslationResult(text=out_text, latency_ms=latency_ms)
+
+    def unload(self) -> None:
+        """Release the Translator + tokenizer."""
+        self._translator = None
+        self._tokenizer = None
+        self._loaded = False
+        if TORCH_AVAILABLE and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        logger.info("MarianCT2Engine unloaded (%s)", self._model_dir)
+
+    @property
+    def model_id(self) -> str:
+        return self._model_dir
+
+    @property
+    def backend(self) -> str:
+        # Format: "ct2-{compute_type}" — disambiguates from MarianHFEngine's
+        # "hf-{device}" so the partial pipeline diagnostic shows which path is hot.
+        return f"ct2-{self._compute_type}"
+
+    # -- internal helpers ----------------------------------------------------
+
+    def _translate_raw(self, text: str) -> str:
+        """Encode → CT2 translate_batch → decode round-trip. No timing."""
+        # Marian/CT2 uses token-string input (not ids). The pattern:
+        #   1. tokenizer(text) -> input_ids (with EOS appended).
+        #   2. convert_ids_to_tokens(ids) -> ['▁For', '▁God', ..., '</s>'].
+        #   3. translator.translate_batch([tokens], max_decoding_length=N)
+        #      -> [TranslationResult(hypotheses=[['▁Para', '▁Dios', ...]])]
+        #   4. convert_tokens_to_ids(hypothesis) -> output ids.
+        #   5. tokenizer.decode(out_ids, skip_special_tokens=True) -> text.
+        ids = self._tokenizer(text, truncation=True)["input_ids"]
+        tokens = self._tokenizer.convert_ids_to_tokens(ids)
+        results = self._translator.translate_batch(
+            [tokens],
+            max_decoding_length=self._max_new_tokens,
+            beam_size=1,
+        )
+        out_tokens = results[0].hypotheses[0]
+        out_ids = self._tokenizer.convert_tokens_to_ids(out_tokens)
+        return self._tokenizer.decode(out_ids, skip_special_tokens=True)

@@ -3,13 +3,15 @@
 Provides:
   - MLXWhisperEngine  -- STT via mlx-whisper (distil-whisper / whisper-large-v3-turbo)
   - MLXGemmaEngine    -- Translation via mlx-lm (TranslateGemma 4B/12B 4-bit)
-  - MarianEngine      -- Fast partial translation via MarianMT PyTorch (any backend)
+
+Note: ``MarianEngine`` (the HF MarianMT partial translator) lives in
+``engines.marian_hf_engine`` as ``MarianHFEngine`` since v2026.8. ``PiperTTSEngine``
+remains here.
 """
 
 import copy
 import logging
 import os
-import threading
 import time
 
 import numpy as np
@@ -45,7 +47,6 @@ except ImportError:
     mlx_whisper = None
     MLX_AVAILABLE = False
 
-
 def materialize_mlx_model(model) -> None:
     """Eagerly evaluate model parameters for cross-thread use (MLX >= 0.31.2).
 
@@ -67,8 +68,10 @@ def materialize_mlx_model(model) -> None:
         logger.warning("Could not materialize MLX model parameters: %s", exc)
 
 
-# PyTorch is always available (used by MarianEngine and as a fallback)
-import torch
+# PyTorch is always available (used as a fallback). Silero VAD on Mac uses
+# the shared lock from engines._locks so concurrent calls between MLX engines
+# (Metal-bound) and any HF PyTorch path (e.g. MarianHFEngine) are serialized.
+import torch  # noqa: F401  -- imported for downstream guards
 
 # ---------------------------------------------------------------------------
 # MLX Whisper STT
@@ -734,119 +737,6 @@ class MLXGemmaEngine(TranslationEngine):
             len(suffix_tokens),
         )
         return prompt_cache, suffix_tokens
-
-
-# ---------------------------------------------------------------------------
-# MarianMT (PyTorch -- works on any backend)
-# ---------------------------------------------------------------------------
-
-# Module-level lock for PyTorch thread safety.  MarianMT inference and
-# Silero VAD both use PyTorch; concurrent calls from different threads
-# cause heap corruption on macOS.
-_pytorch_lock = threading.Lock()
-
-
-class MarianEngine(TranslationEngine):
-    """Fast partial-translation engine wrapping Helsinki-NLP MarianMT.
-
-    Uses PyTorch (CPU or CUDA).  Typical latency: ~80 ms on CPU,
-    ~50 ms on CUDA.
-
-    Constructor args:
-        model_id:  HuggingFace repo (default: Helsinki-NLP/opus-mt-en-es).
-        device:    "cpu", "cuda", or "auto" (auto-detect).  Default: "auto".
-    """
-
-    def __init__(
-        self,
-        model_id: str = "Helsinki-NLP/opus-mt-en-es",
-        device: str = "auto",
-    ):
-        self._model_id_str = model_id
-        self._requested_device = device
-        self._device = None
-        self._model = None
-        self._tokenizer = None
-        self._loaded = False
-
-    # -- public interface ----------------------------------------------------
-
-    def load(self) -> None:
-        """Download (if needed) and warm up MarianMT."""
-        from transformers import MarianMTModel, MarianTokenizer
-
-        # Resolve device
-        if self._requested_device == "auto":
-            self._device = "cuda" if torch.cuda.is_available() else "cpu"
-        else:
-            self._device = self._requested_device
-
-        logger.info("Loading %s (MarianMT, device=%s)...", self._model_id_str, self._device)
-        t0 = time.time()
-        self._tokenizer = MarianTokenizer.from_pretrained(self._model_id_str)
-        self._model = MarianMTModel.from_pretrained(self._model_id_str)
-        if self._device == "cuda":
-            self._model = self._model.to("cuda")
-        self._model.eval()
-
-        # Warm up
-        inputs = self._tokenizer("Hello", return_tensors="pt", padding=True)
-        if self._device == "cuda":
-            inputs = {k: v.to("cuda") for k, v in inputs.items()}
-        with torch.no_grad():
-            self._model.generate(**inputs, max_new_tokens=16)
-
-        logger.info("MarianMT ready (%.1fs)", time.time() - t0)
-        self._loaded = True
-
-    def translate(
-        self,
-        text: str,
-        *,
-        source_lang: str = "en",
-        target_lang: str = "es",
-    ) -> TranslationResult:
-        """Translate *text* via MarianMT.
-
-        Thread-safe: uses ``_pytorch_lock`` to prevent concurrent PyTorch
-        calls (which cause heap corruption on macOS).
-        """
-        if not self._loaded:
-            raise RuntimeError("Engine not loaded -- call load() first")
-
-        if self._model is None or self._tokenizer is None:
-            return TranslationResult(text="(MarianMT not loaded)", latency_ms=0.0)
-
-        t0 = time.perf_counter()
-        inputs = self._tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-        if self._device == "cuda":
-            inputs = {k: v.to("cuda") for k, v in inputs.items()}
-        with _pytorch_lock, torch.no_grad():
-            translated = self._model.generate(**inputs, max_new_tokens=128)
-        result = self._tokenizer.decode(translated[0], skip_special_tokens=True)
-        latency_ms = (time.perf_counter() - t0) * 1000
-
-        return TranslationResult(
-            text=result,
-            latency_ms=latency_ms,
-        )
-
-    def unload(self) -> None:
-        """Release model from memory."""
-        self._model = None
-        self._tokenizer = None
-        self._loaded = False
-        logger.info("MarianEngine unloaded (%s)", self._model_id_str)
-
-    @property
-    def model_id(self) -> str:
-        return self._model_id_str
-
-    @property
-    def backend(self) -> str:
-        if self._device is not None:
-            return self._device
-        return "cpu"
 
 
 # ---------------------------------------------------------------------------
