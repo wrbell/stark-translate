@@ -64,6 +64,7 @@ mlx = [
     "mlx>=0.31",
     "mlx-whisper>=0.4",
     "mlx-lm>=0.30",
+    "mlx-optiq>=0.1",                 # TurboQuant KV cache (optional at runtime)
     "transformers>=5.5",
     "scipy>=1.13",
     "piper-tts",

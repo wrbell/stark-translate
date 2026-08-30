@@ -157,9 +157,15 @@ _partial_future_lock = threading.Lock()
 # prevent fire-and-forget partial tasks from being garbage-collected (RUF006)
 _partial_tasks = set()
 
-# MLX model IDs (4-bit quantized, community-converted)
+# MLX model IDs (4-bit quantized, community-converted) — overridden from settings in main()
 MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"  # ~2.2GB
 MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
+# Optional LoRA adapters + TurboQuant (set from CLI / settings in main())
+ADAPTER_DIR_A = None  # 4B adapter path
+ADAPTER_DIR_B = None  # 12B adapter path (optional)
+USE_TURBOQUANT = False
+TURBOQUANT_KEY_BITS = 3
+TURBOQUANT_VAL_BITS = 4
 
 # [P7-1E] Whisper initial_prompt — capped at ~40 words to reduce prefill time.
 # Biases decoder toward theological vocabulary that Whisper otherwise
@@ -1013,8 +1019,12 @@ def load_whisper(backend="mlx"):
         return model
 
 
-def load_mlx_gemma(model_id, label):
-    """Load a TranslateGemma model via MLX (4-bit, Apple Silicon native)."""
+def load_mlx_gemma(model_id, label, adapter_path=None):
+    """Load a TranslateGemma model via MLX (4-bit, Apple Silicon native).
+
+    Passes ``adapter_path`` to ``mlx_lm.load`` when set, and optionally wraps
+    the model KV cache with TurboQuant (``USE_TURBOQUANT`` / mlx-optiq).
+    """
     import mlx.core as mx
     from mlx_lm import load
 
@@ -1022,8 +1032,13 @@ def load_mlx_gemma(model_id, label):
     mx.set_cache_limit(256 * 1024 * 1024)
 
     print(f"  Loading {model_id}...")
+    if adapter_path:
+        print(f"  Adapter: {adapter_path}")
     t0 = time.time()
-    model, tokenizer = load(model_id)
+    load_kwargs = {}
+    if adapter_path:
+        load_kwargs["adapter_path"] = adapter_path
+    model, tokenizer = load(model_id, **load_kwargs)
 
     # [P7-2E] Verify and fix EOS tokens for early stopping.
     # TranslateGemma uses <end_of_turn> (id=106) as its actual EOS, but the
@@ -1039,6 +1054,23 @@ def load_mlx_gemma(model_id, label):
     else:
         # Already has it (e.g. from a newer tokenizer version)
         print(f"  [P7-2E] EOS tokens verified: {tokenizer._eos_token_ids}")
+
+    # TurboQuant KV cache compression (mlx-optiq) — same as MLXGemmaEngine
+    if USE_TURBOQUANT:
+        try:
+            from mlx_optiq import TurboQuantKVCache
+
+            model.kv_cache = TurboQuantKVCache(
+                model,
+                key_bits=TURBOQUANT_KEY_BITS,
+                val_bits=TURBOQUANT_VAL_BITS,
+                rotate=True,
+            )
+            print(f"  TurboQuant KV cache enabled (key={TURBOQUANT_KEY_BITS}-bit, val={TURBOQUANT_VAL_BITS}-bit)")
+        except ImportError:
+            print("  WARNING: TurboQuant requested but mlx-optiq not installed (pip install mlx-optiq)")
+        except Exception as exc:
+            print(f"  WARNING: TurboQuant initialization failed: {exc}")
 
     elapsed = time.time() - t0
     print(f"  {label} ready ({elapsed:.1f}s)")
@@ -1122,7 +1154,7 @@ def load_translation_models(load_b=True):
     global mlx_a_suffix_tokens, mlx_b_suffix_tokens
 
     print("[3/6] Loading TranslateGemma models (MLX 4-bit)...")
-    a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)")
+    a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, "Approach A (4B)", adapter_path=ADAPTER_DIR_A)
 
     # [P7-2B] Build prompt cache for 4B model
     mlx_a_prompt_cache, _, mlx_a_suffix_tokens = _build_prompt_cache(a_model, a_tok, "4B")
@@ -1130,7 +1162,7 @@ def load_translation_models(load_b=True):
     b_model, b_tok = None, None
     if load_b:
         try:
-            b_model, b_tok = load_mlx_gemma(MLX_MODEL_B, "Approach B (12B)")
+            b_model, b_tok = load_mlx_gemma(MLX_MODEL_B, "Approach B (12B)", adapter_path=ADAPTER_DIR_B)
             # [P7-2B] Build prompt cache for 12B model
             mlx_b_prompt_cache, _, mlx_b_suffix_tokens = _build_prompt_cache(b_model, b_tok, "12B")
         except Exception as e:
@@ -3971,6 +4003,36 @@ def main():
         default="INFO",
         help="Logging level for console and file output (default: INFO)",
     )
+    parser.add_argument(
+        "--adapter-dir",
+        type=str,
+        default=None,
+        help=(
+            "LoRA adapter directory for the primary (4B) MLX TranslateGemma model. "
+            "Passed to mlx_lm.load(..., adapter_path=). Ignored on CUDA/llamacpp."
+        ),
+    )
+    parser.add_argument(
+        "--adapter-dir-b",
+        type=str,
+        default=None,
+        help="Optional LoRA adapter directory for the 12B model in --ab mode (MLX only).",
+    )
+    parser.add_argument(
+        "--turboquant",
+        action="store_true",
+        default=None,
+        help=(
+            "Enable TurboQuant KV cache compression on MLX (requires mlx-optiq). "
+            "Overrides STARK_TRANSLATION__TURBOQUANT when set."
+        ),
+    )
+    parser.add_argument(
+        "--no-turboquant",
+        action="store_true",
+        default=False,
+        help="Disable TurboQuant even if enabled in settings.",
+    )
     args = parser.parse_args()
 
     # --- Resolve backend ---
@@ -4076,6 +4138,24 @@ def main():
     settings.stt.backend = args.stt_backend
     MUSIC_THRESHOLD = args.music_threshold
     MUSIC_HOLDOFF = args.music_holdoff
+
+    # MLX translation: model IDs from settings, adapters + TurboQuant from CLI/settings
+    global MLX_MODEL_A, MLX_MODEL_B, ADAPTER_DIR_A, ADAPTER_DIR_B
+    global USE_TURBOQUANT, TURBOQUANT_KEY_BITS, TURBOQUANT_VAL_BITS
+    MLX_MODEL_A = settings.translation.mlx_model_4b
+    MLX_MODEL_B = settings.translation.mlx_model_12b
+    ADAPTER_DIR_A = args.adapter_dir
+    ADAPTER_DIR_B = args.adapter_dir_b
+    if args.no_turboquant:
+        USE_TURBOQUANT = False
+    elif args.turboquant is True:
+        USE_TURBOQUANT = True
+    else:
+        USE_TURBOQUANT = bool(settings.translation.turboquant)
+    TURBOQUANT_KEY_BITS = settings.translation.turboquant_key_bits
+    TURBOQUANT_VAL_BITS = settings.translation.turboquant_val_bits
+    # Keep settings in sync so factory-created engines match live path
+    settings.translation.turboquant = USE_TURBOQUANT
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):

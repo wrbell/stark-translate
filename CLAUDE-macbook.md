@@ -212,6 +212,21 @@ model, tokenizer = mlx_lm.load(
 )
 ```
 
+**Live path:** pass the same folder to the dry-run CLI (wired into `load_mlx_gemma` / `MLXGemmaEngine`):
+
+```bash
+python dry_run_ab.py --backend mlx --adapter-dir ./fine_tuned_gemma_mi_A
+# Optional: --adapter-dir-b for 12B in --ab mode; --turboquant for KV compression
+```
+
+**Phase 7 health gate on Mac** (no CUDA/bitsandbytes):
+
+```bash
+python tools/health_check.py --backend mlx --n-canaries 8 --adapter ./fine_tuned_gemma_mi_A
+```
+
+Same-day Mac refresh checklist (filter validation, TurboQuant, what *not* to run without WSL): [`docs/mac_pipeline_refresh.md`](./docs/mac_pipeline_refresh.md).
+
 For Whisper LoRA adapters, the PyTorch/PEFT path is still needed for evaluation (mlx-whisper does not yet support LoRA directly):
 
 ```python
