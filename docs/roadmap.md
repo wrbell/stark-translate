@@ -3,7 +3,7 @@
 > Living document tracking the full project trajectory from Mac prototype
 > through Windows training to production deployment.
 >
-> **Last updated:** 2026-04-25
+> **Last updated:** 2026-08-30
 
 ---
 
@@ -15,12 +15,11 @@ Mac (M3 Pro 18GB, MLX)                Windows (A2000 Ada 16GB, CUDA/WSL2)
   Whisper Large-V3-Turbo (STT)           198K aligned chunks (328 sermons)
   engines/ package (MLX + CUDA)          TranslateGemma S1-S9 sweep → S6 winner
   settings.py (pydantic-settings)        Whisper W12 data scaling (198K chunks)
-  Backend: --backend auto|mlx|cuda       W15 hard example mining + curriculum
+  Backend: --backend auto|mlx|cuda       W15 hard mining + W16 = 7.25% fresh-eval WER
   Piper TTS (EN + ES, --tts)             Deepgram Nova-3 oracle (35 sermons)
   Pipeline overlap (STT N+1 ∥ TT N)     Tiered glossary (50 boost + 229 master)
-  5 display modes (WebSocket)            12GB memory-capped alignment pipeline
-  935 tests, 7 CI workflows              benchmark_gemma4.py (Gemma 4 comparison)
-  v2026.6 operator UI shipped            llama.cpp E4B Q4_K_M = production CUDA default
+  Display modes + operator UI            llama.cpp E4B Q4_K_M = production CUDA default
+  v2026.6/v2026.7 shipped                W17 curriculum scripted (DoRA + hard-mix)
 
 Production Endpoints (implemented):
   1. Mac M-series (8-18 GB) — MLX, --backend=mlx
@@ -29,6 +28,8 @@ Production Endpoints (implemented):
 
 See `docs/operator_runbook.md` for the day-of-event workflow and `bootstrap.sh`
 for first-time church PC setup.
+
+**Next WSL execution:** `docs/wsl_pipeline_refresh.md` (Phase 4 → E4B SFT → W17 → Mac → AL).
 ```
 
 ---
@@ -81,16 +82,24 @@ for first-time church PC setup.
 
 ## Active Work
 
-### Whisper Curriculum Learning (Current)
+### Pipeline refresh (WSL execution)
 
-Continue W15 hard mining pipeline: mine → filter → build subset → train with `--init-from` → re-mine on new adapter. Target: reduce WER from 21.41% baseline toward <10% on church audio.
+**Primary runbook:** [`docs/wsl_pipeline_refresh.md`](./wsl_pipeline_refresh.md)
 
-### Gemma 4 Evaluation
+Ordered stages on the A2000 Ada box:
 
-`benchmark_gemma4.py` compares TranslateGemma 4B/12B vs Gemma 4 E2B/E4B across 3 tiers:
-- Tier 1: Bible verse holdout (BLEU/chrF++/COMET)
-- Tier 2: Deepgram sermon chunks (COMET-QE + hallucination ratio)
-- Tier 3: 8 theological canary sentences (term accuracy)
+1. Phase 4 full audio preprocess (`run_phase4_preprocess.sh`)
+2. Gemma 4 E4B domain SFT → GGUF (`run_gemma4_e4b_domain_sft.sh`, 8-canary sanity)
+3. W17 Whisper DoRA + hard-mix → CT2 + `benchmark_stt_engines.py` gate (must ≤ W16)
+4. Optional Parakeet EN-only bench — adopt only if it beats W17; bilingual default stays Whisper
+5. Mac transfer / Phase 7 A/B + live YT compare
+6. Phase 8 active learning (`merge_corrections.py` → retrain → `deploy_adapters.py`)
+
+**Status notes:** W16 shipped in production CT2 path (7.25% fresh-eval WER). W17 is scripted in-repo, not yet trained. Scripts and garbage-filter hardening landed with the 2026-08 pipeline refresh (PR #162).
+
+### Gemma 4 Evaluation (reference)
+
+`benchmark_gemma4.py` / Phase 1A llama.cpp matrix remain the eval harnesses. Production CUDA finals stay **E4B Q4_K_M**; next accuracy lever is domain SFT of that model (stage 2 above), not a larger base on 16 GB.
 
 ---
 
@@ -98,17 +107,17 @@ Continue W15 hard mining pipeline: mine → filter → build subset → train wi
 
 ### Phase 5: Adapter Evaluation & Transfer (Next)
 
-- Transfer best Whisper + TranslateGemma adapters to Mac
+- Transfer best Whisper + Gemma adapters to Mac — see refresh runbook §5
 - Re-run A/B comparison with fine-tuned vs base models
 - Live YouTube caption comparison with fine-tuned STT
-- Smoke test: 5 canary sentences + theological term audit
+- Smoke test: **8** canary sentences (`tools/health_check.py --n-canaries 8`) + theological term audit
 
 ### Phase 6: Active Learning Feedback Loop
 
 - Route low-confidence segments to operator review
-- Human correction workflow → merge corrections into training data
-- Retrain on corrected data (repeat 2-4 cycles)
-- Target: 20-40% relative WER reduction per cycle
+- Human correction → `tools/merge_corrections.py` into training data
+- Retrain on corrected data (repeat 2-4 cycles) — refresh runbook §6
+- Target: 20-40% relative WER reduction per early cycle; stop when &lt; 2% for 2 cycles
 
 ### Phase 7: Live Demo Deployment ✅ shipped as v2026.6
 
