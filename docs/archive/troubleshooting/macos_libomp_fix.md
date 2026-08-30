@@ -60,15 +60,17 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"        # Safety net for any remainin
 
 CTranslate2 was previously used for fast MarianMT int8 inference (~50ms partials). CT2 also bundles its own libomp, creating a three-way conflict. Removed CT2 entirely — PyTorch MarianMT handles all partial translations now (~80ms, negligible difference for the pipeline).
 
-## Related Fix: MLX Thread Safety
+## Related Fix: MLX Thread Safety (updated for mlx 0.31.2+)
 
-MLX's Metal backend is not thread-safe. All MLX inference (Whisper STT + TranslateGemma translation) must be serialized on a single thread:
+Prior to mlx 0.31.2, Metal was not safe for concurrent MLX calls from multiple threads — all Whisper STT + TranslateGemma work had to share one worker:
 
 ```python
 _pipeline_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
 ```
 
-Running MLX operations on separate threads causes SIGSEGV from concurrent Metal GPU access.
+**As of mlx 0.31.2** (April 2026), independent models may run concurrently on separate threads via thread-local streams. The production Mac path now uses `max_workers=2` (CUDA parity) after materializing weights on the load thread (`mx.eval` / `synchronize`). Requires **mlx-lm >= 0.31.3**. `--multiprocess` remains an optional escape hatch (separate Metal contexts), not the default overlap mechanism.
+
+If you still see `There is no Stream(gpu, N) in current thread` or SIGSEGV under load, fall back with `--multiprocess` or pin an older mlx and serialize again.
 
 ## Diagnosis Method
 

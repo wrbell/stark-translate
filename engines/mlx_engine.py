@@ -40,6 +40,28 @@ except ImportError:
     mlx_whisper = None
     MLX_AVAILABLE = False
 
+
+def materialize_mlx_model(model) -> None:
+    """Eagerly evaluate model parameters for cross-thread use (MLX >= 0.31.2).
+
+    MLX binds lazy arrays to the creating thread's stream. Evaluating parameters
+    on the load thread materializes weights so other pool threads can safely run
+    independent computations (STT ∥ translation overlap). See ml-explore/mlx#3078
+    and #3529.
+    """
+    if mx is None or model is None:
+        return
+    try:
+        if hasattr(model, "parameters"):
+            mx.eval(model.parameters())
+        elif hasattr(model, "trainable_parameters"):
+            mx.eval(model.trainable_parameters())
+        elif hasattr(mx, "synchronize"):
+            mx.synchronize()
+    except Exception as exc:
+        logger.warning("Could not materialize MLX model parameters: %s", exc)
+
+
 # PyTorch is always available (used by MarianEngine and as a fallback)
 import torch
 
@@ -126,6 +148,11 @@ class MLXWhisperEngine(STTEngine):
             )
             logger.info("Whisper ready (%s) (%.1fs)", self._model_id, time.time() - t0)
 
+        # Warmup already eval'd graphs on this thread; synchronize so the
+        # mlx-whisper cache is safe for pool workers (MLX >= 0.31.2 TLS streams).
+        if hasattr(mx, "synchronize"):
+            mx.synchronize()
+
         self._loaded = True
 
     def transcribe(
@@ -145,8 +172,10 @@ class MLXWhisperEngine(STTEngine):
         has ``avg_logprob < fallback_threshold`` or
         ``compression_ratio > hallucination_threshold``.
 
-        **MLX Metal is NOT thread-safe** -- the fallback model is loaded and
-        run on the same thread as the primary model.  No threading is used.
+        MLX >= 0.31.2 supports independent multi-thread eval via thread-local
+        streams. Callers may overlap STT with translation on separate pool
+        threads after ``load()`` materializes weights. Fallback still runs on
+        the same worker thread as the primary call (no cross-thread handoff).
         """
         if not self._loaded:
             raise RuntimeError("Engine not loaded -- call load() first")
@@ -300,8 +329,8 @@ class MLXWhisperEngine(STTEngine):
         """Lazily load the fallback Whisper model (warmup with 1s silence).
 
         Only called on first fallback trigger, not at startup.
-        MLX Metal is NOT thread-safe -- this runs on the same thread as
-        the primary model.
+        Runs on the same worker thread as the primary call (no cross-thread
+        handoff of lazy arrays).
         """
         logger.info("Lazy-loading fallback model %s (MLX)...", self._fallback_model_id)
         t0 = time.time()
@@ -311,6 +340,8 @@ class MLXWhisperEngine(STTEngine):
             path_or_hf_repo=self._fallback_model_id,
             condition_on_previous_text=False,
         )
+        if hasattr(mx, "synchronize"):
+            mx.synchronize()
         logger.info(
             "Fallback model ready (%s) (%.1fs)",
             self._fallback_model_id,
@@ -491,6 +522,10 @@ class MLXGemmaEngine(TranslationEngine):
         # -- prompt cache (mirrors dry_run_ab._build_prompt_cache) ------------
         if self._use_prompt_cache:
             self._prompt_cache_template, self._suffix_tokens = self._build_prompt_cache()
+
+        # Materialize weights on the load thread so pool workers can run
+        # independent inference (MLX >= 0.31.2 thread-local streams).
+        materialize_mlx_model(self._model)
 
         self._loaded = True
 

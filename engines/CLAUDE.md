@@ -74,9 +74,16 @@ Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `
 | `CUDAGemmaEngine` | Basic translation with bitsandbytes 4-bit, no streaming |
 | `CUDAGemmaStreamingEngine` | Full-featured: streaming, prompt cache, speculative decoding |
 
-## MLX Thread Safety (CRITICAL)
+## MLX Thread Safety (MLX >= 0.31.2)
 
-Metal is NOT thread-safe. All MLX inference (Whisper STT + TranslateGemma translation) must run on a **single thread** via `ThreadPoolExecutor(max_workers=1)`. Concurrent MLX on different threads causes SIGSEGV.
+As of **mlx 0.31.2**, independent models may run concurrently on separate threads via **thread-local streams** (see ml-explore/mlx#3078). The live pipeline uses `ThreadPoolExecutor(max_workers=2)` on Mac — same as CUDA — so **STT(N) can overlap Translation(N−1)**.
+
+Rules that still apply:
+
+- Materialize weights on the load thread (`mx.eval(model.parameters())` / `mx.synchronize()` after Whisper warmup) before pool workers use them. Lazy arrays are bound to the creating thread's stream (#3529).
+- Do not share one stream across threads without serialization (`mx.new_thread_unsafe_stream`).
+- `--multiprocess` remains an optional escape hatch (separate OS processes / Metal contexts) for debugging or older mlx builds — not required for overlap on 0.31.2+.
+- Companion: **mlx-lm >= 0.31.3** (thread-local generation stream).
 
 PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD runs inline on the asyncio thread (<1ms) — never on a separate thread (heap corruption risk from concurrent PyTorch).
 
@@ -174,7 +181,7 @@ Fine-tuned LoRA adapters integrate as follows:
 - **MLX**: `mlx_lm.load(model_path, adapter_path=)` — point `adapter_path` to `adapters/{model}/active/`
 - **CUDA Whisper STT (v2026.7)**: Use `training/export_ct2.py` to merge the LoRA into Whisper bf16 and convert to CTranslate2. Output goes to `whisper_ct2/{run}/`; register via `tools/manage_adapters.py register --model whisper_turbo_ct2 --adapter whisper_ct2/{run}`. The factory auto-loads `adapters/whisper_turbo_ct2/active/` when present (no engine-side change required). Override via `model_id=` kwarg or set `STARK_STT__WHISPER_CUDA_MODEL`.
 - **CUDA Gemma**: Merge LoRA into base model offline, export GGUF/quantized, load merged model (no runtime adapter swapping)
-- **Hot-reload (Mac)**: Pipeline receives SIGUSR1, re-runs `load()` within the single-thread executor (Metal thread safety preserved). During reload (~2-3s), VAD + STT + MarianMT partials continue — only TranslateGemma finals pause.
+- **Hot-reload (Mac)**: Pipeline receives SIGUSR1, re-runs `load()` on the pipeline pool (materialize weights after reload). During reload (~2-3s), VAD + STT + MarianMT partials continue — only TranslateGemma finals pause.
 - **Directory convention**: `adapters/{model}/active/` (current) + `adapters/{model}/previous/` (one-step rollback). See `docs/deploy.md` for the full 6-phase deployment pipeline.
 
 ## Settings Integration
