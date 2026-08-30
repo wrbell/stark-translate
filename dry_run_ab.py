@@ -1790,9 +1790,7 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
     family = globals().get("MODEL_FAMILY", "translategemma")
     max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
 
-    use_cache = (
-        prompt_cache_template is not None and suffix_tokens is not None and family == "translategemma"
-    )
+    use_cache = prompt_cache_template is not None and suffix_tokens is not None and family == "translategemma"
 
     if use_cache:
         _dc_t0 = time.perf_counter()
@@ -4128,10 +4126,7 @@ def main():
         "--mlx-drafter",
         type=str,
         default=None,
-        help=(
-            "Gemma-4 assistant drafter model id for --mts "
-            "(default: mlx-community/gemma-4-e4b-it-assistant-bf16)."
-        ),
+        help=("Gemma-4 assistant drafter model id for --mts (default: mlx-community/gemma-4-e4b-it-assistant-bf16)."),
     )
     args = parser.parse_args()
 

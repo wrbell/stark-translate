@@ -39,8 +39,7 @@ def gemma4_user_content(text: str, source_lang: str = "en", target_lang: str = "
     src_name = lang_display_name(source_lang)
     tgt_name = lang_display_name(target_lang)
     return (
-        f"Translate the following {src_name} text to {tgt_name}. "
-        f"Output only the translation, nothing else.\n\n{text}"
+        f"Translate the following {src_name} text to {tgt_name}. Output only the translation, nothing else.\n\n{text}"
     )
 
 
