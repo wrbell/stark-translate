@@ -8,18 +8,22 @@ partimiento del pan), checks expected substrings, measures latency, and
 detects hallucination via word-count ratio.
 
 Usage:
-    # Base model only (no adapter)
+    # Base model only (no adapter) — auto backend
     python tools/health_check.py
 
-    # With adapter
-    python tools/health_check.py --adapter hybrid_runs/S8_deepl_only
+    # Mac / Apple Silicon (MLX 4-bit)
+    python tools/health_check.py --backend mlx \\
+        --base-model mlx-community/translategemma-4b-it-4bit \\
+        --adapter adapters/translategemma_4b/active
 
-    # Custom latency threshold
-    python tools/health_check.py --adapter hybrid_runs/S8_deepl_only --max-latency 15
+    # CUDA / bitsandbytes (WSL training box)
+    python tools/health_check.py --backend cuda --adapter hybrid_runs/S8_deepl_only
 
-    # Verbose (print full translations)
-    python tools/health_check.py --adapter hybrid_runs/S8_deepl_only --verbose
+    # Custom latency threshold + verbose
+    python tools/health_check.py --backend mlx --max-latency 15 --verbose
 """
+
+from __future__ import annotations
 
 import argparse
 import json
@@ -27,11 +31,12 @@ import logging
 import os
 import sys
 import time
+from collections.abc import Callable
+from typing import Any
 
 # Insert project root so training/ imports work
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from training.evaluate_translation import load_gemma_model, translate_gemma
 from training.theological_canaries import THEOLOGICAL_CANARIES, canary_sentences
 
 logging.basicConfig(
@@ -48,6 +53,127 @@ CANARY_TESTS = THEOLOGICAL_CANARIES
 HALLUCINATION_MIN = 0.5
 HALLUCINATION_MAX = 2.5
 
+DEFAULT_MLX_MODEL = "mlx-community/translategemma-4b-it-4bit"
+DEFAULT_CUDA_MODEL = "google/translategemma-4b-it"
+
+
+def _detect_backend() -> str:
+    """Prefer MLX on Apple Silicon, else CUDA when available, else cuda label for HF path."""
+    try:
+        import mlx.core  # noqa: F401
+
+        return "mlx"
+    except ImportError:
+        pass
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return "cuda"
+    except ImportError:
+        pass
+    return "cuda"  # HF/bnb path; will fail clearly if torch/CUDA missing
+
+
+def _load_mlx(
+    base_model: str,
+    adapter_dir: str | None,
+    model_family: str,
+) -> tuple[Any, Any, Callable[..., str]]:
+    """Load TranslateGemma via mlx-lm; return (model, tokenizer, translate_fn)."""
+    import mlx.core as mx
+    from mlx_lm import generate, load
+
+    mx.set_cache_limit(256 * 1024 * 1024)
+    load_kwargs: dict[str, Any] = {}
+    if adapter_dir and os.path.exists(adapter_dir):
+        load_kwargs["adapter_path"] = adapter_dir
+        logger.info("MLX adapter: %s", adapter_dir)
+    elif adapter_dir:
+        logger.warning("Adapter path does not exist: %s — loading base only", adapter_dir)
+
+    logger.info("Loading MLX model %s...", base_model)
+    model, tokenizer = load(base_model, **load_kwargs)
+
+    # EOS fix (same as dry_run_ab / MLXGemmaEngine)
+    eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
+    default_eos = tokenizer.eos_token_id
+    if not hasattr(tokenizer, "_eos_token_ids") or eot_id not in tokenizer._eos_token_ids:
+        tokenizer._eos_token_ids = {default_eos, eot_id}
+
+    def translate_fn(
+        _model: Any,
+        _tokenizer: Any,
+        text: str,
+        *,
+        source_lang: str = "en",
+        target_lang: str = "es",
+    ) -> str:
+        if model_family == "gemma4":
+            lang_names = {"en": "English", "es": "Spanish", "hi": "Hindi", "zh": "Chinese"}
+            src_name = lang_names.get(source_lang, source_lang)
+            tgt_name = lang_names.get(target_lang, target_lang)
+            messages = [
+                {
+                    "role": "user",
+                    "content": (
+                        f"Translate the following {src_name} text to {tgt_name}. "
+                        f"Output only the translation, nothing else.\n\n{text}"
+                    ),
+                }
+            ]
+        else:
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "source_lang_code": source_lang,
+                            "target_lang_code": target_lang,
+                            "text": text,
+                        }
+                    ],
+                }
+            ]
+        prompt = _tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+        input_words = len(text.split())
+        max_tok = max(64, int(input_words * 3.0))
+        result = generate(_model, _tokenizer, prompt=prompt, max_tokens=max_tok, verbose=False)
+        clean = result.split("<end_of_turn>")[0].strip()
+        if model_family == "gemma4":
+            for prefix in ("Here is the translation:\n", "Here is the translation:"):
+                if clean.startswith(prefix):
+                    clean = clean[len(prefix) :].strip()
+                    break
+        return clean
+
+    return model, tokenizer, translate_fn
+
+
+def _load_cuda(
+    base_model: str,
+    adapter_dir: str | None,
+) -> tuple[Any, Any, Callable[..., str]]:
+    """Load via bitsandbytes / PEFT (WSL training path)."""
+    from training.evaluate_translation import load_gemma_model, translate_gemma
+
+    model, tokenizer = load_gemma_model(base_model, adapter_dir=adapter_dir)
+
+    def translate_fn(
+        _model: Any,
+        _tokenizer: Any,
+        text: str,
+        *,
+        source_lang: str = "en",
+        target_lang: str = "es",
+    ) -> str:
+        # evaluate_translation.translate_gemma is EN→ES fixed; ignore lang kwargs
+        _ = source_lang, target_lang
+        return translate_gemma(_model, _tokenizer, text)
+
+    return model, tokenizer, translate_fn
+
 
 def run_health_check(
     base_model: str,
@@ -55,10 +181,21 @@ def run_health_check(
     max_latency: float,
     verbose: bool = False,
     n_canaries: int = 8,
+    backend: str = "auto",
+    model_family: str = "translategemma",
 ) -> dict:
     """Run canary sentence health check. Returns results dict."""
-    logger.info("Loading model...")
-    model, tokenizer = load_gemma_model(base_model, adapter_dir=adapter_dir)
+    if backend == "auto":
+        backend = _detect_backend()
+
+    logger.info("Backend=%s  base=%s  adapter=%s", backend, base_model, adapter_dir or "(none)")
+
+    if backend == "mlx":
+        model, tokenizer, translate_fn = _load_mlx(base_model, adapter_dir, model_family)
+    elif backend in ("cuda", "hf", "cpu"):
+        model, tokenizer, translate_fn = _load_cuda(base_model, adapter_dir)
+    else:
+        raise ValueError(f"Unsupported backend: {backend!r}")
 
     results = []
     all_pass = True
@@ -69,7 +206,7 @@ def run_health_check(
         expected = test["expected_substrings"]
 
         t0 = time.perf_counter()
-        translation = translate_gemma(model, tokenizer, en, source_lang="en", target_lang="es")
+        translation = translate_fn(model, tokenizer, en, source_lang="en", target_lang="es")
         elapsed = time.perf_counter() - t0
 
         translation_l = (translation or "").lower()
@@ -131,6 +268,7 @@ def run_health_check(
         "passed": passed_count,
         "total": len(results),
         "all_pass": all_pass,
+        "backend": backend,
         "base_model": base_model,
         "adapter": adapter_dir,
         "max_latency": max_latency,
@@ -148,9 +286,21 @@ def main():
         help="Path to adapter directory (optional, runs base model if omitted)",
     )
     parser.add_argument(
+        "--backend",
+        choices=["auto", "mlx", "cuda", "hf"],
+        default="auto",
+        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda/hf (bitsandbytes)",
+    )
+    parser.add_argument(
         "--base-model",
-        default="google/translategemma-4b-it",
-        help="Base TranslateGemma/Gemma model ID (default: google/translategemma-4b-it)",
+        default=None,
+        help=(f"Base model ID (default: {DEFAULT_MLX_MODEL} for mlx, {DEFAULT_CUDA_MODEL} for cuda)"),
+    )
+    parser.add_argument(
+        "--model-family",
+        choices=["translategemma", "gemma4"],
+        default="translategemma",
+        help="Chat template family for MLX path (default: translategemma)",
     )
     parser.add_argument(
         "--max-latency",
@@ -172,12 +322,21 @@ def main():
     )
     args = parser.parse_args()
 
+    backend = args.backend
+    if backend == "auto":
+        backend = _detect_backend()
+    base_model = args.base_model
+    if not base_model:
+        base_model = DEFAULT_MLX_MODEL if backend == "mlx" else DEFAULT_CUDA_MODEL
+
     result = run_health_check(
-        base_model=args.base_model,
+        base_model=base_model,
         adapter_dir=args.adapter,
         max_latency=args.max_latency,
         verbose=args.verbose,
         n_canaries=args.n_canaries,
+        backend=backend,
+        model_family=args.model_family,
     )
 
     if args.output:

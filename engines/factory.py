@@ -174,6 +174,26 @@ def create_stt_engine(
     raise ValueError(f"Unsupported stt_backend: {stt_backend!r}")
 
 
+def _mlx_gemma_settings_kwargs() -> dict[str, Any]:
+    """Pull TurboQuant / model_family defaults from settings for MLX Gemma.
+
+    Returns an empty dict if settings cannot be imported (keeps factory usable
+    in minimal test environments). Callers may still override via ``**kwargs``.
+    """
+    try:
+        from settings import settings as _settings
+
+        ts = _settings.translation
+        return {
+            "use_turboquant": ts.turboquant,
+            "turboquant_key_bits": ts.turboquant_key_bits,
+            "turboquant_val_bits": ts.turboquant_val_bits,
+            "model_family": ts.model_family,
+        }
+    except Exception:
+        return {}
+
+
 def create_translation_engine(
     backend: str = "auto",
     model_id: str | None = None,
@@ -200,7 +220,9 @@ def create_translation_engine(
         assistant_model_id:  Optional draft model for HF spec decode (CUDA only).
                              For llama.cpp spec decode, pass ``-md`` to llama-server
                              instead.
-        **kwargs:            Forwarded to the engine constructor.
+        **kwargs:            Forwarded to the engine constructor. For MLX Gemma,
+                             also accepts ``adapter_path``, ``use_turboquant``,
+                             and TurboQuant bit settings.
 
     Returns:
         An *unloaded* ``TranslationEngine`` instance.  Call ``.load()`` first.
@@ -226,6 +248,9 @@ def create_translation_engine(
 
     if backend == "mlx":
         from engines.mlx_engine import MLXGemmaEngine
+
+        for key, value in _mlx_gemma_settings_kwargs().items():
+            kwargs.setdefault(key, value)
 
         return MLXGemmaEngine(
             model_id=model_id or "mlx-community/translategemma-4b-it-4bit",

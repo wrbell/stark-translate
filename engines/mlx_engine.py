@@ -392,6 +392,11 @@ class MLXGemmaEngine(TranslationEngine):
         cache_limit_mb:  Metal memory cache limit in megabytes (default: 256).
         use_prompt_cache: Pre-compute KV cache for the fixed chat template
                           prefix, saving ~50-80 ms per call (default: True).
+        adapter_path:    Optional LoRA adapter directory passed to
+                         ``mlx_lm.load(..., adapter_path=)``.
+        use_turboquant:  Enable TurboQuant KV cache (requires mlx-optiq).
+        turboquant_key_bits / turboquant_val_bits: Quantization bits for TQ.
+        model_family:    ``translategemma`` (structured lang codes) or ``gemma4``.
     """
 
     def __init__(
@@ -403,6 +408,7 @@ class MLXGemmaEngine(TranslationEngine):
         turboquant_key_bits: int = 3,
         turboquant_val_bits: int = 4,
         model_family: str = "translategemma",
+        adapter_path: str | None = None,
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
@@ -415,6 +421,7 @@ class MLXGemmaEngine(TranslationEngine):
         self._turboquant_key_bits = turboquant_key_bits
         self._turboquant_val_bits = turboquant_val_bits
         self._model_family = model_family
+        self._adapter_path = adapter_path
 
         self._model = None
         self._tokenizer = None
@@ -432,7 +439,11 @@ class MLXGemmaEngine(TranslationEngine):
 
         logger.info("Loading %s (MLX 4-bit)...", self._model_id)
         t0 = time.time()
-        self._model, self._tokenizer = mlx_load(self._model_id)
+        load_kwargs: dict = {}
+        if self._adapter_path:
+            load_kwargs["adapter_path"] = self._adapter_path
+            logger.info("Loading LoRA adapter from %s", self._adapter_path)
+        self._model, self._tokenizer = mlx_load(self._model_id, **load_kwargs)
 
         # -- EOS fix (mirrors dry_run_ab.load_mlx_gemma) ----------------------
         # TranslateGemma uses <end_of_turn> (id=106) as its actual EOS, but

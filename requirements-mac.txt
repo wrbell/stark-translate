@@ -26,6 +26,7 @@ MarkupSafe==3.0.3
 mlx==0.31.2
 mlx-lm==0.30.7
 mlx-metal==0.31.2
+mlx-optiq>=0.1                        # TurboQuant KV cache (STARK_TRANSLATION__TURBOQUANT)
 mlx-whisper>=0.4.3                    # Turbo: mlx-community/whisper-large-v3-turbo
 more-itertools==10.8.0
 mpmath==1.3.0

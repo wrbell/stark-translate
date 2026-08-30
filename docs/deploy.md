@@ -479,12 +479,12 @@ This connects inference quality metrics back to specific adapter versions.
 
 | File | Change | Lines (est.) |
 |------|--------|-------------|
-| `tools/deploy_adapters.py` | **New**: 6-phase deploy pipeline CLI | ~350 |
-| `tools/health_check.py` | **New**: 5-sentence smoke test + result types | ~150 |
-| `engines/mlx_engine.py` | Add `adapter_path` param to `MLXGemmaEngine.__init__()`, add `reload()` method | ~30 |
-| `engines/factory.py` | Forward `adapter_path` to engine constructors | ~10 |
-| `settings.py` | Add `adapter_dir`, per-model adapter path fields | ~15 |
-| `dry_run_ab.py` | Add `--adapter-dir` flag, SIGUSR1 handler, `_reload_adapters()` | ~40 |
+| `tools/deploy_adapters.py` | **Done** (refresh): 6-phase deploy pipeline CLI | ~350 |
+| `tools/health_check.py` | **Done**: 8-canary check; `--backend mlx` for Mac | ~200 |
+| `engines/mlx_engine.py` | **Partial:** `adapter_path` + TurboQuant on `MLXGemmaEngine`; `reload()` still TODO | ~40 |
+| `engines/factory.py` | **Done:** forwards settings TurboQuant + `adapter_path` kwargs | ~20 |
+| `settings.py` | TurboQuant fields done; optional dedicated `adapter_dir` settings still open | ~15 |
+| `dry_run_ab.py` | **Partial:** `--adapter-dir` / `--turboquant` wired; SIGUSR1 hot-reload still TODO | ~60 |
 | `.gitignore` | Add `adapters/` | ~1 |
 | `tests/test_deploy.py` | **New**: version ID format, manifest schema, rollback swap, health check | ~120 |
 

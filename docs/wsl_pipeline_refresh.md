@@ -2,7 +2,7 @@
 
 > **Audience:** Willem on the Windows/WSL training desktop (A2000 Ada 16GB)
 > **Purpose:** Ordered execution checklist for the 2026-08 pipeline refresh — run this when the WSL box is ready, without re-deriving context from chat.
-> **Related:** [`CLAUDE-windows.md`](../CLAUDE-windows.md) (env setup) · [`CLAUDE.md`](../CLAUDE.md) (project Next Steps) · [`docs/roadmap.md`](./roadmap.md) (living roadmap)
+> **Related:** [`CLAUDE-windows.md`](../CLAUDE-windows.md) (env setup) · [`CLAUDE.md`](../CLAUDE.md) (project Next Steps) · [`docs/roadmap.md`](./roadmap.md) (living roadmap) · [`mac_pipeline_refresh.md`](./mac_pipeline_refresh.md) (Mac / MLX same-day path, no WSL)
 >
 > **Last updated:** 2026-08-30
 
@@ -156,11 +156,11 @@ python tools/manage_adapters.py export --model gemma_e4b_gguf --target user@mac:
 python tools/deploy_adapters.py --cycle N --models whisper_turbo_ct2 --endpoints mac-dev --dry-run
 ```
 
-On Mac:
+On Mac (see full checklist in [`mac_pipeline_refresh.md`](./mac_pipeline_refresh.md)):
 
 ```bash
-python tools/health_check.py --n-canaries 8 --adapter <path>   # MT adapters
-python dry_run_ab.py --ab --backend mlx
+python tools/health_check.py --backend mlx --n-canaries 8 --adapter <path>
+python dry_run_ab.py --ab --backend mlx --adapter-dir <path>   # optional --turboquant
 # Live YT caption compare: see tools/CLAUDE.md Layer 4
 ```
 
