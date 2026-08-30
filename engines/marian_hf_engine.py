@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import time
+from typing import Any
 
 import torch
 
@@ -48,8 +49,8 @@ class MarianHFEngine(TranslationEngine):
         self._model_id_str = model_id
         self._requested_device = device
         self._device: str | None = None
-        self._model = None
-        self._tokenizer = None
+        self._model: Any = None
+        self._tokenizer: Any = None
         self._max_new_tokens = max_new_tokens
         self._warmup_passes = max(0, int(warmup_passes))
         self._loaded = False
