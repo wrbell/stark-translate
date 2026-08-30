@@ -29,7 +29,7 @@ jobs:
             pyproject.toml
 
       - name: Install test dependencies
-        run: pip install pytest pytest-cov pydantic pydantic-settings numpy jiwer psutil fastapi httpx
+        run: pip install pytest pytest-cov pydantic pydantic-settings numpy jiwer psutil fastapi httpx openpyxl
 
       - name: Run tests
         run: >
@@ -38,7 +38,7 @@ jobs:
           --cov-report=term-missing
           --cov-report=json:coverage.json
           --cov-report=xml:coverage.xml
-          --cov-fail-under=18
+          --cov-fail-under=50
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'

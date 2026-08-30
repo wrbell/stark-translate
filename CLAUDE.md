@@ -93,7 +93,7 @@ Seven GitHub Actions workflows:
 | Workflow | Trigger | What it does |
 |----------|---------|-------------|
 | **Lint** (`lint.yml`) | push / PR | Ruff check + format, mypy, bandit, vulture (advisory), HTML tidy |
-| **Test** (`test.yml`) | push / PR | pytest (855 tests, Python 3.11 + 3.12), coverage ≥18%, Codecov, PR comment |
+| **Test** (`test.yml`) | push / PR | pytest (Python 3.11 + 3.12), coverage ≥50%, Codecov, PR comment |
 | **Release** (`release.yml`) | `v*` tag | Creates GitHub Release |
 | **Security** (`security.yml`) | push / PR / weekly | pip-audit on both requirements files |
 | **Label** (`label.yml`) | PR | Auto-labels by changed paths |
