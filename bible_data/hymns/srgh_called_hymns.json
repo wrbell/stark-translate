@@ -1,0 +1,86 @@
+{
+  "source": "Stark Road Gospel Hall recent service announcements (spoken hymn numbers + first lines as commonly sung)",
+  "note": "Numbers as spoken at SRGH. Verify against classic BHB / GHB; if GHB, book=ghb. Non-PD hymns stay indexed with zero lyrics in stanza/pair files.",
+  "hymns": [
+    {
+      "spoken_number": 23,
+      "book": "ghb",
+      "first_line_en": "What can wash away my sin?",
+      "common_title": "Nothing but the Blood",
+      "author": "Robert Lowry",
+      "author_death_year": 1899,
+      "pd_status": "public_domain",
+      "hymn_id": "pd-what-can-wash-away-my-sin",
+      "notes": "Gospel hymn often called as #23 at SRGH; GHB numbering. Lowry d.1899 — PD."
+    },
+    {
+      "spoken_number": 13,
+      "book": "ghb",
+      "first_line_en": "I stand amazed in the presence",
+      "common_title": "My Savior's Love",
+      "author": "Charles H. Gabriel",
+      "author_death_year": 1932,
+      "pd_status": "public_domain",
+      "hymn_id": "pd-i-stand-amazed-in-the-presence",
+      "notes": "Published 1905; US PD. Author d.1932."
+    },
+    {
+      "spoken_number": 25,
+      "book": "ghb",
+      "first_line_en": "Come, for the feast is spread",
+      "alt_first_line_en": "Yet there is room",
+      "common_title": "Yet There Is Room / Come hear the gospel sound",
+      "author": "Horatius Bonar",
+      "author_death_year": 1889,
+      "pd_status": "public_domain",
+      "hymn_id": "pd-yet-there-is-room",
+      "notes": "Gospel invitation hymn; Bonar PD. First line variants exist in gospel hymnals."
+    },
+    {
+      "spoken_number": 45,
+      "book": "ghb",
+      "first_line_en": "We've a story to tell to the nations",
+      "common_title": "We've a Story to Tell to the Nations",
+      "author": "H. Ernest Nichol",
+      "author_death_year": 1939,
+      "pd_status": "public_domain",
+      "hymn_id": "pd-weve-a-story-to-tell",
+      "notes": "Published 1896; gospel tidings hymn as announced. US PD for 1896 publication."
+    },
+    {
+      "spoken_number": 118,
+      "book": "ghb",
+      "first_line_en": "O soul, are you weary and troubled?",
+      "common_title": "Turn Your Eyes Upon Jesus",
+      "author": "Helen Howarth Lemmel",
+      "author_death_year": 1961,
+      "pd_status": "excluded_modern",
+      "hymn_id": "pd-turn-your-eyes-upon-jesus",
+      "exclude_reason": "Helen Howarth Lemmel d.1961 — not public domain. Index only; zero lyrics in train.",
+      "notes": "Do not put lyrics in stanza or pair files."
+    },
+    {
+      "spoken_number": 100,
+      "book": "ghb",
+      "first_line_en": "My faith has found a resting place",
+      "common_title": "My Faith Has Found a Resting Place",
+      "author": "Eliza E. Hewitt",
+      "author_death_year": 1920,
+      "pd_status": "public_domain",
+      "hymn_id": "pd-my-faith-has-found-a-resting-place",
+      "notes": "Late 19th-c. gospel hymn; Hewitt d.1920 — PD."
+    },
+    {
+      "spoken_number": 138,
+      "book": "ghb",
+      "first_line_en": "One there is above all others",
+      "alt_first_line_en": "One there is who loves thee",
+      "common_title": "One There Is Above All Others",
+      "author": "John Newton",
+      "author_death_year": 1807,
+      "pd_status": "public_domain",
+      "hymn_id": "pd-one-there-is-above-all-others",
+      "notes": "Newton text; brethren assemblies often announce a related first-line variant."
+    }
+  ]
+}

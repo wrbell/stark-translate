@@ -1,0 +1,509 @@
+{
+  "candidates": [
+    {
+      "en": "mercy seat",
+      "es": "propiciatorio",
+      "alt_es": [
+        "trono de la gracia"
+      ],
+      "category": "Liturgical & worship terms",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We gather before the mercy seat.",
+      "example_es": "Nos reunimos ante el propiciatorio.",
+      "rationale": "BHB + SRGH preaching; glossary gap vs bare 'mercy'",
+      "recommend_merge": true
+    },
+    {
+      "en": "Lord's table",
+      "es": "mesa del Señor",
+      "alt_es": [
+        "mesa del Señor"
+      ],
+      "category": "Liturgical & worship terms",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We come to the Lord's table in remembrance.",
+      "example_es": "Venimos a la mesa del Señor en memorial.",
+      "rationale": "Remembrance meeting language at SRGH",
+      "recommend_merge": true
+    },
+    {
+      "en": "table of the Lord",
+      "es": "mesa del Señor",
+      "alt_es": [],
+      "category": "Liturgical & worship terms",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "The table of the Lord is spread for His people.",
+      "example_es": "La mesa del Señor está preparada para Su pueblo.",
+      "rationale": "Synonym of Lord's table",
+      "recommend_merge": true
+    },
+    {
+      "en": "remembrance",
+      "es": "memorial",
+      "alt_es": [
+        "recuerdo"
+      ],
+      "category": "Liturgical & worship terms",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "This do in remembrance of Me.",
+      "example_es": "Haced esto en memoria de Mí.",
+      "rationale": "Lord's supper sense; not generic memory",
+      "recommend_merge": true
+    },
+    {
+      "en": "gathered to Thy Name",
+      "es": "reunidos a Tu Nombre",
+      "alt_es": [
+        "reunidos en Tu Nombre"
+      ],
+      "category": "Ecclesiology & worship",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We are gathered to Thy Name.",
+      "example_es": "Estamos reunidos a Tu Nombre.",
+      "rationale": "Brethren distinctive",
+      "recommend_merge": true
+    },
+    {
+      "en": "gathered to Your Name",
+      "es": "reunidos a Tu Nombre",
+      "alt_es": [],
+      "category": "Ecclesiology & worship",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We are gathered to Your Name.",
+      "example_es": "Estamos reunidos a Tu Nombre.",
+      "rationale": "Modern-pronoun variant of gathered to Thy Name",
+      "recommend_merge": true
+    },
+    {
+      "en": "little while",
+      "es": "poquito de tiempo",
+      "alt_es": [
+        "un poco de tiempo"
+      ],
+      "category": "Eschatology & hope",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "A little while, and ye shall see Me.",
+      "example_es": "Un poquito de tiempo, y me veréis.",
+      "rationale": "John 16 / hymn 'A little while'",
+      "recommend_merge": true
+    },
+    {
+      "en": "Surety",
+      "es": "Fiador",
+      "alt_es": [
+        "fiador"
+      ],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "Christ is the Surety of a better covenant.",
+      "example_es": "Cristo es el Fiador de un mejor pacto.",
+      "rationale": "Hebrews suretyship; BHB register",
+      "recommend_merge": true
+    },
+    {
+      "en": "Calvary",
+      "es": "Calvario",
+      "alt_es": [],
+      "category": "Biblical places",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We look to Calvary where the Saviour died.",
+      "example_es": "Miramos al Calvario donde murió el Salvador.",
+      "rationale": "Hymn + preaching staple",
+      "recommend_merge": true
+    },
+    {
+      "en": "Immanuel",
+      "es": "Emanuel",
+      "alt_es": [
+        "Enmanuel"
+      ],
+      "category": "Christology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "His name is Immanuel, God with us.",
+      "example_es": "Su nombre es Emanuel, Dios con nosotros.",
+      "rationale": "Normalize to Emanuel matching RVR-ish register",
+      "recommend_merge": true
+    },
+    {
+      "en": "Advocate",
+      "es": "Abogado",
+      "alt_es": [],
+      "category": "Christology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We have an Advocate with the Father.",
+      "example_es": "Tenemos un Abogado para con el Padre.",
+      "rationale": "1 John 2:1; hymn/preaching",
+      "recommend_merge": true
+    },
+    {
+      "en": "pilgrim",
+      "es": "peregrino",
+      "alt_es": [],
+      "category": "Christian life",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "I am a pilgrim through this barren land.",
+      "example_es": "Soy peregrino por este árido yermo.",
+      "rationale": "Pilgrimage sense in hymns",
+      "recommend_merge": true
+    },
+    {
+      "en": "assembly",
+      "es": "asamblea",
+      "alt_es": [
+        "reunión"
+      ],
+      "category": "Ecclesiology & worship",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "The assembly gathers to the Name of the Lord.",
+      "example_es": "La asamblea se reúne al Nombre del Señor.",
+      "rationale": "Assembly of believers; brethren usage",
+      "recommend_merge": true
+    },
+    {
+      "en": "nothing but the blood",
+      "es": "nada sino la sangre",
+      "alt_es": [
+        "sólo de Jesús la sangre"
+      ],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "Nothing but the blood of Jesus can wash away my sin.",
+      "example_es": "Nada sino la sangre de Jesús puede lavar mi pecado.",
+      "rationale": "Lowry gospel hymn + preaching",
+      "recommend_merge": true
+    },
+    {
+      "en": "Yet there is room",
+      "es": "aún hay lugar",
+      "alt_es": [
+        "todavía hay lugar"
+      ],
+      "category": "Gospel invitation",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "Yet there is room at the gospel feast.",
+      "example_es": "Aún hay lugar en el festín del evangelio.",
+      "rationale": "Bonar invitation hymn",
+      "recommend_merge": true
+    },
+    {
+      "en": "gospel sound",
+      "es": "sonido del evangelio",
+      "alt_es": [
+        "mensaje del evangelio"
+      ],
+      "category": "Gospel invitation",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of gospel sound in worship and preaching.",
+      "example_es": "Hablamos de sonido del evangelio en la adoración y la predicación.",
+      "rationale": "SRGH-called gospel hymn language",
+      "recommend_merge": true
+    },
+    {
+      "en": "mercy-seat",
+      "es": "propiciatorio",
+      "alt_es": [],
+      "category": "Liturgical & worship terms",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of mercy-seat in worship and preaching.",
+      "example_es": "Hablamos de propiciatorio en la adoración y la predicación.",
+      "rationale": "Hyphenated spelling of mercy seat",
+      "recommend_merge": true
+    },
+    {
+      "en": "blood of Jesus",
+      "es": "sangre de Jesús",
+      "alt_es": [
+        "sangre de Cristo"
+      ],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of blood of Jesus in worship and preaching.",
+      "example_es": "Hablamos de sangre de Jesús en la adoración y la predicación.",
+      "rationale": "Hymn refrain register; glossary has blood of Christ",
+      "recommend_merge": true
+    },
+    {
+      "en": "precious blood",
+      "es": "preciosa sangre",
+      "alt_es": [],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of precious blood in worship and preaching.",
+      "example_es": "Hablamos de preciosa sangre en la adoración y la predicación.",
+      "rationale": "Hymn stock phrase",
+      "recommend_merge": true
+    },
+    {
+      "en": "wondrous cross",
+      "es": "cruz maravillosa",
+      "alt_es": [
+        "admirable cruz"
+      ],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of wondrous cross in worship and preaching.",
+      "example_es": "Hablamos de cruz maravillosa en la adoración y la predicación.",
+      "rationale": "Watts hymn phrase",
+      "recommend_merge": true
+    },
+    {
+      "en": "Man of Sorrows",
+      "es": "Varón de dolores",
+      "alt_es": [],
+      "category": "Christology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "The Man of Sorrows died for me.",
+      "example_es": "El Varón de dolores murió por mí.",
+      "rationale": "Isaiah 53 / Bliss hymn",
+      "recommend_merge": true
+    },
+    {
+      "en": "Rock of Ages",
+      "es": "Roca de la eternidad",
+      "alt_es": [
+        "Roca de los siglos"
+      ],
+      "category": "Christology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of Rock of Ages in worship and preaching.",
+      "example_es": "Hablamos de Roca de la eternidad en la adoración y la predicación.",
+      "rationale": "Toplady hymn title-phrase",
+      "recommend_merge": true
+    },
+    {
+      "en": "eventide",
+      "es": "anochecer",
+      "alt_es": [
+        "ocaso"
+      ],
+      "category": "Christian life",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of eventide in worship and preaching.",
+      "example_es": "Hablamos de anochecer en la adoración y la predicación.",
+      "rationale": "Abide with me register",
+      "recommend_merge": true
+    },
+    {
+      "en": "cleft for me",
+      "es": "hendida por mí",
+      "alt_es": [
+        "abierta por mí"
+      ],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of cleft for me in worship and preaching.",
+      "example_es": "Hablamos de hendida por mí en la adoración y la predicación.",
+      "rationale": "Rock of Ages line",
+      "recommend_merge": true
+    },
+    {
+      "en": "hiding place",
+      "es": "escondedero",
+      "alt_es": [
+        "refugio"
+      ],
+      "category": "Christian life",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of hiding place in worship and preaching.",
+      "example_es": "Hablamos de escondedero en la adoración y la predicación.",
+      "rationale": "Newton / Psalms hymn language",
+      "recommend_merge": true
+    },
+    {
+      "en": "fountain filled with blood",
+      "es": "fuente de sangre",
+      "alt_es": [],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of fountain filled with blood in worship and preaching.",
+      "example_es": "Hablamos de fuente de sangre en la adoración y la predicación.",
+      "rationale": "Cowper hymn",
+      "recommend_merge": true
+    },
+    {
+      "en": "Prince of glory",
+      "es": "Príncipe de gloria",
+      "alt_es": [],
+      "category": "Christology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of Prince of glory in worship and preaching.",
+      "example_es": "Hablamos de Príncipe de gloria en la adoración y la predicación.",
+      "rationale": "Watts When I Survey",
+      "recommend_merge": true
+    },
+    {
+      "en": "Thy Name",
+      "es": "Tu Nombre",
+      "alt_es": [],
+      "category": "Liturgical & worship terms",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of Thy Name in worship and preaching.",
+      "example_es": "Hablamos de Tu Nombre en la adoración y la predicación.",
+      "rationale": "Worship address register",
+      "recommend_merge": true
+    },
+    {
+      "en": "Thy cross",
+      "es": "Tu cruz",
+      "alt_es": [],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of Thy cross in worship and preaching.",
+      "example_es": "Hablamos de Tu cruz en la adoración y la predicación.",
+      "rationale": "Archaic pronoun kept in EN speech",
+      "recommend_merge": true
+    },
+    {
+      "en": "Thy blood",
+      "es": "Tu sangre",
+      "alt_es": [],
+      "category": "Soteriology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of Thy blood in worship and preaching.",
+      "example_es": "Hablamos de Tu sangre en la adoración y la predicación.",
+      "rationale": "Archaic pronoun worship register",
+      "recommend_merge": true
+    },
+    {
+      "en": "Thy table",
+      "es": "Tu mesa",
+      "alt_es": [],
+      "category": "Liturgical & worship terms",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of Thy table in worship and preaching.",
+      "example_es": "Hablamos de Tu mesa en la adoración y la predicación.",
+      "rationale": "Remembrance table language",
+      "recommend_merge": true
+    },
+    {
+      "en": "brethren",
+      "es": "hermanos",
+      "alt_es": [],
+      "category": "Ecclesiology & worship",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of brethren in worship and preaching.",
+      "example_es": "Hablamos de hermanos en la adoración y la predicación.",
+      "rationale": "Assembly address",
+      "recommend_merge": true
+    },
+    {
+      "en": "gospel tidings",
+      "es": "nuevas del evangelio",
+      "alt_es": [
+        "buenas nuevas"
+      ],
+      "category": "Gospel invitation",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of gospel tidings in worship and preaching.",
+      "example_es": "Hablamos de nuevas del evangelio en la adoración y la predicación.",
+      "rationale": "SRGH gospel hymn announcements",
+      "recommend_merge": true
+    },
+    {
+      "en": "resting place",
+      "es": "lugar de reposo",
+      "alt_es": [],
+      "category": "Christian life",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of resting place in worship and preaching.",
+      "example_es": "Hablamos de lugar de reposo en la adoración y la predicación.",
+      "rationale": "Hewitt hymn + preaching",
+      "recommend_merge": true
+    },
+    {
+      "en": "Nazarene",
+      "es": "Nazareno",
+      "alt_es": [],
+      "category": "Christology",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of Nazarene in worship and preaching.",
+      "example_es": "Hablamos de Nazareno en la adoración y la predicación.",
+      "rationale": "Gabriel I stand amazed",
+      "recommend_merge": true
+    },
+    {
+      "en": "sovereign",
+      "es": "Soberano",
+      "alt_es": [],
+      "category": "Theology proper",
+      "in_tier1": false,
+      "in_tier2": false,
+      "in_theological_glossary": false,
+      "example_en": "We speak of sovereign in worship and preaching.",
+      "example_es": "Hablamos de Soberano en la adoración y la predicación.",
+      "rationale": "Watts Alas stanza",
+      "recommend_merge": true
+    }
+  ],
+  "note": "Curated allowlist for merge into THEOLOGICAL_GLOSSARY via build_glossary.py --merge-hymn-allowlist. Not auto-merged on default export."
+}

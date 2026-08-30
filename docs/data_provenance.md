@@ -13,6 +13,12 @@ Tracks exactly which data files and counts went into each training run.
 | **H1200** | `bible_data/synthetic/hybrid_sermon_pairs.jsonl` | 1200 chunks, 70% 12B + 30% DeepL | 1,200 |
 | **H1800** | `bible_data/synthetic/hybrid_sermon_pairs_1800.jsonl` | 1800 chunks, 60% 12B + 40% DeepL | 1,800 |
 | **D5000** | `bible_data/synthetic/deepl_sermon_pairs_5000.jsonl` | 5000 chunks, 100% DeepL glossary-enforced | 5,000 |
+| **HYMN_PD** | `bible_data/hymns/hymn_pairs_pd.jsonl` | Public-domain same-original EN–ES hymn stanza pairs (train; ~5% spice) | 52 |
+| **HYMN_HOLD** | `bible_data/hymns/hymn_pairs_pd_holdout.jsonl` | Hymn pair holdout (disjoint; includes SRGH-called PD hymns with pairs) | 13 |
+| **HYMN_CAND** | `bible_data/hymns/hymn_candidates_synthetic.jsonl` | PD English stanzas with no verified PD Spanish (`needs_synthetic`) | 74 |
+| **G_HYMN** | `bible_data/hymns/glossary_hymn_allowlist.json` | Curated hymn-domain glossary allowlist (review/merge via `build_glossary.py --from-hymns` / `--merge-hymn-allowlist`; not auto-injected) | 36 terms |
+
+Hymn corpus notes (see [`hymn_data.md`](./hymn_data.md)): PD texts only — not New BHB 2019 compilation dumps. Suggested mix spice: `0.80 * S6 sources + 0.15 * glossary + 0.05 * HYMN_PD` (documentation only; no hymn S-run executed in this log). Regenerate with `python training/prepare_hymn_corpus.py all --seed 42`.
 
 ### Sermon Chunk Source
 
