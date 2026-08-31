@@ -1099,10 +1099,7 @@ def load_mlx_gemma(model_id, label, adapter_path=None):
                     val_bits=TURBOQUANT_VAL_BITS,
                     rotate=True,
                 )
-                print(
-                    f"  TurboQuant KV cache enabled "
-                    f"(key={TURBOQUANT_KEY_BITS}-bit, val={TURBOQUANT_VAL_BITS}-bit)"
-                )
+                print(f"  TurboQuant KV cache enabled (key={TURBOQUANT_KEY_BITS}-bit, val={TURBOQUANT_VAL_BITS}-bit)")
         except Exception as exc:
             print(f"  WARNING: TurboQuant initialization failed: {exc}")
 
