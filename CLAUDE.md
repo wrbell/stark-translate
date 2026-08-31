@@ -5,7 +5,7 @@ A fully on-device, live bidirectional speech-to-text system (English/Spanish) fo
 **Two-pass pipeline** for fast partials and high-quality finals:
 - **Partials (while speaking):** Whisper STT + MarianMT (HF on Mac / CT2 on CUDA) — italicised in UI
 - **Finals (on silence):** Whisper STT + Gemma 4 translation — replaces partial
-- **Mac (MLX):** mlx-whisper STT + TranslateGemma 4B/12B 4-bit (~1.1s / ~2.6s); MarianMT-HF on PyTorch CPU
+- **Mac (MLX):** mlx-whisper STT + Gemma 4 OptiQ E4B finals (TranslateGemma opt-out via `--model-family translategemma`); MarianMT-HF on PyTorch CPU
 - **CUDA (v2026.8+):** faster-whisper + W16 LoRA via CT2 (~353ms p50 / ~413ms p95 STT, A2000 Ada) + MarianMT-CT2 int8_float16 (~57ms p50 / ~116ms p95 partial) + Gemma 4 E4B Q4_K_M via llama.cpp (~470ms final). Partial p50 ≈ 410 ms (STT 353 + Marian 57); final p50 ≈ 820 ms.
 - **CUDA model options:** Gemma 4 E2B Q4_K_M (3.5 GB VRAM, ~280ms) for low-VRAM, E4B Q4_K_M (4.9 GB, ~470ms, 7/8 canary) for best quality
 - **Optimization wins:** v2026.7 Whisper drops STT WER 19% relative overall, 43% on theological terms (`docs/archive/v2026.7/STT_BENCHMARK.md`). v2026.8 Marian drops partial-translate latency 66% relative at p50 vs HF CUDA (`docs/archive/v2026.8/MARIAN_BENCHMARK.md`).

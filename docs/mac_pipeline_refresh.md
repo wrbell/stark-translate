@@ -16,8 +16,9 @@
 | File-side AL | `mine_hallucination_phrases.py`, `prepare_finetune_data.py`, `merge_corrections.py`, `deploy_adapters.py --dry-run` |
 | Live A/B + operator UI | `dry_run_ab.py --ab`, `uvicorn operator_app.main:app --port 9000` |
 | TurboQuant + LoRA path | `--turboquant`, `--adapter-dir` (this Mac refresh) |
-| Gemma 4 OptiQ + MTS (opt-in) | `--model-family gemma4 [--mts] [--turboquant]` — see [`mlx_cuda_parity.md`](./mlx_cuda_parity.md) |
-| Phase 7 health gate on M3 | `tools/health_check.py --backend mlx` |
+| Gemma 4 OptiQ + MTS | Default finals; `--mts` for drafter — see [`mlx_cuda_parity.md`](./mlx_cuda_parity.md) |
+| TranslateGemma opt-out | `--model-family translategemma` |
+| Phase 7 health gate on M3 | `tools/health_check.py --backend mlx` (defaults to Gemma4 OptiQ) |
 
 ## Do **not** run on Mac
 
@@ -61,30 +62,46 @@ python tools/mine_hallucination_phrases.py --glob 'metrics/diagnostics_*.jsonl'
 
 ---
 
-## 2. Baseline A/B latency (TranslateGemma 4B ± 12B)
+## 2. Baseline A/B latency (Gemma 4 OptiQ ± TranslateGemma)
 
 ```bash
-# 4B only (~4.3 GB)
+# Default: Gemma 4 E4B OptiQ
 python dry_run_ab.py --backend mlx
 
-# A/B (~11 GB) — use when you want 4B vs 12B side-by-side
-python dry_run_ab.py --ab --backend mlx
+# TranslateGemma 4B opt-out
+python dry_run_ab.py --backend mlx --model-family translategemma
+
+# A/B TranslateGemma 4B vs 12B (~11 GB)
+python dry_run_ab.py --ab --backend mlx --model-family translategemma
 ```
 
-Model IDs come from settings (`STARK_TRANSLATE_MLX_MODEL_4B` / `_12B`). Defaults remain community TranslateGemma 4-bit. For CUDA-parity Gemma 4 OptiQ (opt-in, do **not** flip default until canaries pass):
+Model IDs come from settings (`STARK_TRANSLATE_MLX_MODEL_GEMMA4_E4B` / TG `STARK_TRANSLATE_MLX_MODEL_4B`). For MTS / size overrides:
 
 ```bash
-python dry_run_ab.py --backend mlx --model-family gemma4 --gemma4-size e4b
-python dry_run_ab.py --backend mlx --model-family gemma4 --mts --turboquant
+python dry_run_ab.py --backend mlx --mts
+python dry_run_ab.py --backend mlx --gemma4-size e2b
 python tools/benchmark_mlx_accel.py --quick --configs tg4b,e4b,e4b_mts
 ```
 
 See [`mlx_cuda_parity.md`](./mlx_cuda_parity.md). Naïve uniform Gemma 4 MLX 4-bit quants (PLE quantized) produce garbage — use OptiQ / PLE-safe builds only.
 
+### Mac latency notes (2026-08-30 soak)
+
+| Config | medium p50 | Canary | Role |
+|--------|------------|--------|------|
+| **e4b OptiQ (default)** | ~2176 ms | **7/8** | **Quality mode / Mac default** |
+| tg4b (opt-out) | ~899 ms | 6/8 | Faster legacy finals |
+| e2b OptiQ | ~1624 ms | **0/8** | Not usable — PLE/canary collapse on this build |
+| e4b + MTS (`-assistant`) | LOAD FAIL | — | `gemma4_assistant` unsupported in current mlx-lm; skip `--mts` until mlx-lm catches up |
+
+**Demo mode vs quality mode:** keep **E4B OptiQ** for demos that need theological register; use `--model-family translategemma` when you need sub-second finals and can accept TG canary gaps. Do not ship E2B OptiQ until canaries recover.
+
 ### TurboQuant (optional KV compression)
 
+`--turboquant` is soft-disabled against **mlx-optiq 0.4.x**: that package imports as `optiq` and does not expose a drop-in `TurboQuantKVCache` for the `mlx_lm.generate` path (KV mixed-precision is serve/runtime-only). The flag remains for forward compatibility; the pipeline logs a warning and continues without TQ.
+
 ```bash
-pip install mlx-optiq   # if not already via '.[mlx]'
+# Will warn and continue without TQ on mlx-optiq 0.4.x:
 python dry_run_ab.py --ab --backend mlx --turboquant
 # or: export STARK_TRANSLATION__TURBOQUANT=true
 ```
@@ -150,9 +167,9 @@ After a live or file session, use the YT comparison tools in [`tools/CLAUDE.md`]
 
 | Goal | Command |
 |------|---------|
-| Live 4B | `python dry_run_ab.py --backend mlx` |
-| Live A/B + TQ | `python dry_run_ab.py --ab --backend mlx --turboquant` |
-| Live Gemma 4 + MTS | `python dry_run_ab.py --backend mlx --model-family gemma4 --mts` |
+| Live Gemma4 OptiQ | `python dry_run_ab.py --backend mlx` |
+| Live A/B + TQ (TG) | `python dry_run_ab.py --ab --backend mlx --model-family translategemma --turboquant` |
+| Live Gemma 4 + MTS | `python dry_run_ab.py --backend mlx --mts` |
 | Accel matrix | `python tools/benchmark_mlx_accel.py --quick` |
 | Live + LoRA | `python dry_run_ab.py --backend mlx --adapter-dir <path>` |
 | Health (MLX) | `python tools/health_check.py --backend mlx --n-canaries 8` |
@@ -164,6 +181,8 @@ After a live or file session, use the YT comparison tools in [`tools/CLAUDE.md`]
 
 ## Honesty notes
 
-- Mac default translation remains **TranslateGemma** MLX 4-bit until a proven Gemma 4 MLX community build + domain adapter exists.
+- Mac default translation is **Gemma 4 OptiQ E4B**. TranslateGemma remains available via `--model-family translategemma`.
+- Domain adapters from WSL still improve theological canaries (Santiago / partimiento); base OptiQ alone is ~7/8.
 - Operator control plane does not yet expose TurboQuant / adapter-dir toggles — use CLI/env for those.
 - SIGUSR1 hot-reload of adapters is still a deploy.md TODO; restart the process after swapping `active/`.
+- `--turboquant` is soft-disabled on mlx-optiq 0.4.x (no drop-in TurboQuantKVCache for mlx_lm.generate).

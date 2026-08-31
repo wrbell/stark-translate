@@ -77,12 +77,13 @@ class TestCUDAGemma4Prompt:
 class TestMLXGemma4Prompt:
     """Test Gemma 4 prompt format in MLXGemmaEngine."""
 
-    def test_model_family_default_is_translategemma(self):
+    def test_model_family_default_is_gemma4(self):
         from engines.mlx_engine import MLXGemmaEngine
 
         with patch("engines.mlx_engine.MLX_AVAILABLE", True):
             engine = MLXGemmaEngine()
-        assert engine._model_family == "translategemma"
+        assert engine._model_family == "gemma4"
+        assert "OptiQ" in engine._model_id or "gemma-4" in engine._model_id
 
     def test_model_family_gemma4(self):
         from engines.mlx_engine import MLXGemmaEngine
@@ -90,6 +91,16 @@ class TestMLXGemma4Prompt:
         with patch("engines.mlx_engine.MLX_AVAILABLE", True):
             engine = MLXGemmaEngine(model_family="gemma4")
         assert engine._model_family == "gemma4"
+
+    def test_model_family_translategemma_opt_out(self):
+        from engines.mlx_engine import MLXGemmaEngine
+
+        with patch("engines.mlx_engine.MLX_AVAILABLE", True):
+            engine = MLXGemmaEngine(
+                model_family="translategemma",
+                model_id="mlx-community/translategemma-4b-it-4bit",
+            )
+        assert engine._model_family == "translategemma"
 
 
 class TestGemma4PreambleStripping:
@@ -113,11 +124,11 @@ class TestGemma4PreambleStripping:
 class TestModelFamilySettings:
     """Test model_family setting in TranslationSettings."""
 
-    def test_default_is_translategemma(self):
+    def test_default_is_gemma4(self):
         from settings import TranslationSettings
 
         ts = TranslationSettings()
-        assert ts.model_family == "translategemma"
+        assert ts.model_family == "gemma4"
 
     def test_env_override(self, monkeypatch):
         monkeypatch.setenv("STARK_TRANSLATE_MODEL_FAMILY", "gemma4")

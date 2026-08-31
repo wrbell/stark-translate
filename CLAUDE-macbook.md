@@ -25,18 +25,19 @@
 | Component | Framework | Memory |
 |-----------|-----------|--------|
 | Distil-Whisper large-v3 | mlx-whisper | ~1.5 GB |
-| TranslateGemma 4B 4-bit | mlx-lm | ~2.5 GB |
-| TranslateGemma 12B 4-bit | mlx-lm | ~7 GB |
+| **Gemma 4 E4B OptiQ (Mac default)** | mlx-lm | ~3–4 GB |
+| TranslateGemma 4B 4-bit (opt-out) | mlx-lm | ~2.5 GB |
+| TranslateGemma 12B 4-bit (A/B) | mlx-lm | ~7 GB |
 | MarianMT CT2 int8 | ctranslate2 | ~76 MB |
 | MarianMT PyTorch | transformers | ~300 MB |
 | Silero VAD | PyTorch | ~2 MB |
-| **Total (4B only)** | | **~4.3 GB** |
-| **Total (A/B mode)** | | **~11.3 GB** |
+| **Total (Gemma4 E4B default)** | | **~5–6 GB** |
+| **Total (TG A/B mode)** | | **~11.3 GB** |
 | **Headroom (18 GB, A/B)** | | **~6.7 GB** |
 
-With 18 GB unified memory, A/B mode (both Gemma models in MLX 4-bit) fits comfortably at ~11.3 GB peak, leaving ~6.7 GB for macOS and buffers.
+With 18 GB unified memory, default Gemma 4 OptiQ E4B fits easily; TG A/B mode (~11.3 GB) still leaves headroom.
 
-**Important:** PyTorch/MPS with bitsandbytes 4-bit is CUDA-only (~18s/weight on MPS). PyTorch fp16 on MPS causes inf/nan with TranslateGemma. MLX 4-bit is the correct approach for Apple Silicon inference.
+**Important:** PyTorch/MPS with bitsandbytes 4-bit is CUDA-only (~18s/weight on MPS). PyTorch fp16 on MPS causes inf/nan with TranslateGemma. MLX (OptiQ / 4-bit) is the correct approach for Apple Silicon inference.
 
 ---
 
@@ -115,8 +116,9 @@ Run `stark-translate setup` to download and verify all models. Uses Wi-Fi — to
 | Model | Framework | Size | Purpose |
 |-------|-----------|------|---------|
 | `wbell7/distil-whisper-large-v3.5-mlx` | mlx-whisper | ~1.5 GB | STT |
-| `mlx-community/translategemma-4b-it-4bit` | mlx-lm | ~2.2 GB disk, ~2.5 GB RAM | Translation A |
-| `mlx-community/translategemma-12b-it-4bit` | mlx-lm | ~6.6 GB disk, ~7 GB RAM | Translation B |
+| `mlx-community/gemma-4-e4b-it-OptiQ-4bit` | mlx-lm | OptiQ 4-bit | Translation (Mac default) |
+| `mlx-community/translategemma-4b-it-4bit` | mlx-lm | ~2.2 GB disk, ~2.5 GB RAM | Translation A (TG opt-out) |
+| `mlx-community/translategemma-12b-it-4bit` | mlx-lm | ~6.6 GB disk, ~7 GB RAM | Translation B (TG A/B) |
 | `Helsinki-NLP/opus-mt-en-es` (CT2 int8) | ctranslate2 | ~76 MB | Fast partial translation |
 | `Helsinki-NLP/opus-mt-en-es` (PyTorch) | transformers | ~300 MB | Comparison logging |
 | `Unbabel/wmt22-cometkiwi-da` | comet | ~580 MB | Translation QE |
@@ -145,9 +147,8 @@ Mic (48kHz) → Resample 16kHz → Silero VAD ─┐
          │
          └─ FINAL (on silence gap or 8s max utterance)
               mlx-whisper STT (~500ms, word timestamps)
-              TranslateGemma 4B EN→ES (~650ms)       ← replaces partial
-              TranslateGemma 12B EN→ES (~1.4s, --ab) ← side-by-side
-              Total: ~1.3s (4B) / ~1.9s (A/B)
+              Gemma 4 OptiQ E4B EN→ES (~2–3s)         ← Mac default
+              TranslateGemma 4B/12B via --model-family translategemma [--ab]
                                    │
                                    ▼
                         WebSocket (0.0.0.0:8765)
@@ -163,8 +164,8 @@ Mic (48kHz) → Resample 16kHz → Silero VAD ─┐
 
 - **STT:** `mlx-whisper` with `wbell7/distil-whisper-large-v3.5-mlx`, word timestamps on finals only (disabled for partials to save ~100-200ms)
 - **Fast translation:** MarianMT CT2 int8 (`ct2_opus_mt_en_es/`, 76MB). PyTorch variant runs in parallel for comparison logging
-- **Quality translation:** TranslateGemma via `mlx-lm` — 4B always, 12B with `--ab` flag
-- **Speculative decoding:** 4B as draft model for 12B via `mlx_lm.generate(draft_model=)`, configurable with `--num-draft-tokens`
+- **Quality translation:** Gemma 4 OptiQ E4B via `mlx-lm` (Mac default); TranslateGemma with `--model-family translategemma` (12B with `--ab`)
+- **Speculative decoding:** Gemma-4 assistant MTS via `--mts`; TG 4B can draft 12B with `--ab --num-draft-tokens`
 - **Serving:** HTTP on `0.0.0.0:8080` (`--http-port`) serves display HTML to phones. WebSocket on `0.0.0.0:8765` pushes transcriptions
 - **Metal cache:** `mx.set_cache_limit(100 * 1024 * 1024)` prevents cache growth with word_timestamps
 - **Model pre-warming:** 1-token forward pass during silence gaps to avoid cold-start latency

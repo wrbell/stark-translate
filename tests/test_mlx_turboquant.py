@@ -65,23 +65,63 @@ class TestMLXGemmaTurboQuant:
         _, kwargs = mock_load.call_args
         assert kwargs.get("adapter_path") == "/adapters/s6"
 
-    def test_turboquant_import_error_warns(self):
-        """If mlx-optiq not installed, engine loads without TurboQuant."""
+    def test_turboquant_missing_api_soft_disables(self):
+        """Missing drop-in TurboQuantKVCache: load continues without TQ."""
         from engines.mlx_engine import MLXGemmaEngine
+
+        mock_tokenizer = MagicMock()
+        mock_tokenizer.convert_tokens_to_ids.return_value = 106
+        mock_tokenizer.eos_token_id = 1
+        mock_tokenizer._eos_token_ids = {1, 106}
+        mock_model = MagicMock()
+        mock_load = MagicMock(return_value=(mock_model, mock_tokenizer))
+        mock_mx = MagicMock()
 
         with (
             patch("engines.mlx_engine.MLX_AVAILABLE", True),
-            patch("engines.mlx_engine.mx") as mock_mx,
+            patch("engines.mlx_engine.mx", mock_mx),
+            patch("engines.mlx_engine.MLXGemmaEngine._build_prompt_cache", return_value=(None, None)),
+            patch("engines.mlx_engine.resolve_turboquant_kv_cache_cls", return_value=None),
+            patch("engines.mlx_engine.materialize_mlx_model"),
+            patch("mlx_lm.load", mock_load),
         ):
-            engine = MLXGemmaEngine(use_turboquant=True)
-            mock_mx.set_cache_limit.return_value = None
+            engine = MLXGemmaEngine(use_turboquant=True, use_prompt_cache=False)
+            engine.load()
 
-            with (
-                patch("engines.mlx_engine.MLXGemmaEngine._build_prompt_cache", return_value=(None, None)),
-                patch.dict("sys.modules", {"mlx_optiq": None}),
-                patch("builtins.__import__", side_effect=ImportError("no mlx-optiq")),
-            ):
-                assert engine._use_turboquant is True
+        assert engine._loaded is True
+        # Soft-disable: never assigned a TurboQuant cache object
+        assert "kv_cache" not in mock_model.__dict__
+
+    def test_resolve_turboquant_skips_stub_class(self):
+        """OptiQ VLM stub (doc mentions stubbed) must not be treated as usable."""
+        from engines.mlx_engine import resolve_turboquant_kv_cache_cls
+
+        class StubTurboQuantKVCache:
+            """TurboQuantKVCache is stubbed out in OptiQ; use optiq.runtime.kv."""
+
+            def __init__(self, *a, **k):
+                raise RuntimeError("stub")
+
+        fake_mod = MagicMock()
+        fake_mod.TurboQuantKVCache = StubTurboQuantKVCache
+
+        with patch("importlib.import_module", return_value=fake_mod):
+            assert resolve_turboquant_kv_cache_cls() is None
+
+    def test_resolve_turboquant_returns_real_class(self):
+        from engines.mlx_engine import resolve_turboquant_kv_cache_cls
+
+        class RealTurboQuantKVCache:
+            """Drop-in KV cache for mlx_lm."""
+
+            def __init__(self, *a, **k):
+                pass
+
+        fake_mod = MagicMock()
+        fake_mod.TurboQuantKVCache = RealTurboQuantKVCache
+
+        with patch("importlib.import_module", return_value=fake_mod):
+            assert resolve_turboquant_kv_cache_cls() is RealTurboQuantKVCache
 
 
 class TestTurboQuantSettings:

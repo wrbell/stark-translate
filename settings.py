@@ -213,8 +213,9 @@ class STTSettings(BaseSettings):
 class TranslationSettings(BaseSettings):
     """Translation model configuration (TranslateGemma + MarianMT + Gemma 4)."""
 
-    # MLX models (Apple Silicon) — TranslateGemma remains the Mac default until
-    # Gemma 4 OptiQ canaries pass (see docs/mlx_cuda_parity.md).
+    # MLX models (Apple Silicon) — Gemma 4 OptiQ is the Mac finals default
+    # (parity with CUDA Gemma 4). TranslateGemma IDs remain for --model-family
+    # translategemma / A/B. See docs/mlx_cuda_parity.md.
     mlx_model_4b: str = Field(
         default="mlx-community/translategemma-4b-it-4bit",
         description="TranslateGemma 4B 4-bit MLX model (~2.2GB disk, ~2.5GB RAM)",
@@ -223,9 +224,9 @@ class TranslationSettings(BaseSettings):
         default="mlx-community/translategemma-12b-it-4bit",
         description="TranslateGemma 12B 4-bit MLX model (~6.6GB disk, ~7GB RAM)",
     )
-    # Gemma 4 OptiQ / PLE-safe candidates for Mac accel matrix (opt-in via
-    # model_family=gemma4 + mlx_model_gemma4_*). Naïve mlx-community uniform
-    # 4-bit Gemma 4 quants are known-broken (PLE layers quantized → garbage).
+    # Gemma 4 OptiQ / PLE-safe (Mac default via model_family=gemma4).
+    # Naïve mlx-community uniform 4-bit Gemma 4 quants are known-broken
+    # (PLE layers quantized → garbage) — OptiQ only.
     mlx_model_gemma4_e4b: str = Field(
         default="mlx-community/gemma-4-e4b-it-OptiQ-4bit",
         description="Gemma 4 E4B OptiQ mixed-precision 4-bit (Mac; text-only)",
@@ -299,8 +300,11 @@ class TranslationSettings(BaseSettings):
         ),
     )
     model_family: str = Field(
-        default="translategemma",
-        description="Translation model family: 'translategemma' (structured lang codes) or 'gemma4' (instruct prompt)",
+        default="gemma4",
+        description=(
+            "Translation model family: 'gemma4' (Mac default, OptiQ E4B instruct) "
+            "or 'translategemma' (structured lang codes, opt-out)"
+        ),
     )
     num_draft_tokens: int = Field(
         default=3,
