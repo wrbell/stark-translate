@@ -88,6 +88,26 @@ class TestCleanTranslation:
         raw = "Hola mundo.<end_of_turn>"
         assert clean_translation(raw, model_family="gemma4") == "Hola mundo."
 
+    def test_strips_thinking_channel_leak(self):
+        raw = "Romper el pan es un solemne recuerdo.<turn|><|channel>thought\nThinking Process:"
+        assert clean_translation(raw, model_family="gemma4") == "Romper el pan es un solemne recuerdo."
+
+    def test_strips_trailing_turn_markers(self):
+        raw = "La gracia de Dios.<turn|><turn|><turn|>"
+        assert clean_translation(raw, model_family="gemma4") == "La gracia de Dios."
+
+
+class TestChatTemplateExtraKwargs:
+    def test_gemma4_disables_thinking(self):
+        from engines.translation_prompts import chat_template_extra_kwargs
+
+        assert chat_template_extra_kwargs(model_family="gemma4") == {"enable_thinking": False}
+
+    def test_translategemma_empty(self):
+        from engines.translation_prompts import chat_template_extra_kwargs
+
+        assert chat_template_extra_kwargs(model_family="translategemma") == {}
+
 
 class TestDynamicMaxTokens:
     def test_floor(self):

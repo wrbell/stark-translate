@@ -383,7 +383,7 @@ def create_translation_engine(
         for key, value in _mlx_gemma_settings_kwargs().items():
             kwargs.setdefault(key, value)
 
-        family = kwargs.get("model_family", "translategemma")
+        family = kwargs.get("model_family", "gemma4")
         resolved = resolve_mlx_translation_model_id(model_id, model_family=family)
 
         return MLXGemmaEngine(

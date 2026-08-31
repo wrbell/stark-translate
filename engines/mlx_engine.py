@@ -26,6 +26,7 @@ from engines.base import (
 )
 from engines.translation_prompts import (
     build_chat_messages,
+    chat_template_extra_kwargs,
     clean_translation,
     dynamic_max_tokens,
 )
@@ -46,6 +47,46 @@ except ImportError:
     mlx_lm = None
     mlx_whisper = None
     MLX_AVAILABLE = False
+
+
+# Message when --turboquant is requested but no drop-in API exists for mlx_lm.
+TURBOQUANT_UNAVAILABLE_MSG = (
+    "TurboQuant requested but no drop-in TurboQuantKVCache for mlx_lm.generate. "
+    "mlx-optiq 0.4+ imports as 'optiq' and routes KV mixed-precision through "
+    "optiq serve/runtime — not a model.kv_cache attribute swap. "
+    "Continuing without TurboQuant."
+)
+
+
+def resolve_turboquant_kv_cache_cls():
+    """Return TurboQuantKVCache class if a drop-in mlx_lm API exists, else None.
+
+    Historical research assumed ``from mlx_optiq import TurboQuantKVCache``.
+    Current mlx-optiq 0.4.x exposes package ``optiq`` and stubs / omits that
+    symbol for the mlx_lm path. Try known locations; never raise.
+    """
+    candidates = (
+        "mlx_optiq.TurboQuantKVCache",
+        "optiq.TurboQuantKVCache",
+        "optiq.vlm._mlxvlm.turboquant.TurboQuantKVCache",
+    )
+    for dotted in candidates:
+        mod_name, _, attr = dotted.rpartition(".")
+        try:
+            import importlib
+
+            mod = importlib.import_module(mod_name)
+            cls = getattr(mod, attr, None)
+            if cls is None or not callable(cls):
+                continue
+            # OptiQ VLM stub: module/class docs mention stub, or __init__ raises
+            blob = f"{getattr(cls, '__doc__', '') or ''} {getattr(mod, '__doc__', '') or ''}".lower()
+            if "stub" in blob:
+                continue
+            return cls
+        except Exception:
+            continue
+    return None
 
 
 def materialize_mlx_model(model) -> None:
@@ -424,19 +465,18 @@ class MLXWhisperEngine(STTEngine):
 
 
 class MLXGemmaEngine(TranslationEngine):
-    """Translation engine wrapping TranslateGemma via mlx-lm.
+    """Translation engine wrapping Gemma 4 OptiQ / TranslateGemma via mlx-lm.
 
     Constructor args:
-        model_id:        MLX-community 4-bit model repo
-                         (default: mlx-community/translategemma-4b-it-4bit).
+        model_id:        MLX-community model repo (default: Gemma 4 E4B OptiQ).
         cache_limit_mb:  Metal memory cache limit in megabytes (default: 256).
         use_prompt_cache: Pre-compute KV cache for the fixed chat template
-                          prefix, saving ~50-80 ms per call (default: True).
+                          prefix (TranslateGemma only; skipped for gemma4).
         adapter_path:    Optional LoRA adapter directory passed to
                          ``mlx_lm.load(..., adapter_path=)``.
-        use_turboquant:  Enable TurboQuant KV cache (requires mlx-optiq).
+        use_turboquant:  Request TurboQuant KV cache (soft-disabled on mlx-optiq 0.4).
         turboquant_key_bits / turboquant_val_bits: Quantization bits for TQ.
-        model_family:    ``translategemma`` (structured lang codes) or ``gemma4``.
+        model_family:    ``gemma4`` (Mac default) or ``translategemma``.
         draft_model_id:  Optional mlx-lm draft / Gemma-4 ``-assistant`` model for
                          speculative decoding (MTS). Loaded alongside the target.
         num_draft_tokens: Tokens drafted per verify step (gamma). Default 1 — optimal
@@ -445,13 +485,13 @@ class MLXGemmaEngine(TranslationEngine):
 
     def __init__(
         self,
-        model_id: str = "mlx-community/translategemma-4b-it-4bit",
+        model_id: str = "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
         cache_limit_mb: int = 256,
         use_prompt_cache: bool = True,
         use_turboquant: bool = False,
         turboquant_key_bits: int = 3,
         turboquant_val_bits: int = 4,
-        model_family: str = "translategemma",
+        model_family: str = "gemma4",
         adapter_path: str | None = None,
         draft_model_id: str | None = None,
         num_draft_tokens: int = 1,
@@ -532,27 +572,26 @@ class MLXGemmaEngine(TranslationEngine):
                 logger.info("Disabling prompt cache (incompatible with draft_model)")
                 self._use_prompt_cache = False
 
-        # -- TurboQuant KV cache compression (mlx-optiq) ----------------------
-        # Replaces the default KV cache with a quantized version that uses
-        # 4.6x less memory.  Near-lossless at key_bits=3, val_bits=4.
-        # Enables 12B on 8GB Macs and reduces memory pressure on 18GB.
+        # -- TurboQuant KV cache compression (optional drop-in) ---------------
+        # Historical API: replace model.kv_cache with TurboQuantKVCache.
+        # mlx-optiq 0.4+ does not expose that drop-in for mlx_lm.generate.
         if self._use_turboquant:
             try:
-                from mlx_optiq import TurboQuantKVCache
-
-                self._model.kv_cache = TurboQuantKVCache(
-                    self._model,
-                    key_bits=self._turboquant_key_bits,
-                    val_bits=self._turboquant_val_bits,
-                    rotate=True,
-                )
-                logger.info(
-                    "TurboQuant KV cache enabled (key=%d-bit, val=%d-bit, rotate=True)",
-                    self._turboquant_key_bits,
-                    self._turboquant_val_bits,
-                )
-            except ImportError:
-                logger.warning("TurboQuant requested but mlx-optiq not installed. Install with: pip install mlx-optiq")
+                turbo_cls = resolve_turboquant_kv_cache_cls()
+                if turbo_cls is None:
+                    logger.warning(TURBOQUANT_UNAVAILABLE_MSG)
+                else:
+                    self._model.kv_cache = turbo_cls(
+                        self._model,
+                        key_bits=self._turboquant_key_bits,
+                        val_bits=self._turboquant_val_bits,
+                        rotate=True,
+                    )
+                    logger.info(
+                        "TurboQuant KV cache enabled (key=%d-bit, val=%d-bit, rotate=True)",
+                        self._turboquant_key_bits,
+                        self._turboquant_val_bits,
+                    )
             except Exception as exc:
                 logger.warning("TurboQuant initialization failed: %s", exc)
 
@@ -621,6 +660,7 @@ class MLXGemmaEngine(TranslationEngine):
             prompt = self._tokenizer.apply_chat_template(
                 messages,
                 add_generation_prompt=True,
+                **chat_template_extra_kwargs(model_family=self._model_family),
             )
             gen_kwargs = dict(
                 prompt=prompt,

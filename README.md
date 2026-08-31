@@ -93,11 +93,12 @@ Key flags: `--lang es` (Spanish speaker mode), `--tts` (audio output), `--ab` (A
 | Translation (partials, HF fallback) | MarianMT opus-mt-{en-es,es-en} HF transformers | ~298 MB | ~167ms CUDA / ~360ms CPU |
 | **Translation default** (CUDA, finals) | **Gemma 4 E4B Q4_K_M (llama.cpp)** | **5.0 GB GGUF / 4.9 GB VRAM** | **~470ms** |
 | Translation low-VRAM (CUDA, finals) | Gemma 4 E2B Q4_K_M (llama.cpp) | 3.2 GB GGUF / 3.5 GB VRAM | ~280ms |
-| Translation (Mac MLX) | TranslateGemma 4B / 12B 4-bit | ~2.5 GB / ~7 GB | ~550ms / ~2.1s |
+| Translation (Mac MLX, default) | **Gemma 4 E4B OptiQ-4bit** | OptiQ | ~2–3s medium |
+| Translation (Mac MLX, opt-out) | TranslateGemma 4B / 12B 4-bit | ~2.5 GB / ~7 GB | ~550ms / ~2.1s |
 | TTS | Piper EN/ES (ONNX) | ~63 MB | ~40ms/word |
 | VAD | Silero VAD | ~2 MB | <1ms |
 
-CUDA path now uses **llama.cpp via `engines/llamacpp_engine.py`** (v2026.5+) for ~5–9× speedup and ~4× VRAM reduction vs HF NF4. Caller starts `llama-server` (see `start_server.sh`). MLX/Mac path unchanged. Pipeline overlap hides translation latency by running translation(N) concurrent with STT(N+1). See [`docs/archive/v2026.5/BENCHMARK.md`](./docs/archive/v2026.5/BENCHMARK.md) for the full Phase 1A benchmark across TG4B/TG12B/E2B/E4B × HF/GGUF.
+CUDA path now uses **llama.cpp via `engines/llamacpp_engine.py`** (v2026.5+) for ~5–9× speedup and ~4× VRAM reduction vs HF NF4. Caller starts `llama-server` (see `start_server.sh`). **Mac MLX default is Gemma 4 OptiQ E4B** (`--model-family translategemma` to opt out). Pipeline overlap hides translation latency by running translation(N) concurrent with STT(N+1). See [`docs/mlx_cuda_parity.md`](./docs/mlx_cuda_parity.md) and [`docs/archive/v2026.5/BENCHMARK.md`](./docs/archive/v2026.5/BENCHMARK.md).
 
 ## Displays
 
@@ -125,8 +126,8 @@ Fine-tuning runs on Windows/WSL (A2000 Ada 16GB). Adapters transfer to Mac for i
 
 | Target | RAM/VRAM | Config |
 |--------|----------|--------|
-| Mac (M1-M4) 8 GB+ | ~4.3 GB | TranslateGemma 4B-only (`--no-ab`) |
-| Mac (M1-M4) 18 GB+ | ~11.3 GB | Full A/B (`--ab`) |
+| Mac (M1-M4) 8 GB+ | ~5–6 GB | Gemma 4 OptiQ E4B (or `--gemma4-size e2b`) |
+| Mac (M1-M4) 18 GB+ | ~11.3 GB | TG A/B (`--model-family translategemma --ab`) or E4B+MTS |
 | **NVIDIA 6 GB+** (RTX 3060/4060) | **~5 GB** | **Whisper + Gemma 4 E2B Q4_K_M (llama.cpp)** |
 | NVIDIA 8 GB+ | ~6 GB | Whisper + Gemma 4 E4B Q4_K_M (llama.cpp) |
 | Training (A2000 Ada 16GB) | ~8-12 GB | LoRA/QLoRA fine-tuning |

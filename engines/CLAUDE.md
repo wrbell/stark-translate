@@ -107,9 +107,9 @@ PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD ru
 | STT primary (CUDA, v2026.7) | merged W16 LoRA at `adapters/whisper_turbo_ct2/active/` (~777 MB CT2 int8_float16) — falls back to off-the-shelf `large-v3-turbo` (downloaded by faster-whisper into the cache) | ~777 MB |
 | STT fallback (Mac) | `wbell7/distil-whisper-large-v3.5-mlx` | ~1.5 GB |
 | STT fallback (CUDA) | off-the-shelf `large-v3` via faster-whisper, lazy-loaded by `FasterWhisperEngine` on low-confidence retry | ~3 GB |
-| Translation A (Mac default) | `mlx-community/translategemma-4b-it-4bit` | ~2.5 GB |
-| Translation B (Mac A/B) | `mlx-community/translategemma-12b-it-4bit` | ~7 GB |
-| Translation Gemma 4 (Mac opt-in) | `mlx-community/gemma-4-e4b-it-OptiQ-4bit` (+ optional `-assistant-bf16` MTS) | see OptiQ cards |
+| Translation A (Mac default) | `mlx-community/gemma-4-e4b-it-OptiQ-4bit` | OptiQ 4-bit |
+| Translation A (TG opt-out) | `mlx-community/translategemma-4b-it-4bit` | ~2.5 GB |
+| Translation B (TG A/B) | `mlx-community/translategemma-12b-it-4bit` | ~7 GB |
 | Translation CUDA prod | Gemma 4 E4B Q4_K_M via llama.cpp | ~4.9 GB VRAM |
 | Partial translate | `Helsinki-NLP/opus-mt-en-es` / `es-en` (MarianMT) | ~298 MB |
 | TTS (EN) | Piper `en_US-lessac-high` | ~63 MB |

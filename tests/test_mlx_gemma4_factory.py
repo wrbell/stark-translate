@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, patch
 
 
 class TestGemma4Settings:
-    def test_defaults_keep_translategemma(self):
+    def test_defaults_are_gemma4(self):
         from settings import TranslationSettings
 
         ts = TranslationSettings()
-        assert ts.model_family == "translategemma"
+        assert ts.model_family == "gemma4"
         assert ts.mlx_mts is False
         assert "OptiQ" in ts.mlx_model_gemma4_e4b
         assert "OptiQ" in ts.mlx_model_gemma4_e2b
