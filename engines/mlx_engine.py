@@ -972,11 +972,14 @@ class PiperTTSEngine(TTSEngine):
 
         Returns immediately after the audio is queued; the playback runs on
         sounddevice's own thread.
+        PortAudioError propagates so the routing layer can re-resolve hotplugged devices.
         """
-        try:
-            import sounddevice as sd
+        import sounddevice as sd
 
+        try:
             sd.play(audio_float32, samplerate=sample_rate, device=device)
+        except sd.PortAudioError:
+            raise
         except Exception as exc:
             logger.warning("PiperTTSEngine.play failed (device=%s): %s", device, exc)
 

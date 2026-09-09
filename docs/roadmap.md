@@ -156,8 +156,7 @@ Then: **CUDA latency proposal** (`docs/cuda_latency_proposal.md`, for the A2000 
 - ✅ systemd unit + launchd plist + bootstrap.sh for church PC install
 - See [`operator_runbook.md`](./operator_runbook.md) for the day-of-event workflow
 
-**Deferred patches** (will ship as v2026.6.x): multi-channel TTS routing (9.4.1),
-live diarization on a rolling audio buffer (9.6.1), macOS Shortcuts for
+**Deferred patches:** live diarization on a rolling audio buffer (9.6.1), macOS Shortcuts for
 voice-command triggers (10).
 
 ### Phase 8: Multilingual Expansion (Hindi & Chinese)
@@ -185,7 +184,7 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 - ✅ Dedicated hardware auto-start (Phase 9.5 — systemd unit + launchd plist + bootstrap.sh)
 - ✅ Post-sermon summary trigger (Phase 9.6 — `/api/features/summary`)
 - ✅ Verse extraction wired into the live operator UI (Phase 9.6 — `/api/features/verses`)
-- 9.4.1 — Multi-channel TTS routing (#132, scheduled after v2026.13). Shipped so far: `settings.tts.output_device`, `--tts-output local` + `--tts-device`, `PiperTTSEngine.play(device=)`. Remaining: per-language device map, name-based resolution with hotplug re-resolve, enable the operator UI dropdown.
+- ✅ 9.4.1 — Multi-channel TTS routing (#132) shipped: per-language device map, `--tts-device-en/es` by index or name, cached resolution with hotplug retry and default fallback, and persisted EN/ES operator output selectors. `--tts-device` remains the fallback for unlisted languages.
 - 9.6.1 — Live diarization on a rolling audio buffer (#133, scheduled after v2026.13). `features/live_diarize.py` daemon stub exists (PR #70); needs rolling-window attribution of finals, `--diarize` opt-in, display labels, p95 guard.
 - Continuous improvement loop: live inference → log diagnostics → retrain monthly (depends on Phase 6/8 active learning)
 

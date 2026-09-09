@@ -63,6 +63,13 @@ for _mod in _MOCK_MODULES:
         sys.modules[_mod] = MagicMock()
 
 
+class MockPortAudioError(Exception):
+    """An exception class, since MagicMock cannot be used in an except clause."""
+
+
+sys.modules["sounddevice"].PortAudioError = MockPortAudioError
+
+
 @pytest.fixture(autouse=True)
 def _mock_heavy_deps(monkeypatch):
     """Auto-mock heavy ML dependencies that aren't installed on CI."""

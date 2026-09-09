@@ -4,6 +4,8 @@
 > **Role:** Inference, live demos, quality monitoring, browser displays, A/B testing
 > **Parent doc:** [`CLAUDE.md`](./CLAUDE.md)
 
+**TTS (9.4.1):** `--tts --tts-output local --tts-device-en "MacBook Pro Speakers" --tts-device-es "BlackHole 2ch"` routes each translation language independently. The operator UI saves per-language output choices; named routes retry after USB hotplug, then fall back to system output. See [the operator runbook](docs/operator_runbook.md#route-tts-to-a-second-output-941).
+
 ---
 
 ## Hardware Profile (Verified)

@@ -3131,6 +3131,11 @@ async def broadcast_tts_audio(chunk_id: int, audio: np.ndarray, sample_rate: int
         print(f"  [tts-ws] Sent {len(audio_int16) // 2} samples to {ok} client(s)")
 
 
+from engines.audio_devices import OutputDeviceResolver
+
+_tts_device_resolver = OutputDeviceResolver()
+
+
 def _run_tts(engine, text, language, cid, output_mode, loop):
     """Synthesize TTS and dispatch output (runs on _tts_pool thread).
 
@@ -3166,7 +3171,13 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
 
         # Local sounddevice playback (Phase 9.4.1)
         if output_mode == "local":
-            engine.play(tts_result.audio, tts_result.sample_rate, device=settings.tts.output_device)
+            _tts_device_resolver.play(
+                engine.play,
+                tts_result.audio,
+                tts_result.sample_rate,
+                language=language,
+                spec=settings.tts.output_devices.get(language, settings.tts.output_device),
+            )
 
         # Log TTS latency
         tts_e2e_ms = tts_result.latency_ms
@@ -3829,6 +3840,10 @@ async def main_async(args):
             settings.tts.output_mode = args.tts_output
             if args.tts_device is not None:
                 settings.tts.output_device = args.tts_device
+            for language in ("en", "es"):
+                device_spec = getattr(args, f"tts_device_{language}", None)
+                if device_spec is not None:
+                    settings.tts.output_devices[language] = device_spec
             device_suffix = f", device={settings.tts.output_device}" if args.tts_output == "local" else ""
             print(f"  TTS enabled: {TARGET_LANG} voice ({tts_voice}), output={args.tts_output}{device_suffix}")
         else:
@@ -4140,7 +4155,7 @@ def main():
         default="ws",
         help=(
             "TTS output mode: ws (WebSocket stream), wav (file), both, "
-            "local (sounddevice playback to --tts-device). default: ws"
+            "local (per-language --tts-device-en/es, falling back to --tts-device). default: ws"
         ),
     )
     parser.add_argument(
@@ -4153,6 +4168,13 @@ def main():
             "Defaults to system default output."
         ),
     )
+    for language in ("en", "es"):
+        parser.add_argument(
+            f"--tts-device-{language}",
+            type=lambda value: int(value) if value.lstrip("+-").isdigit() else value,
+            default=None,
+            help=f"Local {language.upper()} TTS output index or device-name substring; overrides the language map.",
+        )
     parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
