@@ -4068,7 +4068,7 @@ def main():
         "--stt-backend",
         type=str,
         default="auto",
-        choices=["auto", "faster-whisper", "hf", "mlx", "parakeet"],
+        choices=["auto", "faster-whisper", "hf", "mlx", "parakeet", "parakeet-mlx"],
         help=(
             "Whisper implementation within the chosen --backend hardware tier. "
             "'auto' (default): faster-whisper on cuda/cpu, mlx on Apple. "

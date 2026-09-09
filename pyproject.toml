@@ -70,6 +70,9 @@ mlx = [
     "piper-tts",
 ]
 
+# Optional multilingual STT engine; combine with the mlx extra on Apple Silicon.
+parakeet-mlx = ["parakeet-mlx>=0.5.2"]
+
 # CPU fallback — no GPU acceleration. Slow but works on any machine.
 cpu = [
     "torch>=2.6,<3",
