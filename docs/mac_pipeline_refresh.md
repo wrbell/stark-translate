@@ -94,6 +94,8 @@ See [`mlx_cuda_parity.md`](./mlx_cuda_parity.md). Naïve uniform Gemma 4 MLX 4-b
 | e2b OptiQ | ~1624 ms | **0/8** | Not usable — PLE/canary collapse on this build |
 | e4b + MTS (`-assistant`) | LOAD FAIL | — | `gemma4_assistant` unsupported in current mlx-lm; skip `--mts` until mlx-lm catches up |
 
+> **2026-09-09 correction (#172):** the latency and E2B canary rows above are invalid. The Mac loaders replaced Gemma 4's stop set with `{<eos>, <unk>}` (a TranslateGemma-era `<end_of_turn>` patch), so every call ran to `max_tokens`; E2B's 0/8 was thinking-on plus the same bug, not PLE collapse. Kept for history — v2026.13 replaces this table with replay-benchmark numbers (#179).
+
 **Demo mode vs quality mode:** keep **E4B OptiQ** for demos that need theological register; use `--model-family translategemma` when you need sub-second finals and can accept TG canary gaps. Do not ship E2B OptiQ until canaries recover.
 
 ### TurboQuant (optional KV compression)

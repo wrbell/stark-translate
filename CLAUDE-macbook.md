@@ -52,9 +52,9 @@ With 18 GB unified memory, default Gemma 4 OptiQ E4B fits easily; TG A/B mode (~
 ### Verified Environment
 
 - Python 3.11.11
-- MLX 0.30.6, mlx-lm 0.30.6, mlx-whisper 0.4.3
+- MLX 0.32.2, mlx-lm 0.31.3, mlx-whisper 0.4.3, mlx-optiq 0.4.34 (verified 2026-09-09)
 - PyTorch 2.10.0 (used for Silero VAD and MarianMT PyTorch backend only)
-- CTranslate2 (MarianMT int8 backend)
+- CTranslate2 4.7.1 (MarianMT int8 backend; the arm64 wheel no longer links libomp — the live Mac path still uses HF/PyTorch Marian until `adapters/marian_ct2/` is populated)
 
 ### Installation
 
@@ -167,7 +167,7 @@ Mic (48kHz) → Resample 16kHz → Silero VAD ─┐
 - **Quality translation:** Gemma 4 OptiQ E4B via `mlx-lm` (Mac default); TranslateGemma with `--model-family translategemma` (12B with `--ab`)
 - **Speculative decoding:** Gemma-4 assistant MTS via `--mts`; TG 4B can draft 12B with `--ab --num-draft-tokens`
 - **Serving:** HTTP on `0.0.0.0:8080` (`--http-port`) serves display HTML to phones. WebSocket on `0.0.0.0:8765` pushes transcriptions
-- **Metal cache:** `mx.set_cache_limit(100 * 1024 * 1024)` prevents cache growth with word_timestamps
+- **Metal cache:** `mx.set_cache_limit(256 * 1024 * 1024)` prevents cache growth with word_timestamps
 - **Model pre-warming:** 1-token forward pass during silence gaps to avoid cold-start latency
 - **Background I/O:** WAV/JSONL/CSV writes run on background threads to avoid blocking inference
 
@@ -631,7 +631,7 @@ python training/evaluate_translation.py
 |-------|-----|
 | Cold boot slowness | Pipeline pre-warms models during silence gaps; first utterance may be slower |
 | Battery throttling | Plug in for A/B tests (~80% speed on battery) |
-| Metal cache growing | `mx.set_cache_limit(100 * 1024 * 1024)` prevents cache growth with word_timestamps |
+| Metal cache growing | `mx.set_cache_limit(256 * 1024 * 1024)` prevents cache growth with word_timestamps |
 | TranslateGemma generates pad tokens | Add `<end_of_turn>` (id=106) to `tokenizer._eos_token_ids` — default EOS (id=1) never generates |
 | High memory in A/B mode | Both models ~11.3 GB; run 4B-only (no `--ab`) if memory-constrained |
 | PyTorch fp16 on MPS fails | Expected — causes inf/nan with TranslateGemma. Use MLX 4-bit (the default) |
