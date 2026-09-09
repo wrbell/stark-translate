@@ -2,7 +2,7 @@
 # See pyproject.toml [project.optional-dependencies]. This file is kept
 # only as a pip-cache key for CI workflows and as a frozen-version snapshot
 # for the WSL training environment per CLAUDE-windows.md.
-accelerate==1.12.0
+accelerate==1.15.0
 anyio==4.12.1
 
 certifi==2026.2.25
