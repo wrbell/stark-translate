@@ -86,6 +86,12 @@ Settings: `STARK_TRANSLATE__CUDA_MODEL_4B`, `STARK_TRANSLATE__CUDA_MODEL_12B`, `
 | `MarianCT2Engine` | Fast partial translator via CTranslate2 (v2026.8). 57 ms p50 / 116 ms p95 on A2000 Ada at `int8_float16` — 2.9× faster than the HF CUDA path with identical canary score and lower peak VRAM. Auto-loads `adapters/marian_ct2/{en-es,es-en}/active/` when present; CT2 `Translator` is internally thread-safe so this engine drops the historical `_pytorch_lock` (live pipeline can call `translate()` concurrently). See `docs/archive/v2026.8/MARIAN_BENCHMARK.md`. |
 | `MarianHFEngine` (in `engines/marian_hf_engine.py`) | Fast partial translator via HF transformers — fallback path when CT2 isn't available (Mac MLX, missing `ctranslate2`, or explicit `STARK_TRANSLATE__MARIAN_BACKEND=hf`). Acquires the shared `_pytorch_lock` from `engines/_locks.py` (Silero VAD uses the same lock — pre-v2026.8 they had separate locks, a latent thread-safety bug). |
 
+## MLX Engine Classes
+
+| Class | Role |
+|-------|------|
+| `ParakeetMLXEngine` | Optional multilingual STT via `parakeet-mlx>=0.5.2`, including EN/ES; `stt_backend="parakeet-mlx"` requires `backend="mlx"`. Batch decoding and incremental `open_stream()` on one dedicated worker; confidence proxies preserve Whisper metric keys. No prompt biasing. Live dispatch and WER gate are separate (#178). |
+
 ## MLX Thread Safety (MLX >= 0.31.2)
 
 As of **mlx 0.31.2**, independent models may run concurrently on separate threads via **thread-local streams** (see ml-explore/mlx#3078). The live pipeline uses `ThreadPoolExecutor(max_workers=2)` on Mac — same as CUDA — so **STT(N) can overlap Translation(N−1)**.
@@ -104,6 +110,7 @@ PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD ru
 
 | Role | Model ID | Size |
 |------|----------|------|
+| STT optional (Mac, Parakeet TDT v3) | `mlx-community/parakeet-tdt-0.6b-v3` | 0.6B parameters, bfloat16 |
 | STT primary (Mac) | `mlx-community/whisper-large-v3-turbo` | ~1.5 GB |
 | STT primary (CUDA, v2026.7) | merged W16 LoRA at `adapters/whisper_turbo_ct2/active/` (~777 MB CT2 int8_float16) — falls back to off-the-shelf `large-v3-turbo` (downloaded by faster-whisper into the cache) | ~777 MB |
 | STT fallback (Mac) | `wbell7/distil-whisper-large-v3.5-mlx` | ~1.5 GB |

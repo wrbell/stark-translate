@@ -28,6 +28,7 @@ mlx-lm>=0.31.3                        # thread-local generation stream (MLX 0.31
 mlx-metal==0.32.2
 mlx-optiq>=0.1                        # TurboQuant KV cache (STARK_TRANSLATION__TURBOQUANT)
 mlx-whisper>=0.4.3                    # Turbo: mlx-community/whisper-large-v3-turbo
+# parakeet-mlx>=0.5.2                 # Optional Parakeet TDT v3 STT (.[mlx,parakeet-mlx])
 more-itertools==10.8.0
 mpmath==1.3.0
 networkx==3.6.1

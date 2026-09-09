@@ -65,7 +65,9 @@ def test_percentile_handles_edge_cases():
 def test_variants_table_has_required_fields():
     for key, cfg in bench.VARIANTS.items():
         assert "engine" in cfg, f"{key} missing engine"
-        assert cfg["engine"] in {"faster-whisper", "hf"}, f"{key} unknown engine {cfg['engine']!r}"
+        assert cfg["engine"] in {"faster-whisper", "hf", "mlx", "parakeet-mlx"}, (
+            f"{key} unknown engine {cfg['engine']!r}"
+        )
         if cfg["engine"] == "faster-whisper":
             assert "compute_type" in cfg
         if cfg["engine"] == "hf":
@@ -108,3 +110,84 @@ def test_collect_hardware_info_handles_missing_nvidia_smi(monkeypatch):
     assert "python" in info
     # Either no GPU keys or an error key — never both populated successfully.
     assert "gpu_query_error" in info or "gpu_name" not in info
+
+
+@pytest.mark.parametrize(
+    "variant_key,target",
+    [
+        ("mlx_whisper_turbo", "engines.mlx_engine.MLXWhisperEngine"),
+        ("parakeet_mlx", "engines.parakeet_mlx_engine.ParakeetMLXEngine"),
+    ],
+)
+def test_mac_variant_construction(monkeypatch, variant_key, target):
+    constructor = MagicMock()
+    monkeypatch.setattr(target, constructor)
+    cfg = bench.VARIANTS[variant_key]
+    assert cfg["device"] == "mlx"
+    assert bench.build_engine(variant_key, cfg, None) is constructor.return_value
+    assert constructor.call_args.kwargs["model_id"] == cfg["model_id"]
+    if variant_key == "mlx_whisper_turbo":
+        assert constructor.call_args.kwargs["fallback_on_low_conf"] is False
+    bench.build_engine(variant_key, cfg, "custom/model")
+    assert constructor.call_args.kwargs["model_id"] == "custom/model"
+    constructor.return_value.load.assert_not_called()
+
+
+def test_device_cli_and_invalid_combination():
+    assert bench.parse_args(["--variant", "parakeet_mlx", "--device", "mlx"]).device == "mlx"
+    assert bench.main(["--variant", "parakeet_mlx", "--device", "cuda"]) == 2
+    assert bench.main(["--variant", "fw_int8_offshelf", "--device", "mlx"]) == 2
+
+
+@pytest.mark.parametrize("device,sampler_available", [("mlx", False), ("mlx", True), ("cuda", False), ("cuda", True)])
+def test_mocked_benchmark_preserves_schema(tmp_path, monkeypatch, device, sampler_available):
+    """Exercise aggregation with a fake engine; never run model inference."""
+    import json
+
+    import numpy as np
+
+    from engines.base import STTResult
+
+    fake_engine = MagicMock()
+    fake_engine.transcribe.return_value = STTResult("Grace saves", latency_ms=1)
+    monkeypatch.setattr(bench, "build_engine", MagicMock(return_value=fake_engine))
+    monkeypatch.setattr(bench, "load_pcm16_wav", lambda _: (np.zeros(160, dtype=np.float32), 16000))
+    fake_wer = MagicMock(return_value=0.125)
+    monkeypatch.setattr(bench, "wer", fake_wer)
+    sampler = MagicMock() if sampler_available else None
+    if sampler is not None:
+        sampler.return_value.stop.return_value = {"max_mib": 1024, "max_gb": 1.0, "n_samples": 1, "median_mib": 1024}
+    monkeypatch.setattr(bench, "VramSampler", sampler)
+    key = "parakeet_mlx" if device == "mlx" else "fw_int8_offshelf"
+    clips = [
+        {
+            "id": "mock",
+            "audio_path_relative": "unused.wav",
+            "tier": "short",
+            "duration_s": 0.01,
+            "ground_truth": "Grace saves",
+            "tier1_terms_present": ["grace"],
+        }
+    ]
+    output = tmp_path / "clips.jsonl"
+    summary = bench.run_variant(key, bench.VARIANTS[key], clips, 1, 0, output, None)
+    assert summary["wer_normalized_overall"] == 0.125
+    assert summary["wer_normalized_tier1_only"] == 0.125
+    assert fake_wer.call_args.args == (["Grace saves"], ["Grace saves"])
+    assert set(summary["vram"]) == {"max_mib", "max_gb", "n_samples", "median_mib"}
+    if device == "cuda" and sampler_available:
+        sampler.return_value.start.assert_called_once()
+        sampler.return_value.stop.assert_called_once()
+        assert summary["vram"]["max_mib"] == 1024
+    else:
+        assert summary["vram"]["max_mib"] is None
+        assert summary["vram"]["n_samples"] == 0
+        if sampler is not None:
+            sampler.assert_not_called()
+    assert "latency_ms_overall_p95" in summary
+    assert "rtf_p95" in summary["tiers"]["short"]
+    record = json.loads(output.read_text())
+    assert record["prediction"] == "Grace saves"
+    assert "rtf" in record
+    assert "engine_avg_logprob" in record
+    fake_engine.unload.assert_called_once()

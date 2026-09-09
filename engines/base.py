@@ -1,9 +1,16 @@
 """Abstract base classes for STT and translation engines."""
 
+import zlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import numpy as np
+
+
+def text_compression_ratio(text: str) -> float:
+    """Whisper-compatible UTF-8/zlib repetition metric (zero for empty text)."""
+    text_bytes = text.encode("utf-8")
+    return len(text_bytes) / len(zlib.compress(text_bytes))
 
 
 @dataclass
@@ -18,6 +25,7 @@ class STTResult:
     segments: list | None = field(default_factory=list)
     low_confidence_words: list | None = field(default_factory=list)
     used_fallback: bool = False
+    no_speech_prob: float | None = None
 
 
 @dataclass
