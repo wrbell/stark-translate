@@ -2505,6 +2505,12 @@ async def _pipeline_translate_and_finalize(
     GPU and actually be slower than sequential.
     """
     global _chunks_completed
+    # Every branch below assigns the A-model results, but only the A/B branches
+    # assign the B-model ones. The single-model MLX path (the Mac default) then
+    # hit UnboundLocalError on `qe_b` at the summary print, so every final failed.
+    spanish_a = spanish_b = None
+    lat_a = lat_b = tps_a = tps_b = 0.0
+    qe_a = qe_b = None
     try:
         async with _pipeline_translation_lock:
             loop = asyncio.get_event_loop()
