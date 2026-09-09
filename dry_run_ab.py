@@ -93,6 +93,8 @@ SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
 CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
+PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
+EXIT_AFTER_REPLAY = False
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
 BEAM_SIZE = 1  # Whisper beam search width: 1=greedy (fastest), 5=default
@@ -727,6 +729,13 @@ def _write_jsonl_record(record):
     os.makedirs(os.path.dirname(DIAG_PATH), exist_ok=True)
     with open(DIAG_PATH, "a") as f:
         f.write(json.dumps(record) + "\n")
+
+
+def _write_partial_record(record):
+    """Persist every emitted partial, independently of last-partial caches."""
+    os.makedirs(os.path.dirname(PARTIALS_PATH), exist_ok=True)
+    with open(PARTIALS_PATH, "a") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def _compute_force_cut(buffer_len, sample_rate, last_silence_boundary, min_cut_s=0.5):
@@ -2269,6 +2278,19 @@ async def process_partial(audio_data, utterance_id):
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
         total = stt_latency + marian_latency
 
+        _io_pool.submit(
+            _write_partial_record,
+            {
+                "utterance_id": utterance_id,
+                "ts": datetime.now().isoformat(),
+                "buffer_s": len(audio_data) / SAMPLE_RATE,
+                "stt_ms": stt_latency,
+                "marian_ms": marian_latency,
+                "text_en": english if SOURCE_LANG == "en" else spanish,
+                "text_es": spanish if SOURCE_LANG == "en" else english,
+            },
+        )
+
         # Store for Marian/Gemma divergence comparison and latency logging
         partial_translations[utterance_id] = spanish
         partial_latencies[utterance_id] = {
@@ -3476,8 +3498,15 @@ async def audio_loop():
             # interface so the loop below is unchanged.
             from tools.audio_bridge_client import open_audio_stream
 
+            stream_callback = audio_callback
+            if os.environ.get("STARK_AUDIO_SOURCE") == "file":
+                # asyncio.Queue must be fed on its owning loop. Wake it for
+                # every replay block instead of waiting for the queue timeout.
+                capture_loop = asyncio.get_running_loop()
+                stream_callback = lambda *args, _loop=capture_loop: _loop.call_soon_threadsafe(audio_callback, *args)
+
             stream = open_audio_stream(
-                callback=audio_callback,
+                callback=stream_callback,
                 samplerate=MIC_SAMPLE_RATE,
                 channels=1,
                 dtype="float32",
@@ -3492,6 +3521,23 @@ async def audio_loop():
                     try:
                         audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
                     except TimeoutError:
+                        # EOF is checked only once all callback blocks have drained.
+                        finished = getattr(stream, "finished", None)
+                        if EXIT_AFTER_REPLAY and finished is not None and finished.is_set() and audio_queue.empty():
+                            if getattr(stream, "error", None) is not None:
+                                raise RuntimeError("Audio replay failed") from stream.error
+                            if len(speech_buffer):
+                                # Tail silence normally finalizes speech. Flush any
+                                # remainder, retaining the live minimum-length gate.
+                                if len(speech_buffer) / SAMPLE_RATE >= 0.7:
+                                    await process_final(speech_buffer.copy(), utterance_id)
+                                speech_buffer = np.array([], dtype=np.float32)
+                            if (
+                                _pipeline_chunk_queue.empty()
+                                and not any(not task.done() for task in _partial_tasks)
+                                and (_active_partial_future is None or _active_partial_future.done())
+                            ):
+                                return
                         continue
                     has_speech = is_speech(audio_frame, vad_model, vad_utils)
 
@@ -3830,7 +3876,7 @@ async def main_async(args):
 
     # Detect best microphone and auto-calibrate gain
     global MIC_DEVICE, MIC_GAIN
-    if MIC_DEVICE is None:
+    if MIC_DEVICE is None and os.environ.get("STARK_AUDIO_SOURCE") != "file":
         print("[5/6] Detecting microphone...")
         MIC_DEVICE, mic_rms = detect_macbook_mic()
         if mic_rms > 0 and MIC_GAIN == 1.0:
@@ -3997,6 +4043,15 @@ def main():
     parser.add_argument("--vad-threshold", type=float, default=0.3, help="VAD speech threshold (0-1)")
     parser.add_argument("--device", type=int, default=None, help="Audio input device index (default: auto-detect)")
     parser.add_argument("--gain", type=float, default=None, help="Mic gain multiplier (default: auto-calibrate)")
+    parser.add_argument("--audio-file", help="Replay a WAV through the live audio pipeline")
+    parser.add_argument("--replay-speed", type=float, default=1.0, help="Replay speed; <=0 runs unpaced")
+    parser.add_argument("--session-id", help="Deterministic session ID for metrics and recordings")
+    parser.add_argument(
+        "--exit-after-replay",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Exit after replay drains (default: enabled with --audio-file)",
+    )
     parser.add_argument(
         "--num-draft-tokens",
         type=int,
@@ -4179,6 +4234,13 @@ def main():
     )
     args = parser.parse_args()
 
+    global EXIT_AFTER_REPLAY
+    EXIT_AFTER_REPLAY = bool(args.audio_file) if args.exit_after_replay is None else args.exit_after_replay
+    if args.audio_file:
+        os.environ["STARK_AUDIO_SOURCE"] = "file"
+        os.environ["STARK_AUDIO_FILE"] = args.audio_file
+        os.environ["STARK_REPLAY_SPEED"] = str(args.replay_speed)
+
     # --- Resolve backend ---
     # CUDA engine selection: CLI --engine wins over env vars/defaults in settings.
     if args.engine is not None:
@@ -4237,16 +4299,20 @@ def main():
 
     # --- Resolve language direction ---
     global SOURCE_LANG, TARGET_LANG, WHISPER_PROMPT
-    global SESSION_ID, CSV_PATH, AUDIO_DIR, DIAG_PATH
+    global SESSION_ID, CSV_PATH, AUDIO_DIR, DIAG_PATH, PARTIALS_PATH
     SOURCE_LANG = args.lang
     TARGET_LANG = "es" if args.lang == "en" else "en"
     WHISPER_PROMPT = WHISPER_PROMPT_ES if SOURCE_LANG == "es" else WHISPER_PROMPT_EN
 
     # Re-derive session paths with language tag so EN/ES data stays separate
-    SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}_{SOURCE_LANG}"
+    SESSION_ID = args.session_id or f"{datetime.now():%Y%m%d_%H%M%S}_{SOURCE_LANG}"
     CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
     AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"
     DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"
+    PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
+    os.makedirs(os.path.dirname(PARTIALS_PATH), exist_ok=True)
+    with open(PARTIALS_PATH, "w"):
+        pass
 
     # --- Configure structured logging ---
     log_level = getattr(logging, args.log_level, logging.INFO)
@@ -4267,6 +4333,8 @@ def main():
     WS_PORT = args.ws_port
     VAD_THRESHOLD = args.vad_threshold
     MIC_DEVICE = args.device
+    if args.audio_file:
+        MIC_GAIN = 1.0
     if args.gain is not None:
         MIC_GAIN = args.gain  # Explicit gain skips auto-calibration
     NUM_DRAFT_TOKENS = args.num_draft_tokens

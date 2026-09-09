@@ -1,0 +1,3 @@
+{"utterance_id": 1, "ts": "2026-09-09T10:00:00", "buffer_s": 0.6, "stt_ms": 100, "marian_ms": 40, "text_en": "Hello", "text_es": "Hola"}
+{"utterance_id": 1, "ts": "2026-09-09T10:00:01", "buffer_s": 1.2, "stt_ms": 200, "marian_ms": 60, "text_en": "Hello world", "text_es": "Hola mundo"}
+{"utterance_id": 2, "stt_ms": null, "marian_ms": 20, "text_es": "<turn|><|channel>"}
