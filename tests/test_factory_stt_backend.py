@@ -135,3 +135,31 @@ class TestSTTBackendResolution:
             create_stt_engine(backend="cuda", model_id="user/override-model")
         kwargs = fake_engines["fw"].call_args.kwargs
         assert kwargs["model_id"] == "user/override-model"
+
+
+@pytest.mark.parametrize("backend", ["cuda", "cpu"])
+def test_parakeet_mlx_requires_mlx(backend):
+    with pytest.raises(ValueError, match="requires backend='mlx'"):
+        create_stt_engine(backend=backend, stt_backend="parakeet-mlx")
+
+
+def test_parakeet_mlx_factory_defaults_and_overrides(monkeypatch):
+    from settings import settings
+
+    fake = MagicMock()
+    monkeypatch.setattr("engines.parakeet_mlx_engine.ParakeetMLXEngine", fake)
+    monkeypatch.setattr(settings.stt, "parakeet_mlx_model", "custom/default-parakeet")
+    engine = create_stt_engine(backend="mlx", stt_backend="parakeet-mlx", fallback_threshold=-1.0)
+    assert engine is fake.return_value
+    fake.assert_called_once_with(model_id="custom/default-parakeet")
+    fake.return_value.load.assert_not_called()
+    fake.reset_mock()
+    create_stt_engine(backend="mlx", stt_backend="parakeet-mlx", model_id="custom/override", dtype="float32")
+    fake.assert_called_once_with(model_id="custom/override", dtype="float32")
+
+
+def test_parakeet_mlx_rejects_spec_decode_override():
+    with pytest.raises(ValueError, match="incompatible with spec_decode"):
+        create_stt_engine(backend="mlx", stt_backend="parakeet-mlx", spec_decode=True)
+    with pytest.raises(ValueError, match="requires backend='mlx'"):
+        create_stt_engine(backend="cuda", stt_backend="parakeet-mlx", spec_decode=True)

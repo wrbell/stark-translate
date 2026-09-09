@@ -15,6 +15,7 @@ ENGINE_MODULES = [
     "engines.base",
     "engines.factory",
     "engines.mlx_engine",
+    "engines.mlx_spec",
     "engines.cuda_engine",
     "engines.active_learning",
 ]

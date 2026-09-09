@@ -85,7 +85,8 @@ def create_stt_engine(
                                  are available.
         stt_backend:             Whisper implementation choice within a hardware
                                  tier: "auto" (default), "faster-whisper", "hf",
-                                 "mlx", or "parakeet" (EN-only NeMo accelerator).
+                                 "mlx", "parakeet" (EN-only NeMo accelerator), or
+                                 "parakeet-mlx" (multilingual, MLX only).
                                  On cuda/cpu, "auto" → "faster-whisper".
                                  On mlx hardware, "auto" → "mlx".
         model_id:                Override the default model identifier.
@@ -118,6 +119,13 @@ def create_stt_engine(
     """
     if backend == "auto":
         backend = _detect_backend()
+
+    # Validate before the legacy spec-decode shortcut can replace the selection.
+    if stt_backend == "parakeet-mlx":
+        if backend != "mlx":
+            raise ValueError(f"stt_backend='parakeet-mlx' requires backend='mlx' (got {backend!r})")
+        if spec_decode:
+            raise ValueError("stt_backend='parakeet-mlx' is incompatible with spec_decode=True")
 
     # Resolve stt_backend (Whisper implementation choice).
     if spec_decode and stt_backend == "faster-whisper":
@@ -192,6 +200,15 @@ def create_stt_engine(
             device=backend,
             **merged_kwargs,
         )
+
+    if stt_backend == "parakeet-mlx":
+        from engines.parakeet_mlx_engine import ParakeetMLXEngine
+
+        if model_id is None:
+            from settings import settings
+
+            model_id = settings.stt.parakeet_mlx_model
+        return ParakeetMLXEngine(model_id=model_id, **kwargs)
 
     if stt_backend == "parakeet":
         # EN-only accelerator — do not use as bilingual default.

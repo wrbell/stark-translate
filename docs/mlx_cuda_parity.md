@@ -16,7 +16,7 @@ after pipeline parallelism (#168) and the Gemma 4 CUDA cutover (v2026.5).
 | EOS / preamble | Strip `<end_of_turn>` + “Here is the translation:” | Same `clean_translation()` | **Aligned** |
 | Spec / MTS | llama.cpp `-md` (bench: loss on single GPU) | Gemma-4 `-assistant` drafter via `--mts` (gamma=1) | Wired; measure on Mac |
 | TurboQuant KV | N/A (use `-ctk q8_0`) | `--turboquant` requested → soft-disabled on mlx-optiq 0.4.x (no drop-in `TurboQuantKVCache` for `mlx_lm.generate`; OptiQ KV lives in serve/runtime) | Unavailable on Mac live path today |
-| STT model | W16 CT2 turbo (`adapters/whisper_turbo_ct2/active/`) | Stock `mlx-community/whisper-large-v3-turbo` | Same size family; **fine-tune CUDA-only** |
+| STT model | W16 CT2 turbo (`adapters/whisper_turbo_ct2/active/`) | Stock `mlx-community/whisper-large-v3-turbo` | Same size family; **fine-tune CUDA-only**. Optional Parakeet TDT v3 on MLX, WER-gated, #178 (dispatch/gate tracked separately). |
 | STT confidence | avg_logprob / compression_ratio / no_speech | Same on `MLXWhisperEngine` | **Aligned** |
 | Partials timestamps | `word_timestamps=False` | Same | **Aligned** |
 | Pipeline overlap | `max_workers=2` | #168 in-process / `--multiprocess` escape | Pipeline parity in flight |

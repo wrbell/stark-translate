@@ -145,3 +145,14 @@ class TestPipelineSettings:
 
         assert settings is not None
         assert settings.backend in ("auto", "mlx", "cuda", "cpu")
+
+
+def test_parakeet_mlx_settings_default_and_environment(monkeypatch):
+    from settings import STTSettings
+
+    assert STTSettings().parakeet_mlx_model == "mlx-community/parakeet-tdt-0.6b-v3"
+    monkeypatch.setenv("STARK_STT_BACKEND", "parakeet-mlx")
+    monkeypatch.setenv("STARK_STT_PARAKEET_MLX_MODEL", "custom/parakeet")
+    config = STTSettings()
+    assert config.backend == "parakeet-mlx"
+    assert config.parakeet_mlx_model == "custom/parakeet"

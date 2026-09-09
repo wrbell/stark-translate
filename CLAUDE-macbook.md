@@ -162,6 +162,7 @@ Mic (48kHz) → Resample 16kHz → Silero VAD ─┐
 
 ### Key Details
 
+- **Optional STT:** `ParakeetMLXEngine` (`mlx-community/parakeet-tdt-0.6b-v3`, `.[mlx,parakeet-mlx]`) adds EN/ES batch and streaming STT; benchmark with `--variant parakeet_mlx --device mlx`. Live dispatch and WER gate follow separately (#178).
 - **STT:** `mlx-whisper` with `wbell7/distil-whisper-large-v3.5-mlx`, word timestamps on finals only (disabled for partials to save ~100-200ms)
 - **Fast translation:** MarianMT CT2 int8 (`ct2_opus_mt_en_es/`, 76MB). PyTorch variant runs in parallel for comparison logging
 - **Quality translation:** Gemma 4 OptiQ E4B via `mlx-lm` (Mac default); TranslateGemma with `--model-family translategemma` (12B with `--ab`)

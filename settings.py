@@ -180,12 +180,17 @@ class STTSettings(BaseSettings):
     backend: str = Field(
         default="auto",
         description=(
-            "Whisper implementation choice within a hardware tier: 'auto' "
+            "STT implementation choice within a hardware tier: 'auto' "
             "(faster-whisper on cuda/cpu, mlx on Apple Silicon), 'faster-whisper' "
             "(CTranslate2, default on CUDA), 'hf' (transformers, supports "
             "torch.compile + spec decode), 'mlx' (Apple Silicon only), "
-            "'parakeet' (NVIDIA Parakeet TDT — EN-only accelerator, requires nemo)."
+            "'parakeet' (NVIDIA Parakeet TDT — EN-only accelerator, requires nemo), "
+            "'parakeet-mlx' (multilingual Parakeet TDT v3, Apple Silicon only)."
         ),
+    )
+    parakeet_mlx_model: str = Field(
+        default="mlx-community/parakeet-tdt-0.6b-v3",
+        description="Parakeet MLX model id for backend='parakeet-mlx' (STARK_STT_PARAKEET_MLX_MODEL)",
     )
     parakeet_model: str = Field(
         default="nvidia/parakeet-tdt-0.6b-v3",

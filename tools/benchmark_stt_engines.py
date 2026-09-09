@@ -3,8 +3,8 @@
 
 Production replacement for ``scripts/benchmarks/_stt_baseline.py``. Compares
 faster-whisper variants (off-the-shelf vs merged W16 CT2, int8 vs int8_float16)
-and HF Whisper variants (with/without spec decode, with/without torch.compile)
-on a fixed canonical bench manifest.
+and HF Whisper variants (with/without spec decode, with/without torch.compile),
+plus MLX Whisper turbo and Parakeet TDT v3 on a fixed canonical bench manifest.
 
 Output:
   - ``--output FILE.json`` — per-variant summary (latency p50/p95/mean per
@@ -36,6 +36,7 @@ import argparse
 import json
 import logging
 import platform
+import shutil
 import statistics
 import struct
 import subprocess
@@ -50,7 +51,10 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.benchmarks.vram_sampler import VramSampler
+if shutil.which("nvidia-smi"):
+    from scripts.benchmarks.vram_sampler import VramSampler
+else:
+    VramSampler = None
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("benchmark_stt_engines")
@@ -58,6 +62,18 @@ log = logging.getLogger("benchmark_stt_engines")
 DEFAULT_MANIFEST = PROJECT_ROOT / "tools" / "stt_bench_manifest.json"
 
 VARIANTS: dict[str, dict] = {
+    "mlx_whisper_turbo": {
+        "engine": "mlx",
+        "model_id": "mlx-community/whisper-large-v3-turbo",
+        "device": "mlx",
+        "spec_decode": False,
+    },
+    "parakeet_mlx": {
+        "engine": "parakeet-mlx",
+        "model_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "device": "mlx",
+        "spec_decode": False,
+    },
     "fw_int8_offshelf": {
         "engine": "faster-whisper",
         "model_id": "large-v3-turbo",
@@ -206,6 +222,20 @@ def wer(refs: list[str], preds: list[str]) -> float:
 
 
 def build_engine(variant_key: str, variant: dict, override_model_id: str | None) -> object:
+    is_mlx_engine = variant["engine"] in ("mlx", "parakeet-mlx")
+    if is_mlx_engine != (variant["device"] == "mlx"):
+        raise ValueError(f"Variant {variant_key!r} is incompatible with device={variant['device']!r}")
+    if variant["engine"] == "mlx":
+        from engines.mlx_engine import MLXWhisperEngine
+
+        return MLXWhisperEngine(
+            model_id=override_model_id or variant["model_id"],
+            fallback_on_low_conf=False,
+        )
+    if variant["engine"] == "parakeet-mlx":
+        from engines.parakeet_mlx_engine import ParakeetMLXEngine
+
+        return ParakeetMLXEngine(model_id=override_model_id or variant["model_id"])
     if variant["engine"] == "faster-whisper":
         from engines.cuda_engine import FasterWhisperEngine
 
@@ -311,8 +341,9 @@ def run_variant(
     log.info("=== variant %s ===", variant_key)
     log.info("config: %s", variant)
 
-    sampler = VramSampler(interval_s=0.5)
-    sampler.start()
+    sampler = VramSampler(interval_s=0.5) if VramSampler is not None and variant["device"] == "cuda" else None
+    if sampler is not None:
+        sampler.start()
 
     t_load_start = time.perf_counter()
     engine = build_engine(variant_key, variant, override_model_id)
@@ -371,7 +402,17 @@ def run_variant(
             )
 
     engine.unload()
-    vram = sampler.stop()
+    # Preserve the schema without reporting unavailable NVIDIA memory as zero.
+    vram = (
+        sampler.stop()
+        if sampler is not None
+        else {
+            "max_mib": None,
+            "max_gb": None,
+            "n_samples": 0,
+            "median_mib": None,
+        }
+    )
 
     summary: dict = {
         "variant": variant_key,
@@ -450,6 +491,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default=None,
         help="Override the variant's default model_id (useful for fw_int8float16_w16 etc.)",
     )
+    p.add_argument("--device", choices=["cuda", "cpu", "mlx"], default=None, help="Default: variant device")
     p.add_argument("--quiet", action="store_true")
     return p.parse_args(argv)
 
@@ -464,6 +506,13 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if args.quiet:
         logging.getLogger().setLevel(logging.WARNING)
+
+    variant = VARIANTS[args.variant].copy()
+    if args.device is not None:
+        variant["device"] = args.device
+    if (variant["engine"] in ("mlx", "parakeet-mlx")) != (variant["device"] == "mlx"):
+        log.error("variant %s is incompatible with --device %s", args.variant, variant["device"])
+        return 2
 
     output = args.output or PROJECT_ROOT / "metrics" / f"stt_bench_{args.variant}.json"
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -481,7 +530,7 @@ def main(argv: list[str] | None = None) -> int:
     started = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     summary = run_variant(
         args.variant,
-        VARIANTS[args.variant],
+        variant,
         clips,
         iterations=args.iterations,
         warmup=args.warmup,
