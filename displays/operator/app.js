@@ -99,6 +99,49 @@
 
   // ---- mic + output devices ----
   const outputSelect = document.getElementById("output-device");
+  const languageOutputs = ["en", "es"].map(lang => document.getElementById(`output-device-${lang}`));
+  const ttsModeSelect = form.elements.namedItem("tts_output_mode");
+  const ttsStorageKey = "stark-translate-tts-outputs";
+
+  function populateOutput(select, devices, byName) {
+    const selected = select.value;
+    select.innerHTML = "";
+    select.add(new Option(byName ? "use fallback output" : "system default", ""));
+    for (const d of devices) {
+      const value = String(byName ? d.name : d.index);
+      if (!Array.from(select.options).some(opt => opt.value === value)) {
+        select.add(new Option(`${d.index}: ${d.name} (${d.channels}ch)${d.default ? " — default" : ""}`, value));
+      }
+    }
+    if (selected && !Array.from(select.options).some(opt => opt.value === selected)) {
+      select.add(new Option(`${selected} (unavailable)`, selected));
+    }
+    select.value = selected;
+  }
+
+  // Keep language routes by name across reloads and USB device renumbering.
+  try {
+    const saved = JSON.parse(localStorage.getItem(ttsStorageKey) || "{}");
+    for (const select of [outputSelect, ...languageOutputs]) {
+      if (typeof saved[select.name] === "string" && saved[select.name]) {
+        select.add(new Option(saved[select.name], saved[select.name]));
+        select.value = saved[select.name];
+      }
+    }
+    if (["ws", "wav", "both", "local"].includes(saved.tts_output_mode)) {
+      ttsModeSelect.value = saved.tts_output_mode;
+    }
+  } catch (e) { /* Storage may be disabled; session controls still work. */ }
+
+  for (const select of [outputSelect, ...languageOutputs, ttsModeSelect]) {
+    select.addEventListener("change", () => {
+      const saved = {};
+      for (const control of [outputSelect, ...languageOutputs, ttsModeSelect]) {
+        saved[control.name] = control.value;
+      }
+      try { localStorage.setItem(ttsStorageKey, JSON.stringify(saved)); } catch (e) { /* optional storage */ }
+    });
+  }
   const toastEl = document.getElementById("toast");
   let knownChangeSeq = 0;
   let toastTimer = null;
@@ -117,8 +160,12 @@
 
   async function refreshDevices(showChangeToast) {
     try {
-      const data = await getJson("/api/devices");
+      const [data, outputs] = await Promise.all([
+        getJson("/api/devices"),
+        getJson("/api/audio/output-devices"),
+      ]);
       // mic
+      const selectedMic = micSelect.value;
       micSelect.innerHTML = '<option value="">auto-detect</option>';
       for (const d of data.inputs || []) {
         const opt = document.createElement("option");
@@ -126,19 +173,14 @@
         opt.textContent = `${d.index}: ${d.name} (${d.channels}ch)`;
         micSelect.appendChild(opt);
       }
-      // outputs (Phase 9.4.1: wired through to PiperTTSEngine via --tts-output local --tts-device N)
-      if (outputSelect) {
-        outputSelect.innerHTML = '<option value="">system default</option>';
-        for (const d of data.outputs || []) {
-          const opt = document.createElement("option");
-          opt.value = d.index;
-          opt.textContent = `${d.index}: ${d.name} (${d.channels}ch)`;
-          outputSelect.appendChild(opt);
-        }
+      micSelect.value = Array.from(micSelect.options).some(opt => opt.value === selectedMic) ? selectedMic : "";
+      populateOutput(outputSelect, outputs.outputs || [], false);
+      for (const select of languageOutputs) {
+        populateOutput(select, outputs.outputs || [], true);
       }
       if (showChangeToast) {
         const counts = `${(data.inputs || []).length} in / ${(data.outputs || []).length} out`;
-        showToast(`Audio devices changed — ${counts}. Confirm your mic is still selected.`);
+        showToast(`Audio devices changed — ${counts}. Check your mic and TTS outputs.`);
       }
       knownChangeSeq = data.change_seq || knownChangeSeq;
     } catch (e) {
@@ -181,6 +223,10 @@
     if (ttsMode) body.tts_output_mode = ttsMode;
     const ttsDevice = fd.get("output_device");
     if (ttsDevice) body.tts_device = Number(ttsDevice);
+    for (const lang of ["en", "es"]) {
+      const device = fd.get(`tts_device_${lang}`);
+      if (device) body[`tts_device_${lang}`] = device;
+    }
     return body;
   }
 
