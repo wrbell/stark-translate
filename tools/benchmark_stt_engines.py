@@ -122,6 +122,19 @@ VARIANTS: dict[str, dict] = {
         "warmup_seconds": 2,
         "spec_decode": False,
     },
+    # W16 LoRA merged to HF fp16 (training/export_ct2.py --keep-intermediate).
+    # Off-the-shelf HF turbo was 193 ms p50 vs W16 CT2 353 ms; this variant
+    # asks whether W16 quality survives the HF path. See docs/cuda_latency_proposal.md.
+    "hf_fp16_w16": {
+        "engine": "hf",
+        "model_id": "whisper_hf/W16_mixed_w7",
+        "draft_model_id": None,
+        "device": "cuda",
+        "compile_mode": None,
+        "warmup_seconds": 1,
+        "spec_decode": False,
+        "requires_local_hf": True,
+    },
     # Spec decode against turbo (4-layer decoder) is broken with distil-v3.5
     # (32-layer decoder) — see docs/archive/v2026.5/spec_decode_research.md.
     # The verified-compatible pairing is target=large-v3 (32 layers) + draft=turbo
@@ -241,8 +254,15 @@ def build_engine(variant_key: str, variant: dict, override_model_id: str | None)
     if variant["engine"] == "hf":
         from engines.hf_whisper_engine import HFWhisperEngine
 
+        model_id = override_model_id or variant["model_id"]
+        if variant.get("requires_local_hf") and not Path(model_id).exists():
+            raise SystemExit(
+                f"variant {variant_key!r} requires a local HF merge at {model_id}. "
+                f"Run training/export_ct2.py --keep-intermediate --intermediate {model_id} "
+                f"or pass --model-id."
+            )
         return HFWhisperEngine(
-            model_id=override_model_id or variant["model_id"],
+            model_id=model_id,
             draft_model_id=variant.get("draft_model_id"),
             device=variant["device"],
             compile_mode=variant.get("compile_mode"),
@@ -447,7 +467,11 @@ def list_variants() -> None:
         compute = cfg.get("compute_type", "")
         spec = " spec" if cfg.get("spec_decode") else ""
         compile_mode = f" compile={cfg.get('compile_mode')}" if cfg.get("compile_mode") else ""
-        local = " (needs local CT2)" if cfg.get("requires_local_ct2") else ""
+        local = ""
+        if cfg.get("requires_local_ct2"):
+            local = " (needs local CT2)"
+        elif cfg.get("requires_local_hf"):
+            local = " (needs local HF merge)"
         print(f"  {key:30s}  {engine:14s} {compute}{spec}{compile_mode}{local}")
 
 

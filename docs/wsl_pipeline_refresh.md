@@ -2,9 +2,9 @@
 
 > **Audience:** Willem on the Windows/WSL training desktop (A2000 Ada 16GB)
 > **Purpose:** Ordered execution checklist for the 2026-08 pipeline refresh — run this when the WSL box is ready, without re-deriving context from chat.
-> **Related:** [`CLAUDE-windows.md`](../CLAUDE-windows.md) (env setup) · [`CLAUDE.md`](../CLAUDE.md) (project Next Steps) · [`docs/roadmap.md`](./roadmap.md) (living roadmap) · [`mac_pipeline_refresh.md`](./mac_pipeline_refresh.md) (Mac / MLX same-day path, no WSL)
+> **Related:** [`CLAUDE-windows.md`](../CLAUDE-windows.md) (env setup) · [`CLAUDE.md`](../CLAUDE.md) (project Next Steps) · [`docs/roadmap.md`](./roadmap.md) (living roadmap) · [`mac_pipeline_refresh.md`](./mac_pipeline_refresh.md) (Mac / MLX same-day path, no WSL) · [`cuda_latency_proposal.md`](./cuda_latency_proposal.md) (inference latency, §7 below)
 >
-> **Last updated:** 2026-08-30
+> **Last updated:** 2026-09-09
 
 ---
 
@@ -185,11 +185,65 @@ live session → metrics/diagnostics_*.jsonl
 
 ---
 
+## 7. Latency (after §1–§6 or standalone)
+
+Full ranked proposal, gates, and citations: [`cuda_latency_proposal.md`](./cuda_latency_proposal.md). **Not yet executed on this box.** Do not run these scripts on the Mac.
+
+Can run standalone (no Phase 4 / SFT / W17 required) as long as production GGUFs + W16 CT2 are on disk.
+
+```bash
+source ~/stt_train_env/bin/activate
+# 1. Pin llama.cpp b10883 (Ada sm_89) — keep ~/llama.cpp-b9022 as rollback
+LLAMA_CPP_REF=b10883 scripts/cuda/build_llamacpp.sh
+
+# 2. Baseline on the new binary, old flags (must hold canary 7/8 ≈ 473 ms)
+./start_server.sh --no-draft
+python scripts/benchmarks/bench_translate_t1_t4.py --config t3 \
+  --server-log /tmp/llama_t3.log --n-sermon 125 --out metrics/cuda_lat_t3.json
+
+# 3. Official Google MTP assistants → GGUF f16 + Q4_0
+scripts/cuda/convert_gemma4_assistant_gguf.sh
+
+# 4. MTP n-max sweep (f16 KV; q8 KV → ~0% accept)
+scripts/cuda/bench_mtp.sh          # t3 then t3-mtp n-max=2,3,4
+
+# 5. Flash-attn retest (isolate from MTP first)
+scripts/cuda/retest_flash_attn.sh
+
+# 6. Optional STT: W16 as HF fp16, Parakeet TDT v3 EN+ES
+python training/export_ct2.py --adapter adapters/whisper_turbo/active \
+  --output adapters/whisper_turbo_ct2/active \
+  --keep-intermediate --intermediate whisper_hf/W16_mixed_w7
+python tools/benchmark_stt_engines.py --variant hf_fp16_w16 \
+  --model-id whisper_hf/W16_mixed_w7
+python tools/benchmark_parakeet_en.py   # also score ES clips; do not adopt on EN-only
+```
+
+**Gates (adopt only if all hold):**
+
+| Step | Latency | Quality | VRAM |
+|------|---------|---------|------|
+| MTP (`--mtp`, default n-max=3) | E4B p50 **≤ 300 ms** (was 473) | canary **≥ 7/8**, draft accept **≥ 0.45** | STT+Marian+E4B+assistant **≤ 12 GB** |
+| `-fa on` | p50 **≤** FA-off | canary 7/8 | ≤ baseline + 0.2 GB |
+| `hf_fp16_w16` | p95 **≤ 261 ms** | WER ≤ 11.00% / tier-1 ≤ 8.70% | combined ≤ 12 GB |
+| Parakeet | p95 ≤ 413 ms | WER ≤ W16 on **EN and ES** | — |
+
+**Rollback:** `./start_server.sh --no-draft`. Docker default is `--no-draft`; MTP is `STARK_LLAMA_MTP=1`. Client plumbing (`dynamic_max_tokens`, keep-alive, `n_probs`) is specified in the proposal, not implemented in this patch.
+
+Production launch after a pass:
+
+```bash
+./start_server.sh --mtp          # SPEC_N=3, f16 KV, -md e4b assistant
+# Docker: STARK_LLAMA_MTP=1
+```
+
+---
+
 ## Out of scope for this refresh
 
 - Cloud STT/MT APIs
 - Live Gemma 4 26B-A4B co-resident with Whisper on the A2000 (VRAM)
-- Speculative decode revival (already measured loss / broken distil↔turbo)
+- E2B→E4B speculative decode revival (measured loss). Official Gemma 4 **MTP** is the replacement — see §7 / [`cuda_latency_proposal.md`](./cuda_latency_proposal.md).
 - Multi-channel TTS routing and live diarization on rolling buffer (Phase 10 polish)
 
 ---
@@ -201,7 +255,8 @@ live session → metrics/diagnostics_*.jsonl
 | Phase 4 | `training/run_phase4_preprocess.sh` |
 | E4B SFT + GGUF | `training/run_gemma4_e4b_domain_sft.sh` |
 | W17 | `training/run_w17_curriculum.sh` then `tools/benchmark_stt_engines.py` |
-| Parakeet bench | `tools/benchmark_parakeet_en.py` |
+| Parakeet bench | `tools/benchmark_parakeet_en.py` (EN+ES; v3 is multilingual) |
+| CUDA latency §7 | `scripts/cuda/build_llamacpp.sh` → `convert_gemma4_assistant_gguf.sh` → `bench_mtp.sh` / `retest_flash_attn.sh` |
 | Health | `tools/health_check.py --n-canaries 8` |
 | Deploy | `tools/deploy_adapters.py` / `tools/manage_adapters.py` |
 | Merge AL | `tools/merge_corrections.py` |

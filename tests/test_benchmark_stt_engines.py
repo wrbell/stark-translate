@@ -99,6 +99,14 @@ def test_build_engine_local_ct2_missing_raises(tmp_path: Path):
         bench.build_engine("fw_int8float16_w16", variant, override_model_id=str(tmp_path / "missing_ct2"))
 
 
+def test_hf_fp16_w16_variant_requires_local_merge(tmp_path: Path):
+    assert "hf_fp16_w16" in bench.VARIANTS
+    variant = bench.VARIANTS["hf_fp16_w16"].copy()
+    assert variant.get("requires_local_hf")
+    with pytest.raises(SystemExit, match="requires a local HF merge"):
+        bench.build_engine("hf_fp16_w16", variant, override_model_id=str(tmp_path / "missing_hf"))
+
+
 def test_collect_hardware_info_handles_missing_nvidia_smi(monkeypatch):
     """nvidia-smi may not be present on CI; helper should still return a dict."""
     monkeypatch.setattr(

@@ -63,6 +63,12 @@ class TestDockerfile:
         assert "GGML_CUDA=ON" in text
         assert "llama-server" in text
 
+    def test_llama_cpp_ref_locked_to_start_server_pin(self):
+        docker = (ROOT / "Dockerfile").read_text()
+        server = (ROOT / "start_server.sh").read_text()
+        assert "ARG LLAMA_CPP_REF=b10883" in docker, "Dockerfile pin must match start_server.sh (Gemma 4 MTP ≥ b10883)"
+        assert "b10883" in server, "start_server.sh pin comment must name b10883"
+
     def test_installs_cuda_extras(self):
         text = (ROOT / "Dockerfile").read_text()
         assert ".[cuda]" in text or "[cuda]" in text, "must pip install '.[cuda]'"
@@ -134,6 +140,37 @@ class TestEntrypoint:
         text = (ROOT / "docker" / "entrypoint.sh").read_text()
         assert "gemma-4-e4b-it-q4km.gguf" in text
         assert "gemma-4-e2b-it-q4km.gguf" in text
+
+    def test_llama_server_defaults_to_no_draft(self):
+        text = (ROOT / "docker" / "entrypoint.sh").read_text()
+        assert "--no-draft" in text
+        assert "STARK_LLAMA_MTP" in text
+        assert "--mtp" in text
+
+
+# ---------------------------------------------------------------------------
+# start_server.sh (copied into the image; entrypoint execs it)
+# ---------------------------------------------------------------------------
+
+
+class TestStartServer:
+    def test_present(self):
+        assert (ROOT / "start_server.sh").exists()
+
+    def test_default_is_no_draft(self):
+        text = (ROOT / "start_server.sh").read_text()
+        assert "NO_DRAFT=true" in text
+        assert "--mtp" in text
+        assert "draft-mtp" in text
+        assert "SPEC_N" in text
+        # Legacy E2B spec is opt-in only (measured single-GPU loss).
+        assert "--e2b-draft" in text
+        assert "--draft 16 --draft-min 5" in text
+
+    def test_mtp_drops_q8_kv(self):
+        text = (ROOT / "start_server.sh").read_text()
+        assert "Quantized KV" in text or "f16 KV" in text
+        assert "--spec-type draft-mtp" in text
 
 
 # ---------------------------------------------------------------------------
