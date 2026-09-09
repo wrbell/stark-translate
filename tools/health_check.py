@@ -101,11 +101,9 @@ def _load_mlx(
     logger.info("Loading MLX model %s...", base_model)
     model, tokenizer = load(base_model, **load_kwargs)
 
-    # EOS fix (same as dry_run_ab / MLXGemmaEngine)
-    eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
-    default_eos = tokenizer.eos_token_id
-    if not hasattr(tokenizer, "_eos_token_ids") or eot_id not in tokenizer._eos_token_ids:
-        tokenizer._eos_token_ids = {default_eos, eot_id}
+    from engines.translation_prompts import ensure_stop_tokens
+
+    ensure_stop_tokens(tokenizer, model_family=model_family)
 
     def translate_fn(
         _model: Any,

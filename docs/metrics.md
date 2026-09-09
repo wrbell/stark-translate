@@ -51,6 +51,27 @@ When `true_e2e_ms` is unavailable (historical data), falls back to `e2e_latency_
 
 ---
 
+## MLX Generation Telemetry
+
+MLX `TranslationResult` exposes optional fields below. Model A's values are included in completed chunk results and diagnostics JSONL, and appended as eight trailing CSV columns. Unavailable values are `None` (JSON `null`, empty CSV cells), including paths that do not report MLX telemetry.
+
+| TranslationResult field | CSV / JSONL field | Meaning |
+|---|---|---|
+| `generated_tokens` | `gen_tokens_a` | Last mlx-lm `generation_tokens`, including the stopping response; never re-encoded cleaned text |
+| `prompt_tokens` | `prompt_tokens_a` | Prompt token count reported by mlx-lm (dynamic suffix when using a prefilled cache) |
+| `prefill_ms` | `prefill_ms_a` | `prompt_tokens / prompt_tps × 1000`; unknown when throughput is zero |
+| `ttft_ms` | `ttft_ms_a` | Wall time from generation start to first response |
+| `decode_ms` | `decode_ms_a` | Total generation wall time minus TTFT, including callback overhead |
+| `finish_reason` | `finish_reason_a` | `stop` for EOS, `length` for the safety cap |
+| `draft_tokens` | `draft_tokens_a` | Number of responses with `from_draft=True` |
+| `draft_accept_rate` | `draft_accept_a` | Draft tokens / generated tokens (0–1); accepted output share, not acceptance over all proposed drafts |
+
+`tokens_per_second` / `tps_a` uses the final response's `generation_tps`. The shared safety cap defaults to `max(64, input_words × 3.0)`; correct EOS handling should end translation before this cap.
+
+`benchmark_mlx_accel.py` reports per-length `gen_tokens_mean`, `prefill_p50`, `ttft_p50`, `decode_p50`, `finish_reason_counts`, and `pct_hit_max_tokens` (fraction 0–1 among known finish reasons). Missing samples are excluded from aggregates; wholly unavailable metrics remain null. `gate_stops_before_max` requires every measured length run and canary to report `stop`; unknown reasons do not pass. The output `env` records Python, MLX, mlx-lm, and OptiQ versions from installed package metadata.
+
+---
+
 ## 2. Word Error Rate (WER)
 
 **Definition:** Fraction of words incorrectly transcribed by STT, measured against a reference. No ground-truth church test set exists yet, so two proxy measurements are used.

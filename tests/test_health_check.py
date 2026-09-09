@@ -11,8 +11,9 @@ class TestHealthCheckMLX:
 
         mock_tokenizer = MagicMock()
         mock_tokenizer.convert_tokens_to_ids.return_value = 106
+        mock_tokenizer.unk_token_id = 3
         mock_tokenizer.eos_token_id = 1
-        mock_tokenizer._eos_token_ids = {1, 106}
+        mock_tokenizer._eos_token_ids = {1}
         mock_model = MagicMock()
         mock_load = MagicMock(return_value=(mock_model, mock_tokenizer))
 
@@ -29,6 +30,8 @@ class TestHealthCheckMLX:
 
         assert model is mock_model
         assert tok is mock_tokenizer
+        assert tok._eos_token_ids == {1, 106}
+        tok.add_eos_token.assert_called_once_with("<end_of_turn>")
         assert callable(translate_fn)
         mock_load.assert_called_once_with(
             "mlx-community/translategemma-4b-it-4bit",

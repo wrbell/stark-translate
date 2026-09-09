@@ -53,9 +53,9 @@ class TestInitCsv:
         with open(d.CSV_PATH, newline="") as f:
             reader = csv.reader(f)
             header = next(reader)
-        # 26 columns since v2026.8: added `marian_backend` field so operators
-        # can see whether the CT2 or HF Marian path was hot.
-        assert len(header) == 26
+        # Preserve the original 26 columns, then append MLX generation telemetry.
+        assert len(header) == 34
+        assert header[-8:] == list(d._GEN_STAT_FIELDS)
         assert "marian_backend" in header
 
     def test_creates_parent_dirs(self, tmp_path):
