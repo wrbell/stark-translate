@@ -40,6 +40,7 @@ except ImportError:
 
 import argparse
 import asyncio
+import atexit
 import copy
 import csv
 import http.server
@@ -50,6 +51,7 @@ import platform
 import queue as queue_module
 import signal
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -94,6 +96,13 @@ CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
+# Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
+DIARIZE_ENABLED = False
+DIARIZE_MODE = "embed"
+DIARIZE_JSONL = ""
+DIARIZE_INTERVAL_S = 2.0
+_diarize_proc = None
+_rolling_window = None
 EXIT_AFTER_REPLAY = False
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
@@ -2757,6 +2766,16 @@ async def _pipeline_translate_and_finalize(
             "timestamp": datetime.now().isoformat(),
         }
         result_data.update(gen_stats)
+        # Phase 9.6.1: speaker lookup is a JSONL read (no models). Rolling-WAV
+        # export happens on _io_pool below so this stays off the GPU path.
+        utt_start_ts = utt_end_ts = None
+        if DIARIZE_ENABLED:
+            try:
+                utt_start_ts, utt_end_ts = _utterance_wallclock(utterance_start, audio_data)
+                result_data["speaker"] = _lookup_speaker(utt_start_ts, utt_end_ts)
+            except Exception as exc:
+                logger.warning("speaker lookup failed: %s", exc)
+                result_data["speaker"] = None
         all_results.append(result_data)
         await broadcast(result_data)
 
@@ -2801,6 +2820,11 @@ async def _pipeline_translate_and_finalize(
                 resources=resources,
                 marian_lat=marian_lat,
             )
+            if DIARIZE_ENABLED:
+                try:
+                    _export_diarize_chunk(audio_data, cid, utt_start_ts, utt_end_ts)
+                except Exception as exc:
+                    logger.warning("diarize export failed: %s", exc)
 
         _io_pool.submit(_save_io)
 
@@ -3204,6 +3228,109 @@ def save_chunk_audio(audio_data, cid):
     return path
 
 
+# ---------------------------------------------------------------------------
+# Live diarization hook (Phase 9.6.1) — isolated; no-op unless --diarize
+# ---------------------------------------------------------------------------
+
+
+def _utterance_wallclock(utterance_start, audio_data):
+    """Wall-clock [start, end] for a final. Delegates to features.speaker_labels."""
+    from features.speaker_labels import utterance_wallclock
+
+    duration = len(audio_data) / SAMPLE_RATE if audio_data is not None else 0.0
+    return utterance_wallclock(utterance_start, duration)
+
+
+def _lookup_speaker(start_ts, end_ts):
+    """Best-effort speaker for a final from the daemon JSONL (overlap + carry-forward)."""
+    from features.speaker_labels import assign_speaker_from_jsonl
+
+    return assign_speaker_from_jsonl(DIARIZE_JSONL, start_ts, end_ts)
+
+
+def _export_diarize_chunk(audio_data, cid, start_ts, end_ts):
+    """Refresh rolling.wav + chunks.jsonl on _io_pool. Never called on the GPU pool."""
+    global _rolling_window
+    from features.rolling_buffer import RollingSpeechWindow
+
+    if start_ts is None or end_ts is None:
+        start_ts, end_ts = _utterance_wallclock(None, audio_data)
+    if _rolling_window is None or str(_rolling_window.session_dir) != AUDIO_DIR:
+        _rolling_window = RollingSpeechWindow(AUDIO_DIR)
+    _rolling_window.append(audio_data, cid, start_ts, end_ts)
+
+
+def start_diarize_daemon():
+    """Spawn ``features/live_diarize.py``. Failures are logged; the pipeline continues."""
+    global _diarize_proc
+    if not DIARIZE_ENABLED:
+        return
+    from features.live_diarize import build_daemon_command, hf_token
+
+    os.makedirs(AUDIO_DIR, exist_ok=True)
+    os.makedirs(os.path.dirname(DIARIZE_JSONL) or ".", exist_ok=True)
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "features", "live_diarize.py")
+    if not hf_token() and DIARIZE_MODE == "pyannote":
+        logger.warning("HF_TOKEN not set — pyannote diarization daemon not started")
+        return
+    cmd = build_daemon_command(
+        python=sys.executable,
+        script=script,
+        rolling_wav=os.path.join(AUDIO_DIR, "rolling.wav"),
+        output=DIARIZE_JSONL,
+        mode=DIARIZE_MODE,
+        interval_s=DIARIZE_INTERVAL_S,
+        session_dir=AUDIO_DIR,
+        chunks_jsonl=os.path.join(AUDIO_DIR, "chunks.jsonl"),
+    )
+    try:
+        _diarize_proc = subprocess.Popen(
+            cmd,
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+            start_new_session=True,
+        )
+        logger.info("live diarization daemon pid=%s mode=%s jsonl=%s", _diarize_proc.pid, DIARIZE_MODE, DIARIZE_JSONL)
+        print(f"  Diarization daemon started ({DIARIZE_MODE}) → {DIARIZE_JSONL}")
+    except OSError as exc:
+        logger.warning("failed to start diarization daemon: %s — pipeline continues without labels", exc)
+        _diarize_proc = None
+
+
+def stop_diarize_daemon():
+    """SIGTERM the daemon process group. Never raises into the pipeline."""
+    global _diarize_proc
+    proc = _diarize_proc
+    _diarize_proc = None
+    if proc is None or proc.poll() is not None:
+        return
+    try:
+        if hasattr(os, "killpg"):
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        else:
+            proc.terminate()
+    except (ProcessLookupError, OSError, PermissionError, AttributeError):
+        try:
+            proc.terminate()
+        except (ProcessLookupError, OSError):
+            return
+    try:
+        proc.wait(timeout=3.0)
+    except subprocess.TimeoutExpired:
+        try:
+            if hasattr(os, "killpg"):
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            else:
+                proc.kill()
+        except (ProcessLookupError, OSError, PermissionError, AttributeError):
+            try:
+                proc.kill()
+            except (ProcessLookupError, OSError):
+                pass
+
+
+atexit.register(stop_diarize_daemon)
+
+
 def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, resources=None, marian_lat=None):
     """Append a structured diagnostics record for the active learning loop.
 
@@ -3296,6 +3423,7 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         ],
         "corrected_english": None,  # filled in during human review
         "corrected_spanish": None,  # filled in during human review
+        "speaker": data.get("speaker"),
     }
 
     record.update({field: data.get(field) for field in _GEN_STAT_FIELDS})
@@ -3339,6 +3467,7 @@ def init_csv():
                 "marian_backend",
                 "word_stability_pct",
                 *_GEN_STAT_FIELDS,
+                "speaker",
             ]
         )
     print(f"  CSV: {CSV_PATH}")
@@ -3391,6 +3520,7 @@ def write_csv_row(data, marian_lat=None):
                 _marian_engine.backend if _marian_engine is not None else "",
                 data.get("word_stability_pct", ""),
                 *(data.get(field) for field in _GEN_STAT_FIELDS),
+                data.get("speaker", "") if data.get("speaker") is not None else "",
             ]
         )
 
@@ -3967,6 +4097,9 @@ async def main_async(args):
     else:
         print("  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
 
+    if DIARIZE_ENABLED:
+        start_diarize_daemon()
+
     # Rolling stats task — prints averages every 5 minutes
     rolling_task = asyncio.create_task(_rolling_stats_task())
 
@@ -3997,6 +4130,7 @@ async def main_async(args):
         # Stop multiprocess workers if running
         if MULTIPROCESS:
             _stop_workers()
+        stop_diarize_daemon()
         print_summary()
         ws_server.close()
         await ws_server.wait_closed()
@@ -4254,6 +4388,24 @@ def main():
         default=None,
         help=("Gemma-4 assistant drafter model id for --mts (default: mlx-community/gemma-4-e4b-it-assistant-bf16)."),
     )
+    parser.add_argument(
+        "--diarize",
+        action="store_true",
+        default=False,
+        help="Enable live speaker diarization (off by default; separate CPU daemon, no GPU)",
+    )
+    parser.add_argument(
+        "--diarize-mode",
+        choices=["embed", "pyannote"],
+        default="embed",
+        help="Diarization backend: embed (default, ~100-300ms/chunk) or pyannote (rolling window)",
+    )
+    parser.add_argument(
+        "--diarize-interval-s",
+        type=float,
+        default=2.0,
+        help="Diarization daemon poll interval in seconds (default: 2)",
+    )
     args = parser.parse_args()
 
     global EXIT_AFTER_REPLAY
@@ -4322,6 +4474,7 @@ def main():
     # --- Resolve language direction ---
     global SOURCE_LANG, TARGET_LANG, WHISPER_PROMPT
     global SESSION_ID, CSV_PATH, AUDIO_DIR, DIAG_PATH, PARTIALS_PATH
+    global DIARIZE_ENABLED, DIARIZE_MODE, DIARIZE_JSONL, DIARIZE_INTERVAL_S
     SOURCE_LANG = args.lang
     TARGET_LANG = "es" if args.lang == "en" else "en"
     WHISPER_PROMPT = WHISPER_PROMPT_ES if SOURCE_LANG == "es" else WHISPER_PROMPT_EN
@@ -4332,6 +4485,10 @@ def main():
     AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"
     DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"
     PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
+    DIARIZE_ENABLED = bool(args.diarize)
+    DIARIZE_MODE = args.diarize_mode
+    DIARIZE_INTERVAL_S = float(args.diarize_interval_s)
+    DIARIZE_JSONL = f"metrics/diarization_{SESSION_ID}.jsonl"
     os.makedirs(os.path.dirname(PARTIALS_PATH), exist_ok=True)
     with open(PARTIALS_PATH, "w"):
         pass

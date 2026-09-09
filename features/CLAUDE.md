@@ -30,12 +30,12 @@ Outputs per-speaker JSON with reference, timestamp, and context snippet. Stretch
 
 ## Integration with Live Pipeline
 
-How features connect to `dry_run_ab.py` for future live/batch integration:
+How features connect to `dry_run_ab.py` for live/batch integration:
 
-- **Input**: Features read session CSV from `metrics/ab_metrics_{SESSION_ID}.csv` (columns: `chunk_id`, `timestamp`, `english`, `spanish_a`, `spanish_b`, `stt_ms`, `translate_ms_a`, `confidence`, `low_confidence_words`)
-- **Diarization**: Currently standalone. Will be called with `--diarize-on-demand` flag to process live session audio post-service. Output feeds into both summary and verse extraction.
+- **Input**: Features read session CSV from `metrics/ab_metrics_{SESSION_ID}.csv` (columns include `english`, `spanish_a`, trailing `speaker` when live diarization is on).
+- **Live diarization (9.6.1)**: `dry_run_ab --diarize` (default off) writes `rolling.wav` + `chunks.jsonl` on `_io_pool` and spawns `features/live_diarize.py`. Default `--diarize-mode embed` (SpeechBrain ECAPA / online cosine clustering). Labels land in `metrics/diarization_{SESSION_ID}.jsonl`; finals get `speaker` by timestamp overlap (`features/speaker_labels.py`). See [`docs/live_diarization.md`](../docs/live_diarization.md).
+- **Offline diarization**: `diarize.py` remains the post-session pyannote 3.1 path.
 - **Summary + Verses**: Run as batch jobs after session ends, reading the session CSV. No real-time constraint.
-- **Future live integration**: Register as post-final callback in `dry_run_ab.py` pipeline — verse extraction could run on each final translation in real-time. Summary remains batch-only (needs full transcript).
 
 ## Active Learning Connection
 

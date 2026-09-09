@@ -53,9 +53,10 @@ class TestInitCsv:
         with open(d.CSV_PATH, newline="") as f:
             reader = csv.reader(f)
             header = next(reader)
-        # Preserve the original 26 columns, then append MLX generation telemetry.
-        assert len(header) == 34
-        assert header[-8:] == list(d._GEN_STAT_FIELDS)
+        # Preserve the original 26 columns, then MLX generation telemetry, then speaker.
+        assert len(header) == 35
+        assert header[-1] == "speaker"
+        assert header[-9:-1] == list(d._GEN_STAT_FIELDS)
         assert "marian_backend" in header
 
     def test_creates_parent_dirs(self, tmp_path):
@@ -130,6 +131,25 @@ class TestWriteCsvRow:
         # bad_split column (index 20, after near_miss_flags at 19)
         assert rows[1][20] == "Y"
 
+    def test_trailing_speaker_column(self):
+        import dry_run_ab as d
+
+        d.init_csv()
+        d.write_csv_row(self._make_data(speaker="Speaker A"))
+        with open(d.CSV_PATH, newline="") as f:
+            rows = list(csv.reader(f))
+        assert rows[0][-1] == "speaker"
+        assert rows[1][-1] == "Speaker A"
+
+    def test_speaker_column_empty_when_absent(self):
+        import dry_run_ab as d
+
+        d.init_csv()
+        d.write_csv_row(self._make_data())
+        with open(d.CSV_PATH, newline="") as f:
+            rows = list(csv.reader(f))
+        assert rows[1][-1] == ""
+
 
 # ===================================================================
 # write_diag_jsonl
@@ -156,6 +176,15 @@ class TestWriteDiagJsonl:
         assert record["chunk_id"] == 1
         assert record["english"] == "Hello world"
         assert record["audio_path"] == "/tmp/chunk_0001.wav"
+        assert record.get("speaker") is None
+
+    def test_speaker_when_present(self):
+        import dry_run_ab as d
+
+        d.write_diag_jsonl(self._make_data(speaker="Speaker B"), "/tmp/chunk_0001.wav")
+        with open(d.DIAG_PATH) as f:
+            record = json.loads(f.readline())
+        assert record["speaker"] == "Speaker B"
 
     def test_priority_low_confidence(self):
         import dry_run_ab as d
