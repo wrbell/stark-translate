@@ -67,9 +67,10 @@
     </div>
     <div class="metric-row">
       <div class="metric">
-        <div class="metric-label">Current speaker (Phase 9.6.1)</div>
+        <div class="metric-label">Current speaker</div>
         <div class="metric-value" id="metric-speaker">—</div>
         <div class="metric-sub" id="metric-speaker-detail">no diarization data yet</div>
+        <ul class="caption-view" id="caption-view"></ul>
       </div>
     </div>
     <p class="meta" id="metrics-meta">disconnected</p>
@@ -126,6 +127,9 @@
       </label>
       <label class="inline">
         <input type="checkbox" name="tts"> TTS audio
+      </label>
+      <label class="inline">
+        <input type="checkbox" name="diarize"> Live diarization
       </label>
     </form>
     <p class="hint">TTS output choices apply in local mode when you start a session. Stop and start to change an active session's routing.</p>

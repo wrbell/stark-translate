@@ -214,6 +214,7 @@
       engine: fd.get("engine"),
       tts: fd.get("tts") === "on",
       run_ab: fd.get("run_ab") === "on",
+      diarize: fd.get("diarize") === "on",
       vad_threshold: Number(fd.get("vad_threshold")),
       log_level: "INFO",
     };
@@ -314,9 +315,10 @@
       refreshDevices(true);
     }
 
-    // Live diarization (Phase 9.6.1) — current speaker pill.
+    // Live diarization (Phase 9.6.1) — current speaker pill + caption view.
     const speakerEl = document.getElementById("metric-speaker");
     const speakerDetailEl = document.getElementById("metric-speaker-detail");
+    const captionViewEl = document.getElementById("caption-view");
     const diar = (snap.audio && snap.audio.diarization) || null;
     if (speakerEl && speakerDetailEl) {
       if (diar && diar.current_speaker) {
@@ -327,6 +329,29 @@
       } else {
         speakerEl.textContent = "—";
         speakerDetailEl.textContent = "no diarization data yet";
+      }
+    }
+    if (captionViewEl) {
+      const captions = (diar && diar.captions && diar.captions.length)
+        ? diar.captions
+        : (diar && diar.recent) || [];
+      if (!captions.length) {
+        captionViewEl.innerHTML = '<li class="empty">no captions yet</li>';
+      } else {
+        captionViewEl.innerHTML = "";
+        for (const rec of captions.slice(-8)) {
+          const li = document.createElement("li");
+          const spk = rec.speaker || rec.current_speaker;
+          const text = rec.english || "";
+          if (spk) {
+            const tag = document.createElement("span");
+            tag.className = "spk";
+            tag.textContent = spk + ":";
+            li.appendChild(tag);
+          }
+          li.appendChild(document.createTextNode(text ? " " + text : ""));
+          captionViewEl.appendChild(li);
+        }
       }
     }
   }

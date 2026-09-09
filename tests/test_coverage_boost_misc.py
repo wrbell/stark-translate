@@ -85,8 +85,9 @@ class TestLiveDiarize:
         run = MagicMock(return_value=ann)
         ld._emit_real_label(out, 3, run, tmp_path / "r.wav")
         data = json.loads(out.read_text().strip())
-        assert data["speaker"] == "SPEAKER_00"
+        assert data["speaker"] == "Speaker A"
         assert data["chunk_id"] == 3
+        assert "start_ts" in data and "end_ts" in data
 
     def test_emit_real_label_failure(self, tmp_path: Path):
         from features import live_diarize as ld
@@ -117,6 +118,7 @@ class TestLiveDiarize:
                 "0",
                 "--max-iters",
                 "2",
+                "--fake-labels",
             ],
         )
         assert ld.main() == 0

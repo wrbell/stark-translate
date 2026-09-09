@@ -161,10 +161,17 @@ class MetricsCollector:
 
             diarize = get_diarize_watcher()
             audio_summary["diarization"] = (
-                diarize.snapshot() if diarize is not None else {"current_speaker": None, "transitions": 0, "recent": []}
+                diarize.snapshot()
+                if diarize is not None
+                else {"current_speaker": None, "transitions": 0, "recent": [], "captions": []}
             )
         except Exception:
-            audio_summary["diarization"] = {"current_speaker": None, "transitions": 0, "recent": []}
+            audio_summary["diarization"] = {
+                "current_speaker": None,
+                "transitions": 0,
+                "recent": [],
+                "captions": [],
+            }
 
         return {
             "ts": time.time(),

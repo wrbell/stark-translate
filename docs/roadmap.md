@@ -156,8 +156,9 @@ Then: **CUDA latency proposal** (`docs/cuda_latency_proposal.md`, for the A2000 
 - ✅ systemd unit + launchd plist + bootstrap.sh for church PC install
 - See [`operator_runbook.md`](./operator_runbook.md) for the day-of-event workflow
 
-**Deferred patches:** live diarization on a rolling audio buffer (9.6.1), macOS Shortcuts for
-voice-command triggers (10).
+**Deferred patches:** live diarization on a rolling audio buffer (9.6.1 — wired behind `--diarize`,
+see [`live_diarization.md`](./live_diarization.md); gate still needs a two-speaker clip + HF_TOKEN),
+macOS Shortcuts for voice-command triggers (10).
 
 ### Phase 8: Multilingual Expansion (Hindi & Chinese)
 
@@ -185,7 +186,7 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 - ✅ Post-sermon summary trigger (Phase 9.6 — `/api/features/summary`)
 - ✅ Verse extraction wired into the live operator UI (Phase 9.6 — `/api/features/verses`)
 - ✅ 9.4.1 — Multi-channel TTS routing (#132) shipped: per-language device map, `--tts-device-en/es` by index or name, cached resolution with hotplug retry and default fallback, and persisted EN/ES operator output selectors. `--tts-device` remains the fallback for unlisted languages.
-- 9.6.1 — Live diarization on a rolling audio buffer (#133, scheduled after v2026.13). `features/live_diarize.py` daemon stub exists (PR #70); needs rolling-window attribution of finals, `--diarize` opt-in, display labels, p95 guard.
+- 9.6.1 — Live diarization on a rolling audio buffer (#133). **Code is in** (`--diarize`, default off): rolling WAV + `chunks.jsonl` export from `dry_run_ab`, `features/live_diarize.py --mode embed|pyannote` daemon (spawned by the pipeline, killed on exit), overlap assignment in `features/speaker_labels.py`, `speaker` on finals/CSV/JSONL/WebSocket, audience + operator caption prefix. **Gate not yet run** — needs `HF_TOKEN` (pyannote) or SpeechBrain ECAPA plus a two-speaker clip; p95 finals must stay within +50 ms vs `--diarize` off (`tools/replay_bench.py`). Design: [`live_diarization.md`](./live_diarization.md).
 - Continuous improvement loop: live inference → log diagnostics → retrain monthly (depends on Phase 6/8 active learning)
 
 ---

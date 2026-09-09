@@ -66,7 +66,7 @@ def load_csv_transcript(csv_path):
     CSV columns: chunk_id, timestamp, english, spanish_a, spanish_b, ...
 
     Returns:
-        list of dicts with 'timestamp', 'text', 'speaker' (None for CSV).
+        list of dicts with 'timestamp', 'text', 'speaker' (from CSV when present).
     """
     entries = []
     with open(csv_path, newline="") as f:
@@ -79,7 +79,7 @@ def load_csv_transcript(csv_path):
                 {
                     "timestamp": row.get("timestamp", ""),
                     "text": text,
-                    "speaker": None,  # CSV has no speaker diarization
+                    "speaker": row.get("speaker") or None,
                 }
             )
 

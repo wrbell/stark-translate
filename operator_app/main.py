@@ -119,6 +119,7 @@ class StartRequest(BaseModel):
     # Phase 9.4.1: TTS output device routing
     tts_output_mode: str = Field(default="ws", pattern="^(ws|wav|both|local)$")
     tts_device: int | None = None
+    diarize: bool = False
     tts_device_en: int | str | None = None
     tts_device_es: int | str | None = None
 

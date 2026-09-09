@@ -14,10 +14,9 @@ two of them to the live operator UI:
   with the live pipeline for VRAM, so it always runs out-of-process. The
   operator UI polls a task ID for status / result.
 
-Live diarization is intentionally out of scope: it requires audio files
-(not just transcripts) and a 2–4 GB pyannote model load — too heavy for
-the live path. Documented as 9.6.1 in the plan; the existing CLI continues
-to handle it post-service.
+Live diarization (9.6.1) runs in a separate ``features/live_diarize.py``
+daemon started by ``dry_run_ab --diarize``. This module only *tails* the
+JSONL that daemon writes — pyannote/ECAPA stay out of the operator process.
 """
 
 from __future__ import annotations
@@ -284,6 +283,8 @@ class SpeakerLabel:
     speaker: str  # "Speaker A" / "Speaker B" / etc.
     confidence: float
     timestamp: float | None = None
+    start_ts: float | None = None
+    end_ts: float | None = None
 
     def to_dict(self) -> dict:
         return self.__dict__.copy()
@@ -293,19 +294,24 @@ class LiveDiarizationWatcher:
     """Tail a JSONL file written by ``features/live_diarize.py`` and surface
     the latest speaker label.
 
-    The daemon is started separately by the operator's pipeline runner; this
-    watcher only reads the file. That keeps pyannote (~2-4 GB) out of the
-    operator process and lets a crashed diarizer not take down the UI.
+    ``dry_run_ab --diarize`` starts the daemon; this watcher only reads the
+    file. That keeps pyannote/ECAPA out of the operator process and lets a
+    crashed diarizer not take down the UI.
 
-    JSONL format (one entry per chunk):
-        {"chunk_id": 12, "speaker": "Speaker A", "confidence": 0.92, "ts": 1714060800.5}
+    JSONL format (one entry per labeled interval)::
+
+        {"chunk_id": 12, "speaker": "Speaker A", "confidence": 0.92,
+         "ts": 1714060800.5, "start_ts": 1714060798.1, "end_ts": 1714060800.4}
+
+    Legacy records without ``start_ts``/``end_ts`` are still accepted.
     """
 
     POLL_INTERVAL_S = 2.0
     MAX_LABELS = 100
 
-    def __init__(self, jsonl_path: Path | str) -> None:
+    def __init__(self, jsonl_path: Path | str, csv_path: Path | str | None = None) -> None:
         self._jsonl_path = Path(jsonl_path)
+        self._csv_path = Path(csv_path) if csv_path else None
         self._lock = threading.RLock()
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
@@ -332,12 +338,24 @@ class LiveDiarizationWatcher:
 
     def snapshot(self) -> dict:
         with self._lock:
-            recent = list(self._labels)[-10:]
-            return {
-                "current_speaker": self._current_speaker,
-                "transitions": _detect_transitions(self._labels),
-                "recent": [label.to_dict() for label in recent],
-            }
+            recent = [label.to_dict() for label in self._labels[-10:]]
+            current = self._current_speaker
+            transitions = _detect_transitions(self._labels)
+            csv_path = self._csv_path
+        captions: list[dict] = []
+        if csv_path is not None:
+            try:
+                from features.speaker_labels import load_recent_captions
+
+                captions = load_recent_captions(csv_path)
+            except Exception:
+                captions = []
+        return {
+            "current_speaker": current,
+            "transitions": transitions,
+            "recent": recent,
+            "captions": captions,
+        }
 
     def _loop(self) -> None:
         while not self._stop_event.wait(timeout=self.POLL_INTERVAL_S):
@@ -373,6 +391,8 @@ class LiveDiarizationWatcher:
                         speaker=str(rec.get("speaker", "?")),
                         confidence=float(rec.get("confidence", 0.0)),
                         timestamp=_safe_float(rec.get("ts") or rec.get("timestamp")),
+                        start_ts=_safe_float(rec.get("start_ts")),
+                        end_ts=_safe_float(rec.get("end_ts")),
                     )
                 )
             except (TypeError, ValueError):
@@ -442,7 +462,9 @@ def get_summary_runner(project_root: Path | None = None) -> SummaryTaskRunner:
         return _summary_runner
 
 
-def get_diarize_watcher(jsonl_path: Path | str | None = None) -> LiveDiarizationWatcher | None:
+def get_diarize_watcher(
+    jsonl_path: Path | str | None = None, csv_path: Path | str | None = None
+) -> LiveDiarizationWatcher | None:
     """Lazily create / rebind the diarization watcher to a session's JSONL.
 
     Same lifecycle as get_verse_watcher: pass jsonl_path=None to peek at the
@@ -458,7 +480,7 @@ def get_diarize_watcher(jsonl_path: Path | str | None = None) -> LiveDiarization
                 _diarize_watcher.stop()
             except Exception:
                 pass
-        _diarize_watcher = LiveDiarizationWatcher(jsonl_path=jsonl_path)
+        _diarize_watcher = LiveDiarizationWatcher(jsonl_path=jsonl_path, csv_path=csv_path)
         _diarize_watcher.start()
         return _diarize_watcher
 
