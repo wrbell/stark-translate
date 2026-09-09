@@ -102,13 +102,19 @@
       <label>Mic
         <select name="mic_device" id="mic-device"><option value="">auto-detect</option></select>
       </label>
-      <label>TTS output device
+      <label>TTS fallback output
         <select name="output_device" id="output-device"><option value="">system default</option></select>
+      </label>
+      <label>English TTS output
+        <select name="tts_device_en" id="output-device-en"><option value="">use fallback output</option></select>
+      </label>
+      <label>Spanish TTS output
+        <select name="tts_device_es" id="output-device-es"><option value="">use fallback output</option></select>
       </label>
       <label>TTS output mode
         <select name="tts_output_mode">
           <option value="ws">ws (browser)</option>
-          <option value="local">local (sounddevice)</option>
+          <option value="local">local (selected speakers)</option>
           <option value="wav">wav (file only)</option>
           <option value="both">both (ws + wav)</option>
         </select>
@@ -126,6 +132,7 @@
         <input type="checkbox" name="diarize"> Live diarization
       </label>
     </form>
+    <p class="hint">TTS output choices apply in local mode when you start a session. Stop and start to change an active session's routing.</p>
     <div class="actions">
       <button id="start-btn" class="primary">Start session</button>
       <button id="stop-btn" class="danger" disabled>Stop session</button>

@@ -10,11 +10,8 @@ module:
   Frontend reads the counter from the metrics WS frame and re-fetches
   ``/api/devices``, surfacing a toast when a device disappears.
 
-Multi-channel TTS routing (EN main / ES monitor) is out of scope for 9.4
-— the plumbing requires PiperTTSEngine output-device support and a
-restart-on-change flow. Documented in plans/we-haven-t-worked-on-lexical-moth.md
-as a 9.4.1 follow-up; the current code surfaces output devices in the
-listing so the UI can be ready when that lands.
+Phase 9.4.1 uses this same change counter to refresh the per-language TTS
+output selectors. Playback resolution lives in ``engines.audio_devices``.
 """
 
 from __future__ import annotations

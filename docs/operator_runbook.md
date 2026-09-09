@@ -199,6 +199,35 @@ install. If you click **Block** by accident, fix it under
 
 ---
 
+## Route TTS to a second output (9.4.1)
+
+Before starting a session, enable **TTS audio**, choose **local (selected speakers)**
+as the TTS output mode, then select **English TTS output** and **Spanish TTS output**
+independently. For example, send English to MacBook Pro Speakers and Spanish to
+BlackHole 2ch or a hearing-assist transmitter. Each selector routes the spoken
+translation language. **Use fallback output** uses the common TTS fallback choice,
+which defaults to the system output. Choices are saved in this browser. Stop and
+start the session to apply changed routes.
+
+The device lists refresh on USB hotplug. A missing selection stays visible as
+unavailable. Named routes are resolved again after a playback error; if the retry
+fails, TTS warns in the log and tries the system default. Numeric indices can
+change after hotplug, so prefer names for USB devices.
+
+CLI equivalent (device names match the first case-insensitive substring):
+
+```bash
+python dry_run_ab.py --tts --tts-output local \
+  --tts-device-en "MacBook Pro Speakers" --tts-device-es "BlackHole 2ch"
+```
+
+Or set `STARK_TTS_OUTPUT_DEVICES='{"en":"MacBook Pro Speakers","es":"BlackHole 2ch"}'`
+and run with `--tts --tts-output local`. Per-language CLI flags override that map;
+unlisted languages use `--tts-device <index>` / `STARK_TTS_OUTPUT_DEVICE`, or the
+system default. A JSON `null` explicitly selects the system default for a language.
+The output list is available at `/api/audio/output-devices`. WebSocket and WAV
+modes keep their existing behavior and do not use these device choices.
+
 ## Glossary for non-technical operators
 
 | Term | Plain English |

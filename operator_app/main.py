@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from engines.audio_devices import list_output_devices
 from operator_app.audio import get_watcher
 from operator_app.audio_ingest import get_bus as get_audio_bus
 from operator_app.audio_ingest import handle_audio_ingest, handle_audio_subscribe
@@ -119,6 +120,8 @@ class StartRequest(BaseModel):
     tts_output_mode: str = Field(default="ws", pattern="^(ws|wav|both|local)$")
     tts_device: int | None = None
     diarize: bool = False
+    tts_device_en: int | str | None = None
+    tts_device_es: int | str | None = None
 
 
 # -- endpoints ----------------------------------------------------------------
@@ -149,6 +152,15 @@ def api_devices() -> dict:
     if listing.error:
         return JSONResponse(status_code=503, content=body)
     return body
+
+
+@app.get("/api/audio/output-devices")
+def api_output_devices() -> dict:
+    """Output devices with the current system default marked."""
+    try:
+        return {"outputs": list_output_devices()}
+    except Exception as exc:
+        return JSONResponse(status_code=503, content={"outputs": [], "error": str(exc)})
 
 
 @app.get("/api/session/status")

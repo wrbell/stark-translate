@@ -53,6 +53,8 @@ class SessionConfig:
     tts_output_mode: str = "ws"  # "ws" | "wav" | "both" | "local"
     tts_device: int | None = None
     diarize: bool = False
+    tts_device_en: int | str | None = None
+    tts_device_es: int | str | None = None
 
 
 @dataclass
@@ -253,6 +255,10 @@ class PipelineRunner:
             argv += ["--tts-output", config.tts_output_mode]
             if config.tts_device is not None:
                 argv += ["--tts-device", str(config.tts_device)]
+            for language in ("en", "es"):
+                device = getattr(config, f"tts_device_{language}")
+                if device is not None:
+                    argv += [f"--tts-device-{language}", str(device)]
         if config.mic_device is not None:
             argv += ["--device", str(config.mic_device)]
         if config.mic_gain is not None:

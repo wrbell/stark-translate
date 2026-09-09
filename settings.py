@@ -386,7 +386,8 @@ class TTSSettings(BaseSettings):
         default="ws",
         description=(
             "TTS output: 'ws' for WebSocket stream, 'wav' for file, 'both' for both, "
-            "'local' for sounddevice playback to output_device (Phase 9.4.1)"
+            "'local' for sounddevice playback using per-language output_devices, "
+            "with output_device as the fallback (Phase 9.4.1)"
         ),
     )
     audio_ws_port: int = Field(
@@ -396,8 +397,17 @@ class TTSSettings(BaseSettings):
     output_device: int | None = Field(
         default=None,
         description=(
-            "sounddevice output device index for output_mode='local'. None = system default. "
+            "Fallback sounddevice output index for languages absent from output_devices in local mode. "
+            "None = system default. "
             "Get the index from /api/devices or `python -m sounddevice`."
+        ),
+    )
+
+    output_devices: dict[str, int | str | None] = Field(
+        default_factory=dict,
+        description=(
+            "Local TTS output per language: sounddevice index, case-insensitive device-name substring, "
+            "or None for system default. Unlisted languages use output_device."
         ),
     )
 
