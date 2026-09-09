@@ -28,8 +28,10 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import threading
+import time
 from collections.abc import Callable
 from urllib.parse import urlparse, urlunparse
 
@@ -152,6 +154,122 @@ class WebsocketAudioStream:
                 backoff_s = min(backoff_s * 2, 10.0)
 
 
+class FileAudioStream:
+    """Replay a WAV through the sounddevice callback interface, including EOF silence.
+
+    Mono is duplicated across requested channels. The final block is zero-padded;
+    ``finished`` denotes natural EOF (not an early stop). Callback failures are
+    exposed as ``error`` and also signal completion so consumers cannot hang.
+    """
+
+    def __init__(
+        self,
+        path: str,
+        *,
+        callback: Callable | None = None,
+        samplerate: int = 16000,
+        channels: int = 1,
+        dtype: str = "float32",
+        blocksize: int | None = None,
+        device: int | None = None,
+        speed: float | None = None,
+        tail_silence_s: float = 2.0,
+        on_finished: Callable | None = None,
+    ) -> None:
+        from scipy.signal import resample_poly
+
+        self.path = path
+        self.samplerate = samplerate
+        self.channels = channels
+        self.dtype = dtype
+        self.blocksize = blocksize if blocksize is not None else int(samplerate * 0.032)
+        self.device = device
+        self.speed = float(os.environ.get("STARK_REPLAY_SPEED", "1.0")) if speed is None else speed
+        if samplerate <= 0 or channels <= 0 or self.blocksize <= 0:
+            raise ValueError("samplerate, channels and blocksize must be positive")
+        if not math.isfinite(self.speed) or not math.isfinite(tail_silence_s) or tail_silence_s < 0:
+            raise ValueError("speed must be finite and tail_silence_s must be finite and nonnegative")
+        if dtype != "float32":
+            raise ValueError("FileAudioStream supports float32 only")
+        try:
+            from scipy.io import wavfile
+
+            source_rate, samples = wavfile.read(path)
+        except (ImportError, ValueError):
+            import soundfile as sf
+
+            samples, source_rate = sf.read(path, dtype="float32")
+        if np.issubdtype(samples.dtype, np.integer):
+            info = np.iinfo(samples.dtype)
+            midpoint = (int(info.max) + 1 + int(info.min)) / 2
+            scale = (int(info.max) + 1 - int(info.min)) / 2
+            samples = ((samples.astype(np.float64) - midpoint) / scale).astype(np.float32)
+        else:
+            samples = samples.astype(np.float32)
+        if samples.ndim == 2:
+            samples = samples.mean(axis=1)
+        samples = np.clip(np.nan_to_num(samples), -1, 1)
+        if source_rate != samplerate and samples.size:
+            divisor = math.gcd(int(source_rate), samplerate)
+            samples = resample_poly(samples, samplerate // divisor, int(source_rate) // divisor)
+        self._samples = np.concatenate(
+            [np.clip(samples, -1, 1).astype(np.float32), np.zeros(round(tail_silence_s * samplerate), np.float32)]
+        )
+        self._callback = callback
+        self._on_finished = on_finished
+        self.finished = threading.Event()
+        self.error: Exception | None = None
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def start(self) -> FileAudioStream:
+        if self._callback is None:
+            raise RuntimeError("FileAudioStream requires a callback")
+        if self._thread is not None and self._thread.is_alive():
+            return self
+        self._stop.clear()
+        self.finished.clear()
+        self.error = None
+        self._thread = threading.Thread(target=self._reader_loop, name="file-audio-reader", daemon=True)
+        self._thread.start()
+        return self
+
+    def stop(self) -> None:
+        self._stop.set()
+        if self._thread is not None and self._thread is not threading.current_thread():
+            self._thread.join()
+
+    def close(self) -> None:
+        self.stop()
+
+    def __enter__(self) -> FileAudioStream:
+        return self.start()
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        self.close()
+
+    def _reader_loop(self) -> None:
+        started = time.monotonic()
+        try:
+            for offset in range(0, len(self._samples), self.blocksize):
+                if self._stop.is_set():
+                    return
+                block = np.zeros((self.blocksize, self.channels), dtype=np.float32)
+                samples = self._samples[offset : offset + self.blocksize]
+                block[: len(samples)] = samples[:, None]
+                self._callback(block, self.blocksize, None, None)
+                if self.speed > 0:
+                    deadline = started + (offset + self.blocksize) / self.samplerate / self.speed
+                    if self._stop.wait(max(0, deadline - time.monotonic())):
+                        return
+        except Exception as exc:
+            self.error = exc
+            logger.exception("file-audio: replay failed")
+        self.finished.set()
+        if self._on_finished is not None:
+            self._on_finished()
+
+
 def open_audio_stream(
     callback: Callable,
     *,
@@ -161,13 +279,26 @@ def open_audio_stream(
     blocksize: int,
     device: int | None,
 ):
-    """Factory: return ``sd.InputStream`` or ``WebsocketAudioStream`` per env.
+    """Factory: return a microphone, WebSocket, or WAV-file stream per env.
 
     When ``STARK_AUDIO_SOURCE=ws`` is set, returns a ``WebsocketAudioStream``
     pointed at ``STARK_OPERATOR_URL`` (default ``http://localhost:9000``).
     Otherwise opens a normal sounddevice ``InputStream`` with the given args
     — drop-in-compatible swap point for the pipeline.
     """
+    if os.environ.get("STARK_AUDIO_SOURCE") == "file":
+        path = os.environ.get("STARK_AUDIO_FILE")
+        if not path:
+            raise ValueError("STARK_AUDIO_FILE is required when STARK_AUDIO_SOURCE=file")
+        return FileAudioStream(
+            path,
+            callback=callback,
+            samplerate=samplerate,
+            channels=channels,
+            dtype=dtype,
+            blocksize=blocksize,
+            device=device,
+        )
     if os.environ.get("STARK_AUDIO_SOURCE") == "ws":
         url = os.environ.get("STARK_OPERATOR_URL", "http://localhost:9000")
         logger.info("STARK_AUDIO_SOURCE=ws — opening WebsocketAudioStream at %s", url)
