@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import signal
 import sys
 import time
@@ -31,7 +32,17 @@ logger = logging.getLogger("live_diarize")
 
 
 def _load_pyannote():
-    """Import pyannote lazily; return None if unavailable."""
+    """Import pyannote lazily; return None if unavailable or unconfigured.
+
+    ``features.diarize.run_diarization`` calls ``sys.exit(1)`` when ``HF_TOKEN``
+    is missing (SystemExit is not caught by the ``except Exception`` in
+    ``_emit_real_label``), so check the token here and fall back to fake labels.
+    """
+    if not os.environ.get("HF_TOKEN"):
+        logger.warning(
+            "HF_TOKEN not set — pyannote needs a HuggingFace token; daemon will emit fake labels for testing"
+        )
+        return None
     try:
         from features.diarize import run_diarization
 
