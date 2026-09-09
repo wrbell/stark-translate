@@ -28,6 +28,14 @@ class TranslationResult:
     latency_ms: float
     tokens_per_second: float = 0.0
     qe_score: float | None = None
+    prompt_tokens: int | None = None
+    generated_tokens: int | None = None
+    prefill_ms: float | None = None
+    ttft_ms: float | None = None
+    decode_ms: float | None = None
+    finish_reason: str | None = None
+    draft_tokens: int | None = None
+    draft_accept_rate: float | None = None
 
 
 class STTEngine(ABC):

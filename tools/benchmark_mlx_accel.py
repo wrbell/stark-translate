@@ -31,10 +31,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import resource
 import statistics
 import time
+from collections import Counter
 from datetime import datetime
+from importlib import metadata
 from typing import Any
 
 # Theological canaries shared with health_check / CUDA Phase 1A
@@ -158,6 +161,48 @@ def _looks_like_garbage(text: str) -> bool:
     return False
 
 
+_GENERATION_FIELDS = ("generated_tokens", "prefill_ms", "ttft_ms", "decode_ms", "finish_reason")
+
+
+def _generation_metrics(result) -> dict[str, Any]:
+    return {field: getattr(result, field, None) for field in _GENERATION_FIELDS}
+
+
+def _generation_summary(rows: list[dict]) -> dict[str, Any]:
+    """Aggregate known telemetry; missing observations stay unknown, never zero."""
+    summary: dict[str, Any] = {}
+    for field, name in (
+        ("generated_tokens", "gen_tokens_mean"),
+        ("prefill_ms", "prefill_p50"),
+        ("ttft_ms", "ttft_p50"),
+        ("decode_ms", "decode_p50"),
+    ):
+        values = [row[field] for row in rows if row.get(field) is not None]
+        summary[name] = (
+            (statistics.mean(values) if field == "generated_tokens" else _pct(values, 50)) if values else None
+        )
+    reasons = Counter(row["finish_reason"] for row in rows if row.get("finish_reason") is not None)
+    summary["finish_reason_counts"] = dict(reasons)
+    summary["pct_hit_max_tokens"] = reasons["length"] / sum(reasons.values()) if reasons else None
+    return summary
+
+
+def _stops_before_max(rows: list[dict]) -> bool:
+    """Require observed stop reasons for all runs, including canaries."""
+    return bool(rows) and all(row.get("finish_reason") == "stop" for row in rows)
+
+
+def _environment_versions() -> dict[str, str | None]:
+    """Read installed distribution metadata without importing ML runtimes."""
+    env: dict[str, str | None] = {"python": platform.python_version()}
+    for name, distribution in (("mlx", "mlx"), ("mlx_lm", "mlx-lm"), ("optiq", "mlx-optiq")):
+        try:
+            env[name] = metadata.version(distribution)
+        except metadata.PackageNotFoundError:
+            env[name] = None
+    return env
+
+
 def run_canaries(engine) -> dict[str, Any]:
     """Run theological canaries; return pass count + details."""
     results = []
@@ -176,6 +221,7 @@ def run_canaries(engine) -> dict[str, Any]:
                 "latency_ms": out.latency_ms,
                 "pass": ok,
                 "garbage": _looks_like_garbage(text),
+                **_generation_metrics(out),
             }
         )
     return {"passed": passed, "total": len(CANARIES), "details": results}
@@ -213,20 +259,28 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
         engine.translate(TEST_SENTENCES["short"], source_lang="en", target_lang="es")
 
     per_length: dict[str, Any] = {}
+    all_generation = []
     for length, text in TEST_SENTENCES.items():
         lats: list[float] = []
         tps_list: list[float] = []
+        generation = []
+        sample = ""
         for _ in range(runs):
             result = engine.translate(text, source_lang="en", target_lang="es")
             if _looks_like_garbage(result.text):
                 print(f"  WARNING: garbage output on {length}: {result.text[:80]!r}")
             lats.append(result.latency_ms)
-            tps_list.append(result.tokens_per_second)
+            if result.tokens_per_second is not None:
+                tps_list.append(result.tokens_per_second)
+            generation.append(_generation_metrics(result))
+            sample = result.text[:120]
         per_length[length] = {
             "latency": _stats(lats),
             "tps_mean": statistics.mean(tps_list) if tps_list else 0.0,
-            "sample": result.text[:120],
+            "sample": sample,
+            **_generation_summary(generation),
         }
+        all_generation.extend(generation)
         print(
             f"  {length}: p50={per_length[length]['latency']['p50']:.0f}ms "
             f"p95={per_length[length]['latency']['p95']:.0f}ms "
@@ -236,6 +290,7 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
     canary = run_canaries(engine)
     print(f"  canary: {canary['passed']}/{canary['total']}")
 
+    all_generation.extend(canary["details"])
     rss_delta = _rss_mb() - rss_before
     engine.unload()
 
@@ -250,6 +305,7 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
         "canary": {"passed": canary["passed"], "total": canary["total"]},
         "canary_details": canary["details"],
         "rss_delta_mb": rss_delta,
+        "gate_stops_before_max": _stops_before_max(all_generation),
         "gate_canary_ok": canary["passed"] >= 7,
         "gate_no_garbage": not any(d.get("garbage") for d in canary["details"]),
     }
@@ -318,6 +374,7 @@ def bench_mlx_gemma4_accel(
     selected = configs or ["tg4b", "e4b", "e2b", "e4b_mts"]
     out: dict[str, Any] = {
         "timestamp": datetime.now().isoformat(),
+        "env": _environment_versions(),
         "runs": runs,
         "warmup": warmup,
         "configs": {},
@@ -328,6 +385,10 @@ def bench_mlx_gemma4_accel(
             out["configs"][key] = {"error": f"unknown config {key}"}
             continue
         out["configs"][key] = bench_config(key, runs, warmup)
+
+    out["gate_stops_before_max"] = bool(out["configs"]) and all(
+        row.get("gate_stops_before_max", False) for row in out["configs"].values()
+    )
 
     if include_stt:
         out["stt"] = bench_stt_baseline(runs, warmup, stt_model)

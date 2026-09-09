@@ -1054,8 +1054,8 @@ def load_whisper(backend="mlx"):
         return model
 
 
-def load_mlx_gemma(model_id, label, adapter_path=None):
-    """Load a TranslateGemma model via MLX (4-bit, Apple Silicon native).
+def load_mlx_gemma(model_id, label, adapter_path=None, model_family: str | None = None):
+    """Load a Gemma model via MLX, defaulting model_family to MODEL_FAMILY.
 
     Passes ``adapter_path`` to ``mlx_lm.load`` when set, and optionally wraps
     the model KV cache with TurboQuant (``USE_TURBOQUANT`` / mlx-optiq).
@@ -1075,20 +1075,10 @@ def load_mlx_gemma(model_id, label, adapter_path=None):
         load_kwargs["adapter_path"] = adapter_path
     model, tokenizer = load(model_id, **load_kwargs)
 
-    # [P7-2E] Verify and fix EOS tokens for early stopping.
-    # TranslateGemma uses <end_of_turn> (id=106) as its actual EOS, but the
-    # tokenizer's default EOS is <eos> (id=1) which the model never generates.
-    # Without this fix, generation runs to max_tokens (~5s wasted on pad tokens).
-    eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
-    default_eos = tokenizer.eos_token_id
-    if not hasattr(tokenizer, "_eos_token_ids") or eot_id not in tokenizer._eos_token_ids:
-        tokenizer._eos_token_ids = {default_eos, eot_id}
-        print(
-            f"  [P7-2E] EOS fix applied: added <end_of_turn> (id={eot_id}) to EOS set (was only <eos> id={default_eos})"
-        )
-    else:
-        # Already has it (e.g. from a newer tokenizer version)
-        print(f"  [P7-2E] EOS tokens verified: {tokenizer._eos_token_ids}")
+    from engines.translation_prompts import ensure_stop_tokens
+
+    family = MODEL_FAMILY if model_family is None else model_family
+    ensure_stop_tokens(tokenizer, model_family=family)
 
     # TurboQuant KV cache compression — same resolver as MLXGemmaEngine
     if USE_TURBOQUANT:
@@ -1116,11 +1106,16 @@ def load_mlx_gemma(model_id, label, adapter_path=None):
     # Materialize weights on the load thread so pool workers can run
     # independent inference (MLX >= 0.31.2 thread-local streams).
     try:
-        from engines.mlx_engine import materialize_mlx_model
+        from engines.mlx_engine import materialize_mlx_model, warm_mlx_model
 
         materialize_mlx_model(model)
+        # The FIRST forward pass must run on this (load) thread: with mlx 0.32.x
+        # a first pass on a pool worker binds lazy state to that worker's
+        # thread-local stream and every later generation from another thread
+        # raises "There is no Stream(gpu, N) in current thread".
+        warm_mlx_model(model, tokenizer, model_family=family, label=label)
     except Exception as exc:
-        print(f"  WARNING: could not materialize MLX weights: {exc}")
+        print(f"  WARNING: could not materialize/warm MLX model: {exc}")
     print(f"  {label} ready ({elapsed:.1f}s)")
     return model, tokenizer
 
@@ -1618,7 +1613,27 @@ def qe_score(source, translation):
 # ---------------------------------------------------------------------------
 
 
-def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_template=None, suffix_tokens=None):
+# Pop telemetry when a chunk completes; A/B model B and warmups have no chunk id.
+_last_gen_stats: dict[int, dict] = {}
+_GEN_STAT_FIELDS = {
+    "gen_tokens_a": "generated_tokens",
+    "prompt_tokens_a": "prompt_tokens",
+    "prefill_ms_a": "prefill_ms",
+    "ttft_ms_a": "ttft_ms",
+    "decode_ms_a": "decode_ms",
+    "finish_reason_a": "finish_reason",
+    "draft_tokens_a": "draft_tokens",
+    "draft_accept_a": "draft_accept_rate",
+}
+
+
+def _generation_stats(result):
+    return {column: getattr(result, attr, None) for column, attr in _GEN_STAT_FIELDS.items()}
+
+
+def translate_mlx(
+    model, tokenizer, text, draft_model=None, prompt_cache_template=None, suffix_tokens=None, chunk_id=None
+):
     """Translate using TranslateGemma or Gemma 4 via MLX.
 
     Prompt format follows ``MODEL_FAMILY`` (``translategemma`` | ``gemma4``)
@@ -1626,12 +1641,10 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
 
     Returns (translation, latency_ms, generation_tps).
     """
-    from mlx_lm import generate
-
+    from engines.mlx_engine import generate_translation
     from engines.translation_prompts import (
         build_chat_messages,
         chat_template_extra_kwargs,
-        clean_translation,
         dynamic_max_tokens,
     )
 
@@ -1639,7 +1652,7 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
         return "(model not loaded)", 0.0, 0.0
 
     family = globals().get("MODEL_FAMILY", "gemma4")
-    max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
+    max_tok = dynamic_max_tokens(text)
 
     # Prompt cache is TG-only and incompatible with speculative decoding
     use_cache = (
@@ -1662,7 +1675,6 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
         gen_kwargs = dict(
             prompt=dynamic_tokens,
             max_tokens=max_tok,
-            verbose=False,
             prompt_cache=cached,
         )
     else:
@@ -1680,24 +1692,15 @@ def translate_mlx(model, tokenizer, text, draft_model=None, prompt_cache_templat
         gen_kwargs = dict(
             prompt=prompt,
             max_tokens=max_tok,
-            verbose=False,
         )
         if draft_model is not None:
             gen_kwargs["draft_model"] = draft_model
             gen_kwargs["num_draft_tokens"] = NUM_DRAFT_TOKENS
 
-    t0 = time.perf_counter()
-    result = generate(
-        model,
-        tokenizer,
-        **gen_kwargs,
-    )
-    latency_ms = (time.perf_counter() - t0) * 1000
-
-    clean = clean_translation(result, model_family=family)
-    out_tokens = len(tokenizer.encode(clean))
-    gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
-    return clean, latency_ms, gen_tps
+    result = generate_translation(model, tokenizer, model_family=family, gen_kwargs=gen_kwargs)
+    if chunk_id is not None:
+        _last_gen_stats[chunk_id] = _generation_stats(result)
+    return result.text, result.latency_ms, result.tokens_per_second
 
 
 # ---------------------------------------------------------------------------
@@ -1813,12 +1816,10 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
 
     Returns (translation, latency_ms, generation_tps).
     """
-    from mlx_lm import stream_generate
-
+    from engines.mlx_engine import generate_translation
     from engines.translation_prompts import (
         build_chat_messages,
         chat_template_extra_kwargs,
-        clean_translation,
         dynamic_max_tokens,
     )
 
@@ -1826,7 +1827,7 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
         return "(model not loaded)", 0.0, 0.0
 
     family = globals().get("MODEL_FAMILY", "gemma4")
-    max_tok = dynamic_max_tokens(text, ratio=1.8, floor=32)
+    max_tok = dynamic_max_tokens(text)
 
     use_cache = prompt_cache_template is not None and suffix_tokens is not None and family == "translategemma"
 
@@ -1862,28 +1863,20 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
             max_tokens=max_tok,
         )
 
-    t0 = time.perf_counter()
-    accumulated_text = ""
-    tokens_generated = 0
-    gen_tps = 0.0
-    last_sent_tokens = 0
+    def token_callback(partial, tokens):
+        if partial:
+            _enqueue_stream_token(("token", chunk_id, partial, tokens))
 
-    for response in stream_generate(model, tokenizer, **gen_kwargs):
-        accumulated_text += response.text
-        tokens_generated = response.generation_tokens
-        gen_tps = response.generation_tps
-
-        # Batch tokens: only push to queue every STREAM_TOKEN_BATCH_SIZE tokens
-        if tokens_generated - last_sent_tokens >= STREAM_TOKEN_BATCH_SIZE:
-            partial = clean_translation(accumulated_text, model_family=family)
-            if partial:
-                _enqueue_stream_token(("token", chunk_id, partial, tokens_generated))
-                last_sent_tokens = tokens_generated
-
-    latency_ms = (time.perf_counter() - t0) * 1000
-    clean = clean_translation(accumulated_text, model_family=family)
-
-    return clean, latency_ms, gen_tps
+    result = generate_translation(
+        model,
+        tokenizer,
+        model_family=family,
+        gen_kwargs=gen_kwargs,
+        token_callback=token_callback,
+        batch_size=STREAM_TOKEN_BATCH_SIZE,
+    )
+    _last_gen_stats[chunk_id] = _generation_stats(result)
+    return result.text, result.latency_ms, result.tokens_per_second
 
 
 async def stream_token_broadcaster():
@@ -1935,21 +1928,16 @@ def warmup_translation_models():
     try:
         from mlx_lm import generate
 
+        from engines.translation_prompts import build_chat_messages, chat_template_extra_kwargs
+
         if mlx_a_model is not None and mlx_a_tokenizer is not None:
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "source_lang_code": SOURCE_LANG,
-                            "target_lang_code": TARGET_LANG,
-                            "text": "hello",
-                        }
-                    ],
-                }
-            ]
-            prompt = mlx_a_tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+            family = globals().get("MODEL_FAMILY", "gemma4")
+            messages = build_chat_messages(
+                "hello", source_lang=SOURCE_LANG, target_lang=TARGET_LANG, model_family=family
+            )
+            prompt = mlx_a_tokenizer.apply_chat_template(
+                messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
+            )
             generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
     except Exception:
         pass  # warmup is best-effort, never block the pipeline
@@ -2613,7 +2601,7 @@ async def _pipeline_translate_and_finalize(
 
             elif mlx_b_model is not None:
                 # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
-                # non-streaming (speculative decoding can't stream).
+                # without partial broadcasts for model B.
                 task_a = loop.run_in_executor(
                     _pipeline_pool,
                     lambda: translate_mlx_streaming(
@@ -2654,8 +2642,7 @@ async def _pipeline_translate_and_finalize(
                 spanish_b, lat_b, tps_b = await task_b
                 qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
             else:
-                # 4B/E4B-only: stream unless Gemma-4 MTS draft is active
-                # (speculative decode is incompatible with streaming).
+                # 4B/E4B-only: broadcast partials unless Gemma-4 MTS draft is active.
                 if MLX_DRAFT_MODEL is not None:
                     spanish_a, lat_a, tps_a = await loop.run_in_executor(
                         _pipeline_pool,
@@ -2664,6 +2651,7 @@ async def _pipeline_translate_and_finalize(
                             mlx_a_tokenizer,
                             english,
                             draft_model=MLX_DRAFT_MODEL,
+                            chunk_id=cid,
                         ),
                     )
                 else:
@@ -2714,12 +2702,25 @@ async def _pipeline_translate_and_finalize(
             check_marian_divergence(cid, last_marian, spanish_a)
             word_stability_pct = compute_word_stability(last_marian, spanish_a)
 
+        gen_stats = _last_gen_stats.pop(cid, {})
+        gen_str = ""
+        for key, label, suffix in (
+            ("gen_tokens_a", "tok", ""),
+            ("prefill_ms_a", "pre", "ms"),
+            ("ttft_ms_a", "ttft", "ms"),
+            ("finish_reason_a", "fin", ""),
+        ):
+            value = gen_stats.get(key)
+            if value is not None:
+                formatted = f"{value:.0f}" if isinstance(value, (int, float)) else value
+                gen_str += f" {label}={formatted}{suffix}"
+
         conf_str = f" | conf: {stt_confidence:.2f}" if stt_confidence is not None else ""
         qe_str = f" | QE: A={qe_a}"
         if qe_b is not None:
             qe_str = f" | QE: A={qe_a} B={qe_b}"
             print(f"  +{lat_b:.0f}ms B ({tps_b:.0f} t/s): {spanish_b}")
-        print(f"  +{lat_a:.0f}ms A ({tps_a:.0f} t/s): {spanish_a}")
+        print(f"  +{lat_a:.0f}ms A ({tps_a:.0f} t/s){gen_str}: {spanish_a}")
         true_e2e_str = f" | true_e2e: {true_e2e_ms:.0f}ms" if true_e2e_ms is not None else ""
         ws_str = f" | ws: {word_stability_pct:.0%}" if word_stability_pct is not None else ""
         print(f"  E2E: {e2e_latency:.0f}ms{true_e2e_str}{conf_str}{qe_str}{ws_str}")
@@ -2749,6 +2750,7 @@ async def _pipeline_translate_and_finalize(
             "word_stability_pct": word_stability_pct,
             "timestamp": datetime.now().isoformat(),
         }
+        result_data.update(gen_stats)
         all_results.append(result_data)
         await broadcast(result_data)
 
@@ -3279,6 +3281,8 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "corrected_spanish": None,  # filled in during human review
     }
 
+    record.update({field: data.get(field) for field in _GEN_STAT_FIELDS})
+
     os.makedirs(os.path.dirname(DIAG_PATH), exist_ok=True)
     with open(DIAG_PATH, "a") as f:
         f.write(json.dumps(record) + "\n")
@@ -3317,6 +3321,7 @@ def init_csv():
                 "partial_stt_ms",
                 "marian_backend",
                 "word_stability_pct",
+                *_GEN_STAT_FIELDS,
             ]
         )
     print(f"  CSV: {CSV_PATH}")
@@ -3368,6 +3373,7 @@ def write_csv_row(data, marian_lat=None):
                 marian_lat["stt_ms"] if marian_lat and "stt_ms" in marian_lat else "",
                 _marian_engine.backend if _marian_engine is not None else "",
                 data.get("word_stability_pct", ""),
+                *(data.get(field) for field in _GEN_STAT_FIELDS),
             ]
         )
 
