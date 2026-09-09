@@ -3,7 +3,7 @@
 > Living document tracking the full project trajectory from Mac prototype
 > through Windows training to production deployment.
 >
-> **Last updated:** 2026-08-30
+> **Last updated:** 2026-09-09
 
 ---
 
@@ -25,12 +25,14 @@ Production Endpoints (implemented):
   1. Mac M-series (8-18 GB) — MLX, --backend=mlx
   2. NVIDIA GPU (6-16 GB VRAM) — CUDA via llama.cpp (--engine auto|llamacpp|hf)
   3. Operator control plane — FastAPI + vanilla JS at http://host:9000/operator/
+```
 
 See `docs/operator_runbook.md` for the day-of-event workflow and `bootstrap.sh`
 for first-time church PC setup.
 
-**Next WSL execution:** `docs/wsl_pipeline_refresh.md` (Phase 4 → E4B SFT → W17 → Mac → AL).
-```
+**Next WSL execution:** [`docs/wsl_pipeline_refresh.md`](./wsl_pipeline_refresh.md) (Phase 4 → E4B SFT → W17 → Mac → AL).
+
+**Then: [CUDA latency proposal](./cuda_latency_proposal.md)** — Gemma 4 MTP drafter (llama.cpp ≥ b10883), `-fa on` retest, W16 HF fp16 / Parakeet TDT v3 STT, client plumbing. Scripts in `scripts/cuda/`; not yet run on the A2000.
 
 ---
 
@@ -91,9 +93,11 @@ Ordered stages on the A2000 Ada box:
 1. Phase 4 full audio preprocess (`run_phase4_preprocess.sh`)
 2. Gemma 4 E4B domain SFT → GGUF (`run_gemma4_e4b_domain_sft.sh`, 8-canary sanity)
 3. W17 Whisper DoRA + hard-mix → CT2 + `benchmark_stt_engines.py` gate (must ≤ W16)
-4. Optional Parakeet EN-only bench — adopt only if it beats W17; bilingual default stays Whisper
+4. Optional Parakeet EN+ES bench — adopt only if it beats W16/W17 on **both** languages; bilingual default stays Whisper until that gate ([`cuda_latency_proposal.md`](./cuda_latency_proposal.md) §3b)
 5. Mac transfer / Phase 7 A/B + live YT compare
 6. Phase 8 active learning (`merge_corrections.py` → retrain → `deploy_adapters.py`)
+
+**Then: CUDA latency** — [`docs/cuda_latency_proposal.md`](./cuda_latency_proposal.md) (runbook §7). MTP drafter is the only ~2× finals lever; do not revive E2B spec decode.
 
 **Status notes:** W16 shipped in production CT2 path (7.25% fresh-eval WER). W17 is scripted in-repo, not yet trained. Scripts and garbage-filter hardening landed with the 2026-08 pipeline refresh (PR #162).
 

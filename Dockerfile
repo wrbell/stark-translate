@@ -16,8 +16,10 @@ FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION} AS builder
 ARG CUDA_ARCHS
 # Pin llama.cpp to a known-working release tag; bump intentionally with a
 # Dockerfile change so we can reason about behavior across releases.
-# (b8782 was skipped in llama.cpp's tag sequence — sequence jumps b8781→b8783.)
-ARG LLAMA_CPP_REF=b8783
+# Must stay in lockstep with start_server.sh and scripts/cuda/build_llamacpp.sh.
+# b10883 (2026-09-09) includes Gemma 4 MTP (#23398, #24282) and the
+# gemma4-assistant fix (#28183). Prior pins: b8783 (image), b9022 (v2026.9).
+ARG LLAMA_CPP_REF=b10883
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -111,7 +113,7 @@ COPY settings.py dry_run_ab.py models.lock.json start_server.sh run_operator.sh 
 
 RUN mkdir -p /app/metrics /app/models /app/stark_data \
  && chmod +x /app/docker/entrypoint.sh /app/run_operator.sh /app/start_server.sh \
-              /app/scripts/dry_run_rehearsal.sh
+              /app/scripts/dry_run_rehearsal.sh /app/scripts/cuda/*.sh
 
 # llama-server is a thin native binary; expose its config knobs as env vars
 ENV LLAMA_DIR=/usr/local \

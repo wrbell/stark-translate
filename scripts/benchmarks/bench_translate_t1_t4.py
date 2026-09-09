@@ -89,6 +89,24 @@ CONFIGS = {
         "expected_target": "gemma-4-e4b-it-q4km.gguf",
         "expected_draft": "gemma-4-e2b-it-q4km.gguf",
     },
+    # CUDA latency proposal — official Gemma 4 MTP assistants (llama.cpp
+    # --spec-type draft-mtp). Drafter is google/gemma-4-E{2,4}B-it-assistant
+    # converted to GGUF (scripts/cuda/convert_gemma4_assistant_gguf.sh).
+    # Server must run with f16 KV (no -ctk/-ctv q8_0) or accept ~0%.
+    "t2-mtp": {
+        "engine": "llamacpp",
+        "label": "T2-MTP — llama.cpp E2B Q4_K_M + E2B assistant (draft-mtp)",
+        "expected_target": "gemma-4-e2b-it-q4km.gguf",
+        "expected_draft": "gemma-4-e2b-it-assistant-q4_0.gguf",
+        "spec_type": "draft-mtp",
+    },
+    "t3-mtp": {
+        "engine": "llamacpp",
+        "label": "T3-MTP — llama.cpp E4B Q4_K_M + E4B assistant (draft-mtp)",
+        "expected_target": "gemma-4-e4b-it-q4km.gguf",
+        "expected_draft": "gemma-4-e4b-it-assistant-q4_0.gguf",
+        "spec_type": "draft-mtp",
+    },
     # v2026.10 — IQ4_XS quantization sweep (PR3). No imatrix; head-to-head vs
     # the existing Q4_K_M T2/T3 to test whether lower-bit quant gives latency
     # without breaking the canary.
@@ -354,7 +372,11 @@ def parse_server_timings(log_path: str | Path) -> dict:
 
     For spec-decode runs (T4), additionally captures ``n_drafted``/``n_accept`` if
     present in the log (llama.cpp emits these in the slot release line for spec
-    decode runs).
+    decode runs). For MTP (``--spec-type draft-mtp``, configs t2-mtp / t3-mtp)
+    llama.cpp instead prints::
+
+        draft acceptance = 0.59596 (472 accepted / 792 generated)
+        statistics        draft-mtp: ... #gen tokens = 792, #acc tokens = 472
 
     Returns a dict with median/mean of each metric. Empty dict if no blocks parsed.
     """
@@ -378,6 +400,14 @@ def parse_server_timings(log_path: str | Path) -> dict:
     re_total = re.compile(r"total time\s*=\s*([\d.]+)\s*ms\s*/\s*(\d+)\s*tokens")
     re_drafted = re.compile(r"n_drafted\s*=\s*(\d+)")
     re_accept = re.compile(r"n_accept\s*=\s*(\d+)")
+    re_mtp_line = re.compile(
+        r"draft acceptance\s*=\s*([\d.]+)\s*\(\s*(\d+)\s*accepted\s*/\s*(\d+)\s*generated",
+        re.IGNORECASE,
+    )
+    re_mtp_stats = re.compile(
+        r"#gen tokens\s*=\s*(\d+),\s*#acc tokens\s*=\s*(\d+)",
+        re.IGNORECASE,
+    )
 
     prompt_tps = [float(m.group(3)) for m in re_prompt.finditer(text)]
     gen_tps = [float(m.group(3)) for m in re_gen.finditer(text)]
@@ -386,6 +416,14 @@ def parse_server_timings(log_path: str | Path) -> dict:
     total_ms = [float(m.group(1)) for m in re_total.finditer(text)]
     drafted = [int(m.group(1)) for m in re_drafted.finditer(text)]
     accepted = [int(m.group(1)) for m in re_accept.finditer(text)]
+    mtp_rates = [float(m.group(1)) for m in re_mtp_line.finditer(text)]
+    if not drafted or not accepted:
+        mtp_pairs = [(int(m.group(3)), int(m.group(2))) for m in re_mtp_line.finditer(text)]
+        if not mtp_pairs:
+            mtp_pairs = [(int(m.group(1)), int(m.group(2))) for m in re_mtp_stats.finditer(text)]
+        if mtp_pairs:
+            drafted = [p[0] for p in mtp_pairs]
+            accepted = [p[1] for p in mtp_pairs]
 
     if not gen_tps:
         return {"_warning": "no slot print_timing blocks found"}
@@ -402,11 +440,15 @@ def parse_server_timings(log_path: str | Path) -> dict:
     if drafted and accepted:
         total_drafted = sum(drafted)
         total_accepted = sum(accepted)
-        out["spec_decode"] = {
+        spec: dict = {
             "n_drafted_total": total_drafted,
             "n_accepted_total": total_accepted,
             "acceptance_rate": round(total_accepted / total_drafted, 3) if total_drafted else 0.0,
         }
+        if mtp_rates:
+            spec["mtp_acceptance_median"] = round(statistics.median(mtp_rates), 3)
+            spec["mtp_acceptance_mean"] = round(statistics.mean(mtp_rates), 3)
+        out["spec_decode"] = spec
     return out
 
 
@@ -585,6 +627,8 @@ def run_one_config(args) -> dict:
             "details": canary_records,
         },
         "server_timings": parse_server_timings(args.server_log) if args.server_log else {},
+        "spec_type": cfg.get("spec_type"),
+        "expected_draft": cfg.get("expected_draft"),
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
     }, sermon_records
 
@@ -734,7 +778,7 @@ def main() -> int:
         "--server-url",
         type=str,
         default="http://127.0.0.1:8090",
-        help="llama-server URL for t2/t3/t4",
+        help="llama-server URL for t2/t3/t4/t3-mtp/t2-mtp",
     )
     parser.add_argument(
         "--server-log",

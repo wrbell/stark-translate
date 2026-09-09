@@ -3,7 +3,8 @@
 # command (CMD or `docker compose run … <command>`):
 #
 #   operator       → uvicorn operator_app.main:app --host 0.0.0.0 --port 9000
-#   llama-server   → ./start_server.sh (auto-detects E4B + E2B GGUFs in $MODEL_DIR)
+#   llama-server   → ./start_server.sh --no-draft (E4B or E2B GGUF in $MODEL_DIR;
+#                    STARK_LLAMA_MTP=1 enables --mtp)
 #   audio-bridge   → tools/audio_bridge.py (Phase 9.4 fallback; not yet built)
 #   bash           → drop into a shell for debugging
 #
@@ -32,11 +33,19 @@ case "$cmd" in
         : "${MODEL_DIR:=/app/models}"
         echo "[entrypoint] launching llama-server on 0.0.0.0:${LLAMA_PORT} (models: ${MODEL_DIR})"
         cd /app
-        # start_server.sh already handles --no-draft / --port / --model
+        # Production default is target-only (NO_DRAFT=true). The old implicit
+        # E2B draft when gemma-4-e2b-it-q4km.gguf was present is a measured
+        # single-GPU loss — do not re-enable. MTP is opt-in via STARK_LLAMA_MTP=1
+        # (maps to start_server.sh --mtp; requires the assistant GGUF).
+        extra=()
+        case "${STARK_LLAMA_MTP:-0}" in
+            1|true|TRUE|yes|YES) extra+=(--mtp) ;;
+            *) extra+=(--no-draft) ;;
+        esac
         if [ -f "${MODEL_DIR}/gemma-4-e4b-it-q4km.gguf" ]; then
-            exec ./start_server.sh --port "${LLAMA_PORT}"
+            exec ./start_server.sh --port "${LLAMA_PORT}" "${extra[@]}"
         elif [ -f "${MODEL_DIR}/gemma-4-e2b-it-q4km.gguf" ]; then
-            exec ./start_server.sh --port "${LLAMA_PORT}" --no-draft \
+            exec ./start_server.sh --port "${LLAMA_PORT}" "${extra[@]}" \
                  --model "${MODEL_DIR}/gemma-4-e2b-it-q4km.gguf"
         else
             echo "[entrypoint] FATAL: no GGUFs in ${MODEL_DIR}. Mount STARK_MODELS_DIR." >&2
