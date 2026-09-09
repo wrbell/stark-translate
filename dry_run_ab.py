@@ -990,6 +990,26 @@ def load_vad():
     return model, utils
 
 
+def _resolve_mlx_stt_backend() -> str:
+    """Pick the Mac STT engine: explicit setting wins; ``auto`` → Parakeet for English.
+
+    v2026.13 gate (tools/stt_roundtrip_compare.py, Piper → STT): EN WER 0.6 % vs
+    whisper-turbo 0.2 % with equal theological-term recall at 4.5× lower latency, so
+    English sessions default to ``parakeet-mlx``. Spanish stayed on whisper-turbo
+    (synthetic ES WER 9.3 % vs 6.8 %). ``--stt-backend mlx`` forces Whisper.
+    """
+    requested = getattr(settings.stt, "backend", "auto")
+    if requested != "auto":
+        return requested
+    if SOURCE_LANG != "en":
+        return "mlx"
+    try:
+        import parakeet_mlx  # noqa: F401  -- optional extra; fall back to Whisper when absent
+    except ImportError:
+        return "mlx"
+    return "parakeet-mlx"
+
+
 def load_whisper(backend="mlx"):
     """Load Whisper STT model for the given backend.
 
@@ -1002,6 +1022,19 @@ def load_whisper(backend="mlx"):
         MLX: model_id string (mlx_whisper uses it per call)
         CUDA/CPU: faster_whisper.WhisperModel instance
     """
+    if backend == "mlx" and _resolve_mlx_stt_backend() == "parakeet-mlx":
+        # NVIDIA Parakeet TDT v3 on MLX (multilingual, ~5x cheaper GPU time than
+        # whisper-large-v3-turbo). Returned as an STTEngine; _run_stt_mlx and
+        # process_partial dispatch on isinstance(stt_pipe, STTEngine).
+        from engines.parakeet_mlx_engine import ParakeetMLXEngine
+
+        engine = ParakeetMLXEngine(model_id=settings.stt.parakeet_mlx_model)
+        print(f"[2/6] Loading {engine.model_id} (Parakeet MLX)...")
+        t0 = time.time()
+        engine.load()  # warm forward on the load thread (thread-local streams)
+        print(f"  Parakeet ready ({time.time() - t0:.1f}s)")
+        return engine
+
     if backend == "mlx":
         global mlx_whisper  # make available to process_partial / _run_stt
         import mlx.core as mx
@@ -2177,7 +2210,21 @@ async def process_partial(audio_data, utterance_id):
             conf = None
             no_speech = None
             cr = None
-            if BACKEND == "mlx":
+            from engines.base import STTEngine
+
+            if BACKEND == "mlx" and isinstance(stt_pipe, STTEngine):
+                res = stt_pipe.transcribe(
+                    audio_data,
+                    language=SOURCE_LANG,
+                    initial_prompt=_whisper_prompt(),
+                    word_timestamps=False,
+                )
+                stt_lat = res.latency_ms
+                english = res.text.strip()
+                conf = round(min(1.0, max(0.0, res.confidence)), 2) if res.confidence is not None else None
+                no_speech = getattr(res, "no_speech_prob", None)
+                cr = res.compression_ratio
+            elif BACKEND == "mlx":
                 result = mlx_whisper.transcribe(
                     audio_data,
                     path_or_hf_repo=stt_pipe,
@@ -2382,12 +2429,32 @@ def _run_stt(audio_data, whisper_prompt):
         return _run_stt_faster_whisper(audio_data, whisper_prompt)
 
 
+def _run_stt_engine(audio_data, whisper_prompt):
+    """Run STT through an ``engines.base.STTEngine`` (e.g. Parakeet-MLX).
+
+    Normalises ``STTResult`` to the 5-tuple the pipeline expects. Engines
+    without prompt biasing ignore ``whisper_prompt``.
+    """
+    res = stt_pipe.transcribe(
+        audio_data,
+        language=SOURCE_LANG,
+        initial_prompt=whisper_prompt,
+        word_timestamps=WORD_TIMESTAMPS,
+    )
+    conf = round(min(1.0, max(0.0, res.confidence)), 2) if res.confidence is not None else None
+    return res.text.strip(), res.latency_ms, conf, list(res.segments or []), list(res.low_confidence_words or [])
+
+
 def _run_stt_mlx(audio_data, whisper_prompt):
     """Run STT via mlx-whisper (Apple Silicon / MLX backend).
 
     Note: mlx-whisper is always greedy (beam search not implemented).
     beam_size is only used by faster-whisper (CUDA backend).
     """
+    from engines.base import STTEngine
+
+    if isinstance(stt_pipe, STTEngine):
+        return _run_stt_engine(audio_data, whisper_prompt)
     t0 = time.perf_counter()
     result = mlx_whisper.transcribe(
         audio_data,

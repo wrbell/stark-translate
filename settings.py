@@ -376,7 +376,7 @@ class TTSSettings(BaseSettings):
     voices: dict = Field(
         default={
             "en": "en_US-lessac-high",
-            "es": "es_ES-carlfm-high",
+            "es": "es_MX-claude-high",
             "hi": "hi_IN-kusal-medium",
             "zh": "zh_CN-huayan-medium",
         },

@@ -890,7 +890,7 @@ class PiperTTSEngine(TTSEngine):
     """
 
     def __init__(self, voices: dict[str, str] | None = None):
-        self._voice_specs = voices or {"es": "es_ES-carlfm-high"}
+        self._voice_specs = voices or {"es": "es_MX-claude-high"}
         self._voices: dict = {}  # lang -> PiperVoice instance
         self._loaded = False
 

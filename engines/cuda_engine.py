@@ -1006,6 +1006,7 @@ class MarianCT2Engine(TranslationEngine):
         compute_type: str = "int8_float16",
         max_new_tokens: int = 128,
         warmup_passes: int = 2,
+        intra_threads: int | None = None,
     ):
         self._model_dir = model_dir
         self._source_lang = source_lang
@@ -1015,6 +1016,9 @@ class MarianCT2Engine(TranslationEngine):
         self._compute_type = compute_type
         self._max_new_tokens = max_new_tokens
         self._warmup_passes = max(0, int(warmup_passes))
+        # CPU only: cap CT2's OpenMP-free thread pool so Marian partials do not
+        # starve the asyncio/VAD thread and MLX kernel dispatch on the Mac.
+        self._intra_threads = intra_threads
         self._translator = None
         self._tokenizer = None
         self._loaded = False
@@ -1044,11 +1048,10 @@ class MarianCT2Engine(TranslationEngine):
             self._compute_type,
         )
         t0 = time.time()
-        self._translator = ctranslate2.Translator(
-            self._model_dir,
-            device=self._device,
-            compute_type=self._compute_type,
-        )
+        translator_kwargs: dict = {"device": self._device, "compute_type": self._compute_type}
+        if self._device == "cpu" and self._intra_threads:
+            translator_kwargs["intra_threads"] = int(self._intra_threads)
+        self._translator = ctranslate2.Translator(self._model_dir, **translator_kwargs)
         # Tokenizer files were copied next to model.bin by the converter, so
         # the tokenizer loads from the same directory as the CT2 weights.
         self._tokenizer = MarianTokenizer.from_pretrained(self._model_dir)
