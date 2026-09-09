@@ -78,6 +78,7 @@ In the **Session** panel, the **Mic** dropdown lists every input device. Pick th
 - **Latency p50 / p95** shows the typical delay from speech to subtitle. **Under 1 second is healthy.** Above 3 seconds means something is stressed; consider a fallback (below).
 - **Confidence mean** below 0.5 means the speaker is too quiet or there's too much background noise — adjust mic position.
 - **Recent verses** under Features shows Bible references the system caught (Romans 8:28, John 3:16, etc.). Useful to confirm coverage.
+- **Live diarization** is off by default. Check **Live diarization** on the session form only when you want `Speaker A:` / `Speaker B:` prefixes on the projector. It must not be used on a latency-sensitive Sunday until the two-speaker gate in [`live_diarization.md`](./live_diarization.md) has been run.
 
 ### Mid-session controls
 

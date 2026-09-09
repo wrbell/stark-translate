@@ -196,6 +196,20 @@ class TestBuildArgv:
         assert "--ab" in argv
         assert "--no-ab" not in argv
 
+    def test_diarize_omitted_by_default(self, stub_pipeline):
+        from operator_app.pipeline_manager import PipelineRunner, SessionConfig
+
+        runner = PipelineRunner(project_root=stub_pipeline)
+        argv = runner._build_argv(SessionConfig(lang="en"))
+        assert "--diarize" not in argv
+
+    def test_diarize_flag_when_enabled(self, stub_pipeline):
+        from operator_app.pipeline_manager import PipelineRunner, SessionConfig
+
+        runner = PipelineRunner(project_root=stub_pipeline)
+        argv = runner._build_argv(SessionConfig(lang="en", diarize=True))
+        assert "--diarize" in argv
+
 
 # -- control endpoints (FastAPI) ---------------------------------------------
 

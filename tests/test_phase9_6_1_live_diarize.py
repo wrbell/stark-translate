@@ -57,6 +57,7 @@ class TestLiveDiarizationWatcher:
         assert snap["current_speaker"] == "Speaker B"
         assert snap["transitions"] == 1
         assert len(snap["recent"]) == 2
+        assert "captions" in snap
 
     def test_incremental_tail(self, tmp_path):
         """Rescanning doesn't re-emit already-seen records."""
@@ -113,6 +114,53 @@ class TestLiveDiarizationWatcher:
         # snapshot returns last 10 in 'recent'; buffer total is capped at MAX_LABELS internally
         with watcher._lock:
             assert len(watcher._labels) == LiveDiarizationWatcher.MAX_LABELS
+
+    def test_snapshot_includes_interval_timestamps(self, tmp_path):
+        from operator_app.features import LiveDiarizationWatcher
+
+        path = tmp_path / "diarize.jsonl"
+        path.write_text(
+            json.dumps(
+                {
+                    "chunk_id": 1,
+                    "speaker": "Speaker A",
+                    "confidence": 0.9,
+                    "ts": 10.0,
+                    "start_ts": 8.0,
+                    "end_ts": 10.0,
+                }
+            )
+            + "\n"
+        )
+        watcher = LiveDiarizationWatcher(jsonl_path=path)
+        snap = watcher.force_scan()
+        rec = snap["recent"][0]
+        assert rec["start_ts"] == 8.0
+        assert rec["end_ts"] == 10.0
+        assert rec["timestamp"] == 10.0
+
+    def test_legacy_record_timestamps_are_none(self, tmp_path):
+        from operator_app.features import LiveDiarizationWatcher
+
+        path = tmp_path / "diarize.jsonl"
+        path.write_text(json.dumps({"chunk_id": 1, "speaker": "Speaker A", "confidence": 0.9, "ts": 1.0}) + "\n")
+        watcher = LiveDiarizationWatcher(jsonl_path=path)
+        rec = watcher.force_scan()["recent"][0]
+        assert rec["start_ts"] is None
+        assert rec["end_ts"] is None
+        assert rec["timestamp"] == 1.0
+
+    def test_captions_from_csv_when_bound(self, tmp_path):
+        from operator_app.features import LiveDiarizationWatcher
+
+        jsonl = tmp_path / "diarize.jsonl"
+        jsonl.write_text(json.dumps({"chunk_id": 1, "speaker": "Speaker A", "confidence": 1.0, "ts": 1.0}) + "\n")
+        csv_path = tmp_path / "ab.csv"
+        csv_path.write_text("chunk_id,english,spanish_a,speaker\n1,Hello world,Hola mundo,Speaker A\n")
+        watcher = LiveDiarizationWatcher(jsonl_path=jsonl, csv_path=csv_path)
+        snap = watcher.force_scan()
+        assert snap["captions"][0]["english"] == "Hello world"
+        assert snap["captions"][0]["speaker"] == "Speaker A"
 
 
 # -- get_diarize_watcher singleton ------------------------------------------
@@ -215,21 +263,16 @@ class TestDaemon:
             timeout=5,
         )
         assert result.returncode == 0
-        assert "live diarization" in result.stdout.lower() or "live diarization" in result.stderr.lower()
+        help_text = (result.stdout + result.stderr).lower()
+        assert "live diarization" in help_text
+        assert "--mode" in result.stdout or "--mode" in result.stderr
 
     def test_daemon_emits_fake_labels_when_wav_present(self, tmp_path):
-        """Touch the rolling WAV file. Without pyannote, the fake-label
-        fallback should write labels."""
+        """``--fake-labels`` writes alternating A/B with start_ts/end_ts."""
         out_path = tmp_path / "diarize.jsonl"
         rolling_wav = tmp_path / "rolling.wav"
-        rolling_wav.write_bytes(b"RIFF\x00\x00\x00\x00WAVE")  # not a valid WAV but exists
+        rolling_wav.write_bytes(b"RIFF\x00\x00\x00\x00WAVE")
 
-        # Force fake-label path: monkeypatch the daemon's pyannote import to
-        # fail. Simplest: invoke with PYTHONPATH that excludes the project root,
-        # but that breaks other imports too. Just trust _load_pyannote's
-        # try/except — on this test machine pyannote may or may not be installed.
-        # If it's installed, the real path runs; either way, the daemon should
-        # exit 0.
         result = subprocess.run(
             [
                 sys.executable,
@@ -239,7 +282,71 @@ class TestDaemon:
                 "--output",
                 str(out_path),
                 "--interval-s",
-                "0.1",
+                "0.05",
+                "--max-iters",
+                "2",
+                "--fake-labels",
+                "--log-level",
+                "WARNING",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        assert result.returncode == 0, f"stderr:\n{result.stderr}"
+        assert out_path.exists()
+        lines = [json.loads(l) for l in out_path.read_text().splitlines() if l.strip()]
+        assert len(lines) >= 1
+        assert lines[0]["speaker"] in ("Speaker A", "Speaker B")
+        assert "start_ts" in lines[0] and "end_ts" in lines[0]
+
+    def test_daemon_embed_fake_clusters_a_and_b(self, tmp_path):
+        """``--mode embed --embedder fake`` assigns distinct labels to quiet vs loud WAVs."""
+        import array
+        import wave
+
+        session = tmp_path / "session"
+        session.mkdir()
+        out_path = tmp_path / "diarize.jsonl"
+
+        def _write(name: str, amplitude: int) -> Path:
+            path = session / name
+            samples = array.array("h", [int(amplitude)] * 8000)
+            with wave.open(str(path), "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(16000)
+                wf.writeframes(samples.tobytes())
+            return path
+
+        _write("chunk_0001.wav", 0)
+        _write("chunk_0002.wav", 30000)
+        chunks = session / "chunks.jsonl"
+        chunks.write_text(
+            json.dumps({"chunk_id": 1, "wav": "chunk_0001.wav", "start_ts": 1.0, "end_ts": 2.0})
+            + "\n"
+            + json.dumps({"chunk_id": 2, "wav": "chunk_0002.wav", "start_ts": 2.0, "end_ts": 3.0})
+            + "\n"
+        )
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(DAEMON),
+                "--rolling-wav",
+                str(session / "rolling.wav"),
+                "--chunks-jsonl",
+                str(chunks),
+                "--session-dir",
+                str(session),
+                "--output",
+                str(out_path),
+                "--mode",
+                "embed",
+                "--embedder",
+                "fake",
+                "--interval-s",
+                "0.05",
                 "--max-iters",
                 "2",
                 "--log-level",
@@ -250,3 +357,44 @@ class TestDaemon:
             timeout=15,
         )
         assert result.returncode == 0, f"stderr:\n{result.stderr}"
+        records = [json.loads(l) for l in out_path.read_text().splitlines() if l.strip()]
+        speakers = {r["speaker"] for r in records}
+        assert "Speaker A" in speakers
+        assert "Speaker B" in speakers
+        assert all("start_ts" in r and "end_ts" in r for r in records)
+
+
+class TestPipelineHook:
+    def test_diarize_off_by_default(self):
+        import dry_run_ab as d
+
+        assert d.DIARIZE_ENABLED is False
+
+    def test_lookup_reads_jsonl(self, tmp_path, monkeypatch):
+        import dry_run_ab as d
+
+        path = tmp_path / "diarize.jsonl"
+        path.write_text(
+            json.dumps(
+                {
+                    "chunk_id": 1,
+                    "speaker": "Speaker A",
+                    "confidence": 1.0,
+                    "start_ts": 0.0,
+                    "end_ts": 2.0,
+                    "ts": 2.0,
+                }
+            )
+            + "\n"
+        )
+        monkeypatch.setattr(d, "DIARIZE_JSONL", str(path))
+        assert d._lookup_speaker(0.2, 1.8) == "Speaker A"
+
+    def test_result_data_speaker_only_when_enabled(self):
+        from features.speaker_labels import speaker_field_for_result
+
+        result = {"chunk_id": 1, "english": "Hello"}
+        result.update(speaker_field_for_result(False, "Speaker A"))
+        assert "speaker" not in result
+        result.update(speaker_field_for_result(True, "Speaker A"))
+        assert result["speaker"] == "Speaker A"

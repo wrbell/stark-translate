@@ -25,6 +25,9 @@ FEATURE_FILES = [
     ("features.diarize", "features/diarize.py"),
     ("features.extract_verses", "features/extract_verses.py"),
     ("features.summarize_sermon", "features/summarize_sermon.py"),
+    ("features.live_diarize", "features/live_diarize.py"),
+    ("features.speaker_labels", "features/speaker_labels.py"),
+    ("features.rolling_buffer", "features/rolling_buffer.py"),
 ]
 
 TOOL_FILES = [

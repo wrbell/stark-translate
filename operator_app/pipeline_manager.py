@@ -52,6 +52,7 @@ class SessionConfig:
     # Phase 9.4.1: TTS output device routing
     tts_output_mode: str = "ws"  # "ws" | "wav" | "both" | "local"
     tts_device: int | None = None
+    diarize: bool = False
 
 
 @dataclass
@@ -117,6 +118,14 @@ class PipelineRunner:
                 target=self._run, args=(config, session_id), name=f"pipeline-{session_id}", daemon=True
             )
             self._thread.start()
+            if config.diarize:
+                try:
+                    from operator_app.features import get_diarize_watcher
+
+                    jsonl = self._project_root / "metrics" / f"diarization_{session_id}.jsonl"
+                    get_diarize_watcher(jsonl_path=jsonl, csv_path=csv_path)
+                except Exception:
+                    logger.warning("failed to bind live diarization watcher", exc_info=True)
             return self._snapshot()
 
     def stop(self, timeout_s: float = 10.0) -> SessionStatus:
@@ -248,6 +257,8 @@ class PipelineRunner:
             argv += ["--device", str(config.mic_device)]
         if config.mic_gain is not None:
             argv += ["--gain", str(config.mic_gain)]
+        if config.diarize:
+            argv += ["--diarize"]
         return argv
 
     def _run(self, config: SessionConfig, session_id: str) -> None:

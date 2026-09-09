@@ -107,6 +107,14 @@
     font-style: italic;
   }
 
+  .spk {
+    font-weight: 600;
+    color: var(--text-dim);
+    font-size: 0.78em;
+    letter-spacing: 0.02em;
+    margin-right: 0.25em;
+  }
+
   /* [P7-P3-6A] Streaming translation cursor */
   .sentence.streaming {
     color: var(--text);
@@ -289,6 +297,11 @@
   setupAutoScroll(englishEl, (v) => { autoScrollEn = v; });
   setupAutoScroll(spanishEl, (v) => { autoScrollEs = v; });
 
+  function speakerPrefix(s) {
+    if (!s || !s.speaker || s.partial) return '';
+    return '<span class="spk">' + esc(s.speaker) + ':</span> ';
+  }
+
   function render() {
     const total = sentences.length;
 
@@ -298,7 +311,7 @@
         : s.streaming ? 'sentence streaming'
         : age < FADE_COUNT ? 'sentence age-' + Math.min(age, 4)
         : 'sentence age-4';
-      return '<span class="' + cls + '">' + esc(s.english) + ' </span>';
+      return '<span class="' + cls + '">' + speakerPrefix(s) + esc(s.english) + ' </span>';
     }).join('');
 
     spanishEl.innerHTML = sentences.map((s, i) => {
@@ -306,12 +319,12 @@
       // [P7-P3-6A] Streaming sentences get a blinking cursor
       if (s.streaming) {
         const cursor = '<span class="streaming-cursor"></span>';
-        return '<span class="sentence streaming">' + esc(s.spanish) + cursor + ' </span>';
+        return '<span class="sentence streaming">' + speakerPrefix(s) + esc(s.spanish) + cursor + ' </span>';
       }
       const cls = s.partial ? 'sentence partial'
         : age < FADE_COUNT ? 'sentence age-' + Math.min(age, 4)
         : 'sentence age-4';
-      return '<span class="' + cls + '">' + esc(s.spanish) + ' </span>';
+      return '<span class="' + cls + '">' + speakerPrefix(s) + esc(s.spanish) + ' </span>';
     }).join('');
 
     if (autoScrollEn && englishEl.lastElementChild) englishEl.lastElementChild.scrollIntoView({ block: 'end' });
@@ -372,6 +385,7 @@
             id: 'stream-' + data.chunk_id,
             english: en,
             spanish: lastPartial.spanish,
+            speaker: data.speaker || lastPartial.speaker || '',
             partial: false,
             streaming: true,
           });
@@ -380,6 +394,7 @@
             id: 'stream-' + data.chunk_id,
             english: en,
             spanish: '',
+            speaker: data.speaker || '',
             partial: false,
             streaming: true,
           });
@@ -412,7 +427,7 @@
           existing.spanish = es;
         } else {
           sentences = sentences.filter(s => !s.partial);
-          sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, partial: true, streaming: false });
+          sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, speaker: '', partial: true, streaming: false });
         }
       } else {
         // Final translation — remove ALL partials and streaming entries.
@@ -424,8 +439,9 @@
         if (existing) {
           existing.english = en;
           existing.spanish = es;
+          if (data.speaker) existing.speaker = data.speaker;
         } else {
-          sentences.push({ id: data.chunk_id, english: en, spanish: es, partial: false, streaming: false });
+          sentences.push({ id: data.chunk_id, english: en, spanish: es, speaker: data.speaker || '', partial: false, streaming: false });
         }
 
         // Keep all sentences for scroll history (capped at 200 to limit memory)
