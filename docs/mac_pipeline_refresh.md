@@ -92,7 +92,22 @@ python tools/benchmark_mlx_accel.py --quick --configs tg4b,e4b,e4b_mts
 
 See [`mlx_cuda_parity.md`](./mlx_cuda_parity.md). Naïve uniform Gemma 4 MLX 4-bit quants (PLE quantized) produce garbage — use OptiQ / PLE-safe builds only.
 
-### Mac latency notes (2026-08-30 soak)
+### Mac latency (v2026.13, 2026-09-09 — replay of real sermon audio, `tools/replay_bench.py`)
+
+Speech-end → final on display (`e2e_latency_ms`), two 150 s sermon clips, M3 Pro:
+
+| Config | 12_14_25 e2e p50 / p95 | 2_8_26 e2e p50 / p95 | partial p50 | Notes |
+|---|---|---|---|---|
+| 2026-08-30 code (whisper, HF Marian, EOS bug) | 4803 / 8939 | 3742 / 6641 | ~1000 | every final ran to max_tokens |
+| + #181 / #184 fixes (whisper, HF Marian) | 4016 / 7944 | 2858 / 4365 | ~1000 | |
+| + parakeet-mlx STT (HF Marian) | 1631 / 2708 | 1008 / 1394 | 380–446 | GPU no longer contended |
+| **default: parakeet-mlx (EN) + CT2 Marian int8/4 thr** | **1544 / 2576** | **1222 / 2851** | 191–237 | shipped |
+| fast mode: `--gemma4-size e2b` | 1208 / 2274 | 863 / 2115 | 162–213 | canary 11/18 vs E4B 13/18 |
+
+Isolated E4B OptiQ translate p50 (bench): short 473 ms · medium 1393 ms · long 1677 ms (was 2139 / 2176 / 3242).
+Details and every intermediate run: [`docs/archive/v2026.13/MAC_LATENCY.md`](./archive/v2026.13/MAC_LATENCY.md).
+
+### Mac latency notes (2026-08-30 soak — superseded, kept for history)
 
 | Config | medium p50 | Canary | Role |
 |--------|------------|--------|------|

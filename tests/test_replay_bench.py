@@ -83,8 +83,10 @@ def test_launch_and_report_use_real_flags_without_launching_pipeline(tmp_path, m
         assert report["chunk_count"] == 4
     command = seen[0]
     assert command[:2] == [sys.executable, str(bench.ROOT / "dry_run_ab.py")]
-    assert command[command.index("--ws-port") + 1] == "8769"
-    assert command[command.index("--http-port") + 1] == "8770"
+    ws_port = int(command[command.index("--ws-port") + 1])
+    http_port = int(command[command.index("--http-port") + 1])
+    assert ws_port >= 8865  # dynamically chosen free ports (8769 is squatted by another app on the dev Mac)
+    assert http_port > ws_port
     assert command[command.index("--session-id") + 1] == "test"
     assert command[-1] == "--mts"
     assert json.loads((tmp_path / "replay_test.json").read_text())["returncode"] == returncode

@@ -502,10 +502,13 @@ def back_translate_check(source_en: str, translated_es: str) -> dict:
 
 | Component | Time | Notes |
 |-----------|------|-------|
-| mlx-whisper STT | ~500ms | Word timestamps add ~100-200ms (finals only) |
-| MarianMT CT2 int8 (partials) | ~50ms | 3.3x faster than PyTorch |
-| TranslateGemma-4B translation (finals) | ~650ms | Via mlx-lm |
-| TranslateGemma-12B translation (finals) | ~1.4s | Via mlx-lm, --ab mode |
+| Parakeet TDT v3 STT (EN default, v2026.13) | ~100–250 ms | 3 s → 98 ms, 8 s → 149 ms isolated; 240–250 ms p50 live |
+| mlx-whisper STT (ES sessions / `--stt-backend mlx`) | ~500 ms | 1.0–1.2 s p50 live when it shares the GPU with Gemma |
+| MarianMT CT2 int8, 4 threads (partials) | ~50–90 ms | HF PyTorch fallback 270–380 ms |
+| Gemma 4 E4B OptiQ finals | ~470 / 1390 / 1680 ms (6 / 21 / 33 words) | ~33 tok/s; 0.73–1.13 s p50 live (15–22 tokens) |
+| Gemma 4 E2B OptiQ finals (`--gemma4-size e2b`) | ~310 / 860 / 1000 ms | ~62 tok/s; canary 11/18 vs 13/18 |
+| TranslateGemma-4B (opt-out) | ~650ms | Via mlx-lm |
+| TranslateGemma-12B (A/B) | ~1.4s | Via mlx-lm, --ab mode |
 | CometKiwi scoring | ~100-200ms | |
 | LaBSE similarity | ~50-100ms | |
 | Simple checks | < 5ms | |

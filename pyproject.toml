@@ -1,6 +1,6 @@
 [project]
 name = "stark-translate"
-version = "2026.12.0.0"
+version = "2026.13.0.0"
 requires-python = ">=3.11"
 description = "Live bilingual speech-to-text for church outreach"
 readme = "README.md"
@@ -251,7 +251,7 @@ markers = [
 [tool.briefcase]
 project_name = "Stark Translate"
 bundle = "com.starkroad"
-version = "2026.12.0.0"
+version = "2026.13.0.0"
 url = "https://github.com/wrbell/stark-translate"
 license.file = "LICENSE"
 

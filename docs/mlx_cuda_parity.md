@@ -16,7 +16,7 @@ after pipeline parallelism (#168) and the Gemma 4 CUDA cutover (v2026.5).
 | EOS / preamble | Strip `<end_of_turn>` + “Here is the translation:” | Same `clean_translation()` | **Aligned** |
 | Spec / MTS | llama.cpp `-md` (bench: loss on single GPU) | Gemma-4 `-assistant` drafter via `--mts` (gamma=1) | Wired; measure on Mac |
 | TurboQuant KV | N/A (use `-ctk q8_0`) | `--turboquant` requested → soft-disabled on mlx-optiq 0.4.x (no drop-in `TurboQuantKVCache` for `mlx_lm.generate`; OptiQ KV lives in serve/runtime) | Unavailable on Mac live path today |
-| STT model | W16 CT2 turbo (`adapters/whisper_turbo_ct2/active/`) | Stock `mlx-community/whisper-large-v3-turbo` | Same size family; **fine-tune CUDA-only**. Optional Parakeet TDT v3 on MLX, WER-gated, #178 (dispatch/gate tracked separately). |
+| STT model | W16 CT2 turbo (`adapters/whisper_turbo_ct2/active/`) | **Parakeet TDT 0.6B v3 (`parakeet-mlx`) for EN sessions** (v2026.13; roundtrip gate: WER 0.6 % vs 0.2 %, term recall 1.0, 4.5× faster); whisper-turbo for ES | Parakeet is also the CUDA proposal's STT candidate (`docs/cuda_latency_proposal.md` §3b) |
 | STT confidence | avg_logprob / compression_ratio / no_speech | Same on `MLXWhisperEngine` | **Aligned** |
 | Partials timestamps | `word_timestamps=False` | Same | **Aligned** |
 | Pipeline overlap | `max_workers=2` | #168 in-process / `--multiprocess` escape | Pipeline parity in flight |
@@ -56,7 +56,7 @@ python tools/benchmark_latency.py --only mlx-accel --quick
 
 Configs: `tg4b`, `e4b`, `e2b`, `e4b_mts`, `e4b_tq`, `e4b_mts_tq`.
 
-**Gates before claiming Mac≈CUDA latency:** medium p50 competitive with ~470 ms CUDA finals (Mac E4B OptiQ is slower today — quality-first parity). Canary ≥ 7/8 and no PLE garbage are required for any OptiQ soak.
+**Gates before claiming Mac≈CUDA latency:** medium p50 competitive with ~470 ms CUDA finals. Status 2026-09-09: isolated E4B medium p50 1393 ms (36 tokens at ~33 tok/s, bandwidth-bound; the CUDA 470 ms is for ~19-token sermon chunks), live speech-end→final p50 ≈ 1.0–1.6 s with Parakeet STT. Canary ≥ 7/8 on the bench set (13/18 on the 18-item health set) and no PLE garbage remain required for any OptiQ soak.
 
 ## STT notes
 

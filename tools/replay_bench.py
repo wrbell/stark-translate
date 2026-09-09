@@ -216,8 +216,25 @@ def prepare_clips(raw_dir: Path, replay_dir: Path, seconds: float = 300, offset:
     return manifest
 
 
+def _free_port(start: int) -> int:
+    """First TCP port >= start that binds on loopback (other apps may squat on 87xx)."""
+    import socket
+
+    for port in range(start, start + 200):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                sock.bind(("127.0.0.1", port))
+            except OSError:
+                continue
+            return port
+    raise RuntimeError(f"no free port in {start}..{start + 200}")
+
+
 def run_replay(clip: dict, wav: Path, tag: str, extra: list[str], index: int, metrics_dir: Path) -> dict:
     """Launch one child and wait before analyzing its flushed metrics."""
+    ws_port = _free_port(8865 + index * 2)
+    http_port = _free_port(ws_port + 1)
     command = [
         sys.executable,
         str(ROOT / "dry_run_ab.py"),
@@ -231,9 +248,9 @@ def run_replay(clip: dict, wav: Path, tag: str, extra: list[str], index: int, me
         "--session-id",
         tag,
         "--ws-port",
-        str(8765 + index * 2),
+        str(ws_port),
         "--http-port",
-        str(8766 + index * 2),
+        str(http_port),
         *extra,
     ]
     log_path = metrics_dir / f"replay_{tag}.log"

@@ -327,6 +327,15 @@ def create_translation_engine(
         # safe to forward to either engine (HF and CT2 share most names).
         marian_backend = kwargs.pop("marian_backend", "auto")
         compute_type = kwargs.pop("compute_type", "int8_float16")
+        intra_threads = kwargs.pop("intra_threads", None)
+        if backend != "cuda" and intra_threads is None:
+            intra_threads = 4  # leave cores for VAD / asyncio / MLX dispatch on the Mac
+        if backend != "cuda" and compute_type == "int8_float16":
+            # CTranslate2 rejects int8_float16 on CPU ("target device or backend do
+            # not support efficient int8_float16 computation"); int8 is the CPU
+            # equivalent (Mac/MLX hosts run Marian CT2 on CPU next to Metal).
+            logger.info("Marian CT2: compute_type int8_float16 -> int8 on %s (CPU)", backend)
+            compute_type = "int8"
         max_new_tokens = kwargs.pop("max_new_tokens", 128)
         warmup_passes = kwargs.pop("warmup_passes", 2)
         source_lang = kwargs.pop("source_lang", "en")
@@ -372,6 +381,7 @@ def create_translation_engine(
                     compute_type=compute_type,
                     max_new_tokens=max_new_tokens,
                     warmup_passes=warmup_passes,
+                    intra_threads=intra_threads,
                     **kwargs,
                 )
 

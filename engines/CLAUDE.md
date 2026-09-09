@@ -111,7 +111,8 @@ PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD ru
 | Role | Model ID | Size |
 |------|----------|------|
 | STT optional (Mac, Parakeet TDT v3) | `mlx-community/parakeet-tdt-0.6b-v3` | 0.6B parameters, bfloat16 |
-| STT primary (Mac) | `mlx-community/whisper-large-v3-turbo` | ~1.5 GB |
+| STT primary (Mac, English sessions, v2026.13) | `mlx-community/parakeet-tdt-0.6b-v3` via `ParakeetMLXEngine` (auto for `--lang en`; `--stt-backend mlx` forces Whisper) | ~2.3 GB bf16 |
+| STT primary (Mac, Spanish sessions) | `mlx-community/whisper-large-v3-turbo` | ~1.5 GB |
 | STT primary (CUDA, v2026.7) | merged W16 LoRA at `adapters/whisper_turbo_ct2/active/` (~777 MB CT2 int8_float16) — falls back to off-the-shelf `large-v3-turbo` (downloaded by faster-whisper into the cache) | ~777 MB |
 | STT fallback (Mac) | `wbell7/distil-whisper-large-v3.5-mlx` | ~1.5 GB |
 | STT fallback (CUDA) | off-the-shelf `large-v3` via faster-whisper, lazy-loaded by `FasterWhisperEngine` on low-confidence retry | ~3 GB |
@@ -119,7 +120,7 @@ PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD ru
 | Translation A (TG opt-out) | `mlx-community/translategemma-4b-it-4bit` | ~2.5 GB |
 | Translation B (TG A/B) | `mlx-community/translategemma-12b-it-4bit` | ~7 GB |
 | Translation CUDA prod | Gemma 4 E4B Q4_K_M via llama.cpp | ~4.9 GB VRAM |
-| Partial translate | `Helsinki-NLP/opus-mt-en-es` / `es-en` (MarianMT) | ~298 MB |
+| Partial translate | `Helsinki-NLP/opus-mt-en-es` / `es-en` (MarianMT) — CT2 int8 at `adapters/marian_ct2/<dir>/active/` when present (`scripts/convert_marian_ct2.py --quantization int8`; Mac uses 4 CPU threads), HF PyTorch otherwise | ~80 MB (CT2) / ~298 MB |
 | TTS (EN) | Piper `en_US-lessac-high` | ~63 MB |
 | TTS (ES) | Piper `es_MX-claude-high` | ~63 MB |
 
