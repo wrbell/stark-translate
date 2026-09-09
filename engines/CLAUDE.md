@@ -93,6 +93,7 @@ As of **mlx 0.31.2**, independent models may run concurrently on separate thread
 Rules that still apply:
 
 - Materialize weights on the load thread (`mx.eval(model.parameters())` / `mx.synchronize()` after Whisper warmup) before pool workers use them. Lazy arrays are bound to the creating thread's stream (#3529).
+- **Run the model's first forward pass on the load thread** (`engines.mlx_engine.warm_mlx_model`, 1 token). Verified 2026-09-09 on mlx 0.32.2 + mlx-lm 0.31.3 (and mlx-lm main): if the first Gemma forward happens on a pool worker, every later generation from another thread fails with `RuntimeError: There is no Stream(gpu, 1) in current thread` — this silently killed every Mac final until fixed (#181). Materializing weights alone is not enough.
 - Do not share one stream across threads without serialization (`mx.new_thread_unsafe_stream`).
 - `--multiprocess` remains an optional escape hatch (separate OS processes / Metal contexts) for debugging or older mlx builds — not required for overlap on 0.31.2+.
 - Companion: **mlx-lm >= 0.31.3** (thread-local generation stream).
@@ -131,9 +132,14 @@ PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD ru
 
 Use `mx.set_cache_limit(100 * 1024 * 1024)` to prevent Metal cache growth with `word_timestamps=True`.
 
-## TranslateGemma EOS Fix
+## Gemma Stop Tokens
 
-Must add `<end_of_turn>` (id=106) to `tokenizer._eos_token_ids`. Default EOS is `<eos>` (id=1) which the model never generates. Without this fix, generates 256 pad tokens (~5s wasted).
+Call `translation_prompts.ensure_stop_tokens(tokenizer, model_family=...)` after MLX loading. It preserves all existing EOS ids, resolves family-specific turn terminators, skips unknown/invalid ids, and prefers the tokenizer's `add_eos_token` method. Added and existing ids are logged at INFO.
+
+- **Gemma 4:** `<eos>` = 1, `<turn|>` = 106, `<|tool_response>` = 50. mlx-lm already loads `{1, 106, 50}` from config; the helper ensures `<turn|>` without dropping any ids. Gemma 4 has no `<end_of_turn>`: it resolves to unknown id 3 and must never be added.
+- **TranslateGemma:** add `<end_of_turn>` = 106 to the default `{1}` EOS set. This remains necessary for early stopping.
+
+Replacing Gemma 4's set with `{1, 3}` loses its real turn terminator, causing generation to hit the token cap and emit channel/thinking junk. Cleanup is only a display safeguard; correct EOS handling stops generation itself.
 
 ## Confidence-Based Flagging
 

@@ -6,7 +6,42 @@ backends so Mac and CUDA production paths stay semantically aligned.
 
 from __future__ import annotations
 
+import logging
 from typing import Any
+
+logger = logging.getLogger(__name__)
+
+GEMMA4_STOP_TOKENS = ("<turn|>",)
+TRANSLATEGEMMA_STOP_TOKENS = ("<end_of_turn>",)
+
+
+def stop_token_strings(model_family: str) -> tuple[str, ...]:
+    """Return the turn terminators for the model's chat template."""
+    return GEMMA4_STOP_TOKENS if model_family == "gemma4" else TRANSLATEGEMMA_STOP_TOKENS
+
+
+def ensure_stop_tokens(tokenizer, *, model_family: str) -> set[int]:
+    """Add valid family stop tokens, preserving every EOS id supplied by load()."""
+    existing = getattr(tokenizer, "_eos_token_ids", None)
+    eos_ids = set(existing) if existing else {tokenizer.eos_token_id}
+    original = eos_ids.copy()
+    # Initialize before add_eos_token, which expects the backing set to exist.
+    if existing is None:
+        tokenizer._eos_token_ids = eos_ids.copy()
+    for token in stop_token_strings(model_family):
+        token_id = tokenizer.convert_tokens_to_ids(token)
+        if token_id is None or token_id < 0 or token_id == getattr(tokenizer, "unk_token_id", None):
+            continue
+        if token_id not in eos_ids:
+            add_eos = getattr(tokenizer, "add_eos_token", None)
+            if callable(add_eos):
+                add_eos(token)
+            eos_ids.add(token_id)
+    eos_ids.update(getattr(tokenizer, "_eos_token_ids", None) or ())
+    tokenizer._eos_token_ids.update(eos_ids)
+    logger.info("%s EOS ids: added=%s already present=%s", model_family, sorted(eos_ids - original), sorted(original))
+    return eos_ids
+
 
 # Canonical language display names for Gemma 4 instruct prompts.
 LANG_NAMES: dict[str, str] = {
