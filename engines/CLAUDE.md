@@ -93,6 +93,7 @@ As of **mlx 0.31.2**, independent models may run concurrently on separate thread
 Rules that still apply:
 
 - Materialize weights on the load thread (`mx.eval(model.parameters())` / `mx.synchronize()` after Whisper warmup) before pool workers use them. Lazy arrays are bound to the creating thread's stream (#3529).
+- **Run the model's first forward pass on the load thread** (`engines.mlx_engine.warm_mlx_model`, 1 token). Verified 2026-09-09 on mlx 0.32.2 + mlx-lm 0.31.3 (and mlx-lm main): if the first Gemma forward happens on a pool worker, every later generation from another thread fails with `RuntimeError: There is no Stream(gpu, 1) in current thread` — this silently killed every Mac final until fixed (#181). Materializing weights alone is not enough.
 - Do not share one stream across threads without serialization (`mx.new_thread_unsafe_stream`).
 - `--multiprocess` remains an optional escape hatch (separate OS processes / Metal contexts) for debugging or older mlx builds — not required for overlap on 0.31.2+.
 - Companion: **mlx-lm >= 0.31.3** (thread-local generation stream).

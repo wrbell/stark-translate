@@ -1097,11 +1097,16 @@ def load_mlx_gemma(model_id, label, adapter_path=None, model_family: str | None 
     # Materialize weights on the load thread so pool workers can run
     # independent inference (MLX >= 0.31.2 thread-local streams).
     try:
-        from engines.mlx_engine import materialize_mlx_model
+        from engines.mlx_engine import materialize_mlx_model, warm_mlx_model
 
         materialize_mlx_model(model)
+        # The FIRST forward pass must run on this (load) thread: with mlx 0.32.x
+        # a first pass on a pool worker binds lazy state to that worker's
+        # thread-local stream and every later generation from another thread
+        # raises "There is no Stream(gpu, N) in current thread".
+        warm_mlx_model(model, tokenizer, model_family=family, label=label)
     except Exception as exc:
-        print(f"  WARNING: could not materialize MLX weights: {exc}")
+        print(f"  WARNING: could not materialize/warm MLX model: {exc}")
     print(f"  {label} ready ({elapsed:.1f}s)")
     return model, tokenizer
 
@@ -1914,21 +1919,16 @@ def warmup_translation_models():
     try:
         from mlx_lm import generate
 
+        from engines.translation_prompts import build_chat_messages, chat_template_extra_kwargs
+
         if mlx_a_model is not None and mlx_a_tokenizer is not None:
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "source_lang_code": SOURCE_LANG,
-                            "target_lang_code": TARGET_LANG,
-                            "text": "hello",
-                        }
-                    ],
-                }
-            ]
-            prompt = mlx_a_tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+            family = globals().get("MODEL_FAMILY", "gemma4")
+            messages = build_chat_messages(
+                "hello", source_lang=SOURCE_LANG, target_lang=TARGET_LANG, model_family=family
+            )
+            prompt = mlx_a_tokenizer.apply_chat_template(
+                messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
+            )
             generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
     except Exception:
         pass  # warmup is best-effort, never block the pipeline

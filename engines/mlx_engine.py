@@ -112,6 +112,38 @@ def materialize_mlx_model(model) -> None:
         logger.warning("Could not materialize MLX model parameters: %s", exc)
 
 
+def warm_mlx_model(model, tokenizer, *, model_family: str, label: str = "model") -> None:
+    """Run the model's *first* forward pass on the load thread (1 token).
+
+    mlx-lm's ``generation_stream`` is a thread-local stream. On mlx 0.32.x the
+    first forward pass creates lazily-initialised state bound to the calling
+    thread's stream; if that first pass happens on a pool worker, every later
+    generation from another thread raises
+    ``RuntimeError: There is no Stream(gpu, N) in current thread``. Calling this
+    right after ``load()`` (main/load thread) makes the model usable from any
+    worker. Verified 2026-09-09 on mlx 0.32.2 / mlx-lm 0.31.3 and mlx-lm main.
+    Weight materialisation alone (``materialize_mlx_model``) is not sufficient.
+    """
+    if mx is None or model is None or tokenizer is None:
+        return
+    try:
+        from mlx_lm import generate
+
+        messages = build_chat_messages("Hello.", source_lang="en", target_lang="es", model_family=model_family)
+        prompt = tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            **chat_template_extra_kwargs(model_family=model_family),
+        )
+        t0 = time.perf_counter()
+        generate(model, tokenizer, prompt=prompt, max_tokens=1, verbose=False)
+        if hasattr(mx, "synchronize"):
+            mx.synchronize()
+        logger.info("%s warm forward on load thread (%.0f ms)", label, (time.perf_counter() - t0) * 1000)
+    except Exception as exc:
+        logger.warning("%s warm forward failed: %s", label, exc)
+
+
 # PyTorch is always available (used as a fallback). Silero VAD on Mac uses
 # the shared lock from engines._locks so concurrent calls between MLX engines
 # (Metal-bound) and any HF PyTorch path (e.g. MarianHFEngine) are serialized.
@@ -646,6 +678,8 @@ class MLXGemmaEngine(TranslationEngine):
         materialize_mlx_model(self._model)
         if self._draft_model is not None:
             materialize_mlx_model(self._draft_model)
+        # First forward pass must happen on the load thread (thread-local stream).
+        warm_mlx_model(self._model, self._tokenizer, model_family=self._model_family, label=self._model_id)
 
         self._loaded = True
 
