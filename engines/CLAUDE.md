@@ -131,9 +131,14 @@ PyTorch operations (MarianMT, Silero VAD) use a separate `_pytorch_lock`. VAD ru
 
 Use `mx.set_cache_limit(100 * 1024 * 1024)` to prevent Metal cache growth with `word_timestamps=True`.
 
-## TranslateGemma EOS Fix
+## Gemma Stop Tokens
 
-Must add `<end_of_turn>` (id=106) to `tokenizer._eos_token_ids`. Default EOS is `<eos>` (id=1) which the model never generates. Without this fix, generates 256 pad tokens (~5s wasted).
+Call `translation_prompts.ensure_stop_tokens(tokenizer, model_family=...)` after MLX loading. It preserves all existing EOS ids, resolves family-specific turn terminators, skips unknown/invalid ids, and prefers the tokenizer's `add_eos_token` method. Added and existing ids are logged at INFO.
+
+- **Gemma 4:** `<eos>` = 1, `<turn|>` = 106, `<|tool_response>` = 50. mlx-lm already loads `{1, 106, 50}` from config; the helper ensures `<turn|>` without dropping any ids. Gemma 4 has no `<end_of_turn>`: it resolves to unknown id 3 and must never be added.
+- **TranslateGemma:** add `<end_of_turn>` = 106 to the default `{1}` EOS set. This remains necessary for early stopping.
+
+Replacing Gemma 4's set with `{1, 3}` loses its real turn terminator, causing generation to hit the token cap and emit channel/thinking junk. Cleanup is only a display safeguard; correct EOS handling stops generation itself.
 
 ## Confidence-Based Flagging
 

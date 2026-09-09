@@ -13,6 +13,7 @@ import copy
 import logging
 import os
 import time
+from collections.abc import Callable
 
 import numpy as np
 
@@ -29,6 +30,7 @@ from engines.translation_prompts import (
     chat_template_extra_kwargs,
     clean_translation,
     dynamic_max_tokens,
+    ensure_stop_tokens,
 )
 
 logger = logging.getLogger(__name__)
@@ -464,6 +466,60 @@ class MLXWhisperEngine(STTEngine):
 # ---------------------------------------------------------------------------
 
 
+def generate_translation(
+    model,
+    tokenizer,
+    *,
+    model_family: str,
+    gen_kwargs: dict,
+    token_callback: Callable[[str, int], None] | None = None,
+    batch_size: int = 3,
+) -> TranslationResult:
+    """Consume mlx-lm responses once for text, callbacks, and generation telemetry.
+
+    Draft acceptance is the share of generated tokens supplied by the draft;
+    mlx-lm does not expose the number of rejected draft proposals here.
+    """
+    from mlx_lm import stream_generate
+
+    if batch_size < 1:
+        raise ValueError("batch_size must be positive")
+    t0 = time.perf_counter()
+    accumulated = ""
+    first_ms = None
+    last = None
+    draft_tokens = 0
+    last_sent_tokens = 0
+    for response in stream_generate(model, tokenizer, **gen_kwargs):
+        if first_ms is None:
+            first_ms = (time.perf_counter() - t0) * 1000
+        last = response
+        accumulated += response.text
+        draft_tokens += int(bool(getattr(response, "from_draft", False)))
+        tokens = response.generation_tokens
+        if token_callback and tokens - last_sent_tokens >= batch_size:
+            token_callback(clean_translation(accumulated, model_family=model_family), tokens)
+            last_sent_tokens = tokens
+
+    latency_ms = (time.perf_counter() - t0) * 1000
+    prompt_tokens = getattr(last, "prompt_tokens", None)
+    prompt_tps = getattr(last, "prompt_tps", None)
+    generated_tokens = getattr(last, "generation_tokens", None)
+    return TranslationResult(
+        text=clean_translation(accumulated, model_family=model_family),
+        latency_ms=latency_ms,
+        tokens_per_second=getattr(last, "generation_tps", None) or 0.0,
+        prompt_tokens=prompt_tokens,
+        generated_tokens=generated_tokens,
+        prefill_ms=prompt_tokens / prompt_tps * 1000 if prompt_tokens is not None and prompt_tps else None,
+        ttft_ms=first_ms,
+        decode_ms=max(0.0, latency_ms - first_ms) if first_ms is not None else None,
+        finish_reason=getattr(last, "finish_reason", None),
+        draft_tokens=draft_tokens if last is not None else None,
+        draft_accept_rate=draft_tokens / generated_tokens if generated_tokens else None,
+    )
+
+
 class MLXGemmaEngine(TranslationEngine):
     """Translation engine wrapping Gemma 4 OptiQ / TranslateGemma via mlx-lm.
 
@@ -534,21 +590,7 @@ class MLXGemmaEngine(TranslationEngine):
             logger.info("Loading LoRA adapter from %s", self._adapter_path)
         self._model, self._tokenizer = mlx_load(self._model_id, **load_kwargs)
 
-        # -- EOS fix (mirrors dry_run_ab.load_mlx_gemma) ----------------------
-        # TranslateGemma uses <end_of_turn> (id=106) as its actual EOS, but
-        # the tokenizer default is <eos> (id=1) which the model never generates.
-        # Without this fix, generation runs to max_tokens (~5 s of pad tokens).
-        eot_id = self._tokenizer.convert_tokens_to_ids("<end_of_turn>")
-        default_eos = self._tokenizer.eos_token_id
-        if not hasattr(self._tokenizer, "_eos_token_ids") or eot_id not in self._tokenizer._eos_token_ids:
-            self._tokenizer._eos_token_ids = {default_eos, eot_id}
-            logger.info(
-                "EOS fix applied: added <end_of_turn> (id=%d) to EOS set (was only <eos> id=%d)",
-                eot_id,
-                default_eos,
-            )
-        else:
-            logger.info("EOS tokens already correct: %s", self._tokenizer._eos_token_ids)
+        ensure_stop_tokens(self._tokenizer, model_family=self._model_family)
 
         elapsed = time.time() - t0
         logger.info("%s loaded (%.1fs)", self._model_id, elapsed)
@@ -614,15 +656,38 @@ class MLXGemmaEngine(TranslationEngine):
         source_lang: str = "en",
         target_lang: str = "es",
     ) -> TranslationResult:
-        """Translate *text* from *source_lang* to *target_lang*.
+        """Translate using the same generation and telemetry path as streaming."""
+        return self._translate(text, source_lang=source_lang, target_lang=target_lang)
 
-        Uses the pre-computed prompt cache when available.  Falls back to the
-        full-prompt path when the cache was not built.
-        """
+    def translate_streaming(
+        self,
+        text: str,
+        *,
+        source_lang: str = "en",
+        target_lang: str = "es",
+        token_callback: Callable[[str, int], None] | None = None,
+        batch_size: int = 3,
+    ) -> TranslationResult:
+        """Call token_callback(cleaned_partial, tokens_so_far) every batch_size tokens."""
+        return self._translate(
+            text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            token_callback=token_callback,
+            batch_size=batch_size,
+        )
+
+    def _translate(
+        self,
+        text: str,
+        *,
+        source_lang: str,
+        target_lang: str,
+        token_callback: Callable[[str, int], None] | None = None,
+        batch_size: int = 3,
+    ) -> TranslationResult:
         if not self._loaded:
             raise RuntimeError("Engine not loaded -- call load() first")
-
-        from mlx_lm import generate
 
         if self._model is None or self._tokenizer is None:
             return TranslationResult(text="(model not loaded)", latency_ms=0.0)
@@ -647,7 +712,6 @@ class MLXGemmaEngine(TranslationEngine):
             gen_kwargs = dict(
                 prompt=dynamic_tokens,
                 max_tokens=max_tok,
-                verbose=False,
                 prompt_cache=cached,
             )
         else:
@@ -665,7 +729,6 @@ class MLXGemmaEngine(TranslationEngine):
             gen_kwargs = dict(
                 prompt=prompt,
                 max_tokens=max_tok,
-                verbose=False,
             )
 
         # Optional Gemma-4 assistant-drafter / mlx-lm draft_model speculative decode
@@ -675,18 +738,13 @@ class MLXGemmaEngine(TranslationEngine):
             # Prompt cache is incompatible with speculative decoding
             gen_kwargs.pop("prompt_cache", None)
 
-        t0 = time.perf_counter()
-        result = generate(self._model, self._tokenizer, **gen_kwargs)
-        latency_ms = (time.perf_counter() - t0) * 1000
-
-        clean = clean_translation(result, model_family=self._model_family)
-        out_tokens = len(self._tokenizer.encode(clean))
-        gen_tps = out_tokens / (latency_ms / 1000) if latency_ms > 0 else 0.0
-
-        return TranslationResult(
-            text=clean,
-            latency_ms=latency_ms,
-            tokens_per_second=gen_tps,
+        return generate_translation(
+            self._model,
+            self._tokenizer,
+            model_family=self._model_family,
+            gen_kwargs=gen_kwargs,
+            token_callback=token_callback,
+            batch_size=batch_size,
         )
 
     def unload(self) -> None:
