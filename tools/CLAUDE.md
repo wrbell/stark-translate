@@ -248,3 +248,19 @@ python tools/test_adaptive_model.py --sentences 20
 # Download test texts for roundtrip quality testing
 python tools/download_roundtrip_texts.py --count 50
 ```
+
+## Replay benchmark
+
+Replay WAV audio through the normal VAD → partial → final pipeline on the Mac. Prepare clips explicitly, then run a sequential config × clip matrix (each child uses distinct display ports):
+
+```bash
+python tools/replay_bench.py --prepare --seconds 300
+python tools/replay_bench.py --configs 'baseline=' 'mts=--mts' --tag replay01
+python tools/replay_bench.py --configs configs.json --baseline metrics/replay_replay01_baseline_Gospel_Message_1.json
+```
+
+Preparation cuts `stark_data/raw/Gospel_Message_*.wav` and `spanish_test_2cor1.wav`, preserving rate/channels, and writes `stark_data/replay/manifest.json` with duration, language and SHA-256. Config JSON maps names to argument strings or lists: `{"baseline": [], "mts": ["--mts"]}`. Extra flags must match `dry_run_ab.py`; its current STT choice is `parakeet`, not `parakeet-mlx` (EN-only NeMo, not a Mac MLX backend).
+
+Each run writes `metrics/replay_<tag>.log` and `.json` alongside the normal CSV and `partials_<tag>.jsonl`. Reports include p50/p95/mean, every emitted partial's STT + Marian latency, chunk/partial counts, overlap percentage, and special-token output counts. Marian-only share uses the labeled `tps_a == 0` proxy; absent measurements remain null. `--baseline` prints a Markdown delta table. Existing session artifacts are rejected; choose a fresh `--tag` for each matrix.
+
+For one clip: `python dry_run_ab.py --backend mlx --no-ab --audio-file clip.wav --session-id replay_test`. Replay defaults to real time and exits after EOF plus two seconds of tail silence and pending work. Use `--replay-speed 2` for double speed (`<=0` unpaced), or `--no-exit-after-replay` to keep the session open. Accelerated playback changes queue pressure and latency interpretation; use speed 1 for comparable real-time results. File input skips microphone detection and defaults to unity gain; `--gain` overrides it.

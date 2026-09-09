@@ -64,6 +64,13 @@ python tools/mine_hallucination_phrases.py --glob 'metrics/diagnostics_*.jsonl'
 
 ## 2. Baseline A/B latency (Gemma 4 OptiQ ± TranslateGemma)
 
+For repeatable real-audio input, add `--audio-file clip.wav --session-id replay_test`.
+This skips microphone detection, uses unity gain unless `--gain` is supplied, and
+exits after replay and pending work drain. `--replay-speed` defaults to 1.0;
+`--no-exit-after-replay` keeps the session open. See the
+[Replay benchmark](../tools/CLAUDE.md#replay-benchmark) for clip preparation,
+config matrices, per-partial telemetry, and baseline comparisons.
+
 ```bash
 # Default: Gemma 4 E4B OptiQ
 python dry_run_ab.py --backend mlx
