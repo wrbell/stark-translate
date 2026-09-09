@@ -3,7 +3,7 @@
 > Living document tracking the full project trajectory from Mac prototype
 > through Windows training to production deployment.
 >
-> **Last updated:** 2026-08-30
+> **Last updated:** 2026-09-09
 
 ---
 
@@ -31,6 +31,8 @@ for first-time church PC setup.
 
 **Next WSL execution:** `docs/wsl_pipeline_refresh.md` (Phase 4 → E4B SFT → W17 → Mac → AL).
 ```
+
+**Sept 2026 restart:** v2026.12 close-out (branches pruned, #131–#138 triaged, #172–#179 filed) → v2026.13 Mac latency program (see [Active Work](#active-work)). Key finding: the Gemma 4 stop-set bug (#172) made every Mac final run to `max_tokens`, so the 2026-08-30 Mac latency numbers are invalid.
 
 ---
 
@@ -97,6 +99,26 @@ Ordered stages on the A2000 Ada box:
 
 **Status notes:** W16 shipped in production CT2 path (7.25% fresh-eval WER). W17 is scripted in-repo, not yet trained. Scripts and garbage-filter hardening landed with the 2026-08 pipeline refresh (PR #162).
 
+### Mac latency program (v2026.13 — in progress, started 2026-09-09)
+
+Measured with the real-audio replay benchmark (#179) on the M3 Pro. Baseline (2026-08-30): finals ≈ 3.2 s true end-to-end (silence 0.5 + STT 0.5 + translate 2.2), partials 0.6–1.0 s. Targets: finals **< 1.0 s p50**, partials **< 300 ms**, canary **≥ 7/8**.
+
+1. **B0 — Gemma 4 EOS/stop fix + telemetry** (#172): `ensure_stop_tokens()`; `generated_tokens/prefill_ms/ttft_ms/decode_ms/finish_reason` in CSV/JSONL/bench. Expected finals 2176 → ~700–900 ms.
+2. **B1 — replay harness** (#179): `--audio-file` + `tools/replay_bench.py`.
+3. **B3 — Gemma 4 MTP drafter on the streaming path** (#177) via mlx-optiq `optiq.runtime.spec`; gate: byte-identical greedy, p50 ≤ 0.85×, acceptance ≥ 30 %.
+4. **B4 — Parakeet TDT 0.6B v3 STT on MLX** (#178): streaming partials, confidence proxy; WER-gated vs whisper-turbo.
+5. **B5 — Marian CT2 on Mac** (`scripts/convert_marian_ct2.py` → `adapters/marian_ct2/`; ctranslate2 4.7.1 arm64 has no libomp) — later: ONNX Silero VAD for a torch-free live process.
+6. **B6 — tuning**: `silence_trigger` 0.5 → 0.35 s, `partial_interval` 0.6 → 0.4 s, wider `should_use_marian_only`.
+7. **B7/B8** — consolidate `dry_run_ab.py` onto `MLXGemmaEngine`; docs + tag v2026.13.
+
+Then: **CUDA latency proposal** (`docs/cuda_latency_proposal.md`, for the A2000 box): Gemma 4 MTP drafter in llama.cpp ≥ b10883 with f16 KV (#173, #174), `-fa on` retest, W16 as HF fp16 / Parakeet on CUDA, `LlamaCppEngine` `cache_prompt` + dynamic `max_tokens`, `-np 2`. Then Part D: #132 (9.4.1) and #133 (9.6.1).
+
+### Deferred followups (from v2026.9; the referenced `FOLLOWUPS.md` never existed — #175)
+
+1. Re-test `-fa on` against a newer llama.cpp build (the +56 % E4B regression was on b8782).
+2. Larger context (`-c 2048`) bench.
+3. Per-request / intra-request prompt-cache reuse for streaming partials (Gemma 4 SWA forces a full re-prefill per request today).
+
 ### Gemma 4 Evaluation (reference)
 
 `benchmark_gemma4.py` / Phase 1A llama.cpp matrix remain the eval harnesses. Production CUDA finals stay **E4B Q4_K_M**; next accuracy lever is domain SFT of that model (stage 2 above), not a larger base on 16 GB.
@@ -159,8 +181,8 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 - ✅ Dedicated hardware auto-start (Phase 9.5 — systemd unit + launchd plist + bootstrap.sh)
 - ✅ Post-sermon summary trigger (Phase 9.6 — `/api/features/summary`)
 - ✅ Verse extraction wired into the live operator UI (Phase 9.6 — `/api/features/verses`)
-- 9.4.1 — Multi-channel TTS routing (UI is ready, output dropdown disabled / preview-only; needs PiperTTSEngine output-device support + `--tts-output local` mode)
-- 9.6.1 — Live diarization on a rolling audio buffer (UI surface deferred; existing `features/diarize.py` is offline-only)
+- 9.4.1 — Multi-channel TTS routing (#132, scheduled after v2026.13). Shipped so far: `settings.tts.output_device`, `--tts-output local` + `--tts-device`, `PiperTTSEngine.play(device=)`. Remaining: per-language device map, name-based resolution with hotplug re-resolve, enable the operator UI dropdown.
+- 9.6.1 — Live diarization on a rolling audio buffer (#133, scheduled after v2026.13). `features/live_diarize.py` daemon stub exists (PR #70); needs rolling-window attribution of finals, `--diarize` opt-in, display labels, p95 guard.
 - Continuous improvement loop: live inference → log diagnostics → retrain monthly (depends on Phase 6/8 active learning)
 
 ---
@@ -200,6 +222,8 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 | Final 12B (STT + TranslateGemma) | ~2.6s |
 | Piper TTS | ~40ms/word EN, ~8ms/word ES |
 
+> These are TranslateGemma-era figures. The Gemma 4 OptiQ E4B default measured 2176 ms medium p50 on 2026-08-30, but that run hit `max_tokens` on every call (EOS bug #172). Re-measured tables land with v2026.13 (`docs/archive/v2026.13/MAC_LATENCY.md`).
+
 ---
 
 ## Key Decisions (Resolved)
@@ -232,13 +256,13 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 
 | Doc | Contents |
 |-----|----------|
-| [`training_plan.md`](training_plan.md) | Full training schedule, channel inventory, go/no-go gates |
-| [`accent_tuning_plan.md`](accent_tuning_plan.md) | 4-week accent-diverse STT tuning plan (code complete) |
-| [`hard_mining.md`](hard_mining.md) | W15 hard example mining design |
-| [`multi_lingual.md`](multi_lingual.md) | Hindi & Chinese actionable todo list |
-| [`multilingual_tuning_proposal.md`](multilingual_tuning_proposal.md) | Full Hindi/Chinese research: corpora, glossaries, evaluation |
-| [`rtx2070_feasibility.md`](rtx2070_feasibility.md) | RTX 2070 hardware analysis |
-| [`fast_stt_options.md`](fast_stt_options.md) | Lightning-whisper-mlx feasibility (not viable) |
-| [`projection_integration.md`](projection_integration.md) | OBS/NDI/ProPresenter integration |
-| [`turbo_inference.md`](turbo_inference.md) | Turbo model inference details |
-| [`data_pipeline_status.md`](data_pipeline_status.md) | Data pipeline current state |
+| [`training_plan.md`](archive/training/training_plan.md) | Full training schedule, channel inventory, go/no-go gates |
+| [`accent_tuning_plan.md`](archive/research/accent_tuning_plan.md) | 4-week accent-diverse STT tuning plan (code complete) |
+| [`hard_mining.md`](archive/research/hard_mining.md) | W15 hard example mining design |
+| [`multi_lingual.md`](archive/research/multi_lingual.md) | Hindi & Chinese actionable todo list |
+| [`multilingual_tuning_proposal.md`](archive/research/multilingual_tuning_proposal.md) | Full Hindi/Chinese research: corpora, glossaries, evaluation |
+| [`rtx2070_feasibility.md`](archive/research/rtx2070_feasibility.md) | RTX 2070 hardware analysis |
+| [`fast_stt_options.md`](archive/research/fast_stt_options.md) | Lightning-whisper-mlx feasibility (not viable) |
+| [`projection_integration.md`](archive/research/projection_integration.md) | OBS/NDI/ProPresenter integration |
+| [`turbo_inference.md`](archive/research/turbo_inference.md) | Turbo model inference details |
+| [`data_pipeline_status.md`](archive/training/data_pipeline_status.md) | Data pipeline current state |
