@@ -56,6 +56,19 @@ clean imports and an [installed dependency audit](evaluation/lite_installer_secu
 These Mac CPU functional tests do not certify x86 or RTX2070. E2B pipeline RSS
 excludes its native child and cannot certify combined memory.
 
+The [final integration validation](evaluation/overnight_final_validation_20260910.md)
+records source `84832fb`: 2,384 CPU tests passed, four skipped, 63.80% coverage
+(91.56 s), prescribed static checks and mechanical artifact checks passed. Remote
+CI also passed its executed checks on that exact head; its legacy audit was skipped.
+A real interpreter-exit crash exposed unfinished native audio-watcher work. The
+cleanup fix changed five operator modules; 138/143 code/resource wheel members,
+including the pipeline and every engine module, remain byte-identical to 752.
+Six actual native enumeration/rapid-exit checks passed with no surviving polling
+workers or model imports. They saw zero input/output devices and opened no audio
+stream, so this is not a hardware or microphone test. No new inference hour was
+run after this cleanup change. The report preserves the failed intermediate receipt
+and the older 752 evidence below; PR #192 is still open and not merged at this snapshot.
+
 The [runtime-freeze artifact check](evaluation/overnight_artifact_validation_20260910.json)
 verified the wheel, sdist and Mac ZIP at frozen source `752ab9a`. All 152 runtime
 members match that source, and both rebuilt wheels are byte-identical to canonical
@@ -66,7 +79,7 @@ not loaded. The [older b65e6e0 receipt](evaluation/overnight_artifact_validation
 is preserved for the original hour. Mechanical package checks do not transfer an
 old inference result to changed runtime bytes or certify a new full-hour run.
 
-The [final local validation record](evaluation/overnight_validation_20260910.json)
+The [752 local validation record](evaluation/overnight_validation_20260910.json)
 records 2,363 passing CPU-suite tests, four skips and 63.80% coverage at frozen
 source `752ab9a` (89.97 s); all three real GPU regressions passed (21.16 s).
 Pre-commit and the [prescribed static checks](evaluation/overnight_static_validation_752ab9a_20260910.json)

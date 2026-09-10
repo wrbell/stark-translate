@@ -14,7 +14,7 @@ collected while the native Mac was locked, so physical screen visibility remains
 unverified. Negative results, small endpoint counts and original hashes are retained. Lite installation and CPU evidence are in
 [Lite profiles](../lite_profiles.md).
 
-The [current local validation](overnight_validation_20260910.json),
+The [752 local validation](overnight_validation_20260910.json),
 [mechanical artifact receipt](overnight_artifact_validation_20260910.json) and
 [static check receipt](overnight_static_validation_752ab9a_20260910.json) bind to
 frozen source `752ab9a`. They do not replace the `911f4ae` screen or the older
@@ -24,6 +24,15 @@ quality limits, selected waveform checks and the actual truncated long-summary U
 Lite completed functionally but does not qualify as a fast production profile.
 The validation JSON preserves its earlier dated start checkpoint; it is not the
 terminal endurance record. Publication and device/human acceptance remain separate.
+
+The [final integration report](overnight_final_validation_20260910.md) and its
+[machine-readable record](overnight_final_validation_20260910.json) bind later
+CPU/static/artifact validation and remote CI to source `84832fb`. They retain the
+real intermediate interpreter-exit failure and its operator cleanup fix. Exact
+wheel comparison found five changed operator modules and 138 unchanged code/resource
+members; pipeline/engine bytes remain unchanged, while the completed hours still
+belong to the actual 752 wheel. Full receipts and modest logs are retained in the
+[final evidence directory](overnight_final_validation_20260910/README.md).
 
 ## Frozen inputs
 

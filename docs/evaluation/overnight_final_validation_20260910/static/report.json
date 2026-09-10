@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only Ruff/format, mypy engines/settings, widened prescribed Bandit and six HTML5 Tidy checks. No pytest, dependency audit, install, network, model/device operation, Git mutation or publication.",
+  "source": {
+    "expected_head": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+    "source_head": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+    "git_status_before": "",
+    "started_at_utc": "2026-09-10T11:15:22.276154+00:00",
+    "ci_workflow_sha256": "2d9598dd9fdf4c9c6a47d9204e8801271e43e72c77f3abe0183a5fcc2737890c",
+    "scope": "Read-only Ruff/format, mypy engines/settings, widened prescribed Bandit and six HTML5 Tidy checks. No pytest, dependency audit, install, network, model/device operation, Git mutation or publication."
+  },
+  "source_head_after": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+  "git_status_after": "",
+  "ended_at_utc": "2026-09-10T11:15:47.941497+00:00",
+  "passed": true,
+  "source_unchanged": true,
+  "checks": [
+    {
+      "name": "ruff-check",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "."
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:22.303536+00:00",
+      "ended_at_utc": "2026-09-10T11:15:22.387898+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/ruff-check.log",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "ruff-format",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:22.414531+00:00",
+      "ended_at_utc": "2026-09-10T11:15:22.493688+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/ruff-format.log",
+      "log_sha256": "0b82d5f0ddee3cd7c567e296e3fa87dceeffd23a0571e1e8f662a061c2e29a12"
+    },
+    {
+      "name": "mypy",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+        "-m",
+        "mypy",
+        "engines/",
+        "settings.py"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:22.520780+00:00",
+      "ended_at_utc": "2026-09-10T11:15:45.786112+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/mypy.log",
+      "log_sha256": "5ca59a2361304496c36048048a43aa6f41eb23e74111d16719b962637888fc08"
+    },
+    {
+      "name": "bandit",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+        "-m",
+        "bandit",
+        "-r",
+        "engines/",
+        "features/",
+        "tools/",
+        "operator_app/",
+        "settings.py",
+        "-s",
+        "B101,B603,B607,B615",
+        "--severity-level",
+        "medium",
+        "-f",
+        "json",
+        "-o",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/bandit.json"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:45.817746+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.670603+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/bandit.log",
+      "log_sha256": "347750eaeff405275e284b18adc4102c42f8ca98017755a804b09e2aff3098c4"
+    },
+    {
+      "name": "tidy-version",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/html5-validation/build/tidy",
+        "--version"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:47.699515+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.711307+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-version.log",
+      "log_sha256": "c927c6aa5f2864eb1b26273730b1b7ab2499ea9525a21c21fd41b394c9d969c2"
+    },
+    {
+      "name": "tidy-displays-ab_display.html",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/html5-validation/build/tidy",
+        "-q",
+        "-e",
+        "--show-info",
+        "no",
+        "displays/ab_display.html"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:47.738849+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.744635+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-ab_display.html.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tidy-displays-audience_display.html",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/html5-validation/build/tidy",
+        "-q",
+        "-e",
+        "--show-info",
+        "no",
+        "displays/audience_display.html"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:47.770125+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.775894+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-audience_display.html.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tidy-displays-church_display.html",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/html5-validation/build/tidy",
+        "-q",
+        "-e",
+        "--show-info",
+        "no",
+        "displays/church_display.html"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:47.801037+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.806721+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-church_display.html.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tidy-displays-mobile_display.html",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/html5-validation/build/tidy",
+        "-q",
+        "-e",
+        "--show-info",
+        "no",
+        "displays/mobile_display.html"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:47.831844+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.837160+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-mobile_display.html.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tidy-displays-obs_overlay.html",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/html5-validation/build/tidy",
+        "-q",
+        "-e",
+        "--show-info",
+        "no",
+        "displays/obs_overlay.html"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:47.862204+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.867954+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-obs_overlay.html.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tidy-displays-operator-index.html",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/html5-validation/build/tidy",
+        "-q",
+        "-e",
+        "--show-info",
+        "no",
+        "displays/operator/index.html"
+      ],
+      "cwd": "/Users/willem/Code/vibes/SRTranslate",
+      "started_at_utc": "2026-09-10T11:15:47.892451+00:00",
+      "ended_at_utc": "2026-09-10T11:15:47.898078+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-operator-index.html.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "summary": {
+    "all_requested_checks_completed": true,
+    "bandit_findings": 0,
+    "bandit_errors": [],
+    "html_files": 6,
+    "html_exit_policy": "0 clean; 1 warnings accepted by prescribed CI; 2/errors or unexpected codes fail",
+    "dependency_audits": "Not rerun; dependency environment unchanged"
+  },
+  "evidence_sha256": {
+    "bandit.json": "41569a3d88babbbbc666ec51278abc99339ca72ec3b56b560e44e3fcd8cd69ec",
+    "bandit.log": "347750eaeff405275e284b18adc4102c42f8ca98017755a804b09e2aff3098c4",
+    "bandit.result.json": "707bf04866ba704e2bf3711859099dec09b8fb63f8794bcb4a45604e4791ee67",
+    "commands.json": "5ea4da0e405a5d7b9253d44ec519731212a2ccb247fa3622d626d6597a9c849f",
+    "commands.template.json": "a6535764bd3cd6bc599fe09f9cda9cb108764524a2dcab113ff8c970f5d26ab2",
+    "mypy.log": "5ca59a2361304496c36048048a43aa6f41eb23e74111d16719b962637888fc08",
+    "mypy.result.json": "48d222a254b141a0f08449a7fc9a135936816a322dd4d65dd5bba68ecca71680",
+    "ruff-check.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "ruff-check.result.json": "1437c14cde4dd4f7a7054b3d9c05fa238e6dd642a224f10b566e296e61645221",
+    "ruff-format.log": "0b82d5f0ddee3cd7c567e296e3fa87dceeffd23a0571e1e8f662a061c2e29a12",
+    "ruff-format.result.json": "1672fbd6bfe85d2b1b2adf6b8aaec691ac8b41f9c0dabf48886a4d940d410ab8",
+    "run_check.py": "4a09ced47e30e2e43a9fe1ec0c8ace0edaad1b1025cfa2b182fb0904999cbc10",
+    "run_suite.py": "a1cb7d6fcb7e563ee47561d6f5b2e90d57ba85356d791e57bf4154638726d328",
+    "source-after.json": "5c8e2deb91822d28bdfb7bfe0f4d17be028842791572d9d79ba4be6ce24957c5",
+    "source.json": "769871623e7796fbbb01a8cb58e287d3db92c5f6be3da7901d77bf23c82d5fc0",
+    "tidy-displays-ab_display.html.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tidy-displays-ab_display.html.result.json": "4cc4ab92771bb57b176e522523f9c3eab0ded9ca0357d1834a06aa2a262f62df",
+    "tidy-displays-audience_display.html.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tidy-displays-audience_display.html.result.json": "6df19a3fb8cf53cab80603ef0d5a4b66e0f94c4fc0c0c71c20115e8ad13aa189",
+    "tidy-displays-church_display.html.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tidy-displays-church_display.html.result.json": "eb7a5edce80f87a94a92ea696b0be455d088c5afa8efd138916a721c0c138852",
+    "tidy-displays-mobile_display.html.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tidy-displays-mobile_display.html.result.json": "aa1b19f91b5a017269d3ef192f0c86a22607a46dd86e02a477a1f5ff5536c641",
+    "tidy-displays-obs_overlay.html.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tidy-displays-obs_overlay.html.result.json": "8af9afcbfed24c46efa98dfd7822398d3f38294937fa3db879789af2200b8689",
+    "tidy-displays-operator-index.html.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tidy-displays-operator-index.html.result.json": "939f7453c08156b294b2c1263b3fcc7c3d91951e5179dc6a5943a74237300119",
+    "tidy-version.log": "c927c6aa5f2864eb1b26273730b1b7ab2499ea9525a21c21fd41b394c9d969c2",
+    "tidy-version.result.json": "7596e7eaecbe0d441f8a524cb4f6c297d0bb92bcbfb014b077deae93c384ae6f",
+    "tools.json": "732067a7f85004f287261d60b1b48b0724948086494041604c06ae17682c3bcc"
+  }
+}

@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "source_revision": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+  "copy_policy": "Exact bytes from explicit finalized local receipts and modest logs; original paths retained. Comparator source is an inert .py.txt attachment with original bytes.",
+  "privacy_scope": "No OS crash report/core dump, audio, models, corrections or environment-variable dump included. Selected receipt/log text retains local paths and package/runtime metadata. Credential-pattern review is heuristic, not a privacy certification.",
+  "files": [
+    {
+      "path": "cpu/report.json",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-cpu-84832fb/report.json",
+      "size_bytes": 2308,
+      "sha256": "df5f76ce058b10a345a186420404cd89c4789ad91afb1b9dd58ebbbcb57440d7",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "cpu/pytest.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-cpu-84832fb/pytest.log",
+      "size_bytes": 15264,
+      "sha256": "28ff89867a06d100619873af2800b164cc366ba2cbbaa2f4200687530f741e58",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/report.json",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/report.json",
+      "size_bytes": 12215,
+      "sha256": "1b8c76e9d2d6379c7009e97d44efe9985156763f5d78c586e7d28b2a1431fd94",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/report.json",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/report.json",
+      "size_bytes": 53840,
+      "sha256": "d13fe9aabad161f45b3631ed33f20194a5ab7bfa83d64c020ab38fb032b94b3b",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "failed-60ad/report.json",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-60ad4db-final/report.json",
+      "size_bytes": 26930,
+      "sha256": "0f279e252a0fa65c8bba935f8f124097a193cf4591f17354c48925c74aaaf8ba",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "failed-60ad/mac-installed-smoke.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-60ad4db-final/mac-installed-smoke.log",
+      "size_bytes": 390,
+      "sha256": "5c32e296caafa8af5dea0fd0d7b227d0b6de3b541affedf5d3d49dface58385d",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/bandit.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/bandit.log",
+      "size_bytes": 1742,
+      "sha256": "347750eaeff405275e284b18adc4102c42f8ca98017755a804b09e2aff3098c4",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/tidy-displays-audience_display.html.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-audience_display.html.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/tidy-displays-obs_overlay.html.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-obs_overlay.html.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/tidy-version.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-version.log",
+      "size_bytes": 40,
+      "sha256": "c927c6aa5f2864eb1b26273730b1b7ab2499ea9525a21c21fd41b394c9d969c2",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/tidy-displays-operator-index.html.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-operator-index.html.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/ruff-format.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/ruff-format.log",
+      "size_bytes": 28,
+      "sha256": "0b82d5f0ddee3cd7c567e296e3fa87dceeffd23a0571e1e8f662a061c2e29a12",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/mypy.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/mypy.log",
+      "size_bytes": 44,
+      "sha256": "5ca59a2361304496c36048048a43aa6f41eb23e74111d16719b962637888fc08",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/ruff-check.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/ruff-check.log",
+      "size_bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/tidy-displays-mobile_display.html.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-mobile_display.html.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/tidy-displays-ab_display.html.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-ab_display.html.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "static/tidy-displays-church_display.html.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-integration-static-84832fb/tidy-displays-church_display.html.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/mac-installed-smoke.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/mac-installed-smoke.log",
+      "size_bytes": 464,
+      "sha256": "7557f603bc7370fbc889b0b7011fc6aeabb94db2131d40e02977a04c93a15c95",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/lite-installed-smoke.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/lite-installed-smoke.log",
+      "size_bytes": 792,
+      "sha256": "6f6a37a6ed7b2f700ec2e5f07a798490b4a06f969a22f4e5d03fd4e363885160",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/mac-native-exit-1.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/mac-native-exit-1.log",
+      "size_bytes": 241,
+      "sha256": "05e6e4f0ef0317c8c19dddd91231b752061cb9d3f11272583ddd168f68dfd89c",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/mac-native-exit-2.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/mac-native-exit-2.log",
+      "size_bytes": 241,
+      "sha256": "05e6e4f0ef0317c8c19dddd91231b752061cb9d3f11272583ddd168f68dfd89c",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/mac-native-exit-3.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/mac-native-exit-3.log",
+      "size_bytes": 241,
+      "sha256": "05e6e4f0ef0317c8c19dddd91231b752061cb9d3f11272583ddd168f68dfd89c",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/lite-native-exit-1.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/lite-native-exit-1.log",
+      "size_bytes": 551,
+      "sha256": "16d9e801dd154569d5c73f5fee2bdb79f247f2a240906cfece8e9e285c9ce5a2",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/lite-native-exit-2.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/lite-native-exit-2.log",
+      "size_bytes": 551,
+      "sha256": "16d9e801dd154569d5c73f5fee2bdb79f247f2a240906cfece8e9e285c9ce5a2",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/lite-native-exit-3.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/lite-native-exit-3.log",
+      "size_bytes": 551,
+      "sha256": "16d9e801dd154569d5c73f5fee2bdb79f247f2a240906cfece8e9e285c9ce5a2",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/mac-pip-check.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/mac-pip-check.log",
+      "size_bytes": 304,
+      "sha256": "2b5f2dde8c1a559c7ac472382738e85c2c05b33bd5a26ba1ff314fb87c467c1a",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/lite-pip-check.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/lite-pip-check.log",
+      "size_bytes": 304,
+      "sha256": "2b5f2dde8c1a559c7ac472382738e85c2c05b33bd5a26ba1ff314fb87c467c1a",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/canonical-build.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/canonical-build.log",
+      "size_bytes": 227,
+      "sha256": "2d84bb06d84f46b58e95eb0b8f4699072204655970f70a0dc66be0a43303ac77",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/sdist-offline-rebuild.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/sdist-offline-rebuild.log",
+      "size_bytes": 126,
+      "sha256": "ac95fb318a27cc30f9b2ae599cb62be6e8f1c5d4d5b841ca9268d94b4d9b33a4",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/zip-offline-rebuild.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/zip-offline-rebuild.log",
+      "size_bytes": 126,
+      "sha256": "ac95fb318a27cc30f9b2ae599cb62be6e8f1c5d4d5b841ca9268d94b4d9b33a4",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/version-guard.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/version-guard.log",
+      "size_bytes": 27,
+      "sha256": "ccfe5507ee923a4d104dd6ab6030703db42b2422b917bd8e5ad199e0bc50bace",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "artifacts/artifact-guard.log",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-84832fb-final/artifact-guard.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "ci/pr192-84832fb.json",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/pr192-ci-84832fb.json",
+      "size_bytes": 2684,
+      "sha256": "08af3a5044f4c2542fe355d797f039509b6671fe365aed57f8624c5f91516916",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "continuity/report.json",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/wheel-continuity-84832fb/report.json",
+      "size_bytes": 85118,
+      "sha256": "abcf9210366479ba5c7f87fc817c9efde99d0c82b124c8fa5802816370892690",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "continuity/README.md",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/wheel-continuity-84832fb/README.md",
+      "size_bytes": 4040,
+      "sha256": "da2745dd2055f4e74e9cc427810e33cd558f7be64b724b306e3c4b92558f6bd1",
+      "copy": "exact_bytes"
+    },
+    {
+      "path": "continuity/compare_wheels.py.txt",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/wheel-continuity-84832fb/compare_wheels.py",
+      "size_bytes": 12090,
+      "sha256": "ff049c136e6c4fa28b283cad66145e1dc47c697c3b9806403789d8741334ddf8",
+      "copy": "exact_bytes",
+      "original_name": "compare_wheels.py"
+    },
+    {
+      "path": "continuity/manifest.json",
+      "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/wheel-continuity-84832fb/manifest.json",
+      "size_bytes": 479,
+      "sha256": "2b74178a32c4b6a276ca19c19209e848cae1bafd6898c46908239cd65fa49521",
+      "copy": "exact_bytes"
+    }
+  ]
+}

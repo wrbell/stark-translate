@@ -18,10 +18,11 @@ publication and release tags remain pending by user choice.
 | Current runtime interfaces and defaults | [Architecture](current_architecture.md) |
 | Completed English matrix and retained negative results | [Compact screen report](evaluation/overnight_screen_20260910/README.md) |
 | EN↔ES speed experiments and decision rules | [Experiment plan](evaluation/overnight_experiment_plan.md) |
-| Final local CPU/GPU check counts | [Validation record](evaluation/overnight_validation_20260910.json) |
+| Final integration CPU/static/artifact checks and wheel continuity | [84832fb validation](evaluation/overnight_final_validation_20260910.md) |
+| 752 CPU/GPU checks bound to the endurance runtime | [752 validation record](evaluation/overnight_validation_20260910.json) |
 | Actual browser/session evidence | [Operator rehearsal](evaluation/overnight_operator_rehearsal.md) |
 | CPU and original RTX2070 installation/performance gates | [Lite profiles](lite_profiles.md) |
-| Installed wheel, sdist and Mac ZIP evidence | [Runtime artifact validation](evaluation/overnight_artifact_validation_20260910.json) |
+| 752 installed wheel, sdist and Mac ZIP evidence | [Endurance artifact validation](evaluation/overnight_artifact_validation_20260910.json) |
 | Installed dependency findings and scope | [Security assessment](evaluation/overnight_security/README.md) |
 | Original open-issue acceptance | [Issue closure audit](issue_closure_audit.md) |
 
@@ -74,8 +75,15 @@ prescribed static checks. Its canonical wheel matches all 152 runtime members;
 sdist/ZIP rebuilds are byte-identical, and both isolated installs passed their
 mechanical checks without inference or dependency changes. Previous check/artifact
 records remain linked separately. The Standard and Lite terminal results are recorded separately from those
-mechanical checks. Final documentation/workflow-head CI and the authorized source
-merge remain pending; package publication is separate.
+mechanical checks. The later [84832fb integration validation](evaluation/overnight_final_validation_20260910.md)
+passed 2,384 CPU tests with four skips, 63.80% coverage (91.56 s), prescribed static
+checks and repeated installed artifact checks. Exact-head remote CI passed its
+executed checks; the legacy audit was skipped. Five operator cleanup modules differ
+from 752; 138/143 code/resource members remain identical, including the pipeline
+and every engine module. Six real native enumeration/exit checks passed with no
+surviving polling workers, no model imports and no opened audio streams. No devices
+were visible in that tool context, and no new inference hour is claimed. PR #192
+is still open and not merged at this pre-merge snapshot; package publication is separate.
 
 ## Decisions and evidence boundaries
 

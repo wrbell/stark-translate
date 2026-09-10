@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "status": "passed_pre_merge_snapshot",
+  "recorded_at_utc": "2026-09-10T11:23:15.761714+00:00",
+  "source_revision": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+  "scope": "Final-source CPU/static/artifact checks, remote CI snapshot and measured wheel continuity; no new model inference or endurance run.",
+  "cpu_suite": {
+    "passed": 2384,
+    "skipped": 4,
+    "duration_seconds": 91.56,
+    "coverage_percent": 63.80316462798788,
+    "covered_statements": 11371,
+    "total_statements": 17822,
+    "source_clean_before_and_after": true,
+    "receipt": {
+      "path": "overnight_final_validation_20260910/cpu/report.json",
+      "sha256": "df5f76ce058b10a345a186420404cd89c4789ad91afb1b9dd58ebbbcb57440d7",
+      "size_bytes": 2308
+    },
+    "log": {
+      "path": "overnight_final_validation_20260910/cpu/pytest.log",
+      "sha256": "28ff89867a06d100619873af2800b164cc366ba2cbbaa2f4200687530f741e58",
+      "size_bytes": 15264
+    }
+  },
+  "static": {
+    "status": "passed",
+    "source_clean_before_and_after": true,
+    "ruff": "passed",
+    "format": "passed",
+    "mypy_scope": "engines/ settings.py",
+    "bandit_scope": "engines/ features/ tools/ operator_app/ settings.py; medium+; B101/B603/B607/B615 excluded as prescribed",
+    "bandit_findings": 0,
+    "html_pages": 6,
+    "html_exit_codes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "dependency_audit": "Local dependency audit not rerun; retain separate prior security evidence.",
+    "receipt": {
+      "path": "overnight_final_validation_20260910/static/report.json",
+      "sha256": "1b8c76e9d2d6379c7009e97d44efe9985156763f5d78c586e7d28b2a1431fd94",
+      "size_bytes": 12215
+    }
+  },
+  "artifact_validation": {
+    "status": "passed",
+    "source_revision": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+    "wheel_sha256": "ac3d5216ce79f2ef004e2ed5be4c42d5eccb3f2ce8612661a2a7d138c7c2c41e",
+    "source_runtime_members": 152,
+    "sdist_and_mac_zip_rebuilt_wheels_byte_identical": true,
+    "isolated_environments": [
+      "Mac package environment",
+      "Torch-free Lite environment"
+    ],
+    "dependency_versions_unchanged": true,
+    "working_stt_env_modified": false,
+    "inference": false,
+    "service_installed": false,
+    "publication": false,
+    "native_audio_checks": [
+      {
+        "environment": "mac",
+        "exit_code": 0,
+        "device_endpoint_status": 200,
+        "input_devices": 0,
+        "output_devices": 0,
+        "model_runtime_modules_loaded": [],
+        "native_device_modules_loaded": [
+          "sounddevice"
+        ],
+        "polling_workers_after_lifespan": [],
+        "microphone_or_output_stream_opened": false
+      },
+      {
+        "environment": "mac",
+        "exit_code": 0,
+        "device_endpoint_status": 200,
+        "input_devices": 0,
+        "output_devices": 0,
+        "model_runtime_modules_loaded": [],
+        "native_device_modules_loaded": [
+          "sounddevice"
+        ],
+        "polling_workers_after_lifespan": [],
+        "microphone_or_output_stream_opened": false
+      },
+      {
+        "environment": "mac",
+        "exit_code": 0,
+        "device_endpoint_status": 200,
+        "input_devices": 0,
+        "output_devices": 0,
+        "model_runtime_modules_loaded": [],
+        "native_device_modules_loaded": [
+          "sounddevice"
+        ],
+        "polling_workers_after_lifespan": [],
+        "microphone_or_output_stream_opened": false
+      },
+      {
+        "environment": "lite",
+        "exit_code": 0,
+        "device_endpoint_status": 200,
+        "input_devices": 0,
+        "output_devices": 0,
+        "model_runtime_modules_loaded": [],
+        "native_device_modules_loaded": [
+          "sounddevice"
+        ],
+        "polling_workers_after_lifespan": [],
+        "microphone_or_output_stream_opened": false
+      },
+      {
+        "environment": "lite",
+        "exit_code": 0,
+        "device_endpoint_status": 200,
+        "input_devices": 0,
+        "output_devices": 0,
+        "model_runtime_modules_loaded": [],
+        "native_device_modules_loaded": [
+          "sounddevice"
+        ],
+        "polling_workers_after_lifespan": [],
+        "microphone_or_output_stream_opened": false
+      },
+      {
+        "environment": "lite",
+        "exit_code": 0,
+        "device_endpoint_status": 200,
+        "input_devices": 0,
+        "output_devices": 0,
+        "model_runtime_modules_loaded": [],
+        "native_device_modules_loaded": [
+          "sounddevice"
+        ],
+        "polling_workers_after_lifespan": [],
+        "microphone_or_output_stream_opened": false
+      }
+    ],
+    "receipt": {
+      "path": "overnight_final_validation_20260910/artifacts/report.json",
+      "sha256": "d13fe9aabad161f45b3631ed33f20194a5ab7bfa83d64c020ab38fb032b94b3b",
+      "size_bytes": 53840
+    }
+  },
+  "continuity": {
+    "status": "expected_operator_cleanup_only_runtime_delta",
+    "endurance_source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+    "final_source_revision": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+    "endurance_wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+    "final_wheel_sha256": "ac3d5216ce79f2ef004e2ed5be4c42d5eccb3f2ce8612661a2a7d138c7c2c41e",
+    "comparison": {
+      "identical_member_inventory": true,
+      "runtime_total": 152,
+      "non_markdown_runtime_count": 143,
+      "byte_identical_non_markdown_runtime_count": 138,
+      "changed_non_markdown_runtime_paths": [
+        "operator_app/audio.py",
+        "operator_app/features.py",
+        "operator_app/main.py",
+        "operator_app/metrics.py",
+        "operator_app/pipeline_manager.py"
+      ],
+      "markdown_runtime_count": 9,
+      "changed_markdown_paths": [
+        "displays/CLAUDE.md",
+        "engines/AGENTS.md",
+        "tools/CLAUDE.md"
+      ],
+      "identical_markdown_paths": [
+        "displays/AGENTS.md",
+        "displays/operator/README.md",
+        "engines/CLAUDE.md",
+        "features/AGENTS.md",
+        "features/CLAUDE.md",
+        "tools/AGENTS.md"
+      ],
+      "metadata_count": 5,
+      "changed_metadata_paths": [
+        "stark_translate-2026.14.0.0.dist-info/METADATA",
+        "stark_translate-2026.14.0.0.dist-info/RECORD"
+      ],
+      "metadata_headers_equal": true,
+      "canonical_wheel_bytes_identical": false,
+      "expected_operator_cleanup_paths": [
+        "operator_app/audio.py",
+        "operator_app/features.py",
+        "operator_app/main.py",
+        "operator_app/metrics.py",
+        "operator_app/pipeline_manager.py"
+      ],
+      "unexpected_non_markdown_runtime_paths": [],
+      "runtime_code_resources_outside_operator_delta": 138,
+      "unchanged_outside_operator_delta": true,
+      "explicit_pipeline_engine_paths": [
+        "dry_run_ab.py",
+        "engines/__init__.py",
+        "engines/_locks.py",
+        "engines/active_learning.py",
+        "engines/audio_devices.py",
+        "engines/base.py",
+        "engines/cuda_engine.py",
+        "engines/factory.py",
+        "engines/hf_whisper_engine.py",
+        "engines/llamacpp_engine.py",
+        "engines/marian_hf_engine.py",
+        "engines/mlx_engine.py",
+        "engines/mlx_generation_lock.py",
+        "engines/mlx_spec.py",
+        "engines/model_paths.py",
+        "engines/parakeet_engine.py",
+        "engines/parakeet_mlx_engine.py",
+        "engines/prefix_cache.py",
+        "engines/spec_decode_logger.py",
+        "engines/stt_fallback.py",
+        "engines/translation_prompts.py",
+        "engines/tts_engine.py"
+      ],
+      "uncompared_runtime_members": []
+    },
+    "receipt": {
+      "path": "overnight_final_validation_20260910/continuity/report.json",
+      "sha256": "abcf9210366479ba5c7f87fc817c9efde99d0c82b124c8fa5802816370892690",
+      "size_bytes": 85118
+    },
+    "interpretation": "Five operator cleanup modules changed and remain fully hash-compared; 138/143 code/resource members, including pipeline and every engine module, are identical. Both completed hours remain bound to the actual752 wheel; no new848 inference/hour is claimed."
+  },
+  "earlier_failure": {
+    "source_revision": "60ad4db3d0cd221d3cf110c2bb823033eab27b4b",
+    "stage": "mac-installed-smoke",
+    "exit_code": -11,
+    "signal": "SIGSEGV",
+    "classification": "real_operator_native_watcher_interpreter_shutdown_bug",
+    "explanation": "The background audio watcher could remain alive while native sounddevice import and interpreter shutdown overlapped. The operator lifespan now stops and joins existing polling workers, including on exceptional exit, and reports failed bounded joins; it does not construct absent workers during cleanup.",
+    "diagnostic_boundary": "Retained process receipt proves exit-11 after HTTP assertions passed. Root investigation identified the watcher/native-import race; private OS crash records are intentionally excluded.",
+    "receipt": {
+      "path": "overnight_final_validation_20260910/failed-60ad/report.json",
+      "sha256": "0f279e252a0fa65c8bba935f8f124097a193cf4591f17354c48925c74aaaf8ba",
+      "size_bytes": 26930
+    },
+    "log": {
+      "path": "overnight_final_validation_20260910/failed-60ad/mac-installed-smoke.log",
+      "sha256": "5c32e296caafa8af5dea0fd0d7b227d0b6de3b541affedf5d3d49dface58385d",
+      "size_bytes": 390
+    }
+  },
+  "remote_ci": {
+    "source_revision": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+    "successful_checks": 8,
+    "skipped_checks": [
+      "audit"
+    ],
+    "snapshot": {
+      "path": "overnight_final_validation_20260910/ci/pr192-84832fb.json",
+      "sha256": "08af3a5044f4c2542fe355d797f039509b6671fe365aed57f8624c5f91516916",
+      "size_bytes": 2684
+    },
+    "interpretation": "Executed checks passed on exact848 head; legacy audit skipped. Later documentation commit not yet checked by this snapshot."
+  },
+  "historical_evidence": {
+    "runtime_validation": "overnight_validation_20260910.json",
+    "artifact_receipt": "overnight_artifact_validation_20260910.json",
+    "endurance_report": "overnight_endurance_20260910/README.md",
+    "screen_report": "overnight_screen_20260910/README.md",
+    "gpu_regressions": {
+      "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+      "passed": 3,
+      "duration_seconds": 21.16,
+      "new_run_after_cleanup_fix": false
+    }
+  },
+  "integration": {
+    "pr_url": "https://github.com/wrbell/stark-translate/pull/192",
+    "pr_state": "open",
+    "is_draft": true,
+    "merged": false,
+    "merge_commit": null,
+    "issue_states": {
+      "134": "open",
+      "176": "open",
+      "177": "open",
+      "193": "open",
+      "194": "open"
+    },
+    "last_published_release": "v2026.13",
+    "publication": "pending_by_user_choice"
+  },
+  "limitations": [
+    "Device enumeration observed0 inputs/0 outputs; no stream opened and no microphone/output/hotplug certification.",
+    "New operator cleanup code has CPU, actual native-exit and artifact coverage; the earlier752 hour is not replayed against it.",
+    "No human-quality, physical-screen, natural-Spanish, training, x86/RTX2070 or speed promotion follows from these mechanical checks.",
+    "Original752 receipts and three endurance cohorts remain byte-for-byte unchanged."
+  ],
+  "evidence_inventory": {
+    "path": "overnight_final_validation_20260910/inventory.json",
+    "sha256": "6ae0349e1de8aa4b246f0857792206fa22482378e14b4dbecf1f19472e12379c",
+    "size_bytes": 13041
+  }
+}

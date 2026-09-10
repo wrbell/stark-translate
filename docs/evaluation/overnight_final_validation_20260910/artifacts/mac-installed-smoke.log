@@ -1,0 +1,2 @@
+{"version": "2026.14.0.0", "http": {"/healthz": 200, "/operator/": 200, "/operator/review.js": 200, "/operator/widgets/qr.js": 200, "/api/capabilities": 200}, "model_entries": 16, "package": "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/lib/python3.11/site-packages/operator_app/__init__.py", "runtime_files": 45, "verse_parser": "passed"}
+{"model_runtime_modules_loaded": [], "native_device_modules_loaded": [], "polling_workers_after_lifespan": []}
