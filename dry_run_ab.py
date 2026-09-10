@@ -3595,6 +3595,7 @@ async def _pipeline_coordinator():
                 {
                     "type": "translation_start",
                     "chunk_id": cid,
+                    "utterance_id": timing.utterance_id,
                     "english": english,
                     "stage": "final",
                     "stt_latency_ms": round(stt_latency, 1),

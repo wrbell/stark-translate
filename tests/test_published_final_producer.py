@@ -5,7 +5,7 @@ import json
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import numpy as np
 import pytest
@@ -86,6 +86,55 @@ async def final(d, uid=7):
         time.perf_counter(),
         timing=ChunkTiming(utterance_id=uid),
     )
+
+
+def test_coordinator_translation_start_preserves_capture_identity_distinct_from_chunk_id(pipeline, monkeypatch):
+    d = pipeline
+    messages = []
+    producer_messages = []
+    actual_broadcast = d.broadcast
+    monkeypatch.setattr(d, "chunk_id", 2)
+    monkeypatch.setattr(d, "prev_text", "")
+    monkeypatch.setattr(d, "_last_final_text", "")
+    monkeypatch.setattr(d, "correct_stt_output", lambda text: (text, []))
+    monkeypatch.setattr(d, "_run_stt", lambda *args: ("Actual coordinator source.", 10, 0.9, [], []))
+    finalize = AsyncMock()
+    monkeypatch.setattr(d, "_pipeline_translate_and_finalize", finalize)
+
+    async def run():
+        async def send(raw):
+            messages.append(json.loads(raw))
+
+        async def observe_producer(data):
+            # Assert the coordinator payload before broadcast can enrich it
+            # from the chunk timing lookup; otherwise that fallback masks a
+            # missing producer field (including when no clients are connected).
+            producer_messages.append(dict(data))
+            await actual_broadcast(data)
+
+        timing = ChunkTiming(utterance_id=17)
+        queue = asyncio.Queue()
+        queue.put_nowait((np.ones(16000), time.perf_counter(), None, timing))
+        queue.put_nowait(None)
+        monkeypatch.setattr(d, "_pipeline_chunk_queue", queue)
+        monkeypatch.setattr(d, "ws_clients", {Mock(send=send)})
+        monkeypatch.setattr(d, "broadcast", observe_producer)
+        await asyncio.wait_for(d._pipeline_coordinator(), 1)
+        assert len(producer_messages) == 1
+        assert producer_messages[0]["chunk_id"] == 3
+        assert producer_messages[0]["utterance_id"] == 17
+        assert len(messages) == 1
+        event = messages[0]
+        assert event["type"] == "translation_start"
+        assert event["chunk_id"] == 3
+        assert event["utterance_id"] == 17
+        assert event["english"] == "Actual coordinator source."
+        assert finalize.await_args.args[0] == 3
+        assert finalize.await_args.kwargs["timing"] is timing
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        monkeypatch.setattr(d, "_pipeline_pool", pool)
+        asyncio.run(run())
 
 
 @pytest.mark.parametrize("ab", [False, True])
