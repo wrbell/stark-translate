@@ -176,6 +176,11 @@
       "bytes": 4781
     },
     {
+      "path": "identity/microphone-identity-probe-20260910.json",
+      "sha256": "bc4de09d9306cbd55ebbc1609f437df7cbfa5f1d47a0fb3155c5f310d41f1ac5",
+      "bytes": 1124
+    },
+    {
       "path": "initial-runtime.json",
       "sha256": "c2f1c44e4d8f42b158ec9433f993d80272f5f85b8763158b75a36fc0cc278c02",
       "bytes": 5702

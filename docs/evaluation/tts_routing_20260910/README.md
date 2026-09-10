@@ -169,8 +169,24 @@ See [capture analysis](CAPTURE_ANALYSIS.md). The retest pipeline, capture child,
 both temporary operator PIDs and all test ports were stopped before releasing
 the device/model window; [cleanup](raw/retest-cleanup.json) confirms it.
 
-Retained work: resolve input identity within the process opening the device;
-diagnose upstream Spanish capture loss before claiming reliable EN↔ES live capture; exercise
+## Bounded input identity validation
+
+Source `d8c3f05` carries exact microphone name and host API through operator
+preflight, start/restart and microphone tests, then resolves the current device
+index in the native child. Missing or ambiguous identities fail before input
+opens; legacy integer-only CLI use retains process-local index semantics.
+
+The [two-second native probe](raw/identity/microphone-identity-probe-20260910.json)
+ran at 15:32 UTC on `eddb0ad`. It supplied stale index 2 plus exact
+`MacBook Pro Microphone` / `Core Audio`; the child opened current index 1 and
+returned 96,000 samples, RMS 0.08394 and peak 0.47759. Samples were discarded,
+no audio file was saved and no STT ran. A missing device name was rejected.
+The receipt retains the requested/actual identity and capture source hashes.
+This supports the identity repair only; it does not establish live-pipeline
+reliability, sustained capture or repair of the earlier upstream sample loss.
+
+Retained work: diagnose upstream Spanish capture loss before claiming reliable
+EN↔ES live capture; exercise
 caption-triggered route dispatch and virtual far-end receipt if required by
 #132; retain human-heard/physical output and unrelated #131 adapter gates.
 No acceptance issue was closed. The [raw manifest](raw/manifest.json) hashes

@@ -150,7 +150,7 @@ native process after the continuity microphone reappeared. Restarting the
 temporary operator refreshed its list and allowed the original retest. This is
 separate from the subsequent capture loss.
 
-The source follow-up binds explicit microphone selection to exact name and
+Source `d8c3f05` binds explicit microphone selection to exact name and
 host API through operator preflight, session restarts, live capture and the
 idle microphone test. The native child resolves the current index immediately
 before opening input, fails if the identity is missing or ambiguous, and
@@ -158,4 +158,37 @@ returns its actual identity in frame/probe metadata. Legacy integer-only CLI
 callers retain process-local index behavior; automatic input remains explicit
 automatic selection. CPU regressions exercise drift, missing and duplicate
 names, cross-API identity, actual worker options and metadata, bounded UI
-placeholders and test-input propagation. No post-fix hardware run is claimed.
+placeholders and test-input propagation.
+
+The [native identity probe](raw/identity/microphone-identity-probe-20260910.json)
+at 15:32 UTC on `eddb0ad` requested stale index 2 with exact name
+`MacBook Pro Microphone` and host API `Core Audio`. The child opened current
+index 1, captured 96,000 samples over two seconds and discarded them; no audio
+file or STT run was produced. A missing identity was rejected. This validates
+native identity resolution and rejection in that bounded probe, not sustained
+capture, the complete operator pipeline, caption quality or upstream loss repair.
+
+## Native inference drain at EOF and shutdown
+
+The later Standard screen v1 exposed a separate shutdown integrity defect.
+Spanish E4B `early_2s_160ms` repeat 0 exited with code 0 but its frozen trace
+contained an unmatched native partial-STT start/finish. Cancelling the asyncio
+executor wrapper did not stop the native call, and the old cleanup could write
+the summary before that call finished. The 96-run cohort was aborted after 13
+completed process runs and remains failed technical evidence.
+
+In `d8c3f05`, `_drain_inference_workers` cancels publication tasks and queued
+inference that has not started, then joins the actual executors off the event
+loop before model unload and summary persistence. Already-promised queued TTS
+is allowed to finish. This applies at replay EOF and ordinary shutdown; the
+process supervisor retains the outer deadline if native work never returns.
+It does not change native microphone queue capacity or repair upstream capture
+loss by itself.
+
+The distinct v4 integrity pilot used `eddb0ad` for three Spanish E4B runs:
+opening control, `early_2s_160ms`, closing control. All completed integrity and
+source-ledger checks. The [follow-up status](../mac_followup_20260910/README.md)
+keeps this functional result separate from the aborted v1 cohort and the
+96-run Standard v2 cohort started at 15:33 UTC on `eddb0ad`, whose completion
+and results remain pending. No optimization or microphone certification follows
+from these three file-replay runs.

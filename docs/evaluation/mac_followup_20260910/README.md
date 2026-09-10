@@ -53,10 +53,38 @@ no release or package publication is authorized for this follow-up. The
   remain unapproved. Missing WSL artifacts/holdouts are not treated as passing.
 
 The [normalized integrity pilot](normalized-integrity-pilot/README.md) passed both
-actual production runs on `a8511ee`. The independent 96-run Standard EN/ES
-screen is now executing on that frozen runtime. The [device follow-up](../tts_routing_20260910/README.md)
-retains successful native TTS routing and a retest with zero parent-handoff drops
-but remaining upstream microphone loss; its mixed-input evidence contains no incidental text.
+actual production runs on `a8511ee`. The subsequent 96-run Standard EN/ES screen
+v1 was aborted after 13 completed process runs. Its Spanish E4B
+`early_2s_160ms` repeat 0 exited successfully but retained an unmatched native
+partial-STT start/finish: cancelling the asyncio wrapper had allowed the session
+summary to freeze while the physical call was still running. The entire v1
+cohort remains failed technical evidence, including the interrupted next run;
+it supplies no optimization selection result.
+
+Source `d8c3f05` joins native inference workers before model unload and final
+session summaries, including at file EOF. It cancels queued inference that has
+not started while preserving queued TTS already promised by published finals.
+The separate v4 integrity pilot on `eddb0ad` completed three Spanish E4B runs
+(opening control, `early_2s_160ms`, closing control) with passing integrity and
+source-ledger checks. This verifies the shutdown repair in those runs; it does
+not establish a speed improvement. A fresh 96-run Standard v2 cohort started
+at 15:33 UTC on frozen `eddb0ad`; completion and results remain pending, separate
+from v1 and the v4 pilot. Local receipts remain under
+`.cache/mac-en-es-closeout/standard-screen-normalized-v1` and
+`.cache/mac-en-es-closeout/measurement-pilot-v4`, with the v1 abort receipt beside
+those directories.
+
+The [device follow-up](../tts_routing_20260910/README.md) retains successful
+native TTS routing and a retest with zero parent-handoff drops but remaining
+upstream microphone loss; its mixed-input evidence contains no incidental text.
+The [input identity repair](../tts_routing_20260910/CAPTURE_ANALYSIS.md#input-device-identity-follow-up)
+in `d8c3f05` binds exact microphone name and host API through preflight,
+start/restart and microphone tests, resolving the index inside the native child.
+Missing or ambiguous selections fail rather than selecting another input.
+A [two-second native identity probe](../tts_routing_20260910/raw/identity/microphone-identity-probe-20260910.json)
+opened the built-in microphone at current index 1 despite a supplied stale index
+2, and rejected a missing name. It discarded its samples and ran no STT;
+post-fix live-pipeline capture reliability remains unvalidated.
 
 ## Development STT result
 
