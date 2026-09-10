@@ -1,15 +1,14 @@
 {
   "schema_version": 2,
   "repository": "/Users/willem/Code/vibes/SRTranslate",
-  "source_revision_at_start": "4b0144d1b15bcca2fac4b490d52db2ca257238fb",
-  "source_revision_at_end": "4b0144d1b15bcca2fac4b490d52db2ca257238fb",
+  "source_revision_at_start": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+  "source_revision_at_end": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
   "scope": "Read-only static source inventory observed during the live pinning preparation, before final runtime/artifact validation. Core and optional live repairs are classified from source only. This is not global B615 clearance, dependency remediation proof, or model/device certification.",
   "method": [
     "Read root and engines/tools/training/features/displays AGENTS.md.",
     "Search tracked runtime, tools, training, setup, scripts and archived evidence with rg; AST enumerate model/download constructor families and mlx_lm.load aliases.",
     "Manually inspect live reachability, local/pinned resolver behavior and shell/heredoc download calls.",
-    "Record exact observed line spans, call text, per-file SHA-256 and manifest entries.",
-    "Final post-fix refresh: inspect both summary load calls and setup revision validation before cache/download mutation; inspect live QE/optional CSV QE separation and wrapper-specific downloads."
+    "Record exact observed line spans, call text, per-file SHA-256 and manifest entries."
   ],
   "limitations": [
     "Static source inventory is not a Bandit run or global B615 clearance; third-party transitive model fetching is not exhaustively audited.",
@@ -142,6 +141,7 @@
     "tests/test_phase9_6_features.py",
     "tests/test_phase9_7_runbook.py",
     "tests/test_pinned_live_model_sources.py",
+    "tests/test_pinned_mlx_model_loading.py",
     "tests/test_pipeline_integration.py",
     "tests/test_pipeline_refresh.py",
     "tests/test_pipeline_startup_validation.py",
@@ -188,34 +188,15 @@
     "tests_gpu/test_mlx_gemma4_live.py",
     "tests_gpu/test_mlx_worker_first_forward.py"
   ],
-  "created_at_utc": "2026-09-10T16:42:04.825174+00:00",
-  "completed_at_utc": "2026-09-10T16:42:06.619607+00:00",
+  "created_at_utc": "2026-09-10T17:10:07.514990+00:00",
+  "completed_at_utc": "2026-09-10T17:10:09.355991+00:00",
   "working_tree_status": [
-    "M dry_run_ab.py",
-    " M engines/mlx_engine.py",
-    " M engines/model_paths.py",
-    " M engines/parakeet_mlx_engine.py",
-    " M features/live_diarize.py",
-    " M features/summarize_sermon.py",
-    " M models.lock.json",
-    " M operator_app/cli.py",
-    " M operator_app/setup.py",
-    " M tests/test_gemma4_eos.py",
-    " M tests/test_mlx_stt_fallback_language.py",
-    " M tests/test_mlx_thread_first_forward.py",
-    " M tests/test_mlx_turboquant.py",
-    " M tests/test_parakeet_mlx_engine.py",
-    " M tests/test_stt_benchmark_identity.py",
-    " M tests/test_summarize_sermon.py",
-    " M workers.py",
-    "?? docs/evaluation/mac_followup_20260910/hymn-annotation-protocol.md",
-    "?? docs/evaluation/mac_followup_20260910/live-hf-pinning-receipts.json",
-    "?? docs/evaluation/mac_followup_20260910/live-hf-pinning.md",
-    "?? docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json",
-    "?? docs/evaluation/mac_followup_20260910/live-hf-source-inventory.md",
-    "?? tests/test_pinned_mlx_model_loading.py"
+    "M docs/evaluation/mac_followup_20260910/live-hf-pinning-receipts.json",
+    " M docs/evaluation/mac_followup_20260910/live-hf-pinning.md",
+    " M docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json",
+    " M docs/evaluation/mac_followup_20260910/live-hf-source-inventory.md"
   ],
-  "prior_inventory_sha256": "d16591836e656b9fc0c77265f255c89378a4e137e65f48867a49a87855d5479f",
+  "prior_inventory_sha256": "10c9b338347b9118946e770582e3030a8f5f1e0014b71f028f488cffb464c2df",
   "scanned_source_file_sha256": {
     "bootstrap.sh": "33e74f60338a881a67990c016b32befa5e0bcc185713a71aab9b9cfb3641678e",
     "docker/entrypoint.sh": "a9b466de9359bacb5d890774b0aa4dd24edf53136bb876b26e8f4a115132ef7f",
@@ -227,7 +208,7 @@
     "docs/evaluation/overnight_screen_20260910/verify_evidence.py": "7c72ba8a97c21c4f5a81301cdef358dda690334fb1cd9f73d7c71424ef322c94",
     "docs/evaluation/tts_routing_20260910/probe.py": "9906f0ae66d85d75b366e43e6c683e535ec1acaf882a2098662a341639aa49ac",
     "docs/evaluation/tts_routing_20260910/raw/routes-r0-probe.py": "63aeb6f3af4b452195b4fcb821f92eff7376e75d4e95f566d8ce403dc2c9b08c",
-    "dry_run_ab.py": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+    "dry_run_ab.py": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
     "engines/__init__.py": "45034d1776f5ee1ad620a8b09e654431f0c179b0c8c9320c8a2882fa1d4393fd",
     "engines/_locks.py": "80bb52edd8441e66e9ed96c24a750c2694e20dcd9ecce3e4121d0ab878daaf90",
     "engines/active_learning.py": "ca1f5c59afb7cd212393e26c55ea056491217a56274947c82a50effa87ffe5a6",
@@ -692,7 +673,7 @@
       "site_id": "dry_run_ab.py:1188",
       "line": 1188,
       "end_line": 1188,
-      "source_file_sha256": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+      "source_file_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
       "trust_remote_code": {
         "explicit_expression": null,
         "status": "not_explicitly_passed",
@@ -703,7 +684,8 @@
       },
       "pin_status": "immutable_revision_via_complete_local_snapshot",
       "residual_remote_risk": false,
-      "code_execution_surface": "Model deserialization and third-party transitive behavior were not executed or certified by this source inventory."
+      "code_execution_surface": "Model deserialization and third-party transitive behavior were not executed or certified by this source inventory.",
+      "startup_fallback_policy": "Primary resolution and warmup share the guarded try. English network/cache/inference failure may resolve the configured pinned/local fallback. Spanish is rejected by require_mlx_fallback_language before fallback resolution or inference. UnpinnedModelError is re-raised for either language rather than silently changing the declared model."
     },
     {
       "path": "dry_run_ab.py",
@@ -720,10 +702,10 @@
       "role_description": "Main EN/ES application MLX Whisper load/transcribe; includes configured fallback model.",
       "observed_policy": "Live load boundaries now resolve an existing local model or download the registered immutable 40-hex revision to a complete local snapshot before the wrapper call. Transcribe calls reuse that selected source. Explicit existing local overrides are preserved without inventing an HF revision.",
       "pinning_scope": "targeted_core_mac_and_worker_pinning",
-      "site_id": "dry_run_ab.py:1196",
-      "line": 1196,
-      "end_line": 1196,
-      "source_file_sha256": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+      "site_id": "dry_run_ab.py:1198",
+      "line": 1198,
+      "end_line": 1198,
+      "source_file_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
       "trust_remote_code": {
         "explicit_expression": null,
         "status": "not_explicitly_passed",
@@ -734,7 +716,8 @@
       },
       "pin_status": "immutable_revision_via_complete_local_snapshot",
       "residual_remote_risk": false,
-      "code_execution_surface": "Model deserialization and third-party transitive behavior were not executed or certified by this source inventory."
+      "code_execution_surface": "Model deserialization and third-party transitive behavior were not executed or certified by this source inventory.",
+      "startup_fallback_policy": "Primary resolution and warmup share the guarded try. English network/cache/inference failure may resolve the configured pinned/local fallback. Spanish is rejected by require_mlx_fallback_language before fallback resolution or inference. UnpinnedModelError is re-raised for either language rather than silently changing the declared model."
     },
     {
       "path": "dry_run_ab.py",
@@ -754,10 +737,10 @@
       "role_description": "Main EN/ES application MLX Whisper load/transcribe; includes configured fallback model.",
       "observed_policy": "Live load boundaries now resolve an existing local model or download the registered immutable 40-hex revision to a complete local snapshot before the wrapper call. Transcribe calls reuse that selected source. Explicit existing local overrides are preserved without inventing an HF revision.",
       "pinning_scope": "targeted_core_mac_and_worker_pinning",
-      "site_id": "dry_run_ab.py:2682",
-      "line": 2682,
-      "end_line": 2689,
-      "source_file_sha256": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+      "site_id": "dry_run_ab.py:2684",
+      "line": 2684,
+      "end_line": 2691,
+      "source_file_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
       "trust_remote_code": {
         "explicit_expression": null,
         "status": "not_explicitly_passed",
@@ -788,10 +771,10 @@
       "role_description": "Main EN/ES application MLX Whisper load/transcribe; includes configured fallback model.",
       "observed_policy": "Live load boundaries now resolve an existing local model or download the registered immutable 40-hex revision to a complete local snapshot before the wrapper call. Transcribe calls reuse that selected source. Explicit existing local overrides are preserved without inventing an HF revision.",
       "pinning_scope": "targeted_core_mac_and_worker_pinning",
-      "site_id": "dry_run_ab.py:3049",
-      "line": 3049,
-      "end_line": 3056,
-      "source_file_sha256": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+      "site_id": "dry_run_ab.py:3051",
+      "line": 3051,
+      "end_line": 3058,
+      "source_file_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
       "trust_remote_code": {
         "explicit_expression": null,
         "status": "not_explicitly_passed",
@@ -5849,7 +5832,7 @@
   ],
   "counts": {
     "scanned_source_files": 211,
-    "excluded_test_files": 168,
+    "excluded_test_files": 169,
     "call_sites": 173,
     "by_role": {
       "core_mac_live": 15,
@@ -5925,12 +5908,6 @@
       "source_file_sha256": "4c25adf28bac742fed092559653aa93b1dad8d4ee5285d1b8eff8e6cde4b0bb0"
     }
   ],
-  "supersedes": {
-    "source_inventory_sha256": "bf0bcf43655096cde46905c8076a7efe84481829dc484e3497020f03a363f7c9",
-    "created_at_utc": "2026-09-10T16:34:47.291708+00:00",
-    "preserved_in": ".cache/mac-en-es-closeout/live-pinning-preparation/before-summary-setup-fixes/",
-    "reason": "Post-session summary and optional TranslateGemma loaders now use the pinned boundary; HF setup rejects missing or non-40-hex revisions before mutation."
-  },
   "unexecuted_native_gates": [
     "This inventory did not execute post-change MLX, summary, SpeechBrain or pyannote inference, model downloads, capture or playback.",
     "Optional pyannote model access and native/human acceptance remain separate; see the paired live-hf-pinning.md and live-hf-pinning-receipts.json for the implementation agent evidence."
@@ -5938,14 +5915,14 @@
   "non_model_qe_boundaries": [
     {
       "path": "dry_run_ab.py",
-      "line": 1794,
-      "end_line": 1798,
+      "line": 1796,
+      "end_line": 1800,
       "symbol": "qe_score",
       "roles": [
         "core_mac_live"
       ],
       "source": "def qe_score(source, translation):\n    \"\"\"Combined lightweight QE score (0-1). Higher = better.\"\"\"\n    lr = qe_length_ratio(source, translation)\n    ut = qe_untranslated(source, translation)\n    return round((lr + ut) / 2, 2)",
-      "source_file_sha256": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+      "source_file_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
       "policy": "Deterministic length-ratio/untranslated-word heuristics; no model or remote loading."
     },
     {
@@ -5972,5 +5949,136 @@
       "source_file_sha256": "a17a378b73e501a8796f6e6cf3a766863bc5f83e6ef27987a0ca4fa358f30097",
       "policy": "Full 40-hex string required before selected HF entries can reach cache, target-directory or download processing; the low-level wrapper repeats the check."
     }
-  ]
+  ],
+  "initial_inventory_sha256": "d16591836e656b9fc0c77265f255c89378a4e137e65f48867a49a87855d5479f",
+  "supersedes": {
+    "source_inventory_sha256": "10c9b338347b9118946e770582e3030a8f5f1e0014b71f028f488cffb464c2df",
+    "pinning_receipt_sha256": "bf5fd0822d28e64a93635616d8fdd2256eb2f82ed95e426d92bc64c67a917385",
+    "created_at_utc": "2026-09-10T16:42:04.825174+00:00",
+    "preserved_in": ".cache/mac-en-es-closeout/live-pinning-preparation/before-startup-fallback-20260910T170347Z",
+    "reason": "Refresh after committed Mac startup fallback repair and resolved-path fixture correction; all model pins and residual call-site classifications unchanged.",
+    "earlier_inventory_snapshot": {
+      "source_inventory_sha256": "bf0bcf43655096cde46905c8076a7efe84481829dc484e3497020f03a363f7c9",
+      "created_at_utc": "2026-09-10T16:34:47.291708+00:00",
+      "preserved_in": ".cache/mac-en-es-closeout/live-pinning-preparation/before-summary-setup-fixes/",
+      "reason": "Post-session summary and optional TranslateGemma loaders now use the pinned boundary; HF setup rejects missing or non-40-hex revisions before mutation."
+    }
+  },
+  "source_commits": {
+    "pinning": "97cfc9f9e5be3794e56757c7ef05fe7e05b6ef71",
+    "resolved_path_test_fixture": "fad0558f0c1cec282ef47ce06f37f49b894b0abf",
+    "startup_fallback": "fb44a0f7023f1fde539f908ef09c4d85062b4c5c",
+    "documentation_contract": "476e349d6887b9f4e2379f9e57646bdd2bb2c581"
+  },
+  "source_tree_observation": "All tracked source files match committed 476e349; only the four inventory/pinning documentation files are being refreshed in the recorded working-tree status. No runtime file changed after fb44a0f.",
+  "source_changes_since_prior_inventory": [
+    {
+      "path": "dry_run_ab.py",
+      "prior_sha256": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+      "current_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32"
+    }
+  ],
+  "excluded_test_count_change": {
+    "previous": 168,
+    "current": 169,
+    "reason": "tests/test_pinned_mlx_model_loading.py is now tracked; tests remain excluded from model-acquisition call counts."
+  },
+  "startup_fallback_boundary": {
+    "path": "dry_run_ab.py",
+    "symbol": "load_whisper",
+    "line": 1184,
+    "end_line": 1199,
+    "source_file_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
+    "policy": "Primary resolution and warmup share the guarded try. English network/cache/inference failure may resolve the configured pinned/local fallback. Spanish is rejected by require_mlx_fallback_language before fallback resolution or inference. UnpinnedModelError is re-raised for either language rather than silently changing the declared model.",
+    "language_guard": {
+      "path": "engines/stt_fallback.py",
+      "line": 9,
+      "source_file_sha256": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4"
+    }
+  },
+  "validation_evidence": {
+    "startup_source_checks": {
+      "receipt_path": ".cache/mac-en-es-closeout/startup-fallback-review/source-checks.json",
+      "receipt_sha256": "931976ec642f83d6be5b203a987822b657688ff4a71a6aa4d66c70b2af22a1e5",
+      "script_path": ".cache/mac-en-es-closeout/startup-fallback-review/check_source.py",
+      "recorded_result": {
+        "status": "passed",
+        "checks": [
+          "actual EN load catches pinned download failure and loads existing fallback cache",
+          "es fixture/primary: correct exception and no fallback inference",
+          "en unregistered/primary: correct exception and no fallback inference",
+          "es unregistered/primary: correct exception and no fallback inference",
+          "native/runtime modules absent after shim restoration"
+        ],
+        "count": 5,
+        "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+        "scope": "AST-extracted actual load_whisper, real resolver/language guard, tiny fake cache, fake downloader/native APIs",
+        "source_sha256": {
+          "dry_run_ab.py": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
+          "tests/test_mlx_stt_fallback_language.py": "d21465e9bf526f9cc46ed353914655d2fb1f142d864350bc351ac050090d57d6",
+          "engines/model_paths.py": "e0d820fab595adeaee041f0a09b36f2c4ad9e127f1551f0e8a7592808410c189",
+          "engines/stt_fallback.py": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4"
+        },
+        "script_sha256": "6c44887e0af1d8e2f75115ad183a062c781869fa83b6da3148d6f923297c6f52",
+        "pytest_executed": false,
+        "weights_downloaded": false,
+        "native_models_or_devices": false
+      },
+      "review": "Receipt and all recorded source/script hashes verified against current files; checks were not rerun by the inventory refresh."
+    },
+    "prior_ci": {
+      "source_revision": "fad0558f0c1cec282ef47ce06f37f49b894b0abf",
+      "status": "passed",
+      "python311": {
+        "passed": 2809,
+        "skipped": 6,
+        "warnings": 2,
+        "duration_seconds": 127.39,
+        "coverage_percent": 66.24,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34504851183/job/102964373192",
+        "log_path": ".cache/mac-en-es-closeout/ci-fad0558-python311.log",
+        "log_sha256": "9de3532c1f0e2133c7c1255051d1d63233e0bff82f4546328f670d95d65d3bb7"
+      },
+      "python312_and_lint": "Passed on the same head; verified and reported by the coordinator.",
+      "scope": "Prior integrated CI after the resolved-model-path fixture correction; does not validate the subsequent fb44a0f startup repair."
+    },
+    "startup_ci": {
+      "source_revision": "fb44a0f7023f1fde539f908ef09c4d85062b4c5c",
+      "status": "failed",
+      "url": "https://github.com/wrbell/stark-translate/actions/runs/34505780125",
+      "python311": {
+        "passed": 2812,
+        "failed": 1,
+        "skipped": 6,
+        "warnings": 2,
+        "duration_seconds": 126.6,
+        "coverage_percent": 66.24,
+        "log_path": ".cache/mac-en-es-closeout/ci-fb44a0f-python311.log",
+        "log_sha256": "188f14923ac4a8823fb1a05704fd2005725958bafedae0253bf0a5b5f4af33fc"
+      },
+      "failure": "Documentation contract still hardcoded historical PR192; current/draft PR196 contract repaired by 476e349. Coordinator reported the same sole failure on Python3.12.",
+      "new_startup_pytest_cases": {
+        "count": 4,
+        "status": "passed",
+        "names": [
+          "test_live_english_primary_download_failure_uses_cached_fallback",
+          "test_live_spanish_primary_download_failure_does_not_attempt_english_fallback",
+          "test_live_unpinned_primary_never_attempts_fallback[en]",
+          "test_live_unpinned_primary_never_attempts_fallback[es]"
+        ]
+      },
+      "test_file": "tests/test_mlx_stt_fallback_language.py",
+      "test_lines": [
+        62,
+        73,
+        84
+      ],
+      "scope": "The four startup pytest cases passed in CI; the local five-check stdlib harness did not execute pytest. The full fb44a0f suite did not pass."
+    },
+    "current_ci": {
+      "source_revision": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+      "status": "pending; final result not established at coordinator report",
+      "scope": "The 476e349 documentation-only repair does not change the 211 inventoried source files; full CI is separate from earlier fb44a0f startup-test success."
+    }
+  }
 }

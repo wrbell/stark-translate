@@ -26,6 +26,14 @@ other live and manual training, export, evaluation and operator paths. The earli
 | Optional Pyannote embedding | `Inference` receives the pinned local `pytorch_model.bin`, selecting the wrapper's local-file branch. |
 | Optional live full Pyannote pipeline | Verified pinned pipeline config, separately pinned segmentation and embedding checkpoints, local `Model` objects, then original pipeline/instantiation parameters. Unknown nested sources or unavailable gated files disable the optional loader gracefully. The standalone offline `features.diarize` path is unchanged. |
 
+The committed startup repair in `fb44a0f` puts `dry_run_ab.load_whisper` primary
+resolution inside the same `try` as warmup. An English primary download/cache
+failure can therefore use the configured pinned or cached fallback. Spanish
+fails its English-only fallback guard before fallback resolution or inference.
+Both languages re-raise `UnpinnedModelError` for an unregistered primary instead
+of silently switching the declared model. The engine wrapper retains the same
+policy; model IDs and confidence thresholds are unchanged.
+
 The full Pyannote daemon defers model loading until a real file has a valid WAV
 header and at least one frame. Missing paths, directories and empty/partial files
 do not trigger downloads or native imports. An unavailable optional pipeline is
@@ -89,7 +97,7 @@ immutable source selection does not replace trust in checkpoint/YAML contents.
 
 ## Validation and remaining execution
 
-Sixteen tiny stdlib source fixtures passed: offline behavior, exact pinned download
+The original sixteen tiny stdlib source fixtures passed: offline behavior, exact pinned download
 arguments, cache reuse, explicit local overrides, partial snapshot rejection,
 SpeechBrain API/secondary-source handling, local Pyannote loading and rejection of
 an unknown nested source, the real setup parser/Lite policy, rejection of malformed
@@ -99,13 +107,41 @@ focused Ruff checks. All six new entries matched fetched metadata filenames and
 full revisions. Existing MLX unit fixtures now mock the load-time boundary so
 ordinary CI cannot accidentally download models.
 
-Focused pytest tests are prepared in `tests/test_pinned_mlx_model_loading.py` and
-the existing MLX/fallback suites; they exercise the actual resolver and YAML
-parser with mocked download and native APIs. They were not executed during the
-active model measurement queue. The coordinator can run these with the normal
-test environment and `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 STARK_RUN_VAD_TESTS=0`, then
-run the repository's full CI checks. This receipt must not be read as those tests
-already passing.
+These checks and the earlier 17-file AST/Ruff results retain their original
+scope. After the resolved-path adapter fixture correction `fad0558`,
+[Python 3.11 CI](https://github.com/wrbell/stark-translate/actions/runs/34504851183/job/102964373192)
+passed 2,809 tests, with six skipped, two warnings and 66.24% coverage in 127.39 s.
+Python 3.12 and lint also passed that head. This precedes the startup repair.
+
+Five additional stdlib checks exercised the actual AST-extracted startup loader,
+real resolver/language guard, a tiny fake cache and fake downloader/native APIs:
+English acquisition failure used cached fallback; Spanish acquisition failure
+made no fallback inference; unregistered English and Spanish primary IDs each
+raised the policy error; and no native/runtime modules remained after shim
+restoration. The embedded receipt preserves the original result from
+`.cache/mac-en-es-closeout/startup-fallback-review/source-checks.json`; its script
+and four source hashes match the committed `fb44a0f` files.
+
+The repair adds four pytest cases in three test functions, with EN/ES
+parameterization for unregistered IDs. The source-check harness did not execute
+pytest. Subsequent [CI for `fb44a0f`](https://github.com/wrbell/stark-translate/actions/runs/34505780125)
+passed all four new startup cases. The full Python 3.11 suite recorded 2,812
+passed, one failed, six skipped and two warnings, with 66.24% coverage in 126.60 s.
+Its sole failure was a stale documentation assertion hardcoding PR #192; the
+coordinator reported the same failure on Python 3.12. Commit `476e349` repairs
+that assertion without changing runtime files; its full CI remains pending here.
+The earlier failed full suite is not relabeled as passing. Mocked tests do not
+establish native model or installed-artifact behavior.
+
+The refreshed [inventory](live-hf-source-inventory.json) binds `476e349`, whose
+211 source hashes are unchanged since `fb44a0f`; the receipt rechecks its 20
+current source/test hashes and five existing
+local upstream API-source hashes. Metadata, configuration/access observations
+and model pins are unchanged, with no new remote requests. Exact pre-refresh
+inventory `10c9b338347b9118946e770582e3030a8f5f1e0014b71f028f488cffb464c2df`
+and receipt `bf5fd0822d28e64a93635616d8fdd2256eb2f82ed95e426d92bc64c67a917385`
+bytes remain with both Markdown files in
+`.cache/mac-en-es-closeout/live-pinning-preparation/before-startup-fallback-20260910T170347Z/`.
 
 Final installed-artifact EN/ES tests still require a reserved execution window,
 explicit file input and `--no-tts`. Diarization remains off by default, and its
