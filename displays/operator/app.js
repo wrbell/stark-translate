@@ -612,6 +612,8 @@
         const query = new SearchParams({backend: selected.backend, lang: selected.lang,
           tts: String(selected.tts), diarize: String(selected.diarize)});
         if (selected.mic_device != null) query.set("input_device", String(selected.mic_device));
+        if (selected.mic_device_name) query.set("input_device_name", selected.mic_device_name);
+        if (selected.mic_host_api) query.set("input_host_api", selected.mic_host_api);
         // The same profile the start request will carry, so both agree.
         if (selected.profile) query.set("profile", selected.profile);
         const data = await getJson(`/api/preflight?${query}`, {timeout: true});
@@ -695,6 +697,25 @@
     }
 
     let knownChangeSeq = 0;
+    function selectMicIdentity(name, hostApi) {
+      // Only real inventory entries can resolve an identity. Keep one bounded
+      // placeholder when an explicit choice is unavailable or ambiguous.
+      for (const option of Array.from(el.micSelect.options)) {
+        if (option.dataset.inputPlaceholder) option.remove();
+      }
+      const matches = Array.from(el.micSelect.options).filter(o => o.dataset.inputName === name &&
+        (!hostApi || o.dataset.hostApi === hostApi));
+      let selected = matches.length === 1 ? matches[0] : null;
+      if (!selected) {
+        selected = makeOption(`${name} (unavailable or ambiguous)`, `identity:${JSON.stringify([name, hostApi || null])}`);
+        selected.dataset.inputName = name;
+        selected.dataset.inputPlaceholder = "true";
+        if (hostApi) selected.dataset.hostApi = hostApi;
+        el.micSelect.appendChild(selected);
+      }
+      el.micSelect.value = selected.value;
+    }
+
     let deviceRequest = 0;
     async function refreshDevices(showChangeToast) {
       const request = ++deviceRequest;
@@ -706,14 +727,26 @@
         if (request !== deviceRequest) return; // a newer listing already landed
         const inputs = data.inputs || [];
         const selectedMic = el.micSelect.value;
+        const selectedOption = Array.from(el.micSelect.options).find(o => o.value === selectedMic);
+        const micName = selectedOption && selectedOption.dataset.inputName;
+        const micApi = selectedOption && selectedOption.dataset.hostApi;
         el.micSelect.replaceChildren();
         el.micSelect.appendChild(makeOption("Automatic (computer default)", ""));
         const dupes = duplicateNames(inputs);
-        for (const d of inputs) el.micSelect.appendChild(makeOption(deviceLabel(d, dupes), d.index));
-        if (selectedMic && !hasOption(el.micSelect, selectedMic)) {
-          el.micSelect.appendChild(makeOption(`Previously chosen microphone (unavailable)`, selectedMic));
+        for (const d of inputs) {
+          const option = makeOption(deviceLabel(d, dupes), d.index);
+          option.dataset.inputName = d.name;
+          if (d.host_api) option.dataset.hostApi = d.host_api;
+          el.micSelect.appendChild(option);
         }
-        el.micSelect.value = selectedMic;
+        if (micName) {
+          selectMicIdentity(micName, micApi);
+        } else {
+          if (selectedMic && !hasOption(el.micSelect, selectedMic)) {
+            el.micSelect.appendChild(makeOption(`Previously chosen microphone (unavailable)`, selectedMic));
+          }
+          el.micSelect.value = selectedMic;
+        }
         setText(el.micHint, inputs.length
           ? `${inputs.length} microphone${inputs.length === 1 ? "" : "s"} found. Choose the USB microphone by name.`
           : "No microphones were found. Plug in the USB microphone.");
@@ -878,6 +911,12 @@
       const device = select.value ? Number(select.value) : null;
       const deviceName = selectedLabel(select, input ? "the computer's default microphone" : "the computer's default speakers");
       const body = input ? {device, duration_s: 2} : {device, duration_s: 0.4};
+      if (input) {
+        const selected = readForm();
+        body.device = selected.mic_device == null ? null : selected.mic_device;
+        if (selected.mic_device_name) body.device_name = selected.mic_device_name;
+        if (selected.mic_host_api) body.device_host_api = selected.mic_host_api;
+      }
       const label = input ? "Microphone test" : "Speaker test";
       audioTestBusy = true;
       renderAudioTests();
@@ -955,6 +994,13 @@
         const key = target.name === "output_device" ? "tts_device" : target.name;
         if (!Object.hasOwn(config, key) || (!force && (statusSeen || idleEditedFields.has(target.name)))) continue;
         const value = config[key];
+        if (key === "mic_device" && config.mic_device_name) {
+          const before = target.value;
+          selectMicIdentity(config.mic_device_name, config.mic_host_api);
+          changed = changed || before !== target.value;
+          idleEditedFields.delete(target.name);
+          continue;
+        }
         if (["tts_device_en", "tts_device_es"].includes(key)) {
           changed = changed || target.dataset.deviceIndex !== (typeof value === "number" ? String(value) : undefined);
           if (typeof value === "number") target.dataset.deviceIndex = String(value);
@@ -1292,7 +1338,10 @@
         log_level: "INFO",
       };
       const mic = value("mic_device");
-      if (mic) body.mic_device = Number(mic);
+      if (mic && Number.isInteger(Number(mic))) body.mic_device = Number(mic);
+      const micOption = Array.from(el.micSelect.options).find(o => o.value === mic);
+      if (micOption && micOption.dataset.inputName) body.mic_device_name = micOption.dataset.inputName;
+      if (micOption && micOption.dataset.hostApi) body.mic_host_api = micOption.dataset.hostApi;
       const ttsMode = value("tts_output_mode");
       if (ttsMode) body.tts_output_mode = ttsMode;
       const ttsDevice = value("output_device");

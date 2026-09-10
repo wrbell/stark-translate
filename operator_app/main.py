@@ -125,6 +125,8 @@ class StartRequest(BaseModel):
     run_ab: bool = False
     vad_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
     mic_device: int | None = None
+    mic_device_name: str | None = Field(default=None, min_length=1, max_length=512)
+    mic_host_api: str | None = Field(default=None, min_length=1, max_length=512)
     mic_gain: float | None = None
     log_level: str = Field(default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR)$")
     # Phase 9.4.1: TTS output device routing
@@ -211,6 +213,8 @@ def _preflight_config(cfg, root):
         tts=cfg.tts,
         diarize=cfg.diarize,
         input_device=cfg.mic_device,
+        input_device_name=cfg.mic_device_name,
+        input_host_api=cfg.mic_host_api,
         stt_backend=cfg.stt_backend,
         model_family=cfg.model_family or "gemma4",
         gemma4_size=cfg.gemma4_size or "e4b",
@@ -229,6 +233,12 @@ def _require_preflight(cfg, runner):
                 "checks": checks["checks"],
             },
         )
+    for check in checks["checks"]:
+        if check.get("name") == "Microphone" and check.get("device"):
+            selected = check["device"]
+            cfg.mic_device = selected["index"]
+            cfg.mic_device_name = selected["name"]
+            cfg.mic_host_api = selected["host_api"]
 
 
 def _checked_restart(cfg, runner, *, requested_engine=None):
@@ -254,6 +264,8 @@ def api_preflight(
     tts: bool = False,
     diarize: bool = False,
     input_device: int | None = None,
+    input_device_name: str | None = None,
+    input_host_api: str | None = None,
     profile: str | None = None,
     runner: PipelineRunner = Depends(get_runner),
 ) -> dict:
@@ -263,6 +275,8 @@ def api_preflight(
         tts=tts,
         diarize=diarize,
         mic_device=input_device,
+        mic_device_name=input_device_name,
+        mic_host_api=input_host_api,
         profile=profile or os.environ.get("STARK_PROFILE", "standard"),
     )
     checks = _preflight_config(cfg, runner._project_root)

@@ -135,6 +135,7 @@ CHUNK_DURATION = 2.0  # seconds of speech — more context = better word accurac
 VAD_THRESHOLD = 0.3  # Lower threshold for better sensitivity
 WS_PORT = 8765
 MIC_DEVICE = None  # None = auto-detect best input device
+MIC_DEVICE_NAME = MIC_DEVICE_HOST_API = None
 # Session paths — set in main() after SOURCE_LANG is resolved so the language
 # tag is included, keeping EN and ES data separate.
 SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
@@ -4700,6 +4701,8 @@ async def audio_loop():
                 dtype="float32",
                 blocksize=int(input_rate * 0.032),  # ~32ms frames
                 device=MIC_DEVICE,
+                device_name=MIC_DEVICE_NAME,
+                device_host_api=MIC_DEVICE_HOST_API,
             )
 
             is_replay = isinstance(stream, FileAudioStream)
@@ -5169,6 +5172,28 @@ async def _rolling_stats_task():
         await broadcast(stats_data)
 
 
+async def _drain_inference_workers():
+    """Finish physical work before unloading models or freezing the session trace.
+
+    Cancelling an asyncio executor wrapper cannot stop a running native call.
+    Stop its publication task, cancel work that has not started, and join the
+    actual executors off the event loop. The process supervisor still owns the
+    outer stop deadline if a native library never returns.
+    """
+    tasks = tuple(_partial_tasks)
+    for task in tasks:
+        if not task.done():
+            task.cancel()
+    if tasks:
+        await asyncio.gather(*tasks, return_exceptions=True)
+    pools = (_pipeline_pool, _pytorch_pool, _stt_comm_pool, _trans_comm_pool, _vad_pool)
+    for pool in dict.fromkeys(pool for pool in pools if pool is not None):
+        await asyncio.to_thread(pool.shutdown, wait=True, cancel_futures=True)
+    if _tts_pool is not None:
+        # Published finals already promised this audio; preserve queued playback.
+        await asyncio.to_thread(_tts_pool.shutdown, wait=True)
+
+
 async def main_async(args):
     """Start WebSocket server and audio loop."""
     global vad_model, vad_utils, stt_pipe
@@ -5326,7 +5351,12 @@ async def main_async(args):
 
     # Detect best microphone and auto-calibrate gain
     global MIC_DEVICE, MIC_GAIN
-    if MIC_DEVICE is None and os.environ.get("STARK_AUDIO_SOURCE") != "file":
+    if (
+        MIC_DEVICE is None
+        and MIC_DEVICE_NAME is None
+        and MIC_DEVICE_HOST_API is None
+        and os.environ.get("STARK_AUDIO_SOURCE") != "file"
+    ):
         print("[5/6] Detecting microphone...")
         MIC_DEVICE, mic_rms = detect_macbook_mic()
         if mic_rms > 0 and MIC_GAIN == 1.0:
@@ -5515,17 +5545,12 @@ async def main_async(args):
             if _incremental_stt is not None:
                 await asyncio.wrap_future(_stt_scheduler.submit("final", _incremental_stt.close))
             await asyncio.get_running_loop().run_in_executor(None, _stt_scheduler.shutdown)
-        if _vad_pool is not None:
-            _vad_pool.shutdown(wait=True)
+        await _drain_inference_workers()
         if _caption_delivery is not None:
             await _caption_delivery.close()
-        # Release the Marian engine first, then shut down the PyTorch pool.
+        # All native calls are finished before model state is released.
         if _marian_engine is not None:
             _marian_engine.unload()
-        _pytorch_pool.shutdown(wait=False)
-        # Shut down TTS pool if running
-        if _tts_pool is not None:
-            _tts_pool.shutdown(wait=True)
         if tts_engine is not None:
             tts_engine.unload()
         # Stop multiprocess workers if running
@@ -5614,6 +5639,8 @@ def main():
     parser.add_argument("--routing-policy", choices=["legacy", "conservative", "off"], default=None)
     parser.add_argument("--terminology-prompt", choices=["none", "church"], default=None)
     parser.add_argument("--device", type=int, default=None, help="Audio input device index (default: auto-detect)")
+    parser.add_argument("--device-name", help="Exact input device name, resolved inside the capture process")
+    parser.add_argument("--device-host-api", help="Host API name to disambiguate the selected input device")
     parser.add_argument("--gain", type=float, default=None, help="Mic gain multiplier (default: auto-calibrate)")
     parser.add_argument("--audio-file", help="Replay a WAV through the live audio pipeline")
     parser.add_argument("--replay-speed", type=float, default=1.0, help="Replay speed; <=0 runs unpaced")
@@ -6013,6 +6040,7 @@ def main():
     logger.info("Session %s started — log file: %s", SESSION_ID, LOG_PATH)
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
+    global MIC_DEVICE_NAME, MIC_DEVICE_HOST_API
     global WORD_TIMESTAMPS, BEAM_SIZE, MULTIPROCESS, MUSIC_THRESHOLD, MUSIC_HOLDOFF
     CHUNK_DURATION = args.chunk_duration
     WS_PORT = args.ws_port
@@ -6027,6 +6055,7 @@ def main():
         if getattr(args, name) is not None:
             setattr(settings.translation, name, getattr(args, name))
     MIC_DEVICE = args.device
+    MIC_DEVICE_NAME, MIC_DEVICE_HOST_API = args.device_name, args.device_host_api
     if args.audio_file:
         MIC_GAIN = 1.0
     if args.gain is not None:

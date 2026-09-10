@@ -319,6 +319,8 @@ def open_audio_stream(
     dtype: str,
     blocksize: int,
     device: int | None,
+    device_name: str | None = None,
+    device_host_api: str | None = None,
 ):
     """Factory: return a microphone, WebSocket, or WAV-file stream per env.
 
@@ -361,4 +363,6 @@ def open_audio_stream(
         blocksize=blocksize,
         callback=callback,
         device=device,
+        device_name=device_name,
+        device_host_api=device_host_api,
     )

@@ -5,7 +5,7 @@ This analysis uses the failed synthetic microphone session
 not relabel that session successful or establish that a proposed change fixes
 the real microphone path.
 
-## Established loss path
+## Established pre-fix loss path
 
 1. `tools/capture_worker.py` receives 1,536 samples at 48 kHz per callback
    (32 ms). Its native callback uses a bounded 32-frame `queue.Queue`, drops a
@@ -61,9 +61,9 @@ run. Do not invent one or conclude that GPU execution alone blocked capture.
 
 ## Narrow remediation and required validation
 
-The following transport change is now implemented with five focused model-free
-regressions in `tests/test_capture_transport.py`; a real microphone retest is
-still required. The original failed run remains pre-fix evidence.
+The following transport change is implemented with seven focused model-free
+regressions in `tests/test_capture_transport.py`. The real microphone retest is
+recorded below; the original failed run remains pre-fix evidence.
 
 Use bounded backpressure for the isolated **reader thread**, as already used for
 file transport, with the native child callback remaining nonblocking. Select the
@@ -92,8 +92,70 @@ session trace events now include `capture_pipe_received`, `capture_pipe_gap`,
 `capture_handoff_dropped`, and source sample coordinates on `audio_dequeued`.
 Trace clocks retain the existing session origin and do not include PCM.
 
-Then run one separately reserved, traced Spanish synthetic acoustic retest.
-Require zero child/handoff/input-queue drops and a completed lifecycle; preserve
-the failed original. If upstream loss persists, use measured stage delays to
-choose an isolation/scheduling change. Neither widening queues nor asserting
-the event loop is “nonblocking” from its async syntax is sufficient evidence.
+The reserved traced microphone retest required zero child/handoff/input-queue
+drops and a completed lifecycle. Neither widening queues nor asserting the
+event loop is “nonblocking” from its async syntax is sufficient evidence.
+
+## Traced retest: upstream loss remains
+
+Session `20260910_105554_710324_es` used clean source `a8511ee` with trace capacity
+131,072 and retained all 8,585 events. It played the original generated Spanish
+WAV, but incidental room speech also entered the real microphone. That makes
+this an uncontrolled functional/reliability observation, not a controlled
+synthetic comparison or a quality reference. Shared evidence keeps only
+[structural timing](raw/retest-structural-trace.jsonl) and a
+[structural summary](raw/acoustic-es-retest-structural-summary.json); no room
+speech text or audio is included.
+
+The parent handoff admitted and dequeued 1,681 frames with zero drops, zero
+terminal pending frames and no waiting producers. The native worker still
+lost 7,680 samples (160 ms), so the lifecycle failed with two required capture
+failures. Its queue remains 32 frames, approximately 1.024 seconds. This
+demonstrates the new handoff policy can preserve the reader burst in this run;
+it does not repair or certify the upstream capture path.
+
+All times below use the original pipeline monotonic trace origin. Gap receipt
+time is when the parent parsed the first later frame reporting loss; it is not
+the exact instant a callback was discarded.
+
+| Source gap at 48 kHz | Gap parsed at ms | Measured overlapping work / transport delay |
+|---|---:|---|
+| `[436224,442368)` (128 ms) | 23424.918 | Partial STT ran 20009.754–21707.605; Gemma warmup ran 21814.926–24432.010. The frame beginning 368640 was received by the child callback at 21888.799 and parsed at 23396.972, a measured callback-to-pipe delay of 1508.147 ms. |
+| `[2537472,2539008)` (32 ms) | 68251.343 | Final STT ran 65664.785–68468.289 and Gemma warmup ran 65752.197–68458.595. Inline MainThread VAD occupied 746.953 ms ending at 66498.485. The frame beginning 2469888 had callback-to-pipe delay 1414.656 ms; frame 2445312 reached handoff dequeue with capture age 2201.490 ms. |
+
+Handoff high-water was 32. Maximum producer wait was 903.845 ms; maximum
+handoff wait was 1592.030 ms. The measured inline VAD span establishes delayed
+event-loop progress within that call, including any unmeasured scheduling or
+lock waits. The trace does not separate those causes, prove GIL retention,
+identify the exact child write stall, or assign either gap solely to a model.
+Its source coordinates and receipt clocks establish accumulated transport
+delay, not the acoustic content of the missing samples.
+
+The existing opt-in `latency.vad_worker` already submits `is_speech` to a
+dedicated one-thread pool and awaits each result, preserving frame order and
+the existing PyTorch lock. No duplicate worker or queue enlargement is needed.
+Both Torch and ONNX worker variants were already unselected in the English
+45-second [September 10 screen](../overnight_screen_20260910/README.md), including
+tail-guard failures. If a later reserved experiment tests that existing toggle,
+its distinct question is whether the traced Spanish microphone capture losses
+and event-loop delays change. It needs bounded trace, identical source/defaults
+apart from the toggle, zero input loss and shutdown accounting; it would not
+reopen the prior speed result or justify changing the default by itself.
+
+## Input device identity follow-up
+
+The first retest start was correctly rejected with HTTP 422: index 1 meant
+MacBook speakers in the old operator process, but built-in microphone in a new
+native process after the continuity microphone reappeared. Restarting the
+temporary operator refreshed its list and allowed the original retest. This is
+separate from the subsequent capture loss.
+
+The source follow-up binds explicit microphone selection to exact name and
+host API through operator preflight, session restarts, live capture and the
+idle microphone test. The native child resolves the current index immediately
+before opening input, fails if the identity is missing or ambiguous, and
+returns its actual identity in frame/probe metadata. Legacy integer-only CLI
+callers retain process-local index behavior; automatic input remains explicit
+automatic selection. CPU regressions exercise drift, missing and duplicate
+names, cross-API identity, actual worker options and metadata, bounded UI
+placeholders and test-input propagation. No post-fix hardware run is claimed.

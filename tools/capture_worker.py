@@ -24,6 +24,15 @@ def main():
     options = json.loads(sys.argv[1])
     mode = options.pop("mode", "capture")
     duration = options.pop("duration_s", 2)
+    device_name = options.pop("device_name", None)
+    device_host_api = options.pop("device_host_api", None)
+    identity = None
+    if mode != "output":
+        from tools.input_devices import resolve_input_device
+
+        identity = resolve_input_device(options.get("device"), name=device_name, host_api=device_host_api, sd=sd)
+        if identity is not None:
+            options["device"] = identity["index"]
     if mode == "output":
         rate = 48000
         # Short quiet test tone with smooth fade; never persist any audio.
@@ -43,6 +52,7 @@ def main():
                 {
                     "ok": True,
                     "device": options.get("device"),
+                    "input_device": identity,
                     "duration_s": duration,
                     "rms": float(np.sqrt(np.mean(samples * samples))),
                     "peak": float(np.max(np.abs(samples))),
@@ -68,6 +78,7 @@ def main():
             "sample_start": sample_position,
             "dropped": dropped,
             "status": str(status) if status else "",
+            "input_device": identity,
         }
         sample_position += frames
         try:

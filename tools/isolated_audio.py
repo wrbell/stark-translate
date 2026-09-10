@@ -26,14 +26,23 @@ def worker_argv(options):
     return [sys.executable, "-m", "tools.capture_worker", json.dumps(options)]
 
 
-def probe_audio(mode, device=None, duration_s=2, *, argv=None):
+def probe_audio(mode, device=None, duration_s=2, *, device_name=None, device_host_api=None, argv=None):
     """A hung native device open is terminated after a bounded timeout."""
     if not 0 < duration_s <= 5:
         raise ValueError("Audio tests must last at most five seconds")
     if mode not in {"probe", "output"}:
         raise ValueError("Invalid audio test")
     proc = subprocess.Popen(
-        argv or worker_argv({"mode": mode, "device": device, "duration_s": duration_s}),
+        argv
+        or worker_argv(
+            {
+                "mode": mode,
+                "device": device,
+                "duration_s": duration_s,
+                "device_name": device_name,
+                "device_host_api": device_host_api,
+            }
+        ),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -68,6 +77,8 @@ class IsolatedInputStream:
         dtype,
         blocksize,
         device,
+        device_name=None,
+        device_host_api=None,
         startup_timeout=5.0,
         idle_timeout=3.0,
         argv=None,
@@ -75,7 +86,15 @@ class IsolatedInputStream:
         self.callback = callback
         self.rate, self.channels = samplerate, channels
         self.argv = argv or worker_argv(
-            {"samplerate": samplerate, "channels": channels, "dtype": dtype, "blocksize": blocksize, "device": device}
+            {
+                "samplerate": samplerate,
+                "channels": channels,
+                "dtype": dtype,
+                "blocksize": blocksize,
+                "device": device,
+                "device_name": device_name,
+                "device_host_api": device_host_api,
+            }
         )
         self.startup_timeout, self.idle_timeout = startup_timeout, idle_timeout
         self.finished = threading.Event()
@@ -93,6 +112,7 @@ class IsolatedInputStream:
         self._frames_received = self._gap_count = 0
         self._max_pipe_age_ms = self._max_capture_age_ms = 0.0
         self._source_gaps = deque(maxlen=32)
+        self._opened_device = None
 
     def __enter__(self):
         # No native calls or wait for permission on the inference event loop.
@@ -123,6 +143,8 @@ class IsolatedInputStream:
                 if not 1 <= size <= 8192:
                     raise AudioCaptureError("Invalid capture frame")
                 metadata = json.loads(self._bytes(size))
+                if metadata.get("input_device") is not None:
+                    self._opened_device = metadata["input_device"]
                 frames, channels = metadata["frames"], metadata["channels"]
                 if not isinstance(frames, int) or not 1 <= frames <= self.rate or channels != self.channels:
                     raise AudioCaptureError("Invalid capture sample bounds")
@@ -191,6 +213,7 @@ class IsolatedInputStream:
                 "source_gaps": list(self._source_gaps),
                 "source_gaps_truncated": self._gap_count > len(self._source_gaps),
                 "timeout_stage": self._timeout_stage,
+                "opened_device": self._opened_device,
             }
 
     def _watch(self):
