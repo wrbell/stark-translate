@@ -17,6 +17,7 @@ publication and release tags remain pending by user choice.
 | EN↔ES speed experiments and decision rules | [Experiment plan](evaluation/overnight_experiment_plan.md) |
 | Actual browser/session evidence | [Operator rehearsal](evaluation/overnight_operator_rehearsal.md) |
 | CPU and original RTX2070 installation/performance gates | [Lite profiles](lite_profiles.md) |
+| Installed wheel, sdist and Mac ZIP evidence | [Runtime artifact validation](evaluation/overnight_artifact_validation_20260910.json) |
 | Installed dependency findings and scope | [Security assessment](evaluation/overnight_security/README.md) |
 | Original open-issue acceptance | [Issue closure audit](issue_closure_audit.md) |
 

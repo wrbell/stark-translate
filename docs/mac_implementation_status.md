@@ -54,6 +54,13 @@ clean imports and an [installed dependency audit](evaluation/lite_installer_secu
 These Mac CPU functional tests do not certify x86 or RTX2070. E2B pipeline RSS
 excludes its native child and cannot certify combined memory.
 
+The [runtime-freeze artifact check](evaluation/overnight_artifact_validation_20260910.json)
+verified the wheel, sdist and Mac ZIP at `b65e6e0`. All 149 runtime members match
+source, and wheels rebuilt from the sdist/ZIP match the canonical wheel. Both isolated
+installations passed five real HTTP routes, version/profile/launchd-render checks
+and `pip check`, without loading inference libraries. Final documentation archives
+and actual installed inference remain separate checks.
+
 The last full local suite before the latest barrier/security changes recorded
 1,992 passes, four skips and four stale runbook assertions. Their focused repair
 passed. CI then found an extracted cleanup-test namespace missing the replay
@@ -64,7 +71,10 @@ remain to be recorded against the final integrated source.
 The [overnight plan](evaluation/overnight_experiment_plan.md) defines the frozen
 96-run English screen, alternating E4B/E2B pairs and baseline anchors. Collection
 is underway on source `911f4ae`, with one inference process and a visible audience
-browser. Its first run acknowledged all seven finals and 66 previews. One run
+browser. Its first run acknowledged all seven finals and 66 previews. At 05:46 UTC
+the native-app surface reported a locked Mac while the browser still reported
+`visible` and acknowledged updates; physical display verification is therefore
+unavailable for that interval. Lock onset was not observed. One run
 cannot establish a speed gain or justify a default change.
 
 Previous [48-run screening](evaluation/mac_v2026_14_screening/README.md),
@@ -84,8 +94,10 @@ delivery measurements. The sub-second median goal remains unachieved.
   external dependencies. Predicted text does not count as a human reference.
 - Execute native Windows/RTX2070, representative x86 CPU and WSL training/CUDA
   gates on their target hardware; portable reviewed data remains the handoff.
-- Complete source-security review, isolated updated Mac dependency assessment,
-  installed-artifact checks, evidence/docs refresh and PR merge. Preserve working
+- Finish the integrated checks, installed inference, evidence/docs refresh and PR
+  merge. Source privacy fixes and isolated artifact checks have passed their focused
+  regressions; the [Mac dependency assessment](evaluation/overnight_security/README.md)
+  retains two unresolved Torch advisories. Preserve working
   `stt_env`, original holdouts and the frozen benchmark dependencies.
 - Leave PyPI and release publication pending. Published tags have not moved.
   Previous v2026.13 MSI verification and obsolete-asset cleanup remain in the
