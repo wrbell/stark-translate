@@ -78,14 +78,24 @@ Reads the session CSV or diarized JSONL and produces EN + ES summaries (five sen
 with speakers, three without). Model family is inferred from the model id
 (`_summary_model_family`), so the Gemma 4 stop-token rules from
 [`engines/CLAUDE.md`](../engines/CLAUDE.md) apply. Spanish comes from the same model or
-`--translate-with-gemma` (TranslateGemma 4B). Always run out-of-process next to a live
-pipeline. Tests: `tests/test_summarize_sermon.py`, `tests/test_phase9_6_features.py`.
+`--translate-with-gemma` (TranslateGemma 4B). The operator runs the post-session
+summary in a subprocess after live work releases the exclusive work lease.
+Both model loading paths now use the shared pinned load-time resolver;
+an uncached custom model requires a manifest revision or local path. Tests:
+`tests/test_summarize_sermon.py`, `tests/test_phase9_6_features.py`.
 
 ## Dependencies
 
 - Live diarization `embed` mode: `.[mlx,diarization]` (SpeechBrain ECAPA, torchaudio, scikit-learn).
-- `pyannote` mode and `diarize.py`: `pyannote.audio ≥ 3.1` plus an HF token with the accepted model agreement.
+- `pyannote` mode and `diarize.py`: `pyannote.audio ≥ 3.1` plus authorized HF access to both `pyannote/speaker-diarization-3.1` and `pyannote/segmentation-3.0`.
 - Summary: the MLX runtime already installed for finals.
+
+Live ECAPA pins its YAML and secondary weights. Full Pyannote waits for a valid
+nonempty rolling WAV, resolves pinned configuration and nested checkpoint sources,
+and retains the original pipeline parameters. The available credential currently
+lacks access to the segmentation model; unavailable optional models fail gracefully
+and are attempted once per daemon run. [Source and access receipts](../docs/evaluation/mac_followup_20260910/live-hf-pinning.md)
+do not certify native speaker accuracy or latency.
 
 ## Open items
 

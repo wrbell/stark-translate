@@ -67,19 +67,27 @@ independently.
 
 ### `pyannote` — full pipeline on the rolling window
 
-Reuses `features.diarize.run_diarization` (`pyannote/speaker-diarization-3.1`,
-CNRS / pyannote.ai). Each poll runs segmentation + embedding + clustering on
+Loads the registered `pyannote/speaker-diarization-3.1` configuration and its
+separately pinned segmentation/embedding checkpoints on CPU, preserving upstream
+pipeline parameters. It waits for a valid nonempty rolling WAV before loading
+and does not retry unavailable optional models until daemon restart. The
+standalone offline `features.diarize` loader is a separate path. Each poll runs
+segmentation + embedding + clustering on
 the last 20–30 s of speech and emits **every** segment with wall-clock times
 mapped through `rolling_meta.json` (`window_start_ts + segment.start`).
 
 | | |
 |---|---|
-| Needs | Gated HF models; `HF_TOKEN` with the 3.1 terms accepted |
+| Needs | `HF_TOKEN` with authorized access to both `pyannote/speaker-diarization-3.1` and `pyannote/segmentation-3.0` |
 | Cost on M3 Pro CPU | **Several seconds per 25 s window** (estimate 3–8 s, RTF ~0.12–0.3). pyannote 3.1 is slower than 3.0 on CPU; the embeddings stage dominates ([pyannote-audio#1621](https://github.com/pyannote/pyannote-audio/issues/1621), [#1626](https://github.com/pyannote/pyannote-audio/issues/1626)). |
 | Label lag | One poll interval (default 2 s) **plus** the multi-second run |
 | Strength | Overlap / rapid turn-taking (Q&A), speaker count |
 
 Must stay off the Metal GPU used by MLX Whisper/Gemma. CPU-only in the daemon.
+The September 10 credential check could retrieve the pinned pipeline config but
+received HTTP 403 for `pyannote/segmentation-3.0`. Full native mode is therefore
+unvalidated here. [Pinning and access evidence](evaluation/mac_followup_20260910/live-hf-pinning.md)
+keeps this access gate separate from two-speaker quality and latency gates.
 
 ### `embed` — per-chunk embedding + online cosine clustering (default)
 

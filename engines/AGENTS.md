@@ -12,7 +12,7 @@
 - **MLX threads:** mlx ≥ 0.31.2 thread-local streams; `max_workers=2` overlap is the production path. Materialize weights and run the first Gemma forward on the load thread (`warm_mlx_model`). One generation lock per model.
 - **PyTorch:** `MarianHFEngine` and Silero VAD share `_pytorch_lock`; VAD runs on the asyncio thread by default. The experimental worker path remains opt-in and uses the same lock.
 - **Quantization:** only OptiQ mixed-precision Gemma 4 repos; uniform 4-bit quants break PLE.
-- **Downloads:** identity is an HF id, resolution is local (`model_paths.py`, `STARK_MODELS_DIR`, `models.lock.json`). Do not add unpinned live-path downloads (B615 followups are tracked in the backlog).
+- **Downloads:** keep `resolve_model_path` purely offline for setup/preflight. Live MLX wrappers use `resolve_model_for_loading`: existing local copy or registered full-commit snapshot, never an uncached bare ID. Model identity and explicit local overrides remain in provenance. Do not add unpinned live-path downloads; [pinning scope and residual inventory](../docs/evaluation/mac_followup_20260910/live-hf-pinning.md) retain the B615 limitations.
 - Do not recreate `stt_env`; do not run model loads in unit tests.
 
 ## Current Mac defaults (verify in `settings.py` / `factory.py` before citing)

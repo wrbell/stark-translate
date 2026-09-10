@@ -23,11 +23,17 @@ return **unloaded** engines — call `.load()` before `.transcribe()` / `.transl
 | `marian_hf_engine.py` | `MarianHFEngine` — PyTorch fallback for partials, guarded by `_pytorch_lock` |
 | `hf_whisper_engine.py` | `HFWhisperEngine` — transformers Whisper; only path with `torch.compile` / spec decode |
 | `translation_prompts.py` | `build_chat_messages()`, `gemma4_user_content()`, `ensure_stop_tokens()`, Gemma 4 output cleanup |
-| `model_paths.py` | Offline model lookup shared by setup, preflight and inference (`resolve_model_path`, `resolve_marian_ct2`, `resolve_piper_voice`) |
+| `model_paths.py` | Pure offline lookup (`resolve_model_path`, `resolve_marian_ct2`, `resolve_piper_voice`) plus explicit pinned acquisition at loading boundaries (`resolve_model_for_loading`) |
 | `_locks.py`, `mlx_generation_lock.py` | Shared PyTorch lock; per-model MLX generation locks so distinct models overlap |
 | `audio_devices.py` | Lazy output-device discovery and per-language TTS routing with hotplug re-resolution |
 | `mlx_spec.py`, `spec_decode_logger.py` | Experimental mlx-optiq spec-decode wrapper and its telemetry (see #177) |
 | `active_learning.py` | JSONL logger for STT fallback events (quality layer 6) |
+
+Live Mac MLX wrappers resolve an existing explicit local override or a complete
+cached/downloaded snapshot before calling upstream loaders. Unknown uncached remote IDs require a full manifest revision or an
+explicit local path; setup/preflight lookup stays offline. Existing local caches
+and defaults are preserved. [Exact pinning scope and remaining download sites](../docs/evaluation/mac_followup_20260910/live-hf-pinning.md)
+keep native validation and broad B615 findings separate.
 
 ## Current defaults (Mac, `--backend auto` → `mlx`)
 

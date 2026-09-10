@@ -30,7 +30,10 @@ must pass before use at a service.
 The [current installed-dependency audit](../evaluation/overnight_security/README.md)
 records two unresolved findings in the pinned Mac Torch line and the incompatible
 audio-wheel upgrade attempt. The Lite runtime has a separate clean audit; neither
-that result nor filtered CI certifies the full Mac dependency set.
+that result nor filtered CI certifies the full Mac dependency set. A separate
+[full-application dependency candidate](../evaluation/mac_followup_20260910/torch-full-application-candidate.md)
+passed installed EN/ES inference and a zero-known-finding audit of 123 third-party
+distributions. It has not replaced production bounds or the working `stt_env`.
 
 `bootstrap.sh --skip-systemd` performs the dependency install, backend-specific
 model setup and CLI preflight without requiring an already-running web server.
@@ -41,12 +44,20 @@ No macOS login service is installed unless `--install-launchd` is supplied.
 `setup --backend mlx` fetches only Mac defaults, including both language directions.
 Use `--include e2b`, `--include tts`, or `--include translategemma` for optional
 profiles. E2B is a faster, separately evaluated profile; it does not replace E4B.
-Piper setup downloads only the EN/ES voice and configuration files.
+Piper setup downloads only the EN/ES voice and configuration files. Standard setup
+also accepts optional `--include whisper-fallback`, `--include diarization`
+(SpeechBrain model), and `--include diarization-pyannote`. Optional runtime packages
+and any gated model access are still required; [current access/validation limits](../evaluation/mac_followup_20260910/live-hf-pinning.md)
+remain pending. These groups are not included in ordinary setup, and Lite retains
+its `--include tts`-only policy.
 
 Both setup and inference use `engines.model_paths`: explicit existing model paths,
 then `--models-dir` / `STARK_MODELS_DIR`, project `models/`, then the Hugging Face
 cache. Setup-installed models are therefore usable by the inference engines.
-Existing pinned HF snapshots are reused. `STARK_MODELS_DIR` must also be set when
+Existing pinned HF snapshots are reused. Setup rejects selected HF entries without
+a full 40-character revision before changing model caches. MLX inference and
+summary loaders use a separate pinned acquisition resolver; doctor/preflight
+lookup remains offline. `STARK_MODELS_DIR` must also be set when
 launching if setup used a custom directory. Snapshot markers include revision and
 manifest version, so changing the manifest cannot silently reuse an old revision.
 
