@@ -3,8 +3,8 @@
 > **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
 > [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
 > Standard, Spanish Parakeet and CPU Lite cadence screens, with no qualified arms.
-> CPU Whisper small/base quality recovery, independent Lite deadlines, final
-> artifact rehearsals and merge validation remain pending; defaults are unchanged.
+> CPU Whisper-base failed its separate accuracy gate; independent Lite deadlines,
+> final artifact rehearsals and merge validation remain pending. Defaults are unchanged.
 
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
 > (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
@@ -48,8 +48,10 @@ The September 10 normalized follow-up completed [Standard screening](docs/evalua
 (24 passes, 0/4). Each run has six eligible anchors, so these screens support no
 p95 claim. Faster medians did not satisfy the other guards. E4B finals, Spanish
 Whisper and the 0.6-second cadence remain unchanged. Lite finals in this screen
-use Marian CPU; E2B is only a harness label. CPU Whisper small/base quality
-recovery and independent Lite deadline follow-ups remain pending; rejected arms cannot enter confirmation
+use Marian CPU; E2B is only a harness label. The separate
+[CPU STT comparison](docs/evaluation/mac_followup_20260910/cpu-stt-comparison.md)
+completed 600 calls and rejected Whisper-base for higher WER in both languages.
+Independent Lite deadlines remain pending; rejected arms cannot enter confirmation
 or combinations.
 
 The [earlier September 10 overnight screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.

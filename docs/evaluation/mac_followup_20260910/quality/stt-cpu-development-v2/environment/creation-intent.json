@@ -1,0 +1,6 @@
+{
+  "created_at": "2026-09-10T18:16:04.837171+00:00",
+  "old_python": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+  "original_freeze_sha256": "3093802d8c7c6996c421bf2a7032d6d542bc03172aebcaccb0453d4644187f55",
+  "purpose": "Fresh CPU evaluation environment; preserve existing pinned runtime versions and working environments. SoundFile required by actual read_audio helper. No devices."
+}

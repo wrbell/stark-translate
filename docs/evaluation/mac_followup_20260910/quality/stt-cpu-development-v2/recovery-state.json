@@ -1,0 +1,101 @@
+{
+  "updated_at": "2026-09-10T18:36:18.903288+00:00",
+  "stage": "completed",
+  "owner": {
+    "pid": 79689,
+    "created_at": 1789064704.123635,
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/run_cpu_quality_recovery_v2.py",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/cpu-quality-recovery-v2",
+      "--execute-reserved-serial-window"
+    ]
+  },
+  "defaults_changed": false,
+  "frozen_runtime": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "prior_cohorts_rerun": false,
+  "prior_completed_runs": {
+    "standard-screen-normalized-v2": 96,
+    "spanish-parakeet-normalized-v1": 18,
+    "lite-cadence-normalized-v1": 24
+  },
+  "quality_index": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/index.json",
+  "quality_report": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2-report.json",
+  "quality_python": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/cpu-eval-environment-v2/venv/bin/python",
+  "quality_completed_runs": 12,
+  "quality_completed_rows": 600,
+  "base_quality_by_language": {
+    "en": {
+      "quality_eligible_for_conditional_implementation": false,
+      "pairs": [
+        {
+          "repeat": 0,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1413.696792034898,
+          "base_call_p50_ms": 479.1547500062734
+        },
+        {
+          "repeat": 1,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1435.6964374892414,
+          "base_call_p50_ms": 447.79497949639335
+        },
+        {
+          "repeat": 2,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1493.335124454461,
+          "base_call_p50_ms": 494.3062079837546
+        }
+      ],
+      "live_latency_eligible": false,
+      "p95_claim_eligible": false,
+      "next_action": "If quality eligible, implement and test explicit replay model override + frozen runtime contract before a separately controlled base replay; no production default change."
+    },
+    "es": {
+      "quality_eligible_for_conditional_implementation": false,
+      "pairs": [
+        {
+          "repeat": 0,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1491.779646021314,
+          "base_call_p50_ms": 517.1696459874511
+        },
+        {
+          "repeat": 1,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1604.9388954997994,
+          "base_call_p50_ms": 604.9018955673091
+        },
+        {
+          "repeat": 2,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1633.6450834642164,
+          "base_call_p50_ms": 602.9900625580922
+        }
+      ],
+      "live_latency_eligible": false,
+      "p95_claim_eligible": false,
+      "next_action": "If quality eligible, implement and test explicit replay model override + frozen runtime contract before a separately controlled base replay; no production default change."
+    }
+  },
+  "original_failures_preserved": true
+}

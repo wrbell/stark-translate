@@ -1,0 +1,300 @@
+"""One fresh CPU quality cohort; no reruns of completed latency cohorts or devices."""
+
+import argparse
+import datetime
+import hashlib
+import importlib.util
+import json
+import os
+import signal
+import subprocess
+from pathlib import Path
+
+ROOT = Path("/Users/willem/Code/vibes/SRTranslate")
+CACHE = ROOT / ".cache/mac-en-es-closeout"
+RUNTIME = CACHE / "runtime"
+PREP = CACHE / "lite-followup-preparation"
+FROZEN = "eddb0adb4741307680079802c47f33cb21d56aec"
+PYTHON = CACHE / "quality/cpu-eval-environment-v2/venv/bin/python"
+ENVIRONMENT = CACHE / "quality/cpu-eval-environment-v2/validation.json"
+STATE = CACHE / "cpu-quality-recovery-v2-state.json"
+QUALITY = CACHE / "quality/stt-cpu-development-v2"
+REPORT = CACHE / "quality/stt-cpu-development-v2-report.json"
+MANIFEST = ROOT / "docs/evaluation/mac_followup_20260910/public_data/manifest.json"
+MODELS = ROOT / ".cache/overnight-20260910/lite-models"
+BASE = CACHE / "base-model/hub/models--Systran--faster-whisper-base/snapshots/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66"
+PRIOR = {"standard-screen-normalized-v2": 96, "spanish-parakeet-normalized-v1": 18, "lite-cadence-normalized-v1": 24}
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def module(path, name):
+    spec = importlib.util.spec_from_file_location(name, path)
+    loaded = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(loaded)
+    return loaded
+
+
+def commands():
+    return [
+        (
+            "quality-v2",
+            [
+                str(PYTHON),
+                "-m",
+                "tools.mac_followup_quality",
+                "stt",
+                "--manifest",
+                str(MANIFEST),
+                "--audio-root",
+                str(CACHE / "fleurs-v1"),
+                "--output",
+                str(QUALITY),
+                "--partition",
+                "development",
+                "--languages",
+                "en",
+                "es",
+                "--engines",
+                "ct2-small",
+                "ct2-base",
+                "--repeats",
+                "3",
+                "--python",
+                str(PYTHON),
+                "--timeout-seconds",
+                "1200",
+                "--model-override",
+                "ct2-small=" + str(MODELS / "whisper-small"),
+                "--model-override",
+                "ct2-base=" + str(BASE),
+            ],
+            15000,
+        ),
+        (
+            "quality-v2-report",
+            [
+                str(PYTHON),
+                "-m",
+                "tools.mac_followup_quality",
+                "report",
+                "--manifest",
+                str(MANIFEST),
+                "--input",
+                str(QUALITY),
+                "--output",
+                str(REPORT),
+            ],
+            300,
+        ),
+    ]
+
+
+def validate_prior(previous, selection_api):
+    """Read already completed outputs; never invoke their runners or rewrite them."""
+    bindings = {}
+    for name, expected in PRIOR.items():
+        directory = CACHE / name
+        previous.check_replays(directory, expected)
+        report_path, selection_path = CACHE / (name + "-report.json"), CACHE / (name + "-selection.json")
+        report, selection = read(report_path), read(selection_path)
+        if (
+            report.get("inventory_complete") is not True
+            or report.get("inventory_errors") != []
+            or report.get("run_count") != expected
+            or report.get("expected_runs") != expected
+            or report.get("defaults_changed") is not False
+        ):
+            raise RuntimeError("Completed prior report failed integrity: " + name)
+        if {k: v for k, v in selection.items() if k != "source_report"} != selection_api.select(report):
+            raise RuntimeError("Prior selection does not reproduce: " + name)
+        source = selection.get("source_report", {})
+        if source.get("sha256") != digest(report_path) or source.get("size_bytes") != report_path.stat().st_size:
+            raise RuntimeError("Prior selection/report binding failed: " + name)
+        provenance = directory / "provenance.json"
+        if read(provenance).get("source", {}).get("code_sha") != FROZEN:
+            raise RuntimeError("Prior cohort used different frozen source: " + name)
+        for path in (report_path, selection_path, *sorted(directory.glob("*.json"))):
+            bindings[str(path)] = digest(path)
+    if read(CACHE / "lite-cadence-normalized-v1-selection.json").get("qualified_count") != 0:
+        raise RuntimeError("Cadence selection changed; recovery requires a new interaction review")
+    return bindings
+
+
+def validate_failed_predecessors():
+    paths = [CACHE / "serial-model-followups-state.json", CACHE / "lite-adaptive-followups-v1/state.json"]
+    if any(read(path).get("stage") != "failed" for path in paths):
+        raise RuntimeError("Expected retained failed predecessor receipts")
+    index_path = CACHE / "quality/stt-cpu-development-v1/index.json"
+    index = read(index_path)
+    if index.get("completed") is not False or len(index.get("runs", [])) != 12:
+        raise RuntimeError("Original failed CPU cohort changed")
+    failed_rows = 0
+    paths.append(index_path)
+    for item in index["runs"]:
+        path = (index_path.parent / item["file"]).resolve()
+        if not path.is_relative_to(index_path.parent.resolve()) or digest(path) != item["sha256"]:
+            raise RuntimeError("Original failed worker binding changed")
+        row = read(path)
+        if (
+            row.get("completed") is not False
+            or len(row.get("rows", [])) != 50
+            or any(
+                r.get("status") != "failed" or r.get("error") != "ModuleNotFoundError: No module named 'soundfile'"
+                for r in row["rows"]
+            )
+        ):
+            raise RuntimeError("Original failure differs from missing SoundFile before decoding")
+        failed_rows += len(row["rows"])
+        paths.append(path)
+    if failed_rows != 600:
+        raise RuntimeError("Expected 600 retained failed source rows")
+    return {str(path): digest(path) for path in paths}
+
+
+def validate_environment():
+    receipt = read(ENVIRONMENT)
+    if (
+        receipt.get("original_environment_unchanged") is not True
+        or receipt.get("all_original_package_versions_preserved_in_new_environment") is not True
+        or receipt.get("torch_or_mlx_installed") is not False
+        or receipt.get("devices_used") is not False
+        or receipt.get("models_executed") is not False
+        or receipt.get("frozen_runtime") != FROZEN
+        or receipt.get("pip_check") != "No broken requirements found."
+        or {r.get("language") for r in receipt.get("file_decode_checks", []) if r.get("decoded") is True}
+        != {"en", "es"}
+        or not PYTHON.is_file()
+    ):
+        raise RuntimeError("Fresh CPU environment receipt does not satisfy recovery contract")
+
+
+def verify_bindings(bindings):
+    if any(digest(path) != value for path, value in bindings.items()):
+        raise RuntimeError("Recovery source, environment receipt or preserved input changed")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--execute-reserved-serial-window", action="store_true", required=True)
+    args = parser.parse_args()
+    output = args.output.resolve()
+    if STATE.exists() or QUALITY.exists() or REPORT.exists():
+        raise FileExistsError("Recovery v2 state/output already exists; preserve it and use a new reviewed identity")
+    output.mkdir(exist_ok=False)
+    core = module(PREP / "execute.py", "reviewed_lite_coordinator")
+    previous = core.load_runner()
+    preparation = module(PREP / "prepare.py", "reviewed_lite_preparation")
+    selection_api = module(RUNTIME / "tools/mac_followup_selection.py", "frozen_recovery_selection")
+    quality_api = module(RUNTIME / "tools/mac_followup_quality.py", "frozen_recovery_quality")
+    import psutil
+
+    owner_process = psutil.Process(os.getpid())
+    owner = {"pid": owner_process.pid, "created_at": owner_process.create_time(), "argv": owner_process.cmdline()}
+    signal.signal(signal.SIGTERM, core.request_stop)
+    source_paths = [
+        Path(__file__).resolve(),
+        PREP / "execute.py",
+        PREP / "prepare.py",
+        CACHE / "serial-model-followups.py",
+        ROOT / "operator_app/processes.py",
+        ENVIRONMENT,
+        MANIFEST,
+    ]
+    bindings = {str(path): digest(path) for path in source_paths}
+
+    def save(stage, **detail):
+        row = {"updated_at": datetime.datetime.now(datetime.UTC).isoformat(), "stage": stage, "owner": owner, **detail}
+        temporary = STATE.with_suffix(".tmp")
+        temporary.write_text(json.dumps(row, indent=2) + "\n")
+        temporary.replace(STATE)
+        print(json.dumps(row), flush=True)
+
+    def verify():
+        previous.verify_source()
+        verify_bindings(bindings)
+
+    def run(label, argv, timeout):
+        verify()
+        env = {
+            k: v for k, v in os.environ.items() if not k.startswith("STARK_") and k not in {"PYTHONPATH", "PYTHONHOME"}
+        }
+        env.update(
+            STARK_MODELS_DIR=str(MODELS),
+            STARK_AUDIO_SOURCE="file",
+            STARK_TTS="false",
+            HF_HUB_OFFLINE="1",
+            TRANSFORMERS_OFFLINE="1",
+        )
+        save(label, command=argv, timeout_s=timeout)
+        with (output / (label + ".log")).open("x") as log:
+            process = subprocess.Popen(
+                argv, cwd=RUNTIME, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True
+            )
+            code = core.wait_owned(process, timeout, previous)
+        verify()
+        if code:
+            raise RuntimeError(f"{label}: exit {code}; retain failure and stop")
+
+    try:
+        # Historical queue and waiting driver must both have exited. Reused PIDs
+        # fail closed here rather than granting a model window from an old receipt.
+        for pid in (44229, 69665):
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                continue
+            raise RuntimeError(f"Preceding PID still exists: {pid}")
+        validate_environment()
+        verify()
+        bindings.update(validate_failed_predecessors())
+        bindings.update(validate_prior(previous, selection_api))
+        core.write_new(output / "source-and-preserved-inputs.json", {"sha256": bindings, "frozen_runtime": FROZEN})
+        for label, argv, timeout in commands():
+            run(label, argv, timeout)
+        expected_sources = {
+            name: digest(RUNTIME / name)
+            for name in (
+                "tools/mac_followup_quality.py",
+                "settings.py",
+                "models.lock.json",
+                *[str(path.relative_to(RUNTIME)) for path in sorted((RUNTIME / "engines").glob("*.py"))],
+            )
+        }
+        quality_paths = dict(
+            manifest=str(MANIFEST),
+            index=str(QUALITY / "index.json"),
+            report=str(REPORT),
+            expected_models={"ct2-small": str(MODELS / "whisper-small"), "ct2-base": str(BASE)},
+        )
+        decisions = preparation.validate_quality(quality_paths, read, quality_api, expected_sources)
+        validate_prior(previous, selection_api)
+        verify()
+        save(
+            "completed",
+            defaults_changed=False,
+            frozen_runtime=FROZEN,
+            prior_cohorts_rerun=False,
+            prior_completed_runs=PRIOR,
+            quality_index=str(QUALITY / "index.json"),
+            quality_report=str(REPORT),
+            quality_python=str(PYTHON),
+            quality_completed_runs=12,
+            quality_completed_rows=600,
+            base_quality_by_language=decisions,
+            original_failures_preserved=True,
+        )
+    except BaseException as exc:
+        save("failed", error=type(exc).__name__ + ": " + str(exc), defaults_changed=False)
+        raise
+
+
+if __name__ == "__main__":
+    main()

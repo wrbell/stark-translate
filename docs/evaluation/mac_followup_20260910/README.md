@@ -33,6 +33,10 @@ no release or package publication is authorized for this follow-up. The
   recordings, 50 development / 50 confirmation per language, pinned source,
   hashes, independent archive verification and portable reference metadata.
   Public read speech is engineering evidence, not church or local human review.
+- [CPU STT comparison](cpu-stt-comparison.md): all 12 workers and 600 items
+  completed. Whisper-base reduced isolated call time but raised WER beyond the
+  unchanged allowance in both languages; no base pipeline trial follows.
+  Failed-v1 dependency errors and the successful fresh environment are retained.
 - [Development STT comparison](quality/stt-mlx-development-report.json): all
   twelve isolated runs completed, 50 recordings per engine/language/repeat.
   Three repeats alternated model order; no fallback or failed item occurred.

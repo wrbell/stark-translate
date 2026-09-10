@@ -58,9 +58,11 @@ does not imply capture or final-source loss.
 
 Independent CPU Lite deadline screens remain pending at the unchanged
 0.6-second cadence; no rejected cadence arm enters a combination. The separate
-CPU Whisper small/base quality recovery also remains pending, using 50 public
-development recordings per language in three repeats. Its isolated STT scores
-cannot establish live caption latency or qualify a production model change.
+[CPU Whisper small/base comparison](evaluation/mac_followup_20260910/cpu-stt-comparison.md)
+completed all 600 calls on 50 public development recordings per language over
+three repeats. Base was faster but failed the WER gate in both languages; no
+conditional base pipeline trial follows. These isolated scores do not establish
+production WER or caption-delivery latency.
 
 ## First improve attribution
 

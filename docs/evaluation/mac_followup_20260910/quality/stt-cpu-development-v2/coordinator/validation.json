@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "count": 25,
+  "checks": [
+    "seven original reviewed validation/cleanup helper bodies preserved exactly",
+    "only exact fresh CPU small/base EN/ES development three-repeat run and report are executable",
+    "completed 96/18/24 cohorts remain validation-only",
+    "unfilled predecessor placeholders rejected before output creation",
+    "old failed queue rejected",
+    "fresh quality interpreter used for cadence comparison rejected",
+    "invalid predecessor birth rejected",
+    "different predecessor command rejected",
+    "actual unchanged preparation writer produces 24 exact ordered deadline runs, reports and selections",
+    "module command drift rejected",
+    "audio command drift rejected",
+    "cwd command drift rejected",
+    "environment command drift rejected",
+    "timeout command drift rejected",
+    "command ordering drift rejected",
+    "actual preparation writer produces formal zero-command no-combination for both languages",
+    "zero-qualified cadence cannot silently schedule an interaction",
+    "wait requires owned predecessor exit and matching completed terminal receipt",
+    "reused predecessor PID rejected",
+    "inventory failure is not interpreted as process exit",
+    "terminal stage mismatch prevents any adaptive work",
+    "terminal quality_completed_rows mismatch prevents any adaptive work",
+    "terminal owner mismatch prevents any adaptive work",
+    "surviving owned predecessor descendant prevents next model stage",
+    "exited predecessor descendants permit terminal verification"
+  ],
+  "scope": "stdlib mocked source/preparation/process fixtures only; no commands/models/devices launched"
+}

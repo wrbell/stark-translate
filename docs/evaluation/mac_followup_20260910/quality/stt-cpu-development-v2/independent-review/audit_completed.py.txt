@@ -1,0 +1,170 @@
+"""Read retained CPU quality JSON only, after its independent owner completes.
+
+No subprocesses, native/model imports, audio reads, or weight/archive hashes.
+Run with Python 3.11 because the reviewed pure quality helper uses datetime.UTC.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import math
+import statistics
+import sys
+import unicodedata
+from collections import Counter
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+ROOT = Path('/Users/willem/Code/vibes/SRTranslate')
+CACHE = ROOT / '.cache/mac-en-es-closeout'
+RUNTIME = CACHE / 'runtime'
+STATE = CACHE / 'cpu-quality-recovery-v2-state.json'
+COHORT = CACHE / 'quality/stt-cpu-development-v2'
+REPORT = CACHE / 'quality/stt-cpu-development-v2-report.json'
+MANIFEST = ROOT / 'docs/evaluation/mac_followup_20260910/public_data/manifest.json'
+OUTPUT = CACHE / 'cpu-stt-review'
+
+
+def read(path):
+    path = Path(path)
+    if path.stat().st_size > 2_000_000:
+        raise ValueError(f'Expected small JSON/source: {path}')
+    return json.loads(path.read_text())
+
+
+def digest(path):
+    path = Path(path)
+    if path.stat().st_size > 2_000_000:
+        raise ValueError(f'Refuse large hash: {path}')
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load_source(path, name):
+    spec = importlib.util.spec_from_file_location(name, path)
+    loaded = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(loaded)
+    return loaded
+
+
+def normalized_words(text):
+    text = unicodedata.normalize('NFKC', text).casefold()
+    return ''.join(' ' if unicodedata.category(ch).startswith('P') else ch for ch in text).split()
+
+
+def independent_edits(reference, hypothesis):
+    left, right = normalized_words(reference), normalized_words(hypothesis)
+    costs = list(range(len(right) + 1))
+    for i, token in enumerate(left, 1):
+        current = [i]
+        for j, candidate in enumerate(right, 1):
+            current.append(min(current[-1] + 1, costs[j] + 1, costs[j - 1] + (token != candidate)))
+        costs = current
+    return costs[-1], len(left)
+
+
+def distribution(values):
+    values = sorted(values)
+    return {'n': len(values), 'p50': statistics.median(values), 'p95': values[math.ceil(.95 * len(values)) - 1]}
+
+
+def main():
+    state = read(STATE)
+    if state.get('stage') != 'completed':
+        print(json.dumps({'status': 'waiting_for_completed_owner', 'observed_stage': state.get('stage')}))
+        return
+    if state.get('quality_completed_runs') != 12 or state.get('quality_completed_rows') != 600:
+        raise ValueError('Unexpected owner completion inventory')
+    quality = load_source(RUNTIME / 'tools/mac_followup_quality.py', 'cpu_comparison_quality')
+    prep = load_source(CACHE / 'lite-followup-preparation/prepare.py', 'cpu_comparison_preparation')
+    source_names = ['tools/mac_followup_quality.py', 'settings.py', 'models.lock.json']
+    source_names += [str(p.relative_to(RUNTIME)) for p in sorted((RUNTIME / 'engines').glob('*.py'))]
+    sources = {name: digest(RUNTIME / name) for name in source_names}
+    paths = {
+        'manifest': str(MANIFEST), 'index': str(COHORT / 'index.json'), 'report': str(REPORT),
+        'expected_models': {
+            'ct2-small': str(ROOT / '.cache/overnight-20260910/lite-models/whisper-small'),
+            'ct2-base': str(CACHE / 'base-model/hub/models--Systran--faster-whisper-base/snapshots/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66'),
+        },
+    }
+    decisions = prep.validate_quality(paths, read, quality, sources)
+    if decisions != state['base_quality_by_language']:
+        raise ValueError('Independent quality decision disagrees with owner')
+    print(json.dumps({'base_quality_by_language': decisions}), flush=True)
+    manifest, index, report = read(MANIFEST), read(COHORT / 'index.json'), read(REPORT)
+    runs, checks, summaries = {}, [], []
+    for entry in index['runs']:
+        path = COHORT / entry['file']
+        run = read(path)
+        summary = quality.summarize_run(run, manifest)
+        if {'file': entry['file'], 'sha256': digest(path), **summary} not in report['runs']:
+            raise ValueError('Reported worker summary differs from recomputation')
+        config = quality.engine_config(run['engine'], 'stt', paths['expected_models'][run['engine']])
+        if run['config'] != config:
+            raise ValueError('Actual decoding config differs from frozen quality config')
+        if quality.json_hash(run['model']['files']) != run['model']['files_sha256']:
+            raise ValueError('Recorded model inventory hash inconsistent')
+        counts = [independent_edits(row['reference'], row['hypothesis']) for row in run['rows']]
+        if any(count != (row['wer_counts']['errors'], row['wer_counts']['reference_words']) for row, count in zip(run['rows'], counts)):
+            raise ValueError('Independent word-edit counts disagree')
+        for metric in ('call_wall_ms', 'engine_latency_ms', 'real_time_factor'):
+            calculated = distribution([row[metric] for row in run['rows']])
+            if any(abs(calculated[k] - summary[metric][k]) > 1e-8 for k in calculated):
+                raise ValueError(f'Independent {metric} distribution differs')
+        checks.append({'file': entry['file'], 'rows_recomputed': len(counts), 'word_edits_and_distributions_match': True, 'decoding_config_matches': True})
+        summaries.append({'file': entry['file'], **summary})
+        runs[(run['engine'], run['source_lang'], run['repeat'])] = run
+
+    comparisons = {}
+    for lang in ('en', 'es'):
+        small, base = [runs[(engine, lang, 0)]['rows'] for engine in ('ct2-small', 'ct2-base')]
+        examples = []
+        for left, right in zip(small, base):
+            if left['id'] != right['id']:
+                raise ValueError('Model comparison row identity mismatch')
+            if normalized_words(left['hypothesis']) != normalized_words(right['hypothesis']):
+                examples.append({
+                    'id': left['id'], 'reference': left['reference'],
+                    'small': left['hypothesis'], 'base': right['hypothesis'],
+                    'small_errors': left['wer_counts']['errors'], 'base_errors': right['wer_counts']['errors'],
+                    'base_minus_small_errors': right['wer_counts']['errors'] - left['wer_counts']['errors'],
+                    'terms': left['terms'], 'small_term_hits': left['term_hits'], 'base_term_hits': right['term_hits'],
+                })
+        repeat_consistency = {}
+        for engine in ('ct2-small', 'ct2-base'):
+            reference_rows = runs[(engine, lang, 0)]['rows']
+            repeat_consistency[engine] = [
+                sum(normalized_words(a['hypothesis']) != normalized_words(b['hypothesis']) for a, b in zip(reference_rows, runs[(engine, lang, repeat)]['rows']))
+                for repeat in (1, 2)
+            ]
+        comparisons[lang] = {'changed_count': len(examples), 'changed_examples': examples, 'repeat_normalized_output_differences_vs_r0': repeat_consistency}
+
+    old_directory = CACHE / 'quality/stt-cpu-development-v1'
+    old_index = read(old_directory / 'index.json')
+    old_rows = [row for item in old_index['runs'] for row in read(old_directory / item['file'])['rows']]
+    failures = Counter(row.get('error') for row in old_rows)
+    env = CACHE / 'quality/cpu-eval-environment-v2'
+    old_freeze = set((env / 'original-freeze.txt').read_text().splitlines())
+    new_freeze = set((env / 'installed-freeze.txt').read_text().splitlines())
+    if old_freeze - new_freeze:
+        raise ValueError('Fresh environment did not preserve original freeze entries')
+    result = {
+        'schema_version': 1,
+        'scope': 'Completed retained JSON/source review; no inference, devices, native imports, audio or weight/archive reads.',
+        'state_sha256': digest(STATE), 'report_sha256': digest(REPORT), 'index_sha256': digest(COHORT / 'index.json'),
+        'manifest_sha256': digest(MANIFEST), 'frozen_source_sha256': sources,
+        'base_quality_by_language': decisions, 'worker_checks': checks, 'summaries': summaries,
+        'comparisons': comparisons,
+        'prior_failed_v1': {'completed': old_index['completed'], 'workers': len(old_index['runs']), 'rows': len(old_rows), 'error_counts': dict(failures), 'stage': 'read_audio SoundFile import, after model load/builtin warmup and before evaluation transcription'},
+        'environment': {'validation_sha256': digest(env / 'validation.json'), 'original_versions_preserved': True, 'added_freeze_entries': sorted(new_freeze - old_freeze)},
+        'limits': ['50 call observations per run; no >=100-observation p95 claim', 'No pooling across repeats/languages/models', 'Quality config beam 5 / four CPU threads differs from production Lite beam 1 / three threads', 'No live latency or promotion claim; references lack local bilingual approval'],
+    }
+    with (OUTPUT / 'completed-review.json').open('x') as handle:
+        json.dump(result, handle, indent=2, ensure_ascii=False, allow_nan=False)
+        handle.write('\n')
+    print(json.dumps({'review': str(OUTPUT / 'completed-review.json'), 'workers': len(checks), 'rows_recomputed': sum(x['rows_recomputed'] for x in checks)}))
+
+
+if __name__ == '__main__':
+    main()

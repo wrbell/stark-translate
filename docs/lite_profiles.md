@@ -36,8 +36,10 @@ final medians. The 0.6-second cadence remains unchanged. These runs used
 Whisper-small and Marian finals; the harness's `e2b` label does not indicate
 Gemma inference or a test of `lite-cpu-quality`.
 
-CPU Whisper small/base quality recovery and independent CPU Lite deadline screens
-remain pending. Deadline screens retain the default cadence; rejected cadence
+The [CPU Whisper small/base comparison](evaluation/mac_followup_20260910/cpu-stt-comparison.md)
+completed 600 calls: base was faster but worsened WER beyond the allowed increase
+in both languages. Whisper-small stays selected; no base pipeline trial follows.
+Independent CPU Lite deadline screens remain pending at the default cadence; rejected cadence
 arms cannot enter a combination. The separate
 [Standard endpoint/deadline](evaluation/mac_followup_20260910/standard-screen-result.md)
 and [Spanish Parakeet](evaluation/mac_followup_20260910/spanish-parakeet-result.md)
