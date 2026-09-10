@@ -21,6 +21,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import sys
 import urllib.request
 from pathlib import Path
@@ -222,6 +223,17 @@ def check_lockfile_urls(
             url = entry["url"]
         elif kind == "hf-snapshot":
             url = f"https://huggingface.co/api/models/{entry['repo_id']}"
+        elif kind == "derived-ct2":
+            source = lockfile["models"][entry["source_model"]]
+            checks.append(
+                {
+                    "name": key,
+                    "url": "",
+                    "status": "pass",
+                    "detail": f"Derived locally from {source['repo_id']}@{source['revision']}",
+                }
+            )
+            continue
         else:
             checks.append({"name": key, "url": "", "status": "fail", "detail": f"unknown type {kind!r}"})
             continue
@@ -276,6 +288,8 @@ def bootstrap_models(
     """Run the model setup flow. Returns process exit code."""
     if models_dir is None:
         models_dir = default_models_dir()
+    if project_root is None:
+        project_root = Path(os.environ.get("STARK_PROJECT_ROOT", Path.cwd()))
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -366,6 +380,15 @@ def bootstrap_models(
                     )
                 )
                 n_done += 1
+            elif kind == "derived-ct2":
+                from tools.marian_ct2_setup import ensure_managed_marian
+
+                artifact, created = ensure_managed_marian(
+                    entry, project_root=project_root or _find_project_root(), models_dir=models_dir, refresh=refresh
+                )
+                logger.info("[%s] %s — %s", "build" if created else "skip", key, artifact)
+                n_done += int(created)
+                n_skipped += int(not created)
             else:
                 logger.error("[fail] %s — unknown type %r", key, kind)
                 n_failed += 1

@@ -114,6 +114,9 @@ def resolve_model_path(
         ),
         {},
     )
+    if entry.get("type") == "derived-ct2":
+        resolved = resolve_marian_ct2(entry["direction"], project_root=project_root, models_dir=models_dir)
+        return resolved if resolved is not None or local_only else model_id
     root = project_root or Path(os.environ.get("STARK_PROJECT_ROOT", Path(__file__).resolve().parent.parent))
     for directory in (models_dir or default_models_dir(), root / "models"):
         target = directory / entry.get("subdir", entry.get("filename", model_id))
@@ -146,4 +149,76 @@ def resolve_piper_voice(voice_name: str, *, models_dir: Path | None = None) -> s
     for path in [cache / f"{voice_name}.onnx", *cache.glob(f"models--*/snapshots/*/**/{voice_name}.onnx")]:
         if path.is_file() and path.with_suffix(".onnx.json").is_file():
             return str(path)
+    return None
+
+
+MARIAN_CT2_REQUIRED_FILES = (
+    "model.bin",
+    "config.json",
+    "vocab.json",
+    "source.spm",
+    "target.spm",
+    "tokenizer_config.json",
+)
+
+
+def marian_ct2_complete(path: Path) -> bool:
+    """Cheap structural check; model loading and file hashes belong to setup."""
+    return path.is_dir() and all(
+        (path / name).is_file() and (path / name).stat().st_size > 0 for name in MARIAN_CT2_REQUIRED_FILES
+    )
+
+
+def resolve_marian_ct2(
+    direction: str,
+    *,
+    explicit_path: str | Path | None = None,
+    project_root: Path | None = None,
+    models_dir: Path | None = None,
+    adapter_root: Path | None = None,
+) -> str | None:
+    """Use an explicit override, existing working adapter, then managed cache.
+
+    Managed active.json is atomically replaced only after conversion succeeds.
+    Its immutable build directory carries source revision and quantization.
+    Existing adapters are preserved without inventing a source revision for them.
+    """
+    if direction not in {"en-es", "es-en"}:
+        raise ValueError(f"Unsupported Marian direction: {direction}")
+    if explicit_path is not None:
+        explicit = Path(explicit_path).expanduser()
+        if not marian_ct2_complete(explicit):
+            raise ValueError(f"Explicit Marian CT2 path is incomplete: {explicit}")
+        return str(explicit.resolve())
+    project = project_root or Path(os.environ.get("STARK_PROJECT_ROOT", Path.cwd()))
+    adapters = adapter_root if adapter_root is not None else project / "adapters" / "marian_ct2"
+    if adapter_root is not None and not adapters.is_absolute():
+        adapters = project / adapters
+    candidate = adapters / direction / "active"
+    if marian_ct2_complete(candidate):
+        return str(candidate.resolve())
+    try:
+        entries = load_model_manifest(project).get("models", {})
+        entry = entries[f"marian-ct2-{direction}"]
+        source = entries[entry["source_model"]]
+        managed = (models_dir or default_models_dir()) / entry["subdir"]
+        pointer = json.loads((managed / "active.json").read_text())
+        name = pointer["directory"]
+        if not isinstance(name, str) or Path(name).name != name or name in {".", ".."}:
+            return None
+        candidate = managed / name
+        if candidate.is_symlink() or candidate.resolve().parent != managed.resolve():
+            return None
+        exported = json.loads((candidate / "export_manifest.json").read_text())
+        if not isinstance(exported, dict) or (
+            exported.get("model_id") != source["repo_id"]
+            or exported.get("source_revision") != source["revision"]
+            or exported.get("direction") != direction
+            or exported.get("ct2_quantization") != entry["quantization"]
+        ):
+            return None
+        if marian_ct2_complete(candidate):
+            return str(candidate.resolve())
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
     return None

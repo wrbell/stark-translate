@@ -49,9 +49,18 @@ loading Metal models. Missing required models or packages block Start; MLX does
 not require GGUF files or a running llama-server. Preflight is a readiness check,
 not a substitute for live caption, microphone-permission, and physical-output tests.
 
-For CT2 partials, run `scripts/convert_marian_ct2.py --quantization int8` once per
-direction. Until the converted adapters are present, the supported HF Marian
-fallback works but is slower. The conversion is a separate operation from setup.
+Mac setup includes derived int8 Marian CT2 models for both directions. It reuses
+complete existing `adapters/marian_ct2/<direction>/active` directories first,
+without modifying them. If neither adapter nor a valid managed artifact exists,
+setup converts the pinned HF source using the same interpreter, validates a CPU
+smoke and atomically publishes the result under the selected model cache. Mac
+preflight requires the selected direction's complete CT2 artifact. The HF engine
+remains available for explicit/manual fallback, but does not satisfy this default
+Mac readiness gate. See [models.md](./models.md#derived-marian-ct2-models-on-mac).
+
+The manual converter remains available for custom adapter work:
+`scripts/convert_marian_ct2.py --quantization int8` with the existing `--model-id`
+and `--output` flags. Setup never runs it against your working adapter directory.
 
 ## Interpreter selection and launchd
 

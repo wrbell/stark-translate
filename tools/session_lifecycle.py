@@ -164,6 +164,7 @@ def completion_metadata(model_ids: dict[str, str | None], root: Path) -> dict:
                         item["export_manifest"] = {
                             "sha256": _digest(export_manifest)["sha256"],
                             "source_model_id": exported.get("model_id"),
+                            "source_revision": exported.get("source_revision"),
                             "ct2_quantization": exported.get("ct2_quantization"),
                             "direction": exported.get("direction"),
                             "declared_model_bin_sha256": exported.get("model_bin_sha256"),

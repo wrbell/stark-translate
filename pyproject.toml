@@ -67,7 +67,7 @@ cuda = [
 # MLX / Apple Silicon. arm64 only.
 mlx = [
     "torch>=2.10,<2.11",
-    "silero-vad>=6.2.1",
+    "silero-vad==6.2.1",
     "onnxruntime>=1.20",
     "ctranslate2>=4.7.1",
     "sentencepiece>=0.2",

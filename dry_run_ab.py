@@ -998,6 +998,7 @@ _last_final_text = ""  # consecutive duplicate suppression
 # Models (set during init)
 vad_model = None
 vad_utils = None
+_vad_provenance = {}
 stt_pipe = None
 mlx_a_model = None
 mlx_a_tokenizer = None
@@ -1026,11 +1027,13 @@ mlx_b_suffix_tokens = None
 
 
 def load_vad():
-    """Load Silero VAD (~2MB)."""
-    print("[1/6] Loading Silero VAD...")
-    kwargs = {"onnx": True, "force_onnx_cpu": True} if settings.vad.backend == "onnx" else {}
-    model, utils = torch.hub.load("snakers4/silero-vad", "silero_vad", **kwargs)
-    print("  VAD ready")
+    """Load the installed Silero package's bundled weights without network access."""
+    from tools.vad_runtime import load_packaged_vad
+
+    global _vad_provenance
+    print("[1/6] Loading packaged Silero VAD...")
+    model, utils, _vad_provenance = load_packaged_vad(settings.vad.backend)
+    print(f"  VAD ready (silero-vad {_vad_provenance['package_version']}, {settings.vad.backend})")
     return model, utils
 
 
@@ -4364,7 +4367,7 @@ async def main_async(args):
         "model_a": MLX_MODEL_A,
         "model_b": MLX_MODEL_B if _RUN_AB else None,
         "stt_backend": settings.stt.backend,
-        "vad": settings.vad.model_dump(),
+        "vad": {**settings.vad.model_dump(), "artifact": _vad_provenance},
         "translation": settings.translation.model_dump(),
         "replay_speed": float(os.environ.get("STARK_REPLAY_SPEED", "1")),
     }

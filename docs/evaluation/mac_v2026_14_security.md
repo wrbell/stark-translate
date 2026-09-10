@@ -76,22 +76,34 @@ metadata records the actual CT2 `model.bin` SHA-256 and export-manifest identity
 after inference. That binds the measured weights for comparison; it neither
 retroactively establishes an HF revision nor certifies the model's safety.
 
-Two reachable download paths outside this B615 list also remain relevant:
+Two paths outside this B615 list also matter when interpreting the recorded scan:
 
-- `dry_run_ab.py:1032` uses `torch.hub.load("snakers4/silero-vad", ...)` without
-  a repo commit/tag. This is the default VAD path and also supplies its ONNX
-  variant. An installed `silero-vad` package version does not pin that Hub code
-  or the cached model artifact. The pipeline file is outside the CI scan roots.
+- At scan time `dry_run_ab.py:1032` used unpinned Torch Hub for Silero. After the
+  48 frozen screens, the loader changed to the installed `silero-vad==6.2.1`
+  package's bundled JIT/ONNX weights. Preflight checks both files; startup metadata
+  records their actual hashes. Both variants passed real CPU inference with
+  empty Torch/HF caches and network/Hub calls blocked. The package's model code,
+  utility code and both weights match the prior local Hub cache byte for byte
+  (`.cache/mac-roadmap/vad-cache-proof.json`). This preserves local artifact
+  identity without inventing an upstream Hub commit. Historical screen evidence
+  remains bound to its original source; the pipeline file is still outside the
+  CI scan roots.
 - `features/live_diarize.py:221` uses SpeechBrain `from_hparams` with the
   `speechbrain/spkrec-ecapa-voxceleb` source and no revision. It is reachable only
   for optional diarization; B615 does not report that wrapper call here.
 
 ## Remaining work
 
+Mac setup now also derives both Marian CT2 directions from pinned HF sources
+when no complete working adapter exists. It records source revision, converter
+interpreter/version and file hashes before atomically publishing the managed
+artifact. Existing adapters remain unchanged and keep their original provenance.
+
 Prefer a shared revision-aware download or an explicit missing-model error for
-managed runtime models, with deliberate overrides kept visible. Pin and record
-the actual Silero and optional SpeechBrain sources; then update the alternate
-backend, conversion, corpus and offline-QE tools. Broaden audit roots and cover
+remaining runtime cache misses, with deliberate overrides kept visible. Pin the
+optional SpeechBrain source; then update the alternate backend, legacy conversion,
+corpus and offline-QE tools. Broaden audit roots and cover
 the resolved extras environment before describing the project as comprehensively
-audited. These are follow-up items; none were changed during the frozen latency
-screening run. PyPI account setup and publication remain pending by user choice.
+audited. These are follow-up items. The Silero/managed-CT2 setup fixes were applied
+after the frozen screening run and require their separate routing validation.
+PyPI account setup and publication remain pending by user choice.

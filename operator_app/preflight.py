@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 from typing import Literal
 
-from engines.model_paths import resolve_backend, resolve_model_path, resolve_piper_voice
+from engines.model_paths import resolve_backend, resolve_marian_ct2, resolve_model_path, resolve_piper_voice
 
 CheckStatus = Literal["pass", "warn", "fail"]
 Check = dict
@@ -74,19 +74,29 @@ def check_dependencies(
         requirements.update(
             {"torch": ">=2.10,<2.11", "mlx": ">=0.32.2,<0.33", "mlx-lm": ">=0.31.3,<0.32", "mlx-optiq": ">=0.4.34,<0.5"}
         )
+    if backend == "mlx":
+        requirements["silero-vad"] = "==6.2.1"
     if diarize:
         requirements["torchaudio"] = ">=2.10,<2.11"
     from packaging.specifiers import SpecifierSet
 
     missing = []
     for package, minimum in requirements.items():
-        specifier = minimum if minimum.startswith(">=") else f">={minimum}"
+        specifier = minimum if minimum.startswith((">", "<", "=", "!", "~")) else f">={minimum}"
         try:
             installed = importlib.metadata.version(package)
             if installed not in SpecifierSet(specifier):
                 missing.append(f"{package}{specifier} (installed {installed})")
         except importlib.metadata.PackageNotFoundError:
             missing.append(f"{package}{specifier}")
+    if not missing:
+        from tools.vad_runtime import packaged_vad_path
+
+        for vad_backend in ("torch", "onnx"):
+            try:
+                packaged_vad_path(vad_backend)
+            except (importlib.metadata.PackageNotFoundError, OSError) as exc:
+                missing.append(f"silero-vad bundled {vad_backend} weights ({exc})")
     if missing:
         extra = backend + (",diarization" if diarize else "")
         return _check(
@@ -120,9 +130,9 @@ def check_models(
     else:
         names = ["whisper-large-v3-turbo", f"gemma-4-{'e2b' if backend == 'cpu' else gemma4_size}-it-q4km.gguf"]
     direction = "es-en" if lang == "es" else "en-es"
-    ct2 = project_root / "adapters" / "marian_ct2" / direction / "active"
-    if not ((ct2 / "model.bin").is_file() and (ct2 / "vocab.json").is_file()):
-        names.append(f"marian-{direction}")
+    ct2 = resolve_marian_ct2(direction, project_root=project_root, models_dir=models_dir)
+    if ct2 is None:
+        names.append(f"marian-ct2-{direction}" if backend == "mlx" else f"marian-{direction}")
 
     missing = [
         name
@@ -142,7 +152,7 @@ def check_models(
             f"Missing local models: {', '.join(missing)}. Run stark-translate setup --backend {backend}"
             + (" --include tts" if tts else ""),
         )
-    partial = "CT2" if (ct2 / "model.bin").is_file() else "HF CPU fallback"
+    partial = f"CT2 ({ct2})" if ct2 else "HF CPU fallback"
     return _check("Models", "pass", f"{', '.join(names)}; Marian {partial}")
 
 

@@ -24,6 +24,8 @@ def main() -> None:
         "dry_run_ab.py",
         "workers.py",
         "tools/session_lifecycle.py",
+        "tools/vad_runtime.py",
+        "tools/marian_ct2_setup.py",
         "training/theological_canaries.py",
         "displays/audience_display.html",
         "displays/caption_telemetry.js",

@@ -150,7 +150,7 @@ def test_mac_model_selection_changes_with_language(tmp_path):
     requested = [call.args[0] for call in resolve.call_args_list]
     assert "mlx-whisper-large-v3-turbo" in requested
     assert "mlx-parakeet-v3" not in requested
-    assert "marian-es-en" in requested
+    assert "marian-ct2-es-en" in requested
 
 
 def test_missing_selected_model_blocks_start(tmp_path):

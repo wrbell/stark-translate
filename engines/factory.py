@@ -41,18 +41,10 @@ def _resolve_ct2_whisper_model(explicit_model_id: str | None) -> str:
 
 
 def _resolve_ct2_marian_model(direction: str, explicit_path: str | None) -> str | None:
-    """Return a usable CT2 Marian directory for *direction* or None if not available.
+    """Shared adapter/managed-cache lookup; explicit overrides remain first."""
+    from engines.model_paths import resolve_marian_ct2
 
-    *direction* is "en-es" or "es-en". Mirrors ``_resolve_ct2_whisper_model``:
-    explicit override wins; otherwise check the active adapter slot.
-    """
-    if explicit_path is not None and Path(explicit_path).exists():
-        return explicit_path
-    candidate = _MARIAN_CT2_ROOT / direction / "active"
-    if candidate.exists() and (candidate / "model.bin").exists():
-        logger.info("Marian: using local CT2 model at %s", candidate)
-        return str(candidate)
-    return None
+    return resolve_marian_ct2(direction, explicit_path=explicit_path, adapter_root=_MARIAN_CT2_ROOT)
 
 
 def _marian_direction_from_langs(source_lang: str, target_lang: str) -> str:

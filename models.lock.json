@@ -1,6 +1,6 @@
 {
   "$schema_comment": "Runtime model manifest. HF snapshots and direct files pin exact revisions. Mac setup installs Parakeet EN, Whisper ES, Gemma E4B and Marian; optional groups are selected with setup --include.",
-  "version": "2026.13.1",
+  "version": "2026.14.0",
   "updated": "2026-09-09",
   "models": {
     "gemma-4-e2b-it-q4km.gguf": {
@@ -77,8 +77,7 @@
       "subdir": "marian-en-es",
       "required_for": [
         "cuda",
-        "cpu",
-        "mlx"
+        "cpu"
       ],
       "comment": "MarianMT for fast EN\u2192ES partials.",
       "required_files": [
@@ -96,8 +95,7 @@
       "subdir": "marian-es-en",
       "required_for": [
         "cuda",
-        "cpu",
-        "mlx"
+        "cpu"
       ],
       "comment": "MarianMT for fast ES\u2192EN partials.",
       "required_files": [
@@ -183,6 +181,44 @@
       ],
       "weights_required": false,
       "voice": "es_MX-claude-high"
+    },
+    "marian-ct2-en-es": {
+      "type": "derived-ct2",
+      "source_model": "marian-en-es",
+      "direction": "en-es",
+      "quantization": "int8",
+      "subdir": "marian-ct2/en-es",
+      "required_for": [
+        "mlx"
+      ],
+      "required_files": [
+        "model.bin",
+        "config.json",
+        "vocab.json",
+        "source.spm",
+        "target.spm",
+        "tokenizer_config.json"
+      ],
+      "comment": "Preserve a complete project adapter first; otherwise convert the pinned HF source into an atomic managed cache."
+    },
+    "marian-ct2-es-en": {
+      "type": "derived-ct2",
+      "source_model": "marian-es-en",
+      "direction": "es-en",
+      "quantization": "int8",
+      "subdir": "marian-ct2/es-en",
+      "required_for": [
+        "mlx"
+      ],
+      "required_files": [
+        "model.bin",
+        "config.json",
+        "vocab.json",
+        "source.spm",
+        "target.spm",
+        "tokenizer_config.json"
+      ],
+      "comment": "Preserve a complete project adapter first; otherwise convert the pinned HF source into an atomic managed cache."
     }
   }
 }

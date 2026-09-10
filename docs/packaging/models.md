@@ -74,9 +74,34 @@ completion metadata distinguishes resolved revisions from manifest revisions.
 ## Optional models
 
 `--include e2b` adds the faster Gemma profile; `--include tts` adds EN/ES Piper
-voices; `--include translategemma` adds the legacy translation family. Marian
-CT2 conversion remains a separate step from model setup. See
-[macos.md](./macos.md#models-and-offline-readiness) for the conversion workflow.
+voices; `--include translategemma` adds the legacy translation family.
+
+## Derived Marian CT2 models on Mac
+
+The two `derived-ct2` Mac defaults reference the pinned `marian-en-es` and
+`marian-es-en` HF source entries. Setup first reuses a complete working adapter
+under `adapters/marian_ct2/<direction>/active`, even with `--refresh`; it never
+rewrites those adapters. Otherwise it converts the pinned HF snapshot to int8
+using the setup interpreter, checks the required model/tokenizer files, runs one
+nonempty CPU translation smoke and publishes a versioned managed artifact through
+an atomic `active.json` pointer. A failed conversion leaves the previous pointer
+and artifact intact. The source HF weights are fetched only if conversion needs
+them and no matching pinned snapshot is already available.
+
+`resolve_marian_ct2` is shared by setup, factory and preflight. Priority is an
+explicit complete CT2 override, then the existing project adapter, then the
+managed cache. Managed artifacts must match the source repo/revision, direction
+and quantization in the manifest. Their export manifests record converter Python
+and CT2 version, source path/revision, actual file hashes and the CPU smoke. Local
+adapter provenance stays unknown when its original manifest lacks a revision;
+reusing it does not relabel it as a pinned conversion.
+
+Manual `scripts/convert_marian_ct2.py` commands remain supported for deliberate
+adapter creation or custom quantization. Registered repo IDs use the shared
+pinned source; custom remote repos require a full `--revision`, and explicit
+local source paths remain deliberate overrides. Conversion uses `sys.executable`
+so an unrelated converter on PATH cannot select a different environment.
+See [macos.md](./macos.md#models-and-offline-readiness).
 
 Update the model manifest whenever a pinned model revision or installation
 requirement changes. App versions and manifest versions are independent.

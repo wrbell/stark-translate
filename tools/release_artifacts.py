@@ -46,6 +46,8 @@ RUNTIME_REQUIRED = {
     "tools/audio_bridge_client.py",
     "tools/review_data.py",
     "tools/session_lifecycle.py",
+    "tools/vad_runtime.py",
+    "tools/marian_ct2_setup.py",
     "training/theological_canaries.py",
     "features/live_diarize.py",
     "displays/audience_display.html",
