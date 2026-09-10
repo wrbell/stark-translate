@@ -6,6 +6,7 @@ import plistlib
 import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -14,6 +15,14 @@ from operator_app.launchd import manage_launchd
 from stark_translate.profiles import PROFILE_NAMES
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture(autouse=True)
+def isolated_cli_environment():
+    # CLI entry points normally run in their own process. Restore even keys
+    # they introduce after a test deliberately removes an ambient setting.
+    with patch.dict(os.environ):
+        yield
 
 
 def test_standalone_smoke_obeys_actual_localhost_boundary():
