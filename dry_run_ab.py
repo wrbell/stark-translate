@@ -83,9 +83,9 @@ import websockets
 
 from settings import settings
 from stark_translate.profiles import apply_profile, resolve_profile
-
-RUNTIME_PROFILE = resolve_profile(settings.profile)
-_managed_llama_server = None
+from tools.latency_experiments import LatencyExperiments
+from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker
+from tools.latency_trace import LatencyTrace
 from tools.pipeline_timing import (
     SAMPLE_COLUMNS,
     TIMING_COLUMNS,
@@ -98,6 +98,9 @@ from tools.pipeline_timing import (
     capture_stamp,
     milliseconds,
 )
+
+RUNTIME_PROFILE = resolve_profile(settings.profile)
+_managed_llama_server = None
 
 # ---------------------------------------------------------------------------
 # Structured logging — logger used for VAD diagnostics, pipeline events,
@@ -153,6 +156,15 @@ _experiment_lock = threading.Lock()
 _active_stt_workers = {"partial": 0, "final": 0}
 _experiment_counters = {}
 _INPUT_AUDIO_HASH = None
+_latency = LatencyExperiments()
+_latency_trace = LatencyTrace()
+_stt_scheduler = None
+_caption_delivery = None
+_vad_pool = None
+_marian_memo = ExactTextMemo(0)
+_closed_utterances = set()
+_partial_sequence = 0
+_partial_emitted_sequence = {}
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
 BEAM_SIZE = 1  # Whisper beam search width: 1=greedy (fastest), 5=default
@@ -1945,6 +1957,7 @@ def _inference_idle():
         or _final_pending.is_set()
         or (_pipeline_chunk_queue is not None and not _pipeline_chunk_queue.empty())
         or (_active_partial_future is not None and not _active_partial_future.done())
+        or (_stt_scheduler is not None and _stt_scheduler.busy)
     )
 
 
@@ -2055,6 +2068,11 @@ def warmup_translation_models():
         pass  # warmup is best-effort, never block the pipeline
 
 
+def _latency_event(event, **fields):
+    _count_experiment(event)
+    _latency_trace.record(event, **fields)
+
+
 def translate_marian(text):
     """Fast partial translation via the configured Marian engine.
 
@@ -2065,7 +2083,17 @@ def translate_marian(text):
     if _marian_engine is None:
         return "(MarianMT not loaded)", 0.0
     target_lang = "en" if SOURCE_LANG == "es" else "es"
+    memo_started = time.perf_counter()
+    key = (id(_marian_engine), getattr(_marian_engine, "model_id", None), SOURCE_LANG, target_lang, text)
+    if _latency.marian_memo:
+        cached = _marian_memo.get(key)
+        if cached is not None:
+            _latency_event("marian_memo_hit")
+            return cached, (time.perf_counter() - memo_started) * 1000
+        _latency_event("marian_memo_miss")
     result = _marian_engine.translate(text, source_lang=SOURCE_LANG, target_lang=target_lang)
+    if _latency.marian_memo:
+        _marian_memo.put(key, result.text)
     return result.text, result.latency_ms
 
 
@@ -2251,7 +2279,9 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
     the MLX pipeline thread. MarianMT runs on a separate PyTorch pool
     to free ~80ms of MLX pool time per partial.
     """
-    global _active_partial_future
+    global _active_partial_future, _partial_sequence
+    _partial_sequence += 1
+    request_sequence = _partial_sequence
     sample_bounds = sample_bounds or {name: None for name in SAMPLE_COLUMNS}
     partial_submitted = time.perf_counter()
     if settings.translation.final_aware_partials and _translation_active.is_set():
@@ -2279,7 +2309,7 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
     # [FIX] At most one partial in flight on the pool — a second partial
     # queued behind the first just adds latency with no UX benefit (the
     # first partial's text is already on screen).
-    if _active_partial_future is not None and not _active_partial_future.done():
+    if _stt_scheduler is None and _active_partial_future is not None and not _active_partial_future.done():
         _count_experiment("partial_suppressed_in_flight")
         return
 
@@ -2362,7 +2392,12 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
             return english, stt_lat, conf, no_speech, cr
 
         # Submit STT and track the future so process_final can cancel it
-        if MULTIPROCESS:
+        if _stt_scheduler is not None:
+            function = (lambda: _run_partial_stt_via_worker(audio_data)) if MULTIPROCESS else _partial_stt
+            stt_future = asyncio.wrap_future(
+                _stt_scheduler.submit("partial", _run_tracked_stt, "partial", function, key=utterance_id)
+            )
+        elif MULTIPROCESS:
             stt_future = loop.run_in_executor(
                 _stt_comm_pool, _run_tracked_stt, "partial", _run_partial_stt_via_worker, audio_data
             )
@@ -2372,6 +2407,7 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
             _active_partial_future = stt_future
 
         stt_result = await stt_future
+        _latency_trace.record("partial_stt_resumed", utterance_id=utterance_id)
 
         with _partial_future_lock:
             _active_partial_future = None
@@ -2414,6 +2450,12 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
 
         # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
+        if _latency.latest_partial and (
+            utterance_id in _closed_utterances or request_sequence <= _partial_emitted_sequence.get(utterance_id, -1)
+        ):
+            _latency_event("partial_suppressed_stale_result")
+            return
+        _partial_emitted_sequence[utterance_id] = request_sequence
         total = stt_latency + marian_latency
         _count_experiment("partial_emitted")
 
@@ -3112,11 +3154,15 @@ async def _pipeline_coordinator():
                 finally:
                     clock.stt_finished = time.perf_counter()
 
-            stt_future = loop.run_in_executor(_stt_comm_pool if MULTIPROCESS else _pipeline_pool, timed_stt)
+            if _stt_scheduler is not None:
+                stt_future = asyncio.wrap_future(_stt_scheduler.submit("final", timed_stt, key=timing.utterance_id))
+            else:
+                stt_future = loop.run_in_executor(_stt_comm_pool if MULTIPROCESS else _pipeline_pool, timed_stt)
 
             # Await STT completion (translation of N-1 may still be running
             # concurrently in another thread — that's the overlap)
             english, stt_latency, stt_confidence, segment_meta, low_conf_words = await stt_future
+            _latency_trace.record("final_stt_resumed", chunk_id=cid, worker_finished=timing.stt_finished)
 
             # [FIX] Final STT done — allow partials again for the next utterance
             _final_pending.clear()
@@ -3249,9 +3295,14 @@ async def process_final(audio_data, finalized_utterance_id=None):
     _final_pending_utterance_id = finalized_utterance_id
     _final_pending.set()
 
+    if _latency.latest_partial:
+        _closed_utterances.add(finalized_utterance_id)
+    if _stt_scheduler is not None:
+        _stt_scheduler.cancel_partial(finalized_utterance_id)
+
     # Cancel any queued (not-yet-started) partial STT future
     with _partial_future_lock:
-        if _active_partial_future is not None:
+        if _stt_scheduler is None and _active_partial_future is not None:
             cancelled = _active_partial_future.cancel()
             if cancelled:
                 print("  [FIX] cancelled queued partial (final arriving)")
@@ -3304,7 +3355,8 @@ def _write_display_record(record):
 async def ws_handler(websocket, path=None):
     """Handle new WebSocket connections."""
     global _ws_total_connections
-    ws_clients.add(websocket)
+    if not _latency.async_captions:
+        ws_clients.add(websocket)
     _ws_total_connections += 1
     logger.info("ws_connect clients=%d total_connections=%d", len(ws_clients), _ws_total_connections)
     print(f"  Browser connected ({len(ws_clients)} client(s))")
@@ -3325,6 +3377,8 @@ async def ws_handler(websocket, path=None):
     except websockets.ConnectionClosed:
         ws_clients.discard(websocket)
         return
+    if _latency.async_captions:
+        ws_clients.add(websocket)
     try:
         async for raw in websocket:
             if not isinstance(raw, str) or len(raw) > 2048:
@@ -3343,10 +3397,39 @@ async def ws_handler(websocket, path=None):
     finally:
         global _ws_total_disconnections
         ws_clients.discard(websocket)
+        if _caption_delivery is not None:
+            await _caption_delivery.remove(websocket)
         _ws_total_disconnections += 1
         _render_tracker.disconnect(websocket)
         logger.info("ws_disconnect clients=%d total_disconnections=%d", len(ws_clients), _ws_total_disconnections)
         print(f"  Browser disconnected ({len(ws_clients)} client(s))")
+
+
+def _caption_before_send(client, data, started, queue_ms):
+    _latency_trace.record("caption_send_started", event_id=data.get("event_id"), queue_ms=queue_ms)
+    if data.get("type") != "translation":
+        return
+    timing = _chunk_timings.get(data.get("chunk_id")) if data.get("stage") != "partial" else None
+    _render_tracker.sent(
+        client,
+        data["event_id"],
+        started,
+        timing.speech_end if timing and timing.timing_source != "replay_nonrealtime" else None,
+        data.get("stage", "complete"),
+        {
+            "chunk_id": data.get("chunk_id"),
+            "utterance_id": data.get("utterance_id", data.get("chunk_id")),
+            **{name: data.get(name) for name in SAMPLE_COLUMNS},
+        },
+    )
+
+
+def _caption_failed(client, error):
+    global _ws_send_failures
+    _ws_send_failures += 1
+    ws_clients.discard(client)
+    _render_tracker.disconnect(client)
+    logger.warning("caption_client_failed: %s", error)
 
 
 async def broadcast(data):
@@ -3354,7 +3437,7 @@ async def broadcast(data):
     if not ws_clients:
         print("  [ws] No clients connected, skipping broadcast")
         return
-    global _broadcast_sequence
+    global _broadcast_sequence, _caption_delivery
     # Add the correlation id to the producer record too, so diagnostics can
     # be joined to acknowledgments. Never add post-send durations to payload.
     data.setdefault("session_id", SESSION_ID)
@@ -3366,6 +3449,16 @@ async def broadcast(data):
         data.setdefault("utterance_id", timing.utterance_id)
         for name, value in timing.sample_metadata().items():
             data.setdefault(name, value)
+    if _latency.async_captions:
+        from tools.caption_delivery import CaptionDelivery
+
+        if _caption_delivery is None:
+            _caption_delivery = CaptionDelivery(
+                before_send=_caption_before_send, on_failure=_caption_failed, on_event=_latency_event
+            )
+        for client in list(ws_clients):
+            _caption_delivery.publish(client, data)
+        return
     msg = json.dumps(data)
     dead = set()
     clients = list(ws_clients)
@@ -3892,6 +3985,8 @@ def print_summary():
             "ws_total_disconnections": _ws_total_disconnections,
             "ws_send_failures": _ws_send_failures,
             "latency_experiment_counters": _experiment_snapshot(),
+            "latency_experiment_configuration": _latency.as_dict(),
+            "latency_trace": _latency_trace.snapshot(),
         },
     )
     if not all_results:
@@ -4040,6 +4135,7 @@ async def audio_loop():
                                 _pipeline_chunk_queue.empty()
                                 and not any(not task.done() for task in _partial_tasks)
                                 and (_active_partial_future is None or _active_partial_future.done())
+                                and (_stt_scheduler is None or not _stt_scheduler.busy)
                             ):
                                 return
                         continue
@@ -4047,7 +4143,19 @@ async def audio_loop():
                         frame_stamp, audio_frame = audio_frame.stamp, audio_frame.samples
                     else:  # historical callers/tests with raw PCM have receipt estimates
                         frame_stamp = sample_clock.capture(len(audio_frame), SAMPLE_RATE, None)
-                    has_speech = is_speech(audio_frame, vad_model, vad_utils)
+                    _latency_trace.record(
+                        "audio_dequeued",
+                        capture_age_ms=milliseconds(time.perf_counter(), frame_stamp.end),
+                        queue_depth=audio_queue.qsize(),
+                    )
+                    vad_started = time.perf_counter()
+                    if _vad_pool is not None:
+                        has_speech = await asyncio.get_running_loop().run_in_executor(
+                            _vad_pool, is_speech, audio_frame, vad_model, vad_utils
+                        )
+                    else:
+                        has_speech = is_speech(audio_frame, vad_model, vad_utils)
+                    _latency_trace.record("vad_complete", elapsed_ms=(time.perf_counter() - vad_started) * 1000)
 
                     frame_count += 1
 
@@ -4333,7 +4441,10 @@ async def main_async(args):
         mlx_b_model, mlx_b_tokenizer = None, None
         _start_workers(run_ab=args.run_ab)
     else:
-        stt_pipe = load_whisper(BACKEND)
+        if _stt_scheduler is not None:
+            stt_pipe = await asyncio.wrap_future(_stt_scheduler.submit("final", load_whisper, BACKEND))
+        else:
+            stt_pipe = load_whisper(BACKEND)
         if args.low_vram:
             # Low-VRAM mode: skip Gemma entirely, MarianMT handles all translation
             mlx_a_model, mlx_a_tokenizer = None, None
@@ -4574,6 +4685,12 @@ async def main_async(args):
         if _stream_token_queue is not None:
             await _stream_token_queue.put(None)
         stream_task.cancel()
+        if _stt_scheduler is not None:
+            await asyncio.get_running_loop().run_in_executor(None, _stt_scheduler.shutdown)
+        if _vad_pool is not None:
+            _vad_pool.shutdown(wait=True)
+        if _caption_delivery is not None:
+            await _caption_delivery.close()
         # Release the Marian engine first, then shut down the PyTorch pool.
         if _marian_engine is not None:
             _marian_engine.unload()
@@ -4950,6 +5067,15 @@ def main():
                 file=sys.stderr,
             )
             args.run_ab = False
+
+    global _latency, _latency_trace, _stt_scheduler, _marian_memo, _vad_pool
+    _latency = LatencyExperiments.from_env()
+    _latency_trace = LatencyTrace(_latency.trace)
+    _marian_memo = ExactTextMemo(_latency.marian_memo)
+    if _latency.latest_partial or _latency.incremental_stt != "off":
+        _stt_scheduler = LatestSTTWorker(on_event=_latency_event)
+    if _latency.vad_worker:
+        _vad_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="vad-owner")
 
     # --- Create pipeline thread pool (backend-dependent) ---
     global _pipeline_pool
