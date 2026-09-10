@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -53,15 +54,23 @@ class TestModelsLockShape:
         data = json.loads((ROOT / "models.lock.json").read_text())
         for key, entry in data["models"].items():
             assert "type" in entry, f"{key} missing type"
-            assert entry["type"] in ("direct", "hf-snapshot"), f"{key} unknown type"
+            assert entry["type"] in ("direct", "hf-snapshot", "derived-ct2"), f"{key} unknown type"
             assert "required_for" in entry, f"{key} missing required_for"
             if entry["type"] == "direct":
                 assert "url" in entry
                 assert "filename" in entry
                 assert "sha256" in entry
-            else:
+            elif entry["type"] == "hf-snapshot":
                 assert "repo_id" in entry
                 assert "subdir" in entry
+            else:
+                assert entry["direction"] in ("en-es", "es-en")
+                assert entry["quantization"] == "int8"
+                assert entry["subdir"]
+                source = data["models"][entry["source_model"]]
+                assert source["type"] == "hf-snapshot"
+                assert source["repo_id"].endswith(entry["direction"])
+                assert re.fullmatch(r"[0-9a-f]{40}", source["revision"])
 
     def test_gguf_entries_match_local_files(self):
         """If we have the GGUFs locally, their SHA-256 should match the lockfile."""
