@@ -37,7 +37,7 @@ ids from a previous session cannot collide with the new one.
 | `lang_config` | On connect and on language flip | `session_id`, `source_lang`, `target_lang`, `source_label`, `target_label` |
 | `translation` (`stage: "partial"`) | Every ~0.6 s of new speech | `chunk_id` (utterance id), `english`, `spanish_a` (Marian), `spanish_b: null`, `stt_latency_ms`, `latency_a_ms`, `marian_pt_ms`, `timing_schema_version: 2`, sample bounds |
 | `utterance_discarded` | A provisional utterance is abandoned | `session_id`, `utterance_id`, `reason`; remove only its partial and suppress late matching partials, never a final or final stream |
-| `translation_start` | Final STT done, translation starting | `chunk_id`, `english`, `stage: "final"`, `stt_latency_ms`, `stt_confidence` |
+| `translation_start` | Final STT done, translation starting | `chunk_id`, `utterance_id`, `english`, `stage: "final"`, `stt_latency_ms`, `stt_confidence` |
 | `translation_stream` | Token batches while a final translation streams (CUDA streaming engine; batch size `settings.cuda.streaming_batch_size`) | `chunk_id`, `partial_spanish_a`, `tokens_so_far` |
 | `translation` (`stage: "complete"`) | Final ready | `chunk_id`, `english`, `spanish_a`, `spanish_b`, `stt_latency_ms`, `latency_a_ms`, `latency_b_ms`, legacy `e2e_latency_ms` / `true_e2e_ms` / `silence_delay_ms`, `queue_wait_ms`, `stt_confidence`, `tps_a`, `qe_a`, `word_stability_pct`, `speaker` (with `--diarize`), session provenance, schema 2 sample metadata |
 | `speaker_update` | Diarization label arrives after a final (`--diarize`) | `chunk_id`, `speaker`, `session_id` |
@@ -51,6 +51,15 @@ IDs as opaque identities rather than parsing them as chunk numbers. Provenance f
 `replay` or `synthetic`; `audio_source`; `input_audio_path`; `input_audio_sha256`) are
 attached to finals so downstream review and evaluation can separate live audio from
 file replay.
+
+Capture `utterance_id` is distinct from final `chunk_id`. At authoritative final
+publication the producer, delivery queue, health inventory and displays close the
+explicit session/utterance identity against late partials. Ordinary previews can
+still arrive while the final computes. Replacing that utterance's preview must
+preserve a newer utterance already on screen; never substitute a final chunk
+counter for a missing utterance identity. Legacy events without the identity keep
+their historical display fallback. Experimental closure at final admission is a
+separate opt-in scheduling policy.
 
 The "spanish_*" field names are historical: in `--lang es` sessions `english` carries
 the Spanish source and `spanish_a` the English target; use `lang_config` labels for UI.

@@ -51,6 +51,13 @@ frame across an unbuffered gap. Scoped `utterance_discarded` events remove only
 the abandoned preview; pending STT/translation and queued delivery cannot repaint
 it. Music hold and capture-error recovery share the same invalidation contract.
 
+Authoritative final publication also closes its explicit session/utterance against
+late previews, through the producer, delivery queue, health inventory and displays.
+An older final preserves the next utterance's preview. Ordinary previews remain
+eligible while a final computes; experimental closure at final admission stays
+opt-in. Preview text and timing join final diagnostics by capture utterance identity,
+not by the independent final chunk counter.
+
 **Health/control channel:** `tools/pipeline_health.py` writes a low-rate snapshot (`phase`
 ∈ `loading, listening, ready, paused, input_error, …`, input/caption ages, error counts,
 last captions) and accepts pause/resume/stop control; readers mark it `stale` after 3 s.
