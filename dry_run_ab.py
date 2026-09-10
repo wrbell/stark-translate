@@ -266,6 +266,17 @@ MODEL_FAMILY = "gemma4"
 MLX_DRAFT_MODEL_ID = None
 MLX_DRAFT_MODEL = None
 USE_MTS = False
+LIVE_MTS_UNAVAILABLE = (
+    "Live --mts is unavailable: the supported mlx-lm loader cannot load the Gemma 4 assistant drafter. "
+    "MTP remains an offline experiment (docs/mlx_mtp_notes.md); run with --no-mts. "
+    "The live pipeline will not silently continue after a drafter failure."
+)
+
+
+def validate_live_mts(requested, disabled=False, configured=False):
+    if not disabled and (requested is True or (requested is None and configured)):
+        raise ValueError(LIVE_MTS_UNAVAILABLE)
+
 
 # [P7-1E] Whisper initial_prompt — capped at ~40 words to reduce prefill time.
 # Biases decoder toward theological vocabulary that Whisper otherwise
@@ -1325,6 +1336,9 @@ def load_translation_models(load_b=True):
     global mlx_a_suffix_tokens, mlx_b_suffix_tokens
     global MLX_DRAFT_MODEL
 
+    if USE_MTS:
+        raise RuntimeError(LIVE_MTS_UNAVAILABLE)
+
     family_label = "Gemma 4" if MODEL_FAMILY == "gemma4" else "TranslateGemma"
     print(f"[3/6] Loading {family_label} models (MLX)...")
     a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, f"Approach A ({MLX_MODEL_A})", adapter_path=ADAPTER_DIR_A)
@@ -1336,15 +1350,8 @@ def load_translation_models(load_b=True):
         mlx_a_prompt_cache, mlx_a_suffix_tokens = None, None
         print("  Prompt cache skipped (gemma4 instruct path)")
 
-    # Gemma-4 assistant-drafter MTS (loads alongside target; used as draft_model)
+    # Live MTP is explicitly unavailable; offline research uses mlx_spec.
     MLX_DRAFT_MODEL = None
-    if USE_MTS and MLX_DRAFT_MODEL_ID and MODEL_FAMILY == "gemma4":
-        try:
-            MLX_DRAFT_MODEL, _ = load_mlx_gemma(MLX_DRAFT_MODEL_ID, f"MTS drafter ({MLX_DRAFT_MODEL_ID})")
-            print(f"  MTS enabled: draft={MLX_DRAFT_MODEL_ID}, num_draft_tokens={NUM_DRAFT_TOKENS}")
-        except Exception as e:
-            print(f"  WARNING: MTS drafter load failed: {e}")
-            MLX_DRAFT_MODEL = None
 
     b_model, b_tok = None, None
     if load_b and MODEL_FAMILY == "translategemma":
@@ -5265,6 +5272,10 @@ def main():
 
     parser.add_argument("--profile", choices=PROFILE_NAMES, default=settings.profile)
     args = parser.parse_args()
+    try:
+        validate_live_mts(args.mts, args.no_mts, settings.translation.mlx_mts)
+    except ValueError as exc:
+        parser.error(str(exc))
     global RUNTIME_PROFILE
     try:
         RUNTIME_PROFILE = apply_profile(settings, args.profile, args.backend)
