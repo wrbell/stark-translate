@@ -1190,12 +1190,24 @@ def load_whisper(backend="mlx"):
         requested = settings.stt.whisper_cuda_model
         from stark_translate.profiles import resolve_profile_model
 
-        model_path = (
-            resolve_profile_model(requested)
-            if settings.profile != "standard"
-            else resolve_model_path(requested, local_only=settings.stt.local_files_only)
+        auto_model = (
+            settings.profile == "standard"
+            and requested == "large-v3-turbo"
+            and "whisper_cuda_model" not in settings.stt.model_fields_set
         )
-        if model_path is None:
+        # An untouched standard default delegates to the factory's existing
+        # active-adapter preference. Explicit overrides, even the stock alias,
+        # bypass that preference; Lite always resolves its exact pinned model.
+        model_path = (
+            None
+            if auto_model
+            else (
+                resolve_profile_model(requested)
+                if settings.profile != "standard"
+                else resolve_model_path(requested, local_only=settings.stt.local_files_only)
+            )
+        )
+        if model_path is None and not auto_model:
             raise FileNotFoundError(f"Pinned STT model {requested} missing; run setup for {settings.profile}")
         compute = settings.stt.whisper_cuda_compute_type
         if backend == "cpu" and compute == "int8_float16":
@@ -1212,7 +1224,7 @@ def load_whisper(backend="mlx"):
             fallback_threshold=settings.stt.fallback_threshold,
             hallucination_threshold=settings.stt.hallucination_threshold,
         )
-        print(f"[2/6] Loading {model_path} ({backend}, {compute})...")
+        print(f"[2/6] Loading {model.model_id} ({backend}, {compute})...")
         model.load()
         return model
 

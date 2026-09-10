@@ -224,3 +224,23 @@ def test_setup_offline_never_downloads_missing_profile_artifacts(tmp_path, monke
     )
     assert setup.bootstrap_models(tmp_path, project_root=ROOT, profile="lite-cpu", offline=True) == 1
     download.assert_not_called()
+
+
+@pytest.mark.parametrize("explicit", [False, True])
+def test_standard_default_preserves_adapter_preference_but_explicit_alias_wins(monkeypatch, explicit):
+    import dry_run_ab as pipeline
+    import engines.factory as factory
+    import engines.model_paths as paths
+
+    selected = PipelineSettings()
+    if explicit:
+        selected.stt.whisper_cuda_model = "large-v3-turbo"
+    monkeypatch.setattr(pipeline, "settings", selected)
+    resolved = Mock(return_value="/cache/stock-turbo")
+    monkeypatch.setattr(paths, "resolve_model_path", resolved)
+    create = Mock(return_value=Mock(model_id="/chosen-model"))
+    monkeypatch.setattr(factory, "create_stt_engine", create)
+    pipeline.load_whisper("cpu")
+    assert create.call_args.kwargs["model_id"] == ("/cache/stock-turbo" if explicit else None)
+    assert create.call_args.kwargs["compute_type"] == "int8"
+    assert resolved.call_count == int(explicit)

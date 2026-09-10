@@ -22,7 +22,7 @@ thread. Final output quality and sustained backlog must be measured independentl
 for each tier. No latency gate has passed for Lite yet.
 
 The profiles disable A/B, speculative drafting, extra STT fallback models,
-multprocess and live diarization. TTS is an optional CPU extra. E2B failures fail
+multiprocess and live diarization. TTS is an optional CPU extra. E2B failures fail
 the selected session rather than silently loading HF NF4 or publishing a model
 error as a translation. CPU normal finals are actual Marian translations; no
 missing-Gemma sentinel reaches the audience.
@@ -148,3 +148,55 @@ smokes separate from natural speech quality gates. E2B quality-mode runs need th
 own latency/memory cohort. GPU runs require real 2070 sustained speech, VRAM/OOM,
 thermal soak and OS process-cleanup checks. Physical microphone, second audio
 output/hotplug and human bilingual approval remain separate acceptance gates.
+
+## Installed CPU smoke observed on 2026-09-10
+
+The isolated `lite-cpu,tts` installation from commit `0d5a875` passed an actual
+outside-checkout import check for 14 runtime/operator modules. Its distributions
+and loaded modules contain no Torch, MLX, Silero Python wrapper or bitsandbytes;
+`pip check` passes. CT2 4.8.2, faster-whisper 1.2.1, ONNX Runtime 1.29.0,
+transformers 5.17.0 and Piper 1.8.0 were resolved. Both Marian tokenizers also
+loaded and encoded offline without Torch. Setup installed four selected assets,
+reused four, and failed none; its offline repeat reused all eight. Verified
+existing Marian CT2 builds were copied to the new cache without conversion or
+modification of the working environment or adapters.
+
+The wheel SHA-256 is
+`a1578b40b6a18e9710e18d7bd1ba4fdb00d91fd2cf8595f687c98b079ed9f5e3`.
+The executed installed pipeline SHA-256 is
+`227661cdd1a865eff9150dd0b726b1377b6282568d8688c5d1eec931b3c8afae`.
+The [machine-readable evidence](evaluation/lite_cpu_smoke_20260910.json) records
+model revisions, model file hashes, dependency versions, exact commands and raw
+artifact checksums. The original preparation and logs remain under
+`.cache/overnight-20260910/`; the environment is `lite-runtime`, the prepared
+cache is `lite-models`, and replay artifacts are `lite-cpu-smoke-attempt01`.
+
+| Synthetic input | Observed STT | Observed CPU Marian final | Completion |
+| --- | --- | --- | --- |
+| EN, 3.283 s | The grace of God brings salvation. | La gracia de Dios trae salvación. | exit 0, completed lifecycle, one TTS WAV |
+| ES, 3.248 s | La gracia de Dios trae salvación. | God's grace brings salvation. | exit 0, completed lifecycle, one TTS WAV |
+
+Both replays used the installed package from a separate data directory with
+network model access disabled, Whisper small INT8 and CPU Marian. No Gemma,
+GPU, microphone or physical speaker output was used. The short smoke inputs and
+outputs are synthetic and do not establish translation quality or performance
+on natural speech. Timing fields remain in the raw CSV but are not promoted as a
+latency gate. Lifecycle peak process RSS was approximately 1.28 GiB (EN) and
+1.39 GiB (ES) on this Mac, not a claim about total deployment memory.
+
+One provenance limitation was found: the historical lifecycle Git lookup walked
+from the installed venv into its ancestor checkout and recorded that checkout's
+HEAD. The wheel and executed pipeline hashes above identify the tested code;
+the observed Git values in the raw records are retained rather than rewritten.
+Managed model revisions are also independently bound by profile metadata and
+artifact receipts even where a legacy lifecycle field labels an explicit local
+path's revision as unknown. Follow-up integration should reject unrelated ancestor
+Git identities and read managed model receipts directly.
+
+For the standard CPU/CUDA path, an untouched STT default now delegates to the
+factory's existing active CT2 adapter preference. Explicit model configuration
+(including explicitly selecting the stock `large-v3-turbo` alias) takes priority.
+Lite profiles always select their pinned artifact and never inherit that adapter
+preference. This correction has targeted loader contract tests. The completed Lite replays
+above identify the earlier installed pipeline hash; this follow-up did not rerun
+the models.
