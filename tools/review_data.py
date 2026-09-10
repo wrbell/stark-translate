@@ -22,6 +22,8 @@ from pathlib import Path
 from tools.session_lifecycle import require_completed, session_status
 
 _LOCK = threading.RLock()
+_EXPORT_SCHEMA = 2
+_MAX_EXPORT_METADATA = 64 * 1024 * 1024
 _SESSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,159}$")
 
 
@@ -145,6 +147,178 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _export_corrections(records: list[dict]) -> list[dict]:
+    """Only selected, approved text crosses the portable-export boundary."""
+    rows = []
+    for record in records:
+        row = {
+            key: record.get(key)
+            for key in (
+                "session",
+                "chunk_id",
+                "revision",
+                "review_timestamp",
+                "source_lang",
+                "target_lang",
+                "transcript_approved",
+                "translation_approved",
+                "corrected_source_text",
+            )
+        }
+        if record["translation_approved"]:
+            row["corrected_translation_text"] = record["corrected_translation_text"]
+        rows.append(row)
+    return rows
+
+
+def _export_id(session: str, split: str, samples: list[dict], corrections: list[dict]) -> str:
+    # The privacy schema and exact approved projection invalidate legacy bundle IDs.
+    content = [_EXPORT_SCHEMA, split, samples, corrections]
+    digest = hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()[:16]
+    return f"{session}-{split}-{digest}"
+
+
+def _validate_export_privacy(manifest, bundle_id, names, read_bytes, expected_corrections=None):
+    """Validate directories and downloadable ZIPs without trusting cached sidecars."""
+    message = "Export does not meet the current approval privacy policy; re-export this session"
+    try:
+        if not isinstance(manifest, dict) or manifest.get("schema_version") != _EXPORT_SCHEMA:
+            raise ReviewConflict(message)
+        if set(manifest) != {"schema_version", "session", "split", "samples", "stt_samples", "translation_pairs"}:
+            raise ReviewConflict(message)
+        session, split = session_key(manifest["session"]), manifest["split"]
+        if split not in ("train", "eval"):
+            raise ReviewConflict(message)
+
+        def rows(name):
+            data = read_bytes(name)
+            if len(data) > _MAX_EXPORT_METADATA:
+                raise ReviewConflict("Export metadata exceeds the download validation limit")
+            result = [json.loads(line) for line in data.splitlines() if line.strip()]
+            if any(not isinstance(row, dict) for row in result):
+                raise ReviewConflict(message)
+            return result
+
+        corrections = rows("corrections.jsonl")
+        samples = manifest["samples"]
+        if not corrections or len(corrections) != len(samples):
+            raise ReviewConflict(message)
+        if _export_id(session, split, samples, corrections) != bundle_id:
+            raise ReviewConflict(message)
+        if expected_corrections is not None and corrections != expected_corrections:
+            raise ReviewConflict(message)
+        selected = {}
+        expected_names = {"manifest.json", "corrections.jsonl", f"translation/{split}.jsonl"}
+        expected_stt = {lang: {} for lang in ("en", "es")}
+        expected_pairs = {}
+        for row, sample in zip(corrections, samples, strict=True):
+            if set(row) != set(_export_corrections([row])[0]):
+                raise ReviewConflict(message)
+            chunk = row["chunk_id"]
+            source, target = row["source_lang"], row["target_lang"]
+            sample_id = f"{session}__{chunk}"
+            audio_hash = sample["audio_sha256"]
+            if (
+                type(chunk) is not int
+                or chunk < 0
+                or sample_id in selected
+                or type(row["revision"]) is not int
+                or row["revision"] < 1
+                or row["session"] != session
+                or source not in ("en", "es")
+                or target != ("es" if source == "en" else "en")
+                or row["transcript_approved"] is not True
+                or type(row["translation_approved"]) is not bool
+                or not isinstance(row["corrected_source_text"], str)
+                or not row["corrected_source_text"].strip()
+                or (not audio_hash and not row["translation_approved"])
+                or (audio_hash is not None and not re.fullmatch(r"[0-9a-f]{64}", audio_hash))
+                or sample != {"sample_id": sample_id, "revision": row["revision"], "audio_sha256": audio_hash}
+            ):
+                raise ReviewConflict(message)
+            selected[sample_id] = (row, sample)
+            if audio_hash:
+                filename = f"{sample_id}.wav"
+                expected_names.add(f"whisper/{split}/{source}/{filename}")
+                expected_stt[source][sample_id] = {
+                    "file_name": filename,
+                    "transcription": row["corrected_source_text"].strip(),
+                }
+            if row["translation_approved"]:
+                translation = row["corrected_translation_text"]
+                if not isinstance(translation, str) or not translation.strip():
+                    raise ReviewConflict(message)
+                expected_pairs[sample_id] = {source: row["corrected_source_text"].strip(), target: translation.strip()}
+
+        def validate_metadata(name, expected):
+            expected_names.add(name)
+            metadata = rows(name)
+            if len(metadata) != len(expected) or {row.get("sample_id") for row in metadata} != set(expected):
+                raise ReviewConflict(message)
+            for item in metadata:
+                sample_id = item["sample_id"]
+                correction, sample = selected[sample_id]
+                values = {
+                    **sample,
+                    "session": session,
+                    "split": split,
+                    "chunk_id": correction["chunk_id"],
+                    "source_lang": correction["source_lang"],
+                    "target_lang": correction["target_lang"],
+                    **expected[sample_id],
+                }
+                if set(item) != set(values) | {"session_kind", "provenance_confirmation"}:
+                    raise ReviewConflict(message)
+                if any(item[key] != value for key, value in values.items()):
+                    raise ReviewConflict(message)
+                if item["session_kind"] not in ("live", "replay", "synthetic", "unknown"):
+                    raise ReviewConflict(message)
+                confirmation = item["provenance_confirmation"]
+                if confirmation is not None and (
+                    not isinstance(confirmation, dict)
+                    or set(confirmation) != {"session", "session_kind", "confirmed_at", "confirmation_source"}
+                    or confirmation["session"] != session
+                    or confirmation["session_kind"] != "live"
+                    or confirmation["confirmation_source"] != "prepare_finetune_data --confirm-live-session"
+                ):
+                    raise ReviewConflict(message)
+
+        for language, expected in expected_stt.items():
+            validate_metadata(f"whisper/{split}/{language}/metadata.jsonl", expected)
+        validate_metadata(f"translation/{split}.jsonl", expected_pairs)
+        if (
+            manifest["stt_samples"] != {lang: len(items) for lang, items in expected_stt.items()}
+            or manifest["translation_pairs"] != len(expected_pairs)
+            or len(names) != len(expected_names)
+            or set(names) != expected_names
+        ):
+            raise ReviewConflict(message)
+    except (KeyError, TypeError, ValueError, UnicodeError) as exc:
+        if isinstance(exc, ReviewConflict):
+            raise
+        raise ReviewConflict(message) from exc
+
+
+def validate_export_download(path: Path, bundle_id: str) -> None:
+    """Old or overbroad cached ZIPs cannot bypass current export approval rules."""
+    if path.is_symlink():
+        raise ReviewConflict("Export archive must not be a symlink")
+    try:
+        with zipfile.ZipFile(path) as archive:
+
+            def read_bytes(name):
+                if archive.getinfo(name).file_size > _MAX_EXPORT_METADATA:
+                    raise ReviewConflict("Export metadata exceeds the download validation limit")
+                return archive.read(name)
+
+            manifest = json.loads(read_bytes("manifest.json"))
+            _validate_export_privacy(manifest, bundle_id, archive.namelist(), read_bytes)
+    except (OSError, ValueError, KeyError, EOFError, RuntimeError, zipfile.BadZipFile, zlib.error) as exc:
+        if isinstance(exc, ReviewConflict):
+            raise
+        raise ReviewConflict("Export archive cannot be validated; re-export this session") from exc
 
 
 def _bundle_files(directory: Path) -> list[Path]:
@@ -273,6 +447,13 @@ def _publish_bundle_archive(archive: Path, directory: Path, files: list[Path]) -
 def _finish_bundle_export(directory, archive, bundle_id, manifest, registry_path, registry, records):
     files = _bundle_files(directory)
     _validate_bundle_samples(directory, manifest, records)
+    _validate_export_privacy(
+        manifest,
+        bundle_id,
+        [path.relative_to(directory).as_posix() for path in files],
+        lambda name: (directory / name).read_bytes(),
+        _export_corrections(records),
+    )
     if not _archive_matches(archive, directory, files):
         _publish_bundle_archive(archive, directory, files)
     entry = {"session": manifest["session"], "split": manifest["split"], "bundle_id": bundle_id}
@@ -472,11 +653,15 @@ class ReviewStore:
                 raise ReviewConflict("This session has an existing export assigned to a different dataset split")
             # Hash revisions and audio so repeated exports are deterministic and portable.
             payload = []
+            eligible = []
             for rec in records:
                 try:
                     audio = self.audio_path(session, rec["chunk_id"], rec)
                 except (FileNotFoundError, ValueError):
                     audio = None
+                if not rec["transcript_approved"] or not (audio or rec["translation_approved"]):
+                    continue
+                eligible.append(rec)
                 payload.append(
                     {
                         "sample_id": f"{session}__{rec['chunk_id']}",
@@ -484,8 +669,13 @@ class ReviewStore:
                         "audio_sha256": sha256_file(audio) if audio else None,
                     }
                 )
-            key = hashlib.sha256(json.dumps([split, payload], sort_keys=True).encode()).hexdigest()[:16]
-            bundle_id = f"{session}-{split}-{key}"
+            records = eligible
+            if not records:
+                raise ValueError(
+                    "No exportable samples: approve a transcript with audio, or both texts for translation"
+                )
+            corrections = _export_corrections(records)
+            bundle_id = _export_id(session, split, payload, corrections)
             destination = exports / bundle_id
             archive = exports / f"{bundle_id}.zip"
             if destination.exists():
@@ -496,7 +686,7 @@ class ReviewStore:
                     raise ReviewConflict(
                         "Existing export manifest is unreadable; inspect the bundle before retrying"
                     ) from exc
-                expected = {"schema_version": 1, "session": session, "split": split, "samples": payload}
+                expected = {"schema_version": _EXPORT_SCHEMA, "session": session, "split": split, "samples": payload}
                 if not isinstance(manifest, dict) or any(manifest.get(k) != v for k, v in expected.items()):
                     raise ReviewConflict("Existing export manifest conflicts with the requested session revisions")
                 return _finish_bundle_export(
@@ -544,9 +734,9 @@ class ReviewStore:
                 for language, rows in transcripts.items():
                     atomic_jsonl(temp / "whisper" / split / language / "metadata.jsonl", rows)
                 atomic_jsonl(temp / "translation" / f"{split}.jsonl", pairs)
-                atomic_jsonl(temp / "corrections.jsonl", list(latest_corrections(self.sidecar_path(session)).values()))
+                atomic_jsonl(temp / "corrections.jsonl", corrections)
                 manifest = {
-                    "schema_version": 1,
+                    "schema_version": _EXPORT_SCHEMA,
                     "session": session,
                     "split": split,
                     "stt_samples": {lang: len(rows) for lang, rows in transcripts.items()},

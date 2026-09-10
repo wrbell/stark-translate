@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from operator_app.pipeline_manager import PipelineRunner, get_runner
-from tools.review_data import ReviewConflict, ReviewStore, session_key
+from tools.review_data import ReviewConflict, ReviewStore, session_key, validate_export_download
 from tools.session_lifecycle import SessionNotComplete
 
 router = APIRouter(prefix="/api/review", tags=["review"])
@@ -138,9 +138,13 @@ def download_review(bundle_id: str, runner: PipelineRunner = Depends(get_runner)
         if split not in {"train", "eval"} or len(digest) != 16 or any(c not in "0123456789abcdef" for c in digest):
             raise ValueError("Invalid export ID")
         directory = _store(runner).corrections / "exports"
-        path = (directory / f"{bundle_id}.zip").resolve()
+        path = directory / f"{bundle_id}.zip"
+        if path.is_symlink():
+            raise ReviewConflict("Export archive must not be a symlink")
+        path = path.resolve()
         if not path.is_relative_to(directory.resolve()) or not path.is_file():
             raise FileNotFoundError("Export not found")
+        validate_export_download(path, bundle_id)
         return FileResponse(path, media_type="application/zip", filename=path.name)
     except (FileNotFoundError, ValueError) as exc:
         raise _error(exc) from exc

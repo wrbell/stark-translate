@@ -65,6 +65,12 @@ Support exports are local ZIP downloads. By default they contain allowlisted met
 
 A support bundle is not sent anywhere automatically. Review its preview before downloading or sharing it. The in-process work reservation does not coordinate unrelated CLI sessions or multiple operator server instances; run one operator per installation.
 
+## Review export privacy
+
+Portable review ZIPs contain only selected exportable samples. Excluded chunks, unapproved drafts, and freeform review notes stay in local corrections. A transcript-approved chunk with retained audio can produce an STT sample independently; its unapproved translation is omitted from every exported sidecar. A translation pair requires both text approvals.
+
+Export schema 2 binds the selected revisions, audio hashes, and approved text projection to the bundle ID. Repeated exports validate copied samples, sidecars, and exact file inventory before reuse. Downloading a cached bundle also validates its approval scope. Older schema 1 links return HTTP 409 with a request to re-export; the old files and original local corrections remain intact. These checks validate the saved approval snapshot and do not revoke copies already downloaded.
+
 ## API contract
 
 | Request | Body / response |
