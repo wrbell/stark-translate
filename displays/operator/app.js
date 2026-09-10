@@ -290,7 +290,11 @@
     const ttsEnabled = control("tts");
     const idleEditedFields = new Set();
 
-    function setText(node, text) { if (node) node.textContent = text; }
+    // Skip identical writes: several targets are aria-live regions, and a
+    // rewrite every poll would make screen readers re-announce them.
+    function setText(node, text) {
+      if (node && node.textContent !== String(text)) node.textContent = text;
+    }
     function makeOption(text, value) {
       const option = doc.createElement("option");
       option.textContent = text;
@@ -592,11 +596,18 @@
     // ---- capabilities (all optional) --------------------------------------
     let capabilities = {};
     let capabilitiesRequest = 0;
+    let capabilitiesJson = null;
     let profilesSupported = false;
     const PROFILE_KEY = "stark-operator-profile";
 
     function applyCapabilities(data) {
-      capabilities = data && typeof data === "object" ? data : {};
+      const next = data && typeof data === "object" ? data : {};
+      const json = JSON.stringify(next);
+      // Status snapshots may embed capabilities on every poll; only rebuild
+      // the dependent controls when something actually changed.
+      if (json === capabilitiesJson) return;
+      capabilitiesJson = json;
+      capabilities = next;
       setText(el.capabilitiesDetail, Object.keys(capabilities).length ? JSON.stringify(capabilities, null, 2) : "none advertised");
       renderProfiles();
       renderAudience();
@@ -947,7 +958,7 @@
       renderLive();
       renderAudioTests();
       setText(el.statusDetail, JSON.stringify(snap, null, 2));
-      if (el.summaryBtn) el.summaryBtn.disabled = isActive;
+      if (el.summaryBtn) el.summaryBtn.disabled = isActive || !!summaryPollTimer;
       if (currentState === "error") {
         // Keep a request failure visible until dismissed; the state error
         // returns on the next poll after that.
@@ -963,10 +974,10 @@
         dismissedStateError = null;
         clearAttention("state");
       }
-      if (!isActive && wasActive) refreshPreflight();
       syncCaptionClient(isActive);
       if (EventImpl) dispatch(new EventImpl("operator-session", {detail: snap}));
-      if (languageChanged || configChanged || opts.forcePreflight) refreshPreflight();
+      // Recheck after a stop, after a confirmed change, or when a control asks for it.
+      if ((!isActive && wasActive) || languageChanged || configChanged || opts.forcePreflight) refreshPreflight();
     }
 
     async function refreshStatus() {
@@ -1143,7 +1154,10 @@
           : "Not receiving captions right now — reconnecting. Captions may still reach the audience display.");
       }
     }
+    let captionViewKey = "";
+    const captionKey = () => `${currentState}:${captionSocketState}`;
     function renderCaptions() {
+      captionViewKey = captionKey();
       const sentences = captionModel ? captionModel.sentences().slice(-6) : [];
       el.captionView.replaceChildren();
       if (!sentences.length) {
@@ -1176,19 +1190,25 @@
       renderCaptionStatus();
     }
     function syncCaptionClient(active) {
+      let changed = false;
       if (active && !captionClient && captionsLib && captionModel && WS) {
         captionClient = captionsLib.connect(captionUrl(), captionModel, {
           WebSocket: WS, setTimeout: setTimeoutImpl, clearTimeout: clearTimeoutImpl, retryMs: 3000,
           onChange: () => renderCaptions(),
-          onStatus: state => { captionSocketState = state; renderCaptionStatus(); },
+          // A socket state change only touches the status line, not the list.
+          onStatus: state => { captionSocketState = state; renderCaptionStatus(); captionViewKey = captionKey(); },
         });
+        changed = true;
       } else if (!active && captionClient) {
         captionClient.close();
         captionClient = null;
         captionSocketState = "closed";
         captionModel.reset();
+        changed = true;
       }
-      renderCaptions();
+      // Re-render only when the session state changed; a polled rewrite of an
+      // unchanged list would churn the DOM every 1.5 s.
+      if (changed || captionKey() !== captionViewKey) renderCaptions();
     }
 
     // ---- audience display links -------------------------------------------

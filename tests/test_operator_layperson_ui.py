@@ -692,3 +692,42 @@ assert.strictEqual(readinessSummary({checks: [{status: 'fail'}, {status: 'fail'}
 same(pickProfiles({profiles: ['turbo', 'lite-cpu']}).map(p => p.id), ['lite-cpu']);
 assert.strictEqual(humanPhase('warming_up_gpu'), 'warming up gpu');
 """)
+
+
+def test_repeated_polls_do_not_churn_live_regions():
+    run_node(r"""
+const h = createHarness({capabilities: {profiles: ['full', 'lite-cpu']}});
+await h.start();
+await h.setStatus({state: 'running', session_id: 's1', config: {lang: 'en'}, capabilities: {profiles: ['full', 'lite-cpu']}});
+const sock = h.sockets().find(s => s.url === 'ws://localhost:8765');
+sock.open();
+sock.message({type: 'translation', stage: 'complete', chunk_id: 1, english: 'hello', spanish_a: 'hola'});
+const pillNode = h.el('state-pill').childNodes[0];
+const captionRow = h.el('caption-view').children[0];
+const profileOption = h.el('profile-select').options[1];
+const readiness = h.el('readiness-summary').childNodes[0];
+for (let i = 0; i < 3; i++) { await h.app.refreshStatus(); await h.app.refreshPreflight(); }
+await settle();
+assert.strictEqual(h.el('state-pill').childNodes[0], pillNode); // aria-live text was not rewritten
+assert.strictEqual(h.el('caption-view').children[0], captionRow); // caption list was not rebuilt
+assert.strictEqual(h.el('profile-select').options[1], profileOption); // embedded capabilities did not rebuild the dropdown
+assert.strictEqual(h.el('readiness-summary').childNodes[0], readiness);
+// Real changes still render.
+sock.message({type: 'translation', stage: 'complete', chunk_id: 2, english: 'again', spanish_a: 'otra vez'});
+assert.notStrictEqual(h.el('caption-view').children[0], captionRow);
+await h.setStatus({state: 'paused', session_id: 's1', config: {lang: 'en'}});
+assert.strictEqual(h.text('state-pill'), 'Paused');
+assert.notStrictEqual(h.el('state-pill').childNodes[0], pillNode);
+// The summary button stays disabled while its task is still being polled.
+await h.setStatus({state: 'idle', outcome: 'completed'});
+h.route('POST', '/api/features/summary', () => response({task_id: 't1', state: 'running'}));
+h.route('GET', '/api/features/summary/t1', () => response({task_id: 't1', state: 'running'}));
+await h.el('summary-btn').click(); await settle();
+assert.strictEqual(h.el('summary-btn').disabled, true);
+await h.setStatus({state: 'idle', outcome: 'completed'});
+assert.strictEqual(h.el('summary-btn').disabled, true);
+h.route('GET', '/api/features/summary/t1', () => response({task_id: 't1', state: 'done', return_code: 0, result: {en: 'ok'}}));
+await h.intervals.at(-1).fn(); await settle();
+assert.strictEqual(h.el('summary-btn').disabled, false);
+assert(h.text('summary-status').startsWith('Finished'));
+""")

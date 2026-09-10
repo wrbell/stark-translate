@@ -120,7 +120,6 @@ body {
   cursor: pointer;
 }
 .tab[aria-selected="true"] { background: #fff; color: var(--primary); box-shadow: 0 -2px 0 var(--primary) inset; }
-.tab.attention-dot::after { content: " •"; color: var(--fail); }
 
 main {
   max-width: 1200px;
@@ -129,7 +128,6 @@ main {
 }
 .panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 20px; }
 .panel > .card { min-width: 0; }
-#panel-prepare > .card:nth-child(2), #panel-prepare > .start-card { grid-column: auto; }
 #panel-sessions > .card, #panel-help > .card { grid-column: 1 / -1; }
 .live-card, .observability { grid-column: 1 / -1; }
 
