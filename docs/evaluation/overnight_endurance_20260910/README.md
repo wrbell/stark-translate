@@ -147,9 +147,10 @@ and would not demonstrate automatic singing suppression.
 | Old impossible/misparsed Bible references | Conservative English number/context parsing and structural KJV bounds were added. Actual fresh UI showed Luke 23:32 / Luke 23 and, after Stop, Isaiah 53:11 instead of old invalid references. Valid bounds do not prove spoken-reference accuracy. |
 | Audio-feed wording and technical details confused status | Current UI distinguishes feed updates from heard sound and discloses technical details separately. |
 | Support preview implied an empty ZIP; log list crowded Sessions | Current preview separates metadata from optional attachment bytes; detailed log list is collapsed with selections retained. |
-| Hymn fragments and lyric meaning error | Negative evidence retained; separate quality follow-up issue links remain to be inserted. |
+| Hymn fragments and lyric meaning error | Negative evidence retained in [#193 — hymn fragments](https://github.com/wrbell/stark-translate/issues/193) and [#194 — title boundaries and meaning](https://github.com/wrbell/stark-translate/issues/194); these are remaining hymn/quality follow-ups, separate from the fixed operator UX blockers. |
 
-**Blocking UX issue mapping remains pending final review.** This report does not
+**Follow-up mapping is recorded:** the operator UX blockers above were fixed;
+remaining hymn/quality work is tracked in #193 and #194. This report does not
 claim #134 is closed.
 
 ## Completion, audience acknowledgments and resources
@@ -288,7 +289,7 @@ and driver shell exit 241 are separate from the pipeline's successful exit 0.
 | Runbook walk on church hardware or laptop | Laptop stand-in and actual operator page exercised; helper boundaries above. |
 | Setup→first-caption timing and assistance | Both Standard Start brackets and first-caption events recorded; first-install/download duration unavailable. |
 | Full hymn and spoken segment | Uncropped full service selected; hymn→prayer chronological/UI evidence retained. Repaired declared spans/header durations agree. Exact EOF/all-input sequence coverage is not claimed. |
-| Written results and issues for blocking UX holes | This report and the verified archive record successes and failures; actual blocker issue URLs remain pending. |
+| Written results and issues for blocking UX holes | The written note and verified archive record successes and failures; fixed operator UX blockers are listed above, with remaining hymn/quality follow-ups in #193 and #194. |
 
 CPU Lite's terminal result and selected waveform reconstruction after both hours
 are recorded above and retained in the verified archive. Native Mac lock/physical visibility,

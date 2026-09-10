@@ -49,11 +49,11 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P0 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
-- **Sources:** [#134](https://github.com/wrbell/stark-translate/issues/134), `docs/operator_runbook.md`, `docs/evaluation/overnight_endurance_20260910/README.md`
+- **Sources:** [#134](https://github.com/wrbell/stark-translate/issues/134), `docs/operator_runbook.md`, `docs/evaluation/overnight_endurance_20260910/README.md`, [#193](https://github.com/wrbell/stark-translate/issues/193), [#194](https://github.com/wrbell/stark-translate/issues/194), [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md)
 - **Issue acceptance (verbatim intent):** Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.
 - **Acceptance:** Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.
-- **Notes:** The laptop stand-in used the installed 752ab9a Standard runtime on the uncropped 3,640.053 s natural English service. Session 20260910_043120_839144_en completed exit 0 with consistent bounds for 563 finals and 2,814 previews, all 7,594 required writes complete and observed cleanup. Actual SPA hymn→prayer chronology, prepared operator launch-to-first-server-preview 436.790088 s and actual Start-to-first-server-preview 420.492–420.762 s (including 403.1448125 s of source zeros), operator/helper steps and a post-Stop long summary are retained. First-install/download time was not measured; the summary omitted the transcript middle and is not human-reviewed. Original b65 failures stay separate. The written report and verified archive are linked; actual blocking UX issue URLs remain; #134 is OPEN.
-- **Next action:** Use the written timing/UX note, full-hymn-plus-spoken input chronology and verified archive to file blocking UX follow-ups; then reassess #134 against its original criteria. Do not add physical microphone, exact lyric-boundary review or the separate CPU Lite hour as new issue requirements.
+- **Notes:** The laptop stand-in used the installed 752ab9a Standard runtime on the uncropped 3,640.053 s natural English service. Session 20260910_043120_839144_en completed exit 0 with consistent bounds for 563 finals and 2,814 previews, all 7,594 required writes complete and observed cleanup. Actual SPA hymn→prayer chronology, prepared operator launch-to-first-server-preview 436.790088 s and actual Start-to-first-server-preview 420.492–420.762 s (including 403.1448125 s of source zeros), operator/helper steps and a post-Stop long summary are retained. First-install/download time was not measured; the summary omitted the transcript middle and is not human-reviewed. Original b65 failures stay separate. The written report and verified archive are linked; remaining hymn behavior is mapped to #193 and #194 as quality follow-ups; earlier operator UX blockers were fixed. #134 remains OPEN pending the final closure action.
+- **Next action:** Use the immutable written evidence and mapped #193/#194 follow-ups to reassess and close #134 after source integration; do not add microphone, physical-display, exact lyric-boundary or separate CPU Lite requirements.
 
 ### `pr-192-integration` — Validate the integrated candidate branch and finish the authorized merge of draft PR #192
 
@@ -61,7 +61,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Depends on:** none
 - **Sources:** [PR #192](https://github.com/wrbell/stark-translate/pull/192), `docs/overnight_status.md`, `docs/evaluation/overnight_screen_20260910/README.md`, `docs/evaluation/overnight_endurance_20260910/README.md`
 - **Acceptance:** PR #192 marked ready with integrated operator, Lite, latency and failure-recovery changes, CI green on the final head, and root-recorded evidence; main advances only at the authorized merge, without publishing a release.
-- **Notes:** Frozen 752 CPU/GPU/static and mechanical artifact validation passed; the 96-run screen selected 0/28 arms. Repaired Standard completed 563 finals/2,814 previews and 7,594 writes; Lite completed 468 finals/271 previews and 1,979 writes, all retained spans consistent and cleanup verified. The original b65 span failure remains separate. The Docker main-build-only guard is implemented. The raw archive is verified; final UX issue mapping and future-head CI/review remain before the authorized merge.
+- **Notes:** Frozen 752 CPU/GPU/static and mechanical artifact validation passed; the 96-run screen selected 0/28 arms. Repaired Standard completed 563 finals/2,814 previews and 7,594 writes; Lite completed 468 finals/271 previews and 1,979 writes, all retained spans consistent and cleanup verified. The original b65 span failure remains separate. The Docker main-build-only guard is implemented. The raw archive is verified; hymn follow-ups are mapped to #193/#194 and future-head CI/review remains before the authorized merge.
 - **Next action:** Finalize retained evidence and real hymn-issue links, verify the Docker upload guard and exact final remote head, mark PR #192 ready and perform the authorized source merge. Do not publish package releases or tags.
 
 ### `packaging-artifacts-local` — v2026.14 wheel, sdist and Mac ZIP local validation
@@ -88,8 +88,8 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Depends on:** `pr-192-integration`
 - **Sources:** `docs/overnight_status.md`, `docs/evaluation/overnight_endurance_20260910/README.md`
 - **Acceptance:** Every README/CLAUDE/AGENTS guide describes current behavior from source, historical numbers live only under dated archive links, and tests/test_documentation.py plus render/link checks pass.
-- **Notes:** Current guides, exact752 artifact/test receipts, canonical backlog and explicit public endurance files are refreshed. Standard/Lite completed evidence remains separate from original failed data and96-run screen. The raw archive is verified and linked. Actual hymn issue URLs, final head checks and merge-state wording are the remaining integration edits.
-- **Next action:** Add the real hymn issue URLs to the verified retained evidence, regenerate/check backlog.md and current links, then update merge/closure states only after those actions occur.
+- **Notes:** Current guides, exact752 artifact/test receipts, canonical backlog and explicit public endurance files are refreshed. Standard/Lite completed evidence remains separate from original failed data and96-run screen. The raw archive is verified and linked. Hymn follow-ups #193/#194 are linked. Final head checks and merge-state wording are the remaining integration edits.
+- **Next action:** Keep the verified evidence and #193/#194 links current, then update merge/closure states only after those actions occur.
 
 ## Pending Input Or Hardware
 
@@ -109,6 +109,26 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** llama.cpp b10883 built, MTP opt-in bench, `-fa on` retest, W16 HF fp16 and Parakeet probes recorded with the proposal's tables filled in.
 - **Notes:** start_server.sh now defaults to --no-draft with --mtp opt-in and both pins read b10883; the scripts remain header-marked unexecuted.
 - **Next action:** Run scripts/cuda/*.sh on WSL.
+
+### `hymn-capture-suppression` — Reduce unwanted hymn captions without losing short spoken replies (#193)
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** pending
+- **Depends on:** none
+- **Sources:** [#193](https://github.com/wrbell/stark-translate/issues/193), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md)
+- **Acceptance:** On a bounded, human-labeled natural hymn→speech transition, measure unwanted captions, suppressed legitimate speech and recovery alongside unchanged controls and partial/final latency. Include quiet prayer and short valid EN/ES replies; no global short-word blacklist or inferred reference labels from generated captions.
+- **Evidence:** Repaired Standard emitted hymn-context fragments including “It dies a” and “Changing uh” while process health remained normal. No music-hold event was recorded. Current energy/VAD logic is a heuristic, not a validated music classifier; absence of its event does not establish exactly why the streak threshold was not met.
+- **Notes:** Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately.
+- **Next action:** Label uncertain music/speech transitions before evaluating a detector or scheduling change; retain legitimate short spoken replies and report recovery and latency.
+
+### `hymn-translation-boundary` — Preserve title/sentence meaning in natural hymn captions (#194)
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** pending
+- **Depends on:** `bilingual-blinded-review`
+- **Sources:** [#194](https://github.com/wrbell/stark-translate/issues/194), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md)
+- **Acceptance:** With independently reviewed source boundaries and bilingual references, preserve the intended subject/title boundary on the retained natural hymn example without hard-coded word substitutions. Compare unchanged controls, report subject/negation/name/theological meaning errors and preview/final latency before any prompt or context promotion.
+- **Evidence:** Repaired Standard session 20260910_043120_839144_en, chunk 3, source 414.592–422.592 s, installed 752ab9a: the recognized string includes “Eternity Time will soon end”, but the Spanish final says “La eternidad pronto terminará.” QE 1.0 did not flag the changed meaning. Audio punctuation and the bilingual reference remain unreviewed.
+- **Notes:** Open quality follow-up #194 from the completed #134 rehearsal. Retained evidence is not an approved correction, model-default promotion or attribution of the whole error to one pipeline stage. Earlier operator UX blockers were fixed separately.
+- **Next action:** Obtain independent boundary/reference review, then compare a bounded delimiter/context hypothesis with unchanged controls and meaning/latency guards.
 
 ### `issue-135-mac-ab` — Deploy W16 + v2-cpo to Mac and live A/B vs stock (#135)
 
@@ -326,7 +346,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Depends on:** none
 - **Sources:** `docs/mac_implementation_status.md`, [PR #192](https://github.com/wrbell/stark-translate/pull/192), `docs/evaluation/overnight_endurance_20260910/README.md`
 - **Acceptance:** Merged to main through PR #192 with the human, device and visible-browser gates recorded as still open.
-- **Notes:** Operator/session reliability, schema 2 timing, setup, safe Review/export and packaging are integrated. 752 CPU/GPU/static checks passed; the 96-run screen selected no arms. Repaired Standard and CPU Lite completed their independent natural-English runs with consistent retained spans and durable writes/cleanup; selected waveforms match and the old failure is preserved. Docker publication guard is implemented. Final evidence/issue links and future-head checks precede the pending source merge; device/human gates remain separate.
+- **Notes:** Operator/session reliability, schema 2 timing, setup, safe Review/export and packaging are integrated. 752 CPU/GPU/static checks passed; the 96-run screen selected no arms. Repaired Standard and CPU Lite completed their independent natural-English runs with consistent retained spans and durable writes/cleanup; selected waveforms match and the old failure is preserved. Docker publication guard is implemented. Evidence and #193/#194 links are recorded; future-head checks precede the pending source merge; device/human gates remain separate.
 - **Next action:** Finish final evidence/issue mapping and head-specific checks, then record the authorized merge. Keep actual live-mic, independent outputs and human-quality acceptance open.
 
 ### `issue-132-tts-routing` — Multi-channel TTS routing code and tests (9.4.1 / #132)
@@ -436,7 +456,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 | Status | Count |
 |--------|------:|
 | In Progress | 6 |
-| Pending Input Or Hardware | 14 |
+| Pending Input Or Hardware | 16 |
 | Experimental | 2 |
 | Deferred | 6 |
 | Implemented | 10 |

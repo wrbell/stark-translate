@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "document_status": "both_fresh_hours_completed_summary_observed_archive_verified_issue_links_pending",
+  "document_status": "both_fresh_hours_completed_summary_observed_archive_verified_followups_linked",
   "date": "2026-09-10",
   "issue": {
     "number": 134,
@@ -706,7 +706,7 @@
       "acceptance": {
         "status": "functional_completion_and_retained_source_span_checks_passed",
         "issue_closure": "pending",
-        "remaining_scope": "Archive verified; actual blocking UX issue URLs and issue mapping pending. Selected waveform reconstruction passed for three windows; no all-source speech coverage or human-quality claim."
+        "remaining_scope": "Archive verified and remaining hymn/quality follow-ups mapped to #193/#194; #134 remains open pending final closure action. Selected waveform reconstruction passed for three windows; no all-source speech coverage or human-quality claim."
       },
       "profile": "standard",
       "planned_backend": "mlx",
@@ -1860,8 +1860,26 @@
     "evidence": "fresh-standard-terminal/summary-evidence.json"
   },
   "follow_up_issue_mapping": {
-    "status": "pending_root_verification",
-    "items": null
+    "status": "recorded_issues_open",
+    "immutable_evidence_url": "https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md",
+    "operator_ux": "Earlier operator UX blockers are fixed and documented in the written report. Remaining hymn/quality follow-ups do not assert those UI blockers remain open.",
+    "items": [
+      {
+        "number": 193,
+        "url": "https://github.com/wrbell/stark-translate/issues/193",
+        "scope": "Unwanted hymn-context fragment captions and recovery to legitimate short speech",
+        "status": "open",
+        "kind": "hymn_handling_quality_followup"
+      },
+      {
+        "number": 194,
+        "url": "https://github.com/wrbell/stark-translate/issues/194",
+        "scope": "Title/sentence boundary and meaning preservation",
+        "status": "open",
+        "kind": "translation_quality_followup"
+      }
+    ],
+    "issue_134": "Remains open pending final closure action; no merge or issue closure is claimed."
   },
   "unused_transition_slice": {
     "duration_s": 350,
