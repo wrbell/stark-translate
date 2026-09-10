@@ -1,18 +1,17 @@
 {
   "schema_version": 1,
-  "id": "mac_followup_lite_cadence_v1_normalized_v2",
+  "id": "mac_followup_clause_deadline_v1",
   "purpose": "Independent opt-in server delivery screening; no browser/device or semantic approval claim. Frozen opening spans, paired closing controls, retain all failures.",
-  "profile": "lite-cpu",
+  "profile": "standard",
   "clips": [
     {
       "id": "fleurs_development_en",
       "lang": "en",
-      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_en.wav",
-      "sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v1/fleurs_development_en.wav",
+      "sha256": "713f9a8183cd453f743227f6b87b8eb3b1eb860c9a72ff40b9cba1498b5bada8",
       "duration": 46.94,
       "sample_rate": 16000,
       "provenance": "fleurs_development_read_speech_concatenation",
-      "level_normalization": "rms-0.08",
       "reference_status": "upstream_public_annotations_not_local_approval",
       "spans": [
         {
@@ -20,15 +19,6 @@
           "sample_start": 0,
           "sample_end": 179520,
           "original_audio_sha256": "a1942662f19a288c80ce936418669c3c8d88aa6a89b48a7d1b6d8d836f9e3795",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 63.235035532569654,
-            "original_rms": 0.0012651214524706867,
-            "original_peak": 0.01400059461593628,
-            "output_rms": 0.07999999922856925,
-            "output_peak": 0.8853281140327454,
-            "clipping": false
-          },
           "reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population.",
           "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n.",
           "padding_after_samples": 16000
@@ -38,15 +28,6 @@
           "sample_start": 195520,
           "sample_end": 391360,
           "original_audio_sha256": "68a7e4554855ad270fc02d113e51267c64515000913f52f0439f6b21e06802a6",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 31.556301324769965,
-            "original_rms": 0.0025351513530264204,
-            "original_peak": 0.018468081951141357,
-            "output_rms": 0.07999999947043027,
-            "output_peak": 0.5827843546867371,
-            "clipping": false
-          },
           "reference": "Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations.",
           "translation_reference": "Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares.",
           "padding_after_samples": 16000
@@ -56,15 +37,6 @@
           "sample_start": 407360,
           "sample_end": 532160,
           "original_audio_sha256": "d733a878fbb3393dac0349cfa1293e4fad9a8bd5ec1f58ce6adc019de4b94f32",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 160.71790680132162,
-            "original_rms": 0.0004977665624957115,
-            "original_peak": 0.003160715103149414,
-            "output_rms": 0.08000000196909851,
-            "output_peak": 0.5079835057258606,
-            "clipping": false
-          },
           "reference": "In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country.",
           "translation_reference": "En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen.",
           "padding_after_samples": 16000
@@ -74,15 +46,6 @@
           "sample_start": 548160,
           "sample_end": 657600,
           "original_audio_sha256": "417fee0dad20562352aa591b6ed5b1f10752eba60ef2d9f95389e8ba34272191",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 30.65960534510282,
-            "original_rms": 0.002609296470046644,
-            "original_peak": 0.016126036643981934,
-            "output_rms": 0.07999999915419242,
-            "output_peak": 0.4944179058074951,
-            "clipping": false
-          },
           "reference": "The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte.",
           "translation_reference": "El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte.",
           "padding_after_samples": 16000
@@ -92,15 +55,6 @@
           "sample_start": 673600,
           "sample_end": 735040,
           "original_audio_sha256": "cd18277b92bd22d1c2827f6bee287a636cc227365fd9bc1d7e3ef5b81afe6ad3",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 139.02699291202106,
-            "original_rms": 0.0005754278239379423,
-            "original_peak": 0.0034540891647338867,
-            "output_rms": 0.07999999994641573,
-            "output_peak": 0.48021161556243896,
-            "clipping": false
-          },
           "reference": "It's worth half an hour to stroll about the intriguing village.",
           "translation_reference": "Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
           "padding_after_samples": 16000
@@ -110,12 +64,11 @@
     {
       "id": "fleurs_development_es",
       "lang": "es",
-      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_es.wav",
-      "sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v1/fleurs_development_es.wav",
+      "sha256": "7a15b867c7c8e111b1714cabf4f8b6ba4fdf8ecdac4a66cbb768622ea8b88667",
       "duration": 47.6,
       "sample_rate": 16000,
       "provenance": "fleurs_development_read_speech_concatenation",
-      "level_normalization": "rms-0.08",
       "reference_status": "upstream_public_annotations_not_local_approval",
       "spans": [
         {
@@ -123,15 +76,6 @@
           "sample_start": 0,
           "sample_end": 168960,
           "original_audio_sha256": "89b130dd9614c385a64cc108128293352b21e6c137c589cc7fd19d68823634e0",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 2.03178456291453,
-            "original_rms": 0.039374253284631,
-            "original_peak": 0.3380175828933716,
-            "output_rms": 0.07999999888881319,
-            "output_peak": 0.6867789030075073,
-            "clipping": false
-          },
           "reference": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes.",
           "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors.",
           "padding_after_samples": 16000
@@ -141,15 +85,6 @@
           "sample_start": 184960,
           "sample_end": 394240,
           "original_audio_sha256": "21ea8214d7e42eba4316dbd4d9754560b990d3c680888b6a27ae0b99027e8668",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 0.7930809296290099,
-            "original_rms": 0.1008724292959896,
-            "original_peak": 1.0,
-            "output_rms": 0.07999999962569342,
-            "output_peak": 0.7930809259414673,
-            "clipping": false
-          },
           "reference": "Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds.",
           "translation_reference": "When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt.",
           "padding_after_samples": 16000
@@ -159,15 +94,6 @@
           "sample_start": 410240,
           "sample_end": 519680,
           "original_audio_sha256": "3725e882548b7058a1634cdbbdb4f910cd6f9d4f4b4d9b1560f1921479f4dc14",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 1.7990311076669767,
-            "original_rms": 0.04446838059612308,
-            "original_peak": 0.44692176580429077,
-            "output_rms": 0.08000000136404455,
-            "output_peak": 0.804026186466217,
-            "clipping": false
-          },
           "reference": "Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones.",
           "translation_reference": "Inland waterways can be a good theme to base a holiday around.",
           "padding_after_samples": 16000
@@ -177,15 +103,6 @@
           "sample_start": 535680,
           "sample_end": 659520,
           "original_audio_sha256": "dbdca0be1d3c552bc6b5bf359a22429cf87c196a315b3ceebc8f408dc99aa233",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 1.5750028101708964,
-            "original_rms": 0.050793560165978094,
-            "original_peak": 0.48982203006744385,
-            "output_rms": 0.07999999895984251,
-            "output_peak": 0.7714710831642151,
-            "clipping": false
-          },
           "reference": "Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio.",
           "translation_reference": "The first cases of the disease this season were reported in late July.",
           "padding_after_samples": 16000
@@ -195,15 +112,6 @@
           "sample_start": 675520,
           "sample_end": 745600,
           "original_audio_sha256": "efb05420d238ceb86f11aaa31a012e7594206684ab26b4730f6429203a373c01",
-          "level_transform": {
-            "rule": "rms-0.08",
-            "gain": 0.9649543312664158,
-            "original_rms": 0.08290547791521614,
-            "original_peak": 0.7410763502120972,
-            "output_rms": 0.07999999876440005,
-            "output_peak": 0.7151048183441162,
-            "clipping": false
-          },
           "reference": "\u00c9l dijo que construy\u00f3 un timbre wifi.",
           "translation_reference": "He built a WiFi door bell, he said.",
           "padding_after_samples": 16000
@@ -212,6 +120,7 @@
     }
   ],
   "sizes": [
+    "e4b",
     "e2b"
   ],
   "partial_interval": 0.6,
@@ -224,15 +133,44 @@
       "env": {}
     },
     {
-      "name": "cadence_09",
-      "partial_interval": 0.9,
-      "env": {}
+      "name": "early_2s_160ms",
+      "env": {
+        "STARK_EXPERIMENT_EARLY_CLAUSE_S": "2",
+        "STARK_EXPERIMENT_EARLY_CLAUSE_PAUSE_MS": "160"
+      }
     },
     {
-      "name": "cadence_12",
-      "partial_interval": 1.2,
-      "env": {}
+      "name": "early_2s_240ms",
+      "env": {
+        "STARK_EXPERIMENT_EARLY_CLAUSE_S": "2",
+        "STARK_EXPERIMENT_EARLY_CLAUSE_PAUSE_MS": "240"
+      }
+    },
+    {
+      "name": "early_4s_160ms",
+      "env": {
+        "STARK_EXPERIMENT_EARLY_CLAUSE_S": "4",
+        "STARK_EXPERIMENT_EARLY_CLAUSE_PAUSE_MS": "160"
+      }
+    },
+    {
+      "name": "early_4s_240ms",
+      "env": {
+        "STARK_EXPERIMENT_EARLY_CLAUSE_S": "4",
+        "STARK_EXPERIMENT_EARLY_CLAUSE_PAUSE_MS": "240"
+      }
+    },
+    {
+      "name": "deadline_100ms",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS": "100"
+      }
+    },
+    {
+      "name": "deadline_250ms",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS": "250"
+      }
     }
-  ],
-  "input_level_protocol": "Per original recording: fixed RMS target0.08 with peakcap0.95, float32 gain only, no clipping. Frozen before paired screening; low-level original pilot retained separately."
+  ]
 }

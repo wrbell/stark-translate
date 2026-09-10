@@ -73,8 +73,11 @@ The [Standard screen](protocol/standard-screen.json) independently tests 2/4 s
 early-clause buffers with 160/240 ms pauses and 100/250 ms partial-STT deadline
 margins. The [CPU Lite screen](protocol/lite-screen.json) tests 0.6/0.9/1.2 s
 partial cadence. Three repeats alternate E4B/E2B order and have opening/closing
-controls. Public development replays concatenate five original recordings with
-one second of declared silence; [provenance](protocol/public-replay-provenance.json)
+controls. Public development replays apply a declared per-record RMS 0.08/peak 0.95
+linear level rule, then concatenate five recordings with one second of declared
+silence. The [unmodified-level pilot](input-level-pilot/README.md) produced no
+finals because its English input fell below the unchanged energy filter; it
+is retained separately. Original recordings and quality results are unchanged; [provenance](protocol/public-replay-provenance.json)
 retains every reference and source boundary. No confirmation audio enters tuning.
 
 The selection target is delivery of the opening control's frozen VAD-positive
