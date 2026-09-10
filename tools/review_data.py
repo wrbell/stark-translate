@@ -14,6 +14,7 @@ import shutil
 import tempfile
 import threading
 import zipfile
+import zlib
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
@@ -144,6 +145,140 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _bundle_files(directory: Path) -> list[Path]:
+    if directory.is_symlink():
+        raise ReviewConflict("Existing export directory must not be a symlink")
+    paths = sorted(directory.rglob("*"))
+    if any(path.is_symlink() for path in paths):
+        raise ReviewConflict("Existing export bundle contains a symlink; inspect it before exporting")
+    return [path for path in paths if path.is_file()]
+
+
+def _archive_matches(archive: Path, directory: Path, files: list[Path]) -> bool:
+    """Check every member and its content, including ZIP CRC/truncation errors."""
+    if archive.is_symlink():
+        raise ReviewConflict("Existing export archive must not be a symlink")
+    if not archive.is_file():
+        return False
+    expected = {path.relative_to(directory).as_posix(): path for path in files}
+    try:
+        with zipfile.ZipFile(archive) as bundle:
+            members = bundle.infolist()
+            if len(members) != len(expected) or {item.filename for item in members} != set(expected):
+                return False
+            for item in members:
+                path = expected[item.filename]
+                if item.file_size != path.stat().st_size:
+                    return False
+                digest = hashlib.sha256()
+                with bundle.open(item) as stream:
+                    for block in iter(lambda: stream.read(1024 * 1024), b""):
+                        digest.update(block)
+                if digest.hexdigest() != sha256_file(path):
+                    return False
+        return True
+    except (OSError, ValueError, EOFError, RuntimeError, zipfile.BadZipFile, zlib.error):
+        return False
+
+
+def _validate_bundle_samples(directory: Path, manifest: dict, records: list[dict]) -> None:
+    """A damaged copied WAV or metadata must not become a newly valid archive."""
+    samples = {row["sample_id"]: row for row in manifest["samples"]}
+    reviewed = {f"{manifest['session']}__{row['chunk_id']}": row for row in records}
+    split = manifest["split"]
+    expected_stt = {
+        lang: {
+            key
+            for key, row in reviewed.items()
+            if row["source_lang"] == lang and row["transcript_approved"] and samples[key]["audio_sha256"]
+        }
+        for lang in ("en", "es")
+    }
+    expected_pairs = {
+        key for key, row in reviewed.items() if row["transcript_approved"] and row["translation_approved"]
+    }
+
+    def metadata_rows(path):
+        if not path.is_file():
+            raise ReviewConflict("Existing export metadata is missing; inspect the bundle before retrying")
+        rows = read_jsonl(path)
+        if len(rows) != sum(bool(line.strip()) for line in path.read_bytes().splitlines()):
+            raise ReviewConflict("Existing export metadata is corrupt; inspect the bundle before retrying")
+        return rows
+
+    def validate_rows(rows, expected):
+        if len(rows) != len(expected) or {row.get("sample_id") for row in rows} != expected:
+            raise ReviewConflict("Existing export metadata conflicts with the approved samples")
+        for row in rows:
+            sample = samples[row["sample_id"]]
+            if (
+                row.get("session") != manifest["session"]
+                or row.get("split") != split
+                or any(row.get(key) != sample[key] for key in ("revision", "audio_sha256"))
+            ):
+                raise ReviewConflict("Existing export metadata conflicts with sample provenance")
+
+    if manifest.get("stt_samples") != {lang: len(ids) for lang, ids in expected_stt.items()} or manifest.get(
+        "translation_pairs"
+    ) != len(expected_pairs):
+        raise ReviewConflict("Existing export manifest conflicts with approved sample counts")
+    for lang, expected in expected_stt.items():
+        audio_dir = directory / "whisper" / split / lang
+        rows = metadata_rows(audio_dir / "metadata.jsonl")
+        validate_rows(rows, expected)
+        for row in rows:
+            name = f"{row['sample_id']}.wav"
+            audio = audio_dir / name
+            original = reviewed[row["sample_id"]]
+            if (
+                row.get("file_name") != name
+                or row.get("source_lang") != lang
+                or row.get("transcription") != original["corrected_source_text"].strip()
+                or not audio.is_file()
+                or sha256_file(audio) != row["audio_sha256"]
+            ):
+                raise ReviewConflict(
+                    "Existing export audio or transcript is damaged; inspect the bundle before retrying"
+                )
+    pairs = metadata_rows(directory / "translation" / f"{split}.jsonl")
+    validate_rows(pairs, expected_pairs)
+    for pair in pairs:
+        original = reviewed[pair["sample_id"]]
+        source, target = original["source_lang"], original["target_lang"]
+        if (
+            pair.get(source) != original["corrected_source_text"].strip()
+            or pair.get(target) != original["corrected_translation_text"].strip()
+        ):
+            raise ReviewConflict("Existing export translation is damaged; inspect the bundle before retrying")
+
+
+def _publish_bundle_archive(archive: Path, directory: Path, files: list[Path]) -> None:
+    """Never expose a partly written ZIP under the downloadable final name."""
+    fd, name = tempfile.mkstemp(prefix=".export-zip-", suffix=".tmp", dir=archive.parent)
+    os.close(fd)
+    try:
+        with zipfile.ZipFile(name, "w", compression=zipfile.ZIP_DEFLATED) as out:
+            for path in files:
+                out.write(path, path.relative_to(directory))
+        with open(name, "rb") as stream:
+            os.fsync(stream.fileno())
+        os.replace(name, archive)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
+def _finish_bundle_export(directory, archive, bundle_id, manifest, registry_path, registry, records):
+    files = _bundle_files(directory)
+    _validate_bundle_samples(directory, manifest, records)
+    if not _archive_matches(archive, directory, files):
+        _publish_bundle_archive(archive, directory, files)
+    entry = {"session": manifest["session"], "split": manifest["split"], "bundle_id": bundle_id}
+    if not any(all(row.get(key) == value for key, value in entry.items()) for row in registry):
+        atomic_jsonl(registry_path, [*registry, entry])
+    return {"bundle_id": bundle_id, "archive": str(archive), **manifest}
 
 
 class ReviewStore:
@@ -330,6 +465,11 @@ class ReviewStore:
             registry = read_jsonl(registry_path)
             if any(r.get("session") == session and r.get("split") != split for r in registry):
                 raise ReviewConflict("This session is already assigned to a different dataset split")
+            exports = self.corrections / "exports"
+            other_split = "eval" if split == "train" else "train"
+            opposite = re.compile(rf"{re.escape(session)}-{other_split}-[0-9a-f]{{16}}(?:\.zip)?")
+            if exports.exists() and any(opposite.fullmatch(path.name) for path in exports.iterdir()):
+                raise ReviewConflict("This session has an existing export assigned to a different dataset split")
             # Hash revisions and audio so repeated exports are deterministic and portable.
             payload = []
             for rec in records:
@@ -345,16 +485,23 @@ class ReviewStore:
                     }
                 )
             key = hashlib.sha256(json.dumps([split, payload], sort_keys=True).encode()).hexdigest()[:16]
-            exports = self.corrections / "exports"
             bundle_id = f"{session}-{split}-{key}"
             destination = exports / bundle_id
             archive = exports / f"{bundle_id}.zip"
-            if destination.exists() and archive.exists():
-                return {
-                    "bundle_id": bundle_id,
-                    "archive": str(archive),
-                    **json.loads((destination / "manifest.json").read_text()),
-                }
+            if destination.exists():
+                _bundle_files(destination)
+                try:
+                    manifest = json.loads((destination / "manifest.json").read_text())
+                except (OSError, ValueError) as exc:
+                    raise ReviewConflict(
+                        "Existing export manifest is unreadable; inspect the bundle before retrying"
+                    ) from exc
+                expected = {"schema_version": 1, "session": session, "split": split, "samples": payload}
+                if not isinstance(manifest, dict) or any(manifest.get(k) != v for k, v in expected.items()):
+                    raise ReviewConflict("Existing export manifest conflicts with the requested session revisions")
+                return _finish_bundle_export(
+                    destination, archive, bundle_id, manifest, registry_path, registry, records
+                )
             exports.mkdir(parents=True, exist_ok=True)
             temp = Path(tempfile.mkdtemp(prefix=".export-", dir=exports))
             try:
@@ -407,16 +554,10 @@ class ReviewStore:
                     "samples": payload,
                 }
                 (temp / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-                if destination.exists():
-                    shutil.rmtree(temp)
-                else:
-                    os.replace(temp, destination)
-                with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as out:
-                    for path in sorted(destination.rglob("*")):
-                        if path.is_file():
-                            out.write(path, path.relative_to(destination))
-                atomic_jsonl(registry_path, [*registry, {"session": session, "split": split, "bundle_id": bundle_id}])
-                return {"bundle_id": bundle_id, "archive": str(archive), **manifest}
+                os.replace(temp, destination)
+                return _finish_bundle_export(
+                    destination, archive, bundle_id, manifest, registry_path, registry, records
+                )
             finally:
                 if temp.exists():
                     shutil.rmtree(temp)
