@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "raw": {
+    "path": "docs/evaluation/mac_followup_20260910/profiling/compile-development-r1.json",
+    "sha256": "9f73bcda37e3ac8857a531e6f3a51149dc856478f34bf348313454a623414fa9",
+    "size_bytes": 910959
+  },
+  "candidate_source_sha256": "50c9e3ad7501c9298919ff597f7609ecdf79581adbc42f4c04f4e39c56d4f6bc",
+  "manifest_sha256": "9de09bead155cef2a62f58ef0be91c43e35ced2e91672fbcfa641f358c498385",
+  "source_lock": {
+    "parakeet_mlx/parakeet.py": "2a4208b051ed20356908848c76080ebee7df4a554be91fc338fbe6747b19fccb",
+    "parakeet_mlx/rnnt.py": "474d4896be99fa5b93c47198f2bd6da5160eaa691a50c8e2827baf7ccc1132d9",
+    "mlx/nn/layers/recurrent.py": "553738db5ffede77d4d97a6b431ac82475b99c34902a9a32e05b940a95f34ae7"
+  },
+  "model_identity": {
+    "requested_model_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+    "actual_model_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+    "primary_identity_verified": true
+  },
+  "triplets": 18,
+  "calls": 54,
+  "original_vs_joint_exact": 18,
+  "compiled_exact": 12,
+  "compiled_changed": 6,
+  "changed_source_ids": [
+    "fleurs-en-development-1603-561237249582086895",
+    "fleurs-es-development-1624-8750634895258922350"
+  ],
+  "changed_fields": [
+    {
+      "id": "fleurs-en-development-1603-561237249582086895",
+      "source_lang": "en",
+      "repeat": 0,
+      "differences": [
+        {
+          "field": "/aligned_results/0/sentences/0/confidence",
+          "control": 0.9990682809700849,
+          "compiled_joint": 0.9990682824640457
+        },
+        {
+          "field": "/aligned_results/0/sentences/0/tokens/39/confidence",
+          "control": 0.9964972138404846,
+          "compiled_joint": 0.9964972734451294
+        },
+        {
+          "field": "/stt/avg_logprob",
+          "control": -0.00093215344998198,
+          "compiled_joint": -0.0009321519546279999
+        },
+        {
+          "field": "/stt/confidence",
+          "control": 0.999067846550018,
+          "compiled_joint": 0.999067848045372
+        },
+        {
+          "field": "/stt/segments/0/avg_logprob",
+          "control": -0.00093215344998198,
+          "compiled_joint": -0.0009321519546279999
+        }
+      ]
+    },
+    {
+      "id": "fleurs-es-development-1624-8750634895258922350",
+      "source_lang": "es",
+      "repeat": 0,
+      "differences": [
+        {
+          "field": "/aligned_results/0/sentences/0/confidence",
+          "control": 0.996655103128679,
+          "compiled_joint": 0.9966551059141584
+        },
+        {
+          "field": "/aligned_results/0/sentences/0/tokens/6/confidence",
+          "control": 0.9272507429122925,
+          "compiled_joint": 0.9272508025169373
+        },
+        {
+          "field": "/stt/avg_logprob",
+          "control": -0.0033505036451963567,
+          "compiled_joint": -0.003350500850368495
+        },
+        {
+          "field": "/stt/confidence",
+          "control": 0.9966494963548036,
+          "compiled_joint": 0.9966494991496315
+        },
+        {
+          "field": "/stt/segments/0/avg_logprob",
+          "control": -0.0033505036451963567,
+          "compiled_joint": -0.003350500850368495
+        }
+      ]
+    },
+    {
+      "id": "fleurs-en-development-1603-561237249582086895",
+      "source_lang": "en",
+      "repeat": 1,
+      "differences": [
+        {
+          "field": "/aligned_results/0/sentences/0/confidence",
+          "control": 0.9990682809700849,
+          "compiled_joint": 0.9990682824640457
+        },
+        {
+          "field": "/aligned_results/0/sentences/0/tokens/39/confidence",
+          "control": 0.9964972138404846,
+          "compiled_joint": 0.9964972734451294
+        },
+        {
+          "field": "/stt/avg_logprob",
+          "control": -0.00093215344998198,
+          "compiled_joint": -0.0009321519546279999
+        },
+        {
+          "field": "/stt/confidence",
+          "control": 0.999067846550018,
+          "compiled_joint": 0.999067848045372
+        },
+        {
+          "field": "/stt/segments/0/avg_logprob",
+          "control": -0.00093215344998198,
+          "compiled_joint": -0.0009321519546279999
+        }
+      ]
+    },
+    {
+      "id": "fleurs-es-development-1624-8750634895258922350",
+      "source_lang": "es",
+      "repeat": 1,
+      "differences": [
+        {
+          "field": "/aligned_results/0/sentences/0/confidence",
+          "control": 0.996655103128679,
+          "compiled_joint": 0.9966551059141584
+        },
+        {
+          "field": "/aligned_results/0/sentences/0/tokens/6/confidence",
+          "control": 0.9272507429122925,
+          "compiled_joint": 0.9272508025169373
+        },
+        {
+          "field": "/stt/avg_logprob",
+          "control": -0.0033505036451963567,
+          "compiled_joint": -0.003350500850368495
+        },
+        {
+          "field": "/stt/confidence",
+          "control": 0.9966494963548036,
+          "compiled_joint": 0.9966494991496315
+        },
+        {
+          "field": "/stt/segments/0/avg_logprob",
+          "control": -0.0033505036451963567,
+          "compiled_joint": -0.003350500850368495
+        }
+      ]
+    },
+    {
+      "id": "fleurs-en-development-1603-561237249582086895",
+      "source_lang": "en",
+      "repeat": 2,
+      "differences": [
+        {
+          "field": "/aligned_results/0/sentences/0/confidence",
+          "control": 0.9990682809700849,
+          "compiled_joint": 0.9990682824640457
+        },
+        {
+          "field": "/aligned_results/0/sentences/0/tokens/39/confidence",
+          "control": 0.9964972138404846,
+          "compiled_joint": 0.9964972734451294
+        },
+        {
+          "field": "/stt/avg_logprob",
+          "control": -0.00093215344998198,
+          "compiled_joint": -0.0009321519546279999
+        },
+        {
+          "field": "/stt/confidence",
+          "control": 0.999067846550018,
+          "compiled_joint": 0.999067848045372
+        },
+        {
+          "field": "/stt/segments/0/avg_logprob",
+          "control": -0.00093215344998198,
+          "compiled_joint": -0.0009321519546279999
+        }
+      ]
+    },
+    {
+      "id": "fleurs-es-development-1624-8750634895258922350",
+      "source_lang": "es",
+      "repeat": 2,
+      "differences": [
+        {
+          "field": "/aligned_results/0/sentences/0/confidence",
+          "control": 0.996655103128679,
+          "compiled_joint": 0.9966551059141584
+        },
+        {
+          "field": "/aligned_results/0/sentences/0/tokens/6/confidence",
+          "control": 0.9272507429122925,
+          "compiled_joint": 0.9272508025169373
+        },
+        {
+          "field": "/stt/avg_logprob",
+          "control": -0.0033505036451963567,
+          "compiled_joint": -0.003350500850368495
+        },
+        {
+          "field": "/stt/confidence",
+          "control": 0.9966494963548036,
+          "compiled_joint": 0.9966494991496315
+        },
+        {
+          "field": "/stt/segments/0/avg_logprob",
+          "control": -0.0033505036451963567,
+          "compiled_joint": -0.003350500850368495
+        }
+      ]
+    }
+  ],
+  "only_confidence_and_derived_logprob_changed": true,
+  "text_token_ids_and_timestamps_exact_all_triplets": true,
+  "largest_absolute_confidence_delta": 5.960464477539063e-08,
+  "wall_ms": {
+    "control": {
+      "n": 18,
+      "p50": 189.39816698548384,
+      "p95": 228.95754204364493
+    },
+    "joint_eval": {
+      "n": 18,
+      "p50": 169.68083352549002,
+      "p95": 231.51670797960833
+    },
+    "compiled_joint": {
+      "n": 18,
+      "p50": 174.28443749668077,
+      "p95": 930.4615419823676
+    }
+  },
+  "paired_savings_against_compiled_joint": {
+    "control": {
+      "saved_ms": {
+        "n": 18,
+        "p50": 16.225729981670156,
+        "p95": 42.225167038850486
+      },
+      "saved_percent": {
+        "n": 18,
+        "p50": 8.369412797898388,
+        "p95": 20.425355379981205
+      }
+    },
+    "joint_eval": {
+      "saved_ms": {
+        "n": 18,
+        "p50": -0.9781659755390137,
+        "p95": 37.18829096760601
+      },
+      "saved_percent": {
+        "n": 18,
+        "p50": -0.5641121297110426,
+        "p95": 16.062897270844704
+      }
+    }
+  },
+  "compile_stats": {
+    "calls": 912,
+    "eager_bootstrap_calls": 78,
+    "compiled_calls": 834,
+    "failed_calls": 0,
+    "signature_count": 1,
+    "signatures": [
+      {
+        "shapes": [
+          [
+            1,
+            1,
+            1024
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1,
+            640
+          ],
+          [
+            2,
+            1,
+            640
+          ]
+        ],
+        "dtypes": [
+          "mlx.core.float32",
+          "mlx.core.int32",
+          "mlx.core.float32",
+          "mlx.core.float32"
+        ],
+        "first_dispatch_ms": 0.3131660050712526,
+        "first_dispatch_failed": false
+      }
+    ],
+    "wrapper_creation_ms": 0.00462500611320138,
+    "cold_cost_scope": "First signature dispatch may include tracing/compilation but not deferred device execution; whole first compiled STT call below includes its completion. Neither is compiler-exclusive time."
+  },
+  "cold_containing_triplets": [
+    {
+      "id": "fleurs-en-development-1585-3207241257175584099",
+      "repeat": 0,
+      "compiled_joint_call_wall_ms": 930.4615419823676
+    }
+  ],
+  "percentiles": "median p50; nearest-rank ceil(.95*n) p95; n=18 descriptive only",
+  "result": "rejected_no_production_integration",
+  "defaults_changed": false,
+  "human_approved_locally": false,
+  "training_eligible": false,
+  "raw_label_caveat": "Nested comparisons reuse the earlier joint assessor and retain compile_experiment='not implemented; conditional follow-up only'. That inherited inner label is stale: the outer compilation_contract, candidate_source_sha256, compile_stats and all three actual call modes prove this isolated compiled candidate ran. The raw receipt remains unchanged.",
+  "interpretation": "No exactness tolerance is introduced after the result. Confidence differences are small but fail the predeclared full-output equivalence gate. First-call cost remains included. The compiled candidate has no median advantage over joint evaluation; no production speed claim or integration follows.",
+  "memory_scope": "Process RSS/Metal high-water values in raw receipt include all arms and model load; not per-arm allocations."
+}
