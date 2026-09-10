@@ -10,7 +10,7 @@
 - **Gemma 4 stop tokens:** always run `ensure_stop_tokens(tokenizer, model_family=...)` after load; it *adds* `<turn|>` and preserves loader EOS ids. Never replace the set (the `{1, 3}` regression, #172) and never apply the TranslateGemma `<end_of_turn>` fix to Gemma 4.
 - **Prompts:** Gemma 4 → `gemma4_user_content()` (plain instruct, thinking off); TranslateGemma → structured lang-code template. Both MLX and CUDA paths, and `workers.py`, must use `translation_prompts.py` — no inline prompts.
 - **MLX threads:** mlx ≥ 0.31.2 thread-local streams; `max_workers=2` overlap is the production path. Materialize weights and run the first Gemma forward on the load thread (`warm_mlx_model`). One generation lock per model.
-- **PyTorch:** `MarianHFEngine` and Silero VAD share `_pytorch_lock`; VAD stays on the asyncio thread.
+- **PyTorch:** `MarianHFEngine` and Silero VAD share `_pytorch_lock`; VAD runs on the asyncio thread by default. The experimental worker path remains opt-in and uses the same lock.
 - **Quantization:** only OptiQ mixed-precision Gemma 4 repos; uniform 4-bit quants break PLE.
 - **Downloads:** identity is an HF id, resolution is local (`model_paths.py`, `STARK_MODELS_DIR`, `models.lock.json`). Do not add unpinned live-path downloads (B615 followups are tracked in the backlog).
 - Do not recreate `stt_env`; do not run model loads in unit tests.
@@ -50,7 +50,7 @@ top-level settings object also accepts `STARK_<GROUP>__<FIELD>`. Full table in
 |------|-------|
 | #176 `--multiprocess` shared prompts/stop rules | implemented in `workers.py` (wraps `MLXGemmaEngine`); closure evidence is the parent's |
 | #177 Gemma 4 assistant drafter | off; live `--mts` rejected before load; `engines/mlx_spec.py` offline probe only |
-| Lite CPU profile / RTX 2070 | **implemented and integrated**; isolated Mac CPU synthetic EN+ES caption/TTS smoke passed; pinned E2B GGUF + native llama.cpp setup verified (download/integrity only); x86 CPU, native Windows and 2070 performance **pending hardware** |
+| Lite CPU profile / RTX 2070 | **implemented and integrated**; isolated Mac CPU synthetic EN+ES caption/TTS and optional CPU E2B inference smokes passed; x86 CPU, native Windows and 2070 performance **pending hardware** ([evidence](../docs/lite_profiles.md)) |
 | W16 + v2-cpo Mac A/B (#135) | pending artifact transfer from WSL |
 | Hindi (#138) | `tools/offline_hindi.py` offline baseline exists (evaluation only); no live integration; language decision pending |
 

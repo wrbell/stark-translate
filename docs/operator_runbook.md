@@ -177,6 +177,15 @@ volunteers do not need a terminal. Do not replace a working `stt_env` to test an
 installation. A dedicated `STARK_PROJECT_ROOT` holds writable session data when
 running an installed package outside the checkout.
 
+Operator controls and private recordings are local by default (`127.0.0.1:9000`).
+The separate audience ports remain reachable on the LAN and serve only public
+display assets and live captions. Browser-origin and Host checks protect the
+operator from foreign pages; they are not account authentication. Explicit
+`stark-translate operator --host 0.0.0.0` enables unauthenticated remote operator
+access and prints its exposure warning. Use a restricted network or authenticated
+proxy for that configuration; custom proxy hostnames must be listed explicitly in
+`STARK_OPERATOR_ALLOWED_HOSTS`. Audience phones do not require remote operator access.
+
 Operational application logs rotate at 20 MiB with five backups. Thirty-day
 pruning applies only to eligible operational logs, not originals; service-manager
 stdout/stderr files have their own policy. This is not a bound on total audio or

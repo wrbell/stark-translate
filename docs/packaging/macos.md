@@ -12,6 +12,7 @@ Create an isolated environment; existing `stt_env` installations can continue un
 
 ```bash
 python3.11 -m venv venv
+venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
 venv/bin/python -m pip install '.[mlx]'
 venv/bin/python -m operator_app.cli setup --backend mlx
 venv/bin/python -m operator_app.cli doctor --backend mlx --lang en
@@ -25,6 +26,11 @@ SentencePiece support, Parakeet, Whisper, MLX/OptiQ, and Piper. Optional extras:
 and translation scoring. Mac installs constrain MLX/OptiQ/Parakeet and PyTorch
 to the verified minor versions; upgrading those lines requires another replay gate. Diarization is still opt-in and its model/latency gate
 must pass before use at a service.
+
+The [current installed-dependency audit](../evaluation/overnight_security/README.md)
+records two unresolved findings in the pinned Mac Torch line and the incompatible
+audio-wheel upgrade attempt. The Lite runtime has a separate clean audit; neither
+that result nor filtered CI certifies the full Mac dependency set.
 
 `bootstrap.sh --skip-systemd` performs the dependency install, backend-specific
 model setup and CLI preflight without requiring an already-running web server.

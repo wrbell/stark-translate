@@ -139,7 +139,7 @@ accepts `STARK_<GROUP>__<FIELD>` with the double-underscore delimiter. Common ke
 ## Adding a New Language
 
 - STT: mlx-whisper is multilingual; Parakeet TDT v3 covers EN/ES/others but is only wired for EN dispatch. Add the `--lang` choice in `dry_run_ab.py` and a Marian direction in `factory._marian_direction_from_langs()` (only `en-es` / `es-en` have CT2 adapters today).
-- Translation: Gemma 4 prompts take language names; TranslateGemma takes codes. Hindi/Chinese remain pending user decisions (#138, roadmap Phase 8). `tools/offline_hindi.py` (church audio → Parakeet English → Gemma Hindi; `prepare` / `transcribe` / `translate --size e4b|e2b` / `report` subcommands, evaluation-only output directories, never starts the live pipeline) is an **offline baseline tool with no live integration**, executed sequentially by the parent session; the earlier text probe is in [`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md).
+- Translation: Gemma 4 prompts take language names; TranslateGemma takes codes. Hindi/Chinese integration requires a later user decision. The [offline Hindi baseline](../docs/evaluation/overnight_hindi/README.md) is completed R&D with no live integration or approved references; EN↔ES remains the latency priority.
 - TTS: add a Piper voice to `settings.tts.voices` and the setup `tts` profile.
 
 ## Related
