@@ -77,6 +77,8 @@ def test_engine_load_preserves_stop_tokens(family):
         patch("engines.mlx_engine.MLX_AVAILABLE", True),
         patch("engines.mlx_engine.mx", MagicMock()),
         patch("engines.mlx_engine.materialize_mlx_model"),
+        # These tests isolate EOS setup; first-forward behavior has its own suite.
+        patch("engines.mlx_engine.warm_mlx_model"),
         patch("mlx_lm.load", return_value=(object(), tok)),
     ):
         engine = MLXGemmaEngine(model_family=family, use_prompt_cache=False)
@@ -94,7 +96,10 @@ def test_pipeline_load_uses_global_or_explicit_family(monkeypatch, family):
     tok = FakeTokenizer(family or "gemma4")
     monkeypatch.setattr(d, "MODEL_FAMILY", "gemma4")
     monkeypatch.setattr(d, "USE_TURBOQUANT", False)
-    with patch("mlx_lm.load", return_value=(MagicMock(), tok)):
+    with (
+        patch("mlx_lm.load", return_value=(MagicMock(), tok)),
+        patch("engines.mlx_engine.warm_mlx_model"),
+    ):
         d.load_mlx_gemma("fake", "test", model_family=family)
     assert tok._eos_token_ids == ({1, 106} if family else {1, 106, 50})
 
