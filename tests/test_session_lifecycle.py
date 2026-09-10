@@ -15,8 +15,8 @@ from tools.session_lifecycle import (
     completion_metadata,
     finish_session,
     migrate_completion,
-    require_completed,
     request_graceful_stop,
+    require_completed,
     session_status,
     start_session,
 )
@@ -229,7 +229,10 @@ def test_model_metadata_distinguishes_resolved_and_manifest_revisions(tmp_path, 
 
 
 @pytest.mark.parametrize("forced_stop", [False, True])
-def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(tmp_path, monkeypatch, forced_stop):
+@pytest.mark.parametrize("stop_signal", [2, 15])
+def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
+    tmp_path, monkeypatch, forced_stop, stop_signal
+):
     """Run the production signal handler/finally blocks with inert model stubs."""
     import sys
 
@@ -257,12 +260,13 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(tmp_pa
     pool = ThreadPoolExecutor(max_workers=1)
     monkeypatch.chdir(tmp_path)
     events = []
+    registered_signals = {}
 
     async def done():
         pass
 
     async def audio_loop():
-        asyncio.get_running_loop().call_soon(namespace["signal_handler"], 2, None)
+        asyncio.get_running_loop().call_soon(registered_signals[stop_signal], stop_signal, None)
         await asyncio.Event().wait()
 
     def summary():
@@ -313,9 +317,20 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(tmp_pa
         "lifecycle_root": tmp_path,
         "lifecycle": start_session(tmp_path, "example_en"),
         "finish_session": finish_session,
+        "signal": SimpleNamespace(
+            SIGINT=2, SIGTERM=15, signal=lambda number, handler: registered_signals.update({number: handler})
+        ),
     }
     definitions = ast.fix_missing_locations(ast.Module(body=[signal_handler, cleanup], type_ignores=[]))
     exec(compile(definitions, str(source), "exec"), namespace)
+    registrations = [
+        node
+        for node in main.body
+        if isinstance(node, ast.Expr)
+        and isinstance(node.value, ast.Call)
+        and ast.unparse(node.value.func) == "signal.signal"
+    ]
+    exec(compile(ast.Module(body=registrations, type_ignores=[]), str(source), "exec"), namespace)
     exec(compile(ast.Module(body=main.body[wrapper_start:], type_ignores=[]), str(source), "exec"), namespace)
     if forced_stop:
         assert session_status(tmp_path, "example_en")["status"] == "failed"
@@ -323,3 +338,25 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(tmp_pa
     else:
         require_completed(tmp_path, "example_en")
         assert events == ["coordinator_drained", "summary"]
+
+
+def test_sigkill_leaves_no_completed_export_evidence(tmp_path):
+    import subprocess
+    import sys
+
+    code = (
+        "from pathlib import Path; from tools.session_lifecycle import start_session; import time; "
+        "start_session(Path(__import__('sys').argv[1]), 'example_en'); print('ready', flush=True); time.sleep(30)"
+    )
+    process = subprocess.Popen([sys.executable, "-c", code, str(tmp_path)], stdout=subprocess.PIPE, text=True)
+    try:
+        assert process.stdout.readline().strip() == "ready"
+        process.kill()
+        process.wait(timeout=5)
+        assert session_status(tmp_path, "example_en")["status"] == "failed"
+        with pytest.raises(SessionNotComplete):
+            require_completed(tmp_path, "example_en")
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=5)
