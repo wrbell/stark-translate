@@ -20,7 +20,7 @@ Output: JSON file in metrics/sermon_summaries/
 
 Requirements:
   - mlx-lm (pip install mlx-lm)
-  - A small MLX chat model (default: mlx-community/gemma-2-2b-it-4bit)
+  - The configured Gemma 4 E4B MLX model (shared with live translation)
 
 Usage:
     python summarize_sermon.py metrics/ab_metrics_20260208_183356.csv
@@ -38,14 +38,21 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from engines.model_paths import resolve_model_path
+from engines.translation_prompts import chat_template_extra_kwargs, ensure_stop_tokens
+from settings import settings
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
 OUTPUT_DIR = "metrics/sermon_summaries"
 
-# Default summarization model — small, fast, fits easily in 18GB with other models
-DEFAULT_MODEL = "mlx-community/gemma-2-2b-it-4bit"
+# Reuse the setup/preflight-managed model, after the live session has stopped.
+DEFAULT_MODEL = settings.translation.mlx_model_gemma4_e4b
 
 # Max tokens for transcript fed to the LLM (leave room for generation)
 MAX_TRANSCRIPT_TOKENS = 3000  # ~12K characters, safe for 8K context models
@@ -216,16 +223,42 @@ def get_speaker_texts(entries):
 # ---------------------------------------------------------------------------
 
 
-def load_summarization_model(model_id):
-    """Load a small chat LLM via mlx-lm for summarization."""
+def _summary_model_family(model_id, resolved):
+    identity = model_id.lower()
+    config_path = Path(resolved) / "config.json"
+    if config_path.is_file():
+        try:
+            config = json.loads(config_path.read_text())
+            identity += (
+                " " + str(config.get("model_type", "")) + " " + str(config.get("text_config", {}).get("model_type", ""))
+            )
+        except (OSError, ValueError, AttributeError):
+            pass
+    if "gemma-4" in identity or "gemma4" in identity:
+        return "gemma4"
+    return "translategemma" if "gemma" in identity else None
+
+
+def load_summarization_model(model_id=None):
+    """Resolve setup/HF caches, preserve family EOS, and warm on the load thread."""
     import mlx.core as mx
     from mlx_lm import load
 
     mx.set_cache_limit(100 * 1024 * 1024)
 
+    model_id = model_id or settings.translation.mlx_model_gemma4_e4b
+    resolved = resolve_model_path(model_id)
+    family = _summary_model_family(model_id, resolved)
     print(f"  Loading {model_id}...")
     t0 = time.time()
-    model, tokenizer = load(model_id)
+    model, tokenizer = load(resolved)
+    tokenizer._stark_summary_model_family = family
+    if family:
+        ensure_stop_tokens(tokenizer, model_family=family)
+    # First forward must run on the load thread. Do not report ready after a
+    # failed warmup; this generation is required to establish MLX stream state.
+    generate_text(model, tokenizer, "Hello.", max_tokens=1)
+    mx.synchronize()
     print(f"  Model ready ({time.time() - t0:.1f}s)")
     return model, tokenizer
 
@@ -235,7 +268,10 @@ def generate_text(model, tokenizer, prompt, max_tokens=512):
     from mlx_lm import generate
 
     messages = [{"role": "user", "content": prompt}]
-    chat_prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+    family = getattr(tokenizer, "_stark_summary_model_family", None)
+    chat_prompt = tokenizer.apply_chat_template(
+        messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
+    )
 
     result = generate(
         model,
@@ -249,6 +285,8 @@ def generate_text(model, tokenizer, prompt, max_tokens=512):
     clean = result.split("<end_of_turn>")[0].strip()
     clean = clean.split("<|eot_id|>")[0].strip()
     clean = clean.split("<|end|>")[0].strip()
+    if family == "gemma4":
+        clean = clean.split("<turn|>")[0].strip()
     return clean
 
 
@@ -358,11 +396,10 @@ def translate_with_translategemma(en_summary):
 
     print("  Loading TranslateGemma for Spanish translation...")
     t0 = time.time()
-    model, tokenizer = load(TRANSLATE_MODEL_ID)
+    model, tokenizer = load(resolve_model_path(TRANSLATE_MODEL_ID))
 
     # Fix EOS token (same as dry_run_ab.py)
-    eot_id = tokenizer.convert_tokens_to_ids("<end_of_turn>")
-    tokenizer._eos_token_ids = {tokenizer.eos_token_id, eot_id}
+    ensure_stop_tokens(tokenizer, model_family="translategemma")
     print(f"  TranslateGemma ready ({time.time() - t0:.1f}s)")
 
     messages = [
@@ -394,7 +431,7 @@ def translate_with_translategemma(en_summary):
 
 def write_summary(summary_data, output_path):
     """Write summary to JSON file."""
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(summary_data, f, indent=2, ensure_ascii=False)
     print(f"\n  Output: {output_path}")

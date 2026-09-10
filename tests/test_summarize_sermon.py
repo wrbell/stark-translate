@@ -2,6 +2,85 @@
 
 import csv
 import json
+import sys
+import threading
+import types
+
+import pytest
+
+
+@pytest.fixture
+def summary_runtime(monkeypatch, tmp_path):
+    from features import summarize_sermon as summary
+
+    calls = []
+
+    class Tokenizer:
+        eos_token_id = 1
+        unk_token_id = 3
+
+        def __init__(self):
+            self._eos_token_ids = {1, 50}
+
+        def convert_tokens_to_ids(self, token):
+            return 106 if token == "<turn|>" else 3
+
+        def apply_chat_template(self, messages, **kwargs):
+            calls.append(("template", messages, kwargs))
+            return "rendered-prompt"
+
+    tokenizer = Tokenizer()
+    core = types.ModuleType("mlx.core")
+    core.set_cache_limit = lambda limit: None
+    core.synchronize = lambda: calls.append(("synchronize", threading.get_ident()))
+    mlx = types.ModuleType("mlx")
+    mlx.core = core
+    runtime = types.ModuleType("mlx_lm")
+    runtime.load = lambda path: (calls.append(("load", path)) or "model", tokenizer)
+    runtime.generate = lambda *a, **kw: calls.append(("generate", threading.get_ident(), kw)) or "Summary.<turn|>junk"
+    monkeypatch.setitem(sys.modules, "mlx", mlx)
+    monkeypatch.setitem(sys.modules, "mlx.core", core)
+    monkeypatch.setitem(sys.modules, "mlx_lm", runtime)
+    cached = tmp_path / "cached-model"
+    cached.mkdir()
+    (cached / "config.json").write_text('{"model_type":"gemma4"}')
+    monkeypatch.setattr(
+        summary, "resolve_model_path", lambda identity: calls.append(("resolve", identity)) or str(cached)
+    )
+    return summary, tokenizer, runtime, calls, cached
+
+
+def test_summary_default_uses_cache_family_stops_and_load_thread_warmup(summary_runtime):
+    summary, tokenizer, _, calls, cached = summary_runtime
+    model, loaded = summary.load_summarization_model()
+    assert calls[0] == ("resolve", summary.settings.translation.mlx_model_gemma4_e4b)
+    assert calls[1] == ("load", str(cached))
+    assert loaded is tokenizer and tokenizer._eos_token_ids == {1, 50, 106}
+    warmup = next(call for call in calls if call[0] == "generate")
+    assert warmup[1] == threading.get_ident() and warmup[2]["max_tokens"] == 1
+    assert summary.generate_text(model, tokenizer, "Summary prompt") == "Summary."
+    assert all(call[2]["enable_thinking"] is False for call in calls if call[0] == "template")
+
+
+def test_summary_explicit_non_gemma_override_preserves_template_and_eos(summary_runtime):
+    summary, tokenizer, _, calls, cached = summary_runtime
+    (cached / "config.json").write_text('{"model_type":"llama"}')
+    summary.load_summarization_model("explicit/llama-model")
+    assert calls[0] == ("resolve", "explicit/llama-model")
+    assert tokenizer._eos_token_ids == {1, 50}
+    assert all("enable_thinking" not in call[2] for call in calls if call[0] == "template")
+
+
+def test_summary_failed_first_forward_is_not_reported_ready(summary_runtime):
+    summary, _, runtime, _, _ = summary_runtime
+
+    def failed(*args, **kwargs):
+        raise RuntimeError("first forward failed")
+
+    runtime.generate = failed
+    with pytest.raises(RuntimeError, match="first forward failed"):
+        summary.load_summarization_model()
+
 
 # ===================================================================
 # _format_timestamp
