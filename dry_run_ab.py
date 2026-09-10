@@ -127,6 +127,9 @@ _broadcast_sequence = 0
 _speaker_pending: dict[int, tuple[float, float, str | None]] = {}
 _warmup_future = None
 _translation_active = threading.Event()
+_experiment_lock = threading.Lock()
+_active_stt_workers = {"partial": 0, "final": 0}
+_experiment_counters = {}
 _INPUT_AUDIO_HASH = None
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
@@ -1853,20 +1856,75 @@ _WARMUP_INTERVAL = 4.0  # seconds between periodic warmups during sustained sile
 
 
 def _inference_idle():
+    with _experiment_lock:
+        stt_running = any(_active_stt_workers.values())
     return not (
-        _translation_active.is_set()
+        stt_running
+        or _translation_active.is_set()
         or _final_pending.is_set()
         or (_pipeline_chunk_queue is not None and not _pipeline_chunk_queue.empty())
         or (_active_partial_future is not None and not _active_partial_future.done())
     )
 
 
+def _count_experiment(name):
+    with _experiment_lock:
+        _experiment_counters[name] = _experiment_counters.get(name, 0) + 1
+
+
+def _experiment_snapshot():
+    with _experiment_lock:
+        counters = dict.fromkeys(
+            (
+                "warmup_requested",
+                "warmup_executed",
+                "warmup_failed",
+                "warmup_suppressed_busy",
+                "warmup_suppressed_coalesced",
+                "warmup_suppressed_before_run",
+                "warmup_suppressed_no_pending",
+                "warmup_suppressed_model_lock",
+                "partial_suppressed_final_decode",
+                "partial_suppressed_final_pending",
+                "partial_suppressed_backlog",
+                "partial_suppressed_in_flight",
+                "partial_suppressed_after_stt",
+                "partial_stt_started",
+                "partial_stt_finished",
+                "final_stt_started",
+                "final_stt_finished",
+                "partial_emitted",
+                "final_marian_routes",
+                "final_gemma_requests",
+            ),
+            0,
+        )
+        return {**counters, **_experiment_counters}
+
+
+def _run_tracked_stt(kind, function, *args):
+    """Track actual worker lifetime; cancelling its asyncio wrapper is not completion."""
+    with _experiment_lock:
+        _active_stt_workers[kind] += 1
+    _count_experiment(f"{kind}_stt_started")
+    try:
+        return function(*args)
+    finally:
+        with _experiment_lock:
+            _active_stt_workers[kind] -= 1
+        _count_experiment(f"{kind}_stt_finished")
+
+
 def _schedule_warmup(loop):
     global _warmup_future
-    if settings.translation.idle_warmup_only and (
-        not _inference_idle() or (_warmup_future is not None and not _warmup_future.done())
-    ):
-        return
+    _count_experiment("warmup_requested")
+    if settings.translation.idle_warmup_only:
+        if not _inference_idle():
+            _count_experiment("warmup_suppressed_busy")
+            return
+        if _warmup_future is not None and not _warmup_future.done():
+            _count_experiment("warmup_suppressed_coalesced")
+            return
     _warmup_future = loop.run_in_executor(_pipeline_pool, warmup_translation_models)
 
 
@@ -1879,8 +1937,10 @@ def warmup_translation_models():
     """
     global _warmup_pending, _last_warmup_time
     if settings.translation.idle_warmup_only and not _inference_idle():
+        _count_experiment("warmup_suppressed_before_run")
         return
     if not _warmup_pending:
+        _count_experiment("warmup_suppressed_no_pending")
         return
     _warmup_pending = False
     _last_warmup_time = time.perf_counter()
@@ -1898,6 +1958,7 @@ def warmup_translation_models():
                 # A final can become ready after the warmup task was queued.
                 if settings.translation.idle_warmup_only and not _inference_idle():
                     _warmup_pending = True
+                    _count_experiment("warmup_suppressed_model_lock")
                     return
                 family = globals().get("MODEL_FAMILY", "gemma4")
                 messages = build_chat_messages(
@@ -1907,7 +1968,9 @@ def warmup_translation_models():
                     messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
                 )
                 generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
+                _count_experiment("warmup_executed")
     except Exception:
+        _count_experiment("warmup_failed")
         pass  # warmup is best-effort, never block the pipeline
 
 
@@ -2111,11 +2174,13 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
     sample_bounds = sample_bounds or {name: None for name in SAMPLE_COLUMNS}
     partial_submitted = time.perf_counter()
     if settings.translation.final_aware_partials and _translation_active.is_set():
+        _count_experiment("partial_suppressed_final_decode")
         return
 
     # [FIX] Skip partial if a final is queued for the SAME utterance — finals take priority.
     # Partials for a NEW utterance (different utterance_id) are allowed through.
     if _final_pending.is_set() and utterance_id == _final_pending_utterance_id:
+        _count_experiment("partial_suppressed_final_pending")
         print("  [FIX] partial skipped (final pending)", end="\r")
         return
 
@@ -2127,12 +2192,14 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
     # normal — partials still run for live UX feedback.  queue>=2 means the
     # pipeline is behind — shed partials so finals can drain the backlog.
     if _pipeline_chunk_queue is not None and _pipeline_chunk_queue.qsize() > 1:
+        _count_experiment("partial_suppressed_backlog")
         return
 
     # [FIX] At most one partial in flight on the pool — a second partial
     # queued behind the first just adds latency with no UX benefit (the
     # first partial's text is already on screen).
     if _active_partial_future is not None and not _active_partial_future.done():
+        _count_experiment("partial_suppressed_in_flight")
         return
 
     # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
@@ -2215,9 +2282,11 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
 
         # Submit STT and track the future so process_final can cancel it
         if MULTIPROCESS:
-            stt_future = loop.run_in_executor(_stt_comm_pool, _run_partial_stt_via_worker, audio_data)
+            stt_future = loop.run_in_executor(
+                _stt_comm_pool, _run_tracked_stt, "partial", _run_partial_stt_via_worker, audio_data
+            )
         else:
-            stt_future = loop.run_in_executor(_pipeline_pool, _partial_stt)
+            stt_future = loop.run_in_executor(_pipeline_pool, _run_tracked_stt, "partial", _partial_stt)
         with _partial_future_lock:
             _active_partial_future = stt_future
 
@@ -2258,12 +2327,14 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
 
         # [FIX] Re-check after STT — a final may have arrived while we were running
         if _final_pending.is_set() and utterance_id == _final_pending_utterance_id:
+            _count_experiment("partial_suppressed_after_stt")
             print("  [FIX] partial skipped after STT (final pending)", end="\r")
             return
 
         # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
         total = stt_latency + marian_latency
+        _count_experiment("partial_emitted")
 
         _io_pool.submit(
             _write_partial_record,
@@ -2552,6 +2623,7 @@ async def _pipeline_translate_and_finalize(
                     return fn(*args)
 
                 def submit_translate(pool, fn, *args):
+                    _count_experiment("final_marian_routes" if fn is translate_marian else "final_gemma_requests")
                     return loop.run_in_executor(pool, timed_translate, fn, *args)
 
                 async def run_translate(pool, fn, *args):
@@ -2561,7 +2633,7 @@ async def _pipeline_translate_and_finalize(
                 if MULTIPROCESS:
                     # Adaptive routing still works — MarianMT is in the main process
                     if not _RUN_AB and should_use_marian_only(english, stt_confidence):
-                        spanish_a, lat_a = timed_translate(translate_marian, english)
+                        spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
                         tps_a = 0.0
                         qe_a = qe_score(english, spanish_a)
                         print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
@@ -2580,7 +2652,7 @@ async def _pipeline_translate_and_finalize(
                     and mlx_a_model is not None
                     and should_use_marian_only(english, stt_confidence)
                 ):
-                    spanish_a, lat_a = timed_translate(translate_marian, english)
+                    spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
                     tps_a = 0.0
                     qe_a = qe_score(english, spanish_a)
                     print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
@@ -2594,7 +2666,7 @@ async def _pipeline_translate_and_finalize(
                         and should_use_marian_only(english, stt_confidence)
                     ):
                         # Adaptive routing: simple utterance, skip Gemma
-                        spanish_a, lat_a = timed_translate(translate_marian, english)
+                        spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
                         tps_a = 0.0
                         qe_a = qe_score(english, spanish_a)
                         print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
@@ -2637,7 +2709,7 @@ async def _pipeline_translate_and_finalize(
                         qe_a = qe_score(english, spanish_a)
                     else:
                         # Low-VRAM: MarianMT only
-                        spanish_a, lat_a = timed_translate(translate_marian, english)
+                        spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
                         tps_a = 0.0
                         qe_a = qe_score(english, spanish_a)
 
@@ -2897,13 +2969,15 @@ async def _pipeline_coordinator():
 
     # Track the currently-running translation task so we can measure overlap
     active_translation_task = None
+    translation_tasks = []
 
     while True:
         item = await _pipeline_chunk_queue.get()
         if item is None:
-            # Poison pill — wait for any in-flight translation to finish
-            if active_translation_task is not None:
-                await active_translation_task
+            # Earlier tasks may still be broadcasting/logging after releasing
+            # the model lock. Completion evidence must include every finalizer.
+            if translation_tasks:
+                await asyncio.gather(*translation_tasks)
             break
 
         audio_data, e2e_start, utterance_start, timing = item
@@ -2943,7 +3017,7 @@ async def _pipeline_coordinator():
             def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing):
                 clock.stt_started = time.perf_counter()
                 try:
-                    return (_run_stt_via_worker if MULTIPROCESS else _run_stt)(audio, prompt)
+                    return _run_tracked_stt("final", _run_stt_via_worker if MULTIPROCESS else _run_stt, audio, prompt)
                 finally:
                     clock.stt_finished = time.perf_counter()
 
@@ -3036,6 +3110,7 @@ async def _pipeline_coordinator():
                     timing=timing,
                 )
             )
+            translation_tasks.append(active_translation_task)
 
         except Exception as e:
             _final_pending.clear()  # [FIX] Don't leave flag stuck on error
@@ -3710,6 +3785,24 @@ def write_csv_row(data, marian_lat=None):
 
 def print_summary():
     """Print summary statistics on exit."""
+    # Also write zero-output runs: suppression counters explain a failed screen.
+    _io_pool.submit(
+        _write_jsonl_record,
+        {
+            "event": "session_summary",
+            "session": SESSION_ID,
+            "timestamp": datetime.now().isoformat(),
+            "chunks_attempted": _chunks_attempted,
+            "chunks_completed": _chunks_completed,
+            "chunks_empty_stt": _chunks_empty_stt,
+            "chunks_hallucination": _chunks_hallucination,
+            "chunks_dedup": _chunks_dedup,
+            "ws_total_connections": _ws_total_connections,
+            "ws_total_disconnections": _ws_total_disconnections,
+            "ws_send_failures": _ws_send_failures,
+            "latency_experiment_counters": _experiment_snapshot(),
+        },
+    )
     if not all_results:
         print("\nNo results to summarize.")
         return
@@ -3759,22 +3852,6 @@ def print_summary():
     print(
         f"  WS stats:    connections={_ws_total_connections} disconnections={_ws_total_disconnections} send_failures={_ws_send_failures}"
     )
-
-    # Write session summary to diagnostics JSONL for KPI report tool
-    summary_record = {
-        "event": "session_summary",
-        "session": SESSION_ID,
-        "timestamp": datetime.now().isoformat(),
-        "chunks_attempted": _chunks_attempted,
-        "chunks_completed": _chunks_completed,
-        "chunks_empty_stt": _chunks_empty_stt,
-        "chunks_hallucination": _chunks_hallucination,
-        "chunks_dedup": _chunks_dedup,
-        "ws_total_connections": _ws_total_connections,
-        "ws_total_disconnections": _ws_total_disconnections,
-        "ws_send_failures": _ws_send_failures,
-    }
-    _io_pool.submit(_write_jsonl_record, summary_record)
 
 
 # ---------------------------------------------------------------------------
