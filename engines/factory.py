@@ -453,7 +453,9 @@ def create_tts_engine(voices: dict[str, str] | None = None) -> TTSEngine:
     if voices is None:
         from settings import settings
 
-        voices = dict(settings.tts.voices)
+        voices = {
+            language: settings.tts.voices[language] for language in ("en", "es") if language in settings.tts.voices
+        }
     return PiperTTSEngine(voices=voices)
 
 

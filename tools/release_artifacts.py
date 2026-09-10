@@ -19,6 +19,8 @@ MAC_ROOTS = (
     "displays",
     "scripts",
     "launchd",
+    "tests",
+    "docs",
     "dry_run_ab.py",
     "workers.py",
     "settings.py",
@@ -30,14 +32,19 @@ MAC_ROOTS = (
     "bootstrap.sh",
     "start_server.sh",
     "requirements-mac.txt",
-    "docs/packaging",
 )
 RUNTIME_REQUIRED = {
     "stark_translate/__init__.py",
     "operator_app/cli.py",
+    "operator_app/review.py",
     "displays/operator/index.html",
+    "displays/operator/review.js",
+    "displays/caption_telemetry.js",
+    "displays/display_connection.js",
     "engines/model_paths.py",
     "tools/audio_bridge_client.py",
+    "tools/review_data.py",
+    "tools/session_lifecycle.py",
     "features/live_diarize.py",
     "displays/audience_display.html",
     "dry_run_ab.py",
@@ -45,6 +52,7 @@ RUNTIME_REQUIRED = {
     "workers.py",
     "models.lock.json",
 }
+SOURCE_REQUIRED = {"pyproject.toml", "README.md", "docs/packaging/macos.md", "tests/test_mac_setup_runtime.py"}
 
 
 def validate_version(root: Path, tag: str | None = None, *, check_ref: bool = False) -> str:
@@ -90,13 +98,13 @@ def verify_artifact(path: Path) -> None:
     if path.name.endswith(".tar.gz"):
         with tarfile.open(path) as archive:
             names = {"/".join(name.split("/")[1:]) for name in archive.getnames()}
-        required = RUNTIME_REQUIRED | {"pyproject.toml", "README.md"}
+        required = RUNTIME_REQUIRED | SOURCE_REQUIRED
     else:
         with zipfile.ZipFile(path) as archive:
             names = set(archive.namelist())
         required = RUNTIME_REQUIRED
         if path.suffix == ".zip":
-            required |= {"run_operator.sh", "bootstrap.sh", "scripts/runtime_env.sh", "pyproject.toml", "README.md"}
+            required |= SOURCE_REQUIRED | {"run_operator.sh", "bootstrap.sh", "scripts/runtime_env.sh"}
     missing = required - names
     if missing:
         raise ValueError(f"{path.name} missing runtime files: {', '.join(sorted(missing))}")

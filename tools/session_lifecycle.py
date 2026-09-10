@@ -138,12 +138,37 @@ def completion_metadata(model_ids: dict[str, str | None], root: Path) -> dict:
                 marker = path / ".installed"
                 if marker.is_file():
                     installed = json.loads(marker.read_text())
-                    if installed.get("repo_id") == entry.get("repo_id") and installed.get("revision"):
+                    if (
+                        isinstance(installed, dict)
+                        and installed.get("repo_id") == entry.get("repo_id")
+                        and installed.get("revision")
+                    ):
                         item["resolved_revision"] = installed["revision"]
                         item["revision_source"] = "setup_install_marker"
                 config = path / "config.json"
                 if config.is_file():
                     item["config_sha256"] = _digest(config)["sha256"]
+                # CT2 exports do not necessarily retain their HF source revision.
+                # Hash the loaded local weights after inference instead of treating
+                # the manifest's declared hash as proof of the file contents.
+                model_bin = path / "model.bin"
+                if model_bin.is_file():
+                    weights = _digest(model_bin)
+                    item["model_bin_sha256"] = weights["sha256"]
+                    item["model_bin_size_bytes"] = weights["size_bytes"]
+                    export_manifest = path / "export_manifest.json"
+                    if export_manifest.is_file():
+                        exported = json.loads(export_manifest.read_text())
+                        if not isinstance(exported, dict):
+                            raise ValueError("Model export manifest must be an object")
+                        item["export_manifest"] = {
+                            "sha256": _digest(export_manifest)["sha256"],
+                            "source_model_id": exported.get("model_id"),
+                            "ct2_quantization": exported.get("ct2_quantization"),
+                            "direction": exported.get("direction"),
+                            "declared_model_bin_sha256": exported.get("model_bin_sha256"),
+                            "model_bin_hash_matches": exported.get("model_bin_sha256") == weights["sha256"],
+                        }
         except (OSError, ValueError, TypeError) as exc:
             item["resolution_error"] = type(exc).__name__
         models[role] = item

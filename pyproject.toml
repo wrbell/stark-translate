@@ -139,7 +139,7 @@ packages = ["stark_translate", "operator_app", "engines", "tools", "features"]
 include = [
     "stark_translate",
     "launchd",
-    "docs/packaging",
+    "docs",
     "LICENSE",
     "workers.py",
     "operator_app",

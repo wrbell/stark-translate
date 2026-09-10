@@ -57,6 +57,52 @@ def test_incomplete_snapshot_fails_offline_lookup(tmp_path, monkeypatch):
     assert resolve_model_path("test/model", models_dir=cache, project_root=tmp_path) == "test/model"
 
 
+@pytest.mark.parametrize(
+    "marker", [{"repo_id": "wrong", "revision": "a" * 40}, {"repo_id": "test/model", "revision": "old"}, []]
+)
+def test_managed_snapshot_mismatch_falls_back_to_pinned_cache(tmp_path, monkeypatch, marker):
+    entry = _manifest(tmp_path)
+    cache = tmp_path / "custom"
+    _weights(cache / "selected")
+    (cache / "selected" / ".installed").write_text(json.dumps(marker))
+    hub = tmp_path / "hf"
+    snapshot = hub / "models--test--model" / "snapshots" / entry["revision"]
+    _weights(snapshot)
+    monkeypatch.setenv("HF_HUB_CACHE", str(hub))
+    assert resolve_model_path("test/model", models_dir=cache, project_root=tmp_path, local_only=True) == str(snapshot)
+    # An explicit user path remains a deliberate override even with an old marker.
+    assert resolve_model_path(str(cache / "selected"), project_root=tmp_path, local_only=True) == str(
+        cache / "selected"
+    )
+
+
+def test_matching_managed_snapshot_remains_first_choice(tmp_path, monkeypatch):
+    entry = _manifest(tmp_path)
+    cache = tmp_path / "custom"
+    _weights(cache / "selected")
+    (cache / "selected" / ".installed").write_text(
+        json.dumps({"repo_id": entry["repo_id"], "revision": entry["revision"]})
+    )
+    monkeypatch.setenv("HF_HUB_CACHE", str(tmp_path / "empty-hf"))
+    assert resolve_model_path("test/model", models_dir=cache, project_root=tmp_path, local_only=True) == str(
+        cache / "selected"
+    )
+
+
+def test_default_tts_factory_only_uses_setup_languages(monkeypatch):
+    from types import SimpleNamespace
+
+    from engines.factory import create_tts_engine
+    from settings import settings
+
+    monkeypatch.setitem(sys.modules, "engines.mlx_engine", SimpleNamespace(PiperTTSEngine=lambda **kwargs: kwargs))
+    monkeypatch.setattr(
+        settings.tts, "voices", {"en": "english", "es": "spanish", "hi": "future-hindi", "zh": "future-chinese"}
+    )
+    assert create_tts_engine() == {"voices": {"en": "english", "es": "spanish"}}
+    assert create_tts_engine({"hi": "custom-hindi"}) == {"voices": {"hi": "custom-hindi"}}
+
+
 def test_setup_only_downloads_selected_backend(tmp_path):
     _manifest(tmp_path)
     manifest = json.loads((tmp_path / "models.lock.json").read_text())

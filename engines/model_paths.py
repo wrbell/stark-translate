@@ -44,6 +44,17 @@ def resolve_backend(backend: str = "auto") -> str:
 
 def _snapshot_complete(path: Path, entry: dict[str, Any]) -> bool:
     """Reject empty directories and partial snapshots without loading weights."""
+    marker = path / ".installed"
+    if entry.get("type") == "hf-snapshot" and marker.is_file():
+        try:
+            installed = json.loads(marker.read_text())
+            if not isinstance(installed, dict) or (
+                installed.get("repo_id") != entry.get("repo_id")
+                or installed.get("revision") != entry.get("revision", "main")
+            ):
+                return False
+        except (OSError, ValueError):
+            return False
     required = entry.get("required_files", ["config.json"])
     if not all((path / name).is_file() for name in required):
         return False

@@ -53,27 +53,34 @@ Runs on Apple Silicon (MLX) or NVIDIA GPUs (CUDA) via `--backend auto|mlx|cuda`.
 
 ## Quick Start
 
+Run these commands from a checkout or extracted Mac source ZIP. Package publication
+is pending; a locally built wheel or source install provides the current code.
+See [Mac installation and readiness](docs/packaging/macos.md) for full setup and
+optional evaluation/diarization dependencies.
+
 ```bash
 # Mac (Apple Silicon)
 brew install ffmpeg portaudio
-uv tool install 'stark-translate[mlx]'        # or: pip install '.[mlx]'
-huggingface-cli login                          # Required for TranslateGemma
-stark-translate setup                          # Download all models
-stark-translate operator                       # Open the operator UI
+python3.11 -m venv venv
+venv/bin/python -m pip install '.[mlx]'
+venv/bin/stark-translate setup --backend mlx    # Mac defaults, both languages
+venv/bin/stark-translate doctor --backend mlx --lang en
+VENV="$PWD/venv" ./run_operator.sh              # Open /operator/ on port 9000
 
 # NVIDIA (Linux)
-uv tool install 'stark-translate[cuda]'        # or: pip install '.[cuda]'
-stark-translate setup
-stark-translate operator
+python3.11 -m venv venv
+venv/bin/python -m pip install '.[cuda]'
+venv/bin/stark-translate setup --backend cuda
+venv/bin/stark-translate operator
 
-# v2026.8 — one-time MarianMT CT2 conversion (CUDA only; ~30 s per direction).
+# Optional MarianMT CT2 conversion on Mac.
 # Skips automatically if adapters/marian_ct2/<dir>/active/model.bin already exists.
-python scripts/convert_marian_ct2.py \
+venv/bin/python scripts/convert_marian_ct2.py \
     --model-id Helsinki-NLP/opus-mt-en-es \
-    --output adapters/marian_ct2/en-es/active
-python scripts/convert_marian_ct2.py \
+    --output adapters/marian_ct2/en-es/active --quantization int8
+venv/bin/python scripts/convert_marian_ct2.py \
     --model-id Helsinki-NLP/opus-mt-es-en \
-    --output adapters/marian_ct2/es-en/active
+    --output adapters/marian_ct2/es-en/active --quantization int8
 ```
 
 The legacy `requirements-mac.txt` / `requirements-nvidia.txt` install path is
@@ -203,7 +210,7 @@ features/                      Post-processing (not yet integrated with live pip
 
 **Done:** Bidirectional EN/ES inference (MLX + CUDA), two-pass pipeline with overlap, 5 audience display modes, Piper TTS, TranslateGemma S1-S9 ablation (S6 winner), Whisper W12 data scaling (198K chunks), W15 hard mining pipeline, W16 corrective run (7.25% WER), Deepgram oracle (35 sermons), data integrity pipeline. **v2026.5:** llama.cpp engine (5–9× faster CUDA, 4× less VRAM), Gemma 4 E4B Q4_K_M as production default, Phase 1D wired into `dry_run_ab.py`. **v2026.6:** Operator control plane at `http://host:9000/operator/` — FastAPI + vanilla JS, pre-flight gating, mid-session controls, live observability sparklines, audio device hotplug, verse highlights, summary trigger, systemd/launchd/bootstrap.sh. **1,366 tests, 7 CI workflows.**
 
-**v2026.13 (2026-09-09) — Mac latency program shipped:** three production bugs fixed (Gemma 4 stop tokens #172, first-forward thread-local stream #181, `qe_b` #184/#187), real-audio replay benchmark (#182), Parakeet TDT v3 STT on MLX as the English default (#186), Marian CTranslate2 on Mac, CUDA latency proposal + scripts for the A2000 box (#185), TTS routing (#188), live diarization behind `--diarize` (#189). Speech-end → final p50 on real sermon audio: 3.7–4.8 s → ~1.0–1.6 s; partials ~1.0 s → ~0.2 s. **Next:** run `scripts/cuda/*.sh` on the WSL box (Gemma 4 MTP, `-fa` retest), chase MTP acceptance on Metal (#177), WER on human-verified church audio for Parakeet (#178), then WSL Phase 4 → E4B SFT → W17 (`docs/wsl_pipeline_refresh.md`) and the Sunday dry-run (#134).
+**v2026.13 (2026-09-09) — Mac latency program shipped:** three production bugs fixed (Gemma 4 stop tokens #172, first-forward thread-local stream #181, `qe_b` #184/#187), real-audio replay benchmark (#182), Parakeet TDT v3 STT on MLX as the English default (#186), Marian CTranslate2 on Mac, CUDA latency proposal + scripts for the A2000 box (#185), TTS routing (#188), live diarization behind `--diarize` (#189). Historical processing p50 on real sermon audio (submission → completion, before display delivery): 3.7–4.8 s → ~1.0–1.6 s; partials ~1.0 s → ~0.2 s. These legacy values are not speech-end → display measurements; see the [measurement correction](docs/archive/v2026.13/MAC_LATENCY.md) and [current Mac status](docs/mac_implementation_status.md). **Next:** run `scripts/cuda/*.sh` on the WSL box (Gemma 4 MTP, `-fa` retest), chase MTP acceptance on Metal (#177), WER on human-verified church audio for Parakeet (#178), then WSL Phase 4 → E4B SFT → W17 (`docs/wsl_pipeline_refresh.md`) and the Sunday dry-run (#134).
 
 ## License
 

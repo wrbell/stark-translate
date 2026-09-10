@@ -11,7 +11,7 @@ Use Python 3.11 or newer and install ffmpeg/PortAudio with your system package m
 Create an isolated environment; existing `stt_env` installations can continue unchanged.
 
 ```bash
-python3.12 -m venv venv
+python3.11 -m venv venv
 venv/bin/python -m pip install '.[mlx]'
 venv/bin/python -m operator_app.cli setup --backend mlx
 venv/bin/python -m operator_app.cli doctor --backend mlx --lang en
@@ -80,6 +80,7 @@ Build wheel and sdist with `python -m build`; verify both with
 Build a complete source ZIP with `python tools/release_artifacts.py mac`.
 Release workflows reject tag/project/Briefcase version mismatches and include
 CLI, operator UI, tools, workers, displays, model manifest and launch scripts.
+Source distributions and Mac ZIPs also include the current documentation and tests.
 
 For a Mac installation check, use a separate virtual environment and install the
 built wheel with `[mlx,eval,diarization]` extras, then run `python -m pip check`.

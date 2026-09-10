@@ -228,6 +228,35 @@ def test_model_metadata_distinguishes_resolved_and_manifest_revisions(tmp_path, 
     assert len(result["config_sha256"]) == 64
 
 
+@pytest.mark.parametrize("declared_hash_matches", [False, True])
+def test_ct2_metadata_hashes_actual_weights_without_inventing_source_revision(tmp_path, declared_hash_matches):
+    import hashlib
+
+    model_dir = tmp_path / "adapters" / "marian_ct2" / "en-es" / "active"
+    model_dir.mkdir(parents=True)
+    weights = b"tiny mocked CT2 weights"
+    actual_hash = hashlib.sha256(weights).hexdigest()
+    (model_dir / "model.bin").write_bytes(weights)
+    (model_dir / "export_manifest.json").write_text(
+        json.dumps(
+            {
+                "model_id": "Helsinki-NLP/opus-mt-en-es",
+                "ct2_quantization": "int8",
+                "direction": "en-es",
+                "model_bin_sha256": actual_hash if declared_hash_matches else "0" * 64,
+            }
+        )
+    )
+    result = completion_metadata({"translation_b": str(model_dir)}, tmp_path)["models"]["translation_b"]
+    assert result["model_bin_sha256"] == actual_hash
+    assert result["model_bin_size_bytes"] == len(weights)
+    assert result["resolved_revision"] is None
+    assert result["revision_source"] == "unknown"
+    assert result["export_manifest"]["source_model_id"] == "Helsinki-NLP/opus-mt-en-es"
+    assert result["export_manifest"]["ct2_quantization"] == "int8"
+    assert result["export_manifest"]["model_bin_hash_matches"] is declared_hash_matches
+
+
 @pytest.mark.parametrize("forced_stop", [False, True])
 @pytest.mark.parametrize("stop_signal", [2, 15])
 def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
