@@ -8,7 +8,7 @@
 
 - **Main release:** `v2026.13` — main last recorded at 09e4679, with v2026.13 PRs #180–191 merged. PR #192 is still open; the authorized main merge has not occurred. v2026.13 remains the last published release even after a source-only merge until a separate release is published.
 - **Local candidate:** `2026.14.0.0` on `codex/mac-reliability-roadmap` (base `Integrated runtime frozen at 752ab9a351815feee4b8cd155f732c588cb30a6c. Later evidence, documentation and workflow edits retain their separate source identity.`)
-- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft against main; checks green at 752ab9a. Final evidence/issue mapping and future-head checks precede the authorized source merge.
+- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft against main, not merged; checks green at 752ab9a. Final evidence/issue mapping and future-head checks precede the authorized source merge.
 - **Publication:** Source and issue publishing and the final merge to main are authorized by the user. Local package artifacts are built and mechanically validated; PyPI/GHCR/release uploads and release tags remain pending by user choice.
 
 Items marked implemented or validated exist on the integrated reliability branch unless noted as main-only. Source integration, local artifact validation, public distribution and service certification are separate. PR #192 remains open; do not infer a main merge or release from local checks. Certification records whether the item’s own acceptance was met; implementation alone does not close an issue.
