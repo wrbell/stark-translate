@@ -12,118 +12,78 @@ def test_confirmed_language_controls_preflight_and_next_start():
     if node is None:
         pytest.skip("Node is needed to execute the operator UI")
     script = r"""
-const fs = require('fs'), vm = require('vm'), assert = require('assert');
-const source = fs.readFileSync('displays/operator/app.js', 'utf8');
-function makeContext(storage = new Map()) {
-  const control = (name, choices, initial = '', type = 'select-one') => ({
-    name, type, tagName: choices ? 'SELECT' : 'INPUT', _value: initial, checked: false,
-    options: (choices || []).map(value => ({value})), dataset: {}, handlers: {},
-    get value() {return this._value;},
-    set value(value) {this._value = this.tagName !== 'SELECT' || this.options.some(o => o.value === String(value)) ? String(value) : '';},
-    set innerHTML(value) {this.options = []; this._value = '';},
-    add(option) {this.options.push(option);},
-    addEventListener(name, fn) {
-      const before = this.handlers[name];
-      this.handlers[name] = before ? event => {before(event); fn(event);} : fn;
-    },
-  });
-  const controls = {
-    lang: control('lang', ['en', 'es'], 'en'), backend: control('backend', ['auto', 'mlx', 'cuda'], 'auto'),
-    engine: control('engine', ['auto', 'hf', 'llamacpp'], 'auto'),
-    mic_device: control('mic_device', ['']), output_device: control('output_device', ['']),
-    tts_device_en: control('tts_device_en', ['']), tts_device_es: control('tts_device_es', ['']),
-    tts_output_mode: control('tts_output_mode', ['ws', 'wav', 'both', 'local'], 'ws'),
-    vad_threshold: control('vad_threshold', null, '0.3', 'number'),
-    tts: control('tts', null, 'on', 'checkbox'), run_ab: control('run_ab', null, 'on', 'checkbox'),
-    diarize: control('diarize', null, 'on', 'checkbox'),
-  };
-  const elements = Object.values(controls);
-  elements.namedItem = name => controls[name];
-  const select = controls.lang;
-  const button = () => ({handlers: {}, addEventListener(name, fn) {this.handlers[name] = fn;}});
-  const context = {
-    currentState: 'idle', select, controls, storage, form: {elements}, idleEditedFields: new Set(),
-    statusDetailEl: {}, setStatePill() {}, updateButtonsForState() {},
-    document: {getElementById: id => ({'output-device': controls.output_device,
-      'output-device-en': controls.tts_device_en, 'output-device-es': controls.tts_device_es})[id] || null},
-    window: {dispatchEvent() {}}, CustomEvent: class {},
-    Option: class {constructor(text, value) {this.text = text; this.value = String(value);}},
-    localStorage: {getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value)},
-    startBtn: button(), stopBtn: button(), pauseBtn: button(), resumeBtn: button(), flipBtn: button(),
-    fallbackBtn: button(), preflights: [], posts: [],
-  };
-  context.refreshPreflight = () => {context.preflights.push(context.select.value);};
-  context.postJson = async (url, body) => {context.posts.push({url, body}); return context.nextPost;};
-  vm.createContext(context);
-  const devices = source.indexOf('  // ---- mic + output devices ----');
-  const begin = source.indexOf('  // ---- session status ----');
-  const end = source.indexOf('  // ---- live metrics over', begin);
-  vm.runInContext(source.slice(devices, begin), context);
-  vm.runInContext(source.slice(begin, end), context);
-  return context;
-}
+const {createHarness, deferred, response, preflightPayload} = require(process.cwd() + '/tests/frontend/operator_harness.js');
+const assert = require('assert');
 const status = (state, lang) => ({state, config: {lang}});
+const preflights = h => h.fetchLog.filter(f => f.url.startsWith('/api/preflight'));
+const lastPreflightLang = h => new URLSearchParams(preflights(h).at(-1).url.split('?')[1]).get('lang');
+const startBody = h => JSON.parse(h.lastFetch('/api/session/start').init.body);
 (async () => {
-  const c = makeContext();
-  c.renderStatus(status('running', 'es')); // Reload into an active ES session.
-  assert.strictEqual(c.select.value, 'es');
-  assert.strictEqual(c.select.disabled, true);
-  assert.strictEqual(c.preflights.at(-1), 'es');
-  assert.strictEqual(c.readForm().lang, 'es'); // Disabled controls are absent from FormData.
-  c.nextPost = status('idle', 'es');
-  await c.stopBtn.handlers.click();
-  assert.strictEqual(c.select.disabled, false);
-  c.nextPost = status('starting', 'es');
-  await c.startBtn.handlers.click();
-  assert.strictEqual(c.posts.at(-1).body.lang, 'es');
+  const h = createHarness();
+  h.app.renderChecks(preflightPayload());
+  let nextPost = status('idle', 'es');
+  for (const path of ['/api/session/start', '/api/session/stop', '/api/control/lang_flip']) h.route('POST', path, () => response(nextPost));
+  const select = h.el('lang-select');
+  h.app.renderStatus(status('running', 'es')); // Reload into an active ES session.
+  assert.strictEqual(select.value, 'es');
+  assert.strictEqual(select.disabled, true);
+  assert.strictEqual(lastPreflightLang(h), 'es');
+  assert.strictEqual(h.app.readForm().lang, 'es'); // Disabled controls are absent from FormData.
+  nextPost = status('idle', 'es');
+  await h.el('stop-btn').click();
+  assert.strictEqual(select.disabled, false);
+  nextPost = status('starting', 'es');
+  await h.el('start-btn').click();
+  assert.strictEqual(startBody(h).lang, 'es');
 
-  let resolveOldStatus;
-  c.getJson = () => new Promise(resolve => {resolveOldStatus = resolve;});
-  const oldPoll = c.refreshStatus();
-  c.nextPost = status('starting', 'en');
-  await c.flipBtn.handlers.click();
-  assert.strictEqual(c.select.value, 'en');
-  assert.strictEqual(c.preflights.at(-1), 'en');
-  resolveOldStatus(status('running', 'es'));
+  const slow = deferred();
+  h.route('GET', '/api/session/status', () => slow.promise);
+  const oldPoll = h.app.refreshStatus();
+  nextPost = status('starting', 'en');
+  await h.el('flip-btn').click();
+  assert.strictEqual(select.value, 'en');
+  assert.strictEqual(lastPreflightLang(h), 'en');
+  slow.resolve(response(status('running', 'es')));
   await oldPoll;
-  assert.strictEqual(c.select.value, 'en'); // A stale poll cannot undo the flip.
-  const before = c.preflights.length;
-  await c.flipBtn.handlers.click();
-  assert.strictEqual(c.preflights.length, before + 1); // Recheck even if a poll already synced it.
+  assert.strictEqual(select.value, 'en'); // A stale poll cannot undo the flip.
+  const before = preflights(h).length;
+  await h.el('flip-btn').click();
+  assert.strictEqual(preflights(h).length, before + 1); // Recheck even if a poll already synced it.
 
-  c.renderStatus(status('paused', 'en'));
-  assert.strictEqual(c.select.disabled, true);
-  c.renderStatus(status('error', 'en'));
-  c.select.value = 'es';
-  c.select.handlers.change();
-  c.renderStatus(status('idle', 'en'));
-  assert.strictEqual(c.select.value, 'es'); // Preserve a deliberate next-session choice.
-  c.nextPost = status('starting', 'es');
-  await c.startBtn.handlers.click();
-  assert.strictEqual(c.posts.at(-1).body.lang, 'es');
+  h.app.renderStatus(status('paused', 'en'));
+  assert.strictEqual(select.disabled, true);
+  h.app.renderStatus(status('error', 'en'));
+  select.value = 'es';
+  await select.fire('change');
+  h.app.renderStatus(status('idle', 'en'));
+  assert.strictEqual(select.value, 'es'); // Preserve a deliberate next-session choice.
+  nextPost = status('starting', 'es');
+  await h.el('start-btn').click();
+  assert.strictEqual(startBody(h).lang, 'es');
 
-  const idleReload = makeContext();
-  idleReload.renderStatus(status('idle', 'es'));
-  assert.strictEqual(idleReload.select.value, 'es');
-  const earlyChoice = makeContext();
-  earlyChoice.select.value = 'es';
-  earlyChoice.select.handlers.change();
-  earlyChoice.renderStatus(status('idle', 'en'));
-  assert.strictEqual(earlyChoice.select.value, 'es');
+  const idleReload = createHarness();
+  idleReload.app.renderStatus(status('idle', 'es'));
+  assert.strictEqual(idleReload.el('lang-select').value, 'es');
+  const earlyChoice = createHarness();
+  earlyChoice.el('lang-select').value = 'es';
+  await earlyChoice.el('lang-select').fire('change');
+  earlyChoice.app.renderStatus(status('idle', 'en'));
+  assert.strictEqual(earlyChoice.el('lang-select').value, 'es');
 
-  const t = makeContext();
+  const t = createHarness();
+  const c = name => t.el('config-form').elements.namedItem(name);
   const activeConfig = {lang: 'es', backend: 'mlx', engine: 'auto', tts: true, run_ab: false,
     diarize: true, vad_threshold: 0.4, mic_device: 0, tts_output_mode: 'local', tts_device: 0,
     tts_device_en: 17, tts_device_es: 'Church Spanish Speakers'};
   const active = {state: 'running', config: activeConfig};
-  t.renderStatus(active);
-  assert.strictEqual(t.controls.tts.checked, true);
-  assert.strictEqual(t.controls.tts_output_mode.value, 'local');
-  assert.strictEqual(t.controls.output_device.value, '0');
-  assert.strictEqual(t.controls.tts_device_en.value, '17');
-  assert.strictEqual(t.controls.tts_device_es.value, 'Church Spanish Speakers');
-  assert(Object.values(t.controls).every(control => control.disabled));
-  const payload = t.readForm();
+  t.app.renderStatus(active);
+  assert.strictEqual(c('tts').checked, true);
+  assert.strictEqual(c('tts_output_mode').value, 'local');
+  assert.strictEqual(c('output_device').value, '0');
+  assert.strictEqual(c('tts_device_en').value, '17');
+  assert.strictEqual(c('tts_device_es').value, 'Church Spanish Speakers');
+  assert(Array.from(t.el('config-form').elements).every(control => control.disabled));
+  const payload = t.app.readForm();
   assert.strictEqual(payload.tts, true);
   assert.strictEqual(payload.backend, 'mlx');
   assert.strictEqual(payload.diarize, true);
@@ -132,65 +92,60 @@ const status = (state, lang) => ({state, config: {lang}});
   assert.strictEqual(payload.tts_device_en, 17); // Keep numeric IDs distinct from names.
   assert.strictEqual(payload.tts_device_es, 'Church Spanish Speakers');
   // Device enumeration arrives after status, with those outputs disconnected.
-  t.populateOutput(t.controls.tts_device_es, [], true);
-  t.populateOutput(t.controls.output_device, [], false);
-  assert.strictEqual(t.controls.tts_device_es.value, 'Church Spanish Speakers');
-  assert.strictEqual(t.controls.output_device.value, '0');
-  t.renderStatus({...active, state: 'idle'});
-  assert(Object.values(t.controls).every(control => !control.disabled));
-  t.nextPost = {...active, state: 'starting'};
-  await t.startBtn.handlers.click();
-  assert.strictEqual(t.posts.at(-1).body.tts, true);
-  assert.strictEqual(t.posts.at(-1).body.tts_device_en, 17);
-  t.renderStatus({...active, state: 'idle'});
-  t.controls.tts.checked = false;
-  t.controls.tts.handlers.change();
-  t.controls.tts_output_mode.value = 'ws';
-  t.controls.tts_output_mode.handlers.change();
-  t.controls.tts_device_es.value = '';
-  t.controls.tts_device_es.handlers.change();
-  t.renderStatus({...active, state: 'idle'});
-  assert.strictEqual(t.controls.tts.checked, false);
-  assert.strictEqual(t.controls.tts_output_mode.value, 'ws');
-  assert.strictEqual(t.controls.tts_device_es.value, '');
-  const restored = makeContext(t.storage);
-  restored.renderStatus({...active, state: 'idle'});
-  assert.strictEqual(restored.readForm().tts, false);
-  assert.strictEqual(restored.readForm().tts_output_mode, 'ws');
-  assert.strictEqual(restored.readForm().tts_device_es, undefined); // Explicitly cleared route survives reload.
-  assert.strictEqual(restored.readForm().tts_device_en, 17);
+  t.app.populateOutput(c('tts_device_es'), [], true);
+  t.app.populateOutput(c('output_device'), [], false);
+  assert.strictEqual(c('tts_device_es').value, 'Church Spanish Speakers');
+  assert.strictEqual(c('output_device').value, '0');
+  t.app.renderStatus({...active, state: 'idle'});
+  assert(Array.from(t.el('config-form').elements).every(control => !control.disabled));
+  t.route('POST', '/api/session/start', () => response({...active, state: 'starting'}));
+  await t.el('start-btn').click();
+  assert.strictEqual(startBody(t).tts, true);
+  assert.strictEqual(startBody(t).tts_device_en, 17);
+  t.app.renderStatus({...active, state: 'idle'});
+  c('tts').checked = false;
+  await c('tts').fire('change');
+  c('tts_output_mode').value = 'ws';
+  await c('tts_output_mode').fire('change');
+  c('tts_device_es').value = '';
+  await c('tts_device_es').fire('change');
+  t.app.renderStatus({...active, state: 'idle'});
+  assert.strictEqual(c('tts').checked, false);
+  assert.strictEqual(c('tts_output_mode').value, 'ws');
+  assert.strictEqual(c('tts_device_es').value, '');
+  const restored = createHarness({storage: [...t.storage]});
+  restored.app.renderStatus({...active, state: 'idle'});
+  assert.strictEqual(restored.app.readForm().tts, false);
+  assert.strictEqual(restored.app.readForm().tts_output_mode, 'ws');
+  assert.strictEqual(restored.app.readForm().tts_device_es, undefined); // Explicitly cleared route survives reload.
+  assert.strictEqual(restored.app.readForm().tts_device_en, 17);
   // A confirmed active configuration supersedes those saved next-start choices.
-  restored.renderStatus(active);
-  assert.strictEqual(restored.readForm().tts, true);
-  assert.strictEqual(restored.readForm().tts_output_mode, 'local');
-  const reloadedActive = makeContext(restored.storage);
-  assert.strictEqual(reloadedActive.controls.tts.checked, true);
+  restored.app.renderStatus(active);
+  assert.strictEqual(restored.app.readForm().tts, true);
+  assert.strictEqual(restored.app.readForm().tts_output_mode, 'local');
+  const reloadedActive = createHarness({storage: [...restored.storage]});
+  assert.strictEqual(reloadedActive.el('config-form').elements.namedItem('tts').checked, true);
 
   // A numeric-looking route selected by the user is a device name, not an ID.
-  restored.renderStatus({...active, state: 'idle'});
-  restored.controls.tts_device_en.handlers.change();
-  assert.strictEqual(restored.readForm().tts_device_en, '17');
+  restored.app.renderStatus({...active, state: 'idle'});
+  await restored.el('config-form').elements.namedItem('tts_device_en').fire('change');
+  assert.strictEqual(restored.app.readForm().tts_device_en, '17');
 
   // A slower EN preflight must not overwrite the completed ES preflight.
-  const requests = [], rendered = [];
-  const p = {preflightRequest: 0, URLSearchParams, selected: 'en', preflightMetaEl: {},
-    readForm() {return {backend: 'mlx', lang: p.selected, tts: false, diarize: false};},
-    getJson(url) {return new Promise(resolve => requests.push({url, resolve}));},
-    renderChecks(data) {rendered.push(data);},
-  };
-  vm.createContext(p);
-  const first = source.indexOf('  async function refreshPreflight()');
-  const last = source.indexOf('  // ---- mic + output devices ----', first);
-  vm.runInContext(source.slice(first, last), p);
-  const en = p.refreshPreflight();
-  p.selected = 'es';
-  const es = p.refreshPreflight();
+  const p = createHarness();
+  const requests = [];
+  p.route('GET', '/api/preflight', url => new Promise(resolve => requests.push({url, resolve})));
+  p.el('lang-select').value = 'en';
+  const en = p.app.refreshPreflight();
+  p.el('lang-select').value = 'es';
+  const es = p.app.refreshPreflight();
   assert(requests[1].url.includes('lang=es'));
-  requests[1].resolve('Whisper ES');
+  requests[1].resolve(response(preflightPayload({checks: [{name: 'Models', status: 'pass', detail: 'Whisper ES'}]})));
   await es;
-  requests[0].resolve('Parakeet EN');
+  requests[0].resolve(response(preflightPayload({checks: [{name: 'Models', status: 'pass', detail: 'Parakeet EN'}]})));
   await en;
-  assert.deepStrictEqual(rendered, ['Whisper ES']);
+  assert(p.text('checks').includes('Whisper ES'));
+  assert(!p.text('checks').includes('Parakeet EN'));
 })().catch(error => {console.error(error); process.exit(1);});
 """
-    subprocess.run([node, "-e", script], cwd=Path(__file__).resolve().parents[1], check=True, timeout=10)
+    subprocess.run([node, "-e", script], cwd=Path(__file__).resolve().parents[1], check=True, timeout=30)

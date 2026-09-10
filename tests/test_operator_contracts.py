@@ -88,21 +88,21 @@ def test_startup_buttons_allow_stop_but_not_pause():
     if node is None:
         pytest.skip("Node is needed to execute the operator UI")
     script = r"""
-const fs = require('fs'), vm = require('vm'), assert = require('assert');
-const source = fs.readFileSync('displays/operator/app.js', 'utf8');
-const begin = source.indexOf('  function updateButtonsForState(');
-const end = source.indexOf('  // ---- preflight ----', begin);
-const context = {preflightOk: true, startBtn: {}, stopBtn: {}, pauseBtn: {}, resumeBtn: {}, flipBtn: {}, fallbackBtn: {}};
-vm.createContext(context);
-vm.runInContext(source.slice(begin, end), context);
-context.updateButtonsForState('starting');
-assert.strictEqual(context.startBtn.disabled, true);
-assert.strictEqual(context.stopBtn.disabled, false);
-assert.strictEqual(context.pauseBtn.disabled, true);
-assert.strictEqual(context.flipBtn.disabled, true);
-context.updateButtonsForState('running');
-assert.strictEqual(context.pauseBtn.disabled, false);
-context.updateButtonsForState('stopping');
-assert.strictEqual(context.stopBtn.disabled, true);
+const {createHarness, preflightPayload} = require(process.cwd() + '/tests/frontend/operator_harness.js');
+const assert = require('assert');
+const h = createHarness();
+h.app.renderChecks(preflightPayload());
+h.app.renderStatus({state: 'starting'});
+assert.strictEqual(h.el('start-btn').disabled, true);
+assert.strictEqual(h.el('stop-btn').disabled, false);
+assert.strictEqual(h.el('pause-btn').disabled, true);
+assert.strictEqual(h.el('flip-btn').disabled, true);
+h.app.renderStatus({state: 'running'});
+assert.strictEqual(h.el('pause-btn').disabled, false);
+h.app.renderStatus({state: 'stopping'});
+assert.strictEqual(h.el('stop-btn').disabled, true);
+h.app.renderStatus({state: 'error', error: 'pipeline did not stop within 10s'});
+assert.strictEqual(h.el('stop-btn').disabled, false); // recovery from an error keeps Stop available
+assert.strictEqual(h.el('pause-btn').disabled, true);
 """
     subprocess.run([node, "-e", script], cwd=Path(__file__).resolve().parents[1], check=True, timeout=10)
