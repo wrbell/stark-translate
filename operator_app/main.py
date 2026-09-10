@@ -23,17 +23,18 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from engines.audio_devices import list_output_devices
-from operator_app.audio import get_watcher
+from operator_app.audio import get_watcher, shutdown_watcher
 from operator_app.audio_ingest import get_bus as get_audio_bus
 from operator_app.audio_ingest import handle_audio_ingest, handle_audio_subscribe
-from operator_app.features import get_summary_runner, get_verse_watcher
-from operator_app.metrics import get_collector, healthz_snapshot
+from operator_app.features import get_summary_runner, get_verse_watcher, shutdown_features
+from operator_app.metrics import get_collector, healthz_snapshot, shutdown_collector
 from operator_app.pipeline_manager import (
     InvalidStateError,
     PipelineRunner,
     SessionAlreadyRunningError,
     SessionConfig,
     get_runner,
+    shutdown_runner,
 )
 from operator_app.preflight import run_all_checks
 from operator_app.review import router as review_router
@@ -65,15 +66,23 @@ async def _lifespan(app: FastAPI):
     or partially-flushed CSVs.
     """
     logger.info("operator app starting up")
-    yield
-    logger.info("operator app shutting down — stopping pipeline if running")
     try:
-        runner = get_runner()
-        if runner.status().state != "idle":
-            runner.stop(timeout_s=10.0)
-    except Exception as exc:
-        logger.warning("graceful pipeline stop failed: %s", exc)
-    get_summary_runner(project_root=get_runner()._project_root).close()
+        yield
+    finally:
+        logger.info("operator app shutting down — stopping existing workers")
+        # Stop the pipeline first so its final health/features cannot restart a poller
+        # after cleanup. Helpers detach only existing singletons, then join outside
+        # registry locks; a later lifespan can create fresh workers normally.
+        for name, shutdown in (
+            ("pipeline", shutdown_runner),
+            ("features", shutdown_features),
+            ("metrics", shutdown_collector),
+            ("audio devices", shutdown_watcher),
+        ):
+            try:
+                shutdown()
+            except Exception:
+                logger.exception("operator %s shutdown failed", name)
 
 
 app = FastAPI(

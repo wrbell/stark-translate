@@ -85,6 +85,8 @@ class MetricsCollector:
         self._stop_event.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
+            if self._thread.is_alive():
+                raise RuntimeError("metrics sampler did not stop within 2 seconds")
 
     # -- ingest hooks (called by pipeline) ------------------------------------
 
@@ -300,6 +302,15 @@ def get_collector() -> MetricsCollector:
             _collector = MetricsCollector()
             _collector.start()
         return _collector
+
+
+def shutdown_collector() -> None:
+    """Stop the existing sampler and permit a later app lifespan to recreate it."""
+    global _collector
+    with _collector_lock:
+        collector, _collector = _collector, None
+    if collector is not None:
+        collector.stop()
 
 
 def reset_collector_for_tests() -> None:

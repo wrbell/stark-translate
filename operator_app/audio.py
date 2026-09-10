@@ -108,6 +108,8 @@ class DeviceWatcher:
         self._stop_event.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
+            if self._thread.is_alive():
+                raise RuntimeError("audio device watcher did not stop within 2 seconds")
 
     def snapshot(self) -> dict:
         with self._lock:
@@ -160,6 +162,15 @@ def get_watcher() -> DeviceWatcher:
             _watcher = DeviceWatcher()
             _watcher.start()
         return _watcher
+
+
+def shutdown_watcher() -> None:
+    """Stop the existing device poller without starting one during shutdown."""
+    global _watcher
+    with _watcher_lock:
+        watcher, _watcher = _watcher, None
+    if watcher is not None:
+        watcher.stop()
 
 
 def reset_watcher_for_tests() -> None:

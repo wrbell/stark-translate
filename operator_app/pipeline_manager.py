@@ -598,6 +598,15 @@ def get_runner() -> PipelineRunner:
         return _runner
 
 
+def shutdown_runner(timeout_s: float = 10.0) -> None:
+    """Drain the existing pipeline on app exit without creating a new runner."""
+    global _runner
+    with _runner_lock:
+        runner, _runner = _runner, None
+    if runner is not None:
+        runner.stop(timeout_s=timeout_s)
+
+
 def reset_runner_for_tests() -> None:
     """Test helper — never call from production code."""
     global _runner

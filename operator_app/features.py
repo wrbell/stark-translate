@@ -101,6 +101,8 @@ class VerseHighlightWatcher:
         self._stop_event.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
+            if self._thread.is_alive():
+                raise RuntimeError("verse watcher did not stop within 2 seconds")
 
     def snapshot(self, since_chunk: int | None = None) -> list[dict]:
         with self._lock:
@@ -403,6 +405,8 @@ class LiveDiarizationWatcher:
         self._stop_event.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
+            if self._thread.is_alive():
+                raise RuntimeError("diarization watcher did not stop within 2 seconds")
 
     def force_scan(self) -> dict:
         self._scan_once()
@@ -559,6 +563,20 @@ def get_diarize_watcher(
         _diarize_watcher = LiveDiarizationWatcher(jsonl_path=jsonl_path, csv_path=csv_path)
         _diarize_watcher.start()
         return _diarize_watcher
+
+
+def shutdown_features() -> None:
+    """Close only existing feature workers; never join while holding their registry lock."""
+    global _verse_watcher, _summary_runner, _diarize_watcher
+    with _lock:
+        verse, summary, diarize = _verse_watcher, _summary_runner, _diarize_watcher
+        _verse_watcher = _summary_runner = _diarize_watcher = None
+    for name, worker in (("verse", verse), ("diarize", diarize), ("summary", summary)):
+        if worker is not None:
+            try:
+                worker.close() if name == "summary" else worker.stop()
+            except Exception:
+                logger.exception("operator %s worker shutdown failed", name)
 
 
 def reset_features_for_tests() -> None:
