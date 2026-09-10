@@ -1,5 +1,11 @@
 # CLAUDE.md — Live Bilingual Speech-to-Text
 
+> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
+> installed dependency candidate and operator/device findings. Final experiments,
+> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+
+
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
 > (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
 > The last published release recorded here is **v2026.13**. Source integration,

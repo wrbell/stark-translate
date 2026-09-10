@@ -1,6 +1,7 @@
 # Mac EN↔ES follow-up implementation and experiments
 
-Work is in progress on `codex/mac-en-es-closeout`. Defaults remain unchanged;
+Work is in progress on `codex/mac-en-es-closeout`, tracked by
+[draft PR #196](https://github.com/wrbell/stark-translate/pull/196). Defaults remain unchanged;
 no release or package publication is authorized for this follow-up. The
 [43-item audit](backlog-audit.md) preserves each original acceptance condition.
 
@@ -50,6 +51,12 @@ no release or package publication is authorized for this follow-up. The
   new DoRA magnitudes, and materialize W17's JSON selection into an audio dataset.
   [Sixty original candidate triples](../../../training/candidates/README.md)
   remain unapproved. Missing WSL artifacts/holdouts are not treated as passing.
+
+The [normalized integrity pilot](normalized-integrity-pilot/README.md) passed both
+actual production runs on `a8511ee`. The independent 96-run Standard EN/ES
+screen is now executing on that frozen runtime. The [device follow-up](../tts_routing_20260910/README.md)
+retains successful native TTS routing and a retest with zero parent-handoff drops
+but remaining upstream microphone loss; its mixed-input evidence contains no incidental text.
 
 ## Development STT result
 

@@ -1,5 +1,11 @@
 # Roadmap — Stark Road Bilingual Speech-to-Text
 
+> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
+> installed dependency candidate and operator/device findings. Final experiments,
+> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+
+
 > Living document tracking the project from Mac prototype through Windows training to
 > production deployment.
 >

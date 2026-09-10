@@ -1,5 +1,11 @@
 # stark-translate
 
+> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
+> installed dependency candidate and operator/device findings. Final experiments,
+> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+
+
 [![Lint](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml)
 [![Test](https://github.com/wrbell/stark-translate/actions/workflows/test.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/test.yml)
 [![Security](https://github.com/wrbell/stark-translate/actions/workflows/security.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/security.yml)

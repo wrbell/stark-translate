@@ -1,5 +1,11 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
+> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
+> installed dependency candidate and operator/device findings. Final experiments,
+> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+
+
 > **Machine:** MacBook Pro M3 Pro (Mac15,6), 18 GB unified memory, 12-core CPU, 18-core GPU,
 > macOS 26 (`platform` recorded per session in `metrics/hardware_<session>.json`).
 > **Role:** inference, operator UI, browser displays, Mac evaluation. Training happens on

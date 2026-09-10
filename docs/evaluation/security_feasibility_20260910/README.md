@@ -3,7 +3,10 @@
 This is a separate follow-up to the [installed dependency assessment](../overnight_security/README.md)
 and [B615 scope review](../mac_v2026_14_security.md). Earlier audits remain unchanged.
 No working `stt_env` packages, model revisions, release artifacts or publication
-settings were changed by this work.
+settings were changed by this work. The later
+[full-application candidate](../mac_followup_20260910/torch-full-application-candidate.md)
+completed its installed audit and actual EN/ES replay checks; this page retains
+the earlier minimal-environment scope and its original receipts.
 
 ## Live fallback model sources
 
