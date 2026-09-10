@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from operator_app.pipeline_manager import PipelineRunner, get_runner
 from tools.review_data import ReviewConflict, ReviewStore, session_key
+from tools.session_lifecycle import SessionNotComplete
 
 router = APIRouter(prefix="/api/review", tags=["review"])
 _ACTIVE = {"starting", "running", "paused", "stopping"}
@@ -35,7 +36,13 @@ def _store(runner: PipelineRunner) -> ReviewStore:
 
 
 def _error(exc: Exception) -> HTTPException:
-    code = 409 if isinstance(exc, ReviewConflict) else 404 if isinstance(exc, FileNotFoundError) else 400
+    code = (
+        409
+        if isinstance(exc, (ReviewConflict, SessionNotComplete))
+        else 404
+        if isinstance(exc, FileNotFoundError)
+        else 400
+    )
     return HTTPException(status_code=code, detail=str(exc))
 
 

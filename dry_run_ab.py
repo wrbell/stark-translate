@@ -105,6 +105,8 @@ CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
+_session_stop_requested = False
+_clean_session_shutdown = False
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
@@ -4097,9 +4099,10 @@ async def main_async(args):
     global _marian_engine
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
-    global _RUN_AB
+    global _RUN_AB, _clean_session_shutdown
 
     _RUN_AB = args.run_ab
+    _clean_session_shutdown = False
 
     spec_info = ""
     if args.run_ab and BACKEND == "mlx":
@@ -4326,6 +4329,7 @@ async def main_async(args):
     except KeyboardInterrupt:
         pass
     finally:
+        shutdown_exception = sys.exc_info()[1]
         rolling_task.cancel()
         if speaker_task is not None:
             speaker_task.cancel()
@@ -4357,6 +4361,10 @@ async def main_async(args):
         if tts_ws_server is not None:
             tts_ws_server.close()
             await tts_ws_server.wait_closed()
+        _clean_session_shutdown = shutdown_exception is None or (
+            _session_stop_requested
+            and isinstance(shutdown_exception, (asyncio.CancelledError, KeyboardInterrupt, SystemExit))
+        )
 
 
 def main():
@@ -4708,6 +4716,22 @@ def main():
 
     # Re-derive session paths with language tag so EN/ES data stays separate
     SESSION_ID = args.session_id or f"{datetime.now():%Y%m%d_%H%M%S}_{SOURCE_LANG}"
+    import hashlib
+    from pathlib import Path
+
+    from tools.session_lifecycle import finish_session, start_session
+
+    try:
+        git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=Path(__file__).parent, text=True).strip()
+    except (OSError, subprocess.CalledProcessError):
+        git_sha = None
+    lifecycle_root = Path.cwd()
+    lifecycle = start_session(
+        lifecycle_root,
+        SESSION_ID,
+        git_sha=git_sha,
+        pipeline_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    )
     CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
     AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"
     DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"
@@ -4825,16 +4849,34 @@ def main():
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):
+        global _session_stop_requested
+        _session_stop_requested = True
         print("\n\nStopping...")
         print_summary()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
 
+    completed = False
     try:
         asyncio.run(main_async(args))
+        completed = True
     except KeyboardInterrupt:
         print_summary()
+    finally:
+        # A completed marker is export evidence: all queued diagnostics must be
+        # on disk, and the pipeline must have drained without an abnormal exit.
+        failure = sys.exc_info()[1]
+        _io_pool.shutdown(wait=True)
+        completed = completed or _clean_session_shutdown
+        exit_code = getattr(failure, "code", 1) if failure is not None else 1
+        finish_session(
+            lifecycle_root,
+            SESSION_ID,
+            run_id=lifecycle["run_id"],
+            status="completed" if completed else "failed",
+            exit_code=0 if completed else exit_code if isinstance(exit_code, int) and exit_code else 1,
+        )
 
 
 if __name__ == "__main__":
