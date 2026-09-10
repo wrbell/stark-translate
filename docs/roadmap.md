@@ -73,8 +73,8 @@ Status, priority, dependencies and acceptance for every item below are in
 2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): the stall fix is implemented — `tools/isolated_audio.py` / `capture_worker.py` (disposable PortAudio child, 5 s no-input and 3 s idle timeouts), `tools/pipeline_health.py` readiness consumed by the operator. What remains is the **real built-in-mic retest** with live EN and ES utterances and the audience display connected (deferred to tomorrow). #131 closes only on that evidence.
 3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): active engineering on the frozen 45-second English screen — opt-in latency experiments (`tools/latency_experiments.py`: provisional previews, exact fixed-prefix cache, bounded allocator, pause speculation), bounded scheduling and caption-delivery instrumentation are integrated; `tools/overnight_bench.py` pairs runs with a visible audience browser. Measurement needs a visible browser (`visible-browser-timing-run`); natural-speech quality certification is a separate gate and does not block the engineering experiments.
 4. **Human and device gates:** natural Spanish references, blinded bilingual review, natural two-speaker audio (#133 gate), second physical output (#132 acceptance), dry run with a laptop stand-in permitted (#134: full hymn + spoken segment + setup-to-first-caption timing + written note — no new live-mic or human-walkthrough requirement beyond the issue text).
-5. **Active learning evidence (#137):** Review/export is implemented and fixture-tested; one real operator correction from a recorded session, exported and merged (dry run acceptable), is still required.
-6. **Hindi baseline (#138):** `tools/offline_hindi.py` (church audio → Parakeet EN → Gemma Hindi, evaluation only) exists and is executed sequentially by the parent; no live integration; the language decision remains the user's.
+5. **Active learning evidence (#137):** Review/export is implemented and fixture-tested. A real human correction from a recorded Sunday must reach a dated corpus and be merged; the documented first retrain may be a dry run. Draft notes and generated text are not approved pairs.
+6. **Separate R&D (#138):** the [offline Hindi church-audio baseline](./evaluation/overnight_hindi/README.md) is complete and archived. Human Hindi review, live integration and the QLoRA decision remain pending; no further Hindi work is scheduled in this EN↔ES latency program.
 
 ### Equal-priority deployment targets
 
@@ -183,12 +183,12 @@ Deferred: macOS Shortcuts voice triggers.
 
 ### Phase 8: Multilingual Expansion (Hindi & Chinese) — pending user decision
 
-Gemma 4 and TranslateGemma support Hindi and Chinese; fine-tuning is domain adaptation
-only. The earlier offline Hindi text probe
-([`evaluation/mac_v2026_14_hindi/README.md`](./evaluation/mac_v2026_14_hindi/README.md))
-was not the church-audio baseline #138 asks for; `tools/offline_hindi.py` now produces that
-offline audio baseline (Parakeet English → Gemma Hindi, evaluation-only, run sequentially by
-the parent). There is still **no live Hindi path**, and the language decision remains open.
+The separate [offline Hindi church-audio baseline](./evaluation/overnight_hindi/README.md)
+is complete: Parakeet English transcripts and E4B/E2B Hindi predictions are archived.
+It establishes offline availability, without Hindi reference scores, human approval,
+a QLoRA decision or a live target. The earlier [text probe](./evaluation/mac_v2026_14_hindi/README.md)
+remains separate evidence. Future steps below require a later language decision;
+no Hindi/Chinese work is scheduled in the current EN↔ES latency program.
 
 | Step | What |
 |------|------|
@@ -197,7 +197,7 @@ the parent). There is still **no live Hindi path**, and the language decision re
 | Hindi / Chinese QLoRA | separate adapters, r=32; 768 / 512 max sequence |
 | Evaluation + integration | chrF++/COMET, adapter switching, display labels |
 
-Key decisions on record: Hindi → English partial + Hindi final; Chinese → 神 (Shen) for God.
+Historical design proposals: English partial + Hindi final; Chinese → 神 (Shen) for God. These do not authorize the pending language expansion.
 
 ### Phase 9: Piper TTS Multi-Language (deferred)
 
@@ -210,7 +210,7 @@ Scripts ready: `prepare_piper_dataset.py`, `train_piper.py`, `export_piper_onnx.
 - Done — post-sermon summary trigger and live verse highlights in the operator UI (workflow evidence in the rehearsal; bilingual accuracy review pending)
 - **Implemented, acceptance pending** — 9.4.1 multi-channel TTS routing (#132): per-language device map, `--tts-device-en/es`, hotplug retry, persisted operator selectors, hardware-independent tests. Physical two-output verification is the open half.
 - **Implemented, gate not run** — 9.6.1 live diarization (#133): `--diarize`, rolling buffer, separate daemon, `speaker` on finals. Needs a two-speaker clip and the +50 ms p95 check ([`live_diarization.md`](./live_diarization.md)).
-- **Pending** — Sunday dry run (#134) on a laptop stand-in with live microphone; continuous improvement loop after Phases 6/8.
+- **Pending** — Sunday dry run (#134): a laptop stand-in is allowed; retain a full hymn, spoken segment, setup-to-first-caption timing and a written UX note. Live microphone certification belongs to #131. Continuous improvement follows Phases 6/8.
 
 ---
 
@@ -273,7 +273,7 @@ and [`evaluation/README.md`](./evaluation/README.md).
 
 | Decision | When | Options / owner |
 |----------|------|-----------------|
-| Hindi/Chinese timing | User decision | Hindi first (higher demand); offline church-audio baseline tool exists (#138), live path not started |
+| Hindi/Chinese timing | Later user decision | Separate R&D; offline Hindi church-audio baseline archived (#138), live path not started; no overnight action |
 | Natural Spanish recording source | User decision | Needed before any Spanish WER/quality claim |
 | E2B as default | After blinded bilingual review | Speed vs meaning/terminology tradeoff |
 | Production hardware | Before the Sunday dry run | Dedicated church PC vs portable Mac; laptop stand-in acceptable for #134 |
