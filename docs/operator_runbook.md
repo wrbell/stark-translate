@@ -123,7 +123,9 @@ duplicates. Keep Spanish STT material separate from an English-only trainer.
 With captions stopped, choose **Create summary**. Read the English and Spanish text
 before sharing it. Summaries are model output, not human approval. Very short
 sessions show the actual recorded text as a labeled excerpt rather than inventing
-a longer sermon. Failed generation remains visible and can be retried or canceled.
+a longer sermon. Long transcripts use their beginning and end; the result explicitly
+states when the middle was omitted. Failed generation remains visible and can be
+retried or canceled.
 
 ## When something goes wrong
 

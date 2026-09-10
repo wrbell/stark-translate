@@ -233,7 +233,7 @@
     const shareable = !isLocalHost(shareHost);
     const note = shareable
       ? "Phones on the same Wi-Fi can open this link while captions are running."
-      : "This link only works on this computer. To get a link phones can use, open the operator page with the computer's network address, or click the audience display's header for its own QR code.";
+      : "This link only works on this computer. Open the network audience-display bookmark prepared by the setup owner, then click its header for the phone QR code.";
     return {audience, mobile, church: urls.church || null, obs: urls.obs || null, shareable, note, host: shareHost, httpPort, wsPort};
   }
 
@@ -1691,7 +1691,11 @@
       const excerpt = metadata.content_mode === "excerpt" || data.format === "short-session excerpt";
       setText(el.summaryEnglish, data.english || "(no English text)");
       setText(el.summarySpanish, data.spanish || "(no Spanish text)");
-      const notice = data.notice || "";
+      const notices = data.notice ? [data.notice] : [];
+      if (metadata.transcript_truncated === true) {
+        notices.push("This summary uses the beginning and end of the transcript; the middle was omitted.");
+      }
+      const notice = notices.join(" ");
       setText(el.summaryNotice, notice);
       el.summaryNotice.hidden = !notice;
       const parts = [];

@@ -705,13 +705,14 @@ assert.strictEqual(h.el('summary-btn').disabled, false);
 // A model summary shows its format; a failure stays visible and retryable.
 task = {...task, task_id: 't2', state: 'done', result: {english: 'Summary EN', spanish: 'Resumen ES',
   format: 'up to 3 sentences (undiarized)', translation_method: 'gemma (direct)',
-  metadata: {content_mode: 'model_summary', human_reviewed: false, total_words: 900}}};
+  metadata: {content_mode: 'model_summary', human_reviewed: false, total_words: 9000, transcript_truncated: true}}};
 h.route('POST', '/api/features/summary', () => response(task));
 h.route('GET', '/api/features/summary/t2', () => response(task));
 await h.el('summary-btn').click(); await settle();
 await h.intervals.at(-1).fn(); await settle();
 assert(h.text('summary-meta').includes('Model summary (up to 3 sentences (undiarized))'), h.text('summary-meta'));
-assert.strictEqual(h.el('summary-notice').hidden, true);
+assert.strictEqual(h.el('summary-notice').hidden, false);
+assert(h.text('summary-notice').includes('the middle was omitted'));
 task = {...task, task_id: 't3', state: 'error', return_code: 1, error: 'No transcript content found', result: null};
 h.route('POST', '/api/features/summary', () => response(task));
 h.route('GET', '/api/features/summary/t3', () => response(task));
