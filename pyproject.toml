@@ -167,7 +167,8 @@ include = [
     "models.lock.json",
     "pyproject.toml",
     "README.md",
-    "CLAUDE.md",
+    "AGENTS.md",
+    "CLAUDE*.md",
     "*.sh",
 ]
 exclude = [
