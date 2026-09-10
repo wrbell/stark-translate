@@ -7,10 +7,10 @@
     "local_branch": "codex/mac-en-es-closeout",
     "local_base": "958bb5c9425473256038bae04ce95ee1c32c7ae8",
     "local_version": "2026.14.0.0",
-    "draft_pr": "[PR #196](https://github.com/wrbell/stark-translate/pull/196) — draft Mac EN↔ES follow-up on codex/mac-en-es-closeout. Experiments, final artifact checks and review remain in progress; no merge claimed.",
+    "draft_pr": "[PR #196](https://github.com/wrbell/stark-translate/pull/196) — open draft Mac EN↔ES follow-up on codex/mac-en-es-closeout; not merged. Experiments, final artifact checks and review remain in progress.",
     "publication": "User authorized source merge after validation. PyPI, GHCR, release uploads and new tags remain pending by user choice.",
     "distinction": "PR #192 integration and its immutable test/artifact/service evidence remain complete. PR #196 is a separate active follow-up with its own source identities. Final-source validation and merge are pending; neither source integration nor file replay certifies human or physical-device gates.",
-    "pr_state": "draft",
+    "pr_state": "open",
     "previous_integration": {
       "main_release_tag": "v2026.13",
       "main_head_note": "PR #192 merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z, from reviewed source ab66ad2929e61171e4ab9c7c77685ba1ac988577. v2026.13 remains the last published release; no release/tag upload followed this source merge.",
@@ -24,7 +24,8 @@
       "merge_commit": "3e935fe39b96e7b0aa62a74711307f2b3e31a18c",
       "merged_at": "2026-09-10T11:57:22Z",
       "merged_head": "ab66ad2929e61171e4ab9c7c77685ba1ac988577"
-    }
+    },
+    "is_draft": true
   },
   "status_definitions": {
     "in_progress": "Active engineering right now; code may still be changing on the branch and its acceptance is not yet met.",

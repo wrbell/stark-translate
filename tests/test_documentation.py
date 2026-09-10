@@ -118,16 +118,22 @@ class TestBacklogJson:
 
     def test_pr_status_has_consistent_merge_evidence(self):
         integration = _load_backlog()["integration"]
-        assert "pull/192" in integration["draft_pr"]
-        state = integration["pr_state"]
-        assert state in {"open", "merged", "closed"}
-        if state == "merged":
-            assert re.fullmatch(r"[0-9a-f]{40}", integration["merge_commit"])
-            assert "not merged" not in integration["draft_pr"].lower()
-            assert "merged" in integration["draft_pr"].lower()
-        else:
-            assert "not merged" in integration["draft_pr"].lower()
-            assert not integration.get("merge_commit")
+        records = [integration]
+        if "previous_integration" in integration:
+            records.append(integration["previous_integration"])
+        for record in records:
+            assert re.search(r"https://github\.com/wrbell/stark-translate/pull/[1-9]\d*", record["draft_pr"])
+            state = record["pr_state"]
+            assert state in {"open", "merged", "closed"}
+            if record.get("is_draft"):
+                assert state == "open"
+            if state == "merged":
+                assert re.fullmatch(r"[0-9a-f]{40}", record["merge_commit"])
+                assert "not merged" not in record["draft_pr"].lower()
+                assert "merged" in record["draft_pr"].lower()
+            else:
+                assert "not merged" in record["draft_pr"].lower()
+                assert not record.get("merge_commit")
 
     def test_known_issue_items_carry_issue_acceptance(self):
         items = {item["id"]: item for item in _load_backlog()["items"]}

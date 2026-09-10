@@ -8,7 +8,7 @@
 
 - **Main release:** `v2026.13` — Verified main is 958bb5c9425473256038bae04ce95ee1c32c7ae8. PR #192 remains merged; the new PR #196 follow-up is still a draft. v2026.13 remains the last published release.
 - **Local candidate:** `2026.14.0.0` on `codex/mac-en-es-closeout` (base `958bb5c9425473256038bae04ce95ee1c32c7ae8`)
-- **Draft PR:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) — draft Mac EN↔ES follow-up on codex/mac-en-es-closeout. Experiments, final artifact checks and review remain in progress; no merge claimed.
+- **Draft PR:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) — open draft Mac EN↔ES follow-up on codex/mac-en-es-closeout; not merged. Experiments, final artifact checks and review remain in progress.
 - **Publication:** User authorized source merge after validation. PyPI, GHCR, release uploads and new tags remain pending by user choice.
 
 PR #192 integration and its immutable test/artifact/service evidence remain complete. PR #196 is a separate active follow-up with its own source identities. Final-source validation and merge are pending; neither source integration nor file replay certifies human or physical-device gates.
