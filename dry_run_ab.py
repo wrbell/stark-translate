@@ -2051,6 +2051,7 @@ def _experiment_snapshot():
                 "partial_suppressed_backlog",
                 "partial_suppressed_in_flight",
                 "partial_suppressed_after_stt",
+                "partial_suppressed_empty_translation",
                 "partial_stt_started",
                 "partial_stt_finished",
                 "final_stt_started",
@@ -2891,6 +2892,32 @@ async def process_partial(
             )
         ):
             _latency_event("partial_suppressed_stale_result")
+            return
+        if not spanish.strip():
+            # A blank target is not a translated preview. Keep the last usable
+            # caption while a later partial or final can supply a translation.
+            _latency_event(
+                "partial_suppressed_empty_translation",
+                session_id=request_session,
+                utterance_id=utterance_id,
+                request_sequence=request_sequence,
+                preview_kind=preview_kind,
+                source_lang=SOURCE_LANG,
+                target_lang="es" if SOURCE_LANG == "en" else "en",
+                stt_ms=stt_latency,
+                marian_ms=marian_latency,
+                **sample_bounds,
+            )
+            logger.info(
+                "partial_translation_suppressed session_id=%s utterance_id=%s request_sequence=%s "
+                "reason=empty_translation stt_ms=%.3f marian_ms=%.3f sample_bounds=%s",
+                request_session,
+                utterance_id,
+                request_sequence,
+                stt_latency,
+                marian_latency,
+                sample_bounds,
+            )
             return
         _partial_emitted_sequence[utterance_id] = request_sequence
         previous_source = _partial_source_text.get(utterance_id, "")
