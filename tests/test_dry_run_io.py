@@ -54,7 +54,14 @@ class TestInitCsv:
             reader = csv.reader(f)
             header = next(reader)
         # Preserve the original 26 columns, then MLX generation telemetry, then speaker.
-        assert len(header) == 35 + len(d.TIMING_COLUMNS)
+        legacy_end = 35 + len(d.TIMING_COLUMNS)
+        assert header[legacy_end:] == [
+            "cached_prompt_tokens_a",
+            "prompt_cache_prepare_ms_a",
+            "generation_lock_wait_ms_a",
+            "prompt_cache_hit_a",
+            "caption_delivery_mode",
+        ]
         assert header[34] == "speaker"
         assert header[26:34] == list(d._GEN_STAT_FIELDS)
         assert "marian_backend" in header
