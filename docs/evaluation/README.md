@@ -99,3 +99,8 @@ code and model identities. The [security scope](mac_v2026_14_security.md) record
 what the checks covered and the remaining unpinned model-download findings.
 The [validation record](mac_v2026_14_validation.json) records the final unit,
 type, lint, HTML, security, replay and setup checks with local evidence hashes.
+The [local installation evidence](mac_v2026_14_installation.md) records final
+wheel/sdist/Mac ZIP identities, actual unpacked-ZIP launch/build/install checks,
+and installed EN/ES inference. It distinguishes the GPU-exercised artifact from
+the final shell-adjusted wheel using exact member hashes. These are post-build
+records; publication and the human, device and visible-browser gates remain open.

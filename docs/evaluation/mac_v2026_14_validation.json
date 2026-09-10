@@ -119,7 +119,62 @@
     "report": ".cache/mac-roadmap/ct2-setup-validation/report.json"
   },
   "final_artifacts": {
-    "status": "pending_final_build_and_installed_inference"
+    "status": "validated_local_artifacts",
+    "version": "2026.14.0.0",
+    "built_source_revision": "977583bdb970369b0979412ccb06ef0646c9d85f",
+    "post_build_evidence": true,
+    "report": "docs/evaluation/mac_v2026_14_installation.json",
+    "artifacts": [
+      {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/package-final-v14-r4/stark_translate-2026.14.0.0-py3-none-any.whl",
+        "sha256": "f6c02f64624cd911d79887d6004ceea0499aaffd624ce25f2b0c088a0e851f65",
+        "size_bytes": 521238
+      },
+      {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/package-final-v14-r4/stark_translate-2026.14.0.0.tar.gz",
+        "sha256": "f1589cb9ead18d17ab95f6ae56b64d67c3cc0906cb60c7458de3083170cabc87",
+        "size_bytes": 2399825
+      },
+      {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/package-final-v14-r4/stark-translate-v2026.14.0.0-mac.zip",
+        "sha256": "4e3bd7fed6beb06cc09a404adc9933acb985233b8e890f3f7571b72d32bddaa3",
+        "size_bytes": 3306940
+      }
+    ],
+    "source_zip_build_install": "passed; wheel byte-identical to canonical sdist-built wheel",
+    "direct_extracted_launcher": "passed healthz200; owned server stopped",
+    "installed_http": "passed both ZIP-built and canonical wheels",
+    "pip_check": "passed",
+    "native_imports": 18,
+    "installed_source_hash_matches": 106,
+    "actual_gpu_exercised_wheel_sha256": "1ca39d41c9f147c4daa69f7acd70f0ebffeb44caff0983b812322fd6c6598d58",
+    "functional_sessions": [
+      {
+        "session_id": "20260909_225354_018346_en",
+        "source_lang": "en",
+        "status": "passed",
+        "lifecycle_status": "completed",
+        "exit_code": 0
+      },
+      {
+        "session_id": "20260909_225534_182211_es",
+        "source_lang": "es",
+        "status": "passed",
+        "lifecycle_status": "completed",
+        "exit_code": 0
+      }
+    ],
+    "final_wheel_inference_equivalence": {
+      "identical_members": 113,
+      "changed_members": [
+        "scripts/runtime_env.sh",
+        "stark_translate-2026.14.0.0.dist-info/RECORD"
+      ],
+      "actual_gpu_exercised_artifact": "r3",
+      "final_artifact": "r4",
+      "note": "Actual GPU inference exercised r3. Final r4 differs only in the active-Conda shell resolver and regenerated wheel RECORD. Every Python, UI, model manifest and other non-shell runtime resource is byte-identical. r4 direct launcher/install/import checks were executed separately."
+    },
+    "publishing": "pending_by_user_choice"
   },
   "pending_gates": [
     "50 human-reviewed natural utterances per language",
@@ -195,6 +250,21 @@
       "path": ".cache/mac-roadmap/coverage-delivery.json",
       "size_bytes": 567636,
       "sha256": "8efb86038ec1b2ce4532ef68fbc746245487dd743b9bee087f723a4b721fad20"
+    },
+    {
+      "path": ".cache/package-final-v14-r4/report.json",
+      "size_bytes": 48976,
+      "sha256": "dfa697af7d041918e5da69f6dc8f3a0d7d4870cc484f948d2063843f97e34bcc"
+    },
+    {
+      "path": ".cache/package-final-v14-r4/runtime-equivalence.json",
+      "size_bytes": 27116,
+      "sha256": "9760a7e5d7924c3f50dd38e69a500b218666a45bf71ac9ab394bc15b9b606ad4"
+    },
+    {
+      "path": ".cache/mac-roadmap/installed-runtime-final-verified/report.json",
+      "size_bytes": 35140,
+      "sha256": "9e3f0ef02078d3d76e0a0c88a09de67767f31bc8e60ecc888ca18372457e45f8"
     }
   ],
   "visible_browser_status": {
@@ -211,5 +281,6 @@
     "inference_artifact": "r3",
     "report": ".cache/mac-roadmap/installed-runtime-final-verified/report.json",
     "scope": "Actual installed EN/ES STT, Gemma E4B, managed CT2, packaged VAD, target-language Piper WAV and clean lifecycle. Corrected harness assertions verified preserved production artifacts without repeating successful inference. Final shell-only artifact rebuild will be bound by runtime content hashes."
-  }
+  },
+  "post_build_evidence_recorded_at": "2026-09-10T03:01:40.519883+00:00"
 }

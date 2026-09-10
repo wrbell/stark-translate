@@ -10,7 +10,8 @@
 > and automatic pinned Marian CT2 setup passed focused/real CPU checks. Separate
 > [24-run synthetic routing probes](docs/evaluation/mac_v2026_14_routing/README.md)
 > passed; the final CPU suite is 1,790 passed/4 skipped (59.07% coverage).
-> Final release artifacts remain pending. Archived
+> [Local wheel/sdist/Mac ZIP validation](docs/evaluation/mac_v2026_14_installation.md)
+> and installed EN/ES runtime checks are complete; publication remains pending. Archived
 > `e2e_latency_ms` is processing time, not speech-end-to-display. Human natural
 > Spanish/two-speaker/bilingual review and physical output tests remain gates.
 > PyPI publishing is pending by user choice. Do not restart the older roadmap

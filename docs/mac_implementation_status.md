@@ -3,7 +3,8 @@
 This work follows v2026.13 (`09e4679`, PRs #180–191 already merged). Changes are on
 `codex/mac-reliability-roadmap` in separate commits. E4B remains the default;
 the operator has no new model-selection control. English STT remains Parakeet;
-Spanish STT remains Whisper. MTP remains disabled. Local validation is progressing;
+Spanish STT remains Whisper. MTP remains disabled. Local implementation and
+artifact validation are complete; the external gates below remain open.
 v2026.14 publication is pending by the user's choice.
 
 ## Implemented
@@ -116,13 +117,18 @@ have no reference score. Predictions and measured timings were preserved.
   hashes matched the existing adapters. Existing adapters and `stt_env` were
   unchanged. The setup CLI separately reused all five Mac defaults without
   downloads (0 installed, 5 skipped, 0 failed).
-- A preliminary wheel installed in `.cache/package-smoke` starts outside the
-  checkout and serves `/healthz`, `/operator/` and the review script. The full
+- The final v2026.14 wheel, sdist and Mac ZIP are validated from source `977583b`;
+  [installation evidence](evaluation/mac_v2026_14_installation.md) records hashes
+  and the post-build evidence boundary. The unpacked ZIP launches directly and
+  builds a byte-identical wheel. Both wheels installed outside the checkout and
+  served `/healthz`, `/operator/` and the review script. The full
   `[mlx,eval,diarization]` extras were **installed**, all 18 runtime import checks
-  passed and `pip check` was clean. Existing `stt_env` was unchanged. Mac setup
-  reused five cached default artifacts with no model downloads. The final
-  v2026.14 wheel/sdist/Mac ZIP rebuild and reinstall remain pending; the
-  preliminary artifact is not the final release.
+  passed, 106 installed/source hashes matched, and `pip check` was clean.
+  Existing `stt_env` was unchanged. Real installed EN/ES STT→E4B→target-voice WAV
+  sessions completed with exit zero on the preceding r3 wheel. The final r4 wheel
+  changes only the Conda shell resolver and generated package inventory; all 113
+  other members match the exercised artifact. Its launcher/install checks were
+  executed separately. No natural-quality or physical-playback gate is inferred.
 - Independent STT inference completed on 50 English and 11 Spanish saved clips,
   with no approved human references, so **no WER or natural-audio acceptance claim**
   is made. Offline Hindi generation completed on both models for 43 English
@@ -130,7 +136,8 @@ have no reference score. Predictions and measured timings were preserved.
 
 Local evidence is recorded in `.cache/mac-roadmap/validation.json`,
 `.cache/mac-roadmap/full-tests.log`, `.cache/mac-roadmap/full-tests-final.log`,
-`.cache/mac-roadmap/coverage-final.json`, `.cache/html5-validation/report.json`,
+`.cache/mac-roadmap/full-tests-delivery.log`, `.cache/mac-roadmap/coverage-delivery.json`,
+`.cache/html5-validation/report.json`,
 `.cache/security-audit/`, `.cache/package-artifacts-validation/`,
 `.cache/mac-roadmap/vad-cache-proof.json` and
 `.cache/mac-roadmap/ct2-setup-validation/report.json`. See the
@@ -181,10 +188,9 @@ in `.cache/mac-roadmap/rehearsal_report.json`; the retained summary failure is
 - A service rehearsal with natural bilingual speech, real speaker transitions and
   church audio hardware. The controlled hymn/pause/restart/Review/Stop rehearsal
   above does not close those human and device gates.
-- Final v2026.14 wheel/sdist/Mac ZIP rebuild, build/install from the unpacked
-  source ZIP, and outside-checkout installed runtime checks. Both the 48-run
-  screen and 24-run synthetic routing report are complete, as is the final CPU
-  suite; no combined experiment or default change is justified by those reports.
+- A frozen visible-browser timing run on the unlocked Mac. The screen and routing
+  reports have no visible ACKs; the earlier controlled operator rehearsal remains
+  separate evidence. Local artifact and installed-runtime checks are complete.
 - PyPI trusted publisher account setup: the browser is signed out and the user
   explicitly chose to leave publishing pending. Required mapping is owner
   `wrbell`, repository `stark-translate`, workflow `pypi.yml`, environment `pypi`.
