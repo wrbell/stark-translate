@@ -238,4 +238,4 @@ class TestDryRunLoadMlxGemma:
 
         assert model is mock_model
         assert tok is mock_tokenizer
-        mock_load.assert_called_once_with("mlx-community/test", adapter_path="/lora")
+        mock_load.assert_called_once_with("/installed/mlx-community/test", adapter_path="/lora")
