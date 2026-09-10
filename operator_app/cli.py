@@ -159,6 +159,7 @@ def cmd_launchd(args: argparse.Namespace) -> int:
         project_root=Path(args.project_root),
         python=Path(args.python) if args.python else None,
         output=Path(args.output) if args.output else None,
+        profile=getattr(args, "profile", None),
     )
 
 
@@ -239,7 +240,7 @@ def main(argv: list[str] | None = None) -> int:
 
     from stark_translate.profiles import PROFILE_NAMES
 
-    for command in (p_op, p_setup, p_doctor):
+    for command in (p_op, p_setup, p_doctor, p_service):
         command.add_argument("--profile", choices=PROFILE_NAMES, default=os.environ.get("STARK_PROFILE", "standard"))
     p_setup.add_argument("--offline", action="store_true", help="Use only verified prepared cache; never download")
     p_setup.add_argument("--build-native", action="store_true", help="Build pinned llama.cpp sm_75 on Linux CUDA")

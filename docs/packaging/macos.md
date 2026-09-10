@@ -74,7 +74,8 @@ and `--output` flags. Setup never runs it against your working adapter directory
 then activated `VIRTUAL_ENV` or `CONDA_PREFIX`, then repo `stt_env`, then repo
 `venv`. A nested virtualenv takes precedence over its parent Conda environment.
 An invalid selected interpreter fails instead of silently using another environment.
-The launcher runs `python -m uvicorn` so the pipeline child uses the same environment.
+The launcher delegates to the installed operator CLI, which starts uvicorn; the
+pipeline child uses that same selected environment.
 
 Generate and inspect the actual login-agent configuration first:
 
@@ -85,7 +86,10 @@ venv/bin/python -m operator_app.cli launchd uninstall
 ```
 
 The plist records the current venv interpreter, working directory, model cache
-override, and log paths. It binds localhost by default. These commands explicitly
+override, log paths, and the resolved profile. Pass `--profile lite-cpu` when
+rendering/installing a Lite service (the `stark-translate-lite` alias retains its
+Lite default). The generated command preserves that choice at the next login.
+It binds localhost by default. These commands explicitly
 install/remove a user login service; a plain setup or operator launch never does so.
 The checked-in plist is a reference, not an installable hard-coded user configuration.
 
@@ -101,7 +105,8 @@ Generated roundtrip audio/text directories are excluded explicitly, including
 when a wheel is built from an unpacked source ZIP without Git ignore metadata.
 
 For a Mac installation check, use a separate virtual environment and install the
-built wheel with `[mlx,eval,diarization]` extras, then run `python -m pip check`.
+built wheel with `[mlx,eval,diarization]` extras. Install `httpx>=0.28` in this
+smoke environment for the ASGI test client, then run `python -m pip check`.
 From a directory outside the checkout, run `python -m tools.installed_smoke` using
 that environment's interpreter. The smoke checks installed package provenance,
 the health and operator routes, the review JavaScript, and required runtime files.

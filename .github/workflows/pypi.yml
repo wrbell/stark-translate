@@ -56,7 +56,8 @@ jobs:
       - name: Smoke installed wheel outside checkout
         run: |
           python -m venv .package-smoke
-          .package-smoke/bin/python -m pip install dist/*.whl
+          # HTTPX is needed only by the standalone ASGI smoke, not the live runtime.
+          .package-smoke/bin/python -m pip install dist/*.whl 'httpx>=0.28'
           cd "$(mktemp -d)"
           "$GITHUB_WORKSPACE/.package-smoke/bin/python" "$GITHUB_WORKSPACE/tools/installed_smoke.py"
 

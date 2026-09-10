@@ -12,7 +12,12 @@ from pathlib import Path
 LABEL = "com.starkroad.translate"
 
 
-def launchd_plist(project_root: Path, python: Path, *, host: str = "127.0.0.1", port: int = 9000) -> dict:
+def launchd_plist(
+    project_root: Path, python: Path, *, host: str = "127.0.0.1", port: int = 9000, profile: str | None = None
+) -> dict:
+    from stark_translate.profiles import resolve_profile
+
+    selected_profile = resolve_profile(profile).name
     root = project_root.resolve()
     # Do not resolve Python symlinks: a venv's interpreter path selects that venv.
     interpreter = python.expanduser().absolute()
@@ -28,6 +33,8 @@ def launchd_plist(project_root: Path, python: Path, *, host: str = "127.0.0.1", 
             "operator_app.cli",
             "operator",
             "--no-browser",
+            "--profile",
+            selected_profile,
             "--host",
             host,
             "--port",
@@ -43,7 +50,14 @@ def launchd_plist(project_root: Path, python: Path, *, host: str = "127.0.0.1", 
     }
 
 
-def manage_launchd(action: str, *, project_root: Path, python: Path | None = None, output: Path | None = None) -> int:
+def manage_launchd(
+    action: str,
+    *,
+    project_root: Path,
+    python: Path | None = None,
+    output: Path | None = None,
+    profile: str | None = None,
+) -> int:
     """Render is portable; install/uninstall explicitly call launchctl on macOS."""
     path = output or Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
     if action != "render" and platform.system() != "Darwin":
@@ -53,7 +67,7 @@ def manage_launchd(action: str, *, project_root: Path, python: Path | None = Non
             subprocess.run(["launchctl", "bootout", f"gui/{os.getuid()}", str(path)], check=False)
             path.unlink()
         return 0
-    config = launchd_plist(project_root, python or Path(sys.executable))
+    config = launchd_plist(project_root, python or Path(sys.executable), profile=profile)
     if action == "render" and output is None:
         print(plistlib.dumps(config).decode())
         return 0
