@@ -230,8 +230,13 @@ def test_release_rejects_version_mismatch():
 
 
 def test_mac_bundle_contains_installable_runtime(tmp_path):
+    import zipfile
+
     bundle = build_mac_bundle(ROOT, tmp_path, f"v{validate_version(ROOT)}")
     verify_artifact(bundle)
+    with zipfile.ZipFile(bundle) as archive:
+        for name in ("run_operator.sh", "bootstrap.sh"):
+            assert archive.getinfo(name).external_attr >> 16 & 0o111, f"{name} must support documented direct launch"
 
 
 def test_mac_bundle_from_unpacked_source_excludes_generated_roundtrip_data(tmp_path):
