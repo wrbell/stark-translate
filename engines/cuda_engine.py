@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import os
 import time
 from collections.abc import Callable
 from threading import Thread
@@ -44,6 +45,8 @@ except ImportError:
     FASTER_WHISPER_AVAILABLE = False
 
 try:
+    if os.environ.get("STARK_PROFILE", "standard").startswith("lite-"):
+        raise ImportError("Lite does not load PyTorch")
     import torch
 
     TORCH_AVAILABLE = True
@@ -52,6 +55,8 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 try:
+    if os.environ.get("STARK_PROFILE", "standard").startswith("lite-"):
+        raise ImportError("Lite uses llama.cpp")
     import bitsandbytes  # noqa: F401 -- presence check only
 
     BITSANDBYTES_AVAILABLE = True
@@ -91,9 +96,15 @@ class FasterWhisperEngine(STTEngine):
         fallback_threshold: float = -1.2,
         hallucination_threshold: float = 2.4,
         fallback_on_low_conf: bool = True,
+        cpu_threads: int = 4,
+        num_workers: int = 1,
+        local_files_only: bool = False,
     ):
         if not FASTER_WHISPER_AVAILABLE:
             raise RuntimeError("faster-whisper is not installed. Install with: pip install faster-whisper")
+        self._cpu_threads = cpu_threads
+        self._num_workers = num_workers
+        self._local_files_only = local_files_only
         self._model_id_str = model_id
         self._compute_type = compute_type
         self._device = device
@@ -121,6 +132,9 @@ class FasterWhisperEngine(STTEngine):
             self._model_id_str,
             device=self._device,
             compute_type=self._compute_type,
+            cpu_threads=self._cpu_threads,
+            num_workers=self._num_workers,
+            local_files_only=self._local_files_only,
         )
 
         # Warm up -- consume the generator to trigger actual inference
@@ -1054,7 +1068,7 @@ class MarianCT2Engine(TranslationEngine):
         self._translator = ctranslate2.Translator(self._model_dir, **translator_kwargs)
         # Tokenizer files were copied next to model.bin by the converter, so
         # the tokenizer loads from the same directory as the CT2 weights.
-        self._tokenizer = MarianTokenizer.from_pretrained(self._model_dir)
+        self._tokenizer = MarianTokenizer.from_pretrained(self._model_dir, local_files_only=True)
 
         # Warmup. "Lord, have mercy on us." exercises the theological-term
         # SentencePiece subword path (tier1) — a reliably non-trivial codepath

@@ -35,6 +35,7 @@ dependencies = [
 
 [project.scripts]
 stark-translate = "operator_app.cli:main"
+stark-translate-lite = "operator_app.cli:lite_main"
 
 [project.urls]
 Homepage = "https://github.com/wrbell/stark-translate"
@@ -42,6 +43,12 @@ Documentation = "https://github.com/wrbell/stark-translate/blob/main/docs/operat
 Issues = "https://github.com/wrbell/stark-translate/issues"
 
 [project.optional-dependencies]
+# Runtime is torch-free. Model conversion is a separate setup interpreter.
+lite-cpu = ["ctranslate2>=4.7.1,<5", "faster-whisper>=1.2.1,<2", "onnxruntime>=1.20,<2", "transformers>=5.5,<6", "sentencepiece>=0.2,<0.3", "sacremoses>=0.1", "scipy>=1.13,<2"]
+lite-cuda = ["stark-translate[lite-cpu]"]
+lite-build = ["torch>=2.6,<3", "transformers>=5.5,<6", "ctranslate2>=4.7.1,<5", "sentencepiece>=0.2,<0.3", "sacremoses>=0.1"]
+tts = ["piper-tts>=1.4.1,<2"]
+
 # --------------------------------------------------------------------------
 # Hardware-backend extras — pick exactly one for your platform.
 # --------------------------------------------------------------------------

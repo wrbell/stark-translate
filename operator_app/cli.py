@@ -109,6 +109,10 @@ def cmd_setup(args: argparse.Namespace) -> int:
         backend=args.backend,
         include=args.include,
         allow_patterns=args.allow if args.allow else None,
+        profile=getattr(args, "profile", None),
+        offline=getattr(args, "offline", False),
+        build_native=getattr(args, "build_native", False),
+        converter_python=getattr(args, "converter_python", None),
     )
 
 
@@ -121,6 +125,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     payload = run_all_checks(
         project_root=project_root,
         backend=args.backend,
+        profile=getattr(args, "profile", None),
         lang=args.lang,
         tts=args.tts,
         diarize=args.diarize,
@@ -224,11 +229,29 @@ def main(argv: list[str] | None = None) -> int:
     p_ver = sub.add_parser("version", help="Print installed version")
     p_ver.set_defaults(func=cmd_version)
 
+    from stark_translate.profiles import PROFILE_NAMES
+
+    for command in (p_op, p_setup, p_doctor):
+        command.add_argument("--profile", choices=PROFILE_NAMES, default=os.environ.get("STARK_PROFILE", "standard"))
+    p_setup.add_argument("--offline", action="store_true", help="Use only verified prepared cache; never download")
+    p_setup.add_argument("--build-native", action="store_true", help="Build pinned llama.cpp sm_75 on Linux CUDA")
+    p_setup.add_argument("--converter-python", help="Separate interpreter with lite-build extra for Marian CT2 setup")
     args = parser.parse_args(argv)
+    if hasattr(args, "profile"):
+        os.environ["STARK_PROFILE"] = args.profile
+    if getattr(args, "offline", False):
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
     if args.func is None:
         parser.print_help(sys.stderr)
         return 2
     return args.func(args)
+
+
+def lite_main(argv: list[str] | None = None) -> int:
+    """Same application, explicit CPU product default (including on a Mac)."""
+    os.environ.setdefault("STARK_PROFILE", "lite-cpu")
+    return main(argv)
 
 
 if __name__ == "__main__":

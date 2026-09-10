@@ -317,6 +317,7 @@ def create_translation_engine(
         backend = _detect_backend()
 
     if engine_type == "marian":
+        backend = kwargs.pop("device", None) or backend
         # Marian-specific kwargs. Pop them off kwargs so the residual dict is
         # safe to forward to either engine (HF and CT2 share most names).
         marian_backend = kwargs.pop("marian_backend", "auto")
@@ -440,7 +441,7 @@ def create_tts_engine(voices: dict[str, str] | None = None) -> TTSEngine:
     Returns:
         An *unloaded* ``TTSEngine`` instance.  Call ``.load()`` to initialise.
     """
-    from engines.mlx_engine import PiperTTSEngine
+    from engines.tts_engine import PiperTTSEngine
 
     if voices is None:
         from settings import settings

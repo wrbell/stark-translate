@@ -67,7 +67,10 @@ def test_pipeline_keeps_model_utils_interface_and_records_provenance(monkeypatch
     loader = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "load_vad")
     model, utils, artifact = object(), object(), {"package_version": "6.2.1", "sha256": "known"}
     monkeypatch.setattr(vad_runtime, "load_packaged_vad", lambda backend: (model, utils, artifact))
-    namespace = {"settings": SimpleNamespace(vad=SimpleNamespace(backend="onnx"))}
+    namespace = {
+        "settings": SimpleNamespace(vad=SimpleNamespace(backend="onnx")),
+        "RUNTIME_PROFILE": SimpleNamespace(lite=False),
+    }
     exec(compile(ast.Module(body=[loader], type_ignores=[]), str(ROOT / "dry_run_ab.py"), "exec"), namespace)
     assert namespace["load_vad"]() == (model, utils)
     assert namespace["_vad_provenance"] == artifact

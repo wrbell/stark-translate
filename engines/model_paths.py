@@ -176,6 +176,7 @@ def resolve_marian_ct2(
     project_root: Path | None = None,
     models_dir: Path | None = None,
     adapter_root: Path | None = None,
+    managed_only: bool = False,
 ) -> str | None:
     """Use an explicit override, existing working adapter, then managed cache.
 
@@ -185,7 +186,7 @@ def resolve_marian_ct2(
     """
     if direction not in {"en-es", "es-en"}:
         raise ValueError(f"Unsupported Marian direction: {direction}")
-    if explicit_path is not None:
+    if explicit_path is not None and not managed_only:
         explicit = Path(explicit_path).expanduser()
         if not marian_ct2_complete(explicit):
             raise ValueError(f"Explicit Marian CT2 path is incomplete: {explicit}")
@@ -195,7 +196,7 @@ def resolve_marian_ct2(
     if adapter_root is not None and not adapters.is_absolute():
         adapters = project / adapters
     candidate = adapters / direction / "active"
-    if marian_ct2_complete(candidate):
+    if not managed_only and marian_ct2_complete(candidate):
         return str(candidate.resolve())
     try:
         entries = load_model_manifest(project).get("models", {})

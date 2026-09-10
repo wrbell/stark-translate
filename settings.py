@@ -101,6 +101,10 @@ class STTSettings(BaseSettings):
         default="wbell7/distil-whisper-large-v3.5-mlx",
         description="Fallback Whisper model if primary returns low-confidence output",
     )
+    cpu_threads: int = Field(default=4, ge=1, le=64)
+    num_workers: int = Field(default=1, ge=1, le=8)
+    local_files_only: bool = False
+
     whisper_cuda_model: str = Field(
         default="large-v3-turbo",
         description="Whisper model name for faster-whisper (CUDA backend)",
@@ -278,6 +282,9 @@ class TranslationSettings(BaseSettings):
         description="MarianMT model for fast partial translations (~80ms PyTorch)",
     )
     # MarianMT CT2 acceleration (v2026.8). Mirrors the v2026.7 STT pattern.
+    marian_device: Literal["auto", "cpu", "cuda"] = "auto"
+    marian_intra_threads: int = Field(default=4, ge=1, le=64)
+
     marian_backend: Literal["auto", "ct2", "hf"] = Field(
         default="auto",
         description=(
@@ -545,6 +552,8 @@ class PipelineSettings(BaseSettings):
 
     Also reads from .env file in the project root if present.
     """
+
+    profile: Literal["standard", "lite-cpu", "lite-cpu-quality", "lite-cuda-8gb"] = "standard"
 
     backend: Literal["auto", "mlx", "cuda", "cpu"] = Field(
         default="auto",

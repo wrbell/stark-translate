@@ -226,10 +226,35 @@ def run_all_checks(
     models_dir: Path | None = None,
     input_device: int | str | None = None,
     stt_backend: str = "auto",
+    profile: str | None = None,
 ) -> dict:
     """Cheap backend-aware preflight shared by CLI and selected operator config."""
     if project_root is None:
         project_root = Path(os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
+    from stark_translate.profiles import resolve_profile
+
+    selected_profile = resolve_profile(profile, backend)
+    if selected_profile.lite:
+        from operator_app.lite_preflight import checks as lite_checks
+
+        checks, selected_profile = lite_checks(
+            selected_profile.name,
+            backend=backend,
+            lang=lang,
+            models_dir=models_dir,
+            project_root=project_root,
+            tts=tts,
+            diarize=diarize,
+        )
+        checks.append(check_microphone(input_device))
+        counts = {status: sum(c["status"] == status for c in checks) for status in ("pass", "warn", "fail")}
+        return {
+            "checks": checks,
+            "ok": counts["fail"] == 0,
+            "status_counts": counts,
+            "backend": selected_profile.backend,
+            "profile": selected_profile.to_dict(),
+        }
     backend = resolve_backend(backend)
     if llamacpp_url is None:
         try:

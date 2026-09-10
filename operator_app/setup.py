@@ -284,6 +284,10 @@ def bootstrap_models(
     project_root: Path | None = None,
     backend: str | None = None,
     include: list[str] | None = None,
+    profile: str | None = None,
+    offline: bool = False,
+    build_native: bool = False,
+    converter_python: str | None = None,
 ) -> int:
     """Run the model setup flow. Returns process exit code."""
     if models_dir is None:
@@ -301,7 +305,16 @@ def bootstrap_models(
 
     lockfile_version = lockfile.get("version", "?")
     models = lockfile.get("models", {})
-    if backend is not None:
+    from stark_translate.profiles import resolve_profile
+
+    selected_profile = resolve_profile(profile, backend or "auto")
+    if selected_profile.lite:
+        keys = selected_profile.model_keys(include, models)
+        missing_keys = keys - models.keys()
+        if missing_keys:
+            raise ValueError(f"Profile entries missing from manifest: {sorted(missing_keys)}")
+        models = {k: v for k, v in models.items() if k in keys}
+    elif backend is not None:
         selected_backend = resolve_backend(backend)
         selected_groups = set(include or [])
         models = {
@@ -332,6 +345,8 @@ def bootstrap_models(
                     logger.info("[skip] %s — already installed", key)
                     n_skipped += 1
                     continue
+                if offline:
+                    raise FileNotFoundError(f"Offline artifact missing or unverified: {target}")
                 logger.info("[get ] %s ← %s", key, entry["url"])
                 _download_direct(entry["url"], target, entry.get("size_bytes"))
                 if entry.get("sha256"):
@@ -361,6 +376,8 @@ def bootstrap_models(
                     logger.info("[skip] %s — already installed", key)
                     n_skipped += 1
                     continue
+                if offline:
+                    raise FileNotFoundError(f"Offline pinned snapshot missing: {key}")
                 logger.info("[get ] %s ← hf:%s@%s", key, entry["repo_id"], entry.get("revision", "main"))
                 _download_hf_snapshot(
                     repo_id=entry["repo_id"],
@@ -384,7 +401,13 @@ def bootstrap_models(
                 from tools.marian_ct2_setup import ensure_managed_marian
 
                 artifact, created = ensure_managed_marian(
-                    entry, project_root=project_root or _find_project_root(), models_dir=models_dir, refresh=refresh
+                    entry,
+                    project_root=project_root or _find_project_root(),
+                    models_dir=models_dir,
+                    refresh=refresh,
+                    **({"converter_python": converter_python} if converter_python else {}),
+                    **({"offline": True} if offline else {}),
+                    **({"managed_only": True} if selected_profile.lite else {}),
                 )
                 logger.info("[%s] %s — %s", "build" if created else "skip", key, artifact)
                 n_done += int(created)
@@ -396,6 +419,14 @@ def bootstrap_models(
             logger.error("[fail] %s — %s", key, exc)
             n_failed += 1
 
+    if selected_profile.final_engine == "llamacpp" and n_failed == 0:
+        from tools.llama_runtime import install_native
+
+        try:
+            install_native(selected_profile.backend, models_dir, offline=offline, build=build_native)
+        except Exception as exc:
+            logger.error("[fail] native llama-server: %s", exc)
+            n_failed += 1
     logger.info("done: %d installed, %d skipped, %d failed", n_done, n_skipped, n_failed)
     return 0 if n_failed == 0 else 1
 

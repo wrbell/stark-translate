@@ -95,7 +95,7 @@ def test_default_tts_factory_only_uses_setup_languages(monkeypatch):
     from engines.factory import create_tts_engine
     from settings import settings
 
-    monkeypatch.setitem(sys.modules, "engines.mlx_engine", SimpleNamespace(PiperTTSEngine=lambda **kwargs: kwargs))
+    monkeypatch.setitem(sys.modules, "engines.tts_engine", SimpleNamespace(PiperTTSEngine=lambda **kwargs: kwargs))
     monkeypatch.setattr(
         settings.tts, "voices", {"en": "english", "es": "spanish", "hi": "future-hindi", "zh": "future-chinese"}
     )

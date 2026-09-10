@@ -219,6 +219,33 @@
         "tokenizer_config.json"
       ],
       "comment": "Preserve a complete project adapter first; otherwise convert the pinned HF source into an atomic managed cache."
+    },
+    "whisper-small": {
+      "type": "hf-snapshot",
+      "repo_id": "Systran/faster-whisper-small",
+      "revision": "536b0662742c02347bc0e980a01041f333bce120",
+      "subdir": "whisper-small",
+      "required_for": [],
+      "aliases": [
+        "small"
+      ],
+      "required_files": [
+        "config.json",
+        "model.bin",
+        "tokenizer.json"
+      ],
+      "comment": "Multilingual small (not small.en): pinned lite CPU STT baseline."
+    },
+    "silero-vad-onnx": {
+      "type": "direct",
+      "url": "https://raw.githubusercontent.com/snakers4/silero-vad/7e30209a3e901f9842f81b225f3e93d8199902b1/src/silero_vad/data/silero_vad.onnx",
+      "revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+      "filename": "silero-vad-6.2.1.onnx",
+      "size_bytes": 2327524,
+      "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+      "required_for": [],
+      "license": "MIT",
+      "comment": "Torch-free NumPy ONNX runtime; upstream Silero v6.2.1."
     }
   }
 }

@@ -86,11 +86,13 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def convert_source(source: Path, output: Path, quantization: str, direction: str) -> dict:
+def convert_source(
+    source: Path, output: Path, quantization: str, direction: str, *, converter_python: str | None = None
+) -> dict:
     """Run conversion and one nonempty CPU smoke in the selected interpreter."""
     copies = [name for name in COPY_FILES if (source / name).is_file()]
     command = [
-        sys.executable,
+        converter_python or sys.executable,
         "-m",
         "ctranslate2.converters.transformers",
         "--model",
@@ -123,23 +125,44 @@ if not translation.strip():
 print(json.dumps({"device": "cpu", "nonempty": True, "input": text, "translation": translation}))
 """
     result = subprocess.run(
-        [sys.executable, "-c", script, str(output), direction], check=True, env=env, capture_output=True, text=True
+        [converter_python or sys.executable, "-c", script, str(output), direction],
+        check=True,
+        env=env,
+        capture_output=True,
+        text=True,
     )
     return {"command": command, "smoke": json.loads(result.stdout.splitlines()[-1])}
 
 
 def ensure_managed_marian(
-    entry: dict, *, project_root: Path, models_dir: Path | None = None, refresh: bool = False
+    entry: dict,
+    *,
+    project_root: Path,
+    models_dir: Path | None = None,
+    refresh: bool = False,
+    converter_python: str | None = None,
+    offline: bool = False,
+    managed_only: bool = False,
 ) -> tuple[Path, bool]:
     """Preserve adapters; publish only complete validated new cache artifacts."""
     models_dir = models_dir or default_models_dir()
     direction = entry["direction"]
-    existing = resolve_marian_ct2(direction, project_root=project_root, models_dir=models_dir)
+    existing = resolve_marian_ct2(
+        direction, project_root=project_root, models_dir=models_dir, **({"managed_only": True} if managed_only else {})
+    )
     managed = models_dir / entry["subdir"]
     if existing is not None and (not refresh or not Path(existing).is_relative_to(managed.resolve())):
         return Path(existing), False
     manifest = load_model_manifest(project_root)
     source_entry = manifest["models"][entry["source_model"]]
+    if (
+        offline
+        and resolve_model_path(
+            source_entry["repo_id"], project_root=project_root, models_dir=models_dir, local_only=True
+        )
+        is None
+    ):
+        raise FileNotFoundError("Offline Marian source missing; prepare and copy the pinned cache first")
     source, provenance = resolve_hf_source(source_entry["repo_id"], project_root=project_root, models_dir=models_dir)
     if provenance.get("source_revision") != source_entry["revision"]:
         raise ValueError("Managed Marian conversion requires its pinned HF source revision")
@@ -150,7 +173,13 @@ def ensure_managed_marian(
     retain_artifact = False
     pointer_tmp = managed / (".active-" + uuid.uuid4().hex + ".tmp")
     try:
-        conversion = convert_source(source, staging, entry["quantization"], direction)
+        conversion = convert_source(
+            source,
+            staging,
+            entry["quantization"],
+            direction,
+            **({"converter_python": converter_python} if converter_python else {}),
+        )
         if not marian_ct2_complete(staging):
             raise ValueError("Cannot publish an incomplete Marian CT2 conversion")
         weights = staging / "model.bin"
@@ -164,7 +193,7 @@ def ensure_managed_marian(
             "model_bin_sha256": _sha256(weights),
             "model_bin_size_bytes": weights.stat().st_size,
             "files": {p.name: _sha256(p) for p in staging.iterdir() if p.is_file()},
-            "converter_python": sys.executable,
+            "converter_python": converter_python or sys.executable,
             **conversion,
         }
         (staging / "export_manifest.json").write_text(json.dumps(exported, indent=2) + "\n")

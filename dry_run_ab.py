@@ -24,6 +24,16 @@ Usage:
 """
 
 import os
+import sys
+
+# Resolve only the product name before optional acceleration imports. A CPU
+# lite launch must not import Torch/MLX just because the host has them installed.
+for _index, _argument in enumerate(sys.argv[1:], 1):
+    if _argument == "--profile" and _index + 1 < len(sys.argv):
+        os.environ["STARK_PROFILE"] = sys.argv[_index + 1]
+    elif _argument.startswith("--profile="):
+        os.environ["STARK_PROFILE"] = _argument.split("=", 1)[1]
+_LITE_IMPORTS = os.environ.get("STARK_PROFILE", "standard").startswith("lite-")
 
 os.environ["NUMBA_THREADING_LAYER"] = "workqueue"  # Prevent numba from loading its own libomp (conflicts with torch's)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # Safety net for any remaining libomp duplicates
@@ -31,6 +41,8 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # Safety net for any remaining libo
 # Backend detection — MLX for Apple Silicon, CUDA for NVIDIA
 # Must come before other imports so we know which inference paths are available.
 try:
+    if _LITE_IMPORTS:
+        raise ImportError("Lite uses CPU/CUDA runtime")
     import mlx.core as _mx  # noqa: F401
     import mlx_lm as _mlx_lm  # noqa: F401
 
@@ -60,10 +72,20 @@ from datetime import datetime
 import numpy as np
 import psutil
 import sounddevice as sd
-import torch
+
+try:
+    if _LITE_IMPORTS:
+        raise ImportError("Lite does not require PyTorch")
+    import torch
+except ImportError:
+    torch = None
 import websockets
 
 from settings import settings
+from stark_translate.profiles import apply_profile, resolve_profile
+
+RUNTIME_PROFILE = resolve_profile(settings.profile)
+_managed_llama_server = None
 from tools.pipeline_timing import (
     SAMPLE_COLUMNS,
     TIMING_COLUMNS,
@@ -1028,11 +1050,13 @@ mlx_b_suffix_tokens = None
 
 def load_vad():
     """Load the installed Silero package's bundled weights without network access."""
-    from tools.vad_runtime import load_packaged_vad
+    from tools.vad_runtime import load_managed_onnx_vad, load_packaged_vad
 
     global _vad_provenance
     print("[1/6] Loading packaged Silero VAD...")
-    model, utils, _vad_provenance = load_packaged_vad(settings.vad.backend)
+    model, utils, _vad_provenance = (
+        load_managed_onnx_vad() if RUNTIME_PROFILE.lite else load_packaged_vad(settings.vad.backend)
+    )
     print(f"  VAD ready (silero-vad {_vad_provenance['package_version']}, {settings.vad.backend})")
     return model, utils
 
@@ -1115,25 +1139,69 @@ def load_whisper(backend="mlx"):
         return model_id  # mlx_whisper uses model_id per call, no persistent object
 
     elif backend in ("cuda", "cpu"):
-        # CUDA/CPU: use faster-whisper (CTranslate2 backend)
-        try:
-            from faster_whisper import WhisperModel
-        except ImportError:
-            print("ERROR: faster-whisper not installed. Install with: pip install faster-whisper", file=sys.stderr)
-            sys.exit(1)
+        from engines.factory import create_stt_engine
+        from engines.model_paths import resolve_model_path
 
-        device = "cuda" if backend == "cuda" else "cpu"
-        compute_type = "int8" if backend == "cuda" else "int8"
-        fw_model_id = "large-v3-turbo"
-        print(f"[2/6] Loading faster-whisper {fw_model_id} ({device})...")
-        t0 = time.time()
-        model = WhisperModel(fw_model_id, device=device, compute_type=compute_type)
-        # Warm up
-        silence = np.zeros(16000, dtype=np.float32)
-        segments, _ = model.transcribe(silence, language=SOURCE_LANG)
-        list(segments)  # consume generator to trigger actual inference
-        print(f"  Whisper Turbo ready ({time.time() - t0:.1f}s)")
+        if settings.stt.backend == "hf":
+            # Explicit standard HF selection has a distinct artifact/config API.
+            model = create_stt_engine(
+                backend=backend,
+                stt_backend="hf",
+                compile_mode=settings.stt.compile_mode,
+                warmup_seconds=settings.stt.warmup_seconds,
+            )
+            model.load()
+            return model
+        if settings.stt.backend not in ("auto", "faster-whisper"):
+            raise ValueError(
+                f"STT {settings.stt.backend!r} is unsupported by this CPU/CUDA pipeline; choose faster-whisper or hf"
+            )
+        requested = settings.stt.whisper_cuda_model
+        from stark_translate.profiles import resolve_profile_model
+
+        model_path = (
+            resolve_profile_model(requested)
+            if settings.profile != "standard"
+            else resolve_model_path(requested, local_only=settings.stt.local_files_only)
+        )
+        if model_path is None:
+            raise FileNotFoundError(f"Pinned STT model {requested} missing; run setup for {settings.profile}")
+        compute = settings.stt.whisper_cuda_compute_type
+        if backend == "cpu" and compute == "int8_float16":
+            compute = "int8"
+        model = create_stt_engine(
+            backend=backend,
+            model_id=model_path,
+            stt_backend=settings.stt.backend,
+            compute_type=compute,
+            cpu_threads=settings.stt.cpu_threads,
+            num_workers=settings.stt.num_workers,
+            local_files_only=settings.stt.local_files_only,
+            fallback_on_low_conf=settings.stt.fallback_on_low_conf,
+            fallback_threshold=settings.stt.fallback_threshold,
+            hallucination_threshold=settings.stt.hallucination_threshold,
+        )
+        print(f"[2/6] Loading {model_path} ({backend}, {compute})...")
+        model.load()
         return model
+
+
+def profile_artifact_provenance():
+    if not RUNTIME_PROFILE.lite:
+        return None
+    from engines.model_paths import load_model_manifest
+    from stark_translate.profiles import resolve_profile_model
+
+    manifest = load_model_manifest()["models"]
+    return {
+        key: {
+            "repo_id": manifest[key].get("repo_id"),
+            "revision": manifest[key].get("revision"),
+            "sha256": manifest[key].get("sha256"),
+            "path": resolve_profile_model(key),
+        }
+        for key in sorted(RUNTIME_PROFILE.model_keys())
+    }
 
 
 def load_mlx_gemma(model_id, label, adapter_path=None, model_family: str | None = None):
@@ -1299,11 +1367,21 @@ def load_marian():
     model_id = "Helsinki-NLP/opus-mt-es-en" if SOURCE_LANG == "es" else "Helsinki-NLP/opus-mt-en-es"
     print(f"[4/6] Loading {model_id} (Marian partial translator)...")
     t0 = time.time()
+    ct2_path = None
+    if RUNTIME_PROFILE.lite:
+        from engines.model_paths import resolve_marian_ct2
+
+        ct2_path = resolve_marian_ct2(f"{SOURCE_LANG}-{target_lang}", managed_only=True)
+        if ct2_path is None:
+            raise FileNotFoundError("Pinned managed Marian CT2 missing; run setup for the selected profile")
     engine = create_translation_engine(
+        ct2_path=ct2_path,
         backend=BACKEND,
         engine_type="marian",
         model_id=model_id,
         marian_backend=settings.translation.marian_backend,
+        device=None if settings.translation.marian_device == "auto" else settings.translation.marian_device,
+        intra_threads=settings.translation.marian_intra_threads,
         compute_type=settings.translation.marian_compute_type,
         max_new_tokens=settings.translation.marian_max_new_tokens,
         warmup_passes=settings.translation.marian_warmup_passes,
@@ -2075,7 +2153,7 @@ def is_speech(audio_chunk, model, utils):
     music segments, or use inaSpeechSegmenter to detect music and skip/handle
     differently.
     """
-    tensor = torch.from_numpy(audio_chunk).float()
+    tensor = audio_chunk if getattr(model, "numpy_input", False) else torch.from_numpy(audio_chunk).float()
     with _pytorch_lock:
         speech_prob = model(tensor, SAMPLE_RATE).item()
     return speech_prob > VAD_THRESHOLD
@@ -2222,7 +2300,7 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
             cr = None
             from engines.base import STTEngine
 
-            if BACKEND == "mlx" and isinstance(stt_pipe, STTEngine):
+            if isinstance(stt_pipe, STTEngine):
                 res = stt_pipe.transcribe(
                     audio_data,
                     language=SOURCE_LANG,
@@ -2446,6 +2524,10 @@ def _run_stt(audio_data, whisper_prompt):
 
     Returns (english, stt_latency_ms, stt_confidence, segment_meta, low_conf_words).
     """
+    from engines.base import STTEngine
+
+    if isinstance(stt_pipe, STTEngine):
+        return _run_stt_engine(audio_data, whisper_prompt)
     if BACKEND == "mlx":
         return _run_stt_mlx(audio_data, whisper_prompt)
     else:
@@ -2463,6 +2545,7 @@ def _run_stt_engine(audio_data, whisper_prompt):
         language=SOURCE_LANG,
         initial_prompt=whisper_prompt,
         word_timestamps=WORD_TIMESTAMPS,
+        beam_size=BEAM_SIZE,
     )
     conf = round(min(1.0, max(0.0, res.confidence)), 2) if res.confidence is not None else None
     return res.text.strip(), res.latency_ms, conf, list(res.segments or []), list(res.low_confidence_words or [])
@@ -2633,7 +2716,12 @@ async def _pipeline_translate_and_finalize(
                     return await submit_translate(pool, fn, *args)
 
                 # --- Multiprocess path: dispatch to translation worker process ---
-                if MULTIPROCESS:
+                if not MULTIPROCESS and mlx_a_model is None:
+                    # A missing/disabled Gemma always means real Marian finals,
+                    # including CPU and --low-vram; never audience placeholder text.
+                    spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
+                    qe_a = qe_score(english, spanish_a)
+                elif MULTIPROCESS:
                     # Adaptive routing still works — MarianMT is in the main process
                     if not _RUN_AB and should_use_marian_only(english, stt_confidence):
                         spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
@@ -2659,7 +2747,7 @@ async def _pipeline_translate_and_finalize(
                     tps_a = 0.0
                     qe_a = qe_score(english, spanish_a)
                     print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
-                elif BACKEND == "cuda":
+                elif BACKEND == "cuda" or RUNTIME_PROFILE.final_engine == "llamacpp":
                     # CUDA backend: full feature parity — streaming, A/B, adaptive routing.
                     # CUDA is thread-safe, so task_a and task_b run truly concurrently
                     # on the 2-worker pipeline pool (unlike MLX which serializes).
@@ -4250,6 +4338,26 @@ async def main_async(args):
             # Low-VRAM mode: skip Gemma entirely, MarianMT handles all translation
             mlx_a_model, mlx_a_tokenizer = None, None
             mlx_b_model, mlx_b_tokenizer = None, None
+        elif RUNTIME_PROFILE.final_engine == "llamacpp":
+            global _managed_llama_server
+            from pathlib import Path
+
+            from engines.llamacpp_engine import LlamaCppEngine
+            from tools.llama_runtime import ManagedLlamaServer
+
+            _managed_llama_server = ManagedLlamaServer(
+                RUNTIME_PROFILE, log_path=Path(f"metrics/llama_{SESSION_ID}.log")
+            )
+            url = _managed_llama_server.start()
+            mlx_a_model = LlamaCppEngine(
+                server_url=url,
+                model_family="gemma4",
+                timeout_s=120 if BACKEND == "cpu" else 30,
+                max_tokens=128,
+                strict_errors=True,
+            )
+            mlx_a_model.load()
+            mlx_a_tokenizer = mlx_b_model = mlx_b_tokenizer = None
         elif BACKEND == "mlx":
             mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_translation_models(load_b=args.run_ab)
         elif BACKEND == "cuda":
@@ -4266,7 +4374,7 @@ async def main_async(args):
     # --- TTS engine (optional, ONNX Runtime — thread-safe, separate pool) ---
     global tts_engine, _tts_pool
     if args.tts:
-        from engines.mlx_engine import PiperTTSEngine
+        from engines.tts_engine import PiperTTSEngine
 
         # Dynamic language: TTS speaks in TARGET_LANG (the translated language)
         tts_voice = settings.tts.voices.get(TARGET_LANG)
@@ -4299,7 +4407,7 @@ async def main_async(args):
                 prompt_cache_template=mlx_a_prompt_cache,
                 suffix_tokens=mlx_a_suffix_tokens,
             )
-        elif BACKEND == "cuda" and mlx_a_model is not None:
+        elif (BACKEND == "cuda" or RUNTIME_PROFILE.final_engine == "llamacpp") and mlx_a_model is not None:
             # mlx_a_model is a CUDAGemmaStreamingEngine when using streaming path
             if hasattr(mlx_a_model, "translate_streaming"):
                 result = mlx_a_model.translate(args.dry_run_text, source_lang=SOURCE_LANG, target_lang=TARGET_LANG)
@@ -4354,7 +4462,9 @@ async def main_async(args):
     print("[6/6] Starting servers...")
     _session_model_ids = {
         "stt": stt_pipe if isinstance(stt_pipe, str) else getattr(stt_pipe, "model_id", None),
-        "translation_a": MLX_MODEL_A if BACKEND == "mlx" and not args.low_vram else None,
+        "translation_a": (MLX_MODEL_A if BACKEND == "mlx" else getattr(mlx_a_model, "model_id", None))
+        if not args.low_vram
+        else None,
         "translation_b": MLX_MODEL_B if BACKEND == "mlx" and _RUN_AB else None,
         "marian": getattr(_marian_engine, "model_id", None),
         "draft": MLX_DRAFT_MODEL_ID if USE_MTS else None,
@@ -4364,7 +4474,11 @@ async def main_async(args):
         "timing_schema_version": 2,
         "backend": BACKEND,
         "model_family": MODEL_FAMILY,
-        "model_a": MLX_MODEL_A,
+        "model_a": _session_model_ids["translation_a"],
+        "profile": RUNTIME_PROFILE.to_dict(),
+        "profile_artifacts": profile_artifact_provenance(),
+        "stt_settings": settings.stt.model_dump(),
+        "managed_llama": _managed_llama_server.provenance if _managed_llama_server else None,
         "model_b": MLX_MODEL_B if _RUN_AB else None,
         "stt_backend": settings.stt.backend,
         "vad": {**settings.vad.model_dump(), "artifact": _vad_provenance},
@@ -4492,7 +4606,7 @@ def main():
     )
     parser.add_argument(
         "--backend",
-        choices=["auto", "mlx", "cuda"],
+        choices=["auto", "mlx", "cuda", "cpu"],
         default="auto",
         help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA)",
     )
@@ -4759,7 +4873,26 @@ def main():
         default=2.0,
         help="Diarization daemon poll interval in seconds (default: 2)",
     )
+    from stark_translate.profiles import PROFILE_NAMES
+
+    parser.add_argument("--profile", choices=PROFILE_NAMES, default=settings.profile)
     args = parser.parse_args()
+    global RUNTIME_PROFILE
+    try:
+        RUNTIME_PROFILE = apply_profile(settings, args.profile, args.backend)
+    except ValueError as exc:
+        parser.error(str(exc))
+    if RUNTIME_PROFILE.lite:
+        if args.run_ab or args.multiprocess or args.diarize:
+            parser.error("Lite profiles do not enable A/B, multiprocess or diarization")
+        args.backend = RUNTIME_PROFILE.backend
+        args.low_vram = settings.low_vram
+        args.stt_backend = "faster-whisper"
+        args.vad_backend = "onnx"
+        args.gemma4_size = "e2b"
+        args.model_family = "gemma4"
+        args.engine = settings.cuda.engine
+        args.no_mts = True
 
     global EXIT_AFTER_REPLAY
     EXIT_AFTER_REPLAY = bool(args.audio_file) if args.exit_after_replay is None else args.exit_after_replay
@@ -4781,7 +4914,7 @@ def main():
     if args.backend == "auto":
         if MLX_AVAILABLE:
             BACKEND = "mlx"
-        elif torch.cuda.is_available():
+        elif torch is not None and torch.cuda.is_available():
             BACKEND = "cuda"
         else:
             BACKEND = "cpu"
@@ -4791,10 +4924,13 @@ def main():
             sys.exit(1)
         BACKEND = "mlx"
     elif args.backend == "cuda":
-        if not torch.cuda.is_available():
-            print("ERROR: CUDA not available.", file=sys.stderr)
-            sys.exit(1)
+        import ctranslate2
+
+        if ctranslate2.get_cuda_device_count() < 1:
+            parser.error("CUDA profile selected but CTranslate2 cannot find a CUDA device")
         BACKEND = "cuda"
+    elif args.backend == "cpu":
+        BACKEND = "cpu"
 
     # --low-vram implies --no-ab
     if args.low_vram:
@@ -4988,6 +5124,8 @@ def main():
         if not _session_stop_requested:
             raise
     finally:
+        if _managed_llama_server is not None:
+            _managed_llama_server.stop()
         # A completed marker is export evidence: all queued diagnostics must be
         # on disk, and the pipeline must have drained without an abnormal exit.
         failure = sys.exc_info()[1]
