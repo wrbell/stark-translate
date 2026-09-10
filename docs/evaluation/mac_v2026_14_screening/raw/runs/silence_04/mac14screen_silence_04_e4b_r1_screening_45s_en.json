@@ -1,0 +1,364 @@
+{
+  "session_id": "mac14screen_silence_04_e4b_r1_screening_45s_en",
+  "clip": {
+    "path": "stark_data/replay/mac_screening_45s.wav",
+    "sha256": "7e5510ea9296ec86523535fe72882be593d3ac39c59bd3385bd875bf18944a0a",
+    "duration": 45.0,
+    "lang": "en",
+    "offset_s": 1290,
+    "rms": 0.1376,
+    "id": "screening_45s",
+    "provenance": "church_replay",
+    "reference_status": "unreviewed",
+    "conditions": [
+      "speech"
+    ],
+    "parent_audio_sha256": "db11fb4c96131390e178e59e29f5d47f550a0e68047e3401f898094d40babd3f"
+  },
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+    "/Users/willem/Code/vibes/SRTranslate/dry_run_ab.py",
+    "--backend",
+    "mlx",
+    "--no-ab",
+    "--lang",
+    "en",
+    "--audio-file",
+    "/Users/willem/Code/vibes/SRTranslate/stark_data/replay/mac_screening_45s.wav",
+    "--session-id",
+    "mac14screen_silence_04_e4b_r1_screening_45s_en",
+    "--ws-port",
+    "8871",
+    "--http-port",
+    "8872",
+    "--model-family",
+    "gemma4",
+    "--gemma4-size",
+    "e4b",
+    "--no-mts",
+    "--stt-backend",
+    "parakeet-mlx",
+    "--partial-interval",
+    "0.6",
+    "--silence-trigger",
+    "0.5",
+    "--partial-interval",
+    "0.6",
+    "--vad-backend",
+    "torch",
+    "--no-idle-warmup-only",
+    "--no-final-aware-partials",
+    "--routing-policy",
+    "legacy",
+    "--terminology-prompt",
+    "none",
+    "--silence-trigger",
+    "0.4",
+    "--replay-speed",
+    "1"
+  ],
+  "returncode": 0,
+  "replay_speed": 1.0,
+  "realtime_latency_eligible": true,
+  "timeout_s": 315.0,
+  "timed_out": false,
+  "session_lifecycle": {
+    "schema_version": 1,
+    "session_id": "mac14screen_silence_04_e4b_r1_screening_45s_en",
+    "run_id": "123a579e6cd84eb992fddd402cdcbb07",
+    "status": "completed",
+    "pid": 67778,
+    "hostname": "Invicta91.local",
+    "started_at": "2026-09-10T01:50:53.866146+00:00",
+    "git_sha": "b1b3d60cb49b349c815d0b05b23c261202f02331",
+    "pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T01:51:49.510806+00:00",
+    "memory": {
+      "scope": "pipeline_process_lifetime",
+      "peak_rss_bytes": 3855237120,
+      "peak_metal_bytes": 8920347010
+    },
+    "models": {
+      "stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+      },
+      "translation_a": {
+        "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+      },
+      "marian": {
+        "requested_id": "adapters/marian_ct2/en-es/active",
+        "manifest_revision": null,
+        "resolved_revision": null,
+        "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+        "revision_source": "unknown",
+        "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+        "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+        "model_bin_size_bytes": 79567635,
+        "export_manifest": {
+          "sha256": "a2252e22ba84cde86261163aacb51708f62c3defae3a52a928fd428c4a4ae789",
+          "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+          "ct2_quantization": "int8",
+          "direction": "en-es",
+          "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_hash_matches": true
+        }
+      }
+    },
+    "diagnostics": {
+      "size_bytes": 25146,
+      "sha256": "1c754ac3cc9af0646f02dc5b4033707c4f8a2e38f6ff6bc44d9e67be489b6b7b"
+    }
+  },
+  "session_metadata": {
+    "session_id": "mac14screen_silence_04_e4b_r1_screening_45s_en",
+    "source_lang": "en",
+    "target_lang": "es",
+    "session_kind": "replay",
+    "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/stark_data/replay/mac_screening_45s.wav",
+    "input_audio_sha256": "7e5510ea9296ec86523535fe72882be593d3ac39c59bd3385bd875bf18944a0a",
+    "audio_source": "file",
+    "timing_schema_version": 2,
+    "backend": "mlx",
+    "model_family": "gemma4",
+    "model_a": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+    "model_b": null,
+    "stt_backend": "parakeet-mlx",
+    "vad": {
+      "threshold": 0.3,
+      "silence_trigger": 0.4,
+      "max_utterance": 8.0,
+      "partial_interval": 0.6,
+      "backend": "torch"
+    },
+    "translation": {
+      "idle_warmup_only": false,
+      "final_aware_partials": false,
+      "routing_policy": "legacy",
+      "terminology_prompt": "none",
+      "mlx_model_4b": "mlx-community/translategemma-4b-it-4bit",
+      "mlx_model_12b": "mlx-community/translategemma-12b-it-4bit",
+      "mlx_model_gemma4_e4b": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "mlx_model_gemma4_e2b": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+      "mlx_drafter_gemma4": "mlx-community/gemma-4-e4b-it-assistant-bf16",
+      "mlx_mts": false,
+      "cuda_model_4b": "google/translategemma-4b-it",
+      "cuda_model_12b": "google/translategemma-12b-it",
+      "marian_model": "Helsinki-NLP/opus-mt-en-es",
+      "marian_backend": "auto",
+      "marian_compute_type": "int8_float16",
+      "marian_max_new_tokens": 128,
+      "marian_warmup_passes": 2,
+      "marian_eager_both": false,
+      "model_family": "gemma4",
+      "num_draft_tokens": 3,
+      "default_source_lang": "en",
+      "default_target_lang": "es",
+      "turboquant": false,
+      "turboquant_key_bits": 3,
+      "turboquant_val_bits": 4
+    },
+    "replay_speed": 1.0,
+    "git_sha": "b1b3d60cb49b349c815d0b05b23c261202f02331"
+  },
+  "chunk_count": 8,
+  "partial_count": 68,
+  "metrics": {
+    "speech_end_to_final_ms": {
+      "n": 8,
+      "p50": 2710.2,
+      "p95": 5042.6,
+      "mean": 2607.4375
+    },
+    "vad_wait_ms": {
+      "n": 8,
+      "p50": 395.2,
+      "p95": 3917.2,
+      "mean": 1197.6125
+    },
+    "stt_queue_wait_ms": {
+      "n": 8,
+      "p50": 1.6,
+      "p95": 433.0,
+      "mean": 55.4875
+    },
+    "translation_queue_wait_ms": {
+      "n": 8,
+      "p50": 0.0,
+      "p95": 130.2,
+      "mean": 16.299999999999997
+    },
+    "finalization_overhead_ms": {
+      "n": 8,
+      "p50": 1.3,
+      "p95": 2.6,
+      "mean": 1.2125000000000001
+    },
+    "broadcast_ms": {
+      "n": 8,
+      "p50": 0.0,
+      "p95": 0.0,
+      "mean": 0.0
+    },
+    "true_e2e_ms": {
+      "n": 8,
+      "p50": 9172.8,
+      "p95": 11042.0,
+      "mean": 7970.05
+    },
+    "e2e_latency_ms": {
+      "n": 8,
+      "p50": 1252.0,
+      "p95": 3025.6,
+      "mean": 1408.4875
+    },
+    "stt_latency_ms": {
+      "n": 8,
+      "p50": 351.2,
+      "p95": 1122.9,
+      "mean": 398.1125
+    },
+    "latency_a_ms": {
+      "n": 8,
+      "p50": 978.8,
+      "p95": 1334.3,
+      "mean": 933.0375
+    },
+    "silence_delay_ms": {
+      "n": 8,
+      "p50": 7976.1,
+      "p95": 8016.4,
+      "mean": 6561.5625
+    },
+    "queue_wait_ms": {
+      "n": 8,
+      "p50": 1.5,
+      "p95": 432.1,
+      "mean": 55.237500000000004
+    },
+    "marian_pt_ms": {
+      "n": 8,
+      "p50": 79.0,
+      "p95": 109.2,
+      "mean": 66.6125
+    },
+    "gen_tokens_a": {
+      "n": 7,
+      "p50": 18.0,
+      "p95": 31.0,
+      "mean": 20.142857142857142
+    },
+    "prefill_ms_a": {
+      "n": 7,
+      "p50": 136.64395903469995,
+      "p95": 166.8272499809973,
+      "mean": 136.63708357905438
+    },
+    "ttft_ms_a": {
+      "n": 7,
+      "p50": 369.4988340139389,
+      "p95": 602.3224589880556,
+      "mean": 406.3259999966249
+    },
+    "decode_ms_a": {
+      "n": 7,
+      "p50": 595.72029102128,
+      "p95": 1026.840791979339,
+      "mean": 658.5936964256689
+    },
+    "partial_total_ms": {
+      "n": 68,
+      "p50": 194.2216659663245,
+      "p95": 347.1054579713382,
+      "mean": 214.14651219332453
+    }
+  },
+  "timing_schema_versions": [
+    "2"
+  ],
+  "metric_definitions": {
+    "speech_end_to_final_ms": "last VAD-positive capture frame end to final payload ready; not browser rendering",
+    "e2e_latency_ms": "legacy queue submission to translation/QE completion",
+    "true_e2e_ms": "legacy first speech observation to translation/QE completion",
+    "silence_delay_ms": "legacy first speech observation to queue submission (includes speaking)",
+    "partial_total_ms": "STT plus Marian compute only; excludes cadence, queue and delivery"
+  },
+  "speech_end_by_endpoint": {
+    "hard_cut": {
+      "n": 1,
+      "p50": 3043.3,
+      "p95": 3043.3,
+      "mean": 3043.3
+    },
+    "silence": {
+      "n": 3,
+      "p50": 1640.5,
+      "p95": 2206.2,
+      "mean": 1445.0666666666666
+    },
+    "smart_cut": {
+      "n": 4,
+      "p50": 3990.6,
+      "p95": 5042.6,
+      "mean": 3370.25
+    }
+  },
+  "partial_capture_to_ready_ms": {
+    "n": 68,
+    "p50": 206.6,
+    "p95": 491.8,
+    "mean": 245.31617647058823
+  },
+  "marian_only_share": 0.125,
+  "marian_only_observations": 8,
+  "marian_only_source": "tps_a == 0 proxy",
+  "special_token_outputs": 0,
+  "special_token_counts": {
+    "<turn|>": 0,
+    "<|channel>": 0
+  },
+  "overlap_pct": 0.0,
+  "size": "e4b",
+  "experiment": "silence_04",
+  "repeat": 1,
+  "clip_id": "screening_45s",
+  "language": "en",
+  "provenance": "church_replay",
+  "manifest_sha256": "196799c7a8b8eef65bbb793a99561dde590ebaa4d188461995a0a511a83ef875",
+  "environment": {
+    "code_sha": "b1b3d60cb49b349c815d0b05b23c261202f02331",
+    "tracked_diff_sha256": "9585b66eaec545b8d844bbe653308c0ed2dbe70d4416d03d3304e5c2212aabb4",
+    "source_sha256": {
+      "dry_run_ab.py": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "settings.py": "58da818e27ce1698f7c7385272a5456bbcea92308a5aa7275be6c828290c3b75",
+      "engines/mlx_engine.py": "1f62e38eba9b6605fc4ffc8665c7e2a00e47008f3d617a09bea3c6e4c7329ceb",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/model_paths.py": "0db290cce1932173356be3203c58422d22ea105df3883ae6629b2a2da1ad1d36",
+      "tools/pipeline_timing.py": "cd47a816ecc04d7f26dc1cf6fc090d0fa91cb70c387a542a83a838f6fb1e3dbc",
+      "tools/mac_evaluation.py": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": "2.6.0"
+    },
+    "created_at": "2026-09-10T01:50:50.212007+00:00"
+  },
+  "experiment_settings": {}
+}

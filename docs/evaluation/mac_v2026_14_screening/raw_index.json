@@ -1,0 +1,1165 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-10T02:20:24.721080+00:00",
+  "purpose": "Immutable original run JSON, raw timing observations and diagnostic summaries for the 48-run screen. Existing audio remains outside the archive, identified by the frozen manifest hash. Some persisted per-run percentiles predate the nearest-rank fix; canonical comparison and screen-analysis recompute raw observations.",
+  "files": [
+    {
+      "original_path": "metrics/mac_roadmap/experiments/conservative_marian/mac14screen_conservative_marian_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/conservative_marian/mac14screen_conservative_marian_e2b_r0_screening_45s_en.json",
+      "sha256": "f3e7c196cdff4bdf8df8728bffc2d7f9d73658a510fbadcca54b9068035044b6",
+      "size_bytes": 11503
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_conservative_marian_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_conservative_marian_e2b_r0_screening_45s_en.csv",
+      "sha256": "e3d08e412184faf8c46b4db131ce02cf049eb46c0d90f9317c41428b69d188a9",
+      "size_bytes": 4638
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_conservative_marian_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_conservative_marian_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "a9911ddf87d1305e7ee6a05eec4309983b6b248a22400d6e8bb4350396e58bc4",
+      "size_bytes": 60000
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_conservative_marian_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_conservative_marian_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "04f8a065a5d1c541b660d853d418ce9417ca971e5e2c966599313047a4f5c7a5",
+      "size_bytes": 23022
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/conservative_marian/mac14screen_conservative_marian_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/conservative_marian/mac14screen_conservative_marian_e2b_r1_screening_45s_en.json",
+      "sha256": "890d8574e8c3dbcb41dbd0c2294b7cfd0520db7ba9e2dcbe4ae3a4bf28236a0e",
+      "size_bytes": 11516
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_conservative_marian_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_conservative_marian_e2b_r1_screening_45s_en.csv",
+      "sha256": "39cb9f22cd5a2621f963c3241715b005fc2ee5326821db18d5decfa50d298b58",
+      "size_bytes": 4637
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_conservative_marian_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_conservative_marian_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "f059e9f73788cd830500d17b02635adb6c9437fba031ed6d0a99baee6e79db39",
+      "size_bytes": 61848
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_conservative_marian_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_conservative_marian_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "5ae24fc48b9c58d1e40c725a72aa691e788658c09be3568b1d49282fe9ec3175",
+      "size_bytes": 23016
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/conservative_marian/mac14screen_conservative_marian_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/conservative_marian/mac14screen_conservative_marian_e2b_r2_screening_45s_en.json",
+      "sha256": "ad6e28594f0654efb6d59fb8632d737ad060465119e196aa80c71e634e6e1d3f",
+      "size_bytes": 11494
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_conservative_marian_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_conservative_marian_e2b_r2_screening_45s_en.csv",
+      "sha256": "61cc35fe83c26771a97cac32806eed93d67c99a0657130d83f49cd943790275f",
+      "size_bytes": 4633
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_conservative_marian_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_conservative_marian_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "517e818875f17e3dee1c1a9d80cb2b228f541fd6ebafd556ac98036051a5e101",
+      "size_bytes": 60887
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_conservative_marian_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_conservative_marian_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "e327b4a493ec3117661953319c6de4fa999474dd2162855aa06dd0887139a3e8",
+      "size_bytes": 23011
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/conservative_marian/mac14screen_conservative_marian_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/conservative_marian/mac14screen_conservative_marian_e4b_r0_screening_45s_en.json",
+      "sha256": "2f890f04cc540770d9489459eab2aa2eba780355cfee08ef0d0c793ef1de7038",
+      "size_bytes": 11511
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_conservative_marian_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_conservative_marian_e4b_r0_screening_45s_en.csv",
+      "sha256": "9562e45466c2b04a96f02323f5576b55aee4c1ab963e3b2924a9bc92345265bd",
+      "size_bytes": 4640
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_conservative_marian_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_conservative_marian_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "5a21be0e9e94089cdf4f029c3f4460d035d39a763b730afe68d96e135bd5a2f6",
+      "size_bytes": 57316
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_conservative_marian_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_conservative_marian_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "b7f27e802fbc52fda2c75b1c7bb80c4391c434b621fe985bd5fd5419b2e17495",
+      "size_bytes": 22813
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/conservative_marian/mac14screen_conservative_marian_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/conservative_marian/mac14screen_conservative_marian_e4b_r1_screening_45s_en.json",
+      "sha256": "1fdbd5be7ee74ec584750b2ba31f25f739e693a239db349e7017a555ea87d704",
+      "size_bytes": 11506
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_conservative_marian_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_conservative_marian_e4b_r1_screening_45s_en.csv",
+      "sha256": "dac4ecba967354d4ac65e25670c452b1b7730755415e9447c29229b3645e9579",
+      "size_bytes": 4627
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_conservative_marian_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_conservative_marian_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "74227598441b62959b5ee38a0e38cda15df97361b52ab098e113850b53b4fd99",
+      "size_bytes": 60975
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_conservative_marian_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_conservative_marian_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "f478d467715abcde6a93a1d9091316e22854e3034af7df9a36a893f1910ae7af",
+      "size_bytes": 23008
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/conservative_marian/mac14screen_conservative_marian_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/conservative_marian/mac14screen_conservative_marian_e4b_r2_screening_45s_en.json",
+      "sha256": "e3fa6088f40ee2f3b559fae97a4ca1e7666394b71fce7758e04e66552d930ae4",
+      "size_bytes": 11485
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_conservative_marian_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_conservative_marian_e4b_r2_screening_45s_en.csv",
+      "sha256": "755480732ecce698dba8d81498d98ad4ab936c7a697505456646dc7ffed8a6b8",
+      "size_bytes": 4634
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_conservative_marian_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_conservative_marian_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "9422f0f470502aa34f18cdac6cc3e29365883897c9fb64c6d6397ecf567e3025",
+      "size_bytes": 60086
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_conservative_marian_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_conservative_marian_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "85f177328c686fa8c3632a8c73d7008b382b2d8820036852916bf7cba312c2f9",
+      "size_bytes": 23017
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/final_aware_partials/mac14screen_final_aware_partials_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/final_aware_partials/mac14screen_final_aware_partials_e2b_r0_screening_45s_en.json",
+      "sha256": "e85cf15fffd4c30a22c6d7cf643b9e257566115690025d4e571a54a73b059719",
+      "size_bytes": 11463
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_final_aware_partials_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_final_aware_partials_e2b_r0_screening_45s_en.csv",
+      "sha256": "c503c5e58046db2e5bee01bc49efa1f5bf967808edaea5932503e090c6dc5be1",
+      "size_bytes": 4627
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_final_aware_partials_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_final_aware_partials_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "bfa830da5cbe7da934e094bf240ca17af22bf55ff9e96e66d01d78fda5c3e8b9",
+      "size_bytes": 57722
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_final_aware_partials_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_final_aware_partials_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "8a987646f392fda737639a442cf8559e279acf0afb34ea4c0a67e10edce7cc02",
+      "size_bytes": 23030
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/final_aware_partials/mac14screen_final_aware_partials_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/final_aware_partials/mac14screen_final_aware_partials_e2b_r1_screening_45s_en.json",
+      "sha256": "0346d0841fb654dbe2b5d1ab764dfa6593b44c84b109fae2a649b4793b8dce36",
+      "size_bytes": 11475
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_final_aware_partials_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_final_aware_partials_e2b_r1_screening_45s_en.csv",
+      "sha256": "446baec80dd51c6a7c9ed80da548a3e1652f5fbbbccdafe48ce0645242ad0fb7",
+      "size_bytes": 4633
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_final_aware_partials_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_final_aware_partials_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "1d6dc236739d72b10dbe2514b461dc8ce52d8cf6ef47da58715ba05696789d0b",
+      "size_bytes": 57723
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_final_aware_partials_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_final_aware_partials_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "5bdde3f22ef4d3925cf162fc07ee390fb96f676bbe2391f00bd88d1f814f742d",
+      "size_bytes": 23042
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/final_aware_partials/mac14screen_final_aware_partials_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/final_aware_partials/mac14screen_final_aware_partials_e2b_r2_screening_45s_en.json",
+      "sha256": "ffbff2383435ce32f14f86b651dc7fa8ed8452c753bb3673949dff2c5fb1b7a1",
+      "size_bytes": 11473
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_final_aware_partials_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_final_aware_partials_e2b_r2_screening_45s_en.csv",
+      "sha256": "7b558aa35b74fe938bbc42cdb3fdf23d99b2a67f9cd3a6a773b96ef401fa3939",
+      "size_bytes": 4637
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_final_aware_partials_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_final_aware_partials_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "8afc2876d0ea8ed5ef1032f61d7947ace53fb1677d1b78035381c662e4677962",
+      "size_bytes": 58631
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_final_aware_partials_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_final_aware_partials_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "a086480615c70ccbd84cc51807d74f320686d0effd774caf303aca146ffd7b53",
+      "size_bytes": 23023
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/final_aware_partials/mac14screen_final_aware_partials_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/final_aware_partials/mac14screen_final_aware_partials_e4b_r0_screening_45s_en.json",
+      "sha256": "76e037cadbc6f9db5903cf855f10f141513865bc263488b2165e9d213719b6aa",
+      "size_bytes": 11476
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_final_aware_partials_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_final_aware_partials_e4b_r0_screening_45s_en.csv",
+      "sha256": "c1d1483d625748855c4a8af0f4589ee86ae9e70d433eb2763f73dbfffa6ecdcb",
+      "size_bytes": 4642
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_final_aware_partials_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_final_aware_partials_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "b47a1238a0805edaa6921aba1ce92bc669efc05f2b5ffc0eb3fdbb49c42eeab7",
+      "size_bytes": 51659
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_final_aware_partials_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_final_aware_partials_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "61f48f5375865bf2466074d553a756bc6663dfdaa387afab38904e1ad7c9ee44",
+      "size_bytes": 23042
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/final_aware_partials/mac14screen_final_aware_partials_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/final_aware_partials/mac14screen_final_aware_partials_e4b_r1_screening_45s_en.json",
+      "sha256": "04cfaf7b0834f0e6e745ccfbbd8516581a7bed30e860e89ba69f353f155a4e93",
+      "size_bytes": 11486
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_final_aware_partials_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_final_aware_partials_e4b_r1_screening_45s_en.csv",
+      "sha256": "14f166601f141ef6ef9d6e2d9e039de0a6abfe409fe42327896642efb06c47f9",
+      "size_bytes": 4630
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_final_aware_partials_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_final_aware_partials_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "d5b5d5e45051fed8faa1e170e01a7bb842646b9bda66bfd10142eb3bebb8ef08",
+      "size_bytes": 52490
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_final_aware_partials_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_final_aware_partials_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "1163dbf2b9ed5871a538f0521f94916a489117d4da3972df5e06d12d837b26f3",
+      "size_bytes": 23039
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/final_aware_partials/mac14screen_final_aware_partials_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/final_aware_partials/mac14screen_final_aware_partials_e4b_r2_screening_45s_en.json",
+      "sha256": "aca7e11ef6f04c3dc9b5f346f4c4eae49434161431497e514b7e0de42f2e1991",
+      "size_bytes": 11503
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_final_aware_partials_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_final_aware_partials_e4b_r2_screening_45s_en.csv",
+      "sha256": "d5360c28331563eb3e540a516246aa216b1a9ad5158328905733c98b0e6135fc",
+      "size_bytes": 4632
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_final_aware_partials_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_final_aware_partials_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "c430c51cc87c8eeb26869a9544843f54b9db18f2e51df242639e54ea86bd9e99",
+      "size_bytes": 55217
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_final_aware_partials_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_final_aware_partials_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "0799f5d7c22ab9bb680763a8001903c76cbac27e18a3bd0141062fbc38920a65",
+      "size_bytes": 23034
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/idle_warmup/mac14screen_idle_warmup_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/idle_warmup/mac14screen_idle_warmup_e2b_r0_screening_45s_en.json",
+      "sha256": "64fb9724c358f87c036ab2d2b9fa976b732b6d69b5b254681287293904a13780",
+      "size_bytes": 11438
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_idle_warmup_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_idle_warmup_e2b_r0_screening_45s_en.csv",
+      "sha256": "9a2ab52877fd18498bd470929cb7ea26f00f3c623750edb8fecb7ab272a5018d",
+      "size_bytes": 4630
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_idle_warmup_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_idle_warmup_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "2007e580261ee59741a6beabcff59992694bc05f26d39672ca12c035abda3d23",
+      "size_bytes": 62212
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_idle_warmup_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_idle_warmup_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "b4828f926015d0f8697bcd576caee380ec50dbb724c41197c0b40df168f17cda",
+      "size_bytes": 22816
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/idle_warmup/mac14screen_idle_warmup_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/idle_warmup/mac14screen_idle_warmup_e2b_r1_screening_45s_en.json",
+      "sha256": "739e249b2b62292e7fa59b2351877bc0fadc5e208257a7651178f4a5027c2c13",
+      "size_bytes": 11416
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_idle_warmup_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_idle_warmup_e2b_r1_screening_45s_en.csv",
+      "sha256": "9a131d217303c1de2dbef885e3802518b2be85b5d505a49563073d9a9f2b7559",
+      "size_bytes": 4630
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_idle_warmup_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_idle_warmup_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "f40891dfe71c547662d5371ba73ff4d8f528b62c604ce80dc3eff62b121d54b3",
+      "size_bytes": 61311
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_idle_warmup_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_idle_warmup_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "80210910ca5e900ec8604b128c4fb4b046a940fe2dff1efba28fff669a93942a",
+      "size_bytes": 22816
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/idle_warmup/mac14screen_idle_warmup_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/idle_warmup/mac14screen_idle_warmup_e2b_r2_screening_45s_en.json",
+      "sha256": "e9cc288e9277c196e1058cf869393942c68842493443a4fe9f676115b9c542c9",
+      "size_bytes": 11439
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_idle_warmup_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_idle_warmup_e2b_r2_screening_45s_en.csv",
+      "sha256": "0248cfbb7ff323a1b7d477df6efe527f681c49384d8a8eda963410fc10db884e",
+      "size_bytes": 4633
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_idle_warmup_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_idle_warmup_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "9d528443b598a02c7d015c1bb1b928b3959e7a5dc8fe708d689385ebba829821",
+      "size_bytes": 62197
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_idle_warmup_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_idle_warmup_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "6704b88349fe156a25578fb4a730d458e30b2160c45a709e19211948ed757bb1",
+      "size_bytes": 22822
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/idle_warmup/mac14screen_idle_warmup_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/idle_warmup/mac14screen_idle_warmup_e4b_r0_screening_45s_en.json",
+      "sha256": "09adecbaf268a3fe75a1a69a7d1d783c4bbce6da0639fad9c4458ae820d977c8",
+      "size_bytes": 11404
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_idle_warmup_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_idle_warmup_e4b_r0_screening_45s_en.csv",
+      "sha256": "ca50bd2ead9f3d7cc70268b1ef4982568e6d1dc329cbbb0e9ff55aa8529860fa",
+      "size_bytes": 4631
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_idle_warmup_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_idle_warmup_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "5fa74fc69b6a63149625f4ff57d40566a11bf407d94f8f6cf8ed787fbafcfb7c",
+      "size_bytes": 60495
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_idle_warmup_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_idle_warmup_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "bf17d993b5f54b334dc9d0d5531dc91912231cbcd9c8d48317e9cc6b0bdcf034",
+      "size_bytes": 22813
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/idle_warmup/mac14screen_idle_warmup_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/idle_warmup/mac14screen_idle_warmup_e4b_r1_screening_45s_en.json",
+      "sha256": "8aa719975a66773deccf21bf7fa11404240de35f70b9657780a5481883dec72b",
+      "size_bytes": 11439
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_idle_warmup_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_idle_warmup_e4b_r1_screening_45s_en.csv",
+      "sha256": "495f277deeda8b6a02a9cd7a699b68910dbc05a9328cb5fe3b5f93995a598e64",
+      "size_bytes": 4632
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_idle_warmup_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_idle_warmup_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "d171bc4463545cdb3ae4a5ef52135bcfdba38645a046dbdd0b3409c108de6df8",
+      "size_bytes": 58627
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_idle_warmup_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_idle_warmup_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "aca380acc65de69986ee760e60dd61aa436448fd35483b5faae82fd48af879ea",
+      "size_bytes": 22819
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/idle_warmup/mac14screen_idle_warmup_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/idle_warmup/mac14screen_idle_warmup_e4b_r2_screening_45s_en.json",
+      "sha256": "ebe50f6f16772f1817acdcfa36bcb861930d111ec008af9c35a72dc8353cee75",
+      "size_bytes": 11460
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_idle_warmup_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_idle_warmup_e4b_r2_screening_45s_en.csv",
+      "sha256": "4107e0c2a0d77249063a90903b41635ced66475a9caad70732b5499a46bb2073",
+      "size_bytes": 4643
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_idle_warmup_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_idle_warmup_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "4266dee0231c3388cca3bfd892c91213e81472721b3dae439716fb75fc4f3755",
+      "size_bytes": 49512
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_idle_warmup_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_idle_warmup_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "8d8ceea94a720fd66630df501a01d640c60dd18797cf426132ffb391e906d642",
+      "size_bytes": 22809
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/onnx_vad/mac14screen_onnx_vad_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/onnx_vad/mac14screen_onnx_vad_e2b_r0_screening_45s_en.json",
+      "sha256": "0665ce78c94eead7691ba2ec44ca9c0f82e41e407ca3c849083ed7a0878c55dd",
+      "size_bytes": 11396
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_onnx_vad_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_onnx_vad_e2b_r0_screening_45s_en.csv",
+      "sha256": "80f21b5e40eabeafcc0c87e2d6f0f9e423af71de8942240e49f1bb819f6776b1",
+      "size_bytes": 4627
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_onnx_vad_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_onnx_vad_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "718d35654dcb9f36f9e2d6707c671f711384b1ba354adee29677a3a80dc4ea7d",
+      "size_bytes": 61994
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_onnx_vad_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_onnx_vad_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "b8a7d7f2d5111409e585c1625a57e6cd19f151552b5e084ffb2fafa2bbd48505",
+      "size_bytes": 22745
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/onnx_vad/mac14screen_onnx_vad_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/onnx_vad/mac14screen_onnx_vad_e2b_r1_screening_45s_en.json",
+      "sha256": "566e156853182982b501708c80e495d1c4ee824eb1b2d7e3da4c13b826b3b689",
+      "size_bytes": 11423
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_onnx_vad_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_onnx_vad_e2b_r1_screening_45s_en.csv",
+      "sha256": "3e60e5dd1c8a0e04c525da944713dc65e15e5aa06c92804f3985f2a1998e53a4",
+      "size_bytes": 4634
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_onnx_vad_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_onnx_vad_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "5bcb64fa78ff40f621ff458df45f8c784a27610c7b2c57ec381774d3c4ea88a3",
+      "size_bytes": 61980
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_onnx_vad_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_onnx_vad_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "f402947db6c6bcd7297610c00cf62b08460ac7d23e3047b5e70543ec3e520098",
+      "size_bytes": 22752
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/onnx_vad/mac14screen_onnx_vad_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/onnx_vad/mac14screen_onnx_vad_e2b_r2_screening_45s_en.json",
+      "sha256": "a8583fd844c4867de7d264e530670adf42d3ec918e1a3bc64819ab12f0241296",
+      "size_bytes": 11417
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_onnx_vad_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_onnx_vad_e2b_r2_screening_45s_en.csv",
+      "sha256": "1e434d6b803814a50d62c14da53f7e42854d9c8f030897e9e4b3414b86987995",
+      "size_bytes": 4629
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_onnx_vad_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_onnx_vad_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "a4825392e205a4cbeaef4e758f7f46debe34c7e264ba5c8520937803ca65e9db",
+      "size_bytes": 61992
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_onnx_vad_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_onnx_vad_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "78611300de7588b6d9f62ff536ac3351277ec6ada5c57dfd52a1f6781edff663",
+      "size_bytes": 22744
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/onnx_vad/mac14screen_onnx_vad_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/onnx_vad/mac14screen_onnx_vad_e4b_r0_screening_45s_en.json",
+      "sha256": "f39876fb4b445dea83fd56ac1061575551a7aed2c9c446f3656f52369a1fe096",
+      "size_bytes": 11426
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_onnx_vad_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_onnx_vad_e4b_r0_screening_45s_en.csv",
+      "sha256": "30ff06c85581f6319cf813a2a197f4c74761565771c8ab523e239695fd4f53d4",
+      "size_bytes": 4628
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_onnx_vad_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_onnx_vad_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "1dec716b7cd0d7efe19f73487f9607d093f6fdaf36057bdb976327984489cff7",
+      "size_bytes": 60212
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_onnx_vad_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_onnx_vad_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "062fe4bf8da21f84ce03c83dd79a71e56dea32519a96dc4277c587d927be0883",
+      "size_bytes": 22748
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/onnx_vad/mac14screen_onnx_vad_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/onnx_vad/mac14screen_onnx_vad_e4b_r1_screening_45s_en.json",
+      "sha256": "b11e6ff10d15ff96c1291f218fc619951683db94cdcd6c568f408029314848ca",
+      "size_bytes": 11409
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_onnx_vad_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_onnx_vad_e4b_r1_screening_45s_en.csv",
+      "sha256": "a7641f0ca1413119a18ea4443803e6b73fcca4dac2cece112bee8bd6674fbddf",
+      "size_bytes": 4626
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_onnx_vad_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_onnx_vad_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "c0d28a6ce1ac5f5f48231e6d74bcf7bf5dd858d67c8fa519640da3ed39f21a5b",
+      "size_bytes": 61991
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_onnx_vad_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_onnx_vad_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "2d13a048814bc57ea73f223e64f18bb68b5a396f4405abcf4559cd25cd81564e",
+      "size_bytes": 22739
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/onnx_vad/mac14screen_onnx_vad_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/onnx_vad/mac14screen_onnx_vad_e4b_r2_screening_45s_en.json",
+      "sha256": "db689f7b6c2692150e50bb5fd944a57561bf623c6bded6495403e97200632744",
+      "size_bytes": 11420
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_onnx_vad_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_onnx_vad_e4b_r2_screening_45s_en.csv",
+      "sha256": "dd78d59cd2ba22171e080a20598a3539aab717cec0689b2aff2e1be004d08bab",
+      "size_bytes": 4621
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_onnx_vad_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_onnx_vad_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "6317e85cd5fbc81029165cfc35c62bd480f5fe8b62594aee4ebf402209628032",
+      "size_bytes": 56560
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_onnx_vad_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_onnx_vad_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "4a38591e7002b32731062d161d309991d8923351875fe6a3572e9f7807051902",
+      "size_bytes": 22721
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/screening_baseline/mac14screen_screening_baseline_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/screening_baseline/mac14screen_screening_baseline_e2b_r0_screening_45s_en.json",
+      "sha256": "8d9886a5788f6b419a9255b6c2b889cc5acc521f1691e2f6e6d29dc95324ef72",
+      "size_bytes": 11449
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_screening_baseline_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_screening_baseline_e2b_r0_screening_45s_en.csv",
+      "sha256": "aa426d463b606b941b9ebb7aadd28f14bf1db5bac20141e844bb0acd0955e2c1",
+      "size_bytes": 4631
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_screening_baseline_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_screening_baseline_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "668fcb5735c8b21ebcf4629dc87177c59cc7b43154d21a120ca0e276f8f8244b",
+      "size_bytes": 62696
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_screening_baseline_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_screening_baseline_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "cf01fc344eaeb498ba5a853ed2362b448aea29623b3a73ca9e1045a5335acf59",
+      "size_bytes": 22985
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/screening_baseline/mac14screen_screening_baseline_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/screening_baseline/mac14screen_screening_baseline_e2b_r1_screening_45s_en.json",
+      "sha256": "24891f9331cb1e4b8a6f0f5d0e81539d020a580fc60f60bd9c605d5a829bf6e5",
+      "size_bytes": 11446
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_screening_baseline_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_screening_baseline_e2b_r1_screening_45s_en.csv",
+      "sha256": "384f5e950af0eabc7792135ef3400ea9a8b2dcd1d2de6f2f6f81a1081b0f3ad3",
+      "size_bytes": 4630
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_screening_baseline_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_screening_baseline_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "8b03e892ea7ff0755d2e359635871274cf933c4c43b833dff4619b236d5263e2",
+      "size_bytes": 62698
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_screening_baseline_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_screening_baseline_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "5656c78a2f2b0ad8526fd6b14adbba77a97e721c0e2a532b4de409cf1cc5c45e",
+      "size_bytes": 22988
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/screening_baseline/mac14screen_screening_baseline_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/screening_baseline/mac14screen_screening_baseline_e2b_r2_screening_45s_en.json",
+      "sha256": "93aeb203667824ff33548cfc0e21f1db4508fc1d5997afec1d2b69b268995511",
+      "size_bytes": 11433
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_screening_baseline_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_screening_baseline_e2b_r2_screening_45s_en.csv",
+      "sha256": "921c0d6b77738f14bf9d62479096534440f309f17cb432b66a67de697f0ac6b1",
+      "size_bytes": 4633
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_screening_baseline_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_screening_baseline_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "975d37bb53b47de5de3f972f8a74c637e3c9f033ac164a8ec792a9e18c1ecc4a",
+      "size_bytes": 62672
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_screening_baseline_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_screening_baseline_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "caad487061ddc80eab9770a6d98e1d50dfc9f9492d8e9ad5283aca5378db494a",
+      "size_bytes": 22993
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/screening_baseline/mac14screen_screening_baseline_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/screening_baseline/mac14screen_screening_baseline_e4b_r0_screening_45s_en.json",
+      "sha256": "b1a099b87ba792d70c8a1723b290c020f27ad50f2f8d3e29ecfa52022ef6e946",
+      "size_bytes": 11444
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_screening_baseline_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_screening_baseline_e4b_r0_screening_45s_en.csv",
+      "sha256": "950f296014757df3f494f472f5d3a06e1cd9202bbfd2184ef1efdb4ad7dba3ce",
+      "size_bytes": 4636
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_screening_baseline_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_screening_baseline_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "8e73791ca2d5220adcee79b351b72a7dc31739bbdac9a3dc686af15b418b511b",
+      "size_bytes": 54681
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_screening_baseline_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_screening_baseline_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "2ca1d3c399ee19569ce7d7dcbe3512439a56829152fcb4e29bc6fdf90b3174d5",
+      "size_bytes": 22989
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/screening_baseline/mac14screen_screening_baseline_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/screening_baseline/mac14screen_screening_baseline_e4b_r1_screening_45s_en.json",
+      "sha256": "09e31a2c74c305d7ac48ca5935da21ad1809e9fd73ebe617b610f99962b4b4e3",
+      "size_bytes": 11443
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_screening_baseline_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_screening_baseline_e4b_r1_screening_45s_en.csv",
+      "sha256": "1a10ee3b38ae66368d172637af370fef56f4890a9dc1e3e26cadfa9feab05a00",
+      "size_bytes": 4634
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_screening_baseline_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_screening_baseline_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "efc48e6cc3b13872aec3a3686c6f2b232d2bb1ecf267a8ead1a6f2c3b72e3c98",
+      "size_bytes": 60957
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_screening_baseline_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_screening_baseline_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "55a1423f7b0c93e0c14bdcaa6e6981338919bec48d8b99153f8080ea92dca13f",
+      "size_bytes": 22985
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/screening_baseline/mac14screen_screening_baseline_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/screening_baseline/mac14screen_screening_baseline_e4b_r2_screening_45s_en.json",
+      "sha256": "67dd95d2341772e05261ab2c158efc6c4bb0d6abafe8e1116943fe27a76ae079",
+      "size_bytes": 11438
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_screening_baseline_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_screening_baseline_e4b_r2_screening_45s_en.csv",
+      "sha256": "bce62674567d05d74445234b9a3a8e6412541448e8c93e7a8de3fdfe94d95223",
+      "size_bytes": 4635
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_screening_baseline_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_screening_baseline_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "66273450ceca1486f2f04c3f3217ce9517d864d87993595bdbc3d353ef53fd35",
+      "size_bytes": 61800
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_screening_baseline_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_screening_baseline_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "d6784507f8d9be851a2dffdc25ebe409a6ed87b3bf526287dc3a914f31706f9d",
+      "size_bytes": 22995
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_035/mac14screen_silence_035_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/silence_035/mac14screen_silence_035_e2b_r0_screening_45s_en.json",
+      "sha256": "bab72350316c8d1f0b8132568fd96dad387d579ab7d14f33ec1505d6dd0697b8",
+      "size_bytes": 11338
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_035_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_035_e2b_r0_screening_45s_en.csv",
+      "sha256": "f236d0cc34e0d5f2f1c0e8565c6e8337d8b4cc294c43073d2456bd11d78e3499",
+      "size_bytes": 4997
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_035_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_035_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "8fbd2b771f3ba3bb30214af9074b464dfe09f7590f377c1106f514a111a2dd8a",
+      "size_bytes": 63319
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_035_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_035_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "13ea5f93bf412de8ab866b18c81181707b033dabca744e5cda81f3c175c0ccc6",
+      "size_bytes": 25177
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_035/mac14screen_silence_035_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/silence_035/mac14screen_silence_035_e2b_r1_screening_45s_en.json",
+      "sha256": "041df6130076ba690efd9e87b8ba7adfcdb23176635c4f0f12825c044cd14d82",
+      "size_bytes": 11350
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_035_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_035_e2b_r1_screening_45s_en.csv",
+      "sha256": "79a956a75625a29d65dde543600326d433ed820d1ee81b69d95e6416ceaa5de0",
+      "size_bytes": 4997
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_035_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_035_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "ac926fb523a9530a33e7eabdb8740b0c1357d380e8d23614064e9a060c005643",
+      "size_bytes": 63321
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_035_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_035_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "e1df7e69d015cfe6b8091d7aefa44f06d6ea3d21791f3fbef91f3d0712bd9864",
+      "size_bytes": 25175
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_035/mac14screen_silence_035_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/silence_035/mac14screen_silence_035_e2b_r2_screening_45s_en.json",
+      "sha256": "74e5f05d8c3e08f982b98d27f12051a97756b8a8e6aa0bda7dffd7d81761537d",
+      "size_bytes": 11346
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_035_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_035_e2b_r2_screening_45s_en.csv",
+      "sha256": "44a72463f6b9a282e513c3c087d3a61a7b51785d59ee5895702127716a3d185e",
+      "size_bytes": 4993
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_035_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_035_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "0689ea8e4f102ac21eefc30a3a1e673ab599b2c9af7e92ba93eb2037a0b9dd96",
+      "size_bytes": 63330
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_035_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_035_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "e2b99089560372c42400a975b83fe5851d8d5af4bc50e6f801f9b63998e05e78",
+      "size_bytes": 25169
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_035/mac14screen_silence_035_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/silence_035/mac14screen_silence_035_e4b_r0_screening_45s_en.json",
+      "sha256": "a7979229551a6dea837508724476065d0dc3f9620208a5281714855756cc02a7",
+      "size_bytes": 11357
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_035_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_035_e4b_r0_screening_45s_en.csv",
+      "sha256": "91807cc4cffaf58461175efa61df4d1409347a043928ed74f46e63fa6ccdc2b8",
+      "size_bytes": 4999
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_035_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_035_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "3be5cb63880d167df8adcf4c0093001915ccfd955105e4e0e39ea06f6365a5b3",
+      "size_bytes": 61459
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_035_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_035_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "10ae74a50886c44522d33edc725838f682e1f3d6ba41f1db0f9fef6dfdaabce4",
+      "size_bytes": 25182
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_035/mac14screen_silence_035_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/silence_035/mac14screen_silence_035_e4b_r1_screening_45s_en.json",
+      "sha256": "9a587d0ba0da69c2027f2e76385f59f36858c65fcb571fea3ffb9d029327ee13",
+      "size_bytes": 11361
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_035_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_035_e4b_r1_screening_45s_en.csv",
+      "sha256": "fa63e19408f6322a2c1ebe3d758cec0366cb34bd7b68991f973a06755e798647",
+      "size_bytes": 4974
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_035_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_035_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "242b9c1ae9ec7c452bd38b81bbf514fa860feaa6ed40522bd0e02380483191db",
+      "size_bytes": 60699
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_035_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_035_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "ace5234a0c001e0acb206c9436b769db261c6f04712d5f47df542c2f68ca47f5",
+      "size_bytes": 25125
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_035/mac14screen_silence_035_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/silence_035/mac14screen_silence_035_e4b_r2_screening_45s_en.json",
+      "sha256": "9d16ce8ea5600b27e07d2a35d11d472d518408736f76f8561b07d34201e6fdff",
+      "size_bytes": 11346
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_035_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_035_e4b_r2_screening_45s_en.csv",
+      "sha256": "15f70a5bda2173eeed26ca718a7aaa57ca9baf4b822bd19af962de8f32d72bea",
+      "size_bytes": 4986
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_035_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_035_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "465142ef14e4a7dd6cb5e396fd784d9307f43c58337c503b521d114ca22565bd",
+      "size_bytes": 59800
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_035_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_035_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "059635814a404e136e5e1381ac8c23d7900ad33f81dc771be82e927a61afb2d5",
+      "size_bytes": 25155
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_04/mac14screen_silence_04_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/silence_04/mac14screen_silence_04_e2b_r0_screening_45s_en.json",
+      "sha256": "12e0792e9c496a97524b9c3160581e49385bd044ea749cfb34cc69530fd0589e",
+      "size_bytes": 11346
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_04_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_04_e2b_r0_screening_45s_en.csv",
+      "sha256": "d031e435b2d893145f9e9c7a0793a3b4326c244cccd68e743184be53dc3cd559",
+      "size_bytes": 4992
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_04_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_04_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "1253a5a17596fd1041a0aad702cd311a230c89fb9f967125aa61174da8b56ee2",
+      "size_bytes": 62332
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_04_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_04_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "6e8b5c736825020c9bf1312be57ce36cda2a1230962dfdee67ce59ce4092428d",
+      "size_bytes": 25149
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_04/mac14screen_silence_04_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/silence_04/mac14screen_silence_04_e2b_r1_screening_45s_en.json",
+      "sha256": "1817d9506d9473d23d5e613ba0f446ea5f0ff7b18bd0fd7df09672f0dc8923dd",
+      "size_bytes": 11336
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_04_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_04_e2b_r1_screening_45s_en.csv",
+      "sha256": "44ec083e25e3d1ae4ec01d29979a9b489bcff7123d354dd2c4817d15b58bd2df",
+      "size_bytes": 4990
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_04_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_04_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "f3c91a0698f43cb41d8ac906f7decc35bf8493373cdb97adceffc75b3d33a0e2",
+      "size_bytes": 63254
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_04_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_04_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "ec5c95d88899489d2904586c5e1f68aea2e21cad726425aec415da494d7d0e58",
+      "size_bytes": 25146
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_04/mac14screen_silence_04_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/silence_04/mac14screen_silence_04_e2b_r2_screening_45s_en.json",
+      "sha256": "e3d34bab02ed6ebeaba76e3e38944ddeaaf9579897327ad64270d3f6ce8be86f",
+      "size_bytes": 11356
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_04_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_04_e2b_r2_screening_45s_en.csv",
+      "sha256": "e599a5613699e244895bee1b1ff5bcb1355c32c64147ce0adb438b0b300414bd",
+      "size_bytes": 4995
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_04_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_04_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "114abdbc33379f1a3090baa109396c872a9ea54b82b4c0ee738422d252474f91",
+      "size_bytes": 63247
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_04_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_04_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "31240afb8c01d11a336160b5243b11a682a8d1887d40e5e841758f83663c6e25",
+      "size_bytes": 25153
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_04/mac14screen_silence_04_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/silence_04/mac14screen_silence_04_e4b_r0_screening_45s_en.json",
+      "sha256": "5b759093559cc91886655793e1f96933d8f8ab3321dbe7864c11a1e8fffef686",
+      "size_bytes": 11352
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_04_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_04_e4b_r0_screening_45s_en.csv",
+      "sha256": "6cfb4ac28b7a09c1fec76020c2c3718bc5e5b085c9ff712f8f79205d53fab9b8",
+      "size_bytes": 4987
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_04_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_04_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "7efe2414507b10f51d489ea706a454b994b1408e832a1f329409062b178a0911",
+      "size_bytes": 62346
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_04_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_04_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "114673840dccd38cfaf8f702f69e6b493a8e93070b4b14c0804bde24638ac0b8",
+      "size_bytes": 25100
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_04/mac14screen_silence_04_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/silence_04/mac14screen_silence_04_e4b_r1_screening_45s_en.json",
+      "sha256": "f1b3500075bdc0f58a7b65888fea23f567dfe676ae1e4db66574be048b2231f2",
+      "size_bytes": 11381
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_04_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_04_e4b_r1_screening_45s_en.csv",
+      "sha256": "f9dca8ef7ea1b6eb35ccba6d84e6ed1c26a415adc293f77e2eb8889f13e8e515",
+      "size_bytes": 4987
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_04_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_04_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "b44d865904e14eef3ae71185d38aa9f28a6d54d6ac0701c09dde5c567008027a",
+      "size_bytes": 61402
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_04_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_04_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "1c754ac3cc9af0646f02dc5b4033707c4f8a2e38f6ff6bc44d9e67be489b6b7b",
+      "size_bytes": 25146
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/silence_04/mac14screen_silence_04_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/silence_04/mac14screen_silence_04_e4b_r2_screening_45s_en.json",
+      "sha256": "622dbca90368a123d93ed315e561121178749bbe6e6489296d9201199e36ddcd",
+      "size_bytes": 11361
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_silence_04_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_silence_04_e4b_r2_screening_45s_en.csv",
+      "sha256": "630f109d89b24b19dfa5a7716499eaad094d3967eadd9aaf477803a49ac8b975",
+      "size_bytes": 4989
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_silence_04_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_silence_04_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "994daf5ed876a258b9946d37f803ad64b5c4eba532f7dbb1410cdc770cb5fd42",
+      "size_bytes": 61479
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_silence_04_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_silence_04_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "a964bff5077dfe73a9426de1925001d36afb8e88bc0ab16ec72c222b23b13fa1",
+      "size_bytes": 25148
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/terminology/mac14screen_terminology_e2b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/terminology/mac14screen_terminology_e2b_r0_screening_45s_en.json",
+      "sha256": "bb6589ba6ab35712a12f75c81278aaebdfc8457e770e374556413c5b5eebfe3a",
+      "size_bytes": 11432
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_terminology_e2b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_terminology_e2b_r0_screening_45s_en.csv",
+      "sha256": "c19cc1217b705a7aefb20da2b08a4b47f222d4a53456823b57b0c3731ac5cee4",
+      "size_bytes": 4618
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_terminology_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_terminology_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "89647f58a3bbf278ae0c51acf62b48619ce1046d589e5ef87ad10be1f5a10c76",
+      "size_bytes": 61313
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_terminology_e2b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_terminology_e2b_r0_screening_45s_en.jsonl",
+      "sha256": "fb455c8d9cb06499b5fb68871a7c2bd143c7b5e63d244b3daa2fdbad142a5685",
+      "size_bytes": 22811
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/terminology/mac14screen_terminology_e2b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/terminology/mac14screen_terminology_e2b_r1_screening_45s_en.json",
+      "sha256": "af2e2c53c00186a5a84709013f585ffb27e716e3862d1ce780ea142aa1bd78f1",
+      "size_bytes": 11425
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_terminology_e2b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_terminology_e2b_r1_screening_45s_en.csv",
+      "sha256": "90db0dc0f242781d13a6735516434212b07e9448b9d4b9a5460ae1d610f3ad63",
+      "size_bytes": 4615
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_terminology_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_terminology_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "9d31acb3501447d9a67edd109a373f03d81d3bde14a93fb769067b0c126c3d26",
+      "size_bytes": 62188
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_terminology_e2b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_terminology_e2b_r1_screening_45s_en.jsonl",
+      "sha256": "88f8410dc11298aeb603b7a72b3719bc2aa19daa7b50fe34f4ee60d88d366e63",
+      "size_bytes": 22816
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/terminology/mac14screen_terminology_e2b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/terminology/mac14screen_terminology_e2b_r2_screening_45s_en.json",
+      "sha256": "8ab85d62846df4aac121292ffa255eb13f6d070dca8e3647a13a4245e06d74f5",
+      "size_bytes": 11436
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_terminology_e2b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_terminology_e2b_r2_screening_45s_en.csv",
+      "sha256": "15ed8aaa41430805e928cb6e0e359c6eb1db7ba07e321b7b92255ab2ee7aeb3c",
+      "size_bytes": 4620
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_terminology_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_terminology_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "5eb6d95186f496b00330fdd199b36af80415749f2390788a61c582e66fd41c7c",
+      "size_bytes": 62178
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_terminology_e2b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_terminology_e2b_r2_screening_45s_en.jsonl",
+      "sha256": "04d77ec5c09810b2995cb22189163b5f7fd30b581ef03cb969dd494eecaf1cd1",
+      "size_bytes": 22807
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/terminology/mac14screen_terminology_e4b_r0_screening_45s_en.json",
+      "report_path": "raw/runs/terminology/mac14screen_terminology_e4b_r0_screening_45s_en.json",
+      "sha256": "6805163f0790016d226dc4a76cf8f74872d30a4894871b438a4654ac0beb4992",
+      "size_bytes": 11463
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_terminology_e4b_r0_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_terminology_e4b_r0_screening_45s_en.csv",
+      "sha256": "7261c69543e7cddf1dd6de69a3772b707d68f54d967e9bd7d2c4c8fd223afad4",
+      "size_bytes": 4646
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_terminology_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_terminology_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "b1c6c85b6973cfce8abb3de65cacc3c1041f46fff014f16734d400e39d652fb4",
+      "size_bytes": 59558
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_terminology_e4b_r0_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_terminology_e4b_r0_screening_45s_en.jsonl",
+      "sha256": "ff71e5d08ae1193aa40637c6ff297a9a3e465a281432c090d079671b0d336692",
+      "size_bytes": 22844
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/terminology/mac14screen_terminology_e4b_r1_screening_45s_en.json",
+      "report_path": "raw/runs/terminology/mac14screen_terminology_e4b_r1_screening_45s_en.json",
+      "sha256": "7dcacb422aa3e93d3d5fff644573ae7fb6750e755ae0722e66620f070913bdaa",
+      "size_bytes": 11449
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_terminology_e4b_r1_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_terminology_e4b_r1_screening_45s_en.csv",
+      "sha256": "d1b301d3ec0da8b9488d468581da48f07b807be0becaea5aff5ad862910d4fc4",
+      "size_bytes": 4643
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_terminology_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_terminology_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "bc72c42e6a0665d2e79e37e945fb48dc1714f0f907f399f597605d1966943075",
+      "size_bytes": 59569
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_terminology_e4b_r1_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_terminology_e4b_r1_screening_45s_en.jsonl",
+      "sha256": "ed4166b2ea4e1e5145abcbbe7d82785ce5377743ef353a5ba88323474543a6db",
+      "size_bytes": 22835
+    },
+    {
+      "original_path": "metrics/mac_roadmap/experiments/terminology/mac14screen_terminology_e4b_r2_screening_45s_en.json",
+      "report_path": "raw/runs/terminology/mac14screen_terminology_e4b_r2_screening_45s_en.json",
+      "sha256": "4cddcc6ea375e1ce27652515e0206d6e232b9dc3e618785639e96357fb0ecd5d",
+      "size_bytes": 11452
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14screen_terminology_e4b_r2_screening_45s_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14screen_terminology_e4b_r2_screening_45s_en.csv",
+      "sha256": "fb4d05a1a2437782ddd944d28d778b7f36036d2c1b62dfbd97994fa9eebf0d75",
+      "size_bytes": 4653
+    },
+    {
+      "original_path": "metrics/partials_mac14screen_terminology_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/timing/partials_mac14screen_terminology_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "3d47d8e0b012540de065356aeb8d054d4b2420f8cdabe871697644fc8c7424eb",
+      "size_bytes": 54088
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14screen_terminology_e4b_r2_screening_45s_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14screen_terminology_e4b_r2_screening_45s_en.jsonl",
+      "sha256": "da68af97dbfde322a832e368e758ccc45f38c71a23d4d693b6823d253b2e5c06",
+      "size_bytes": 22849
+    },
+    {
+      "original_path": ".cache/mac-roadmap/vad-cache-proof.json",
+      "report_path": "raw/provenance/vad-cache-proof.json",
+      "sha256": "36bb23be5242996889a012560546fdf9c01bf720ffa6a4f9c0f1efefa3952fa0",
+      "size_bytes": 1630
+    }
+  ]
+}
