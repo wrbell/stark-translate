@@ -4,7 +4,7 @@ This describes the overnight reliability implementation. The integrated UI uses 
 
 ## Before a service
 
-Select a runtime profile and language, then run preflight. Profiles listed by `GET /api/capabilities` are selectable software configurations; the list does not establish that their models or dependencies are installed. Preflight reports the effective configuration, and Start runs fresh server-side preflight again. A failed preflight returns HTTP 422 with `detail.code = preflight_failed` and the current checks. A stale green browser result cannot bypass it.
+Select a runtime profile and language, then run preflight. Profiles listed by `GET /api/capabilities` are selectable software configurations; the list does not establish that their models or dependencies are installed. Preflight reports the effective configuration, and Start runs fresh server-side preflight again. A failed preflight returns HTTP 422 with `detail.code = preflight_failed` and the current checks. A stale green browser result cannot bypass it. Language, VAD and engine restarts run the same check before stopping the working session. An engine choice incompatible with the selected profile is rejected without restarting.
 
 Use the input test while idle, with the actual microphone selected. It reports sample count, RMS and peak level; it does not save a recording. The output test plays a short quiet tone on the selected device. These tests, a live session, and a summary share an exclusive work reservation within one operator process. A conflicting request returns HTTP 409. The reservation is released after the owned subprocess exits, including cancellation and timeout.
 
@@ -48,6 +48,8 @@ Thirty-day pruning applies to rotated application logs and operational session l
 Storage inspection reports disk capacity/free space and per-session removable operational-log bytes. Cleanup is explicit: preview completed sessions, inspect the file list, then confirm that preview. Completion and file hashes are checked again before deletion. Unknown, failed and running session logs cannot be removed by this cleanup API. Originals are always preserved.
 
 `record_audio:false` disables saving original chunk WAVs. It does not mean no audio is stored: enabled speaker identification still uses a rolling WAV, and TTS `wav`/`both` modes save synthesized audio. Use the setting label “Save original chunk audio”.
+
+Summary output names are generated from the selected session CSV (`metrics/summary_<session>.json`). The web API cannot redirect a summary into original diagnostics, lifecycle evidence, another session summary, or an arbitrary custom file.
 
 Support exports are local ZIP downloads. By default they contain allowlisted metadata, model revision/hash evidence, storage state, and bounded error codes. They exclude transcript text, audio, raw operational log messages, environment variables, local model paths, and user home paths. Text and original chunk audio require explicit opt-in followed by a preview. Attachment totals are limited to 100 MiB; changed attachments invalidate the preview. Preview tokens expire after ten minutes and are bound to the installation and action. Symlink paths are rejected.
 

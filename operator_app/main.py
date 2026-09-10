@@ -14,6 +14,7 @@ import json
 import logging
 import logging.handlers
 import os
+import re
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
@@ -205,6 +206,35 @@ def _preflight_config(cfg, root):
     )
 
 
+def _require_preflight(cfg, runner):
+    checks = _preflight_config(cfg, runner._project_root)
+    if not checks["ok"]:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "preflight_failed",
+                "message": "The selected configuration is not ready. Resolve the failed checks before starting.",
+                "checks": checks["checks"],
+            },
+        )
+
+
+def _checked_restart(cfg, runner, *, requested_engine=None):
+    _require_preflight(cfg, runner)
+    if requested_engine is not None and cfg.engine != requested_engine:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "profile_conflict",
+                "message": f"The {cfg.profile} profile requires engine {cfg.engine}. Choose a matching profile before switching engines.",
+            },
+        )
+    try:
+        return runner.restart_with(cfg).to_dict()
+    except (WorkBusyError, SessionAlreadyRunningError, InvalidStateError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
 @app.get("/api/preflight")
 def api_preflight(
     backend: str = "auto",
@@ -262,16 +292,7 @@ def api_session_start(req: StartRequest, runner: PipelineRunner = Depends(get_ru
     cfg = SessionConfig(**req.model_dump())
     if runner.status().state in {"starting", "running", "paused", "stopping"}:
         raise HTTPException(status_code=409, detail="A session is already running")
-    checks = _preflight_config(cfg, runner._project_root)
-    if not checks["ok"]:
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "code": "preflight_failed",
-                "message": "The selected configuration is not ready. Resolve the failed checks before starting.",
-                "checks": checks["checks"],
-            },
-        )
+    _require_preflight(cfg, runner)
     try:
         snap = runner.start(cfg)
     except WorkBusyError as exc:
@@ -328,7 +349,7 @@ def api_control_lang_flip(runner: PipelineRunner = Depends(get_runner)) -> dict:
         raise HTTPException(status_code=409, detail="no active session to flip")
     cfg = SessionConfig(**snap.config)
     cfg.lang = "es" if cfg.lang == "en" else "en"
-    return runner.restart_with(cfg).to_dict()
+    return _checked_restart(cfg, runner)
 
 
 @app.post("/api/control/vad")
@@ -339,7 +360,7 @@ def api_control_vad(req: VadRequest, runner: PipelineRunner = Depends(get_runner
         raise HTTPException(status_code=409, detail="no active session to retune")
     cfg = SessionConfig(**snap.config)
     cfg.vad_threshold = req.threshold
-    return runner.restart_with(cfg).to_dict()
+    return _checked_restart(cfg, runner)
 
 
 @app.post("/api/control/fallback")
@@ -350,7 +371,7 @@ def api_control_fallback(req: FallbackRequest, runner: PipelineRunner = Depends(
         raise HTTPException(status_code=409, detail="no active session to swap")
     cfg = SessionConfig(**snap.config)
     cfg.engine = req.engine
-    return runner.restart_with(cfg).to_dict()
+    return _checked_restart(cfg, runner, requested_engine=req.engine)
 
 
 # -- features (Phase 9.6) -----------------------------------------------------
@@ -405,12 +426,22 @@ def api_features_summary(
     if not Path(csv_path).exists():
         raise HTTPException(status_code=404, detail=f"csv_path does not exist: {csv_path}")
     root = runner._project_root.resolve()
-    source = Path(csv_path).resolve()
-    output = Path(req.output_path).resolve() if req.output_path else None
-    if source.parent != root / "metrics" or (output and output.parent != root / "metrics"):
-        raise HTTPException(
-            status_code=400, detail="Summary paths must stay inside this installation's metrics directory"
-        )
+    from operator_app.support import _scoped
+
+    try:
+        source = _scoped(root, Path(csv_path)).resolve()
+        if source.parent != root / "metrics" or source.suffix != ".csv" or not source.is_file():
+            raise ValueError("Summary input must be a CSV inside this installation's metrics directory")
+        expected_name = f"summary_{source.stem.removeprefix('ab_metrics_')}.json"
+        output = _scoped(root, root / "metrics" / expected_name)
+        if not re.fullmatch(r"summary_[A-Za-z0-9][A-Za-z0-9_.-]{0,159}\.json", output.name):
+            raise ValueError("Invalid session filename for a summary")
+        if req.output_path is not None and _scoped(root, Path(req.output_path)).resolve() != output:
+            raise ValueError("Summary output is generated from the session name; custom output paths are not supported")
+        if output == source:
+            raise ValueError("A summary cannot replace its input")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     try:
         task = get_summary_runner(project_root=root).submit(
             csv_path=str(source), output_path=str(output) if output else None

@@ -471,3 +471,123 @@ def test_support_rejects_parent_symlink_inside_same_installation(tmp_path):
     (tmp_path / "stark_data").symlink_to(tmp_path / "inside", target_is_directory=True)
     with pytest.raises(ValueError, match="symlinks"):
         preview_support(tmp_path, SupportRequest(session_id="service_en", include_audio=True))
+
+
+@pytest.mark.parametrize(
+    "target_name",
+    [
+        "diagnostics_service_en.jsonl",
+        "session_lifecycle_service_en.json",
+        "ab_metrics_service_en.csv",
+        "summary_other_session.json",
+    ],
+)
+def test_summary_web_output_cannot_replace_recording_evidence(tmp_path, monkeypatch, target_name):
+    from unittest.mock import Mock
+
+    from fastapi.testclient import TestClient
+
+    from operator_app.main import app
+    from operator_app.pipeline_manager import PipelineRunner, get_runner
+
+    folder = tmp_path / "metrics"
+    folder.mkdir()
+    source = folder / "ab_metrics_service_en.csv"
+    source.write_text("chunk_id,english\n1,Hello\n")
+    target = folder / target_name
+    if target != source:
+        target.write_text("original evidence")
+    original = target.read_bytes()
+    summary = Mock()
+    monkeypatch.setattr("operator_app.main.get_summary_runner", lambda **kwargs: summary)
+    app.dependency_overrides[get_runner] = lambda: PipelineRunner(tmp_path)
+    try:
+        response = TestClient(app).post(
+            "/api/features/summary", json={"csv_path": str(source), "output_path": str(target)}
+        )
+        assert response.status_code == 400
+        summary.submit.assert_not_called()
+        assert target.read_bytes() == original
+    finally:
+        app.dependency_overrides.pop(get_runner)
+
+
+def test_summary_default_output_remains_compatible(tmp_path, monkeypatch):
+    from unittest.mock import Mock
+
+    from fastapi.testclient import TestClient
+
+    from operator_app.features import SummaryTask
+    from operator_app.main import app
+    from operator_app.pipeline_manager import PipelineRunner, get_runner
+
+    source = tmp_path / "metrics" / "ab_metrics_service_en.csv"
+    source.parent.mkdir()
+    source.write_text("chunk_id,english\n1,Hello\n")
+    output = source.parent / "summary_service_en.json"
+    summary = Mock()
+    summary.submit.return_value = SummaryTask(task_id="task", csv_path=str(source), output_path=str(output))
+    monkeypatch.setattr("operator_app.main.get_summary_runner", lambda **kwargs: summary)
+    app.dependency_overrides[get_runner] = lambda: PipelineRunner(tmp_path)
+    try:
+        for body in ({"csv_path": str(source)}, {"csv_path": str(source), "output_path": str(output)}):
+            response = TestClient(app).post("/api/features/summary", json=body)
+            assert response.status_code == 200
+            summary.submit.assert_called_with(csv_path=str(source), output_path=str(output))
+    finally:
+        app.dependency_overrides.pop(get_runner)
+
+
+@pytest.mark.parametrize("route,body", [("lang_flip", {}), ("vad", {"threshold": 0.6}), ("fallback", {"engine": "hf"})])
+def test_restarts_validate_before_stopping_working_session(tmp_path, monkeypatch, route, body):
+    from unittest.mock import Mock
+
+    from fastapi.testclient import TestClient
+
+    from operator_app.main import app
+    from operator_app.pipeline_manager import SessionConfig, SessionStatus, get_runner
+
+    runner = Mock()
+    runner._project_root = tmp_path
+    runner.status.return_value = SessionStatus(state="running", config=SessionConfig().__dict__.copy())
+    checks = Mock(return_value={"ok": False, "checks": [{"name": "Models", "status": "fail"}]})
+    monkeypatch.setattr("operator_app.main.run_all_checks", checks)
+    app.dependency_overrides[get_runner] = lambda: runner
+    try:
+        response = TestClient(app).post(f"/api/control/{route}", json=body)
+        assert response.status_code == 422 and response.json()["detail"]["code"] == "preflight_failed"
+        runner.restart_with.assert_not_called()
+        runner.stop.assert_not_called()
+        assert runner.status.return_value.state == "running"
+        assert checks.call_args.kwargs["lang"] == ("es" if route == "lang_flip" else "en")
+    finally:
+        app.dependency_overrides.pop(get_runner)
+
+
+def test_restart_cannot_claim_engine_rejected_by_effective_profile(tmp_path, monkeypatch):
+    from unittest.mock import Mock
+
+    from fastapi.testclient import TestClient
+
+    from operator_app.main import app
+    from operator_app.pipeline_manager import SessionConfig, SessionStatus, get_runner
+
+    runner = Mock()
+    runner._project_root = tmp_path
+    runner.status.return_value = SessionStatus(
+        state="running",
+        config=SessionConfig(profile="lite-cpu-quality", backend="cpu", engine="llamacpp").__dict__.copy(),
+    )
+
+    def preflight(cfg, root):
+        cfg.engine = "llamacpp"  # selected profile's canonical policy
+        return {"ok": True, "checks": []}
+
+    monkeypatch.setattr("operator_app.main._preflight_config", preflight)
+    app.dependency_overrides[get_runner] = lambda: runner
+    try:
+        response = TestClient(app).post("/api/control/fallback", json={"engine": "hf"})
+        assert response.status_code == 422 and response.json()["detail"]["code"] == "profile_conflict"
+        runner.restart_with.assert_not_called()
+    finally:
+        app.dependency_overrides.pop(get_runner)
