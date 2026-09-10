@@ -105,6 +105,10 @@ gain plus human review.
 
 ---
 
+The [next EN↔ES latency proposals](latency_next_experiments.md) rank subsequent
+experiments from observed stage delays. They require profiling and confirmation;
+they are not implemented default changes.
+
 ## Completed Work (historical)
 
 ### Phase 1: Infrastructure & Inference (done; v2026.1–v2026.6)

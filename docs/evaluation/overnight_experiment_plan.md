@@ -104,3 +104,8 @@ reported a locked screen while the audience document still reported `visible` an
 continued rendering acknowledgements. Lock onset was not observed. Reports must
 distinguish this browser protocol telemetry from an attended physical display
 check; server latency and source coverage remain independently measurable.
+
+The [subsequent EN↔ES experiment proposals](../latency_next_experiments.md) target
+earlier endpoint commitment, deadline-aware partial admission and measured TDT
+readback overhead. They are research follow-ups, not current optimizations or
+evidence that a default should change.
