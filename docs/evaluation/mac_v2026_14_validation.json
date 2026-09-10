@@ -20,7 +20,8 @@
       "B603",
       "B607",
       "B615"
-    ]
+    ],
+    "evidence": ".cache/mac-roadmap/bandit-ci-release.json"
   },
   "bandit_expanded": {
     "status": "findings",
@@ -31,7 +32,8 @@
       "previous_findings_with_documented_cache_and_fallback_limits": 26,
       "guarded_full_commit_revision_false_positive": 1
     },
-    "report": "docs/evaluation/mac_v2026_14_security.md"
+    "report": "docs/evaluation/mac_v2026_14_security.md",
+    "evidence": ".cache/mac-roadmap/bandit-expanded-release.json"
   },
   "vulture": {
     "status": "advisory",
@@ -50,17 +52,18 @@
   },
   "cpu_suite": {
     "status": "passed",
-    "passed": 1785,
+    "passed": 1787,
     "skipped": 4,
-    "duration_s": 42.96,
-    "coverage_percent": 59.05,
-    "log": ".cache/mac-roadmap/full-tests-final.log",
-    "coverage": ".cache/mac-roadmap/coverage-final.json",
+    "duration_s": 41.07,
+    "coverage_percent": 59.07,
+    "log": ".cache/mac-roadmap/full-tests-release.log",
+    "coverage": ".cache/mac-roadmap/coverage-release.json",
     "initial_failure": {
       "log": ".cache/mac-roadmap/full-tests-final-initial-failure.log",
       "reason": "The old packaging shape test did not accept derived-ct2 entries. It now validates their pinned source, direction and int8 quantization.",
       "fix_revision": "753c48e"
-    }
+    },
+    "packaging_followup": "Complete suite rerun after source-ZIP generated-data exclusion and verification-order regressions; earlier passed and failed logs preserved."
   },
   "browser": {
     "review_draft_reload": "passed",
@@ -78,8 +81,8 @@
     "report": ".cache/html5-validation/report-final.json"
   },
   "schema_version": 2,
-  "observed_at": "2026-09-10T02:39:57.197295+00:00",
-  "code_revision": "8e98997dc71eca02ba211298555b5dd4d58c4e30",
+  "observed_at": "2026-09-10T02:49:43.771041+00:00",
+  "code_revision": "a123c266b6105073e00465b68b978c21cfbdb601",
   "replays": {
     "historical_baseline": {
       "completed": 18,
@@ -162,6 +165,26 @@
       "path": ".cache/mac-roadmap/ct2-setup-validation/report.json",
       "size_bytes": 5826,
       "sha256": "6efef22b1fabec321eb543eef7da0999ecf242a820025fa67b0d8e55fa0b19cf"
+    },
+    {
+      "path": ".cache/mac-roadmap/full-tests-release.log",
+      "size_bytes": 18653,
+      "sha256": "93112935601c16231289b9512763ee4644f39566ecddcd7015b3efd347d62b1d"
+    },
+    {
+      "path": ".cache/mac-roadmap/coverage-release.json",
+      "size_bytes": 567636,
+      "sha256": "01817b53b720e98169ca9f27b0a636e0817f6afb564420434dccc05f39931604"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-ci-release.json",
+      "size_bytes": 23557,
+      "sha256": "60d5d8e36a6c301d644d52ba8d779a928fc3bfb4650d263999541e33f0a94014"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-expanded-release.json",
+      "size_bytes": 47576,
+      "sha256": "9321143316624b3a0145818f1a6fcd8bcd2c790d1b09ed82b5403649d9b60ccb"
     }
   ],
   "visible_browser_status": {
