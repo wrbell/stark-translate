@@ -123,6 +123,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["stark_translate", "operator_app", "engines", "tools", "features"]
+exclude = ["/tools/roundtrip_output/**", "/tools/roundtrip_texts/**"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "settings.py" = "settings.py"
@@ -163,6 +164,8 @@ include = [
     "*.sh",
 ]
 exclude = [
+    "/tools/roundtrip_output/**",
+    "/tools/roundtrip_texts/**",
     "stt-data",
     "stark_data",
     "whisper_ablation",

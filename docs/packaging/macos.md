@@ -90,6 +90,8 @@ Build a complete source ZIP with `python tools/release_artifacts.py mac`.
 Release workflows reject tag/project/Briefcase version mismatches and include
 CLI, operator UI, tools, workers, displays, model manifest and launch scripts.
 Source distributions and Mac ZIPs also include the current documentation and tests.
+Generated roundtrip audio/text directories are excluded explicitly, including
+when a wheel is built from an unpacked source ZIP without Git ignore metadata.
 
 For a Mac installation check, use a separate virtual environment and install the
 built wheel with `[mlx,eval,diarization]` extras, then run `python -m pip check`.
@@ -99,3 +101,5 @@ the health and operator routes, the review JavaScript, and required runtime file
 Import the selected runtime dependencies with `HF_HUB_OFFLINE=1` to verify native
 library loading before a separate model/inference check. Rebuild and reinstall
 the wheel after the final source/version changes so the check covers the release artifact.
+Also unpack the Mac ZIP, build its wheel offline, compare its contents with the
+sdist-built wheel, and run the outside-checkout smoke after installing each.

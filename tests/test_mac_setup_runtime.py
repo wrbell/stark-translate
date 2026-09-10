@@ -234,6 +234,46 @@ def test_mac_bundle_contains_installable_runtime(tmp_path):
     verify_artifact(bundle)
 
 
+def test_mac_bundle_from_unpacked_source_excludes_generated_roundtrip_data(tmp_path):
+    import zipfile
+
+    bundle = build_mac_bundle(ROOT, tmp_path / "initial", f"v{validate_version(ROOT)}")
+    source = tmp_path / "unpacked"
+    with zipfile.ZipFile(bundle) as archive:
+        archive.extractall(source)
+    assert not (source / ".git").exists()
+    for name in ("tools/roundtrip_output/private.wav", "tools/roundtrip_texts/private.txt"):
+        path = source / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"generated fixture, not release content")
+    rebuilt = build_mac_bundle(source, tmp_path / "rebuilt", f"v{validate_version(ROOT)}")
+    with zipfile.ZipFile(rebuilt) as archive:
+        names = archive.namelist()
+        assert not any(name.startswith(("tools/roundtrip_output/", "tools/roundtrip_texts/")) for name in names)
+        assert archive.read("dry_run_ab.py") == (ROOT / "dry_run_ab.py").read_bytes()
+        assert archive.read("docs/packaging/macos.md") == (ROOT / "docs/packaging/macos.md").read_bytes()
+    with zipfile.ZipFile(rebuilt, "a") as archive:
+        archive.writestr("tools/roundtrip_output/private.wav", b"generated fixture")
+    with pytest.raises(ValueError, match="generated roundtrip"):
+        verify_artifact(rebuilt)
+
+
+def test_verifying_source_zip_does_not_change_wheel_requirements(tmp_path):
+    import zipfile
+
+    from tools.release_artifacts import RUNTIME_REQUIRED
+
+    assert "docs/packaging/macos.md" not in RUNTIME_REQUIRED
+    wheel = tmp_path / "runtime.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        for name in RUNTIME_REQUIRED:
+            archive.writestr(name, b"runtime fixture")
+    verify_artifact(wheel)
+    bundle = build_mac_bundle(ROOT, tmp_path / "source", f"v{validate_version(ROOT)}")
+    verify_artifact(bundle)
+    verify_artifact(wheel)
+
+
 def test_source_cli_version_does_not_report_an_old_installed_distribution():
     from operator_app.cli import _resolve_version
 

@@ -57,6 +57,11 @@ RUNTIME_REQUIRED = {
     "models.lock.json",
 }
 SOURCE_REQUIRED = {"pyproject.toml", "README.md", "docs/packaging/macos.md", "tests/test_mac_setup_runtime.py"}
+GENERATED_TREES = ("tools/roundtrip_output", "tools/roundtrip_texts")
+
+
+def _generated_output(name: str) -> bool:
+    return any(name == tree or name.startswith(tree + "/") for tree in GENERATED_TREES)
 
 
 def validate_version(root: Path, tag: str | None = None, *, check_ref: bool = False) -> str:
@@ -92,6 +97,7 @@ def build_mac_bundle(root: Path, output_dir: Path, tag: str) -> Path:
                     and not path.is_symlink()
                     and "__pycache__" not in path.parts
                     and path.suffix != ".pyc"
+                    and not _generated_output(path.relative_to(root).as_posix())
                     and (item != "training" or path.suffix in {".py", ".sh", ".md"})
                 ):
                     archive.write(path, path.relative_to(root))
@@ -107,7 +113,7 @@ def verify_artifact(path: Path) -> None:
     else:
         with zipfile.ZipFile(path) as archive:
             names = set(archive.namelist())
-        required = RUNTIME_REQUIRED
+        required = set(RUNTIME_REQUIRED)
         if path.suffix == ".zip":
             required |= SOURCE_REQUIRED | {"run_operator.sh", "bootstrap.sh", "scripts/runtime_env.sh"}
     missing = required - names
@@ -115,6 +121,8 @@ def verify_artifact(path: Path) -> None:
         raise ValueError(f"{path.name} missing runtime files: {', '.join(sorted(missing))}")
     if any("__pycache__" in name or name.endswith(".pyc") for name in names):
         raise ValueError(f"{path.name} includes Python cache files")
+    if any(_generated_output(name) for name in names):
+        raise ValueError(f"{path.name} includes generated roundtrip audio/text outputs")
 
 
 def main() -> None:
