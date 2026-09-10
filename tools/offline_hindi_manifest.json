@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "id": "offline_hindi_church_audio_v1",
+  "usage": "evaluation_only",
+  "source_lang": "en",
+  "target_lang": "hi",
+  "base_manifest_sha256": "3f000c1cd4d1fedf063ab98b1f7b81fa5b8be60a095531f086a4de3c96cd6716",
+  "reference_status": "Hindi references unavailable in local corpus; bilingual review pending",
+  "audio_sources": [
+    {
+      "path": "stark_data/replay/mac_screening_45s.wav",
+      "sha256": "7e5510ea9296ec86523535fe72882be593d3ac39c59bd3385bd875bf18944a0a",
+      "duration": 45.0,
+      "lang": "en",
+      "offset_s": 1290,
+      "rms": 0.1376,
+      "id": "december_45s",
+      "provenance": "church_replay",
+      "reference_status": "unreviewed",
+      "conditions": [
+        "speech"
+      ],
+      "parent_audio_sha256": "db11fb4c96131390e178e59e29f5d47f550a0e68047e3401f898094d40babd3f",
+      "reference_hi": null,
+      "reference_provenance": null
+    },
+    {
+      "path": "stark_data/replay/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "sha256": "a7b69415c26c16918b785152e92994ec5018d5f19d513ec27a3aee99bab8ae78",
+      "duration": 150.0,
+      "lang": "en",
+      "offset_s": 1170,
+      "rms": 0.1643,
+      "id": "february_150s",
+      "provenance": "church_replay",
+      "reference_status": "unreviewed",
+      "conditions": [
+        "speech"
+      ],
+      "reference_hi": null,
+      "reference_provenance": null
+    }
+  ],
+  "text_probes": [
+    {
+      "id": "canary_1",
+      "kind": "theological_text_probe",
+      "source": "The atonement of Christ reconciles us to God.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    },
+    {
+      "id": "canary_2",
+      "kind": "theological_text_probe",
+      "source": "James wrote about faith and works.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    },
+    {
+      "id": "canary_3",
+      "kind": "theological_text_probe",
+      "source": "The propitiation for our sins was the blood of Christ.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    },
+    {
+      "id": "canary_4",
+      "kind": "theological_text_probe",
+      "source": "The breaking of bread is a solemn remembrance.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    },
+    {
+      "id": "canary_5",
+      "kind": "theological_text_probe",
+      "source": "Paul wrote to the Corinthians about the resurrection.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    },
+    {
+      "id": "canary_6",
+      "kind": "theological_text_probe",
+      "source": "Justification is by faith alone, not by works of the law.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    },
+    {
+      "id": "canary_7",
+      "kind": "theological_text_probe",
+      "source": "The Holy Spirit convicts the world of sin and righteousness.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    },
+    {
+      "id": "canary_8",
+      "kind": "theological_text_probe",
+      "source": "Grace and mercy meet at the cross of our Lord Jesus Christ.",
+      "source_provenance": "training/theological_canaries.py",
+      "reference_hi": null,
+      "reference_provenance": null,
+      "required_hindi_terms": null
+    }
+  ]
+}
