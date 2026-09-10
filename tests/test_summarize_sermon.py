@@ -82,6 +82,57 @@ def test_summary_failed_first_forward_is_not_reported_ready(summary_runtime):
         summary.load_summarization_model()
 
 
+@pytest.mark.parametrize("diarized", [False, True])
+def test_spanish_summary_uses_live_translation_prompt_without_loading_another_model(
+    summary_runtime, monkeypatch, diarized
+):
+    from engines.translation_prompts import build_chat_messages
+
+    summary, tokenizer, runtime, calls, _ = summary_runtime
+    monkeypatch.setattr(summary.settings.translation, "terminology_prompt", "none")
+    model, tokenizer = summary.load_summarization_model()
+    english = "God loves the world. Christ died for our sins. John 3:16 offers hope."
+    spanish = "Dios ama al mundo. Cristo murió por nuestros pecados. Juan 3:16 ofrece esperanza."
+    replies = iter([english, f"Here is the translation:\n{spanish}<turn|><|channel>thought"])
+
+    def generate(loaded_model, loaded_tokenizer, **kwargs):
+        assert loaded_model is model and loaded_tokenizer is tokenizer
+        calls.append(("summary_generate", kwargs))
+        return next(replies)
+
+    runtime.generate = generate
+    if diarized:
+        result = summary.summarize_with_diarization(model, tokenizer, "Transcript", {"A": "One", "B": "Two"})
+    else:
+        result = summary.summarize_without_diarization(model, tokenizer, "Transcript")
+
+    assert result["english"] == english
+    assert result["spanish"] == spanish
+    template = [call for call in calls if call[0] == "template"][-1]
+    assert template[1] == build_chat_messages(english, source_lang="en", target_lang="es", model_family="gemma4")
+    assert "Output only the translation, nothing else." in template[1][0]["content"]
+    assert template[2]["enable_thinking"] is False
+    assert len([call for call in calls if call[0] == "load"]) == 1
+    assert tokenizer._eos_token_ids == {1, 50, 106}
+
+
+@pytest.mark.parametrize("model_type,family", [("llama", None), ("translategemma", "translategemma")])
+def test_spanish_translation_preserves_overridden_model_template(summary_runtime, model_type, family):
+    summary, tokenizer, runtime, calls, cached = summary_runtime
+    (cached / "config.json").write_text(json.dumps({"model_type": model_type}))
+    model, _ = summary.load_summarization_model(f"custom/{model_type}")
+    runtime.generate = lambda *args, **kwargs: "Dios es amor.<end_of_turn>"
+    assert summary.translate_summary(model, tokenizer, "God is love.") == "Dios es amor."
+    template = [call for call in calls if call[0] == "template"][-1]
+    content = template[1][0]["content"]
+    if family == "translategemma":
+        assert content == [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": "God is love."}]
+    else:
+        assert isinstance(content, str) and "Output only the translation" in content
+    assert "enable_thinking" not in template[2]
+    assert len([call for call in calls if call[0] == "load"]) == 1
+
+
 # ===================================================================
 # _format_timestamp
 # ===================================================================

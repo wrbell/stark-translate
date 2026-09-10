@@ -42,7 +42,12 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from engines.model_paths import resolve_model_path
-from engines.translation_prompts import chat_template_extra_kwargs, ensure_stop_tokens
+from engines.translation_prompts import (
+    build_chat_messages,
+    chat_template_extra_kwargs,
+    clean_translation,
+    ensure_stop_tokens,
+)
 from settings import settings
 
 # ---------------------------------------------------------------------------
@@ -265,9 +270,14 @@ def load_summarization_model(model_id=None):
 
 def generate_text(model, tokenizer, prompt, max_tokens=512):
     """Generate text using mlx-lm."""
+    messages = [{"role": "user", "content": prompt}]
+    return _generate_messages(model, tokenizer, messages, max_tokens=max_tokens)
+
+
+def _generate_messages(model, tokenizer, messages, max_tokens):
+    """Generate with the loaded model's template, EOS, and thinking policy."""
     from mlx_lm import generate
 
-    messages = [{"role": "user", "content": prompt}]
     family = getattr(tokenizer, "_stark_summary_model_family", None)
     chat_prompt = tokenizer.apply_chat_template(
         messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
@@ -287,7 +297,22 @@ def generate_text(model, tokenizer, prompt, max_tokens=512):
     clean = clean.split("<|end|>")[0].strip()
     if family == "gemma4":
         clean = clean.split("<turn|>")[0].strip()
-    return clean
+    return clean_translation(clean, model_family=family or "gemma4")
+
+
+def translate_summary(model, tokenizer, en_summary, max_tokens=400):
+    """Translate once, using the live translation prompt and the existing model."""
+    family = getattr(tokenizer, "_stark_summary_model_family", None)
+    # Other instruct-model overrides use the plain translation-only instruction;
+    # their own chat template and generation options still apply below.
+    messages = build_chat_messages(
+        en_summary,
+        source_lang="en",
+        target_lang="es",
+        model_family=family or "gemma4",
+        terminology_prompt=settings.translation.terminology_prompt,
+    )
+    return _generate_messages(model, tokenizer, messages, max_tokens=max_tokens)
 
 
 def summarize_with_diarization(model, tokenizer, transcript_text, speaker_texts):
@@ -319,17 +344,9 @@ Write your 5-sentence summary:"""
     en_summary = generate_text(model, tokenizer, prompt, max_tokens=400)
     print(f"  English summary ready ({time.time() - t0:.1f}s)")
 
-    # Generate Spanish summary
-    es_prompt = f"""Translate the following church sermon summary into natural, fluent Spanish. Preserve all theological terms accurately. Use Protestant Spanish conventions (e.g., "pacto" not "alianza" for covenant).
-
-English summary:
-{en_summary}
-
-Spanish translation:"""
-
     print("  Generating Spanish summary...")
     t0 = time.time()
-    es_summary = generate_text(model, tokenizer, es_prompt, max_tokens=500)
+    es_summary = translate_summary(model, tokenizer, en_summary, max_tokens=500)
     print(f"  Spanish summary ready ({time.time() - t0:.1f}s)")
 
     return {
@@ -362,17 +379,9 @@ Write your 3-sentence summary:"""
     en_summary = generate_text(model, tokenizer, prompt, max_tokens=300)
     print(f"  English summary ready ({time.time() - t0:.1f}s)")
 
-    # Generate Spanish summary
-    es_prompt = f"""Translate the following church sermon summary into natural, fluent Spanish. Preserve all theological terms accurately. Use Protestant Spanish conventions (e.g., "pacto" not "alianza" for covenant).
-
-English summary:
-{en_summary}
-
-Spanish translation:"""
-
     print("  Generating Spanish summary...")
     t0 = time.time()
-    es_summary = generate_text(model, tokenizer, es_prompt, max_tokens=400)
+    es_summary = translate_summary(model, tokenizer, en_summary, max_tokens=400)
     print(f"  Spanish summary ready ({time.time() - t0:.1f}s)")
 
     return {
@@ -390,7 +399,7 @@ def translate_with_translategemma(en_summary):
     Returns Spanish translation string.
     """
     import mlx.core as mx
-    from mlx_lm import generate, load
+    from mlx_lm import load
 
     mx.set_cache_limit(100 * 1024 * 1024)
 
@@ -400,26 +409,11 @@ def translate_with_translategemma(en_summary):
 
     # Fix EOS token (same as dry_run_ab.py)
     ensure_stop_tokens(tokenizer, model_family="translategemma")
+    tokenizer._stark_summary_model_family = "translategemma"
     print(f"  TranslateGemma ready ({time.time() - t0:.1f}s)")
 
-    messages = [
-        {
-            "role": "user",
-            "content": [{"type": "text", "source_lang_code": "en", "target_lang_code": "es", "text": en_summary}],
-        }
-    ]
-
-    prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
-
     t0 = time.time()
-    result = generate(
-        model,
-        tokenizer,
-        prompt=prompt,
-        max_tokens=600,
-        verbose=False,
-    )
-    clean = result.split("<end_of_turn>")[0].strip()
+    clean = translate_summary(model, tokenizer, en_summary, max_tokens=600)
     print(f"  TranslateGemma translation ready ({(time.time() - t0) * 1000:.0f}ms)")
     return clean
 
