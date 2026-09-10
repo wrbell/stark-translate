@@ -36,7 +36,7 @@ class TestMetricsCollector:
         c = MetricsCollector()
         snap = c.snapshot()
         assert "ts" in snap
-        assert snap["queue_depth"] == 0
+        assert snap["queue_depth"] is None
         assert snap["error_count"] == 0
         assert snap["latency"] == {"n": 0}
         assert snap["resources"]["vram_mib_recent"] == []

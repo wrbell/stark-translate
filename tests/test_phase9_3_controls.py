@@ -34,7 +34,8 @@ def stub_pipeline(tmp_path: Path) -> Path:
         '"""Test stub mimicking dry_run_ab.py CSV output."""\n'
         "from __future__ import annotations\n"
         "import argparse\n"
-        "import csv\n"
+        "import csv, json\n"
+        "from pathlib import Path\n"
         "import os\n"
         "import signal\n"
         "import sys\n"
@@ -76,14 +77,33 @@ def stub_pipeline(tmp_path: Path) -> Path:
         "        stopped['flag'] = True\n"
         "    signal.signal(signal.SIGTERM, _stop)\n"
         "    signal.signal(signal.SIGINT, _stop)\n"
+        "    phase = 'ready'\n"
         "    while not stopped['flag']:\n"
-        "        time.sleep(0.1)\n"
+        "        command = Path(f'metrics/control_{args.session_id}.json')\n"
+        "        if command.exists():\n"
+        "            op = json.loads(command.read_text())['operation']\n"
+        "            if op == 'stop': stopped['flag'] = True\n"
+        "            elif op == 'pause': phase = 'paused'\n"
+        "            elif op == 'resume': phase = 'ready'\n"
+        "        target = Path(f'metrics/health_{args.session_id}.json')\n"
+        "        temp = target.with_suffix('.tmp')\n"
+        "        temp.write_text(json.dumps(dict(schema_version=1, session_id=args.session_id, updated_at=time.time(), phase=phase)))\n"
+        "        temp.replace(target)\n"
+        "        time.sleep(0.05)\n"
         "    sys.exit(0)\n"
         "\n"
         "if __name__ == '__main__':\n"
         "    main()\n"
     )
     return tmp_path
+
+
+def _wait_state(runner, state):
+    for _ in range(60):
+        if runner.status().state == state:
+            return
+        time.sleep(0.05)
+    raise AssertionError(runner.status().to_dict())
 
 
 # -- subprocess lifecycle ----------------------------------------------------
@@ -208,10 +228,6 @@ class TestPipelineRunnerSubprocess:
         runner.stop(timeout_s=5)
 
     def test_pause_resume_flow(self, stub_pipeline):
-        import platform
-
-        if platform.system() == "Windows":
-            pytest.skip("SIGSTOP/SIGCONT not supported on Windows")
         from operator_app.pipeline_manager import PipelineRunner, SessionConfig
 
         runner = PipelineRunner(project_root=stub_pipeline)
@@ -220,10 +236,10 @@ class TestPipelineRunnerSubprocess:
             if runner.status().state == "running":
                 break
             time.sleep(0.1)
-        snap = runner.pause()
-        assert snap.state == "paused"
-        snap = runner.resume()
-        assert snap.state == "running"
+        runner.pause()
+        _wait_state(runner, "paused")
+        runner.resume()
+        _wait_state(runner, "running")
         runner.stop(timeout_s=5)
 
     def test_pause_when_idle_raises(self, stub_pipeline):
@@ -299,7 +315,9 @@ def client_and_root(stub_pipeline, monkeypatch):
 
     pipeline_manager.reset_runner_for_tests()
     pipeline_manager._runner = pipeline_manager.PipelineRunner(project_root=stub_pipeline)
-    return TestClient(app), stub_pipeline
+    monkeypatch.setattr("operator_app.main.run_all_checks", lambda **kw: {"ok": True, "checks": []})
+    with TestClient(app) as client:
+        yield client, stub_pipeline
 
 
 class TestControlEndpoints:
@@ -330,10 +348,6 @@ class TestControlEndpoints:
         assert resp.status_code == 422
 
     def test_pause_resume_full_cycle(self, client_and_root):
-        import platform
-
-        if platform.system() == "Windows":
-            pytest.skip("SIGSTOP/SIGCONT not supported on Windows")
         client, _ = client_and_root
 
         start_resp = client.post("/api/session/start", json={"lang": "en"})
@@ -343,8 +357,12 @@ class TestControlEndpoints:
             if client.get("/api/session/status").json()["state"] == "running":
                 break
             time.sleep(0.1)
-        assert client.post("/api/control/pause").json()["state"] == "paused"
-        assert client.post("/api/control/resume").json()["state"] == "running"
+        assert client.post("/api/control/pause").status_code == 200
+        from operator_app.pipeline_manager import get_runner
+
+        _wait_state(get_runner(), "paused")
+        assert client.post("/api/control/resume").status_code == 200
+        _wait_state(get_runner(), "running")
         client.post("/api/session/stop")
 
 

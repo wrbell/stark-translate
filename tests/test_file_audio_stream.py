@@ -249,6 +249,7 @@ def test_no_exit_after_replay_keeps_loop_open(monkeypatch):
         stream = MagicMock()
         stream.finished = threading.Event()
         stream.finished.set()
+        stream.error = None
         monkeypatch.setattr(audio_bridge_client, "open_audio_stream", lambda **kwargs: stream)
         monkeypatch.setattr(d, "audio_queue", asyncio.Queue())
         monkeypatch.setattr(d, "EXIT_AFTER_REPLAY", False)

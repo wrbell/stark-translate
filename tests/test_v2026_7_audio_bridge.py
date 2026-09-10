@@ -397,7 +397,7 @@ class TestAudioBridgeClient:
         assert stream.url == "ws://test-host:9000/ws/audio/subscribe"
 
     def test_open_audio_stream_picks_sounddevice_by_default(self, monkeypatch):
-        """No env var → falls back to sd.InputStream import + call."""
+        """No env var isolates native device open in a disposable child."""
         monkeypatch.delenv("STARK_AUDIO_SOURCE", raising=False)
         from unittest.mock import MagicMock, patch
 
@@ -414,8 +414,10 @@ class TestAudioBridgeClient:
                 blocksize=512,
                 device=None,
             )
-        assert result == "<sd_stream>"
-        fake_sd.InputStream.assert_called_once()
+        from tools.isolated_audio import IsolatedInputStream
+
+        assert isinstance(result, IsolatedInputStream)
+        fake_sd.InputStream.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

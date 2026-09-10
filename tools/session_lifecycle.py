@@ -8,6 +8,7 @@ import json
 import os
 import re
 import socket
+import subprocess
 import sys
 import tempfile
 import uuid
@@ -90,6 +91,37 @@ def _alive(pid: object) -> bool:
     return True
 
 
+def source_provenance(script: Path) -> dict:
+    """Bind runtime bytes to their owning checkout, never an ancestor install cache."""
+    from importlib import metadata
+
+    script = script.resolve()
+    result = {"git_sha": None, "pipeline_sha256": _digest(script)["sha256"], "package_version": None}
+    try:
+        dist = metadata.distribution("stark-translate")
+        result["package_version"] = dist.version
+        direct = json.loads(dist.read_text("direct_url.json") or "{}")
+        # Retain artifact/commit evidence without leaking local paths or URL credentials.
+        result["package_artifact_hashes"] = direct.get("archive_info", {}).get("hashes", {})
+        result["package_vcs_commit"] = direct.get("vcs_info", {}).get("commit_id")
+    except (metadata.PackageNotFoundError, ValueError, OSError):
+        pass
+    try:
+
+        def git(*args):
+            return subprocess.check_output(
+                ["git", *args], cwd=script.parent, text=True, stderr=subprocess.DEVNULL, timeout=2
+            ).strip()
+
+        root = Path(git("rev-parse", "--show-toplevel")).resolve()
+        if script.parent == root and script.name == "dry_run_ab.py":
+            git("ls-files", "--error-unmatch", "--", script.name)
+            result["git_sha"] = git("rev-parse", "HEAD")
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return result
+
+
 def completion_metadata(model_ids: dict[str, str | None], root: Path) -> dict:
     """Read process peak counters and local model provenance after inference ends.
 
@@ -140,11 +172,13 @@ def completion_metadata(model_ids: dict[str, str | None], root: Path) -> dict:
                     installed = json.loads(marker.read_text())
                     if (
                         isinstance(installed, dict)
-                        and installed.get("repo_id") == entry.get("repo_id")
-                        and installed.get("revision")
+                        and isinstance(installed.get("repo_id"), str)
+                        and (not entry or installed["repo_id"] == entry.get("repo_id"))
+                        and re.fullmatch(r"[0-9a-f]{40}", str(installed.get("revision", "")))
                     ):
                         item["resolved_revision"] = installed["revision"]
                         item["revision_source"] = "setup_install_marker"
+                        item["source_repo_id"] = installed["repo_id"]
                 config = path / "config.json"
                 if config.is_file():
                     item["config_sha256"] = _digest(config)["sha256"]
@@ -176,7 +210,14 @@ def completion_metadata(model_ids: dict[str, str | None], root: Path) -> dict:
     return {"memory": memory, "models": models}
 
 
-def start_session(root: Path, session: str, *, git_sha: str | None = None, pipeline_sha256: str | None = None) -> dict:
+def start_session(
+    root: Path,
+    session: str,
+    *,
+    git_sha: str | None = None,
+    pipeline_sha256: str | None = None,
+    source: dict | None = None,
+) -> dict:
     """Record ownership before model loading. This does not touch predictions/audio."""
     marker = _path(root, session, "session_lifecycle", "json")
     if marker.exists() or _path(root, session, "diagnostics", "jsonl").exists():
@@ -192,6 +233,7 @@ def start_session(root: Path, session: str, *, git_sha: str | None = None, pipel
         "hostname": socket.gethostname(),
         "started_at": datetime.now(UTC).isoformat(),
         "git_sha": git_sha,
+        "source": source,
         "pipeline_sha256": pipeline_sha256,
     }
     _write(marker, data, exclusive=True)
@@ -206,11 +248,16 @@ def finish_session(
     status: str = "completed",
     exit_code: int = 0,
     model_ids: dict[str, str | None] | None = None,
+    persistence: dict | None = None,
 ) -> dict:
     """Call only after all diagnostics writers have drained; failure never enables export."""
-    if status not in {"completed", "failed"} or (status == "completed" and exit_code != 0):
+    if status not in {"completed", "failed", "interrupted"} or (status == "completed" and exit_code != 0):
         raise ValueError("A completed session requires exit code zero")
+    if persistence and (not persistence.get("ok") or persistence.get("pending", 0)):
+        status, exit_code = "failed", 1
     data = _read(root, session)
+    if persistence is not None:
+        data["persistence"] = persistence
     if data.get("run_id") != run_id or data.get("status") != "running":
         raise SessionNotComplete("Session lifecycle ownership changed before completion")
     data.update(status=status, exit_code=exit_code, ended_at=datetime.now(UTC).isoformat())
@@ -232,7 +279,7 @@ def session_status(root: Path, session: str) -> dict:
         if data.get("hostname") == socket.gethostname() and not _alive(data.get("pid")):
             status, active = "failed", False
             reason = "The pipeline exited without a completion marker; review drafts are saved but export is blocked"
-    elif status == "failed":
+    elif status in {"failed", "interrupted"}:
         reason = "This session ended abnormally; review drafts are saved but export is blocked"
     elif status == "completed":
         diagnostics = _path(root, session, "diagnostics", "jsonl")

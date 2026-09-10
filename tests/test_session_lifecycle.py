@@ -4,12 +4,12 @@ import ast
 import asyncio
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
+from tools.persistence import PersistenceExecutor
 from tools.session_lifecycle import (
     SessionNotComplete,
     completion_metadata,
@@ -125,7 +125,7 @@ def test_pipeline_completion_waits_for_io_and_blocks_abnormal_exit(tmp_path, mon
         i for i, node in enumerate(main.body) if isinstance(node, ast.Try) and "asyncio.run(" in ast.unparse(node)
     )
     wrapper = ast.Module(body=main.body[start:], type_ignores=[])
-    pool = ThreadPoolExecutor(max_workers=1)
+    pool = PersistenceExecutor(max_workers=1)
     monkeypatch.chdir(tmp_path)
 
     def pipeline(args):
@@ -142,6 +142,8 @@ def test_pipeline_completion_waits_for_io_and_blocks_abnormal_exit(tmp_path, mon
         "SESSION_ID": "example_en",
         "_clean_session_shutdown": False,
         "_session_model_ids": {},
+        "_health": None,
+        "_session_stop_requested": False,
         "_io_pool": pool,
         "sys": __import__("sys"),
         "print_summary": lambda: None,
@@ -286,7 +288,7 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
         body=[ast.Global(names=["_clean_session_shutdown"]), shutdown],
         decorator_list=[],
     )
-    pool = ThreadPoolExecutor(max_workers=1)
+    pool = PersistenceExecutor(max_workers=1)
     monkeypatch.chdir(tmp_path)
     events = []
     registered_signals = {}
@@ -341,6 +343,7 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
         "args": None,
         "completed": False,
         "_io_pool": pool,
+        "_health": None,
         "_session_model_ids": {},
         "SESSION_ID": "example_en",
         "lifecycle_root": tmp_path,
@@ -362,7 +365,7 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
     exec(compile(ast.Module(body=registrations, type_ignores=[]), str(source), "exec"), namespace)
     exec(compile(ast.Module(body=main.body[wrapper_start:], type_ignores=[]), str(source), "exec"), namespace)
     if forced_stop:
-        assert session_status(tmp_path, "example_en")["status"] == "failed"
+        assert session_status(tmp_path, "example_en")["status"] == "interrupted"
         assert "summary" not in events
     else:
         require_completed(tmp_path, "example_en")

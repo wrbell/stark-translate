@@ -36,7 +36,7 @@ class TestLogRotation:
         root = logging.getLogger()
         original_handlers = list(root.handlers)
         for h in list(root.handlers):
-            if getattr(h, "baseFilename", "").endswith("operator.log"):
+            if str(getattr(h, "path", "")).endswith("operator.log"):
                 root.removeHandler(h)
                 h.close()
 
@@ -50,11 +50,11 @@ class TestLogRotation:
         importlib.reload(operator_main)
 
         try:
-            file_handlers = [h for h in root.handlers if getattr(h, "baseFilename", "").endswith("operator.log")]
+            file_handlers = [h for h in root.handlers if str(getattr(h, "path", "")).endswith("operator.log")]
             assert file_handlers, "expected RotatingFileHandler to be attached"
             handler = file_handlers[0]
-            assert handler.maxBytes == 100 * 1024 * 1024
-            assert handler.backupCount == 5
+            assert handler._sink.maxBytes == 20 * 1024 * 1024
+            assert handler._sink.backupCount == 5
             assert (tmp_path / "operator.log").parent.exists()
         finally:
             for h in list(root.handlers):
@@ -71,7 +71,7 @@ class TestLogRotation:
 
 class TestLifespanShutdown:
     @pytest.mark.parametrize("ready", [False, True])
-    def test_shutdown_stops_running_session(self, tmp_path, ready):
+    def test_shutdown_stops_running_session(self, tmp_path, ready, monkeypatch):
         """When the app is torn down, the lifespan context stops the pipeline.
 
         Use a stub project root with a no-op dry_run_ab so the subprocess
@@ -83,11 +83,12 @@ class TestLifespanShutdown:
         from operator_app import pipeline_manager
         from operator_app.main import app
 
+        monkeypatch.setattr("operator_app.main.run_all_checks", lambda **kw: {"ok": True, "checks": []})
         # Both model loading and a ready pipeline must stop at app shutdown.
         (tmp_path / "metrics").mkdir()
         stub = tmp_path / "dry_run_ab.py"
         stub.write_text(
-            "import signal, sys, time\n"
+            "import signal, sys, time, json\n"
             "from pathlib import Path\n"
             "session = sys.argv[sys.argv.index('--session-id') + 1]\n"
             f"if {ready!r}: Path(f'metrics/ab_metrics_{{session}}.csv').write_text('chunk_id,stt_latency_ms\\n')\n"
@@ -96,6 +97,7 @@ class TestLifespanShutdown:
             "signal.signal(signal.SIGTERM, _stop)\n"
             "signal.signal(signal.SIGINT, _stop)\n"
             "while not stopped['flag']:\n"
+            f"    if {ready!r}: Path(f'metrics/health_{{session}}.json').write_text(json.dumps(dict(schema_version=1,session_id=session,updated_at=time.time(),phase='ready')))\n"
             "    time.sleep(0.1)\n"
             "sys.exit(0)\n"
         )

@@ -32,6 +32,9 @@ import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from operator_app.processes import cleanup_children
+from operator_app.work_lease import get_work_lease
+
 logger = logging.getLogger(__name__)
 
 
@@ -201,9 +204,16 @@ class SummaryTaskRunner:
         self._project_root = project_root or Path.cwd()
         self._lock = threading.RLock()
         self._tasks: dict[str, SummaryTask] = {}
+        self._lease = get_work_lease(self._project_root)
+        self._tokens = {}
+        self._processes = {}
+        self._cancelled = set()
+        self._threads = {}
 
     def submit(self, csv_path: str, output_path: str | None = None) -> SummaryTask:
         task_id = uuid.uuid4().hex[:12]
+        token = self._lease.acquire("summary", task_id)
+        self._tokens[task_id] = token
         if output_path is None:
             csv_p = Path(csv_path)
             output_path = str(csv_p.parent / f"summary_{csv_p.stem.replace('ab_metrics_', '')}.json")
@@ -211,7 +221,12 @@ class SummaryTaskRunner:
         with self._lock:
             self._tasks[task_id] = task
         thread = threading.Thread(target=self._run, args=(task,), name=f"summary-{task_id}", daemon=True)
-        thread.start()
+        self._threads[task_id] = thread
+        try:
+            thread.start()
+        except BaseException:
+            self._lease.release(self._tokens.pop(task_id))
+            raise
         return task
 
     def get(self, task_id: str) -> SummaryTask | None:
@@ -240,13 +255,20 @@ class SummaryTaskRunner:
             ]
             logger.info("summary task %s: spawning %s", task.task_id, " ".join(argv))
             try:
-                completed = subprocess.run(
+                proc = subprocess.Popen(
                     argv,
                     cwd=str(self._project_root),
-                    capture_output=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     text=True,
-                    timeout=self.SUBPROCESS_TIMEOUT_S,
+                    start_new_session=True,
                 )
+                with self._lock:
+                    self._processes[task.task_id] = proc
+                    if task.task_id in self._cancelled:
+                        proc.terminate()
+                stdout, stderr = proc.communicate(timeout=self.SUBPROCESS_TIMEOUT_S)
+                completed = subprocess.CompletedProcess(argv, proc.returncode, stdout, stderr)
             except subprocess.TimeoutExpired:
                 with self._lock:
                     task.state = "error"
@@ -276,6 +298,50 @@ class SummaryTaskRunner:
                 task.state = "error"
                 task.error = f"{type(exc).__name__}: {exc}"
                 task.finished_at = time.time()
+        finally:
+            with self._lock:
+                proc = self._processes.pop(task.task_id, None)
+            if proc is not None:
+                if proc.poll() is None:
+                    proc.kill()
+                    proc.communicate(timeout=2)
+                cleanup_children(proc.pid)
+            with self._lock:
+                if task.task_id in self._cancelled:
+                    task.state, task.error = "error", "Summary cancelled by operator"
+                    self._cancelled.discard(task.task_id)
+                task.finished_at = task.finished_at or time.time()
+            try:
+                from tools.session_lifecycle import _write
+
+                _write(self._project_root / "metrics" / f"summary_task_{task.task_id}.json", task.to_dict())
+            except OSError:
+                logger.warning("Could not save summary task status")
+            self._lease.release(self._tokens.pop(task.task_id))
+
+    def cancel(self, task_id):
+        with self._lock:
+            task = self._tasks.get(task_id)
+            if task is None:
+                raise KeyError(task_id)
+            if task.state in {"done", "error"}:
+                return task.to_dict()
+            self._cancelled.add(task_id)
+            proc = self._processes.get(task_id)
+        if proc and proc.poll() is None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+        return task.to_dict()
+
+    def close(self):
+        for task in self.list_tasks():
+            if task.state not in {"done", "error"}:
+                self.cancel(task.task_id)
+        for thread in list(self._threads.values()):
+            thread.join(timeout=3)
 
 
 # -- live diarization watcher (Phase 9.6.1) ----------------------------------
@@ -505,5 +571,7 @@ def reset_features_for_tests() -> None:
                 except Exception:
                     pass
         _verse_watcher = None
+        if _summary_runner is not None:
+            _summary_runner.close()
         _summary_runner = None
         _diarize_watcher = None

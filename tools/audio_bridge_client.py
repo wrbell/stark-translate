@@ -330,9 +330,9 @@ def open_audio_stream(
             blocksize=blocksize,
             device=device,
         )
-    import sounddevice as sd
+    from tools.isolated_audio import IsolatedInputStream
 
-    return sd.InputStream(
+    return IsolatedInputStream(
         samplerate=samplerate,
         channels=channels,
         dtype=dtype,

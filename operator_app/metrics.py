@@ -62,7 +62,8 @@ class MetricsCollector:
         self._vram_samples: collections.deque[_Sample] = collections.deque(maxlen=self.RESOURCE_BUFFER)
         self._cpu_samples: collections.deque[_Sample] = collections.deque(maxlen=self.RESOURCE_BUFFER)
         self._segments: collections.deque[_Segment] = collections.deque(maxlen=self.SEGMENT_BUFFER)
-        self._queue_depth = 0  # current pending inference jobs
+        self._health = {}
+        self._queue_depth = None  # unknown until the producer supplies a sample
         self._error_count = 0
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
@@ -91,7 +92,8 @@ class MetricsCollector:
         with self._lock:
             self._session_id = session_id
             self._segments.clear()
-            self._queue_depth = 0
+            self._queue_depth = None
+            self._health = {}
             self._error_count = 0
 
     def record_segment(
@@ -120,6 +122,14 @@ class MetricsCollector:
                 )
             )
 
+    def record_health(self, health: dict) -> None:
+        with self._lock:
+            if health.get("session_id") != self._session_id:
+                return
+            self._health = health.copy()
+            self._queue_depth = health.get("queues", {}).get("finals")
+            self._error_count = health.get("error_count", 0) + (health.get("persistence") or {}).get("failed", 0)
+
     def set_queue_depth(self, depth: int) -> None:
         with self._lock:
             self._queue_depth = int(depth)
@@ -140,6 +150,7 @@ class MetricsCollector:
             error_count = self._error_count
             started_at = self._started_at
             session_id = self._session_id
+            health = self._health.copy()
 
         # Latency aggregates from the last N segments.
         if segs:
@@ -205,6 +216,8 @@ class MetricsCollector:
             "uptime_s": round(time.time() - started_at, 1) if started_at else 0.0,
             "queue_depth": queue_depth,
             "error_count": error_count,
+            "health": health,
+            "captions": health.get("captions", []),
             "latency": latency,
             "resources": {
                 "vram_mib_recent": _recent_values(vram, 30),

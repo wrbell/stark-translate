@@ -23,18 +23,24 @@ import logging
 import math
 import os
 import platform
-import signal
 import subprocess
 import sys
 import threading
 import time
-from dataclasses import dataclass
+import weakref
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+
+from operator_app.processes import cleanup_children, descendants
+from operator_app.work_lease import get_work_lease
+from tools.pipeline_health import read_health, send_control
+from tools.session_lifecycle import session_status
 
 logger = logging.getLogger(__name__)
 
 _IS_WINDOWS = platform.system() == "Windows"
+_instances = weakref.WeakSet()
 
 
 def _number(record: dict, *keys: str) -> float | None:
@@ -77,6 +83,12 @@ class SessionConfig:
     """Subset of dry_run_ab args the operator needs to set per session."""
 
     lang: str = "en"
+    profile: str = field(default_factory=lambda: os.environ.get("STARK_PROFILE", "standard"))
+    record_audio: bool = True
+    stt_backend: str = "auto"
+    model_family: str | None = None
+    gemma4_size: str | None = None
+    low_vram: bool = False
     backend: str = "auto"
     engine: str = "auto"
     tts: bool = False
@@ -107,6 +119,11 @@ class SessionStatus:
     pid: int | None = None
     csv_path: str | None = None
     log_path: str | None = None
+    outcome: str | None = None
+    readiness: dict | None = None
+    health: dict | None = None
+    work: dict | None = None
+    effective_profile: dict | None = None
 
     def to_dict(self) -> dict:
         return {k: v for k, v in self.__dict__.items() if v is not None or k == "state"}
@@ -122,6 +139,7 @@ class PipelineRunner:
     CSV_TAIL_INTERVAL_S = 0.5
 
     def __init__(self, project_root: Path | None = None) -> None:
+        _instances.add(self)
         self._lock = threading.RLock()
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
@@ -129,6 +147,11 @@ class PipelineRunner:
         self._config: SessionConfig | None = None
         self._proc: subprocess.Popen | None = None
         self._project_root = project_root or Path(os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
+        self._lease = get_work_lease(self._project_root)
+        self._lease_token = None
+        self._owned_children = {}
+        self._log_thread = None
+        self._log_handler = None
 
     # -- public API -----------------------------------------------------------
 
@@ -141,6 +164,8 @@ class PipelineRunner:
             ):
                 raise SessionAlreadyRunningError(self._status.session_id)
 
+            self._lease_token = self._lease.acquire("live session")
+            self._owned_children = {}
             self._stop_event.clear()
             self._proc = None
             session_id = f"{datetime.now():%Y%m%d_%H%M%S_%f}_{config.lang}"
@@ -177,29 +202,34 @@ class PipelineRunner:
         with self._lock:
             if self._status.state == "idle":
                 return self._snapshot()
-            was_paused = self._status.state == "paused"
             self._status.state = "stopping"
             self._status.last_event = "stop requested"
             self._stop_event.set()
             proc = self._proc
 
-        # Politely SIGTERM first; SIGKILL after grace period if needed.
+        forced = False
         if proc is not None and proc.poll() is None:
-            try:
-                if was_paused and not _IS_WINDOWS:
-                    os.kill(proc.pid, signal.SIGCONT)
-                proc.terminate()
-            except ProcessLookupError:
-                pass
-            try:
-                proc.wait(timeout=max(2.0, timeout_s - 2.0))
-            except subprocess.TimeoutExpired:
-                logger.warning("subprocess did not exit on SIGTERM, killing")
+            self._owned_children.update(descendants(proc.pid))
+            # Cooperative commands work on Windows and let asyncio drain active
+            # translations. A process still loading may not have a command loop.
+            health = read_health(self._project_root, self._status.session_id)
+            send_control(self._project_root, self._status.session_id, "stop")
+            if not health.get("stale") and health.get("phase") in {"ready", "paused", "listening", "input_error"}:
                 try:
-                    proc.kill()
+                    proc.wait(timeout=max(0.2, timeout_s - 2))
+                except subprocess.TimeoutExpired:
+                    pass
+            if proc.poll() is None:
+                try:
+                    proc.terminate()
+                    proc.wait(timeout=min(2.0, max(0.2, timeout_s / 2)))
                 except ProcessLookupError:
                     pass
-                proc.wait(timeout=2.0)
+                except subprocess.TimeoutExpired:
+                    forced = True
+                    proc.kill()
+                    proc.wait(timeout=2.0)
+            cleanup_children(proc.pid, self._owned_children)
 
         if self._thread is not None:
             self._thread.join(timeout=timeout_s)
@@ -211,43 +241,38 @@ class PipelineRunner:
             else:
                 self._status.state = "idle"
                 self._status.stopped_at = datetime.now().isoformat(timespec="seconds")
-                self._status.last_event = "stopped cleanly"
+                lifecycle = (
+                    session_status(self._project_root, self._status.session_id) if self._status.session_id else {}
+                )
+                self._status.outcome = "completed" if lifecycle.get("exportable") else "interrupted"
+                if lifecycle.get("status") == "failed" and not forced:
+                    self._status.outcome = "failed"
+                if self._status.error:
+                    self._status.outcome = "failed"
+                self._status.last_event = (
+                    "Session saved and completed"
+                    if self._status.outcome == "completed"
+                    else "Session stopped; recording is incomplete"
+                    if self._status.outcome == "interrupted"
+                    else "Session stopped with errors; review is available, export is blocked"
+                )
                 self._status.pid = None
             return self._snapshot()
 
     def pause(self) -> SessionStatus:
-        """SIGSTOP the subprocess. No-op on Windows."""
         with self._lock:
             if self._status.state != "running":
                 raise InvalidStateError(f"cannot pause from state={self._status.state}")
-            proc = self._proc
-            if _IS_WINDOWS:
-                self._status.last_event = "pause not supported on Windows"
-                return self._snapshot()
-            if proc is not None and proc.poll() is None:
-                try:
-                    os.kill(proc.pid, signal.SIGSTOP)
-                    self._status.state = "paused"
-                    self._status.last_event = "SIGSTOP sent"
-                except ProcessLookupError:
-                    self._status.last_event = "process gone before pause"
+            send_control(self._project_root, self._status.session_id, "pause")
+            self._status.last_event = "Pause requested; waiting for pipeline acknowledgment"
             return self._snapshot()
 
     def resume(self) -> SessionStatus:
         with self._lock:
             if self._status.state != "paused":
                 raise InvalidStateError(f"cannot resume from state={self._status.state}")
-            proc = self._proc
-            if _IS_WINDOWS:
-                self._status.last_event = "resume not supported on Windows"
-                return self._snapshot()
-            if proc is not None and proc.poll() is None:
-                try:
-                    os.kill(proc.pid, signal.SIGCONT)
-                    self._status.state = "running"
-                    self._status.last_event = "SIGCONT sent"
-                except ProcessLookupError:
-                    self._status.last_event = "process gone before resume"
+            send_control(self._project_root, self._status.session_id, "resume")
+            self._status.last_event = "Resume requested; waiting for pipeline acknowledgment"
             return self._snapshot()
 
     def restart_with(self, config: SessionConfig) -> SessionStatus:
@@ -261,6 +286,24 @@ class PipelineRunner:
             return self._snapshot()
 
     def _snapshot(self) -> SessionStatus:
+        health = read_health(self._project_root, self._status.session_id) if self._status.session_id else {}
+        phase = health.get("phase", "idle")
+        stale = health.get("stale", False)
+        if self._log_handler is not None:
+            health["operational_logging"] = self._log_handler.snapshot()
+        readiness = {
+            "phase": phase,
+            "ready": phase == "ready" and not stale,
+            "reason": "Pipeline health is unavailable" if stale else phase.replace("_", " "),
+            "updated_at": health.get("updated_at"),
+            "age_s": health.get("age_s"),
+            "stale": stale,
+        }
+        if not stale and self._status.state in {"starting", "running", "paused"}:
+            if phase == "paused":
+                self._status.state = "paused"
+            elif phase == "ready":
+                self._status.state = "running"
         return SessionStatus(
             state=self._status.state,
             session_id=self._status.session_id,
@@ -272,6 +315,11 @@ class PipelineRunner:
             pid=self._status.pid,
             csv_path=self._status.csv_path,
             log_path=self._status.log_path,
+            outcome=self._status.outcome,
+            readiness=readiness,
+            health=health,
+            work=self._lease.snapshot(),
+            effective_profile={"name": self._config.profile} if self._config else None,
         )
 
     # -- internals ------------------------------------------------------------
@@ -296,6 +344,16 @@ class PipelineRunner:
         ]
         if session_id is not None:
             argv += ["--session-id", session_id]
+        for option_name in ("stt_backend", "model_family", "gemma4_size"):
+            value = getattr(config, option_name)
+            if value and value != "auto":
+                argv += ["--" + option_name.replace("_", "-"), str(value)]
+        if config.low_vram:
+            argv.append("--low-vram")
+        if config.profile != "standard":
+            argv += ["--profile", config.profile]
+        if not config.record_audio:
+            argv += ["--no-record-audio"]
         if config.engine != "auto":
             argv += ["--engine", config.engine]
         if config.run_ab:
@@ -331,14 +389,35 @@ class PipelineRunner:
                     if self._stop_event.is_set():
                         return
                     # Capture failures before the pipeline's logger is initialized.
-                    with log_path.open("a", encoding="utf-8") as output:
-                        proc = subprocess.Popen(
-                            argv,
-                            cwd=str(self._project_root),
-                            stdout=output,
-                            stderr=subprocess.STDOUT,
-                            start_new_session=True,
-                        )
+                    env = dict(os.environ, STARK_OPERATOR_CAPTURE="1")
+                    proc = subprocess.Popen(
+                        argv,
+                        cwd=str(self._project_root),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        text=True,
+                        errors="replace",
+                        start_new_session=True,
+                        env=env,
+                    )
+                    self._proc = proc
+                    self._status.pid = proc.pid
+                    from tools.operational_logging import AsyncOperationalHandler
+
+                    self._log_handler = AsyncOperationalHandler(log_path)
+
+                    def capture_output():
+                        try:
+                            while line := proc.stdout.readline(4096):
+                                record = logging.LogRecord("pipeline", logging.INFO, "", 0, line.rstrip(), (), None)
+                                record.session_id = session_id
+                                record.event = "pipeline_output"
+                                self._log_handler.handle(record)
+                        finally:
+                            proc.stdout.close()
+
+                    self._log_thread = threading.Thread(target=capture_output, name="pipeline-output", daemon=True)
+                    self._log_thread.start()
                     self._proc = proc
                     self._status.pid = proc.pid
                     self._status.last_event = "loading models; waiting for pipeline metrics header"
@@ -359,10 +438,20 @@ class PipelineRunner:
                     self._status.last_event = f"subprocess exited (rc={return_code}) after stop"
                 elif return_code == 0:
                     self._status.state = "idle"
-                    self._status.last_event = "subprocess exited cleanly"
+                    lifecycle = session_status(self._project_root, session_id)
+                    completed = lifecycle.get("exportable")
+                    self._status.outcome = (
+                        "completed"
+                        if completed
+                        else ("failed" if lifecycle.get("status") == "failed" else "interrupted")
+                    )
+                    self._status.last_event = (
+                        "Session completed" if completed else "Process exited without complete recording evidence"
+                    )
                     self._status.stopped_at = datetime.now().isoformat(timespec="seconds")
                 else:
                     self._status.state = "error"
+                    self._status.outcome = "failed"
                     self._status.error = f"subprocess exited rc={return_code} unexpectedly"
                     try:
                         with log_path.open("rb") as output:
@@ -380,6 +469,20 @@ class PipelineRunner:
                 self._status.error = f"{type(exc).__name__}: {exc}"
                 self._status.last_event = "runner thread crashed"
 
+        finally:
+            if self._proc is not None:
+                if self._proc.poll() is None:
+                    self._proc.kill()
+                    self._proc.wait(timeout=2)
+                cleanup_children(self._proc.pid, self._owned_children)
+            if self._log_thread is not None:
+                self._log_thread.join(timeout=2)
+            if self._log_handler is not None:
+                self._log_handler.close()
+            if self._lease_token is not None:
+                self._lease.release(self._lease_token)
+                self._lease_token = None
+
     def _tail_metrics_csv(self, proc: subprocess.Popen, session_id: str) -> None:
         """Tail the session's ab_metrics CSV; feed each row to MetricsCollector."""
         from operator_app.metrics import get_collector
@@ -391,7 +494,9 @@ class PipelineRunner:
         header: list[str] | None = None
 
         try:
-            while not self._stop_event.is_set() and proc.poll() is None:
+            while proc.poll() is None:
+                self._owned_children.update(descendants(proc.pid))
+                collector.record_health(read_health(self._project_root, session_id))
                 if f is None and csv_path is not None and csv_path.exists():
                     f = csv_path.open("r")
                     reader = csv.reader(f)
@@ -409,14 +514,8 @@ class PipelineRunner:
                         ):
                             header = candidate
                             with self._lock:
-                                if (
-                                    self._status.session_id == session_id
-                                    and self._status.state == "starting"
-                                    and not self._stop_event.is_set()
-                                    and proc.poll() is None
-                                ):
-                                    self._status.state = "running"
-                                    self._status.last_event = "pipeline ready; metrics header received"
+                                if self._status.state == "starting":
+                                    self._status.last_event = "Models loaded; waiting for audio readiness"
 
                 if reader is not None and header is not None:
                     advanced = False
@@ -468,9 +567,7 @@ def reset_runner_for_tests() -> None:
     """Test helper — never call from production code."""
     global _runner
     with _runner_lock:
-        if _runner is not None:
-            try:
-                _runner.stop(timeout_s=2.0)
-            except Exception:
-                pass
+        runners = list(_instances)
         _runner = None
+    for runner in runners:
+        runner.stop(timeout_s=2.0)

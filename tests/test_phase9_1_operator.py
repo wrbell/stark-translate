@@ -19,23 +19,33 @@ def _reset_runner():
 
 
 @pytest.fixture
-def client(tmp_path):
+def client(tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
 
     from operator_app import pipeline_manager
     from operator_app.main import app
 
+    monkeypatch.setattr(
+        "operator_app.main.run_all_checks",
+        lambda **kw: {"ok": True, "checks": [], "status_counts": {"pass": 0, "warn": 0, "fail": 0}},
+    )
     # API lifecycle tests must never launch the real inference pipeline.
     (tmp_path / "metrics").mkdir()
     (tmp_path / "dry_run_ab.py").write_text(
-        "import sys, time\n"
+        "import sys, time, json\n"
         "from pathlib import Path\n"
         "session = sys.argv[sys.argv.index('--session-id') + 1]\n"
         "Path(f'metrics/ab_metrics_{session}.csv').write_text('chunk_id,stt_latency_ms\\n')\n"
-        "while True: time.sleep(0.1)\n"
+        "while True:\n"
+        "    Path(f'metrics/health_{session}.json').write_text(json.dumps(dict(schema_version=1,session_id=session,updated_at=time.time(),phase='ready')))\n"
+        "    time.sleep(0.1)\n"
     )
     pipeline_manager._runner = pipeline_manager.PipelineRunner(project_root=tmp_path)
-    return TestClient(app)
+    try:
+        with TestClient(app) as client:
+            yield client
+    finally:
+        pipeline_manager.reset_runner_for_tests()
 
 
 # -- preflight ---------------------------------------------------------------

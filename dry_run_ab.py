@@ -83,9 +83,13 @@ import websockets
 
 from settings import settings
 from stark_translate.profiles import apply_profile, resolve_profile
+from tools.capture_handoff import CaptureHandoff
+from tools.isolated_audio import AudioCaptureError
 from tools.latency_experiments import LatencyExperiments
 from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker
 from tools.latency_trace import LatencyTrace
+from tools.persistence import PersistenceExecutor
+from tools.pipeline_health import PipelineHealth
 from tools.pipeline_timing import (
     SAMPLE_COLUMNS,
     TIMING_COLUMNS,
@@ -137,6 +141,9 @@ _session_stop_requested = False
 _clean_session_shutdown = False
 _session_model_ids = {}
 _session_main_task = None
+_health = None
+_RECORD_AUDIO = True
+_capture_handoff = None
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
@@ -1041,7 +1048,7 @@ def start_http_server(port, directory):
 # Globals
 # ---------------------------------------------------------------------------
 
-audio_queue = asyncio.Queue()
+audio_queue = asyncio.Queue(maxsize=64)
 ws_clients = set()
 chunk_id = 0
 all_results = []
@@ -2138,53 +2145,30 @@ def translate_marian(text):
 
 
 def detect_macbook_mic():
-    """Find the MacBook Pro built-in microphone by name.
-    Returns (device_index, measured_rms) so gain can be auto-calibrated.
-    """
-    devices = sd.query_devices()
-    # Find MacBook Pro mic by name
-    for idx, d in enumerate(devices):
-        if d["max_input_channels"] > 0 and "MacBook Pro" in d["name"]:
-            # Quick RMS measurement for gain calibration
-            test = sd.rec(
-                int(1.0 * d["default_samplerate"]),
-                samplerate=d["default_samplerate"],
-                channels=1,
-                dtype="float32",
-                device=idx,
-            )
-            sd.wait()
-            rms = float(np.sqrt(np.mean(test[:, 0] ** 2)))
-            print(f"  Using: [{idx}] {d['name']} (RMS={rms:.4f})")
-            return idx, rms
+    """Select the system default; explicit idle audio probes measure gain safely.
 
-    # Fallback: use system default input if MacBook Pro mic not found
-    print("  WARNING: MacBook Pro mic not found, using system default", file=sys.stderr)
-    default_idx = sd.default.device[0]
-    d = sd.query_devices(default_idx)
-    test = sd.rec(
-        int(1.0 * d["default_samplerate"]),
-        samplerate=d["default_samplerate"],
-        channels=1,
-        dtype="float32",
-        device=default_idx,
-    )
-    sd.wait()
-    rms = float(np.sqrt(np.mean(test[:, 0] ** 2)))
-    print(f"  Using default: [{default_idx}] {d['name']} (RMS={rms:.4f})")
-    return default_idx, rms
+    Never open a native recording device here: permission prompts can block
+    indefinitely. The capture child confirms sample flow after displays start.
+    """
+    return None, 0.0
 
 
 MIC_GAIN = 1.0  # Set during mic detection based on measured signal level
 TARGET_RMS = 0.08  # Target RMS for speech audio fed to VAD/Whisper
 
 # [P7-5D] Background thread pool for non-blocking I/O (WAV saves, CSV/JSONL writes)
-_io_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="io")
+_io_pool = PersistenceExecutor(max_workers=2, max_pending=256)
 
 
 def audio_callback(indata, frames, time_info, status):
     """sounddevice callback — resample from mic rate to 16kHz and push to queue."""
     if status:
+        if _health is not None:
+            _health.error(
+                "audio", "capture_overflow" if str(status).startswith("capture_overflow:") else "capture_status"
+            )
+        if str(status).startswith("capture_overflow:"):
+            _io_pool.record_failure("audio_capture", "samples_dropped")
         print(f"  Audio status: {status}", file=sys.stderr)
     stamp = capture_stamp(frames, MIC_SAMPLE_RATE, time_info)
     raw = indata[:, 0].copy()
@@ -2205,7 +2189,16 @@ def audio_callback(indata, frames, time_info, status):
 
             target_len = int(len(raw) * SAMPLE_RATE / MIC_SAMPLE_RATE)
             raw = resample(raw, target_len).astype(np.float32)
-    audio_queue.put_nowait(AudioFrame(raw, stamp))
+    if _health is not None:
+        _health.input(float(np.sqrt(np.mean(raw * raw))))
+        if _health.paused:
+            return
+    try:
+        audio_queue.put_nowait(AudioFrame(raw, stamp))
+    except asyncio.QueueFull:
+        _io_pool.record_failure("audio_capture", "input_queue_full")
+        if _health is not None:
+            _health.error("capture", "input_queue_full")
 
 
 def is_speech(audio_chunk, model, utils):
@@ -3312,6 +3305,8 @@ async def _pipeline_translate_and_finalize(
         _io_pool.submit(_save_io)
 
     except Exception as e:
+        if _health is not None:
+            _health.error("translation", type(e).__name__)
         logger.error("Translation error chunk #%d: %s", cid, e, exc_info=True)
         print(f"\n  ERROR in chunk #{cid} translation: {e}", file=sys.stderr)
 
@@ -3493,6 +3488,8 @@ async def _pipeline_coordinator():
         except Exception as e:
             _final_pending.clear()  # [FIX] Don't leave flag stuck on error
             _final_pending_utterance_id = None
+            if _health is not None:
+                _health.error("stt", type(e).__name__)
             print(f"\n  ERROR in pipeline chunk #{cid}: {e}", file=sys.stderr)
 
     # Print overlap statistics
@@ -3707,6 +3704,8 @@ def _caption_failed(client, error):
 async def broadcast(data):
     """Send data to all connected WebSocket clients."""
     data.setdefault("caption_delivery_mode", "queued" if _latency.async_captions else "awaited")
+    if _health is not None and data.get("type") == "translation":
+        _health.caption(data)
     if not ws_clients:
         print("  [ws] No clients connected, skipping broadcast")
         return
@@ -3887,6 +3886,8 @@ def _run_tts(engine, text, language, cid, output_mode, loop, speech_end=None, su
 
 def save_chunk_audio(audio_data, cid):
     """Save chunk audio as 16kHz WAV for later Whisper fine-tuning."""
+    if not _RECORD_AUDIO:
+        return None
     import scipy.io.wavfile as wav
 
     os.makedirs(AUDIO_DIR, exist_ok=True)
@@ -4129,7 +4130,7 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
     from pathlib import Path
 
     record["audio_sha256"] = (
-        hashlib.sha256(Path(audio_path).read_bytes()).hexdigest() if Path(audio_path).is_file() else None
+        hashlib.sha256(Path(audio_path).read_bytes()).hexdigest() if audio_path and Path(audio_path).is_file() else None
     )
 
     os.makedirs(os.path.dirname(DIAG_PATH), exist_ok=True)
@@ -4320,7 +4321,7 @@ def print_summary():
 
 async def audio_loop():
     """Main audio capture and processing loop with error recovery."""
-    global _warmup_pending  # [P7-4A]
+    global _warmup_pending, _capture_handoff  # [P7-4A]
     print("\nListening... (Ctrl+C to stop)\n")
 
     PARTIAL_INTERVAL = settings.vad.partial_interval
@@ -4350,6 +4351,9 @@ async def audio_loop():
     music_hold_start_frame = 0
 
     while True:
+        if _health is not None and _health.paused:
+            await asyncio.sleep(0.05)
+            continue
         try:
             # Phase 9.4.2: when STARK_AUDIO_SOURCE=ws, read frames from the
             # operator's /ws/audio/subscribe endpoint instead of the local
@@ -4359,7 +4363,20 @@ async def audio_loop():
 
             capture_loop = asyncio.get_running_loop()
 
-            def stream_callback(indata, frames, time_info, status, _loop=capture_loop):
+            def capture_dropped():
+                _io_pool.record_failure("audio_capture", "handoff_overflow")
+                if _health is not None:
+                    _health.error("capture", "handoff_overflow")
+
+            _capture_handoff = CaptureHandoff(
+                capture_loop,
+                audio_callback,
+                lambda: not audio_queue.full(),
+                capture_dropped,
+                wait_for_space=os.environ.get("STARK_AUDIO_SOURCE") == "file",
+            )
+
+            def stream_callback(indata, frames, time_info, status, _handoff=_capture_handoff):
                 # Capture before loop handoff; device callbacks must never touch
                 # asyncio.Queue from their producer thread. Copy PortAudio's buffer.
                 stamp = sample_clock.capture(frames, MIC_SAMPLE_RATE, time_info)
@@ -4373,7 +4390,7 @@ async def audio_loop():
                         stamp.sample_rate,
                         stamp.padding_samples,
                     )
-                _loop.call_soon_threadsafe(audio_callback, indata.copy(), frames, stamp, status)
+                _handoff.put(indata.copy(), frames, stamp, status)
 
             stream = open_audio_stream(
                 callback=stream_callback,
@@ -4384,16 +4401,37 @@ async def audio_loop():
                 device=MIC_DEVICE,
             )
 
-            with stream:
+            if hasattr(stream, "sample_offset"):
+                stream.sample_offset = sample_clock.next_sample
+            with stream, _capture_handoff:
+                if _health is not None:
+                    _health.phase("listening")
                 while True:
+                    if _health is not None and _health.paused:
+                        speech_buffer = np.array([], dtype=np.float32)
+                        timeline = AudioTimeline()
+                        silence_frames = speech_frame_count = last_partial_len = 0
+                        while not audio_queue.empty():
+                            audio_queue.get_nowait()
+                        break  # close the native capture child while paused
                     # Get audio frame from sounddevice callback, run VAD inline.
                     # VAD is <1ms so running it on the asyncio thread is fine.
                     try:
                         audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
                     except TimeoutError:
+                        if getattr(stream, "error", None) is not None:
+                            if isinstance(stream.error, AudioCaptureError):
+                                raise stream.error from None
+                            raise RuntimeError("Audio source failed") from stream.error
                         # EOF is checked only once all callback blocks have drained.
                         finished = getattr(stream, "finished", None)
-                        if EXIT_AFTER_REPLAY and finished is not None and finished.is_set() and audio_queue.empty():
+                        if (
+                            EXIT_AFTER_REPLAY
+                            and finished is not None
+                            and finished.is_set()
+                            and audio_queue.empty()
+                            and _capture_handoff.qsize() == 0
+                        ):
                             if getattr(stream, "error", None) is not None:
                                 raise RuntimeError("Audio replay failed") from stream.error
                             if len(speech_buffer):
@@ -4685,7 +4723,14 @@ async def audio_loop():
                         loop = asyncio.get_event_loop()
                         _schedule_warmup(loop)
 
-        except sd.PortAudioError as e:
+        except (sd.PortAudioError, AudioCaptureError) as e:
+            if len(speech_buffer):
+                _io_pool.record_failure("audio_capture", "interrupted_utterance")
+                if _health is not None:
+                    _health.error("capture", "interrupted_utterance")
+            if _health is not None:
+                _health.phase("input_error")
+                _health.error("audio", type(e).__name__)
             print(f"\n  Mic error: {e} — retrying in 2s...", file=sys.stderr)
             speech_buffer = np.array([], dtype=np.float32)
             timeline = AudioTimeline()
@@ -4933,15 +4978,13 @@ async def main_async(args):
     }
     from pathlib import Path
 
-    try:
-        metadata["git_sha"] = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=Path(__file__).parent, text=True
-        ).strip()
-    except (OSError, subprocess.CalledProcessError):
-        metadata["git_sha"] = None
+    from tools.session_lifecycle import source_provenance
+
+    metadata.update(source_provenance(Path(__file__)))
     metadata["latency_experiment_configuration"] = _latency.as_dict()
     Path(os.path.dirname(DIAG_PATH), f"session_metadata_{SESSION_ID}.json").write_text(json.dumps(metadata, indent=2))
     init_csv()
+    _io_pool.submit(_write_jsonl_record, {"event": "session_started", **_session_provenance()})
 
     # Start HTTP server for mobile access
     project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -5002,6 +5045,34 @@ async def main_async(args):
     # Rolling stats task — prints averages every 5 minutes
     rolling_task = asyncio.create_task(_rolling_stats_task())
 
+    if _health is not None:
+
+        def health_provider():
+            return {
+                "queues": {
+                    "audio": audio_queue.qsize(),
+                    "capture_handoff": _capture_handoff.qsize() if _capture_handoff is not None else 0,
+                    "finals": _pipeline_chunk_queue.qsize() if _pipeline_chunk_queue else 0,
+                    "stream_tokens": _stream_token_queue.qsize() if _stream_token_queue else 0,
+                },
+                "clients": len(ws_clients),
+            }
+
+        def apply_control(operation):
+            global _session_stop_requested
+            if operation == "stop":
+                _session_stop_requested = True
+                request_graceful_stop(_session_main_task)
+            else:
+                if operation == "resume":
+                    _health.phase("listening")
+                _health.paused = operation == "pause"
+
+        from tools.session_lifecycle import request_graceful_stop
+
+        _health._provider = health_provider
+        _health._control = apply_control
+
     # Run audio loop
     try:
         await audio_loop()
@@ -5058,6 +5129,11 @@ async def main_async(args):
 
 def main():
     parser = argparse.ArgumentParser(description="Live A/B bilingual speech-to-text dry run")
+    parser.add_argument(
+        "--no-record-audio",
+        action="store_true",
+        help="Keep captions/diagnostics without retaining microphone WAV files",
+    )
     parser.add_argument(
         "--ab", action="store_true", dest="run_ab", help="Load both 4B and 12B for A/B comparison (default: 4B only)"
     )
@@ -5443,19 +5519,21 @@ def main():
     import hashlib
     from pathlib import Path
 
-    from tools.session_lifecycle import finish_session, request_graceful_stop, start_session
+    from tools.session_lifecycle import finish_session, request_graceful_stop, source_provenance, start_session
 
-    try:
-        git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=Path(__file__).parent, text=True).strip()
-    except (OSError, subprocess.CalledProcessError):
-        git_sha = None
+    source = source_provenance(Path(__file__))
     lifecycle_root = Path.cwd()
     lifecycle = start_session(
         lifecycle_root,
         SESSION_ID,
-        git_sha=git_sha,
+        git_sha=source["git_sha"],
+        source=source,
         pipeline_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     )
+    global _health, _RECORD_AUDIO
+    _RECORD_AUDIO = not args.no_record_audio
+    _health = PipelineHealth(lifecycle_root, SESSION_ID, persistence=_io_pool, record_audio=_RECORD_AUDIO)
+    _health.start()
     CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
     AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"
     DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"
@@ -5473,12 +5551,10 @@ def main():
     _console_handler.setLevel(log_level)
     LOG_PATH = f"metrics/session_{SESSION_ID}.log"
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
-    _file_handler = logging.FileHandler(LOG_PATH)
-    _file_handler.setLevel(logging.DEBUG)  # file always captures everything
-    _file_handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    )
-    logger.addHandler(_file_handler)
+    if not os.environ.get("STARK_OPERATOR_CAPTURE"):
+        from tools.operational_logging import configure_log
+
+        configure_log(logger, LOG_PATH)
     logger.info("Session %s started — log file: %s", SESSION_ID, LOG_PATH)
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
@@ -5601,14 +5677,27 @@ def main():
         failure = sys.exc_info()[1]
         _io_pool.shutdown(wait=True)
         completed = completed or _clean_session_shutdown
+        persistence = _io_pool.snapshot()
+        completed = completed and persistence["ok"] and persistence["pending"] == 0
+        health_snapshot = _health.snapshot() if _health is not None else {}
+        if _health is not None and (
+            not health_snapshot["input_seen"] or health_snapshot["recording"]["required_failures"]
+        ):
+            completed = False
+        outcome = "completed" if completed else "interrupted" if _session_stop_requested else "failed"
+        if not persistence["ok"] or health_snapshot.get("recording", {}).get("required_failures"):
+            outcome = "failed"
+        if _health is not None:
+            _health.close(outcome)
         exit_code = getattr(failure, "code", 1) if failure is not None else 1
         finish_session(
             lifecycle_root,
             SESSION_ID,
             run_id=lifecycle["run_id"],
-            status="completed" if completed else "failed",
+            status=outcome,
             exit_code=0 if completed else exit_code if isinstance(exit_code, int) and exit_code else 1,
             model_ids=_session_model_ids,
+            persistence=persistence,
         )
 
 
