@@ -1,132 +1,185 @@
-# Operator Runbook — stark-translate
+# Operator runbook
 
-> **Audience:** the volunteer running live translation at Stark Road Gospel Hall (Farmington Hills, MI) or a coffee-shop outreach event. Assumes you can open a web browser; no command line required.
+This guide is for the volunteer running English/Spanish captions after the setup
+owner has installed and rehearsed the system. The normal event workflow uses a
+browser. The setup owner's commands are kept at the end.
 
----
+## Before people arrive
 
-## What you're running
+1. Plug in the microphone, projector, and any speakers used for spoken translation.
+   Use the connections that were rehearsed. Keep the computer connected to power.
+2. Open the installed operator shortcut, or its saved browser bookmark. The usual
+   address on that computer is `http://localhost:9000/operator/`.
+3. In **Prepare**, choose **Speaker's language** and the microphone by name. English
+   speakers produce Spanish captions; Spanish speakers produce English captions.
+4. Keep the performance profile selected by the setup owner. **Standard** is the
+   normal Apple Silicon configuration. Lite choices are for installations prepared
+   for those models; selecting a profile does not install them.
+5. Read **Is everything ready?** Clear red failures before starting. A warning can
+   mean base models are in use rather than custom vocabulary; it is not necessarily
+   a fault. **Check again** repeats the checks after a setup change.
+6. Use **Test microphone** while captions are stopped. Speak normally and check the
+   measured level. If macOS asks for microphone permission, allow the installed
+   launcher and retry. A successful level test does not check translation quality.
+7. If spoken translation is wanted, expand **Spoken translation (optional)**. Select
+   its destination and the rehearsed language/output devices. **Test speakers**
+   checks playback; someone must confirm the intended speakers actually made sound.
+   A reported playback success alone cannot identify what people heard.
+8. Click **Start captions**. Keep watching the startup explanation until audio is
+   arriving, then say a complete test sentence and wait for its final translation.
 
-The **stark-translate operator** turns a microphone in the room into live English/Spanish subtitles on a projector and any phones connected to the local Wi-Fi. Two screens matter:
+The target is under one minute of volunteer interaction once installed; model
+loading and the spoken rehearsal take additional time. Cold startup may take
+longer. Preflight checks local prerequisites without loading every model, so green
+checks do not replace this rehearsal.
 
-1. **Operator screen** (your laptop or the church PC): `http://localhost:9000/operator/`
-2. **Audience display** (projector / TV): `http://<server-ip>:8080/audience_display.html`
+## Projector and phones
 
-You only have to interact with the operator screen.
+In **Live**, use **Open audience display** for the projector. Put that browser on
+the projector and enter full screen using the browser's controls.
 
----
+The **Projector and phones** area provides the phone link and QR code. Phones must
+be on a network that can reach the caption computer. A link containing `localhost`
+or `127.0.0.1` only works on that computer: open the operator using the computer's
+LAN address to obtain a link usable by phones. Custom ports come from the service.
+The caption display reconnects automatically between sessions.
 
-## Before the event (10 minutes)
+The operator's **What the audience sees** preview helps check content. Also inspect
+one actual audience display. The preview is not proof of projector or phone output.
 
-### 1. Power on the church PC and the projector
+## While the speaker talks
 
-- Wait ~30 seconds after boot for the operator service to come up automatically (systemd starts it at boot).
-- If the service didn't auto-start, open a terminal and run:
+- **Live** shows input activity, recent captions, session state and any required
+  action. Italic text is a revisable preview. A final caption replaces it.
+- **Pause** stops accepting new speech for captions and finishes valid buffered
+  speech. Use it during a hymn or an intentional break. **Resume** continues in
+  the same session. Do not speak essential content during the pause.
+- **Switch to Spanish speaker** (or English) restarts the pipeline in the other
+  direction. Wait through loading and test the first sentence. The new direction
+  gets a new session identity; old captions and correction records stay separate.
+- **Bible references heard** shows detected verses. Treat detection as an aid;
+  confirm the passage before presenting it as authoritative.
+- Leave technical controls in **Advanced** to the setup owner. Changing a backend
+  or profile in the middle of an event can require a new model load.
 
-  ```bash
-  cd /opt/stark-translate
-  ./run_operator.sh
-  ```
+**Starting** means preparation is still underway. **Listening** requires actual
+input frames. The first translated sentence confirms that audio, recognition,
+translation and delivery have worked together. A file or CSV header does not make
+a session ready. If input becomes stale, the page shows the fault and recovery
+step rather than continuing to claim healthy operation.
 
-  Leave the terminal window open during the event.
+## End the session
 
-### 2. Open the operator UI
+Click **Stop captions** and wait for completion. Buffered speech and final writes
+must drain before the session can be marked completed. Do not quit the launcher
+while it says it is stopping.
 
-- On the church PC, open Firefox or Chrome and go to **http://localhost:9000/operator/**.
-- You should see **Pre-flight**, **Session**, **Live observability**, **Features**, and **Review and corrections** panels.
+A completed session has persisted completion evidence. An interrupted or failed
+session remains available for diagnosis and text review, but cannot be exported as
+successfully completed training data. Closing the browser does not by itself stop
+captions; use **Stop captions** first.
 
-### 3. Pre-flight: all green or yellow
+## Review and corrections
 
-Choose the **Language direction**, **Backend**, microphone, and optional TTS or diarization settings first. Pre-flight checks the selected configuration without loading models. `auto` selects MLX on Apple Silicon and CUDA on the NVIDIA machine.
+Open **Sessions** and choose the session to review. During recording, only finalized
+segments whose diagnostic records are already saved are shown. New arrivals do not
+replace an edit in progress. Use the priority filters, neighboring context and audio
+player to find and understand a segment.
 
-| Check | Green means | Yellow means | Red means |
-|---|---|---|---|
-| GPU | CUDA or Apple Silicon detected | running on CPU (slow but works) | n/a |
-| Runtime dependencies | The selected backend and optional features have compatible packages | n/a | a package is missing or incompatible |
-| Models | The selected STT, translation, and Marian models are available locally | n/a | a required local model or TTS voice is missing |
-| Microphone | Audio input is available and the selected device supports input | n/a | unavailable audio runtime or input device |
-| Adapter manifest | `adapters/manifest.json` parses | manifest absent (using base models) | invalid JSON |
-| llama-server (CUDA/CPU only) | server reachable on the configured port | server not running; the selected setup needs attention | n/a |
+Edit the transcript and translation independently. Transcript approval means you
+checked the spoken words; translation approval means you checked the bilingual
+meaning. Neither implies the other. Mark unsuitable material excluded. Use **Save
+draft** or **Save and next**, and check that the save succeeded.
 
-**Red means STOP — fix before the event.** Most common red:
+A local draft can survive a browser reload. **Restore my local draft** lets you
+recover it; the server save remains the durable shared record. A revision conflict
+means somebody saved a newer version: reload and reconcile it instead of silently
+replacing their work.
 
-- *Microphone* red: USB mic not plugged in. Plug it into the same port you used last time.
+Corrections are separate revisioned records. They do not rewrite original
+predictions, change audience captions, or trigger a new translation. Missing audio
+still permits text review, but prevents an STT training sample.
 
-On a Mac, pre-flight checks MLX model caches and does not require GGUF files or a llama-server. Missing MLX models, Python packages, or audio input are red checks. The Start button stays disabled until red checks clear. A green pre-flight confirms local prerequisites; it does not replace a short audio rehearsal. Treat a fallback warning as something to rehearse before the event.
+### Export reviewed material
 
-The setup owner can install the matching backend dependencies, then run `stark-translate setup --backend mlx` and `stark-translate doctor --backend mlx --lang en` on the Mac. Add `--include tts` to setup when voices are needed. See [Mac packaging and service setup](packaging/macos.md) for installation and launchd commands. The repository launcher, `./run_operator.sh`, uses the configured Python environment rather than requiring a fixed checkout location.
+After a session completes, select **Training — reviewed live audio** or
+**Evaluation — held apart from training**, then **Export completed session** and
+download the bundle. Training requires known live provenance. Replay, synthetic
+and unknown sessions remain evaluation material. A session's assigned split is
+preserved across repeated exports.
 
-### 4. Pick the right mic
+An approved transcript plus retained audio is required for STT export. A bilingual
+pair requires both transcript and translation approval; missing audio does not
+prevent that text-only pair. Excluded chunks are omitted. The portable ZIP includes
+copied audio, language direction, original predictions, correction revisions and
+provenance. Repeated unchanged exports and imports preserve identity without adding
+duplicates. Keep Spanish STT material separate from an English-only trainer.
 
-In the **Session** panel, the **Mic** dropdown lists every input device. Pick the USB lavaliere mic by name (e.g. *"Yeti Stereo Microphone"* — not *"Built-in Microphone"*).
+### Session summary
 
-### 5. (Optional) Open the audience display on the projector
+With captions stopped, choose **Create summary**. Read the English and Spanish text
+before sharing it. Summaries are model output, not human approval. Very short
+sessions show the actual recorded text as a labeled excerpt rather than inventing
+a longer sermon. Failed generation remains visible and can be retried or canceled.
 
-- On the projector PC: `http://<church-pc-ip>:8080/audience_display.html`
-- Press **F11** for full-screen.
-- The display will say *"Connecting…"* until you start a session — that's normal.
+## When something goes wrong
 
----
-
-## During the event
-
-### Start the session
-
-1. Confirm **Language direction**: usually `EN → ES` for the speaker.
-2. Click **Start session**. The state pill stays yellow (`STARTING`) while models load, then turns green (`RUNNING`) when the pipeline writes its metrics header. **Stop** remains available during loading; Pause and language switching become available after startup.
-3. Wait for model startup and speak a short test sentence. `RUNNING` means the subprocess launched; the first subtitle confirms audio and inference are ready. A cold start can take longer than later sessions.
-
-### Watch the dashboard while the speaker talks
-
-- **VRAM / CPU** sparklines show how hard the machine is working. Steady is fine; spiking is fine.
-- **Latency p50 / p95** for current sessions measures the last detected speech frame to the final caption being ready to send. It includes endpoint waiting, queueing, recognition, and translation. It does not include browser/network delay. Hover over the value to see whether the data uses this definition or a historical pipeline timing definition. Historical and current measurements are kept apart; a new session clears the history.
-- **An em dash (`—`) means unavailable**, including missing historical timing or confidence fields. It is not a zero-millisecond result. Compare delays only within the same timing definition and replay/live setup. Low latency targets are goals; confirm the actual measured result before relying on them at an event.
-- **Confidence mean** can help identify difficult audio, but is not an accuracy score. Listen to the source before deciding whether to move the mic or flag a correction.
-- The **VRAM** counter uses NVIDIA monitoring. A zero value on a Mac does not establish how much Apple unified memory the models use.
-- **Recent verses** under Features shows Bible references the system caught (Romans 8:28, John 3:16, etc.). Useful to confirm coverage.
-- **Live diarization** is off by default. Check **Live diarization** on the session form only when you want `Speaker A:` / `Speaker B:` prefixes on the projector. It must not be used on a latency-sensitive Sunday until the two-speaker gate in [`live_diarization.md`](./live_diarization.md) has been run.
-
-### Mid-session controls
-
-The controls row (just below Start / Stop) is for the speaker pausing or switching languages mid-event. **You don't need them for a normal sermon.**
-
-| Button | When to press |
+| What you see | What to do |
 |---|---|
-| **Pause** | Speaker is taking a long break (>1 minute). Suspends pipeline processing on macOS/Linux. |
-| **Resume** | Press after Pause. State pill goes back to green. |
-| **Flip EN↔ES** | A different-language speaker is taking the mic. Restarts the session with the selected direction and matching STT; allow time for model startup. |
-| **Fallback to HF** | For a CUDA setup whose llama-server failed. Restarts with the HF engine. This is not a Mac MLX latency or memory control. |
+| Start is unavailable | Read the failed readiness check. Reconnect the required device or ask the setup owner to repair missing software/models, then **Check again**. |
+| Starting never reaches input readiness | Read the displayed reason. Check the operating system's microphone permission, then stop and retry. Do not assume a running process can hear you. |
+| Microphone unplugged or input stale | Pause or stop, reconnect and reselect the intended device, test it, then restart and say a test sentence. |
+| Operator disconnected or status stale | Wait for reconnect; reload if needed. Avoid repeated Start clicks. Check the launcher if reconnect fails. |
+| Audience display reconnecting | Confirm the session is listening, the link/ports are correct, and the display can reach the caption computer. Reload that display if needed. |
+| Captions fall behind | Pause at a suitable break and close competing compute-heavy applications. Ask the setup owner to inspect queues and timing; do not switch models blindly. |
+| Recording incomplete or a write failed | Keep the session and its original files. Create a support bundle; do not claim it completed or delete evidence. |
+| Low disk space | Stop before storage is exhausted. Use the explicit cleanup preview for completed operational logs. Original recordings need the setup owner's separate retention decision. |
 
-### Stop the session
+**Help** contains these recovery instructions and support controls. Choose the
+session, leave text/audio unchecked for a metadata-only bundle, click **Preview
+bundle**, inspect the listed files, then **Create bundle** and download it. Nothing
+is sent automatically. Opting into caption text or audio makes the bundle more
+sensitive; share only what the setup owner needs.
 
-Click **Stop session**. State pill goes back to gray (`IDLE`).
+**Sessions → Disk space** offers a cleanup preview. **Delete the listed files**
+removes only eligible completed-session operational logs that still match the
+preview. It never automatically deletes original audio, predictions, corrections,
+or exports. Keep original data until its retention has been agreed.
 
-### Generate a post-session summary (optional)
+## Setup owner reference
 
-After **Stop**, click **Generate summary** under Features. The background task reads the saved session transcript and displays the English/Spanish result or an error. It uses local inference, so wait until live translation and benchmarking are finished. Completion time depends on the session and model. A failed task shows its error rather than a success message; an empty transcript cannot produce a summary.
+- [Mac installation and launchd](packaging/macos.md): selected environment, model
+  setup, installed entry points and explicit service install/uninstall.
+- [Lite profiles](lite_profiles.md): CPU Marian, optional CPU E2B, and 8 GB NVIDIA
+  setup; actual x86/RTX2070 certification is separate from Mac CPU tests.
+- [Reliability and support contracts](operator_reliability.md): capture isolation,
+  work ownership, health, logging limits, privacy, and API payloads.
+- [Evaluation definitions](evaluation/README.md): current measurements and dated
+  evidence. [Backlog](backlog.md) distinguishes implementation from validation.
 
-## Review and correct a session
+Run one operator service for an installation. It coordinates sessions, summaries
+and audio tests, but cannot reserve resources used by unrelated command-line jobs.
+An installed package starts with `stark-translate operator`; a checkout starts with
+`./run_operator.sh`. The setup owner should supply a working shortcut/service so
+volunteers do not need a terminal. Do not replace a working `stt_env` to test an
+installation. A dedicated `STARK_PROJECT_ROOT` holds writable session data when
+running an installed package outside the checkout.
 
-The **Review and corrections** panel defaults to the newest completed session. You can select a session marked **LIVE** while it runs. Only finalized chunks already saved to diagnostics are available; partial captions and unfinished writes are not editable. The list refreshes while you are not editing.
+Operational application logs rotate at 20 MiB with five backups. Thirty-day
+pruning applies only to eligible operational logs, not originals; service-manager
+stdout/stderr files have their own policy. This is not a bound on total audio or
+disk use. The recording switch means **Save original chunk audio**: optional
+speaker identification can still create a rolling WAV, and TTS file modes save
+synthesized audio.
 
-1. Select a session. **Pending only** and **Flagged only** are enabled initially. Clear **Flagged only** to inspect other finalized chunks. Higher-priority flags appear first; use **Previous page** and **Next page** for a large queue.
-2. Select a chunk and listen to its audio. The previous and next source lines provide context. **Original predictions and flags** shows the model text, confidence, QE, and detected vocabulary issues.
-3. Check **Spoken language**, especially for older sessions. The transcript always represents the language spoken in the audio. English source maps to Spanish translation; Spanish source maps to English translation. Unknown language must be resolved before approval.
-4. Correct the transcript and translation independently. Select **Transcript checked against audio** only after checking the source text, and **Translation checked by a bilingual reviewer** only after checking the translation. Editing either text clears the affected approval; editing source text or language also clears translation approval.
-5. Use **Save draft** to save a revision without approving it, or **Save and next** to continue. You can save revisions during a live session. **Exclude this segment from exports** retains its history while removing it from training/evaluation output.
+Current schema-2 server latency measures estimated speech end to final payload
+readiness, including endpoint wait, queues, recognition and translation. Browser
+receipt-to-render is reported separately. Speech-end-to-acknowledgement is an upper
+bound including return-network time. Hidden tabs and accelerated replay cannot
+pass the live delivery gate. A dash means unavailable, not zero. Historical
+processing timings must not be pooled with these measurements.
 
-Draft text is also kept in this browser while you type. Navigation tries to save first. A failed save keeps your local draft and shows the error. If another reviewer saved a newer revision, click **Refresh** to load the current saved version, inspect it, then use **Restore my local draft** if you want to recover your own text and reconcile the difference. Save again to create a new revision. Local browser drafts are not a substitute for a successful server save.
-
-Saved corrections live in revisioned sidecar files under `stark_data/corrections/`. They do not rewrite the original diagnostic text or change audience captions. If audio was not retained or has been removed, text review remains available; the panel explains that STT export will skip that chunk.
-
-### Export a completed session
-
-1. Stop the session before exporting. Live review is allowed, but **Export completed session** is unavailable until that session finishes.
-2. Choose **Training — reviewed live audio** or **Evaluation — held apart from training**. Training requires known live provenance. Replay, synthetic, and unknown sessions can be reviewed and exported for evaluation; they cannot silently become training data. Once a session is assigned to a split, later exports keep that assignment.
-3. Click **Export completed session**, then **Download review bundle**. The ZIP contains copied WAVs, Whisper metadata separated by spoken language, EN/ES translation pairs, correction revisions, and a manifest. Repeating an unchanged export produces the same bundle.
-
-A transcript approval plus retained audio is required for a Whisper sample. **Both text approvals** are required for a translation pair. Missing audio still permits an approved translation pair. Excluded chunks are omitted. Keep Spanish speech samples in a separate Spanish corpus; the existing English Whisper trainer is configured for English.
-
-For the setup/training owner, extract the ZIP on the destination machine, then use the existing merger commands:
+After extracting a portable review bundle, the training owner can use:
 
 ```bash
 python tools/merge_corrections.py whisper --corrections /path/to/bundle --train-dir /path/to/english/train
@@ -134,157 +187,12 @@ python tools/merge_corrections.py whisper --corrections /path/to/bundle --train-
 python tools/merge_corrections.py translation --corrections /path/to/bundle/translation/train.jsonl --train-jsonl /path/to/pairs_train.jsonl
 ```
 
-Merges preserve sample identity and do not add duplicates when repeated. Evaluation bundles are rejected by training mergers. Retain the ZIP and manifest with the training run for provenance.
+Evaluation bundles are rejected by training mergers. Retain the bundle manifest
+with any training run. Older sessions without successful completion evidence remain
+reviewable; do not invent completion or human approval to export them.
 
-Completion is checked against a persisted lifecycle record, so an operator restart cannot make a still-active session look exportable. Older sessions without evidence of successful completion remain reviewable. For an older successful file replay, the setup owner can migrate its real benchmark report with `python -m tools.session_lifecycle --root . --session SESSION --migrate-successful-replay REPORT_JSON`. The report must identify the same successful pipeline run; this does not turn replay data into live training audio.
-
-The historical `prepare_finetune_data.py` commands also read review sidecars. Stop the pipeline before using these commands for a training handoff; they retain their explicit CLI export behavior and do not enforce the web bundle's completion-marker gate. Use `--eval-only` for unknown/replay evaluation data and `--source-lang en` or `es` when an old session has no language tag. For an older recording you can independently verify was live training audio, `--confirm-live-session SESSION` records that explicit provenance; it cannot override replay or evaluation flags. Choosing a source language alone does not establish live provenance. The historical TSV `apply-corrections` command still writes diagnostics; the browser workflow uses sidecars.
-
----
-
-## First-time setup
-
-Have the setup owner install the runtime and models for the machine before handing it to a volunteer. A working launcher or installed wheel alone does not establish that the inference dependencies, cached models, microphone, or optional voices are ready.
-
-- **Apple Silicon:** follow [Mac installation and launchd setup](packaging/macos.md), then check the selected MLX configuration in Pre-flight.
-- **Windows/NVIDIA:** use an installer supplied and verified by the setup owner for the intended release. Confirm the installed version, CUDA dependencies, model cache, and audio input before an event. The [Windows packaging notes](packaging/windows.md) include development plans and are not evidence that a particular downloaded installer has passed an end-to-end test.
-- **Repository checkout:** `./run_operator.sh` selects the configured environment. Installed packages can launch with `stark-translate operator`; their static assets are resolved from the package even when the working directory is elsewhere. Set `STARK_PROJECT_ROOT` to the writable session-data directory when needed.
-
-If microphone permission was denied, enable it for the launcher/terminal in the operating system's privacy settings, then restart the operator. Run a short spoken rehearsal after setup changes.
-
----
-
-## When something goes wrong
-
-### Audience display says "Disconnecting" / no subtitles
-
-- Refresh the audience display browser tab.
-- If still broken, click **Stop** then **Start session** in the operator UI.
-
-### Operator UI says state="error"
-
-- Click **Stop**. Wait until the pill says `IDLE`.
-- Click **Start session** again.
-- Read the error shown in Session and the per-session log under `metrics/`. Startup failures now include the last log lines. Missing models, incompatible packages, audio failures, and memory pressure need different fixes; share the actual error with the setup owner.
-
-### USB mic gets unplugged mid-session
-
-- A yellow toast appears on the operator UI: *"Audio devices changed — confirm your mic is still selected."*
-- Plug the mic back in. The dropdown will refresh automatically.
-- Re-select the mic in the dropdown if it cleared.
-- Click **Stop** then **Start session** to resume cleanly.
-
-### "VRAM" reads >90% of the card and stays there
-
-- Stop the session and close competing GPU applications. HF fallback is not a guarantee of lower memory use.
-- If memory remains high, ask the setup owner to inspect the process and selected model. The NVIDIA VRAM counter does not measure Mac unified memory.
-
-### Latency sparkline keeps creeping up
-
-- Usually means another process is competing for the GPU (someone left a game open?).
-- Click **Stop**, close other GPU apps, **Start** again.
-
----
-
-## End-of-event checklist (2 minutes)
-
-1. Click **Stop session** if not already stopped.
-2. (Optional) Click **Generate summary** and wait for it to finish — the JSON lands in `metrics/`.
-3. Save any review drafts. Export completed reviewed data now or leave it for the reviewer after the event.
-4. Close the browser tabs.
-5. Power off the projector. Leave the church PC powered on; systemd will keep the operator service running for next time.
-
----
-
-## Route TTS to a second output (9.4.1)
-
-Before starting a session, enable **TTS audio**, choose **local (selected speakers)**
-as the TTS output mode, then select **English TTS output** and **Spanish TTS output**
-independently. For example, send English to MacBook Pro Speakers and Spanish to
-BlackHole 2ch or a hearing-assist transmitter. Each selector routes the spoken
-translation language. **Use fallback output** uses the common TTS fallback choice,
-which defaults to the system output. Choices are saved in this browser. Stop and
-start the session to apply changed routes.
-
-The device lists refresh on USB hotplug. A missing selection stays visible as
-unavailable. Named routes are resolved again after a playback error; if the retry
-fails, TTS warns in the log and tries the system default. Numeric indices can
-change after hotplug, so prefer names for USB devices.
-
-CLI equivalent (device names match the first case-insensitive substring):
-
-```bash
-python dry_run_ab.py --tts --tts-output local \
-  --tts-device-en "MacBook Pro Speakers" --tts-device-es "BlackHole 2ch"
-```
-
-Or set `STARK_TTS_OUTPUT_DEVICES='{"en":"MacBook Pro Speakers","es":"BlackHole 2ch"}'`
-and run with `--tts --tts-output local`. Per-language CLI flags override that map;
-unlisted languages use `--tts-device <index>` / `STARK_TTS_OUTPUT_DEVICE`, or the
-system default. A JSON `null` explicitly selects the system default for a language.
-The output list is available at `/api/audio/output-devices`. WebSocket and WAV
-modes keep their existing behavior and do not use these device choices.
-
-## Glossary for non-technical operators
-
-| Term | Plain English |
-|---|---|
-| **Pre-flight** | The checklist that confirms the system can run a session. |
-| **Session** | One run of the live translation, from Start to Stop. |
-| **VAD** | "Voice Activity Detection" — the system noticing when someone starts/stops talking. Don't change unless told to. |
-| **Backend** | Which inference path to use (CUDA = NVIDIA card, MLX = Apple Silicon). Leave on `auto`. |
-| **Engine** | CUDA translation runtime. Leave on `auto`; MLX uses its own runtime on a Mac. |
-| **A/B comparison** | Runs two translation models side-by-side. Only useful for development; **leave unchecked for live events**. |
-| **TTS** | Text-to-speech (the system reading translations aloud). Leave unchecked unless you have headphones routed for it. |
-| **VRAM** | Memory on the graphics card. The sparkline shows how full it is. |
-| **Latency** | For current sessions, speech end to the final caption being ready to send. Browser delivery is measured separately. |
-| **p50 / p95** | Median and 95th percentile of measured delays; these describe the observed sample, not a guaranteed maximum. |
-| **Confidence** | A model-specific signal to help prioritize review; it does not guarantee the transcript is correct. |
-| **Adapter** | A small fine-tuning patch that improves accuracy on church-specific vocabulary. The pre-flight check tells you if one is loaded. |
-
----
-
-## Quick health probe
-
-A quick way to check the service is alive without opening the operator UI:
-
-```
-curl http://localhost:9000/healthz
-```
-
-Expect a 200 with JSON containing `"status": "ok"`. If that fails, the operator service is down — see "When something goes wrong" above.
-
-## Who to call
-
-| Problem | Who |
-|---|---|
-| Operator UI won't load at all | The dev who set up the church PC. |
-| Pre-flight has red items you can't fix | Same dev. |
-| Audience display projector not showing the laptop | The A/V volunteer. Hardware-only, not a software issue. |
-| Wrong translation of a specific term | Select the finalized chunk in Review, listen to the audio, and save the corrected text and note. A bilingual reviewer can approve it for export. |
-
----
-
-## Pre-event dry-run
-
-Run this once a week before a real event, not the day of.
-
-**Automated** (preferred): run the rehearsal script, which walks every endpoint
-and exits 0 on green, 1 on any red:
-
-```
-./scripts/dry_run_rehearsal.sh
-```
-
-**Manual**:
-
-1. Open the operator UI.
-2. Select the intended language, backend, mic, and optional features; resolve every red pre-flight check.
-3. Click **Start session** with the default settings.
-4. Speak a test sentence into the mic ("This is a test — Romans 8:28 says God is good.").
-5. Confirm an accurate Spanish subtitle appears on the audience display and inspect the measured delay.
-6. Confirm "Romans 8:28" appears in the Recent verses panel.
-7. In Review, confirm a saved final chunk appears and its audio can be played; save a draft without approval.
-8. Click **Stop session**. Confirm the state pill returns to `IDLE`; completed-session export should now be available when its completion record is present.
-
-If any step fails, file an issue with the dev.
+Live microphone permission, output routing/unplug/replug, a real two-speaker
+recording, natural Spanish references and bilingual approval remain explicit
+rehearsal gates. Controlled file replay does not certify these physical or human
+steps. The September 10 overnight work defers live microphone and physical outputs
+until the user returns.
