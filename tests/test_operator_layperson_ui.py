@@ -924,7 +924,7 @@ h.route('POST', '/api/support/preview', () => response({preview_id: 'sp1', files
   privacy: {text_included: false, audio_included: false, message: 'Metadata excludes transcript, raw log messages, environment and local model paths.'}}));
 await h.el('support-preview').click(); await settle();
 assert.deepStrictEqual(JSON.parse(h.lastFetch('/api/support/preview').init.body), {session_id: '20260909_101500_000000_en', include_text: false, include_audio: false});
-assert(h.text('support-status').includes('1 file, 0 B, for session 20260909_101500_000000_en. Metadata excludes transcript'), h.text('support-status'));
+assert(h.text('support-status').includes('Metadata plus 0 B of optional attachments for session 20260909_101500_000000_en. Metadata excludes transcript'), h.text('support-status'));
 assert.strictEqual(h.el('support-export').disabled, false);
 h.route('POST', '/api/support/export', () => response({bundle_id: 'b1', download_url: '/api/support/download/b1'}));
 await h.el('support-export').click(); await settle();

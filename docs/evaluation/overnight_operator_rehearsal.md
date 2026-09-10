@@ -32,7 +32,12 @@ The Help workflow built and downloaded a metadata-only support ZIP. Its only
 member was a 2,090-byte `metadata.json`; the tested caption phrases, audio,
 `/Users/` paths and environment-token names were absent. No bundle was sent to
 anyone. The UI's preview byte count represents attachments, not generated metadata;
-that wording is an identified presentation follow-up.
+the follow-up UI now labels it “Metadata plus 0 B of optional attachments” for
+this case. The existing support-preview regression assertion covers the corrected
+wording. The Disk space card also keeps its detailed session checkbox list inside
+a collapsed native disclosure, preserving selections and cleanup controls. These
+are subsequent presentation fixes; the original captured rehearsal evidence is
+unchanged.
 
 Actual rehearsal caught and corrected stale status descriptions after startup,
 Pause and Resume. The prominent live status now reflects input errors/stale health;

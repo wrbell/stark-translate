@@ -1961,7 +1961,7 @@
           : preview.privacy && typeof preview.privacy === "object"
             ? [preview.privacy.message, preview.privacy.text_included ? "Includes caption text." : "", preview.privacy.audio_included ? "Includes audio clips." : ""].filter(Boolean).join(" ")
             : "";
-        setText(el.supportStatus, `${files.length} file${files.length === 1 ? "" : "s"}, ${formatBytes(preview.bytes)}, for session ${sessionId}.${privacy ? ` ${privacy}` : ""}`);
+        setText(el.supportStatus, `Metadata plus ${formatBytes(preview.bytes)} of optional attachments for session ${sessionId}.${privacy ? ` ${privacy}` : ""}`);
         el.supportExport.disabled = !preview.preview_id;
       } catch (e) {
         if (version !== supportVersion) return;
