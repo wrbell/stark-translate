@@ -1,0 +1,41 @@
+{
+  "files": [
+    {
+      "path": "pr192-merged.json",
+      "original_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/pr192-merged.json",
+      "size_bytes": 283,
+      "sha256": "54f9f938cb4cccbaae0459e94361789b7bfe5074811f30f2d761ec26b7043687"
+    },
+    {
+      "path": "issue134-closed.json",
+      "original_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/issue-134-closed.json",
+      "size_bytes": 153,
+      "sha256": "e4df32787cada1129d826d640295846883ab13db5201ef9dcf97cfa67d3d4438"
+    },
+    {
+      "path": "issue176-closed.json",
+      "original_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/issue-176-closed.json",
+      "size_bytes": 153,
+      "sha256": "8661ac922174ada8c7190b24adeaec7bde6b4c686376883ceb7bc95c5de0db49"
+    },
+    {
+      "path": "issue177-closed.json",
+      "original_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/issue-177-closed.json",
+      "size_bytes": 155,
+      "sha256": "205e1457cd0d5419021749c62bef573a86e512984c0c38613cff422f43170e62"
+    },
+    {
+      "path": "ci-ab66ad2.json",
+      "original_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/ci-ab66ad2-receipt.json",
+      "size_bytes": 955,
+      "sha256": "508d640b732dde4de666bbcf696769c14d3f019ee80521a6771f008eef28b3a0"
+    },
+    {
+      "path": "bootstrap-delivery-ab66ad2.json",
+      "original_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/bootstrap-delivery-ab66ad2/report.json",
+      "size_bytes": 1756,
+      "sha256": "62bc055d04a8ad337fd16cb7e2c2c01d763f4190f71de6ca17fbee3e0460fd53"
+    }
+  ],
+  "policy": "Exact source receipts; no log dumps, audio, models, corrections or private crash content."
+}

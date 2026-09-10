@@ -270,8 +270,9 @@ schema 2 timing, reproducible setup, Review/export, frozen screening, Lite profi
 latency experiments, the lay-volunteer operator page and the offline Hindi baseline tool —
 implemented in the integrated source; recorded evidence and remaining gates are in
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) and
-[`docs/lite_profiles.md`](docs/lite_profiles.md). Source publishing and the final merge are
-authorized; PyPI/package/release tags remain pending.
+[`docs/lite_profiles.md`](docs/lite_profiles.md). PR #192 merged into main;
+[closeout evidence](docs/evaluation/overnight_closeout_20260910/README.md) records the
+merge and justified issue closures. PyPI/package/release tags remain pending.
 
 **Live microphone (2026-09-09 → 10):** the built-in-mic session stalled after model load
 (no audio frames, operator showed RUNNING from the CSV header) while file replay passed. The
@@ -280,9 +281,10 @@ the pipeline health channel — is implemented; the real built-in-mic retest is 
 the next attended session (`mac-live-mic-stall`, #131).
 
 **Open gates:** live microphone EN/ES retest, natural Spanish references, bilingual review,
-visible-browser timing run, two-speaker diarization gate, physical second output, dry run
-(#134, laptop stand-in allowed), WSL training cycle, Lite x86 CPU / RTX 2070 hardware
-performance — tracked in [`docs/backlog.json`](docs/backlog.json).
+visible-browser timing certification, two-speaker diarization gate, physical second
+output, WSL training cycle, Lite x86 CPU / RTX 2070 hardware performance — tracked
+in [`docs/backlog.json`](docs/backlog.json). The laptop runbook rehearsal is complete
+and #134 is closed; hymn/quality follow-ups #193/#194 remain open.
 
 ## License
 

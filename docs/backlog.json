@@ -3,14 +3,17 @@
   "last_updated": "2026-09-10",
   "integration": {
     "main_release_tag": "v2026.13",
-    "main_head_note": "main last recorded at 09e4679, with v2026.13 PRs #180–191 merged. PR #192 is still open; the authorized main merge has not occurred. v2026.13 remains the last published release even after a source-only merge until a separate release is published.",
-    "local_branch": "codex/mac-reliability-roadmap",
-    "local_base": "Integrated runtime frozen at 752ab9a351815feee4b8cd155f732c588cb30a6c. Later evidence, documentation and workflow edits retain their separate source identity.",
+    "main_head_note": "PR #192 merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z, from reviewed source ab66ad2929e61171e4ab9c7c77685ba1ac988577. v2026.13 remains the last published release; no release/tag upload followed this source merge.",
+    "local_branch": "main",
+    "local_base": "PR #192 merged at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c from reviewed ab66ad2. The 752ab9a endurance cohort, five-module 84832fb operator cleanup and ab66ad2 bootstrap delivery retain separate exact-source evidence.",
     "local_version": "2026.14.0.0",
-    "draft_pr": "[PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft against main, not merged; checks green at 752ab9a. Final evidence/issue mapping and future-head checks precede the authorized source merge.",
-    "publication": "Source and issue publishing and the final merge to main are authorized by the user. Local package artifacts are built and mechanically validated; PyPI/GHCR/release uploads and release tags remain pending by user choice.",
-    "distinction": "Items marked implemented or validated exist on the integrated reliability branch unless noted as main-only. Source integration, local artifact validation, public distribution and service certification are separate. PR #192 remains open; do not infer a main merge or release from local checks. Certification records whether the item’s own acceptance was met; implementation alone does not close an issue.",
-    "pr_state": "open"
+    "draft_pr": "[PR #192](https://github.com/wrbell/stark-translate/pull/192) — merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z; exact-head Python 3.11/3.12 CI passed 2,398 tests with four skips each. Merge and closure receipts: docs/evaluation/overnight_closeout_20260910/README.md.",
+    "publication": "PR #192 source merge and justified issue closures are complete. Local package artifacts are mechanically validated; PyPI/GHCR/release uploads and release tags remain pending by user choice.",
+    "distinction": "Implemented/validated source from PR #192 is merged into main. Source integration, local artifact validation, public distribution and service certification remain separate. Certification records each item’s actual acceptance; source merge alone does not close human/device gates.",
+    "pr_state": "merged",
+    "merge_commit": "3e935fe39b96e7b0aa62a74711307f2b3e31a18c",
+    "merged_at": "2026-09-10T11:57:22Z",
+    "merged_head": "ab66ad2929e61171e4ab9c7c77685ba1ac988577"
   },
   "status_definitions": {
     "in_progress": "Active engineering right now; code may still be changing on the branch and its acceptance is not yet met.",
@@ -52,9 +55,9 @@
   "items": [
     {
       "id": "pr-192-integration",
-      "title": "Validate the integrated candidate branch and finish the authorized merge of draft PR #192",
-      "status": "in_progress",
-      "certification": "pending",
+      "title": "Integrated source merged through PR #192",
+      "status": "validated",
+      "certification": "met",
       "priority": "P0",
       "machine": "any",
       "dependencies": [],
@@ -62,11 +65,12 @@
         "https://github.com/wrbell/stark-translate/pull/192",
         "docs/overnight_status.md",
         "docs/evaluation/overnight_screen_20260910/README.md",
-        "docs/evaluation/overnight_endurance_20260910/README.md"
+        "docs/evaluation/overnight_endurance_20260910/README.md",
+        "docs/evaluation/overnight_closeout_20260910/README.md"
       ],
       "acceptance": "PR #192 marked ready with integrated operator, Lite, latency and failure-recovery changes, CI green on the final head, and root-recorded evidence; main advances only at the authorized merge, without publishing a release.",
-      "notes": "Frozen 752 CPU/GPU/static and mechanical artifact validation passed; the 96-run screen selected 0/28 arms. Repaired Standard completed 563 finals/2,814 previews and 7,594 writes; Lite completed 468 finals/271 previews and 1,979 writes, all retained spans consistent and cleanup verified. The original b65 span failure remains separate. The Docker main-build-only guard is implemented. The raw archive is verified; hymn follow-ups are mapped to #193/#194 and future-head CI/review remains before the authorized merge.",
-      "next_action": "Finalize retained evidence and real hymn-issue links, verify the Docker upload guard and exact final remote head, mark PR #192 ready and perform the authorized source merge. Do not publish package releases or tags."
+      "notes": "Actual merge 3e935fe39b96e7b0aa62a74711307f2b3e31a18c at 2026-09-10T11:57:22Z; final reviewed head ab66ad2929e61171e4ab9c7c77685ba1ac988577 passed 2,398 tests with four skips on each Python 3.11/3.12 CI job. Bootstrap delivery verifies executable ZIP bootstrap and 152 unchanged runtime members versus 84832fb. Earlier 752 endurance, 848 cleanup checks and negative 96-run screen remain separate evidence. No package publication or device/human certification.",
+      "next_action": "None for source integration. Continue remaining latency, human/device and hardware work; release publication needs the separate user decision."
     },
     {
       "id": "mac-live-mic-stall",
@@ -118,8 +122,8 @@
     {
       "id": "issue-134-sunday-dry-run",
       "title": "Dry-run with the operator runbook (#134)",
-      "status": "in_progress",
-      "certification": "pending",
+      "status": "validated",
+      "certification": "met",
       "priority": "P0",
       "machine": "mac",
       "dependencies": [],
@@ -129,12 +133,13 @@
         "docs/evaluation/overnight_endurance_20260910/README.md",
         "https://github.com/wrbell/stark-translate/issues/193",
         "https://github.com/wrbell/stark-translate/issues/194",
-        "https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md"
+        "https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md",
+        "docs/evaluation/overnight_closeout_20260910/README.md"
       ],
       "issue_acceptance": "Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.",
       "acceptance": "Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.",
-      "notes": "The laptop stand-in used the installed 752ab9a Standard runtime on the uncropped 3,640.053 s natural English service. Session 20260910_043120_839144_en completed exit 0 with consistent bounds for 563 finals and 2,814 previews, all 7,594 required writes complete and observed cleanup. Actual SPA hymn→prayer chronology, prepared operator launch-to-first-server-preview 436.790088 s and actual Start-to-first-server-preview 420.492–420.762 s (including 403.1448125 s of source zeros), operator/helper steps and a post-Stop long summary are retained. First-install/download time was not measured; the summary omitted the transcript middle and is not human-reviewed. Original b65 failures stay separate. The written report and verified archive are linked; remaining hymn behavior is mapped to #193 and #194 as quality follow-ups; earlier operator UX blockers were fixed. #134 remains OPEN pending the final closure action.",
-      "next_action": "Use the immutable written evidence and mapped #193/#194 follow-ups to reassess and close #134 after source integration; do not add microphone, physical-display, exact lyric-boundary or separate CPU Lite requirements."
+      "notes": "The laptop stand-in used the installed 752ab9a Standard runtime on the uncropped 3,640.053 s natural English service. Session 20260910_043120_839144_en completed exit 0 with consistent bounds for 563 finals and 2,814 previews, all 7,594 required writes complete and observed cleanup. Actual SPA hymn→prayer chronology, prepared operator launch-to-first-server-preview 436.790088 s and actual Start-to-first-server-preview 420.492–420.762 s (including 403.1448125 s of source zeros), operator/helper steps and a post-Stop long summary are retained. First-install/download time was not measured; the summary omitted the transcript middle and is not human-reviewed. Original b65 failures stay separate. The written report and verified archive are linked; remaining hymn behavior is mapped to #193 and #194 as quality follow-ups; earlier operator UX blockers were fixed. #134 closed COMPLETED at 2026-09-10T11:57:48Z after the recorded source merge.",
+      "next_action": "Rehearsal acceptance is met. Continue open hymn/quality follow-ups #193/#194 and separate microphone/device/human gates without relabeling them as #134 requirements."
     },
     {
       "id": "issue-132-tts-routing",
@@ -462,8 +467,8 @@
     {
       "id": "issue-176-multiprocess",
       "title": "--multiprocess workers use shared Gemma 4 prompts and stop rules (#176)",
-      "status": "implemented",
-      "certification": "pending",
+      "status": "validated",
+      "certification": "met",
       "priority": "P3",
       "machine": "mac",
       "dependencies": [],
@@ -472,7 +477,8 @@
         "workers.py",
         "engines/translation_prompts.py",
         "tests/test_worker_translation_contract.py",
-        "docs/issue_closure_audit.md"
+        "docs/issue_closure_audit.md",
+        "docs/evaluation/overnight_closeout_20260910/README.md"
       ],
       "issue_acceptance": "Route workers.py through engines/translation_prompts build_chat_messages + ensure_stop_tokens (skipping the prompt cache for gemma4), or deprecate --multiprocess.",
       "acceptance": "workers.translation_worker_main builds engines through MLXGemmaEngine with the parent-selected model_family, so Gemma 4 never receives TranslateGemma prompts and stop handling is shared; a live --multiprocess run is not part of the acceptance.",
@@ -480,13 +486,13 @@
         "Integrated workers.translation_worker_main delegates to MLXGemmaEngine with the parent-selected model family, direction and adapters; Gemma 4 skips the incompatible TranslateGemma prompt cache.",
         "Real pipe-loop contract tests cover both model families, EN/ES directions, the six-value A/B response and cleanup with mocked inference; included in the frozen 752ab9a CPU suite."
       ],
-      "notes": "Correctness fix is ready for closure after merge under original option (a). #176 remains OPEN. Multiprocess is optional and has no new performance endorsement.",
-      "next_action": "After PR #192 actually merges, root may close #176 with the source/test evidence. Do not change issue state before the recorded merge."
+      "notes": "#176 closed COMPLETED at 2026-09-10T11:57:50Z after source merge: original shared-engine option (a) is implemented and contract-tested. Multiprocess remains optional with no new performance endorsement.",
+      "next_action": "Maintain shared prompt/stop contracts; no new multiprocess performance promotion."
     },
     {
       "id": "issue-177-mtp",
       "title": "Gemma 4 MTP assistant drafter on MLX (#177)",
-      "status": "experimental",
+      "status": "deferred",
       "certification": "pending",
       "priority": "P3",
       "machine": "mac",
@@ -497,11 +503,12 @@
         "docs/mlx_mtp_notes.md",
         "engines/mlx_spec.py",
         "tools/mts_acceptance_probe.py",
-        "dry_run_ab.py"
+        "dry_run_ab.py",
+        "docs/evaluation/overnight_closeout_20260910/README.md"
       ],
       "acceptance": "Record the original timeboxed investigation and each promotion gate. Only greedy-identical output, canary ≥7/8, medium p50 ≤0.85× the post-EOS baseline and acceptance ≥30% together permit promotion; otherwise keep MTP off.",
-      "notes": "The archived offline experiment had 33/33 greedy-identical outputs and 31.3% acceptance, but medium p50 1,339/1,393 ms (about 0.96×) failed the ≤0.85× speed gate; a ≥7/8 canary result was not established. The RoPE-offset hypothesis was rejected. Live requested/configured MTP fails before model loading; --no-mts explicitly selects the supported off path. #177 remains OPEN, ready for a negative-investigation closure after merge, not a deployed-optimization claim.",
-      "next_action": "Keep MTP off. After merge, root may close the timeboxed investigation with its failed promotion gates; a future upstream/runtime hypothesis requires new evidence, not repetition of rejected settings.",
+      "notes": "The archived offline experiment had 33/33 greedy-identical outputs and 31.3% acceptance, but medium p50 1,339/1,393 ms (about 0.96×) failed the ≤0.85× speed gate; a ≥7/8 canary result was not established. The RoPE-offset hypothesis was rejected. Live requested/configured MTP fails before model loading; --no-mts explicitly selects the supported off path. #177 closed NOT_PLANNED at 2026-09-10T11:57:53Z as a negative/timeboxed investigation. Promotion acceptance remains unmet; implementation is deferred and certification pending.",
+      "next_action": "Keep MTP off. A distinct future upstream/runtime hypothesis requires new evidence and all promotion gates; closure is not an optimization certification.",
       "issue_acceptance": "Greedy-identical output; canary ≥7/8; medium p50 ≤0.85× post-EOS-fix E4B; drafter acceptance ≥30%. Otherwise MTP stays off; low acceptance was a timeboxed implementation investigation."
     },
     {
@@ -544,20 +551,21 @@
     },
     {
       "id": "mac-reliability-implementation",
-      "title": "v2026.14 Mac reliability program on the local branch",
-      "status": "implemented",
-      "certification": "pending",
+      "title": "v2026.14 Mac reliability source integrated in main",
+      "status": "validated",
+      "certification": "met",
       "priority": "P0",
       "machine": "mac",
       "dependencies": [],
       "sources": [
         "docs/mac_implementation_status.md",
         "https://github.com/wrbell/stark-translate/pull/192",
-        "docs/evaluation/overnight_endurance_20260910/README.md"
+        "docs/evaluation/overnight_endurance_20260910/README.md",
+        "docs/evaluation/overnight_closeout_20260910/README.md"
       ],
       "acceptance": "Merged to main through PR #192 with the human, device and visible-browser gates recorded as still open.",
-      "notes": "Operator/session reliability, schema 2 timing, setup, safe Review/export and packaging are integrated. 752 CPU/GPU/static checks passed; the 96-run screen selected no arms. Repaired Standard and CPU Lite completed their independent natural-English runs with consistent retained spans and durable writes/cleanup; selected waveforms match and the old failure is preserved. Docker publication guard is implemented. Evidence and #193/#194 links are recorded; future-head checks precede the pending source merge; device/human gates remain separate.",
-      "next_action": "Finish final evidence/issue mapping and head-specific checks, then record the authorized merge. Keep actual live-mic, independent outputs and human-quality acceptance open."
+      "notes": "Operator/session reliability, schema 2 timing, setup, safe Review/export and packaging are integrated. 752 CPU/GPU/static checks passed; the 96-run screen selected no arms. Repaired Standard and CPU Lite completed their independent natural-English runs with consistent retained spans and durable writes/cleanup; selected waveforms match and the old failure is preserved. Docker publication guard is implemented. Evidence and #193/#194 links are recorded; source merged at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c; device/human gates remain separate.",
+      "next_action": "Source integration acceptance is met; continue actual live-mic, independent outputs and human-quality validation separately."
     },
     {
       "id": "mac-cpu-test-suite",
@@ -758,8 +766,8 @@
         "docs/evaluation/overnight_endurance_20260910/README.md"
       ],
       "acceptance": "Every README/CLAUDE/AGENTS guide describes current behavior from source, historical numbers live only under dated archive links, and tests/test_documentation.py plus render/link checks pass.",
-      "notes": "Current guides, exact752 artifact/test receipts, canonical backlog and explicit public endurance files are refreshed. Standard/Lite completed evidence remains separate from original failed data and96-run screen. The raw archive is verified and linked. Hymn follow-ups #193/#194 are linked. Final head checks and merge-state wording are the remaining integration edits.",
-      "next_action": "Keep the verified evidence and #193/#194 links current, then update merge/closure states only after those actions occur."
+      "notes": "Current guides, exact 752 artifact/test receipts, canonical backlog and explicit public endurance files are refreshed. Standard/Lite completed evidence remains separate from original failed data and 96-run screen. The raw archive is verified and linked. Hymn follow-ups #193/#194 are linked. Final-head CI passed; current source/issue states now reference actual closeout receipts. Historical pre-merge snapshots remain unchanged.",
+      "next_action": "Keep current guides synchronized with actual states; preserve historical receipts and separate device/human/publication gates."
     },
     {
       "id": "mac-torch-security-migration",

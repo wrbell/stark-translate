@@ -1,0 +1,38 @@
+{
+  "source_revision": "ab66ad2929e61171e4ab9c7c77685ba1ac988577",
+  "started_at_utc": "2026-09-10T11:43:55.536511+00:00",
+  "status": "passed",
+  "inference": false,
+  "environment_installation": false,
+  "service_mutation": false,
+  "publication": false,
+  "source_archive_sha256": "43ef46934160bda1076deb885030fd227fd941bf7bbc9f7510b3d8ef8216aa0e",
+  "runtime_source_continuity": {
+    "baseline_revision": "84832fb98caf4504cf65b1f5969558b0be911f5c",
+    "baseline_report_sha256": "d13fe9aabad161f45b3631ed33f20194a5ab7bfa83d64c020ab38fb032b94b3b",
+    "compared_members": 152,
+    "mismatches": []
+  },
+  "build": {
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/bootstrap-delivery-ab66ad2/source/tools/release_artifacts.py",
+      "mac",
+      "--root",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/bootstrap-delivery-ab66ad2/source",
+      "--output-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/bootstrap-delivery-ab66ad2/bundle"
+    ],
+    "exit_code": 0,
+    "log_sha256": "b05d822af9782ee87f550432af209fae63df570064d12b336b8ef807e2df7287"
+  },
+  "mac_zip": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/bootstrap-delivery-ab66ad2/bundle/stark-translate-v2026.14.0.0-mac.zip",
+    "sha256": "b3fca1168e01c890e76c20747285bc4ffca59edf991c35925f2a349506b3307c",
+    "bootstrap_sha256": "33e74f60338a881a67990c016b32befa5e0bcc185713a71aab9b9cfb3641678e",
+    "bootstrap_mode_octal": "0o100755",
+    "bootstrap_equals_frozen_source": true,
+    "all_152_runtime_members_match_84832fb": true
+  },
+  "ended_at_utc": "2026-09-10T11:43:56.872795+00:00"
+}
