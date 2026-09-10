@@ -16,6 +16,7 @@
   const stopBtn = document.getElementById("stop-btn");
   const micSelect = document.getElementById("mic-device");
   const form = document.getElementById("config-form");
+  const idleEditedFields = new Set();
 
   let preflightOk = false;
   let currentState = "idle";
@@ -107,7 +108,12 @@
   const outputSelect = document.getElementById("output-device");
   const languageOutputs = ["en", "es"].map(lang => document.getElementById(`output-device-${lang}`));
   const ttsModeSelect = form.elements.namedItem("tts_output_mode");
+  const ttsEnabled = form.elements.namedItem("tts");
   const ttsStorageKey = "stark-translate-tts-outputs";
+
+  function readTtsRoute(control) {
+    return control.dataset.deviceIndex === control.value ? Number(control.value) : control.value;
+  }
 
   function populateOutput(select, devices, byName) {
     const selected = select.value;
@@ -129,23 +135,35 @@
   try {
     const saved = JSON.parse(localStorage.getItem(ttsStorageKey) || "{}");
     for (const select of [outputSelect, ...languageOutputs]) {
-      if (typeof saved[select.name] === "string" && saved[select.name]) {
-        select.add(new Option(saved[select.name], saved[select.name]));
-        select.value = saved[select.name];
+      if (["string", "number"].includes(typeof saved[select.name])) {
+        const value = String(saved[select.name]);
+        if (value) select.add(new Option(value, value));
+        select.value = value;
+        if (typeof saved[select.name] === "number") select.dataset.deviceIndex = value;
+        idleEditedFields.add(select.name);
       }
     }
     if (["ws", "wav", "both", "local"].includes(saved.tts_output_mode)) {
       ttsModeSelect.value = saved.tts_output_mode;
+      idleEditedFields.add(ttsModeSelect.name);
+    }
+    if (typeof saved.tts === "boolean") {
+      ttsEnabled.checked = saved.tts;
+      idleEditedFields.add(ttsEnabled.name);
     }
   } catch (e) { /* Storage may be disabled; session controls still work. */ }
 
-  for (const select of [outputSelect, ...languageOutputs, ttsModeSelect]) {
-    select.addEventListener("change", () => {
-      const saved = {};
-      for (const control of [outputSelect, ...languageOutputs, ttsModeSelect]) {
-        saved[control.name] = control.value;
-      }
-      try { localStorage.setItem(ttsStorageKey, JSON.stringify(saved)); } catch (e) { /* optional storage */ }
+  function persistTtsChoices() {
+    const saved = {tts: ttsEnabled.checked};
+    for (const control of [outputSelect, ...languageOutputs, ttsModeSelect]) {
+      saved[control.name] = readTtsRoute(control);
+    }
+    try { localStorage.setItem(ttsStorageKey, JSON.stringify(saved)); } catch (e) { /* optional storage */ }
+  }
+  for (const control of [outputSelect, ...languageOutputs, ttsModeSelect, ttsEnabled]) {
+    control.addEventListener("change", () => {
+      delete control.dataset.deviceIndex;
+      persistTtsChoices();
     });
   }
   const toastEl = document.getElementById("toast");
@@ -179,7 +197,10 @@
         opt.textContent = `${d.index}: ${d.name} (${d.channels}ch)`;
         micSelect.appendChild(opt);
       }
-      micSelect.value = Array.from(micSelect.options).some(opt => opt.value === selectedMic) ? selectedMic : "";
+      if (selectedMic && !Array.from(micSelect.options).some(opt => opt.value === selectedMic)) {
+        micSelect.add(new Option(`${selectedMic} (unavailable)`, selectedMic));
+      }
+      micSelect.value = selectedMic;
       populateOutput(outputSelect, outputs.outputs || [], false);
       for (const select of languageOutputs) {
         populateOutput(select, outputs.outputs || [], true);
@@ -203,6 +224,40 @@
   languageSelect.addEventListener("change", () => {
     if (!activeStates.includes(currentState)) idleLanguageEdited = true;
   });
+  for (const control of Array.from(form.elements)) {
+    control.addEventListener("change", () => {
+      if (!activeStates.includes(currentState)) idleEditedFields.add(control.name);
+    });
+  }
+
+  function syncSessionConfig(config, force) {
+    let changed = false;
+    for (const control of Array.from(form.elements)) {
+      if (control.name === "lang") continue;
+      const key = control.name === "output_device" ? "tts_device" : control.name;
+      if (!Object.hasOwn(config, key) || (!force && (statusSeen || idleEditedFields.has(control.name)))) continue;
+      const value = config[key];
+      if (["tts_device_en", "tts_device_es"].includes(key)) {
+        changed = changed || control.dataset.deviceIndex !== (typeof value === "number" ? String(value) : undefined);
+        if (typeof value === "number") control.dataset.deviceIndex = String(value);
+        else delete control.dataset.deviceIndex;
+      }
+      if (control.type === "checkbox") {
+        if (typeof value !== "boolean") continue;
+        changed = changed || control.checked !== value;
+        control.checked = value;
+      } else {
+        const selected = value == null ? "" : String(value);
+        if (control.tagName === "SELECT" && !Array.from(control.options).some(opt => opt.value === selected)) {
+          control.add(new Option(selected || "system default", selected));
+        }
+        changed = changed || control.value !== selected;
+        control.value = selected;
+      }
+      idleEditedFields.delete(control.name);
+    }
+    return changed;
+  }
 
   function renderStatus(snap, {forcePreflight = false} = {}) {
     ++statusRenderRevision;
@@ -210,6 +265,7 @@
     currentState = snap.state || "idle";
     const isActive = activeStates.includes(currentState);
     const confirmedLang = snap.config && snap.config.lang;
+    const configChanged = snap.config ? syncSessionConfig(snap.config, isActive || wasActive) : false;
     let languageChanged = false;
     // Live status owns the direction; a volunteer's next-session choice owns
     // it while idle. Also recover the previous direction on an initial reload.
@@ -218,15 +274,16 @@
       languageSelect.value = confirmedLang;
       idleLanguageEdited = false;
     }
+    if (snap.config && (configChanged || !statusSeen) && (isActive || wasActive)) persistTtsChoices();
     statusSeen = true;
-    languageSelect.disabled = isActive;
+    for (const control of Array.from(form.elements)) control.disabled = isActive;
     setStatePill(currentState);
     updateButtonsForState(currentState);
     statusDetailEl.textContent = JSON.stringify(snap, null, 2);
     const summaryControl = document.getElementById("summary-btn");
     if (summaryControl) summaryControl.disabled = ["starting", "running", "paused", "stopping"].includes(currentState);
     window.dispatchEvent(new CustomEvent("operator-session", {detail: snap}));
-    if (languageChanged || forcePreflight) refreshPreflight();
+    if (languageChanged || configChanged || forcePreflight) refreshPreflight();
   }
 
   async function refreshStatus() {
@@ -242,26 +299,28 @@
 
   // ---- start / stop ----
   function readForm() {
-    const fd = new FormData(form);
+    // Active controls are disabled, so FormData would silently omit them.
+    const value = name => form.elements.namedItem(name).value;
+    const checked = name => form.elements.namedItem(name).checked;
     const body = {
-      lang: languageSelect.value, // Disabled during a session, so absent from FormData.
-      backend: fd.get("backend"),
-      engine: fd.get("engine"),
-      tts: fd.get("tts") === "on",
-      run_ab: fd.get("run_ab") === "on",
-      diarize: fd.get("diarize") === "on",
-      vad_threshold: Number(fd.get("vad_threshold")),
+      lang: value("lang"),
+      backend: value("backend"),
+      engine: value("engine"),
+      tts: checked("tts"),
+      run_ab: checked("run_ab"),
+      diarize: checked("diarize"),
+      vad_threshold: Number(value("vad_threshold")),
       log_level: "INFO",
     };
-    const mic = fd.get("mic_device");
+    const mic = value("mic_device");
     if (mic) body.mic_device = Number(mic);
-    const ttsMode = fd.get("tts_output_mode");
+    const ttsMode = value("tts_output_mode");
     if (ttsMode) body.tts_output_mode = ttsMode;
-    const ttsDevice = fd.get("output_device");
+    const ttsDevice = value("output_device");
     if (ttsDevice) body.tts_device = Number(ttsDevice);
     for (const lang of ["en", "es"]) {
-      const device = fd.get(`tts_device_${lang}`);
-      if (device) body[`tts_device_${lang}`] = device;
+      const device = value(`tts_device_${lang}`);
+      if (device) body[`tts_device_${lang}`] = readTtsRoute(form.elements.namedItem(`tts_device_${lang}`));
     }
     return body;
   }
