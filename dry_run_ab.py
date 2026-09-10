@@ -88,6 +88,7 @@ from tools.isolated_audio import AudioCaptureError
 from tools.latency_experiments import LatencyExperiments
 from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker, PartialRuntimePredictor
 from tools.latency_trace import LatencyTrace
+from tools.music_recovery import MusicSpeechRecovery
 from tools.persistence import PersistenceExecutor
 from tools.pipeline_health import PipelineHealth
 from tools.pipeline_timing import (
@@ -657,7 +658,7 @@ diag_low_confidence = []  # [(chunk_id, confidence, text)]
 diag_empty_stt = []  # [(stage, id, buffer_duration_s)]
 diag_force_cuts = []  # [(chunk_id, cut_type, buffer_duration_s, cut_position_s)]
 diag_near_misses = []  # [(chunk_id, original_word, correction, match_type, text)]
-diag_music_holds = []  # [(start_frame, end_frame, duration_s)]
+diag_music_holds = []  # [(capture_frame_start, capture_frame_end, consumed_frame_duration_s)]; excludes pauses
 diag_stt_corrections = []  # [(chunk_id, original, corrected, correction_type)]
 partial_translations = {}  # utterance_id → last MarianMT translation
 partial_latencies = {}  # utterance_id → {"pt_ms": float}
@@ -951,7 +952,7 @@ def print_diagnostics():
 
     if diag_music_holds:
         total_hold = sum(d for _, _, d in diag_music_holds)
-        print(f"\n  Music holds: {len(diag_music_holds)} ({total_hold:.1f}s total)")
+        print(f"\n  Music holds: {len(diag_music_holds)} ({total_hold:.1f}s captured-frame time; excludes pauses)")
         for start, end, dur in diag_music_holds[:10]:
             print(f"    frame {start}-{end}: {dur:.1f}s")
     else:
@@ -4630,6 +4631,18 @@ async def audio_loop():
     music_holdoff_frames = int(MUSIC_HOLDOFF * SAMPLE_RATE / 512)  # ~2s
     music_resume_frames = int(0.5 * SAMPLE_RATE / 512)  # ~0.5s speech to exit
     music_hold_start_frame = 0
+    music_capture_frames = 0  # never reset by utterance finalization or operator pause
+    music_hold_started_at = None
+    music_recovery = MusicSpeechRecovery(music_resume_frames)
+
+    def suppress_music_recovery(reason):
+        nonlocal music_speech_frames
+        frames = music_recovery.take()
+        music_speech_frames = 0
+        if frames:
+            bounds = MusicSpeechRecovery.timeline(frames).sample_metadata()
+            _source_coverage.outcome(bounds, "music_resume_suppressed_" + reason)
+            _latency_trace.record("music_resume_suppressed", reason=reason, frames=len(frames), **bounds)
 
     def discard_buffer(reason):
         nonlocal speech_buffer, timeline, silence_frames, speech_frame_count
@@ -4730,6 +4743,7 @@ async def audio_loop():
                     _health.phase("listening")
                 while True:
                     if _health is not None and _health.paused:
+                        suppress_music_recovery("pause")
                         # Stop production before final admission. File prefetch is
                         # replayed from the last consumed sample after Resume.
                         if is_replay:
@@ -4776,6 +4790,7 @@ async def audio_loop():
                             if getattr(stream, "error", None) is not None:
                                 raise RuntimeError("Audio replay failed") from stream.error
                             source_count = getattr(stream, "source_sample_count", None)
+                            suppress_music_recovery("eof")
                             if source_count is not None:
                                 _source_coverage.eof(source_count, stream.samplerate)
                             if len(speech_buffer):
@@ -4824,6 +4839,7 @@ async def audio_loop():
                     _latency_trace.record("vad_complete", elapsed_ms=(time.perf_counter() - vad_started) * 1000)
 
                     frame_count += 1
+                    music_capture_frames += 1
 
                     # --- Music/hymn auto-muting ---
                     frame_rms = float(np.sqrt(np.mean(audio_frame**2)))
@@ -4841,7 +4857,8 @@ async def audio_loop():
                     # Enter music hold
                     if not music_hold_active and music_nonspeech_frames >= music_holdoff_frames:
                         music_hold_active = True
-                        music_hold_start_frame = frame_count
+                        music_hold_start_frame = music_capture_frames
+                        music_hold_started_at = time.perf_counter()
                         print(
                             f"\n  [MUSIC] Music detected — muting STT (RMS={frame_rms:.4f}, threshold={MUSIC_THRESHOLD})"
                         )
@@ -4853,27 +4870,47 @@ async def audio_loop():
                         _partial_tasks.add(task)
                         task.add_done_callback(_partial_tasks.discard)
 
-                    # Exit music hold when speech resumes for ~0.5s
-                    if music_hold_active and music_speech_frames >= music_resume_frames:
-                        hold_dur = (frame_count - music_hold_start_frame) * 512 / SAMPLE_RATE
-                        diag_music_holds.append((music_hold_start_frame, frame_count, round(hold_dur, 1)))
+                    # Stage the unchanged ~0.5s recovery decision without losing
+                    # the accepted speech onset. Tentative frames are observed
+                    # exactly once, then explicitly recovered or suppressed.
+                    recovered_frames = ()
+                    if music_hold_active:
+                        if has_speech:
+                            candidate = AudioFrame(audio_frame.copy(), frame_stamp)
+                            if not music_recovery.contiguous(candidate):
+                                suppress_music_recovery("source_discontinuity")
+                            music_recovery.append(candidate)
+                            music_speech_frames = len(music_recovery)
+                            _source_coverage.observe(vars(frame_stamp), "music_resume_pending", speech=True)
+                        else:
+                            suppress_music_recovery("vad_non_speech")
+                            _source_coverage.observe(vars(frame_stamp), "music_hold", speech=False)
+                        if music_speech_frames < music_resume_frames:
+                            continue
+                        recovered_frames = music_recovery.take()
+                        hold_dur = (music_capture_frames - music_hold_start_frame) * 512 / SAMPLE_RATE
+                        wall_ms = milliseconds(time.perf_counter(), music_hold_started_at)
+                        diag_music_holds.append((music_hold_start_frame, music_capture_frames, round(hold_dur, 1)))
+                        _latency_trace.record(
+                            "music_hold_finished",
+                            captured_frame_duration_ms=round(hold_dur * 1000, 3),
+                            captured_frame_time_excludes_operator_pause=True,
+                            wall_elapsed_ms=wall_ms,
+                            wall_time_includes_operator_pause=True,
+                        )
                         music_hold_active = False
                         music_nonspeech_frames = 0
-                        print(f"  [MUSIC] Speech resumed after {hold_dur:.1f}s hold")
+                        print(f"  [MUSIC] Speech resumed after {hold_dur:.1f}s captured-frame hold (excludes pauses)")
                         vad_model.reset_states()
                         task = asyncio.create_task(broadcast({"type": "music_hold", "active": False}))
                         _partial_tasks.add(task)
                         task.add_done_callback(_partial_tasks.discard)
 
-                    # Skip all speech buffering when in music hold
-                    if music_hold_active:
-                        _source_coverage.observe(vars(frame_stamp), "music_hold", speech=has_speech)
-                        continue
-
                     buffered_frame = has_speech or (len(speech_buffer) > 0 and silence_frames + 1 < max_silence_frames)
-                    _source_coverage.observe(
-                        vars(frame_stamp), "buffered" if buffered_frame else "vad_non_speech", speech=has_speech
-                    )
+                    if not recovered_frames:
+                        _source_coverage.observe(
+                            vars(frame_stamp), "buffered" if buffered_frame else "vad_non_speech", speech=has_speech
+                        )
 
                     if has_speech:
                         if silence_frames:
@@ -4886,10 +4923,24 @@ async def audio_loop():
                             last_partial_len = 0
                             last_silence_boundary = 0
                             logger.debug("vad_speech_start utterance_id=%d frame=%d", utterance_id, frame_count)
-                        speech_buffer = np.concatenate([speech_buffer, audio_frame])
-                        timeline.append(len(audio_frame), frame_stamp, True)
+                        if recovered_frames:
+                            speech_buffer = np.concatenate([speech_buffer, *(f.samples for f in recovered_frames)])
+                            for accepted in recovered_frames:
+                                timeline.append(len(accepted.samples), accepted.stamp, True)
+                            speech_frame_count += len(recovered_frames)
+                            bounds = MusicSpeechRecovery.timeline(recovered_frames).sample_metadata()
+                            _source_coverage.outcome(bounds, "music_resume_recovered", utterance_id)
+                            _latency_trace.record(
+                                "music_resume_recovered",
+                                frames=len(recovered_frames),
+                                utterance_id=utterance_id,
+                                **bounds,
+                            )
+                        else:
+                            speech_buffer = np.concatenate([speech_buffer, audio_frame])
+                            timeline.append(len(audio_frame), frame_stamp, True)
+                            speech_frame_count += 1
                         silence_frames = 0
-                        speech_frame_count += 1
                     else:
                         # Record silence boundary on speech→silence transition
                         if len(speech_buffer) > 0 and silence_frames == 0:
@@ -5110,6 +5161,7 @@ async def audio_loop():
                         _schedule_warmup(loop)
 
         except asyncio.CancelledError:
+            suppress_music_recovery("stop" if _session_stop_requested else "cancelled")
             # Admit captured speech before main_async sends the coordinator's
             # sentinel. Pending translation then follows the normal final drain.
             if _session_stop_requested and len(speech_buffer) / SAMPLE_RATE >= 0.7:
@@ -5123,6 +5175,7 @@ async def audio_loop():
                     _health.error("capture", "stop_queued_audio_discarded")
             raise
         except (sd.PortAudioError, AudioCaptureError) as e:
+            suppress_music_recovery("capture_error")
             if len(speech_buffer):
                 _io_pool.record_failure("audio_capture", "interrupted_utterance")
                 if _health is not None:
@@ -5141,6 +5194,9 @@ async def audio_loop():
                 except asyncio.QueueEmpty:
                     break
             await asyncio.sleep(2)
+        finally:
+            # Includes EOF, pause and unexpected source/consumer failures.
+            suppress_music_recovery("capture_closed")
 
 
 _ROLLING_STATS_INTERVAL = 300  # 5 minutes

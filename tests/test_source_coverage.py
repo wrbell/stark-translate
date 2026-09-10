@@ -66,3 +66,26 @@ def test_frozen_vad_mask_retains_transitions_inside_buffered_audio():
     ledger.observe(span(512, 1024), "buffered", speech=False)
     ledger.observe(span(1024, 1536), "buffered", speech=True)
     assert [r["vad_positive"] for r in ledger.snapshot()["observed"]] == [True, False, True]
+
+
+def test_pending_music_recovery_requires_explicit_terminal_disposition():
+    ledger = SourceCoverage()
+    ledger.observe(span(0, 512), "music_resume_pending", speech=True)
+    ledger.eof(512, 16000)
+    assert ledger.snapshot()["unclassified_intervals"] == [[0, 512]]
+    ledger.outcome(span(0, 512), "music_resume_recovered", 1)
+    assert not ledger.snapshot()["complete"]
+    ledger.outcome(span(0, 512), "submitted", 1)
+    assert not ledger.snapshot()["complete"]
+    ledger.outcome(span(0, 512), "final_ready", 1)
+    assert ledger.snapshot()["complete"]
+
+
+def test_unaccepted_music_recovery_is_explicitly_suppressed_without_duplicate_observation():
+    ledger = SourceCoverage()
+    ledger.observe(span(0, 512), "music_resume_pending", speech=True)
+    ledger.outcome(span(0, 512), "music_resume_suppressed_eof")
+    ledger.eof(512, 16000)
+    report = ledger.snapshot()
+    assert report["complete"] and report["duplicate_observed_samples"] == 0
+    assert report["observed"] == [{"start": 0, "end": 512, "state": "music_resume_pending", "vad_positive": True}]

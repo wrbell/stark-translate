@@ -91,8 +91,14 @@ class SourceCoverage:
         with self._lock:
             expected = self._eof["source_samples"] if self._eof else self._last_end
             observed = [(r["start"], r["end"]) for r in self._observed]
-            classified = [(r["start"], r["end"]) for r in self._observed if r["state"] != "buffered"]
-            classified += [(r["start"], r["end"]) for r in self._outcomes.values() if r["state"] != "submitted"]
+            classified = [
+                (r["start"], r["end"]) for r in self._observed if r["state"] not in {"buffered", "music_resume_pending"}
+            ]
+            classified += [
+                (r["start"], r["end"])
+                for r in self._outcomes.values()
+                if r["state"] not in {"submitted", "music_resume_recovered"}
+            ]
             capture_gaps = missing(observed, expected)
             disposition_gaps = missing(classified, expected)
             outside = sum(max(0, end - max(start, expected)) for start, end in observed)
