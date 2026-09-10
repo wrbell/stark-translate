@@ -24,6 +24,8 @@ class CaptureHandoff:
         self._items = deque()
         self._condition = Condition()
         self._scheduled = self._closed = False
+        self._record_close_discard = True
+        self._waiting_producers = 0
         self.dropped = 0
         self.trace, self.frame_metadata, self.clock = trace, frame_metadata, clock
         self.origin = trace.origin if trace is not None else clock()
@@ -46,9 +48,18 @@ class CaptureHandoff:
     def put(self, *item):
         requested = self.clock()
         with self._condition:
+            was_open = not self._closed
             while self.wait_for_space and len(self._items) >= self.capacity and not self._closed:
-                self._condition.wait(0.1)
+                self._waiting_producers += 1
+                try:
+                    self._condition.wait(0.1)
+                finally:
+                    self._waiting_producers -= 1
             if self._closed:
+                if was_open and self._record_close_discard:
+                    self.dropped += 1
+                    self._event("capture_handoff_dropped", item, self.clock(), reason="close_waiting_producer")
+                    self.on_drop()
                 return
             now = self.clock()
             producer_wait_ms = max(0.0, (now - requested) * 1000)
@@ -114,6 +125,7 @@ class CaptureHandoff:
                 "submitted": self.submitted,
                 "dequeued": self.dequeued,
                 "pending": len(self._items),
+                "waiting_producers": self._waiting_producers,
                 "high_water": self.high_water,
                 "dropped_frames": self.dropped,
                 "max_producer_wait_ms": self.max_producer_wait_ms,
@@ -128,6 +140,9 @@ class CaptureHandoff:
 
     def close(self, *, record_discard=True):
         with self._condition:
+            if self._closed:
+                return
+            self._record_close_discard = record_discard
             self._closed = True
             if self._items and record_discard:
                 self.dropped += len(self._items)

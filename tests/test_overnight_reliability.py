@@ -275,11 +275,12 @@ def test_file_capture_handoff_backpressures_and_close_unblocks_producer():
     thread = threading.Thread(target=lambda: handoff.put(2))
     thread.start()
     try:
+        until(lambda: handoff.snapshot()["waiting_producers"] == 1)
         assert thread.is_alive() and handoff.qsize() == 1
     finally:
         handoff.__exit__()
         thread.join(timeout=1)
-    assert not thread.is_alive() and handoff.dropped == 1
+    assert not thread.is_alive() and handoff.dropped == 2  # queued and blocked producer frames
 
 
 def test_forced_runner_stop_cleans_child_group_and_reports_incomplete(tmp_path):

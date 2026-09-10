@@ -199,3 +199,38 @@ def test_pipe_gap_telemetry_retains_original_source_positions_and_callback_clock
     assert received[1][2].sample_start == 1060 and received[1][3] == "capture_overflow:480"
     pipe = [e for e in trace.snapshot()["events"] if e["event"] == "capture_pipe_received"]
     assert all(e["callback_received_at_ms"] == (callback_at - trace.origin) * 1000 for e in pipe)
+
+
+def test_prolonged_backpressure_is_bounded_consumer_failure_not_false_microphone_idle(tmp_path):
+    _, _, _, handoff, stream, _ = setup_pipe(tmp_path, capacity=1)
+    stream.idle_timeout = 0.1
+    with ExitStack() as stack:
+        stack.enter_context(stream)
+        stack.enter_context(handoff)
+        wait_until(lambda: stream.finished.is_set())
+        assert "processing backpressure" in str(stream.error)
+        assert "Microphone delivered no samples" not in str(stream.error)
+        assert stream.capture_snapshot()["timeout_stage"] == "consumer_backpressure"
+    assert not stream._reader.is_alive() and stream._proc.poll() is not None
+    spans = handoff.snapshot()["drop_spans"]
+    assert [(row["sample_start"], row["sample_end"]) for row in spans] == [(0, 1536), (1536, 3072)]
+
+
+def test_intentional_replay_close_does_not_mark_waiting_prefetch_as_lost():
+    loop = SimpleNamespace(call_soon_threadsafe=lambda fn: None)
+    handoff = CaptureHandoff(loop, lambda *a: None, lambda: False, lambda: None, capacity=1, wait_for_space=True)
+    handoff.put(0)
+    started = threading.Event()
+
+    def producer():
+        started.set()
+        handoff.put(1)
+
+    thread = threading.Thread(target=producer)
+    thread.start()
+    assert started.wait(timeout=1)
+    wait_until(lambda: handoff.snapshot()["waiting_producers"] == 1)
+    handoff.close(record_discard=False)
+    handoff.close()  # ExitStack's repeated close must retain the first policy.
+    thread.join(timeout=1)
+    assert not thread.is_alive() and handoff.dropped == 0

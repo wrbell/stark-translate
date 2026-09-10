@@ -84,6 +84,8 @@ class IsolatedInputStream:
         self.sample_offset = 0
         self._stop = threading.Event()
         self._last_frame = None
+        self._callback_started = None
+        self._timeout_stage = None
         self._started = None
         self._proc = self._reader = self._watcher = None
         self.trace = None  # Optional bounded session trace; no PCM is recorded.
@@ -167,7 +169,13 @@ class IsolatedInputStream:
                         capture_age_ms=capture_age_ms,
                         upstream_dropped_samples=newly_dropped,
                     )
-                self.callback(samples, frames, stamp, status)
+                self._callback_started = time.monotonic()
+                try:
+                    self.callback(samples, frames, stamp, status)
+                finally:
+                    # The input idle clock excludes time spent in the consumer.
+                    self._last_frame = time.monotonic()
+                    self._callback_started = None
         except Exception as exc:
             if not self._stop.is_set() and self.error is None:
                 self.error = exc if isinstance(exc, AudioCaptureError) else AudioCaptureError(type(exc).__name__)
@@ -182,16 +190,25 @@ class IsolatedInputStream:
                 "max_capture_age_ms": self._max_capture_age_ms,
                 "source_gaps": list(self._source_gaps),
                 "source_gaps_truncated": self._gap_count > len(self._source_gaps),
+                "timeout_stage": self._timeout_stage,
             }
 
     def _watch(self):
         while not self._stop.wait(0.1) and not self.finished.is_set():
-            elapsed = time.monotonic() - (self._last_frame or self._started)
+            callback_started = self._callback_started
+            elapsed = time.monotonic() - (callback_started or self._last_frame or self._started)
             limit = self.idle_timeout if self._last_frame else self.startup_timeout
             if elapsed > limit:
-                self.error = AudioCaptureError(
-                    "Microphone delivered no samples. Check permission and reconnect the device."
-                )
+                if callback_started is not None:
+                    # Preserve the bounded failure policy without diagnosing a
+                    # healthy device as silent while its reader is backpressured.
+                    self._timeout_stage = "consumer_backpressure"
+                    self.error = AudioCaptureError("Audio processing backpressure exceeded the capture timeout.")
+                else:
+                    self._timeout_stage = "input_idle" if self._last_frame else "input_startup"
+                    self.error = AudioCaptureError(
+                        "Microphone delivered no samples. Check permission and reconnect the device."
+                    )
                 self.finished.set()
                 self._proc.kill()
                 return
