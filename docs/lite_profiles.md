@@ -227,3 +227,32 @@ verification only. No native server or E2B model inference was started; CPU-qual
 memory, output fidelity, latency and real RTX 2070 behavior remain unmeasured.
 The environment still identifies source `0d5a875`; install the integrated source
 before collecting new performance evidence.
+
+## Native server log limits and privacy
+
+Managed llama-server stdout/stderr is drained by a dedicated thread in reads of
+at most 4 KiB, with bounded line fragments, into a nonblocking 2,048-record queue.
+A separate writer stores structured records in `metrics/llama_SESSION.log`.
+Each record's message is capped at 4,000 characters. Rotation keeps a current
+file of at most 20 MiB and five backups, at most 120 MiB per native session log
+set. Rotation can discard the oldest messages even during an active session.
+Queue overload drops operational log records and counts them; a failed log sink
+also increments an operational counter while the native output is still drained.
+These conditions do not invalidate required audio or caption recording.
+
+Native messages can contain private text. They stay in this local log, are never
+forwarded to the shared application logger, and are excluded from support exports
+by the support API's file allowlist, including its text/audio options. Newly
+created and rotated native logs have mode `0600` on macOS/Linux; Windows access
+uses the data directory's inherited ACL. Do not manually share them without review.
+
+Age-based cleanup deletes only `metrics/llama_SESSION.log` and numbered backups
+`.1` through `.5` older than 30 days when session lifecycle and diagnostic integrity
+prove that the session completed. Active, interrupted and unknown sessions are
+not deleted by age. Original audio, diagnostics, corrections and exports are
+never part of this log cleanup. The owned-server stop sequence terminates the
+child (10-second grace, then kill with a 5-second wait), waits at most one second
+for its output reader and at most three seconds for the asynchronous writer.
+`log_snapshot()` reports queued, dropped, write failures, read failures and an
+incomplete-drain indicator separately; final values are retained in native
+provenance. The native process remains the only process this owner terminates.

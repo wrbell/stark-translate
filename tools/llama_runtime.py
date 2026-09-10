@@ -10,12 +10,14 @@ from __future__ import annotations
 import atexit
 import hashlib
 import json
+import logging
 import platform
 import shutil
 import socket
 import subprocess
 import tarfile
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -228,6 +230,20 @@ def install_native(backend: str, models_dir: Path | None = None, *, offline: boo
             shutil.rmtree(stage)
 
 
+class _UnavailableNativeLog(logging.Handler):
+    """Keep draining native output if the optional log file cannot be opened."""
+
+    def __init__(self):
+        super().__init__()
+        self.dropped = 0
+
+    def emit(self, record):
+        self.dropped += 1
+
+    def snapshot(self):
+        return {"queued": 0, "dropped": self.dropped, "write_failures": 1}
+
+
 class ManagedLlamaServer:
     def __init__(
         self, profile, *, models_dir: Path | None = None, log_path: Path | None = None, timeout_s: float = 180
@@ -238,6 +254,10 @@ class ManagedLlamaServer:
         self.timeout_s = timeout_s
         self.process = None
         self.log = None
+        self._log_thread = None
+        self._log_stats = {"queued": 0, "dropped": 0, "write_failures": 0}
+        self._read_failures = 0
+        self._drain_incomplete = False
         self.provenance = {}
         self.url = ""
 
@@ -282,15 +302,33 @@ class ManagedLlamaServer:
         ]
         if self.profile.backend == "cpu":
             command += ["--no-kv-offload", "--no-op-offload"]
-        self.log_path.parent.mkdir(parents=True, exist_ok=True)
-        self.log = self.log_path.open("ab")
+        from tools.operational_logging import AsyncOperationalHandler, prune_completed_logs
+
+        # Native output can include prompts; it stays in a private local file,
+        # never a shared application logger or default support attachment.
+        try:
+            if self.log_path.parent.name == "metrics":
+                prune_completed_logs(self.log_path.parent.parent)
+            self.log = AsyncOperationalHandler(self.log_path, private=True, prune_backups=False)
+        except OSError:
+            self.log = _UnavailableNativeLog()
         try:
             self.process = subprocess.Popen(
-                command, stdin=subprocess.DEVNULL, stdout=self.log, stderr=subprocess.STDOUT
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=0,
             )
+            self._log_thread = threading.Thread(
+                target=self._capture_output,
+                args=(self.process.stdout, self.log),
+                name="llama-output",
+                daemon=True,
+            )
+            self._log_thread.start()
         except BaseException:
-            self.log.close()
-            self.log = None
+            self.stop()
             raise
         atexit.register(self.stop)
         self.provenance = {
@@ -327,16 +365,63 @@ class ManagedLlamaServer:
             self.stop()
             raise
 
+    def _capture_output(self, stream, handler):
+        # Read at most 4 KiB at a time. No line buffer grows with native output;
+        # oversized/unterminated lines are emitted as bounded fragments.
+        pending = b""
+        session_id = self.log_path.stem.removeprefix("llama_")
+
+        def emit(raw):
+            record = logging.LogRecord(
+                "llama", logging.INFO, "", 0, raw.decode("utf-8", errors="replace").rstrip(), (), None
+            )
+            record.session_id = session_id
+            record.event = "native_output"
+            record.stage = "translation"
+            handler.handle(record)  # bounded nonblocking enqueue; disk work is independent
+
+        try:
+            while block := stream.read(4096):
+                pending += block
+                while pending:
+                    newline = pending.find(b"\n", 0, 4096)
+                    if newline >= 0:
+                        emit(pending[:newline])
+                        pending = pending[newline + 1 :]
+                    elif len(pending) >= 4096:
+                        emit(pending[:4096])
+                        pending = pending[4096:]
+                    else:
+                        break
+            if pending:
+                emit(pending)
+        except (OSError, ValueError):
+            self._read_failures += 1
+        finally:
+            stream.close()
+
+    def log_snapshot(self):
+        snapshot = self.log.snapshot() if self.log is not None else dict(self._log_stats)
+        return {**snapshot, "read_failures": self._read_failures, "drain_incomplete": self._drain_incomplete}
+
     def stop(self):
-        if self.process is not None and self.process.poll() is None:
-            self.process.terminate()
-            try:
-                self.process.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                self.process.kill()
-                self.process.wait(timeout=5)
-        self.process = None
-        atexit.unregister(self.stop)
-        if self.log is not None:
-            self.log.close()
-            self.log = None
+        try:
+            if self.process is not None and self.process.poll() is None:
+                self.process.terminate()
+                try:
+                    self.process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    self.process.kill()
+                    self.process.wait(timeout=5)
+        finally:
+            self.process = None
+            atexit.unregister(self.stop)
+            if self._log_thread is not None and self._log_thread.ident is not None:
+                self._log_thread.join(timeout=1)
+                self._drain_incomplete = self._log_thread.is_alive()
+                self._log_thread = None
+            if self.log is not None:
+                self.log.close()  # independently bounded to three seconds
+                self._log_stats = self.log.snapshot()
+                self.log = None
+            self.provenance["logging"] = self.log_snapshot()

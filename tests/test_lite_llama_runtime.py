@@ -62,6 +62,7 @@ def fake_server(tmp_path, monkeypatch, *, foreign=False, exit_code=None):
         lambda: {"models": {"gemma-4-e2b-it-q4km.gguf": {"sha256": runtime.sha256(model)}}},
     )
     process = Mock(pid=31415)
+    process.stdout = io.BytesIO(b"native startup\n")
     process.poll.return_value = exit_code
     process.returncode = exit_code
     start = Mock(return_value=process)
@@ -151,3 +152,25 @@ def test_archive_extracts_only_validated_regular_zip_members(tmp_path):
     runtime._extract(archive, destination)
     assert (destination / "bundle" / "llama-server.exe").read_bytes() == b"verified binary"
     assert (destination / "bundle" / "runtime.dll").read_bytes() == b"verified library"
+
+
+def test_unavailable_native_log_does_not_disable_server(tmp_path, monkeypatch):
+    owner, process, _ = fake_server(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        "tools.operational_logging.AsyncOperationalHandler", Mock(side_effect=OSError("disk unavailable"))
+    )
+    assert owner.start() == "http://127.0.0.1:18090"
+    owner.stop()
+    assert owner.provenance["logging"]["write_failures"] == 1
+    assert owner.provenance["logging"]["dropped"] == 1
+    assert owner.provenance["logging"]["drain_incomplete"] is False
+    process.terminate.assert_called_once()
+
+
+def test_native_spawn_failure_closes_log_writer(tmp_path, monkeypatch):
+    owner, _, start = fake_server(tmp_path, monkeypatch)
+    start.side_effect = OSError("failed spawn")
+    with pytest.raises(OSError, match="failed spawn"):
+        owner.start()
+    assert owner.log is None
+    assert owner.process is None

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import logging.handlers
+import os
 import queue
 import re
 import threading
@@ -44,24 +45,47 @@ class JsonLogFormatter(logging.Formatter):
         )
 
 
+class _PrivateRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    def _open(self):
+        stream = open(
+            self.baseFilename,
+            self.mode,
+            encoding=self.encoding,
+            errors=self.errors,
+            opener=lambda path, flags: os.open(path, flags, 0o600),
+        )
+        if os.name != "nt":
+            os.fchmod(stream.fileno(), 0o600)
+        return stream
+
+
 class AsyncOperationalHandler(logging.Handler):
     """Logging overload is counted and visible, never allowed to block capture."""
 
-    def __init__(self, path: Path, *, capacity=2048, max_bytes=MAX_BYTES, backups=BACKUPS):
+    def __init__(
+        self,
+        path: Path,
+        *,
+        capacity=2048,
+        max_bytes=MAX_BYTES,
+        backups=BACKUPS,
+        private=False,
+        prune_backups=True,
+    ):
         super().__init__(logging.INFO)
         self.path = path.absolute()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.queue = queue.Queue(maxsize=capacity)
         self.dropped = self.write_failures = 0
         self._closed_event = threading.Event()
-        self._sink = logging.handlers.RotatingFileHandler(
-            self.path, maxBytes=max_bytes, backupCount=backups, encoding="utf-8"
-        )
+        sink_class = _PrivateRotatingFileHandler if private else logging.handlers.RotatingFileHandler
+        self._sink = sink_class(self.path, maxBytes=max_bytes, backupCount=backups, encoding="utf-8")
         self._sink.setFormatter(JsonLogFormatter())
         # RotatingFileHandler normally swallows disk errors and prints stderr;
         # expose them as health counters instead.
         self._sink.handleError = lambda record: self._write_failed()
-        self.prune()
+        if prune_backups:
+            self.prune()
         self._thread = threading.Thread(target=self._run, name="operational-log", daemon=True)
         self._thread.start()
 
@@ -78,17 +102,22 @@ class AsyncOperationalHandler(logging.Handler):
             self.dropped += 1
 
     def _run(self):
-        while not self._closed_event.is_set() or not self.queue.empty():
-            try:
-                record = self.queue.get(timeout=0.1)
-            except queue.Empty:
-                continue
-            try:
-                self._sink.handle(record)
-            except Exception:
-                self.write_failures += 1
-            finally:
-                self.queue.task_done()
+        try:
+            while not self._closed_event.is_set() or not self.queue.empty():
+                try:
+                    record = self.queue.get(timeout=0.1)
+                except queue.Empty:
+                    continue
+                try:
+                    self._sink.handle(record)
+                except Exception:
+                    self.write_failures += 1
+                finally:
+                    self.queue.task_done()
+        finally:
+            # The writer owns the sink, including after close() times out on a
+            # slow filesystem. It must eventually close rather than leak a file.
+            self._sink.close()
 
     def snapshot(self):
         return {"queued": self.queue.qsize(), "dropped": self.dropped, "write_failures": self.write_failures}
@@ -104,8 +133,6 @@ class AsyncOperationalHandler(logging.Handler):
         if not self._closed_event.is_set():
             self._closed_event.set()
             self._thread.join(timeout=3)
-            if not self._thread.is_alive():
-                self._sink.close()
         super().close()
 
 
@@ -136,8 +163,8 @@ def prune_completed_logs(root: Path, *, now=None):
     cutoff = (now or time.time()) - RETENTION_DAYS * 86400
     removed = 0
     completed = {}
-    for path in directory.glob("session_*.log*"):
-        match = re.fullmatch(r"session_([A-Za-z0-9][A-Za-z0-9_.-]{0,159})\.log(?:\.[1-5])?", path.name)
+    for path in directory.glob("*.log*"):
+        match = re.fullmatch(r"(?:session|llama)_([A-Za-z0-9][A-Za-z0-9_.-]{0,159})\.log(?:\.[1-5])?", path.name)
         if not match or path.is_symlink() or not path.is_file() or path.stat().st_mtime >= cutoff:
             continue
         session = match[1]
