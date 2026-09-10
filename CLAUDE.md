@@ -144,9 +144,10 @@ Latest recorded suite counts live only in
 - [x] Phases 0–3, 5–6, 9 — infrastructure, data, first fine-tunes, operator UI
 - [ ] Phase 4 — WSL full preprocess ([`docs/wsl_pipeline_refresh.md`](docs/wsl_pipeline_refresh.md))
 - [ ] Phase 7–8 — Mac A/B (#135), active learning evidence (#137)
-- [ ] Phase 10 — Human gates: live-mic smoke EN/ES (#131, fix implemented, retest deferred),
-      diarization gate (#133), physical second output (#132), dry run with laptop stand-in
-      allowed (#134); TTS routing code and live diarization code are implemented, their
-      acceptance is not certified
+- [ ] Phase 10 — Remaining human/device gates: live-mic smoke EN/ES (#131, fix
+      implemented, retest deferred), diarization (#133) and physical second output
+      (#132). The laptop runbook rehearsal is complete and #134 is closed; see
+      [closeout evidence](docs/evaluation/overnight_closeout_20260910/README.md).
+      TTS routing and live diarization are implemented; their acceptance is not certified.
 
 Statuses, priorities, dependencies and acceptance per item: [`docs/backlog.json`](docs/backlog.json).

@@ -1,7 +1,7 @@
 # September 10 delivery status
 
 The v2026.14 source (`2026.14.0.0`) is tracked by
-[PR #192](https://github.com/wrbell/stark-translate/pull/192); v2026.13 is the last published release recorded here.
+[PR #192](https://github.com/wrbell/stark-translate/pull/192), merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z. See [closeout evidence](evaluation/overnight_closeout_20260910/README.md). v2026.13 remains the last published release.
 The operator, reliability, Lite, latency and documentation work is integrated. The English matrix is complete:
 96/96 valid runs, 672 finals and 0/28 selected arms. The sub-second final-delivery
 goal was not met on this cohort; E4B remains unchanged. Endurance and the
@@ -12,6 +12,7 @@ publication and release tags remain pending by user choice.
 
 | Need | Current document |
 |---|---|
+| Actual merge/issue closures, final CI and bootstrap ZIP | [closeout evidence](evaluation/overnight_closeout_20260910/README.md) |
 | Implemented behavior, validation and unresolved gates | [Mac implementation status](mac_implementation_status.md) |
 | Every remaining task with acceptance and ownership | [Machine-readable backlog](backlog.json), [rendered backlog](backlog.md) |
 | Volunteer operation and recovery | [Operator runbook](operator_runbook.md) |
@@ -83,7 +84,7 @@ from 752; 138/143 code/resource members remain identical, including the pipeline
 and every engine module. Six real native enumeration/exit checks passed with no
 surviving polling workers, no model imports and no opened audio streams. No devices
 were visible in that tool context, and no new inference hour is claimed. PR #192
-is still open and not merged at this pre-merge snapshot; package publication is separate.
+has now merged, as recorded in [closeout evidence](evaluation/overnight_closeout_20260910/README.md); the linked `84832fb` report remains its unchanged pre-merge snapshot. Package publication is separate.
 
 ## Decisions and evidence boundaries
 
@@ -104,8 +105,8 @@ is still open and not merged at this pre-merge snapshot; package publication is 
   hardware requirements to that issue. #131 has its own live EN/ES microphone gate.
 - No approved correction, retrain cycle, natural-language reference score or target
   hardware certification is inferred from synthetic/stub tests.
-- Source push, justified issue updates and merge are authorized. Published tags must
-  not move; release artifacts and PyPI remain pending.
+- PR #192 source merge and the justified #134/#176/#177 closures are complete.
+  Published tags must not move; release artifacts and PyPI remain pending.
 
 ## Validation commands
 
@@ -116,5 +117,7 @@ python tools/render_backlog.py check-links
 pytest tests/test_documentation.py -v
 ```
 
-Refresh evidence and integration state after the final checks and merge; retain
-historical measurements and failure logs with their original source boundaries.
+Maintain evidence and integration state as future changes occur; retain historical
+measurements and failure logs with their original source boundaries.
+
+Final reviewed source `ab66ad2` passed **2,398 tests with four skips** on each Python 3.11/3.12 CI job. Its Mac ZIP contains the patched executable bootstrap and all 152 runtime members match `84832fb`; this is bootstrap delivery evidence, not new inference. #134/#176 closed COMPLETED; #177 closed NOT_PLANNED with MTP promotion still pending. Hindi remains parked separate R&D.

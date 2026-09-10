@@ -48,8 +48,8 @@ top-level settings object also accepts `STARK_<GROUP>__<FIELD>`. Full table in
 
 | Item | State |
 |------|-------|
-| #176 `--multiprocess` shared prompts/stop rules | implemented in `workers.py` (wraps `MLXGemmaEngine`); closure evidence is the parent's |
-| #177 Gemma 4 assistant drafter | off; live `--mts` rejected before load; `engines/mlx_spec.py` offline probe only |
+| #176 `--multiprocess` shared prompts/stop rules | merged in `workers.py` (wraps `MLXGemmaEngine`); closed completed ([actual closeout](../docs/evaluation/overnight_closeout_20260910/README.md)) |
+| #177 Gemma 4 assistant drafter | closed not planned; deferred with promotion pending. Off; live `--mts` rejected before load; `engines/mlx_spec.py` offline probe only |
 | Lite CPU profile / RTX 2070 | **implemented and integrated**; isolated Mac CPU synthetic EN+ES caption/TTS and optional CPU E2B inference smokes passed; x86 CPU, native Windows and 2070 performance **pending hardware** ([evidence](../docs/lite_profiles.md)) |
 | W16 + v2-cpo Mac A/B (#135) | pending artifact transfer from WSL |
 | Hindi (#138) | [Offline church-audio baseline](../docs/evaluation/overnight_hindi/README.md) completed as separate R&D; no live integration or further EN↔ES-program work; human review/language decision pending |

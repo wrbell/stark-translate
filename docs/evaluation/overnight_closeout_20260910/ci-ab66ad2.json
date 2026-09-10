@@ -1,0 +1,23 @@
+{
+  "source_revision": "ab66ad2929e61171e4ab9c7c77685ba1ac988577",
+  "run_url": "https://github.com/wrbell/stark-translate/actions/runs/34472765721",
+  "status": "completed",
+  "conclusion": "success",
+  "test_summaries": [
+    "test (3.12)\tRun tests\t2026-09-10T11:46:00.4926041Z =========== 2398 passed, 4 skipped, 2 warnings in 126.95s (0:02:06) ============",
+    "test (3.11)\tRun tests\t2026-09-10T11:45:31.9878937Z =========== 2398 passed, 4 skipped, 2 warnings in 101.24s (0:01:41) ============"
+  ],
+  "log_sha256": "61e4683d1492df1f19b8584134cb558744ff5e4e7190ed913471f4616820977b",
+  "jobs": [
+    {
+      "name": "test (3.12)",
+      "conclusion": "success",
+      "url": "https://github.com/wrbell/stark-translate/actions/runs/34472765721/job/102856295734"
+    },
+    {
+      "name": "test (3.11)",
+      "conclusion": "success",
+      "url": "https://github.com/wrbell/stark-translate/actions/runs/34472765721/job/102856296051"
+    }
+  ]
+}

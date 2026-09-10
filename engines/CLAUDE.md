@@ -152,4 +152,4 @@ accepts `STARK_<GROUP>__<FIELD>` with the double-underscore delimiter. Common ke
 - [`docs/mlx_cuda_parity.md`](../docs/mlx_cuda_parity.md) — MLX ↔ CUDA semantic parity checklist
 - [`docs/packaging/models.md`](../docs/packaging/models.md) — model manifest, managed Marian CT2 artifacts
 - [`docs/lite_profiles.md`](../docs/lite_profiles.md) — Lite profile contract, pinned artifacts, Mac CPU smoke evidence
-- [`docs/backlog.json`](../docs/backlog.json) — open engine items (#176 implemented, #177 rejected-before-load, Lite implemented / hardware pending)
+- [`docs/backlog.json`](../docs/backlog.json) — current engine status (#176 closed completed; #177 closed not planned, off with promotion pending; Lite implemented / hardware pending)

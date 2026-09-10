@@ -2,7 +2,7 @@
 
 This document describes v2026.14 source (`2026.14.0.0`), tracked by
 [PR #192](https://github.com/wrbell/stark-translate/pull/192). The last published release recorded here is v2026.13.
-The PR records source integration separately from the acceptance evidence below.
+The PR merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z; [closeout evidence](evaluation/overnight_closeout_20260910/README.md) retains actual merge/closure records, final ab66ad2 CI and bootstrap ZIP evidence. Source integration remains separate from the acceptance evidence below.
 Package publication and release tags are pending by user choice. The [September 9 snapshot](mac_implementation_status_20260909.md)
 preserves earlier counts and artifact identities; those do not certify later changes.
 
@@ -67,7 +67,7 @@ Six actual native enumeration/rapid-exit checks passed with no surviving polling
 workers or model imports. They saw zero input/output devices and opened no audio
 stream, so this is not a hardware or microphone test. No new inference hour was
 run after this cleanup change. The report preserves the failed intermediate receipt
-and the older 752 evidence below; PR #192 is still open and not merged at this snapshot.
+and the older 752 evidence below. This linked `84832fb` report remains a pre-merge snapshot; the actual merge and closures are in [closeout evidence](evaluation/overnight_closeout_20260910/README.md).
 
 The [runtime-freeze artifact check](evaluation/overnight_artifact_validation_20260910.json)
 verified the wheel, sdist and Mac ZIP at frozen source `752ab9a`. All 152 runtime
@@ -155,9 +155,9 @@ delivery measurements. The sub-second median goal remains unachieved.
   external dependencies. Predicted text does not count as a human reference.
 - Execute native Windows/RTX2070, representative x86 CPU and WSL training/CUDA
   gates on their target hardware; portable reviewed data remains the handoff.
-- Record the final integrated checks, installed inference, evidence/docs refresh and
-  PR merge evidence. Source privacy fixes and isolated artifact checks have passed their focused
-  regressions; the [Mac dependency assessment](evaluation/overnight_security/README.md)
+- Preserve the recorded integration checks, installed inference, evidence and actual
+  PR merge/closure receipts. Source privacy fixes and isolated artifact checks have
+  passed; the [Mac dependency assessment](evaluation/overnight_security/README.md)
   retains two unresolved Torch advisories. Preserve working
   `stt_env`, original holdouts and the frozen benchmark dependencies.
 - Leave PyPI and release publication pending. Published tags have not moved.
@@ -168,3 +168,5 @@ The [backlog](backlog.md) and [issue acceptance audit](issue_closure_audit.md)
 keep implementation and certification separate. #134 permits a laptop stand-in
 with a complete recorded hymn, spoken segment and written timing/UX note; live
 microphone and physical-device requirements belong to their own gates.
+
+The final reviewed `ab66ad2` head passed 2,398 tests with four skips on both Python 3.11 and 3.12 CI. Its Mac ZIP contains the patched executable bootstrap; all 152 packaged runtime members match `84832fb`. No additional inference or hardware validation is implied. #134/#176 acceptance is met after their actual completed closures; #177 is closed NOT_PLANNED with implementation deferred and promotion certification pending.

@@ -6,12 +6,12 @@
 
 ## Integration status
 
-- **Main release:** `v2026.13` — main last recorded at 09e4679, with v2026.13 PRs #180–191 merged. PR #192 is still open; the authorized main merge has not occurred. v2026.13 remains the last published release even after a source-only merge until a separate release is published.
-- **Local candidate:** `2026.14.0.0` on `codex/mac-reliability-roadmap` (base `Integrated runtime frozen at 752ab9a351815feee4b8cd155f732c588cb30a6c. Later evidence, documentation and workflow edits retain their separate source identity.`)
-- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft against main, not merged; checks green at 752ab9a. Final evidence/issue mapping and future-head checks precede the authorized source merge.
-- **Publication:** Source and issue publishing and the final merge to main are authorized by the user. Local package artifacts are built and mechanically validated; PyPI/GHCR/release uploads and release tags remain pending by user choice.
+- **Main release:** `v2026.13` — PR #192 merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z, from reviewed source ab66ad2929e61171e4ab9c7c77685ba1ac988577. v2026.13 remains the last published release; no release/tag upload followed this source merge.
+- **Local candidate:** `2026.14.0.0` on `main` (base `PR #192 merged at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c from reviewed ab66ad2. The 752ab9a endurance cohort, five-module 84832fb operator cleanup and ab66ad2 bootstrap delivery retain separate exact-source evidence.`)
+- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z; exact-head Python 3.11/3.12 CI passed 2,398 tests with four skips each. Merge and closure receipts: docs/evaluation/overnight_closeout_20260910/README.md.
+- **Publication:** PR #192 source merge and justified issue closures are complete. Local package artifacts are mechanically validated; PyPI/GHCR/release uploads and release tags remain pending by user choice.
 
-Items marked implemented or validated exist on the integrated reliability branch unless noted as main-only. Source integration, local artifact validation, public distribution and service certification are separate. PR #192 remains open; do not infer a main merge or release from local checks. Certification records whether the item’s own acceptance was met; implementation alone does not close an issue.
+Implemented/validated source from PR #192 is merged into main. Source integration, local artifact validation, public distribution and service certification remain separate. Certification records each item’s actual acceptance; source merge alone does not close human/device gates.
 
 ## Status vocabulary
 
@@ -45,25 +45,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** The completed 96-run, 672-final English screen selected 0/28 experiment/model arms and did not achieve the sub-second final goal on this workload. E4B defaults remain unchanged. All 588 candidate final comparisons against each control set retained text; quality remains unreviewed. Endpoint counts are small and control drift is material.
 - **Next action:** Pursue distinct endpoint/deadline/readback hypotheses from latency_next_experiments.md after endurance; do not schedule ordinary confirmations or combine these rejected arms. Keep natural references and physical display certification separate.
 
-### `issue-134-sunday-dry-run` — Dry-run with the operator runbook (#134)
-
-- **Priority:** P0 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** [#134](https://github.com/wrbell/stark-translate/issues/134), `docs/operator_runbook.md`, `docs/evaluation/overnight_endurance_20260910/README.md`, [#193](https://github.com/wrbell/stark-translate/issues/193), [#194](https://github.com/wrbell/stark-translate/issues/194), [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md)
-- **Issue acceptance (verbatim intent):** Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.
-- **Acceptance:** Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.
-- **Notes:** The laptop stand-in used the installed 752ab9a Standard runtime on the uncropped 3,640.053 s natural English service. Session 20260910_043120_839144_en completed exit 0 with consistent bounds for 563 finals and 2,814 previews, all 7,594 required writes complete and observed cleanup. Actual SPA hymn→prayer chronology, prepared operator launch-to-first-server-preview 436.790088 s and actual Start-to-first-server-preview 420.492–420.762 s (including 403.1448125 s of source zeros), operator/helper steps and a post-Stop long summary are retained. First-install/download time was not measured; the summary omitted the transcript middle and is not human-reviewed. Original b65 failures stay separate. The written report and verified archive are linked; remaining hymn behavior is mapped to #193 and #194 as quality follow-ups; earlier operator UX blockers were fixed. #134 remains OPEN pending the final closure action.
-- **Next action:** Use the immutable written evidence and mapped #193/#194 follow-ups to reassess and close #134 after source integration; do not add microphone, physical-display, exact lyric-boundary or separate CPU Lite requirements.
-
-### `pr-192-integration` — Validate the integrated candidate branch and finish the authorized merge of draft PR #192
-
-- **Priority:** P0 · **Machine:** any · **Certification:** pending
-- **Depends on:** none
-- **Sources:** [PR #192](https://github.com/wrbell/stark-translate/pull/192), `docs/overnight_status.md`, `docs/evaluation/overnight_screen_20260910/README.md`, `docs/evaluation/overnight_endurance_20260910/README.md`
-- **Acceptance:** PR #192 marked ready with integrated operator, Lite, latency and failure-recovery changes, CI green on the final head, and root-recorded evidence; main advances only at the authorized merge, without publishing a release.
-- **Notes:** Frozen 752 CPU/GPU/static and mechanical artifact validation passed; the 96-run screen selected 0/28 arms. Repaired Standard completed 563 finals/2,814 previews and 7,594 writes; Lite completed 468 finals/271 previews and 1,979 writes, all retained spans consistent and cleanup verified. The original b65 span failure remains separate. The Docker main-build-only guard is implemented. The raw archive is verified; hymn follow-ups are mapped to #193/#194 and future-head CI/review remains before the authorized merge.
-- **Next action:** Finalize retained evidence and real hymn-issue links, verify the Docker upload guard and exact final remote head, mark PR #192 ready and perform the authorized source merge. Do not publish package releases or tags.
-
 ### `packaging-artifacts-local` — v2026.14 wheel, sdist and Mac ZIP local validation
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
@@ -88,8 +69,8 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Depends on:** `pr-192-integration`
 - **Sources:** `docs/overnight_status.md`, `docs/evaluation/overnight_endurance_20260910/README.md`
 - **Acceptance:** Every README/CLAUDE/AGENTS guide describes current behavior from source, historical numbers live only under dated archive links, and tests/test_documentation.py plus render/link checks pass.
-- **Notes:** Current guides, exact752 artifact/test receipts, canonical backlog and explicit public endurance files are refreshed. Standard/Lite completed evidence remains separate from original failed data and96-run screen. The raw archive is verified and linked. Hymn follow-ups #193/#194 are linked. Final head checks and merge-state wording are the remaining integration edits.
-- **Next action:** Keep the verified evidence and #193/#194 links current, then update merge/closure states only after those actions occur.
+- **Notes:** Current guides, exact 752 artifact/test receipts, canonical backlog and explicit public endurance files are refreshed. Standard/Lite completed evidence remains separate from original failed data and 96-run screen. The raw archive is verified and linked. Hymn follow-ups #193/#194 are linked. Final-head CI passed; current source/issue states now reference actual closeout receipts. Historical pre-merge snapshots remain unchanged.
+- **Next action:** Keep current guides synchronized with actual states; preserve historical receipts and separate device/human/publication gates.
 
 ## Pending Input Or Hardware
 
@@ -248,16 +229,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** 24/24 synthetic EN/ES routing probes exited zero and routed as designed; they are functional checks, not quality evidence.
 - **Next action:** Keep opt-in.
 
-### `issue-177-mtp` — Gemma 4 MTP assistant drafter on MLX (#177)
-
-- **Priority:** P3 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** [#177](https://github.com/wrbell/stark-translate/issues/177), `docs/archive/v2026.13/MAC_LATENCY.md`, `docs/mlx_mtp_notes.md`, `engines/mlx_spec.py`, `tools/mts_acceptance_probe.py`, `dry_run_ab.py`
-- **Issue acceptance (verbatim intent):** Greedy-identical output; canary ≥7/8; medium p50 ≤0.85× post-EOS-fix E4B; drafter acceptance ≥30%. Otherwise MTP stays off; low acceptance was a timeboxed implementation investigation.
-- **Acceptance:** Record the original timeboxed investigation and each promotion gate. Only greedy-identical output, canary ≥7/8, medium p50 ≤0.85× the post-EOS baseline and acceptance ≥30% together permit promotion; otherwise keep MTP off.
-- **Notes:** The archived offline experiment had 33/33 greedy-identical outputs and 31.3% acceptance, but medium p50 1,339/1,393 ms (about 0.96×) failed the ≤0.85× speed gate; a ≥7/8 canary result was not established. The RoPE-offset hypothesis was rejected. Live requested/configured MTP fails before model loading; --no-mts explicitly selects the supported off path. #177 remains OPEN, ready for a negative-investigation closure after merge, not a deployed-optimization claim.
-- **Next action:** Keep MTP off. After merge, root may close the timeboxed investigation with its failed promotion gates; a future upstream/runtime hypothesis requires new evidence, not repetition of rejected settings.
-
 ## Deferred
 
 ### `security-b615-pinning` — Remaining unpinned Hugging Face download paths (B615)
@@ -287,6 +258,16 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** Written baseline note on church audio (does zero-shot Hindi work; is a QLoRA week worth it) with a QLoRA go/no-go. The issue asks for the live pipeline; the offline audio tool provides the baseline measurement only — a live Hindi target is not integrated.
 - **Notes:** The separate offline church-audio R&D baseline is complete on E4B/E2B with every output archived. There are no Hindi references or human quality review and no live Hindi integration. User reaffirmed EN↔ES as the speed priority; no further Hindi work is scheduled.
 - **Next action:** Await a later R&D decision and human Hindi review; keep live Hindi integration and QLoRA separate from EN↔ES optimization.
+
+### `issue-177-mtp` — Gemma 4 MTP assistant drafter on MLX (#177)
+
+- **Priority:** P3 · **Machine:** mac · **Certification:** pending
+- **Depends on:** none
+- **Sources:** [#177](https://github.com/wrbell/stark-translate/issues/177), `docs/archive/v2026.13/MAC_LATENCY.md`, `docs/mlx_mtp_notes.md`, `engines/mlx_spec.py`, `tools/mts_acceptance_probe.py`, `dry_run_ab.py`, `docs/evaluation/overnight_closeout_20260910/README.md`
+- **Issue acceptance (verbatim intent):** Greedy-identical output; canary ≥7/8; medium p50 ≤0.85× post-EOS-fix E4B; drafter acceptance ≥30%. Otherwise MTP stays off; low acceptance was a timeboxed implementation investigation.
+- **Acceptance:** Record the original timeboxed investigation and each promotion gate. Only greedy-identical output, canary ≥7/8, medium p50 ≤0.85× the post-EOS baseline and acceptance ≥30% together permit promotion; otherwise keep MTP off.
+- **Notes:** The archived offline experiment had 33/33 greedy-identical outputs and 31.3% acceptance, but medium p50 1,339/1,393 ms (about 0.96×) failed the ≤0.85× speed gate; a ≥7/8 canary result was not established. The RoPE-offset hypothesis was rejected. Live requested/configured MTP fails before model loading; --no-mts explicitly selects the supported off path. #177 closed NOT_PLANNED at 2026-09-10T11:57:53Z as a negative/timeboxed investigation. Promotion acceptance remains unmet; implementation is deferred and certification pending.
+- **Next action:** Keep MTP off. A distinct future upstream/runtime hypothesis requires new evidence and all promotion gates; closure is not an optimization certification.
 
 ### `macos-shortcuts` — macOS Shortcuts voice-command triggers
 
@@ -339,15 +320,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Evidence:** Fix integrated 2026-09-10: tools/isolated_audio.py runs PortAudio in a disposable child (tools/capture_worker.py) and raises AudioCaptureError after 5 s without first samples or 3 s idle; tools/pipeline_health.py phases loading → listening → ready feed operator readiness (stale after 3 s); unit tests cover the modules. No live microphone session has been run against the fix.
 - **Notes:** The capture/readiness fix is implemented and integrated; the real built-in-microphone retest and physical-device checks are deferred to the next attended session at the user’s request.
 - **Next action:** At the next attended session, run built-in-mic captions through the operator and audience pages; confirm readiness follows real frames and a blocked/disconnected input surfaces as input_error within seconds. Record the session identity.
-
-### `mac-reliability-implementation` — v2026.14 Mac reliability program on the local branch
-
-- **Priority:** P0 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `docs/mac_implementation_status.md`, [PR #192](https://github.com/wrbell/stark-translate/pull/192), `docs/evaluation/overnight_endurance_20260910/README.md`
-- **Acceptance:** Merged to main through PR #192 with the human, device and visible-browser gates recorded as still open.
-- **Notes:** Operator/session reliability, schema 2 timing, setup, safe Review/export and packaging are integrated. 752 CPU/GPU/static checks passed; the 96-run screen selected no arms. Repaired Standard and CPU Lite completed their independent natural-English runs with consistent retained spans and durable writes/cleanup; selected waveforms match and the old failure is preserved. Docker publication guard is implemented. Evidence and #193/#194 links are recorded; future-head checks precede the pending source merge; device/human gates remain separate.
-- **Next action:** Finish final evidence/issue mapping and head-specific checks, then record the authorized merge. Keep actual live-mic, independent outputs and human-quality acceptance open.
 
 ### `issue-132-tts-routing` — Multi-channel TTS routing code and tests (9.4.1 / #132)
 
@@ -409,19 +381,17 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Actual integrated browser sessions exercised EN↔ES switching, Pause/Resume/Stop, unapproved draft recovery and metadata-only support download. Repaired Standard added a full natural-service Live/hymn/prayer view, preserved draft revision 1 with both approvals false, and an actual long-summary UI result disclosing omitted middle content. No successful reload or human summary-fidelity approval is inferred. QR oracle/decoder checks and all six HTML5 Tidy checks passed; final production caption guards are covered by the frozen 752 suite.
 - **Next action:** Finalize the current runbook/evidence links and blocking UX issue mapping. Keep live microphone, physical outputs and human quality in their separate gates.
 
-### `issue-176-multiprocess` — --multiprocess workers use shared Gemma 4 prompts and stop rules (#176)
-
-- **Priority:** P3 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** [#176](https://github.com/wrbell/stark-translate/issues/176), `workers.py`, `engines/translation_prompts.py`, `tests/test_worker_translation_contract.py`, `docs/issue_closure_audit.md`
-- **Issue acceptance (verbatim intent):** Route workers.py through engines/translation_prompts build_chat_messages + ensure_stop_tokens (skipping the prompt cache for gemma4), or deprecate --multiprocess.
-- **Acceptance:** workers.translation_worker_main builds engines through MLXGemmaEngine with the parent-selected model_family, so Gemma 4 never receives TranslateGemma prompts and stop handling is shared; a live --multiprocess run is not part of the acceptance.
-- **Evidence:** Integrated workers.translation_worker_main delegates to MLXGemmaEngine with the parent-selected model family, direction and adapters; Gemma 4 skips the incompatible TranslateGemma prompt cache.
-- **Evidence:** Real pipe-loop contract tests cover both model families, EN/ES directions, the six-value A/B response and cleanup with mocked inference; included in the frozen 752ab9a CPU suite.
-- **Notes:** Correctness fix is ready for closure after merge under original option (a). #176 remains OPEN. Multiprocess is optional and has no new performance endorsement.
-- **Next action:** After PR #192 actually merges, root may close #176 with the source/test evidence. Do not change issue state before the recorded merge.
-
 ## Validated
+
+### `issue-134-sunday-dry-run` — Dry-run with the operator runbook (#134)
+
+- **Priority:** P0 · **Machine:** mac · **Certification:** met
+- **Depends on:** none
+- **Sources:** [#134](https://github.com/wrbell/stark-translate/issues/134), `docs/operator_runbook.md`, `docs/evaluation/overnight_endurance_20260910/README.md`, [#193](https://github.com/wrbell/stark-translate/issues/193), [#194](https://github.com/wrbell/stark-translate/issues/194), [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/overnight_closeout_20260910/README.md`
+- **Issue acceptance (verbatim intent):** Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.
+- **Acceptance:** Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.
+- **Notes:** The laptop stand-in used the installed 752ab9a Standard runtime on the uncropped 3,640.053 s natural English service. Session 20260910_043120_839144_en completed exit 0 with consistent bounds for 563 finals and 2,814 previews, all 7,594 required writes complete and observed cleanup. Actual SPA hymn→prayer chronology, prepared operator launch-to-first-server-preview 436.790088 s and actual Start-to-first-server-preview 420.492–420.762 s (including 403.1448125 s of source zeros), operator/helper steps and a post-Stop long summary are retained. First-install/download time was not measured; the summary omitted the transcript middle and is not human-reviewed. Original b65 failures stay separate. The written report and verified archive are linked; remaining hymn behavior is mapped to #193 and #194 as quality follow-ups; earlier operator UX blockers were fixed. #134 closed COMPLETED at 2026-09-10T11:57:48Z after the recorded source merge.
+- **Next action:** Rehearsal acceptance is met. Continue open hymn/quality follow-ups #193/#194 and separate microphone/device/human gates without relabeling them as #134 requirements.
 
 ### `mac-cpu-test-suite` — Frozen 752ab9a CPU, GPU and prescribed static validation
 
@@ -442,6 +412,24 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Evidence:** Separate September 10 screen: 96/96 valid runs, 672 finals and 0/28 selected experiment/model arms. Defaults remain unchanged; these distinct cohorts are not pooled.
 - **Next action:** Retain both negative reports and unchanged defaults. Any new experiment needs a distinct hypothesis; a default change still requires matched gains and human quality review.
 
+### `mac-reliability-implementation` — v2026.14 Mac reliability source integrated in main
+
+- **Priority:** P0 · **Machine:** mac · **Certification:** met
+- **Depends on:** none
+- **Sources:** `docs/mac_implementation_status.md`, [PR #192](https://github.com/wrbell/stark-translate/pull/192), `docs/evaluation/overnight_endurance_20260910/README.md`, `docs/evaluation/overnight_closeout_20260910/README.md`
+- **Acceptance:** Merged to main through PR #192 with the human, device and visible-browser gates recorded as still open.
+- **Notes:** Operator/session reliability, schema 2 timing, setup, safe Review/export and packaging are integrated. 752 CPU/GPU/static checks passed; the 96-run screen selected no arms. Repaired Standard and CPU Lite completed their independent natural-English runs with consistent retained spans and durable writes/cleanup; selected waveforms match and the old failure is preserved. Docker publication guard is implemented. Evidence and #193/#194 links are recorded; source merged at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c; device/human gates remain separate.
+- **Next action:** Source integration acceptance is met; continue actual live-mic, independent outputs and human-quality validation separately.
+
+### `pr-192-integration` — Integrated source merged through PR #192
+
+- **Priority:** P0 · **Machine:** any · **Certification:** met
+- **Depends on:** none
+- **Sources:** [PR #192](https://github.com/wrbell/stark-translate/pull/192), `docs/overnight_status.md`, `docs/evaluation/overnight_screen_20260910/README.md`, `docs/evaluation/overnight_endurance_20260910/README.md`, `docs/evaluation/overnight_closeout_20260910/README.md`
+- **Acceptance:** PR #192 marked ready with integrated operator, Lite, latency and failure-recovery changes, CI green on the final head, and root-recorded evidence; main advances only at the authorized merge, without publishing a release.
+- **Notes:** Actual merge 3e935fe39b96e7b0aa62a74711307f2b3e31a18c at 2026-09-10T11:57:22Z; final reviewed head ab66ad2929e61171e4ab9c7c77685ba1ac988577 passed 2,398 tests with four skips on each Python 3.11/3.12 CI job. Bootstrap delivery verifies executable ZIP bootstrap and 152 unchanged runtime members versus 84832fb. Earlier 752 endurance, 848 cleanup checks and negative 96-run screen remain separate evidence. No package publication or device/human certification.
+- **Next action:** None for source integration. Continue remaining latency, human/device and hardware work; release publication needs the separate user decision.
+
 ### `overnight-latency-scheduling` — Opt-in bounded scheduling and caption delivery instrumentation
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** met
@@ -451,13 +439,25 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Opt-in implementation and tests are integrated. The complete 96-run screen recorded the negative outcome: 0/28 experiment/model arms selected; all remain opt-in, with no ordinary confirmation or combination justified. This meets this item's acceptance alternative of recording rejected experiments, not the separate sub-second or quality gates.
 - **Next action:** Retain negative evidence and unchanged defaults. Any follow-up needs a new explicit hypothesis and separate evidence.
 
+### `issue-176-multiprocess` — --multiprocess workers use shared Gemma 4 prompts and stop rules (#176)
+
+- **Priority:** P3 · **Machine:** mac · **Certification:** met
+- **Depends on:** none
+- **Sources:** [#176](https://github.com/wrbell/stark-translate/issues/176), `workers.py`, `engines/translation_prompts.py`, `tests/test_worker_translation_contract.py`, `docs/issue_closure_audit.md`, `docs/evaluation/overnight_closeout_20260910/README.md`
+- **Issue acceptance (verbatim intent):** Route workers.py through engines/translation_prompts build_chat_messages + ensure_stop_tokens (skipping the prompt cache for gemma4), or deprecate --multiprocess.
+- **Acceptance:** workers.translation_worker_main builds engines through MLXGemmaEngine with the parent-selected model_family, so Gemma 4 never receives TranslateGemma prompts and stop handling is shared; a live --multiprocess run is not part of the acceptance.
+- **Evidence:** Integrated workers.translation_worker_main delegates to MLXGemmaEngine with the parent-selected model family, direction and adapters; Gemma 4 skips the incompatible TranslateGemma prompt cache.
+- **Evidence:** Real pipe-loop contract tests cover both model families, EN/ES directions, the six-value A/B response and cleanup with mocked inference; included in the frozen 752ab9a CPU suite.
+- **Notes:** #176 closed COMPLETED at 2026-09-10T11:57:50Z after source merge: original shared-engine option (a) is implemented and contract-tested. Multiprocess remains optional with no new performance endorsement.
+- **Next action:** Maintain shared prompt/stop contracts; no new multiprocess performance promotion.
+
 ## Summary counts
 
 | Status | Count |
 |--------|------:|
-| In Progress | 6 |
+| In Progress | 4 |
 | Pending Input Or Hardware | 16 |
-| Experimental | 2 |
-| Deferred | 6 |
-| Implemented | 10 |
-| Validated | 3 |
+| Experimental | 1 |
+| Deferred | 7 |
+| Implemented | 8 |
+| Validated | 7 |
