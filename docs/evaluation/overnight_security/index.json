@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "files": {
+    "working_mac_audit.json": {
+      "sha256": "fc04ba073111d2faa53197a1cbb99ce2d3b32f30e1867c1fbb72cb9b350e9749",
+      "bytes": 101151
+    },
+    "isolated_mac_audit.json": {
+      "sha256": "67b5bf0cb484ca2b85e448c8580ae030b42a0368890f0d6f1a085693c0a48106",
+      "bytes": 10510
+    }
+  }
+}

@@ -1,79 +1,54 @@
-# Windows MSI — v2026.7.2 (planned, unsigned)
+# Windows delivery and MSI status
 
-> **Status:** scaffold only. The Windows MSI build is the next track on
-> the v2026.7 roadmap. Code-signing is a follow-up patch (v2026.7.2.1)
-> blocked on Sectigo/DigiCert cert procurement (~$300/yr).
+Updated September 10, 2026. A v2026.13 MSI exists; its downloaded SHA-256 and embedded
+ProductVersion were verified on the Mac. That is artifact inspection, not a Windows
+installation test. [The recorded verification](../mac_implementation_status_20260909.md)
+also documents removal of the obsolete v2026.12 asset. Published tags were not moved.
+The v2026.14 source candidate has not been published as a package or release.
 
-For non-technical Windows volunteers. The MSI installer drops a thin Rust
-launcher (PyApp, ~5 MB) into Program Files, registers a Start Menu entry,
-and on first run downloads python-build-standalone + the
-`stark-translate[cuda|cpu]` wheel into `%LOCALAPPDATA%\stark-translate`.
+## Supported implementation and pending execution
 
----
+The shared runtime has `lite-cpu`, `lite-cpu-quality` and `lite-cuda-8gb` profiles.
+For native Windows/RTX2070 installation commands, model/native binary setup,
+offline readiness and hardware gates, use [Lite profiles](../lite_profiles.md).
+Those instructions still need execution on Windows. Mac CPU smokes do not certify
+Windows, NVIDIA driver compatibility or RTX2070 memory/performance.
 
-## First-launch UX (unsigned)
+WSL training is a separate environment and task. See
+[the Windows/WSL guide](../../CLAUDE-windows.md). Do not use a training environment
+as the minimal volunteer inference installation.
 
-On first install, Windows SmartScreen will show:
+## What the MSI workflow actually builds
 
-> *"Windows protected your PC — Microsoft Defender SmartScreen prevented
-> an unrecognized app from starting."*
+[release-win.yml](../../.github/workflows/release-win.yml) reads the package version,
+validates release identity, embeds project/interpreter/entry-point environment
+variables while compiling PyApp, and wraps the executable with Briefcase 0.4.1.
+A tag-triggered run attaches the MSI to that tag's GitHub release. Manual workflow
+execution also builds an artifact; no workflow was dispatched for this turn.
 
-Click **More info → Run anyway**. The warning gradually disappears as the
-binary accumulates download reputation (typically after ~30 unique installs
-and a few weeks of dwell time). The operator runbook will document this
-click path with screenshots so volunteers don't bounce off it.
+The [asset directory](../../packaging/windows/README.md) contains the icon, WiX
+fragment and a design-reference PyApp TOML. The workflow configures PyApp using
+`PYAPP_*` environment variables; it does not read that TOML. Its `args`, update
+strategy and extras field are therefore not proof of launcher behavior.
 
-After the click-through, a Start Menu entry "Stark Translate" launches the
-operator UI in the default browser.
+The WiX fragment proposes NVIDIA detection through `STARK_INSTALL_EXTRAS`, but
+an end-to-end test must prove that the launcher actually consumes the selected
+runtime extras, obtains a published matching wheel, starts the operator when
+launched from the Start Menu and completes model setup. The current CLI entry
+point expects a subcommand. Do not promise volunteers a verified one-click MSI
+installation until this bootstrap chain is exercised and repaired as necessary.
 
----
+## Remaining release gates
 
-## What's planned
+- Install the current MSI in a clean native Windows account, record signature,
+  paths and first-launch behavior, and test offline relaunch/uninstall.
+- Verify explicit CPU/RTX2070 profile selection, model download/resume, preflight,
+  operator launch, EN/ES captions, microphone permission and physical output.
+- Validate the original RTX2070's memory/latency targets using recorded evidence.
+- Establish signing and updater delivery separately. No signing certificate,
+  SmartScreen reputation threshold or functioning auto-updater is claimed here.
+- Publish a new version/tag only after authorization. PyPI trusted-publisher
+  configuration and package/release publication remain pending by user choice.
 
-| Component | Tool | Why |
-|---|---|---|
-| Rust launcher | [PyApp](https://github.com/ofek/pyapp) | ~5 MB binary, vs PyInstaller --onefile's 800 MB-1.5 GB |
-| MSI wrapper | [Briefcase 0.3.25](https://briefcase.readthedocs.io/) "external app packaging" | Wraps PyApp's binary into a standard WiX MSI |
-| Auto-updater | [WinSparkle](https://winsparkle.org/) | EdDSA-signed appcast; works against unsigned MSIs |
-| CUDA detection at install time | PowerShell `Get-WmiObject Win32_VideoController` | Sets `STARK_INSTALL_EXTRAS=[cuda]` or `[cpu]` |
-
-```text
-packaging/windows/
-  icon.ico
-  wix-fragment.wxi              MSI customization (Start Menu, mic permission opt-in)
-  pyapp-config.toml             pinned Python version, target wheel, launch arg
-.github/workflows/release-win.yml   Windows runner builds the MSI on v* tag
-```
-
----
-
-## Why PyApp instead of PyInstaller
-
-|  | PyInstaller --onefile | PyApp |
-|---|---|---|
-| Binary size | 800 MB – 1.5 GB | ~5 MB |
-| Cold-start delay | 10–30 s extract | <500 ms |
-| Updates | Rebuild whole binary | Bump `pyproject`, PyApp re-pip-installs |
-| Antivirus false positives | Frequent | Rare |
-| ML wheel ecosystem fit | Painful | Designed for it |
-
-PyApp downloads python-build-standalone on first run (~30 s) and
-pip-installs the published wheel. After first launch it caches the venv in
-`%LOCALAPPDATA%\stark-translate` and starts in <500 ms thereafter.
-
----
-
-## Code-signing roadmap
-
-- **v2026.7.2.0** — unsigned MSI ships. SmartScreen click-through documented.
-- **v2026.7.2.1** — purchase Sectigo/DigiCert cert (~$300/yr, ~1 week
-  procurement), attach via `signtool` in CI, ship signed MSI. WinSparkle
-  EdDSA appcast signing is independent and will be enabled at the same time.
-
----
-
-## See also
-
-- [`pypi.md`](./pypi.md) — what PyApp pip-installs at first run
-- [`models.md`](./models.md) — model bootstrap that ships in the same wheel
-- [`../operator_runbook.md`](../operator_runbook.md) — operator UI walkthrough
+See [PyPI delivery](pypi.md), [model bootstrap](models.md),
+[operator runbook](../operator_runbook.md) and [remaining tasks](../backlog.md).

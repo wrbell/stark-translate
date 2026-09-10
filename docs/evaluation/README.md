@@ -3,6 +3,14 @@
 `tools/mac_evaluation.py` freezes inputs, runs one model process at a time, and
 reports distributions from individual observations. E4B remains the default.
 
+The September 10 continuation is tracked by the
+[overnight EN↔ES experiment plan](overnight_experiment_plan.md),
+[integrated operator rehearsal](overnight_operator_rehearsal.md) and
+[current implementation status](../mac_implementation_status.md).
+Its visible-browser screen uses a new frozen source cohort; do not pool it with
+the earlier runs below. Lite installation and CPU evidence are in
+[Lite profiles](../lite_profiles.md).
+
 ## Frozen inputs
 
 - `mac_v2026_14_manifest.json`: original frozen audio/transcript inputs. Retains

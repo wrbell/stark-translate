@@ -1,205 +1,97 @@
-# Mac implementation status — v2026.14 candidate
+# Mac implementation status — September 10 candidate
 
-This work follows v2026.13 (`09e4679`, PRs #180–191 already merged). Changes are on
-`codex/mac-reliability-roadmap` in separate commits. E4B remains the default;
-the operator has no new model-selection control. English STT remains Parakeet;
-Spanish STT remains Whisper. MTP remains disabled. Local implementation and
-artifact validation are complete; the external gates below remain open.
-v2026.14 publication is pending by the user's choice.
+The integrated candidate is on `codex/mac-reliability-roadmap`, proposed in
+[PR #192](https://github.com/wrbell/stark-translate/pull/192). Final validation and
+the authorized source merge remain in progress. Package publication and release
+tags are pending by user choice. The [September 9 snapshot](mac_implementation_status_20260909.md)
+preserves earlier counts and artifact identities; those do not certify later changes.
+
+EN↔ES is the production and latency priority. Mac defaults remain Parakeet English,
+Whisper Turbo Spanish, Marian CT2 CPU previews and Gemma 4 E4B OptiQ finals,
+0.5-second silence and 0.6-second partial cadence. E2B and new scheduling experiments
+are opt-in. MTP is rejected before live model loading. Hindi is a separate completed
+offline R&D baseline, with no further work in the current speed program.
 
 ## Implemented
 
-- Operator-owned session identity, production CSV parsing, unavailable values,
-  persistent verse watcher, positional summary CLI and surfaced subprocess errors.
-- Capture/sample timing through partials, silence, smart-cut remainders, forced
-  endings and EOF. Additive schema 2 fields retain the old CSV column ordering.
-- Visible caption render acknowledgments and delayed, chunk-specific speaker
-  updates. New sessions clear caption history; same-session reconnects preserve it.
-  Caption timing excludes TTS; synthesis and playback calls have separate metrics.
-- Shared MLX generation/prompt/stop handling, and opt-in idle warmups,
-  final-aware partial scheduling, silence thresholds, conservative Marian routing,
-  terminology examples and ONNX VAD.
-- Mac-aware model resolution, cached model setup, environment selection, generated
-  launchd installation, complete wheel/source ZIP contents and release identity checks.
-  Managed cache markers must match the pinned manifest; explicit user paths remain
-  supported. The default Piper voices match the English/Spanish setup profile.
-  Mac VAD loads bundled Silero 6.2.1 weights without Torch Hub. Setup reuses
-  existing complete Marian CT2 adapters or converts both pinned HF directions
-  into an isolated managed cache using the selected interpreter. Setup,
-  preflight and inference share that CT2 resolver; atomic publication preserves
-  working artifacts even if interrupted after the active pointer changes.
-- Live and post-session Review, independent transcript/translation approvals,
-  local drafts, revision checks, portable audio bundles, direction-aware exports,
-  idempotent imports and evaluation isolation.
-- Explicit session completion after worker/diagnostics draining for both SIGINT
-  and SIGTERM. Running, failed and unknown legacy sessions cannot export training
-  data. Completion records process peak RSS/Metal memory and local model provenance,
-  including actual Marian CT2 weight hashes where available.
+- Operator-owned session identity, production CSV parsing and unavailable values.
+  Readiness requires fresh health and observed audio, not a process or CSV header.
+- Isolated bounded microphone capture, input-stall reporting, persistence failure
+  reporting and owned-process cleanup. Pause/Stop drain work; file Resume preserves
+  consumed audio positions instead of replaying or skipping prefetched samples.
+- Additive timing schema 2 through partials, carryover and finalization. Silence,
+  smart/hard cuts, EOF, Pause and Stop remain distinct. Actual visible render ACKs
+  never block inference; speech-end-to-ACK includes return-network time.
+- Shared MLX generation, prompt, stop, warmup, streaming and telemetry contracts,
+  including model-family prompts in the multiprocess worker.
+- Prepare, Live, Sessions, Help and Advanced operator views; actual readiness,
+  language restart, review, faithful short-session excerpts, support and storage.
+  QR codes have independent encoder and decoder verification.
+- Separate revision-checked corrections, persistent drafts, independent STT and
+  bilingual approvals, explicit languages, portable audio/provenance and idempotent
+  imports. Incomplete sessions and missing audio cannot silently enter STT training.
+- Bounded structured operational logs, a separate required-write persistence ledger,
+  work leases and metadata-only support defaults. Optional logs/audio/transcripts
+  require explicit selection; native llama.cpp children have bounded private logs.
+- Shared-code Lite profiles: CPU Whisper small/Marian, optional CPU E2B quality,
+  and RTX2070 E2B. CPU runtime is Torch-free; conversion uses a separate interpreter.
+- Backend-aware pinned setup/resolution, explicit/active environment selection,
+  explicit generated launchd install/uninstall, complete runtime artifact checks
+  and release version/tag identity checks.
 
-## Measurement and data integrity
+## Evidence and active validation
 
-The [evaluation README](evaluation/README.md) records the manifest, commands,
-quality report and reference repair. Only schema 2 `speech_end_to_final_ms` measures
-estimated speech end to final payload readiness. A visible browser's
-`speech_end_to_ack_upper_bound_ms` includes its render and return-network time.
-Neither is interchangeable with archived `e2e_latency_ms` processing times.
+The [integrated browser rehearsal](evaluation/overnight_operator_rehearsal.md)
+records actual EN→ES→EN captions, John 3:16, Pause/Resume, Stop, draft reload,
+faithful bilingual excerpts and a metadata-only support download. All three sessions
+completed with zero required persistence failures. The longer English session had
+7/8 final ACKs, below the 95% delivery gate; short EN/ES sessions had 1/1 each.
+No human transcript or translation approval was fabricated.
 
-All 18 historical real-time baseline replays have completed: E4B/E2B, three repeats,
-two English sermon clips and one separate synthetic Spanish clip. The measured
-caption-delivery goal is **not yet achieved**. Baseline results retain their source
-and configuration cohorts; startup/shutdown and instrumentation revisions during
-that collection must not be pooled into a single claim about the current runtime.
+[Lite evidence](lite_profiles.md) includes isolated installed CPU EN/ES caption and
+Piper WAV smokes, actual installed CPU E2B translation, pinned native/model hashes,
+clean imports and an [installed dependency audit](evaluation/lite_installer_security_20260910.json).
+These Mac CPU functional tests do not certify x86 or RTX2070. E2B pipeline RSS
+excludes its native child and cannot certify combined memory.
 
-The [frozen English screening report](evaluation/mac_v2026_14_screening/README.md)
-is complete: **48/48 runs exited zero**, covering eight configurations, both
-models and three alternating pairs on the same 45-second input. It retains
-348 finals, 3,184 partials and a hash index of 193 raw files. The result supports
-**no additional combined configuration**: gains were model-specific, some tails
-and first-partial delays worsened, and shorter silence changed the captions.
-Matched later-caption analysis did not show a consistent gain across both models.
-Keep E4B, 0.5-second silence and 0.6-second partial cadence as defaults; experiments
-remain opt-in. No browser clients were observed (visible final ACK coverage
-0/348), so this screen cannot establish the caption-delivery goal.
+The last full local suite before the latest barrier/security changes recorded
+1,992 passes, four skips and four stale runbook assertions. Their focused repair
+passed. CI then found an extracted cleanup-test namespace missing the replay
+barrier and a timeout-message casing assumption; all 34 lifecycle/rehearsal checks
+pass after repair. Final suite, CI, HTML, lint/type/security and artifact results
+remain to be recorded against the final integrated source.
 
-The conservative routing branch was unexercised on that sermon clip. The separate
-[synthetic EN/ES routing report](evaluation/mac_v2026_14_routing/README.md) now
-records **24/24 runs exited zero**, with 72 finals and 90 partials after the
-packaged VAD and automatic CT2 setup changes. Across both models, languages and
-three repeats, conservative routing used Marian for the two allowlisted phrases
-and Gemma for the non-allowlisted sentence; legacy routing used Marian for all
-three. All runs recorded the installed Silero 6.2.1 JIT artifact and its weight
-hash. Visible final ACK coverage was 0/72. Keep conservative routing opt-in:
-these synthetic path checks do not replace natural Spanish references or human
-translation review. The 48-run screen retains its original source/loader cohort.
+The [overnight plan](evaluation/overnight_experiment_plan.md) defines the frozen
+96-run English screen, alternating E4B/E2B pairs and baseline anchors. Collection
+is underway on source `911f4ae`, with one inference process and a visible audience
+browser. Its first run acknowledged all seven finals and 66 previews. One run
+cannot establish a speed gain or justify a default change.
 
-The [translation comparison](evaluation/mac_v2026_14_quality/comparison.md) uses
-identical text inputs and three repeats. E2B's translation-only median is 37–43%
-lower across the tested directions/prompts, with different outputs and fewer
-English-to-Spanish canary passes: 11/18 versus E4B's 13/18 without terminology
-examples, and 14/18 versus 15/18 with them. This is a bounded speed/quality tradeoff,
-not evidence to change the default or a speech-end-to-display result. Bilingual
-meaning and terminology review is still pending.
+Previous [48-run screening](evaluation/mac_v2026_14_screening/README.md),
+[24 bilingual routing probes](evaluation/mac_v2026_14_routing/README.md) and
+[translation quality comparison](evaluation/mac_v2026_14_quality/comparison.md)
+remain separate cohorts. Negative silence, warmup and scheduling results are
+retained. Legacy processing times and isolated generation speed are not caption
+delivery measurements. The sub-second median goal remains unachieved.
 
-An existing training export test overwrote the local holdout with two fixtures.
-The export now writes its holdout beside the requested dataset, and the original
-local holdout was restored from the aligned test corpus. Separately, that older
-parallel corpus contains known row-ID alignment errors. Evaluation manifest v2
-rebinds references using exact source text and book/chapter/verse; ambiguous items
-have no reference score. Predictions and measured timings were preserved.
+## Remaining gates
 
-## Completed validation
+- Finish screen analysis, justified historical confirmations and separate Spanish
+  probes, then standard and CPU Lite endurance rehearsals. Require visible,
+  real-time schema 2 evidence; no default promotion without quality review.
+- Retest live microphone and physical outputs tomorrow, as requested. Natural
+  Spanish, two-speaker audio, bilingual review and approved corrections remain
+  external dependencies. Predicted text does not count as a human reference.
+- Execute native Windows/RTX2070, representative x86 CPU and WSL training/CUDA
+  gates on their target hardware; portable reviewed data remains the handoff.
+- Complete source-security review, isolated updated Mac dependency assessment,
+  installed-artifact checks, evidence/docs refresh and PR merge. Preserve working
+  `stt_env`, original holdouts and the frozen benchmark dependencies.
+- Leave PyPI and release publication pending. Published tags have not moved.
+  Previous v2026.13 MSI verification and obsolete-asset cleanup remain in the
+  September 9 snapshot; native Windows installation remains untested.
 
-- Final CPU suite after the VAD/CT2 setup changes: **1,790 passed, 4 skipped**,
-  59.07% coverage against the 50% gate. An earlier rerun exposed a stale packaging
-  test that rejected the new derived-CT2 manifest type; its schema assertion was
-  corrected and the complete suite rerun. The failure log was retained.
-- Earlier cached MLX GPU regression suite: **3 passed**, covering E4B EOS/canary
-  behavior and the worker's first forward pass. The later 24 routing runs cover
-  actual post-setup pipeline execution separately.
-- Ruff lint/format (236 files) and mypy (19 files) pass. Official HTML5 Tidy 5.8.0 reports zero warnings
-  or errors across all five displays; it was built only in the repository cache.
-- CI-configured Bandit passes with zero medium/high findings. The final expanded
-  run retaining B615 reports **27 medium findings**: the original 26 call sites
-  with their documented local/fallback limitations, plus the managed CT2 source
-  download whose revision is guarded by a full 40-character commit check. That
-  additional static-analysis report is not a new unpinned path; the earlier
-  pinning debt remains outside the CI pass. Vulture reports three advisory findings.
-- CI-filtered Mac, Windows and NVIDIA requirement audits report zero known
-  vulnerabilities. This scope does not certify every optional package or model.
-- VAD/setup regression subset: **119 passed**, including real JIT and ONNX CPU
-  loads and a frame/reset with empty Torch Hub caches and network access blocked.
-  Packaged weights and relevant loader files match the prior Hub cache byte for
-  byte. The subsequent atomic-publication interruption fix passed all **8 managed
-  CT2 setup tests**, including a replace-then-interrupt regression.
-- Actual offline CT2 conversion in `.cache/package-smoke` produced both int8
-  directions from pinned HF snapshots under an empty project root. Both CPU
-  translations were nonempty, repeated setup reused the results, and the weight
-  hashes matched the existing adapters. Existing adapters and `stt_env` were
-  unchanged. The setup CLI separately reused all five Mac defaults without
-  downloads (0 installed, 5 skipped, 0 failed).
-- The final v2026.14 wheel, sdist and Mac ZIP are validated from source `977583b`;
-  [installation evidence](evaluation/mac_v2026_14_installation.md) records hashes
-  and the post-build evidence boundary. The unpacked ZIP launches directly and
-  builds a byte-identical wheel. Both wheels installed outside the checkout and
-  served `/healthz`, `/operator/` and the review script. The full
-  `[mlx,eval,diarization]` extras were **installed**, all 18 runtime import checks
-  passed, 106 installed/source hashes matched, and `pip check` was clean.
-  Existing `stt_env` was unchanged. Real installed EN/ES STT→E4B→target-voice WAV
-  sessions completed with exit zero on the preceding r3 wheel. The final r4 wheel
-  changes only the Conda shell resolver and generated package inventory; all 113
-  other members match the exercised artifact. Its launcher/install checks were
-  executed separately. No natural-quality or physical-playback gate is inferred.
-- Independent STT inference completed on 50 English and 11 Spanish saved clips,
-  with no approved human references, so **no WER or natural-audio acceptance claim**
-  is made. Offline Hindi generation completed on both models for 43 English
-  inputs each; Hindi references and human quality review remain absent.
-
-Local evidence is recorded in `.cache/mac-roadmap/validation.json`,
-`.cache/mac-roadmap/full-tests.log`, `.cache/mac-roadmap/full-tests-final.log`,
-`.cache/mac-roadmap/full-tests-delivery.log`, `.cache/mac-roadmap/coverage-delivery.json`,
-`.cache/html5-validation/report.json`,
-`.cache/security-audit/`, `.cache/package-artifacts-validation/`,
-`.cache/mac-roadmap/vad-cache-proof.json` and
-`.cache/mac-roadmap/ct2-setup-validation/report.json`. See the
-[security scope audit](evaluation/mac_v2026_14_security.md) for the distinction
-between pinned default setup paths and remaining optional/fallback download debt.
-
-## Operator rehearsal completed
-
-Three controlled mixed/synthetic sessions completed with exit code zero and
-drained lifecycle markers. These runs used TTS and are explicitly excluded from
-the frozen latency acceptance configurations.
-
-| Session purpose | Final captions | Finals with visible completion acknowledgment | Browser receipt-to-render p50 |
-|---|---:|---:|---:|
-| English hymn, pause/resume and speech | 9 | 8 | 12.2 ms |
-| Synthetic Spanish restart | 1 | 1 | 7.4 ms |
-| English verse cue, speech, Review, Stop and summary | 8 | 8 | 6.9 ms |
-
-The browser figures measure local render overhead only. They do not include
-speech recognition or translation and cannot establish sub-second caption delivery.
-
-Observed checks passed for startup readiness, pause/resume, EN→ES→EN session
-identity, audience reconnect/history reset, visible caption acknowledgments,
-John 3:16 from the production CSV remaining stable across polls, live finalized
-Review, persisted draft notes and selection, audience/review separation, and
-rejection of unapproved exports. No transcript or translation approval was fabricated.
-Per-language TTS device choices persisted; normal Stop drained and marked the
-session complete. The positional summary command worked. An initial summary
-format failure was retained, and the corrected rerun produced one three-sentence
-Spanish translation without alternatives or notes.
-
-Piper synthesized both configured languages and host playback calls completed on
-MacBook Pro Speakers. This validates the built-in output path, not acoustic
-quality/onset or a second physical device. Rehearsal details and limitations are
-in `.cache/mac-roadmap/rehearsal_report.json`; the retained summary failure is
-`.cache/mac-roadmap/summary_format_failure_20260909_211201_787725_en.json`.
-
-## Explicit pending gates
-
-- At least 50 human-reviewed natural utterances per language. There are 50 English
-  and 11 Spanish candidates, all still unapproved; the user does not currently
-  have a natural Spanish recording location. Synthetic Spanish stays separate.
-- Natural two-speaker audio, human speaker-transition labels and the ≤50 ms
-  additional final-p95 diarization gate.
-- Bilingual blinded review of meaning errors and terminology preferences.
-- Physical second-output selection, unplug/replug and acoustic playback validation;
-  only the built-in speaker path has been exercised.
-- A service rehearsal with natural bilingual speech, real speaker transitions and
-  church audio hardware. The controlled hymn/pause/restart/Review/Stop rehearsal
-  above does not close those human and device gates.
-- A frozen visible-browser timing run on the unlocked Mac. The screen and routing
-  reports have no visible ACKs; the earlier controlled operator rehearsal remains
-  separate evidence. Local artifact and installed-runtime checks are complete.
-- PyPI trusted publisher account setup: the browser is signed out and the user
-  explicitly chose to leave publishing pending. Required mapping is owner
-  `wrbell`, repository `stark-translate`, workflow `pypi.yml`, environment `pypi`.
-
-The v2026.13 MSI SHA-256 matches the release digest
-`e772992f5ad925cac7d78984574615846125e9837e497c081f315c632a1cc7a2`;
-its embedded ProductVersion is `2026.13.0`. The obsolete v2026.12 MSI asset was
-removed from that release. Windows installation execution remains untested here.
-Published tags have not been moved. A future release must use a new version/tag.
-
-WSL preprocessing, training, CUDA experiments and adapter conversion remain
-separate execution work. Portable reviewed data is the handoff boundary.
+The [backlog](backlog.md) and [issue acceptance audit](issue_closure_audit.md)
+keep implementation and certification separate. #134 permits a laptop stand-in
+with a complete recorded hymn, spoken segment and written timing/UX note; live
+microphone and physical-device requirements belong to their own gates.
