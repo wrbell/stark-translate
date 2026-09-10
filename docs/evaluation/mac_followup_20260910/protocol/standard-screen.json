@@ -217,7 +217,8 @@
   ],
   "partial_interval": 0.6,
   "baseline_env": {
-    "STARK_EXPERIMENT_TRACE": "true"
+    "STARK_EXPERIMENT_TRACE": "true",
+    "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"
   },
   "experiments": [
     {

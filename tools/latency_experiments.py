@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,7 @@ class LatencyExperiments:
     mlx_cache_mb: int = 256
     gemma_prefix_cache: bool = False
     trace: bool = False
+    trace_capacity: int = 8192
     early_clause_s: float = 0.0
     early_clause_pause_ms: float = 0.0
     partial_deadline_margin_ms: float = 0.0
@@ -34,7 +36,7 @@ class LatencyExperiments:
     def from_env(cls, env: Mapping[str, str] | None = None) -> LatencyExperiments:
         env = os.environ if env is None else env
         defaults = cls()
-        values = {}
+        values: dict[str, Any] = {}
         for name, default in asdict(defaults).items():
             key = "STARK_EXPERIMENT_" + name.upper()
             raw = env.get(key)
@@ -59,6 +61,7 @@ class LatencyExperiments:
             "clause_preview_s": (0, 8),
             "rolling_window_s": (1, 8),
             "mlx_cache_mb": (0, 1024),
+            "trace_capacity": (1024, 262144),
             "early_clause_s": (0, 8),
             "early_clause_pause_ms": (0, 500),
             "partial_deadline_margin_ms": (0, 1000),

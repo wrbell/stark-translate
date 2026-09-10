@@ -109,7 +109,10 @@ is larger. Disjoint first/last windows use up to 16 requests each, requiring
   100 ms or 5% of its maximum wait. This bounded screen does not establish a
   long-service trend.
 Browser acknowledgments and physical visibility remain separate from this
-server-side engineering screen. Nothing here changes a production default.
+server-side engineering screen. Research traces explicitly retain at most 131,072
+events for these cohorts; overflow still invalidates physical-stage completeness.
+The ordinary trace capacity remains 8,192 and tracing remains off by default.
+Nothing here changes a production model default.
 
 ## Remaining execution
 

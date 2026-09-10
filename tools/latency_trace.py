@@ -57,6 +57,7 @@ class LatencyTrace:
                 "origin_perf_counter_s": self.origin,
                 "clock_scope": "same pipeline process only; not comparable across runs or hosts",
                 "enabled": self.enabled,
+                "capacity": self._records.maxlen,
                 "total_events": self._total,
                 "discarded_old_events": self._total - len(self._records),
                 "events": list(self._records),

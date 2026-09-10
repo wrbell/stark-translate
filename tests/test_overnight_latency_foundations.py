@@ -21,6 +21,26 @@ def test_default_experiments_preserve_deployment_behavior():
             LatencyExperiments.from_env({"STARK_EXPERIMENT_" + key: value})
 
 
+@pytest.mark.parametrize("value", ["1024", "131072", "262144"])
+def test_trace_capacity_is_explicit_bounded_and_snapshot_visible(value):
+    config = LatencyExperiments.from_env({"STARK_EXPERIMENT_TRACE_CAPACITY": value})
+    assert config.trace is False  # More capacity does not enable research tracing.
+    assert config.trace_capacity == int(value)
+    assert config.as_dict()["trace_capacity"] == int(value)
+    trace = LatencyTrace(config.trace, capacity=config.trace_capacity)
+    trace.record("ignored")
+    snapshot = trace.snapshot()
+    assert snapshot["capacity"] == int(value)
+    assert snapshot["total_events"] == 0 and snapshot["events"] == []
+    assert LatencyExperiments.from_env({}).trace_capacity == LatencyTrace().snapshot()["capacity"] == 8192
+
+
+@pytest.mark.parametrize("value", ["0", "1023", "262145", "131072.0", "NaN", "true", "-1"])
+def test_trace_capacity_rejects_invalid_environment_values(value):
+    with pytest.raises(ValueError, match="STARK_EXPERIMENT_TRACE_CAPACITY"):
+        LatencyExperiments.from_env({"STARK_EXPERIMENT_TRACE_CAPACITY": value})
+
+
 def test_deadline_predictor_cold_start_duration_bins_and_expiry():
     predictor = PartialRuntimePredictor(history=3)
     assert predictor.admit(3, now=10, deadline=10.1, margin_ms=100) == (True, None)
@@ -173,6 +193,8 @@ def test_trace_reports_discarded_events_instead_of_unbounded_memory():
     for i in range(3):
         trace.record("event", index=i)
     snapshot = trace.snapshot()
+    assert snapshot["capacity"] == 2
+    assert snapshot["total_events"] == 3
     assert snapshot["discarded_old_events"] == 1
     assert [r["index"] for r in snapshot["events"]] == [1, 2]
 

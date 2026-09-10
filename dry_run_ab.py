@@ -5944,7 +5944,7 @@ def main():
     global _latency, _latency_trace, _stt_scheduler, _marian_memo, _vad_pool, _source_coverage, _partial_runtime
     global _final_queue_pressure, _capture_transport
     _latency = LatencyExperiments.from_env()
-    _latency_trace = LatencyTrace(_latency.trace, origin=_SESSION_CLOCK_ORIGIN)
+    _latency_trace = LatencyTrace(_latency.trace, capacity=_latency.trace_capacity, origin=_SESSION_CLOCK_ORIGIN)
     _final_queue_pressure = FinalQueuePressure(origin=_SESSION_CLOCK_ORIGIN, on_event=_latency_trace.record)
     _capture_transport = CaptureTransportSummary()
     _source_coverage = SourceCoverage()
