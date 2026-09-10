@@ -356,6 +356,61 @@ def test_multiple_browsers_require_explicit_selection(tmp_path):
     assert not any(metric.endswith(":second") for metric in selected["target_metrics"])
 
 
+def test_actual_process_local_socket_ids_bind_per_session_not_intersection(tmp_path):
+    ids = {"baseline": "21820749712", "candidate": "21700229776", "baseline_anchor": "21676049296"}
+
+    def change(config, repeat, data, row, partials, acks, diag):
+        for ack in acks:
+            ack["client_id"] = ids[config] + str(repeat)
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    report = analysis.analyze(inputs, metrics)
+    arm = report["arms"][0]
+    assert arm["status"] == "worth_confirming"
+    assert "first_visible_preview:declared_display" in arm["target_metrics"]
+    assert arm["pooled_matched_metrics"]["versus_opening"]["first_visible_preview:declared_display"]["before"]["n"] == 3
+    pair = arm["comparisons"][0]["versus_opening"]["browser_bindings"]
+    assert pair["before"]["client_id"] == ids["baseline"] + "0"
+    assert pair["after"]["client_id"] == ids["candidate"] + "0"
+    assert not pair["before"]["stable_physical_identity_verified"]
+    assert not pair["after"]["stable_physical_identity_verified"]
+    assert analysis.analyze(inputs, metrics, client_id=ids["baseline"] + "0")["arms"][0]["status"] == "not_selected"
+
+
+def test_session_client_map_resolves_multiple_clients_without_pooling(tmp_path):
+    mapping = {}
+
+    def change(config, repeat, data, row, partials, acks, diag):
+        wanted = "selected_" + data["session_id"]
+        mapping[data["session_id"]] = wanted
+        for ack in acks:
+            ack["client_id"] = wanted
+        for ack in list(acks):
+            extra = {**ack, "client_id": "other"}
+            if extra["stage"] == "complete":
+                extra["speech_end_to_ack_upper_bound_ms"] = 9000
+            acks.append(extra)
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    assert analysis.analyze(inputs, metrics)["arms"][0]["status"] == "not_selected"
+    report = analysis.analyze(inputs, metrics, client_map=mapping)
+    arm = report["arms"][0]
+    assert arm["status"] == "worth_confirming"
+    visible = arm["pooled_matched_metrics"]["versus_opening"]["final_visible:silence|replay_realtime:declared_display"]
+    assert visible["before"]["n"] == 3 and visible["after"]["p95"] == 710
+    assert all(len(row["browsers"]) == 2 for row in report["sessions"])
+    incomplete = dict(mapping)
+    incomplete.pop(next(iter(incomplete)))
+    assert analysis.analyze(inputs, metrics, client_map=incomplete)["arms"][0]["status"] == "not_selected"
+
+
+@pytest.mark.parametrize("mapping", [{"outside": "123"}, {"bad": 123}, []])
+def test_invalid_browser_mapping_fails_closed(tmp_path, mapping):
+    inputs, metrics, _ = fixture_matrix(tmp_path)
+    with pytest.raises(ValueError, match="Client map"):
+        analysis.analyze(inputs, metrics, client_map=mapping)
+
+
 def test_tail_regression_cannot_hide_behind_two_fast_repetitions(tmp_path):
     def change(config, repeat, data, row, *_):
         if config == "candidate" and repeat == 2:

@@ -12,9 +12,9 @@ python tools/overnight_analysis.py \
   --output /path/to/separate-report
 ```
 
-The output contains `analysis.json` and `README.md`. An optional `--client-id`
-selects a particular audience browser when multiple visible clients exist.
-Otherwise each comparison requires exactly one common visible client. Output
+The output contains `analysis.json` and `README.md`. An optional `--client-map`
+selects a connection for each session when multiple visible clients exist.
+Otherwise each session requires exactly one eligible visible connection. Output
 must be outside the evidence directories. Re-running replaces only these report
 files. Missing sessions or unreadable result files make the matrix incomplete;
 no candidate is selected while the declared matrix is incomplete.
@@ -48,6 +48,18 @@ hidden and mismatched events are excluded. Each client retains its own coverage
 and timing. Browser latency is an upper bound including the return network hop;
 server timestamps and browser clocks are never compared directly.
 
+The controlled benchmark reuses one visible audience tab, but `client_id` is the
+server process's socket object ID and changes on each subprocess launch. The
+analyzer therefore binds the sole eligible visible connection **per session**,
+never intersects those IDs across sessions. Paired `declared_display` measurements
+retain both source session IDs and connection IDs and use only one connection
+from each run; all other client distributions stay separate. A socket ID is not
+proof of stable physical browser identity. Two eligible visible connections are
+ambiguous unless an explicit `--client-map mapping.json` supplies a JSON object
+of session IDs to connection ID strings. Missing/invalid entries fail closed.
+`--client-id` remains a literal selector, useful only if the specified ID exists
+in every compared run. Do not use a single historical socket ID for the matrix.
+
 First-preview timing counts finalized utterances, with explicit missing-utterance
 lists. Intermediate preview ACKs can be missing because queued delivery coalesced
 updates; that alone does not establish lost first-preview coverage. Server update
@@ -79,7 +91,7 @@ candidate to qualify:
 - The declared matrix and at least three candidate repetitions are recorded.
 - Every repetition has valid compatible opening/closing controls and unchanged
   final segmentation/source coverage.
-- One common or declared visible browser has at least 95% timed final and first
+- One bound visible connection per session has at least 95% timed final and first
   translated-preview utterance coverage in all three runs. Candidate server
   previews are complete and have no emission after final readiness requiring
   browser-order review. This conservative server guard is not a stale-repaint claim.

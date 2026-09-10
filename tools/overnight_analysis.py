@@ -499,6 +499,32 @@ def inspect_result(path, metrics):
     return result, raw["finals"]
 
 
+def bind_browser(row, *, client_id=None, client_map=None):
+    """Bind one connection per run under the declared controlled-display protocol.
+
+    Runtime IDs are process-local ``id(websocket)`` values, not browser IDs.
+    Never intersect them across subprocesses or pool two clients in one run.
+    """
+    clients = {
+        key: data for key, data in row["browsers"].items() if data["final_acks"] or data["visible_preview_events"]
+    }
+    if client_map is not None:
+        chosen, mode = client_map.get(row["session_id"]), "explicit_session_map"
+    elif client_id is not None:
+        chosen, mode = client_id, "explicit_literal_client_id"
+    else:
+        chosen, mode = next(iter(clients)) if len(clients) == 1 else None, "sole_visible_client_per_session"
+    return {
+        "client_id": chosen if chosen in clients else None,
+        "mode": mode,
+        "status": "bound" if chosen in clients else "unassessable",
+        "reason": None
+        if chosen in clients
+        else "No unambiguous visible connection selected; supply a session-to-client map for multiple clients",
+        "stable_physical_identity_verified": False,
+    }
+
+
 def paired(before, after):
     if not before or not after:
         return {"status": "unassessable", "reason": "Missing eligible compatible comparison", "metrics": {}}
@@ -510,7 +536,8 @@ def paired(before, after):
     keys = sorted(a.keys() & b.keys())
     metrics: dict[str, dict[str, list[float]]] = defaultdict(lambda: {"before": [], "after": [], "delta_ms": []})
     changes = []
-    common_clients = sorted(left["browsers"].keys() & right["browsers"].keys())
+    left_binding, right_binding = left.get("browser_binding", {}), right.get("browser_binding", {})
+    paired_browser = left_binding.get("status") == right_binding.get("status") == "bound"
 
     def add(name, x, y):
         x, y = number(x), number(y)
@@ -528,16 +555,17 @@ def paired(before, after):
             left["previews"]["first_by_utterance_ms"].get(uid_a),
             right["previews"]["first_by_utterance_ms"].get(uid_b),
         )
-        for client in common_clients:
+        if paired_browser:
+            client_a, client_b = left_binding["client_id"], right_binding["client_id"]
             add(
-                "final_visible:" + endpoint(x) + ":" + client,
-                left["browsers"][client]["final_by_chunk_ms"].get(str(x["chunk_id"])),
-                right["browsers"][client]["final_by_chunk_ms"].get(str(y["chunk_id"])),
+                "final_visible:" + endpoint(x) + ":declared_display",
+                left["browsers"][client_a]["final_by_chunk_ms"].get(str(x["chunk_id"])),
+                right["browsers"][client_b]["final_by_chunk_ms"].get(str(y["chunk_id"])),
             )
             add(
-                "first_visible_preview:" + client,
-                left["browsers"][client]["first_by_utterance_ms"].get(uid_a),
-                right["browsers"][client]["first_by_utterance_ms"].get(uid_b),
+                "first_visible_preview:declared_display",
+                left["browsers"][client_a]["first_by_utterance_ms"].get(uid_a),
+                right["browsers"][client_b]["first_by_utterance_ms"].get(uid_b),
             )
         if (x.get("english"), x.get("spanish_a")) != (y.get("english"), y.get("spanish_a")):
             changes.append(
@@ -551,6 +579,10 @@ def paired(before, after):
         "status": "assessable",
         "before_session": left["session_id"],
         "after_session": right["session_id"],
+        "browser_bindings": {
+            "before": {"session_id": left["session_id"], **left_binding},
+            "after": {"session_id": right["session_id"], **right_binding},
+        },
         "matched_final_bounds": len(keys),
         "before_unmatched": len(a.keys() - b.keys()),
         "after_unmatched": len(b.keys() - a.keys()),
@@ -636,10 +668,19 @@ def expected_sessions(provenance):
     }
 
 
-def analyze(input_dir, metrics_dir, *, client_id=None):
+def analyze(input_dir, metrics_dir, *, client_id=None, client_map=None):
     provenance_path = input_dir / "provenance.json"
     provenance = json.loads(provenance_path.read_text())
     expected = expected_sessions(provenance)
+    if client_map is not None:
+        if client_id is not None:
+            raise ValueError("Choose a session-to-client map or a literal client ID, not both")
+        if not isinstance(client_map, dict) or any(
+            not isinstance(key, str) or not isinstance(value, str) or not value for key, value in client_map.items()
+        ):
+            raise ValueError("Client map must be a JSON object of session IDs to nonempty connection ID strings")
+        if client_map.keys() - expected:
+            raise ValueError("Client map contains sessions outside the declared matrix")
     records, failures, seen = [], [], set()
     for path in sorted(input_dir.glob("*.json")):
         if path.name in {"provenance.json", "comparison.json", "analysis.json"}:
@@ -663,6 +704,7 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
     indexed = defaultdict(list)
     for record in records:
         row = record[0]
+        row["browser_binding"] = bind_browser(row, client_id=client_id, client_map=client_map)
         indexed[(row["experiment"], row["size"], row["clip_id"], row["repeat"], row["cohort"])].append(record)
 
     def lookup(name, row):
@@ -712,21 +754,15 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
                 reasons.append(f"repeat{row['repeat']}: source segmentation or coverage differs")
                 continue
             triple = [opening[0], row, closing[0]]
-            clients = set.intersection(*(set(item["browsers"]) for item in triple))
-            chosen = (
-                client_id
-                if client_id in clients
-                else next(iter(clients))
-                if len(clients) == 1 and client_id is None
-                else None
-            )
-            if chosen is None:
-                reasons.append(f"repeat{row['repeat']}: no single common/declared visible browser")
+            if any(item["browser_binding"]["status"] != "bound" for item in triple):
+                reasons.append(f"repeat{row['repeat']}: no unambiguous per-session visible browser binding")
                 continue
+            chosen = row["browser_binding"]["client_id"]
             if any(
-                (item["browsers"][chosen]["final_coverage"] or 0) < 0.95
-                or (item["browsers"][chosen]["first_preview_coverage"] or 0) < 0.95
-                or item["browsers"][chosen]["timed_final_acks"] < 0.95 * item["final_count"]
+                (item["browsers"][item["browser_binding"]["client_id"]]["final_coverage"] or 0) < 0.95
+                or (item["browsers"][item["browser_binding"]["client_id"]]["first_preview_coverage"] or 0) < 0.95
+                or item["browsers"][item["browser_binding"]["client_id"]]["timed_final_acks"]
+                < 0.95 * item["final_count"]
                 for item in triple
             ):
                 reasons.append(f"repeat{row['repeat']}: final or first-preview timed ACK coverage below95%")
@@ -745,10 +781,6 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
             guard_failures = []
             common_metrics = before["metrics"].keys() & after["metrics"].keys()
             for metric in common_metrics:
-                if metric.startswith(("first_visible_preview:", "final_visible:")) and not metric.endswith(
-                    ":" + chosen
-                ):
-                    continue
                 if any(
                     not p95_guard(pair["metrics"][metric]["before"]["p95"], pair["metrics"][metric]["after"]["p95"])
                     for pair in (before, after)
@@ -770,10 +802,7 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
                 )
                 continue
             for metric in common_metrics:
-                if metric == "first_server_preview" or (
-                    metric.startswith(("first_visible_preview:", "final_visible:"))
-                    and not metric.endswith(":" + chosen)
-                ):
+                if metric == "first_server_preview":
                     continue
                 if all(
                     gain(pair["metrics"][metric]["before"]["p50"], pair["metrics"][metric]["after"]["p50"])
@@ -853,6 +882,7 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
         "missing_sessions": missing,
         "input_failures": failures,
         "declared_client_id": client_id,
+        "declared_client_map": client_map,
         "provenance_sha256": sha(provenance_path),
         "sessions": [record[0] for record in records],
         "arms": arms,
@@ -862,6 +892,7 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
             "matching": "Unique exact sample_start/end/rate, speech_end_sample, endpoint and timing source within model/clip/repeat/source/model-artifact cohort.",
             "selection": "Whole matrix completed; every repeat passes validity/coverage/tail/memory guards; same target median improves15% OR150ms versus both controls in at least2/3repeats. Followup selection only.",
             "browser": "Per client only. Timed first-preview coverage and final ACK coverage>=95%. Connection barrier alone never certifies visibility; missing intermediate ACKs can reflect coalescing.",
+            "browser_binding": "The controlled audience-tab protocol binds exactly one visible connection per session, or uses an explicit session-to-client map. Runtime socket IDs are process-local and cannot prove stable physical browser identity. Paired declared_display metrics use only the selected connection in each run; original IDs and per-client distributions remain separate. Ambiguity is rejected.",
             "preview_order": "Server preview emission after final payload readiness requires review, not proof of stale repaint. Per-client preview_acks_after_final_ack compares reconstructed server receipt times for matched events; missing clocks/ACKs are unassessable. ACK opportunity order does not prove which pixels remained visible. The automatic selector retains its conservative readiness guard.",
             "lexical": "Literal whitespace-token prefix/suffix revisions are display-change proxies, not semantic quality or WER. Smart-cut previews can include carryover beyond final bounds.",
             "components": "Generation metrics can belong to earlier speculation; do not sum latency_a_ms/prefill/decode into post-end latency. Diagnostic stage wall times describe the final path.",
@@ -972,15 +1003,22 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--metrics", type=Path)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument(
-        "--client-id", help="Select this visible browser for followup eligibility; default requires one common client"
+    browser = parser.add_mutually_exclusive_group()
+    browser.add_argument("--client-id", help="Use this literal connection ID in every run (usually IDs change)")
+    browser.add_argument(
+        "--client-map", type=Path, help="JSON session→connection IDs; default binds the sole visible client per session"
     )
     args = parser.parse_args()
     if any(
         args.output.resolve().is_relative_to(path.resolve()) for path in (args.input, args.metrics or args.input.parent)
     ):
         parser.error("Use a separate report output directory; evidence inputs are read-only")
-    report = analyze(args.input, args.metrics or args.input.parent, client_id=args.client_id)
+    report = analyze(
+        args.input,
+        args.metrics or args.input.parent,
+        client_id=args.client_id,
+        client_map=json.loads(args.client_map.read_text()) if args.client_map else None,
+    )
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "analysis.json").write_text(json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
     (args.output / "README.md").write_text(markdown(report))
