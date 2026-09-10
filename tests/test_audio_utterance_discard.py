@@ -4,13 +4,16 @@ import asyncio
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import numpy as np
 import pytest
 
 from tools.latency_experiments import LatencyExperiments
+from tools.latency_scheduler import PartialRuntimePredictor
 from tools.pipeline_timing import AudioFrame, CaptureStamp
+from tools.source_coverage import SourceCoverage
 
 
 @pytest.fixture
@@ -35,6 +38,7 @@ def pipeline(monkeypatch):
     monkeypatch.setattr(d, "_discarded_utterance_id", 0)
     monkeypatch.setattr(d, "_last_capture_utterance_id", 0)
     monkeypatch.setattr(d, "_latency", LatencyExperiments())
+    monkeypatch.setattr(d, "_source_coverage", SourceCoverage())
     monkeypatch.setattr(d, "_stt_scheduler", None)
     monkeypatch.setattr(d, "_vad_pool", None)
     monkeypatch.setattr(d, "_health", None)
@@ -93,6 +97,58 @@ async def capture(pipeline, monkeypatch, frames):
     monkeypatch.setattr(d, "process_final", save)
     await asyncio.wait_for(d.audio_loop(), 2)
     return finals
+
+
+@pytest.mark.parametrize("pause_frames,threshold_ms", [(5, 160), (8, 240)])
+def test_early_clause_uses_actual_pause_and_preserves_remainder(pipeline, monkeypatch, pause_frames, threshold_ms):
+    monkeypatch.setattr(
+        pipeline, "_latency", replace(LatencyExperiments(), early_clause_s=2, early_clause_pause_ms=threshold_ms)
+    )
+    stop = 70 + pause_frames + 30
+    frames = [frame(i * 1536, i < 70 or 70 + pause_frames <= i < stop) for i in range(stop + 20)]
+    finals = asyncio.run(capture(pipeline, monkeypatch, frames))
+    assert len(finals) == 2
+    first, second = finals
+    assert first[2].endpoint_reason == "early_clause"
+    assert second[2].endpoint_reason == "silence"
+    assert first[2].sample_end == second[2].sample_start == 70 * 1536
+    assert first[1] != second[1]
+    assert first[2].speech_end_sample == 70 * 1536
+    for audio, _uid, timing in finals:
+        assert timing.sample_end - timing.sample_start == len(audio) * 3
+    assert not pipeline._source_coverage.snapshot()["capture_gaps"]
+
+
+def test_early_clause_waits_for_configured_minimum(pipeline, monkeypatch):
+    monkeypatch.setattr(
+        pipeline, "_latency", replace(LatencyExperiments(), early_clause_s=4, early_clause_pause_ms=160)
+    )
+    frames = [frame(i * 1536, i < 70 or 75 <= i < 135) for i in range(155)]
+    finals = asyncio.run(capture(pipeline, monkeypatch, frames))
+    assert len(finals) == 1
+    assert finals[0][2].endpoint_reason == "early_clause"  # final pause after 4s of buffered speech
+    assert finals[0][2].sample_start == 0
+    assert finals[0][2].sample_end == 135 * 1536
+
+
+def test_deadline_deferral_never_calls_stt_or_logs_empty_prediction(pipeline, monkeypatch):
+    d = pipeline
+    predictor = PartialRuntimePredictor()
+    for _ in range(3):
+        predictor.observe(1, 300)
+    monkeypatch.setattr(d, "_partial_runtime", predictor)
+    monkeypatch.setattr(d, "_latency", replace(LatencyExperiments(), partial_deadline_margin_ms=100))
+    monkeypatch.setattr(d, "MULTIPROCESS", True)
+    recognize, drop = Mock(), Mock()
+    monkeypatch.setattr(d, "_run_partial_stt_via_worker", recognize)
+    monkeypatch.setattr(d, "_log_stt_drop", drop)
+    monkeypatch.setattr(d, "_pipeline_chunk_queue", None)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        monkeypatch.setattr(d, "_stt_comm_pool", pool)
+        asyncio.run(d.process_partial(np.full(16000, 0.1), 1, captured_start=0))
+    recognize.assert_not_called()
+    drop.assert_not_called()
+    assert any(call.args == ("partial_deferred_deadline",) for call in d._latency_event.call_args_list)
 
 
 def test_short_vad_blip_expires_before_post_hymn_speech(pipeline, monkeypatch):

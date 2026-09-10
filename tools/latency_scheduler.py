@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import threading
 import time
 from collections import OrderedDict, deque
@@ -9,6 +10,38 @@ from collections.abc import Callable
 from concurrent.futures import Future
 from dataclasses import dataclass
 from typing import Any
+
+
+class PartialRuntimePredictor:
+    """Session-local p90 of physical partial durations, binned by two audio seconds.
+
+    Unknown/cold bins admit normal work. Never treats a canceled asyncio wrapper
+    as an interrupted model call. A pipeline process owns only one STT backend.
+    """
+
+    def __init__(self, history=20, minimum=3):
+        if not 1 <= minimum <= history:
+            raise ValueError("Invalid runtime predictor history")
+        self.history, self.minimum = history, minimum
+        self._bins = {}
+        self._lock = threading.Lock()
+
+    def predict_ms(self, audio_seconds):
+        with self._lock:
+            values = sorted(self._bins.get(min(4, int(audio_seconds // 2)), ()))
+        if len(values) < self.minimum:
+            return None
+        return values[math.ceil(len(values) * 0.9) - 1]
+
+    def observe(self, audio_seconds, elapsed_ms):
+        if not math.isfinite(elapsed_ms) or elapsed_ms < 0 or not math.isfinite(audio_seconds) or audio_seconds < 0:
+            raise ValueError("Invalid physical partial duration")
+        with self._lock:
+            self._bins.setdefault(min(4, int(audio_seconds // 2)), deque(maxlen=self.history)).append(elapsed_ms)
+
+    def admit(self, audio_seconds, *, now, deadline, margin_ms):
+        predicted = self.predict_ms(audio_seconds)
+        return (deadline is None or predicted is None or now + (predicted + margin_ms) / 1000 <= deadline), predicted
 
 
 @dataclass

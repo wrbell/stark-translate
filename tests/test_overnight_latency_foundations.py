@@ -9,7 +9,7 @@ import pytest
 
 from tools.caption_delivery import CaptionDelivery
 from tools.latency_experiments import LatencyExperiments
-from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker
+from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker, PartialRuntimePredictor
 from tools.latency_trace import LatencyTrace
 
 
@@ -19,6 +19,30 @@ def test_default_experiments_preserve_deployment_behavior():
     for key, value in (("LATEST_PARTIAL", "yes"), ("FIRST_PREVIEW_S", "nan"), ("MLX_CACHE_MB", "4096")):
         with pytest.raises(ValueError, match="STARK_EXPERIMENT"):
             LatencyExperiments.from_env({"STARK_EXPERIMENT_" + key: value})
+
+
+def test_deadline_predictor_cold_start_duration_bins_and_expiry():
+    predictor = PartialRuntimePredictor(history=3)
+    assert predictor.admit(3, now=10, deadline=10.1, margin_ms=100) == (True, None)
+    for value in (200, 300, 400):
+        predictor.observe(3, value)
+    assert predictor.admit(3, now=10, deadline=10.49, margin_ms=100) == (False, 400)
+    assert predictor.admit(3, now=10, deadline=10.5, margin_ms=100) == (True, 400)
+    assert predictor.admit(5, now=10, deadline=10.1, margin_ms=100) == (True, None)
+    for _ in range(3):
+        predictor.observe(3, 100)
+    assert predictor.predict_ms(3) == 100  # old slow work ages out
+    assert predictor.admit(3, now=10, deadline=None, margin_ms=250) == (True, 100)
+
+
+def test_early_clause_options_require_both_bounds_and_preserve_minimum():
+    for values in (
+        {"EARLY_CLAUSE_S": "2"},
+        {"EARLY_CLAUSE_S": "0.5", "EARLY_CLAUSE_PAUSE_MS": "160"},
+        {"PARTIAL_DEADLINE_MARGIN_MS": "nan"},
+    ):
+        with pytest.raises(ValueError):
+            LatencyExperiments.from_env({"STARK_EXPERIMENT_" + k: v for k, v in values.items()})
 
 
 def test_latest_pending_partial_replaced_but_running_model_finishes_before_final():
@@ -151,6 +175,23 @@ def test_trace_reports_discarded_events_instead_of_unbounded_memory():
     snapshot = trace.snapshot()
     assert snapshot["discarded_old_events"] == 1
     assert [r["index"] for r in snapshot["events"]] == [1, 2]
+
+
+def test_trace_uses_pipeline_origin_and_records_failed_physical_work(monkeypatch):
+    import tools.latency_trace as module
+
+    monkeypatch.setattr(module.time, "perf_counter", lambda: 103.5)
+    trace = LatencyTrace(True, origin=100.0)
+    with pytest.raises(ValueError, match="worker failure"), trace.span("stt", kind="partial"):
+        raise ValueError("worker failure")
+    snapshot = trace.snapshot()
+    assert snapshot["schema_version"] == 2
+    assert snapshot["origin_perf_counter_s"] == 100.0
+    assert all(row["at_ms"] == 3500 for row in snapshot["events"])
+    assert snapshot["events"][-1]["failed"] is True
+    assert snapshot["events"][-1]["thread_id"] == threading.get_ident()
+    with pytest.raises(ValueError, match="capacity"):
+        LatencyTrace(capacity=0)
 
 
 def test_live_marian_facade_exact_hit_preserves_zero_and_request_identity(monkeypatch):

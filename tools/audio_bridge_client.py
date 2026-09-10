@@ -226,6 +226,11 @@ class FileAudioStream:
         self._thread: threading.Thread | None = None
         self._next_offset = 0
 
+    @property
+    def source_sample_count(self) -> int:
+        """Original recording extent at callback rate, excluding synthetic tail."""
+        return self._audio_sample_count
+
     def resume_from(self, sample_offset: int, *, callback=None) -> None:
         """Resume a stopped replay at an original-rate block boundary.
 
