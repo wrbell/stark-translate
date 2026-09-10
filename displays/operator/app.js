@@ -119,6 +119,34 @@
     return String(text || "").split("\n")[0].trim();
   }
 
+  function awaitingFirstHealth(readiness, hasReportedHealth) {
+    return !!readiness && readiness.stale === true && !hasReportedHealth &&
+      readiness.updated_at == null && readiness.age_s == null && readiness.phase !== "input_error";
+  }
+
+  function runningReadiness(readiness, hasReportedHealth) {
+    if (!readiness || typeof readiness !== "object") return null;
+    const phase = String(readiness.phase || "").toLowerCase();
+    const reason = firstLine(readiness.reason);
+    const extra = reason ? ` ${reason}` : "";
+    if (awaitingFirstHealth(readiness, hasReportedHealth)) {
+      return {label: "Waiting for status", tone: "busy", detail: "Waiting for the caption process to report its first status. Stop is available if you need it."};
+    }
+    if (readiness.stale === true) {
+      return {label: "Needs attention", tone: "bad", detail: `Status from the caption process is out of date.${extra} Use Stop, then start the session again.`};
+    }
+    if (phase === "input_error") {
+      return {label: "Needs attention", tone: "bad", detail: `Sound input is unavailable.${extra} Check the selected input and microphone permission. Use Stop to restart.`};
+    }
+    if (readiness.ready === false) {
+      if (["loading", "loading_models", "warming", "warmup", "starting"].includes(phase)) {
+        return {label: "Getting ready…", tone: "busy", detail: `Getting ready: ${humanPhase(phase)}.${extra} Stop is available if you need it.`};
+      }
+      return {label: "Waiting for input", tone: "warn", detail: `Captions are not ready yet.${extra} Check the selected sound input. Stop is available if you need it.`};
+    }
+    return null; // Legacy snapshots without readiness keep their existing display.
+  }
+
   function describeState(input) {
     const state = input.state || "idle";
     if (input.connection === "stale") {
@@ -129,7 +157,7 @@
       case "starting":
         return {label: "Starting…", tone: "busy", detail: "Loading language models. This can take a minute."};
       case "running":
-        return {label: "Live", tone: "ok", detail: "Captions are being sent."};
+        return runningReadiness(input.readiness, input.hasReportedHealth) || {label: "Live", tone: "ok", detail: "Captions are being sent."};
       case "paused":
         return {label: "Paused", tone: "warn", detail: "Captions are paused."};
       case "stopping":
@@ -887,6 +915,8 @@
     let currentState = "idle";
     let currentError = null;
     let currentSnap = null;
+    let hasReportedHealth = false;
+    let healthSessionId = null;
     let statusSeen = false;
     let idleLanguageEdited = false;
     let statusRenderRevision = 0;
@@ -942,6 +972,8 @@
       const described = describeState({
         state: currentState, error: currentError, connection, preflightOk, preflightChecked,
         outcome: currentSnap && currentSnap.outcome, work: workBusy,
+        readiness: currentSnap && currentSnap.readiness,
+        hasReportedHealth,
       });
       setText(el.statePill, described.label);
       el.statePill.className = "state-pill " + described.tone;
@@ -1015,11 +1047,11 @@
       if (errors != null && Number.isFinite(errors)) items.push({text: `Errors: ${errors}`, bad: errors > 0});
       const recording = health.recording;
       if (recording && typeof recording === "object") {
-        if (recording.audio_enabled === false) items.push({text: "Not recording audio", bad: false});
+        if (recording.audio_enabled === false) items.push({text: "Original chunk audio is not being saved", bad: false});
         else if (recording.ok === false || Number(recording.required_failures) > 0) items.push({text: "Recording problems — review audio may be incomplete", bad: true});
         else items.push({text: "Recording audio", bad: false});
       } else if (recording != null) {
-        items.push({text: recording ? "Recording audio" : "Not recording audio", bad: false});
+        items.push({text: recording ? "Recording audio" : "Original chunk audio is not being saved", bad: false});
       }
       if (health.persistence && typeof health.persistence === "object" && health.persistence.ok === false) {
         items.push({text: `Saving problems: ${health.persistence.reason || "some session files failed to save"}`, bad: true});
@@ -1061,8 +1093,13 @@
       const plainPhase = String(readiness.phase || "").toLowerCase().replace(/[_-]+/g, " ");
       const reason = String(readiness.reason || "").trim();
       if (!readiness.ready && reason && reason.toLowerCase() !== plainPhase) text += ` ${reason}`;
-      if (readiness.stale) {
-        text = `The caption process has not reported for ${formatAge(Number(readiness.age_s))}${readiness.reason ? ` — ${readiness.reason}` : ""}.`;
+      if (currentState === "paused" && readiness.phase === "paused" && !readiness.stale) {
+        text = "Captions are paused.";
+      } else if (awaitingFirstHealth(readiness, hasReportedHealth)) {
+        text = "Waiting for the caption process to report its first status.";
+      } else if (readiness.stale) {
+        const age = readiness.age_s == null ? "" : ` (last update ${formatAge(Number(readiness.age_s))})`;
+        text = `The caption process has not reported a recent status${age}${readiness.reason ? ` — ${readiness.reason}` : ""}.`;
       }
       setText(el.pipelineReadiness, text);
       el.pipelineReadiness.hidden = false;
@@ -1071,10 +1108,14 @@
     function renderLive() {
       const snap = currentSnap || {};
       const stale = connection === "stale";
+      const readinessState = currentState === "running" ? runningReadiness(snap.readiness, hasReportedHealth) : null;
       let title, subtitle;
       switch (currentState) {
         case "starting": title = "Starting…"; subtitle = "Loading language models. Stop is available if you need it."; break;
-        case "running": title = "Live"; subtitle = "Captions are being sent to the audience display."; break;
+        case "running":
+          title = readinessState ? readinessState.label : "Live";
+          subtitle = readinessState ? readinessState.detail : "Captions are being sent to the audience display.";
+          break;
         case "paused": title = "Paused"; subtitle = "Captions are paused. Press Resume to continue."; break;
         case "stopping": title = "Stopping…"; subtitle = "Finishing up."; break;
         case "error": title = "Needs attention"; subtitle = firstLine(currentError) || "The caption process reported a problem. Use Stop and reset."; break;
@@ -1087,7 +1128,7 @@
       }
       if (pendingControl && ACTIVE_STATES.includes(currentState)) {
         const waited = now() - pendingControl.since;
-        subtitle = `${pendingControl.kind === "pause" ? "Pausing" : "Resuming"}… waiting for the caption process to confirm.`;
+        subtitle = `${readinessState ? `${subtitle} ` : ""}${pendingControl.kind === "pause" ? "Pausing" : "Resuming"}… waiting for the caption process to confirm.`;
         if (waited > CONTROL_ACK_TIMEOUT_MS) subtitle += " No confirmation yet; the status may be stale.";
       }
       if (stale) {
@@ -1097,7 +1138,12 @@
       setText(el.liveTitle, title);
       setText(el.liveSubtitle, subtitle);
       if (el.liveEvent) {
-        const event = ACTIVE_STATES.includes(currentState) || currentState === "error" ? snap.last_event || "" : "";
+        let event = ACTIVE_STATES.includes(currentState) || currentState === "error" ? snap.last_event || "" : "";
+        const ready = snap.readiness && snap.readiness.ready === true && !snap.readiness.stale;
+        const oldStartup = /models loaded|loading (?:language )?models|waiting for (?:audio|pipeline|input) readiness|subprocess launching/i.test(event);
+        const oldPause = /pause requested.*waiting|waiting.*pause.*acknowledg/i.test(event);
+        const oldResume = /resume requested.*waiting|waiting.*resume.*acknowledg/i.test(event);
+        if ((ready && (oldStartup || oldResume)) || (currentState === "paused" && oldPause)) event = "";
         setText(el.liveEvent, event);
         el.liveEvent.hidden = !event;
       }
@@ -1128,6 +1174,11 @@
       ++statusRenderRevision;
       const previousState = currentState;
       const wasActive = ACTIVE_STATES.includes(currentState);
+      if (snap.session_id !== healthSessionId || !ACTIVE_STATES.includes(snap.state)) {
+        healthSessionId = snap.session_id || null;
+        hasReportedHealth = false;
+      }
+      if ((snap.readiness && snap.readiness.updated_at != null) || (snap.health && snap.health.updated_at != null)) hasReportedHealth = true;
       currentState = snap.state || "idle";
       currentError = snap.error || null;
       currentSnap = snap;
