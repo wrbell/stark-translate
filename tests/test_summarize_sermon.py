@@ -2,11 +2,96 @@
 
 import csv
 import json
+import subprocess
 import sys
 import threading
 import types
+from pathlib import Path
 
 import pytest
+
+
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_short_session_actual_csv_and_cli_preserve_recorded_bilingual_text(tmp_path, monkeypatch, language):
+    import dry_run_ab as pipeline
+
+    csv_path = tmp_path / f"ab_metrics_rehearsal_{language}.csv"
+    output = tmp_path / "summary.json"
+    source, target = "La gracia de Dios es suficiente.", "God's grace is enough."
+    if language == "en":
+        source, target = target, source
+    monkeypatch.setattr(pipeline, "CSV_PATH", str(csv_path))
+    pipeline.init_csv()
+    pipeline.write_csv_row(
+        dict(
+            chunk_id=1,
+            timestamp="2026-09-09T23:38:41",
+            english=source,
+            spanish_a=target,
+            spanish_b="",
+            stt_latency_ms=2081.6,
+            latency_a_ms=41.0,
+            latency_b_ms=0.0,
+            e2e_latency_ms=2127.2,
+            source_lang=language,
+            target_lang="es" if language == "en" else "en",
+        )
+    )
+    # An unusable model identity proves this path needs no model or network.
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "features.summarize_sermon",
+            str(csv_path),
+            "--model",
+            "missing/model",
+            "-o",
+            str(output),
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert result.returncode == 0, result.stderr
+    summary = json.loads(output.read_text())
+    assert summary["english"] == "God's grace is enough."
+    assert summary["spanish"] == "La gracia de Dios es suficiente."
+    assert summary["format"] == "short-session excerpt"
+    assert summary["metadata"]["human_reviewed"] is False
+    assert summary["metadata"]["model"] is None
+
+
+def test_short_session_missing_translation_uses_known_reverse_direction(summary_runtime):
+    summary, _, runtime, calls, _ = summary_runtime
+    runtime.generate = lambda *args, **kwargs: "God is love."
+    result = summary.summarize_short_session([{"text": "Dios es amor.", "source_lang": "es"}])
+    assert result["english"] == "God is love."
+    assert result["spanish"] == "Dios es amor."
+    assert result["translation_method"] == "generated translation"
+    message = [call for call in calls if call[0] == "template"][-1][1][0]["content"]
+    assert "Spanish text to English" in message
+
+
+def test_legacy_short_session_requires_language_resolution(tmp_path):
+    from features import summarize_sermon as summary
+
+    path = tmp_path / "legacy.csv"
+    path.write_text("english,spanish_a\nDios es amor.,God is love.\n")
+    entries = summary.load_csv_transcript(path)
+    with pytest.raises(ValueError, match="ambiguous"):
+        summary.summarize_short_session(entries)
+    renamed = tmp_path / "legacy_es.csv"
+    path.rename(renamed)
+    assert summary.summarize_short_session(summary.load_csv_transcript(renamed))["english"] == "God is love."
+
+
+def test_empty_translation_does_not_produce_success(summary_runtime):
+    summary, _, runtime, _, _ = summary_runtime
+    runtime.generate = lambda *args, **kwargs: ""
+    with pytest.raises(ValueError, match="empty"):
+        summary.summarize_short_session([{"text": "Love.", "source_lang": "en"}])
 
 
 @pytest.fixture
