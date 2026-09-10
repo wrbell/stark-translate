@@ -90,6 +90,51 @@ def stub_pipeline(tmp_path: Path) -> Path:
 
 
 class TestPipelineRunnerSubprocess:
+    def test_stop_during_spawn_cannot_leave_live_child(self, stub_pipeline, monkeypatch):
+        import subprocess
+        import threading
+
+        from operator_app.pipeline_manager import PipelineRunner, SessionConfig
+
+        real_popen = subprocess.Popen
+        spawn_entered = threading.Event()
+        allow_spawn = threading.Event()
+        children = []
+
+        def delayed_popen(*args, **kwargs):
+            spawn_entered.set()
+            assert allow_spawn.wait(timeout=5)
+            child = real_popen(*args, **kwargs)
+            children.append(child)
+            return child
+
+        monkeypatch.setattr(subprocess, "Popen", delayed_popen)
+        runner = PipelineRunner(project_root=stub_pipeline)
+        runner.start(SessionConfig())
+        assert spawn_entered.wait(timeout=5)
+        stopped = []
+        stopper = threading.Thread(target=lambda: stopped.append(runner.stop(timeout_s=5)))
+        stopper.start()
+        allow_spawn.set()
+        stopper.join(timeout=7)
+        try:
+            assert not stopper.is_alive()
+            assert stopped[0].state == "idle"
+            assert children and children[0].poll() is not None
+        finally:
+            for child in children:
+                if child.poll() is None:
+                    child.kill()
+                    child.wait(timeout=2)
+
+    def test_start_rejects_stopping_session(self, stub_pipeline):
+        from operator_app.pipeline_manager import PipelineRunner, SessionAlreadyRunningError, SessionConfig
+
+        runner = PipelineRunner(project_root=stub_pipeline)
+        runner._status.state = "stopping"
+        with pytest.raises(SessionAlreadyRunningError):
+            runner.start(SessionConfig())
+
     def test_start_spawns_subprocess_and_status_running(self, stub_pipeline):
         from operator_app.pipeline_manager import PipelineRunner, SessionConfig
 

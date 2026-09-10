@@ -135,10 +135,15 @@ class PipelineRunner:
 
     def start(self, config: SessionConfig) -> SessionStatus:
         with self._lock:
-            if self._status.state in ("starting", "running", "paused"):
+            if (
+                self._status.state in ("starting", "running", "paused", "stopping")
+                or (self._thread is not None and self._thread.is_alive())
+                or (self._proc is not None and self._proc.poll() is None)
+            ):
                 raise SessionAlreadyRunningError(self._status.session_id)
 
             self._stop_event.clear()
+            self._proc = None
             session_id = f"{datetime.now():%Y%m%d_%H%M%S_%f}_{config.lang}"
             csv_path = str(self._project_root / "metrics" / f"ab_metrics_{session_id}.csv")
             log_path = str(self._project_root / "metrics" / f"session_{session_id}.log")
@@ -195,6 +200,7 @@ class PipelineRunner:
                     proc.kill()
                 except ProcessLookupError:
                     pass
+                proc.wait(timeout=2.0)
 
         if self._thread is not None:
             self._thread.join(timeout=timeout_s)
@@ -321,27 +327,29 @@ class PipelineRunner:
             try:
                 log_path = Path(self._status.log_path)
                 log_path.parent.mkdir(parents=True, exist_ok=True)
-                # Capture startup failures before the pipeline's own logger is initialized.
-                with log_path.open("a", encoding="utf-8") as output:
-                    proc = subprocess.Popen(
-                        argv,
-                        cwd=str(self._project_root),
-                        stdout=output,
-                        stderr=subprocess.STDOUT,
-                        start_new_session=True,
-                    )
+                # Stop must either cancel the launch or see the registered child.
+                with self._lock:
+                    if self._stop_event.is_set():
+                        return
+                    # Capture failures before the pipeline's logger is initialized.
+                    with log_path.open("a", encoding="utf-8") as output:
+                        proc = subprocess.Popen(
+                            argv,
+                            cwd=str(self._project_root),
+                            stdout=output,
+                            stderr=subprocess.STDOUT,
+                            start_new_session=True,
+                        )
+                    self._proc = proc
+                    self._status.pid = proc.pid
+                    self._status.state = "running"
+                    self._status.last_event = "subprocess running"
             except OSError as exc:
                 with self._lock:
                     self._status.state = "error"
                     self._status.error = f"failed to spawn: {exc}"
                     self._status.last_event = "spawn failed"
                 return
-
-            with self._lock:
-                self._proc = proc
-                self._status.pid = proc.pid
-                self._status.state = "running"
-                self._status.last_event = "subprocess running"
 
             # Tail the session CSV in this same thread; doubles as a poll loop
             # for the subprocess so we notice crashes and surface them.
