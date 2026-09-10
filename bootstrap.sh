@@ -54,23 +54,34 @@ fail() { printf '[bootstrap] ERROR: %s\n' "$*" >&2; exit "${2:-2}"; }
 # 1. Prerequisites ------------------------------------------------------------
 log "checking prerequisites…"
 
-command -v python3 >/dev/null || fail "python3 not found — apt install python3.11 python3.11-venv" 2
+EXTRA="cpu"
+if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+    EXTRA="mlx"
+    log "  Apple Silicon detected — operator will use MLX/Metal. NVIDIA CUDA is not required."
+    PYTHON_HINT="install Python 3.11+ (for example: brew install python@3.11)"
+    AUDIO_HINT="brew install ffmpeg portaudio"
+else
+    PYTHON_HINT="install Python 3.11+ (Ubuntu: apt install python3.11 python3.11-venv)"
+    AUDIO_HINT="install ffmpeg and PortAudio using your system package manager"
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        EXTRA="cuda"
+        log "  NVIDIA GPU detected — operator will use CUDA."
+    else
+        log "  NVIDIA GPU not detected — operator will use the CPU backend."
+    fi
+fi
+
+command -v python3 >/dev/null || fail "python3 not found — $PYTHON_HINT" 2
 
 PY_VER=$("$PYTHON" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
 case "$PY_VER" in
     3.11|3.12|3.13|3.14) ;;
-    *) fail "python $PY_VER unsupported — need 3.11 or 3.12 (apt install python3.11)" 2 ;;
+    *) fail "python $PY_VER unsupported — $PYTHON_HINT" 2 ;;
 esac
 log "  python $PY_VER OK"
 
-command -v ffmpeg >/dev/null || fail "ffmpeg not found — apt install ffmpeg" 2
+command -v ffmpeg >/dev/null || fail "ffmpeg not found — $AUDIO_HINT" 2
 log "  ffmpeg OK"
-
-if command -v nvidia-smi >/dev/null 2>&1; then
-    log "  nvidia-smi OK ($(nvidia-smi --query-gpu=name --format=csv,noheader -i 0 2>/dev/null | head -1))"
-else
-    log "  nvidia-smi NOT found — operator will run on CPU (slow). Install NVIDIA driver if this is the church PC."
-fi
 
 # 2. venv + dependencies ------------------------------------------------------
 # Prefer the pyproject.toml extras (v2026.7+); fall back to the legacy
@@ -82,15 +93,13 @@ elif [ -n "${VENV:-}" ]; then
     :
 elif [ -n "${VIRTUAL_ENV:-}" ]; then
     VENV="$VIRTUAL_ENV"
+elif [ -n "${CONDA_PREFIX:-}" ]; then
+    VENV="$CONDA_PREFIX"
 elif [ -x "$ROOT/stt_env/bin/python" ]; then
     VENV="$ROOT/stt_env"
 else
     VENV="$ROOT/venv"
 fi
-EXTRA="cuda"
-command -v nvidia-smi >/dev/null 2>&1 || EXTRA="cpu"
-if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then EXTRA="mlx"; fi
-
 if [ ! -d "$VENV" ]; then
     log "creating venv at $VENV"
     "$PYTHON" -m venv "$VENV" || fail "venv creation failed" 3

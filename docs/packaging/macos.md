@@ -65,8 +65,9 @@ and `--output` flags. Setup never runs it against your working adapter directory
 ## Interpreter selection and launchd
 
 `run_operator.sh` and bootstrap select `STARK_PYTHON` or explicit `VENV` first,
-then activated `VIRTUAL_ENV`, then repo `stt_env`, then repo `venv`.
-An invalid explicit override fails instead of silently using another interpreter.
+then activated `VIRTUAL_ENV` or `CONDA_PREFIX`, then repo `stt_env`, then repo
+`venv`. A nested virtualenv takes precedence over its parent Conda environment.
+An invalid selected interpreter fails instead of silently using another environment.
 The launcher runs `python -m uvicorn` so the pipeline child uses the same environment.
 
 Generate and inspect the actual login-agent configuration first:

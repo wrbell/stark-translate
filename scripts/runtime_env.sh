@@ -8,6 +8,8 @@ stark_resolve_python() {
         candidate="$VENV/bin/python"
     elif [ -n "${VIRTUAL_ENV:-}" ]; then
         candidate="$VIRTUAL_ENV/bin/python"
+    elif [ -n "${CONDA_PREFIX:-}" ]; then
+        candidate="$CONDA_PREFIX/bin/python"
     elif [ -x "$root/stt_env/bin/python" ]; then
         candidate="$root/stt_env/bin/python"
     elif [ -x "$root/venv/bin/python" ]; then

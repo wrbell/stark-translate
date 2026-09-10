@@ -197,11 +197,17 @@ def test_missing_dependency_blocks_preflight_without_importing_models():
 
 
 @pytest.mark.parametrize(
-    "explicit,active,expected", [(True, True, "explicit"), (False, True, "active"), (False, False, "stt_env")]
+    "explicit,active,conda,expected",
+    [
+        (True, True, True, "explicit"),
+        (False, True, True, "active"),
+        (False, False, True, "conda"),
+        (False, False, False, "stt_env"),
+    ],
 )
-def test_launch_environment_precedence(tmp_path, explicit, active, expected):
-    env = {k: v for k, v in os.environ.items() if k not in {"STARK_PYTHON", "VENV", "VIRTUAL_ENV"}}
-    for name in ["explicit", "active", "stt_env", "venv"]:
+def test_launch_environment_precedence(tmp_path, explicit, active, conda, expected):
+    env = {k: v for k, v in os.environ.items() if k not in {"STARK_PYTHON", "VENV", "VIRTUAL_ENV", "CONDA_PREFIX"}}
+    for name in ["explicit", "active", "conda", "stt_env", "venv"]:
         binary = tmp_path / name / "bin" / "python"
         binary.parent.mkdir(parents=True)
         binary.symlink_to(sys.executable)
@@ -209,6 +215,8 @@ def test_launch_environment_precedence(tmp_path, explicit, active, expected):
         env["STARK_PYTHON"] = str(tmp_path / "explicit" / "bin" / "python")
     if active:
         env["VIRTUAL_ENV"] = str(tmp_path / "active")
+    if conda:
+        env["CONDA_PREFIX"] = str(tmp_path / "conda")
     result = subprocess.check_output(
         [
             "bash",
@@ -222,6 +230,45 @@ def test_launch_environment_precedence(tmp_path, explicit, active, expected):
         text=True,
     )
     assert result.strip() == str(tmp_path / expected / "bin" / "python")
+
+
+def test_invalid_active_conda_interpreter_fails_without_fallback(tmp_path):
+    env = {k: v for k, v in os.environ.items() if k not in {"STARK_PYTHON", "VENV", "VIRTUAL_ENV"}}
+    env["CONDA_PREFIX"] = str(tmp_path / "missing-conda")
+    result = subprocess.run(
+        [
+            "bash",
+            "-c",
+            'source "$1"; stark_resolve_python "$2"',
+            "test",
+            str(ROOT / "scripts/runtime_env.sh"),
+            str(ROOT),
+        ],
+        env=env,
+        text=True,
+        capture_output=True,
+    )
+    assert result.returncode == 2
+    assert str(tmp_path / "missing-conda/bin/python") in result.stderr
+
+
+def test_bootstrap_reports_mlx_before_stopping_at_fake_python_prerequisite(tmp_path):
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    for name, text in {
+        "uname": 'if [ "$1" = "-s" ]; then echo Darwin; else echo arm64; fi',
+        "python3": "echo 3.10",
+    }.items():
+        binary = fake_bin / name
+        binary.write_text("#!/bin/sh\n" + text + "\n")
+        binary.chmod(0o755)
+    env = {k: v for k, v in os.environ.items() if k not in {"STARK_PYTHON", "VENV", "VIRTUAL_ENV", "CONDA_PREFIX"}}
+    env.update(STARK_PYTHON=str(fake_bin / "python3"), PATH=str(fake_bin) + ":/usr/bin:/bin")
+    result = subprocess.run([str(ROOT / "bootstrap.sh"), "--skip-systemd"], env=env, text=True, capture_output=True)
+    assert result.returncode == 2
+    assert "Apple Silicon detected" in result.stdout and "MLX/Metal" in result.stdout
+    assert "brew install python@3.11" in result.stderr
+    assert "CPU backend" not in result.stdout and "installing stark-translate" not in result.stdout
 
 
 def test_release_rejects_version_mismatch():
