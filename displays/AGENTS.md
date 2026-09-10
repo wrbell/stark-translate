@@ -1,25 +1,31 @@
-# displays/AGENTS.md — Browser Clients (Agent Guide)
+# displays/AGENTS.md — Displays & WebSocket Protocol (Agent Guide)
 
-> Paired with [`CLAUDE.md`](./CLAUDE.md).
+> Paired with [`CLAUDE.md`](./CLAUDE.md) (full message table, timing semantics, SPA routes).
 
-## Ports and surfaces
+## Constraints
 
-| Port | Surface |
-|------|---------|
-| 8080 | Static audience/mobile/church/OBS HTML |
-| 8765 | Text WebSocket (partials/finals) |
-| 8766 | TTS audio WebSocket |
-| 9000 | Operator SPA + `/ws/control` metrics |
+- Displays are static HTML/JS — no build step, no framework. Include `display_connection.js` and wrap socket handlers with `caption_telemetry.js` so `caption_rendered` ACKs keep flowing.
+- Never add post-send durations to a broadcast payload; ACK timing is computed server-side by `RenderTracker` (`tools/pipeline_timing.py`) and written to `metrics/display_metrics_<session>.jsonl`.
+- `speech_end_to_ack_upper_bound_ms` is recorded only for visible tabs and includes return-network time. Hidden tabs and accelerated replay cannot satisfy caption-delivery gates.
+- Handle `lang_config` first: it carries `session_id`; a changed id resets history. `english` / `spanish_a` are source/target slots, not languages.
+- Legacy `e2e_latency_ms` / `true_e2e_ms` are processing measurements; do not label them speech-end-to-display in any UI or doc.
+- Operator SPA state must not infer RUNNING from file presence (tonight's built-in-mic stall showed RUNNING with no frames). Reliability work for this is uncommitted in another worktree; do not claim it is integrated.
 
-Primary operator UI: `displays/operator/` via FastAPI — not legacy `ab_display.html` for Sunday use.
+## Message types
 
-## Protocol notes
+`lang_config`, `translation` (`stage: partial|complete`), `translation_start`,
+`translation_stream`, `speaker_update`, `music_hold`, `rolling_stats`, `text`.
+Every broadcast has `session_id` and `event_id = "<session_id>:<seq>"`; finals also
+carry provenance (`session_kind` live/replay/synthetic, `audio_source`, input hash) and
+schema 2 sample metadata.
 
-- `stage`: `partial` (italic) vs `translation_a` / final
-- Caption history: new session clears; same-session reconnect preserves
-- Visible render ACKs: separate telemetry from pipeline latency
+## Ports
 
-## Full reference
+8080 HTTP displays · 8765 caption WebSocket · 9000 operator control plane
+(`/ws/control`, `/ws/audio/ingest`, `/ws/audio/subscribe`).
 
-Message fields, auto-reconnect, multilingual extension plan:
-[`CLAUDE.md`](./CLAUDE.md)
+## Validation
+
+HTML5 Tidy (zero warnings) is part of the recorded validation; run it after editing
+any display. Physical projector / second-screen checks remain human gates
+(`docs/backlog.json`: `issue-134-sunday-dry-run`, `visible-browser-timing-run`).

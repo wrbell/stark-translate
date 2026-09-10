@@ -1,31 +1,48 @@
 # AGENTS.md — Live Bilingual Speech-to-Text
 
-> **v2026.14 candidate (local):** [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
-> [`docs/current_architecture.md`](docs/current_architecture.md) ·
-> [`docs/backlog.json`](docs/backlog.json)
+> **Release lines (2026-09-09):** **main** is v2026.13. The v2026.14 candidate
+> (`2026.14.0.0`) lives on `codex/mac-reliability-roadmap` (base `5154fb9`) and is
+> proposed in draft [PR #192](https://github.com/wrbell/stark-translate/pull/192) —
+> open, **not merged**. Overnight worktrees (docs, lite, latency, operator-ui,
+> reliability) are pending integration into that PR. PyPI/package/release tags are
+> pending by user choice. Do not recreate `stt_env`.
 >
-> **Main** is v2026.13 until root merge. Local work lives on
-> `codex/mac-reliability-roadmap` (base `5154fb9`). Do not recreate `stt_env`.
-> PyPI publication is pending by user choice.
+> Paired human guide: [`CLAUDE.md`](CLAUDE.md) (same content, human-facing links).
+> Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) ·
+> Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
+> Remaining work: [`docs/backlog.json`](docs/backlog.json) (rendered
+> [`docs/backlog.md`](docs/backlog.md)) · Tonight: [`docs/overnight_status.md`](docs/overnight_status.md)
 
 On-device live EN↔ES speech-to-text for Stark Road Gospel Hall (Farmington Hills, MI).
 `--lang en` (EN→ES) · `--lang es` (ES→EN) · optional Piper TTS (`--tts`).
-MLX on Apple Silicon for inference; CUDA/WSL for training.
+MLX on Apple Silicon for inference; CUDA/WSL for training. Lite CPU and native
+Windows/RTX 2070 inference are equal-priority targets whose implementation is in
+progress (lite worktree) and whose certification on hardware is pending.
 
-## Two-pass pipeline (current Mac defaults)
+## Two-pass pipeline (current Mac defaults, from `settings.py` / `engines/factory.py`)
 
 | Stage | When | STT | Translation | UI |
 |-------|------|-----|-------------|-----|
-| **Partial** | Every 0.6 s of new speech | Parakeet (EN) / Whisper turbo (ES) | Marian CT2 CPU (HF fallback) | Italic preview |
-| **Final** | 0.5 s silence | Same | Gemma 4 E4B OptiQ (E2B opt-in) | Replaces partial |
+| **Partial** | Every 0.6 s of new speech | Parakeet MLX (EN) / mlx-whisper large-v3-turbo (ES) | Marian CT2 int8 on CPU (HF fallback) | Italic preview |
+| **Final** | 0.5 s silence or 8 s max utterance | Same | Gemma 4 E4B OptiQ (`--gemma4-size e2b` opt-in) | Replaces partial |
 
 **Policy:** fast revisable partials; careful finals. Sub-second median caption delivery
-is the goal and is **not yet achieved**. Schema 2 `speech_end_to_final_ms` measures
-estimated speech end → payload ready; legacy `e2e_latency_ms` is archived processing time.
+is the goal and is **not yet achieved**; it is active Mac engineering with separate
+quality/certification gates (natural references, bilingual review, visible-browser ACKs).
+Schema 2 `speech_end_to_final_ms` = estimated speech end → payload ready;
+`speech_end_to_ack_upper_bound_ms` includes return-network time; legacy
+`e2e_latency_ms` is archived processing time. Definitions:
+[`docs/evaluation/README.md`](docs/evaluation/README.md).
 
-**CUDA (v2026.8+ on A2000):** W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B llama.cpp —
-see [`docs/archive/v2026.7/STT_BENCHMARK.md`](docs/archive/v2026.7/STT_BENCHMARK.md) and
+**CUDA (v2026.8+ on A2000):** W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B via llama.cpp
+(`start_server.sh`, default `--no-draft`, `--mtp` opt-in, pin `b10883`). Benchmarks:
+[`docs/archive/v2026.7/STT_BENCHMARK.md`](docs/archive/v2026.7/STT_BENCHMARK.md),
 [`docs/archive/v2026.8/MARIAN_BENCHMARK.md`](docs/archive/v2026.8/MARIAN_BENCHMARK.md).
+
+**Known open bug (2026-09-09):** the built-in microphone session stalled after
+"Listening..." while the operator showed RUNNING from the CSV header; file replay
+passed. Live-mic and physical-device checks are deferred to tomorrow. See
+`mac-live-mic-stall` in the backlog.
 
 ## Environment split
 
@@ -34,7 +51,8 @@ see [`docs/archive/v2026.7/STT_BENCHMARK.md`](docs/archive/v2026.7/STT_BENCHMARK
 | MacBook M3 Pro 18 GB | Inference, operator UI, displays | [`CLAUDE-macbook.md`](CLAUDE-macbook.md) |
 | Windows WSL2 A2000 Ada | Preprocess, fine-tune, export | [`CLAUDE-windows.md`](CLAUDE-windows.md) |
 
-Adapters: WSL → copy to Mac `adapters/`.
+Adapters: WSL → copy to Mac `adapters/`. Mac install/readiness:
+[`docs/packaging/macos.md`](docs/packaging/macos.md).
 
 ## Six quality layers
 
@@ -43,22 +61,22 @@ Adapters: WSL → copy to Mac `adapters/`.
 3. Confidence flagging (Mac) — [`engines/AGENTS.md`](engines/AGENTS.md)
 4. YouTube caption comparison — [`tools/AGENTS.md`](tools/AGENTS.md)
 5. Translation QE — same
-6. Active learning loop — infer → review → retrain (both)
+6. Active learning loop — infer → review → retrain (both); Review/export is
+   implemented, real correction evidence pending (#137)
 
-## Release history (archived)
+## Release history (archived evidence)
 
-Detailed version notes live under [`docs/archive/`](docs/archive/) — do not duplicate
-benchmark numbers here. Highlights:
+Detailed notes live under [`docs/archive/`](docs/archive/) — do not duplicate
+benchmark numbers in guides.
 
-| Era | Summary |
-|-----|---------|
-| v2026.5–6 | llama.cpp CUDA default; operator control plane shipped |
-| v2026.7–8 | W16 Whisper CT2; Marian CT2 partials on CUDA |
-| v2026.12 | Restart close-out; Gemma 4 OptiQ E4B Mac default; EOS bug #172 |
-| v2026.13 | Mac latency fixes (#180–191 on main); Parakeet EN; Marian CT2 Mac; replay harness |
-| v2026.14 candidate | Reliability, schema 2, setup, Review/export, screening — **local branch only** |
-
-Open engineering debt: [`docs/backlog.md`](docs/backlog.md) (from [`backlog.json`](docs/backlog.json)).
+| Era | Summary | Evidence |
+|-----|---------|----------|
+| v2026.5–6 | llama.cpp CUDA default; operator control plane | [`v2026.5/BENCHMARK.md`](docs/archive/v2026.5/BENCHMARK.md) |
+| v2026.7–8 | W16 Whisper CT2; Marian CT2 partials on CUDA | [`v2026.7/STT_BENCHMARK.md`](docs/archive/v2026.7/STT_BENCHMARK.md), [`v2026.8/MARIAN_BENCHMARK.md`](docs/archive/v2026.8/MARIAN_BENCHMARK.md) |
+| v2026.9–11 | llama.cpp tuning, IQ4_XS rejected, imatrix calibration | [`v2026.9/GEMMA_OPTIM_PHASE2.md`](docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md), [`v2026.10/IQ4_XS_BENCHMARK.md`](docs/archive/v2026.10/IQ4_XS_BENCHMARK.md), [`v2026.11/IMATRIX_CALIBRATION.md`](docs/archive/v2026.11/IMATRIX_CALIBRATION.md) |
+| v2026.12 | Gemma 4 OptiQ E4B Mac default; EOS bug #172 fixed | [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
+| v2026.13 (main) | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
+| v2026.14 candidate | Reliability, schema 2, setup, Review/export, screening — **local branch, PR #192 draft** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md) |
 
 ## Subdirectory guides
 
@@ -66,36 +84,45 @@ Open engineering debt: [`docs/backlog.md`](docs/backlog.md) (from [`backlog.json
 |-----------|-----------|-----------|
 | [`engines/`](engines/AGENTS.md) | Engine ABCs, MLX thread safety, models | [`engines/CLAUDE.md`](engines/CLAUDE.md) |
 | [`training/`](training/AGENTS.md) | Preprocess, LoRA/QLoRA, corpora | [`training/CLAUDE.md`](training/CLAUDE.md) |
-| [`tools/`](tools/AGENTS.md) | QE, YouTube compare, adapters | [`tools/CLAUDE.md`](tools/CLAUDE.md) |
-| [`displays/`](displays/AGENTS.md) | WebSocket protocol, displays | [`displays/CLAUDE.md`](displays/CLAUDE.md) |
+| [`tools/`](tools/AGENTS.md) | QE, YouTube compare, adapters, evaluation | [`tools/CLAUDE.md`](tools/CLAUDE.md) |
+| [`displays/`](displays/AGENTS.md) | WebSocket protocol, displays, operator SPA | [`displays/CLAUDE.md`](displays/CLAUDE.md) |
 | [`features/`](features/AGENTS.md) | Diarization, summary, verses | [`features/CLAUDE.md`](features/CLAUDE.md) |
 
 ## Extension patterns
 
-- New engine → `engines/AGENTS.md` § Adding a New Engine
-- New language → `engines/AGENTS.md` + `training/AGENTS.md`
+- New engine → `engines/AGENTS.md` § Adding a New Engine (details in `engines/CLAUDE.md`)
+- New language → `engines/AGENTS.md` + `training/AGENTS.md` (Hindi/Chinese are pending user decisions)
 - New display → `displays/AGENTS.md`
 - Adapter deploy → `tools/AGENTS.md`
 - Active learning → `tools/AGENTS.md`
 
 ## CI/CD
 
-Seven GitHub Actions: lint, test (coverage gate in `test.yml`), security, release,
-label, commitlint, stale. CalVer in `pyproject.toml`.
+10 GitHub Actions workflow files in `.github/workflows/`: Lint, Test (3.11 + 3.12,
+coverage gate in `test.yml`), Security (pip-audit + Bandit; B615 skipped in CI —
+see [`docs/evaluation/mac_v2026_14_security.md`](docs/evaluation/mac_v2026_14_security.md)),
+Release, Windows MSI Release, PyPI Publish (tag-triggered; trusted publisher pending),
+Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in `pyproject.toml`.
 
 ```bash
 ruff check . && ruff format --check .
 mypy engines/ settings.py
 pytest tests/ -v --cov=engines --cov=tools --cov=features
-python tools/render_backlog.py validate
+python tools/render_backlog.py validate && python tools/render_backlog.py render --check
+python tools/render_backlog.py check-links
 pytest tests/test_documentation.py -v
 ```
+
+Latest recorded suite counts live only in
+[`docs/mac_implementation_status.md`](docs/mac_implementation_status.md).
 
 ## Phase checklist
 
 - [x] Phases 0–3, 5–6, 9 — infrastructure, data, first fine-tunes, operator UI
 - [ ] Phase 4 — WSL full preprocess ([`docs/wsl_pipeline_refresh.md`](docs/wsl_pipeline_refresh.md))
-- [ ] Phase 7–8 — Mac A/B, active learning loop
-- [ ] Phase 10 — Human gates: natural audio review, diarization gate, second output, Sunday dry-run
+- [ ] Phase 7–8 — Mac A/B (#135), active learning evidence (#137)
+- [ ] Phase 10 — Human gates: live-mic smoke (#131), diarization gate (#133), physical
+      second output (#132), Sunday dry-run (#134); TTS routing code and live diarization
+      code are implemented, their acceptance is not certified
 
-Remaining tasks with status, priority, and acceptance: [`docs/backlog.json`](docs/backlog.json).
+Statuses, priorities, dependencies and acceptance per item: [`docs/backlog.json`](docs/backlog.json).

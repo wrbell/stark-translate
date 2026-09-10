@@ -1,266 +1,83 @@
-# tools/ — Monitoring, Benchmarking & Validation
-
-## Tool Inventory
-
-| File | Purpose |
-|------|---------|
-| `live_caption_monitor.py` | YouTube caption comparison (live, post-session, trend analysis) |
-| `translation_qe.py` | Reference-free translation quality estimation |
-| `validate_session.py` | Post-session validation vs YouTube captions |
-| `benchmark_latency.py` | End-to-end latency profiling |
-| `stt_benchmark.py` | STT-only benchmarking (MLX backends: mlx-whisper vs lightning-whisper-mlx) |
-| `benchmark_stt_engines.py` | CUDA STT benchmark (v2026.7): faster-whisper int8 vs int8_float16, off-the-shelf vs merged W16 CT2, HF spec-decode w/wo torch.compile. Reuses `scripts/benchmarks/vram_sampler.py` for continuous nvidia-smi VRAM tracking. Reads the canonical manifest at `tools/stt_bench_manifest.json` (41 stratified Deepgram-aligned chunks). |
-| `roundtrip_test.py` | End-to-end STT + translation roundtrip quality test |
-| `prepare_finetune_data.py` | Fine-tuning data export from live sessions |
-| `download_roundtrip_texts.py` | Download test texts for roundtrip testing |
-| `convert_models_to_both.py` | Model format conversion (MLX ↔ CUDA) |
-| `test_adaptive_model.py` | Adaptive model selection testing |
-| `batch_translate.py` | Batch translation processing |
-| `export_review.py` | Export review queue data |
-| `glossary.py` | Tiered glossary: Tier 1 (50 boost for Deepgram) + Tier 2 (229 master) |
-| `sort_sermons.py` | Sermon cataloging by type/year with manifest + training cutoff |
-| `lock_data.py` | SHA-256 data lockfile for training data versioning |
-| `build_eval_sets.py` | Stratified eval set builder (500 verse holdout + sermon eval) |
-| `health_check.py` | Adapter health verification (8 canary sentences) |
-| `manage_adapters.py` | Adapter lifecycle: register, activate, rollback, export |
-| `deploy_adapters.py` | Six-phase deploy to endpoints (dry-run / rollback) |
-| `merge_corrections.py` | Merge active-learning corrections into train sets |
-| `mine_hallucination_phrases.py` | Suggest new garbage-filter phrases from diagnostics |
-| `benchmark_parakeet_en.py` | EN-only Parakeet vs Whisper holdout bench |
-
-## YouTube Caption Comparison (Layer 4)
-
-Runs local Whisper STT simultaneously with YouTube livestream caption extraction. Not ground truth — a noisy reference for trend monitoring.
-
-**Architecture:**
-- Local channel: `streamlink` captures live audio → Whisper processes in real time
-- YouTube channel: Poll InnerTube timed-text endpoint every 5–10s, or `youtube-transcript-api` / `yt-dlp --write-auto-subs` post-stream
-- Alignment: 30-second windowed comparison with sliding-window offset search
-- Metrics: `jiwer` per-window WER, CER with word-level diffs
-
-**Interpreting cross-system WER:** 5–15% = normal disagreement, 15–25% = potential issues, >25% = likely degradation. Track trends over sessions. Log to JSONL.
-
-## Text-Anchor Alignment (CRITICAL)
-
-Live sessions use wall-clock timestamps; YouTube starts from stream beginning. The offset can be 10–30+ minutes. The narrow ±5s search (`find_best_offset`) will always fail for this.
-
-**Solution:** `find_global_offset_by_text()` fuzzy-matches phrases from the live session against YouTube transcript to find the correct offset.
-
-**The fallback condition must check `_wer is None`** — not just `> 0.6`. When there's zero overlapping text (large offset), `find_best_offset` returns `wer=None`.
-
-**2026-03-01 session reference:** Video `UF0QFnoWZJ4`, offset = -533.8s (~8.9 min), combined WER = 19.6% across 76/81 windows. YouTube segments cached at `stark_data/live_sessions/20260301/UF0QFnoWZJ4_segments.json`.
-
-## Translation Quality Estimation (Layer 5)
-
-Monitor EN↔ES quality without ground-truth references. Three tiers, escalating:
-
-**Tier 1 (always-on, per-segment, ~150–300ms):**
-- **CometKiwi** (`Unbabel/wmt22-cometkiwi-da`) — source + translation → 0–1 score. Good: > 0.85, review: 0.50–0.70, critical: < 0.50
-- **LaBSE** cross-lingual cosine similarity — good > 0.85
-- Length ratio check (Spanish typically 15–25% longer than English)
-- Untranslated content detection via regex
-
-**Tier 2 (triggered by Tier 1 flags):**
-- **Back-translation** via MarianMT (`Helsinki-NLP/opus-mt-es-en`, ~75MB) → BERTScore (F1 > 0.90 = good)
-- **LanguageTool** (`language_tool_python`, `es` locale) for Spanish grammar
-
-**Tier 3 (offline batch):**
-- BLASER 2.0 QE (Meta SONAR) for deep fluency analysis
-- Spanish LM perplexity via BETO (`dccuchile/bert-base-spanish-wwm-cased`)
-
-## Validation Pipeline
-
-`validate_session.py` downloads YouTube segments and caches as JSON. **Engine must call `.load()` before `.transcribe()`.**
-
-YouTube transcript API may return "subtitles disabled" — the pipeline downloads audio and re-transcribes with Whisper instead (more reliable, apples-to-apples comparison).
-
-## Known Issues
-
-- 3 flaky tests in `test_caption_monitor_utils.py` (`TestComputeWerCerExtra`) fail when run alongside `test_validate_session.py` due to jiwer mock cleanup ordering. Pass fine in isolation.
-
----
-
-## Adapter Deployment Pipeline
-
-Planned 6-phase deployment from training desktop to inference endpoints (full spec in `docs/deploy.md`):
-
-1. **Version**: SHA-256 hash adapter weights, store as `adapters/{model}/cycle{N}_{date}_{hash}/`, update `adapters/manifest.json`
-2. **Convert** (NVIDIA only): Merge LoRA into base model, requantize to GGUF Q4_K_M. Mac skips this — MLX loads adapters directly.
-3. **Transfer**: `rsync` adapter files to endpoint staging directory (~260 MB total for all three adapters, <3s on LAN)
-4. **Health check**: SSH → run `tools/health_check.py` on staging adapter. 5 test sentences with expected substrings + latency < 5s. If any check fails → abort, current active adapter untouched.
-5. **Activate**: Atomic swap `staging/` → `active/`, move old `active/` → `previous/`. Signal reload: SIGUSR1 (Mac, ~2-3s hot-reload) or `systemctl restart` (NVIDIA, ~10-20s).
-6. **Verify**: Re-run health check on now-active adapter. If fails → automatic rollback (swap `active/` ↔ `previous/`).
-
-**Rollback**: `python tools/deploy_adapters.py --rollback --endpoints mac-dev`. Base model fallback always available if both slots are corrupted — load without `adapter_path=`.
-
-## Active Learning Feedback Loop
-
-Cross-tool data flow for the flag → correct → retrain cycle (Phases 7–8):
-
-1. **Capture**: `dry_run_ab.py` saves per-chunk WAVs + diagnostics JSONL during live session (confidence scores, latency, low-confidence words)
-2. **Extract**: `prepare_finetune_data.py` identifies low-confidence segments → `stark_data/corrections/review_queue_{date}.tsv`
-3. **Correct**: Human reviews in Label Studio (or TSV editor), saves corrections to `stark_data/corrections/{session_id}.jsonl`
-4. **Merge**: `tools/merge_corrections.py` merges corrections into training dataset
-5. **Retrain**: Transfer to WSL, retrain with corrected data mixed in (70/30 replay buffer to prevent forgetting)
-6. **Deploy**: Transfer adapters back to Mac via `tools/deploy_adapters.py` (or `manage_adapters.py export`)
-7. **Composite quality score**: `0.45 * neural_qe + 0.35 * stt_confidence + 0.20 * marian_agreement` — used to prioritize segments for review
-
-**Hallucination phrase mining:** after sessions, run `python tools/mine_hallucination_phrases.py` to propose new `_HALLUCINATION_PHRASES` entries.
-
-**Target**: 3–5 cycles. First cycle yields 20–40% relative WER reduction. Stop when improvement < 2% relative for 2 consecutive cycles.
-
-## Data Integrity & Adapter Management
-
-### Data Lockfile (`tools/lock_data.py`)
-
-Records SHA-256 hashes of all training data files. Run before training to snapshot, before eval to verify no drift.
-
-```bash
-python tools/lock_data.py generate   # Create/update lockfile
-python tools/lock_data.py verify     # Check files match lockfile
-```
-
-Output: `bible_data/data_lockfile.json`
-
-### Sermon Sorting (`tools/sort_sermons.py`)
-
-Classifies sermons by type (gospel/ministry/conference/throwback) and date from metadata JSONs. Produces `stt-data/manifest.json` and organizes WAVs into `stt-data/{type}/{year}/`.
-
-```bash
-python tools/sort_sermons.py --input stark_data/raw/midwest --output-dir stt-data --cutoff 2026-03-14
-```
-
-Training cutoff: 2026-03-14. Data before = train, on/after = eval.
-
-### Tiered Glossary (`tools/glossary.py`)
-
-Two-tier glossary for Deepgram keyterm boosting and training normalization:
-- **Tier 1 (Boost):** 50 terms, <420 tokens, for Deepgram `keyterm` parameter
-- **Tier 2 (Master):** 229 terms, full EN→ES theological glossary
-
-```bash
-python training/build_glossary.py --build-tiers  # Generates tier1_boost.json + tier2_master.json
-```
-
-### Adapter Management (`tools/manage_adapters.py`)
-
-Lifecycle management with manifest at `adapters/manifest.json`:
-
-```bash
-python tools/manage_adapters.py register --adapter hybrid_runs/S8_deepl_only --model gemma_4b
-python tools/manage_adapters.py activate --model gemma_4b --version S8_deepl_only  # runs health check first
-python tools/manage_adapters.py rollback --model gemma_4b
-python tools/manage_adapters.py list --model gemma_4b
-```
-
-### Health Check (`tools/health_check.py`)
-
-Verifies adapter produces sane translations before deployment. **8 canary sentences** covering theological terms (atonement, James/Santiago, propitiation, breaking of bread / *partimiento del pan*, resurrection, justification, Holy Spirit, grace/mercy). Shared list: `training/theological_canaries.py`.
-
-```bash
-python tools/health_check.py --adapter hybrid_runs/S8_deepl_only --n-canaries 8
-```
-
-Exit code 0 = pass, 1 = fail. Used automatically by `manage_adapters.py activate`.
-
-### Deploy (`tools/deploy_adapters.py`)
-
-```bash
-python tools/deploy_adapters.py --cycle 1 --models whisper_turbo_ct2 --endpoints local --dry-run
-python tools/deploy_adapters.py --rollback --models whisper_turbo_ct2 --endpoints local
-```
-
-### Active-learning merge
-
-```bash
-python tools/merge_corrections.py translation --corrections stark_data/corrections/pairs.jsonl --train-jsonl bible_data/sermon_pairs_train.jsonl
-python tools/merge_corrections.py whisper --corrections stark_data/corrections/whisper_export --train-dir stark_data/whisper_dataset_deepgram/train
-```
-
-### Parakeet EN bench (optional)
-
-```bash
-python tools/benchmark_parakeet_en.py --limit 10
-# Activate only if mean_wer ≤ W16 and p95 ≤ Whisper; bilingual default stays Whisper.
-```
-
-### Evaluation Sets (`tools/build_eval_sets.py`)
-
-Builds proper evaluation sets with stratification and provenance:
-- 500 verse pairs stratified by genre (Pentateuch/History/Poetry/Prophets/Gospels/Epistles)
-- Sermon eval chunks filtered to post-cutoff sermons only
-- Registry at `bible_data/eval_registry.json`
-- **Fresh eval set:** 4 post-cutoff sermons (Gospel+Teaching 3/22 and 3/29), 2,706 examples — used for W12+ Whisper ablation evaluation
-
-```bash
-python tools/build_eval_sets.py --dry-run   # Preview
-python tools/build_eval_sets.py             # Build (modifies verse_pairs_train.jsonl)
-```
-
-### Gemma 4 Benchmark (`training/benchmark_gemma4.py`)
-
-Compares TranslateGemma 4B/12B vs Gemma 4 E2B/E4B on EN→ES translation (HF NF4 only). Three evaluation tiers: Bible verse holdout (BLEU/chrF++/COMET), Deepgram sermon chunks (COMET-QE + hallucination ratio), 8 theological canary sentences (term accuracy).
-
-```bash
-python training/benchmark_gemma4.py --models tg4b,e2b --max-samples 50 --skip-comet
-python training/benchmark_gemma4.py --models all  # Full 4-model comparison
-```
-
-> **Note (v2026.5):** the VRAM column in `metrics/gemma4_benchmark/comparison.json` uses `torch.cuda.max_memory_allocated()`, which undercounts Gemma 4 by ~2×. For accurate VRAM and a head-to-head with llama.cpp Q4_K_M, see Phase 1A below.
-
-### Phase 1A llama.cpp Benchmark (`bench_translate_t1_t4.py`)
-
-Extends the Gemma 4 comparison with three llama.cpp/GGUF configs (T2 E2B, T3 E4B, T4 E4B+E2B spec decode), continuous `nvidia-smi` VRAM sampling (drop-in replacement for the broken PyTorch counter), and server-side timing parser. Output JSON is shape-compatible with `gemma4_benchmark/comparison.json`. Gate 1A: best llama.cpp config tok/s ≥ 1.30× HF baseline AND canary ≥ 6/8.
-
-```bash
-# T1 (HF E2B baseline) and other HF configs
-python bench_translate_t1_t4.py --config t1 --n-sermon 125 --out metrics/phase1a_t1.json
-python bench_translate_t1_t4.py --config tg4b_hf --out metrics/phase1a_tg4b_hf.json    # add tg12b_hf, e4b_hf
-
-# T2/T3/T4 — start llama-server first
-./start_server.sh --model models/gemma-4-e2b-it-q4km.gguf --no-draft &
-python bench_translate_t1_t4.py --config t2 --server-log /tmp/llama_t2.log --out metrics/phase1a_t2.json
-pkill -f llama-server
-
-# Merge full 7-config matrix
-python bench_translate_t1_t4.py --config merge --inputs metrics/phase1a_t*.json metrics/phase1a_*_hf.json --out metrics/phase1a_benchmark.json
-```
-
-Result: T2 (E2B GGUF) 8.89× T1, T3 (E4B GGUF) 5.46× T1 with 7/8 canary. See `docs/archive/v2026.5/BENCHMARK.md`.
-
-## Per-Tool Quick Reference
-
-Invocation examples for tools not covered above:
-
-```bash
-# Batch translation processing
-python tools/batch_translate.py input.txt --lang en --output out.tsv
-
-# Export review queue from diagnostics
-python tools/export_review.py metrics/diagnostics_*.jsonl --min-priority 3
-
-# Convert models between MLX and CUDA formats
-python tools/convert_models_to_both.py --model gemma-4b --format gguf
-
-# Test adaptive model selection logic
-python tools/test_adaptive_model.py --sentences 20
-
-# Download test texts for roundtrip quality testing
-python tools/download_roundtrip_texts.py --count 50
-```
-
-## Replay benchmark
-
-Replay WAV audio through the normal VAD → partial → final pipeline on the Mac. Prepare clips explicitly, then run a sequential config × clip matrix (each child uses distinct display ports):
-
-```bash
-python tools/replay_bench.py --prepare --seconds 300
-python tools/replay_bench.py --configs 'baseline=' 'mts=--mts' --tag replay01
-python tools/replay_bench.py --configs configs.json --baseline metrics/replay_replay01_baseline_Gospel_Message_1.json
-```
-
-Preparation cuts `stark_data/raw/Gospel_Message_*.wav` and `spanish_test_2cor1.wav`, preserving rate/channels, and writes `stark_data/replay/manifest.json` with duration, language and SHA-256. Config JSON maps names to argument strings or lists: `{"baseline": [], "mts": ["--mts"]}`. Extra flags must match `dry_run_ab.py`; its current STT choice is `parakeet`, not `parakeet-mlx` (EN-only NeMo, not a Mac MLX backend).
-
-Each run writes `metrics/replay_<tag>.log` and `.json` alongside the normal CSV and `partials_<tag>.jsonl`. Reports include p50/p95/mean, every emitted partial's STT + Marian latency, chunk/partial counts, overlap percentage, and special-token output counts. Marian-only share uses the labeled `tps_a == 0` proxy; absent measurements remain null. `--baseline` prints a Markdown delta table. Existing session artifacts are rejected; choose a fresh `--tag` for each matrix.
-
-For one clip: `python dry_run_ab.py --backend mlx --no-ab --audio-file clip.wav --session-id replay_test`. Replay defaults to real time and exits after EOF plus two seconds of tail silence and pending work. Use `--replay-speed 2` for double speed (`<=0` unpaced), or `--no-exit-after-replay` to keep the session open. Accelerated playback changes queue pressure and latency interpretation; use speed 1 for comparable real-time results. File input skips microphone detection and defaults to unity gain; `--gain` overrides it.
+# tools/ — Evaluation, Monitoring, Review, Adapter Deployment
+
+> Paired with [`AGENTS.md`](./AGENTS.md). Inventory and contracts reflect the local
+> branch (base `5154fb9`, v2026.14 candidate); main is v2026.13. Numbers belong in the
+> linked evidence documents, not here.
+
+Quality layers 4–6 from the root guide live here (YouTube caption comparison,
+translation QE, active learning), together with the reproducible Mac evaluation
+harness, the replay benchmark, setup helpers and the documentation backlog tooling.
+Importing any module must not load a model; scripts that need one spawn
+`dry_run_ab.py` or a worker subprocess.
+
+## Inventory
+
+| Group | Scripts | Notes |
+|-------|---------|-------|
+| Reproducible Mac evaluation | `mac_evaluation.py` (`prepare`, `validate`, `annotate`, `realign-references`, `rescore-quality`, `stt`, `quality`, `replay`, `experiments`, `report`), `pipeline_timing.py` | Frozen manifests and results: [`docs/evaluation/README.md`](../docs/evaluation/README.md). One model process at a time; predicted transcripts never become references |
+| Replay benchmark | `replay_bench.py` (`--prepare`, `--configs NAME=ARGV`, `--configs-file`, `--manifest`, `--baseline`, `--tag`) | Sequential `dry_run_ab.py --audio-file` runs; argv must match current flags (`--stt-backend parakeet-mlx` is valid on Mac) |
+| Isolated benchmarks | `benchmark_mlx_accel.py`, `benchmark_parakeet_en.py`, `benchmark_stt_engines.py`, `benchmark_translate_engines.py`, `benchmark_latency.py`, `stt_benchmark.py`, `stt_roundtrip_compare.py`, `roundtrip_test.py`, `score_comet22.py`, `mts_acceptance_probe.py`, `test_adaptive_model.py`, `*_bench_manifest.json` | Engine-level numbers; live-pipeline claims require `replay_bench.py` or `mac_evaluation.py` |
+| Live session monitoring | `live_caption_monitor.py`, `kpi_report.py`, `validate_session.py`, `translation_qe.py`, `mine_hallucination_phrases.py` | Post-session KPIs ([`docs/metrics.md`](../docs/metrics.md) — targets there predate schema 2) |
+| Review, corrections, active learning | `review_data.py`, `export_review.py`, `merge_corrections.py` (`translation`, `whisper`), `session_lifecycle.py`, `lock_data.py`, `build_eval_sets.py`, `prepare_finetune_data.py`, `glossary.py` | Shared normalizer with the operator Review UI; see contracts below |
+| Adapter lifecycle | `manage_adapters.py` (`register`, `activate`, `rollback`, `list`, `export`), `deploy_adapters.py`, `health_check.py`, `convert_models_to_both.py` | Design: [`docs/deploy.md`](../docs/deploy.md) |
+| Setup / runtime helpers | `marian_ct2_setup.py`, `vad_runtime.py`, `installed_smoke.py`, `release_artifacts.py`, `audio_bridge.py`, `audio_bridge_client.py` | Used by `stark-translate setup/doctor`, packaging checks and the Docker audio bridge |
+| Corpus builders | `build_v1_corpus.py`, `build_preference_triples.py`, `rebuild_verse_pairs.py`, `fix_platense_alignment.py`, `batch_translate.py`, `download_roundtrip_texts.py`, `sort_sermons.py` | Gemma 4 tuning data ([`docs/gemma4_tuning/`](../docs/gemma4_tuning/overview.md)); Platense realignment postmortem in [`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md) |
+| Documentation | `render_backlog.py` (`validate`, `render [--check]`, `check-links`) | Canonical backlog [`docs/backlog.json`](../docs/backlog.json); tests in `tests/test_documentation.py` |
+
+## Measurement rules
+
+- Server `speech_end_to_final_ms` (schema 2) stops at payload readiness; `speech_end_to_ack_upper_bound_ms` adds the browser and return-network hop and exists only for visible tabs. Legacy `e2e_latency_ms` / `true_e2e_ms` are processing measurements. Definitions: [`docs/evaluation/README.md`](../docs/evaluation/README.md), [`docs/archive/v2026.13/MAC_LATENCY.md`](../docs/archive/v2026.13/MAC_LATENCY.md).
+- `pipeline_timing.py` speech end = end of the last VAD-positive frame; no timestamp is comparable across hosts.
+- Replay reports separate language/provenance, silence vs smart vs hard cuts, EOF handling and timing schema; never pool cohorts with different manifest hashes.
+- Frozen screens (`mac_v2026_14_screening.json`, 45 s) bound experiments; they do not replace the full historical baseline or natural-speech quality gates.
+
+## Review and correction contracts (`review_data.py`, `session_lifecycle.py`)
+
+- Corrections are revisioned sidecars; predictions and audio are never rewritten.
+- Only sessions with recorded completion (`session_lifecycle_<id>.json`, `status: completed`) and explicit per-item approvals export training data. Transcript and translation approvals are independent; unknown language requires an explicit choice.
+- Evaluation and training splits cannot cross (`tests/test_operator_review.py`, `tests/test_correction_import_safety.py`).
+- Portable bundles round-trip and merge idempotently; older revisions cannot overwrite newer corrections.
+- **Evidence status:** these paths are tested with fixtures. No human-approved correction from a real session exists yet (#137), so no "active learning loop closed" claim is allowed.
+
+## Health check (adapter gate)
+
+`python tools/health_check.py --backend mlx [--adapter DIR] [--n-canaries 8]` runs the
+first 8 of the 18 canaries in `training/theological_canaries.py` (all 18 are used by
+the evaluation harness), checks expected terms, latency (`--max-latency`, default 5 s)
+and a word-ratio hallucination band (0.5–2.5). Run before `manage_adapters.py activate`.
+
+## YouTube caption comparison (quality layer 4)
+
+`live_caption_monitor.py` aligns local STT against the livestream's captions.
+Use `find_global_offset_by_text()` for offsets larger than the window and check
+`_wer is None` before aggregating. Cross-system WER is disagreement, not ground truth:
+track trends and flag windows above 20 % rather than reporting it as accuracy.
+
+## Translation QE (quality layer 5)
+
+`translation_qe.py`: Tier 1 heuristics (length ratio, untranslated overlap; no model),
+Tier 2 back-translation via Marian ES→EN plus BERTScore, Tier 3 LaBSE similarity.
+Reference-based scoring (`score_comet22.py`, chrF++ in the evaluation report) applies
+only to frozen manifests with approved references; chrF++ against a specific wording is
+not a universal quality percentage.
+
+## Adapter deployment
+
+`manage_adapters.py register/activate/rollback` maintains the per-model `active` /
+`previous` slots and manifest under `adapters/`; `deploy_adapters.py` pushes to
+endpoints (SSH keys per machine still needed). `stark-translate setup` reuses complete `adapters/marian_ct2/*/active`
+directories and never modifies them (`marian_ct2_setup.py`).
+
+## Recording evidence
+
+Session artifacts under `metrics/` (`session_*.log`, `ab_metrics_*.csv`,
+`diagnostics_*.jsonl`, `display_metrics_*.jsonl`, `session_lifecycle_*.json`,
+`session_metadata_*.json` with `audio_source` mic/file) are the only acceptable basis
+for a status claim. Tonight's built-in-mic stall (`20260909_233204_799019_en`) versus
+the passing file replays (`..._233546_027169_en`, `..._233823_034893_es`) is the
+canonical example: same build, different `audio_source`, different conclusion.
+
+## Backlog pointers
+
+`caption-delivery-goal`, `visible-browser-timing-run`, `issue-137-active-learning`,
+`issue-135-mac-ab`, `natural-spanish-refs` in [`docs/backlog.json`](../docs/backlog.json).

@@ -1,25 +1,25 @@
-# features/AGENTS.md — Post-Processing (Agent Guide)
+# features/AGENTS.md — Diarization, Verses, Summary (Agent Guide)
 
-> Paired with [`CLAUDE.md`](./CLAUDE.md).
+> Paired with [`CLAUDE.md`](./CLAUDE.md) (status table, data flow, dependencies).
 
-## Live vs offline
+## Constraints
 
-| Feature | Live | Offline/batch |
-|---------|------|----------------|
-| Diarization | `--diarize` + `live_diarize.py` (default **off**) | `diarize.py` pyannote |
-| Summary | Operator trigger post-session | `summarize_sermon.py` |
-| Verses | Operator `/api/features/verses` | `extract_verses.py` |
+- Nothing in `features/` may run inside the live pipeline's MLX GPU pool. Verse extraction is regex-only and runs inline; summary runs as a subprocess; live diarization is a separate daemon (`features/live_diarize.py`) whose labels are read from `metrics/diarization_<session>.jsonl` by cheap overlap lookup.
+- Diarization is **off by default** (`--diarize`). Budget from `docs/live_diarization.md`: final p95 within +50 ms of baseline; do not move STT/translation code to satisfy a diarization change.
+- `speaker_labels.py` must stay free of model imports (it is unit-tested on CPU).
+- Summary model ids follow the Gemma 4 stop-token rules in `engines/translation_prompts.py`; never inline prompts.
+- Human-facing claims: verse highlights and summary have workflow evidence in the operator rehearsal only; bilingual accuracy approval is pending. Live diarization has **no** two-speaker evidence — the #133 gate is unmet.
 
-## Diarization gate (#133)
+## Where features surface
 
-Code shipped locally; **gate pending:** two-speaker natural clip, ≤+50 ms final p95 vs off.
-Design: [`docs/live_diarization.md`](../docs/live_diarization.md)
+| Surface | Route / flag |
+|---------|--------------|
+| Operator UI verses | `GET /api/features/verses` (`operator_app/features.py`) |
+| Operator UI summary | `POST /api/features/summary`, `GET /api/features/summary/{task_id}` |
+| Live speaker labels | `dry_run_ab.py --diarize --diarize-mode embed\|pyannote --diarize-interval-s N` |
+| Batch tools | `python features/diarize.py`, `features/extract_verses.py`, `features/summarize_sermon.py` |
 
-## Active learning
+## Backlog
 
-Speaker labels and verse hits feed correction prioritization — export only after human approval.
-
-## Full reference
-
-Integration with `dry_run_ab.py`, CSV columns, MLX contention notes:
-[`CLAUDE.md`](./CLAUDE.md)
+`issue-133-diarize-gate`, `natural-two-speaker` in [`docs/backlog.json`](../docs/backlog.json).
+Runbook UI evidence (`docs/operator_runbook.md`) is owned by root.

@@ -1,12 +1,29 @@
 # training/ — Fine-Tuning & Data Preparation (Windows/WSL)
 
-All training runs on the **Windows Desktop** (WSL2, A2000 Ada 16GB, 64GB RAM). Adapters transfer to Mac for inference. See `CLAUDE-windows.md` for environment setup.
+> Paired with [`AGENTS.md`](./AGENTS.md). All training runs on the **Windows Desktop**
+> (WSL2, A2000 Ada 16 GB, 64 GB RAM); adapters transfer to Mac for inference. Environment
+> setup: [`CLAUDE-windows.md`](../CLAUDE-windows.md). Ordered next steps for the box:
+> [`docs/wsl_pipeline_refresh.md`](../docs/wsl_pipeline_refresh.md).
+>
+> **Status (2026-09-09):** no WSL work ran tonight. Phase 4 full preprocess, the Gemma 4
+> E4B domain SFT, W17 and the CUDA latency proposal are all scripted and pending hardware
+> (`docs/backlog.json`: `wsl-phase4`, `wsl-e4b-domain-sft`, `wsl-w17-export`,
+> `cuda-latency-proposal`). Sections marked **historical** record completed runs whose
+> numbers live in the linked documents; do not treat them as current defaults.
 
 ## Overview
 
-Domain adaptation for two models:
-1. **Whisper LoRA** — church sermon STT (English acoustic domain)
-2. **TranslateGemma QLoRA** — biblical EN↔ES translation
+Domain adaptation programs, in current priority order:
+
+1. **Whisper LoRA** (`train_whisper.py` → `export_ct2.py`) — church sermon STT. **W16** is the deployed CUDA artifact (`adapters/whisper_turbo_ct2/active`, auto-preferred by `FasterWhisperEngine`); **W17** (DoRA + hard-mix curriculum) is scripted in `run_w17_curriculum.sh` and untrained. The Mac EN default is Parakeet MLX, which does not load these adapters — W16 comparisons on Mac run the CPU faster-whisper path (#135).
+2. **Gemma 4 E2B/E4B QLoRA** (`train_gemma4.py` SFT, `train_gemma4_cpo.py` preference optimization, `export_gguf.py`) — the current translation program; plan and results in [`docs/gemma4_tuning/`](../docs/gemma4_tuning/overview.md). v1 → v1.1 → v2-cpo closed most of the COMET-22 gap to stock E4B without crossing it and still fails the Jacobo canary ([`v1_results.md`](../docs/gemma4_tuning/v1_results.md), [`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md); #136). Stock E4B remains the production default on both Mac and CUDA. `train_gemma4.py`, `train_gemma4_cpo.py` and `export_gguf.py` carry `UNTESTED` headers for the full domain run (`run_gemma4_e4b_domain_sft.sh`).
+3. **TranslateGemma QLoRA** (`train_gemma.py`) — **historical** S1–S9 sweep (below); superseded because TranslateGemma is already a translator and the Platense half of its corpus was misaligned.
+4. **MarianMT full fine-tune** (`train_marian.py`) — fallback with a lower ceiling; unused in production.
+
+**Corpus correction (2026-04-29):** `bible_data/aligned/verse_pairs_train.jsonl` joined
+Platense by row order and was misaligned from Psalms onward. Use
+`verse_pairs_train_v2.jsonl` (rebuilt by `tools/rebuild_verse_pairs.py`); postmortem in
+[`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md).
 
 ## Audio Preprocessing (10-Step Pipeline)
 
@@ -36,9 +53,11 @@ Before fine-tuning, establish a baseline on 50–100 stratified segments:
 | 20–30% | Weakly supervised pretraining, then fine-tune on clean subset |
 | > 30% | Re-transcribe with Whisper large-v3 instead of YouTube captions |
 
-**Recommendation:** Re-transcribe all audio with Whisper large-v3 (~7% WER) rather than YouTube auto-captions (~15% WER).
+**Recommendation (historical):** the table above predates the Deepgram oracle. Since the
+W12 runs, Deepgram Nova-3 transcripts (below) are the label source; Whisper large-v3
+re-transcription is only a fallback when Deepgram output is unavailable.
 
-## Biblical Parallel Text Corpus (~155K Verse Pairs)
+## Biblical Parallel Text Corpus (~155K verse pairs v1 → 265K pairs v2)
 
 **Primary datasets:**
 - `bible-nlp/biblenlp-corpus` (HuggingFace, 833 languages, CC-BY-4.0)
@@ -57,11 +76,11 @@ Before fine-tuning, establish a baseline on 50–100 stratified segments:
 
 **Supplementary data:** Tiered theological glossary (50 boost + 229 master terms), bilingual catechism excerpts, bilingual sermon transcripts, hybrid synthetic translations (60% 12B + 40% DeepL glossary-enforced).
 
-## Sermon Audio via Pseudo-Labeling
+## Sermon Audio via Pseudo-Labeling (historical — replaced by the Deepgram oracle)
 
 1. Collect 20–50 hours of church audio (soundboard preferred)
 2. Segment into 5–30s chunks via Silero VAD
-3. Run base Distil-Whisper for initial transcriptions
+3. Run base Distil-Whisper for initial transcriptions (`transcribe_church.py`; no longer the label source)
 4. Filter by confidence (compression ratio > 2.4 or avg log-prob < -1.0 → discard)
 5. Human-correct bottom 20% (prioritize theological terms, biblical names)
 6. Format as HuggingFace Dataset (`audio` + `sentence` columns)
@@ -170,7 +189,28 @@ Curriculum learning pipeline for targeted Whisper adaptation:
 4. **Train** — `training/train_whisper.py --init-from <adapter>`: load pre-trained adapter weights with fresh optimizer state (new learning trajectory, no momentum carry-over)
 5. **Repeat** — Re-mine on the updated adapter, filter harder examples, train again. 2–4 cycles typical for convergence.
 
-## TranslateGemma QLoRA Configuration
+## Gemma 4 Tuning (current program, WSL)
+
+Plan: [`docs/gemma4_tuning/overview.md`](../docs/gemma4_tuning/overview.md) —
+Phase A infrastructure (`train_gemma4.py`, `export_gguf.py`, `qe_filter.py`,
+`glossary_annotate.py`), B spike, C domain SFT (v1), D preference optimization (v2,
+`train_gemma4_cpo.py` with CometKiwi-XL-ranked triples from
+`tools/build_preference_triples.py`), E deploy (`tools/manage_adapters.py`,
+8-canary `tools/health_check.py`, Mac A/B #135).
+
+Architecture rules that shaped the trainers: E2B is a MatFormer slice of E4B, so
+**train each size separately**; freeze Per-Layer Embeddings and the vision/audio towers;
+train with `enable_thinking=False`; QLoRA through Unsloth to fit 16 GB.
+
+Outcome so far ([`v1_results.md`](../docs/gemma4_tuning/v1_results.md)): v1 passed the
+smoke gates but failed canary parity; v1.1 (corpus v2) and v2-cpo reached statistical
+parity with stock E4B on the formal-Spanish holdout without beating it; the Jacobo/Santiago
+disambiguation still fails (#136). What would move the needle next is ranked in
+[`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md) (few-shot prompt
+disambiguation, inference-time re-ranking, targeted preference triples). **Ship
+decision:** stock Gemma 4 E4B stays the default until a Mac A/B note says otherwise.
+
+## TranslateGemma QLoRA Configuration (historical)
 
 | Parameter | Value | Rationale |
 |-----------|-------|-----------|
@@ -337,15 +377,18 @@ Run `python training/export_ct2.py --help` for the full CLI (mirrors `export_ggu
 After training, LoRA adapters must be transferred to inference machines:
 
 1. **Location**: Adapters saved to `fine_tuned_*/` dirs on WSL (safetensors format)
-2. **Transfer to Mac**: Copy adapter dir to `adapters/{model}/active/` (see `docs/deploy.md` for automated rsync pipeline)
-3. **Validate on Mac**: Run health check — 5 canonical sentences, check expected substrings + latency < 5s per sentence
+2. **Transfer to Mac**: Copy adapter dir to `adapters/{model}/active/` (see [`docs/deploy.md`](../docs/deploy.md) for the rsync pipeline; SSH keys per machine still pending)
+3. **Validate on Mac**: `python tools/health_check.py --backend mlx --adapter <dir>` — 8 canaries by default (of 18 in `theological_canaries.py`), expected substrings + latency < 5 s per sentence + word-ratio hallucination band
 4. **Version naming**: `cycle{N}_{YYYYMMDD}_{sha256[:8]}` (SHA-256 over `adapter_model.safetensors`)
 5. **Manifest**: `adapters/manifest.json` tracks all versions with training metrics (final loss, eval WER, epochs, data size)
 6. **Rollback**: Two-slot system — `active/` + `previous/`. Swap back if health check fails post-activation.
 
 ## Adding a New Language Corpus
 
-When adding Hindi or Chinese translation training (see `docs/archive/research/multi_lingual.md`):
+Hindi and Chinese remain **pending user decisions** (#138, roadmap Phase 8); the offline
+Hindi text probe in [`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md)
+is not the requested church-audio baseline. When a decision lands
+(see [`docs/archive/research/multi_lingual.md`](../docs/archive/research/multi_lingual.md)):
 
 1. **Find aligned verse pairs** — `bible-nlp/biblenlp-corpus` has 833 languages (CC-BY-4.0). Hindi IRV: `hin2017` (~31K verses). Chinese CUV-S: `cmn-cu89s` (~31K verses, public domain).
 2. **Prepare with `prepare_bible_corpus.py`** — input: two translation dirs, output: JSONL pairs with `source_lang_code`, `target_lang_code`, `source_text`, `target_text`, `verse_id`.

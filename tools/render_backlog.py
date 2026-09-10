@@ -5,6 +5,16 @@ Usage:
   python tools/render_backlog.py validate
   python tools/render_backlog.py render [--check]
   python tools/render_backlog.py check-links [ROOT ...]
+
+Status vocabulary (implementation state) is separate from ``certification``
+(whether the item's stated acceptance has actually been met):
+
+  in_progress                active engineering right now (code may be uncommitted)
+  implemented                code exists on the local branch; acceptance not yet certified
+  validated                  acceptance met with recorded evidence
+  experimental               opt-in path kept off by default
+  pending_input_or_hardware  blocked on human input, references, or hardware access
+  deferred                   intentionally postponed (often a pending user decision)
 """
 
 from __future__ import annotations
@@ -22,17 +32,20 @@ BACKLOG_JSON = ROOT / "docs" / "backlog.json"
 BACKLOG_MD = ROOT / "docs" / "backlog.md"
 
 ALLOWED_STATUS = {
+    "in_progress",
     "implemented",
     "validated",
     "experimental",
     "pending_input_or_hardware",
     "deferred",
 }
+ALLOWED_CERTIFICATION = {"met", "pending", "not_applicable"}
 ALLOWED_PRIORITY = {"P0", "P1", "P2", "P3"}
 REQUIRED_ITEM_KEYS = {
     "id",
     "title",
     "status",
+    "certification",
     "priority",
     "machine",
     "dependencies",
@@ -40,6 +53,16 @@ REQUIRED_ITEM_KEYS = {
     "acceptance",
     "next_action",
 }
+OPTIONAL_ITEM_KEYS = {"issue_acceptance", "evidence", "notes"}
+
+STATUS_ORDER = [
+    "in_progress",
+    "pending_input_or_hardware",
+    "experimental",
+    "deferred",
+    "implemented",
+    "validated",
+]
 
 CANONICAL_DOC_PATHS = [
     "README.md",
@@ -65,18 +88,26 @@ CANONICAL_DOC_PATHS = [
 ]
 
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+_PATHLIKE_SUFFIXES = (".md", ".py", ".json", ".sh", ".yml", ".yaml", ".js", ".html", ".txt")
 
 
 def load_backlog(path: Path = BACKLOG_JSON) -> dict[str, Any]:
-    data = json.loads(path.read_text(encoding="utf-8"))
-    return data
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _looks_like_repo_path(source: str) -> bool:
+    if source.startswith(("http://", "https://")):
+        return False
+    if "/" in source:
+        return True
+    return source.endswith(_PATHLIKE_SUFFIXES)
 
 
 def validate_backlog(data: dict[str, Any]) -> list[str]:
     errors: list[str] = []
 
-    if data.get("schema_version") != 1:
-        errors.append("schema_version must be 1")
+    if data.get("schema_version") != 2:
+        errors.append("schema_version must be 2")
 
     items = data.get("items")
     if not isinstance(items, list) or not items:
@@ -95,6 +126,9 @@ def validate_backlog(data: dict[str, Any]) -> list[str]:
         missing = REQUIRED_ITEM_KEYS - item.keys()
         if missing:
             errors.append(f"{prefix} missing keys: {sorted(missing)}")
+        unknown = set(item.keys()) - REQUIRED_ITEM_KEYS - OPTIONAL_ITEM_KEYS
+        if unknown:
+            errors.append(f"{prefix} unknown keys: {sorted(unknown)}")
 
         item_id = item.get("id")
         if not isinstance(item_id, str) or not item_id:
@@ -108,6 +142,14 @@ def validate_backlog(data: dict[str, Any]) -> list[str]:
         if status not in ALLOWED_STATUS:
             errors.append(f"{prefix}.status invalid: {status!r}")
 
+        certification = item.get("certification")
+        if certification not in ALLOWED_CERTIFICATION:
+            errors.append(f"{prefix}.certification invalid: {certification!r}")
+        if status == "validated" and certification != "met":
+            errors.append(f"{prefix}: status 'validated' requires certification 'met'")
+        if status in {"in_progress", "pending_input_or_hardware", "experimental"} and certification == "met":
+            errors.append(f"{prefix}: status {status!r} cannot have certification 'met'")
+
         priority = item.get("priority")
         if priority not in ALLOWED_PRIORITY:
             errors.append(f"{prefix}.priority invalid: {priority!r}")
@@ -116,14 +158,22 @@ def validate_backlog(data: dict[str, Any]) -> list[str]:
             value = item.get(field)
             if not isinstance(value, list):
                 errors.append(f"{prefix}.{field} must be a list")
+        for field in ("evidence",):
+            if field in item and not isinstance(item[field], list):
+                errors.append(f"{prefix}.{field} must be a list when present")
 
         deps = item.get("dependencies") or []
         unknown_deps = [dep for dep in deps if dep not in all_ids]
         if unknown_deps:
             errors.append(f"{prefix}.dependencies unknown ids: {unknown_deps}")
+        if item_id in deps:
+            errors.append(f"{prefix} depends on itself")
 
         for source in item.get("sources") or []:
-            if isinstance(source, str) and source.startswith("docs/"):
+            if not isinstance(source, str):
+                errors.append(f"{prefix} source must be a string: {source!r}")
+                continue
+            if _looks_like_repo_path(source):
                 source_path = ROOT / source.split("#", 1)[0]
                 if not source_path.exists():
                     errors.append(f"{prefix} source missing file: {source}")
@@ -132,9 +182,13 @@ def validate_backlog(data: dict[str, Any]) -> list[str]:
     if not isinstance(integration, dict):
         errors.append("integration must be an object")
     else:
-        for key in ("local_branch", "local_version", "main_release_tag"):
+        for key in ("local_branch", "local_version", "main_release_tag", "draft_pr"):
             if key not in integration:
                 errors.append(f"integration missing {key}")
+
+    definitions = data.get("status_definitions")
+    if not isinstance(definitions, dict) or set(definitions) != ALLOWED_STATUS:
+        errors.append("status_definitions must define exactly the allowed statuses")
 
     return errors
 
@@ -143,10 +197,26 @@ def _status_heading(status: str) -> str:
     return status.replace("_", " ").title()
 
 
+def _format_sources(sources: list[str]) -> str:
+    bits = []
+    for source in sources:
+        if source.startswith("http"):
+            label = source.rstrip("/").split("/")[-1]
+            if "/issues/" in source:
+                label = f"#{label}"
+            elif "/pull/" in source:
+                label = f"PR #{label}"
+            bits.append(f"[{label}]({source})")
+        else:
+            bits.append(f"`{source}`")
+    return ", ".join(bits) if bits else "none"
+
+
 def render_backlog_md(data: dict[str, Any]) -> str:
     integration = data.get("integration", {})
     defaults = data.get("defaults", {})
     mac = defaults.get("mac_inference", {})
+    definitions = data.get("status_definitions", {})
 
     lines = [
         "# Remaining backlog — Stark Road Bilingual Speech-to-Text",
@@ -161,35 +231,43 @@ def render_backlog_md(data: dict[str, Any]) -> str:
         f"{integration.get('main_head_note', 'see git log')}",
         f"- **Local candidate:** `{integration.get('local_version', '?')}` on "
         f"`{integration.get('local_branch', '?')}` (base `{integration.get('local_base', '?')}`)",
-        f"- **Publication:** {integration.get('publication', 'unknown').replace('_', ' ')}",
+        f"- **Draft PR:** {integration.get('draft_pr', 'none')}",
+        f"- **Publication:** {integration.get('publication', 'unknown')}",
         "",
         integration.get("distinction", ""),
         "",
-        "## Current Mac defaults",
+        "## Status vocabulary",
         "",
-        f"- EN STT: `{mac.get('stt_en', '?')}` · ES STT: `{mac.get('stt_es', '?')}`",
-        f"- Partials: `{mac.get('partial_translation', '?')}` · Finals: `{mac.get('final_translation', '?')}`",
-        f"- Silence `{mac.get('silence_seconds', '?')}` s · partial cadence `{mac.get('partial_cadence_seconds', '?')}` s · MTP `{mac.get('mtp', '?')}`",
-        "",
-        "See [`current_architecture.md`](./current_architecture.md) and "
-        "[`mac_implementation_status.md`](./mac_implementation_status.md) for contracts and evidence.",
-        "",
+        "| Status | Meaning |",
+        "|--------|---------|",
     ]
+    for status in STATUS_ORDER:
+        lines.append(f"| `{status}` | {definitions.get(status, '')} |")
+    lines.extend(
+        [
+            "",
+            "`certification` records whether the item's stated acceptance has been met "
+            "(`met`, `pending`, `not_applicable`) independently of implementation status.",
+            "",
+            "## Current Mac defaults",
+            "",
+            f"- EN STT: `{mac.get('stt_en', '?')}` · ES STT: `{mac.get('stt_es', '?')}`",
+            f"- Partials: `{mac.get('partial_translation', '?')}` · Finals: `{mac.get('final_translation', '?')}`",
+            f"- Silence `{mac.get('silence_seconds', '?')}` s · partial cadence "
+            f"`{mac.get('partial_cadence_seconds', '?')}` s · MTP `{mac.get('mtp', '?')}`",
+            "",
+            "See [`current_architecture.md`](./current_architecture.md) and "
+            "[`mac_implementation_status.md`](./mac_implementation_status.md) for contracts and evidence.",
+            "",
+        ]
+    )
 
     items = data.get("items", [])
     by_status: dict[str, list[dict[str, Any]]] = {}
     for item in items:
         by_status.setdefault(item["status"], []).append(item)
 
-    status_order = [
-        "pending_input_or_hardware",
-        "experimental",
-        "deferred",
-        "implemented",
-        "validated",
-    ]
-
-    for status in status_order:
+    for status in STATUS_ORDER:
         bucket = by_status.get(status, [])
         if not bucket:
             continue
@@ -198,25 +276,25 @@ def render_backlog_md(data: dict[str, Any]) -> str:
         for item in sorted(bucket, key=lambda x: (x["priority"], x["id"])):
             deps = item.get("dependencies") or []
             dep_text = ", ".join(f"`{d}`" for d in deps) if deps else "none"
-            sources = item.get("sources") or []
-            source_bits = []
-            for source in sources:
-                if source.startswith("http"):
-                    source_bits.append(f"[{source.split('/')[-1]}]({source})")
-                else:
-                    source_bits.append(f"`{source}`")
             lines.extend(
                 [
                     f"### `{item['id']}` — {item['title']}",
                     "",
-                    f"- **Priority:** {item['priority']} · **Machine:** {item.get('machine', '?')}",
+                    f"- **Priority:** {item['priority']} · **Machine:** {item.get('machine', '?')} · "
+                    f"**Certification:** {item['certification'].replace('_', ' ')}",
                     f"- **Depends on:** {dep_text}",
-                    f"- **Sources:** {', '.join(source_bits)}",
-                    f"- **Acceptance:** {item['acceptance']}",
-                    f"- **Next action:** {item['next_action']}",
-                    "",
+                    f"- **Sources:** {_format_sources(item.get('sources') or [])}",
                 ]
             )
+            if item.get("issue_acceptance"):
+                lines.append(f"- **Issue acceptance (verbatim intent):** {item['issue_acceptance']}")
+            lines.append(f"- **Acceptance:** {item['acceptance']}")
+            for evidence in item.get("evidence") or []:
+                lines.append(f"- **Evidence:** {evidence}")
+            if item.get("notes"):
+                lines.append(f"- **Notes:** {item['notes']}")
+            lines.append(f"- **Next action:** {item['next_action']}")
+            lines.append("")
 
     counts = Counter(item["status"] for item in items)
     lines.extend(
@@ -227,7 +305,7 @@ def render_backlog_md(data: dict[str, Any]) -> str:
             "|--------|------:|",
         ]
     )
-    for status in status_order:
+    for status in STATUS_ORDER:
         if counts.get(status):
             lines.append(f"| {_status_heading(status)} | {counts[status]} |")
     lines.append("")
@@ -261,14 +339,12 @@ def check_local_links(paths: list[Path]) -> list[str]:
             if resolved is None:
                 continue
             if not resolved.exists():
-                errors.append(
-                    f"{doc_path.relative_to(ROOT)}: broken link `{target}`"
-                )
+                errors.append(f"{doc_path.relative_to(ROOT)}: broken link `{target}`")
     return errors
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("validate", help="Validate backlog.json schema and references")
@@ -280,33 +356,34 @@ def main(argv: list[str] | None = None) -> int:
         help="Fail if rendered output differs from committed backlog.md",
     )
 
-    links_parser = sub.add_parser(
-        "check-links", help="Check local markdown links in canonical docs"
-    )
-    links_parser.add_argument(
-        "roots",
-        nargs="*",
-        help="Optional doc paths relative to repo root",
-    )
+    links_parser = sub.add_parser("check-links", help="Check local markdown links in canonical docs")
+    links_parser.add_argument("roots", nargs="*", help="Optional doc paths relative to repo root")
 
     args = parser.parse_args(argv)
-    data = load_backlog()
 
-    if args.command == "validate":
-        errors = validate_backlog(data)
+    if args.command == "check-links":
+        rel_paths = args.roots or CANONICAL_DOC_PATHS
+        paths = [ROOT / rel for rel in rel_paths]
+        errors = check_local_links(paths)
         if errors:
             for err in errors:
                 print(err, file=sys.stderr)
             return 1
+        print(f"OK: local links in {len(paths)} docs")
+        return 0
+
+    data = load_backlog()
+    errors = validate_backlog(data)
+    if errors:
+        for err in errors:
+            print(err, file=sys.stderr)
+        return 1
+
+    if args.command == "validate":
         print(f"OK: {len(data['items'])} backlog items validated")
         return 0
 
     if args.command == "render":
-        errors = validate_backlog(data)
-        if errors:
-            for err in errors:
-                print(err, file=sys.stderr)
-            return 1
         rendered = render_backlog_md(data)
         if args.check:
             if not BACKLOG_MD.exists():
@@ -319,17 +396,6 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         BACKLOG_MD.write_text(rendered, encoding="utf-8")
         print(f"Wrote {BACKLOG_MD.relative_to(ROOT)}")
-        return 0
-
-    if args.command == "check-links":
-        rel_paths = args.roots or CANONICAL_DOC_PATHS
-        paths = [ROOT / rel for rel in rel_paths]
-        errors = check_local_links(paths)
-        if errors:
-            for err in errors:
-                print(err, file=sys.stderr)
-            return 1
-        print(f"OK: local links in {len(paths)} docs")
         return 0
 
     return 2

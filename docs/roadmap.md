@@ -1,238 +1,238 @@
 # Roadmap — Stark Road Bilingual Speech-to-Text
 
-> Living document tracking the full project trajectory from Mac prototype
-> through Windows training to production deployment.
+> Living document tracking the project from Mac prototype through Windows training to
+> production deployment.
 >
-> **Last updated:** 2026-09-09 (overnight docs worktree)
+> **Last updated:** 2026-09-09 (overnight docs worktree, base `5154fb9`).
 >
 > **Remaining tasks (canonical):** [`backlog.json`](./backlog.json) · rendered
 > [`backlog.md`](./backlog.md) · contracts [`current_architecture.md`](./current_architecture.md)
+> · evidence [`mac_implementation_status.md`](./mac_implementation_status.md).
+> Sections marked **historical** keep earlier measurements under their original dates;
+> current numbers live only in the linked evidence documents.
 
 ---
 
-## Current State
+## Current State (2026-09-09)
 
 ```
-Mac (M3 Pro 18GB, MLX)                Windows (A2000 Ada 16GB, CUDA/WSL2)
-  Live inference prototype (stable)      Training pipeline hardened
-  Parakeet EN / Whisper ES (STT)        198K aligned chunks (328 sermons)
-  engines/ package (MLX + CUDA)          TranslateGemma S1-S9 sweep → S6 winner
-  settings.py (pydantic-settings)        Whisper W12 data scaling (198K chunks)
-  Backend: --backend auto|mlx|cuda       W15 hard mining + W16 = 7.25% fresh-eval WER
-  Piper TTS (EN + ES, --tts)             Deepgram Nova-3 oracle (35 sermons)
-  Pipeline overlap (STT N+1 ∥ TT N)     Tiered glossary (50 boost + 229 master)
-  Display modes + operator UI            llama.cpp E4B Q4_K_M = production CUDA default
-  v2026.13 shipped; v2026.14 candidate   W17 curriculum scripted (DoRA + hard-mix)
+Mac (M3 Pro 18 GB, MLX) — the only target exercised tonight
+  STT:        Parakeet TDT v3 (EN) · mlx-whisper large-v3-turbo (ES)
+  Partials:   Marian CT2 int8 on CPU, every 0.6 s of speech (HF fallback)
+  Finals:     Gemma 4 E4B OptiQ on 0.5 s silence (E2B opt-in, TranslateGemma opt-out)
+  VAD:        packaged Silero 6.2.1; ONNX opt-in
+  Operator:   FastAPI + vanilla JS control plane (:9000), Review/export, preflight
+  Setup:      stark-translate setup / doctor, models.lock.json, managed Marian CT2 cache
+  Timing:     schema 2 speech_end_to_final_ms + visible-browser ACK upper bound
 
-Production Endpoints (implemented):
-  1. Mac M-series (8-18 GB) — MLX, --backend=mlx
-  2. NVIDIA GPU (6-16 GB VRAM) — CUDA via llama.cpp (--engine auto|llamacpp|hf)
-  3. Operator control plane — FastAPI + vanilla JS at http://host:9000/operator/
+Windows / WSL (A2000 Ada 16 GB, CUDA)
+  Inference:  W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B Q4_K_M via llama.cpp b10883
+  Training:   Phase 4 preprocess, E4B domain SFT, W17 — scripted, not run
+  Latency:    CUDA proposal scripts header-marked unexecuted
+
+Release lines
+  main:       v2026.13 (PRs #180–191)
+  candidate:  2026.14.0.0 on codex/mac-reliability-roadmap → draft PR #192 (open, not merged)
+  overnight:  docs / lite / latency / operator-ui / reliability worktrees pending integration
+  publishing: source + issues + final merge authorized; PyPI / tags pending by user choice
 ```
 
-See `docs/operator_runbook.md` for the day-of-event workflow and `bootstrap.sh`
-for first-time church PC setup.
+**Tonight's open bug:** the built-in-microphone session (`20260909_233204_799019_en`)
+stalled after "Listening..." — the operator showed RUNNING from the CSV header while no
+audio frames arrived and the audience display stayed disconnected; a separate
+`sounddevice` record probe stalled too. File-replay EN/ES sessions on the same build
+completed. Live-mic and physical-device checks are deferred to tomorrow
+(`mac-live-mic-stall`, `issue-131-smoke`).
 
-**Next WSL execution:** [`docs/wsl_pipeline_refresh.md`](./wsl_pipeline_refresh.md) (Phase 4 → E4B SFT → W17 → Mac → AL).
-
-**Then: [CUDA latency proposal](./cuda_latency_proposal.md)** — Gemma 4 MTP drafter (llama.cpp ≥ b10883), `-fa on` retest, W16 HF fp16 / Parakeet TDT v3 STT, client plumbing. Scripts in `scripts/cuda/`; not yet run on the A2000.
-
-**Sept 2026 restart:** v2026.12 close-out → v2026.13 Mac latency fixes (PRs #180–191 merged) → [v2026.14 implementation status](mac_implementation_status.md). Archived measurements are retained, with corrected labels: legacy processing times do not measure speech-end-to-visible-caption delivery.
-
----
-
-## Completed Work
-
-### Phase 1: Infrastructure & Inference (Done)
-
-- **Engines package** — ABCs (`STTEngine`, `TranslationEngine`, `TTSEngine`), MLX + CUDA implementations, factory auto-detection
-- **Whisper Large-V3-Turbo swap** — Both partials and finals, <150ms partials on Mac
-- **CUDA streaming runtime** — `CUDAGemmaStreamingEngine` with TextIteratorStreamer, prompt cache (~50-80ms savings), speculative decoding (4B drafts 12B), VRAM tier detection (15GB/5.5GB thresholds)
-- **Dual-target inference** — `--backend auto|mlx|cuda`, `--no-ab`, `--low-vram` flags
-- **Unified config** — `settings.py` with pydantic-settings, `STARK_` env prefix, `CUDASettings` for CUDA-specific knobs
-- **Piper TTS** — EN + ES voices, ONNX runtime, WebSocket + WAV output, `--tts` flag
-- **Bidirectional language support** — `--lang en` (EN→ES) and `--lang es` (ES→EN)
-- **Pipeline overlap** — Translation on utterance N while STT runs on N+1
-- **5 display modes** — Audience, A/B, Mobile, Church, OBS overlay
-- **CI/CD** — 7 GitHub Actions (lint, test, security, release, label, commitlint, stale), coverage gate in `test.yml`, Codecov, pre-commit, CalVer
-
-### Phase 2: Data Collection (Done)
-
-- **333 sermons cataloged**, 160+ downloaded, organized into `stt-data/{type}/{year}/`
-- **Deepgram Nova-3 oracle** — 35 sermons transcribed with 50 theological keyterms ($9 total)
-- **Tiered glossary** — Tier 1 (50 boost terms for Deepgram), Tier 2 (229 master terms for training)
-- **Data integrity** — SHA-256 lockfile, 2026-03-14 training cutoff, adapter health checks
-- **Evaluation sets** — 500 stratified verse holdout + 422 sermon eval chunks + fresh eval set (4 post-cutoff sermons, 2,706 examples)
-
-### Phase 3: TranslateGemma Fine-Tuning (Done)
-
-- **S1-S9 ablation sweep** — Learning rate, steps, NEFTune, verse/sermon ratio, data scale
-- **S6 winner** — Balanced 1:1 verse/sermon ratio, COMET proximity to 12B base = -0.0002 (effectively tied)
-- **Quantization benchmarks** — 4B at 4-bit: 3.0 GB VRAM, 12B at 4-bit: 7.3 GB, 12B at 8-bit: OOM on 16 GB
-- **DeepL synthetic data** — 10K+ glossary-enforced sermon pairs for training augmentation
-
-### Phase 4: Whisper LoRA Training (In Progress)
-
-- **W0-W9 ablation designed** — Test matrix covering learning rate, target modules, replay ratio, data scale
-- **W12 data scaling** — 198K Deepgram-aligned chunks from 328 sermons, 290 GB Arrow cache
-  - Baseline WER on fresh eval: **21.41%** (normalized)
-  - Config: lr=1e-4, r=32, q_proj+v_proj, replay=0.3, 1 epoch
-- **W15 hard example mining** — Curriculum learning pipeline:
-  - `mine_hard_examples.py` — Batched fp16 inference, per-chunk WER, Tier 1 detection, resume support
-  - `build_hard_subset.py` — WER-bounded filtering (0.15-0.80), stratified per-source caps
-  - `filter_chunks_by_confidence.py` — Top-N selection by logprob/confidence
-  - `recover_shards.py` — Rebuild DatasetDict from shards after OOM
-  - `--init-from` in `train_whisper.py` — Load pre-trained adapter weights with fresh optimizer
-- **Alignment hardening** — Sharded Arrow writes (1000 rows/shard), 12GB memory cap, streaming to disk (5 GB RAM vs 190 GB before)
+Day-of-event workflow: [`operator_runbook.md`](./operator_runbook.md) (UI evidence
+refreshed by root after integration). First-time install:
+[`packaging/macos.md`](./packaging/macos.md), `bootstrap.sh`.
 
 ---
 
 ## Active Work
 
-### Pipeline refresh (WSL execution)
+Status, priority, dependencies and acceptance for every item below are in
+[`backlog.json`](./backlog.json); this section is the narrative.
 
-**Primary runbook:** [`docs/wsl_pipeline_refresh.md`](./wsl_pipeline_refresh.md)
+### Mac — integrate, then certify
 
-Ordered stages on the A2000 Ada box:
+1. **PR #192 integration** (`pr-192-integration`): root reconciles the overnight worktrees onto the reliability branch, re-runs the CPU suite and marks the draft ready. Main advances from v2026.13 only at that merge.
+2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): diagnose the CoreAudio/`InputStream` stall, make operator state depend on actual frames and health signals (reliability worktree drafts `pipeline_health.py`, `capture_worker.py`, `isolated_audio.py`), then run live EN and ES utterances with the audience display connected. #131 closes only on live-mic evidence.
+3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): active engineering on the frozen 45-second English screen — opt-in bounded scheduling and caption-delivery instrumentation are committed in the latency worktree, incremental STT/preview candidates are drafted. Measurement needs a visible browser (`visible-browser-timing-run`); natural-speech quality certification is a separate gate and does not block the engineering experiments.
+4. **Human and device gates:** natural Spanish references, blinded bilingual review, natural two-speaker audio (#133 gate), second physical output (#132 acceptance), Sunday dry run with a laptop stand-in (#134: full hymn + spoken segment + setup-to-first-caption timing + written note).
+5. **Active learning evidence (#137):** Review/export is implemented and fixture-tested; one real operator correction from a recorded session, exported and merged (dry run acceptable), is still required.
 
-1. Phase 4 full audio preprocess (`run_phase4_preprocess.sh`)
-2. Gemma 4 E4B domain SFT → GGUF (`run_gemma4_e4b_domain_sft.sh`, 8-canary sanity)
-3. W17 Whisper DoRA + hard-mix → CT2 + `benchmark_stt_engines.py` gate (must ≤ W16)
-4. Optional Parakeet EN+ES bench — adopt only if it beats W16/W17 on **both** languages; bilingual default stays Whisper until that gate ([`cuda_latency_proposal.md`](./cuda_latency_proposal.md) §3b)
-5. Mac transfer / Phase 7 A/B + live YT compare
-6. Phase 8 active learning (`merge_corrections.py` → retrain → `deploy_adapters.py`)
+### Equal-priority deployment targets
 
-**Then: CUDA latency** — [`docs/cuda_latency_proposal.md`](./cuda_latency_proposal.md) (runbook §7). MTP drafter is the only ~2× finals lever; do not revive E2B spec decode.
+- **Lite CPU inference** (`lite-cpu-inference`): implementation in progress in the lite worktree (profiles, lite preflight, TTS engine, llama runtime helpers); packaging prose owned by that agent. Certification on a CPU-only host is a separate step.
+- **Native Windows / RTX 2070** (`rtx2070-native-validation`): pending hardware after the lite profile lands; the v2026.13 MSI digest was verified without Windows execution.
 
-**Status notes:** W16 shipped in production CT2 path (7.25% fresh-eval WER). W17 is scripted in-repo, not yet trained. Scripts and garbage-filter hardening landed with the 2026-08 pipeline refresh (PR #162).
+### WSL — pipeline refresh (pending hardware)
 
-### Mac reliability and evaluation (v2026.14 candidate)
+Ordered runbook: [`wsl_pipeline_refresh.md`](./wsl_pipeline_refresh.md) — Phase 4 full
+preprocess → Gemma 4 E4B domain SFT → GGUF (8-canary sanity) → W17 DoRA + hard-mix → CT2
+(`benchmark_stt_engines.py` gate: W17 ≤ W16) → optional Parakeet EN bench → Mac transfer
+and Phase 7 A/B (#135) → Phase 8 active learning. Then the
+[CUDA latency proposal](./cuda_latency_proposal.md) (MTP drafter opt-in, `-fa on` retest,
+W16 HF fp16 / Parakeet probes); the v2026.9 followups (`-fa`, `-c 2048`, prompt-cache
+reuse, #175) are folded into it. Gemma 4 tuning results and next directions:
+[`gemma4_tuning/v1_results.md`](./gemma4_tuning/v1_results.md),
+[`gemma4_tuning/v3_directions.md`](./gemma4_tuning/v3_directions.md).
 
-Implemented code and validation gates are tracked separately in [the implementation status](mac_implementation_status.md). The target remains **sub-second median speech-end-to-caption delivery**, measured with schema 2 and visible browser acknowledgments. It is not achieved by the current measurements.
+### Experiments kept opt-in
 
-Final CPU validation after the setup changes includes **1,790 passed, 4 skipped**, 59.07% coverage, Ruff/mypy, and zero HTML5 Tidy warnings across all five displays. The earlier **3 cached MLX GPU tests passed**; later 24 synthetic routing replays separately cover post-setup pipeline execution. Real offline VAD CPU loads and isolated CT2 conversion/reuse also passed. CI-configured security checks pass; the final expanded Bandit run reports 27 medium B615 findings: the original 26 call sites plus one guarded full-commit download, with [scope and remaining pinning limitations documented](evaluation/mac_v2026_14_security.md). The full Mac runtime extras were installed and import-tested in an isolated environment, preserving `stt_env`. [Final local artifacts and installed EN/ES runtime evidence](evaluation/mac_v2026_14_installation.md) are complete, with exact artifact/source boundaries recorded.
+After the [48-run frozen screen](./evaluation/mac_v2026_14_screening/README.md) no
+combined configuration beat E4B + 0.5 s silence + 0.6 s cadence on both models, and the
+[24 synthetic routing probes](./evaluation/mac_v2026_14_routing/README.md) only proved the
+conservative Marian policy routes as designed. Shorter silence, final-aware partials,
+idle-only warmup, ONNX VAD, terminology prompt, conservative routing and the Gemma 4
+assistant drafter (#177) all stay opt-in. Any default change needs a matched both-model
+gain plus human review.
 
-1. **Reliability:** operator session identity, production metric schemas, verse polling, summary errors, startup readiness and drained SIGINT/SIGTERM shutdown are implemented. Controlled EN→ES→EN restarts, audience reconnect/history reset, pause/resume, a stable John 3:16 cue, Review persistence and Stop/summary have passed browser rehearsal.
-2. **Timing:** capture timestamps through buffering and cuts; separate silence, forced cuts and EOF; keep legacy values unchanged. Browser speech-end-to-ack is an upper bound including return-network time.
-3. **Installation:** backend-aware setup/preflight, shared pinned cache resolution, default EN/ES Piper voices, generated launchd install/uninstall and wheel/source-bundle guards are implemented. Mac VAD uses packaged Silero 6.2.1 without Torch Hub. Setup reuses working CT2 adapters or converts both pinned Marian directions into a managed cache with atomic publication; preflight/inference share its resolver. Real offline JIT/ONNX CPU loads and isolated two-direction CT2 conversion/reuse passed without changing `stt_env` or existing adapters. The final wheel/sdist/Mac ZIP passed build/install checks, including executable extracted launchers and a byte-identical wheel built from the ZIP. Active virtualenv/Conda precedence has fake-interpreter regression coverage.
-4. **Comparison:** [versioned manifests and reports](evaluation/README.md), 18 completed historical real-time replays with their code/configuration cohorts preserved, repeated identical E4B/E2B text inputs, independent STT inference and all 18 canaries. E2B is faster on the bounded text sample with different translations and fewer canary passes. Blinded bilingual review and approved natural-audio references remain required; unreviewed transcripts do not establish WER.
-5. **Experiments — complete:** [48/48 frozen runs](evaluation/mac_v2026_14_screening/README.md) exited zero across eight configurations × two models × three alternating pairs on a 45-second English clip. The 348 finals/3,184 partials support **no combined configuration**: gains varied by model, tails or first-partial delays regressed, and shorter silence changed captions; matched comparisons did not establish a gain across both models. E4B, 0.5 s silence and 0.6 s cadence stay default, all experiments opt-in. Visible final ACK coverage was 0/348. The separate [24/24 synthetic routing probes](evaluation/mac_v2026_14_routing/README.md) produced 72 finals/90 partials and exercised conservative Marian eligibility as intended in both languages/models, with packaged VAD provenance; visible ACK coverage was 0/72. Keep conservative routing opt-in. Longer/natural Spanish validation and human quality review still apply. MTP research is deferred.
-6. **Corrections:** live/post-session Review, independent transcript/translation approval, revisioned drafts, portable audio, provenance and training/evaluation separation are implemented. Only explicitly completed, unchanged sessions can export; running/failed/unknown sessions and unapproved data are blocked. No human approvals were fabricated for rehearsal.
-7. **Capability gates:** built-in Mac speaker synthesis/playback and controlled hymn/pause/restart rehearsal passed. Second physical output/hotplug, acoustic validation, natural two-speaker labels and a real church-hardware bilingual rehearsal remain pending. Offline Hindi generation completed for both models, but Hindi reference/quality review and live Hindi/Chinese remain later decisions.
-8. **Delivery:** final local artifacts are ready; version/tag/content guards and outside-checkout installation checks pass. Actual EN/ES inference exercised the r3 wheel; the final r4 differs only in the Conda shell resolver and generated inventory, with every Python/UI/manifest resource hash matched and separate launcher checks. A new release tag and publication remain pending. The obsolete v2026.12 MSI was removed from the v2026.13 release; its current MSI digest and embedded version were verified, without Windows execution. PyPI account setup/publication is explicitly pending at the user's request; published tags have not moved.
+---
 
-E4B stays the default. EN STT remains Parakeet and ES STT remains Whisper. Model selection controls require the measured speed/quality report and review first. CUDA experiments and model training remain separate work on the Windows machine.
+## Completed Work (historical)
 
-### Deferred followups (from v2026.9; the referenced `FOLLOWUPS.md` never existed — #175)
+### Phase 1: Infrastructure & Inference (done; v2026.1–v2026.6)
 
-1. Re-test `-fa on` against a newer llama.cpp build (the +56 % E4B regression was on b8782).
-2. Larger context (`-c 2048`) bench.
-3. Per-request / intra-request prompt-cache reuse for streaming partials (Gemma 4 SWA forces a full re-prefill per request today).
+- **Engines package** — ABCs (`STTEngine`, `TranslationEngine`, `TTSEngine`), MLX + CUDA implementations, factory auto-detection
+- **Whisper Large-V3-Turbo swap** — both partials and finals (Mac ES and CUDA still use it; Mac EN moved to Parakeet in v2026.13)
+- **CUDA streaming runtime** — `CUDAGemmaStreamingEngine` with TextIteratorStreamer, prompt cache, 4B→12B speculative decoding, VRAM tier detection (superseded for finals by llama.cpp in v2026.5)
+- **Dual-target inference** — `--backend auto|mlx|cuda`, `--no-ab`, `--low-vram`
+- **Unified config** — `settings.py` (pydantic-settings, `STARK_` prefix)
+- **Piper TTS** — EN + ES voices, ONNX runtime, WebSocket/WAV/local output, `--tts`
+- **Bidirectional language support** — `--lang en` / `--lang es`
+- **Pipeline overlap** — translation(N) concurrent with STT(N+1)
+- **5 display modes** — Audience, A/B, Mobile, Church, OBS overlay
+- **CI/CD** — GitHub Actions workflows (current count and names in `CLAUDE.md` § CI/CD), coverage gate in `test.yml`, Codecov, pre-commit, CalVer
 
-### Gemma 4 Evaluation (reference)
+### Phase 2: Data Collection (done; 2026-03)
 
-`benchmark_gemma4.py` / Phase 1A llama.cpp matrix remain the eval harnesses. Production CUDA finals stay **E4B Q4_K_M**; next accuracy lever is domain SFT of that model (stage 2 above), not a larger base on 16 GB.
+- **333 sermons cataloged**, 160+ downloaded, organized into `stt-data/{type}/{year}/`
+- **Deepgram Nova-3 oracle** — 35 sermons transcribed with 50 theological keyterms
+- **Tiered glossary** — Tier 1 (50 boost terms), Tier 2 (229 master terms)
+- **Data integrity** — SHA-256 lockfile, 2026-03-14 training cutoff, adapter health checks
+- **Evaluation sets** — 500 stratified verse holdout + 422 sermon eval chunks + fresh eval set (4 post-cutoff sermons)
+
+### Phase 3: TranslateGemma Fine-Tuning (done; superseded by Gemma 4 tuning)
+
+- **S1–S9 ablation sweep**; **S6 winner** (balanced 1:1 verse/sermon) — details in [`archive/training/gemma_tuning_test_matrix.md`](archive/training/gemma_tuning_test_matrix.md)
+- **Platense corpus misalignment** found 2026-04-29 and fixed in `verse_pairs_train_v2.jsonl` ([`platense_alignment_bug.md`](./platense_alignment_bug.md)); the sweep trained on partly misaligned pairs
+- **Gemma 4 program** replaced it: v1 → v1.1 → v2-cpo reached parity with stock E4B, Jacobo canary still failing ([`gemma4_tuning/v1_results.md`](./gemma4_tuning/v1_results.md))
+
+### Phase 4: Whisper LoRA (W16 deployed; W17 pending)
+
+- **W0–W9 ablation**, **W12 data scaling** (198K Deepgram-aligned chunks from 328 sermons), **W15 hard example mining** — [`archive/research/hard_mining.md`](archive/research/hard_mining.md), [`archive/v2026.5/w15_postmortem.md`](archive/v2026.5/w15_postmortem.md)
+- **W16** — production CUDA STT as CTranslate2 int8_float16; measurements and their definitions in [`archive/v2026.7/STT_BENCHMARK.md`](archive/v2026.7/STT_BENCHMARK.md)
+- **W17** — DoRA + hard-mix curriculum scripted (`training/run_w17_curriculum.sh`), not trained
+- **Alignment hardening** — sharded Arrow writes, memory cap, streaming to disk
+
+### Mac latency program (v2026.13, on main)
+
+PRs #180–191: measurement correction (legacy `e2e_latency_ms` is processing time),
+Parakeet EN STT, Marian CT2 on Mac CPU, replay harness, thread-safe MLX overlap.
+Numbers: [`archive/v2026.13/MAC_LATENCY.md`](archive/v2026.13/MAC_LATENCY.md).
+
+### Mac reliability and evaluation (v2026.14 candidate, local branch)
+
+Implemented: operator session identity and metric schemas, drained shutdown, schema 2
+timing, backend-aware setup/preflight with the shared resolver, packaged VAD, managed
+Marian CT2 cache, live/post-session Review with portable exports and evaluation/training
+separation, frozen manifests and the 48-run screen, local wheel/sdist/Mac ZIP checks.
+Validation counts, security scope and artifact hashes are recorded once in
+[`mac_implementation_status.md`](./mac_implementation_status.md) and
+[`evaluation/README.md`](./evaluation/README.md). Open gates are the human/device items
+under Active Work.
 
 ---
 
 ## Upcoming Phases
 
-### Phase 5: Adapter Evaluation & Transfer (Next)
+### Phase 5: Adapter Evaluation & Transfer (pending WSL artifacts; #135)
 
-- Transfer best Whisper + Gemma adapters to Mac — see refresh runbook §5
-- Re-run A/B comparison with fine-tuned vs base models
-- Live YouTube caption comparison with fine-tuned STT
-- Smoke test: **8** canary sentences (`tools/health_check.py --n-canaries 8`) + theological term audit
+- Transfer W16 CT2 and v2-cpo to the Mac — runbook §5
+- Live A/B vs stock (E4B finals; Parakeet vs W16 on the CPU faster-whisper path) with `tools/health_check.py --backend mlx --n-canaries 8`
+- Written ship/no-ship note; stock E4B stays default on no-ship
 
-### Phase 6: Active Learning Feedback Loop
+### Phase 6: Active Learning Feedback Loop (implemented path, evidence pending; #137)
 
-- Route low-confidence segments to operator review
-- Human correction → `tools/merge_corrections.py` into training data
-- Retrain on corrected data (repeat 2-4 cycles) — refresh runbook §6
-- Target: 20-40% relative WER reduction per early cycle; stop when &lt; 2% for 2 cycles
+- Route low-confidence segments to operator Review (implemented)
+- Human correction → dated corrections corpus → `tools/merge_corrections.py` (dry run acceptable for the first cycle)
+- Retrain on corrected data (2–4 cycles) — runbook §6; stop when the worst metric improves < 2 % relative for two cycles
 
-### Phase 7: Live Demo Deployment ✅ shipped as v2026.6
+### Phase 7: Live Demo Deployment — shipped as v2026.6
 
-- ✅ FastAPI + vanilla JS operator control plane (replaced the original Streamlit sketch)
-- ✅ Pre-flight gating (GPU / models / mic / adapter manifest / llama-server)
-- ✅ Mid-session controls (pause / resume / lang_flip / vad / fallback)
-- ✅ Live observability sparklines (VRAM, CPU, latency p50/p95, confidence)
-- ✅ Audio device enumeration + USB hotplug toast
-- ✅ Verse highlights + post-session summary trigger
-- ✅ systemd unit + launchd plist + bootstrap.sh for church PC install
-- See [`operator_runbook.md`](./operator_runbook.md) for the day-of-event workflow
+FastAPI + vanilla JS operator control plane, pre-flight gating, mid-session controls,
+observability sparklines, device enumeration, verse highlights, summary trigger,
+systemd/launchd/bootstrap install. Workflow: [`operator_runbook.md`](./operator_runbook.md).
+Deferred: macOS Shortcuts voice triggers.
 
-**Deferred patches:** live diarization on a rolling audio buffer (9.6.1 — wired behind `--diarize`,
-see [`live_diarization.md`](./live_diarization.md); gate still needs a two-speaker clip + HF_TOKEN),
-macOS Shortcuts for voice-command triggers (10).
+### Phase 8: Multilingual Expansion (Hindi & Chinese) — pending user decision
 
-### Phase 8: Multilingual Expansion (Hindi & Chinese)
+Gemma 4 and TranslateGemma support Hindi and Chinese; fine-tuning is domain adaptation
+only. The offline Hindi text probe
+([`evaluation/mac_v2026_14_hindi/README.md`](./evaluation/mac_v2026_14_hindi/README.md))
+is not the church-audio baseline #138 asks for.
 
-TranslateGemma natively supports Hindi and Chinese — fine-tuning is domain adaptation only.
+| Step | What |
+|------|------|
+| Zero-shot baseline | `target_lang_code="hi"` / `"zh-Hans"` through the live pipeline on church audio; note SOV partial garble |
+| Data preparation | biblical verse pairs (`bible-nlp/biblenlp-corpus`), glossary ≥ 100 terms |
+| Hindi / Chinese QLoRA | separate adapters, r=32; 768 / 512 max sequence |
+| Evaluation + integration | chrF++/COMET, adapter switching, display labels |
 
-| Phase | Duration | What |
-|-------|----------|------|
-| Zero-shot baseline | 1 day | Test with `target_lang_code="hi"` / `"zh-Hans"` |
-| Data preparation | 3-5 days | ~155K EN-HI + ~310K EN-ZH biblical verse pairs |
-| Hindi QLoRA | 1 night | r=32, 768 max_seq_length, separate adapter |
-| Chinese QLoRA | 1 night | r=32, 512 max_seq_length, separate adapter |
-| Evaluation + integration | 2-3 days | chrF++/COMET, adapter switching, display updates |
+Key decisions on record: Hindi → English partial + Hindi final; Chinese → 神 (Shen) for God.
 
-Key decisions: Hindi → English partial + Hindi final (SOV word order garbles partials); Chinese → 神 (Shen) for God (CUV majority edition).
+### Phase 9: Piper TTS Multi-Language (deferred)
 
-### Phase 9: Piper TTS Multi-Language
-
-- Fine-tune Piper voices per language from base checkpoints
-- Multi-channel audio routing (AudioFetch or virtual cables)
-- Scripts ready: `prepare_piper_dataset.py`, `train_piper.py`, `export_piper_onnx.py`, `evaluate_piper.py`
+Scripts ready: `prepare_piper_dataset.py`, `train_piper.py`, `export_piper_onnx.py`,
+`evaluate_piper.py`. Multi-channel routing code exists (Phase 10 below).
 
 ### Phase 10: Production Polish
 
-- ✅ Dedicated hardware auto-start (Phase 9.5 — systemd unit + launchd plist + bootstrap.sh)
-- ✅ Post-sermon summary trigger (Phase 9.6 — `/api/features/summary`)
-- ✅ Verse extraction wired into the live operator UI (Phase 9.6 — `/api/features/verses`)
-- ✅ 9.4.1 — Multi-channel TTS routing (#132) shipped: per-language device map, `--tts-device-en/es` by index or name, cached resolution with hotplug retry and default fallback, and persisted EN/ES operator output selectors. `--tts-device` remains the fallback for unlisted languages.
-- 9.6.1 — Live diarization on a rolling audio buffer (#133). **Code is in** (`--diarize`, default off): rolling WAV + `chunks.jsonl` export from `dry_run_ab`, `features/live_diarize.py --mode embed|pyannote` daemon (spawned by the pipeline, killed on exit), overlap assignment in `features/speaker_labels.py`, `speaker` on finals/CSV/JSONL/WebSocket, audience + operator caption prefix. **Gate not yet run** — needs `HF_TOKEN` (pyannote) or SpeechBrain ECAPA plus a two-speaker clip; p95 finals must stay within +50 ms vs `--diarize` off (`tools/replay_bench.py`). Design: [`live_diarization.md`](./live_diarization.md).
-- Continuous improvement loop: live inference → log diagnostics → retrain monthly (depends on Phase 6/8 active learning)
+- Done — dedicated hardware auto-start (systemd unit, launchd plist, `bootstrap.sh`)
+- Done — post-sermon summary trigger and live verse highlights in the operator UI (workflow evidence in the rehearsal; bilingual accuracy review pending)
+- **Implemented, acceptance pending** — 9.4.1 multi-channel TTS routing (#132): per-language device map, `--tts-device-en/es`, hotplug retry, persisted operator selectors, hardware-independent tests. Physical two-output verification is the open half.
+- **Implemented, gate not run** — 9.6.1 live diarization (#133): `--diarize`, rolling buffer, separate daemon, `speaker` on finals. Needs a two-speaker clip and the +50 ms p95 check ([`live_diarization.md`](./live_diarization.md)).
+- **Pending** — Sunday dry run (#134) on a laptop stand-in with live microphone; continuous improvement loop after Phases 6/8.
 
 ---
 
-## Observed Metrics
+## Observed Metrics (historical — see linked sources for definitions)
 
-### STT Performance
+### STT (2026-03, Whisper LoRA program)
 
-| Metric | Base (no fine-tune) | W12 (198K chunks) | Target |
-|--------|--------------------|--------------------|--------|
-| WER (church, fresh eval) | 21.41% | In progress | <10% |
-| WER (Scottish accent) | ~22-34% | — | <10% |
-| Accent WER gap | ~15-24% | — | <5% |
+| Metric | Base (no fine-tune) | Target | Source |
+|--------|--------------------|--------|--------|
+| WER (church, fresh eval) | 21.41 % normalized | < 10 % | `training/CLAUDE.md` § W12 |
+| WER (Scottish accent) | ~22–34 % | < 10 % | [`archive/research/accent_tuning_plan.md`](archive/research/accent_tuning_plan.md) |
 
-### Translation Performance
+W16 fresh-eval and 41-clip bench WER (different measurements, do not mix):
+[`archive/v2026.7/STT_BENCHMARK.md`](archive/v2026.7/STT_BENCHMARK.md).
 
-| Metric | TranslateGemma 4B (base) | S6 (fine-tuned 4B) | 12B (base) |
-|--------|--------------------------|---------------------|------------|
-| COMET | Baseline | -0.0002 vs 12B | Baseline |
-| Config | — | 1:1 verse/sermon | — |
+### Translation (2026-03, TranslateGemma S-sweep)
 
-### CUDA Inference (A2000 Ada 16GB)
+| Metric | S6 (fine-tuned 4B) vs 12B base |
+|--------|--------------------------------|
+| COMET | −0.0002 (tied) — [`archive/training/gemma_tuning_test_matrix.md`](archive/training/gemma_tuning_test_matrix.md) |
 
-| Component | Latency | VRAM |
-|-----------|---------|------|
-| faster-whisper large-v3 (fp16) | 5-10x real-time | ~5 GB |
-| TranslateGemma 4B (4-bit) | 2-3s/input | 3.0 GB |
-| TranslateGemma 12B (4-bit) | 2-3s/input | 7.3 GB |
-| Prompt cache savings | 50-80ms/call | — |
+Gemma 4 tuning results: [`gemma4_tuning/v1_results.md`](./gemma4_tuning/v1_results.md).
 
-### Mac Inference (M3 Pro 18GB, MLX)
+### CUDA inference
 
-| Component | Latency |
-|-----------|---------|
-| Partial (STT + MarianMT) | ~750ms |
-| Final 4B (STT + TranslateGemma) | ~1.1s |
-| Final 12B (STT + TranslateGemma) | ~2.6s |
-| Piper TTS | ~40ms/word EN, ~8ms/word ES |
+HF NF4 era (2026-03): [`archive/training/benchmark_training.md`](archive/training/benchmark_training.md).
+llama.cpp cutover and later tuning: [`archive/v2026.5/BENCHMARK.md`](archive/v2026.5/BENCHMARK.md),
+[`archive/v2026.9/GEMMA_OPTIM_PHASE2.md`](archive/v2026.9/GEMMA_OPTIM_PHASE2.md),
+[`archive/v2026.10/IQ4_XS_BENCHMARK.md`](archive/v2026.10/IQ4_XS_BENCHMARK.md),
+[`archive/v2026.11/IMATRIX_CALIBRATION.md`](archive/v2026.11/IMATRIX_CALIBRATION.md).
 
-> These are TranslateGemma-era figures. The Gemma 4 OptiQ E4B default measured 2176 ms medium p50 on 2026-08-30, but that run hit `max_tokens` on every call (EOS bug #172). Re-measured tables land with v2026.13 (`docs/archive/v2026.13/MAC_LATENCY.md`).
+### Mac inference
+
+TranslateGemma-era tables (2026-03) and the 2026-08-30 Gemma 4 run that hit `max_tokens`
+on every call (EOS bug #172) are superseded. Current measurements, with the
+speech-end/processing distinction: [`archive/v2026.13/MAC_LATENCY.md`](archive/v2026.13/MAC_LATENCY.md)
+and [`evaluation/README.md`](./evaluation/README.md).
 
 ---
 
@@ -240,25 +240,33 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 
 | Decision | Resolution |
 |----------|------------|
-| TranslateGemma data ratio | S6: balanced 1:1 verse/sermon |
-| CUDA Gemma loading | bitsandbytes 4-bit (NF4) |
-| 12B on 16GB GPU | 4-bit fits at 7.3 GB; 8-bit OOM |
-| Separate venvs | Yes — `requirements-mac.txt` + `requirements-nvidia.txt` |
-| STT model | Whisper Large-V3-Turbo (both Mac + CUDA) |
-| Pipeline threading | MLX: 2 workers (mlx >= 0.31.2 thread-local streams); CUDA: 2 workers |
-| Training data alignment | Deepgram word timestamps + faster-whisper chunk boundaries |
-| OOM mitigation | Sharded Arrow writes (1000 rows), 12GB memory cap |
+| Finals model family | Gemma 4 E4B — CUDA via llama.cpp Q4_K_M (v2026.5), Mac via OptiQ 4-bit (2026-08-30); TranslateGemma is opt-out |
+| CUDA Gemma loading | llama.cpp GGUF; HF NF4 kept as legacy fallback (PLE embeddings make it 14–15 GB) |
+| Mac EN STT | Parakeet TDT v3 MLX (v2026.13); Whisper large-v3-turbo stays for ES and CUDA (W16 CT2) |
+| Partials | Marian CT2 int8 — CUDA (v2026.8) and Mac CPU (v2026.13); HF fallback |
+| Mac defaults | E4B, 0.5 s silence, 0.6 s cadence frozen after the 48-run screen; all experiments opt-in |
+| E2B | Separately evaluated profile behind `--gemma4-size e2b`; not default until bilingual review |
+| Measurement | Schema 2 `speech_end_to_final_ms`; legacy `e2e_latency_ms` labeled processing time |
+| MTP / assistant drafter | Off on both platforms (#177 experimental; CUDA `--mtp` opt-in, unbenchmarked) |
+| Environments | pyproject extras `.[mlx]` / `.[cuda]` / `.[cpu]`; `requirements-*.txt` deprecated except the WSL training env |
+| Pipeline threading | 2 workers on MLX (≥ 0.31.2 thread-local streams) and CUDA; `--multiprocess` escape hatch (#176 implemented) |
+| Training data alignment | Deepgram word timestamps + faster-whisper chunk boundaries; corpus v2 after the Platense fix |
+| Deployment targets | Mac primary; lite CPU and native Windows/RTX 2070 equal priority |
+| Publishing | Source/issue publishing and final merge authorized; PyPI/package/release tags pending |
 
 ## Key Decisions (Pending)
 
-| Decision | When | Options |
-|----------|------|---------|
-| Gemma 4 vs TranslateGemma | After benchmark_gemma4.py results | E2B/E4B may outperform TG on theological text |
-| W15 curriculum iterations | After first mining cycle | 2-4 cycles typical for convergence |
-| Scottish accent data sources | Before accent tuning | User provides YouTube playlist URLs |
-| Hindi/Chinese timing | After Whisper fine-tuning stabilizes | Hindi first (higher demand) |
+| Decision | When | Options / owner |
+|----------|------|-----------------|
+| Hindi/Chinese timing | User decision | Hindi first (higher demand); live church-audio baseline first (#138) |
+| Natural Spanish recording source | User decision | Needed before any Spanish WER/quality claim |
+| E2B as default | After blinded bilingual review | Speed vs meaning/terminology tradeoff |
+| Production hardware | Before the Sunday dry run | Dedicated church PC vs portable Mac; laptop stand-in acceptable for #134 |
+| PyPI publication and release tag | After PR #192 merge | User choice; trusted publisher mapping pending |
+| W17 curriculum iterations | After Phase 4 on WSL | 2–4 cycles typical |
+| Scottish accent data sources | Before accent tuning | User provides playlist URLs |
 | TTS voice fine-tuning | Phase 9 | Fine-tune from Piper base vs train from scratch |
-| Production hardware | Phase 10 | Dedicated PC at church vs portable Mac |
+| Lite vs RTX 2070 certification order | After lite profile lands | Whichever hardware is available first |
 
 ---
 
@@ -266,16 +274,22 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 
 | Doc | Contents |
 |-----|----------|
-| [`backlog.json`](./backlog.json) | Machine-readable remaining tasks with status and acceptance |
+| [`backlog.json`](./backlog.json) | Machine-readable remaining tasks with status, certification and acceptance |
 | [`current_architecture.md`](./current_architecture.md) | v2026.14 candidate inference/operator contracts |
+| [`overnight_status.md`](./overnight_status.md) | Overnight worktree deliverables and unfinished areas |
 | [`mac_implementation_status.md`](./mac_implementation_status.md) | Local validation evidence (single source for test counts) |
+| [`evaluation/README.md`](./evaluation/README.md) | Frozen manifests, measurement definitions, reports |
+| [`mlx_cuda_parity.md`](./mlx_cuda_parity.md) | MLX ↔ CUDA semantic parity checklist |
+| [`cuda_latency_proposal.md`](./cuda_latency_proposal.md) | Unexecuted CUDA latency scripts and gates |
+| [`live_diarization.md`](./live_diarization.md) | Rolling-buffer diarization design and p95 budget |
+| [`gemma4_tuning/overview.md`](./gemma4_tuning/overview.md) | Gemma 4 E2B/E4B tuning program |
 | [`training_plan.md`](archive/training/training_plan.md) | Full training schedule, channel inventory, go/no-go gates |
-| [`accent_tuning_plan.md`](archive/research/accent_tuning_plan.md) | 4-week accent-diverse STT tuning plan (code complete) |
+| [`accent_tuning_plan.md`](archive/research/accent_tuning_plan.md) | Accent-diverse STT tuning plan |
 | [`hard_mining.md`](archive/research/hard_mining.md) | W15 hard example mining design |
 | [`multi_lingual.md`](archive/research/multi_lingual.md) | Hindi & Chinese actionable todo list |
-| [`multilingual_tuning_proposal.md`](archive/research/multilingual_tuning_proposal.md) | Full Hindi/Chinese research: corpora, glossaries, evaluation |
+| [`multilingual_tuning_proposal.md`](archive/research/multilingual_tuning_proposal.md) | Full Hindi/Chinese research |
 | [`rtx2070_feasibility.md`](archive/research/rtx2070_feasibility.md) | RTX 2070 hardware analysis |
 | [`fast_stt_options.md`](archive/research/fast_stt_options.md) | Lightning-whisper-mlx feasibility (not viable) |
 | [`projection_integration.md`](archive/research/projection_integration.md) | OBS/NDI/ProPresenter integration |
 | [`turbo_inference.md`](archive/research/turbo_inference.md) | Turbo model inference details |
-| [`data_pipeline_status.md`](archive/training/data_pipeline_status.md) | Data pipeline current state |
+| [`data_pipeline_status.md`](archive/training/data_pipeline_status.md) | Data pipeline state (2026-03) |

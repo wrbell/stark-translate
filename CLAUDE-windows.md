@@ -1,11 +1,24 @@
 # CLAUDE-windows.md — Windows/WSL Training Environment Guide
 
-> **Machine:** Windows Desktop, WSL2/Ubuntu, NVIDIA A2000 Ada (16GB VRAM), 64GB RAM
-> **Role:** Audio preprocessing, data quality assessment, fine-tuning (Whisper + Gemma LoRA), feedback loop retraining
+> **Machine:** Windows Desktop, WSL2/Ubuntu, NVIDIA A2000 Ada (16 GB VRAM), 64 GB RAM
+> **Role:** audio preprocessing, data quality assessment, fine-tuning (Whisper LoRA, Gemma 4
+> QLoRA/CPO), adapter export, CUDA inference benchmarks
 > **Parent doc:** [`CLAUDE.md`](./CLAUDE.md) · **Backlog:** [`docs/backlog.json`](docs/backlog.json)
+> · **Training guide:** [`training/CLAUDE.md`](training/CLAUDE.md)
 >
+> **Status (2026-09-09):** nothing ran on this machine tonight. Phase 4 preprocess, the
+> Gemma 4 E4B domain SFT, W17 and the [CUDA latency proposal](docs/cuda_latency_proposal.md)
+> are scripted and pending hardware. Long code samples below are the original design
+> notes; the checked-in scripts in `training/` are authoritative where they differ, and
+> `train_gemma4.py` / `train_gemma4_cpo.py` / `export_gguf.py` still carry `UNTESTED`
+> headers for the full domain run.
+>
+> **CUDA inference on this box (v2026.8+):** W16 Whisper CT2 (`adapters/whisper_turbo_ct2/active`),
+> Marian CT2 int8_float16 partials, Gemma 4 E4B Q4_K_M finals via `start_server.sh`
+> (llama.cpp pin `b10883`, `--no-draft` default, `--mtp` opt-in). HF NF4 Gemma is legacy.
 > Lite CPU and native Windows/RTX 2070 inference are equal-priority deployment targets;
-> packaging docs are owned by the lite overnight agent.
+> the lite profile is being implemented in another worktree and its packaging docs are
+> owned by that agent; 2070 certification needs the hardware.
 
 ---
 
@@ -14,12 +27,13 @@
 When this machine is ready for the next training cycle, follow the ordered checklist in
 [`docs/wsl_pipeline_refresh.md`](./docs/wsl_pipeline_refresh.md):
 
-1. Phase 4 full audio preprocess → `phase4_status.json`
-2. Gemma 4 E4B domain SFT → GGUF (`run_gemma4_e4b_domain_sft.sh`)
-3. W17 Whisper DoRA + hard-mix → CT2 + STT bench gate
-4. Optional Parakeet EN-only bench (do not replace bilingual Whisper default)
-5. Mac transfer / Phase 7 A/B
+1. Phase 4 full audio preprocess → `stark_data/cleaned/phase4_status.json`
+2. Gemma 4 E4B domain SFT → GGUF (`run_gemma4_e4b_domain_sft.sh`, 8-canary sanity)
+3. W17 Whisper DoRA + hard-mix → CT2 + `tools/benchmark_stt_engines.py` gate (W17 ≤ W16)
+4. Optional Parakeet EN-only bench on CUDA (the CUDA bilingual default stays Whisper; the Mac already uses Parakeet MLX for EN)
+5. Mac transfer / Phase 7 A/B (#135)
 6. Phase 8 active-learning loop (`merge_corrections.py` → retrain → deploy)
+7. CUDA latency proposal (`scripts/cuda/*.sh`, runbook §7)
 
 Env setup below must be green before that runbook.
 
@@ -377,6 +391,10 @@ def compute_baseline_wer(assessment_path):
 ---
 
 ## Phase 4: Transcription (`training/transcribe_church.py`)
+
+> **Historical.** Whisper pseudo-labels were the original plan; since the W12 runs the
+> label source is the Deepgram Nova-3 oracle below (`prepare_whisper_dataset.py --gt-source deepgram`).
+> Keep this path only as a fallback when Deepgram output is unavailable.
 
 Generate clean labels using Whisper large-v3 (not YouTube auto-captions).
 
@@ -843,7 +861,16 @@ if __name__ == "__main__":
     fine_tune_whisper()
 ```
 
-### TranslateGemma QLoRA (`training/train_gemma.py`) — Biblical Domain Adaptation
+### TranslateGemma QLoRA (`training/train_gemma.py`) — Biblical Domain Adaptation (historical)
+
+> **Superseded by the Gemma 4 program** ([`docs/gemma4_tuning/overview.md`](docs/gemma4_tuning/overview.md)):
+> `training/train_gemma4.py` (Unsloth QLoRA SFT, E2B and E4B trained separately, PLE frozen,
+> `enable_thinking=False`), `training/train_gemma4_cpo.py` (preference optimization) and
+> `training/export_gguf.py` (merge → GGUF Q4_K_M). The S1–S9 sweep below trained on the
+> pre-fix corpus (`verse_pairs_train.jsonl`); use `verse_pairs_train_v2.jsonl`
+> ([`docs/platense_alignment_bug.md`](docs/platense_alignment_bug.md)). Results so far:
+> [`docs/gemma4_tuning/v1_results.md`](docs/gemma4_tuning/v1_results.md) — parity with stock
+> E4B, Jacobo canary still failing (#136); stock E4B remains the production default.
 
 TranslateGemma (Jan 2026, built on Gemma 3) supports 55 languages / ~500 pairs including EN→ES. The 4B variant loads at ~2.6 GB in 4-bit via bitsandbytes. Must follow its exact chat template with `source_lang_code` / `target_lang_code` fields.
 
@@ -1288,35 +1315,33 @@ python training/train_whisper.py -d /path/to/hard_subset_dataset \
 
 ## Model Transfer to Mac
 
-After training, copy LoRA adapter folders to the Mac:
+Export first, then copy the **exported** artifacts — the Mac inference engines do not load
+raw PEFT adapters for STT:
+
+| Artifact | Export | Mac consumer |
+|----------|--------|--------------|
+| Whisper LoRA (W16/W17) | `training/export_ct2.py` → CTranslate2 int8_float16 (built-in canary sanity gate) | `FasterWhisperEngine` on CPU for A/B only; the Mac EN default is Parakeet MLX and ES is mlx-whisper, neither loads LoRA |
+| Gemma 4 QLoRA | `training/export_gguf.py` → Q4_K_M GGUF for CUDA; MLX uses the safetensors adapter directory via `--adapter-dir` | `MLXGemmaEngine` (`--adapter-dir`), gated by `tools/health_check.py --backend mlx` (8 canaries) |
+| Marian CT2 | `scripts/convert_marian_ct2.py --quantization int8` | `adapters/marian_ct2/<dir>/active` (setup reuses, never modifies) |
 
 ```bash
-# From WSL — adapters are small (~60MB each)
-ls -la /mnt/c/Users/YourName/Projects/fine_tuned_whisper_mi/
-# Should contain: adapter_config.json, adapter_model.bin (or .safetensors)
+# From WSL — adapters are small; verify contents before copying
+ls -la fine_tuned_gemma4_e4b_v1/          # adapter_config.json + adapter_model.safetensors
+ls -la adapters/whisper_turbo_ct2/active/ # model.bin + config.json (CT2)
 
-# Transfer options:
-# 1. USB drive
-# 2. Network share (scp, rsync)
-# 3. AirDrop (copy to Windows first, then AirDrop from iPhone/iPad)
-
-# On Mac — place in project root
-cp -r /path/to/fine_tuned_whisper_mi ./project_dir/
-cp -r /path/to/fine_tuned_gemma_mi_A ./project_dir/
-cp -r /path/to/fine_tuned_gemma_mi_B ./project_dir/
+# Transfer: scp/rsync (docs/deploy.md pipeline once SSH keys exist), USB, or AirDrop
+# On Mac — register into the adapter registry, then gate
+python tools/manage_adapters.py register --adapter <dir> --model <name> --eval-file <metrics.json>
+python tools/health_check.py --backend mlx --adapter <dir>
+python tools/manage_adapters.py activate --model <name> --version <version> --base-model <hf_repo>
 ```
 
-Verify on Mac:
+`activate` runs the health check itself; its built-in base-model map only knows the
+TranslateGemma names (`gemma_4b`, `gemma_12b`), so pass `--base-model` explicitly for
+Gemma 4 adapters.
 
-```python
-# Quick smoke test
-from peft import PeftModel
-from transformers import WhisperForConditionalGeneration
-
-base = WhisperForConditionalGeneration.from_pretrained("distil-whisper/distil-large-v3.5")
-model = PeftModel.from_pretrained(base, "./fine_tuned_whisper_mi")
-print("Adapter loaded successfully:", model.peft_config)
-```
+Offline PEFT smoke tests (`PeftModel.from_pretrained(...)`) remain valid for evaluation
+on either machine but are not part of the live Mac path.
 
 ---
 

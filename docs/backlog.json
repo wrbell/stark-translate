@@ -1,174 +1,225 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "last_updated": "2026-09-09",
   "integration": {
     "main_release_tag": "v2026.13",
-    "main_head_note": "main at 09e4679; v2026.13 PRs #180–191 merged",
+    "main_head_note": "main at 09e4679; v2026.13 PRs #180–191 merged. main stays v2026.13 until the authorized final merge.",
     "local_branch": "codex/mac-reliability-roadmap",
     "local_base": "5154fb9",
     "local_version": "2026.14.0.0",
-    "publication": "pending_by_user_choice",
-    "distinction": "Items marked implemented or validated below exist on the local reliability branch unless noted as main-only. Do not treat them as released on main or PyPI until root integration supplies merge/tag evidence."
+    "draft_pr": "[PR #192](https://github.com/wrbell/stark-translate/pull/192) — OPEN DRAFT, base `main` ← `codex/mac-reliability-roadmap`; not merged. Root is integrating overnight operator, lite, latency and failure-recovery work before marking it ready.",
+    "publication": "Source and issue publishing and the final merge to main are authorized by the user. PyPI publication, package artifacts and release tags remain pending by user choice.",
+    "distinction": "Items marked implemented or validated exist on the local reliability branch (or in an overnight worktree awaiting integration) unless noted as main-only. Nothing below is released on main or PyPI until root supplies merge/tag evidence. Certification records whether the item's own acceptance was met; implementation alone does not close an issue."
+  },
+  "status_definitions": {
+    "in_progress": "Active engineering right now; code may live uncommitted in an overnight worktree and is pending integration.",
+    "implemented": "Code exists on the local branch; the item's acceptance has not been certified with recorded evidence.",
+    "validated": "Acceptance met with recorded local evidence (see mac_implementation_status.md and docs/evaluation).",
+    "experimental": "Opt-in path that stays off by default until a measured, reviewed gain exists.",
+    "pending_input_or_hardware": "Blocked on human input, approved references, or hardware/device access.",
+    "deferred": "Intentionally postponed; often a pending user decision."
   },
   "defaults": {
     "mac_inference": {
-      "stt_en": "parakeet-mlx",
+      "stt_en": "parakeet-mlx (mlx-community/parakeet-tdt-0.6b-v3)",
       "stt_es": "mlx-whisper large-v3-turbo",
-      "partial_translation": "marian_ct2_cpu_int8_with_hf_fallback",
-      "final_translation": "gemma4_e4b_optiq",
-      "optional_fast_final": "gemma4_e2b via --gemma4-size e2b",
-      "vad": "packaged_silero_6_2_1",
+      "partial_translation": "Marian CT2 int8 on CPU (adapters/marian_ct2 or managed cache; HF fallback)",
+      "final_translation": "Gemma 4 E4B OptiQ (mlx-community/gemma-4-e4b-it-OptiQ-4bit)",
+      "optional_fast_final": "Gemma 4 E2B OptiQ via --gemma4-size e2b (separately evaluated; not default)",
+      "vad": "packaged Silero 6.2.1 (torch); ONNX opt-in",
       "silence_seconds": 0.5,
       "partial_cadence_seconds": 0.6,
-      "mtp": "off"
+      "mtp": "off (--mts never loads under mlx-lm 0.31.x; engines/mlx_spec.py probe only)"
     },
     "measurement": {
-      "schema2_speech_end_to_final_ms": "estimated speech end → final payload ready",
-      "speech_end_to_ack_upper_bound_ms": "visible browser render + return network; upper bound only",
-      "legacy_e2e_latency_ms": "archived processing time after submission; not speech-end-to-display"
+      "schema2_speech_end_to_final_ms": "estimated speech end (last VAD-positive frame) → final payload ready on the server",
+      "speech_end_to_ack_upper_bound_ms": "server send → visible browser render acknowledgment; includes return-network time; upper bound only",
+      "legacy_e2e_latency_ms": "archived processing time after submission; not speech-end-to-display",
+      "source": "docs/evaluation/README.md and docs/archive/v2026.13/MAC_LATENCY.md"
     },
     "quality_policy": {
-      "partials": "fast revisable previews (Marian CT2 CPU)",
-      "finals": "careful quality (Gemma 4 E4B default; E2B opt-in only after measured tradeoff review)"
+      "partials": "fast, revisable previews (Marian CT2 on CPU)",
+      "finals": "careful quality (Gemma 4 E4B default; E2B opt-in only after bilingual review of the measured tradeoff)"
     },
     "targets": {
-      "lite_cpu_inference": "equal_priority_with_rtx2070",
-      "native_windows_2070": "equal_priority_with_lite_cpu",
-      "caption_delivery_goal": "sub_second_median_not_achieved"
+      "mac_mlx": "primary path documented; the only target exercised tonight",
+      "lite_cpu_inference": "equal priority with RTX 2070; implementation in progress in the lite worktree",
+      "native_windows_rtx2070": "equal priority with lite CPU; execution on hardware pending",
+      "caption_delivery_goal": "sub-second median speech-end-to-caption; active engineering, not achieved"
     }
   },
   "items": [
     {
-      "id": "mac-defaults-frozen",
-      "title": "Retain Mac production defaults after 48-run screen",
-      "status": "validated",
+      "id": "pr-192-integration",
+      "title": "Integrate overnight work into draft PR #192 and finish the authorized merge",
+      "status": "in_progress",
+      "certification": "pending",
+      "priority": "P0",
+      "machine": "any",
+      "dependencies": [],
+      "sources": [
+        "https://github.com/wrbell/stark-translate/pull/192",
+        "docs/overnight_status.md"
+      ],
+      "acceptance": "PR #192 marked ready with integrated operator, lite, latency and failure-recovery changes, CI green, and root-recorded evidence; main advances from v2026.13 only at that merge.",
+      "notes": "Root owns integration and GitHub delivery. Source/issue publishing and the final merge are authorized; PyPI, package artifacts and release tags stay pending.",
+      "next_action": "Root: reconcile the overnight worktrees (docs, lite, latency, operator-ui, reliability, issue-evidence) onto the PR branch and re-run the CPU suite before marking ready."
+    },
+    {
+      "id": "mac-live-mic-stall",
+      "title": "Built-in microphone capture stalled; operator showed RUNNING without audio",
+      "status": "in_progress",
+      "certification": "pending",
       "priority": "P0",
       "machine": "mac",
       "dependencies": [],
       "sources": [
-        "docs/evaluation/mac_v2026_14_screening/README.md",
-        "docs/mac_implementation_status.md"
+        "operator_app/pipeline_manager.py",
+        "tools/audio_bridge_client.py",
+        "docs/overnight_status.md"
       ],
-      "acceptance": "No combined experiment beats E4B + 0.5 s silence + 0.6 s cadence across both models; defaults unchanged.",
-      "next_action": "Keep experiments opt-in; require human review before any default change."
-    },
-    {
-      "id": "caption-delivery-goal",
-      "title": "Sub-second median speech-end-to-caption delivery",
-      "status": "pending_input_or_hardware",
-      "priority": "P0",
-      "machine": "mac",
-      "dependencies": ["natural-spanish-refs", "bilingual-blinded-review", "visible-browser-timing-run"],
-      "sources": ["docs/mac_implementation_status.md", "docs/evaluation/README.md"],
-      "acceptance": "Schema 2 speech_end_to_final_ms and visible ACK establish median under 1000 ms on natural bilingual speech with approved references.",
-      "next_action": "Run frozen visible-browser replay after human reference gates; do not pool historical cohorts."
+      "acceptance": "A live built-in-microphone session produces partial and final captions on the audience display; operator status reflects actual audio frames rather than the CSV header; a stalled input stream is detected and surfaced within seconds.",
+      "evidence": [
+        "2026-09-09 23:32 session 20260909_233204_799019_en (audio_source=mic): models loaded, 'Listening...' printed, audience page fetched, then no frames; session_lifecycle stayed status=running; partials file empty.",
+        "Operator UI derived RUNNING from the CSV header while the audience display stayed disconnected; a separate sounddevice sd.rec probe also stalled.",
+        "File-replay sessions 20260909_233546_027169_en and 20260909_233823_034893_es (audio_source=file) completed with exit 0 on the same build; they do not exercise the microphone path."
+      ],
+      "notes": "User explicitly deferred live microphone and physical-device checks until tomorrow. The reliability worktree is drafting isolated capture/health helpers; nothing is integrated yet.",
+      "next_action": "Reproduce with CoreAudio permission and device enumeration logging, add a frame-arrival health check that fails Start when no audio arrives, then re-run live EN and ES microphone sessions."
     },
     {
       "id": "issue-131-smoke",
-      "title": "Post-dormancy operator smoke (#131)",
-      "status": "validated",
+      "title": "Post-dormancy boot and operator smoke (#131)",
+      "status": "in_progress",
+      "certification": "pending",
       "priority": "P0",
       "machine": "mac",
-      "dependencies": [],
+      "dependencies": ["mac-live-mic-stall"],
       "sources": ["https://github.com/wrbell/stark-translate/issues/131"],
-      "acceptance": "Operator UI loads; partial + final on audience display; factory prefers configured adapters.",
-      "next_action": "Close #131 after root merge confirms same checks on main; local controlled rehearsal passed without fabricating approvals."
+      "issue_acceptance": "Operator UI loads, one partial + one final appear on audience display, no uncaught errors in the session log — including one live mic utterance EN→ES and ES→EN and confirmation that the factory prefers the configured adapters.",
+      "acceptance": "Live built-in-microphone EN→ES and ES→EN utterances render a partial and a final on the audience display with clean session logs; controlled file replay alone does not satisfy the issue.",
+      "evidence": [
+        "Controlled file-replay EN and ES sessions rendered captions and exited 0; review draft recovery passed (2026-09-09, base 5154fb9).",
+        "Live microphone attempt stalled the same night (see mac-live-mic-stall)."
+      ],
+      "next_action": "After the mic stall fix, run one live EN and one live ES utterance through the operator UI with the audience display connected and keep the session logs as evidence; root closes #131 only then."
     },
     {
       "id": "issue-134-sunday-dry-run",
-      "title": "Sunday dry-run on church hardware (#134)",
+      "title": "Dry-run with the operator runbook (#134)",
       "status": "pending_input_or_hardware",
+      "certification": "pending",
       "priority": "P0",
       "machine": "mac",
-      "dependencies": ["physical-second-output", "natural-two-speaker"],
+      "dependencies": ["issue-131-smoke"],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/134",
         "docs/operator_runbook.md"
       ],
-      "acceptance": "Written dry-run note with time-to-first-caption and non-technical operator blockers filed as issues.",
-      "next_action": "Schedule service rehearsal with natural bilingual speech and real audio hardware; controlled hymn rehearsal does not close this gate."
+      "issue_acceptance": "Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.",
+      "acceptance": "Written dry-run note with setup-to-first-caption timing, one full hymn and one spoken segment captured through the live microphone, and follow-up issues filed for non-technical operator blockers. A laptop stand-in is acceptable; church hardware is not mandatory.",
+      "notes": "The controlled hymn/pause/restart rehearsal used file replay and TTS; it does not provide the live-mic timing or the human walk-through the issue requires.",
+      "next_action": "Schedule a laptop stand-in walk-through once live mic capture works; record time-to-first-caption and file UX issues."
     },
     {
       "id": "issue-132-tts-routing",
-      "title": "Multi-channel TTS routing (9.4.1 / #132)",
+      "title": "Multi-channel TTS routing code and tests (9.4.1 / #132)",
       "status": "implemented",
+      "certification": "pending",
       "priority": "P1",
       "machine": "mac",
       "dependencies": [],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/132",
-        "docs/roadmap.md",
-        "tests/test_phase9_4_1_tts_device.py"
+        "tests/test_tts_multichannel.py",
+        "tests/test_phase9_4_1_tts_device.py",
+        "settings.py"
       ],
-      "acceptance": "Per-language device map, operator persistence, hotplug retry; EN and ES routable independently.",
-      "next_action": "Close #132 after root merge; validate acoustic playback on second physical output separately."
+      "issue_acceptance": "Operator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.",
+      "acceptance": "Hardware-independent part: per-language output map (`--tts-device-en/es`, `STARK_TTS_OUTPUT_DEVICES`), operator persistence and hotplug retry covered by tests. Physical part: an operator routes EN and ES to two real outputs and hears each — tracked as `physical-second-output`.",
+      "evidence": [
+        "tests/test_tts_multichannel.py and tests/test_phase9_4_1_tts_device.py pass in the recorded CPU suite (device enumeration mocked).",
+        "Built-in MacBook speaker playback calls completed in the controlled rehearsal; no second physical device was used."
+      ],
+      "next_action": "Keep #132 open until physical-second-output passes; then root closes both together."
     },
     {
       "id": "physical-second-output",
-      "title": "Second physical audio output validation",
+      "title": "Second physical audio output: selection, unplug/replug, audible playback",
       "status": "pending_input_or_hardware",
+      "certification": "pending",
       "priority": "P1",
       "machine": "mac",
-      "dependencies": [],
+      "dependencies": ["issue-132-tts-routing"],
       "sources": ["docs/mac_implementation_status.md"],
-      "acceptance": "Unplug/replug, device selection persistence, and acoustic playback verified on non-built-in output.",
-      "next_action": "Exercise church USB/interface path; built-in speaker rehearsal is insufficient."
+      "acceptance": "EN and ES TTS routed to two distinct real outputs, device choice persists across restart, unplug/replug re-resolves the named route, and playback is audibly verified.",
+      "notes": "User deferred physical-device checks until tomorrow.",
+      "next_action": "Exercise a USB/interface output plus the built-in speaker on the Mac; record the session and device list."
     },
     {
       "id": "issue-133-diarize-gate",
-      "title": "Live diarization gate (9.6.1 / #133)",
+      "title": "Live diarization on a rolling buffer (9.6.1 / #133)",
       "status": "implemented",
+      "certification": "pending",
       "priority": "P1",
       "machine": "mac",
       "dependencies": ["natural-two-speaker"],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/133",
         "docs/live_diarization.md",
-        "features/live_diarize.py"
+        "features/live_diarize.py",
+        "features/speaker_labels.py"
       ],
-      "acceptance": "Code behind --diarize (default off) with speaker on finals/CSV/WebSocket; p95 finals within +50 ms vs off on two-speaker clip.",
-      "next_action": "Run tools/replay_bench.py gate with HF_TOKEN or SpeechBrain ECAPA and human-labeled two-speaker audio."
+      "issue_acceptance": "Two-speaker dry-run shows distinct speaker labels on finals without blowing p95 caption latency. Offline path still works.",
+      "acceptance": "With `--diarize`, a natural two-speaker clip yields distinct speaker labels on finals, final p95 stays within +50 ms of `--diarize` off (tools/replay_bench.py), and the offline pyannote path still runs.",
+      "notes": "Code is in: rolling buffer, separate daemon (`embed` or `pyannote` mode), speaker on finals/CSV/JSONL/WebSocket. The gate has not been run; it needs HF_TOKEN or SpeechBrain ECAPA plus labeled two-speaker audio.",
+      "next_action": "Run the replay_bench gate on a two-speaker clip once one exists; keep default off."
     },
     {
       "id": "natural-two-speaker",
-      "title": "Natural two-speaker audio and human transition labels",
+      "title": "Natural two-speaker audio with human transition labels",
       "status": "pending_input_or_hardware",
+      "certification": "pending",
       "priority": "P1",
       "machine": "mac",
       "dependencies": [],
       "sources": ["docs/mac_implementation_status.md"],
-      "acceptance": "Labeled natural clip with human speaker-transition ground truth available for diarization and service rehearsal.",
-      "next_action": "Obtain or record church two-speaker segment; synthetic routing probes do not substitute."
+      "acceptance": "A natural church clip with two speakers and human-labeled speaker transitions available for the diarization gate and the service rehearsal.",
+      "next_action": "Record or obtain a two-speaker segment; synthetic routing probes do not substitute."
     },
     {
       "id": "natural-spanish-refs",
-      "title": "Human-reviewed natural Spanish references (≥50 utterances)",
+      "title": "Human-reviewed natural Spanish references",
       "status": "pending_input_or_hardware",
+      "certification": "pending",
       "priority": "P1",
       "machine": "mac",
       "dependencies": [],
       "sources": ["docs/mac_implementation_status.md", "docs/evaluation/README.md"],
-      "acceptance": "At least 50 approved natural Spanish utterances per language direction policy; no WER claim without approval.",
-      "next_action": "User to supply natural Spanish recording location; 11 Spanish candidates exist unapproved."
+      "acceptance": "At least 50 approved natural utterances per language; no WER or natural-audio acceptance claim before approval.",
+      "notes": "50 English and 11 Spanish candidates exist, all unapproved. The user has no natural Spanish recording location yet; the synthetic Piper Spanish clip stays separate.",
+      "next_action": "User supplies a natural Spanish source; then annotate via tools/mac_evaluation.py annotate."
     },
     {
       "id": "bilingual-blinded-review",
-      "title": "Blinded bilingual meaning and terminology review",
+      "title": "Blinded bilingual review of meaning errors and terminology",
       "status": "pending_input_or_hardware",
+      "certification": "pending",
       "priority": "P1",
       "machine": "mac",
-      "dependencies": ["natural-spanish-refs"],
+      "dependencies": [],
       "sources": [
         "docs/evaluation/mac_v2026_14_quality/comparison.md",
-        "docs/mac_implementation_status.md"
+        "docs/evaluation/README.md"
       ],
-      "acceptance": "Human review of meaning errors and terminology preferences completed; E2B speed tradeoff documented before any default change.",
-      "next_action": "Review bounded E4B vs E2B comparison outputs; do not switch default on text-only canary counts alone."
+      "acceptance": "A bilingual reviewer completes blind_review.jsonl for the E4B/E2B comparison; the E2B speed tradeoff is accepted or rejected on meaning and terminology, not canary counts alone.",
+      "next_action": "Hand the blind review form to a reviewer; keep review_key.jsonl separate. Do not change the default before this."
     },
     {
       "id": "visible-browser-timing-run",
-      "title": "Frozen visible-browser timing run",
+      "title": "Frozen timing run with a visible browser (non-zero ACK coverage)",
       "status": "pending_input_or_hardware",
+      "certification": "pending",
       "priority": "P1",
       "machine": "mac",
       "dependencies": [],
@@ -176,269 +227,404 @@
         "docs/evaluation/mac_v2026_14_screening/README.md",
         "docs/evaluation/mac_v2026_14_routing/README.md"
       ],
-      "acceptance": "Non-zero visible final ACK coverage on acceptance configuration with schema 2 fields recorded.",
-      "next_action": "Repeat replay with audience display connected; 48-run screen and 24 routing probes had 0/348 and 0/72 ACK coverage."
+      "acceptance": "Replay on the unlocked Mac with the audience display connected records schema 2 speech_end_to_final_ms and non-zero visible final ACK coverage for the acceptance configuration.",
+      "notes": "The 48-run screen and 24 routing probes recorded 0/348 and 0/72 visible ACKs; the controlled operator rehearsal is separate evidence.",
+      "next_action": "Re-run the baseline replay with a visible audience tab and keep the display_metrics JSONL."
+    },
+    {
+      "id": "caption-delivery-goal",
+      "title": "Sub-second median speech-end-to-caption delivery",
+      "status": "in_progress",
+      "certification": "pending",
+      "priority": "P0",
+      "machine": "mac",
+      "dependencies": ["visible-browser-timing-run"],
+      "sources": [
+        "docs/mac_implementation_status.md",
+        "docs/evaluation/README.md",
+        "docs/archive/v2026.13/MAC_LATENCY.md"
+      ],
+      "acceptance": "Median schema 2 speech_end_to_final_ms under 1000 ms on the frozen real-time baseline with visible ACKs, without regressing final quality; natural-speech quality certification (references, bilingual review) is a separate gate and must not be pooled with historical cohorts.",
+      "notes": "Active Mac engineering: the latency worktree committed opt-in bounded scheduling and caption-delivery instrumentation (codex/overnight-latency 1a8470c) and is drafting incremental STT/preview candidates; none of it is integrated or measured yet. Independent engineering experiments proceed on the frozen English screen without waiting for Spanish references; the 48-run screen rejected shorter silence and combined tweaks under the current pipeline.",
+      "next_action": "Integrate and measure the scheduling experiment on the frozen screen with a visible browser; keep every change opt-in until a matched gain is shown on both models."
+    },
+    {
+      "id": "overnight-latency-scheduling",
+      "title": "Opt-in bounded scheduling and caption delivery instrumentation",
+      "status": "in_progress",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "mac",
+      "dependencies": [],
+      "sources": ["docs/overnight_status.md"],
+      "acceptance": "Merged into the PR branch behind opt-in flags with tests; a frozen-screen replay shows a matched delivery improvement on both models or the experiment is recorded as rejected.",
+      "notes": "codex/overnight-latency commit 1a8470c adds tools/latency_scheduler.py, tools/caption_delivery.py, tools/latency_experiments.py, tools/latency_trace.py and tests; uncommitted incremental_stt.py / preview_candidates.py drafts exist. Not on the PR branch.",
+      "next_action": "Root integrates; then run tools/mac_evaluation.py experiments with a visible browser."
+    },
+    {
+      "id": "lite-cpu-inference",
+      "title": "Lite CPU inference profile (no GPU) — implementation",
+      "status": "in_progress",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "any",
+      "dependencies": [],
+      "sources": ["docs/packaging/pypi.md", "docs/overnight_status.md"],
+      "acceptance": "A documented CPU-only profile installs from the `cpu` extra, passes setup/preflight, and runs EN/ES file replay end to end on a machine without a GPU; smoke evidence recorded.",
+      "notes": "The lite worktree has uncommitted profile, preflight, TTS engine and llama runtime changes plus setup/preflight edits; not integrated. Packaging documentation is owned by the lite agent. Implementation is distinct from certification on target hardware.",
+      "next_action": "Lite agent finishes and tests the profile; root integrates; then smoke on a CPU-only host."
+    },
+    {
+      "id": "rtx2070-native-validation",
+      "title": "Native Windows / RTX 2070 inference — certification on hardware",
+      "status": "pending_input_or_hardware",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "windows",
+      "dependencies": ["lite-cpu-inference"],
+      "sources": ["docs/archive/research/rtx2070_feasibility.md", "packaging/windows/README.md"],
+      "acceptance": "Setup, preflight and an EN/ES file replay complete on a 2070-class Windows machine with llama.cpp E2B/E4B tier selection recorded; MSI or source install path documented.",
+      "notes": "The v2026.13 MSI digest and embedded version were verified without Windows execution.",
+      "next_action": "Run on the target hardware after the lite profile lands."
+    },
+    {
+      "id": "overnight-operator-ui",
+      "title": "Operator UI caption and QR widgets",
+      "status": "in_progress",
+      "certification": "pending",
+      "priority": "P2",
+      "machine": "mac",
+      "dependencies": [],
+      "sources": ["docs/overnight_status.md", "docs/operator_runbook.md"],
+      "acceptance": "Widgets integrated, HTML5 Tidy clean, and the operator runbook updated with root-recorded UI evidence.",
+      "notes": "Uncommitted captions.js / qr.js widgets and index/style edits in the operator-ui worktree. Runbook evidence is root-owned.",
+      "next_action": "Root integrates and refreshes docs/operator_runbook.md."
+    },
+    {
+      "id": "overnight-reliability",
+      "title": "Process supervision, work leases and isolated audio capture",
+      "status": "in_progress",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "mac",
+      "dependencies": [],
+      "sources": ["docs/overnight_status.md"],
+      "acceptance": "Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.",
+      "notes": "Uncommitted processes.py, work_lease.py, support.py, capture_worker.py, isolated_audio.py, pipeline_health.py, persistence.py, operational_logging.py in the reliability worktree. Directly relevant to mac-live-mic-stall; not integrated.",
+      "next_action": "Root integrates behind tests; verify against a real microphone tomorrow."
     },
     {
       "id": "issue-135-mac-ab",
-      "title": "Mac live A/B: W16 STT and v2-cpo Gemma (#135)",
+      "title": "Deploy W16 + v2-cpo to Mac and live A/B vs stock (#135)",
       "status": "pending_input_or_hardware",
+      "certification": "pending",
       "priority": "P1",
       "machine": "both",
-      "dependencies": ["wsl-w17-export"],
+      "dependencies": [],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/135",
+        "docs/gemma4_tuning/v3_directions.md",
         "docs/wsl_pipeline_refresh.md"
       ],
-      "acceptance": "Short A/B note with canary scores and ship/no-ship decision for v2-cpo; stock E4B remains default if no-ship.",
-      "next_action": "Transfer W16 CT2 and v2-cpo artifacts from WSL; run health_check --n-canaries 8 on Mac."
+      "issue_acceptance": "A short A/B note with canary scores and a ship decision. If no-ship, stock E4B stays default and this closes.",
+      "acceptance": "W16 CT2 and v2-cpo artifacts copied to the Mac; live A/B (stock E4B vs v2-cpo; stock whisper-turbo vs W16) with the 8-canary health check and a written ship/no-ship note.",
+      "notes": "Mac default EN STT is now Parakeet MLX; W16 is a faster-whisper CT2 artifact, so the STT half of this A/B runs the CPU faster-whisper path or compares against Parakeet explicitly. v2-cpo reached statistical parity with stock E4B on COMET-22 but still misses the Jacobo canary.",
+      "next_action": "Transfer artifacts from WSL; run tools/health_check.py --backend mlx --n-canaries 8 and a replay A/B."
+    },
+    {
+      "id": "issue-136-jacobo-cpo",
+      "title": "Jacobo canary — targeted preference triples (#136)",
+      "status": "pending_input_or_hardware",
+      "certification": "pending",
+      "priority": "P2",
+      "machine": "wsl",
+      "dependencies": [],
+      "sources": [
+        "https://github.com/wrbell/stark-translate/issues/136",
+        "docs/gemma4_tuning/v3_directions.md",
+        "tools/build_preference_triples.py"
+      ],
+      "issue_acceptance": "Jacobo canary passes (or we document why it cannot) and COMET-22 does not regress vs v2-cpo.",
+      "acceptance": "50–100 hand-crafted preference triples, one CPO continue from v2 (`training/train_gemma4_cpo.py --init-adapter`), re-scored 8-canary set and 500-verse holdout, Jacobo passing or a documented reason.",
+      "notes": "v3_directions Tier 1 also proposes few-shot disambiguation in the production prompt as a cheaper first step; the opt-in `--terminology-prompt church` examples are the Mac analogue and remain opt-in after the screen.",
+      "next_action": "Author triples on WSL; run one CPO continue; re-score."
     },
     {
       "id": "issue-137-active-learning",
-      "title": "Active learning operator correction loop (#137)",
+      "title": "Active learning — low-confidence to operator correction (#137)",
       "status": "implemented",
+      "certification": "pending",
       "priority": "P2",
       "machine": "both",
       "dependencies": [],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/137",
+        "operator_app/review.py",
+        "tools/review_data.py",
         "tools/merge_corrections.py",
-        "operator_app review UI"
+        "tests/test_operator_review.py",
+        "tests/test_correction_import_safety.py"
       ],
-      "acceptance": "Operator corrects caption; approved pair exports to dated corrections corpus with provenance; retrain path documented.",
-      "next_action": "Complete one closed loop on a recorded Sunday after human approvals; merge_corrections dry run on WSL."
-    },
-    {
-      "id": "issue-136-jacobo-cpo",
-      "title": "Jacobo canary preference triples + CPO (#136)",
-      "status": "pending_input_or_hardware",
-      "priority": "P2",
-      "machine": "wsl",
-      "dependencies": ["wsl-e4b-domain-sft"],
-      "sources": [
-        "https://github.com/wrbell/stark-translate/issues/136",
-        "docs/gemma4_tuning/v3_directions.md"
-      ],
-      "acceptance": "Jacobo canary passes or documented impossibility; COMET-22 does not regress vs v2-cpo.",
-      "next_action": "Hand-craft 50–100 preference triples; one CPO continue from v2 on A2000."
+      "issue_acceptance": "An operator can correct a caption and that pair lands in a dated corrections corpus. Retrain script documented even if the first retrain is a dry run.",
+      "acceptance": "A human operator corrects and approves at least one real caption from a recorded session, the approved pair exports to a dated corrections corpus with provenance, and tools/merge_corrections.py is run (dry run acceptable) on that export.",
+      "notes": "Live/post-session Review, independent transcript/translation approval, revisioned drafts, portable bundles and evaluation/training separation are implemented and tested with fixtures. No human approval has been recorded; fixtures are not approved correction data.",
+      "next_action": "After a live-mic session, have the operator approve one real correction, export it, and run `tools/merge_corrections.py translation` (and `whisper`) against a scratch copy of the training JSONL; keep the export and merged output as evidence."
     },
     {
       "id": "issue-138-hindi-zero-shot",
-      "title": "Hindi zero-shot baseline (#138)",
-      "status": "pending_input_or_hardware",
+      "title": "Hindi zero-shot baseline on church audio (#138)",
+      "status": "deferred",
+      "certification": "pending",
       "priority": "P3",
       "machine": "mac",
       "dependencies": [],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/138",
+        "docs/evaluation/mac_v2026_14_hindi/README.md",
         "docs/archive/research/multi_lingual.md"
       ],
-      "acceptance": "Short baseline note on zero-shot Hindi through live pipeline and QLoRA week decision.",
-      "next_action": "Offline Hindi generation exists for 43 inputs; references and live Hindi/Chinese remain later."
-    },
-    {
-      "id": "wsl-phase4",
-      "title": "Phase 4 full audio preprocessing on WSL",
-      "status": "pending_input_or_hardware",
-      "priority": "P1",
-      "machine": "wsl",
-      "dependencies": [],
-      "sources": [
-        "docs/wsl_pipeline_refresh.md",
-        "training/run_phase4_preprocess.sh"
-      ],
-      "acceptance": "phase4_status.json complete for sermon corpus on WSL storage.",
-      "next_action": "Execute runbook §1 on A2000 box when WAVs available."
-    },
-    {
-      "id": "wsl-e4b-domain-sft",
-      "title": "Gemma 4 E4B domain SFT → GGUF on WSL",
-      "status": "pending_input_or_hardware",
-      "priority": "P1",
-      "machine": "wsl",
-      "dependencies": ["wsl-phase4"],
-      "sources": ["docs/wsl_pipeline_refresh.md", "training/run_gemma4_e4b_domain_sft.sh"],
-      "acceptance": "8-canary sanity pass on exported GGUF; domain SFT artifact ready for Mac/CUDA transfer.",
-      "next_action": "Run after Phase 4 or parallel if corpus ready."
-    },
-    {
-      "id": "wsl-w17-export",
-      "title": "W17 Whisper DoRA + hard-mix → CT2",
-      "status": "pending_input_or_hardware",
-      "priority": "P1",
-      "machine": "wsl",
-      "dependencies": ["wsl-phase4"],
-      "sources": ["docs/wsl_pipeline_refresh.md", "training/run_w17_curriculum.sh"],
-      "acceptance": "benchmark_stt_engines.py gate: W17 WER ≤ W16 on fresh eval.",
-      "next_action": "Script exists; training not yet executed."
-    },
-    {
-      "id": "cuda-latency-proposal",
-      "title": "CUDA latency proposal execution on A2000",
-      "status": "pending_input_or_hardware",
-      "priority": "P1",
-      "machine": "wsl",
-      "dependencies": [],
-      "sources": [
-        "docs/cuda_latency_proposal.md",
-        "scripts/cuda/",
-        "https://github.com/wrbell/stark-translate/issues/174"
-      ],
-      "acceptance": "llama.cpp ≥ b10883, MTP opt-in bench, -fa retest, W16 HF fp16 and Parakeet probes recorded.",
-      "next_action": "Run scripts/cuda/*.sh on WSL; not executed in v2026.13 close-out."
-    },
-    {
-      "id": "lite-cpu-packaging",
-      "title": "Lite CPU inference packaging validation",
-      "status": "pending_input_or_hardware",
-      "priority": "P1",
-      "machine": "any",
-      "dependencies": [],
-      "sources": ["docs/packaging/pypi.md"],
-      "acceptance": "CPU-only install path documented and smoke-tested outside Mac MLX extras scope.",
-      "next_action": "Owned by overnight lite agent; equal priority with RTX 2070 path per user decision."
-    },
-    {
-      "id": "rtx2070-native-validation",
-      "title": "Native Windows / RTX 2070 inference validation",
-      "status": "pending_input_or_hardware",
-      "priority": "P1",
-      "machine": "windows",
-      "dependencies": [],
-      "sources": ["docs/archive/research/rtx2070_feasibility.md", "packaging/windows/README.md"],
-      "acceptance": "Documented smoke on 2070-class hardware with llama.cpp E2B/E4B tier selection.",
-      "next_action": "Execute on target hardware; v2026.13 MSI digest verified without Windows run here."
-    },
-    {
-      "id": "pypi-publication",
-      "title": "PyPI trusted publisher and release tag",
-      "status": "pending_input_or_hardware",
-      "priority": "P2",
-      "machine": "any",
-      "dependencies": [],
-      "sources": ["docs/mac_implementation_status.md", ".github/workflows/pypi.yml"],
-      "acceptance": "New version tag published; trusted publisher mapped (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi).",
-      "next_action": "User explicitly left publishing pending; merge to main authorized when integration complete."
-    },
-    {
-      "id": "security-b615-pinning",
-      "title": "Remaining unpinned Hugging Face download paths (B615)",
-      "status": "deferred",
-      "priority": "P2",
-      "machine": "both",
-      "dependencies": [],
-      "sources": ["docs/evaluation/mac_v2026_14_security.md"],
-      "acceptance": "Optional/fallback HF paths pin revisions or document explicit operator-only scope.",
-      "next_action": "27 medium B615 findings documented; CI bandit pass excludes B615; prioritize live-path fallbacks first."
+      "issue_acceptance": "A short baseline note: does zero-shot Hindi even work on church audio, and is a QLoRA week worth it this semester — via target_lang_code=\"hi\" through the live pipeline, noting SOV partial garble, with 8 canaries and a few verse pairs.",
+      "acceptance": "Hindi target through the live pipeline on church audio with a written baseline note and QLoRA go/no-go; the existing offline text-only probe does not satisfy this.",
+      "notes": "Offline text Hindi generation exists for 43 English inputs on both models with no references or live integration. Hindi/Chinese timing remains a pending user decision.",
+      "next_action": "None until the user schedules Hindi; keep the offline probe labeled as such."
     },
     {
       "id": "issue-176-multiprocess",
-      "title": "--multiprocess TranslateGemma prompt staleness (#176)",
-      "status": "deferred",
+      "title": "--multiprocess workers use shared Gemma 4 prompts and stop rules (#176)",
+      "status": "implemented",
+      "certification": "pending",
       "priority": "P3",
       "machine": "mac",
       "dependencies": [],
-      "sources": ["https://github.com/wrbell/stark-translate/issues/176", "workers.py"],
-      "acceptance": "workers.py uses translation_prompts.build_chat_messages + ensure_stop_tokens for gemma4, or flag deprecated.",
-      "next_action": "Low priority; in-process max_workers=2 is production path."
+      "sources": [
+        "https://github.com/wrbell/stark-translate/issues/176",
+        "workers.py",
+        "engines/translation_prompts.py"
+      ],
+      "issue_acceptance": "Route workers.py through engines/translation_prompts build_chat_messages + ensure_stop_tokens (skipping the prompt cache for gemma4), or deprecate --multiprocess.",
+      "acceptance": "workers.translation_worker_main builds engines through MLXGemmaEngine with the parent-selected model_family, so Gemma 4 never receives TranslateGemma prompts and stop handling is shared; a live --multiprocess run is not part of the acceptance.",
+      "evidence": [
+        "workers.py at base 5154fb9: translation_worker_main wraps MLXGemmaEngine(model_family=...) and only attaches the TG draft path when model_family == 'translategemma'."
+      ],
+      "notes": "Escape hatch only; the in-process max_workers=2 overlap remains the production path.",
+      "next_action": "Root closes #176 after the PR merge, citing workers.py."
     },
     {
       "id": "issue-177-mtp",
-      "title": "Gemma 4 MTP drafter on MLX (#177)",
+      "title": "Gemma 4 MTP assistant drafter on MLX (#177)",
       "status": "experimental",
+      "certification": "pending",
       "priority": "P3",
       "machine": "mac",
       "dependencies": [],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/177",
         "docs/archive/v2026.13/MAC_LATENCY.md",
-        "engines/mlx_spec.py"
+        "docs/mlx_mtp_notes.md",
+        "engines/mlx_spec.py",
+        "tools/mts_acceptance_probe.py"
       ],
-      "acceptance": "Acceptance rate and latency win justify opt-in default; byte-identical output already proven.",
-      "next_action": "Keep off; probe showed ≤14% latency win at 31% acceptance; RoPE-offset suspect rejected."
+      "acceptance": "Acceptance rate and latency win on the frozen screen justify an opt-in default; output stays byte-identical to the target model.",
+      "notes": "`--mts` still routes through mlx_lm and never loads (no gemma4_assistant class). The engines/mlx_spec.py probe over mlx-optiq produced byte-identical output at low acceptance with a bounded latency win; the RoPE-offset hypothesis was rejected. Numbers: see the archive link.",
+      "next_action": "Keep off; revisit only if upstream mlx-lm adds the assistant model class or acceptance improves."
     },
     {
       "id": "conservative-marian-routing",
       "title": "Conservative Marian partial routing",
       "status": "experimental",
+      "certification": "pending",
       "priority": "P3",
       "machine": "mac",
-      "dependencies": [],
-      "sources": ["docs/evaluation/mac_v2026_14_routing/README.md"],
-      "acceptance": "Synthetic EN/ES routing probes pass; natural Spanish and human review still required before default.",
-      "next_action": "Keep opt-in; 24/24 synthetic runs exited zero."
+      "dependencies": ["natural-spanish-refs"],
+      "sources": ["docs/evaluation/mac_v2026_14_routing/README.md", "settings.py"],
+      "acceptance": "Natural Spanish references plus human review show no quality loss when Marian handles allowlisted phrases; until then `--routing-policy conservative` stays opt-in.",
+      "notes": "24/24 synthetic EN/ES routing probes exited zero and routed as designed; they are functional checks, not quality evidence.",
+      "next_action": "Keep opt-in."
     },
     {
-      "id": "v2026-9-followups",
-      "title": "llama.cpp deferred optimizations (-fa, -c 2048, prompt-cache reuse)",
-      "status": "deferred",
-      "priority": "P3",
-      "machine": "wsl",
-      "dependencies": ["cuda-latency-proposal"],
-      "sources": ["docs/roadmap.md", "docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md"],
-      "acceptance": "Each experiment meets 20% latency gate without canary regression.",
-      "next_action": "Folded into CUDA latency proposal; -fa retest blocked on newer build."
-    },
-    {
-      "id": "mac-reliability-implementation",
-      "title": "v2026.14 Mac reliability program (local branch)",
-      "status": "implemented",
+      "id": "mac-defaults-frozen",
+      "title": "Retain Mac defaults after the 48-run English screen",
+      "status": "validated",
+      "certification": "met",
       "priority": "P0",
       "machine": "mac",
       "dependencies": [],
       "sources": [
-        "docs/mac_implementation_status.md",
-        "docs/overnight_status.md"
+        "docs/evaluation/mac_v2026_14_screening/README.md",
+        "docs/mac_implementation_status.md"
       ],
-      "acceptance": "Operator session identity, schema 2 timing, setup/resolver, review/export, opt-in experiments, packaging guards implemented on codex/mac-reliability-roadmap.",
-      "next_action": "Root owns merge, tag, and GitHub delivery; do not claim main release until integrated."
+      "acceptance": "No combined configuration beat E4B + 0.5 s silence + 0.6 s cadence across both models on the frozen 45-second English screen; all experiments remain opt-in.",
+      "evidence": ["48/48 runs exited zero across eight configurations × two models × three pairs; no consistent both-model winner (screening README)."],
+      "next_action": "Any default change requires a matched both-model gain plus human review."
+    },
+    {
+      "id": "mac-reliability-implementation",
+      "title": "v2026.14 Mac reliability program on the local branch",
+      "status": "implemented",
+      "certification": "pending",
+      "priority": "P0",
+      "machine": "mac",
+      "dependencies": [],
+      "sources": ["docs/mac_implementation_status.md", "https://github.com/wrbell/stark-translate/pull/192"],
+      "acceptance": "Merged to main through PR #192 with the human, device and visible-browser gates recorded as still open.",
+      "notes": "Operator session identity, schema 2 timing, setup/resolver, Review/export, opt-in experiments and packaging guards are implemented and locally validated; integration is the remaining step.",
+      "next_action": "Root: finish PR #192."
     },
     {
       "id": "mac-cpu-test-suite",
       "title": "Final CPU test suite after VAD/CT2 setup changes",
       "status": "validated",
+      "certification": "met",
       "priority": "P0",
       "machine": "mac",
-      "dependencies": ["mac-reliability-implementation"],
-      "sources": [
-        "docs/mac_implementation_status.md",
-        ".cache/mac-roadmap/full-tests-final.log"
-      ],
-      "acceptance": "Documented pass/skip/coverage recorded in mac_implementation_status.md; gate in test.yml remains ≥50% coverage.",
-      "next_action": "Re-run after substantive code changes; avoid hardcoding counts in multiple guides—cite mac_implementation_status.md."
+      "dependencies": [],
+      "sources": ["docs/mac_implementation_status.md", ".github/workflows/test.yml"],
+      "acceptance": "Recorded pass/skip/coverage in mac_implementation_status.md above the test.yml coverage gate.",
+      "notes": "Counts are recorded only in mac_implementation_status.md; guides link there instead of repeating numbers.",
+      "next_action": "Re-run after integrating the overnight worktrees."
     },
     {
       "id": "packaging-artifacts-local",
-      "title": "v2026.14 wheel/sdist/Mac ZIP local validation",
+      "title": "v2026.14 wheel, sdist and Mac ZIP local validation",
       "status": "validated",
+      "certification": "met",
       "priority": "P1",
       "machine": "mac",
-      "dependencies": ["mac-reliability-implementation"],
+      "dependencies": [],
       "sources": ["docs/evaluation/mac_v2026_14_installation.md"],
-      "acceptance": "Outside-checkout install, launcher, and EN/ES runtime smoke documented with hashes.",
-      "next_action": "Publication pending; packaging detail owned by lite agent for cross-platform docs."
+      "acceptance": "Outside-checkout install, launcher checks and installed EN/ES inference recorded with artifact hashes.",
+      "notes": "Publication is pending; overnight integration will change the artifact and require a rebuild.",
+      "next_action": "Rebuild after PR #192 integration; lite agent owns cross-platform packaging prose."
+    },
+    {
+      "id": "pypi-publication",
+      "title": "PyPI trusted publisher, package artifacts and release tag",
+      "status": "pending_input_or_hardware",
+      "certification": "pending",
+      "priority": "P2",
+      "machine": "any",
+      "dependencies": ["pr-192-integration"],
+      "sources": ["docs/mac_implementation_status.md", ".github/workflows/pypi.yml"],
+      "acceptance": "Trusted publisher mapped (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi), a new version tag pushed, and the PyPI workflow green.",
+      "notes": "Explicitly pending by user choice; only source/issue publishing and the final merge are authorized.",
+      "next_action": "User decision after the merge."
+    },
+    {
+      "id": "wsl-phase4",
+      "title": "Phase 4 full audio preprocessing on WSL",
+      "status": "pending_input_or_hardware",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "wsl",
+      "dependencies": [],
+      "sources": ["docs/wsl_pipeline_refresh.md", "training/run_phase4_preprocess.sh"],
+      "acceptance": "`phase4_status.json` written for the sermon corpus on WSL storage.",
+      "next_action": "Execute runbook §1 on the A2000 box."
+    },
+    {
+      "id": "wsl-e4b-domain-sft",
+      "title": "Gemma 4 E4B domain SFT → GGUF on WSL",
+      "status": "pending_input_or_hardware",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "wsl",
+      "dependencies": ["wsl-phase4"],
+      "sources": ["docs/wsl_pipeline_refresh.md", "training/run_gemma4_e4b_domain_sft.sh", "docs/gemma4_tuning/overview.md"],
+      "acceptance": "8-canary sanity on the exported GGUF passes and the artifact is ready for Mac/CUDA transfer.",
+      "notes": "training/train_gemma4.py and export_gguf.py carry UNTESTED headers pending their first end-to-end run.",
+      "next_action": "Run after Phase 4, or in parallel if the corpus is ready."
+    },
+    {
+      "id": "wsl-w17-export",
+      "title": "W17 Whisper DoRA + hard-mix → CT2",
+      "status": "pending_input_or_hardware",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "wsl",
+      "dependencies": ["wsl-phase4"],
+      "sources": ["docs/wsl_pipeline_refresh.md", "training/run_w17_curriculum.sh"],
+      "acceptance": "tools/benchmark_stt_engines.py gate: W17 fresh-eval WER ≤ W16.",
+      "next_action": "Scripted; not yet trained."
+    },
+    {
+      "id": "cuda-latency-proposal",
+      "title": "CUDA latency proposal execution on the A2000",
+      "status": "pending_input_or_hardware",
+      "certification": "pending",
+      "priority": "P1",
+      "machine": "wsl",
+      "dependencies": [],
+      "sources": [
+        "docs/cuda_latency_proposal.md",
+        "scripts/cuda/bench_mtp.sh",
+        "https://github.com/wrbell/stark-translate/issues/174"
+      ],
+      "acceptance": "llama.cpp b10883 built, MTP opt-in bench, `-fa on` retest, W16 HF fp16 and Parakeet probes recorded with the proposal's tables filled in.",
+      "notes": "start_server.sh now defaults to --no-draft with --mtp opt-in and both pins read b10883; the scripts remain header-marked unexecuted.",
+      "next_action": "Run scripts/cuda/*.sh on WSL."
+    },
+    {
+      "id": "v2026-9-followups",
+      "title": "llama.cpp deferred optimizations (-fa, -c 2048, prompt-cache reuse)",
+      "status": "deferred",
+      "certification": "pending",
+      "priority": "P3",
+      "machine": "wsl",
+      "dependencies": ["cuda-latency-proposal"],
+      "sources": ["docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md", "https://github.com/wrbell/stark-translate/issues/175"],
+      "acceptance": "Each experiment meets the proposal's latency gate without canary regression.",
+      "next_action": "Folded into the CUDA proposal."
+    },
+    {
+      "id": "security-b615-pinning",
+      "title": "Remaining unpinned Hugging Face download paths (B615)",
+      "status": "deferred",
+      "certification": "pending",
+      "priority": "P2",
+      "machine": "both",
+      "dependencies": [],
+      "sources": ["docs/evaluation/mac_v2026_14_security.md"],
+      "acceptance": "Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).",
+      "notes": "The configured CI Bandit pass skips B615; the expanded scan's findings and scope limits are documented in the security note.",
+      "next_action": "Pin the live-path fallbacks first."
     },
     {
       "id": "multilingual-expansion",
-      "title": "Hindi and Chinese QLoRA expansion (Phase 8)",
+      "title": "Hindi and Chinese adaptation (roadmap Phase 8)",
       "status": "deferred",
+      "certification": "pending",
       "priority": "P3",
       "machine": "both",
       "dependencies": ["issue-138-hindi-zero-shot"],
       "sources": ["docs/roadmap.md", "docs/archive/research/multi_lingual.md"],
-      "acceptance": "chrF++/COMET gates and adapter switching per roadmap Phase 8.",
-      "next_action": "Defer until Whisper fine-tuning stabilizes and EN/ES gates close."
+      "acceptance": "Per the roadmap: chrF++/COMET gates, adapter switching and display updates per language.",
+      "notes": "Pending user decision; EN/ES gates come first.",
+      "next_action": "None scheduled."
     },
     {
       "id": "macos-shortcuts",
       "title": "macOS Shortcuts voice-command triggers",
       "status": "deferred",
+      "certification": "not_applicable",
       "priority": "P3",
       "machine": "mac",
       "dependencies": [],
       "sources": ["docs/roadmap.md"],
-      "acceptance": "Optional operator convenience documented if useful.",
+      "acceptance": "Optional convenience; documented only if adopted.",
       "next_action": "None scheduled."
+    },
+    {
+      "id": "docs-refresh-remaining",
+      "title": "Documentation refresh — remaining areas after the overnight docs pass",
+      "status": "in_progress",
+      "certification": "pending",
+      "priority": "P2",
+      "machine": "any",
+      "dependencies": ["pr-192-integration"],
+      "sources": ["docs/overnight_status.md"],
+      "acceptance": "Every README/CLAUDE/AGENTS guide describes current behavior from source, historical numbers live only under dated archive links, and tests/test_documentation.py plus render/link checks pass.",
+      "notes": "Areas the overnight docs pass did not finish are listed in docs/overnight_status.md § Unfinished; docs/operator_runbook.md and docs/packaging/* are owned elsewhere.",
+      "next_action": "Root audits; owners of the runbook and packaging docs refresh their files after integration."
     }
   ]
 }

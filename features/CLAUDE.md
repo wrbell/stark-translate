@@ -1,46 +1,72 @@
-# features/ — Post-Processing Features
+# features/ — Diarization, Verse Extraction, Sermon Summary
 
-All three features are implemented but not yet integrated with the live pipeline. Ready for integration testing with live session data.
+> Paired with [`AGENTS.md`](./AGENTS.md). Describes the local branch (base `5154fb9`,
+> v2026.14 candidate); main is v2026.13. Integration status is stated per feature —
+> do not read "implemented" as "certified for a service".
 
-## Speaker Diarization (`diarize.py`)
+Three post-processing capabilities plus a live diarization path. Two are exposed to the
+operator UI through [`operator_app/features.py`](../operator_app/features.py); live
+diarization is a separate daemon started by `dry_run_ab.py --diarize`. None of them
+touches the MLX GPU pool used by STT/translation.
 
-Uses `pyannote-audio` to identify and separate speakers. Two-speaker assumption enforced via `min_speakers=2, max_speakers=2`. Runs on CPU (Mac) or CUDA (WSL). Required by both summarization and verse extraction.
+## Status
 
-## Post-Sermon Summary (`summarize_sermon.py`)
+| Feature | Module(s) | How it is reached today | Certification |
+|---------|-----------|-------------------------|---------------|
+| Live verse highlights | `extract_verses.py` (`VerseExtractor`) | `GET /api/features/verses` tails the session CSV every few seconds (regex only, inline) | Works in the operator rehearsal (`docs/evaluation/mac_v2026_14_rehearsal.md`); no LLM involved |
+| Post-session summary | `summarize_sermon.py` | `POST /api/features/summary` spawns the script out-of-process against the finished CSV; `GET /api/features/summary/{task_id}` polls | Runs on Gemma 4 E4B OptiQ by default (`settings.translation.mlx_model_gemma4_e4b`); output quality not human-reviewed |
+| Offline diarization | `diarize.py` | Batch CLI over a WAV or a `stark_data/live_sessions/<id>/` directory (pyannote 3.1) | Historical; needs HF token and pyannote agreement |
+| Live diarization (9.6.1 / #133) | `live_diarize.py`, `rolling_buffer.py`, `speaker_labels.py` | `dry_run_ab.py --diarize [--diarize-mode embed\|pyannote] [--diarize-interval-s]`; daemon writes `metrics/diarization_<session>.jsonl`, pipeline attaches `speaker` to finals/CSV/JSONL/WebSocket | **Implemented, gate not run.** Issue acceptance needs a two-speaker dry run with distinct labels and final p95 within +50 ms; no natural two-speaker clip exists yet |
 
-Generates a structured 5-sentence summary from the full diarized transcript:
+Default is diarization **off**. Design and the p95 budget:
+[`docs/live_diarization.md`](../docs/live_diarization.md).
 
-- **Sentence 1:** Overall gist covering both speakers' themes
-- **Sentences 2–3:** Summary of Speaker 1's key points
-- **Sentences 4–5:** Summary of Speaker 2's key points
+## Live diarization data flow
 
-Uses a local LLM (Gemma 3 4B or similar) with a structured prompt. Outputs both English and Spanish summaries. Runs as a batch job post-service — no real-time constraint.
+```
+mic → VAD → STT ∥ translation                 (GPU pool, unchanged)
+                 │ final chunk audio
+                 ▼
+rolling_buffer.py  keeps ~25 s of speech as rolling.wav + chunks.jsonl (disk)
+                 │
+                 ▼
+live_diarize.py    separate process: ECAPA embeddings ("embed", SpeechBrain,
+                   online cosine clustering) or pyannote ("pyannote", needs HF_TOKEN);
+                   appends {start, end, speaker} to metrics/diarization_<session>.jsonl
+                 │
+                 ▼
+speaker_labels.assign_speaker_from_jsonl()  cheap overlap lookup on the
+                   asyncio thread → result_data["speaker"] → CSV/JSONL/WS
+```
 
-## Verse Reference Extraction (`extract_verses.py`)
+Pure helpers in `speaker_labels.py` (JSONL parsing, overlap assignment, cosine
+clustering) have no model imports and are unit-tested
+(`tests/test_speaker_labels.py`, `tests/test_phase9_6_1_live_diarize.py`).
 
-Returns a per-speaker list of every Bible verse referenced during the sermon.
+## Verse extraction
 
-**Two-pass approach:**
-1. Regex + rule-based extraction for explicit citations ("Romans 8:28")
-2. LLM-assisted extraction for spoken-form references ("turn to Romans chapter eight")
+Two regex passes — explicit citations (`Romans 8:28`) and spoken forms (`turn to
+Romans chapter eight`, bare `verse 28` resolved against the last book/chapter) — over
+all 66 book-name variants. Input: pipeline CSV or diarized JSONL. Unit tests:
+`tests/test_verse_extraction.py`. Verse pairs for training come from
+`tools/rebuild_verse_pairs.py`, not from this extractor.
 
-Outputs per-speaker JSON with reference, timestamp, and context snippet. Stretch goal: cross-reference extracted verses against translation output for theological accuracy checks.
+## Sermon summary
 
----
+Reads the session CSV or diarized JSONL and produces EN + ES summaries (five sentences
+with speakers, three without). Model family is inferred from the model id
+(`_summary_model_family`), so the Gemma 4 stop-token rules from
+[`engines/CLAUDE.md`](../engines/CLAUDE.md) apply. Spanish comes from the same model or
+`--translate-with-gemma` (TranslateGemma 4B). Always run out-of-process next to a live
+pipeline. Tests: `tests/test_summarize_sermon.py`, `tests/test_phase9_6_features.py`.
 
-## Integration with Live Pipeline
+## Dependencies
 
-How features connect to `dry_run_ab.py` for live/batch integration:
+- Live diarization `embed` mode: `.[mlx,diarization]` (SpeechBrain ECAPA, torchaudio, scikit-learn).
+- `pyannote` mode and `diarize.py`: `pyannote.audio ≥ 3.1` plus an HF token with the accepted model agreement.
+- Summary: the MLX runtime already installed for finals.
 
-- **Input**: Features read session CSV from `metrics/ab_metrics_{SESSION_ID}.csv` (columns include `english`, `spanish_a`, trailing `speaker` when live diarization is on).
-- **Live diarization (9.6.1)**: `dry_run_ab --diarize` (default off) writes `rolling.wav` + `chunks.jsonl` on `_io_pool` and spawns `features/live_diarize.py`. Default `--diarize-mode embed` (SpeechBrain ECAPA / online cosine clustering). Labels land in `metrics/diarization_{SESSION_ID}.jsonl`; finals get `speaker` by timestamp overlap (`features/speaker_labels.py`). See [`docs/live_diarization.md`](../docs/live_diarization.md).
-- **Offline diarization**: `diarize.py` remains the post-session pyannote 3.1 path.
-- **Summary + Verses**: Run as batch jobs after session ends, reading the session CSV. No real-time constraint.
+## Open items
 
-## Active Learning Connection
-
-Features feed into and benefit from the active learning cycle:
-
-- **Diarization → fine-tuning**: Speaker-labeled segments improve per-speaker WER tracking. Enables targeted correction of worst-performing speaker segments.
-- **Verse extraction → quality checks**: If a verse reference is detected, spot-check the translation against glossary entries for that verse's key theological terms (e.g., "atonement" → "expiación").
-- **Summary generation → MLX thread affinity**: Uses the same MLX pipeline pool as live translation. Prefer queuing summaries after the live session ends so they do not contend with STT∥translation overlap. MLX >= 0.31.2 allows independent concurrent eval, but session-end still keeps the live path predictable.
+- `issue-133-diarize-gate` and `natural-two-speaker` in [`docs/backlog.json`](../docs/backlog.json).
+- Summary/verse UI evidence in the operator runbook is root-owned and refreshed after PR #192 integration.
