@@ -346,8 +346,15 @@ def run_variant(
         sampler.start()
 
     t_load_start = time.perf_counter()
-    engine = build_engine(variant_key, variant, override_model_id)
-    engine.load()
+    from tools.benchmark_identity import load_primary_model
+
+    try:
+        engine = build_engine(variant_key, variant, override_model_id)
+        identity = load_primary_model(engine, override_model_id or variant["model_id"])
+    except BaseException:
+        if sampler is not None:
+            sampler.stop()
+        raise
     load_seconds = time.perf_counter() - t_load_start
     log.info("loaded in %.1fs", load_seconds)
 
@@ -387,6 +394,7 @@ def run_variant(
             per_clip_records.append(
                 {
                     "variant": variant_key,
+                    "model_identity": identity,
                     "iteration": it + 1,
                     "clip_id": clip["id"],
                     "tier": clip["tier"],
@@ -417,6 +425,7 @@ def run_variant(
     summary: dict = {
         "variant": variant_key,
         "config": variant,
+        "model_identity": identity,
         "load_seconds": round(load_seconds, 2),
         "iterations": iterations,
         "warmup": warmup,

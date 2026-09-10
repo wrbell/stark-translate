@@ -147,7 +147,9 @@ def main() -> int:
     for name in args.engines.split(","):
         eng = make_engine(name)
         t0 = time.perf_counter()
-        eng.load()
+        from tools.benchmark_identity import load_primary_model
+
+        identity = load_primary_model(eng, eng.model_id)
         load_s = time.perf_counter() - t0
         eng.transcribe(audios[0], language=args.lang)  # warm
         rows = []
@@ -173,6 +175,7 @@ def main() -> int:
         wers = [r["wer"] for r in rows]
         term_rows = [r for r in rows if r["term_hit"] is not None]
         summary = {
+            "model_identity": identity,
             "load_s": round(load_s, 1),
             "wer_mean": round(statistics.mean(wers), 4),
             "wer_median": round(statistics.median(wers), 4),
