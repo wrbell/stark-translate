@@ -5185,6 +5185,9 @@ async def main_async(args):
 
 
 def main():
+    import hashlib
+    from pathlib import Path
+
     parser = argparse.ArgumentParser(description="Live A/B bilingual speech-to-text dry run")
     parser.add_argument(
         "--no-record-audio",
@@ -5490,6 +5493,23 @@ def main():
 
     global EXIT_AFTER_REPLAY
     EXIT_AFTER_REPLAY = bool(args.audio_file) if args.exit_after_replay is None else args.exit_after_replay
+    # Validate fallible replay input before creating a running lifecycle marker,
+    # health thread or inference pool. Invalid CLI input is not a started session.
+    global _INPUT_AUDIO_HASH
+    _INPUT_AUDIO_HASH = None
+    if args.audio_file or os.environ.get("STARK_AUDIO_SOURCE") == "file":
+        effective_audio_file = args.audio_file or os.environ.get("STARK_AUDIO_FILE")
+        if not effective_audio_file:
+            parser.error("STARK_AUDIO_FILE is required when STARK_AUDIO_SOURCE=file")
+        try:
+            _INPUT_AUDIO_HASH = hashlib.sha256(Path(effective_audio_file).read_bytes()).hexdigest()
+        except (OSError, ValueError) as exc:
+            parser.error(f"Cannot read audio input: {exc}")
+    for name in ("silence_trigger", "partial_interval"):
+        value = getattr(args, name)
+        if value is not None and not 0.032 <= value <= 5:
+            parser.error(f"--{name.replace('_', '-')} must be between 0.032 and 5 seconds")
+
     if args.audio_file:
         os.environ["STARK_AUDIO_SOURCE"] = "file"
         os.environ["STARK_AUDIO_FILE"] = args.audio_file
@@ -5573,9 +5593,6 @@ def main():
 
     # Re-derive session paths with language tag so EN/ES data stays separate
     SESSION_ID = args.session_id or f"{datetime.now():%Y%m%d_%H%M%S}_{SOURCE_LANG}"
-    import hashlib
-    from pathlib import Path
-
     from tools.session_lifecycle import finish_session, request_graceful_stop, source_provenance, start_session
 
     source = source_provenance(Path(__file__))
@@ -5622,21 +5639,12 @@ def main():
     for name in ("silence_trigger", "partial_interval"):
         value = getattr(args, name)
         if value is not None:
-            if not 0.032 <= value <= 5:
-                parser.error(f"--{name.replace('_', '-')} must be between 0.032 and 5 seconds")
             setattr(settings.vad, name, value)
     if args.vad_backend is not None:
         settings.vad.backend = args.vad_backend
     for name in ("idle_warmup_only", "final_aware_partials", "routing_policy", "terminology_prompt"):
         if getattr(args, name) is not None:
             setattr(settings.translation, name, getattr(args, name))
-    global _INPUT_AUDIO_HASH
-    effective_audio_file = args.audio_file or os.environ.get("STARK_AUDIO_FILE")
-    if effective_audio_file and os.environ.get("STARK_AUDIO_SOURCE") == "file":
-        import hashlib
-        from pathlib import Path
-
-        _INPUT_AUDIO_HASH = hashlib.sha256(Path(effective_audio_file).read_bytes()).hexdigest()
     MIC_DEVICE = args.device
     if args.audio_file:
         MIC_GAIN = 1.0
@@ -5755,6 +5763,7 @@ def main():
             exit_code=0 if completed else exit_code if isinstance(exit_code, int) and exit_code else 1,
             model_ids=_session_model_ids,
             persistence=persistence,
+            native_server=getattr(globals().get("_managed_llama_server"), "provenance", None),
         )
 
 

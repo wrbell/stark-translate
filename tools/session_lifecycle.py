@@ -249,6 +249,7 @@ def finish_session(
     exit_code: int = 0,
     model_ids: dict[str, str | None] | None = None,
     persistence: dict | None = None,
+    native_server: dict | None = None,
 ) -> dict:
     """Call only after all diagnostics writers have drained; failure never enables export."""
     if status not in {"completed", "failed", "interrupted"} or (status == "completed" and exit_code != 0):
@@ -258,6 +259,8 @@ def finish_session(
     data = _read(root, session)
     if persistence is not None:
         data["persistence"] = persistence
+    if native_server is not None:
+        data["managed_llama"] = native_server
     if data.get("run_id") != run_id or data.get("status") != "running":
         raise SessionNotComplete("Session lifecycle ownership changed before completion")
     data.update(status=status, exit_code=exit_code, ended_at=datetime.now(UTC).isoformat())
