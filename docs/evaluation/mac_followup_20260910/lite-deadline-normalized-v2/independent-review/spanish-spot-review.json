@@ -1,0 +1,878 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-09-10T19:10:23.269265+00:00",
+  "scope": "Independent Spanish retained-data spot review: worst preview loss with largest candidate queue growth among tied pairs; three raw cells. All six candidate trace admission summaries also read.",
+  "sources": {
+    "report": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_report.json",
+      "sha256": "e19fe8f0b1883e13de3168094920563291b7b39dbda2b286e9d3770472858cfc"
+    },
+    "selection": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_selection.json",
+      "sha256": "523e89a2f3c799353c338e72bd6c1ed867fc0dba490979b19243d9717128bc9b"
+    },
+    "provenance": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/provenance.json",
+      "sha256": "7f02a9c18853c3790094b061f42d0a7f1f8aaeced433c67478c6c8bab595435d"
+    }
+  },
+  "validation": {
+    "inventory_complete": true,
+    "runs": 12,
+    "selector_exactly_reproduced": true,
+    "selected_raw_pair_score_exactly_reproduced": true,
+    "runtime_quality_source_persistence_verified": true,
+    "no_audio_or_weight_hash_recomputation": true
+  },
+  "qualified_count": 0,
+  "representative_pair": {
+    "experiment": "deadline_250ms",
+    "repeat": 1,
+    "status": "rejected",
+    "reasons": [
+      "final_queue_sustained_growth",
+      "median_gain_below_gate",
+      "preview_source_coverage_loss",
+      "stage_queue_tail_regression",
+      "tail_regression"
+    ],
+    "preview_missing_fractions": [
+      0.05263157894736819,
+      0.0
+    ],
+    "queue_comparisons": [
+      {
+        "field": "disjoint_queue_wait_growth_ms",
+        "control": -209.85761032594985,
+        "candidate": 287.8861667510743
+      },
+      {
+        "field": "stt_queue_wait_ms",
+        "control_p95_ms": 1853.9,
+        "candidate_p95_ms": 2219.6
+      },
+      {
+        "field": "translation_queue_wait_ms",
+        "control_p95_ms": 0.6,
+        "candidate_p95_ms": 0.6
+      },
+      {
+        "field": "generation_lock_wait_ms_a",
+        "control_p95_ms": null,
+        "candidate_p95_ms": null,
+        "control_sample_count": 0,
+        "candidate_sample_count": 0,
+        "control_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "candidate_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "status": "not_applicable_no_gemma_in_one_or_both_runs"
+      },
+      {
+        "field": "disjoint_queue_wait_growth_ms",
+        "control": 580.9933326672763,
+        "candidate": 287.8861667510743
+      },
+      {
+        "field": "stt_queue_wait_ms",
+        "control_p95_ms": 1617.7,
+        "candidate_p95_ms": 2219.6
+      },
+      {
+        "field": "translation_queue_wait_ms",
+        "control_p95_ms": 0.6,
+        "candidate_p95_ms": 0.6
+      },
+      {
+        "field": "generation_lock_wait_ms_a",
+        "control_p95_ms": null,
+        "candidate_p95_ms": null,
+        "control_sample_count": 0,
+        "candidate_sample_count": 0,
+        "control_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "candidate_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "status": "not_applicable_no_gemma_in_one_or_both_runs"
+      }
+    ],
+    "memory_comparisons": [
+      {
+        "field": "peak_rss_bytes",
+        "control": 1384497152,
+        "candidate": 1306050560,
+        "allowed_increase": 268435456
+      },
+      {
+        "field": "peak_rss_bytes",
+        "control": 1434222592,
+        "candidate": 1306050560,
+        "allowed_increase": 268435456
+      }
+    ],
+    "preview_responsiveness": [
+      [
+        {
+          "field": "first_preview",
+          "status": "compared",
+          "control": {
+            "n": 3,
+            "p50": 4297.8,
+            "p95": 4327.0
+          },
+          "candidate": {
+            "n": 4,
+            "p50": 4146.549999999999,
+            "p95": 4183.4
+          },
+          "matched_source": [
+            {
+              "source_bounds": [
+                86016,
+                202752,
+                48000
+              ],
+              "control_ms": 4297.8,
+              "candidate_ms": 4058.7
+            },
+            {
+              "source_bounds": [
+                658944,
+                775680,
+                48000
+              ],
+              "control_ms": 4327.0,
+              "candidate_ms": 4134.4
+            },
+            {
+              "source_bounds": [
+                1677312,
+                1794048,
+                48000
+              ],
+              "control_ms": 4194.7,
+              "candidate_ms": 4183.4
+            }
+          ],
+          "matched_control": {
+            "n": 3,
+            "p50": 4297.8,
+            "p95": 4327.0
+          },
+          "matched_candidate": {
+            "n": 3,
+            "p50": 4134.4,
+            "p95": 4183.4
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        },
+        {
+          "field": "update_gap",
+          "status": "compared",
+          "control": {
+            "n": 2,
+            "p50": 2390.544500000002,
+            "p95": 2616.855000000003
+          },
+          "candidate": {
+            "n": 2,
+            "p50": 1969.0479999999998,
+            "p95": 1986.491
+          },
+          "matched_source": [
+            {
+              "source_bounds": [
+                86016,
+                202752,
+                86016,
+                290304,
+                48000
+              ],
+              "control_ms": 2164.2340000000004,
+              "candidate_ms": 1986.491
+            }
+          ],
+          "matched_control": {
+            "n": 1,
+            "p50": 2164.2340000000004,
+            "p95": 2164.2340000000004
+          },
+          "matched_candidate": {
+            "n": 1,
+            "p50": 1986.491,
+            "p95": 1986.491
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        }
+      ],
+      [
+        {
+          "field": "first_preview",
+          "status": "compared",
+          "control": {
+            "n": 4,
+            "p50": 4202.700000000001,
+            "p95": 4522.9
+          },
+          "candidate": {
+            "n": 4,
+            "p50": 4146.549999999999,
+            "p95": 4183.4
+          },
+          "matched_source": [
+            {
+              "source_bounds": [
+                86016,
+                202752,
+                48000
+              ],
+              "control_ms": 4135.8,
+              "candidate_ms": 4058.7
+            },
+            {
+              "source_bounds": [
+                658944,
+                775680,
+                48000
+              ],
+              "control_ms": 4146.3,
+              "candidate_ms": 4134.4
+            },
+            {
+              "source_bounds": [
+                1285632,
+                1402368,
+                48000
+              ],
+              "control_ms": 4259.1,
+              "candidate_ms": 4158.7
+            },
+            {
+              "source_bounds": [
+                1677312,
+                1794048,
+                48000
+              ],
+              "control_ms": 4522.9,
+              "candidate_ms": 4183.4
+            }
+          ],
+          "matched_control": {
+            "n": 4,
+            "p50": 4202.700000000001,
+            "p95": 4522.9
+          },
+          "matched_candidate": {
+            "n": 4,
+            "p50": 4146.549999999999,
+            "p95": 4183.4
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        },
+        {
+          "field": "update_gap",
+          "status": "compared",
+          "control": {
+            "n": 2,
+            "p50": 1924.438000000001,
+            "p95": 1928.3330000000024
+          },
+          "candidate": {
+            "n": 2,
+            "p50": 1969.0479999999998,
+            "p95": 1986.491
+          },
+          "matched_source": [
+            {
+              "source_bounds": [
+                86016,
+                202752,
+                86016,
+                290304,
+                48000
+              ],
+              "control_ms": 1920.5429999999997,
+              "candidate_ms": 1986.491
+            },
+            {
+              "source_bounds": [
+                658944,
+                775680,
+                658944,
+                863232,
+                48000
+              ],
+              "control_ms": 1928.3330000000024,
+              "candidate_ms": 1951.6049999999996
+            }
+          ],
+          "matched_control": {
+            "n": 2,
+            "p50": 1924.438000000001,
+            "p95": 1928.3330000000024
+          },
+          "matched_candidate": {
+            "n": 2,
+            "p50": 1969.0479999999998,
+            "p95": 1986.491
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        }
+      ]
+    ],
+    "p95_claim_eligible": false,
+    "fixed_source_delivery": {
+      "opening": {
+        "status": "complete",
+        "n": 6,
+        "p50_ms": 3382.0785000000014,
+        "p95_ms": 5868.884000000002
+      },
+      "candidate": {
+        "status": "complete",
+        "n": 6,
+        "p50_ms": 3264.0615000000016,
+        "p95_ms": 4350.100000000006
+      },
+      "closing": {
+        "status": "complete",
+        "n": 6,
+        "p50_ms": 3261.013500000001,
+        "p95_ms": 3808.741000000002
+      }
+    }
+  },
+  "representative_runs": [
+    {
+      "experiment": "baseline",
+      "repeat": 1,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json",
+      "sha256": "60ab0fea451879d3a06242670eeed349b811115ecf6ab06d800ab9e477121516",
+      "runtime_profile": {
+        "name": "lite-cpu",
+        "backend": "cpu",
+        "stt_model": "whisper-small",
+        "stt_compute_type": "int8",
+        "stt_threads": 3,
+        "stt_workers": 1,
+        "marian_threads": 1,
+        "final_engine": "marian",
+        "translation_model": null,
+        "vad_backend": "onnx",
+        "ram_floor_gb": 8,
+        "physical_core_floor": 4,
+        "vram_floor_gb": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "beam_size": 1,
+      "threads": 3,
+      "cadence": 0.6,
+      "final_count": 6,
+      "final_source_seconds": 30.59199999999999,
+      "preview_count": 5,
+      "preview_source_seconds": 11.551999999999994,
+      "preview_intervals_seconds": [
+        [
+          1.792,
+          6.048
+        ],
+        [
+          13.728,
+          18.592
+        ],
+        [
+          34.944,
+          37.376
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4297.8,
+        "p95": 4327.0
+      },
+      "update_gap": {
+        "n": 2,
+        "p50": 2390.544500000002,
+        "p95": 2616.855000000003
+      },
+      "input_queue": {
+        "max_wait_ms": 1574.7010830091313,
+        "max_pending": 1,
+        "disjoint_growth_ms": -209.85761032594985
+      },
+      "source_coverage": {
+        "schema_version": 1,
+        "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+        "sample_rate": 48000,
+        "expected_source_samples": 2284800,
+        "eof": {
+          "source_samples": 2284800,
+          "reader_eof": true,
+          "capture_queues_drained": true
+        },
+        "dropped_records": 0,
+        "unknown_bounds": 0,
+        "duplicate_observed_samples": 0,
+        "observed_samples_beyond_eof": 0,
+        "capture_gaps": [],
+        "unclassified_intervals": [],
+        "complete": true
+      },
+      "capture_transport": {
+        "schema_version": 1,
+        "scope": "closed capture segments; original source frames; no PCM",
+        "segments_completed": 1,
+        "handoff_dropped_frames": 0,
+        "upstream_dropped_samples": 0,
+        "segments_truncated": false
+      },
+      "persistence": {
+        "submitted": 19,
+        "completed": 19,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "quality": {
+        "wer": 0.0,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "chrf": 63.44258784702201,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0"
+      }
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 1,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+      "sha256": "384ec01dd68346dc395c8e2230e702f2abdbf7f12234d33e9940cd7a38fcd493",
+      "runtime_profile": {
+        "name": "lite-cpu",
+        "backend": "cpu",
+        "stt_model": "whisper-small",
+        "stt_compute_type": "int8",
+        "stt_threads": 3,
+        "stt_workers": 1,
+        "marian_threads": 1,
+        "final_engine": "marian",
+        "translation_model": null,
+        "vad_backend": "onnx",
+        "ram_floor_gb": 8,
+        "physical_core_floor": 4,
+        "vram_floor_gb": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "beam_size": 1,
+      "threads": 3,
+      "cadence": 0.6,
+      "final_count": 6,
+      "final_source_seconds": 30.59199999999999,
+      "preview_count": 6,
+      "preview_source_seconds": 13.376,
+      "preview_intervals_seconds": [
+        [
+          1.792,
+          6.048
+        ],
+        [
+          13.728,
+          17.984
+        ],
+        [
+          26.784,
+          29.216
+        ],
+        [
+          34.944,
+          37.376
+        ]
+      ],
+      "first_preview": {
+        "n": 4,
+        "p50": 4146.549999999999,
+        "p95": 4183.4
+      },
+      "update_gap": {
+        "n": 2,
+        "p50": 1969.0479999999998,
+        "p95": 1986.491
+      },
+      "input_queue": {
+        "max_wait_ms": 864.0131250722334,
+        "max_pending": 1,
+        "disjoint_growth_ms": 287.8861667510743
+      },
+      "source_coverage": {
+        "schema_version": 1,
+        "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+        "sample_rate": 48000,
+        "expected_source_samples": 2284800,
+        "eof": {
+          "source_samples": 2284800,
+          "reader_eof": true,
+          "capture_queues_drained": true
+        },
+        "dropped_records": 0,
+        "unknown_bounds": 0,
+        "duplicate_observed_samples": 0,
+        "observed_samples_beyond_eof": 0,
+        "capture_gaps": [],
+        "unclassified_intervals": [],
+        "complete": true
+      },
+      "capture_transport": {
+        "schema_version": 1,
+        "scope": "closed capture segments; original source frames; no PCM",
+        "segments_completed": 1,
+        "handoff_dropped_frames": 0,
+        "upstream_dropped_samples": 0,
+        "segments_truncated": false
+      },
+      "persistence": {
+        "submitted": 20,
+        "completed": 20,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "quality": {
+        "wer": 0.0,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "chrf": 63.44258784702201,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0"
+      }
+    },
+    {
+      "experiment": "baseline_anchor",
+      "repeat": 1,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+      "sha256": "de7cd3391f49b22002bfe8ad5eefac7d02c3d181f50a84f2dbae444db1e1d210",
+      "runtime_profile": {
+        "name": "lite-cpu",
+        "backend": "cpu",
+        "stt_model": "whisper-small",
+        "stt_compute_type": "int8",
+        "stt_threads": 3,
+        "stt_workers": 1,
+        "marian_threads": 1,
+        "final_engine": "marian",
+        "translation_model": null,
+        "vad_backend": "onnx",
+        "ram_floor_gb": 8,
+        "physical_core_floor": 4,
+        "vram_floor_gb": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "beam_size": 1,
+      "threads": 3,
+      "cadence": 0.6,
+      "final_count": 6,
+      "final_source_seconds": 30.59199999999999,
+      "preview_count": 6,
+      "preview_source_seconds": 13.376,
+      "preview_intervals_seconds": [
+        [
+          1.792,
+          6.048
+        ],
+        [
+          13.728,
+          17.984
+        ],
+        [
+          26.784,
+          29.216
+        ],
+        [
+          34.944,
+          37.376
+        ]
+      ],
+      "first_preview": {
+        "n": 4,
+        "p50": 4202.700000000001,
+        "p95": 4522.9
+      },
+      "update_gap": {
+        "n": 2,
+        "p50": 1924.438000000001,
+        "p95": 1928.3330000000024
+      },
+      "input_queue": {
+        "max_wait_ms": 1742.301290971227,
+        "max_pending": 1,
+        "disjoint_growth_ms": 580.9933326672763
+      },
+      "source_coverage": {
+        "schema_version": 1,
+        "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+        "sample_rate": 48000,
+        "expected_source_samples": 2284800,
+        "eof": {
+          "source_samples": 2284800,
+          "reader_eof": true,
+          "capture_queues_drained": true
+        },
+        "dropped_records": 0,
+        "unknown_bounds": 0,
+        "duplicate_observed_samples": 0,
+        "observed_samples_beyond_eof": 0,
+        "capture_gaps": [],
+        "unclassified_intervals": [],
+        "complete": true
+      },
+      "capture_transport": {
+        "schema_version": 1,
+        "scope": "closed capture segments; original source frames; no PCM",
+        "segments_completed": 1,
+        "handoff_dropped_frames": 0,
+        "upstream_dropped_samples": 0,
+        "segments_truncated": false
+      },
+      "persistence": {
+        "submitted": 20,
+        "completed": 20,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "quality": {
+        "wer": 0.0,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "chrf": 63.44258784702201,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0"
+      }
+    }
+  ],
+  "baseline_control_drift": {
+    "closing_minus_opening_fixed_median_ms": -121.06500000000051,
+    "closing_minus_opening_fixed_tail_ms": -2060.143,
+    "closing_missing_opening_preview_fraction": 0.05263157894736819,
+    "opening_missing_closing_preview_fraction": 0.181818181818182
+  },
+  "all_six_candidate_admissions": [
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 0,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json",
+      "sha256": "7b6811930a1f2d9fedb60d772baba14674e83e860a66c6b6271ad7189182c426",
+      "events": 16,
+      "admitted": 16,
+      "deferred": 0,
+      "cold_prediction": 11,
+      "finite_prediction": 5,
+      "discarded_trace_events": 0
+    },
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 1,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json",
+      "sha256": "d43486d0a2382bc399c587487b85a9b39c81384ec49f5f38e9dd851b86089574",
+      "events": 16,
+      "admitted": 16,
+      "deferred": 0,
+      "cold_prediction": 11,
+      "finite_prediction": 5,
+      "discarded_trace_events": 0
+    },
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 2,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json",
+      "sha256": "b0a6b9a2fc5e207c3da07023a6373b602952d2e8b3b3ed2dea6cb0173441d9dc",
+      "events": 17,
+      "admitted": 17,
+      "deferred": 0,
+      "cold_prediction": 12,
+      "finite_prediction": 5,
+      "discarded_trace_events": 0
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 0,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json",
+      "sha256": "127dc9c598b4a4ae75fdc48259e25245687cb1f59890fe7c794e397ebbcc49ef",
+      "events": 16,
+      "admitted": 16,
+      "deferred": 0,
+      "cold_prediction": 11,
+      "finite_prediction": 5,
+      "discarded_trace_events": 0
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 1,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+      "sha256": "384ec01dd68346dc395c8e2230e702f2abdbf7f12234d33e9940cd7a38fcd493",
+      "events": 17,
+      "admitted": 17,
+      "deferred": 0,
+      "cold_prediction": 11,
+      "finite_prediction": 6,
+      "discarded_trace_events": 0
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 2,
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json",
+      "sha256": "414c7a83ab6bd8e6baaa3fb131c96d7dc036b0990785be79f612e58f7fdd0db9",
+      "events": 17,
+      "admitted": 17,
+      "deferred": 0,
+      "cold_prediction": 12,
+      "finite_prediction": 5,
+      "discarded_trace_events": 0
+    }
+  ],
+  "limitations": [
+    "Actual CPU Whisper-small int8, beam1/3threads, Marian CT2 finals and ONNX VAD at0.6 cadence; E2B is a harness label, no Gemma model loaded.",
+    "Nearest-rank tails from sparse per-run endpoints are descriptive guard values; no p95 pooling or claim.",
+    "Complete retained file/source/persistence evidence is not native microphone/device or human quality certification.",
+    "Only small source and retained JSON/stdlib computations; no native imports, model/tests/device/audio/Git/archive actions."
+  ]
+}

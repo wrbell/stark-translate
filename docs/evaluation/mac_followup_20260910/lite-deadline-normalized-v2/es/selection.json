@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "inventory_complete": true,
+  "arms": [
+    {
+      "experiment": "deadline_100ms",
+      "size": "e2b",
+      "clip_id": "fleurs_development_es",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "final_queue_sustained_growth",
+        "final_queue_wait_regression",
+        "first_preview_tail_regression",
+        "matched_first_preview_tail_regression",
+        "median_gain_below_gate",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression",
+        "update_gap_tail_regression"
+      ]
+    },
+    {
+      "experiment": "deadline_250ms",
+      "size": "e2b",
+      "clip_id": "fleurs_development_es",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "final_queue_sustained_growth",
+        "final_queue_wait_regression",
+        "first_preview_tail_regression",
+        "median_gain_below_gate",
+        "memory_regression",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ]
+    }
+  ],
+  "qualified_count": 0,
+  "defaults_changed": false,
+  "limitations": "Engineering selection only. Historical references remain unavailable; independent public confirmation and bilingual review are required. Never pool repeat counts for p95 eligibility.",
+  "source_report": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_report.json",
+    "sha256": "e19fe8f0b1883e13de3168094920563291b7b39dbda2b286e9d3770472858cfc",
+    "size_bytes": 276589
+  }
+}

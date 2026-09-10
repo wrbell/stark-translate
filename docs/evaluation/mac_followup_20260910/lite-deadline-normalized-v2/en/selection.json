@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "inventory_complete": true,
+  "arms": [
+    {
+      "experiment": "deadline_100ms",
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "first_preview_tail_regression",
+        "median_gain_below_gate",
+        "memory_regression",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ]
+    },
+    {
+      "experiment": "deadline_250ms",
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "median_gain_below_gate",
+        "memory_regression",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ]
+    }
+  ],
+  "qualified_count": 0,
+  "defaults_changed": false,
+  "limitations": "Engineering selection only. Historical references remain unavailable; independent public confirmation and bilingual review are required. Never pool repeat counts for p95 eligibility.",
+  "source_report": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json",
+    "sha256": "c3394548708908ed6f93a3369af16f836534aae8b764e490c2d7f27aaf2bc3af",
+    "size_bytes": 294597
+  }
+}

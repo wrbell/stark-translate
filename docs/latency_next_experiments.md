@@ -5,7 +5,9 @@ completed 96 runs with 0/24 model/language arms qualified; the
 [Spanish Parakeet screen](evaluation/mac_followup_20260910/spanish-parakeet-result.md)
 completed 18 runs with 0/2 arms qualified; the
 [CPU Lite cadence screen](evaluation/mac_followup_20260910/lite-cadence-result.md)
-completed 24 runs with 0/4 language/cadence arms qualified. Their retained results
+completed 24 runs with 0/4 language/cadence arms qualified. The independent
+[CPU Lite deadline screen](evaluation/mac_followup_20260910/lite-deadline-result.md)
+completed another 24 runs with 0/4 arms qualified. Their retained results
 do not authorize confirmation or combinations of the rejected arms. Gemma E4B,
 Spanish Whisper and the 0.6-second partial cadence remain unchanged.
 
@@ -56,8 +58,9 @@ rejected both slower intervals because preview coverage and responsiveness did
 not meet the guards, even where final medians improved. Preview coverage loss
 does not imply capture or final-source loss.
 
-Independent CPU Lite deadline screens remain pending at the unchanged
-0.6-second cadence; no rejected cadence arm enters a combination. The separate
+Independent CPU Lite deadline screens completed 24 runs at unchanged
+0.6-second cadence and rejected all four arms. Neither rejected deadline nor
+cadence candidates enter confirmation or combinations. The separate
 [CPU Whisper small/base comparison](evaluation/mac_followup_20260910/cpu-stt-comparison.md)
 completed all 600 calls on 50 public development recordings per language over
 three repeats. Base was faster but failed the WER gate in both languages; no
@@ -114,9 +117,9 @@ declared experiment; all quality-changing behavior stays opt-in.
    error before deferring a full-prefix partial likely to outlast an imminent
    forced cut. Keep the ordinary 0.6-second cadence outside this bounded guard.
    Reject gains that sacrifice first-preview coverage or update-gap tails.
-   The tested Standard deadline arms did not qualify. Independent CPU Lite
-   deadline measurements remain pending and must pass their own guards; Standard
-   results cannot qualify a Lite arm.
+   The tested Standard and independent CPU Lite deadline arms did not qualify.
+   Their paired controls and failed responsiveness/queue/memory guards remain
+   recorded; no deadline setting is promoted.
 
 3. **Reduce scalar synchronization in Parakeet TDT decoding.** The exercised
    Parakeet package reads token, confidence and duration scalars separately in

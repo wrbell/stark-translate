@@ -1,0 +1,1722 @@
+{
+  "schema_version": 1,
+  "runs": [
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_en_en",
+      "experiment": "baseline_anchor",
+      "repeat": 0,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          3701.8
+        ],
+        "silence|replay_realtime": [
+          2897.0,
+          3096.8,
+          3157.3,
+          2141.2,
+          7107.6
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_en_en",
+      "experiment": "baseline_anchor",
+      "repeat": 1,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          2068.3
+        ],
+        "silence|replay_realtime": [
+          3000.8,
+          2451.1,
+          2432.4,
+          2334.3,
+          7615.3
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_en_en",
+      "experiment": "baseline_anchor",
+      "repeat": 2,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 5,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          2825.1
+        ],
+        "silence|replay_realtime": [
+          3289.7,
+          2378.7,
+          3127.8,
+          2345.1,
+          8851.7
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r0_fleurs_development_en_en",
+      "experiment": "baseline",
+      "repeat": 0,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          3495.7
+        ],
+        "silence|replay_realtime": [
+          2889.3,
+          2362.5,
+          2139.6,
+          2075.1,
+          7077.6
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r1_fleurs_development_en_en",
+      "experiment": "baseline",
+      "repeat": 1,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 5,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          2721.5
+        ],
+        "silence|replay_realtime": [
+          3057.4,
+          2682.6,
+          2424.3,
+          2349.3,
+          6761.5
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r2_fleurs_development_en_en",
+      "experiment": "baseline",
+      "repeat": 2,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          3419.7
+        ],
+        "silence|replay_realtime": [
+          3046.0,
+          2431.0,
+          2863.8,
+          3015.2,
+          10465.3
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_en_en",
+      "experiment": "deadline_100ms",
+      "repeat": 0,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 7,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          3487.0
+        ],
+        "silence|replay_realtime": [
+          2779.6,
+          1914.1,
+          3112.6,
+          2456.2,
+          7360.0
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_en_en",
+      "experiment": "deadline_100ms",
+      "repeat": 1,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          4233.0
+        ],
+        "silence|replay_realtime": [
+          3001.3,
+          3150.4,
+          2400.3,
+          2628.2,
+          9150.5
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_en_en",
+      "experiment": "deadline_100ms",
+      "repeat": 2,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          2092.4
+        ],
+        "silence|replay_realtime": [
+          3020.2,
+          2462.4,
+          2536.7,
+          2611.7,
+          12157.0
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_en_en",
+      "experiment": "deadline_250ms",
+      "repeat": 0,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          1900.7
+        ],
+        "silence|replay_realtime": [
+          2790.2,
+          2496.6,
+          2203.1,
+          2204.2,
+          9516.4
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_en_en",
+      "experiment": "deadline_250ms",
+      "repeat": 1,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          3906.1
+        ],
+        "silence|replay_realtime": [
+          3000.7,
+          3130.2,
+          2307.6,
+          2538.6,
+          10964.0
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_en_en",
+      "experiment": "deadline_250ms",
+      "repeat": 2,
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "source_lang": "en",
+      "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+      "clip_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 6,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "smart_cut|replay_realtime": [
+          3756.4
+        ],
+        "silence|replay_realtime": [
+          2953.8,
+          2395.2,
+          2112.1,
+          2045.4,
+          10763.1
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n. Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen. El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra poblaci\u00f3n. En Ir\u00e1n son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de a\u00f1o sab\u00e1tico en el extranjero puede mejorar sus posibilidades de mudarse a la educaci\u00f3n superior en su pa\u00eds de origen. Los \u00e1rabes tambi\u00e9n trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi caba\u00f1a. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    }
+  ],
+  "defaults_changed": false
+}

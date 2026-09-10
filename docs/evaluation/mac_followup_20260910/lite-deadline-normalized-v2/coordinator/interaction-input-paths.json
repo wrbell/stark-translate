@@ -1,0 +1,47 @@
+{
+  "runtime": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime",
+  "python": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+  "models_dir": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+  "queue_receipt": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/cpu-quality-recovery-v2-state.json",
+  "cadence": {
+    "spec": "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/protocol/lite-screen.json",
+    "provenance": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1/provenance.json",
+    "report": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1-report.json",
+    "selection": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1-selection.json"
+  },
+  "quality": {
+    "manifest": "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/public_data/manifest.json",
+    "index": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/index.json",
+    "report": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2-report.json",
+    "expected_models": {
+      "ct2-small": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+      "ct2-base": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/base-model/hub/models--Systran--faster-whisper-base/snapshots/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66"
+    }
+  },
+  "deadlines": [
+    {
+      "spec": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen.json",
+      "provenance": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/provenance.json",
+      "report": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json",
+      "selection": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_selection.json"
+    },
+    {
+      "spec": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen.json",
+      "provenance": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/provenance.json",
+      "report": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_report.json",
+      "selection": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_selection.json"
+    }
+  ],
+  "recovery_gate": {
+    "pid": 79689,
+    "created_at": 1789064704.123635,
+    "runner": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/run_cpu_quality_recovery_v2.py",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/run_cpu_quality_recovery_v2.py",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/cpu-quality-recovery-v2",
+      "--execute-reserved-serial-window"
+    ]
+  }
+}

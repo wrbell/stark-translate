@@ -1,0 +1,173 @@
+"""Archive completed replay JSON evidence without rewriting original payloads.
+
+Standard library only. Copies negative runs too; never executes inference.
+Run with --help. Report/selection should be generated outside the source cohort.
+"""
+
+import argparse
+import gzip
+import hashlib
+import io
+import json
+import shutil
+import tarfile
+from pathlib import Path
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--runner-log", type=Path, required=True)
+    parser.add_argument("--metrics", type=Path)
+    parser.add_argument("--report", type=Path)
+    parser.add_argument("--selection", type=Path)
+    parser.add_argument(
+        "--compress", action="store_true", help="Deterministic raw-evidence.tar.gz; recommended for large cohorts"
+    )
+    args = parser.parse_args()
+    args.output.mkdir(parents=True, exist_ok=False)
+    raw = args.output / "raw"
+    if not args.compress:
+        raw.mkdir(exist_ok=False)
+    sources = [(p, raw / p.name) for p in sorted(args.input.glob("*.json"))]
+    missing_terminal_artifacts = []
+    if not any(p.name == "provenance.json" for p, _ in sources):
+        raise ValueError("Missing cohort provenance")
+    sources.append((args.runner_log, args.output / "runner.log"))
+    for name in ("report", "selection"):
+        path = getattr(args, name)
+        if path:
+            sources.append((path, args.output / (name + ".json")))
+    summaries = []
+    for path, _ in sources[:]:
+        if path.suffix != ".json":
+            continue
+        run = json.loads(path.read_text())
+        if "experiment" not in run:
+            continue
+        observed = run.get("observed", {})
+        summary = observed.get("session_summary", {})
+        summaries.append(
+            {
+                "session_id": run["session_id"],
+                "experiment": run["experiment"],
+                "repeat": run["repeat"],
+                "size": run["size"],
+                "clip_id": run["clip_id"],
+                "source_lang": run.get("session_metadata", {}).get("source_lang"),
+                "source_identity": run.get("source_identity"),
+                "clip_sha256": run.get("clip", {}).get("sha256"),
+                "returncode": run.get("returncode"),
+                "error": run.get("error"),
+                "completion_errors": run.get("completion_errors"),
+                "lifecycle_status": run.get("session_lifecycle", {}).get("status"),
+                "integrity_status": run.get("replay_integrity", {}).get("status"),
+                "final_count": observed.get("final_count"),
+                "partial_count": observed.get("partial_count"),
+                "source_accounting_complete": summary.get("source_coverage", {}).get("complete"),
+                "endpoint_samples_ms": observed.get("endpoint_samples_ms"),
+                "caption_quality": run.get("caption_quality"),
+                "runtime_contract": run.get("requested_runtime"),
+                "p95_claim_eligible": False,
+                "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints.",
+            }
+        )
+        if args.metrics:
+            session = run["session_id"]
+            for prefix, suffix in [
+                ("session_", ".log"),
+                ("ab_metrics_", ".csv"),
+                ("diagnostics_", ".jsonl"),
+                ("partials_", ".jsonl"),
+                ("session_metadata_", ".json"),
+                ("session_lifecycle_", ".json"),
+                ("replay_", ".json"),
+                ("replay_", ".log"),
+                ("health_", ".json"),
+                ("hardware_", ".json"),
+            ]:
+                metric = args.metrics / (prefix + session + suffix)
+                if metric.is_file():
+                    sources.append((metric, raw / metric.name))
+                else:
+                    missing_terminal_artifacts.append(str(metric))
+    destinations = [str(target) for _, target in sources]
+    if len(destinations) != len(set(destinations)):
+        raise ValueError("Duplicate archive destinations")
+    index = []
+    compressed_sources = [(source, target) for source, target in sources if target.parent == raw]
+    if args.compress:
+        archive = args.output / "raw-evidence.tar.gz"
+        members = []
+        with (
+            archive.open("xb") as output,
+            gzip.GzipFile(filename="", mode="wb", fileobj=output, mtime=0, compresslevel=6) as gz,
+            tarfile.open(fileobj=gz, mode="w|", format=tarfile.GNU_FORMAT) as tar,
+        ):
+            for source, target in sorted(compressed_sources, key=lambda pair: pair[1].name):
+                data = source.read_bytes()
+                name = str(target.relative_to(args.output))
+                info = tarfile.TarInfo(name)
+                info.size = len(data)
+                info.mode = 0o644
+                info.mtime = 0
+                info.uid = info.gid = 0
+                info.uname = info.gname = ""
+                tar.addfile(info, io.BytesIO(data))
+                members.append({"path": name, "sha256": hashlib.sha256(data).hexdigest(), "size_bytes": len(data)})
+        # Read every member back without extraction or trusting filesystem paths.
+        with tarfile.open(archive, "r:gz") as tar:
+            actual = tar.getmembers()
+            if len(actual) != len(members):
+                raise ValueError("Archive member count mismatch")
+            for info, expected in zip(actual, members):
+                if not info.isfile() or info.name != expected["path"] or info.size != expected["size_bytes"]:
+                    raise ValueError("Archive member identity mismatch")
+                data = tar.extractfile(info).read()
+                if hashlib.sha256(data).hexdigest() != expected["sha256"]:
+                    raise ValueError("Archive member hash mismatch")
+        index.append(
+            {"path": archive.name, "sha256": digest(archive), "size_bytes": archive.stat().st_size, "members": members}
+        )
+        sources = [(source, target) for source, target in sources if target.parent != raw]
+        sources.append((args.input / "provenance.json", args.output / "provenance.json"))
+    for source, target in sources:
+        if target.exists():
+            raise ValueError("Refusing to overwrite archived evidence: " + str(target))
+        shutil.copyfile(source, target)
+        if digest(source) != digest(target):
+            raise ValueError("Copy identity changed")
+        index.append(
+            {
+                "path": str(target.relative_to(args.output)),
+                "sha256": digest(target),
+                "size_bytes": target.stat().st_size,
+            }
+        )
+    summary_path = args.output / "run-summary.json"
+    summary_path.write_text(
+        json.dumps({"schema_version": 1, "runs": summaries, "defaults_changed": False}, indent=2) + "\n"
+    )
+    index.append({"path": summary_path.name, "sha256": digest(summary_path), "size_bytes": summary_path.stat().st_size})
+    (args.output / "evidence-index.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "files": index,
+                "raw_payloads_unmodified": True,
+                "audio_included": False,
+                "missing_terminal_artifacts": missing_terminal_artifacts,
+            },
+            indent=2,
+        )
+        + "\n"
+    )
+
+
+if __name__ == "__main__":
+    main()

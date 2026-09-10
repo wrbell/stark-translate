@@ -16,10 +16,18 @@ no release or package publication is authorized for this follow-up. The
 - [CPU Lite cadence screen](lite-cadence-result.md): 24 technically valid replays,
   zero of four arms qualified. Longer cadence helped some final medians but
   reduced preview coverage; CPU Marian finals and 0.6-second cadence remain.
+- [CPU Lite independent deadline screen](lite-deadline-result.md): 24 technically
+  valid replays at unchanged 0.6-second cadence, zero of four arms qualified.
+  Both languages have formal no-combination plans; no rejected candidate enters
+  confirmation. Raw output, source and independent reviews are retained.
 - [Capture loss accounting](capture-loss-accounting.md): observed worker FIFO loss,
   unknown PortAudio overflow and terminal accounting are separate. Mocked checks
   passed; no additional live reliability certification is claimed.
 
+- [Python 3.11 Stop repair](stop-cancellation.md): replace the queue wait that
+  could swallow the first cancellation. The deterministic production regression
+  fails with the old wait and passes with the repair; 88 focused checks and
+  20 subtests pass without native devices.
 - [Capture repair validation](capture-source-validation.md): full Python 3.11/3.12
   CI on `f7b959d` passed 2,834 tests plus 20 subtests per interpreter. The installed
   Lite audit checked 60 dependencies with zero known vulnerabilities; the local
@@ -194,11 +202,11 @@ Nothing here changes a production model default.
 
 ## Remaining execution
 
-Run the bounded live-pipeline comparisons, smaller CPU STT comparison, and untouched
-confirmation for qualifying candidates. Retain negative results. Integrate
-appropriate checks and documentation, rebuild/verify artifacts, run final
-Standard and CPU Lite full-service rehearsals, review the final changes, and
-merge only after validation. External/human/device/CUDA gates keep their actual
+The bounded Standard, Spanish Parakeet, CPU Lite cadence/deadline and smaller
+CPU STT comparisons have completed without a qualifying candidate. Untouched
+confirmation is therefore unused; all negative results are retained. Finish
+the silent hymn diagnostics, source checks, artifact verification and fresh
+Standard/CPU Lite full-service rehearsals, then review and merge after validation. External/human/device/CUDA gates keep their actual
 pending status; the sub-second caption-delivery goal is not yet established.
 
 [Completed evidence index](completed-evidence-index.json) binds the retained raw

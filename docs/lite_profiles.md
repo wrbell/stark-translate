@@ -39,8 +39,9 @@ Gemma inference or a test of `lite-cpu-quality`.
 The [CPU Whisper small/base comparison](evaluation/mac_followup_20260910/cpu-stt-comparison.md)
 completed 600 calls: base was faster but worsened WER beyond the allowed increase
 in both languages. Whisper-small stays selected; no base pipeline trial follows.
-Independent CPU Lite deadline screens remain pending at the default cadence; rejected cadence
-arms cannot enter a combination. The separate
+The [independent CPU Lite deadline screen](evaluation/mac_followup_20260910/lite-deadline-result.md)
+completed 24 runs with 0/4 qualified arms at the default cadence. Neither deadline
+nor cadence candidates enter confirmation or combinations. The separate
 [Standard endpoint/deadline](evaluation/mac_followup_20260910/standard-screen-result.md)
 and [Spanish Parakeet](evaluation/mac_followup_20260910/spanish-parakeet-result.md)
 results leave the Mac Gemma E4B and Spanish Whisper defaults unchanged. None of

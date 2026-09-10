@@ -1,0 +1,448 @@
+{
+  "schema_version": 1,
+  "frozen_inputs": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2-inputs.json",
+  "frozen_inputs_sha256": "4a93d01061a6096f8e0d4e6fe87d1a18f0786c22f18003009a74615676d4c9a6",
+  "source_bindings": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/dry_run_ab.py": {
+      "sha256": "3f23bb062f57d46630cfdf72db18ebb2b54481543964a8a8718100549b5285c9",
+      "bytes": 263524
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/settings.py": {
+      "sha256": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568",
+      "bytes": 23985
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/models.lock.json": {
+      "sha256": "ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273",
+      "bytes": 8296
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/stark_translate/profiles.py": {
+      "sha256": "049d59d41519f73712e24382e38c6b3e9cfad1a46b8510f17eb4adf1cd7d4cd2",
+      "bytes": 5765
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_latency.py": {
+      "sha256": "ac12808b61279f6bc452a3943fa54f4775ba26ffec5b983d5b45bdd74f35908d",
+      "bytes": 44432
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_selection.py": {
+      "sha256": "a6553a89914f665c0f7e18fa862ad66eae29ec306830a08d12b63286f6f23045",
+      "bytes": 6143
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_quality.py": {
+      "sha256": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "bytes": 44156
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/latency_experiments.py": {
+      "sha256": "08e9ae7582c46a1698dcf8d03167bf5b1890c8b6676fdebda3a5ba15f5f54ce9",
+      "bytes": 3203
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/__init__.py": {
+      "sha256": "45034d1776f5ee1ad620a8b09e654431f0c179b0c8c9320c8a2882fa1d4393fd",
+      "bytes": 358
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/_locks.py": {
+      "sha256": "80bb52edd8441e66e9ed96c24a750c2694e20dcd9ecce3e4121d0ab878daaf90",
+      "bytes": 932
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/active_learning.py": {
+      "sha256": "ca1f5c59afb7cd212393e26c55ea056491217a56274947c82a50effa87ffe5a6",
+      "bytes": 2985
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/audio_devices.py": {
+      "sha256": "994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5",
+      "bytes": 3604
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/base.py": {
+      "sha256": "a1292b5809bce689579c398040e268d3dacb56a0c9961ca4354c017cb43bc269",
+      "bytes": 4068
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/cuda_engine.py": {
+      "sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "bytes": 42974
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/factory.py": {
+      "sha256": "fef3dc82b0ac990346e20a0aae0f9288207d0fc8581d606d973b160dac7500f0",
+      "bytes": 20633
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/hf_whisper_engine.py": {
+      "sha256": "d468ed490459f421c0efa5d2be7494f3f3c7c0541297442abc5aea40ca3036f7",
+      "bytes": 8411
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/llamacpp_engine.py": {
+      "sha256": "259900c54808b5abb3fee7b2f901ac218a68e4e4cbe1baf2ede71c6bbc8aac93",
+      "bytes": 10840
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/marian_hf_engine.py": {
+      "sha256": "715e4aeddccf18a62702caad443499506425fb96df57606976b1987d46d03e1c",
+      "bytes": 5364
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/mlx_engine.py": {
+      "sha256": "22aa8ebf4b79780958b9f1707b1f79c98d6298ee56a92f5f6384e9263b06da14",
+      "bytes": 41418
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/mlx_generation_lock.py": {
+      "sha256": "3e9adc6a10366676220ad844e2ca3b6efacfb8d5f61c13cf5b4016b4454a700a",
+      "bytes": 1150
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/mlx_spec.py": {
+      "sha256": "0a33aa9d8d8f51ba1a61b38f97a9003d2d924768802a820947d2cfe534e5692a",
+      "bytes": 9287
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/model_paths.py": {
+      "sha256": "e7ed8fc7b3cf086635e95f47ac0c44b3cc51983c697157cb350a26bc989246e1",
+      "bytes": 11565
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/parakeet_engine.py": {
+      "sha256": "833031c842e60af19322f5809a51a4df8721b6664ca65b9ff7fe6ab30c86d1c8",
+      "bytes": 4238
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/parakeet_mlx_engine.py": {
+      "sha256": "a2e463974659ef671acc46a1935e13326d44b5f2886704fda22ecb2516e71582",
+      "bytes": 9225
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/prefix_cache.py": {
+      "sha256": "c675326e46bd6fa1fbaf126dc06495af1c06e5317396efe79139e3f96b8cd1e0",
+      "bytes": 1950
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/spec_decode_logger.py": {
+      "sha256": "c4b1b3fb0f3163687fda5ae9ebbdf2a61ca27e81290e7cbf6349f42ba9709abb",
+      "bytes": 6759
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/stt_fallback.py": {
+      "sha256": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4",
+      "bytes": 821
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/translation_prompts.py": {
+      "sha256": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "bytes": 8144
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/engines/tts_engine.py": {
+      "sha256": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+      "bytes": 6554
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/cpu-quality-recovery-v2-state.json": {
+      "sha256": "0184528d9422f51ab671e451ea2dcb439265bc788f5b53a0d53aadebabf1690d",
+      "bytes": 3803
+    },
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/protocol/lite-screen.json": {
+      "sha256": "cf8db6fcc056a71eedaf36ed66dd246cddbe30ba35c217117f862aba1757e427",
+      "bytes": 11283
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1/provenance.json": {
+      "sha256": "c5f26d4e151476ad0d5aaaaeb93d456067e95c76206f53b0146452709d85eb81",
+      "bytes": 75435
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1-report.json": {
+      "sha256": "852c44a45a94b3b4147e2b59fbccd5cb6a86b3ddb98b4c7f22cb91768178b17f",
+      "bytes": 534966
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1-selection.json": {
+      "sha256": "d32ac77b70a533ea2d04aa469dad67f148ad59b51c0b086df8302f156ff07904",
+      "bytes": 3058
+    },
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/public_data/manifest.json": {
+      "sha256": "9de09bead155cef2a62f58ef0be91c43e35ced2e91672fbcfa641f358c498385",
+      "bytes": 336677
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/index.json": {
+      "sha256": "c7a250f014c48e1774d39a1badb9e1400b6dce696f955c0677bc42f5d852a88e",
+      "bytes": 7670
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2-report.json": {
+      "sha256": "0060b721479f6cdf5540dfd183b09ec3781e0b8f9d24d35e95cf5f0d04e2b0bf",
+      "bytes": 45163
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-small_en_development_r0.json": {
+      "sha256": "ee643b931bfd01a737272a04307de866af414d8d8b4ef79a542ea347d1435bdc",
+      "bytes": 72271
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-base_en_development_r0.json": {
+      "sha256": "b1cc44461151b6c24041384192db09acd3fea80158f619a9f8697025c1770f7e",
+      "bytes": 70239
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-small_es_development_r0.json": {
+      "sha256": "36024c57d840f260cfb0a60c72012d1f3bc64a4568feb47acace9a20a5022d96",
+      "bytes": 73389
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-base_es_development_r0.json": {
+      "sha256": "812905821ab747882612a73b746bb65e203cd8f564c91a088786ce4fa2d18884",
+      "bytes": 71414
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-base_en_development_r1.json": {
+      "sha256": "d6dde2ef825872540685c5ee5932594b0864c23f9b2ba7e545f59b1b8c2c63ca",
+      "bytes": 70240
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-small_en_development_r1.json": {
+      "sha256": "4711c9dbab1006fd31e738dc8a85c789aa679d6f0e06dde312c48c26431f8ab0",
+      "bytes": 72272
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-base_es_development_r1.json": {
+      "sha256": "50d0d581617ae92db90dfb05b924c71704529f52eac30a41787410b2a8a30eef",
+      "bytes": 71397
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-small_es_development_r1.json": {
+      "sha256": "9d39be8e2f053477e826f07414bff2a7c1e28229ab589774fb8b5518a7b16622",
+      "bytes": 73376
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-small_en_development_r2.json": {
+      "sha256": "1c09571d986867c22bdcdb5550bf5c9bca91ae4ccd32854d6afd973dddcbc999",
+      "bytes": 72251
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-base_en_development_r2.json": {
+      "sha256": "8efa86c5296539925460d6412c46c92601c1737c4bc7d9bca48e3a57e2210824",
+      "bytes": 70224
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-small_es_development_r2.json": {
+      "sha256": "b2ff9c9bb238c13af0d4a68ee18e13fad36da0a71ea6df7911873421c90037f5",
+      "bytes": 73375
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/stt-cpu-development-v2/stt_ct2-base_es_development_r2.json": {
+      "sha256": "c4be599d36e203bd9d78fd2f5794fb12aa535dd67f7f1807043eb73879cec1ba",
+      "bytes": 71409
+    }
+  },
+  "plans": [
+    {
+      "stage": "independent_deadline_screen",
+      "language": "en",
+      "qualification_claim": false,
+      "p95_claim_eligible": false,
+      "reason": "Predeclared Lite deadline100/250 screen after complete cadence inventory; unchanged0.6 controls. No Standard success transferred.",
+      "spec_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen.json",
+      "spec_sha256": "2edb40e3c9badfbbc5a723c04fae1f4aaec59ac4c3de13d8bda12334be8bc7ef"
+    },
+    {
+      "stage": "independent_deadline_screen",
+      "language": "es",
+      "qualification_claim": false,
+      "p95_claim_eligible": false,
+      "reason": "Predeclared Lite deadline100/250 screen after complete cadence inventory; unchanged0.6 controls. No Standard success transferred.",
+      "spec_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen.json",
+      "spec_sha256": "865cd29c796bee23533024d755b5a3138355e16018f81fdfa9b7c6d1438d1f1a"
+    }
+  ],
+  "base_quality_by_language": {
+    "en": {
+      "quality_eligible_for_conditional_implementation": false,
+      "pairs": [
+        {
+          "repeat": 0,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1413.696792034898,
+          "base_call_p50_ms": 479.1547500062734
+        },
+        {
+          "repeat": 1,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1435.6964374892414,
+          "base_call_p50_ms": 447.79497949639335
+        },
+        {
+          "repeat": 2,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1493.335124454461,
+          "base_call_p50_ms": 494.3062079837546
+        }
+      ],
+      "live_latency_eligible": false,
+      "p95_claim_eligible": false,
+      "next_action": "If quality eligible, implement and test explicit replay model override + frozen runtime contract before a separately controlled base replay; no production default change."
+    },
+    "es": {
+      "quality_eligible_for_conditional_implementation": false,
+      "pairs": [
+        {
+          "repeat": 0,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1491.779646021314,
+          "base_call_p50_ms": 517.1696459874511
+        },
+        {
+          "repeat": 1,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1604.9388954997994,
+          "base_call_p50_ms": 604.9018955673091
+        },
+        {
+          "repeat": 2,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1633.6450834642164,
+          "base_call_p50_ms": 602.9900625580922
+        }
+      ],
+      "live_latency_eligible": false,
+      "p95_claim_eligible": false,
+      "next_action": "If quality eligible, implement and test explicit replay model override + frozen runtime contract before a separately controlled base replay; no production default change."
+    }
+  },
+  "commands": [
+    {
+      "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime",
+      "environment": {
+        "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1"
+      },
+      "execute_now": false,
+      "label": "en_independent_deadline_screen",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-m",
+        "tools.mac_followup_latency",
+        "run",
+        "--spec",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen.json",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs",
+        "--tag",
+        "deadline_stage_v2_en_independent_deadline_screen",
+        "--repeats",
+        "3",
+        "--ws-port",
+        "8865",
+        "--http-port",
+        "8866",
+        "--timeout",
+        "300"
+      ],
+      "expected_runs": 12,
+      "timeout_s": 4500
+    },
+    {
+      "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime",
+      "environment": {
+        "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1"
+      },
+      "execute_now": false,
+      "label": "en_independent_deadline_screen_report",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-m",
+        "tools.mac_followup_latency",
+        "report",
+        "--input",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json"
+      ],
+      "timeout_s": 300
+    },
+    {
+      "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime",
+      "environment": {
+        "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1"
+      },
+      "execute_now": false,
+      "label": "en_independent_deadline_screen_selection",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-m",
+        "tools.mac_followup_selection",
+        "--report",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_selection.json"
+      ],
+      "timeout_s": 60
+    },
+    {
+      "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime",
+      "environment": {
+        "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1"
+      },
+      "execute_now": false,
+      "label": "es_independent_deadline_screen",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-m",
+        "tools.mac_followup_latency",
+        "run",
+        "--spec",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen.json",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs",
+        "--tag",
+        "deadline_stage_v2_es_independent_deadline_screen",
+        "--repeats",
+        "3",
+        "--ws-port",
+        "8865",
+        "--http-port",
+        "8866",
+        "--timeout",
+        "300"
+      ],
+      "expected_runs": 12,
+      "timeout_s": 4500
+    },
+    {
+      "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime",
+      "environment": {
+        "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1"
+      },
+      "execute_now": false,
+      "label": "es_independent_deadline_screen_report",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-m",
+        "tools.mac_followup_latency",
+        "report",
+        "--input",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_report.json"
+      ],
+      "timeout_s": 300
+    },
+    {
+      "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime",
+      "environment": {
+        "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1"
+      },
+      "execute_now": false,
+      "label": "es_independent_deadline_screen_selection",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-m",
+        "tools.mac_followup_selection",
+        "--report",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_report.json",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_selection.json"
+      ],
+      "timeout_s": 60
+    }
+  ],
+  "execution": "No process is started by this builder. Coordinator may feed these sequential commands to the existing reserved runner after verifying this immutable bundle and an idle model window.",
+  "gates": "Reuse actual report/selection guards unchanged; >=2/3 median successes, every repeat nonlatency guards, no pooling across languages/models/repeats. A p95 claim requires >=100 fixed observations in EACH opening/candidate/closing run.",
+  "defaults_changed": false,
+  "confirmation_completed": false,
+  "audio_policy": "file input only, explicit --no-tts; no device probes, capture or playback"
+}

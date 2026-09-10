@@ -1,0 +1,95 @@
+{
+  "updated_at": "2026-09-10T18:59:53.544625+00:00",
+  "stage": "completed",
+  "base_quality_by_language": {
+    "en": {
+      "quality_eligible_for_conditional_implementation": false,
+      "pairs": [
+        {
+          "repeat": 0,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1413.696792034898,
+          "base_call_p50_ms": 479.1547500062734
+        },
+        {
+          "repeat": 1,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1435.6964374892414,
+          "base_call_p50_ms": 447.79497949639335
+        },
+        {
+          "repeat": 2,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.053824362606232294,
+          "base_wer": 0.08970727101038715,
+          "small_call_p50_ms": 1493.335124454461,
+          "base_call_p50_ms": 494.3062079837546
+        }
+      ],
+      "live_latency_eligible": false,
+      "p95_claim_eligible": false,
+      "next_action": "If quality eligible, implement and test explicit replay model override + frozen runtime contract before a separately controlled base replay; no production default change."
+    },
+    "es": {
+      "quality_eligible_for_conditional_implementation": false,
+      "pairs": [
+        {
+          "repeat": 0,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1491.779646021314,
+          "base_call_p50_ms": 517.1696459874511
+        },
+        {
+          "repeat": 1,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1604.9388954997994,
+          "base_call_p50_ms": 604.9018955673091
+        },
+        {
+          "repeat": 2,
+          "wer_pass": false,
+          "term_pass": true,
+          "small_wer": 0.05210237659963437,
+          "base_wer": 0.11517367458866545,
+          "small_call_p50_ms": 1633.6450834642164,
+          "base_call_p50_ms": 602.9900625580922
+        }
+      ],
+      "live_latency_eligible": false,
+      "p95_claim_eligible": false,
+      "next_action": "If quality eligible, implement and test explicit replay model override + frozen runtime contract before a separately controlled base replay; no production default change."
+    }
+  },
+  "interaction_plans": [
+    {
+      "stage": "no_combination",
+      "language": "en",
+      "reason": "Both cadence and deadline must independently qualify on this exact Lite scope; no arm invented.",
+      "spec": null
+    },
+    {
+      "stage": "no_combination",
+      "language": "es",
+      "reason": "Both cadence and deadline must independently qualify on this exact Lite scope; no arm invented.",
+      "spec": null
+    }
+  ],
+  "defaults_changed": false,
+  "confirmation_completed": false,
+  "prior_cohorts_rerun": false,
+  "completed_deadline_runs": 24,
+  "no_combination": true
+}
