@@ -256,3 +256,47 @@ for its output reader and at most three seconds for the asynchronous writer.
 `log_snapshot()` reports queued, dropped, write failures, read failures and an
 incomplete-drain indicator separately; final values are retained in native
 provenance. The native process remains the only process this owner terminates.
+
+
+## Installed CPU quality smoke observed on 2026-09-10
+
+The integrated installed wheel built from `a1d7cdf` completed one English-to-Spanish
+synthetic replay as `overnight_lite_quality_smoke02_en`. Whisper small INT8 produced
+“The grace of God brings salvation.” The owned E2B server produced “La gracia de
+Dios trae la salvación.” The lifecycle completed with exit 0, all four required
+writes completed, and no pending or failed recording writes. This check did not
+use TTS, a microphone, a browser client or physical output.
+
+The wheel SHA-256 is
+`c5c12d8658c01a79c5ad93252d15af9f68a6c61a07469a0e80fa6772934e4da3`;
+the installed pipeline SHA-256 is
+`ba5905fe8bcf4f2e2c8e90c1dc97aaefb4ac5c2255e73ac97c13efe2a89a1ef8`.
+Session metadata binds the exact prepared GGUF and native executable hashes,
+CPU backend, `-ngl 0`, `--no-kv-offload`, `--no-op-offload`, three threads,
+512-token context and q8 KV cache. The generic lifecycle model label is still
+`llama.cpp`; actual model identity is retained in `session_metadata.managed_llama`.
+
+The single silence-final sample recorded 3,452.8 ms from estimated speech end to
+server payload readiness, 1,251.3 ms STT, and 428.7 ms translation. These are smoke
+observations, not latency targets or certification. The retained 1,106,247,680-byte
+peak RSS covers the Python pipeline only; the owned llama-server is excluded.
+Combined process-tree peak memory was not sampled and cannot be reconstructed
+from the system RAM snapshot. No RAM floor gate is claimed.
+
+The native log contains 22 valid structured records, is 7,260 bytes with mode
+`0600`, and ends with the native cleanup message. Both successful-run processes
+and the earlier failed-run process were absent at the read-only audit. Rotation
+and retention were covered by unit tests, not exercised by this short run. This
+wheel did not persist final native log counters; the follow-up completion-metadata
+wiring is tested separately and does not rewrite the observed result.
+
+The first attempt, `overnight_lite_quality_smoke_en`, supplied a nonexistent audio
+filename and failed before model loading. Its original traceback and lifecycle
+marker remain preserved. That early failure left a stored `running` marker even
+though its process exited; dead-PID status handling prevents export. The input
+validation correction is separate from this historical evidence.
+
+The [machine-readable smoke evidence](evaluation/lite_cpu_quality_smoke_20260910.json)
+indexes hashes for both attempts and the executed wheel. Spanish-source E2B,
+natural speech, sustained latency, total memory, native Windows/Linux and real
+RTX 2070 acceptance remain separate validation work.
