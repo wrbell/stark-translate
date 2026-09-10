@@ -16,6 +16,7 @@ import math
 import os
 import re
 import shlex
+import signal
 import statistics
 import subprocess
 import sys
@@ -43,6 +44,63 @@ METRIC_COLUMNS = (
     "decode_ms_a",
 )
 SPECIAL_TOKENS = ("<turn|>", "<|channel>")
+REPLAY_MANAGED_ARGS = {
+    "--audio-file",
+    "--session-id",
+    "--ws-port",
+    "--http-port",
+    "--lang",
+    "--dry-run-text",
+    "--no-exit-after-replay",
+    "--backend",
+}
+
+
+def argument_value(arguments: list[str], name: str, default=None):
+    """Match argparse's final occurrence, including --option=value syntax."""
+    result = default
+    for index, argument in enumerate(arguments):
+        if argument.startswith(name + "="):
+            result = argument.split("=", 1)[1]
+        elif argument == name and index + 1 < len(arguments):
+            result = arguments[index + 1]
+    return result
+
+
+def run_child(command: list[str], *, cwd: Path, stdout, timeout: float, env: dict | None = None):
+    """Bound a worker's lifetime and terminate its process group on timeout."""
+    process = subprocess.Popen(
+        command, cwd=cwd, stdout=stdout, stderr=subprocess.STDOUT, env=env, start_new_session=os.name != "nt"
+    )
+    try:
+        return subprocess.CompletedProcess(command, process.wait(timeout=timeout))
+    except subprocess.TimeoutExpired:
+        if os.name != "nt":
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+        else:
+            process.terminate()
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            if os.name != "nt":
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            else:
+                process.kill()
+            process.wait(timeout=5)
+        finally:
+            # A descendant can ignore TERM even when the main process exits.
+            if os.name != "nt":
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+        raise
 
 
 def _pct(xs: list[float], p: float) -> float:
@@ -187,22 +245,13 @@ def load_configs(specs: list[str], json_path: Path | None = None) -> dict[str, l
             configs[name] = argv
     if not configs:
         configs["baseline"] = []
-    reserved = {
-        "--audio-file",
-        "--session-id",
-        "--ws-port",
-        "--http-port",
-        "--lang",
-        "--dry-run-text",
-        "--no-exit-after-replay",
-    }
     for name, argv in configs.items():
         if not re.fullmatch(r"[A-Za-z0-9_-]+", name):
             raise ValueError(f"Invalid config name: {name!r}")
         args = shlex.split(argv) if isinstance(argv, str) else argv
         if not isinstance(args, list) or not all(isinstance(arg, str) for arg in args):
             raise ValueError(f"Config {name} must be an argv string or list")
-        if any(arg.split("=", 1)[0] in reserved for arg in args):
+        if any(arg.split("=", 1)[0] in REPLAY_MANAGED_ARGS for arg in args):
             raise ValueError(f"Config {name} overrides replay-managed arguments")
         configs[name] = args
     return configs
@@ -260,8 +309,24 @@ def _free_port(start: int) -> int:
     raise RuntimeError(f"no free port in {start}..{start + 200}")
 
 
-def run_replay(clip: dict, wav: Path, tag: str, extra: list[str], index: int, metrics_dir: Path) -> dict:
+def run_replay(
+    clip: dict, wav: Path, tag: str, extra: list[str], index: int, metrics_dir: Path, *, timeout_s: float | None = None
+) -> dict:
     """Launch one child and wait before analyzing its flushed metrics."""
+    if any(arg.split("=", 1)[0] in REPLAY_MANAGED_ARGS for arg in extra):
+        raise ValueError("Extra args override replay-managed arguments")
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", tag):
+        raise ValueError("Invalid replay session tag")
+    speed = float(argument_value(extra, "--replay-speed", os.environ.get("STARK_REPLAY_SPEED", "1")))
+    if not math.isfinite(speed):
+        raise ValueError("Replay speed must be finite")
+    timeout_s = (
+        timeout_s
+        if timeout_s is not None
+        else max(300, float(clip.get("duration", 150)) / (speed if speed > 0 else 1) * 3 + 180)
+    )
+    if not math.isfinite(timeout_s) or timeout_s <= 0:
+        raise ValueError("Replay timeout must be positive and finite")
     ws_port = _free_port(8865 + index * 2)
     http_port = _free_port(ws_port + 1)
     command = [
@@ -290,15 +355,26 @@ def run_replay(clip: dict, wav: Path, tag: str, extra: list[str], index: int, me
         if path.exists():
             raise FileExistsError(f"Replay session already exists: {path}")
     metrics_dir.mkdir(parents=True, exist_ok=True)
+    timed_out = False
+    launch_error = None
     with log_path.open("x") as log:
-        result = subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=False)
+        try:
+            result = run_child(command, cwd=ROOT, stdout=log, timeout=timeout_s)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            result = subprocess.CompletedProcess(command, -1)
+        except OSError as exc:
+            launch_error = str(exc)
+            result = subprocess.CompletedProcess(command, -1)
     report = {
         "session_id": tag,
         "clip": clip,
         "command": command,
         "returncode": result.returncode,
-        "replay_speed": float(os.environ.get("STARK_REPLAY_SPEED", "1")),
-        "realtime_latency_eligible": float(os.environ.get("STARK_REPLAY_SPEED", "1")) == 1,
+        "replay_speed": speed,
+        "realtime_latency_eligible": speed == 1,
+        "timeout_s": timeout_s,
+        "timed_out": timed_out,
     }
     metadata = metrics_dir / f"session_metadata_{tag}.json"
     if metadata.exists():
@@ -307,6 +383,12 @@ def run_replay(clip: dict, wav: Path, tag: str, extra: list[str], index: int, me
         report.update(analyze_run(csv_path, partials_path, log_path))
     else:
         report["error"] = "Pipeline did not write metrics CSV"
+    if launch_error:
+        report["error"] = f"Pipeline failed to launch: {launch_error}"
+    elif timed_out:
+        report["error"] = f"Pipeline exceeded {timeout_s:g}s timeout and was terminated"
+    elif result.returncode:
+        report["error"] = f"Pipeline exited with status {result.returncode}"
     output_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     if result.returncode or "error" in report:
         raise RuntimeError(f"Replay failed; see {log_path} and {output_path}")

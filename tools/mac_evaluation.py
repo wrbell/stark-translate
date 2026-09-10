@@ -18,6 +18,7 @@ import re
 import statistics
 import subprocess
 import sys
+import tempfile
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -37,9 +38,86 @@ def digest(path: Path) -> str:
 
 def write_json(path: Path, data: object, *, exclusive: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("x" if exclusive else "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False, allow_nan=False)
-        f.write("\n")
+    encoded = json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+    if exclusive:
+        with path.open("x", encoding="utf-8") as f:
+            f.write(encoded)
+        return
+    fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(encoded)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _numeric(value) -> float | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+        return number if math.isfinite(number) and number >= 0 else None
+    except (ValueError, TypeError):
+        return None
+
+
+def _pipeline_arguments(run: dict) -> list[str] | None:
+    if "experiment" not in run:
+        return None
+    command = run.get("command", [])
+    arguments = command[command.index("--http-port") + 2 :] if "--http-port" in command else []
+    # These dimensions already have separate report groups or a fixed 1x gate.
+    for name in ("--gemma4-size", "--replay-speed"):
+        arguments = _without_argument(arguments, name)
+    return arguments
+
+
+def _runtime_cohort(run: dict) -> str:
+    """Separate inference code/config changes without treating doc commits as model changes."""
+    env = run.get("environment", {})
+    metadata = run.get("session_metadata", {})
+    payload = {
+        "sources": {
+            k: v
+            for k, v in env.get("source_sha256", {}).items()
+            if k.startswith("engines/") or k in {"dry_run_ab.py", "settings.py", "tools/pipeline_timing.py"}
+        },
+        "versions": env.get("versions"),
+        "platform": env.get("platform"),
+        "python": env.get("python"),
+        "settings": run.get("experiment_settings"),
+        "vad": metadata.get("vad"),
+        "translation": metadata.get("translation"),
+        "stt_backend": metadata.get("stt_backend"),
+        "pipeline_arguments": _pipeline_arguments(run),
+    }
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def _clip_matches(run: dict, manifest: dict) -> bool:
+    from tools.replay_bench import argument_value
+
+    clip = run.get("clip", {})
+    expected = next((c for c in manifest.get("replays", []) if c["id"] == run.get("clip_id", clip.get("id"))), None)
+    if expected is None or any(clip.get(k) != expected.get(k) for k in ("id", "sha256", "path", "lang", "provenance")):
+        return False
+    metadata = run.get("session_metadata", {})
+    command = run.get("command", [])
+    command_audio = argument_value(command, "--audio-file")
+    return (
+        run.get("language") == expected["lang"]
+        and run.get("provenance") == expected["provenance"]
+        and metadata.get("input_audio_sha256", expected["sha256"]) == expected["sha256"]
+        and argument_value(command, "--session-id") == run.get("session_id")
+        and argument_value(command, "--lang") == expected["lang"]
+        and argument_value(command, "--gemma4-size") == run.get("size")
+        and command_audio is not None
+        and (ROOT / command_audio).resolve() == (ROOT / expected["path"]).resolve()
+        and _numeric(argument_value(command, "--replay-speed", run.get("replay_speed")))
+        == _numeric(run.get("replay_speed"))
+    )
 
 
 def environment() -> dict:
@@ -75,7 +153,7 @@ def environment() -> dict:
 
 
 def stats(values: list[float]) -> dict:
-    values = sorted(float(x) for x in values if math.isfinite(float(x)))
+    values = sorted(n for x in values if (n := _numeric(x)) is not None)
     return {
         "n": len(values),
         "p50": statistics.median(values) if values else None,
@@ -209,21 +287,32 @@ def prepare_manifest(root: Path, output: Path) -> dict:
     return data
 
 
-def validate_manifest(manifest: dict, root: Path = ROOT) -> dict:
+def validate_manifest(manifest: dict, root: Path | None = None) -> dict:
     """Verify all audio and count only explicitly approved natural references."""
+    root = root or ROOT
     if manifest.get("usage") != "evaluation_only":
         raise ValueError("Expected an evaluation-only manifest")
     counts = {"en": 0, "es": 0}
+    for section in ("replays", "utterances", "translations"):
+        ids = [row.get("id") for row in manifest.get(section, [])]
+        if any(not isinstance(identity, str) or not identity for identity in ids) or len(ids) != len(set(ids)):
+            raise ValueError(f"Manifest {section} needs unique, nonempty IDs")
     for row in manifest.get("replays", []) + manifest.get("utterances", []):
         if digest(root / row["path"]) != row["sha256"]:
             raise ValueError(f"Audio changed: {row['id']}")
+    approved_audio = set()
     for row in manifest.get("utterances", []):
+        if row.get("lang") not in counts:
+            raise ValueError("Utterance language must be en or es")
         if (
             row.get("reference_status") == "approved"
             and row.get("reference_text")
             and row.get("provenance") == "natural_speech"
         ):
-            counts[row["lang"]] += 1
+            identity = row["lang"], row["sha256"]
+            if identity not in approved_audio:
+                counts[row["lang"]] += 1
+                approved_audio.add(identity)
     return {"approved_natural_utterances": counts, "natural_audio_gate": all(n >= 50 for n in counts.values())}
 
 
@@ -304,6 +393,8 @@ def rescore_quality(source: Path, destination: Path, manifest_path: Path) -> Non
     """Rebind references without rerunning or changing any measured prediction."""
     manifest = json.loads(manifest_path.read_text())
     by_id = {r["id"]: r for r in manifest["translations"]}
+    if len(by_id) != len(manifest["translations"]):
+        raise ValueError("Rescoring manifest contains duplicate input IDs")
     run = json.loads(source.read_text())
     for row in run["rows"]:
         fixed = by_id[row["id"]]
@@ -318,6 +409,31 @@ def rescore_quality(source: Path, destination: Path, manifest_path: Path) -> Non
     write_json(destination, run, exclusive=True)
 
 
+def _without_argument(arguments: list[str], name: str) -> list[str]:
+    result = []
+    skip = False
+    for arg in arguments:
+        if skip:
+            skip = False
+        elif arg == name:
+            skip = True
+        elif not arg.startswith(name + "="):
+            result.append(arg)
+    return result
+
+
+def _resolved_model(model_id: str) -> dict:
+    """Record the actual offline snapshot and revision without loading a model."""
+    from engines.model_paths import resolve_model_path
+
+    resolved = resolve_model_path(model_id, local_only=True)
+    path = Path(resolved) if resolved else None
+    return {
+        "resolved_model": resolved or model_id,
+        "model_revision": path.name if path and path.parent.name == "snapshots" else None,
+    }
+
+
 def _model_id(size: str) -> str:
     from settings import settings
 
@@ -327,6 +443,7 @@ def _model_id(size: str) -> str:
 def quality_worker(args) -> None:
     """One model per process to avoid retaining another model's Metal memory."""
     from engines.mlx_engine import MLXGemmaEngine
+    from engines.translation_prompts import dynamic_max_tokens
 
     manifest = json.loads(args.manifest.read_text())
     model_id = _model_id(args.size)
@@ -334,7 +451,7 @@ def quality_worker(args) -> None:
         model_id=model_id, model_family="gemma4", use_prompt_cache=False, terminology_prompt=args.policy
     )
     engine.load()
-    engine.translate("The grace of God is sufficient.", source_lang="en", target_lang="es")
+    engine.translate("The grace of God is sufficient.", source_lang="en", target_lang=args.target or "es")
     data = {
         "environment": environment(),
         "manifest_sha256": digest(args.manifest),
@@ -347,9 +464,7 @@ def quality_worker(args) -> None:
         "completed": False,
     }
     try:
-        from engines.model_paths import resolve_model_path
-
-        data["resolved_model"] = str(resolve_model_path(model_id))
+        data.update(_resolved_model(model_id))
     except (ImportError, TypeError):
         data["resolved_model"] = model_id
     try:
@@ -371,6 +486,10 @@ def quality_worker(args) -> None:
                         "text": res.text,
                         "latency_ms": res.latency_ms,
                         "generated_tokens": res.generated_tokens,
+                        "requested_max_tokens": dynamic_max_tokens(item["source"]),
+                        "budget_exhausted": res.generated_tokens >= dynamic_max_tokens(item["source"])
+                        if res.generated_tokens is not None
+                        else None,
                         "finish_reason": res.finish_reason,
                     }
                 )
@@ -420,8 +539,9 @@ def run_quality(args) -> None:
             if args.target:
                 command += ["--target", args.target]
             env = dict(os.environ, STARK_TRANSLATE_TERMINOLOGY_PROMPT=policy)
-            with output.with_suffix(".log").open("w") as log:
-                result = subprocess.run(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT, check=False)
+            result = _run_evaluation_worker(
+                command, output, args.manifest, env=env, timeout=getattr(args, "timeout_seconds", 1800)
+            )
             print(f"{size}/{policy}: exit {result.returncode}; {output}", flush=True)
             if result.returncode:
                 raise RuntimeError(f"Quality worker failed; see {output.with_suffix('.log')}")
@@ -456,6 +576,9 @@ def stt_worker(args) -> None:
         "manifest_sha256": digest(args.manifest),
         "rows": [],
         "completed": False,
+        "supported_languages": ["en", "es"],
+        "language_control": "auto" if args.engine == "parakeet-mlx" else "forced",
+        **_resolved_model(engine.model_id),
     }
     try:
         for row in manifest["utterances"]:
@@ -485,6 +608,8 @@ def stt_worker(args) -> None:
                 {
                     "id": row["id"],
                     "lang": row["lang"],
+                    "audio_sha256": row["sha256"],
+                    "language_control": result["language_control"],
                     "reference": reference,
                     "hypothesis": hypothesis,
                     "wer_counts": wer_counts,
@@ -527,15 +652,49 @@ def run_stt(args) -> None:
             "--runs",
             str(args.runs),
         ]
-        with destination.with_suffix(".log").open("w") as log:
-            completed = subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=False)
+        completed = _run_evaluation_worker(
+            command, destination, args.manifest, timeout=getattr(args, "timeout_seconds", 1800)
+        )
         if completed.returncode:
             raise RuntimeError(f"STT worker failed; see {destination.with_suffix('.log')}")
         print(f"{name}: {destination}", flush=True)
 
 
+def _run_evaluation_worker(command, destination, manifest, *, env=None, timeout=1800):
+    from tools.replay_bench import run_child
+
+    if timeout is None or not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("Worker timeout must be finite and positive")
+    data = {
+        "command": command,
+        "manifest_sha256": digest(manifest),
+        "environment": environment(),
+        "completed": False,
+        "rows": [],
+        "timeout_s": timeout,
+    }
+    write_json(destination, data, exclusive=True)
+    try:
+        with destination.with_suffix(".log").open("w") as log:
+            result = run_child(command, cwd=ROOT, env=env, stdout=log, timeout=timeout)
+        failure = f"Worker exited with status {result.returncode}" if result.returncode else None
+    except subprocess.TimeoutExpired:
+        failure = f"Worker exceeded {timeout:g}s timeout and was terminated"
+        result = subprocess.CompletedProcess(command, -1)
+    except OSError as exc:
+        failure = f"Worker failed to launch: {exc}"
+        result = subprocess.CompletedProcess(command, -1)
+    if destination.exists():
+        data.update(json.loads(destination.read_text()))
+    data.update(command=command, returncode=result.returncode, timeout_s=timeout)
+    if failure:
+        data.update(completed=False, error=failure)
+    write_json(destination, data)
+    return result
+
+
 def run_replays(args) -> None:
-    from tools.replay_bench import run_replay
+    from tools.replay_bench import REPLAY_MANAGED_ARGS, argument_value, run_replay
 
     manifest = json.loads(args.manifest.read_text())
     validate_manifest(manifest)
@@ -546,9 +705,6 @@ def run_replays(args) -> None:
     for index, (repeat, clip, size) in enumerate(replay_schedule(clips, args.sizes, args.runs)):
         tag = f"{args.tag}_{args.experiment}_{size}_r{repeat}_{clip['id']}_{clip['lang']}"
         destination = args.output / f"{tag}.json"
-        if destination.exists():
-            print(f"Already recorded: {tag}", flush=True)
-            continue
         extra = [
             "--model-family",
             "gemma4",
@@ -561,12 +717,47 @@ def run_replays(args) -> None:
             "0.6",
         ]
         if args.pipeline_args:
+            if any(
+                arg.split("=", 1)[0] in REPLAY_MANAGED_ARGS | {"--gemma4-size", "--replay-speed"}
+                for arg in args.pipeline_args
+            ):
+                raise ValueError("Pipeline args override comparison-managed audio, model, or replay speed")
             extra.extend(args.pipeline_args)
+        extra += ["--replay-speed", "1"]
         run_environment = environment()
+        experiment_settings = {k: v for k, v in os.environ.items() if k.startswith(("STARK_VAD_", "STARK_TRANSLATE_"))}
+        if destination.exists():
+            previous = json.loads(destination.read_text())
+            if previous.get("error") or previous.get("returncode") != 0:
+                raise ValueError(f"Recorded replay failed/incomplete: {destination}; inspect it and use a fresh tag")
+            command = previous.get("command", [])
+            old_extra = command[command.index("--http-port") + 2 :] if "--http-port" in command else []
+            if (
+                not _clip_matches(previous, manifest)
+                or previous.get("size") != size
+                or _without_argument(old_extra, "--replay-speed") != _without_argument(extra, "--replay-speed")
+                or _numeric(argument_value(old_extra, "--replay-speed", previous.get("replay_speed"))) != 1
+                or not (ROOT / "metrics" / f"ab_metrics_{tag}.csv").exists()
+                or previous.get("experiment_settings", {}) != experiment_settings
+                or _runtime_cohort(previous) != _runtime_cohort({**previous, "environment": run_environment})
+            ):
+                raise ValueError(f"Replay configuration/source changed for {destination}; use a fresh tag")
+            print(f"Already recorded compatible successful replay: {tag}", flush=True)
+            continue
         try:
-            report = run_replay(clip, ROOT / clip["path"], tag, extra, index, ROOT / "metrics")
+            report = run_replay(
+                clip,
+                ROOT / clip["path"],
+                tag,
+                extra,
+                index,
+                ROOT / "metrics",
+                timeout_s=getattr(args, "timeout_seconds", None),
+            )
         except RuntimeError as exc:
-            report = {"error": str(exc), "session_id": tag}
+            failure_path = ROOT / "metrics" / f"replay_{tag}.json"
+            report = json.loads(failure_path.read_text()) if failure_path.exists() else {}
+            report.update(error=report.get("error", str(exc)), session_id=tag)
         report.update(
             {
                 "size": size,
@@ -575,12 +766,10 @@ def run_replays(args) -> None:
                 "clip_id": clip["id"],
                 "language": clip["lang"],
                 "provenance": clip["provenance"],
-                "replay_speed": float(os.environ.get("STARK_REPLAY_SPEED", "1")),
+                "replay_speed": report.get("replay_speed", 1.0),
                 "manifest_sha256": digest(args.manifest),
                 "environment": run_environment,
-                "experiment_settings": {
-                    k: v for k, v in os.environ.items() if k.startswith(("STARK_VAD_", "STARK_TRANSLATE_"))
-                },
+                "experiment_settings": experiment_settings,
             }
         )
         write_json(destination, report)
@@ -611,6 +800,43 @@ def _chrf(rows: list[dict]) -> float | None:
     return CHRF(word_order=2).corpus_score([p[0] for p in pairs], [[p[1] for p in pairs]]).score
 
 
+def _quality_inputs_match(run: dict, manifest: dict) -> bool:
+    target = run.get("target_override")
+    expected = {r["id"]: r for r in manifest.get("translations", []) if not target or r["source_lang"] == "en"}
+    rows = run.get("rows", [])
+    if len(rows) != len(expected) or {r.get("id") for r in rows} != set(expected):
+        return False
+    return all(
+        row.get("source") == expected[row["id"]]["source"]
+        and row.get("source_lang") == expected[row["id"]]["source_lang"]
+        and row.get("target_lang") == (target or expected[row["id"]]["target_lang"])
+        and row.get("reference") == (None if target else expected[row["id"]].get("reference"))
+        and row.get("required_terms", []) == ([] if target else expected[row["id"]].get("required_terms", []))
+        and bool(row.get("runs"))
+        for row in rows
+    )
+
+
+def _stt_inputs_match(run: dict, manifest: dict) -> bool:
+    expected = {r["id"]: r for r in manifest.get("utterances", [])}
+    rows = run.get("rows", [])
+    if len(rows) != len(expected) or {r.get("id") for r in rows} != set(expected):
+        return False
+    for row in rows:
+        item = expected[row["id"]]
+        reference = item.get("reference_text") if item.get("reference_status") == "approved" else None
+        if (
+            row.get("audio_sha256") != item["sha256"]
+            or row.get("lang") != item["lang"]
+            or row.get("provenance") != item["provenance"]
+            or row.get("reference") != (reference or None)
+            or row.get("terms", []) != item.get("terms", [])
+            or not row.get("latency_ms")
+        ):
+            return False
+    return True
+
+
 def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
     manifest = json.loads(manifest_path.read_text())
     report = {
@@ -623,12 +849,20 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
     }
     quality = []
     failures = []
+    exclusions = []
+    manifest_hash = digest(manifest_path)
     for path in sorted(directory.rglob("quality_*.json")):
         run = json.loads(path.read_text())
-        if run.get("manifest_sha256") and run["manifest_sha256"] != digest(manifest_path):
+        if run.get("manifest_sha256") != manifest_hash:
+            exclusions.append(
+                {"file": str(path), "reason": "Quality manifest differs or is missing; rescore references explicitly"}
+            )
             continue
         if not run.get("rows") or not run.get("completed"):
             failures.append({"file": str(path), "error": "Quality run incomplete; see adjacent log"})
+            continue
+        if not _quality_inputs_match(run, manifest):
+            exclusions.append({"file": str(path), "reason": "Quality inputs/references do not match the full manifest"})
             continue
         quality.append(run)
         for lang in sorted({r["source_lang"] for r in run["rows"]}):
@@ -647,13 +881,20 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
                     "canaries_total": len(canaries),
                     "chrf_plus_plus": _chrf(rows),
                     "peak_metal_bytes": run.get("peak_metal_bytes"),
+                    "runtime_cohort": _runtime_cohort(run),
                 }
             )
     report["stt"] = []
     for path in sorted(directory.rglob("stt_*.json")):
         run = json.loads(path.read_text())
+        if run.get("manifest_sha256") != manifest_hash:
+            exclusions.append({"file": str(path), "reason": "STT manifest differs or is missing"})
+            continue
         if not run.get("completed"):
             failures.append({"file": str(path), "error": "STT run incomplete; see adjacent log"})
+            continue
+        if not _stt_inputs_match(run, manifest):
+            exclusions.append({"file": str(path), "reason": "STT rows do not match all frozen audio inputs/references"})
             continue
         for lang in ("en", "es"):
             rows = [r for r in run["rows"] if r["lang"] == lang]
@@ -663,6 +904,10 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             report["stt"].append(
                 {
                     "engine": run["engine"],
+                    "language_control": run.get("language_control"),
+                    "model_id": run.get("model_id"),
+                    "model_revision": run.get("model_revision"),
+                    "runtime_cohort": _runtime_cohort(run),
                     "lang": lang,
                     "items": len(rows),
                     "latency_ms": stats([x for r in rows for x in r["latency_ms"]]),
@@ -682,7 +927,8 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             (
                 r
                 for r in report["quality"]
-                if r["size"] == "e2b" and all(r[k] == baseline[k] for k in ("source_lang", "target_lang", "policy"))
+                if r["size"] == "e2b"
+                and all(r[k] == baseline[k] for k in ("source_lang", "target_lang", "policy", "runtime_cohort"))
             ),
             None,
         )
@@ -691,6 +937,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             report["quality_deltas"].append(
                 {
                     "policy": baseline["policy"],
+                    "runtime_cohort": baseline["runtime_cohort"],
                     "source_lang": baseline["source_lang"],
                     "target_lang": baseline["target_lang"],
                     "e2b_p50_reduction_percent": 100 * (before - after) / before if before else None,
@@ -702,58 +949,117 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             )
     groups: dict[tuple, list] = defaultdict(list)
     event_groups: dict[tuple, dict[str, list]] = defaultdict(lambda: defaultdict(list))
+    ack_clients: dict[tuple, set] = defaultdict(set)
+    ack_coverage: dict[tuple, list] = defaultdict(list)
+    counter_sessions: dict[tuple, dict] = defaultdict(dict)
+    seen_sessions = set()
     for path in sorted(directory.rglob("*.json")):
         run = json.loads(path.read_text())
         if "experiment" not in run:
             continue
-        if run.get("error"):
-            failures.append({"session_id": run.get("session_id"), "error": run["error"]})
+        if run.get("error") or run.get("returncode") != 0:
+            failures.append(
+                {"session_id": run.get("session_id"), "error": run.get("error", "Replay did not complete successfully")}
+            )
             continue
-        if float(run.get("replay_speed", 1)) != 1:
+        if not _clip_matches(run, manifest):
+            exclusions.append(
+                {"file": str(path), "reason": "Replay audio identity/language/provenance does not match manifest"}
+            )
+            continue
+        if run.get("session_id") in seen_sessions:
+            exclusions.append({"file": str(path), "reason": "Duplicate replay session; samples counted once"})
+            continue
+        seen_sessions.add(run["session_id"])
+        actual_speed = run.get("session_metadata", {}).get("replay_speed", run.get("replay_speed"))
+        if _numeric(actual_speed) != 1 or _numeric(run.get("replay_speed")) != 1:
             failures.append(
                 {"session_id": run.get("session_id"), "error": "Accelerated replay excluded from latency gate"}
             )
             continue
-        group_key = (run["experiment"], run["size"], run["language"], run["provenance"])
+        group_key = (
+            run["experiment"],
+            run["size"],
+            run["language"],
+            run["provenance"],
+            run["clip"]["id"],
+            _runtime_cohort(run),
+        )
         events = event_groups[group_key]
-        first_utterances = set()
+        for record in reversed(_jsonl(ROOT / "metrics" / f"diagnostics_{run['session_id']}.jsonl")):
+            if record.get("event") == "session_summary" and isinstance(record.get("latency_experiment_counters"), dict):
+                counter_sessions[group_key][run["session_id"]] = {
+                    k: v
+                    for k, v in record["latency_experiment_counters"].items()
+                    if isinstance(v, int) and not isinstance(v, bool) and v >= 0
+                }
+                break
+        first_utterances = {}
         prior_emission = None
-        for partial in _jsonl(ROOT / "metrics" / f"partials_{run['session_id']}.jsonl"):
+        partials = _jsonl(ROOT / "metrics" / f"partials_{run['session_id']}.jsonl")
+        partials.sort(
+            key=lambda p: _numeric(p.get("emitted_at_ms")) if _numeric(p.get("emitted_at_ms")) is not None else math.inf
+        )
+        for partial in partials:
             if partial.get("timing_schema_version") != 2:
                 continue
-            if partial.get("captured_end_to_partial_ms") is not None:
-                events["captured_end_to_partial_ms"].append(partial["captured_end_to_partial_ms"])
+            if (delay := _numeric(partial.get("captured_end_to_partial_ms"))) is not None:
+                events["captured_end_to_partial_ms"].append(delay)
             uid = partial.get("utterance_id")
-            if uid not in first_utterances and partial.get("speech_start_to_partial_ms") is not None:
-                events["first_partial_ms"].append(partial["speech_start_to_partial_ms"])
-                first_utterances.add(uid)
-            emitted = partial.get("emitted_at_ms")
+            delay = _numeric(partial.get("speech_start_to_partial_ms"))
+            if uid is not None and delay is not None:
+                first_utterances[uid] = min(first_utterances.get(uid, math.inf), delay)
+            emitted = _numeric(partial.get("emitted_at_ms"))
             if emitted is not None:
                 if prior_emission is not None:
                     events["partial_update_gap_ms"].append(emitted - prior_emission)
                 prior_emission = emitted
+        events["first_partial_ms"].extend(first_utterances.values())
+        seen_acks = set()
+        acknowledged_chunks = set()
+        finalized_chunks = set()
         for ack in _jsonl(ROOT / "metrics" / f"display_metrics_{run['session_id']}.jsonl"):
-            if ack.get("event") != "caption_rendered" or not ack.get("visible") or ack.get("stage") != "complete":
+            identity = ack.get("client_id"), ack.get("event_id")
+            if (
+                ack.get("event") != "caption_rendered"
+                or ack.get("visible") is not True
+                or ack.get("stage") != "complete"
+                or ack.get("timing_schema_version") != 2
+                or None in identity
+                or identity in seen_acks
+            ):
                 continue
+            seen_acks.add(identity)
+            if ack.get("chunk_id") is not None:
+                acknowledged_chunks.add(str(ack["chunk_id"]))
+            ack_clients[group_key].add((run["session_id"], ack["client_id"]))
             for field in ("receive_to_render_ms", "speech_end_to_ack_upper_bound_ms"):
-                if ack.get(field) is not None:
-                    events[field].append(ack[field])
+                if (delay := _numeric(ack.get(field))) is not None:
+                    events[field].append(delay)
         csv_path = ROOT / "metrics" / f"ab_metrics_{run['session_id']}.csv"
         if csv_path.exists():
             with csv_path.open() as f:
                 rows = list(csv.DictReader(f))
             for row in rows:
+                if row.get("chunk_id") not in (None, ""):
+                    finalized_chunks.add(str(row["chunk_id"]))
                 # Separate source, endpoint reason and timing definition, never average percentiles.
                 schema = row.get("timing_schema_version") or "legacy"
                 key = (
-                    run["experiment"],
-                    run["size"],
-                    run["language"],
-                    run["provenance"],
+                    *group_key,
                     schema,
                     row.get("endpoint_reason") or row.get("finalization_reason") or "unknown",
                 )
                 groups[key].append(row)
+        ack_coverage[group_key].append(
+            {
+                "session_id": run["session_id"],
+                "received_final_chunks": len(finalized_chunks & acknowledged_chunks),
+                "finalized_chunks": len(finalized_chunks),
+                "missing_final_chunks": sorted(finalized_chunks - acknowledged_chunks),
+                "available": bool(finalized_chunks),
+            }
+        )
     for key, rows in groups.items():
         fields = {}
         for field in (
@@ -771,13 +1077,33 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
                     pass
             fields[field] = stats(values)
         report["replays"].append(
-            dict(zip(("experiment", "size", "language", "provenance", "schema", "endpoint"), key, strict=True))
+            dict(
+                zip(
+                    ("experiment", "size", "language", "provenance", "clip_id", "runtime_cohort", "schema", "endpoint"),
+                    key,
+                    strict=True,
+                )
+            )
             | {"metrics": fields}
         )
     report["failures"] = failures
+    report["excluded_runs"] = exclusions
     report["caption_events"] = [
-        dict(zip(("experiment", "size", "language", "provenance"), key, strict=True))
-        | {"metrics": {name: stats(values) for name, values in metrics.items()}}
+        dict(zip(("experiment", "size", "language", "provenance", "clip_id", "runtime_cohort"), key, strict=True))
+        | {
+            "metrics": {name: stats(values) for name, values in metrics.items()},
+            "browser_client_sessions": len(ack_clients[key]),
+            "latency_experiment_counters": {
+                name: sum(row.get(name, 0) for row in counter_sessions[key].values())
+                for name in sorted({name for row in counter_sessions[key].values() for name in row})
+            },
+            "counter_sessions": counter_sessions[key],
+            "final_ack_coverage": {
+                "received_final_chunks": sum(s["received_final_chunks"] for s in ack_coverage[key]),
+                "finalized_chunks": sum(s["finalized_chunks"] for s in ack_coverage[key]),
+                "sessions": ack_coverage[key],
+            },
+        }
         for key, metrics in event_groups.items()
     ]
     output.mkdir(parents=True, exist_ok=True)
@@ -849,37 +1175,51 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         "",
         "## Real-time server latency",
         "",
-        "Speech end is estimated from captured VAD-positive frames. Server-final latency ends at payload readiness; it is not browser display latency. Synthetic and natural inputs and endpoint types are separated.",
+        "Speech end is estimated from captured VAD-positive frames. Server-final latency ends at payload readiness; it is not browser display latency. Clips, inference code/config cohorts, source types and endpoints are kept separate. Cohort IDs bind recorded source hashes, package versions and effective settings.",
         "",
-        "| Experiment | Model | Language/source | Endpoint | n | p50 ms | p95 ms |",
-        "|---|---|---|---|---:|---:|---:|",
+        "| Experiment | Model | Clip / cohort | Language/source | Endpoint | n | p50 ms | p95 ms |",
+        "|---|---|---|---|---|---:|---:|---:|",
     ]
     for r in report["replays"]:
         s = r["metrics"]["speech_end_to_final_ms"]
         lines.append(
-            f"| {r['experiment']} | {r['size']} | {r['language']}/{r['provenance']} | {r['endpoint']} | {s['n']} | {fmt(s['p50'])} | {fmt(s['p95'])} |"
+            f"| {r['experiment']} | {r['size']} | {r['clip_id']} / {r['runtime_cohort']} | {r['language']}/{r['provenance']} | {r['endpoint']} | {s['n']} | {fmt(s['p50'])} | {fmt(s['p95'])} |"
         )
     lines += [
         "",
         "## Partial delivery and visible browser timing",
         "",
-        "First-partial delay starts at the first captured speech frame. Update gaps are between emitted partials, including speaking pauses. Browser receipt-to-render is measured on the client; speech-end-to-ack is an upper bound including return-network time.",
+        "First-partial delay starts at the first captured speech frame; one earliest delay is counted per known utterance. Update gaps use chronological emissions, including speaking pauses. Browser receipt-to-render is measured per visible client acknowledgment; speech-end-to-ack includes return-network time. Duplicate or non-v2 acknowledgments are excluded.",
         "",
-        "| Experiment | Model | Source | Metric | n | p50 ms | p95 ms |",
-        "|---|---|---|---|---:|---:|---:|",
+        "| Experiment | Model | Clip / cohort | Source | Metric | n | p50 ms | p95 ms |",
+        "|---|---|---|---|---|---:|---:|---:|",
     ]
     for row in report["caption_events"]:
         for name, values in row["metrics"].items():
             lines.append(
-                f"| {row['experiment']} | {row['size']} | {row['language']}/{row['provenance']} | {name} | {values['n']} | {fmt(values['p50'])} | {fmt(values['p95'])} |"
+                f"| {row['experiment']} | {row['size']} | {row['clip_id']} / {row['runtime_cohort']} | {row['language']}/{row['provenance']} | {name} | {values['n']} | {fmt(values['p50'])} | {fmt(values['p95'])} |"
             )
+    lines += [
+        "",
+        "### Visible final acknowledgment coverage",
+        "",
+        "Coverage counts each finalized chunk once when any visible client acknowledged it. Missing acknowledgments are missing evidence, not proof of display failure; replay shutdown can race the final browser acknowledgment.",
+        "",
+        "| Experiment | Model | Clip / cohort | Received final chunks | Finalized chunks |",
+        "|---|---|---|---:|---:|",
+    ]
+    for row in report["caption_events"]:
+        coverage = row["final_ack_coverage"]
+        lines.append(
+            f"| {row['experiment']} | {row['size']} | {row['clip_id']} / {row['runtime_cohort']} | {coverage['received_final_chunks']} | {coverage['finalized_chunks']} |"
+        )
     # Per-item output differences + deterministic, blinded review rows.
-    by_model = {(r["size"], r["policy"], r.get("target_override")): r for r in quality}
+    by_model = {(r["size"], r["policy"], r.get("target_override"), _runtime_cohort(r)): r for r in quality}
     blind, key_rows = [], []
     lines += ["", "## Changed translation examples", ""]
     for identity, left in by_model.items():
-        size, policy, target = identity
-        right = by_model.get(("e2b", policy, target))
+        size, policy, target, cohort = identity
+        right = by_model.get(("e2b", policy, target, cohort))
         if size != "e4b" or not right:
             continue
         right_rows = {r["id"]: r for r in right["rows"]}
@@ -888,7 +1228,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             if not b:
                 continue
             first, second = a["runs"][0]["text"], b["runs"][0]["text"]
-            pair_id = f"{policy}_{target or 'bilingual'}_{a['id']}"
+            pair_id = f"{policy}_{target or 'bilingual'}_{cohort}_{a['id']}"
             swap = int(hashlib.sha256(pair_id.encode()).hexdigest(), 16) % 2
             blind.append(
                 {
@@ -916,7 +1256,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         "- Visible-browser render acknowledgments for the sub-second caption-delivery gate.",
         "- Physical second-output / hotplug and real two-speaker validation.",
         "",
-        f"Recorded failed runs: {len(failures)}. Failures are retained in comparison.json.",
+        f"Recorded failed runs: {len(failures)}. Excluded incompatible/duplicate runs: {len(exclusions)}. Details are retained in comparison.json.",
     ]
     (output / "comparison.md").write_text("\n".join(lines) + "\n")
     return report
@@ -949,6 +1289,7 @@ def main() -> None:
     experiments.add_argument("--runs", type=int, default=3)
     experiments.add_argument("--sizes", nargs="+", choices=["e4b", "e2b"], default=["e4b", "e2b"])
     experiments.add_argument("--language", choices=["en", "es"])
+    experiments.add_argument("--timeout-seconds", type=float, default=None)
     for name in ("quality", "_quality-worker", "replay", "report", "stt", "_stt-worker"):
         sub = subs.add_parser(name)
         sub.add_argument("--manifest", type=Path, required=True)
@@ -957,6 +1298,8 @@ def main() -> None:
             sub.add_argument("--input", type=Path, required=True)
         else:
             sub.add_argument("--runs", type=int, default=3)
+            if name in ("quality", "stt", "replay"):
+                sub.add_argument("--timeout-seconds", type=float, default=None if name == "replay" else 1800)
             if name == "_stt-worker":
                 sub.add_argument("--engine", choices=["mlx", "parakeet-mlx"], required=True)
             elif name == "_quality-worker":

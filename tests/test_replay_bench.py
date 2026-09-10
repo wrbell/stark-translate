@@ -73,7 +73,8 @@ def test_launch_and_report_use_real_flags_without_launching_pipeline(tmp_path, m
         (tmp_path / "partials_test.jsonl").write_text((FIXTURES / "partials.jsonl").read_text())
         return SimpleNamespace(returncode=returncode)
 
-    monkeypatch.setattr(bench.subprocess, "run", fake_run)
+    monkeypatch.setattr(bench, "run_child", fake_run)
+    monkeypatch.setattr(bench, "_free_port", lambda start: start)
     clip = {"lang": "en", "path": "clip.wav"}
     if returncode:
         with pytest.raises(RuntimeError, match="Replay failed"):
@@ -92,3 +93,33 @@ def test_launch_and_report_use_real_flags_without_launching_pipeline(tmp_path, m
     assert json.loads((tmp_path / "replay_test.json").read_text())["returncode"] == returncode
     with pytest.raises(FileExistsError):
         bench.run_replay(clip, tmp_path / "clip.wav", "test", [], 2, tmp_path)
+
+
+def test_replay_reports_effective_speed_and_retains_timeout_failure(tmp_path, monkeypatch):
+    import subprocess
+
+    monkeypatch.setattr(bench, "_free_port", lambda start: start)
+
+    def timed_out(command, **kwargs):
+        assert kwargs["timeout"] == 0.01
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr(bench, "run_child", timed_out)
+    with pytest.raises(RuntimeError, match="Replay failed"):
+        bench.run_replay(
+            {"lang": "en"}, tmp_path / "clip.wav", "timeout", ["--replay-speed=2"], 0, tmp_path, timeout_s=0.01
+        )
+    report = json.loads((tmp_path / "replay_timeout.json").read_text())
+    assert report["replay_speed"] == 2 and not report["realtime_latency_eligible"]
+    assert report["timed_out"] and "timeout" in report["error"]
+    assert report["command"][-1] == "--replay-speed=2"
+
+
+def test_bounded_worker_terminates_hanging_child(tmp_path):
+    import subprocess
+    import time
+
+    started = time.monotonic()
+    with (tmp_path / "worker.log").open("w") as log, pytest.raises(subprocess.TimeoutExpired):
+        bench.run_child([sys.executable, "-c", "import time; time.sleep(60)"], cwd=tmp_path, stdout=log, timeout=0.05)
+    assert time.monotonic() - started < 3
