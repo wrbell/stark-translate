@@ -224,6 +224,21 @@ class FileAudioStream:
         self.error: Exception | None = None
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
+        self._next_offset = 0
+
+    def resume_from(self, sample_offset: int, *, callback=None) -> None:
+        """Resume a stopped replay at an original-rate block boundary.
+
+        The consumer may rewind prefetched frames discarded at Pause. They are
+        replayed after Resume, so pausing never converts prefetch into audio loss.
+        """
+        if self._thread is not None and self._thread.is_alive():
+            raise RuntimeError("Stop the file reader before changing its cursor")
+        if sample_offset < 0 or sample_offset % self.blocksize or sample_offset > len(self._samples) + self.blocksize:
+            raise ValueError("Invalid replay cursor")
+        self._next_offset = sample_offset
+        if callback is not None:
+            self._callback = callback
 
     def start(self) -> FileAudioStream:
         if self._callback is None:
@@ -255,15 +270,16 @@ class FileAudioStream:
         from tools.pipeline_timing import CaptureStamp
 
         started = time.perf_counter()
+        resume_offset = self._next_offset
         try:
-            for offset in range(0, len(self._samples), self.blocksize):
+            for offset in range(resume_offset, len(self._samples), self.blocksize):
                 if self._stop.is_set():
                     return
                 block = np.zeros((self.blocksize, self.channels), dtype=np.float32)
                 samples = self._samples[offset : offset + self.blocksize]
                 block[: len(samples)] = samples[:, None]
                 if self.speed > 0:
-                    deadline = started + (offset + self.blocksize) / self.samplerate / self.speed
+                    deadline = started + (offset - resume_offset + self.blocksize) / self.samplerate / self.speed
                     if self._stop.wait(max(0, deadline - time.perf_counter())):
                         return
                 # Real-time replay uses the same block-availability boundary as
@@ -272,8 +288,8 @@ class FileAudioStream:
                 sample_start = min(offset, self._audio_sample_count)
                 sample_end = min(offset + self.blocksize, self._audio_sample_count)
                 stamp = CaptureStamp(
-                    started + offset / self.samplerate / scale,
-                    started + (offset + self.blocksize) / self.samplerate / scale,
+                    started + (offset - resume_offset) / self.samplerate / scale,
+                    started + (offset - resume_offset + self.blocksize) / self.samplerate / scale,
                     "replay_realtime" if self.speed == 1 else "replay_nonrealtime",
                     sample_start=sample_start,
                     sample_end=sample_end,
@@ -281,6 +297,7 @@ class FileAudioStream:
                     padding_samples=self.blocksize - (sample_end - sample_start),
                 )
                 self._callback(block, self.blocksize, stamp, None)
+                self._next_offset = offset + self.blocksize
         except Exception as exc:
             self.error = exc
             logger.exception("file-audio: replay failed")

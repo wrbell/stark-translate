@@ -4345,6 +4345,8 @@ async def audio_loop():
     utterance_id = 0  # tracks current utterance for partial updates
     timeline = AudioTimeline()
     sample_clock = CaptureSampleClock()
+    replay_stream = None
+    replay_consumed_samples = 0
     last_silence_boundary = 0  # sample index of last silence gap start
 
     # Music/hymn auto-muting state
@@ -4364,7 +4366,9 @@ async def audio_loop():
             # operator's /ws/audio/subscribe endpoint instead of the local
             # mic. The factory matches sd.InputStream's context-manager
             # interface so the loop below is unchanged.
-            from tools.audio_bridge_client import open_audio_stream
+            from contextlib import ExitStack
+
+            from tools.audio_bridge_client import FileAudioStream, open_audio_stream
 
             capture_loop = asyncio.get_running_loop()
 
@@ -4397,7 +4401,7 @@ async def audio_loop():
                     )
                 _handoff.put(indata.copy(), frames, stamp, status)
 
-            stream = open_audio_stream(
+            stream = replay_stream or open_audio_stream(
                 callback=stream_callback,
                 samplerate=MIC_SAMPLE_RATE,
                 channels=1,
@@ -4406,24 +4410,39 @@ async def audio_loop():
                 device=MIC_DEVICE,
             )
 
+            is_replay = isinstance(stream, FileAudioStream)
+            if is_replay:
+                replay_stream = stream
+                stream.resume_from(replay_consumed_samples, callback=stream_callback)
             if hasattr(stream, "sample_offset"):
                 stream.sample_offset = sample_clock.next_sample
-            with stream, _capture_handoff:
+            with ExitStack() as capture_context:
+                capture_context.enter_context(stream)
+                capture_context.enter_context(_capture_handoff)
                 if _health is not None:
                     _health.phase("listening")
                 while True:
                     if _health is not None and _health.paused:
+                        # Stop production before final admission. File prefetch is
+                        # replayed from the last consumed sample after Resume.
+                        if is_replay:
+                            _capture_handoff.close(record_discard=False)
+                        capture_context.close()
                         if len(speech_buffer) / SAMPLE_RATE >= 0.7:
                             _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
                                 timeline, utterance_id, "pause"
                             )
                             await process_final(speech_buffer.copy(), utterance_id)
-                        if not audio_queue.empty():
+                        if not is_replay and not audio_queue.empty():
                             _io_pool.record_failure("audio_capture", "pause_queued_audio_discarded")
                             _health.error("capture", "pause_queued_audio_discarded")
                         speech_buffer = np.array([], dtype=np.float32)
                         timeline = AudioTimeline()
                         silence_frames = speech_frame_count = last_partial_len = 0
+                        last_silence_boundary = frame_count = 0
+                        pause_preview_fired = pause_speculation_fired = False
+                        if vad_model is not None:
+                            vad_model.reset_states()
                         while not audio_queue.empty():
                             audio_queue.get_nowait()
                         break  # close the native capture child while paused
@@ -4469,6 +4488,10 @@ async def audio_loop():
                         frame_stamp, audio_frame = audio_frame.stamp, audio_frame.samples
                     else:  # historical callers/tests with raw PCM have receipt estimates
                         frame_stamp = sample_clock.capture(len(audio_frame), SAMPLE_RATE, None)
+                    if is_replay:
+                        replay_consumed_samples += (
+                            frame_stamp.sample_end - frame_stamp.sample_start + frame_stamp.padding_samples
+                        )
                     _latency_trace.record(
                         "audio_dequeued",
                         capture_age_ms=milliseconds(time.perf_counter(), frame_stamp.end),

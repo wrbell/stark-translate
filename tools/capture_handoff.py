@@ -56,11 +56,14 @@ class CaptureHandoff:
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):
+    def close(self, *, record_discard=True):
         with self._condition:
             self._closed = True
-            if self._items:
+            if self._items and record_discard:
                 self.dropped += len(self._items)
                 self.on_drop()
             self._items.clear()
             self._condition.notify_all()
+
+    def __exit__(self, *args):
+        self.close()

@@ -4,6 +4,7 @@ import asyncio
 import importlib
 import sys
 import threading
+from itertools import pairwise
 from unittest.mock import AsyncMock, MagicMock
 
 import numpy as np
@@ -369,6 +370,87 @@ def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tm
                 assert d.process_final.await_count == 1
                 assert len(d.process_final.await_args.args[0]) == 25 * 512
                 assert pool.snapshot()["ok"]
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+            pool.shutdown(wait=True)
+
+    asyncio.run(exercise())
+
+
+def test_actual_file_pipeline_pause_resumes_cursor_without_duplicate_samples(tmp_path, real_scipy, monkeypatch):
+    from types import SimpleNamespace
+
+    import dry_run_ab as d
+    from tools import audio_bridge_client
+    from tools.persistence import PersistenceExecutor
+    from tools.pipeline_health import PipelineHealth
+    from tools.pipeline_timing import AudioFrame
+
+    wav = tmp_path / "replay.wav"
+    # Small real WAV; models, VAD classification and device I/O are excluded.
+    real_scipy.write(wav, 48000, np.arange(1536 * 12, dtype=np.float32) / 100000)
+    monkeypatch.setenv("STARK_AUDIO_SOURCE", "file")
+    monkeypatch.setenv("STARK_AUDIO_FILE", str(wav))
+    monkeypatch.setenv("STARK_REPLAY_SPEED", "4")
+    health = PipelineHealth(tmp_path, "pause_en")
+    pool = PersistenceExecutor(max_workers=1)
+    resets = []
+    streams, consumed = [], []
+    factory = audio_bridge_client.open_audio_stream
+
+    def open_file(**kwargs):
+        stream = factory(**kwargs)
+        streams.append(stream)
+        return stream
+
+    monkeypatch.setattr(audio_bridge_client, "open_audio_stream", open_file)
+    monkeypatch.setattr(d, "_health", health)
+    monkeypatch.setattr(d, "_io_pool", pool)
+    monkeypatch.setattr(d, "_session_stop_requested", False)
+    monkeypatch.setattr(d, "EXIT_AFTER_REPLAY", True)
+    monkeypatch.setattr(d, "is_speech", lambda *args: False)
+    monkeypatch.setattr(d, "process_final", AsyncMock())
+    monkeypatch.setattr(d, "_partial_tasks", set())
+    monkeypatch.setattr(d, "_active_partial_future", None)
+    monkeypatch.setattr(d, "_warmup_pending", False)
+    monkeypatch.setattr(d, "_last_warmup_time", float("inf"))
+    monkeypatch.setattr(d, "vad_model", SimpleNamespace(reset_states=lambda: resets.append(1)))
+
+    async def exercise():
+        class ObservedQueue(asyncio.Queue):
+            async def get(self):
+                frame = await super().get()
+                consumed.append(frame.stamp)
+                if len(consumed) == 6:
+                    health.paused = True
+                return frame
+
+        queue = ObservedQueue(maxsize=64)
+        monkeypatch.setattr(d, "audio_queue", queue)
+        monkeypatch.setattr(d, "_pipeline_chunk_queue", asyncio.Queue())
+        monkeypatch.setattr(
+            d, "audio_callback", lambda data, frames, stamp, status: queue.put_nowait(AudioFrame(data[::3, 0], stamp))
+        )
+        task = asyncio.create_task(d.audio_loop())
+        try:
+            for _ in range(100):
+                if health.paused and streams and not streams[0]._thread.is_alive():
+                    break
+                await asyncio.sleep(0.01)
+            assert health.paused and len(consumed) == 6
+            await asyncio.sleep(0.08)
+            assert len(consumed) == 6  # playback is frozen, not silently consumed
+            resumed_at = __import__("time").perf_counter()
+            health.paused = False
+            await asyncio.wait_for(task, 3)
+            real = [stamp for stamp in consumed if stamp.has_audio]
+            assert [stamp.sample_start for stamp in real] == list(range(0, 1536 * 12, 1536))
+            assert real[6].start >= resumed_at
+            assert all(a.end <= b.start for a, b in pairwise(real))
+            assert len(streams) == 1 and resets == [1]
+            assert pool.snapshot()["ok"]
+            d.process_final.assert_not_awaited()  # silence must not create an empty final
         finally:
             task.cancel()
             await asyncio.gather(task, return_exceptions=True)
