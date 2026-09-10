@@ -221,6 +221,9 @@ def browser_analysis(acks, emitted, finals, diagnostics, session):
         [row for row in diagnostics if row.get("chunk_id") is not None], lambda row: str(row["chunk_id"])
     )
     expected_uids = {str(row["utterance_id"]) for row in finals if row.get("utterance_id") not in (None, "")}
+    final_by_uid, _ = unique(
+        finals, lambda row: str(row["utterance_id"]) if row.get("utterance_id") not in (None, "") else None
+    )
     clients: dict[str, dict[str, Any]] = defaultdict(lambda: {"finals": {}, "previews": {}, "unmatched": 0})
     seen = set()
     for ack in acks:
@@ -289,6 +292,33 @@ def browser_analysis(acks, emitted, finals, diagnostics, session):
             for eid, row in emitted.items()
             if str(row.get("text_en" if row.get("target_lang") == "en" else "text_es") or "").strip()
         }
+        # Readiness is earlier than sending/rendering a final. Distinguish it
+        # from a preview ACK observed after that client's matching final ACK.
+        # Reconstruct both receipt times on the server clock; browser absolute
+        # timestamps are neither available nor required. These are observation
+        # order, not a claim about the pixels remaining on screen.
+        post_final, unassessable = [], []
+        for eid, ack in data["previews"].items():
+            uid = str(ack.get("utterance_id"))
+            final = final_by_uid.get(uid, {})
+            cid = str(final.get("chunk_id"))
+            final_ack = data["finals"].get(cid, {})
+            start = number(ack.get("captured_start_at_ms"))
+            partial_delay = number(ack.get("speech_start_to_preview_ack_upper_bound_ms"))
+            end = number(diag_by_chunk.get(cid, {}).get("timing_stages_ms", {}).get("speech_end"))
+            final_delay = number(final_ack.get("speech_end_to_ack_upper_bound_ms"))
+            if (
+                None in (start, partial_delay, end, final_delay)
+                or ack.get("timing_source") != "replay_realtime"
+                or final_ack.get("timing_source") != "replay_realtime"
+            ):
+                unassessable.append(eid)
+                continue
+            delta = start + partial_delay - (end + final_delay)
+            if delta > 0.2:  # two rounded 0.1-ms ACK durations, plus 0.001-ms stages
+                post_final.append(
+                    {"event_id": eid, "utterance_id": uid, "chunk_id": cid, "ack_after_final_ms": round(delta, 3)}
+                )
         result[client] = {
             "final_acks": len(data["finals"]),
             "expected_finals": len(final_by_chunk),
@@ -304,6 +334,8 @@ def browser_analysis(acks, emitted, finals, diagnostics, session):
             "missing_preview_events": sorted(translated - data["previews"].keys()),
             "visible_preview_events": len(data["previews"]),
             "unmatched_acks": data["unmatched"],
+            "preview_acks_after_final_ack": post_final,
+            "preview_ack_order_unassessable_events": unassessable,
             "ack_observation_gap_ms": distribution(gaps),
             "receive_to_render_ms": distribution(
                 ack.get("receive_to_render_ms") for ack in [*data["previews"].values(), *data["finals"].values()]
@@ -699,10 +731,16 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
             ):
                 reasons.append(f"repeat{row['repeat']}: final or first-preview timed ACK coverage below95%")
                 continue
-            if row["previews"]["missing_final_utterances"] or any(
-                item["preview_after_final_ready"] for item in row["previews"]["utterances"].values()
-            ):
-                reasons.append(f"repeat{row['repeat']}: missing or stale server preview")
+            if row["previews"]["missing_final_utterances"]:
+                reasons.append(f"repeat{row['repeat']}: missing server first preview")
+                continue
+            if row["browsers"][chosen]["preview_acks_after_final_ack"]:
+                reasons.append(f"repeat{row['repeat']}: preview ACK after final ACK; browser-order review required")
+                continue
+            if any(item["preview_after_final_ready"] for item in row["previews"]["utterances"].values()):
+                reasons.append(
+                    f"repeat{row['repeat']}: preview after server final readiness; browser-order review required"
+                )
                 continue
             guard_failures = []
             common_metrics = before["metrics"].keys() & after["metrics"].keys()
@@ -824,6 +862,7 @@ def analyze(input_dir, metrics_dir, *, client_id=None):
             "matching": "Unique exact sample_start/end/rate, speech_end_sample, endpoint and timing source within model/clip/repeat/source/model-artifact cohort.",
             "selection": "Whole matrix completed; every repeat passes validity/coverage/tail/memory guards; same target median improves15% OR150ms versus both controls in at least2/3repeats. Followup selection only.",
             "browser": "Per client only. Timed first-preview coverage and final ACK coverage>=95%. Connection barrier alone never certifies visibility; missing intermediate ACKs can reflect coalescing.",
+            "preview_order": "Server preview emission after final payload readiness requires review, not proof of stale repaint. Per-client preview_acks_after_final_ack compares reconstructed server receipt times for matched events; missing clocks/ACKs are unassessable. ACK opportunity order does not prove which pixels remained visible. The automatic selector retains its conservative readiness guard.",
             "lexical": "Literal whitespace-token prefix/suffix revisions are display-change proxies, not semantic quality or WER. Smart-cut previews can include carryover beyond final bounds.",
             "components": "Generation metrics can belong to earlier speculation; do not sum latency_a_ms/prefill/decode into post-end latency. Diagnostic stage wall times describe the final path.",
             "trace": "Trace distributions cover retained events; truncation is explicit. Counters use one final summary per session. Total decoded audio remains unknown.",
@@ -902,6 +941,20 @@ def markdown(report):
             )
         if row["validation_errors"]:
             lines.append(f"\nInvalid evidence for {row['session_id']}: {'; '.join(row['validation_errors'])}\n")
+        late = [uid for uid, values in row["previews"]["utterances"].items() if values["preview_after_final_ready"]]
+        if late:
+            observed = (
+                "; ".join(
+                    f"{client}: {len(data['preview_acks_after_final_ack'])} preview ACKs after final ACK, "
+                    f"{len(data['preview_ack_order_unassessable_events'])} ACK order unassessable"
+                    for client, data in row["browsers"].items()
+                )
+                or "No visible browser ACK evidence"
+            )
+            lines.append(
+                f"\n{row['session_id']}: preview emission after final readiness for utterances {', '.join(late)}. "
+                f"This requires browser-order review; it does not establish stale repaint. {observed}.\n"
+            )
     lines.extend(["", "## Interpretation", ""])
     lines.extend(f"- **{name}:** {definition}" for name, definition in report["definitions"].items())
     lines.extend(

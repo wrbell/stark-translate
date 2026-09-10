@@ -402,6 +402,54 @@ def test_slower_visible_finals_block_fast_server_only_gain(tmp_path):
     assert any("final_visible:" in reason for reason in arm["reasons"])
 
 
+@pytest.mark.parametrize("final_delay,expected_after", [(910, 0), (710, 1), (809.9, 0)])
+def test_server_late_preview_and_per_client_ack_order_are_distinct(tmp_path, final_delay, expected_after):
+    def change(config, repeat, data, row, partials, acks, diag):
+        diag[0]["timing_stages_ms"]["speech_end"] = 1200
+        if config != "candidate":
+            return
+        partials[-1]["emitted_at_ms"] = 2000  # final readiness 1900
+        partials[-1]["speech_start_to_partial_ms"] = 1000
+        acks[1]["speech_start_to_preview_ack_upper_bound_ms"] = 1010  # receipt 2010
+        acks[-1]["speech_end_to_ack_upper_bound_ms"] = final_delay
+        acks.extend([{**ack, "client_id": "second"} for ack in acks])
+        acks[-1]["speech_end_to_ack_upper_bound_ms"] = 1200  # other browser's final receipt 2400
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    report = analysis.analyze(inputs, metrics, client_id="browser")
+    row = next(item for item in report["sessions"] if item["experiment"] == "candidate")
+    assert row["previews"]["utterances"]["1"]["preview_after_final_ready"]
+    assert len(row["browsers"]["browser"]["preview_acks_after_final_ack"]) == expected_after
+    assert row["browsers"]["second"]["preview_acks_after_final_ack"] == []
+    assert row["browsers"]["browser"]["preview_ack_order_unassessable_events"] == []
+    assert report["arms"][0]["status"] == "not_selected"  # no automatic gate relaxation
+    assert any("browser-order review required" in reason for reason in report["arms"][0]["reasons"])
+    assert "does not establish stale repaint" in analysis.markdown(report)
+
+
+def test_missing_final_clock_is_unassessable_ack_order(tmp_path):
+    inputs, metrics, _ = fixture_matrix(tmp_path)
+    report = analysis.analyze(inputs, metrics)
+    browser = report["sessions"][0]["browsers"]["browser"]
+    assert browser["preview_acks_after_final_ack"] == []
+    assert len(browser["preview_ack_order_unassessable_events"]) == 2
+
+
+def test_preview_ack_after_final_requires_review_even_if_server_emitted_earlier(tmp_path):
+    def change(config, repeat, data, row, partials, acks, diag):
+        diag[0]["timing_stages_ms"]["speech_end"] = 1200
+        if config == "candidate":
+            acks[1]["speech_start_to_preview_ack_upper_bound_ms"] = 1010
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    report = analysis.analyze(inputs, metrics)
+    row = next(item for item in report["sessions"] if item["experiment"] == "candidate")
+    assert not row["previews"]["utterances"]["1"]["preview_after_final_ready"]
+    assert len(row["browsers"]["browser"]["preview_acks_after_final_ack"]) == 1
+    assert report["arms"][0]["status"] == "not_selected"
+    assert any("preview ACK after final ACK" in reason for reason in report["arms"][0]["reasons"])
+
+
 def test_cli_refuses_report_inside_evidence_before_reading_or_writing(tmp_path, monkeypatch):
     inputs = tmp_path / "metrics" / "screen"
     output = inputs / "report"

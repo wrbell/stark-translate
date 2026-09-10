@@ -55,6 +55,16 @@ gaps, ACK observation gaps, the last server preview-to-final gap, and previews
 emitted after final readiness are reported separately. The last gap is not an
 acoustic latency measurement.
 
+Final readiness precedes sending and rendering. A preview emitted after that
+readiness timestamp does **not** by itself prove a stale browser repaint. For each
+client, `preview_acks_after_final_ack` joins the preview to its own final and
+compares reconstructed server ACK receipt times (capture/speech-end reference plus
+the recorded upper-bound duration). Differences within 0.2 ms are rounding ties.
+Missing final ACKs or clock references are explicitly unassessable. This is ACK
+observation order; it does not prove which caption remained on screen. The report
+keeps both signals, and the automatic selector retains its conservative readiness
+guard pending manual review; it does not automatically waive the quality guard.
+
 Literal whitespace-token common prefixes and retracted suffixes describe visible
 text changes. They are **not** word-level accuracy, WER, meaning preservation or
 human approval. First/last preview strings, original revision event IDs and changed
@@ -71,7 +81,8 @@ candidate to qualify:
   final segmentation/source coverage.
 - One common or declared visible browser has at least 95% timed final and first
   translated-preview utterance coverage in all three runs. Candidate server
-  previews are complete and do not repaint after final readiness.
+  previews are complete and have no emission after final readiness requiring
+  browser-order review. This conservative server guard is not a stale-repaint claim.
 - Every paired endpoint and first-preview p95 respects the larger of a 5% or
   100 ms allowed regression. Server update and last-preview-to-final gaps also
   satisfy that guard. Peak process RSS and Metal memory each stay within 1 GiB
