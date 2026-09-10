@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import collections
 import logging
+import math
 import statistics
 import subprocess
 import threading
@@ -237,10 +238,11 @@ class MetricsCollector:
 
 
 def _p95(values: list[float]) -> float:
+    """Nearest-rank 95th percentile, including windows with very few segments."""
     if not values:
         return 0.0
     s = sorted(values)
-    idx = max(0, int(len(s) * 0.95) - 1)
+    idx = math.ceil(len(s) * 0.95) - 1
     return s[idx]
 
 
