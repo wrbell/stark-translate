@@ -20,7 +20,7 @@ class PiperTTSEngine(TTSEngine):
 
     Constructor args:
         voices:  Dict mapping language codes to Piper voice names or paths.
-                 Default: ``{"es": "es_ES-carlfm-high"}``.
+                 Default: ``{"es": "es_MX-claude-high"}``.
     """
 
     def __init__(self, voices: dict[str, str] | None = None):
@@ -42,7 +42,7 @@ class PiperTTSEngine(TTSEngine):
                 voice = PiperVoice.load(custom_path)
                 logger.info("  Loaded custom voice for %s: %s", lang, custom_path)
             else:
-                # Stock voice: download if needed via piper_download
+                # Stock voice: download only the registered, pinned files.
                 model_path = self._ensure_voice_downloaded(voice_spec)
                 voice = PiperVoice.load(model_path)
                 logger.info("  Loaded stock voice for %s: %s", lang, voice_spec)
@@ -133,13 +133,10 @@ class PiperTTSEngine(TTSEngine):
 
     @staticmethod
     def _ensure_voice_downloaded(voice_name: str) -> str:
-        """Download a Piper voice if not already cached, return path to .onnx file.
-
-        Uses piper_download to fetch from HuggingFace rhasspy/piper-voices.
-        """
+        """Resolve a local voice or download its registered immutable HF revision."""
         from pathlib import Path
 
-        from engines.model_paths import resolve_piper_voice
+        from engines.model_paths import pinned_hf_entry, resolve_piper_voice
 
         local = resolve_piper_voice(voice_name)
         if local:
@@ -148,32 +145,26 @@ class PiperTTSEngine(TTSEngine):
         if os.environ.get("STARK_PROFILE", "standard").startswith("lite-"):
             raise FileNotFoundError(f"Pinned Piper voice {voice_name} missing; run setup --include tts")
 
-        # Piper voices cache in ~/.local/share/piper_tts/ by convention
+        entry = pinned_hf_entry(voice_name)
+        files = entry.get("required_files", [])
+        model_file = next((name for name in files if name.endswith(".onnx")), None)
+        if not model_file or f"{model_file}.json" not in files:
+            raise ValueError(f"Pinned Piper voice {voice_name} must register its ONNX model and config files")
+
+        # Piper voices cache in ~/.local/share/piper_tts/ by convention.
         cache_dir = Path.home() / ".local" / "share" / "piper_tts"
         cache_dir.mkdir(parents=True, exist_ok=True)
-
-        # Check if already downloaded
-        onnx_path = cache_dir / f"{voice_name}.onnx"
-        if onnx_path.exists():
-            return str(onnx_path)
 
         # Download via huggingface_hub
         from huggingface_hub import hf_hub_download
 
-        # Piper voice naming: language_REGION-name-quality
-        # e.g., es_ES-carlfm-high -> es/es_ES/carlfm/high/
-        parts = voice_name.split("-")
-        lang_region = parts[0]  # es_ES
-        lang = lang_region.split("_")[0]  # es
-        name = parts[1] if len(parts) > 1 else "default"
-        quality = parts[2] if len(parts) > 2 else "medium"
-
-        repo_id = "rhasspy/piper-voices"
-        model_file = f"{lang}/{lang_region}/{name}/{quality}/{voice_name}.onnx"
-        config_file = f"{lang}/{lang_region}/{name}/{quality}/{voice_name}.onnx.json"
-
         logger.info("Downloading Piper voice: %s", voice_name)
-        onnx_local = hf_hub_download(repo_id=repo_id, filename=model_file, cache_dir=str(cache_dir))
-        hf_hub_download(repo_id=repo_id, filename=config_file, cache_dir=str(cache_dir))
+        source_kwargs = {
+            "repo_id": entry["repo_id"],
+            "revision": entry["revision"],
+            "cache_dir": str(cache_dir),
+        }
+        onnx_local = hf_hub_download(filename=model_file, **source_kwargs)
+        hf_hub_download(filename=f"{model_file}.json", **source_kwargs)
 
         return onnx_local

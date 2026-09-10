@@ -1,0 +1,25 @@
+{
+  "recorded_utc": "2026-09-10T13:15:55.842110+00:00",
+  "commands": [
+    {
+      "argv": [
+        "/Users/willem/anaconda3/bin/python3.11",
+        "-m",
+        "venv",
+        ".cache/mac-en-es-closeout/security-feasibility-venv"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        ".cache/mac-en-es-closeout/security-feasibility-venv/bin/python",
+        "-m",
+        "pip",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "pip 24.0 (python 3.11)"
+    }
+  ],
+  "note": "New isolated venv; the working stt_env was not recreated."
+}

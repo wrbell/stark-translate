@@ -61,7 +61,7 @@ class MarianHFEngine(TranslationEngine):
         """Download (if needed) and warm up MarianMT."""
         from transformers import MarianMTModel, MarianTokenizer
 
-        from engines.model_paths import resolve_model_path
+        from engines.model_paths import resolve_hf_model_source
 
         if self._requested_device == "auto":
             self._device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -70,9 +70,9 @@ class MarianHFEngine(TranslationEngine):
 
         logger.info("Loading %s (MarianMT-HF, device=%s)...", self._model_id_str, self._device)
         t0 = time.time()
-        model_path = resolve_model_path(self._model_id_str)
-        self._tokenizer = MarianTokenizer.from_pretrained(model_path)
-        self._model = MarianMTModel.from_pretrained(model_path)
+        model_path, source_kwargs = resolve_hf_model_source(self._model_id_str)
+        self._tokenizer = MarianTokenizer.from_pretrained(model_path, **source_kwargs)
+        self._model = MarianMTModel.from_pretrained(model_path, **source_kwargs)
         if self._device == "cuda":
             self._model = self._model.to("cuda")
         self._model.eval()
