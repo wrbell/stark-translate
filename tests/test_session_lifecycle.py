@@ -11,6 +11,7 @@ import pytest
 
 from tools.session_lifecycle import (
     SessionNotComplete,
+    completion_metadata,
     finish_session,
     migrate_completion,
     require_completed,
@@ -129,6 +130,7 @@ def test_pipeline_completion_waits_for_io_and_blocks_abnormal_exit(tmp_path, mon
         "args": None,
         "SESSION_ID": "example_en",
         "_clean_session_shutdown": False,
+        "_session_model_ids": {},
         "_io_pool": pool,
         "sys": __import__("sys"),
         "print_summary": lambda: None,
@@ -178,3 +180,38 @@ def test_idle_operator_blocks_unknown_or_external_session_export_but_allows_revi
         },
     )
     assert saved.status_code == 200
+
+
+def test_completion_records_peak_counters_without_importing_mlx(tmp_path, monkeypatch):
+    import resource
+    import sys
+
+    monkeypatch.setitem(sys.modules, "mlx.core", SimpleNamespace(get_peak_memory=lambda: 123456))
+    monkeypatch.setattr(resource, "getrusage", lambda who: SimpleNamespace(ru_maxrss=256))
+    monkeypatch.setattr(sys, "platform", "darwin")
+    result = completion_metadata({}, tmp_path)
+    assert result["memory"]["peak_rss_bytes"] == 256
+    assert result["memory"]["peak_metal_bytes"] == 123456
+    monkeypatch.delitem(sys.modules, "mlx.core")
+    monkeypatch.setattr(sys, "platform", "linux")
+    result = completion_metadata({}, tmp_path)
+    assert result["memory"]["peak_rss_bytes"] == 256 * 1024
+    assert result["memory"]["peak_metal_bytes"] is None
+    assert "mlx.core" not in sys.modules
+
+
+def test_model_metadata_distinguishes_resolved_and_manifest_revisions(tmp_path, monkeypatch):
+    revision = "a" * 40
+    snapshot = tmp_path / "snapshots" / revision
+    snapshot.mkdir(parents=True)
+    (snapshot / "config.json").write_text("{}")
+    monkeypatch.setattr("engines.model_paths.resolve_model_path", lambda *args, **kwargs: str(snapshot))
+    monkeypatch.setattr(
+        "engines.model_paths.load_model_manifest",
+        lambda root: {"models": {"model": {"repo_id": "org/repo", "revision": "b" * 40}}},
+    )
+    result = completion_metadata({"translation_a": "org/repo"}, tmp_path)["models"]["translation_a"]
+    assert result["resolved_revision"] == revision
+    assert result["manifest_revision"] == "b" * 40
+    assert result["revision_source"] == "hf_snapshot_path"
+    assert len(result["config_sha256"]) == 64

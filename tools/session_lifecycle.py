@@ -8,6 +8,7 @@ import json
 import os
 import re
 import socket
+import sys
 import tempfile
 import uuid
 from datetime import UTC, datetime
@@ -89,6 +90,64 @@ def _alive(pid: object) -> bool:
     return True
 
 
+def completion_metadata(model_ids: dict[str, str | None], root: Path) -> dict:
+    """Read process peak counters and local model provenance after inference ends.
+
+    No inference package is imported here. RSS/Metal peaks include model loading
+    and cover this process only, so multiprocessing worker peaks remain unknown.
+    """
+    memory: dict = {"scope": "pipeline_process_lifetime", "peak_rss_bytes": None, "peak_metal_bytes": None}
+    try:
+        import resource
+
+        rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        memory["peak_rss_bytes"] = int(rss if sys.platform == "darwin" else rss * 1024)
+    except (ImportError, OSError, ValueError):
+        pass
+    mlx = sys.modules.get("mlx.core")
+    get_peak = getattr(mlx, "get_peak_memory", None)
+    if callable(get_peak):
+        try:
+            memory["peak_metal_bytes"] = int(get_peak())
+        except Exception as exc:
+            memory["metal_counter_error"] = type(exc).__name__
+
+    from engines.model_paths import load_model_manifest, resolve_model_path
+
+    try:
+        manifest = load_model_manifest(root).get("models", {})
+    except (OSError, ValueError):
+        manifest = {}
+    models = {}
+    for role, model_id in model_ids.items():
+        if not model_id:
+            continue
+        entry: dict = next((v for k, v in manifest.items() if model_id in {k, v.get("repo_id"), *v.get("aliases", [])}), {})
+        item = {"requested_id": model_id, "manifest_revision": entry.get("revision"), "resolved_revision": None}
+        try:
+            resolved = resolve_model_path(model_id, project_root=root, local_only=True)
+            item["resolved_path"] = resolved
+            item["revision_source"] = "unknown"
+            if resolved:
+                path = Path(resolved)
+                if path.parent.name == "snapshots" and re.fullmatch(r"[0-9a-f]{40}", path.name):
+                    item["resolved_revision"] = path.name
+                    item["revision_source"] = "hf_snapshot_path"
+                marker = path / ".installed"
+                if marker.is_file():
+                    installed = json.loads(marker.read_text())
+                    if installed.get("repo_id") == entry.get("repo_id") and installed.get("revision"):
+                        item["resolved_revision"] = installed["revision"]
+                        item["revision_source"] = "setup_install_marker"
+                config = path / "config.json"
+                if config.is_file():
+                    item["config_sha256"] = _digest(config)["sha256"]
+        except (OSError, ValueError, TypeError) as exc:
+            item["resolution_error"] = type(exc).__name__
+        models[role] = item
+    return {"memory": memory, "models": models}
+
+
 def start_session(root: Path, session: str, *, git_sha: str | None = None, pipeline_sha256: str | None = None) -> dict:
     """Record ownership before model loading. This does not touch predictions/audio."""
     marker = _path(root, session, "session_lifecycle", "json")
@@ -111,7 +170,15 @@ def start_session(root: Path, session: str, *, git_sha: str | None = None, pipel
     return data
 
 
-def finish_session(root: Path, session: str, *, run_id: str, status: str = "completed", exit_code: int = 0) -> dict:
+def finish_session(
+    root: Path,
+    session: str,
+    *,
+    run_id: str,
+    status: str = "completed",
+    exit_code: int = 0,
+    model_ids: dict[str, str | None] | None = None,
+) -> dict:
     """Call only after all diagnostics writers have drained; failure never enables export."""
     if status not in {"completed", "failed"} or (status == "completed" and exit_code != 0):
         raise ValueError("A completed session requires exit code zero")
@@ -119,6 +186,7 @@ def finish_session(root: Path, session: str, *, run_id: str, status: str = "comp
     if data.get("run_id") != run_id or data.get("status") != "running":
         raise SessionNotComplete("Session lifecycle ownership changed before completion")
     data.update(status=status, exit_code=exit_code, ended_at=datetime.now(UTC).isoformat())
+    data.update(completion_metadata(model_ids or {}, root))
     diagnostics = _path(root, session, "diagnostics", "jsonl")
     if status == "completed" and diagnostics.is_file():
         data["diagnostics"] = _digest(diagnostics)
