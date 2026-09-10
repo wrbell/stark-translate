@@ -148,6 +148,18 @@ or exports. Keep original data until its retention has been agreed.
 
 ## Setup owner reference
 
+Before an event, rehearse a complete hymn, spoken material including a reference
+such as John 3:16, a pause and a language switch. Time setup to the first actual
+caption, check the intended audience screen, and record anything that failed.
+The [API rehearsal script](../scripts/dry_run_rehearsal.sh) walks the control
+endpoints; a successful script run does not replace that audio/browser rehearsal.
+It starts a session, so use it only with the intended, rehearsed input source.
+
+The `/healthz` route checks service liveness. The usual audience path is
+`/displays/audience_display.html`; use the service-provided URL for custom ports.
+Local operational evidence is under `metrics/`. Liveness and log-file existence
+do not prove that captions are being generated.
+
 - [Mac installation and launchd](packaging/macos.md): selected environment, model
   setup, installed entry points and explicit service install/uninstall.
 - [Lite profiles](lite_profiles.md): CPU Marian, optional CPU E2B, and 8 GB NVIDIA
