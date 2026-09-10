@@ -65,9 +65,11 @@ import websockets
 
 from settings import settings
 from tools.pipeline_timing import (
+    SAMPLE_COLUMNS,
     TIMING_COLUMNS,
     AudioFrame,
     AudioTimeline,
+    CaptureSampleClock,
     CaptureStamp,
     ChunkTiming,
     RenderTracker,
@@ -107,6 +109,7 @@ DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
 _session_stop_requested = False
 _clean_session_shutdown = False
+_session_model_ids = {}
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
@@ -2096,7 +2099,7 @@ def _is_garbage_text(text: str) -> bool:
     return False
 
 
-async def process_partial(audio_data, utterance_id, captured_end=None, captured_start=None):
+async def process_partial(audio_data, utterance_id, captured_end=None, captured_start=None, sample_bounds=None):
     """Fast partial: STT (~300ms) + MarianMT (~80ms). Italic in UI.
 
     [FIX] Partials are skipped when a final is pending to avoid starving
@@ -2104,6 +2107,7 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
     to free ~80ms of MLX pool time per partial.
     """
     global _active_partial_future
+    sample_bounds = sample_bounds or {name: None for name in SAMPLE_COLUMNS}
     partial_submitted = time.perf_counter()
     if settings.translation.final_aware_partials and _translation_active.is_set():
         return
@@ -2265,6 +2269,7 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
             {
                 **_session_provenance(),
                 "timing_schema_version": 2,
+                **sample_bounds,
                 "emitted_at_ms": round((time.perf_counter() - _SESSION_CLOCK_ORIGIN) * 1000, 3),
                 "utterance_id": utterance_id,
                 "captured_end_to_partial_ms": milliseconds(time.perf_counter(), captured_end),
@@ -2291,6 +2296,8 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
             {
                 "type": "translation",
                 "stage": "partial",
+                "timing_schema_version": 2,
+                **sample_bounds,
                 "chunk_id": utterance_id,
                 "english": english,
                 "spanish_a": spanish,
@@ -3190,6 +3197,8 @@ async def broadcast(data):
     timing = _chunk_timings.get(cid) if data.get("stage") != "partial" else None
     if timing is not None:
         data.setdefault("utterance_id", timing.utterance_id)
+        for name, value in timing.sample_metadata().items():
+            data.setdefault(name, value)
     msg = json.dumps(data)
     dead = set()
     clients = list(ws_clients)
@@ -3201,7 +3210,11 @@ async def broadcast(data):
                 time.perf_counter(),
                 timing.speech_end if timing and timing.timing_source != "replay_nonrealtime" else None,
                 data.get("stage", "complete"),
-                {"chunk_id": cid, "utterance_id": data.get("utterance_id", cid)},
+                {
+                    "chunk_id": cid,
+                    "utterance_id": data.get("utterance_id", cid),
+                    **{name: data.get(name) for name in SAMPLE_COLUMNS},
+                },
             )
     results = await asyncio.gather(
         *[client.send(msg) for client in clients],
@@ -3786,6 +3799,7 @@ async def audio_loop():
     last_partial_len = 0  # audio length (samples) at last partial
     utterance_id = 0  # tracks current utterance for partial updates
     timeline = AudioTimeline()
+    sample_clock = CaptureSampleClock()
     last_silence_boundary = 0  # sample index of last silence gap start
 
     # Music/hymn auto-muting state
@@ -3809,9 +3823,17 @@ async def audio_loop():
             def stream_callback(indata, frames, time_info, status, _loop=capture_loop):
                 # Capture before loop handoff; device callbacks must never touch
                 # asyncio.Queue from their producer thread. Copy PortAudio's buffer.
-                stamp = capture_stamp(frames, MIC_SAMPLE_RATE, time_info)
+                stamp = sample_clock.capture(frames, MIC_SAMPLE_RATE, time_info)
                 if os.environ.get("STARK_AUDIO_SOURCE") == "ws":
-                    stamp = CaptureStamp(stamp.start, stamp.end, "bridge_receipt_estimate")
+                    stamp = CaptureStamp(
+                        stamp.start,
+                        stamp.end,
+                        "bridge_receipt_estimate",
+                        stamp.sample_start,
+                        stamp.sample_end,
+                        stamp.sample_rate,
+                        stamp.padding_samples,
+                    )
                 _loop.call_soon_threadsafe(audio_callback, indata.copy(), frames, stamp, status)
 
             stream = open_audio_stream(
@@ -3855,7 +3877,7 @@ async def audio_loop():
                     if isinstance(audio_frame, AudioFrame):
                         frame_stamp, audio_frame = audio_frame.stamp, audio_frame.samples
                     else:  # historical callers/tests with raw PCM have receipt estimates
-                        frame_stamp = capture_stamp(len(audio_frame), SAMPLE_RATE, None)
+                        frame_stamp = sample_clock.capture(len(audio_frame), SAMPLE_RATE, None)
                     has_speech = is_speech(audio_frame, vad_model, vad_utils)
 
                     frame_count += 1
@@ -3953,7 +3975,13 @@ async def audio_loop():
                     ):
                         # [FIX] Fire-and-forget: don't block audio loop on partials
                         task = asyncio.create_task(
-                            process_partial(speech_buffer.copy(), utterance_id, timeline.last, timeline.first)
+                            process_partial(
+                                speech_buffer.copy(),
+                                utterance_id,
+                                timeline.last,
+                                timeline.first,
+                                timeline.sample_metadata(),
+                            )
                         )
                         _partial_tasks.add(task)
                         task.add_done_callback(_partial_tasks.discard)
@@ -4100,7 +4128,7 @@ async def main_async(args):
     global _marian_engine
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
-    global _RUN_AB, _clean_session_shutdown
+    global _RUN_AB, _clean_session_shutdown, _session_model_ids
 
     _RUN_AB = args.run_ab
     _clean_session_shutdown = False
@@ -4242,6 +4270,13 @@ async def main_async(args):
     )
 
     print("[6/6] Starting servers...")
+    _session_model_ids = {
+        "stt": stt_pipe if isinstance(stt_pipe, str) else getattr(stt_pipe, "model_id", None),
+        "translation_a": MLX_MODEL_A if BACKEND == "mlx" and not args.low_vram else None,
+        "translation_b": MLX_MODEL_B if BACKEND == "mlx" and _RUN_AB else None,
+        "marian": getattr(_marian_engine, "model_id", None),
+        "draft": MLX_DRAFT_MODEL_ID if USE_MTS else None,
+    }
     metadata = {
         **_session_provenance(),
         "timing_schema_version": 2,
@@ -4877,6 +4912,7 @@ def main():
             run_id=lifecycle["run_id"],
             status="completed" if completed else "failed",
             exit_code=0 if completed else exit_code if isinstance(exit_code, int) and exit_code else 1,
+            model_ids=_session_model_ids,
         )
 
 

@@ -8,10 +8,11 @@ from __future__ import annotations
 
 import math
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 TIMING_SCHEMA_VERSION = 2
+SAMPLE_COLUMNS = ("sample_start", "sample_end", "sample_rate", "speech_end_sample", "padding_samples")
 TIMING_COLUMNS = (
     "timing_schema_version",
     "source_lang",
@@ -27,6 +28,7 @@ TIMING_COLUMNS = (
     "finalization_overhead_ms",
     "broadcast_ms",
     "input_audio_path",
+    *SAMPLE_COLUMNS,
 )
 
 
@@ -41,6 +43,42 @@ class CaptureStamp:
     start: float
     end: float
     source: str
+    # Half-open original stream coordinates, before per-frame STT resampling.
+    # Virtual replay tail/block padding has no source samples of its own.
+    sample_start: int | None = None
+    sample_end: int | None = None
+    sample_rate: int | None = None
+    padding_samples: int = 0
+
+    def slice(self, start: int, end: int, size: int) -> CaptureStamp:
+        """Slice using buffered PCM indices while retaining source coordinates."""
+        duration = self.end - self.start
+        clock_start = self.start + duration * start / size
+        clock_end = self.start + duration * end / size
+        if self.sample_start is None or self.sample_end is None:
+            return replace(self, start=clock_start, end=clock_end)
+        actual = self.sample_end - self.sample_start
+        total = actual + self.padding_samples
+        first, last = round(total * start / size), round(total * end / size)
+        return replace(
+            self,
+            start=clock_start,
+            end=clock_end,
+            sample_start=self.sample_start + min(first, actual),
+            sample_end=self.sample_start + min(last, actual),
+            padding_samples=max(0, last - actual) - max(0, first - actual),
+        )
+
+    @property
+    def audio_end(self) -> float:
+        if self.sample_start is None or self.sample_end is None or not self.padding_samples:
+            return self.end
+        actual = self.sample_end - self.sample_start
+        return self.start + (self.end - self.start) * actual / (actual + self.padding_samples)
+
+    @property
+    def has_audio(self) -> bool:
+        return self.sample_start is None or self.sample_end is None or self.sample_end > self.sample_start
 
 
 def capture_stamp(frames: int, rate: int, time_info: Any, received: float | None = None) -> CaptureStamp:
@@ -64,10 +102,39 @@ def capture_stamp(frames: int, rate: int, time_info: Any, received: float | None
     return CaptureStamp(received - duration, received, "callback_receipt_estimate")
 
 
+@dataclass
+class CaptureSampleClock:
+    """Assign stream positions in the producer callback, including discarded frames."""
+
+    next_sample: int = 0
+
+    def capture(self, frames: int, rate: int, time_info: Any, received: float | None = None) -> CaptureStamp:
+        stamp = capture_stamp(frames, rate, time_info, received)
+        if stamp.sample_start is None or stamp.sample_end is None:
+            stamp = replace(
+                stamp, sample_start=self.next_sample, sample_end=self.next_sample + frames, sample_rate=rate
+            )
+        assert stamp.sample_end is not None
+        self.next_sample = max(self.next_sample, stamp.sample_end)
+        return stamp
+
+
 @dataclass(frozen=True)
 class AudioFrame:
     samples: Any
     stamp: CaptureStamp
+
+    @property
+    def sample_start(self) -> int | None:
+        return self.stamp.sample_start
+
+    @property
+    def sample_end(self) -> int | None:
+        return self.stamp.sample_end
+
+    @property
+    def sample_rate(self) -> int | None:
+        return self.stamp.sample_rate
 
 
 @dataclass
@@ -85,11 +152,9 @@ class AudioTimeline:
         for size, stamp, speech in self.spans:
             n = min(max(count, 0), size)
             if n:
-                boundary = stamp.start + (stamp.end - stamp.start) * n / size
-                taken.append((n, CaptureStamp(stamp.start, boundary, stamp.source), speech))
+                taken.append((n, stamp.slice(0, n, size), speech))
             if n < size:
-                boundary = stamp.start + (stamp.end - stamp.start) * n / size
-                rest.append((size - n, CaptureStamp(boundary, stamp.end, stamp.source), speech))
+                rest.append((size - n, stamp.slice(n, size, size), speech))
             count -= n
         self.spans = rest
         return AudioTimeline(taken)
@@ -104,7 +169,21 @@ class AudioTimeline:
 
     @property
     def speech_end(self) -> float | None:
+        # Retain schema-2 VAD frame-end timing semantics. Sample metadata below
+        # separately identifies real source audio versus virtual replay padding.
         return next((stamp.end for _, stamp, speech in reversed(self.spans) if speech), None)
+
+    def sample_metadata(self) -> dict:
+        rates = {stamp.sample_rate for _, stamp, _ in self.spans}
+        return {
+            "sample_start": self.spans[0][1].sample_start if self.spans else None,
+            "sample_end": self.spans[-1][1].sample_end if self.spans else None,
+            "sample_rate": next(iter(rates)) if len(rates) == 1 else None,
+            "speech_end_sample": next(
+                (stamp.sample_end for _, stamp, speech in reversed(self.spans) if speech and stamp.has_audio), None
+            ),
+            "padding_samples": sum(stamp.padding_samples for _, stamp, _ in self.spans),
+        }
 
     @property
     def source(self) -> str:
@@ -131,10 +210,23 @@ class ChunkTiming:
     translation_finished: float | None = None
     final_ready: float | None = None
     broadcast_finished: float | None = None
+    sample_start: int | None = None
+    sample_end: int | None = None
+    sample_rate: int | None = None
+    speech_end_sample: int | None = None
+    padding_samples: int = 0
 
     @classmethod
     def from_timeline(cls, timeline: AudioTimeline, utterance_id: int, reason: str) -> ChunkTiming:
-        return cls(utterance_id, reason, timeline.source, timeline.first, timeline.speech_end, time.perf_counter())
+        return cls(
+            utterance_id,
+            reason,
+            timeline.source,
+            timeline.first,
+            timeline.speech_end,
+            time.perf_counter(),
+            **timeline.sample_metadata(),
+        )
 
     def metrics(self) -> dict:
         return {
@@ -142,6 +234,7 @@ class ChunkTiming:
             "utterance_id": self.utterance_id,
             "endpoint_reason": self.endpoint_reason,
             "timing_source": self.timing_source,
+            **self.sample_metadata(),
             "speech_end_to_final_ms": (
                 milliseconds(self.final_ready, self.speech_end) if self.timing_source != "replay_nonrealtime" else None
             ),
@@ -156,8 +249,12 @@ class ChunkTiming:
         return {
             name: round((value - origin) * 1000, 3)
             for name, value in vars(self).items()
-            if name not in {"utterance_id", "endpoint_reason", "timing_source"} and value is not None
+            if name not in {"utterance_id", "endpoint_reason", "timing_source", *self.sample_metadata()}
+            and value is not None
         }
+
+    def sample_metadata(self) -> dict:
+        return {name: getattr(self, name) for name in SAMPLE_COLUMNS}
 
 
 class RenderTracker:
