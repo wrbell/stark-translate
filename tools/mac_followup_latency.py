@@ -97,6 +97,12 @@ def validate_completion(result, observed, diagnostics, expected, clip, profile, 
         errors.append("Resolved experiment settings mismatch")
     if not summary.get("source_coverage", {}).get("complete"):
         errors.append("Source accounting incomplete")
+    if any(r.get("state", "").endswith("_error") for r in summary.get("source_coverage", {}).get("outcomes", [])):
+        errors.append("Inference error in source ledger")
+    if any(r.get("failed") for r in summary.get("latency_trace", {}).get("events", [])):
+        errors.append("Physical worker failed")
+    if metadata.get("backend") != ("mlx" if profile == "standard" else "cpu"):
+        errors.append("Resolved backend mismatch")
     if not observed["final_count"] or summary.get("chunks_completed") != observed["final_count"]:
         errors.append("Completed final count mismatch")
     if lifecycle.get("pipeline_sha256") != source["all_code_sha256"].get("dry_run_ab.py"):

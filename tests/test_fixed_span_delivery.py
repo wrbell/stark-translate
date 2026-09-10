@@ -60,3 +60,8 @@ def test_no_eligible_anchors_is_not_a_completed_comparison():
     result = fixed_span_delivery([{**ANCHOR, "endpoint_reason": "eof"}], [final(0, 8000, 9000)], sample_rate=1000)
     assert result["status"] == "no_eligible_anchors"
     assert result["n"] == 0
+
+
+def test_final_cannot_be_ready_before_its_source_arrives():
+    with pytest.raises(ValueError, match="complete source capture"):
+        fixed_span_delivery([ANCHOR], [final(0, 8000, 7000)], sample_rate=1000)

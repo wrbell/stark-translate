@@ -38,8 +38,8 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
             raise ValueError("Invalid final span")
         stages = row.get("timing_stages_ms") or {}
         captured, ready = (_number(stages.get(key)) for key in ("captured_start", "final_ready"))
-        if ready < captured:
-            raise ValueError("Final precedes capture")
+        if ready + 0.002 < captured + (end - start) * 1000 / sample_rate:
+            raise ValueError("Final precedes complete source capture")
         offsets.append(captured - start * 1000 / sample_rate)
         records.append({"start": start, "end": end, "ready": ready, "padding": row.get("padding_samples", 0)})
     if not offsets:
