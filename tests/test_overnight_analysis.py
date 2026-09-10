@@ -149,7 +149,7 @@ def fixture_matrix(tmp_path, *, repeats=3, omit=(), changes=None):
             with final_path.open("w", newline="") as stream:
                 writer = csv.DictWriter(stream, fieldnames=list(row))
                 writer.writeheader()
-                writer.writerow(row)
+                writer.writerows(data["observed"]["finals"])
             for prefix, records in (("partials", partials), ("diagnostics", diag), ("display_metrics", acks)):
                 (metrics / f"{prefix}_{session}.jsonl").write_text(
                     "\n".join(json.dumps(value) for value in records) + "\n"
@@ -444,6 +444,126 @@ def test_markdown_has_all_endpoint_controls_without_unescaped_pipes(tmp_path):
 def test_negative_and_out_of_bounds_speech_positions_are_not_matched():
     row = {"sample_start": 20, "sample_end": 30, "sample_rate": 10, "speech_end_sample": 10}
     assert analysis.bounds(row) is None
+
+
+@pytest.mark.parametrize(
+    "reason,clock,padding,expected",
+    [
+        ("silence", "replay_realtime", "22656", "silence_replay_tail"),
+        ("silence", "replay_nonrealtime", 22656, "silence_replay_tail"),
+        ("silence", "replay_realtime", "0", "silence"),
+        ("silence", "replay_realtime", None, "silence"),
+        ("silence", "portaudio_adc", 22656, "silence"),
+        ("eof", "replay_realtime", 96000, "eof_replay_tail"),
+    ],
+)
+def test_analytical_endpoint_preserves_raw_reason(reason, clock, padding, expected):
+    row = {"endpoint_reason": reason, "timing_source": clock, "padding_samples": padding}
+    assert analysis.endpoint_classification(row) == expected
+    assert analysis.endpoint(row) == f"{expected}|{clock}"
+    assert row["endpoint_reason"] == reason
+
+
+def test_actual_r0_eof_shape_is_separate_from_recorded_silence(tmp_path):
+    def change(config, repeat, data, row, *_):
+        row.update(
+            chunk_id="6",
+            sample_start="1566720",
+            sample_end="1941504",
+            sample_rate="48000",
+            speech_end_sample="1920000",
+            padding_samples="0",
+            speech_end_to_final_ms="3661.2",
+        )
+        data["observed"]["finals"].append(
+            {
+                **row,
+                "chunk_id": "7",
+                "utterance_id": "7",
+                "sample_start": "1950720",
+                "sample_end": "2160000",
+                "speech_end_sample": "2160000",
+                "padding_samples": "22656",
+                "speech_end_to_final_ms": "1758.9",
+            }
+        )
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    original = {path: analysis.sha(path) for path in metrics.rglob("*") if path.is_file()}
+    report = analysis.analyze(inputs, metrics)
+    assert report["endpoint_classification_version"] == 1
+    session = report["sessions"][0]
+    assert session["endpoints"]["silence|replay_realtime"]["speech_end_to_final_ms"] == {
+        "n": 1,
+        "p50": 3661.2,
+        "p95": 3661.2,
+        "max": 3661.2,
+    }
+    assert session["endpoints"]["silence_replay_tail|replay_realtime"]["speech_end_to_final_ms"]["p50"] == 1758.9
+    tail = session["endpoint_classifications"][1]
+    assert tail["raw_endpoint_reason"] == "silence" and tail["padding_samples"] == 22656
+    assert not tail["eligible_final_gain_target"]
+    assert all(analysis.sha(path) == checksum for path, checksum in original.items())
+
+
+@pytest.mark.parametrize("reason,padding", [("silence", "22656"), ("eof", "0")])
+def test_eof_or_tail_final_gain_alone_cannot_select(tmp_path, reason, padding):
+    def change(config, repeat, data, row, partials, acks, diag):
+        row.update(endpoint_reason=reason, padding_samples=padding)
+        if config == "candidate":
+            # First previews use real audio but provide no gain in this fixture.
+            for partial in partials:
+                partial["speech_start_to_partial_ms"] += 200
+                partial["emitted_at_ms"] += 200
+            for ack in acks[:-1]:
+                ack["speech_start_to_preview_ack_upper_bound_ms"] += 200
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    report = analysis.analyze(inputs, metrics)
+    arm = report["arms"][0]
+    endpoint = "silence_replay_tail" if padding != "0" else "eof"
+    metric = f"final:{endpoint}|replay_realtime"
+    assert arm["pooled_matched_metrics"]["versus_opening"][metric]["paired_delta_ms"]["p50"] == -300
+    assert arm["status"] == "not_selected" and arm["target_metrics"] == []
+    assert metric not in arm["passing_repeat_counts"]
+    browser = report["sessions"][0]["browsers"]["browser"]
+    assert set(browser["final_ack_by_endpoint_ms"]) == {f"{endpoint}|replay_realtime"}
+
+
+def test_real_preview_gain_remains_eligible_when_utterance_ends_in_replay_tail(tmp_path):
+    def change(config, repeat, data, row, *_):
+        row["padding_samples"] = "22656"
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    arm = analysis.analyze(inputs, metrics)["arms"][0]
+    assert arm["status"] == "worth_confirming"
+    assert arm["target_metrics"] == ["first_visible_preview:declared_display"]
+
+
+def test_replay_tail_still_has_a_tail_guard(tmp_path):
+    def change(config, repeat, data, row, partials, acks, diag):
+        row["padding_samples"] = "22656"
+        if config == "candidate":
+            row["speech_end_to_final_ms"] = "1500"
+            acks[-1]["speech_end_to_ack_upper_bound_ms"] = 1510
+            diag[0]["timing_stages_ms"]["final_ready"] = 2700
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    arm = analysis.analyze(inputs, metrics)["arms"][0]
+    assert arm["status"] == "not_selected"
+    assert any("final:silence_replay_tail" in reason for reason in arm["reasons"])
+
+
+def test_same_raw_bounds_do_not_pair_recorded_silence_with_virtual_tail(tmp_path):
+    def change(config, repeat, data, row, *_):
+        row["padding_samples"] = "22656" if config == "candidate" else "0"
+
+    inputs, metrics, _ = fixture_matrix(tmp_path, changes=change)
+    arm = analysis.analyze(inputs, metrics)["arms"][0]
+    pair = arm["comparisons"][0]["versus_opening"]
+    assert pair["matched_final_bounds"] == 0
+    assert pair["before_unmatched"] == pair["after_unmatched"] == 1
+    assert arm["status"] == "not_selected"
 
 
 def test_slower_visible_finals_block_fast_server_only_gain(tmp_path):

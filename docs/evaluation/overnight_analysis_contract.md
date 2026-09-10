@@ -39,6 +39,24 @@ deltas are retained, including negative improvements. Silence, smart cuts, hard
 cuts, EOF and other endpoints are separate. Medians and nearest-rank p95 are
 recomputed from raw observations, never averaged across runs.
 
+`endpoint_classification_version: 1` identifies the corrected analytical endpoint
+contract. `endpoint_classification(row)` appends `_replay_tail` to the raw reason
+when the capture clock is `replay_*` and `padding_samples` is positive. For example,
+`silence_replay_tail` means VAD finalization assisted by synthetic EOF padding;
+it is separate from silence within the recording. A final can end at the actual
+last sample while its VAD input includes virtual padding. The raw reason and
+padding count remain in each session's `endpoint_classifications` inventory.
+Pairing, server distributions and browser distributions use the analytical class.
+Different positive padding counts may pair when their real sample bounds and
+analytical endpoint match; their original counts remain available for review.
+
+Older raw/harness summaries retain emitted `endpoint_reason` and can pool these
+EOF-padding-assisted finals under `silence`. They are preserved unchanged. Use
+the corrected supplemental JSON/Markdown for endpoint interpretation and gates;
+regenerate legacy supplemental analyses before comparing their pooled endpoints.
+This is the existing separate-EOF requirement applied to its recorded evidence,
+not a new gain threshold or a modification of archived measurements.
+
 ## Browser and preview interpretation
 
 Visible ACKs must match their session and event identity. Partial ACKs additionally
@@ -99,9 +117,13 @@ candidate to qualify:
   100 ms allowed regression. Server update and last-preview-to-final gaps also
   satisfy that guard. Peak process RSS and Metal memory each stay within 1 GiB
   of both controls; missing peak measurements fail this check.
-- The same target (one final endpoint or first visible preview) improves its
+- The same target (one recorded final endpoint or first visible preview) improves its
   median by at least 15% **or** 150 ms versus both controls in at least two thirds
   of repeats, and in the pooled matched observations versus both controls.
+  EOF and `_replay_tail` final metrics cannot supply this target gain, but remain
+  separately reported and subject to every tail guard. A real first-preview event
+  remains eligible even when its utterance later ends at EOF; final endpoint
+  classification does not discard earlier preview work from recorded audio.
 - Optimizations with explicit execution evidence must actually execute: memo
   hits, speculative final reuse, prefix-cache hits, relevant preview kinds or
   scheduler events. A flag without the intended event cannot claim its benefit.

@@ -78,7 +78,7 @@ def bounds(row):
         return None
     if not values[0] <= values[3] <= values[1]:
         return None
-    return (*values, row.get("endpoint_reason"), row.get("timing_source"))
+    return (*values, endpoint_classification(row), row.get("timing_source"))
 
 
 def unique(rows, key):
@@ -106,8 +106,28 @@ def missing_seconds(reference, observed):
     )
 
 
+def endpoint_classification(row):
+    """Separate EOF-padding-assisted finals without changing their raw reason."""
+    reason = row.get("endpoint_reason") or "unknown"
+    if str(row.get("timing_source", "")).startswith("replay_") and (number(row.get("padding_samples")) or 0) > 0:
+        return f"{reason}_replay_tail"
+    return reason
+
+
 def endpoint(row):
-    return f"{row.get('endpoint_reason', 'unknown')}|{row.get('timing_source', 'unknown')}"
+    return f"{endpoint_classification(row)}|{row.get('timing_source', 'unknown')}"
+
+
+def recorded_endpoint(row):
+    reason = endpoint_classification(row)
+    return reason != "eof" and not reason.endswith("_replay_tail")
+
+
+def eligible_gain_target(metric):
+    if metric.startswith(("final:", "final_visible:")):
+        reason = metric.split(":", 1)[1].split("|", 1)[0]
+        return reason != "eof" and not reason.endswith("_replay_tail")
+    return metric.startswith("first_visible_preview:")
 
 
 def lexical_change(before, after):
@@ -478,6 +498,17 @@ def inspect_result(path, metrics):
             name: {key: distribution(row.get(key) for row in rows) for key in FINAL_METRICS}
             for name, rows in grouped.items()
         },
+        "endpoint_classifications": [
+            {
+                "chunk_id": row.get("chunk_id"),
+                "raw_endpoint_reason": row.get("endpoint_reason"),
+                "analytical_endpoint": endpoint_classification(row),
+                "timing_source": row.get("timing_source"),
+                "padding_samples": number(row.get("padding_samples")),
+                "eligible_final_gain_target": recorded_endpoint(row),
+            }
+            for row in raw["finals"]
+        ],
         "previews": previews,
         "browsers": browser,
         "counters": summary.get("latency_experiment_counters", {}),
@@ -802,7 +833,7 @@ def analyze(input_dir, metrics_dir, *, client_id=None, client_map=None):
                 )
                 continue
             for metric in common_metrics:
-                if metric == "first_server_preview":
+                if not eligible_gain_target(metric):
                     continue
                 if all(
                     gain(pair["metrics"][metric]["before"]["p50"], pair["metrics"][metric]["after"]["p50"])
@@ -873,6 +904,7 @@ def analyze(input_dir, metrics_dir, *, client_id=None, client_map=None):
         )
     return {
         "schema_version": 1,
+        "endpoint_classification_version": 1,
         "input": str(input_dir.resolve()),
         "metrics": str(metrics_dir.resolve()),
         "matrix_status": "complete" if complete else "incomplete",
@@ -889,7 +921,8 @@ def analyze(input_dir, metrics_dir, *, client_id=None, client_map=None):
         "production_promotion": False,
         "definitions": {
             "percentiles": "Raw observations: median and nearest-rank p95; paired deltas retain negative values. Small-sample p95 is often maximum, not confidence.",
-            "matching": "Unique exact sample_start/end/rate, speech_end_sample, endpoint and timing source within model/clip/repeat/source/model-artifact cohort.",
+            "matching": "Unique exact sample_start/end/rate, speech_end_sample, analytical endpoint and timing source within model/clip/repeat/source/model-artifact cohort.",
+            "endpoint_classification": "Replay finals with positive padding_samples receive a _replay_tail suffix on their unchanged raw endpoint reason. For example, silence_replay_tail is VAD finalization assisted by synthetic EOF padding, not natural recorded silence. EOF and replay-tail final metrics remain separately reported and guarded but cannot supply a selection gain target. Real first-preview events remain eligible even when their utterance later ends at EOF. Older raw/harness summaries retain emitted reasons and may mix padded finals with silence; use this corrected supplemental classification for gates without rewriting those artifacts.",
             "selection": "Whole matrix completed; every repeat passes validity/coverage/tail/memory guards; same target median improves15% OR150ms versus both controls in at least2/3repeats. Followup selection only.",
             "browser": "Per client only. Timed first-preview coverage and final ACK coverage>=95%. Connection barrier alone never certifies visibility; missing intermediate ACKs can reflect coalescing.",
             "browser_binding": "The controlled audience-tab protocol binds exactly one visible connection per session, or uses an explicit session-to-client map. Runtime socket IDs are process-local and cannot prove stable physical browser identity. Paired declared_display metrics use only the selected connection in each run; original IDs and per-client distributions remain separate. Ambiguity is rejected.",
