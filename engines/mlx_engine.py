@@ -26,7 +26,7 @@ from engines.base import (
     TranslationEngine,
     TranslationResult,
 )
-from engines.model_paths import resolve_model_path
+from engines.model_paths import UnpinnedModelError, resolve_model_for_loading
 from engines.stt_fallback import require_mlx_fallback_language
 from engines.translation_prompts import (
     build_chat_messages,
@@ -226,10 +226,12 @@ class MLXWhisperEngine(STTEngine):
         try:
             mlx_whisper.transcribe(
                 silence,
-                path_or_hf_repo=resolve_model_path(self._model_id),
+                path_or_hf_repo=resolve_model_for_loading(self._model_id),
                 condition_on_previous_text=False,
             )
             logger.info("Whisper ready (%s) (%.1fs)", self._model_id, time.time() - t0)
+        except UnpinnedModelError:
+            raise  # A model policy error must not silently select another model.
         except Exception as exc:
             require_mlx_fallback_language(self._session_language, self._fallback_model_id)
             logger.warning(
@@ -242,7 +244,7 @@ class MLXWhisperEngine(STTEngine):
             t0 = time.time()
             mlx_whisper.transcribe(
                 silence,
-                path_or_hf_repo=resolve_model_path(self._model_id),
+                path_or_hf_repo=resolve_model_for_loading(self._model_id),
                 condition_on_previous_text=False,
             )
             logger.info("Whisper ready (%s) (%.1fs)", self._model_id, time.time() - t0)
@@ -365,7 +367,7 @@ class MLXWhisperEngine(STTEngine):
         # mlx-whisper is always greedy; beam_size param is ignored
         result = mlx_whisper.transcribe(
             audio,
-            path_or_hf_repo=resolve_model_path(model_repo),
+            path_or_hf_repo=resolve_model_for_loading(model_repo),
             language=language,
             condition_on_previous_text=False,
             initial_prompt=initial_prompt,
@@ -442,7 +444,7 @@ class MLXWhisperEngine(STTEngine):
         silence = np.zeros(16000, dtype=np.float32)
         mlx_whisper.transcribe(
             silence,
-            path_or_hf_repo=resolve_model_path(self._fallback_model_id),
+            path_or_hf_repo=resolve_model_for_loading(self._fallback_model_id),
             condition_on_previous_text=False,
         )
         if hasattr(mx, "synchronize"):
@@ -822,7 +824,7 @@ class MLXGemmaEngine(TranslationEngine):
         if self._adapter_path:
             load_kwargs["adapter_path"] = self._adapter_path
             logger.info("Loading LoRA adapter from %s", self._adapter_path)
-        self._model, self._tokenizer = mlx_load(resolve_model_path(self._model_id), **load_kwargs)
+        self._model, self._tokenizer = mlx_load(resolve_model_for_loading(self._model_id), **load_kwargs)
 
         ensure_stop_tokens(self._tokenizer, model_family=self._model_family)
 
@@ -841,7 +843,7 @@ class MLXGemmaEngine(TranslationEngine):
                 self._num_draft_tokens,
             )
             t1 = time.time()
-            self._draft_model, _draft_tok = mlx_load(resolve_model_path(self._draft_model_id))
+            self._draft_model, _draft_tok = mlx_load(resolve_model_for_loading(self._draft_model_id))
             logger.info("Draft model loaded (%.1fs)", time.time() - t1)
             # Speculative decode is incompatible with prompt KV cache
             if self._use_prompt_cache:

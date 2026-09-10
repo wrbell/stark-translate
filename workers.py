@@ -37,9 +37,9 @@ def stt_worker_main(conn, model_id, cache_limit_mb=256, source_lang="en"):
     import mlx.core as mx
     import mlx_whisper
 
-    from engines.model_paths import resolve_model_path
+    from engines.model_paths import resolve_model_for_loading
 
-    model_id = resolve_model_path(model_id)
+    model_id = resolve_model_for_loading(model_id)
     mx.set_cache_limit(cache_limit_mb * 1024 * 1024)
 
     # Load and warm up model

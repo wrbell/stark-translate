@@ -7,6 +7,12 @@ import pytest
 from engines.translation_prompts import ensure_stop_tokens, stop_token_strings
 
 
+@pytest.fixture(autouse=True)
+def _local_model_source(monkeypatch):
+    # These suites isolate MLX behavior; real pinned resolution has its own tests.
+    monkeypatch.setattr("engines.mlx_engine.resolve_model_for_loading", lambda model: "/installed/" + model)
+
+
 class FakeTokenizer:
     eos_token_id = 1
     unk_token_id = 3

@@ -5,6 +5,14 @@ All tests mock MLX dependencies — runs in CI without Apple Silicon.
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _local_model_source(monkeypatch):
+    # These suites isolate MLX behavior; real pinned resolution has its own tests.
+    monkeypatch.setattr("engines.mlx_engine.resolve_model_for_loading", lambda model: "/installed/" + model)
+
 
 class TestMLXGemmaTurboQuant:
     """Test TurboQuant KV cache integration in MLXGemmaEngine."""

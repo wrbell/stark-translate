@@ -1176,10 +1176,10 @@ def load_whisper(backend="mlx"):
         # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
         mx.set_cache_limit(256 * 1024 * 1024)
 
-        from engines.model_paths import resolve_model_path
+        from engines.model_paths import resolve_model_for_loading
         from engines.stt_fallback import require_mlx_fallback_language
 
-        model_id = resolve_model_path(settings.stt.whisper_model)
+        model_id = resolve_model_for_loading(settings.stt.whisper_model)
         print(f"[2/6] Loading {model_id} (MLX)...")
         t0 = time.time()
         try:
@@ -1190,7 +1190,7 @@ def load_whisper(backend="mlx"):
         except Exception as e:
             require_mlx_fallback_language(SOURCE_LANG, settings.stt.whisper_fallback)
             print(f"  Whisper load failed ({e}), falling back to {settings.stt.whisper_fallback}...")
-            model_id = resolve_model_path(settings.stt.whisper_fallback)
+            model_id = resolve_model_for_loading(settings.stt.whisper_fallback)
             t0 = time.time()
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)

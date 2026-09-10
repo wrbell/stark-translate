@@ -11,6 +11,12 @@ from engines import mlx_engine
 from engines.translation_prompts import gemma4_user_content
 
 
+@pytest.fixture(autouse=True)
+def _local_model_source(monkeypatch):
+    # These suites isolate MLX behavior; real pinned resolution has its own tests.
+    monkeypatch.setattr("engines.mlx_engine.resolve_model_for_loading", lambda model: "/installed/" + model)
+
+
 class _FakeTokenizer:
     def __init__(self):
         self.calls = []

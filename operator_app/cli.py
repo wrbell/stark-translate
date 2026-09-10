@@ -217,7 +217,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Emit JSON instead of human-readable output (with --check)",
     )
     p_setup.add_argument("--backend", choices=["auto", "mlx", "cuda", "cpu"], default="auto")
-    p_setup.add_argument("--include", nargs="*", choices=["e2b", "tts", "translategemma"], default=[])
+    p_setup.add_argument(
+        "--include",
+        nargs="*",
+        choices=["e2b", "tts", "translategemma", "whisper-fallback", "diarization", "diarization-pyannote"],
+        default=[],
+    )
     p_setup.set_defaults(func=cmd_setup)
 
     p_doctor = sub.add_parser("doctor", help="Run preflight checks (same as operator UI)")

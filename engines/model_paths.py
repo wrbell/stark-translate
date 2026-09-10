@@ -1,7 +1,7 @@
-"""Shared, offline model lookup for setup, preflight and inference.
+"""Shared offline lookup and explicit, pinned load-time model resolution.
 
-Model identity stays a Hugging Face ID; resolution only selects a local copy.
-No model imports or downloads happen here.
+Importing this module and calling ``resolve_model_path`` never downloads models.
+Only ``resolve_model_for_loading`` may fetch a registered immutable snapshot.
 """
 
 from __future__ import annotations
@@ -97,8 +97,9 @@ def resolve_model_path(
 ) -> str | None:
     """Resolve explicit path, setup cache, project models, then HF's local cache.
 
-    Missing models retain their repo ID for normal inference downloads; a
-    preflight caller uses ``local_only=True`` to receive ``None`` instead.
+    Missing models retain their repo ID for identity-only callers; a preflight
+    caller uses ``local_only=True`` to receive ``None`` instead. Live wrappers
+    must use ``resolve_model_for_loading`` before handing a path to a loader.
     """
     explicit = Path(model_id).expanduser()
     if explicit.exists():
@@ -129,6 +130,8 @@ def resolve_model_path(
         hub = Path(os.environ.get("HF_HUB_CACHE", hf_home / "hub"))
         repo = hub / ("models--" + repo_id.replace("/", "--"))
         revision = entry.get("revision", "main")
+        if not isinstance(revision, str):
+            return None if local_only else model_id
         ref = repo / "refs" / revision
         if ref.is_file():
             revision = ref.read_text().strip()
@@ -136,6 +139,10 @@ def resolve_model_path(
         if snapshot.is_dir() and _snapshot_complete(snapshot, entry):
             return str(snapshot)
     return None if local_only else model_id
+
+
+class UnpinnedModelError(ValueError):
+    """A remote model was requested without a registered immutable source."""
 
 
 def pinned_hf_entry(model_id: str, *, project_root: Path | None = None) -> dict[str, Any]:
@@ -156,11 +163,39 @@ def pinned_hf_entry(model_id: str, *, project_root: Path | None = None) -> dict[
         or not isinstance(revision, str)
         or not re.fullmatch(r"[0-9a-f]{40}", revision)
     ):
-        raise ValueError(
+        raise UnpinnedModelError(
             f"No pinned HF source for {model_id}; register its full commit in models.lock.json "
             "and run setup, or configure an explicit local model path"
         )
     return entry
+
+
+def resolve_model_for_loading(
+    model_id: str, *, models_dir: Path | None = None, project_root: Path | None = None, token: str | None = None
+) -> str:
+    """Use an existing local model, or download its registered full HF commit.
+
+    Call only at a model-loading boundary, never from setup status/preflight.
+    Some MLX wrappers accept only a path/repo ID and silently download ``main``
+    for a missing path. Supplying a complete local snapshot closes that escape.
+    Explicit local overrides retain the existing lookup contract and provenance.
+    """
+    local = resolve_model_path(model_id, models_dir=models_dir, project_root=project_root, local_only=True)
+    if local:
+        return local
+    entry = pinned_hf_entry(model_id, project_root=project_root)
+    from huggingface_hub import snapshot_download
+
+    kwargs: dict[str, Any] = {"allow_patterns": entry["allow_patterns"]} if "allow_patterns" in entry else {}
+    if token is not None:
+        kwargs["token"] = token
+    snapshot = Path(snapshot_download(repo_id=entry["repo_id"], revision=entry["revision"], **kwargs))
+    if not snapshot.is_dir() or not _snapshot_complete(snapshot, entry):
+        raise ValueError(
+            f"Incomplete pinned model snapshot for {entry['repo_id']} at {entry['revision']}: {snapshot}; "
+            "rerun setup or repair the local cache before loading"
+        )
+    return str(snapshot.absolute())
 
 
 def resolve_hf_model_source(

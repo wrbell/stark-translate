@@ -21,7 +21,7 @@ Requirements:
 Usage:
     python summarize_sermon.py metrics/ab_metrics_20260208_183356.csv
     python summarize_sermon.py metrics/diarization/sermon.jsonl
-    python summarize_sermon.py metrics/ab_metrics_*.csv --model mlx-community/Llama-3.2-3B-Instruct-4bit
+    python summarize_sermon.py metrics/ab_metrics_*.csv --model /path/to/prepared-summary-model
     python summarize_sermon.py transcript.jsonl --translate-with-gemma
 """
 
@@ -39,7 +39,7 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from engines.model_paths import resolve_model_path
+from engines.model_paths import resolve_model_for_loading
 from engines.translation_prompts import (
     build_chat_messages,
     chat_template_extra_kwargs,
@@ -264,7 +264,7 @@ def load_summarization_model(model_id=None):
     mx.set_cache_limit(100 * 1024 * 1024)
 
     model_id = model_id or settings.translation.mlx_model_gemma4_e4b
-    resolved = resolve_model_path(model_id)
+    resolved = resolve_model_for_loading(model_id)
     family = _summary_model_family(model_id, resolved)
     print(f"  Loading {model_id}...")
     t0 = time.time()
@@ -451,7 +451,7 @@ def translate_with_translategemma(en_summary):
 
     print("  Loading TranslateGemma for Spanish translation...")
     t0 = time.time()
-    model, tokenizer = load(resolve_model_path(TRANSLATE_MODEL_ID))
+    model, tokenizer = load(resolve_model_for_loading(TRANSLATE_MODEL_ID))
 
     # Fix EOS token (same as dry_run_ab.py)
     ensure_stop_tokens(tokenizer, model_family="translategemma")
@@ -500,7 +500,7 @@ def main():
 Examples:
     python summarize_sermon.py metrics/ab_metrics_20260208_183356.csv
     python summarize_sermon.py metrics/diarization/sermon.jsonl
-    python summarize_sermon.py transcript.csv --model mlx-community/Llama-3.2-3B-Instruct-4bit
+    python summarize_sermon.py transcript.csv --model /path/to/prepared-summary-model
     python summarize_sermon.py transcript.jsonl --translate-with-gemma
         """,
     )

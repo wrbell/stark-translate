@@ -23,7 +23,7 @@ def test_actual_mlx_startup_fallback_is_rejected_before_measurement(monkeypatch)
     monkeypatch.setattr(mlx_engine, "MLX_AVAILABLE", True)
     monkeypatch.setattr(mlx_engine, "mx", MagicMock())
     monkeypatch.setattr(mlx_engine, "mlx_whisper", SimpleNamespace(transcribe=transcribe))
-    monkeypatch.setattr(mlx_engine, "resolve_model_path", lambda name: "/installed/" + name)
+    monkeypatch.setattr(mlx_engine, "resolve_model_for_loading", lambda name: "/installed/" + name)
     engine = mlx_engine.MLXWhisperEngine(model_id="primary", fallback_model_id="fallback", fallback_on_low_conf=False)
     with pytest.raises(RuntimeError, match="requested 'primary', loaded 'fallback'"):
         load_primary_model(engine, "primary")
