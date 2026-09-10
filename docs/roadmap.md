@@ -12,14 +12,14 @@
 ```
 Mac (M3 Pro 18GB, MLX)                Windows (A2000 Ada 16GB, CUDA/WSL2)
   Live inference prototype (stable)      Training pipeline hardened
-  Whisper Large-V3-Turbo (STT)           198K aligned chunks (328 sermons)
+  Parakeet EN / Whisper ES (STT)        198K aligned chunks (328 sermons)
   engines/ package (MLX + CUDA)          TranslateGemma S1-S9 sweep → S6 winner
   settings.py (pydantic-settings)        Whisper W12 data scaling (198K chunks)
   Backend: --backend auto|mlx|cuda       W15 hard mining + W16 = 7.25% fresh-eval WER
   Piper TTS (EN + ES, --tts)             Deepgram Nova-3 oracle (35 sermons)
   Pipeline overlap (STT N+1 ∥ TT N)     Tiered glossary (50 boost + 229 master)
   Display modes + operator UI            llama.cpp E4B Q4_K_M = production CUDA default
-  v2026.6/v2026.7 shipped                W17 curriculum scripted (DoRA + hard-mix)
+  v2026.13 shipped; v2026.14 candidate   W17 curriculum scripted (DoRA + hard-mix)
 
 Production Endpoints (implemented):
   1. Mac M-series (8-18 GB) — MLX, --backend=mlx
@@ -34,7 +34,7 @@ for first-time church PC setup.
 
 **Then: [CUDA latency proposal](./cuda_latency_proposal.md)** — Gemma 4 MTP drafter (llama.cpp ≥ b10883), `-fa on` retest, W16 HF fp16 / Parakeet TDT v3 STT, client plumbing. Scripts in `scripts/cuda/`; not yet run on the A2000.
 
-**Sept 2026 restart:** v2026.12 close-out (branches pruned, #131–#138 triaged, #172–#179 filed) → v2026.13 Mac latency program (see [Active Work](#active-work)). Key finding: the Gemma 4 stop-set bug (#172) made every Mac final run to `max_tokens`, so the 2026-08-30 Mac latency numbers are invalid.
+**Sept 2026 restart:** v2026.12 close-out → v2026.13 Mac latency fixes (PRs #180–191 merged) → [v2026.14 implementation status](mac_implementation_status.md). Archived measurements are retained, with corrected labels: legacy processing times do not measure speech-end-to-visible-caption delivery.
 
 ---
 
@@ -103,19 +103,20 @@ Ordered stages on the A2000 Ada box:
 
 **Status notes:** W16 shipped in production CT2 path (7.25% fresh-eval WER). W17 is scripted in-repo, not yet trained. Scripts and garbage-filter hardening landed with the 2026-08 pipeline refresh (PR #162).
 
-### Mac latency program (v2026.13 — in progress, started 2026-09-09)
+### Mac reliability and evaluation (v2026.14 candidate)
 
-Measured with the real-audio replay benchmark (#179) on the M3 Pro. Baseline (2026-08-30): finals ≈ 3.2 s true end-to-end (silence 0.5 + STT 0.5 + translate 2.2), partials 0.6–1.0 s. Targets: finals **< 1.0 s p50**, partials **< 300 ms**, canary **≥ 7/8**.
+Implemented code and validation gates are tracked separately in [the implementation status](mac_implementation_status.md). The target remains **sub-second median speech-end-to-caption delivery**, measured with schema 2 and visible browser acknowledgments. It is not achieved by the current measurements.
 
-1. **B0 — Gemma 4 EOS/stop fix + telemetry** (#172): `ensure_stop_tokens()`; `generated_tokens/prefill_ms/ttft_ms/decode_ms/finish_reason` in CSV/JSONL/bench. Expected finals 2176 → ~700–900 ms.
-2. **B1 — replay harness** (#179): `--audio-file` + `tools/replay_bench.py`.
-3. **B3 — Gemma 4 MTP drafter on the streaming path** (#177) via mlx-optiq `optiq.runtime.spec`; gate: byte-identical greedy, p50 ≤ 0.85×, acceptance ≥ 30 %.
-4. **B4 — Parakeet TDT 0.6B v3 STT on MLX** (#178): streaming partials, confidence proxy; WER-gated vs whisper-turbo.
-5. **B5 — Marian CT2 on Mac** (`scripts/convert_marian_ct2.py` → `adapters/marian_ct2/`; ctranslate2 4.7.1 arm64 has no libomp) — later: ONNX Silero VAD for a torch-free live process.
-6. **B6 — tuning**: `silence_trigger` 0.5 → 0.35 s, `partial_interval` 0.6 → 0.4 s, wider `should_use_marian_only`.
-7. **B7/B8** — consolidate `dry_run_ab.py` onto `MLXGemmaEngine`; docs + tag v2026.13.
+1. **Reliability:** operator session identity, production metric schemas, verse polling, summary errors, and startup/stop lifecycle handling.
+2. **Timing:** capture timestamps through buffering and cuts; separate silence, forced cuts and EOF; keep legacy values unchanged. Browser speech-end-to-ack is an upper bound including return-network time.
+3. **Installation:** backend-aware setup/preflight, shared cache resolution, isolated wheel/ZIP checks and generated launchd install/uninstall.
+4. **Comparison:** [versioned manifests and reports](evaluation/README.md), identical E4B/E2B inputs, three alternating real-time pairs, independent STT tests, all 18 canaries and blinded bilingual review. Natural Spanish and human audio references remain required inputs.
+5. **Experiments:** idle warmups, final-aware partial scheduling, 0.5/0.4/0.35 s silence with fixed 0.6 s cadence, conservative Marian routing, terminology examples and ONNX VAD. All opt-in until reviewed; MTP research is deferred.
+6. **Corrections:** Review during and after sessions, independent transcript/translation approval, revisioned sidecars, portable audio, explicit language/provenance and training/evaluation separation.
+7. **Capability gates:** physical TTS routing/hotplug, natural two-speaker labels, delayed speaker updates, full rehearsal and a separate offline Hindi baseline. Live Hindi/Chinese remains a later decision.
+8. **Delivery:** version/tag/artifact agreement and a new release tag. PyPI account setup is explicitly pending at the user's request; no published tag is moved.
 
-Then: **CUDA latency proposal** (`docs/cuda_latency_proposal.md`, for the A2000 box): Gemma 4 MTP drafter in llama.cpp ≥ b10883 with f16 KV (#173, #174), `-fa on` retest, W16 as HF fp16 / Parakeet on CUDA, `LlamaCppEngine` `cache_prompt` + dynamic `max_tokens`, `-np 2`. Then Part D: #132 (9.4.1) and #133 (9.6.1).
+E4B stays the default. EN STT remains Parakeet and ES STT remains Whisper. Model selection controls require the measured speed/quality report and review first. CUDA experiments and model training remain separate work on the Windows machine.
 
 ### Deferred followups (from v2026.9; the referenced `FOLLOWUPS.md` never existed — #175)
 

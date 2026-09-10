@@ -1,0 +1,188 @@
+{
+  "evaluation": {
+    "approved_natural_utterances": {
+      "en": 0,
+      "es": 0
+    },
+    "natural_audio_gate": false
+  },
+  "quality": [
+    {
+      "size": "e2b",
+      "policy": "church",
+      "source_lang": "en",
+      "target_lang": "es",
+      "items": 43,
+      "reference_items": 25,
+      "latency_ms": {
+        "n": 129,
+        "p50": 553.0735829961486,
+        "p95": 893.5183329740539
+      },
+      "canaries_passed": 14,
+      "canaries_total": 18,
+      "chrf_plus_plus": 45.874311572643236,
+      "peak_metal_bytes": 4411096292
+    },
+    {
+      "size": "e2b",
+      "policy": "church",
+      "source_lang": "es",
+      "target_lang": "en",
+      "items": 25,
+      "reference_items": 24,
+      "latency_ms": {
+        "n": 75,
+        "p50": 619.9284170288593,
+        "p95": 969.3301670486107
+      },
+      "canaries_passed": 0,
+      "canaries_total": 0,
+      "chrf_plus_plus": 46.0351009548953,
+      "peak_metal_bytes": 4411096292
+    },
+    {
+      "size": "e2b",
+      "policy": "none",
+      "source_lang": "en",
+      "target_lang": "es",
+      "items": 43,
+      "reference_items": 25,
+      "latency_ms": {
+        "n": 129,
+        "p50": 516.5572499972768,
+        "p95": 832.4215410393663
+      },
+      "canaries_passed": 11,
+      "canaries_total": 18,
+      "chrf_plus_plus": 45.113712724034464,
+      "peak_metal_bytes": 4418904590
+    },
+    {
+      "size": "e2b",
+      "policy": "none",
+      "source_lang": "es",
+      "target_lang": "en",
+      "items": 25,
+      "reference_items": 24,
+      "latency_ms": {
+        "n": 75,
+        "p50": 618.8571659731679,
+        "p95": 1067.2902920050547
+      },
+      "canaries_passed": 0,
+      "canaries_total": 0,
+      "chrf_plus_plus": 46.0351009548953,
+      "peak_metal_bytes": 4418904590
+    },
+    {
+      "size": "e4b",
+      "policy": "church",
+      "source_lang": "en",
+      "target_lang": "es",
+      "items": 43,
+      "reference_items": 25,
+      "latency_ms": {
+        "n": 129,
+        "p50": 955.1217919797637,
+        "p95": 1560.075749992393
+      },
+      "canaries_passed": 15,
+      "canaries_total": 18,
+      "chrf_plus_plus": 46.86155391461082,
+      "peak_metal_bytes": 6760112944
+    },
+    {
+      "size": "e4b",
+      "policy": "church",
+      "source_lang": "es",
+      "target_lang": "en",
+      "items": 25,
+      "reference_items": 24,
+      "latency_ms": {
+        "n": 75,
+        "p50": 1083.0520000308752,
+        "p95": 1740.5457090353593
+      },
+      "canaries_passed": 0,
+      "canaries_total": 0,
+      "chrf_plus_plus": 48.66774652696142,
+      "peak_metal_bytes": 6760112944
+    },
+    {
+      "size": "e4b",
+      "policy": "none",
+      "source_lang": "en",
+      "target_lang": "es",
+      "items": 43,
+      "reference_items": 25,
+      "latency_ms": {
+        "n": 129,
+        "p50": 839.9097920046188,
+        "p95": 1442.5991250318475
+      },
+      "canaries_passed": 13,
+      "canaries_total": 18,
+      "chrf_plus_plus": 44.38744349434152,
+      "peak_metal_bytes": 6744387856
+    },
+    {
+      "size": "e4b",
+      "policy": "none",
+      "source_lang": "es",
+      "target_lang": "en",
+      "items": 25,
+      "reference_items": 24,
+      "latency_ms": {
+        "n": 75,
+        "p50": 989.06774999341,
+        "p95": 1560.6362089747563
+      },
+      "canaries_passed": 0,
+      "canaries_total": 0,
+      "chrf_plus_plus": 48.66774652696142,
+      "peak_metal_bytes": 6744387856
+    }
+  ],
+  "replays": [],
+  "human_review": "pending",
+  "default_model": "e4b",
+  "latency_gate": "pending_browser_ack",
+  "stt": [],
+  "quality_deltas": [
+    {
+      "policy": "church",
+      "source_lang": "en",
+      "target_lang": "es",
+      "e2b_p50_reduction_percent": 42.093920624536786,
+      "e2b_canary_pass_delta": -1,
+      "e2b_chrf_delta": -0.9872423419675869
+    },
+    {
+      "policy": "church",
+      "source_lang": "es",
+      "target_lang": "en",
+      "e2b_p50_reduction_percent": 42.760973894957345,
+      "e2b_canary_pass_delta": 0,
+      "e2b_chrf_delta": -2.6326455720661244
+    },
+    {
+      "policy": "none",
+      "source_lang": "en",
+      "target_lang": "es",
+      "e2b_p50_reduction_percent": 38.49848460935241,
+      "e2b_canary_pass_delta": -2,
+      "e2b_chrf_delta": 0.7262692296929458
+    },
+    {
+      "policy": "none",
+      "source_lang": "es",
+      "target_lang": "en",
+      "e2b_p50_reduction_percent": 37.43025531089339,
+      "e2b_canary_pass_delta": 0,
+      "e2b_chrf_delta": -2.6326455720661244
+    }
+  ],
+  "failures": [],
+  "caption_events": []
+}

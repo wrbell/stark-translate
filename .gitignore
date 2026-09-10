@@ -145,3 +145,8 @@ preference/*.jsonl
 # replay clips are local benchmark artifacts (tools/replay_bench.py --prepare)
 stark_data/replay
 stark_data/replay/
+
+# Isolated validation environments and reproducible benchmark working files.
+.cache/
+metrics/mac_roadmap/
+metrics/display_metrics_*.jsonl

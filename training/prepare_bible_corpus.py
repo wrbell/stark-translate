@@ -261,7 +261,9 @@ def export_training_jsonl(pairs, output_path="bible_data/aligned/verse_pairs.jso
         print(f"Exported {len(data)} pairs to {path}")
 
     # Also save holdout to dedicated dir
-    holdout_path = "bible_data/holdout/verse_pairs_test.jsonl"
+    # Keep the mirrored holdout in the same data root as the requested output.
+    # A temporary export must never overwrite the real project's evaluation set.
+    holdout_path = os.path.join(os.path.dirname(os.path.dirname(output_path)), "holdout", "verse_pairs_test.jsonl")
     os.makedirs(os.path.dirname(holdout_path), exist_ok=True)
     with open(holdout_path, "w", encoding="utf-8") as f:
         for p in test:

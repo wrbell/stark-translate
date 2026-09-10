@@ -1,0 +1,67 @@
+# Reproducible Mac evaluation
+
+`tools/mac_evaluation.py` freezes inputs, runs one model process at a time, and
+reports distributions from individual observations. E4B remains the default.
+
+## Frozen inputs
+
+- `mac_v2026_14_manifest.json`: original frozen audio/transcript inputs. Retains
+  both historical 150-second English sermon replays and the synthetic Piper
+  Spanish clip. Includes 50 EN and 11 ES unreviewed audio candidates, 18 canaries
+  and 50 text translation items (25 per direction).
+- `mac_v2026_14_manifest_v2.json`: same model inputs and audio, with corrected
+  translation references. The old parallel corpus joins sequential verse IDs
+  across editions with different numbering. Exact source lookup plus unique
+  book/chapter/verse now selects KJV/RVR1909 references; 49/50 items resolve.
+  One ambiguous phrase has no score. These are structural checks, not human review.
+- `mac_v2026_14_screening.json`: a 45-second prefix of the first historical clip,
+  with its own hash and parent provenance. This bounds individual experiments;
+  it does not replace the full historical baseline.
+- `mac_v2026_14_experiments.json`: fixed cadence 0.6 s, three alternating E4B/E2B
+  pairs for each opt-in experiment. Only one behavior changes per screen.
+
+Predicted transcripts never count as references. Use `annotate` to create a new
+manifest with human-reviewed text/provenance; it rejects changes to immutable
+audio identity. Natural Spanish and two-speaker gates remain pending.
+
+## Run
+
+Install `.[mlx,eval]` in the selected environment. Existing `stt_env` was retained;
+additional reporting packages used for this run live in `.cache/mac-eval-deps`.
+All model runs are sequential to avoid GPU contention.
+
+```bash
+python tools/mac_evaluation.py validate --manifest docs/evaluation/mac_v2026_14_manifest_v2.json
+python tools/mac_evaluation.py stt --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --output metrics/mac_roadmap/stt --runs 3
+python tools/mac_evaluation.py quality --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --output metrics/mac_roadmap/quality_new --runs 3 --policies none church
+python tools/mac_evaluation.py replay --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --output metrics/mac_roadmap/baseline_new --tag unique_run --runs 3
+python tools/mac_evaluation.py experiments --manifest docs/evaluation/mac_v2026_14_screening.json --spec docs/evaluation/mac_v2026_14_experiments.json --output metrics/mac_roadmap/experiments --tag unique_screen --runs 3
+python tools/mac_evaluation.py report --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --input metrics/mac_roadmap --output docs/evaluation/mac_v2026_14_report
+```
+
+The original quality runs used v1. `realign-references` created v2 and
+`rescore-quality` rebound only reference metadata, preserving every prediction,
+timing and original run hash. Reports skip quality runs with a different manifest
+hash. Do not use the original v1 reference-based scores.
+
+## Read the results
+
+[Translation comparison](mac_v2026_14_quality/comparison.md) includes all 18
+canaries, latency cost, chrF++, and actual changed outputs. Canary checks require
+all specified terms. chrF++ measures agreement with a specific wording; it is
+not a universal translation-quality percentage. The sample has duplicate source
+wording and archaic verse language and is not representative of all sermons.
+
+`blind_review.jsonl` provides anonymous A/B responses and blank meaning-error and
+terminology ratings; keep `review_key.jsonl` away from reviewers. Automated
+generation of that form does not mean bilingual review has happened.
+
+Replay reports separate language/provenance, silence, smart cuts, hard cuts, EOF,
+and timing schema. Server `speech_end_to_final_ms` stops at payload readiness.
+Client receipt-to-render is local browser overhead; speech-end-to-ack is an upper
+bound including return-network time. Hidden tabs and accelerated replay cannot
+pass caption-delivery gates. Legacy `e2e_latency_ms` remains processing time.
+
+Hindi is an independent offline zero-shot probe (`quality --target hi`), with no
+reference score or live-language integration. Physical output-device, natural
+Spanish, two-speaker and bilingual review gates are explicitly separate.

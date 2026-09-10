@@ -1,5 +1,15 @@
 # CLAUDE.md — Live Bilingual Speech-to-Text
 
+> **Mac handoff, v2026.14 candidate:** See [implementation status](docs/mac_implementation_status.md)
+> and [evaluation inputs/results](docs/evaluation/README.md). v2026.13 PRs #180–191
+> are already merged. Operator reliability, timing schema 2, reproducible setup,
+> live Review/export and opt-in experiments are implemented on
+> `codex/mac-reliability-roadmap`. E4B remains default; MTP stays off. Archived
+> `e2e_latency_ms` is processing time, not speech-end-to-display. Human natural
+> Spanish/two-speaker/bilingual review and physical output tests remain gates.
+> PyPI publishing is pending by user choice. Do not restart the older roadmap
+> from scratch or overwrite the user's working `stt_env`.
+
 A fully on-device, live bidirectional speech-to-text system (English/Spanish) for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). Supports `--lang en` (EN→ES) and `--lang es` (ES→EN). Includes Piper TTS (`--tts`). All Python, MLX on Apple Silicon for inference, CUDA on NVIDIA for training.
 
 **Two-pass pipeline** for fast partials and high-quality finals:

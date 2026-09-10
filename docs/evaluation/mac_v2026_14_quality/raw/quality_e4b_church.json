@@ -1,0 +1,2526 @@
+{
+  "environment": {
+    "code_sha": "09e4679a041fa9825d397436496d6f30cd49aa08",
+    "tracked_diff_sha256": "5365b0f9c4736d1d768a6a8ae91298d45b4f967ac4934295f22b836830208f8a",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": "2.6.0"
+    },
+    "created_at": "2026-09-10T00:01:14.236274+00:00"
+  },
+  "manifest_sha256": "3f000c1cd4d1fedf063ab98b1f7b81fa5b8be60a095531f086a4de3c96cd6716",
+  "size": "e4b",
+  "model_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+  "policy": "church",
+  "target_override": null,
+  "rows": [
+    {
+      "id": "canary_00",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "The atonement of Christ reconciles us to God.",
+      "reference": null,
+      "required_terms": [
+        "expiación",
+        "cristo",
+        "dios"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "La expiación de Cristo nos reconcilia con Dios.",
+          "latency_ms": 743.6771669890732,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La expiación de Cristo nos reconcilia con Dios.",
+          "latency_ms": 789.1542500001378,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La expiación de Cristo nos reconcilia con Dios.",
+          "latency_ms": 795.5954580102116,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_01",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "James wrote about faith and works.",
+      "reference": null,
+      "required_terms": [
+        "santiago",
+        "fe",
+        "obras"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Santiago escribió sobre fe y obras.",
+          "latency_ms": 608.5662919795141,
+          "generated_tokens": 8,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Santiago escribió sobre fe y obras.",
+          "latency_ms": 604.616625001654,
+          "generated_tokens": 8,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Santiago escribió sobre fe y obras.",
+          "latency_ms": 563.546875026077,
+          "generated_tokens": 8,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_02",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "The propitiation for our sins was the blood of Christ.",
+      "reference": null,
+      "required_terms": [
+        "propiciación",
+        "pecados",
+        "sangre",
+        "cristo"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "La propiciación por nuestros pecados fue la sangre de Cristo.",
+          "latency_ms": 819.5541250170209,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La propiciación por nuestros pecados fue la sangre de Cristo.",
+          "latency_ms": 838.9545420068316,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La propiciación por nuestros pecados fue la sangre de Cristo.",
+          "latency_ms": 825.5115420324728,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_03",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "The breaking of bread is a solemn remembrance.",
+      "reference": null,
+      "required_terms": [
+        "partimiento",
+        "pan"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "El partimiento del pan es un solemne recuerdo.",
+          "latency_ms": 795.2752080163918,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "El partimiento del pan es un solemne recuerdo.",
+          "latency_ms": 802.8630000189878,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "El partimiento del pan es un solemne recuerdo.",
+          "latency_ms": 794.697959034238,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_04",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Paul wrote to the Corinthians about the resurrection.",
+      "reference": null,
+      "required_terms": [
+        "pablo",
+        "corintios",
+        "resurrección"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Pablo escribió a los corintios sobre la resurrección.",
+          "latency_ms": 823.0706250178628,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Pablo escribió a los corintios sobre la resurrección.",
+          "latency_ms": 816.9474580208771,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Pablo escribió a los corintios sobre la resurrección.",
+          "latency_ms": 822.3161249770783,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_05",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Justification is by faith alone, not by works of the law.",
+      "reference": null,
+      "required_terms": [
+        "justificación",
+        "fe"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "La justificación es por la fe solamente, no por las obras de la ley.",
+          "latency_ms": 955.8410420431755,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La justificación es por la fe solamente, no por las obras de la ley.",
+          "latency_ms": 970.3769159968942,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La justificación es por la fe solamente, no por las obras de la ley.",
+          "latency_ms": 925.00333301723,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_06",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "The Holy Spirit convicts the world of sin and righteousness.",
+      "reference": null,
+      "required_terms": [
+        "espíritu",
+        "pecado"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "El Espíritu Santo convence al mundo de pecado y de justicia.",
+          "latency_ms": 822.3131250124425,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "El Espíritu Santo convence al mundo de pecado y de justicia.",
+          "latency_ms": 829.0046249749139,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "El Espíritu Santo convence al mundo de pecado y de justicia.",
+          "latency_ms": 822.6567090023309,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_07",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Grace and mercy meet at the cross of our Lord Jesus Christ.",
+      "reference": null,
+      "required_terms": [
+        "gracia",
+        "misericordia",
+        "cristo"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "La gracia y la misericordia se encuentran en la cruz de nuestro Señor Jesucristo.",
+          "latency_ms": 947.5950420019217,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La gracia y la misericordia se encuentran en la cruz de nuestro Señor Jesucristo.",
+          "latency_ms": 958.6047920165583,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La gracia y la misericordia se encuentran en la cruz de nuestro Señor Jesucristo.",
+          "latency_ms": 943.009540962521,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_08",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "We gather before the mercy seat in prayer.",
+      "reference": null,
+      "required_terms": [
+        "propiciatorio"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Nos reunimos ante el trono de la misericordia en oración.",
+          "latency_ms": 800.0187910511158,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Nos reunimos ante el trono de la misericordia en oración.",
+          "latency_ms": 793.4848750010133,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Nos reunimos ante el trono de la misericordia en oración.",
+          "latency_ms": 807.5075829983689,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": false
+    },
+    {
+      "id": "canary_09",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "The table of the Lord is spread for His people.",
+      "reference": null,
+      "required_terms": [
+        "mesa",
+        "señor"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "La mesa del Señor está extendida para Su pueblo.",
+          "latency_ms": 767.8815419785678,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La mesa del Señor está extendida para Su pueblo.",
+          "latency_ms": 721.3882500072941,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "La mesa del Señor está extendida para Su pueblo.",
+          "latency_ms": 711.0415829811245,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_10",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "We are gathered to Thy Name on the first day of the week.",
+      "reference": null,
+      "required_terms": [
+        "nombre"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Nos reunimos en Tu Nombre el primer día de la semana.",
+          "latency_ms": 779.6203750185668,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Nos reunimos en Tu Nombre el primer día de la semana.",
+          "latency_ms": 812.3377080191858,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Nos reunimos en Tu Nombre el primer día de la semana.",
+          "latency_ms": 813.3116660173982,
+          "generated_tokens": 14,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_11",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "A little while, and we shall see the Lord.",
+      "reference": null,
+      "required_terms": [
+        "poco",
+        "señor"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "En poco tiempo, veremos al Señor.",
+          "latency_ms": 653.4558340208605,
+          "generated_tokens": 9,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "En poco tiempo, veremos al Señor.",
+          "latency_ms": 656.7940000095405,
+          "generated_tokens": 9,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "En poco tiempo, veremos al Señor.",
+          "latency_ms": 676.2628339929506,
+          "generated_tokens": 9,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_12",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Nothing but the blood of Jesus can wash away my sin.",
+      "reference": null,
+      "required_terms": [
+        "sangre",
+        "jesús"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Nada sino la sangre de Jesús puede lavar mi pecado.",
+          "latency_ms": 774.4017920340411,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Nada sino la sangre de Jesús puede lavar mi pecado.",
+          "latency_ms": 812.5986250233836,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Nada sino la sangre de Jesús puede lavar mi pecado.",
+          "latency_ms": 761.8438329664059,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_13",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Christ is the Surety of a better covenant.",
+      "reference": null,
+      "required_terms": [
+        "fiador",
+        "pacto"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Cristo es la garantía de un pacto mejor.",
+          "latency_ms": 729.0775409783237,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Cristo es la garantía de un pacto mejor.",
+          "latency_ms": 719.3138750153594,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Cristo es la garantía de un pacto mejor.",
+          "latency_ms": 715.1832500239834,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": false
+    },
+    {
+      "id": "canary_14",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "This do in remembrance of Me at His table.",
+      "reference": null,
+      "required_terms": [
+        "memoria",
+        "mesa"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Haced esto en memoria Mía en su mesa.",
+          "latency_ms": 723.8764590001665,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Haced esto en memoria Mía en su mesa.",
+          "latency_ms": 706.7490000044927,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Haced esto en memoria Mía en su mesa.",
+          "latency_ms": 723.6539169680327,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_15",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "At the mercy seat we remember His propitiation for our sins.",
+      "reference": null,
+      "required_terms": [
+        "propiciatorio",
+        "propiciación"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "En el lugar de misericordia recordamos Su propiciación por nuestros pecados.",
+          "latency_ms": 897.1684160060249,
+          "generated_tokens": 17,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "En el lugar de misericordia recordamos Su propiciación por nuestros pecados.",
+          "latency_ms": 885.9137919498608,
+          "generated_tokens": 17,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "En el lugar de misericordia recordamos Su propiciación por nuestros pecados.",
+          "latency_ms": 878.132083977107,
+          "generated_tokens": 17,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": false
+    },
+    {
+      "id": "canary_16",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Yet there is room at the gospel feast for the weary soul.",
+      "reference": null,
+      "required_terms": [
+        "lugar",
+        "evangelio"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Aun así hay lugar en el festín del evangelio para el alma cansada.",
+          "latency_ms": 996.2177919805981,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Aun así hay lugar en el festín del evangelio para el alma cansada.",
+          "latency_ms": 1005.5024170433171,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Aun así hay lugar en el festín del evangelio para el alma cansada.",
+          "latency_ms": 952.1670419489965,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "canary_17",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "We come as pilgrims to Calvary and the cross.",
+      "reference": null,
+      "required_terms": [
+        "peregrin",
+        "calvario"
+      ],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "Venimos como peregrinos a Calvario y a la cruz.",
+          "latency_ms": 878.142875037156,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Venimos como peregrinos a Calvario y a la cruz.",
+          "latency_ms": 861.4961670245975,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Venimos como peregrinos a Calvario y a la cruz.",
+          "latency_ms": 905.2656250423752,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": true
+    },
+    {
+      "id": "verse_00_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "They look at themselves, then go on their way,",
+      "reference": "Porque él se consideró á sí mismo, y se fué, y luego se olvidó qué tal era.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 30291,
+      "runs": [
+        {
+          "text": "Se miran a sí mismos, luego se van por su camino.",
+          "latency_ms": 838.2736250059679,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Se miran a sí mismos, luego se van por su camino.",
+          "latency_ms": 913.7303339666687,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Se miran a sí mismos, luego se van por su camino.",
+          "latency_ms": 888.0412500002421,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "james",
+        1,
+        24
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_00_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "El servidor se volvió a contar todo esto a su amo. Entonces, lleno de ira el dueño de casa, dijo a su servidor: “Sal en seguida a las calles y callejuelas de la ciudad; y tráeme aquí los pobres, y lisiados, y ciegos y cojos”.",
+      "reference": "So that servant came, and shewed his lord these things. Then the master of the house being angry said to his servant, Go out quickly into the streets and lanes of the city, and bring in hither the poor, and the maimed, and the halt, and the blind.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 30291,
+      "runs": [
+        {
+          "text": "The servant told his master all of this again. Then, filled with anger, the master of the house said to his servant: \"Go immediately out into the streets and alleys of the city; and bring me here the poor, the lame, the blind, and the crippled.\"",
+          "latency_ms": 2393.47137499135,
+          "generated_tokens": 57,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "The servant told his master all of this again. Then, filled with anger, the master of the house said to his servant: \"Go immediately out into the streets and alleys of the city; and bring me here the poor, the lame, the blind, and the crippled.\"",
+          "latency_ms": 2251.732750039082,
+          "generated_tokens": 57,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "The servant told his master all of this again. Then, filled with anger, the master of the house said to his servant: \"Go immediately out into the streets and alleys of the city; and bring me here the poor, the lame, the blind, and the crippled.\"",
+          "latency_ms": 2264.6093749790452,
+          "generated_tokens": 57,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "luke",
+        14,
+        21
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_01_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "The trees of the Lord drink their fill the cedars he planted on Lebanon,",
+      "reference": "Llénanse de jugo los árboles de Jehová, los cedros del Líbano que él plantó.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 15588,
+      "runs": [
+        {
+          "text": "Los árboles del Señor sacian su sed, los cedros que plantó en Líbano.",
+          "latency_ms": 1149.5431670336984,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Los árboles del Señor sacian su sed, los cedros que plantó en Líbano.",
+          "latency_ms": 1099.4674160028808,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Los árboles del Señor sacian su sed, los cedros que plantó en Líbano.",
+          "latency_ms": 1078.2676250091754,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "psalms",
+        104,
+        16
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_01_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Llénanse de jugo los árboles de Jehová, los cedros del Líbano que él plantó.",
+      "reference": "The trees of the Lord are full of sap; the cedars of Lebanon, which he hath planted;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 15588,
+      "runs": [
+        {
+          "text": "Let the trees of the Lord be full of juice, the cedars of Lebanon that he planted.",
+          "latency_ms": 1058.7279580067843,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Let the trees of the Lord be full of juice, the cedars of Lebanon that he planted.",
+          "latency_ms": 1049.7114159516059,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Let the trees of the Lord be full of juice, the cedars of Lebanon that he planted.",
+          "latency_ms": 1068.028041976504,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "psalms",
+        104,
+        16
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_02_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "From Kibroth-hattaavah the people journeyed unto Hazeroth; and they abode at Hazeroth.",
+      "reference": "De Kibroth-hattaavah movió el pueblo á Haseroth, y pararon en Haseroth.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 4060,
+      "runs": [
+        {
+          "text": "Desde Kibroth-hattaavah el pueblo viajó a Hazeroth; y allí permanecieron en Hazeroth.",
+          "latency_ms": 1286.071417038329,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Desde Kibroth-hattaavah el pueblo viajó a Hazeroth; y allí permanecieron en Hazeroth.",
+          "latency_ms": 1261.5021250094287,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Desde Kibroth-hattaavah el pueblo viajó a Hazeroth; y allí permanecieron en Hazeroth.",
+          "latency_ms": 1189.917833020445,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "numbers",
+        11,
+        35
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_02_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "No lo hago así con mi siervo Moisés,   el cual es fiel en toda mi casa.",
+      "reference": "My servant Moses is not so, who is faithful in all mine house.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 4060,
+      "runs": [
+        {
+          "text": "I do not do this with my servant Moses, who is faithful in my whole house.",
+          "latency_ms": 914.3587090075016,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "I do not do this with my servant Moses, who is faithful in my whole house.",
+          "latency_ms": 905.2203749888577,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "I do not do this with my servant Moses, who is faithful in my whole house.",
+          "latency_ms": 888.758625020273,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "numbers",
+        12,
+        7
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_03_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "and from the Nethinim, whom David and the heads gave for the service of the Levites, two hundred and twenty Nethinim, all of them defined by name.",
+      "reference": "Y de los Nethineos, á quienes David con los príncipes puso para el ministerio de los Levitas, doscientos y veinte Nethineos: todos los cuales fueron declarados por sus nombres.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 12222,
+      "runs": [
+        {
+          "text": "y de los Nethinim, a quienes David y los jefes dieron para el servicio de los Levitas, doscientos veinte Nethinim, todos nombrados.",
+          "latency_ms": 1476.674625009764,
+          "generated_tokens": 36,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "y de los Nethinim, a quienes David y los jefes dieron para el servicio de los Levitas, doscientos veinte Nethinim, todos nombrados.",
+          "latency_ms": 1497.7012089802884,
+          "generated_tokens": 36,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "y de los Nethinim, a quienes David y los jefes dieron para el servicio de los Levitas, doscientos veinte Nethinim, todos nombrados.",
+          "latency_ms": 1507.3395419749431,
+          "generated_tokens": 36,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "ezra",
+        8,
+        20
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_03_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Pesé y entregué en sus manos seiscientos cincuenta talentos de plata, utensilios de plata por cien talentos, cien talentos de oro,",
+      "reference": "I even weighed unto their hand six hundred and fifty talents of silver, and silver vessels an hundred talents, and of gold an hundred talents;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 12222,
+      "runs": [
+        {
+          "text": "I weighed and delivered into your hands six hundred fifty talents of silver, silver utensils for one hundred talents, one hundred talents of gold,",
+          "latency_ms": 1177.0205829525366,
+          "generated_tokens": 28,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "I weighed and delivered into your hands six hundred fifty talents of silver, silver utensils for one hundred talents, one hundred talents of gold,",
+          "latency_ms": 1221.7754580196925,
+          "generated_tokens": 28,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "I weighed and delivered into your hands six hundred fifty talents of silver, silver utensils for one hundred talents, one hundred talents of gold,",
+          "latency_ms": 1206.8477909779176,
+          "generated_tokens": 28,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "ezra",
+        8,
+        26
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_04_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And the name of the daughter of Asher <FI>is<Fi> Sarah.",
+      "reference": "Y el nombre de la hija de Aser fué Sera.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 4536,
+      "runs": [
+        {
+          "text": "Y el nombre de la hija de Aser es Sara.",
+          "latency_ms": 740.3853749856353,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y el nombre de la hija de Aser es Sara.",
+          "latency_ms": 740.7285840017721,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y el nombre de la hija de Aser es Sara.",
+          "latency_ms": 730.3482909919694,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "numbers",
+        26,
+        46
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_04_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Yahvé habló a Moisés, diciendo:",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 4536,
+      "runs": [
+        {
+          "text": "Yahweh spoke to Moses, saying:",
+          "latency_ms": 639.5459999912418,
+          "generated_tokens": 9,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Yahweh spoke to Moses, saying:",
+          "latency_ms": 642.4587079673074,
+          "generated_tokens": 9,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Yahweh spoke to Moses, saying:",
+          "latency_ms": 590.2768750092946,
+          "generated_tokens": 9,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "unavailable",
+      "canonical_reference": null,
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_05_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "If thou lend money to any of my people with thee that is poor, thou shalt not be to him as a creditor; neither shall ye lay upon him interest.",
+      "reference": "Si dieres á mi pueblo dinero emprestado, al pobre que está contigo, no te portarás con él como logrero, ni le impondrás usura.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 2139,
+      "runs": [
+        {
+          "text": "Si prestas dinero a alguno de mi pueblo que esté pobre contigo, no serás para él como acreedor; ni le imponerás interés.",
+          "latency_ms": 1342.2452919767238,
+          "generated_tokens": 30,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Si prestas dinero a alguno de mi pueblo que esté pobre contigo, no serás para él como acreedor; ni le imponerás interés.",
+          "latency_ms": 1300.9421250317246,
+          "generated_tokens": 30,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Si prestas dinero a alguno de mi pueblo que esté pobre contigo, no serás para él como acreedor; ni le imponerás interés.",
+          "latency_ms": 1282.3600000119768,
+          "generated_tokens": 30,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "exodus",
+        22,
+        25
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_05_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "No blasfemarás contra Dios, ni maldecirás al príncipe de tu pueblo.",
+      "reference": "Thou shalt not revile the gods, nor curse the ruler of thy people.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 2139,
+      "runs": [
+        {
+          "text": "You shall not blaspheme God, nor curse the prince of your people.",
+          "latency_ms": 810.7187499990687,
+          "generated_tokens": 16,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "You shall not blaspheme God, nor curse the prince of your people.",
+          "latency_ms": 842.720249958802,
+          "generated_tokens": 16,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "You shall not blaspheme God, nor curse the prince of your people.",
+          "latency_ms": 801.8035420100205,
+          "generated_tokens": 16,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "exodus",
+        22,
+        28
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_06_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "But I counted it necessary to send to you Epaphroditus, my brother and fellow-worker and fellow-soldier, and your messenger and minister to my need;",
+      "reference": "Mas tuve por cosa necesaria enviaros á Epafrodito, mi hermano, y colaborador y compañero de milicia, y vuestro mensajero, y ministrador de mis necesidades;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 29417,
+      "runs": [
+        {
+          "text": "Pero consideré necesario enviaros a Epafrodito, mi hermano, compañero de trabajo y compañero de armas, y vuestro mensajero y ministro para mi necesidad;",
+          "latency_ms": 1533.9015829958953,
+          "generated_tokens": 35,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Pero consideré necesario enviaros a Epafrodito, mi hermano, compañero de trabajo y compañero de armas, y vuestro mensajero y ministro para mi necesidad;",
+          "latency_ms": 1455.2272919681855,
+          "generated_tokens": 35,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Pero consideré necesario enviaros a Epafrodito, mi hermano, compañero de trabajo y compañero de armas, y vuestro mensajero y ministro para mi necesidad;",
+          "latency_ms": 1560.075749992393,
+          "generated_tokens": 35,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "philippians",
+        2,
+        25
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_06_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Él no es Dios de muertos, sino de vivos. Vosotros estáis, pues, en un gran error”.",
+      "reference": "He is not the God of the dead, but the God of the living: ye therefore do greatly err.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 29417,
+      "runs": [
+        {
+          "text": "He is not a god of the dead, but of the living. You are, therefore, in a great error.",
+          "latency_ms": 1114.593459002208,
+          "generated_tokens": 25,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "He is not a god of the dead, but of the living. You are, therefore, in a great error.",
+          "latency_ms": 1134.5322910347022,
+          "generated_tokens": 25,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "He is not a god of the dead, but of the living. You are, therefore, in a great error.",
+          "latency_ms": 1137.870333972387,
+          "generated_tokens": 25,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "mark",
+        12,
+        27
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_07_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And this is the testimony of John, when the Jews sent out of Jerusalem priests and Levites, that they might question him, `Who art thou?'",
+      "reference": "Y éste es el testimonio de Juan, cuando los Judíos enviaron de Jerusalem sacerdotes y Levitas, que le preguntasen: ¿Tú, quién eres?",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 26064,
+      "runs": [
+        {
+          "text": "Y este es el testimonio de Juan, cuando los judíos enviaron de Jerusalén sacerdotes y levitas, para que le preguntaran: \"¿Quién eres tú?\"",
+          "latency_ms": 1446.890708990395,
+          "generated_tokens": 34,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y este es el testimonio de Juan, cuando los judíos enviaron de Jerusalén sacerdotes y levitas, para que le preguntaran: \"¿Quién eres tú?\"",
+          "latency_ms": 1450.9613750269637,
+          "generated_tokens": 34,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y este es el testimonio de Juan, cuando los judíos enviaron de Jerusalén sacerdotes y levitas, para que le preguntaran: \"¿Quién eres tú?\"",
+          "latency_ms": 1450.5687080090865,
+          "generated_tokens": 34,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "john",
+        1,
+        19
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_07_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Y éste es el testimonio de Juan, cuando los Judíos enviaron de Jerusalem sacerdotes y Levitas, que le preguntasen: ¿Tú, quién eres?",
+      "reference": "And this is the record of John, when the Jews sent priests and Levites from Jerusalem to ask him, Who art thou?",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 26064,
+      "runs": [
+        {
+          "text": "And this is the testimony of John, when the Jews sent priests and Levites from Jerusalem to ask him: Who are you?",
+          "latency_ms": 1228.4120409749448,
+          "generated_tokens": 27,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And this is the testimony of John, when the Jews sent priests and Levites from Jerusalem to ask him: Who are you?",
+          "latency_ms": 1238.797958008945,
+          "generated_tokens": 27,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And this is the testimony of John, when the Jews sent priests and Levites from Jerusalem to ask him: Who are you?",
+          "latency_ms": 1234.840583987534,
+          "generated_tokens": 27,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "john",
+        1,
+        19
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_08_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And thou shalt make holy garments for Aaron thy brother, for glory and for beauty.",
+      "reference": "Y harás vestidos sagrados á Aarón tu hermano, para honra y hermosura.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 2296,
+      "runs": [
+        {
+          "text": "Y harás vestiduras santas para Aarón tu hermano, por gloria y por hermosura.",
+          "latency_ms": 1164.7816660115495,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y harás vestiduras santas para Aarón tu hermano, por gloria y por hermosura.",
+          "latency_ms": 1142.4664580263197,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y harás vestiduras santas para Aarón tu hermano, por gloria y por hermosura.",
+          "latency_ms": 1143.514833995141,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "exodus",
+        28,
+        2
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_08_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Tomarán para ello oro, jacinto, púrpura escarlata y carmesí y tejido de lino fino.”",
+      "reference": "And they shall take gold, and blue, and purple, and scarlet, and fine linen.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 2296,
+      "runs": [
+        {
+          "text": "They will take for it gold, sapphire, scarlet purple, and fine linen cloth.",
+          "latency_ms": 955.070500029251,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "They will take for it gold, sapphire, scarlet purple, and fine linen cloth.",
+          "latency_ms": 951.9607090041973,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "They will take for it gold, sapphire, scarlet purple, and fine linen cloth.",
+          "latency_ms": 955.2097079576924,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "exodus",
+        28,
+        5
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_09_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "and they said “I will come quickly.”Blessed will he be who lays to heart the words of the prophecy contained in this book.’",
+      "reference": "Y he aquí, vengo presto. Bienaventurado el que guarda las palabras de la profecía de este libro.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 31088,
+      "runs": [
+        {
+          "text": "Y dijeron: \"Vendré pronto\". Bienaventurado el que atesore las palabras de la profecía contenidas en este libro.",
+          "latency_ms": 1455.9802920557559,
+          "generated_tokens": 30,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y dijeron: \"Vendré pronto\". Bienaventurado el que atesore las palabras de la profecía contenidas en este libro.",
+          "latency_ms": 1307.8646659851074,
+          "generated_tokens": 30,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y dijeron: \"Vendré pronto\". Bienaventurado el que atesore las palabras de la profecía contenidas en este libro.",
+          "latency_ms": 1399.4342910009436,
+          "generated_tokens": 30,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "revelation of john",
+        22,
+        7
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_09_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "¿No ha dicho la Escritura que el Cristo ha de venir del linaje de David, y de Belén, la aldea de David?”",
+      "reference": "Hath not the scripture said, That Christ cometh of the seed of David, and out of the town of Bethlehem, where David was?",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 31088,
+      "runs": [
+        {
+          "text": "Has the Scripture not said that the Christ is to come from the lineage of David, and from Bethlehem, the town of David?",
+          "latency_ms": 1251.9301249994896,
+          "generated_tokens": 27,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Has the Scripture not said that the Christ is to come from the lineage of David, and from Bethlehem, the town of David?",
+          "latency_ms": 1257.9722499940544,
+          "generated_tokens": 27,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Has the Scripture not said that the Christ is to come from the lineage of David, and from Bethlehem, the town of David?",
+          "latency_ms": 1204.0807500015944,
+          "generated_tokens": 27,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "john",
+        7,
+        42
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_10_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "and again it saith, `Rejoice ye nations, with His people;'",
+      "reference": "Y otra vez dice: Alegraos, Gentiles, con su pueblo.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28314,
+      "runs": [
+        {
+          "text": "y de nuevo dice, «Regocijaos, naciones, con Su pueblo;»",
+          "latency_ms": 1035.0674589863047,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "y de nuevo dice, «Regocijaos, naciones, con Su pueblo;»",
+          "latency_ms": 1046.7619999544695,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "y de nuevo dice, «Regocijaos, naciones, con Su pueblo;»",
+          "latency_ms": 980.5171249900013,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "romans",
+        15,
+        10
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_10_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "¿Y sus hermanas no están todas entre nosotros? Entonces, ¿de dónde le viene todo esto?”",
+      "reference": "And his sisters, are they not all with us? Whence then hath this man all these things?",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28314,
+      "runs": [
+        {
+          "text": "And aren't all your sisters among us? So, where does all this come from?",
+          "latency_ms": 1020.8391249761917,
+          "generated_tokens": 20,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And aren't all your sisters among us? So, where does all this come from?",
+          "latency_ms": 1060.5548330349848,
+          "generated_tokens": 20,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And aren't all your sisters among us? So, where does all this come from?",
+          "latency_ms": 1001.9440830219537,
+          "generated_tokens": 20,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        13,
+        56
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_11_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "So two or three cities wandered unto one city, to drink water; but they were not satisfied: yet have ye not returned unto me, saith the Lord.",
+      "reference": "Y venían dos ó tres ciudades á una ciudad para beber agua, y no se hartaban: con todo no os tornasteis á mí, dice Jehová.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 22419,
+      "runs": [
+        {
+          "text": "Así dos o tres ciudades vagaron a una ciudad, para beber agua; pero no se saciaron: sin embargo, no habéis vuelto a mí, dice el Señor.",
+          "latency_ms": 1600.4784579854459,
+          "generated_tokens": 37,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Así dos o tres ciudades vagaron a una ciudad, para beber agua; pero no se saciaron: sin embargo, no habéis vuelto a mí, dice el Señor.",
+          "latency_ms": 1611.8535000132397,
+          "generated_tokens": 37,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Así dos o tres ciudades vagaron a una ciudad, para beber agua; pero no se saciaron: sin embargo, no habéis vuelto a mí, dice el Señor.",
+          "latency_ms": 1587.8910419996828,
+          "generated_tokens": 37,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "amos",
+        4,
+        8
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_11_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Al principio del reinado de Joakim, hijo de Josías, rey de Judá, habló Yahvé en estos términos:",
+      "reference": "In the beginning of the reign of Jehoiakim the son of Josiah king of Judah came this word from the Lord, saying,",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 22419,
+      "runs": [
+        {
+          "text": "At the beginning of the reign of Joakim, son of Josiah, king of Judah, Yahweh spoke in these terms:",
+          "latency_ms": 1203.7909170030616,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "At the beginning of the reign of Joakim, son of Josiah, king of Judah, Yahweh spoke in these terms:",
+          "latency_ms": 1163.3884169859812,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "At the beginning of the reign of Joakim, son of Josiah, king of Judah, Yahweh spoke in these terms:",
+          "latency_ms": 1198.140875028912,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "jeremiah",
+        26,
+        1
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_12_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And the God of peace shall bruise Satan under your feet shortly. The grace of our Lord Jesus Christ be with you. Amen.",
+      "reference": "Y el Dios de paz quebrantará presto á Satanás debajo de vuestros pies. La gracia del Señor nuestro Jesucristo sea con vosotros.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28357,
+      "runs": [
+        {
+          "text": "Y el Dios de paz aplastará a Satanás bajo vuestros pies pronto. La gracia de nuestro Señor Jesucristo sea con vosotros. Amén.",
+          "latency_ms": 1375.8811670122668,
+          "generated_tokens": 32,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y el Dios de paz aplastará a Satanás bajo vuestros pies pronto. La gracia de nuestro Señor Jesucristo sea con vosotros. Amén.",
+          "latency_ms": 1414.072750019841,
+          "generated_tokens": 32,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y el Dios de paz aplastará a Satanás bajo vuestros pies pronto. La gracia de nuestro Señor Jesucristo sea con vosotros. Amén.",
+          "latency_ms": 1437.3565000132658,
+          "generated_tokens": 32,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "romans",
+        16,
+        20
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_12_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Vosotros, al contrario, decís: “Cualquiera que diga a su padre o a su madre: “Es ofrenda (para el Templo) aquello con lo cual yo te podría haber socorrido,",
+      "reference": "But ye say, Whosoever shall say to his father or his mother, It is a gift, by whatsoever thou mightest be profited by me;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28357,
+      "runs": [
+        {
+          "text": "You, on the contrary, say: \"Whoever says to his father or his mother: 'It is an offering (for the Temple) of what I could have helped you with,'",
+          "latency_ms": 1611.6216669906862,
+          "generated_tokens": 38,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "You, on the contrary, say: \"Whoever says to his father or his mother: 'It is an offering (for the Temple) of what I could have helped you with,'",
+          "latency_ms": 1584.086374961771,
+          "generated_tokens": 38,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "You, on the contrary, say: \"Whoever says to his father or his mother: 'It is an offering (for the Temple) of what I could have helped you with,'",
+          "latency_ms": 1587.546167022083,
+          "generated_tokens": 38,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        15,
+        5
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_13_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Take my teaching, and not silver; get knowledge in place of the best gold.",
+      "reference": "Recibid mi enseñanza, y no plata; y ciencia antes que el oro escogido.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 16613,
+      "runs": [
+        {
+          "text": "Toma mi enseñanza, y no plata; adquiere conocimiento en lugar del mejor oro.",
+          "latency_ms": 984.9266249802895,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Toma mi enseñanza, y no plata; adquiere conocimiento en lugar del mejor oro.",
+          "latency_ms": 976.9927079905756,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Toma mi enseñanza, y no plata; adquiere conocimiento en lugar del mejor oro.",
+          "latency_ms": 987.9074590280652,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "proverbs",
+        8,
+        10
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_13_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Recibid mi enseñanza, y no plata; y ciencia antes que el oro escogido.",
+      "reference": "Receive my instruction, and not silver; and knowledge rather than choice gold.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 16613,
+      "runs": [
+        {
+          "text": "Receive my teaching, and not silver; and knowledge before chosen gold.",
+          "latency_ms": 822.2245840006508,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Receive my teaching, and not silver; and knowledge before chosen gold.",
+          "latency_ms": 825.0327500281855,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Receive my teaching, and not silver; and knowledge before chosen gold.",
+          "latency_ms": 835.4453339707106,
+          "generated_tokens": 15,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "proverbs",
+        8,
+        10
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_14_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "O death, where is your power? O death, where are your pains?",
+      "reference": "¿Dónde está, oh muerte, tu aguijón? ¿dónde, oh sepulcro, tu victoria?",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28774,
+      "runs": [
+        {
+          "text": "Oh muerte, ¿dónde está tu poder? Oh muerte, ¿dónde están tus dolores?",
+          "latency_ms": 1052.8777909930795,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Oh muerte, ¿dónde está tu poder? Oh muerte, ¿dónde están tus dolores?",
+          "latency_ms": 1004.2721669888124,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Oh muerte, ¿dónde está tu poder? Oh muerte, ¿dónde están tus dolores?",
+          "latency_ms": 1026.764375041239,
+          "generated_tokens": 21,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "i corinthians",
+        15,
+        55
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_14_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "“La Pascua, como sabéis, será dentro de dos días, y el Hijo del hombre va a ser entregado para que lo crucifiquen”.",
+      "reference": "Ye know that after two days is the feast of the passover, and the Son of man is betrayed to be crucified.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28774,
+      "runs": [
+        {
+          "text": "\"Easter, as you know, will be in two days, and the Son of Man is going to be delivered to be crucified.\"",
+          "latency_ms": 1274.2240420193411,
+          "generated_tokens": 28,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "\"Easter, as you know, will be in two days, and the Son of Man is going to be delivered to be crucified.\"",
+          "latency_ms": 1213.0328750354238,
+          "generated_tokens": 28,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "\"Easter, as you know, will be in two days, and the Son of Man is going to be delivered to be crucified.\"",
+          "latency_ms": 1252.3778750328347,
+          "generated_tokens": 28,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        26,
+        2
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_15_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And by the desire of all the people, the feast went on for another seven days, and they kept the seven days with joy.",
+      "reference": "Y toda aquella multitud determinó que celebrasen otros siete días; y celebraron otros siete días con alegría.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 11851,
+      "runs": [
+        {
+          "text": "Y por el deseo de todo el pueblo, la fiesta continuó por siete días más, y celebraron los siete días con gozo.",
+          "latency_ms": 1298.9439590019174,
+          "generated_tokens": 29,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y por el deseo de todo el pueblo, la fiesta continuó por siete días más, y celebraron los siete días con gozo.",
+          "latency_ms": 1287.4719169922173,
+          "generated_tokens": 29,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y por el deseo de todo el pueblo, la fiesta continuó por siete días más, y celebraron los siete días con gozo.",
+          "latency_ms": 1309.3449160223827,
+          "generated_tokens": 29,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "ii chronicles",
+        30,
+        23
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_15_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Y toda aquella multitud determinó que celebrasen otros siete días; y celebraron otros siete días con alegría.",
+      "reference": "And the whole assembly took counsel to keep other seven days: and they kept other seven days with gladness.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 11851,
+      "runs": [
+        {
+          "text": "And all that multitude determined that they celebrate for seven more days; and they celebrated for seven more days with joy.",
+          "latency_ms": 1112.8548340057023,
+          "generated_tokens": 24,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And all that multitude determined that they celebrate for seven more days; and they celebrated for seven more days with joy.",
+          "latency_ms": 1116.3427910069004,
+          "generated_tokens": 24,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And all that multitude determined that they celebrate for seven more days; and they celebrated for seven more days with joy.",
+          "latency_ms": 1132.933916989714,
+          "generated_tokens": 24,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "ii chronicles",
+        30,
+        23
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_16_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "`Remember that which Amalek hath done to thee in the way, in your going out from Egypt,",
+      "reference": "Acuérdate de lo que te hizo Amalec en el camino, cuando salisteis de Egipto:",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 5565,
+      "runs": [
+        {
+          "text": "Recuerda lo que Amalec te hizo en el camino, al salir de Egipto.",
+          "latency_ms": 1043.1087500182912,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Recuerda lo que Amalec te hizo en el camino, al salir de Egipto.",
+          "latency_ms": 1017.4809590098448,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Recuerda lo que Amalec te hizo en el camino, al salir de Egipto.",
+          "latency_ms": 1021.7282089870423,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "deuteronomy",
+        25,
+        17
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_16_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "El sacerdote recibirá el canasto de tu mano y lo pondrá delante del altar de Yahvé, tu Dios.",
+      "reference": "And the priest shall take the basket out of thine hand, and set it down before the altar of the Lord thy God.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 5565,
+      "runs": [
+        {
+          "text": "The priest will receive the basket from your hand and place it before the altar of Yahweh, your God.",
+          "latency_ms": 1131.384500011336,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "The priest will receive the basket from your hand and place it before the altar of Yahweh, your God.",
+          "latency_ms": 1148.091790964827,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "The priest will receive the basket from your hand and place it before the altar of Yahweh, your God.",
+          "latency_ms": 1064.4021249609068,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "deuteronomy",
+        26,
+        4
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_17_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Building up Zion with blood, And Jerusalem with iniquity.",
+      "reference": "Que edificáis á Sión con sangre, y á Jerusalem con injusticia;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 22619,
+      "runs": [
+        {
+          "text": "Edificando Sion con sangre, Y Jerusalén con iniquidad.",
+          "latency_ms": 876.8102500471286,
+          "generated_tokens": 16,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Edificando Sion con sangre, Y Jerusalén con iniquidad.",
+          "latency_ms": 884.244957996998,
+          "generated_tokens": 16,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Edificando Sion con sangre, Y Jerusalén con iniquidad.",
+          "latency_ms": 883.8934170198627,
+          "generated_tokens": 16,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "micah",
+        3,
+        10
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_17_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Que edificáis á Sión con sangre, y á Jerusalem con injusticia;",
+      "reference": "They build up Zion with blood, and Jerusalem with iniquity.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 22619,
+      "runs": [
+        {
+          "text": "That you build Zion with blood, and Jerusalem with injustice;",
+          "latency_ms": 802.7081660111435,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "That you build Zion with blood, and Jerusalem with injustice;",
+          "latency_ms": 758.2330000004731,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "That you build Zion with blood, and Jerusalem with injustice;",
+          "latency_ms": 774.8350410256535,
+          "generated_tokens": 13,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "micah",
+        3,
+        10
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_18_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "He took them and sent them over the stream with all he had.",
+      "reference": "Tomólos pues, y pasólos el arroyo, é hizo pasar lo que tenía.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 952,
+      "runs": [
+        {
+          "text": "Los tomó y los envió al otro lado del arroyo con todo lo que tenía.",
+          "latency_ms": 975.059541000519,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Los tomó y los envió al otro lado del arroyo con todo lo que tenía.",
+          "latency_ms": 1003.6039160331711,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Los tomó y los envió al otro lado del arroyo con todo lo que tenía.",
+          "latency_ms": 970.0332919601351,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "genesis",
+        32,
+        23
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_18_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Tomólos pues, y pasólos el arroyo, é hizo pasar lo que tenía.",
+      "reference": "And he took them, and sent them over the brook, and sent over that he had.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 952,
+      "runs": [
+        {
+          "text": "So he took them, and he passed them across the stream, and he made pass what he had.",
+          "latency_ms": 1089.298749982845,
+          "generated_tokens": 22,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "So he took them, and he passed them across the stream, and he made pass what he had.",
+          "latency_ms": 1090.914459025953,
+          "generated_tokens": 22,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "So he took them, and he passed them across the stream, and he made pass what he had.",
+          "latency_ms": 1071.4201250229962,
+          "generated_tokens": 22,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "genesis",
+        32,
+        23
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_19_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And the Lord your God will give to you and to your seed a circumcision of the heart, so that, loving him with all your heart and all your soul, you may have life.",
+      "reference": "Y circuncidará Jehová tu Dios tu corazón, y el corazón de tu simiente, para que ames á Jehová tu Dios con todo tu corazón y con toda tu alma, á fin de que tú vivas.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 5715,
+      "runs": [
+        {
+          "text": "Y el Señor tu Dios te dará a ti y a tu descendencia una circuncisión del corazón, para que, amándolo con todo tu corazón y con toda tu alma, tengas vida.",
+          "latency_ms": 1775.0671670073643,
+          "generated_tokens": 40,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y el Señor tu Dios te dará a ti y a tu descendencia una circuncisión del corazón, para que, amándolo con todo tu corazón y con toda tu alma, tengas vida.",
+          "latency_ms": 1726.918125001248,
+          "generated_tokens": 40,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y el Señor tu Dios te dará a ti y a tu descendencia una circuncisión del corazón, para que, amándolo con todo tu corazón y con toda tu alma, tengas vida.",
+          "latency_ms": 1782.4874999932945,
+          "generated_tokens": 40,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "deuteronomy",
+        30,
+        6
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_19_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "No está en el cielo, de suerte que puedas decir: ‘¿Quién subirá por nosotros al cielo para que nos la traiga y nos la enseñe, y nosotros la pongamos por obra?’",
+      "reference": "It is not in heaven, that thou shouldest say, Who shall go up for us to heaven, and bring it unto us, that we may hear it, and do it?",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 5715,
+      "runs": [
+        {
+          "text": "It is not in heaven, luckily you can say: 'Who will go up for us to heaven to bring it to us and show it to us, so that we may put it into practice?'",
+          "latency_ms": 1740.5457090353593,
+          "generated_tokens": 41,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "It is not in heaven, luckily you can say: 'Who will go up for us to heaven to bring it to us and show it to us, so that we may put it into practice?'",
+          "latency_ms": 1693.9815829973668,
+          "generated_tokens": 41,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "It is not in heaven, luckily you can say: 'Who will go up for us to heaven to bring it to us and show it to us, so that we may put it into practice?'",
+          "latency_ms": 1692.7713750046678,
+          "generated_tokens": 41,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "deuteronomy",
+        30,
+        12
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_20_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And he arose, and departed to his house.",
+      "reference": "Entonces él se levantó y se fué á su casa.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 23387,
+      "runs": [
+        {
+          "text": "Y se levantó y se fue a su casa.",
+          "latency_ms": 782.0252910023555,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y se levantó y se fue a su casa.",
+          "latency_ms": 782.9331250395626,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y se levantó y se fue a su casa.",
+          "latency_ms": 764.389666961506,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        9,
+        7
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_20_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Entonces él se levantó y se fué á su casa.",
+      "reference": "And he arose, and departed to his house.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 23387,
+      "runs": [
+        {
+          "text": "So he got up and went to his house.",
+          "latency_ms": 671.2389170425013,
+          "generated_tokens": 11,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "So he got up and went to his house.",
+          "latency_ms": 712.85374998115,
+          "generated_tokens": 11,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "So he got up and went to his house.",
+          "latency_ms": 711.4750000182539,
+          "generated_tokens": 11,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        9,
+        7
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_21_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And he arose, and departed to his house.",
+      "reference": "Entonces él se levantó y se fué á su casa.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 23387,
+      "runs": [
+        {
+          "text": "Y se levantó y se fue a su casa.",
+          "latency_ms": 782.9052499728277,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y se levantó y se fue a su casa.",
+          "latency_ms": 755.2087499643676,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y se levantó y se fue a su casa.",
+          "latency_ms": 807.036749960389,
+          "generated_tokens": 12,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        9,
+        7
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_21_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Entonces él se levantó y se fué á su casa.",
+      "reference": "And he arose, and departed to his house.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 23387,
+      "runs": [
+        {
+          "text": "So he got up and went to his house.",
+          "latency_ms": 707.9784999950789,
+          "generated_tokens": 11,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "So he got up and went to his house.",
+          "latency_ms": 664.9497500038706,
+          "generated_tokens": 11,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "So he got up and went to his house.",
+          "latency_ms": 647.8985829744488,
+          "generated_tokens": 11,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        9,
+        7
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_22_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And he stayeth yet other seven days, and addeth to send forth the dove from the ark;",
+      "reference": "Y esperó aún otros siete días, y volvió á enviar la paloma fuera del arca.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 194,
+      "runs": [
+        {
+          "text": "Y se queda siete días más, y añade para enviar la paloma del arca;",
+          "latency_ms": 986.6624170099385,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y se queda siete días más, y añade para enviar la paloma del arca;",
+          "latency_ms": 1015.7979169744067,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y se queda siete días más, y añade para enviar la paloma del arca;",
+          "latency_ms": 955.1217919797637,
+          "generated_tokens": 19,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "genesis",
+        8,
+        10
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_22_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Y esperó aún otros siete días, y volvió á enviar la paloma fuera del arca.",
+      "reference": "And he stayed yet other seven days; and again he sent forth the dove out of the ark;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 194,
+      "runs": [
+        {
+          "text": "And he waited another seven days, and sent the dove out of the ark again.",
+          "latency_ms": 958.6532080429606,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And he waited another seven days, and sent the dove out of the ark again.",
+          "latency_ms": 934.0062079718336,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "And he waited another seven days, and sent the dove out of the ark again.",
+          "latency_ms": 954.1429580422118,
+          "generated_tokens": 18,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "genesis",
+        8,
+        10
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_23_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "And in the evening, at sundown, they took to him all who were diseased, and those who had evil spirits.",
+      "reference": "Y cuando fué la tarde, luego que el sol se puso, traían á él todos los que tenían mal, y endemoniados;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 24248,
+      "runs": [
+        {
+          "text": "Y por la tarde, al atardecer, le trajeron todos los enfermos y los que tenían espíritus malignos.",
+          "latency_ms": 1210.227291972842,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y por la tarde, al atardecer, le trajeron todos los enfermos y los que tenían espíritus malignos.",
+          "latency_ms": 1213.0324589670636,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Y por la tarde, al atardecer, le trajeron todos los enfermos y los que tenían espíritus malignos.",
+          "latency_ms": 1194.7835839819163,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "mark",
+        1,
+        32
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_23_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Por tanto, así dice, Yahvé, el Señor: He aquí que haré venir sobre ti la espada, y exterminaré en ti hombres y bestias.",
+      "reference": "Therefore thus saith the Lord God; Behold, I will bring a sword upon thee, and cut off man and beast out of thee.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 24248,
+      "runs": [
+        {
+          "text": "Therefore, thus says Yahweh, the Lord: Behold, I will bring the sword upon you, and I will exterminate men and beasts in you.",
+          "latency_ms": 1365.1057910174131,
+          "generated_tokens": 32,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Therefore, thus says Yahweh, the Lord: Behold, I will bring the sword upon you, and I will exterminate men and beasts in you.",
+          "latency_ms": 1432.7654170338064,
+          "generated_tokens": 32,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Therefore, thus says Yahweh, the Lord: Behold, I will bring the sword upon you, and I will exterminate men and beasts in you.",
+          "latency_ms": 1405.9142079786398,
+          "generated_tokens": 32,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "ezekiel",
+        29,
+        8
+      ],
+      "reference_translation": "KJV"
+    },
+    {
+      "id": "verse_24_en",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source": "Thou hast turned my mourning to dancing for me, Thou hast loosed my sackcloth, And girdest me <FI>with<Fi> joy.",
+      "reference": "Has tornado mi endecha en baile; desataste mi saco, y ceñísteme de alegría.",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 14331,
+      "runs": [
+        {
+          "text": "Has cambiado mi luto por danza para mí, has quitado mi cilicio, y me vistes de gozo.",
+          "latency_ms": 1221.6713749803603,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Has cambiado mi luto por danza para mí, has quitado mi cilicio, y me vistes de gozo.",
+          "latency_ms": 1203.002541034948,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "Has cambiado mi luto por danza para mí, has quitado mi cilicio, y me vistes de gozo.",
+          "latency_ms": 1196.0086249746382,
+          "generated_tokens": 26,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "psalms",
+        30,
+        11
+      ],
+      "reference_translation": "SpaRV"
+    },
+    {
+      "id": "verse_24_es",
+      "source_lang": "es",
+      "target_lang": "en",
+      "source": "Has tornado mi endecha en baile; desataste mi saco, y ceñísteme de alegría.",
+      "reference": "Thou hast turned for me my mourning into dancing: thou hast put off my sackcloth, and girded me with gladness;",
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 14331,
+      "runs": [
+        {
+          "text": "You have tornado my right hand in dance; you have unleashed my sack, and girded me with joy.",
+          "latency_ms": 1082.514000008814,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "You have tornado my right hand in dance; you have unleashed my sack, and girded me with joy.",
+          "latency_ms": 1074.2960829520598,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "You have tornado my right hand in dance; you have unleashed my sack, and girded me with joy.",
+          "latency_ms": 1083.0520000308752,
+          "generated_tokens": 23,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "psalms",
+        30,
+        11
+      ],
+      "reference_translation": "KJV"
+    }
+  ],
+  "human_review": "pending",
+  "completed": true,
+  "resolved_model": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+  "peak_metal_bytes": 6760112944,
+  "peak_rss_bytes": 3679256576,
+  "original_manifest_sha256": "b9a3e6d03c34a1832a21a5be8604f31b93b826a32360e74c7652625308d0adf6",
+  "source_run_sha256": "5d812c260fcbd798d3d0abac3a00b6b66e11cde4702a821551740bed41650c9e"
+}

@@ -1,5 +1,12 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
+> **Current Mac work:** [v2026.14 implementation status](docs/mac_implementation_status.md),
+> [evaluation definitions and reports](docs/evaluation/README.md), and
+> [reproducible packaging/setup](docs/packaging/macos.md). Use the selected
+> environment and cached MLX model resolver; do not recreate working `stt_env`.
+> New latency uses captured speech end to payload readiness and visible-browser
+> acknowledgments. Legacy processing timings cannot establish the sub-second goal.
+
 > **Machine:** M3 Pro MacBook (Mac15,6), 18GB unified memory, 12-core CPU (6P+6E), 18-core GPU, Metal 4, MLX acceleration
 > **Role:** Inference, live demos, quality monitoring, browser displays, A/B testing
 > **Parent doc:** [`CLAUDE.md`](./CLAUDE.md)
