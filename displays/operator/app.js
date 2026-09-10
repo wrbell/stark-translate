@@ -319,7 +319,7 @@
       ? `${Math.round(lat.total_ms_p50)} / ${Math.round(lat.total_ms_p95)}` : "— / —";
     metricConfidenceEl.textContent = lat.confidence_mean != null ? lat.confidence_mean.toFixed(2) : "—";
     metricLatencyEl.title = lat.basis === "speech_end_to_final_ms"
-      ? "Speech end to final caption" : "Historical pipeline timing; not speech-end latency";
+      ? "Estimated speech end to final payload readiness (server); browser display timing is separate" : "Historical pipeline timing; not speech-end latency";
     drawSparkline(latencySpark, latencyHistory, { color: "#2f6b1a", fill: "rgba(47,107,26,0.08)" });
     drawSparkline(confidenceSpark, confidenceHistory, { color: "#8a4500", min: 0, max: 1 });
 

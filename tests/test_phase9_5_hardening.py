@@ -70,7 +70,8 @@ class TestLogRotation:
 
 
 class TestLifespanShutdown:
-    def test_shutdown_stops_running_session(self, tmp_path):
+    @pytest.mark.parametrize("ready", [False, True])
+    def test_shutdown_stops_running_session(self, tmp_path, ready):
         """When the app is torn down, the lifespan context stops the pipeline.
 
         Use a stub project root with a no-op dry_run_ab so the subprocess
@@ -82,11 +83,14 @@ class TestLifespanShutdown:
         from operator_app import pipeline_manager
         from operator_app.main import app
 
-        # Tiny stub that just sleeps until SIGTERM.
+        # Both model loading and a ready pipeline must stop at app shutdown.
         (tmp_path / "metrics").mkdir()
         stub = tmp_path / "dry_run_ab.py"
         stub.write_text(
             "import signal, sys, time\n"
+            "from pathlib import Path\n"
+            "session = sys.argv[sys.argv.index('--session-id') + 1]\n"
+            f"if {ready!r}: Path(f'metrics/ab_metrics_{{session}}.csv').write_text('chunk_id,stt_latency_ms\\n')\n"
             "stopped = {'flag': False}\n"
             "def _stop(s, f): stopped['flag'] = True\n"
             "signal.signal(signal.SIGTERM, _stop)\n"
@@ -104,14 +108,16 @@ class TestLifespanShutdown:
         with TestClient(app) as client:
             resp = client.post("/api/session/start", json={"lang": "en"})
             assert resp.status_code == 200
-            # Wait for running state
+            expected_state = "running" if ready else "starting"
+            # Wait for the actual child and its expected readiness state.
             import time
 
             for _ in range(40):
-                if client.get("/api/session/status").json()["state"] == "running":
+                snapshot = client.get("/api/session/status").json()
+                if snapshot["state"] == expected_state and snapshot.get("pid"):
                     break
                 time.sleep(0.1)
-            assert client.get("/api/session/status").json()["state"] == "running"
+            assert client.get("/api/session/status").json()["state"] == expected_state
         # Exiting the TestClient context fires app shutdown -> lifespan -> stop().
         assert runner.status().state == "idle"
 

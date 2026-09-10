@@ -120,7 +120,6 @@ class PipelineRunner:
 
     PROCESS_POLL_INTERVAL_S = 0.5
     CSV_TAIL_INTERVAL_S = 0.5
-    STARTUP_GRACE_S = 3.0  # how long we wait for the CSV file to appear
 
     def __init__(self, project_root: Path | None = None) -> None:
         self._lock = threading.RLock()
@@ -342,8 +341,7 @@ class PipelineRunner:
                         )
                     self._proc = proc
                     self._status.pid = proc.pid
-                    self._status.state = "running"
-                    self._status.last_event = "subprocess running"
+                    self._status.last_event = "loading models; waiting for pipeline metrics header"
             except OSError as exc:
                 with self._lock:
                     self._status.state = "error"
@@ -388,7 +386,6 @@ class PipelineRunner:
 
         collector = get_collector()
         csv_path = Path(self._status.csv_path) if self._status.csv_path else None
-        deadline = time.time() + self.STARTUP_GRACE_S
         f = None
         reader = None
         header: list[str] | None = None
@@ -399,15 +396,27 @@ class PipelineRunner:
                     f = csv_path.open("r")
                     reader = csv.reader(f)
                 if reader is not None and header is None:
-                    try:
-                        header = next(reader)
-                    except StopIteration:
-                        header = None
-
-                if f is None and time.time() > deadline:
-                    # CSV never appeared — pipeline still running but not emitting.
-                    # Keep polling but stop logging the warning every loop.
-                    pass
+                    # init_csv() runs after model loading. File creation alone is
+                    # insufficient: the producer may not have flushed its header.
+                    offset = f.tell()
+                    line = f.readline()
+                    if not line.endswith("\n"):
+                        f.seek(offset)
+                    else:
+                        candidate = next(csv.reader([line]))
+                        if "chunk_id" in candidate and any(
+                            key in candidate for key in ("stt_latency_ms", "stt_ms", "e2e_latency_ms", "total_ms")
+                        ):
+                            header = candidate
+                            with self._lock:
+                                if (
+                                    self._status.session_id == session_id
+                                    and self._status.state == "starting"
+                                    and not self._stop_event.is_set()
+                                    and proc.poll() is None
+                                ):
+                                    self._status.state = "running"
+                                    self._status.last_event = "pipeline ready; metrics header received"
 
                 if reader is not None and header is not None:
                     advanced = False
@@ -430,7 +439,6 @@ class PipelineRunner:
                     f.close()
                 except Exception:
                     pass
-            del session_id  # quiet unused-var lint
 
 
 class SessionAlreadyRunningError(RuntimeError):

@@ -19,11 +19,22 @@ def _reset_runner():
 
 
 @pytest.fixture
-def client():
+def client(tmp_path):
     from fastapi.testclient import TestClient
 
+    from operator_app import pipeline_manager
     from operator_app.main import app
 
+    # API lifecycle tests must never launch the real inference pipeline.
+    (tmp_path / "metrics").mkdir()
+    (tmp_path / "dry_run_ab.py").write_text(
+        "import sys, time\n"
+        "from pathlib import Path\n"
+        "session = sys.argv[sys.argv.index('--session-id') + 1]\n"
+        "Path(f'metrics/ab_metrics_{session}.csv').write_text('chunk_id,stt_latency_ms\\n')\n"
+        "while True: time.sleep(0.1)\n"
+    )
+    pipeline_manager._runner = pipeline_manager.PipelineRunner(project_root=tmp_path)
     return TestClient(app)
 
 
@@ -116,7 +127,7 @@ class TestSessionStart:
         assert resp.status_code == 200
         body = resp.json()
         assert body["state"] in ("starting", "running")
-        # Give the thread a moment to flip to "running" via the placeholder loop
+        # Wait for the stub to flush the real readiness header.
         for _ in range(20):
             status = client.get("/api/session/status").json()
             if status["state"] == "running":

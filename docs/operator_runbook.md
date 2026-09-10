@@ -72,7 +72,7 @@ In the **Session** panel, the **Mic** dropdown lists every input device. Pick th
 ### Start the session
 
 1. Confirm **Language direction**: usually `EN → ES` for the speaker.
-2. Click **Start session**. The state pill at the top right turns yellow (`STARTING`) then green (`RUNNING`).
+2. Click **Start session**. The state pill stays yellow (`STARTING`) while models load, then turns green (`RUNNING`) when the pipeline writes its metrics header. **Stop** remains available during loading; Pause and language switching become available after startup.
 3. Wait for model startup and speak a short test sentence. `RUNNING` means the subprocess launched; the first subtitle confirms audio and inference are ready. A cold start can take longer than later sessions.
 
 ### Watch the dashboard while the speaker talks

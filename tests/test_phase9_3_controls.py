@@ -140,8 +140,24 @@ class TestPipelineRunnerSubprocess:
 
         runner = PipelineRunner(project_root=stub_pipeline)
         snap = runner.start(SessionConfig(lang="en"))
-        assert snap.state in ("starting", "running")
-        # Wait for state to flip to running (subprocess actually launched)
+        assert snap.state == "starting"
+        # A live subprocess has not finished model initialization yet.
+        for _ in range(100):
+            if runner.status().pid is not None:
+                break
+            time.sleep(0.01)
+        assert runner.status().pid is not None
+        assert runner.status().state == "starting"
+        assert "loading models" in runner.status().last_event
+        from operator_app.pipeline_manager import InvalidStateError
+
+        with pytest.raises(InvalidStateError):
+            runner.pause()
+        # A partially written header must not announce readiness.
+        Path(snap.csv_path).write_text("chunk_id,stt_latency_ms")
+        time.sleep(0.55)
+        assert runner.status().state == "starting"
+        # Wait for the actual pipeline header to be flushed after startup.
         for _ in range(40):
             snap = runner.status()
             if snap.state == "running":
@@ -150,6 +166,24 @@ class TestPipelineRunnerSubprocess:
         assert snap.state == "running", f"state={snap.state}, last_event={snap.last_event}"
         assert snap.pid is not None
         runner.stop(timeout_s=5)
+
+    def test_stop_during_model_loading_terminates_child(self, stub_pipeline):
+        from operator_app.pipeline_manager import PipelineRunner, SessionConfig
+
+        runner = PipelineRunner(project_root=stub_pipeline)
+        runner.start(SessionConfig())
+        try:
+            for _ in range(100):
+                if runner.status().pid is not None:
+                    break
+                time.sleep(0.01)
+            assert runner.status().state == "starting"
+            child = runner._proc
+            assert child is not None and child.poll() is None
+            assert runner.stop(timeout_s=5).state == "idle"
+            assert child.poll() is not None
+        finally:
+            runner.stop(timeout_s=5)
 
     def test_stop_terminates_subprocess(self, stub_pipeline):
         from operator_app.pipeline_manager import PipelineRunner, SessionConfig

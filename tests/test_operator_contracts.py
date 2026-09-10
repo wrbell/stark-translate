@@ -76,3 +76,33 @@ def test_summary_uses_real_cli_positional_input(tmp_path):
     assert task.return_code == 1
     assert "No transcript content found" in task.error
     assert "unrecognized arguments" not in task.error
+
+
+def test_startup_buttons_allow_stop_but_not_pause():
+    import shutil
+    import subprocess
+
+    import pytest
+
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node is needed to execute the operator UI")
+    script = r"""
+const fs = require('fs'), vm = require('vm'), assert = require('assert');
+const source = fs.readFileSync('displays/operator/app.js', 'utf8');
+const begin = source.indexOf('  function updateButtonsForState(');
+const end = source.indexOf('  // ---- preflight ----', begin);
+const context = {preflightOk: true, startBtn: {}, stopBtn: {}, pauseBtn: {}, resumeBtn: {}, flipBtn: {}, fallbackBtn: {}};
+vm.createContext(context);
+vm.runInContext(source.slice(begin, end), context);
+context.updateButtonsForState('starting');
+assert.strictEqual(context.startBtn.disabled, true);
+assert.strictEqual(context.stopBtn.disabled, false);
+assert.strictEqual(context.pauseBtn.disabled, true);
+assert.strictEqual(context.flipBtn.disabled, true);
+context.updateButtonsForState('running');
+assert.strictEqual(context.pauseBtn.disabled, false);
+context.updateButtonsForState('stopping');
+assert.strictEqual(context.stopBtn.disabled, true);
+"""
+    subprocess.run([node, "-e", script], cwd=Path(__file__).resolve().parents[1], check=True, timeout=10)
