@@ -309,7 +309,10 @@ def api_session_start(req: StartRequest, runner: PipelineRunner = Depends(get_ru
 
 @app.post("/api/session/stop")
 def api_session_stop(runner: PipelineRunner = Depends(get_runner)) -> dict:
-    snap = runner.stop()
+    try:
+        snap = runner.stop()
+    except InvalidStateError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return snap.to_dict()
 
 

@@ -30,6 +30,7 @@ import time
 import weakref
 from dataclasses import dataclass, field
 from datetime import datetime
+from functools import wraps
 from pathlib import Path
 
 from operator_app.processes import cleanup_children, descendants
@@ -129,6 +130,24 @@ class SessionStatus:
         return {k: v for k, v in self.__dict__.items() if v is not None or k == "state"}
 
 
+def _guarded_control(method):
+    """Serialize controls without letting a queued request adopt a new session."""
+
+    @wraps(method)
+    def guarded(self, *args, **kwargs):
+        # Never hold the state lock while waiting for the operation lock: the
+        # subprocess watcher needs it while Stop joins that watcher thread.
+        with self._lock:
+            generation = self._generation
+        with self._control_lock:
+            with self._lock:
+                if self._generation != generation:
+                    raise InvalidStateError("Session changed while this control was waiting; refresh before retrying")
+            return method(self, *args, **kwargs)
+
+    return guarded
+
+
 class PipelineRunner:
     """Owns a single ``dry_run_ab`` subprocess at a time.
 
@@ -141,6 +160,8 @@ class PipelineRunner:
     def __init__(self, project_root: Path | None = None) -> None:
         _instances.add(self)
         self._lock = threading.RLock()
+        self._control_lock = threading.RLock()
+        self._generation = 0
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
         self._status = SessionStatus(state="idle")
@@ -156,7 +177,7 @@ class PipelineRunner:
     # -- public API -----------------------------------------------------------
 
     def start(self, config: SessionConfig) -> SessionStatus:
-        with self._lock:
+        with self._control_lock, self._lock:
             if (
                 self._status.state in ("starting", "running", "paused", "stopping")
                 or (self._thread is not None and self._thread.is_alive())
@@ -165,6 +186,7 @@ class PipelineRunner:
                 raise SessionAlreadyRunningError(self._status.session_id)
 
             self._lease_token = self._lease.acquire("live session")
+            self._generation += 1
             self._owned_children = {}
             self._stop_event.clear()
             self._proc = None
@@ -204,6 +226,7 @@ class PipelineRunner:
                     logger.warning("failed to bind live diarization watcher", exc_info=True)
             return self._snapshot()
 
+    @_guarded_control
     def stop(self, timeout_s: float = 10.0) -> SessionStatus:
         with self._lock:
             if self._status.state == "idle":
@@ -265,6 +288,7 @@ class PipelineRunner:
                 self._status.pid = None
             return self._snapshot()
 
+    @_guarded_control
     def pause(self) -> SessionStatus:
         with self._lock:
             if self._status.state != "running":
@@ -273,6 +297,7 @@ class PipelineRunner:
             self._status.last_event = "Pause requested; waiting for pipeline acknowledgment"
             return self._snapshot()
 
+    @_guarded_control
     def resume(self) -> SessionStatus:
         with self._lock:
             if self._status.state != "paused":
@@ -281,6 +306,7 @@ class PipelineRunner:
             self._status.last_event = "Resume requested; waiting for pipeline acknowledgment"
             return self._snapshot()
 
+    @_guarded_control
     def restart_with(self, config: SessionConfig) -> SessionStatus:
         """Stop the current session and start a new one with the new config."""
         if self._status.state != "idle":
