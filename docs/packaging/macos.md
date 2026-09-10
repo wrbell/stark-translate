@@ -80,3 +80,12 @@ Build wheel and sdist with `python -m build`; verify both with
 Build a complete source ZIP with `python tools/release_artifacts.py mac`.
 Release workflows reject tag/project/Briefcase version mismatches and include
 CLI, operator UI, tools, workers, displays, model manifest and launch scripts.
+
+For a Mac installation check, use a separate virtual environment and install the
+built wheel with `[mlx,eval,diarization]` extras, then run `python -m pip check`.
+From a directory outside the checkout, run `python -m tools.installed_smoke` using
+that environment's interpreter. The smoke checks installed package provenance,
+the health and operator routes, the review JavaScript, and required runtime files.
+Import the selected runtime dependencies with `HF_HUB_OFFLINE=1` to verify native
+library loading before a separate model/inference check. Rebuild and reinstall
+the wheel after the final source/version changes so the check covers the release artifact.

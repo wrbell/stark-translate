@@ -122,7 +122,9 @@ def completion_metadata(model_ids: dict[str, str | None], root: Path) -> dict:
     for role, model_id in model_ids.items():
         if not model_id:
             continue
-        entry: dict = next((v for k, v in manifest.items() if model_id in {k, v.get("repo_id"), *v.get("aliases", [])}), {})
+        entry: dict = next(
+            (v for k, v in manifest.items() if model_id in {k, v.get("repo_id"), *v.get("aliases", [])}), {}
+        )
         item = {"requested_id": model_id, "manifest_revision": entry.get("revision"), "resolved_revision": None}
         try:
             resolved = resolve_model_path(model_id, project_root=root, local_only=True)

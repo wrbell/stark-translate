@@ -18,8 +18,21 @@ def main() -> None:
     package = Path(operator_app.__file__).resolve()
     if not package.is_relative_to(Path(sys.prefix).resolve()):
         raise RuntimeError(f"Smoke imported checkout instead of installed wheel: {package}")
+    runtime_root = package.parent.parent
+    runtime_files = (
+        "dry_run_ab.py",
+        "workers.py",
+        "tools/session_lifecycle.py",
+        "displays/audience_display.html",
+        "displays/caption_telemetry.js",
+        "displays/display_connection.js",
+        "displays/operator/review.js",
+    )
+    missing = [name for name in runtime_files if not (runtime_root / name).is_file()]
+    if missing:
+        raise RuntimeError(f"Installed wheel is missing runtime files: {missing}")
     with TestClient(app) as client:
-        responses = {path: client.get(path).status_code for path in ("/healthz", "/operator/")}
+        responses = {path: client.get(path).status_code for path in ("/healthz", "/operator/", "/operator/review.js")}
     if not all(status == 200 for status in responses.values()):
         raise RuntimeError(f"Installed operator endpoints failed: {responses}")
     manifest = load_lockfile()
@@ -31,6 +44,7 @@ def main() -> None:
                 "http": responses,
                 "model_entries": len(manifest["models"]),
                 "package": str(package),
+                "runtime_files": len(runtime_files),
             }
         )
     )
