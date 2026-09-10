@@ -68,6 +68,7 @@ optional evaluation/diarization dependencies.
 # Mac (Apple Silicon)
 brew install ffmpeg portaudio
 python3.11 -m venv venv
+venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
 venv/bin/python -m pip install '.[mlx]'
 venv/bin/stark-translate setup --backend mlx    # Mac defaults, both languages; --include e2b tts translategemma
 venv/bin/stark-translate doctor --backend mlx --lang en
@@ -75,15 +76,20 @@ VENV="$PWD/venv" ./run_operator.sh              # Open /operator/ on port 9000
 
 # NVIDIA (Linux)
 python3.11 -m venv venv
+venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
 venv/bin/python -m pip install '.[cuda]'
 venv/bin/stark-translate setup --backend cuda
 venv/bin/stark-translate operator
 
-# Lite (CPU-only or RTX 2070 church PC; Torch-free runtime, separate venv)
-python3.11 -m venv .venv-lite && .venv-lite/bin/python -m pip install '.[lite-cpu,tts]'   # or '.[lite-cuda,tts]'
-python3.11 -m venv .venv-lite-build && .venv-lite-build/bin/python -m pip install '.[lite-build]'
+# Lite (CPU-only; Torch-free runtime, separate venv)
+python3.11 -m venv .venv-lite
+.venv-lite/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
+.venv-lite/bin/python -m pip install '.[lite-cpu,tts]'
+python3.11 -m venv .venv-lite-build
+.venv-lite-build/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
+.venv-lite-build/bin/python -m pip install '.[lite-build]'
 .venv-lite/bin/stark-translate-lite setup --models-dir /absolute/lite-models \
-  --converter-python /absolute/.venv-lite-build/bin/python --include tts       # --profile lite-cuda-8gb on a 2070
+  --converter-python /absolute/.venv-lite-build/bin/python --include tts
 STARK_MODELS_DIR=/absolute/lite-models .venv-lite/bin/stark-translate-lite doctor --json
 STARK_MODELS_DIR=/absolute/lite-models .venv-lite/bin/stark-translate-lite operator
 ```
@@ -91,7 +97,8 @@ STARK_MODELS_DIR=/absolute/lite-models .venv-lite/bin/stark-translate-lite opera
 `stark-translate-lite` defaults to the `lite-cpu` profile (Whisper small CT2 int8 + Marian
 CT2 finals); `--profile lite-cpu-quality` / `lite-cuda-8gb` add Gemma 4 E2B through a
 session-owned `llama-server`. Profiles never auto-upgrade; contract and evidence in
-[`docs/lite_profiles.md`](docs/lite_profiles.md).
+[`docs/lite_profiles.md`](docs/lite_profiles.md), including the complete RTX 2070
+installation recipe with the same profile selected for setup, doctor and operator.
 
 `setup` downloads the pinned models from `models.lock.json` and builds the Marian CT2
 int8 artifacts; existing `adapters/marian_ct2/<dir>/active` directories are reused
