@@ -83,6 +83,17 @@ Client receipt-to-render is local browser overhead; speech-end-to-ack is an uppe
 bound including return-network time. Hidden tabs and accelerated replay cannot
 pass caption-delivery gates. Legacy `e2e_latency_ms` remains processing time.
 
+**Replay-ending interpretation:** the file stream appends virtual silence to let
+pending captions finish. Older raw/harness tables group by the emitted
+`endpoint_reason`; a `silence` row can therefore include an EOF-assisted ending.
+Where `padding_samples` is positive and the timing source is replay, the corrected
+supplemental analysis labels the analytical endpoint separately (for example,
+`silence_replay_tail`). It preserves the original reason and every measurement.
+Use those separate groups for latency decisions; a tail/EOF-final improvement
+alone cannot select an optimization. First previews emitted earlier from real
+recorded audio remain valid preview observations. Archived rows without sufficient
+padding/source metadata cannot be retrospectively certified as natural silence.
+
 [Hindi](mac_v2026_14_hindi/README.md) is an independent offline zero-shot probe
 (`quality --target hi`), with no reference score or live-language integration.
 The [operator rehearsal](mac_v2026_14_rehearsal.md) records actual browser,
