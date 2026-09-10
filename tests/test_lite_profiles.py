@@ -244,3 +244,23 @@ def test_standard_default_preserves_adapter_preference_but_explicit_alias_wins(m
     assert create.call_args.kwargs["model_id"] == ("/cache/stock-turbo" if explicit else None)
     assert create.call_args.kwargs["compute_type"] == "int8"
     assert resolved.call_count == int(explicit)
+
+
+def test_standard_cpu_does_not_require_unused_gemma_or_server(tmp_path, monkeypatch):
+    from operator_app import preflight
+
+    monkeypatch.setattr(preflight, "resolve_marian_ct2", lambda *a, **k: "/cache/marian")
+    lookup = Mock(return_value="/cache/whisper")
+    monkeypatch.setattr(preflight, "resolve_model_path", lookup)
+    result = preflight.check_models(tmp_path, backend="cpu")
+    assert result["status"] == "pass"
+    assert [call.args[0] for call in lookup.call_args_list] == ["whisper-large-v3-turbo"]
+    monkeypatch.setattr(preflight, "check_dependencies", lambda *a, **k: preflight._check("deps", "pass", "ok"))
+    monkeypatch.setattr(preflight, "check_microphone", lambda *a: preflight._check("mic", "pass", "ok"))
+    llama = Mock(side_effect=AssertionError("unused server probed"))
+    monkeypatch.setattr(preflight, "check_llamacpp_server", llama)
+    assert preflight.run_all_checks(tmp_path, backend="cpu", profile="standard")["ok"]
+    llama.assert_not_called()
+    manifest = json.loads((ROOT / "models.lock.json").read_text())["models"]
+    assert "cpu" not in manifest["gemma-4-e2b-it-q4km.gguf"]["required_for"]
+    assert manifest["gemma-4-e2b-it-q4km.gguf"]["optional_group"] == "e2b"

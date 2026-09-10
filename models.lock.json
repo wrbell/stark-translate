@@ -8,9 +8,7 @@
       "url": "https://huggingface.co/wbell7/stark-translate-models/resolve/053575db60e30a0c2152233fda33d1a620e97ce5/gemma-4-e2b-it-q4km-v2026.7-base.gguf",
       "size_bytes": 3427877920,
       "sha256": "62adb571af12205e1e6ce0f2a4bd2835441f3e9a47d782af1539c0bc8831107f",
-      "required_for": [
-        "cpu"
-      ],
+      "required_for": [],
       "filename": "gemma-4-e2b-it-q4km.gguf",
       "comment": "Gemma 4 E2B Q4_K_M GGUF \u2014 production translation model (low-VRAM fallback). v2026.7 base \u2014 no fine-tuning. Custom quant with bf16 PLE preserved.",
       "optional_group": "e2b"

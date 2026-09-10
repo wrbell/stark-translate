@@ -127,8 +127,10 @@ def check_models(
         )
         translation = f"mlx-gemma4-{gemma4_size}" if model_family == "gemma4" else "translategemma-4b-it-mlx"
         names = [stt, translation]
+    elif backend == "cpu":
+        names = ["whisper-large-v3-turbo"]
     else:
-        names = ["whisper-large-v3-turbo", f"gemma-4-{'e2b' if backend == 'cpu' else gemma4_size}-it-q4km.gguf"]
+        names = ["whisper-large-v3-turbo", f"gemma-4-{gemma4_size}-it-q4km.gguf"]
     direction = "es-en" if lang == "es" else "en-es"
     ct2 = resolve_marian_ct2(direction, project_root=project_root, models_dir=models_dir)
     if ct2 is None:
@@ -279,7 +281,7 @@ def run_all_checks(
         check_microphone(input_device),
         check_adapter_manifest(project_root),
     ]
-    if backend in {"cuda", "cpu"}:
+    if backend == "cuda":
         checks.append(check_llamacpp_server(llamacpp_url))
     status_counts = {"pass": 0, "warn": 0, "fail": 0}
     for check in checks:
