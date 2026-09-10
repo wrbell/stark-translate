@@ -2,7 +2,9 @@
 
 This work follows v2026.13 (`09e4679`, PRs #180–191 already merged). Changes are on
 `codex/mac-reliability-roadmap` in separate commits. E4B remains the default;
-the operator has no new model-selection control. MTP remains disabled.
+the operator has no new model-selection control. English STT remains Parakeet;
+Spanish STT remains Whisper. MTP remains disabled. Local validation is progressing;
+v2026.14 publication is pending by the user's choice.
 
 ## Implemented
 
@@ -11,15 +13,22 @@ the operator has no new model-selection control. MTP remains disabled.
 - Capture/sample timing through partials, silence, smart-cut remainders, forced
   endings and EOF. Additive schema 2 fields retain the old CSV column ordering.
 - Visible caption render acknowledgments and delayed, chunk-specific speaker
-  updates. Caption timing excludes TTS; synthesis and playback calls have separate metrics.
+  updates. New sessions clear caption history; same-session reconnects preserve it.
+  Caption timing excludes TTS; synthesis and playback calls have separate metrics.
 - Shared MLX generation/prompt/stop handling, and opt-in idle warmups,
   final-aware partial scheduling, silence thresholds, conservative Marian routing,
   terminology examples and ONNX VAD.
 - Mac-aware model resolution, cached model setup, environment selection, generated
   launchd installation, complete wheel/source ZIP contents and release identity checks.
+  Managed cache markers must match the pinned manifest; explicit user paths remain
+  supported. The default Piper voices match the English/Spanish setup profile.
 - Live and post-session Review, independent transcript/translation approvals,
   local drafts, revision checks, portable audio bundles, direction-aware exports,
   idempotent imports and evaluation isolation.
+- Explicit session completion after worker/diagnostics draining for both SIGINT
+  and SIGTERM. Running, failed and unknown legacy sessions cannot export training
+  data. Completion records process peak RSS/Metal memory and local model provenance,
+  including actual Marian CT2 weight hashes where available.
 
 ## Measurement and data integrity
 
@@ -29,9 +38,26 @@ estimated speech end to final payload readiness. A visible browser's
 `speech_end_to_ack_upper_bound_ms` includes its render and return-network time.
 Neither is interchangeable with archived `e2e_latency_ms` processing times.
 
-The first measured replay exceeds one second; the caption-delivery goal is **not
-yet achieved**. Full paired baselines and bounded experiments are being collected.
-Do not promote experimental settings from an isolated translation measurement.
+All 18 historical real-time baseline replays have completed: E4B/E2B, three repeats,
+two English sermon clips and one separate synthetic Spanish clip. The measured
+caption-delivery goal is **not yet achieved**. Baseline results retain their source
+and configuration cohorts; startup/shutdown and instrumentation revisions during
+that collection must not be pooled into a single claim about the current runtime.
+
+The frozen 48-run English screening matrix is **currently running**: eight
+configurations, both models and three alternating pairs on the same 45-second
+input. It covers the baseline, idle warmups, final-aware partials, 0.4/0.35-second
+silence thresholds, conservative Marian routing, terminology examples and ONNX VAD.
+Partial cadence remains 0.6 seconds. Results and any recommendation remain pending;
+these screens do not replace the longer baseline or natural Spanish validation.
+
+The [translation comparison](evaluation/mac_v2026_14_quality/comparison.md) uses
+identical text inputs and three repeats. E2B's translation-only median is 37–43%
+lower across the tested directions/prompts, with different outputs and fewer
+English-to-Spanish canary passes: 11/18 versus E4B's 13/18 without terminology
+examples, and 14/18 versus 15/18 with them. This is a bounded speed/quality tradeoff,
+not evidence to change the default or a speech-end-to-display result. Bilingual
+meaning and terminology review is still pending.
 
 An existing training export test overwrote the local holdout with two fixtures.
 The export now writes its holdout beside the requested dataset, and the original
@@ -40,14 +66,65 @@ parallel corpus contains known row-ID alignment errors. Evaluation manifest v2
 rebinds references using exact source text and book/chapter/verse; ambiguous items
 have no reference score. Predictions and measured timings were preserved.
 
-## Validated so far
+## Completed validation
 
-Focused operator, timing, review/export, setup and engine regression suites pass.
-The isolated base wheel starts outside the checkout and serves both `/healthz`
-and `/operator/`. The complete MLX/diarization/evaluation extras resolve to the
-verified runtime minor lines without modifying `stt_env`. Mac setup reuses five
-cached default artifacts. Full-suite and final GPU/browser results will be recorded
-after sequential benchmarking finishes.
+- Full CPU suite: **1,722 passed, 2 skipped**, 57.83% coverage against the 50% gate.
+- Cached MLX GPU regression suite: **3 passed**, covering E4B EOS/canary behavior
+  and the worker's first forward pass.
+- Ruff lint/format and mypy pass. Official HTML5 Tidy 5.8.0 reports zero warnings
+  or errors across all five displays; it was built only in the repository cache.
+- CI-configured Bandit passes with zero medium/high findings. An expanded run
+  retaining B615 reports **26 medium unpinned Hugging Face download findings**;
+  this remaining pinning work is not covered by the CI pass. Vulture reports
+  three advisory findings.
+- CI-filtered Mac, Windows and NVIDIA requirement audits report zero known
+  vulnerabilities. This scope does not certify every optional package or model.
+- A preliminary wheel installed in `.cache/package-smoke` starts outside the
+  checkout and serves `/healthz`, `/operator/` and the review script. The full
+  `[mlx,eval,diarization]` extras were **installed**, all 18 runtime import checks
+  passed and `pip check` was clean. Existing `stt_env` was unchanged. Mac setup
+  reused five cached default artifacts with no model downloads. The final
+  v2026.14 wheel/sdist/Mac ZIP rebuild and reinstall await the measured reports
+  and source freeze; the preliminary artifact is not the final release.
+- Independent STT inference completed on 50 English and 11 Spanish saved clips,
+  with no approved human references, so **no WER or natural-audio acceptance claim**
+  is made. Offline Hindi generation completed on both models for 43 English
+  inputs each; Hindi references and human quality review remain absent.
+
+Local evidence is recorded in `.cache/mac-roadmap/validation.json`,
+`.cache/mac-roadmap/full-tests.log`, `.cache/html5-validation/report.json`,
+`.cache/security-audit/` and `.cache/package-artifacts-validation/`.
+
+## Operator rehearsal completed
+
+Three controlled mixed/synthetic sessions completed with exit code zero and
+drained lifecycle markers. These runs used TTS and are explicitly excluded from
+the frozen latency acceptance configurations.
+
+| Session purpose | Final captions | Finals with visible completion acknowledgment | Browser receipt-to-render p50 |
+|---|---:|---:|---:|
+| English hymn, pause/resume and speech | 9 | 8 | 12.2 ms |
+| Synthetic Spanish restart | 1 | 1 | 7.4 ms |
+| English verse cue, speech, Review, Stop and summary | 8 | 8 | 6.9 ms |
+
+The browser figures measure local render overhead only. They do not include
+speech recognition or translation and cannot establish sub-second caption delivery.
+
+Observed checks passed for startup readiness, pause/resume, EN→ES→EN session
+identity, audience reconnect/history reset, visible caption acknowledgments,
+John 3:16 from the production CSV remaining stable across polls, live finalized
+Review, persisted draft notes and selection, audience/review separation, and
+rejection of unapproved exports. No transcript or translation approval was fabricated.
+Per-language TTS device choices persisted; normal Stop drained and marked the
+session complete. The positional summary command worked. An initial summary
+format failure was retained, and the corrected rerun produced one three-sentence
+Spanish translation without alternatives or notes.
+
+Piper synthesized both configured languages and host playback calls completed on
+MacBook Pro Speakers. This validates the built-in output path, not acoustic
+quality/onset or a second physical device. Rehearsal details and limitations are
+in `.cache/mac-roadmap/rehearsal_report.json`; the retained summary failure is
+`.cache/mac-roadmap/summary_format_failure_20260909_211201_787725_en.json`.
 
 ## Explicit pending gates
 
@@ -57,8 +134,13 @@ after sequential benchmarking finishes.
 - Natural two-speaker audio, human speaker-transition labels and the ≤50 ms
   additional final-p95 diarization gate.
 - Bilingual blinded review of meaning errors and terminology preferences.
-- Physical second-output selection, unplug/replug and acoustic playback validation.
-- Full rehearsal with hymns, live pauses, continuous speech and EN↔ES restart.
+- Physical second-output selection, unplug/replug and acoustic playback validation;
+  only the built-in speaker path has been exercised.
+- A service rehearsal with natural bilingual speech, real speaker transitions and
+  church audio hardware. The controlled hymn/pause/restart/Review/Stop rehearsal
+  above does not close those human and device gates.
+- Completion and review of the frozen screening reports, followed by final
+  v2026.14 artifacts and an outside-checkout installation smoke check.
 - PyPI trusted publisher account setup: the browser is signed out and the user
   explicitly chose to leave publishing pending. Required mapping is owner
   `wrbell`, repository `stark-translate`, workflow `pypi.yml`, environment `pypi`.
