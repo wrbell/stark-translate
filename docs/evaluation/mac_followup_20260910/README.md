@@ -20,7 +20,12 @@ no release or package publication is authorized for this follow-up. The
   unknown PortAudio overflow and terminal accounting are separate. Mocked checks
   passed; no additional live reliability certification is claimed.
 
-- [Current source validation](current-source-validation.md): Python 3.11/3.12
+- [Capture repair validation](capture-source-validation.md): full Python 3.11/3.12
+  CI on `f7b959d` passed 2,834 tests plus 20 subtests per interpreter. The installed
+  Lite audit checked 60 dependencies with zero known vulnerabilities; the local
+  project was skipped, `[eval]` was outside that audit and the broader audit job
+  was skipped. All six earlier fixture failures remain recorded.
+- [Earlier source validation](current-source-validation.md): Python 3.11/3.12
   suites and lint passed on `476e349`, including the startup fallback cases.
   Dependency-audit jobs were skipped; no new audit clearance is claimed. The
   separate receipt preserves the earlier failed suite and observation-time records.

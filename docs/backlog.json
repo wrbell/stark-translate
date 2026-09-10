@@ -606,10 +606,11 @@
       "sources": [
         "docs/mac_implementation_status.md",
         ".github/workflows/test.yml",
-        "docs/evaluation/overnight_validation_20260910.json"
+        "docs/evaluation/overnight_validation_20260910.json",
+        "docs/evaluation/mac_followup_20260910/capture-source-validation.md"
       ],
       "acceptance": "Recorded pass/skip/coverage in mac_implementation_status.md above the test.yml coverage gate.",
-      "notes": "Frozen 752ab9a351815feee4b8cd155f732c588cb30a6c passed 2,363 CPU-suite tests with four skips and 63.80% coverage. Three separate real GPU regressions passed in 21.16 s. Ruff/format, mypy engines/settings, widened CI-scope Bandit and all six HTML5 Tidy checks passed. The earlier 2,213-test receipt is historical and must remain unchanged when the current validation companion is refreshed.",
+      "notes": "Frozen 752ab9a351815feee4b8cd155f732c588cb30a6c passed 2,363 CPU-suite tests with four skips and 63.80% coverage. Three separate real GPU regressions passed in 21.16 s. Ruff/format, mypy engines/settings, widened CI-scope Bandit and all six HTML5 Tidy checks passed. The earlier 2,213-test receipt is historical and must remain unchanged when the current validation companion is refreshed. Subsequent capture repair/fake-interface correction passed full f7b959d CI: 2,834 tests, six skips, 20 subtests and 66.49% coverage on both Python 3.11/3.12. Six earlier d7ed43d fixture failures remain preserved. Installed Lite audit covered 60 dependencies with zero known vulnerabilities; [eval] and unchanged broader environments were not cleared.",
       "next_action": "Bind current documentation to the 752 validation receipt. Later docs/workflow tests and final-head CI must have their own identities; repeat runtime checks only when subsequent changes warrant them."
     },
     {
