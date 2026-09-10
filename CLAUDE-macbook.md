@@ -4,6 +4,12 @@
 > [evaluation definitions and reports](docs/evaluation/README.md), and
 > [reproducible packaging/setup](docs/packaging/macos.md). Use the selected
 > environment and cached MLX model resolver; do not recreate working `stt_env`.
+> The [48-run screen](docs/evaluation/mac_v2026_14_screening/README.md) is complete:
+> retain E4B, 0.5 s silence and 0.6 s cadence; no combined experiment is justified.
+> Current setup uses bundled Silero 6.2.1 and automatically reuses or converts
+> both pinned Marian CT2 directions. The packaging guide supersedes the older
+> environment snapshot below. Synthetic routing probes and final release checks
+> remain pending; natural Spanish, human review and physical-device gates remain open.
 > New latency uses captured speech end to payload readiness and visible-browser
 > acknowledgments. Legacy processing timings cannot establish the sub-second goal.
 

@@ -4,7 +4,11 @@
 > and [evaluation inputs/results](docs/evaluation/README.md). v2026.13 PRs #180–191
 > are already merged. Operator reliability, timing schema 2, reproducible setup,
 > live Review/export and opt-in experiments are implemented on
-> `codex/mac-reliability-roadmap`. E4B remains default; MTP stays off. Archived
+> `codex/mac-reliability-roadmap`. The [48-run screen](docs/evaluation/mac_v2026_14_screening/README.md)
+> is complete and supports no combined configuration; E4B, 0.5 s silence and
+> 0.6 s partial cadence remain default, and MTP stays off. Packaged offline VAD
+> and automatic pinned Marian CT2 setup passed focused/real CPU checks. Separate
+> 24-run synthetic routing probes, final full-suite checks and artifacts are pending. Archived
 > `e2e_latency_ms` is processing time, not speech-end-to-display. Human natural
 > Spanish/two-speaker/bilingual review and physical output tests remain gates.
 > PyPI publishing is pending by user choice. Do not restart the older roadmap

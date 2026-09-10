@@ -22,6 +22,11 @@ v2026.14 publication is pending by the user's choice.
   launchd installation, complete wheel/source ZIP contents and release identity checks.
   Managed cache markers must match the pinned manifest; explicit user paths remain
   supported. The default Piper voices match the English/Spanish setup profile.
+  Mac VAD loads bundled Silero 6.2.1 weights without Torch Hub. Setup reuses
+  existing complete Marian CT2 adapters or converts both pinned HF directions
+  into an isolated managed cache using the selected interpreter. Setup,
+  preflight and inference share that CT2 resolver; atomic publication preserves
+  working artifacts even if interrupted after the active pointer changes.
 - Live and post-session Review, independent transcript/translation approvals,
   local drafts, revision checks, portable audio bundles, direction-aware exports,
   idempotent imports and evaluation isolation.
@@ -44,12 +49,23 @@ caption-delivery goal is **not yet achieved**. Baseline results retain their sou
 and configuration cohorts; startup/shutdown and instrumentation revisions during
 that collection must not be pooled into a single claim about the current runtime.
 
-The frozen 48-run English screening matrix is **currently running**: eight
-configurations, both models and three alternating pairs on the same 45-second
-input. It covers the baseline, idle warmups, final-aware partials, 0.4/0.35-second
-silence thresholds, conservative Marian routing, terminology examples and ONNX VAD.
-Partial cadence remains 0.6 seconds. Results and any recommendation remain pending;
-these screens do not replace the longer baseline or natural Spanish validation.
+The [frozen English screening report](evaluation/mac_v2026_14_screening/README.md)
+is complete: **48/48 runs exited zero**, covering eight configurations, both
+models and three alternating pairs on the same 45-second input. It retains
+348 finals, 3,184 partials and a hash index of 193 raw files. The result supports
+**no additional combined configuration**: gains were model-specific, some tails
+and first-partial delays worsened, and shorter silence changed the captions.
+Matched later-caption analysis did not show a consistent gain across both models.
+Keep E4B, 0.5-second silence and 0.6-second partial cadence as defaults; experiments
+remain opt-in. No browser clients were observed (visible final ACK coverage
+0/348), so this screen cannot establish the caption-delivery goal.
+
+The conservative routing branch was unexercised on that sermon clip. A separate
+**24-run synthetic EN/ES routing probe is currently running** after the packaged
+VAD and automatic CT2 setup changes: legacy/conservative routing, both models,
+both languages and three alternating pairs. This checks runtime paths; it cannot
+replace natural Spanish references or human translation review. The frozen
+48-run report retains its original source and VAD-loader cohort.
 
 The [translation comparison](evaluation/mac_v2026_14_quality/comparison.md) uses
 identical text inputs and three repeats. E2B's translation-only median is 37–43%
@@ -68,6 +84,9 @@ have no reference score. Predictions and measured timings were preserved.
 
 ## Completed validation
 
+The full-suite figures below precede the latest VAD/CT2 setup changes. Their
+focused checks have passed; the final full-suite and artifact checks remain pending.
+
 - Full CPU suite: **1,722 passed, 2 skipped**, 57.83% coverage against the 50% gate.
 - Cached MLX GPU regression suite: **3 passed**, covering E4B EOS/canary behavior
   and the worker's first forward pass.
@@ -79,6 +98,17 @@ have no reference score. Predictions and measured timings were preserved.
   three advisory findings.
 - CI-filtered Mac, Windows and NVIDIA requirement audits report zero known
   vulnerabilities. This scope does not certify every optional package or model.
+- VAD/setup regression subset: **119 passed**, including real JIT and ONNX CPU
+  loads and a frame/reset with empty Torch Hub caches and network access blocked.
+  Packaged weights and relevant loader files match the prior Hub cache byte for
+  byte. The subsequent atomic-publication interruption fix passed all **8 managed
+  CT2 setup tests**, including a replace-then-interrupt regression.
+- Actual offline CT2 conversion in `.cache/package-smoke` produced both int8
+  directions from pinned HF snapshots under an empty project root. Both CPU
+  translations were nonempty, repeated setup reused the results, and the weight
+  hashes matched the existing adapters. Existing adapters and `stt_env` were
+  unchanged. The setup CLI separately reused all five Mac defaults without
+  downloads (0 installed, 5 skipped, 0 failed).
 - A preliminary wheel installed in `.cache/package-smoke` starts outside the
   checkout and serves `/healthz`, `/operator/` and the review script. The full
   `[mlx,eval,diarization]` extras were **installed**, all 18 runtime import checks
@@ -93,7 +123,11 @@ have no reference score. Predictions and measured timings were preserved.
 
 Local evidence is recorded in `.cache/mac-roadmap/validation.json`,
 `.cache/mac-roadmap/full-tests.log`, `.cache/html5-validation/report.json`,
-`.cache/security-audit/` and `.cache/package-artifacts-validation/`.
+`.cache/security-audit/`, `.cache/package-artifacts-validation/`,
+`.cache/mac-roadmap/vad-cache-proof.json` and
+`.cache/mac-roadmap/ct2-setup-validation/report.json`. See the
+[security scope audit](evaluation/mac_v2026_14_security.md) for the distinction
+between pinned default setup paths and remaining optional/fallback download debt.
 
 ## Operator rehearsal completed
 
@@ -139,8 +173,10 @@ in `.cache/mac-roadmap/rehearsal_report.json`; the retained summary failure is
 - A service rehearsal with natural bilingual speech, real speaker transitions and
   church audio hardware. The controlled hymn/pause/restart/Review/Stop rehearsal
   above does not close those human and device gates.
-- Completion and review of the frozen screening reports, followed by final
-  v2026.14 artifacts and an outside-checkout installation smoke check.
+- Completion and review of the 24 synthetic routing probes, the final full-suite
+  rerun, then v2026.14 wheel/sdist/Mac ZIP rebuild and outside-checkout installed
+  runtime checks. The 48-run screening report is complete; no combined experiment
+  is justified by its results.
 - PyPI trusted publisher account setup: the browser is signed out and the user
   explicitly chose to leave publishing pending. Required mapping is owner
   `wrbell`, repository `stark-translate`, workflow `pypi.yml`, environment `pypi`.
