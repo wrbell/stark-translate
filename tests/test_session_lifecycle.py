@@ -272,6 +272,7 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
 ):
     """Run the production signal handler/finally blocks with inert model stubs."""
     import sys
+    from concurrent.futures import ThreadPoolExecutor
 
     from tools.replay_client_barrier import ReplayClientBarrier
 
@@ -283,6 +284,9 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
     )
     signal_handler = next(
         node for node in main.body if isinstance(node, ast.FunctionDef) and node.name == "signal_handler"
+    )
+    drain_workers = next(
+        node for node in tree.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "_drain_inference_workers"
     )
     shutdown = next(
         node for node in main_async.body if isinstance(node, ast.Try) and "await audio_loop()" in ast.unparse(node)
@@ -297,6 +301,7 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
         decorator_list=[],
     )
     pool = PersistenceExecutor(max_workers=1)
+    native_pool = ThreadPoolExecutor(max_workers=1)
     monkeypatch.chdir(tmp_path)
     events = []
     registered_signals = {}
@@ -309,6 +314,8 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
         await asyncio.Event().wait()
 
     def summary():
+        with pytest.raises(RuntimeError, match="shutdown"):
+            native_pool.submit(lambda: None)
         events.append("summary")
         pool.submit(_diagnostics, tmp_path)
 
@@ -339,7 +346,11 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
         "_stream_token_queue": None,
         "speaker_task": None,
         "_marian_engine": None,
-        "_pytorch_pool": SimpleNamespace(shutdown=lambda **kwargs: None),
+        "_pytorch_pool": native_pool,
+        "_pipeline_pool": None,
+        "_stt_comm_pool": None,
+        "_trans_comm_pool": None,
+        "_partial_tasks": set(),
         "_tts_pool": None,
         "tts_engine": None,
         "MULTIPROCESS": False,
@@ -368,7 +379,7 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
             SIGINT=2, SIGTERM=15, signal=lambda number, handler: registered_signals.update({number: handler})
         ),
     }
-    definitions = ast.fix_missing_locations(ast.Module(body=[signal_handler, cleanup], type_ignores=[]))
+    definitions = ast.fix_missing_locations(ast.Module(body=[signal_handler, drain_workers, cleanup], type_ignores=[]))
     exec(compile(definitions, str(source), "exec"), namespace)
     registrations = [
         node
@@ -378,7 +389,10 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
         and ast.unparse(node.value.func) == "signal.signal"
     ]
     exec(compile(ast.Module(body=registrations, type_ignores=[]), str(source), "exec"), namespace)
-    exec(compile(ast.Module(body=main.body[wrapper_start:], type_ignores=[]), str(source), "exec"), namespace)
+    try:
+        exec(compile(ast.Module(body=main.body[wrapper_start:], type_ignores=[]), str(source), "exec"), namespace)
+    finally:
+        native_pool.shutdown(wait=True)
     if forced_stop:
         assert session_status(tmp_path, "example_en")["status"] == "interrupted"
         assert "summary" not in events
