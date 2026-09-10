@@ -46,7 +46,7 @@ Runbook: [`docs/wsl_pipeline_refresh.md`](../docs/wsl_pipeline_refresh.md).
 | Gemma 4 spike / v1 / v1.1 / v2-cpo | Trained 2026-04-29/30; parity with stock E4B, Jacobo failing | [`docs/gemma4_tuning/v1_results.md`](../docs/gemma4_tuning/v1_results.md) |
 | E4B domain SFT (`run_gemma4_e4b_domain_sft.sh`) | Scripted, not run; needs v2 corpus env var | — |
 | TranslateGemma S1–S9 (S6 winner) | Historical, superseded | [`docs/archive/training/gemma_tuning_test_matrix.md`](../docs/archive/training/gemma_tuning_test_matrix.md) |
-| Hindi / Chinese corpora | Not prepared; pending user decision (#138). `tools/offline_hindi.py` is an evaluation-only baseline, no live path | [`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md) |
+| Hindi / Chinese corpora | Training corpora pending user decision (#138); offline church-audio R&D baseline completed separately, no live path or further EN↔ES-program work | [`docs/evaluation/overnight_hindi/README.md`](../docs/evaluation/overnight_hindi/README.md) |
 
 ## Backlog
 

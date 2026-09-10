@@ -55,8 +55,12 @@ one actual audience display. The preview is not proof of projector or phone outp
 - **Live** shows input activity, recent captions, session state and any required
   action. Italic text is a revisable preview. A final caption replaces it.
 - **Pause** stops accepting new speech for captions and finishes valid buffered
-  speech. Use it during a hymn or an intentional break. **Resume** continues in
-  the same session. Do not speak essential content during the pause.
+  speech. For attended live use, pause before or during congregational singing
+  and **Resume** before spoken prayer or preaching. The automatic music hold is
+  an energy/VAD heuristic that can miss singing; do not depend on it to suppress
+  hymn captions. Resume continues in the same session. Do not speak essential
+  content during the pause. In file replay, Pause preserves the playback position;
+  resuming does not skip the hymn.
 - **Switch to Spanish speaker** (or English) restarts the pipeline in the other
   direction. Wait through loading and test the first sentence. The new direction
   gets a new session identity; old captions and correction records stay separate.
@@ -138,6 +142,7 @@ retried or canceled.
 | Operator disconnected or status stale | Wait for reconnect; reload if needed. Avoid repeated Start clicks. Check the launcher if reconnect fails. |
 | Audience display reconnecting | Confirm the session is listening, the link/ports are correct, and the display can reach the caption computer. Reload that display if needed. |
 | Captions fall behind | Pause at a suitable break and close competing compute-heavy applications. Ask the setup owner to inspect queues and timing; do not switch models blindly. |
+| Fragments appear during congregational singing | For a live service, **Pause** captions and **Resume** before spoken prayer/preaching. Automatic music hold can miss singing; ask the setup owner to retain the session for later review. File-replay Pause holds position rather than skipping the music. |
 | Recording incomplete or a write failed | Keep the session and its original files. Create a support bundle; do not claim it completed or delete evidence. |
 | Low disk space | Stop before storage is exhausted. Use the explicit cleanup preview for completed operational logs. Original recordings need the setup owner's separate retention decision. |
 

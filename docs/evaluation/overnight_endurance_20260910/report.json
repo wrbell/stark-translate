@@ -1,0 +1,1923 @@
+{
+  "schema_version": 1,
+  "document_status": "both_fresh_hours_completed_summary_observed_archive_verified_issue_links_pending",
+  "date": "2026-09-10",
+  "issue": {
+    "number": 134,
+    "url": "https://github.com/wrbell/stark-translate/issues/134",
+    "status": "pending",
+    "acceptance": [
+      "Runbook walk on church hardware or a laptop stand-in.",
+      "Time setup to first caption and identify operator-only versus helper-needed steps.",
+      "Capture one full hymn and one spoken segment.",
+      "Written results and follow-up issues for blocking operator UX holes."
+    ]
+  },
+  "platform": {
+    "host": "MacBook M3 Pro laptop stand-in",
+    "reported_physical_cores": 12,
+    "reported_ram_gib": 18.0,
+    "native_screen": "locked during observed replay",
+    "browser_visibility_basis": "DOM-reported visibility; physical display not certified"
+  },
+  "cohorts": {
+    "old_standard": {
+      "status": "completed_failed_source_timing_validation",
+      "session_id": "20260910_024936_300302_en",
+      "profile": "standard",
+      "backend": "mlx",
+      "source_lang": "en",
+      "target_lang": "es",
+      "source_kind": "natural_recorded_service",
+      "session_kind": "replay",
+      "source_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+      "source_duration_s": 3640.053,
+      "replay_speed": 1.0,
+      "source_revision": "b65e6e0f161553b0b381cab412a39e5d58007e77",
+      "revision_basis": "Independent installed-artifact receipt; runtime git_sha itself is null.",
+      "wheel_sha256": "ea489f722f7536790c24af46188061c215456f57c2100652242077caab86c095",
+      "startup_pipeline_sha256": "d7205f90ecbfd50a0b37f2b11f081306117342ce3b2574743ecf74cf36cb47ec",
+      "model_revisions": {
+        "stt": {
+          "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+          "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+          "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+        },
+        "translation": {
+          "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+          "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+        },
+        "marian": {
+          "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+          "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+          "ct2_quantization": "int8",
+          "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_hash_matches": true
+        }
+      },
+      "setup": {
+        "new_install_and_download_duration_s": null,
+        "operator_service_started_at_utc": "2026-09-10T06:49:03.351235+00:00",
+        "operator_start_action": {
+          "scenario": "standard",
+          "action": "Start captions",
+          "before": "2026-09-10T06:49:36.244Z",
+          "after": "2026-09-10T06:49:36.526Z",
+          "session_id": "20260910_024936_300302_en",
+          "method": "actual operator SPA button",
+          "source": "full recorded service; file injection configured by setup helper",
+          "physical_display": "Mac locked; browser DOM visible; no physical display certification"
+        },
+        "lifecycle_started_at_utc": "2026-09-10T06:49:41.024246+00:00",
+        "start_to_first_server_preview": {
+          "minimum_s": 422.595432,
+          "maximum_s": 422.877432,
+          "basis": "Observed SPA click before/after bracket to server event wall timestamp; includes startup and input lead-in, not caption latency."
+        },
+        "start_to_first_server_final": {
+          "minimum_s": 430.333679,
+          "maximum_s": 430.615679,
+          "basis": "Observed SPA click before/after bracket to server event wall timestamp; includes startup and input lead-in, not caption latency."
+        },
+        "service_launch_to_first_server_preview_s": 455.770197,
+        "digital_zero_lead_in_s": 403.1448125,
+        "first_vad_window_source_start_s": 405.056,
+        "do_not_infer": "First nonzero PCM is not speech onset; subtracting lead-in from wall wait does not isolate model-load time.",
+        "preflight": "EN and ES each passed four checks with a base-model/no-adapter warning. Microphone check enumerated devices; it was not a capture test."
+      },
+      "first_caption": {
+        "first_server_preview_at_utc": "2026-09-10T06:56:39.121432+00:00",
+        "first_server_final_at_utc": "2026-09-10T06:56:46.859679+00:00",
+        "first_preview_from_captured_start_ms": 2336.5,
+        "first_preview_browser_upper_bound_ms": 2373.4,
+        "first_final_endpoint": "smart_cut",
+        "first_final_speech_end_to_payload_ms": 4666.8,
+        "first_final_speech_end_to_browser_ack_upper_bound_ms": 4686.1
+      },
+      "source_span_validation": {
+        "passed": false,
+        "invalid_final_spans": 23,
+        "total_finals": 549,
+        "invalid_preview_spans": 97,
+        "total_preview_records": 2720,
+        "invalid_final_ids": [
+          8,
+          20,
+          24,
+          27,
+          34,
+          91,
+          92,
+          112,
+          120,
+          141,
+          150,
+          238,
+          250,
+          272,
+          285,
+          303,
+          317,
+          328,
+          431,
+          500,
+          506,
+          580,
+          585
+        ],
+        "saved_wav_header_vs_reported_duration_mismatches": [],
+        "whole_recording_caption_coverage": null
+      },
+      "lifecycle_and_persistence": {
+        "verified": true,
+        "lifecycle_status": "completed",
+        "exit_code": 0,
+        "diagnostics_hash_matches": true,
+        "persistence": {
+          "submitted": 7372,
+          "completed": 7372,
+          "pending": 0,
+          "failed": 0,
+          "capacity": 256,
+          "ok": true,
+          "failures": []
+        },
+        "persistence_verified": true,
+        "monitor_status": "completed",
+        "process_cleanup_observed": true,
+        "no_running_processes_observed": true,
+        "last_observed_processes": []
+      },
+      "terminal_at_utc": "2026-09-10T07:51:26.876949+00:00",
+      "monitor_terminal_at_utc": "2026-09-10T07:51:33.980380+00:00",
+      "terminal_queues": {
+        "audio": 0,
+        "capture_handoff": 0,
+        "finals": 0,
+        "stream_tokens": 1
+      },
+      "terminal_queue_interpretation": "stream_tokens=1 is the recorded shutdown None sentinel in the installed code; completed required writes and cleanup are verified separately.",
+      "hymn_evidence": {
+        "status": "full_source_workload_supported_capture_coverage_failed",
+        "source_interval_s": null,
+        "observation": "Full-length uncropped service selected at speed 1. Retained chronology goes from first hymn introduction through hymn-related words to subsequent prayer and later sermon. This supports the input workload, not exact singing boundaries, lyric accuracy or complete capture.",
+        "music_hold_event_count": 0,
+        "evidence": "source-interval-note.json"
+      },
+      "spoken_evidence": {
+        "status": "prayer_sequence_observed_unreviewed",
+        "source_interval_s": [
+          720.864,
+          770.112
+        ],
+        "observation": "Retained prayer rows 9–12 and 14–15 continue through closing Amen; row13 has no completed transcript. These are recorded window coordinates, not a claim of continuous capture or independent transcription.",
+        "evidence": "source-interval-note.json"
+      },
+      "gap_classification": {
+        "whole_recording_coverage": null,
+        "source_after_last_raw_caption_end_s": 160.629,
+        "interpretation": "Unclassified. Last caption bounds are themselves invalid; gaps do not identify silence, hymns or missed speech.",
+        "independently_proved_missing_audio_frame_ms": 32,
+        "proof_chunk_id": 141
+      },
+      "browser_ack_coverage": {
+        "eligible_audience_connections": 1,
+        "final_ack_count": 549,
+        "final_count": 549,
+        "nonempty_translated_preview_ack_count": 2719,
+        "source_only_empty_translation_preview_ack_count": 1,
+        "finalized_utterances_with_first_translated_preview": 522,
+        "native_mac_locked": true,
+        "dom_visibility": "reported visible",
+        "physical_display_certification": false,
+        "invalid_source_span_events_are_not_validated_latency": true
+      },
+      "memory": {
+        "pipeline_lifetime_rss_peak_bytes": 2487255040,
+        "pipeline_lifetime_metal_peak_bytes": 9303011918,
+        "sampled_tree_rss_max_bytes": 619659264,
+        "sample_count": 736,
+        "sample_interval_median_s": 5.016576207999606,
+        "scope_warning": "Pipeline RSS/Metal are separate lifetime counters. Monitor tree RSS is sampled simultaneous process RSS, can double-count shared pages and omit short-lived children. Do not add RSS and Metal, or call observed sampled max a true tree lifetime peak."
+      },
+      "archive": {
+        "status": "built_and_standalone_verified",
+        "path": "raw/",
+        "manifest": "raw/artifact-manifest.json",
+        "manifest_sha256": "68fee0fc07b6a7d405e90fffea70131ad754406b096a42f287f443539a653a60",
+        "verification": "archive-verification.json",
+        "verifier": "raw/verify_endurance.py",
+        "archive_sha256": "b7f58e594b852e1451890b29c1eb893345a0cd34dfefd2f8f45659570518cf4c",
+        "compressed_bytes": 3999389,
+        "shards": 9,
+        "maximum_shard_bytes": 491520,
+        "source_members": 94,
+        "verified_members_including_inventory": 95,
+        "scope": "Three distinct cohorts retained without pooling; original failed Standard evidence unchanged."
+      },
+      "source_reader_completion": {
+        "status": "full_duration_supported_no_explicit_persisted_eof",
+        "exact_eof_at_utc": null,
+        "all_source_frames_captured": null,
+        "downstream_audio_coverage_failed": true,
+        "evidence": "source-interval-note.json"
+      },
+      "selected_waveform_evidence": {
+        "session_id": "20260910_024936_300302_en",
+        "counts": {
+          "exact_declared_sequence": 2,
+          "declared_sequence_mismatch": 1,
+          "unsupported": 0
+        },
+        "selected_chunks": [
+          {
+            "chunk_id": 9,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 68608,
+            "declared_expected_frames_16k": 68608,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          },
+          {
+            "chunk_id": 10,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 128000,
+            "declared_expected_frames_16k": 128000,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          },
+          {
+            "chunk_id": 141,
+            "status": "declared_sequence_mismatch",
+            "stored_frames_16k": 128000,
+            "declared_expected_frames_16k": 128512,
+            "length_delta_frames_16k": -512,
+            "whole_sequence_float32_equal": false
+          }
+        ],
+        "evidence": {
+          "path": ".cache/overnight-20260910/waveform-continuity/results/old-standard.json",
+          "size_bytes": 21239,
+          "sha256": "4b2e4c69c2159605b8053ea31f1b21e7b511b76caee39c599f51d04a1f270077"
+        },
+        "reproducer_sha256": "906d34a5436d68402acca67b49db694543b0f357f35341e38412e9515893660c",
+        "reproducer_versions": {
+          "numpy": "2.3.5",
+          "scipy": "1.17.1",
+          "soundfile": "0.14.0"
+        },
+        "scope": "selected supporting waveform regression evidence; not a quality gate or full-session coverage claim",
+        "public_summary": "waveform-evidence.json"
+      }
+    },
+    "fresh_standard": {
+      "status": "completed_and_source_span_consistent",
+      "session_id": "20260910_043120_839144_en",
+      "source_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+      "source_duration_s": 3640.053,
+      "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+      "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+      "startup_pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36",
+      "model_revisions": {
+        "stt": {
+          "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+          "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+          "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+          "revision_source": "hf_snapshot_path",
+          "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+        },
+        "translation_a": {
+          "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+          "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+          "revision_source": "hf_snapshot_path",
+          "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-roadmap/ct2-setup-validation/managed/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-roadmap/ct2-setup-validation/managed/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "actual_argv_and_environment_evidence": {
+        "path": ".cache/overnight-20260910/installed-standard-fixed-endurance/operator-launch.json",
+        "size_bytes": 1278,
+        "sha256": "ad156f48ab0f71f3431fb16ce6e0c5890105acdec74e3cd4888fd0d99cc6053f"
+      },
+      "preflight": null,
+      "operator_start_action": {
+        "method": "actual operator SPA Start captions",
+        "before_utc": "2026-09-10T08:31:20.797+00:00",
+        "after_utc": "2026-09-10T08:31:21.067+00:00",
+        "state_observed_at_utc": "2026-09-10T08:32:49.616+00:00",
+        "state_at_snapshot": "running"
+      },
+      "first_caption": {
+        "operator_start_before_utc": "2026-09-10T08:31:20.797000+00:00",
+        "operator_start_after_utc": "2026-09-10T08:31:21.067000+00:00",
+        "lifecycle_started_at_utc": "2026-09-10T08:31:24.962266+00:00",
+        "first_server_preview_wall_utc": "2026-09-10T08:38:21.558818+00:00",
+        "first_server_final_wall_utc": "2026-09-10T08:38:30.526435+00:00",
+        "start_to_first_server_preview_wall_s": {
+          "minimum_s": 420.491818,
+          "maximum_s": 420.761818
+        },
+        "start_to_first_server_final_wall_s": {
+          "minimum_s": 429.459435,
+          "maximum_s": 429.729435
+        },
+        "lifecycle_to_first_server_preview_wall_s": 416.596552,
+        "lifecycle_to_first_server_final_wall_s": 425.564169,
+        "digital_zero_lead_in_s": 403.1448125,
+        "digital_zero_basis": "exact digital first nonzero PCM sample; not speech onset",
+        "first_preview_source_start_s": 405.056,
+        "first_preview_source_end_s": 405.664,
+        "first_preview_from_captured_start_ms": 1095.6,
+        "first_preview_event_id": "20260910_043120_839144_en:partial:1",
+        "first_preview_utterance_id": 1,
+        "first_final_chunk_id": 1,
+        "first_final_event_id": "20260910_043120_839144_en:9",
+        "first_final_speech_end_to_payload_ms": 4655.9,
+        "first_final_endpoint": "smart_cut|replay_realtime",
+        "browser_by_connection": {
+          "6360997712": {
+            "first_preview_upper_bound_ms": 1140.5,
+            "first_final_upper_bound_ms": 4668.4
+          }
+        },
+        "clocks": "Raw naive caption timestamps interpreted in recorded host timezone America/Detroit (UTC-4 on 2026-09-10). Only wall timestamps are joined to operator action times; session-relative trace origins are not joined to them.",
+        "limitations": "No speech onset inferred from first nonzero PCM. Do not subtract zeros to infer model-loading duration. Browser ACK upper bounds include return path, are session-local, and do not certify native physical visibility.",
+        "operator_service_started_at_utc": "2026-09-10T08:31:04.768730+00:00",
+        "prepared_operator_launch_to_first_server_preview_wall_s": 436.790088,
+        "launch_boundary_scope": "Operational setup from launching a prepared installed operator; excludes unmeasured one-time package/model installation and downloads. Includes model readiness, pre-Start time and source lead-in; not inference-only latency."
+      },
+      "hymn_evidence": {
+        "status": "full_uncropped_source_hymn_to_prayer_workload_observed",
+        "source_interval_s": null,
+        "evidence": "fresh-standard-early/snapshot.json",
+        "exact_singing_boundaries": null,
+        "lyric_accuracy": "not certified; recorded translation error and short fragments retained",
+        "retained_bounds_consistency": "563 final and 2814 preview spans consistent; exact singing boundaries/all-frame coverage not asserted."
+      },
+      "spoken_evidence": {
+        "status": "prayer_observed_in_spa_and_persisted_closing",
+        "source_interval_s": [
+          720.864,
+          770.112
+        ],
+        "evidence": "fresh-standard-early/snapshot.json",
+        "interpretation": "Individual recorded windows; not continuous source-frame coverage."
+      },
+      "source_span_validation": {
+        "consistent": true,
+        "total_finals": 563,
+        "total_preview_records": 2814,
+        "invalid_final_spans": 0,
+        "invalid_preview_spans": 0,
+        "source_span_vs_actual_wav_header_mismatches": [],
+        "saved_wav_vs_reported_duration_mismatches": [],
+        "validation_scope": "Every retained final and preview source span; every final WAV header. Selected waveform reconstruction remains deferred; this is not proof all source speech was retained."
+      },
+      "gap_classification": {
+        "whole_recording_coverage": null,
+        "last_caption_source_end_s": 3479.36,
+        "source_after_last_caption_window_s": 160.69299999999976,
+        "caption_window_union_s": 2181.6,
+        "padding_assisted_final_count": 0,
+        "exact_reader_eof_at_utc": null,
+        "interpretation": "Last caption source endpoint is not the last captured sample or exact EOF time. Remaining recording interval is unclassified; no musical/silent/missed-speech label is inferred."
+      },
+      "lifecycle_and_persistence": {
+        "verified": true,
+        "lifecycle_status": "completed",
+        "exit_code": 0,
+        "diagnostics_hash_matches": true,
+        "persistence": {
+          "submitted": 7594,
+          "completed": 7594,
+          "pending": 0,
+          "failed": 0,
+          "capacity": 256,
+          "ok": true,
+          "failures": []
+        },
+        "persistence_verified": true,
+        "monitor_status": "completed",
+        "process_cleanup_observed": true,
+        "no_running_processes_observed": true,
+        "last_observed_processes": []
+      },
+      "process_cleanup": {
+        "observed": true,
+        "monitor_terminal_at_utc": "2026-09-10T09:32:42.555986+00:00"
+      },
+      "memory": {
+        "pipeline_lifetime": {
+          "scope": "pipeline_process_lifetime",
+          "peak_rss_bytes": 2588459008,
+          "peak_metal_bytes": 9372995258
+        },
+        "process_tree": {
+          "sample_count": 729,
+          "rss_sum_bytes": {
+            "n": 729,
+            "p50": 385695744,
+            "p95": 479297536,
+            "max": 575602688
+          },
+          "sampling_gaps_s": {
+            "n": 728,
+            "p50": 5.017866937501822,
+            "p95": 5.0307933750445955,
+            "max": 5.801221082976554
+          }
+        },
+        "interpretation": "Pipeline RSS/Metal are separate lifetime counters. Monitor tree RSS is sampled simultaneous process RSS, can double-count shared pages and omit short-lived children. Do not add RSS and Metal, or call observed sampled max a true tree lifetime peak."
+      },
+      "browser_ack_coverage": [
+        {
+          "connection_id": "6360997712",
+          "final_acks": 563,
+          "expected_finals": 563,
+          "timed_final_acks": 563,
+          "final_ack_by_endpoint_ms": {
+            "smart_cut|replay_realtime": {
+              "n": 124,
+              "p50": 3519.6000000000004,
+              "p95": 6465.5,
+              "max": 7865.7
+            },
+            "hard_cut|replay_realtime": {
+              "n": 38,
+              "p50": 2346.1,
+              "p95": 3231.5,
+              "max": 3274.9
+            },
+            "silence|replay_realtime": {
+              "n": 401,
+              "p50": 1442.2,
+              "p95": 3033.9,
+              "max": 5854.7
+            }
+          },
+          "first_preview_ack_ms": {
+            "n": 538,
+            "p50": 883.8,
+            "p95": 4125.4,
+            "max": 7588.9
+          },
+          "first_preview_coverage": 0.955595026642984,
+          "visible_preview_events": 2813,
+          "receive_to_render_ms": {
+            "n": 3376,
+            "p50": 11.4,
+            "p95": 16.4,
+            "max": 609.8
+          },
+          "first_utterance_preview_ack_ms": 1140.5,
+          "first_final_ack_ms": 4668.4,
+          "last_final_ack_ms": 930.5,
+          "preview_acks_after_final_ack_count": 0,
+          "preview_ack_order_unassessable_count": 64,
+          "missing_final_chunks": [],
+          "missing_preview_events": [],
+          "unmatched_acks": 1
+        }
+      ],
+      "endpoint_metrics": {
+        "hard_cut|replay_realtime": {
+          "n": 38,
+          "server_ms": {
+            "n": 38,
+            "p50": 2333.1499999999996,
+            "p95": 3220.2,
+            "max": 3256.6
+          },
+          "stage_ms": {
+            "endpoint_decision_ms": {
+              "n": 38,
+              "p50": 8.864000000059605,
+              "p95": 12.533000000054017,
+              "max": 13.206000000005588
+            },
+            "stt_admission_ms": {
+              "n": 38,
+              "p50": 0.05749999999534339,
+              "p95": 0.3989999999757856,
+              "max": 0.7309999999124557
+            },
+            "stt_call_wall_ms": {
+              "n": 38,
+              "p50": 631.9599999999627,
+              "p95": 1406.377000000095,
+              "max": 1504.875
+            },
+            "post_stt_dispatch_ms": {
+              "n": 38,
+              "p50": 0.7554999999701977,
+              "p95": 13.091000000014901,
+              "max": 37.78800000017509
+            },
+            "translation_admission_ms": {
+              "n": 38,
+              "p50": 0.08649999997578561,
+              "p95": 129.9000000001397,
+              "max": 133.7839999999851
+            },
+            "translation_call_wall_ms": {
+              "n": 38,
+              "p50": 1653.9960000000428,
+              "p95": 2074.652000000002,
+              "max": 2173.600000000093
+            },
+            "finalization_ms": {
+              "n": 38,
+              "p50": 1.7299999999813735,
+              "p95": 3.752000000094995,
+              "max": 4.425999999977648
+            }
+          }
+        },
+        "silence|replay_realtime": {
+          "n": 401,
+          "server_ms": {
+            "n": 401,
+            "p50": 1429.7,
+            "p95": 3019.0,
+            "max": 5793.1
+          },
+          "stage_ms": {
+            "endpoint_decision_ms": {
+              "n": 401,
+              "p50": 491.1319999997504,
+              "p95": 574.9699999997392,
+              "max": 1271.9499999997206
+            },
+            "stt_admission_ms": {
+              "n": 401,
+              "p50": 0.058000000193715096,
+              "p95": 11.070999999996275,
+              "max": 256.5489999996498
+            },
+            "stt_call_wall_ms": {
+              "n": 401,
+              "p50": 414.2630000002682,
+              "p95": 1218.5759999998845,
+              "max": 2378.0789999999106
+            },
+            "post_stt_dispatch_ms": {
+              "n": 401,
+              "p50": 0.4459999999962747,
+              "p95": 4.20699999993667,
+              "max": 3030.006000000052
+            },
+            "translation_admission_ms": {
+              "n": 401,
+              "p50": 0.054999999701976776,
+              "p95": 462.99099999992177,
+              "max": 1448.4509999998845
+            },
+            "translation_call_wall_ms": {
+              "n": 401,
+              "p50": 381.2609999999986,
+              "p95": 1289.089999999851,
+              "max": 1864.6140000000596
+            },
+            "finalization_ms": {
+              "n": 401,
+              "p50": 0.4989999998360872,
+              "p95": 1.8190000001341105,
+              "max": 145.3649999999907
+            }
+          }
+        },
+        "smart_cut|replay_realtime": {
+          "n": 124,
+          "server_ms": {
+            "n": 124,
+            "p50": 3504.95,
+            "p95": 6451.3,
+            "max": 7848.6
+          },
+          "stage_ms": {
+            "endpoint_decision_ms": {
+              "n": 124,
+              "p50": 1259.0254999999888,
+              "p95": 5031.235000000102,
+              "max": 7017.356000000145
+            },
+            "stt_admission_ms": {
+              "n": 124,
+              "p50": 0.045000000041909516,
+              "p95": 0.19699999992735684,
+              "max": 0.7880000001750886
+            },
+            "stt_call_wall_ms": {
+              "n": 124,
+              "p50": 218.45350000006147,
+              "p95": 453.0419999998994,
+              "max": 1011.3239999995567
+            },
+            "post_stt_dispatch_ms": {
+              "n": 124,
+              "p50": 0.5614999998360872,
+              "p95": 3.535999999847263,
+              "max": 5.515000000130385
+            },
+            "translation_admission_ms": {
+              "n": 124,
+              "p50": 0.07600000011734664,
+              "p95": 94.93700000015087,
+              "max": 140.09499999973923
+            },
+            "translation_call_wall_ms": {
+              "n": 124,
+              "p50": 1578.469000000041,
+              "p95": 2739.6040000000503,
+              "max": 3423.2669999999925
+            },
+            "finalization_ms": {
+              "n": 124,
+              "p50": 1.459000000031665,
+              "p95": 7.288000000175089,
+              "max": 115.21900000004098
+            }
+          }
+        }
+      },
+      "preview_and_update_metrics": {
+        "first_translated_preview_ms": {
+          "n": 538,
+          "p50": 865.75,
+          "p95": 4113.9,
+          "max": 7556.4
+        },
+        "update_gap_ms": {
+          "n": 2246,
+          "p50": 622.1385000000591,
+          "p95": 1221.1840000003576,
+          "max": 3567.0740000000224
+        },
+        "missing_finalized_utterance_previews": 25
+      },
+      "ux_observations": {
+        "ready_after_stop_observed_at_utc": "2026-09-10T09:32:51.219Z",
+        "stop_action_before_utc": "2026-09-10T09:32:38.024Z",
+        "stop_action_after_utc": "2026-09-10T09:32:38.414Z",
+        "stopped_verse_list_includes": "Isaiah 53:11",
+        "reference_accuracy": "Structurally valid reference in actual UI, not a certification of the spoken wording.",
+        "draft_review": "List held at33 during editing; grew to40 after Save and next and selected chunk2. Revision1 unapproved, no operator reload attempted.",
+        "discard_events": 32,
+        "late_discarded_preview_work_suppressed": 8,
+        "discard_scope": "Production counters show execution; no complete per-utterance human inspection of provisional disappearance is claimed."
+      },
+      "archive": {
+        "status": "built_and_standalone_verified",
+        "path": "raw/",
+        "manifest": "raw/artifact-manifest.json",
+        "manifest_sha256": "68fee0fc07b6a7d405e90fffea70131ad754406b096a42f287f443539a653a60",
+        "verification": "archive-verification.json",
+        "verifier": "raw/verify_endurance.py",
+        "archive_sha256": "b7f58e594b852e1451890b29c1eb893345a0cd34dfefd2f8f45659570518cf4c",
+        "compressed_bytes": 3999389,
+        "shards": 9,
+        "maximum_shard_bytes": 491520,
+        "source_members": 94,
+        "verified_members_including_inventory": 95,
+        "scope": "Three distinct cohorts retained without pooling; original failed Standard evidence unchanged."
+      },
+      "acceptance": {
+        "status": "functional_completion_and_retained_source_span_checks_passed",
+        "issue_closure": "pending",
+        "remaining_scope": "Archive verified; actual blocking UX issue URLs and issue mapping pending. Selected waveform reconstruction passed for three windows; no all-source speech coverage or human-quality claim."
+      },
+      "profile": "standard",
+      "planned_backend": "mlx",
+      "pid_at_start": 78008,
+      "lifecycle_started_at_utc": "2026-09-10T08:31:24.962266+00:00",
+      "artifact_receipt": {
+        "sha256": "986e9bc40bcd29f10453b4525245c3122b12cc6f5f756e6a2192b87c891566ac",
+        "status": "passed",
+        "scope": "Mechanical installed-artifact validation, bound to this completed Standard run; source code was installed in a dedicated data directory inside checkout ancestry."
+      },
+      "early_snapshot": {
+        "status": "provisional_in_progress_prefix",
+        "at_utc": "2026-09-10T08:48:26.307832+00:00",
+        "evidence": "fresh-standard-early/snapshot.json",
+        "source_consistency": {
+          "csv_finals": 33,
+          "diagnostic_finals": 33,
+          "joined_final_records": 33,
+          "preview_records": 156,
+          "source_consistent_final_records": 33,
+          "source_consistent_preview_records": 156,
+          "source_inconsistent_or_unknown_records": 0,
+          "csv_only_pending_ids": [],
+          "diagnostics_only_pending_ids": [],
+          "through_final_source_s": 820.384,
+          "render_ack_records": 189
+        },
+        "endurance_gate": "pending"
+      },
+      "early_quality_findings": {
+        "short_fragment_examples": [
+          {
+            "chunk_id": 7,
+            "utterance_id": 7,
+            "source_start_s": 434.528,
+            "source_end_s": 436.832,
+            "source_as_recognized": "It dies a",
+            "spanish_as_generated": "Muere a"
+          },
+          {
+            "chunk_id": 9,
+            "utterance_id": 10,
+            "source_start_s": 443.552,
+            "source_end_s": 444.288,
+            "source_as_recognized": "Yeah,",
+            "spanish_as_generated": "Sí."
+          },
+          {
+            "chunk_id": 10,
+            "utterance_id": 11,
+            "source_start_s": 444.48,
+            "source_end_s": 445.472,
+            "source_as_recognized": "Yeah.",
+            "spanish_as_generated": "Sí."
+          },
+          {
+            "chunk_id": 11,
+            "utterance_id": 12,
+            "source_start_s": 445.6,
+            "source_end_s": 446.592,
+            "source_as_recognized": "Uh",
+            "spanish_as_generated": "Uh"
+          },
+          {
+            "chunk_id": 12,
+            "utterance_id": 13,
+            "source_start_s": 447.008,
+            "source_end_s": 448.224,
+            "source_as_recognized": "Well",
+            "spanish_as_generated": "Bueno"
+          },
+          {
+            "chunk_id": 14,
+            "utterance_id": 16,
+            "source_start_s": 454.528,
+            "source_end_s": 456.384,
+            "source_as_recognized": "Changing uh",
+            "spanish_as_generated": "Cambiando eh"
+          },
+          {
+            "chunk_id": 15,
+            "utterance_id": 17,
+            "source_start_s": 456.416,
+            "source_end_s": 457.856,
+            "source_as_recognized": "Okay.",
+            "spanish_as_generated": "Bien."
+          },
+          {
+            "chunk_id": 16,
+            "utterance_id": 18,
+            "source_start_s": 463.36,
+            "source_end_s": 464.192,
+            "source_as_recognized": "Oh",
+            "spanish_as_generated": "Oh"
+          }
+        ],
+        "lyric_meaning_error": {
+          "chunk_id": 3,
+          "utterance_id": 3,
+          "source_excerpt": "Time will soon end",
+          "spanish_excerpt": "La eternidad pronto terminará",
+          "meaning_change_in_recorded_pair": "Time becomes eternity as the subject of ending; this is a translation error relative to the recorded English, independent of any claim that the audio was transcribed correctly.",
+          "qe_score": 1.0,
+          "human_approval": false
+        },
+        "approved": false
+      },
+      "later_operator_ui": {
+        "evidence": "fresh-standard-early/ui-update-0851.json",
+        "at_utc": "2026-09-10T08:51:18.761+00:00",
+        "draft_list_while_editing": 33,
+        "list_after_save": 40,
+        "next_selected_chunk_id": 2,
+        "revision_verification": "verified_by_separate_sidecar_and_unchanged_before_save_prefixes",
+        "operator_reload_attempted": false,
+        "verse_list_observed": [
+          "Luke 23:32",
+          "Luke 23"
+        ],
+        "endurance_outcome": "completed_and_source_span_consistent",
+        "revision": 1,
+        "review_audit": "fresh-standard-terminal/review-audit.json"
+      },
+      "backend": "mlx",
+      "source_lang": "en",
+      "target_lang": "es",
+      "session_kind": "replay",
+      "source_kind": "natural_recorded_service",
+      "replay_speed": 1.0,
+      "terminal_at_utc": "2026-09-10T09:32:38.589810+00:00",
+      "terminal_queues": {
+        "audio": 0,
+        "capture_handoff": 0,
+        "finals": 0,
+        "stream_tokens": 1
+      },
+      "terminal_queue_interpretation": "stream_tokens=1 is the shutdown None sentinel; required-write completion and cleanup are independently verified.",
+      "session_counters": {
+        "event": "session_summary",
+        "session": "20260910_043120_839144_en",
+        "timestamp": "2026-09-10T05:32:38.524322",
+        "chunks_attempted": 599,
+        "chunks_completed": 563,
+        "chunks_empty_stt": 31,
+        "chunks_hallucination": 0,
+        "chunks_dedup": 5,
+        "ws_total_connections": 3,
+        "ws_total_disconnections": 1,
+        "ws_send_failures": 0,
+        "latency_experiment_counters": {
+          "warmup_requested": 1302,
+          "warmup_executed": 733,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 569,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 250,
+          "partial_suppressed_after_stt": 3,
+          "partial_stt_started": 3324,
+          "partial_stt_finished": 3324,
+          "final_stt_started": 599,
+          "final_stt_finished": 599,
+          "partial_emitted": 2814,
+          "final_marian_routes": 203,
+          "final_gemma_requests": 360,
+          "preview_periodic": 2814,
+          "utterance_discarded": 32,
+          "partial_suppressed_discarded_utterance": 8
+        },
+        "latency_experiment_configuration": {
+          "latest_partial": false,
+          "async_captions": false,
+          "marian_memo": 0,
+          "first_preview_s": 0.0,
+          "pause_preview_ms": 0.0,
+          "speculate_pause_ms": 0.0,
+          "clause_preview_s": 0.0,
+          "vad_worker": false,
+          "incremental_stt": "off",
+          "rolling_window_s": 4.0,
+          "mlx_cache_mb": 256,
+          "gemma_prefix_cache": false,
+          "trace": false
+        },
+        "replay_client_wait": {
+          "requested_seconds": 0.0,
+          "actual_wait_seconds": 0.0,
+          "status": "disabled",
+          "connected_clients": 0,
+          "visibility_confirmed": false
+        }
+      },
+      "concurrent_conditions": {
+        "scope": "Fresh Standard functional endurance, approximately 08:31-09:32 UTC; not a quiet causal latency benchmark.",
+        "exact_activity_utc_intervals": "unknown: those lightweight tool calls did not record UTC start/end; file mtimes are not substituted.",
+        "synthetic_only_test_invocations": [
+          {
+            "tests_passed": 7,
+            "runner_elapsed_s": 1.483,
+            "started_at_utc": null,
+            "ended_at_utc": null
+          },
+          {
+            "tests_passed": 8,
+            "runner_elapsed_s": 1.471,
+            "started_at_utc": null,
+            "ended_at_utc": null
+          }
+        ],
+        "other_light_activities": [
+          "Waveform helper source/spec/README preparation and Ruff checks.",
+          "Bounded code, complete metadata-prefix and UI evidence reads; hymn quality issue drafts.",
+          "Periodic model-free source-span snapshots and operator UI observations coordinated by root."
+        ],
+        "model_inference_scope": "No additional model inference was launched by the helper agent. Root ran only the installed session inference during this hour.",
+        "actual_waveform_validation": "Deferred until both fresh endurance hours finish; no session PCM reads by this audit.",
+        "post_terminal_audit": {
+          "started_at_utc": "2026-09-10T09:38:03.310248+00:00",
+          "ended_at_utc": "2026-09-10T09:38:03.524534+00:00",
+          "activities": "Root-authorized terminal record/ACK/receipt reads and 563 WAV-header checks only; completed Standard data was audited while Lite was running. Standard summary had already finished before Lite started.",
+          "overlapping_session": "20260910_053518_894101_en (Lite, started 2026-09-10T09:35:19.220965+00:00)",
+          "other_light_reads": "The shared reader invocation and assessment prose verification were also model-free; their precise UTC call intervals were not captured."
+        }
+      },
+      "terminal_evidence": "fresh-standard-terminal/terminal-evidence.json",
+      "operator_service_shutdown": {
+        "evidence": {
+          "path": ".cache/overnight-20260910/standard-fixed-operator-shutdown.json",
+          "size_bytes": 470,
+          "sha256": "3887f33dfbfd967b8bc54b3c19eb74a59ee00bef51e85e888a7cfebb64323dea"
+        },
+        "at_utc": "2026-09-10T09:34:37.617548+00:00",
+        "operator_exited": true,
+        "launcher_record_returncode": -15,
+        "scope": "Deliberate owned operator SIGTERM after pipeline exit0 and summary done; driver shell exit241 is separate from successful pipeline completion."
+      },
+      "installation_location": "Installed site-packages loaded from a dedicated data directory with no project Python modules and PYTHONPATH cleared. Data directory is physically within checkout ancestry. Mechanical installation smokes separately used /private/tmp outside checkout.",
+      "selected_waveform_evidence": {
+        "session_id": "20260910_043120_839144_en",
+        "counts": {
+          "exact_declared_sequence": 3,
+          "declared_sequence_mismatch": 0,
+          "unsupported": 0
+        },
+        "selected_chunks": [
+          {
+            "chunk_id": 18,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 68608,
+            "declared_expected_frames_16k": 68608,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          },
+          {
+            "chunk_id": 19,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 128000,
+            "declared_expected_frames_16k": 128000,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          },
+          {
+            "chunk_id": 157,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 128000,
+            "declared_expected_frames_16k": 128000,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          }
+        ],
+        "evidence": {
+          "path": ".cache/overnight-20260910/waveform-continuity/results/fixed-standard.json",
+          "size_bytes": 11768,
+          "sha256": "675dd3aebdc6d6bbfd2ff7489697dc15cab9d21d36ef4ac982fa0f6ff730f43c"
+        },
+        "reproducer_sha256": "906d34a5436d68402acca67b49db694543b0f357f35341e38412e9515893660c",
+        "reproducer_versions": {
+          "numpy": "2.3.5",
+          "scipy": "1.17.1",
+          "soundfile": "0.14.0"
+        },
+        "scope": "selected supporting waveform regression evidence; not a quality gate or full-session coverage claim",
+        "public_summary": "waveform-evidence.json"
+      }
+    },
+    "fresh_lite": {
+      "status": "completed_and_source_span_consistent",
+      "session_id": "20260910_053518_894101_en",
+      "source_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+      "source_duration_s": 3640.053,
+      "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+      "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+      "startup_pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36",
+      "model_revisions": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "actual_argv_and_environment_evidence": {
+        "path": ".cache/overnight-20260910/installed-lite-endurance/operator-launch.json",
+        "size_bytes": 1274,
+        "sha256": "abd1a644fe4a7deb7764330179ab0bb41bfac7c1b9ee8ce499851a629a3c7547"
+      },
+      "preflight": {
+        "source": {
+          "path": ".cache/overnight-20260910/endurance-preparation/lite-preflight-ui.txt",
+          "size_bytes": 3309,
+          "sha256": "d1ee7a88850b7d8e4a9f5dabce19650077f9ae4d9538f68e710260113c5f34da"
+        },
+        "pass": 4,
+        "warn": 0,
+        "fail": 0,
+        "profile": "explicit Lite CPU",
+        "microphone_scope": "Enumeration only; not capture."
+      },
+      "operator_start_action": {
+        "method": "actual operator SPA Start captions",
+        "before_utc": "2026-09-10T09:35:18.869+00:00",
+        "after_utc": "2026-09-10T09:35:19.127+00:00"
+      },
+      "first_caption": {
+        "schema_version": 1,
+        "session_id": "20260910_053518_894101_en",
+        "status": "first_observed_events_bound_while_session_running",
+        "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+        "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+        "startup_pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36",
+        "source_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "operator_start_before_utc": "2026-09-10T09:35:18.869000+00:00",
+        "operator_start_after_utc": "2026-09-10T09:35:19.127000+00:00",
+        "lifecycle_started_at_utc": "2026-09-10T09:35:19.220965+00:00",
+        "first_server_preview_wall_utc": "2026-09-10T09:42:17.424807+00:00",
+        "first_server_final_wall_utc": "2026-09-10T09:42:26.308644+00:00",
+        "start_to_first_server_preview_wall_s": {
+          "minimum_s": 418.297807,
+          "maximum_s": 418.555807
+        },
+        "start_to_first_server_final_wall_s": {
+          "minimum_s": 427.181644,
+          "maximum_s": 427.439644
+        },
+        "lifecycle_to_first_server_preview_wall_s": 418.203842,
+        "lifecycle_to_first_server_final_wall_s": 427.087679,
+        "digital_zero_lead_in_s": 403.1448125,
+        "source_lead_in_basis": "Existing exact digital-zero audit, bound to same source hash. No new audio read; first nonzero PCM is not speech onset.",
+        "first_preview": {
+          "event_id": "20260910_053518_894101_en:partial:7",
+          "utterance_id": 1,
+          "preview_revision": 7,
+          "source_start_s": 405.056,
+          "source_end_s": 409.312,
+          "captured_start_to_payload_ms": 6090.4,
+          "captured_end_to_payload_ms": 1834.4,
+          "browser_ack_upper_bound_ms": 6104.5,
+          "browser_connection_id": "13177879824",
+          "translation_nonempty": true
+        },
+        "first_final": {
+          "event_id": "20260910_053518_894101_en:2",
+          "chunk_id": 2,
+          "utterance_id": 2,
+          "source_start_s": 410.464,
+          "source_end_s": 414.592,
+          "endpoint_reason": "smart_cut",
+          "timing_source": "replay_realtime",
+          "estimated_speech_end_to_payload_ms": 5438.3,
+          "browser_ack_upper_bound_ms": 5447.7,
+          "browser_connection_id": "13177879824"
+        },
+        "identity_distinction": "First translated preview is utterance1, while first persisted final is chunk2/utterance2. Do not invent a chunk1 final or treat these as a single utterance. No disposition reason for utterance1 is inferred from missing final output.",
+        "clock_basis": "Raw naive production wall timestamps converted from America/Detroit (UTC-4 on this date). Wall Start brackets and production wall events are compared; independent relative clock origins are not joined.",
+        "ack_join": "Exact session/event/stage/revision/utterance/source bounds, timing schema2 and timing-source identities checked; final joined to original CSV+diagnostics. First-any preview ACK is reported independently from distributions restricted to finalized utterances.",
+        "limitations": [
+          "Start wall waits include startup and source lead-in, not inference-only latency. Do not subtract zeros to infer loading time.",
+          "Browser ACKs are return-path upper bounds from one session-local document-visible connection, not physical screen or human-quality certification.",
+          "Early observations, not terminal coverage, sustained performance or lower-RAM/x86 certification.",
+          "No runtime imports, tests, process probes, audio reads, models or archive build in this preparation."
+        ],
+        "evidence_prefixes": {
+          "partials": {
+            "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/partials_20260910_053518_894101_en.jsonl",
+            "prefix_bytes": 1438,
+            "prefix_sha256": "7be569736a7653cdc2289b435e3a7336348107f5a607007330e140b393d11d7f",
+            "captured_at_utc": "2026-09-10T09:56:16.636590+00:00",
+            "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/partials.jsonl",
+            "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+          },
+          "ab_metrics": {
+            "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/ab_metrics_20260910_053518_894101_en.csv",
+            "prefix_bytes": 1319,
+            "prefix_sha256": "b643829b1a9cb0c07c6d71ea972267738e73dedb3fbca16af102f3a59576ac1f",
+            "captured_at_utc": "2026-09-10T09:56:16.636753+00:00",
+            "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/ab_metrics.csv",
+            "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+          },
+          "diagnostics": {
+            "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/diagnostics_20260910_053518_894101_en.jsonl",
+            "prefix_bytes": 2965,
+            "prefix_sha256": "a497fd08a5199cb4389006b1d69e1b3bfe9d9510b3e146e8836cd6671c88e4ab",
+            "captured_at_utc": "2026-09-10T09:56:16.636922+00:00",
+            "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/diagnostics.jsonl",
+            "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+          },
+          "first_preview_ack": {
+            "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/display_metrics_20260910_053518_894101_en.jsonl",
+            "prefix_bytes": 887,
+            "prefix_sha256": "f062ed715a5c50647ec3e7b37ae3ce5f7863a08277af6f2aca082c540f69ca37",
+            "captured_at_utc": "2026-09-10T09:56:16.637321+00:00",
+            "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/first_preview_ack.jsonl",
+            "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+          },
+          "first_final_ack": {
+            "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/display_metrics_20260910_053518_894101_en.jsonl",
+            "prefix_bytes": 3514,
+            "prefix_sha256": "6c432cd4049b9cc5cc72e23cea2d70febbe87273649c54d981c80a2d8c1669a4",
+            "captured_at_utc": "2026-09-10T09:56:16.637503+00:00",
+            "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/first_final_ack.jsonl",
+            "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+          },
+          "start_before": {
+            "path": ".cache/overnight-20260910/endurance-preparation/lite-ui-actions.jsonl",
+            "prefix_bytes": 96,
+            "prefix_sha256": "a90784a5b7c9359f2a4a645208b9e648acdf4c6fd4547e7e6b0466ebefcc13f3",
+            "captured_at_utc": "2026-09-10T09:56:16.637609+00:00",
+            "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/start_before.jsonl",
+            "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+          },
+          "start_after": {
+            "path": ".cache/overnight-20260910/endurance-preparation/lite-ui-actions.jsonl",
+            "prefix_bytes": 158,
+            "prefix_sha256": "945cb50d0d22140f0bef1127df9834421da952c9007bb952f7c9fbf980749c24",
+            "captured_at_utc": "2026-09-10T09:56:16.637706+00:00",
+            "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/start_after.jsonl",
+            "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+          }
+        },
+        "receipt": {
+          "path": ".cache/overnight-20260910/artifact-validation-752ab9a-20260910T0829Z/report.json",
+          "size_bytes": 38088,
+          "sha256": "986e9bc40bcd29f10453b4525245c3122b12cc6f5f756e6a2192b87c891566ac"
+        },
+        "evidence": "lite-early/first-caption.json"
+      },
+      "hymn_evidence": {
+        "status": "full_uncropped_source_hymn_prayer_and_sermon_workload_observed",
+        "source_interval_s": null,
+        "evidence": "lite-early/quality-observations.json",
+        "prayer_and_second_hymn_ui": {
+          "path": ".cache/overnight-20260910/endurance-preparation/lite-prayer-second-hymn-ui.txt",
+          "size_bytes": 3337,
+          "sha256": "a413a5e103b5329838475570f933a168509493a29503f57870a02d7b95192caf"
+        },
+        "prayer_ui_observed_at_utc": "2026-09-10T09:52:21.982+00:00",
+        "scope": "Actual UI shows prayer Amen, hymn7 announcement and words And can it be. Gaps do not establish automatic music suppression or full-input coverage."
+      },
+      "spoken_evidence": {
+        "status": "prayer_and_sermon_actual_ui_observed",
+        "source_interval_s": null,
+        "evidence": "fresh-lite-terminal/terminal-evidence.json",
+        "scope": "Actual UI contains prayer Amen and subsequent sermon. No exact singing boundaries or all-source speech coverage is inferred."
+      },
+      "source_span_validation": {
+        "consistent": true,
+        "total_finals": 468,
+        "total_preview_records": 271,
+        "invalid_final_spans": 0,
+        "invalid_preview_spans": 0,
+        "source_span_vs_actual_wav_header_mismatches": [],
+        "saved_wav_vs_reported_duration_mismatches": [],
+        "validation_scope": "Every retained final and preview source span; every final WAV header. Three selected Lite waveform intervals also match exactly, reported separately; this is not proof all source speech was retained."
+      },
+      "gap_classification": {
+        "whole_recording_coverage": null,
+        "last_caption_source_end_s": 3477.504,
+        "source_after_last_caption_window_s": 162.549,
+        "caption_window_union_s": 2063.68,
+        "padding_assisted_final_count": 0,
+        "exact_reader_eof_at_utc": null,
+        "interpretation": "Last caption source endpoint is not the last captured sample or exact EOF time. Remaining recording interval is unclassified; no musical/silent/missed-speech label is inferred. Actual late UI includes closing-hymn announcement; do not call the tail quiet."
+      },
+      "lifecycle_and_persistence": {
+        "verified": true,
+        "lifecycle_status": "completed",
+        "exit_code": 0,
+        "diagnostics_hash_matches": true,
+        "persistence": {
+          "submitted": 1979,
+          "completed": 1979,
+          "pending": 0,
+          "failed": 0,
+          "capacity": 256,
+          "ok": true,
+          "failures": []
+        },
+        "persistence_verified": true,
+        "monitor_status": "completed",
+        "process_cleanup_observed": true,
+        "no_running_processes_observed": true,
+        "last_observed_processes": []
+      },
+      "process_cleanup": {
+        "observed": true,
+        "monitor_terminal_at_utc": "2026-09-10T10:36:52.628263+00:00"
+      },
+      "memory": {
+        "pipeline_lifetime": {
+          "scope": "pipeline_process_lifetime",
+          "peak_rss_bytes": 3158310912,
+          "peak_metal_bytes": null
+        },
+        "process_tree": {
+          "sample_count": 729,
+          "rss_sum_bytes": {
+            "n": 729,
+            "p50": 1421901824,
+            "p95": 1793376256,
+            "max": 2027012096
+          },
+          "sampling_gaps_s": {
+            "n": 728,
+            "p50": 5.02311258399277,
+            "p95": 5.034561207983643,
+            "max": 5.043383415963035
+          }
+        },
+        "interpretation": "Pipeline RSS/Metal are separate lifetime counters. Monitor tree RSS is sampled simultaneous process RSS, can double-count shared pages and omit short-lived children. Do not add RSS and Metal, or call observed sampled max a true tree lifetime peak."
+      },
+      "browser_ack_coverage": [
+        {
+          "connection_id": "13177879824",
+          "final_acks": 468,
+          "expected_finals": 468,
+          "timed_final_acks": 468,
+          "final_ack_by_endpoint_ms": {
+            "smart_cut|replay_realtime": {
+              "n": 121,
+              "p50": 4343.4,
+              "p95": 8797.8,
+              "max": 16355.8
+            },
+            "hard_cut|replay_realtime": {
+              "n": 36,
+              "p50": 2764.75,
+              "p95": 10226.2,
+              "max": 19874.3
+            },
+            "silence|replay_realtime": {
+              "n": 311,
+              "p50": 2865.4,
+              "p95": 11264.0,
+              "max": 23671.3
+            }
+          },
+          "first_preview_ack_ms": {
+            "n": 174,
+            "p50": 5512.15,
+            "p95": 7711.3,
+            "max": 10846.8
+          },
+          "first_preview_coverage": 0.3717948717948718,
+          "visible_preview_events": 271,
+          "receive_to_render_ms": {
+            "n": 739,
+            "p50": 11.8,
+            "p95": 16.8,
+            "max": 20.8
+          },
+          "first_utterance_preview_ack_ms": 6104.5,
+          "first_preview_direct_ack": {
+            "session_id": "20260910_053518_894101_en",
+            "chunk_id": 1,
+            "utterance_id": 1,
+            "preview_kind": "periodic",
+            "preview_revision": 7,
+            "timing_source": "replay_realtime",
+            "caption_delivery_mode": "awaited",
+            "caption_queue_wait_ms": 0.0,
+            "captured_start_at_ms": 412192.118,
+            "captured_end_at_ms": 416448.118,
+            "speech_end_at_ms": 416448.118,
+            "sample_start": 19442688,
+            "sample_end": 19646976,
+            "sample_rate": 48000,
+            "speech_end_sample": 19646976,
+            "padding_samples": 0,
+            "event": "caption_rendered",
+            "event_id": "20260910_053518_894101_en:partial:7",
+            "stage": "partial",
+            "client_id": "13177879824",
+            "visible": true,
+            "receive_to_render_ms": 12.2,
+            "send_to_ack_ms": 13.3,
+            "speech_end_to_ack_upper_bound_ms": null,
+            "speech_start_to_preview_ack_upper_bound_ms": 6104.5,
+            "captured_end_to_preview_ack_upper_bound_ms": 1848.5,
+            "speech_end_to_preview_ack_upper_bound_ms": 1848.5,
+            "timing_schema_version": 2
+          },
+          "first_preview_is_final_linked": false,
+          "first_final_ack_ms": 5447.7,
+          "last_final_ack_ms": 2585.1,
+          "preview_acks_after_final_ack_count": 0,
+          "preview_ack_order_unassessable_count": 7,
+          "missing_final_chunks": [],
+          "missing_preview_events": [],
+          "unmatched_acks": 0
+        }
+      ],
+      "endpoint_metrics": {
+        "hard_cut|replay_realtime": {
+          "n": 36,
+          "server_ms": {
+            "n": 36,
+            "p50": 2752.2,
+            "p95": 10216.2,
+            "max": 19857.4
+          },
+          "stage_ms": {
+            "endpoint_decision_ms": {
+              "n": 36,
+              "p50": 9.652499999967404,
+              "p95": 11.43999999994412,
+              "max": 11.881999999983236
+            },
+            "stt_admission_ms": {
+              "n": 36,
+              "p50": 1188.9485000000568,
+              "p95": 7874.920999999857,
+              "max": 17068.612999999896
+            },
+            "stt_call_wall_ms": {
+              "n": 36,
+              "p50": 1489.9464999999618,
+              "p95": 1597.591999999946,
+              "max": 1683.2060000000056
+            },
+            "post_stt_dispatch_ms": {
+              "n": 36,
+              "p50": 1.8874999999534339,
+              "p95": 2.8999999999068677,
+              "max": 3.2199999999720603
+            },
+            "translation_admission_ms": {
+              "n": 36,
+              "p50": 0.03700000001117587,
+              "p95": 0.1389999999664724,
+              "max": 0.1389999999664724
+            },
+            "translation_call_wall_ms": {
+              "n": 36,
+              "p50": 154.98000000003958,
+              "p95": 210.08199999993667,
+              "max": 238.77600000007078
+            },
+            "finalization_ms": {
+              "n": 36,
+              "p50": 1.4415000000735745,
+              "p95": 2.625,
+              "max": 2.8529999998863786
+            }
+          }
+        },
+        "silence|replay_realtime": {
+          "n": 311,
+          "server_ms": {
+            "n": 311,
+            "p50": 2854.6,
+            "p95": 11246.8,
+            "max": 23655.1
+          },
+          "stage_ms": {
+            "endpoint_decision_ms": {
+              "n": 311,
+              "p50": 490.89199999999255,
+              "p95": 491.3880000002682,
+              "max": 493.1400000001304
+            },
+            "stt_admission_ms": {
+              "n": 311,
+              "p50": 690.5999999996275,
+              "p95": 3823.153999999864,
+              "max": 18541.56799999997
+            },
+            "stt_call_wall_ms": {
+              "n": 311,
+              "p50": 1294.0699999998324,
+              "p95": 1462.0930000003427,
+              "max": 9345.296999999788
+            },
+            "post_stt_dispatch_ms": {
+              "n": 311,
+              "p50": 1.6570000001229346,
+              "p95": 2.959999999962747,
+              "max": 3.8160000001080334
+            },
+            "translation_admission_ms": {
+              "n": 311,
+              "p50": 0.05000000027939677,
+              "p95": 0.1690000002272427,
+              "max": 1.2160000000149012
+            },
+            "translation_call_wall_ms": {
+              "n": 311,
+              "p50": 58.79400000022724,
+              "p95": 136.29299999959767,
+              "max": 192.71299999998882
+            },
+            "finalization_ms": {
+              "n": 311,
+              "p50": 0.5449999999254942,
+              "p95": 1.3619999999646097,
+              "max": 2.4229999999515712
+            }
+          }
+        },
+        "smart_cut|replay_realtime": {
+          "n": 121,
+          "server_ms": {
+            "n": 121,
+            "p50": 4328.3,
+            "p95": 8779.9,
+            "max": 16344.5
+          },
+          "stage_ms": {
+            "endpoint_decision_ms": {
+              "n": 121,
+              "p50": 1195.7879999999423,
+              "p95": 4780.084999999963,
+              "max": 7020.117000000086
+            },
+            "stt_admission_ms": {
+              "n": 121,
+              "p50": 1017.557999999728,
+              "p95": 3353.9679999999935,
+              "max": 8769.44299999997
+            },
+            "stt_call_wall_ms": {
+              "n": 121,
+              "p50": 1406.917999999947,
+              "p95": 1537.4599999999627,
+              "max": 7247.641999999993
+            },
+            "post_stt_dispatch_ms": {
+              "n": 121,
+              "p50": 1.4370000001508743,
+              "p95": 2.833000000100583,
+              "max": 3.8489999999292195
+            },
+            "translation_admission_ms": {
+              "n": 121,
+              "p50": 0.05000000004656613,
+              "p95": 0.32499999995343387,
+              "max": 0.8560000001452863
+            },
+            "translation_call_wall_ms": {
+              "n": 121,
+              "p50": 117.36599999992177,
+              "p95": 185.09000000031665,
+              "max": 202.69500000029802
+            },
+            "finalization_ms": {
+              "n": 121,
+              "p50": 1.1499999999068677,
+              "p95": 2.006000000052154,
+              "max": 3.4869999999646097
+            }
+          }
+        }
+      },
+      "preview_and_update_metrics": {
+        "first_translated_preview_ms": {
+          "n": 174,
+          "p50": 5503.25,
+          "p95": 7703.0,
+          "max": 10836.1
+        },
+        "update_gap_ms": {
+          "n": 93,
+          "p50": 1972.9269999999087,
+          "p95": 2309.4580000001006,
+          "max": 2964.188000000082
+        },
+        "missing_finalized_utterance_previews": 294
+      },
+      "ux_observations": {
+        "stop_before_utc": "2026-09-10T10:36:46.932+00:00",
+        "stop_after_utc": "2026-09-10T10:36:47.193+00:00",
+        "ready_observed_at_utc": "2026-09-10T10:37:09.160+00:00",
+        "operator_shutdown_at_utc": "2026-09-10T10:37:27.867786+00:00",
+        "operator_exited": true,
+        "driver_exit_code": 241,
+        "driver_scope": "Deliberate operator SIGTERM after pipeline/monitor successful completion, separate from pipeline exit0.",
+        "draft_or_human_approval": false,
+        "late_ui": "Closing-hymn announcement retained; remaining source tail unclassified."
+      },
+      "archive": {
+        "status": "built_and_standalone_verified",
+        "path": "raw/",
+        "manifest": "raw/artifact-manifest.json",
+        "manifest_sha256": "68fee0fc07b6a7d405e90fffea70131ad754406b096a42f287f443539a653a60",
+        "verification": "archive-verification.json",
+        "verifier": "raw/verify_endurance.py",
+        "archive_sha256": "b7f58e594b852e1451890b29c1eb893345a0cd34dfefd2f8f45659570518cf4c",
+        "compressed_bytes": 3999389,
+        "shards": 9,
+        "maximum_shard_bytes": 491520,
+        "source_members": 94,
+        "verified_members_including_inventory": 95,
+        "scope": "Three distinct cohorts retained without pooling; original failed Standard evidence unchanged."
+      },
+      "acceptance": {
+        "status": "functional_completion_and_retained_source_span_checks_passed",
+        "fast_production_recommendation": false,
+        "quality_certification": false,
+        "hardware_certification": false,
+        "reason": "Sparse first translated previews174/468 and large observed latency tails. Observationally slower than Standard on this Mac, but not a causal paired comparison; x86/8GiB/RTX2070 and human-quality gates remain separate."
+      },
+      "profile": "lite-cpu",
+      "planned_backend": "cpu",
+      "backend": "cpu",
+      "source_lang": "en",
+      "target_lang": "es",
+      "session_kind": "replay",
+      "source_kind": "natural_recorded_service",
+      "replay_speed": 1.0,
+      "actual_profile": {
+        "name": "lite-cpu",
+        "backend": "cpu",
+        "stt_model": "whisper-small",
+        "stt_compute_type": "int8",
+        "stt_threads": 3,
+        "stt_workers": 1,
+        "marian_threads": 1,
+        "final_engine": "marian",
+        "translation_model": null,
+        "vad_backend": "onnx",
+        "ram_floor_gb": 8,
+        "physical_core_floor": 4,
+        "vram_floor_gb": 0
+      },
+      "declared_profile_artifacts": {
+        "marian-ct2-en-es": {
+          "repo_id": null,
+          "revision": null,
+          "sha256": null,
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66"
+        },
+        "marian-ct2-es-en": {
+          "repo_id": null,
+          "revision": null,
+          "sha256": null,
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055"
+        },
+        "marian-en-es": {
+          "repo_id": "Helsinki-NLP/opus-mt-en-es",
+          "revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+          "sha256": null,
+          "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-en-es/snapshots/5bc4493d463cf000c1f0b50f8d56886a392ed4ab"
+        },
+        "marian-es-en": {
+          "repo_id": "Helsinki-NLP/opus-mt-es-en",
+          "revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+          "sha256": null,
+          "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-es-en/snapshots/c96e2c5399ebfae4fc43d9669556b9afa74bb69d"
+        },
+        "silero-vad-onnx": {
+          "repo_id": null,
+          "revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+          "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx"
+        },
+        "whisper-small": {
+          "repo_id": "Systran/faster-whisper-small",
+          "revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "sha256": null,
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small"
+        }
+      },
+      "pid_at_start": 84826,
+      "lifecycle_started_at_utc": "2026-09-10T09:35:19.220965+00:00",
+      "early_quality_observations": {
+        "evidence": "lite-early/quality-observations.json",
+        "ui_observed_at_utc": "2026-09-10T09:42:46.539+00:00",
+        "subject_preservation_observed": true,
+        "other_clause_omission_observed": true,
+        "controlled_profile_comparison": false,
+        "human_reviewed": false,
+        "terminal_result": null
+      },
+      "terminal_at_utc": "2026-09-10T10:36:47.110148+00:00",
+      "terminal_queues": {
+        "audio": 0,
+        "capture_handoff": 0,
+        "finals": 0,
+        "stream_tokens": 1
+      },
+      "terminal_queue_interpretation": "stream_tokens=1 is the shutdown None sentinel; required writes and cleanup verified independently.",
+      "session_counters": {
+        "event": "session_summary",
+        "session": "20260910_053518_894101_en",
+        "timestamp": "2026-09-10T06:36:47.105234",
+        "chunks_attempted": 599,
+        "chunks_completed": 468,
+        "chunks_empty_stt": 21,
+        "chunks_hallucination": 110,
+        "chunks_dedup": 0,
+        "ws_total_connections": 3,
+        "ws_total_disconnections": 1,
+        "ws_send_failures": 0,
+        "latency_experiment_counters": {
+          "warmup_requested": 6046,
+          "warmup_executed": 0,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 5413,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 138,
+          "partial_suppressed_in_flight": 2350,
+          "partial_suppressed_after_stt": 55,
+          "partial_stt_started": 879,
+          "partial_stt_finished": 879,
+          "final_stt_started": 599,
+          "final_stt_finished": 599,
+          "partial_emitted": 271,
+          "final_marian_routes": 468,
+          "final_gemma_requests": 0,
+          "preview_periodic": 271,
+          "utterance_discarded": 32,
+          "partial_suppressed_discarded_utterance": 8
+        },
+        "latency_experiment_configuration": {
+          "latest_partial": false,
+          "async_captions": false,
+          "marian_memo": 0,
+          "first_preview_s": 0.0,
+          "pause_preview_ms": 0.0,
+          "speculate_pause_ms": 0.0,
+          "clause_preview_s": 0.0,
+          "vad_worker": false,
+          "incremental_stt": "off",
+          "rolling_window_s": 4.0,
+          "mlx_cache_mb": 256,
+          "gemma_prefix_cache": false,
+          "trace": false
+        },
+        "replay_client_wait": {
+          "requested_seconds": 0.0,
+          "actual_wait_seconds": 0.0,
+          "status": "disabled",
+          "connected_clients": 0,
+          "visibility_confirmed": false
+        }
+      },
+      "concurrent_conditions": {
+        "scope": "Installed lite-cpu functional endurance on this Mac; not a quiet causal latency benchmark or x86/RTX2070 certification.",
+        "during_session": [
+          {
+            "activity": "Root-authorized Standard terminal WAV-header audit, no PCM samples/models",
+            "started_at_utc": "2026-09-10T09:38:03.310248+00:00",
+            "ended_at_utc": "2026-09-10T09:38:03.524534+00:00"
+          },
+          {
+            "activity": "Bounded metadata/UI/doc reads and scratch documentation/report/spec preparation",
+            "started_at_utc": null,
+            "ended_at_utc": null,
+            "timing_basis": "Exact UTC tool intervals not recorded; do not infer them from file mtimes."
+          }
+        ],
+        "model_inference_scope": "No other agent model inference during Lite; root completed Standard summary and closed its operator before starting Lite.",
+        "synthetic_tests_during_lite": "None run by this helper agent. Earlier 1.483s/1.471s synthetic tests occurred during Standard and are recorded with that cohort.",
+        "post_terminal_audit": {
+          "started_at_utc": "2026-09-10T10:41:23.549378+00:00",
+          "ended_at_utc": "2026-09-10T10:41:23.606574+00:00",
+          "activities": "Terminal record/ACK/receipt reads and 468 WAV-header checks only, after both hours completed."
+        },
+        "selected_waveform_checks": "Separately authorized and executed after both hours completed; retained in ../waveform-continuity/results/ with their own sample windows and versions."
+      },
+      "terminal_evidence": "fresh-lite-terminal/terminal-evidence.json",
+      "selected_waveform_evidence": {
+        "session_id": "20260910_053518_894101_en",
+        "counts": {
+          "exact_declared_sequence": 3,
+          "declared_sequence_mismatch": 0,
+          "unsupported": 0
+        },
+        "selected_chunks": [
+          {
+            "chunk_id": 20,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 128000,
+            "declared_expected_frames_16k": 128000,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          },
+          {
+            "chunk_id": 21,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 128000,
+            "declared_expected_frames_16k": 128000,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          },
+          {
+            "chunk_id": 157,
+            "status": "exact_declared_sequence",
+            "stored_frames_16k": 128000,
+            "declared_expected_frames_16k": 128000,
+            "length_delta_frames_16k": 0,
+            "whole_sequence_float32_equal": true
+          }
+        ],
+        "evidence": {
+          "path": ".cache/overnight-20260910/waveform-continuity/results/lite.json",
+          "size_bytes": 11708,
+          "sha256": "076749837b340dbd3fe7c7b8bebcbf74b170f0aef013b6e6aef53e88b4a61bf8"
+        },
+        "reproducer_sha256": "906d34a5436d68402acca67b49db694543b0f357f35341e38412e9515893660c",
+        "reproducer_versions": {
+          "numpy": "2.3.5",
+          "scipy": "1.17.1",
+          "soundfile": "0.14.0"
+        },
+        "scope": "selected supporting waveform regression evidence; not a quality gate or full-session coverage claim",
+        "public_summary": "waveform-evidence.json"
+      }
+    }
+  },
+  "operator_rehearsal": {
+    "status": "completed_separate_controlled_rehearsal",
+    "report": "../overnight_operator_rehearsal.md",
+    "machine_evidence": "../overnight_operator_rehearsal.json",
+    "session_ids": [
+      "20260910_003912_869693_en",
+      "20260910_004130_713413_es",
+      "20260910_004221_108762_en"
+    ],
+    "observed": [
+      "Partial/final caption delivery",
+      "Pause/Resume and Stop",
+      "EN/ES restart with new session identity",
+      "Unapproved draft persistence",
+      "Short-session summary excerpt",
+      "Metadata-only support ZIP download"
+    ],
+    "spanish_source": "synthetic Piper; no natural Spanish certification",
+    "browser_95_percent_timing_gate_passed": false,
+    "approved_correction_count": 0
+  },
+  "live_review_during_old_standard": {
+    "status": "saved_unapproved_separate_revision",
+    "revision": 1,
+    "transcript_approved": false,
+    "translation_approved": false,
+    "draft_restoration": "Fresh same-origin page; attempted reload was canceled.",
+    "save_and_next": "Observed by operator; HTTP success and saved sidecar independently corroborate save. No after-navigation snapshot retained.",
+    "source_integrity_basis": "Prediction fields agree; correction is separate. No pre-save whole-diagnostics hash exists, so no whole-file before/after hash claim.",
+    "public_private_note_included": false
+  },
+  "long_summary_ui": {
+    "schema_version": 1,
+    "session_id": "20260910_043120_839144_en",
+    "task_id": "efc80421f1df",
+    "status": "done",
+    "return_code": 0,
+    "duration_s": 19.097662,
+    "action_before_utc": "2026-09-10T09:32:58.554Z",
+    "action_after_utc": "2026-09-10T09:32:58.825Z",
+    "task_started_at_utc": "2026-09-10T09:32:58.580713+00:00",
+    "task_finished_at_utc": "2026-09-10T09:33:17.678375+00:00",
+    "ui_observed_at_utc": "2026-09-10T09:34:09.851Z",
+    "input_segments": 563,
+    "input_words": 6746,
+    "english_sentences": 3,
+    "spanish_sentences": 3,
+    "model": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+    "content_mode": "model_summary",
+    "transcript_truncated": true,
+    "truncation_notice_observed": true,
+    "human_reviewed": false,
+    "source_languages": [
+      "en"
+    ],
+    "summary_result": {
+      "path": ".cache/overnight-20260910/installed-standard-fixed-endurance/metrics/summary_20260910_043120_839144_en.json",
+      "size_bytes": 1624,
+      "sha256": "63fecba832fe0d914bcdca075aeeff4d1458f92782c9a4121e1de3f987c44ce8"
+    },
+    "task": {
+      "path": ".cache/overnight-20260910/installed-standard-fixed-endurance/metrics/summary_task_efc80421f1df.json",
+      "size_bytes": 2202,
+      "sha256": "fe2bf82901f42cae7fd23249d0e04a173926f282574bbc8db2be55585edd1651"
+    },
+    "ui_derivative": "summary-ui.txt",
+    "operator_action_ledger": {
+      "path": ".cache/overnight-20260910/endurance-preparation/standard-fixed-ui-actions.jsonl",
+      "size_bytes": 1415,
+      "sha256": "ae0a54ce428fe9ba1a226923913261396776e3981c254811ae17781b4611f96b"
+    },
+    "scope": "Actual Create summary click and Finished bilingual UI; a subsequent selector lookup failed during observation without launching a duplicate task. Beginning/end excerpt only; middle omitted. Successful generation is not a fidelity or human-quality certificate.",
+    "evidence": "fresh-standard-terminal/summary-evidence.json"
+  },
+  "follow_up_issue_mapping": {
+    "status": "pending_root_verification",
+    "items": null
+  },
+  "unused_transition_slice": {
+    "duration_s": 350,
+    "executed": false
+  },
+  "separate_gates_pending": [
+    "Actual microphone EN/ES capture",
+    "Independent physical or virtual EN/ES TTS routes",
+    "Natural two-speaker diarization",
+    "Natural Spanish reference-based quality",
+    "Bilingual human review and approved correction/training loop",
+    "Native Windows/x86 CPU and RTX 2070 certification"
+  ],
+  "evidence_exclusions": [
+    "Original audio",
+    "Model files",
+    "Private correction note contents",
+    "Full corpus transcript excerpts",
+    "Unbounded environment dumps"
+  ],
+  "analysis_rules": [
+    "Never pool original failed source bounds with repaired cohorts.",
+    "Do not replace null pending results with successful old-run observations.",
+    "Retain original endpoint labels and distinguish genuine in-file silence from virtual replay-tail endpoints.",
+    "Keep server payload timing distinct from browser ACK upper bounds.",
+    "Do not sum stage medians, RSS and Metal, or sampled and lifetime peaks.",
+    "No issue closure, release publication or human approval is implied."
+  ],
+  "updated_at_utc": "2026-09-10T09:42:33.517844+00:00",
+  "source_runtime_location": "Installed site-packages loaded from a dedicated data directory with no project Python modules and PYTHONPATH cleared. Data directory is physically within checkout ancestry. Mechanical installation smokes separately used /private/tmp outside checkout.",
+  "cpu_followup": {
+    "status": "proposed_not_run",
+    "observed_configuration": {
+      "beam_size": 1,
+      "stt_threads": 3,
+      "stt_workers": 1,
+      "marian_threads": 1,
+      "partial_interval_s": 0.6
+    },
+    "next_experiment": "Bounded CPU partial-admission/cadence trial with preview coverage, final tails, output omission and quality guards.",
+    "rationale": "Observed STT admission and roughly1.3–1.5s STT call medians dominate; Marian silence p50 is58.8ms. E2B quality mode would not address the identified STT queue cost.",
+    "no_default_change": true
+  },
+  "retained_archive": {
+    "status": "built_and_standalone_verified",
+    "path": "raw/",
+    "manifest": "raw/artifact-manifest.json",
+    "manifest_sha256": "68fee0fc07b6a7d405e90fffea70131ad754406b096a42f287f443539a653a60",
+    "verification": "archive-verification.json",
+    "verifier": "raw/verify_endurance.py",
+    "archive_sha256": "b7f58e594b852e1451890b29c1eb893345a0cd34dfefd2f8f45659570518cf4c",
+    "compressed_bytes": 3999389,
+    "shards": 9,
+    "maximum_shard_bytes": 491520,
+    "source_members": 94,
+    "verified_members_including_inventory": 95,
+    "scope": "Three distinct cohorts retained without pooling; original failed Standard evidence unchanged."
+  }
+}

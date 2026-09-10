@@ -10,9 +10,13 @@ Run with: ``pytest tests/test_v2026_7_linux_docker.py``
 
 from __future__ import annotations
 
+import ast
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
+import yaml
 
 ROOT = Path(__file__).parent.parent
 
@@ -259,3 +263,91 @@ class TestDockerWorkflow:
     def test_triggers_on_version_tags(self):
         text = (ROOT / ".github" / "workflows" / "docker.yml").read_text()
         assert 'tags:\n      - "v*"' in text or "tags:\n      - 'v*'" in text
+
+
+def _release_condition(expression, event_name, ref_type, push):
+    """Evaluate the workflow's boolean subset against an independent event matrix."""
+    expression = expression.removeprefix("${{").removesuffix("}}").strip()
+    tree = ast.parse(expression.replace("&&", " and ").replace("||", " or "), mode="eval")
+    context = {"github": {"event_name": event_name, "ref_type": ref_type}, "inputs": {"push": push}}
+
+    def value(node):
+        if isinstance(node, ast.Constant):
+            return node.value
+        if isinstance(node, ast.Name):
+            return context[node.id]
+        if isinstance(node, ast.Attribute):
+            return value(node.value)[node.attr]
+        if isinstance(node, ast.BoolOp):
+            if isinstance(node.op, ast.And):
+                return all(value(item) for item in node.values)
+            if isinstance(node.op, ast.Or):
+                return any(value(item) for item in node.values)
+        if isinstance(node, ast.Compare) and len(node.ops) == 1:
+            left, right = value(node.left), value(node.comparators[0])
+            if isinstance(node.ops[0], ast.Eq):
+                return left == right
+            if isinstance(node.ops[0], ast.NotEq):
+                return left != right
+        raise AssertionError(f"Unsupported workflow condition syntax: {ast.dump(node)}")
+
+    return bool(value(tree.body))
+
+
+class TestDockerPublicationPolicy:
+    @staticmethod
+    def workflow():
+        # BaseLoader preserves the GitHub Actions `on` key (YAML1.1 calls it True).
+        return yaml.load((ROOT / ".github/workflows/docker.yml").read_text(), Loader=yaml.BaseLoader)
+
+    @pytest.mark.parametrize(
+        "event_name,ref_type,push,expected",
+        [
+            ("push", "branch", False, False),
+            ("push", "branch", True, False),
+            ("push", "tag", False, True),
+            ("push", "tag", True, True),
+            ("workflow_dispatch", "branch", False, False),
+            ("workflow_dispatch", "branch", True, True),
+            ("workflow_dispatch", "tag", False, False),
+            ("workflow_dispatch", "tag", True, True),
+            ("pull_request", "branch", False, False),
+            ("pull_request", "tag", True, False),
+        ],
+    )
+    def test_login_upload_and_report_obey_event_boundary(self, event_name, ref_type, push, expected):
+        steps = self.workflow()["jobs"]["build-and-push"]["steps"]
+        login = next(s for s in steps if s.get("uses", "").startswith("docker/login-action@"))
+        build = next(s for s in steps if s.get("uses", "").startswith("docker/build-push-action@"))
+        summary = next(s for s in steps if s.get("name") == "Image build result")
+        for expression in (login["if"], build["with"]["push"], summary["env"]["IMAGE_PUSHED"]):
+            assert _release_condition(expression, event_name, ref_type, push) is expected
+
+    def test_main_still_builds_and_manual_push_defaults_false(self):
+        workflow = self.workflow()
+        assert "main" in workflow["on"]["push"]["branches"]
+        assert workflow["on"]["workflow_dispatch"]["inputs"]["push"]["default"] == "false"
+        job = workflow["jobs"]["build-and-push"]
+        assert not job.get("if"), "The build must not be skipped when publication is disabled"
+        build = next(s for s in job["steps"] if s.get("uses", "").startswith("docker/build-push-action@"))
+        assert not build.get("if")
+
+    @pytest.mark.parametrize("pushed", [False, True])
+    def test_actual_summary_shell_reports_build_or_upload_without_evaluating_tag_text(self, tmp_path, pushed):
+        summary = next(
+            s for s in self.workflow()["jobs"]["build-and-push"]["steps"] if s.get("name") == "Image build result"
+        )
+        marker = tmp_path / "tag-must-remain-data"
+        tag = f"ghcr.io/example/image:$(touch {marker})"
+        result = subprocess.run(
+            ["bash", "-e", "-c", summary["run"]],
+            env={**os.environ, "IMAGE_PUSHED": str(pushed).lower(), "IMAGE_TAGS": tag},
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=5,
+        )
+        assert ("Uploaded images to GHCR:" in result.stdout) is pushed
+        assert ("Built images; no registry upload:" in result.stdout) is not pushed
+        assert tag in result.stdout
+        assert not marker.exists()

@@ -227,9 +227,9 @@ activation. Details and the Mac-side consumers: [`CLAUDE-windows.md`](../CLAUDE-
 
 Hindi and Chinese remain **pending user decisions** (#138). `tools/offline_hindi.py`
 (church audio → Parakeet English → Gemma Hindi, evaluation only; see
-[`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md))
-is an offline baseline tool, not a live integration, and no Hindi training data has been
-prepared. When a decision lands ([`docs/archive/research/multi_lingual.md`](../docs/archive/research/multi_lingual.md)):
+[`docs/evaluation/overnight_hindi/README.md`](../docs/evaluation/overnight_hindi/README.md))
+has a completed offline R&D report, with no live integration or further work in the
+EN↔ES latency program. No Hindi training data has been prepared. When a decision lands ([`docs/archive/research/multi_lingual.md`](../docs/archive/research/multi_lingual.md)):
 
 1. Aligned verse pairs from `bible-nlp/biblenlp-corpus` (Hindi IRV `hin2017`, Chinese CUV-S `cmn-cu89s`).
 2. `prepare_bible_corpus.py` → JSONL with `source_lang_code`, `target_lang_code`, `source_text`, `target_text`, `verse_id`.

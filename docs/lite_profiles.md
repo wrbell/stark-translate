@@ -21,6 +21,13 @@ The initial budget leaves three CT2 STT threads, one STT worker and one Marian
 thread. Final output quality and sustained backlog must be measured independently
 for each tier. No latency gate has passed for Lite yet.
 
+The [installed natural-English service rehearsal](evaluation/overnight_endurance_20260910/README.md)
+completed on this Mac's CPU with consistent retained spans, required writes and
+process cleanup. First translated previews were sparse and observed final latency
+tails were large. Lite is functionally exercised, but cannot be recommended as a
+fast production profile today; the observational Standard/Lite results are not a
+causal paired comparison or a human-quality certificate.
+
 The profiles disable A/B, speculative drafting, extra STT fallback models,
 multiprocess and live diarization. TTS is an optional CPU extra. E2B failures fail
 the selected session rather than silently loading HF NF4 or publishing a model

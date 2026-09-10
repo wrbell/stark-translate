@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_043120_839144_en",
+  "task_id": "efc80421f1df",
+  "status": "done",
+  "return_code": 0,
+  "duration_s": 19.097662,
+  "action_before_utc": "2026-09-10T09:32:58.554Z",
+  "action_after_utc": "2026-09-10T09:32:58.825Z",
+  "task_started_at_utc": "2026-09-10T09:32:58.580713+00:00",
+  "task_finished_at_utc": "2026-09-10T09:33:17.678375+00:00",
+  "ui_observed_at_utc": "2026-09-10T09:34:09.851Z",
+  "input_segments": 563,
+  "input_words": 6746,
+  "english_sentences": 3,
+  "spanish_sentences": 3,
+  "model": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+  "content_mode": "model_summary",
+  "transcript_truncated": true,
+  "truncation_notice_observed": true,
+  "human_reviewed": false,
+  "source_languages": [
+    "en"
+  ],
+  "summary_result": {
+    "path": ".cache/overnight-20260910/installed-standard-fixed-endurance/metrics/summary_20260910_043120_839144_en.json",
+    "size_bytes": 1624,
+    "sha256": "63fecba832fe0d914bcdca075aeeff4d1458f92782c9a4121e1de3f987c44ce8"
+  },
+  "task": {
+    "path": ".cache/overnight-20260910/installed-standard-fixed-endurance/metrics/summary_task_efc80421f1df.json",
+    "size_bytes": 2202,
+    "sha256": "fe2bf82901f42cae7fd23249d0e04a173926f282574bbc8db2be55585edd1651"
+  },
+  "ui_derivative": "summary-ui.txt",
+  "operator_action_ledger": {
+    "path": ".cache/overnight-20260910/endurance-preparation/standard-fixed-ui-actions.jsonl",
+    "size_bytes": 1415,
+    "sha256": "ae0a54ce428fe9ba1a226923913261396776e3981c254811ae17781b4611f96b"
+  },
+  "scope": "Actual Create summary click and Finished bilingual UI; a subsequent selector lookup failed during observation without launching a duplicate task. Beginning/end excerpt only; middle omitted. Successful generation is not a fidelity or human-quality certificate."
+}

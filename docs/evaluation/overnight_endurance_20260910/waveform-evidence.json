@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "status": "completed_after_both_hours",
+  "cohorts": {
+    "old-standard": {
+      "session_id": "20260910_024936_300302_en",
+      "counts": {
+        "exact_declared_sequence": 2,
+        "declared_sequence_mismatch": 1,
+        "unsupported": 0
+      },
+      "selected_chunks": [
+        {
+          "chunk_id": 9,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 68608,
+          "declared_expected_frames_16k": 68608,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        },
+        {
+          "chunk_id": 10,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 128000,
+          "declared_expected_frames_16k": 128000,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        },
+        {
+          "chunk_id": 141,
+          "status": "declared_sequence_mismatch",
+          "stored_frames_16k": 128000,
+          "declared_expected_frames_16k": 128512,
+          "length_delta_frames_16k": -512,
+          "whole_sequence_float32_equal": false
+        }
+      ],
+      "evidence": {
+        "path": ".cache/overnight-20260910/waveform-continuity/results/old-standard.json",
+        "size_bytes": 21239,
+        "sha256": "4b2e4c69c2159605b8053ea31f1b21e7b511b76caee39c599f51d04a1f270077"
+      },
+      "reproducer_sha256": "906d34a5436d68402acca67b49db694543b0f357f35341e38412e9515893660c",
+      "reproducer_versions": {
+        "numpy": "2.3.5",
+        "scipy": "1.17.1",
+        "soundfile": "0.14.0"
+      },
+      "scope": "selected supporting waveform regression evidence; not a quality gate or full-session coverage claim"
+    },
+    "fixed-standard": {
+      "session_id": "20260910_043120_839144_en",
+      "counts": {
+        "exact_declared_sequence": 3,
+        "declared_sequence_mismatch": 0,
+        "unsupported": 0
+      },
+      "selected_chunks": [
+        {
+          "chunk_id": 18,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 68608,
+          "declared_expected_frames_16k": 68608,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        },
+        {
+          "chunk_id": 19,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 128000,
+          "declared_expected_frames_16k": 128000,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        },
+        {
+          "chunk_id": 157,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 128000,
+          "declared_expected_frames_16k": 128000,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        }
+      ],
+      "evidence": {
+        "path": ".cache/overnight-20260910/waveform-continuity/results/fixed-standard.json",
+        "size_bytes": 11768,
+        "sha256": "675dd3aebdc6d6bbfd2ff7489697dc15cab9d21d36ef4ac982fa0f6ff730f43c"
+      },
+      "reproducer_sha256": "906d34a5436d68402acca67b49db694543b0f357f35341e38412e9515893660c",
+      "reproducer_versions": {
+        "numpy": "2.3.5",
+        "scipy": "1.17.1",
+        "soundfile": "0.14.0"
+      },
+      "scope": "selected supporting waveform regression evidence; not a quality gate or full-session coverage claim"
+    },
+    "lite": {
+      "session_id": "20260910_053518_894101_en",
+      "counts": {
+        "exact_declared_sequence": 3,
+        "declared_sequence_mismatch": 0,
+        "unsupported": 0
+      },
+      "selected_chunks": [
+        {
+          "chunk_id": 20,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 128000,
+          "declared_expected_frames_16k": 128000,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        },
+        {
+          "chunk_id": 21,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 128000,
+          "declared_expected_frames_16k": 128000,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        },
+        {
+          "chunk_id": 157,
+          "status": "exact_declared_sequence",
+          "stored_frames_16k": 128000,
+          "declared_expected_frames_16k": 128000,
+          "length_delta_frames_16k": 0,
+          "whole_sequence_float32_equal": true
+        }
+      ],
+      "evidence": {
+        "path": ".cache/overnight-20260910/waveform-continuity/results/lite.json",
+        "size_bytes": 11708,
+        "sha256": "076749837b340dbd3fe7c7b8bebcbf74b170f0aef013b6e6aef53e88b4a61bf8"
+      },
+      "reproducer_sha256": "906d34a5436d68402acca67b49db694543b0f357f35341e38412e9515893660c",
+      "reproducer_versions": {
+        "numpy": "2.3.5",
+        "scipy": "1.17.1",
+        "soundfile": "0.14.0"
+      },
+      "scope": "selected supporting waveform regression evidence; not a quality gate or full-session coverage claim"
+    }
+  },
+  "manifest": {
+    "path": ".cache/overnight-20260910/waveform-continuity/results/manifest.json",
+    "size_bytes": 1749,
+    "sha256": "8e52f4b1649c1470c3efce432fd62cc56eabc42bc0d0354b0bd8a472e66b5902"
+  },
+  "summary": {
+    "path": ".cache/overnight-20260910/waveform-continuity/RESULTS.md",
+    "size_bytes": 2422,
+    "sha256": "6650c8a9d6b8d7e41df3baf3904eeedda448581a7cf9c8733e3b8431ef3f4071"
+  },
+  "scope": "Selected bounded waveform reconstruction only. All six fresh selected windows match exactly; old chunk141 reproduces512 missing16k samples (32ms). No all-source coverage or transcription/translation quality certification. This document preparation reads result metadata only, not audio."
+}

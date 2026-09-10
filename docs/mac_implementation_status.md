@@ -57,17 +57,25 @@ These Mac CPU functional tests do not certify x86 or RTX2070. E2B pipeline RSS
 excludes its native child and cannot certify combined memory.
 
 The [runtime-freeze artifact check](evaluation/overnight_artifact_validation_20260910.json)
-verified the wheel, sdist and Mac ZIP at `b65e6e0`. All 149 runtime members match
-source, and wheels rebuilt from the sdist/ZIP match the canonical wheel. Both isolated
-installations passed five real HTTP routes, version/profile/launchd-render checks
-and `pip check`, without loading inference libraries. Final documentation archives
-and actual installed inference remain separate checks.
+verified the wheel, sdist and Mac ZIP at frozen source `752ab9a`. All 152 runtime
+members match that source, and both rebuilt wheels are byte-identical to canonical
+wheel `7477574d…`. Isolated Mac and Lite installations passed five real HTTP routes and an installed verse-parser
+assertion, plus version/profile/launchd-render checks
+and `pip check`. Dependency versions stayed unchanged and inference libraries were
+not loaded. The [older b65e6e0 receipt](evaluation/overnight_artifact_validation_b65e6e0_20260910.json)
+is preserved for the original hour. Mechanical package checks do not transfer an
+old inference result to changed runtime bytes or certify a new full-hour run.
 
 The [final local validation record](evaluation/overnight_validation_20260910.json)
-contains 2,213 passing CPU-suite tests, four skips and 63.52% coverage; the three
-real GPU regressions also passed. These checks validate the integrated source
-before this documentation refresh; they do not establish a latency or quality gate.
-Final CI, source review and the authorized merge remain separate.
+records 2,363 passing CPU-suite tests, four skips and 63.80% coverage at frozen
+source `752ab9a` (89.97 s); all three real GPU regressions passed (21.16 s).
+Pre-commit and the [prescribed static checks](evaluation/overnight_static_validation_752ab9a_20260910.json)
+also passed: Ruff/format, mypy engines/settings, the configured Bandit scan and
+HTML5 Tidy on six pages. Bandit uses the documented CI scope/exclusions; this is
+not a new dependency advisory audit. The [earlier local check record](evaluation/overnight_validation_early_20260910.json)
+is retained with its original source-binding limitation. These checks establish
+no latency, human-quality or endurance gate; remote CI and source integration are
+recorded separately.
 
 The [96-run English screen](evaluation/overnight_screen_20260910/README.md) is
 complete on frozen source `911f4ae`: 96/96 valid runs, 672 finals, and 0/28 selected
@@ -86,11 +94,34 @@ unreviewed references and control drift prevent a promotion claim. The
 explains why a large pooled improvement against closing controls does not justify
 an ordinary confirmation run.
 
-The earlier standard full-service attempt is retained as failed source-bound
-validation evidence and does not satisfy endurance acceptance. The next validation
-uses the complete source recording: a fresh full-length standard replay, followed
-by a separate full-length CPU Lite replay. Results for both remain pending. The
-prepared 350-second slice was unused and is not a validation cohort.
+The earlier Standard hour completed required writes and cleanup but failed
+source-bound validation (23/549 final spans and 97/2,720 preview spans); it remains
+a separate failed cohort. The fresh full-service Standard session
+`20260910_043120_839144_en`, installed from frozen source `752ab9a`, completed at
+09:32:38.589810 UTC with exit 0. All 563 final spans and retained WAV headers,
+and all 2,814 preview spans, are consistent; all 7,594 writes completed without
+failure and process cleanup was observed. One document-visible ACK connection
+matched all 563 finals. These checks do not establish human quality, physical
+screen visibility or complete source-speech coverage.
+
+CPU Lite session `20260910_053518_894101_en`, using the same `752ab9a` wheel,
+completed at 10:36:47.110148 UTC with exit 0. All 468 final spans/WAV headers and
+271 preview spans agree; all 1,979 writes completed with zero pending/failed, and
+cleanup was observed. One matched document-visible connection acknowledged all
+468 finals and 271 translated previews, but only 174/468 finalized utterances had
+a first translated preview. Lite is functionally exercised on this Mac; its sparse
+previews and large observed latency tails do not support recommending it as a fast
+production profile today. Hardware and human-quality certification remain pending.
+
+[The retained endurance report](evaluation/overnight_endurance_20260910/README.md)
+keeps the old failed Standard, repaired Standard and Lite cohorts separate. Their
+concurrent lightweight activities are disclosed; observed Standard/Lite speed
+is not a causal paired comparison. Selected waveform reconstruction matched three
+windows in each repaired cohort, while reproducing the old chunk 141 deficit.
+That is supporting regression evidence, not exact EOF or all-source coverage.
+Lite's last caption was followed by 162.549 seconds of unclassified source; its
+closing-hymn context must not be described as a quiet tail. The prepared 350-second
+slice was unused.
 
 Previous [48-run screening](evaluation/mac_v2026_14_screening/README.md),
 [24 bilingual routing probes](evaluation/mac_v2026_14_routing/README.md) and
@@ -101,7 +132,8 @@ delivery measurements. The sub-second median goal remains unachieved.
 
 ## Remaining gates
 
-- Complete and review the standard and CPU Lite endurance rehearsals. The 96-run
+- Retain and review the completed Standard/Lite endurance evidence and the original
+  failed cohort, including sparse Lite previews and unresolved quality. The 96-run
   screen justifies no ordinary confirmations or combined configuration; future
   profiling needs a distinct hypothesis. Keep any Spanish probes in a separate
   cohort, and require quality review before a default change.

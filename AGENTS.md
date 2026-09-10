@@ -38,6 +38,14 @@ processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/READ
 
 The [completed September 10 screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
 
+EN↔ES remains the active speed priority. The installed Standard and CPU Lite
+full-service runs on `752ab9a` completed with consistent retained source spans,
+required writes and process cleanup. Lite was functional on this Mac, but sparse
+previews and large observed tails do not support recommending it as a fast
+production profile today. See the [separate endurance cohorts](docs/evaluation/overnight_endurance_20260910/README.md);
+these observational runs do not establish a causal speed comparison, human quality,
+physical display visibility or a default promotion.
+
 **Lite profiles** (`stark_translate/profiles.py`, `stark-translate-lite`): Whisper small
 CT2 int8 + Marian CT2 finals on CPU (`lite-cpu`), Gemma 4 E2B Q4_K_M via a session-owned
 `llama-server` (`lite-cpu-quality`, `lite-cuda-8gb`); ONNX Silero; no A/B, drafting,

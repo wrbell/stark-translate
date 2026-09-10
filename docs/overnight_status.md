@@ -39,15 +39,43 @@ replace obsolete installation claims. MSI file/hash inspection remains distinct
 from an actual Windows first-launch test. The PyApp reference TOML is not consumed
 by the workflow and cannot establish automatic profile/extras installation.
 
-The earlier standard full-service attempt is retained as failed source-bound
-validation evidence and does not satisfy endurance acceptance. The next validation
-uses the complete source recording: a fresh full-length standard replay, followed
-by a separate full-length CPU Lite replay. Results for both remain pending. The
-prepared 350-second slice was unused and is not a validation cohort.
+The earlier Standard hour completed required writes and cleanup but failed
+source-bound validation (23/549 final spans and 97/2,720 preview spans); it remains
+a separate failed cohort. The fresh full-service Standard session
+`20260910_043120_839144_en`, installed from frozen source `752ab9a`, completed at
+09:32:38.589810 UTC with exit 0. All 563 final spans and retained WAV headers,
+and all 2,814 preview spans, are consistent; all 7,594 writes completed without
+failure and process cleanup was observed. One document-visible ACK connection
+matched all 563 finals. These checks do not establish human quality, physical
+screen visibility or complete source-speech coverage.
 
-The recorded local CPU suite passed 2,213 tests
-with four skips and 63.52% coverage; all three GPU regressions passed. Endurance
-completion and remote CI must be recorded separately.
+CPU Lite session `20260910_053518_894101_en`, using the same `752ab9a` wheel,
+completed at 10:36:47.110148 UTC with exit 0. All 468 final spans/WAV headers and
+271 preview spans agree; all 1,979 writes completed with zero pending/failed, and
+cleanup was observed. One matched document-visible connection acknowledged all
+468 finals and 271 translated previews, but only 174/468 finalized utterances had
+a first translated preview. Lite is functionally exercised on this Mac; its sparse
+previews and large observed latency tails do not support recommending it as a fast
+production profile today. Hardware and human-quality certification remain pending.
+
+[The retained endurance report](evaluation/overnight_endurance_20260910/README.md)
+keeps the old failed Standard, repaired Standard and Lite cohorts separate. Their
+concurrent lightweight activities are disclosed; observed Standard/Lite speed
+is not a causal paired comparison. Selected waveform reconstruction matched three
+windows in each repaired cohort, while reproducing the old chunk 141 deficit.
+That is supporting regression evidence, not exact EOF or all-source coverage.
+Lite's last caption was followed by 162.549 seconds of unclassified source; its
+closing-hymn context must not be described as a quiet tail. The prepared 350-second
+slice was unused.
+
+Frozen source `752ab9a` passed 2,363 CPU-suite tests with four skips and 63.80%
+coverage (89.97 s), plus three real GPU regressions (21.16 s), pre-commit and the
+prescribed static checks. Its canonical wheel matches all 152 runtime members;
+sdist/ZIP rebuilds are byte-identical, and both isolated installs passed their
+mechanical checks without inference or dependency changes. Previous check/artifact
+records remain linked separately. The Standard and Lite terminal results are recorded separately from those
+mechanical checks. Final documentation/workflow-head CI and the authorized source
+merge remain pending; package publication is separate.
 
 ## Decisions and evidence boundaries
 

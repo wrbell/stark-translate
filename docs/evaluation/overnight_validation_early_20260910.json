@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "scope": "Final integrated local checks before documentation refresh; not latency or quality certification",
+  "source_revision": "Not captured in pytest logs; see integrated-source review. Do not infer the frozen screen revision.",
+  "cpu_suite": {
+    "passed": 2213,
+    "skipped": 4,
+    "duration_seconds": 87.21,
+    "coverage_percent": 63.52
+  },
+  "gpu_regressions": {
+    "passed": 3,
+    "warnings": 2,
+    "duration_seconds": 19.41
+  },
+  "logs": [
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/full-tests-final.log",
+      "sha256": "cc1011c4223e4527e83cd310fc0f1c0ec2a79a0e60f6c5f7b4ef9431d8e967f7",
+      "size_bytes": 14932
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/gpu-final.log",
+      "sha256": "c76feaf2c50214d65c47cf4a5e385c96736be1c7ed7375838839acce0a4d3d8c",
+      "size_bytes": 636
+    }
+  ],
+  "endurance_snapshot": {
+    "as_of_utc": "2026-09-10T06:49:36+00:00",
+    "standard": "started; result pending",
+    "lite_cpu": "pending"
+  },
+  "release": "PR #192 merge, PyPI/package publication and release tags remain pending"
+}

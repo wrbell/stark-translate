@@ -52,7 +52,7 @@ top-level settings object also accepts `STARK_<GROUP>__<FIELD>`. Full table in
 | #177 Gemma 4 assistant drafter | off; live `--mts` rejected before load; `engines/mlx_spec.py` offline probe only |
 | Lite CPU profile / RTX 2070 | **implemented and integrated**; isolated Mac CPU synthetic EN+ES caption/TTS and optional CPU E2B inference smokes passed; x86 CPU, native Windows and 2070 performance **pending hardware** ([evidence](../docs/lite_profiles.md)) |
 | W16 + v2-cpo Mac A/B (#135) | pending artifact transfer from WSL |
-| Hindi (#138) | `tools/offline_hindi.py` offline baseline exists (evaluation only); no live integration; language decision pending |
+| Hindi (#138) | [Offline church-audio baseline](../docs/evaluation/overnight_hindi/README.md) completed as separate R&D; no live integration or further EN↔ES-program work; human review/language decision pending |
 
 Canonical list: [`docs/backlog.json`](../docs/backlog.json).
 

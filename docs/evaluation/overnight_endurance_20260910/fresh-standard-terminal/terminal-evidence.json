@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_043120_839144_en",
+  "status": "completed_and_source_span_consistent",
+  "report": {
+    "path": ".cache/overnight-20260910/endurance-standard-fixed-final-audit/report.json",
+    "size_bytes": 3047671,
+    "sha256": "827778fda936b129265b3a22fdbf1ffb0b4210c37f9b6f452590b05ef4d716f4"
+  },
+  "assessment": {
+    "path": ".cache/overnight-20260910/endurance-standard-fixed-final-audit/assessment.json",
+    "size_bytes": 20425,
+    "sha256": "b9289c3df46599bfb99b49300cfebe441a9ab710e9dce913bf454ad2059664c0"
+  },
+  "audit_manifest": {
+    "path": ".cache/overnight-20260910/endurance-standard-fixed-final-audit/audit-manifest.json",
+    "size_bytes": 1108,
+    "sha256": "8be4e86946770957d1fdacf3a625053aabc53954eda4c93015f7b28aff80f62c"
+  },
+  "operator_actions": {
+    "path": ".cache/overnight-20260910/endurance-preparation/standard-fixed-ui-actions.jsonl",
+    "size_bytes": 1415,
+    "sha256": "ae0a54ce428fe9ba1a226923913261396776e3981c254811ae17781b4611f96b"
+  },
+  "stopped_ui": {
+    "path": ".cache/overnight-20260910/endurance-preparation/standard-fixed-stopped-ui.txt",
+    "size_bytes": 2615,
+    "sha256": "9a286c2da077454f2294eda24ddd85d7153b5bb329a7e739d76c6c74d79861d3"
+  },
+  "operator_shutdown": {
+    "path": ".cache/overnight-20260910/standard-fixed-operator-shutdown.json",
+    "size_bytes": 470,
+    "sha256": "3887f33dfbfd967b8bc54b3c19eb74a59ee00bef51e85e888a7cfebb64323dea"
+  },
+  "operator_launch": {
+    "path": ".cache/overnight-20260910/installed-standard-fixed-endurance/operator-launch.json",
+    "size_bytes": 1278,
+    "sha256": "ad156f48ab0f71f3431fb16ce6e0c5890105acdec74e3cd4888fd0d99cc6053f"
+  },
+  "review_audit": "review-audit.json",
+  "summary": "summary-evidence.json",
+  "scope": "Completed records and declared source bounds, WAV-header durations, persistence and process cleanup. Exact reader EOF/all-input or all-speech capture and selected waveform reconstruction are not established by this record. No session audio was read in this document preparation."
+}

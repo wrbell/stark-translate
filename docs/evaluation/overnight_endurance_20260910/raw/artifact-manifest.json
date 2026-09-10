@@ -1,0 +1,80 @@
+{
+  "artifact": {
+    "filename": "endurance-evidence.tar.gz",
+    "parts": [
+      {
+        "path": "endurance-evidence.tar.gz.part0001",
+        "sha256": "95cb8f8f7b08357080b3f0c921dd70ac91e14ab07c085e856f17e4aff6c136ce",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0002",
+        "sha256": "e25a899d87cb2b2d66aa30e99c962e8685a1f1b1617a9ec7a7633c23da8e26be",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0003",
+        "sha256": "c159f98df8b9268015417e1be11d6ea50a787ff9dfffe6686b25b02dca590a98",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0004",
+        "sha256": "196aa90b9e4e1cc4a0764b85078228c6267cea3ebe18ae3bfd81dc8f1b0099d6",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0005",
+        "sha256": "4732e6a404545ca3638017632d45eef15888213377232cf6d7f539457b3c4192",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0006",
+        "sha256": "93a8cab19c2aa1f7cb463ba3aca7825f189ef0d12a12fd6cb954a2ec689be4a5",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0007",
+        "sha256": "dc0c5f7e54abfc394b249ee10909e28a3e72073b2f80c2dcf7b769eac35344da",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0008",
+        "sha256": "c6fd4c6342410a0ef173fdb4d1db75f76d9c811e90dbe45f2c7338e0060743d2",
+        "size_bytes": 491520
+      },
+      {
+        "path": "endurance-evidence.tar.gz.part0009",
+        "sha256": "5ec62f9c34d9c8d1ea6e90f44314010feeccda78fd99ab8d1195d389458d5348",
+        "size_bytes": 67229
+      }
+    ],
+    "sha256": "b7f58e594b852e1451890b29c1eb893345a0cd34dfefd2f8f45659570518cf4c",
+    "size_bytes": 3999389
+  },
+  "inventory": {
+    "path": "inventory.jsonl.gz",
+    "sha256": "e17246eede10bdd413f11623ae60db82fea99d3e9623a3e6412c00a2411c5c8b",
+    "size_bytes": 5727
+  },
+  "kind": "terminal-session-evidence",
+  "part_bytes": 491520,
+  "schema_version": 1,
+  "source_member_count": 94,
+  "tools": [
+    {
+      "path": "package_endurance.py",
+      "sha256": "0613db2613d4ee53f926ae5be29d8b974ffbfc533a7ac93119a767a7afdfa065",
+      "size_bytes": 15438
+    },
+    {
+      "path": "verify_endurance.py",
+      "sha256": "bb52959705509a219421a3858a7c71aef7bad3420932dcfedca4eeba795ece30",
+      "size_bytes": 6140
+    },
+    {
+      "path": "evidence_common.py",
+      "sha256": "c006c8f2043f153a1688ba5b51b48087dee8117ea4a927ef7387b9535173ad61",
+      "size_bytes": 6683
+    }
+  ]
+}

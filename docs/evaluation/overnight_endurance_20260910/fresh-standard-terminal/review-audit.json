@@ -1,0 +1,41 @@
+{
+  "at": "2026-09-10T09:04:42.820410+00:00",
+  "source_snapshot_at": "2026-09-10T08:48:26.307832+00:00",
+  "session": "20260910_043120_839144_en",
+  "correction": {
+    "session": "20260910_043120_839144_en",
+    "chunk_id": 1,
+    "revision": 1,
+    "review_timestamp": "2026-09-10T08:51:00.437741+00:00",
+    "transcript_approved": false,
+    "translation_approved": false,
+    "excluded": false
+  },
+  "original_prefix_checks": {
+    "ab_metrics": {
+      "prefix_bytes": 17197,
+      "before_sha256": "dbec5770cb9a50c7756c8955868ad9eadd80f98d06da1af33c02d273646f8bdd",
+      "after_sha256": "dbec5770cb9a50c7756c8955868ad9eadd80f98d06da1af33c02d273646f8bdd",
+      "unchanged": true
+    },
+    "diagnostics": {
+      "prefix_bytes": 104252,
+      "before_sha256": "bd0bf6a84e280c095fc92f13d2a74a64fea446a5d124f2b1a0454bdd89b07fc7",
+      "after_sha256": "bd0bf6a84e280c095fc92f13d2a74a64fea446a5d124f2b1a0454bdd89b07fc7",
+      "unchanged": true
+    },
+    "partials": {
+      "prefix_bytes": 220191,
+      "before_sha256": "ce05f7a6bcc3a8411162ed2aeba679fab0b3ea913babad732d303e0b6f7f8e37",
+      "after_sha256": "ce05f7a6bcc3a8411162ed2aeba679fab0b3ea913babad732d303e0b6f7f8e37",
+      "unchanged": true
+    },
+    "display_metrics": {
+      "prefix_bytes": 166560,
+      "before_sha256": "bd2010549b52eb8bd15bede5b88e6514e93efff580a7b773f6b8801df3c4ada5",
+      "after_sha256": "bd2010549b52eb8bd15bede5b88e6514e93efff580a7b773f6b8801df3c4ada5",
+      "unchanged": true
+    }
+  },
+  "scope": "Bounded prefixes captured before saved revision; ongoing file growth is not hashed as a frozen whole. No human approvals or reload test."
+}

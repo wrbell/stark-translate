@@ -41,7 +41,7 @@ ids from a previous session cannot collide with the new one.
 | `translation_stream` | Token batches while a final translation streams (CUDA streaming engine; batch size `settings.cuda.streaming_batch_size`) | `chunk_id`, `partial_spanish_a`, `tokens_so_far` |
 | `translation` (`stage: "complete"`) | Final ready | `chunk_id`, `english`, `spanish_a`, `spanish_b`, `stt_latency_ms`, `latency_a_ms`, `latency_b_ms`, legacy `e2e_latency_ms` / `true_e2e_ms` / `silence_delay_ms`, `queue_wait_ms`, `stt_confidence`, `tps_a`, `qe_a`, `word_stability_pct`, `speaker` (with `--diarize`), session provenance, schema 2 sample metadata |
 | `speaker_update` | Diarization label arrives after a final (`--diarize`) | `chunk_id`, `speaker`, `session_id` |
-| `music_hold` | Hymn/music detection toggles STT mute | `active: true\|false` |
+| `music_hold` | Energy/VAD heuristic hold state; can miss singing, not a music classification | `active: true\|false` |
 | `rolling_stats` | Periodic session stats for the A/B display | `chunks`, `stt_avg_ms`, `a_avg_ms`, `true_e2e_avg_ms` |
 | `text` | `--dry-run-text` and test markers | `text`, lang codes |
 

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_053518_894101_en",
+  "status": "first_observed_events_bound_while_session_running",
+  "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+  "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+  "startup_pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36",
+  "source_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+  "profile": {
+    "name": "lite-cpu",
+    "backend": "cpu",
+    "stt_model": "whisper-small",
+    "stt_compute_type": "int8",
+    "stt_threads": 3,
+    "stt_workers": 1,
+    "marian_threads": 1,
+    "final_engine": "marian",
+    "translation_model": null,
+    "vad_backend": "onnx",
+    "ram_floor_gb": 8,
+    "physical_core_floor": 4,
+    "vram_floor_gb": 0
+  },
+  "operator_start_before_utc": "2026-09-10T09:35:18.869000+00:00",
+  "operator_start_after_utc": "2026-09-10T09:35:19.127000+00:00",
+  "lifecycle_started_at_utc": "2026-09-10T09:35:19.220965+00:00",
+  "first_server_preview_wall_utc": "2026-09-10T09:42:17.424807+00:00",
+  "first_server_final_wall_utc": "2026-09-10T09:42:26.308644+00:00",
+  "start_to_first_server_preview_wall_s": {
+    "minimum_s": 418.297807,
+    "maximum_s": 418.555807
+  },
+  "start_to_first_server_final_wall_s": {
+    "minimum_s": 427.181644,
+    "maximum_s": 427.439644
+  },
+  "lifecycle_to_first_server_preview_wall_s": 418.203842,
+  "lifecycle_to_first_server_final_wall_s": 427.087679,
+  "digital_zero_lead_in_s": 403.1448125,
+  "source_lead_in_basis": "Existing exact digital-zero audit, bound to same source hash. No new audio read; first nonzero PCM is not speech onset.",
+  "first_preview": {
+    "event_id": "20260910_053518_894101_en:partial:7",
+    "utterance_id": 1,
+    "preview_revision": 7,
+    "source_start_s": 405.056,
+    "source_end_s": 409.312,
+    "captured_start_to_payload_ms": 6090.4,
+    "captured_end_to_payload_ms": 1834.4,
+    "browser_ack_upper_bound_ms": 6104.5,
+    "browser_connection_id": "13177879824",
+    "translation_nonempty": true
+  },
+  "first_final": {
+    "event_id": "20260910_053518_894101_en:2",
+    "chunk_id": 2,
+    "utterance_id": 2,
+    "source_start_s": 410.464,
+    "source_end_s": 414.592,
+    "endpoint_reason": "smart_cut",
+    "timing_source": "replay_realtime",
+    "estimated_speech_end_to_payload_ms": 5438.3,
+    "browser_ack_upper_bound_ms": 5447.7,
+    "browser_connection_id": "13177879824"
+  },
+  "identity_distinction": "First translated preview is utterance1, while first persisted final is chunk2/utterance2. Do not invent a chunk1 final or treat these as a single utterance. No disposition reason for utterance1 is inferred from missing final output.",
+  "clock_basis": "Raw naive production wall timestamps converted from America/Detroit (UTC-4 on this date). Wall Start brackets and production wall events are compared; independent relative clock origins are not joined.",
+  "ack_join": "Exact session/event/stage/revision/utterance/source bounds, timing schema2 and timing-source identities checked; final joined to original CSV+diagnostics. First-any preview ACK is reported independently from distributions restricted to finalized utterances.",
+  "limitations": [
+    "Start wall waits include startup and source lead-in, not inference-only latency. Do not subtract zeros to infer loading time.",
+    "Browser ACKs are return-path upper bounds from one session-local document-visible connection, not physical screen or human-quality certification.",
+    "Early observations, not terminal coverage, sustained performance or lower-RAM/x86 certification.",
+    "No runtime imports, tests, process probes, audio reads, models or archive build in this preparation."
+  ],
+  "evidence_prefixes": {
+    "partials": {
+      "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/partials_20260910_053518_894101_en.jsonl",
+      "prefix_bytes": 1438,
+      "prefix_sha256": "7be569736a7653cdc2289b435e3a7336348107f5a607007330e140b393d11d7f",
+      "captured_at_utc": "2026-09-10T09:56:16.636590+00:00",
+      "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/partials.jsonl",
+      "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+    },
+    "ab_metrics": {
+      "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/ab_metrics_20260910_053518_894101_en.csv",
+      "prefix_bytes": 1319,
+      "prefix_sha256": "b643829b1a9cb0c07c6d71ea972267738e73dedb3fbca16af102f3a59576ac1f",
+      "captured_at_utc": "2026-09-10T09:56:16.636753+00:00",
+      "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/ab_metrics.csv",
+      "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+    },
+    "diagnostics": {
+      "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/diagnostics_20260910_053518_894101_en.jsonl",
+      "prefix_bytes": 2965,
+      "prefix_sha256": "a497fd08a5199cb4389006b1d69e1b3bfe9d9510b3e146e8836cd6671c88e4ab",
+      "captured_at_utc": "2026-09-10T09:56:16.636922+00:00",
+      "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/diagnostics.jsonl",
+      "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+    },
+    "first_preview_ack": {
+      "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/display_metrics_20260910_053518_894101_en.jsonl",
+      "prefix_bytes": 887,
+      "prefix_sha256": "f062ed715a5c50647ec3e7b37ae3ce5f7863a08277af6f2aca082c540f69ca37",
+      "captured_at_utc": "2026-09-10T09:56:16.637321+00:00",
+      "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/first_preview_ack.jsonl",
+      "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+    },
+    "first_final_ack": {
+      "path": ".cache/overnight-20260910/installed-lite-endurance/metrics/display_metrics_20260910_053518_894101_en.jsonl",
+      "prefix_bytes": 3514,
+      "prefix_sha256": "6c432cd4049b9cc5cc72e23cea2d70febbe87273649c54d981c80a2d8c1669a4",
+      "captured_at_utc": "2026-09-10T09:56:16.637503+00:00",
+      "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/first_final_ack.jsonl",
+      "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+    },
+    "start_before": {
+      "path": ".cache/overnight-20260910/endurance-preparation/lite-ui-actions.jsonl",
+      "prefix_bytes": 96,
+      "prefix_sha256": "a90784a5b7c9359f2a4a645208b9e648acdf4c6fd4547e7e6b0466ebefcc13f3",
+      "captured_at_utc": "2026-09-10T09:56:16.637609+00:00",
+      "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/start_before.jsonl",
+      "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+    },
+    "start_after": {
+      "path": ".cache/overnight-20260910/endurance-preparation/lite-ui-actions.jsonl",
+      "prefix_bytes": 158,
+      "prefix_sha256": "945cb50d0d22140f0bef1127df9834421da952c9007bb952f7c9fbf980749c24",
+      "captured_at_utc": "2026-09-10T09:56:16.637706+00:00",
+      "private_snapshot": "lite-early/first-caption-prefix-20260910T095616635761Z.private/start_after.jsonl",
+      "scope": "Initial prefix through selected complete record; appendable source may grow, not a whole-file terminal hash."
+    }
+  },
+  "receipt": {
+    "path": ".cache/overnight-20260910/artifact-validation-752ab9a-20260910T0829Z/report.json",
+    "size_bytes": 38088,
+    "sha256": "986e9bc40bcd29f10453b4525245c3122b12cc6f5f756e6a2192b87c891566ac"
+  }
+}

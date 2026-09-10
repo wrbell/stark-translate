@@ -1,0 +1,501 @@
+{
+  "schema_version": 1,
+  "status": "provisional_in_progress_prefix",
+  "session_id": "20260910_043120_839144_en",
+  "capture_started_utc": "2026-09-10T08:48:26.302453+00:00",
+  "capture_finished_utc": "2026-09-10T08:48:26.307832+00:00",
+  "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+  "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+  "pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36",
+  "input_audio_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+  "source_kind": "uncropped natural English full-service replay at speed 1",
+  "lifecycle_at_capture": "running",
+  "terminal_result": null,
+  "endurance_gate": "pending",
+  "first_caption": {
+    "operator_start_before_utc": "2026-09-10T08:31:20.797000+00:00",
+    "operator_start_after_utc": "2026-09-10T08:31:21.067000+00:00",
+    "lifecycle_started_at_utc": "2026-09-10T08:31:24.962266+00:00",
+    "first_server_preview_wall_utc": "2026-09-10T08:38:21.558818+00:00",
+    "first_server_final_wall_utc": "2026-09-10T08:38:30.526435+00:00",
+    "start_to_first_server_preview_wall_s": {
+      "minimum_s": 420.491818,
+      "maximum_s": 420.761818
+    },
+    "start_to_first_server_final_wall_s": {
+      "minimum_s": 429.459435,
+      "maximum_s": 429.729435
+    },
+    "lifecycle_to_first_server_preview_wall_s": 416.596552,
+    "lifecycle_to_first_server_final_wall_s": 425.564169,
+    "digital_zero_lead_in_s": 403.1448125,
+    "digital_zero_basis": "exact digital first nonzero PCM sample; not speech onset",
+    "first_preview_source_start_s": 405.056,
+    "first_preview_source_end_s": 405.664,
+    "first_preview_from_captured_start_ms": 1095.6,
+    "first_preview_event_id": "20260910_043120_839144_en:partial:1",
+    "first_preview_utterance_id": 1,
+    "first_final_chunk_id": 1,
+    "first_final_event_id": "20260910_043120_839144_en:9",
+    "first_final_speech_end_to_payload_ms": 4655.9,
+    "first_final_endpoint": "smart_cut|replay_realtime",
+    "browser_by_connection": {
+      "6360997712": {
+        "first_preview_upper_bound_ms": 1140.5,
+        "first_final_upper_bound_ms": 4668.4
+      }
+    },
+    "clocks": "Raw naive caption timestamps interpreted in recorded host timezone America/Detroit (UTC-4 on 2026-09-10). Only wall timestamps are joined to operator action times; session-relative trace origins are not joined to them.",
+    "limitations": "No speech onset inferred from first nonzero PCM. Do not subtract zeros to infer model-loading duration. Browser ACK upper bounds include return path, are session-local, and do not certify native physical visibility."
+  },
+  "captured_prefix_counts": {
+    "csv_finals": 33,
+    "diagnostic_finals": 33,
+    "joined_final_records": 33,
+    "preview_records": 156,
+    "source_consistent_final_records": 33,
+    "source_consistent_preview_records": 156,
+    "source_inconsistent_or_unknown_records": 0,
+    "csv_only_pending_ids": [],
+    "diagnostics_only_pending_ids": [],
+    "through_final_source_s": 820.384,
+    "render_ack_records": 189
+  },
+  "first_hymn_and_prayer": {
+    "chronology_rows": [
+      {
+        "chunk_id": 1,
+        "utterance_id": 1,
+        "source_start_s": 405.056,
+        "source_end_s": 410.464,
+        "source_consistency": "consistent",
+        "source_text_sha256": "a8c1cdf0eb769966ce8b3da9c9ba8bb55f47803c3e5d85eda4b837b3af163067",
+        "translation_sha256": "a2c95a3d7165d49dcf1bbf03e884fc3fa07a37629d13da79af25c06c2b209c2e"
+      },
+      {
+        "chunk_id": 2,
+        "utterance_id": 2,
+        "source_start_s": 410.464,
+        "source_end_s": 414.592,
+        "source_consistency": "consistent",
+        "source_text_sha256": "eac735b1681448ffda1afa066ce8eca97480edb9fdd0ada1143a92b22ef77559",
+        "translation_sha256": "61351d37bc0c8660f811d8e41c94c7a8dacb1360bdd5a150e26f20e8709eb713"
+      },
+      {
+        "chunk_id": 3,
+        "utterance_id": 3,
+        "source_start_s": 414.592,
+        "source_end_s": 422.592,
+        "source_consistency": "consistent",
+        "source_text_sha256": "2ec935b96b0e29c9af8ff868b4bb05fcda373f6f2cf4e42865d58062bf074083",
+        "translation_sha256": "8ed1b7fed36ffb6800a05aacc3b787dd3f5ec6fcd37dc5d3f583c24334f240cc"
+      },
+      {
+        "chunk_id": 4,
+        "utterance_id": 4,
+        "source_start_s": 422.624,
+        "source_end_s": 430.112,
+        "source_consistency": "consistent",
+        "source_text_sha256": "2de3521d72a430515cb8fb1d49edc0c370d946e44d44493dcc7d9bcca5871de8",
+        "translation_sha256": "a32e2afb0234ce7c0331c21b430ddf1fbc71d9b98ced708a45e138968c1565fe"
+      },
+      {
+        "chunk_id": 5,
+        "utterance_id": 5,
+        "source_start_s": 430.112,
+        "source_end_s": 431.904,
+        "source_consistency": "consistent",
+        "source_text_sha256": "0a6eb88ebbb0edc28a3044441d0e96ab81e96c3c180cfd37e92539260dc2b128",
+        "translation_sha256": "7d12c12b859616907d1b62a29a6b3259163422679c158fd029ad4d3a60d76d9a"
+      },
+      {
+        "chunk_id": 6,
+        "utterance_id": 6,
+        "source_start_s": 432.096,
+        "source_end_s": 434.464,
+        "source_consistency": "consistent",
+        "source_text_sha256": "791ff0aee4602629355bdc9acc8a2ea82a1b8b8a02780dd4cb4fb817751a45ab",
+        "translation_sha256": "b208cf0057bce84984dda37e53c2240a429e5e9c138bbf6c6b686e9eb6f9f350"
+      },
+      {
+        "chunk_id": 7,
+        "utterance_id": 7,
+        "source_start_s": 434.528,
+        "source_end_s": 436.832,
+        "source_consistency": "consistent",
+        "source_text_sha256": "a51703fe07bfb233e8183e682a447ef04f2412413d4a2d1bca369d47e6c3fb16",
+        "translation_sha256": "6422e1da7ec98f1e3037f67327709ee7068f9e0bc61047fa82e8ad1e6e841418"
+      },
+      {
+        "chunk_id": 9,
+        "utterance_id": 10,
+        "source_start_s": 443.552,
+        "source_end_s": 444.288,
+        "source_consistency": "consistent",
+        "source_text_sha256": "0aba515a4b51ff632aabf8d925feb31ef508dfede3a9098fc07e0e4c67db7a7b",
+        "translation_sha256": "cbe609112eb03403cbd07080326d2129067220f9943ce0ee1ed8e45f3c015f4d"
+      },
+      {
+        "chunk_id": 10,
+        "utterance_id": 11,
+        "source_start_s": 444.48,
+        "source_end_s": 445.472,
+        "source_consistency": "consistent",
+        "source_text_sha256": "85fec70372b092bb42d021a6d1b373081dde8bcf90feb49e0725e285043fb0ad",
+        "translation_sha256": "cbe609112eb03403cbd07080326d2129067220f9943ce0ee1ed8e45f3c015f4d"
+      },
+      {
+        "chunk_id": 11,
+        "utterance_id": 12,
+        "source_start_s": 445.6,
+        "source_end_s": 446.592,
+        "source_consistency": "consistent",
+        "source_text_sha256": "9ccd4bd53d4ea29835cd232506e915875c256d82a2dbbf1ff3b5fc7e48e695de",
+        "translation_sha256": "9ccd4bd53d4ea29835cd232506e915875c256d82a2dbbf1ff3b5fc7e48e695de"
+      },
+      {
+        "chunk_id": 12,
+        "utterance_id": 13,
+        "source_start_s": 447.008,
+        "source_end_s": 448.224,
+        "source_consistency": "consistent",
+        "source_text_sha256": "bdc7e96514483428984b8dc5197479b3cdc3e492a0264b5d6d0cc6987636dcb9",
+        "translation_sha256": "ebc1a24373390447ecd36bd4f106824729d002da826f4beb9a023c8aceb0d669"
+      },
+      {
+        "chunk_id": 14,
+        "utterance_id": 16,
+        "source_start_s": 454.528,
+        "source_end_s": 456.384,
+        "source_consistency": "consistent",
+        "source_text_sha256": "e6c2e6a2de40a9d93b4b272382a63330d832a45e25eb7c52094dd7426f3f9425",
+        "translation_sha256": "caa4a96746f084738745df836d3289fc843e43aae535054bfaada5774f4b8d7b"
+      },
+      {
+        "chunk_id": 15,
+        "utterance_id": 17,
+        "source_start_s": 456.416,
+        "source_end_s": 457.856,
+        "source_consistency": "consistent",
+        "source_text_sha256": "03b25bed61dad2fc92bb7ca539a0f5abb89e97a767e3ca68789d47009f9fa5c3",
+        "translation_sha256": "39c60d358cd82b58182fd096f93d49984309183e4e281c9ecf3af8bee5e81578"
+      },
+      {
+        "chunk_id": 16,
+        "utterance_id": 18,
+        "source_start_s": 463.36,
+        "source_end_s": 464.192,
+        "source_consistency": "consistent",
+        "source_text_sha256": "ec5acd5e21ac22d556a4783140a064054939e9c8b9217b0fe94f3496024a84d3",
+        "translation_sha256": "ec5acd5e21ac22d556a4783140a064054939e9c8b9217b0fe94f3496024a84d3"
+      },
+      {
+        "chunk_id": 18,
+        "utterance_id": 20,
+        "source_start_s": 720.864,
+        "source_end_s": 725.152,
+        "source_consistency": "consistent",
+        "source_text_sha256": "38fd50b39759bbba31f29dc55df678f32c6c1e6660b4265afbb4d61a59bff192",
+        "translation_sha256": "962755907313c60c2e2e5d7c9ad675eda73ca19bbe5a9c0ca26a57fe7d63948c"
+      },
+      {
+        "chunk_id": 19,
+        "utterance_id": 21,
+        "source_start_s": 725.152,
+        "source_end_s": 733.152,
+        "source_consistency": "consistent",
+        "source_text_sha256": "e1757a8d4e1fe842b2d2d9163af1e7a4402c1f41258a38dffd61b48488b5ee4b",
+        "translation_sha256": "686c100f9728b8a1b4fc0230669e8250886c45719ff9df71bb7c32561675667d"
+      },
+      {
+        "chunk_id": 20,
+        "utterance_id": 22,
+        "source_start_s": 733.248,
+        "source_end_s": 741.248,
+        "source_consistency": "consistent",
+        "source_text_sha256": "d2f51062fc3a62cd2eaabc50c3ad835eed66a58af8f2301d655b32042aae26ac",
+        "translation_sha256": "5c6d7e29f3fa62535fe306d258ee9c90677e161e1b5f6104bb30826b1f1be748"
+      },
+      {
+        "chunk_id": 21,
+        "utterance_id": 23,
+        "source_start_s": 741.28,
+        "source_end_s": 749.28,
+        "source_consistency": "consistent",
+        "source_text_sha256": "9659a7dac0ee83adcade12aa3e5825aac88698cda5af69d360bd3606edd34076",
+        "translation_sha256": "e57749e43630595ede89d9138c3926a8d02a713040977ee1f1d782b74771c070"
+      },
+      {
+        "chunk_id": 23,
+        "utterance_id": 25,
+        "source_start_s": 754.336,
+        "source_end_s": 762.336,
+        "source_consistency": "consistent",
+        "source_text_sha256": "e9bb65e66bdfde2e8458501f4940283ee25aa3c49d872555e21f7194b45ea8e1",
+        "translation_sha256": "2d1bf293413eca9374f4dd181e1372ff0472c0b60179fa8048d2e236a7aa1181"
+      },
+      {
+        "chunk_id": 24,
+        "utterance_id": 26,
+        "source_start_s": 762.368,
+        "source_end_s": 770.112,
+        "source_consistency": "consistent",
+        "source_text_sha256": "181d3e2987e5fd862d513ad2c20d86f582c9b0e97bc0d98de59f2c2972af6492",
+        "translation_sha256": "b6eafe6cf71a35ca2b43770a9ebe1705176281c5045af5d5ce6b9d6f50bdc3a4"
+      },
+      {
+        "chunk_id": 25,
+        "utterance_id": 27,
+        "source_start_s": 770.112,
+        "source_end_s": 775.104,
+        "source_consistency": "consistent",
+        "source_text_sha256": "78cc0839ffe614feb62caa2e3a567a7fe64b63a7638daa477072bd19857f3373",
+        "translation_sha256": "f53291ab3b5030fd732b46d4910f63fdd5214e60ce63967bd57becdc07728a11"
+      }
+    ],
+    "prayer_completed_amen_in_captured_records": true,
+    "amen_chunk_id": 24,
+    "amen_source_end_s": 770.112,
+    "actual_ui_observations": [
+      {
+        "event": "first_hymn_ui_observed",
+        "at": "2026-09-10T08:39:15.717Z"
+      },
+      {
+        "event": "post_hymn_prayer_ui_observed",
+        "at": "2026-09-10T08:44:04.834Z"
+      }
+    ],
+    "lyric_accuracy": "not certified; source text itself is unreviewed STT",
+    "exact_singing_boundaries": null,
+    "no_new_human_or_exact_boundary_requirement_for_issue134": true,
+    "prayer_completed_row_ids": [
+      18,
+      19,
+      20,
+      21,
+      23,
+      24
+    ],
+    "next_hymn_announcement_chunk_id": 25,
+    "prayer_interpretation": "The actual08:44:04.834UTC SPA snapshot shows prayer in progress. The later captured diagnostic/CSV prefix includes its closing Amen. This is recognition/render evidence, not a checked transcription."
+  },
+  "bad_short_hymn_caption_examples": [
+    {
+      "chunk_id": 7,
+      "utterance_id": 7,
+      "source_start_s": 434.528,
+      "source_end_s": 436.832,
+      "source_as_recognized": "It dies a",
+      "spanish_as_generated": "Muere a"
+    },
+    {
+      "chunk_id": 9,
+      "utterance_id": 10,
+      "source_start_s": 443.552,
+      "source_end_s": 444.288,
+      "source_as_recognized": "Yeah,",
+      "spanish_as_generated": "S\u00ed."
+    },
+    {
+      "chunk_id": 10,
+      "utterance_id": 11,
+      "source_start_s": 444.48,
+      "source_end_s": 445.472,
+      "source_as_recognized": "Yeah.",
+      "spanish_as_generated": "S\u00ed."
+    },
+    {
+      "chunk_id": 11,
+      "utterance_id": 12,
+      "source_start_s": 445.6,
+      "source_end_s": 446.592,
+      "source_as_recognized": "Uh",
+      "spanish_as_generated": "Uh"
+    },
+    {
+      "chunk_id": 12,
+      "utterance_id": 13,
+      "source_start_s": 447.008,
+      "source_end_s": 448.224,
+      "source_as_recognized": "Well",
+      "spanish_as_generated": "Bueno"
+    },
+    {
+      "chunk_id": 14,
+      "utterance_id": 16,
+      "source_start_s": 454.528,
+      "source_end_s": 456.384,
+      "source_as_recognized": "Changing uh",
+      "spanish_as_generated": "Cambiando eh"
+    },
+    {
+      "chunk_id": 15,
+      "utterance_id": 17,
+      "source_start_s": 456.416,
+      "source_end_s": 457.856,
+      "source_as_recognized": "Okay.",
+      "spanish_as_generated": "Bien."
+    },
+    {
+      "chunk_id": 16,
+      "utterance_id": 18,
+      "source_start_s": 463.36,
+      "source_end_s": 464.192,
+      "source_as_recognized": "Oh",
+      "spanish_as_generated": "Oh"
+    }
+  ],
+  "lyric_translation_error": {
+    "chunk_id": 3,
+    "utterance_id": 3,
+    "source_excerpt": "Time will soon end",
+    "spanish_excerpt": "La eternidad pronto terminar\u00e1",
+    "meaning_change_in_recorded_pair": "Time becomes eternity as the subject of ending; this is a translation error relative to the recorded English, independent of any claim that the audio was transcribed correctly.",
+    "qe_score": 1.0,
+    "human_approval": false
+  },
+  "browser_connections": {
+    "6360997712": {
+      "final_acks": 33,
+      "expected_finals": 33,
+      "visible_preview_events": 156,
+      "missing_final_chunks": [],
+      "first_preview_coverage": 0.9696969696969697
+    }
+  },
+  "evidence_prefixes": {
+    "ab_metrics": {
+      "prefix_size_bytes": 17197,
+      "size_after_read": 17197,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": 0,
+      "complete_prefix_bytes": 17197,
+      "complete_prefix_sha256": "dbec5770cb9a50c7756c8955868ad9eadd80f98d06da1af33c02d273646f8bdd",
+      "observed_at_utc": "2026-09-10T08:48:26.302453+00:00"
+    },
+    "diagnostics": {
+      "prefix_size_bytes": 104252,
+      "size_after_read": 104252,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": 0,
+      "complete_prefix_bytes": 104252,
+      "complete_prefix_sha256": "bd0bf6a84e280c095fc92f13d2a74a64fea446a5d124f2b1a0454bdd89b07fc7",
+      "observed_at_utc": "2026-09-10T08:48:26.302711+00:00"
+    },
+    "partials": {
+      "prefix_size_bytes": 220191,
+      "size_after_read": 220191,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": 0,
+      "complete_prefix_bytes": 220191,
+      "complete_prefix_sha256": "ce05f7a6bcc3a8411162ed2aeba679fab0b3ea913babad732d303e0b6f7f8e37",
+      "observed_at_utc": "2026-09-10T08:48:26.304109+00:00"
+    },
+    "display_metrics": {
+      "prefix_size_bytes": 166560,
+      "size_after_read": 166560,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": 0,
+      "complete_prefix_bytes": 166560,
+      "complete_prefix_sha256": "bd2010549b52eb8bd15bede5b88e6514e93efff580a7b773f6b8801df3c4ada5",
+      "observed_at_utc": "2026-09-10T08:48:26.305145+00:00"
+    },
+    "session_metadata": {
+      "prefix_size_bytes": 4616,
+      "size_after_read": 4616,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": null,
+      "complete_prefix_bytes": 4616,
+      "complete_prefix_sha256": "8a168c7f60000c75e713a06eb5c5109b7eae50fd3fd75aa7795159616fac95af",
+      "observed_at_utc": "2026-09-10T08:48:26.305369+00:00"
+    },
+    "session_lifecycle": {
+      "prefix_size_bytes": 674,
+      "size_after_read": 674,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": null,
+      "complete_prefix_bytes": 674,
+      "complete_prefix_sha256": "3d5c9136653b0efa89d481531c9901681f5fb7e9d2413a256be90be13858357c",
+      "observed_at_utc": "2026-09-10T08:48:26.305486+00:00"
+    },
+    "session": {
+      "prefix_size_bytes": 338066,
+      "size_after_read": 338066,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": 0,
+      "complete_prefix_bytes": 338066,
+      "complete_prefix_sha256": "50c0a80dcf50be617bb51bdcfeda155414f6ccfc3c573c3cd6186af04d31deaa",
+      "observed_at_utc": "2026-09-10T08:48:26.306519+00:00"
+    },
+    "operator_actions": {
+      "prefix_size_bytes": 594,
+      "size_after_read": 594,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": 0,
+      "complete_prefix_bytes": 594,
+      "complete_prefix_sha256": "86ec6ad4d3d0be1c23cc7ca670bbe01740a213064147f5a0917135a07b2b34c5",
+      "observed_at_utc": "2026-09-10T08:48:26.306719+00:00"
+    },
+    "first_hymn_ui": {
+      "prefix_size_bytes": 2233,
+      "size_after_read": 2233,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": null,
+      "complete_prefix_bytes": 2233,
+      "complete_prefix_sha256": "614a6851a8c0ecdd69914253a083ef011444252470de44aa46b223d8d4138030",
+      "observed_at_utc": "2026-09-10T08:48:26.306909+00:00"
+    },
+    "post_hymn_prayer_ui": {
+      "prefix_size_bytes": 3094,
+      "size_after_read": 3094,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": null,
+      "complete_prefix_bytes": 3094,
+      "complete_prefix_sha256": "618dbe98b7cb4d88b49d3507674f320ea63b53253da79a144d15481306a95cf9",
+      "observed_at_utc": "2026-09-10T08:48:26.307104+00:00"
+    },
+    "source_lead_in": {
+      "prefix_size_bytes": 437,
+      "size_after_read": 437,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": null,
+      "complete_prefix_bytes": 437,
+      "complete_prefix_sha256": "4232f80d75ceefdbd5d630bf1a386ca1a811f5054463ebf56fc5cdc3284417d7",
+      "observed_at_utc": "2026-09-10T08:48:26.307578+00:00"
+    },
+    "build_receipt": {
+      "prefix_size_bytes": 38088,
+      "size_after_read": 38088,
+      "grew_during_read": false,
+      "truncated_during_read": false,
+      "pending_unterminated_bytes": null,
+      "complete_prefix_bytes": 38088,
+      "complete_prefix_sha256": "986e9bc40bcd29f10453b4525245c3122b12cc6f5f756e6a2192b87c891566ac",
+      "observed_at_utc": "2026-09-10T08:48:26.307832+00:00"
+    }
+  },
+  "evidence_storage": {
+    "private_snapshot_directory": "prefix-20260910T084826266380Z",
+    "public_note_excludes_full_transcripts_and_private_notes": true,
+    "hash_scope": "Captured complete prefixes only, not the eventual whole growing files; snapshots are not a transaction across files."
+  },
+  "parser_sha256": {
+    ".cache/overnight-20260910/incremental-span-audit/audit_spans.py": "44c65f96e13ee15f29349d697ea8f79785b6f8c66df54c02f46a614c34e8310c",
+    ".cache/overnight-20260910/endurance-report-reader/read_endurance.py": "05d6c4dd3bb66af2eb003bb472953d048428ccdc4564c4c6c10ed1a3ec873fb6",
+    "tools/overnight_analysis.py": "5bf246c2111590d74ecaa6c672236a5904bb5f6bbea85bc77a1841168d1e1f25",
+    "tools/endurance_monitor.py": "77ad71b6f05817a29f03bfc9470a61526f028d7783f19ac62840d89abf6536ba"
+  },
+  "bounds_scope": "20ms rounded-duration consistency check reused from actual read_endurance.py. Consistent caption windows do not prove all source frames captured, accurate STT/translation, or a completed hour."
+}

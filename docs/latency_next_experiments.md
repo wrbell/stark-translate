@@ -1,11 +1,16 @@
 # EN↔ES latency: experiments after the overnight screen
 
 The [completed screen](evaluation/overnight_screen_20260910/README.md) tested
-15 configurations on E4B and E2B and selected no experimental arms. Ordinary
+15 configurations on E4B and E2B: 96/96 valid runs and 0/28 selected
+experiment/model arms. Ordinary
 confirmations or combinations of those arms are therefore not justified. The
 proposals below are subsequent research, not implemented optimizations or a
 recommendation to change defaults. Natural Spanish and bilingual review remain
-required for quality certification.
+required for quality certification. The [completed Standard and Lite endurance audits](evaluation/overnight_endurance_20260910/README.md)
+confirm consistent retained spans and durable completion on `752ab9a`. Lite's
+sparse translated previews and large observed tails do not support a fast-production
+recommendation. These functional runs do not promote a screen arm, establish a
+causal speed improvement or satisfy quality/hardware certification.
 
 ## What the stage records show
 
@@ -28,6 +33,16 @@ ends, so these records do not establish that overlap as the cause. Untraced warm
 and concurrently executing partial work remain possible contributors. STT-reported
 latency matches wrapper call wall time closely; returning from the worker to the
 event loop contributes at most 2.8 ms in the inspected records.
+
+## CPU Lite follow-up
+
+The completed CPU hour already used beam size 1, three STT threads with one
+worker, one Marian thread and a 0.6-second partial interval. Its recorded STT
+admission waits and roughly 1.3–1.5-second STT-call medians dominate; Marian's
+silence-final translation median was 58.8 ms. A bounded partial-admission/cadence
+trial should preserve translated-preview coverage, final-tail latency and meaning
+while measuring any gain. Greedy decoding is already enabled, and adding E2B
+does not address the CPU STT queue. This is a proposed trial, not a measured fix.
 
 ## First improve attribution
 

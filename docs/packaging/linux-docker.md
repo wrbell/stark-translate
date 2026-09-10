@@ -8,7 +8,7 @@ an Ada/Ampere GPU and a fresh Ubuntu install.
 export STARK_MODELS_DIR="$HOME/.cache/stark-translate/models"
 export STARK_DATA_DIR="$HOME/.local/share/stark-translate/sessions"
 
-# Pull the pre-built image (Track 1 publishes to GHCR on every v* tag)
+# Pull a previously published image; merging source to main does not upload one
 docker compose pull
 
 # Bring up operator + llama-server. First boot loads E4B which takes ~90 s.
@@ -118,14 +118,20 @@ docker buildx build \
 
 ## CI / GHCR
 
-`.github/workflows/docker.yml` builds and pushes on every `v*` tag and on
-pushes to `main`. Tag scheme:
+`.github/workflows/docker.yml` builds on pushes to `main` without registry login
+or image upload. Publishing remains a separate release action: a pushed `v*` tag
+must match the package version, or a manual run must explicitly select `push: true`.
+The manual default is build-only, including when the selected ref is a tag.
 
-| Trigger | Tags |
+| Trigger | Registry behavior |
 |---|---|
-| `git push origin main` | `:main`, `:latest` |
-| `git tag v2026.7.1.0 && git push --tags` | `:v2026.7.1.0`, `:2026.7.1.0`, `:2026.7` |
-| `workflow_dispatch` | configurable via the `tag` input |
+| Push to `main` | Build validation only; computed `:main` / `:latest` tags are not uploaded. |
+| Push a matching version tag (`v*`) | Log in and upload the version's computed image tags. |
+| Manual run, `push: false` (default) | Build only on either a branch or tag. |
+| Manual run, `push: true` | Upload the computed tags, with an optional `tag` input override. |
+
+The final workflow message distinguishes a completed build from an actual registry
+upload. Merging this source does not publish a new container release.
 
 The workflow uses `pypa`-style `id-token: write` permissions so future cosign
 keyless signing can attach without a per-tag KMS key.

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "status": "in_progress_early_output_observations",
+  "captured_at_utc": "2026-09-10T09:46:44.639198+00:00",
+  "session_id": "20260910_053518_894101_en",
+  "actual_ui_observed_at_utc": "2026-09-10T09:42:46.539+00:00",
+  "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+  "profile": "lite-cpu",
+  "source_kind": "natural_recorded_English_service",
+  "legacy_field_interpretation": "spanish_gemma is the persisted primary final-output field; this CPU Lite profile uses Marian finals, not Gemma. Output is not labeled by this legacy column name.",
+  "observed_records": [
+    {
+      "session_id": "20260910_053518_894101_en",
+      "chunk_id": 3,
+      "utterance_id": 3,
+      "timestamp": "2026-09-10T05:42:32.806742",
+      "english": "Hymn number 36, Eternity, Time will soon will end. Its fleeting moments pass away. O sinners say, where will thou spend eternity?",
+      "spanish_gemma": "Himno número 36, Eternidad, El tiempo pronto terminará. Sus momentos fugaces pasan. Oh pecadores, dicen, ¿dónde pasarás la eternidad?",
+      "sample_start": 19900416,
+      "sample_end": 20284416,
+      "sample_rate": 48000,
+      "padding_samples": 0,
+      "endpoint_reason": "hard_cut",
+      "qe_a": 1.0
+    },
+    {
+      "session_id": "20260910_053518_894101_en",
+      "chunk_id": 4,
+      "utterance_id": 4,
+      "timestamp": "2026-09-10T05:42:38.543000",
+      "english": "Where will thou spend eternity? It's unchanging day. Shalt thou the hopeless horde see of hell for all eternity.",
+      "spanish_gemma": "¿Dónde pasarás la eternidad? Es un día inmutable.",
+      "sample_start": 20285952,
+      "sample_end": 20645376,
+      "sample_rate": 48000,
+      "padding_samples": 0,
+      "endpoint_reason": "smart_cut",
+      "qe_a": 0.55
+    }
+  ],
+  "findings": [
+    {
+      "chunk_id": 3,
+      "source_excerpt": "Eternity, Time will soon will end.",
+      "translated_excerpt": "Eternidad, El tiempo pronto terminará.",
+      "assessment": "The recorded Lite pair preserves time as the subject of ending, where the Standard pair changed it to eternity. STT wording, segmentation, schedule and final translator differ; not a controlled translation comparison or a Lite quality win."
+    },
+    {
+      "chunk_id": 4,
+      "source_omitted_clause": "Shalt thou the hopeless horde see of hell for all eternity.",
+      "entire_translated_final": "¿Dónde pasarás la eternidad? Es un día inmutable.",
+      "assessment": "The final output contains only the first two questions/statements; the remaining recognized English clause is absent. The source is an unreviewed STT result, not a verified lyric transcription."
+    }
+  ],
+  "human_reviewed": false,
+  "endurance_terminal_result": null,
+  "evidence": {
+    "diagnostic_prefix": {
+      "original_path": ".cache/overnight-20260910/installed-lite-endurance/metrics/diagnostics_20260910_053518_894101_en.jsonl",
+      "prefix_bytes": 9068,
+      "prefix_sha256": "f672e690c4bab073703c326d0f943f96c0f78f2f6f3488409acc7326f2c5b164",
+      "last_included_chunk_id": 4,
+      "whole_growing_file_hash": false,
+      "private_snapshot": "diagnostics-through-chunk4.private.jsonl"
+    },
+    "actual_ui": {
+      "path": ".cache/overnight-20260910/endurance-preparation/lite-first-hymn-ui.txt",
+      "size_bytes": 2580,
+      "sha256": "461a7a0c08385d2a90decba37fef3e68d7f9ac8851212a7195101e3d2556c1cf"
+    }
+  },
+  "scope": "Lightweight read of completed diagnostic lines and captured actual SPA text only. No audio, model calls, quality reference, approvals, capture/latency gate or complete-hour result."
+}
