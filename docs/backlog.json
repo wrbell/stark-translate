@@ -158,8 +158,8 @@
     {
       "id": "issue-132-tts-routing",
       "title": "Multi-channel TTS routing code and tests (9.4.1 / #132)",
-      "status": "implemented",
-      "certification": "pending",
+      "status": "validated",
+      "certification": "met",
       "priority": "P1",
       "machine": "mac",
       "dependencies": [],
@@ -168,15 +168,17 @@
         "tests/test_tts_multichannel.py",
         "tests/test_phase9_4_1_tts_device.py",
         "settings.py",
-        "docs/evaluation/tts_routing_20260910/README.md"
+        "docs/evaluation/tts_routing_20260910/README.md",
+        "docs/evaluation/mac_followup_20260910/tts-routing-acceptance.md"
       ],
       "issue_acceptance": "Operator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.",
       "acceptance": "Hardware-independent part: per-language output map (`--tts-device-en/es`, `STARK_TTS_OUTPUT_DEVICES`), operator persistence and hotplug retry covered by tests. Physical part: an operator routes EN and ES to two real outputs and hears each — tracked as `physical-second-output`.",
       "evidence": [
-        "tests/test_tts_multichannel.py and tests/test_phase9_4_1_tts_device.py pass in the recorded CPU suite (device enumeration mocked).",
-        "Built-in MacBook speaker playback calls completed in the controlled rehearsal; no second physical device was used."
+        "Actual operator UI persisted independent EN/ES output routes across reload and an idle operator restart; original settings were restored.",
+        "Production Piper and output resolution completed EN on MacBook speakers and ES on Microsoft Teams virtual output, twice, including a clean a8511ee retest after the explicit pinned-voice path fix. Both native streams completed. Existing issue comments explicitly allow a virtual second route.",
+        "Routing, operator configuration/argv and target-language forwarding tests pass in the full Python 3.11/3.12 CI on 476e349 (2813 passed, 6 skipped per interpreter). The dated acceptance audit binds these separate UI, native and software observations without claiming integrated caption-triggered playback."
       ],
-      "next_action": "The integrated operator-caption-to-selected-output harness is prepared but execution is deferred: the user prohibits microphone and output playback testing for the rest of this session. Keep #132 open until its remaining integrated acceptance is demonstrated; physical-second-output remains an independent stronger gate.",
+      "next_action": "Close #132 after the final reviewed merge using the retained acceptance audit. Keep integrated caption-triggered playback, human audibility, far-end reception and physical unplug/replug as separate follow-ups. No microphone capture or output playback is permitted for the rest of this session.",
       "notes": "Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing."
     },
     {

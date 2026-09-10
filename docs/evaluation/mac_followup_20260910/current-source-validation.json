@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-09-10T17:26:23.986679+00:00",
+  "source_revision": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+  "scope": "Configured GitHub CI for this exact source revision, independently checked with read-only gh metadata and retained local CI logs. This receipt does not run local tests, native imports, models, builds, installs, audio capture or output.",
+  "verification_methods": [
+    "gh run view 34506381777 --json databaseId,headSha,name,status,conclusion,event,url,jobs,createdAt,updatedAt",
+    "gh run view 34506381619 --json databaseId,headSha,name,status,conclusion,event,url,jobs,createdAt,updatedAt",
+    "gh run view 34506381639 --json databaseId,headSha,name,status,conclusion,event,url,jobs,createdAt,updatedAt",
+    "gh run view 34506381639 --job 102969484218 --log; inspected exact dependency-filter false results",
+    "Read and hash the two retained 476e349 Python CI logs; verify summaries, coverage, four startup cases and repaired documentation contract."
+  ],
+  "test_workflow": {
+    "run_id": 34506381777,
+    "head_sha": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/wrbell/stark-translate/actions/runs/34506381777",
+    "created_at": "2026-09-10T17:08:32Z",
+    "updated_at": "2026-09-10T17:12:06Z",
+    "jobs": [
+      {
+        "python": "3.11",
+        "job_id": 102969484815,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34506381777/job/102969484815",
+        "status": "completed",
+        "conclusion": "success",
+        "passed": 2813,
+        "skipped": 6,
+        "warnings": 2,
+        "duration_seconds": 127.63,
+        "coverage_percent": 66.24,
+        "log_path": ".cache/mac-en-es-closeout/ci-476e349-python311.log",
+        "log_sha256": "24cb56da0056b33dd551ea9129c12897732fc3c9a7cb493ca6378cc45213e65a",
+        "log_bytes": 473084,
+        "retained_summary_line": "2026-09-10T17:11:20.7300975Z =========== 2813 passed, 6 skipped, 2 warnings in 127.63s (0:02:07) ============",
+        "retained_coverage_line": "2026-09-10T17:11:20.7300161Z Required test coverage of 50% reached. Total coverage: 66.24%",
+        "startup_case_results": [
+          "2026-09-10T17:10:06.6106992Z tests/test_mlx_stt_fallback_language.py::test_live_english_primary_download_failure_uses_cached_fallback PASSED [ 49%]",
+          "2026-09-10T17:10:06.6134201Z tests/test_mlx_stt_fallback_language.py::test_live_spanish_primary_download_failure_does_not_attempt_english_fallback PASSED [ 49%]",
+          "2026-09-10T17:10:06.6165901Z tests/test_mlx_stt_fallback_language.py::test_live_unpinned_primary_never_attempts_fallback[en] PASSED [ 49%]",
+          "2026-09-10T17:10:06.6195941Z tests/test_mlx_stt_fallback_language.py::test_live_unpinned_primary_never_attempts_fallback[es] PASSED [ 49%]"
+        ],
+        "documentation_contract_result": "2026-09-10T17:09:31.5917766Z tests/test_documentation.py::TestBacklogJson::test_pr_status_has_consistent_merge_evidence PASSED [ 17%]"
+      },
+      {
+        "python": "3.12",
+        "job_id": 102969484404,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34506381777/job/102969484404",
+        "status": "completed",
+        "conclusion": "success",
+        "passed": 2813,
+        "skipped": 6,
+        "warnings": 2,
+        "duration_seconds": 134.24,
+        "coverage_percent": 66.24,
+        "log_path": ".cache/mac-en-es-closeout/ci-476e349-python312.log",
+        "log_sha256": "16251bbcf48a048f15cecd61f4a002fe421bd5fbe53b246a380a12b7fa67d40d",
+        "log_bytes": 444143,
+        "retained_summary_line": "2026-09-10T17:12:00.1040023Z =========== 2813 passed, 6 skipped, 2 warnings in 134.24s (0:02:14) ============",
+        "retained_coverage_line": "2026-09-10T17:12:00.1039082Z Required test coverage of 50% reached. Total coverage: 66.24%",
+        "startup_case_results": [
+          "2026-09-10T17:10:42.9128786Z tests/test_mlx_stt_fallback_language.py::test_live_english_primary_download_failure_uses_cached_fallback PASSED [ 49%]",
+          "2026-09-10T17:10:42.9154915Z tests/test_mlx_stt_fallback_language.py::test_live_spanish_primary_download_failure_does_not_attempt_english_fallback PASSED [ 49%]",
+          "2026-09-10T17:10:42.9180387Z tests/test_mlx_stt_fallback_language.py::test_live_unpinned_primary_never_attempts_fallback[en] PASSED [ 49%]",
+          "2026-09-10T17:10:42.9202533Z tests/test_mlx_stt_fallback_language.py::test_live_unpinned_primary_never_attempts_fallback[es] PASSED [ 49%]"
+        ],
+        "documentation_contract_result": "2026-09-10T17:10:10.2731274Z tests/test_documentation.py::TestBacklogJson::test_pr_status_has_consistent_merge_evidence PASSED [ 17%]"
+      }
+    ]
+  },
+  "lint_workflow": {
+    "run_id": 34506381619,
+    "head_sha": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/wrbell/stark-translate/actions/runs/34506381619",
+    "job_id": 102969483694,
+    "passed_steps": [
+      "Ruff check",
+      "Ruff format check",
+      "Mypy (engines + settings)",
+      "Bandit security scan",
+      "Vulture dead code detection (advisory)",
+      "Validate HTML displays"
+    ],
+    "bandit_command": "bandit -r engines/ features/ tools/ operator_app/ settings.py -s B101,B603,B607,B615 --severity-level medium",
+    "limitations": [
+      "B615 is explicitly skipped; this is not repository-wide model-source or security clearance.",
+      "Vulture is advisory because its command uses || true."
+    ]
+  },
+  "security_workflow": {
+    "run_id": 34506381639,
+    "head_sha": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/wrbell/stark-translate/actions/runs/34506381639",
+    "jobs": [
+      {
+        "name": "detect-changes",
+        "id": 102969484218,
+        "conclusion": "success"
+      },
+      {
+        "name": "security",
+        "id": 102969553138,
+        "conclusion": "success"
+      },
+      {
+        "name": "audit",
+        "id": 102969554101,
+        "conclusion": "skipped"
+      },
+      {
+        "name": "audit-lite",
+        "id": 102969554551,
+        "conclusion": "skipped"
+      }
+    ],
+    "dependency_filters": {
+      "requirements": false,
+      "lite": false,
+      "requirements_log_line": "2026-09-10T17:08:43.5033712Z Filter requirements = false",
+      "lite_log_line": "2026-09-10T17:08:43.5041989Z Filter lite = false"
+    },
+    "interpretation": "No dependency changes matched the configured audit filters, so the audit jobs did not run. A successful wrapper supplies no new dependency-audit result."
+  },
+  "historical_failure_preserved": {
+    "source_revision": "fb44a0f7023f1fde539f908ef09c4d85062b4c5c",
+    "workflow_url": "https://github.com/wrbell/stark-translate/actions/runs/34505780125",
+    "full_suite_conclusion": "failure",
+    "python311": {
+      "passed": 2812,
+      "failed": 1,
+      "skipped": 6,
+      "warnings": 2,
+      "coverage_percent": 66.24,
+      "duration_seconds": 126.6
+    },
+    "failure_line": "2026-09-10T17:05:34.7717692Z FAILED tests/test_documentation.py::TestBacklogJson::test_pr_status_has_consistent_merge_evidence - AssertionError: assert 'pull/192' in '[PR #196](https://github.com/wrbell/stark-translate/pull/196) \u2014 draft Mac EN\u2194ES follow-up on codex/mac-en-es-closeout. Experiments, final artifact checks and review remain in progress; no merge claimed.'",
+    "log_path": ".cache/mac-en-es-closeout/ci-fb44a0f-python311.log",
+    "log_sha256": "188f14923ac4a8823fb1a05704fd2005725958bafedae0253bf0a5b5f4af33fc",
+    "startup_cases": "All four new fallback pytest cases passed in that failed full suite; the documentation assertion alone failed.",
+    "repair": "476e349 updates the historical/current PR contract; it changes no runtime source file.",
+    "prior_observed_time_receipts_unchanged": [
+      {
+        "path": "docs/evaluation/mac_followup_20260910/live-hf-pinning-receipts.json",
+        "sha256": "f684b9a666b1ecc624b49c39a57b230945ba542c9707fa06269e3ec7ba0c6a4e"
+      },
+      {
+        "path": "docs/evaluation/mac_followup_20260910/live-hf-pinning.md",
+        "sha256": "d71f75154ae5661f7d6d91f2da4baf4879ae0d82b7652bce841018c7c1584306"
+      },
+      {
+        "path": "docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json",
+        "sha256": "05a44356ad8f3b9d4bb89c412405895556cb886565c4af6ea001993a3dae7498"
+      },
+      {
+        "path": "docs/evaluation/mac_followup_20260910/live-hf-source-inventory.md",
+        "sha256": "20526587d6ba71b12f2a9cc9d83c14a51f706dc905c6fdd5b4bffb73724d7451"
+      }
+    ]
+  },
+  "remaining_gates": [
+    "Final installed-artifact/file-input EN/ES validation and queued latency experiments remain separate; no model/default promotion follows from CI.",
+    "Optional native diarization compatibility, gated model access, source/reference integrity, human bilingual quality and device acceptance remain separate.",
+    "Microphone capture and all output playback are prohibited for the remainder of this session; no such action was performed for this receipt.",
+    "No release, package publication, PR merge or global dependency/model-source security clearance is claimed."
+  ]
+}

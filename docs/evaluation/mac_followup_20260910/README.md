@@ -7,6 +7,10 @@ no release or package publication is authorized for this follow-up. The
 
 ## Completed evidence
 
+- [Current source validation](current-source-validation.md): Python 3.11/3.12
+  suites and lint passed on `476e349`, including the startup fallback cases.
+  Dependency-audit jobs were skipped; no new audit clearance is claimed. The
+  separate receipt preserves the earlier failed suite and observation-time records.
 - [Public input audit](public_data/README.md): 100 EN + 100 ES original FLEURS
   recordings, 50 development / 50 confirmation per language, pinned source,
   hashes, independent archive verification and portable reference metadata.

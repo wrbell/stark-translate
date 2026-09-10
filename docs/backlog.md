@@ -304,18 +304,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** The original issue explicitly asks to confirm W16 CT2 preference. The factory retains adapter preference for the configured faster-whisper path; Mac English auto now selects Parakeet by deliberate policy. Document this distinction during the live EN/ES retest instead of claiming W16 is the Mac auto default. September 10 quiet-room readiness and synthetic acoustic attempts are recorded separately; a Spanish retest retained 160 ms of upstream loss. This supersedes the earlier statement that the integrated capture fix had no real-device test at all, without erasing the failed evidence.
 - **Next action:** Further live microphone testing is prohibited for the rest of this session. At a later permitted attended session, retain clean EN/ES audience partial/final and adapter-selection evidence. Current file replays and the successful bounded device-identity probe do not close the remaining live pipeline acceptance.
 
-### `issue-132-tts-routing` — Multi-channel TTS routing code and tests (9.4.1 / #132)
-
-- **Priority:** P1 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** [#132](https://github.com/wrbell/stark-translate/issues/132), `tests/test_tts_multichannel.py`, `tests/test_phase9_4_1_tts_device.py`, `settings.py`, `docs/evaluation/tts_routing_20260910/README.md`
-- **Issue acceptance (verbatim intent):** Operator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.
-- **Acceptance:** Hardware-independent part: per-language output map (`--tts-device-en/es`, `STARK_TTS_OUTPUT_DEVICES`), operator persistence and hotplug retry covered by tests. Physical part: an operator routes EN and ES to two real outputs and hears each — tracked as `physical-second-output`.
-- **Evidence:** tests/test_tts_multichannel.py and tests/test_phase9_4_1_tts_device.py pass in the recorded CPU suite (device enumeration mocked).
-- **Evidence:** Built-in MacBook speaker playback calls completed in the controlled rehearsal; no second physical device was used.
-- **Notes:** Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing.
-- **Next action:** The integrated operator-caption-to-selected-output harness is prepared but execution is deferred: the user prohibits microphone and output playback testing for the rest of this session. Keep #132 open until its remaining integrated acceptance is demonstrated; physical-second-output remains an independent stronger gate.
-
 ### `issue-133-diarize-gate` — Live diarization on a rolling buffer (9.6.1 / #133)
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
@@ -423,6 +411,19 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Actual merge 3e935fe39b96e7b0aa62a74711307f2b3e31a18c at 2026-09-10T11:57:22Z; final reviewed head ab66ad2929e61171e4ab9c7c77685ba1ac988577 passed 2,398 tests with four skips on each Python 3.11/3.12 CI job. Bootstrap delivery verifies executable ZIP bootstrap and 152 unchanged runtime members versus 84832fb. Earlier 752 endurance, 848 cleanup checks and negative 96-run screen remain separate evidence. No package publication or device/human certification.
 - **Next action:** None for source integration. Continue remaining latency, human/device and hardware work; release publication needs the separate user decision.
 
+### `issue-132-tts-routing` — Multi-channel TTS routing code and tests (9.4.1 / #132)
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** met
+- **Depends on:** none
+- **Sources:** [#132](https://github.com/wrbell/stark-translate/issues/132), `tests/test_tts_multichannel.py`, `tests/test_phase9_4_1_tts_device.py`, `settings.py`, `docs/evaluation/tts_routing_20260910/README.md`, `docs/evaluation/mac_followup_20260910/tts-routing-acceptance.md`
+- **Issue acceptance (verbatim intent):** Operator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.
+- **Acceptance:** Hardware-independent part: per-language output map (`--tts-device-en/es`, `STARK_TTS_OUTPUT_DEVICES`), operator persistence and hotplug retry covered by tests. Physical part: an operator routes EN and ES to two real outputs and hears each — tracked as `physical-second-output`.
+- **Evidence:** Actual operator UI persisted independent EN/ES output routes across reload and an idle operator restart; original settings were restored.
+- **Evidence:** Production Piper and output resolution completed EN on MacBook speakers and ES on Microsoft Teams virtual output, twice, including a clean a8511ee retest after the explicit pinned-voice path fix. Both native streams completed. Existing issue comments explicitly allow a virtual second route.
+- **Evidence:** Routing, operator configuration/argv and target-language forwarding tests pass in the full Python 3.11/3.12 CI on 476e349 (2813 passed, 6 skipped per interpreter). The dated acceptance audit binds these separate UI, native and software observations without claiming integrated caption-triggered playback.
+- **Notes:** Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing.
+- **Next action:** Close #132 after the final reviewed merge using the retained acceptance audit. Keep integrated caption-triggered playback, human audibility, far-end reception and physical unplug/replug as separate follow-ups. No microphone capture or output playback is permitted for the rest of this session.
+
 ### `mac-torch-security-migration` — Resolve pinned Mac Torch dependency advisories
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** met
@@ -461,5 +462,5 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 | Pending Input Or Hardware | 13 |
 | Experimental | 1 |
 | Deferred | 5 |
-| Implemented | 8 |
-| Validated | 8 |
+| Implemented | 7 |
+| Validated | 9 |
