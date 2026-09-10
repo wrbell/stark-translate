@@ -4,6 +4,15 @@ This supplements the [earlier scope audit](../mac_v2026_14_security.md). A passi
 CI gate does not imply every package in an existing developer environment is free
 of known advisories.
 
+The read-only refresh at **07:55 UTC** retained the same findings: the
+[working environment](working-mac-20260910T0755.json) has 52 advisory entries
+across 11 packages; the [isolated Mac runtime](isolated-mac-20260910T0755.json)
+has two entries in Torch; the [Lite runtime](lite-20260910T0755.json) has none.
+The inventories contain 144, 167 and 61 dependency entries respectively, including
+explicit unpublished-project skips. [Command receipts](audit-20260910T0755-receipts.json)
+record the actual paths, timestamps and audit exit codes. The earlier snapshots
+below remain available; no dependencies were changed by either audit.
+
 ## Actual installations inspected
 
 - **Preserved working `stt_env`:** the read-only [full installed audit](working_mac_audit.json)
