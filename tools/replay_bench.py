@@ -378,7 +378,16 @@ def _free_port(start: int) -> int:
 
 
 def run_replay(
-    clip: dict, wav: Path, tag: str, extra: list[str], index: int, metrics_dir: Path, *, timeout_s: float | None = None
+    clip: dict,
+    wav: Path,
+    tag: str,
+    extra: list[str],
+    index: int,
+    metrics_dir: Path,
+    *,
+    timeout_s: float | None = None,
+    env: dict | None = None,
+    ports: tuple[int, int] | None = None,
 ) -> dict:
     """Launch one child and wait before analyzing its flushed metrics."""
     if any(arg.split("=", 1)[0] in REPLAY_MANAGED_ARGS for arg in extra):
@@ -395,8 +404,13 @@ def run_replay(
     )
     if not math.isfinite(timeout_s) or timeout_s <= 0:
         raise ValueError("Replay timeout must be positive and finite")
-    ws_port = _free_port(8865 + index * 2)
-    http_port = _free_port(ws_port + 1)
+    if ports is not None:
+        if len(set(ports)) != 2 or any(not isinstance(port, int) or not 1024 <= port <= 65535 for port in ports):
+            raise ValueError("Replay ports must be distinct unprivileged TCP ports")
+        ws_port, http_port = ports
+    else:
+        ws_port = _free_port(8865 + index * 2)
+        http_port = _free_port(ws_port + 1)
     command = [
         sys.executable,
         str(ROOT / "dry_run_ab.py"),
@@ -427,7 +441,7 @@ def run_replay(
     launch_error = None
     with log_path.open("x") as log:
         try:
-            result = run_child(command, cwd=ROOT, stdout=log, timeout=timeout_s)
+            result = run_child(command, cwd=ROOT, stdout=log, timeout=timeout_s, env=env)
         except subprocess.TimeoutExpired:
             timed_out = True
             result = subprocess.CompletedProcess(command, -1)
