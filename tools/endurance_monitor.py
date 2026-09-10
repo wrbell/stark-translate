@@ -152,7 +152,7 @@ class ProcessTreeSampler:
                 self.known[key] = "descendant"
                 events.append({"event": "child_observed", "pid": key[0], "create_time": key[1]})
             processes[key] = child
-        rows, present = [], set()
+        rows, present, exited = [], set(), set()
         dt = mono - self.last_mono if self.last_mono is not None else None
         for key, process in processes.items():
             try:
@@ -160,10 +160,24 @@ class ProcessTreeSampler:
                 if process.create_time() != key[1]:
                     continue
                 status = process.status()
-                if status in {self.ps.STATUS_ZOMBIE, self.ps.STATUS_DEAD}:
-                    events.append({"event": "exit_observed", "pid": key[0], "status": status, "exit_code": None})
-                    continue
                 present.add(key)
+                if status in {self.ps.STATUS_ZOMBIE, self.ps.STATUS_DEAD}:
+                    exited.add(key)
+                    events.append({"event": "exit_observed", "pid": key[0], "status": status, "exit_code": None})
+                    rows.append(
+                        {
+                            "pid": key[0],
+                            "create_time": key[1],
+                            "role": self.known[key],
+                            "status": status,
+                            "exited_unreaped": True,
+                            "rss_bytes": 0,
+                            "rss_basis": "exited process has no resident address space",
+                            "cpu_seconds": None,
+                            "cpu_percent": None,
+                        }
+                    )
+                    continue
                 rss = process.memory_info().rss
                 cpu = process.cpu_times()
                 cpu_s = cpu.user + cpu.system
@@ -201,7 +215,9 @@ class ProcessTreeSampler:
             "processes": rows,
             "process_count": len(present),
             "observed_process_count": len(rows),
-            "pipeline_alive": ((self.identity["pid"], self.identity["create_time"]) in present)
+            "running_process_count": len(present - exited),
+            "exited_unreaped_count": len(exited),
+            "pipeline_alive": ((self.identity["pid"], self.identity["create_time"]) in present - exited)
             if not any(e["pid"] == self.identity["pid"] for e in errors)
             else None,
             "rss_sum_bytes": sum(row["rss_bytes"] for row in rows) if complete else None,
@@ -414,7 +430,7 @@ def artifact_summary(root, session, identity, annotations=()):
             groups[cohort][kind].append(row)
     cohorts = []
     for key, group in sorted(groups.items()):
-        final_times = [_number(row.get("timing_stages_ms", {}).get("final_ready")) for row in group["finals"]]
+        final_times = [_number((row.get("timing_stages_ms") or {}).get("final_ready")) for row in group["finals"]]
         partial_times = [_number(row.get("emitted_at_ms")) for row in group["partials"]]
         times = sorted(t for t in final_times + partial_times if t is not None)
         # First partial per utterance, not every update's speech-start latency.
@@ -544,9 +560,14 @@ def summarize_samples(samples):
         "rss_sum_bytes": _stats([s["tree"]["rss_sum_bytes"] for s in samples]),
         "cpu_percent_sum": _stats([s["tree"]["cpu_percent_sum"] for s in samples]),
         "process_count": _stats([s["tree"]["process_count"] for s in samples]),
+        "running_process_count": _stats([s["tree"]["running_process_count"] for s in samples]),
+        "exited_unreaped_count": _stats([s["tree"]["exited_unreaped_count"] for s in samples]),
         "sampling_gaps_s": _stats([b["monotonic_s"] - a["monotonic_s"] for a, b in pairwise(samples)]),
         "incomplete_tree_samples": sum(not s["tree"]["counters_complete"] for s in samples),
         "memory_sampling_complete": bool(samples) and all(s["tree"]["counters_complete"] for s in samples),
+        "no_running_processes_observed": bool(samples)
+        and samples[-1]["tree"]["counters_complete"]
+        and samples[-1]["tree"]["running_process_count"] == 0,
         "process_cleanup_observed": bool(samples)
         and samples[-1]["tree"]["counters_complete"]
         and samples[-1]["tree"]["process_count"] == 0,

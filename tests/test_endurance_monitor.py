@@ -210,7 +210,10 @@ def test_zombie_exit_is_observed_without_claiming_exit_code(identity):
     sampler.sample(10)
     process.state = psutil.STATUS_ZOMBIE
     result = sampler.sample(15)
-    assert result["process_count"] == 0 and result["rss_sum_bytes"] == 0
+    assert result["process_count"] == 1 and result["rss_sum_bytes"] == 0
+    assert result["running_process_count"] == 0 and result["exited_unreaped_count"] == 1
+    assert result["pipeline_alive"] is False
+    assert result["processes"][0]["exited_unreaped"] is True
     assert result["events"][0] == {
         "event": "exit_observed",
         "pid": 42,
@@ -392,10 +395,14 @@ tmp.replace(path)
         while not (tmp_path / "metrics/session_lifecycle_session.json").exists():
             assert time.monotonic() < deadline
             time.sleep(0.01)
+        # The fixture owner reaps its own child, independently of the monitor.
+        reaper = threading.Thread(target=process.wait, kwargs={"timeout": 3})
+        reaper.start()
         result = monitor.monitor(
             tmp_path, "session", process.pid, tmp_path / "observed", duration=3, interval=0.1, exit_grace=1
         )
-        assert process.wait(timeout=3) == 0
+        reaper.join(timeout=3)
+        assert process.returncode == 0
         assert result["monitor_status"] == "completed"
         samples = [json.loads(line) for line in (tmp_path / "observed/samples.jsonl").read_text().splitlines()]
         assert any(s["tree"]["process_count"] == 2 for s in samples)
@@ -431,3 +438,30 @@ def test_os_tree_permission_failure_retains_readable_rows_but_not_total(identity
     assert result["pipeline_alive"] is None
     assert result["counters_complete"] is False
     assert result["errors"][0]["error"] == "PermissionError"
+
+
+def test_completed_recording_with_zombie_remains_cleanup_unverified(tmp_path, monkeypatch):
+    artifacts(tmp_path, completed=False)
+    original = monitor.attach
+
+    def complete_after_attach(*args):
+        identity = original(*args)
+        artifacts(tmp_path, completed=True)
+        return identity
+
+    monkeypatch.setattr(monitor, "attach", complete_after_attach)
+    process = FakeProcess(42, 100)
+    process.state = psutil.STATUS_ZOMBIE
+    report = monitor.monitor(tmp_path, "session", 42, tmp_path / "out", exit_grace=0, ps=FakePS(process))
+    assert report["artifacts"]["completion"]["verified"] is True
+    assert report["monitor_status"] == "partial"
+    assert report["measurements"]["no_running_processes_observed"] is True
+    assert report["measurements"]["process_cleanup_observed"] is False
+    assert report["measurements"]["exited_unreaped_count"]["max"] == 1
+
+
+def test_null_legacy_timing_dict_remains_unknown(tmp_path, identity):
+    artifacts(tmp_path, finals=[row(timing_stages_ms=None)])
+    report = monitor.artifact_summary(tmp_path, "session", identity)
+    assert report["cohorts"][0]["server_update_times_ms"] == []
+    assert report["cohorts"][0]["server_update_gap_ms"]["p50"] is None
