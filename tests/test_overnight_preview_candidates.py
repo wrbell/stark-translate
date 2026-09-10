@@ -1,6 +1,7 @@
 """Earlier work cannot bypass exact final confirmation or streaming cleanup."""
 
 import asyncio
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from types import SimpleNamespace
@@ -103,6 +104,70 @@ def test_unidentified_final_does_not_poison_later_bounded_history_cleanup(monkey
         asyncio.run(run())
     finally:
         pipeline._final_pending.clear()
+
+
+@pytest.mark.parametrize(
+    "experiment",
+    [
+        {"first_preview_s": 0.32},
+        {"speculate_pause_ms": 128},
+        {"pause_preview_ms": 128},
+        {"clause_preview_s": 4},
+        {"incremental_stt": "rolling"},
+        {"incremental_stt": "stream"},
+        {"latest_partial": True},
+    ],
+)
+def test_preview_finishing_marian_after_final_never_repaints_closed_utterance(monkeypatch, experiment):
+    import dry_run_ab as pipeline
+
+    monkeypatch.setattr(pipeline, "_latency", replace(LatencyExperiments(), **experiment))
+    monkeypatch.setattr(pipeline, "_stt_scheduler", None)  # policy must not depend on startup side effects
+    monkeypatch.setattr(pipeline, "_closed_utterances", set())
+    monkeypatch.setattr(pipeline, "_final_pending", threading.Event())
+    monkeypatch.setattr(pipeline, "_partial_emitted_sequence", {})
+    monkeypatch.setattr(pipeline, "_partial_source_text", {})
+    monkeypatch.setattr(pipeline, "_rolling_previews", {})
+    monkeypatch.setattr(pipeline, "MULTIPROCESS", True)
+    monkeypatch.setattr(pipeline, "_pipeline_chunk_queue", None)
+    monkeypatch.setattr(pipeline, "_active_partial_future", None)
+    monkeypatch.setattr(pipeline.settings.translation, "final_aware_partials", False)
+    monkeypatch.setattr(pipeline, "_run_partial_stt_via_worker", lambda audio: ("He is not guilty.", 10))
+    monkeypatch.setattr(pipeline, "_is_garbage_text", lambda text: False)
+    monkeypatch.setattr(pipeline, "_should_suppress", lambda *args, **kwargs: None)
+    monkeypatch.setattr(pipeline, "pipeline_submit", AsyncMock())
+    monkeypatch.setattr(pipeline, "broadcast", AsyncMock())
+    monkeypatch.setattr(pipeline, "_io_pool", Mock())
+    release = threading.Event()
+
+    async def run():
+        started = asyncio.Event()
+        loop = asyncio.get_running_loop()
+
+        def marian(text):
+            loop.call_soon_threadsafe(started.set)
+            assert release.wait(2)
+            return "Él no es culpable.", 10
+
+        monkeypatch.setattr(pipeline, "translate_marian", marian)
+        task = asyncio.create_task(pipeline.process_partial(np.ones(16000), 7))
+        try:
+            await asyncio.wait_for(started.wait(), 1)
+            await pipeline.process_final(np.ones(16000), 7)
+            pipeline._final_pending.clear()  # the final STT/translation has already completed
+            release.set()
+            await task
+            assert 7 in pipeline._closed_utterances
+            pipeline.broadcast.assert_not_awaited()
+            pipeline._io_pool.submit.assert_not_called()
+        finally:
+            release.set()
+            await task
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        monkeypatch.setattr(pipeline, "_stt_comm_pool", pool)
+        monkeypatch.setattr(pipeline, "_pytorch_pool", pool)
+        asyncio.run(run())
 
 
 @pytest.mark.parametrize("resume", [False, True])

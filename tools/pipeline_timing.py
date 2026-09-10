@@ -261,7 +261,7 @@ class RenderTracker:
     """Bounded per-connection pending events; acknowledgments never block finals."""
 
     def __init__(self, max_pending: int = 2048, ttl_s: float = 60):
-        self.pending: dict[tuple[int, str], tuple[float, float | None, str, dict]] = {}
+        self.pending: dict[tuple[int, str], tuple[float, float | None, str, dict, dict]] = {}
         self.max_pending, self.ttl_s = max_pending, ttl_s
 
     def sent(
@@ -272,11 +272,23 @@ class RenderTracker:
         speech_end: float | None,
         stage: str,
         metadata: dict | None = None,
+        *,
+        preview_start: float | None = None,
+        preview_end: float | None = None,
+        preview_speech_end: float | None = None,
     ) -> None:
         self.pending = {key: item for key, item in self.pending.items() if sent - item[0] < self.ttl_s}
         while len(self.pending) >= self.max_pending:
             self.pending.pop(next(iter(self.pending)))
-        self.pending[id(client), event_id] = (sent, speech_end, stage, metadata or {})
+        # These references come from the producer's clock, never the browser.
+        # A pause preview's last captured frame includes the pause; its last
+        # VAD-positive frame is a separate endpoint and must remain separate.
+        preview_references = {
+            "speech_start_to_preview_ack_upper_bound_ms": preview_start,
+            "captured_end_to_preview_ack_upper_bound_ms": preview_end,
+            "speech_end_to_preview_ack_upper_bound_ms": preview_speech_end,
+        }
+        self.pending[id(client), event_id] = (sent, speech_end, stage, metadata or {}, preview_references)
 
     def acknowledge(self, client: Any, message: dict, now: float) -> dict | None:
         event_id = message.get("event_id")
@@ -290,7 +302,7 @@ class RenderTracker:
             return None
         if not math.isfinite(render_ms) or not 0 <= render_ms <= self.ttl_s * 1000:
             return None
-        sent, speech_end, stage, metadata = item
+        sent, speech_end, stage, metadata, preview_references = item
         visible = message.get("visible") is True
         return {
             **metadata,
@@ -302,6 +314,10 @@ class RenderTracker:
             "receive_to_render_ms": round(render_ms, 1),
             "send_to_ack_ms": milliseconds(now, sent),
             "speech_end_to_ack_upper_bound_ms": milliseconds(now, speech_end) if visible else None,
+            **{
+                name: milliseconds(now, reference) if visible and stage == "partial" else None
+                for name, reference in preview_references.items()
+            },
             "timing_schema_version": TIMING_SCHEMA_VERSION,
         }
 

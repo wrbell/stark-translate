@@ -2425,8 +2425,28 @@ def _confirmed_speculation(utterance_id, text, confidence):
     return candidate.result
 
 
+def _preview_ordering_enabled():
+    """Use the same closure policy at final admission and preview publication."""
+    return bool(
+        _stt_scheduler is not None
+        or _latency.latest_partial
+        or _latency.incremental_stt != "off"
+        or _latency.first_preview_s
+        or _latency.speculate_pause_ms
+        or _latency.pause_preview_ms
+        or _latency.clause_preview_s
+    )
+
+
 async def process_partial(
-    audio_data, utterance_id, captured_end=None, captured_start=None, sample_bounds=None, preview_kind="periodic"
+    audio_data,
+    utterance_id,
+    captured_end=None,
+    captured_start=None,
+    sample_bounds=None,
+    preview_kind="periodic",
+    speech_end=None,
+    timing_source="unknown",
 ):
     """Fast partial: STT (~300ms) + MarianMT (~80ms). Italic in UI.
 
@@ -2628,12 +2648,7 @@ async def process_partial(
 
         # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
-        if (
-            _stt_scheduler is not None
-            or _latency.speculate_pause_ms
-            or _latency.pause_preview_ms
-            or _latency.clause_preview_s
-        ) and (
+        if _preview_ordering_enabled() and (
             utterance_id in _closed_utterances or request_sequence <= _partial_emitted_sequence.get(utterance_id, -1)
         ):
             _latency_event("partial_suppressed_stale_result")
@@ -2646,23 +2661,44 @@ async def process_partial(
         total = stt_latency + marian_latency
         _count_experiment("partial_emitted")
 
+        emitted = time.perf_counter()
+        preview_metadata = {
+            "event_id": f"{SESSION_ID}:partial:{request_sequence}",
+            "timing_schema_version": 2,
+            "timing_source": timing_source,
+            "clock": "session_monotonic",
+            **sample_bounds,
+            "utterance_id": utterance_id,
+            "preview_kind": preview_kind,
+            "preview_revision": request_sequence,
+            "stable_source_prefix": stable_prefix,
+            "caption_delivery_mode": "queued" if _latency.async_captions else "awaited",
+            "captured_start_at_ms": (
+                round((captured_start - _SESSION_CLOCK_ORIGIN) * 1000, 3) if captured_start is not None else None
+            ),
+            "captured_end_at_ms": (
+                round((captured_end - _SESSION_CLOCK_ORIGIN) * 1000, 3) if captured_end is not None else None
+            ),
+            "speech_end_at_ms": (
+                round((speech_end - _SESSION_CLOCK_ORIGIN) * 1000, 3) if speech_end is not None else None
+            ),
+        }
+
         _io_pool.submit(
             _write_partial_record,
             {
                 **_session_provenance(),
-                "timing_schema_version": 2,
-                **sample_bounds,
-                "emitted_at_ms": round((time.perf_counter() - _SESSION_CLOCK_ORIGIN) * 1000, 3),
-                "utterance_id": utterance_id,
-                "captured_end_to_partial_ms": milliseconds(time.perf_counter(), captured_end),
-                "speech_start_to_partial_ms": milliseconds(time.perf_counter(), captured_start),
-                "partial_processing_ms": milliseconds(time.perf_counter(), partial_submitted),
+                **preview_metadata,
+                "emitted_at_ms": round((emitted - _SESSION_CLOCK_ORIGIN) * 1000, 3),
+                "captured_end_to_partial_ms": milliseconds(emitted, captured_end),
+                "speech_start_to_partial_ms": milliseconds(emitted, captured_start),
+                "speech_end_to_partial_ms": (
+                    milliseconds(emitted, speech_end) if timing_source != "replay_nonrealtime" else None
+                ),
+                "partial_processing_ms": milliseconds(emitted, partial_submitted),
                 "ts": datetime.now().isoformat(),
                 "buffer_s": original_audio_duration,
                 "processed_audio_s": processed_audio_samples / SAMPLE_RATE,
-                "preview_kind": preview_kind,
-                "preview_revision": request_sequence,
-                "stable_source_prefix": stable_prefix,
                 "processed_window_offset_samples": rolling_start,
                 "processed_window_sample_rate": SAMPLE_RATE,
                 "stt_ms": stt_latency,
@@ -2684,11 +2720,7 @@ async def process_partial(
             {
                 "type": "translation",
                 "stage": "partial",
-                "preview_kind": preview_kind,
-                "preview_revision": request_sequence,
-                "stable_source_prefix": stable_prefix,
-                "timing_schema_version": 2,
-                **sample_bounds,
+                **preview_metadata,
                 "chunk_id": utterance_id,
                 "english": english,
                 "spanish_a": spanish,
@@ -3367,7 +3399,11 @@ async def _pipeline_coordinator():
             # Await STT completion (translation of N-1 may still be running
             # concurrently in another thread — that's the overlap)
             english, stt_latency, stt_confidence, segment_meta, low_conf_words = await stt_future
-            _latency_trace.record("final_stt_resumed", chunk_id=cid, worker_finished=timing.stt_finished)
+            _latency_trace.record(
+                "final_stt_resumed",
+                chunk_id=cid,
+                worker_finish_to_resume_ms=milliseconds(time.perf_counter(), timing.stt_finished),
+            )
 
             # [FIX] Final STT done — allow partials again for the next utterance
             _final_pending.clear()
@@ -3515,9 +3551,7 @@ async def process_final(audio_data, finalized_utterance_id=None):
             uid for uid in tuple(_closed_utterances) if uid < finalized_utterance_id - 128
         )
 
-    if finalized_utterance_id is not None and (
-        _stt_scheduler is not None or _latency.pause_preview_ms or _latency.clause_preview_s
-    ):
+    if finalized_utterance_id is not None and _preview_ordering_enabled():
         _closed_utterances.add(finalized_utterance_id)
     if _stt_scheduler is not None:
         _stt_scheduler.cancel_partial(finalized_utterance_id)
@@ -3632,6 +3666,13 @@ def _caption_before_send(client, data, started, queue_ms):
     if data.get("type") != "translation":
         return
     timing = _chunk_timings.get(data.get("chunk_id")) if data.get("stage") != "partial" else None
+
+    def preview_reference(name):
+        if data.get("stage") != "partial" or data.get("timing_source") == "replay_nonrealtime":
+            return None
+        value = data.get(name)
+        return _SESSION_CLOCK_ORIGIN + value / 1000 if value is not None else None
+
     _render_tracker.sent(
         client,
         data["event_id"],
@@ -3641,8 +3682,17 @@ def _caption_before_send(client, data, started, queue_ms):
         {
             "chunk_id": data.get("chunk_id"),
             "utterance_id": data.get("utterance_id", data.get("chunk_id")),
+            "preview_kind": data.get("preview_kind"),
+            "preview_revision": data.get("preview_revision"),
+            "timing_source": data.get("timing_source", timing.timing_source if timing else "unknown"),
+            "caption_delivery_mode": data.get("caption_delivery_mode"),
+            "caption_queue_wait_ms": round(queue_ms, 3),
+            **{name: data.get(name) for name in ("captured_start_at_ms", "captured_end_at_ms", "speech_end_at_ms")},
             **{name: data.get(name) for name in SAMPLE_COLUMNS},
         },
+        preview_start=preview_reference("captured_start_at_ms"),
+        preview_end=preview_reference("captured_end_at_ms"),
+        preview_speech_end=preview_reference("speech_end_at_ms"),
     )
 
 
@@ -3656,6 +3706,7 @@ def _caption_failed(client, error):
 
 async def broadcast(data):
     """Send data to all connected WebSocket clients."""
+    data.setdefault("caption_delivery_mode", "queued" if _latency.async_captions else "awaited")
     if not ws_clients:
         print("  [ws] No clients connected, skipping broadcast")
         return
@@ -3663,8 +3714,9 @@ async def broadcast(data):
     # Add the correlation id to the producer record too, so diagnostics can
     # be joined to acknowledgments. Never add post-send durations to payload.
     data.setdefault("session_id", SESSION_ID)
-    _broadcast_sequence += 1
-    data["event_id"] = f"{SESSION_ID}:{_broadcast_sequence}"
+    if "event_id" not in data:
+        _broadcast_sequence += 1
+        data["event_id"] = f"{SESSION_ID}:{_broadcast_sequence}"
     cid = data.get("chunk_id")
     timing = _chunk_timings.get(cid) if data.get("stage") != "partial" else None
     if timing is not None:
@@ -3686,18 +3738,7 @@ async def broadcast(data):
     clients = list(ws_clients)
     if data.get("type") == "translation":
         for client in clients:
-            _render_tracker.sent(
-                client,
-                data["event_id"],
-                time.perf_counter(),
-                timing.speech_end if timing and timing.timing_source != "replay_nonrealtime" else None,
-                data.get("stage", "complete"),
-                {
-                    "chunk_id": cid,
-                    "utterance_id": data.get("utterance_id", cid),
-                    **{name: data.get(name) for name in SAMPLE_COLUMNS},
-                },
-            )
+            _caption_before_send(client, data, time.perf_counter(), 0.0)
     results = await asyncio.gather(
         *[client.send(msg) for client in clients],
         return_exceptions=True,
@@ -4078,7 +4119,7 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
     record.update(
         {
             field: data.get(field)
-            for field in (*_GEN_STAT_FIELDS, *TIMING_COLUMNS, *_EXPERIMENT_GEN_FIELDS)
+            for field in (*_GEN_STAT_FIELDS, *TIMING_COLUMNS, *_EXPERIMENT_GEN_FIELDS, "caption_delivery_mode")
             if field in data
         }
     )
@@ -4133,6 +4174,7 @@ def init_csv():
                 "speaker",
                 *TIMING_COLUMNS,
                 *_EXPERIMENT_GEN_FIELDS,
+                "caption_delivery_mode",
             ]
         )
     print(f"  CSV: {CSV_PATH}")
@@ -4188,6 +4230,7 @@ def write_csv_row(data, marian_lat=None):
                 data.get("speaker", "") if data.get("speaker") is not None else "",
                 *(data.get(field) for field in TIMING_COLUMNS),
                 *(data.get(field) for field in _EXPERIMENT_GEN_FIELDS),
+                data.get("caption_delivery_mode"),
             ]
         )
 
@@ -4501,6 +4544,8 @@ async def audio_loop():
                                     timeline.first,
                                     timeline.sample_metadata(),
                                     preview_kind=kind,
+                                    speech_end=timeline.speech_end,
+                                    timing_source=timeline.source,
                                 )
                             )
                             _partial_tasks.add(task)
@@ -4542,6 +4587,8 @@ async def audio_loop():
                                 timeline.last,
                                 timeline.first,
                                 timeline.sample_metadata(),
+                                speech_end=timeline.speech_end,
+                                timing_source=timeline.source,
                             )
                         )
                         _partial_tasks.add(task)
