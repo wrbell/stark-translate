@@ -1,5 +1,11 @@
 # Mac implementation status — September 10 source and evidence
 
+> **Follow-up, September 10:** [Current EN/ES work](evaluation/mac_followup_20260910/README.md)
+> adds pinned public speech comparisons, isolated dependency remediation and
+> [real microphone capture/readiness checks](evaluation/attended_mic_20260910/README.md).
+> The quiet-room check produced no spoken captions; that gate remains pending.
+> Older experiment and endurance measurements below retain their original source identities.
+
 This document describes v2026.14 source (`2026.14.0.0`), tracked by
 [PR #192](https://github.com/wrbell/stark-translate/pull/192). The last published release recorded here is v2026.13.
 The PR merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z; [closeout evidence](evaluation/overnight_closeout_20260910/README.md) retains actual merge/closure records, final ab66ad2 CI and bootstrap ZIP evidence. Source integration remains separate from the acceptance evidence below.

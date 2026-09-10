@@ -223,8 +223,11 @@ Evaluation bundles are rejected by training mergers. Retain the bundle manifest
 with any training run. Older sessions without successful completion evidence remain
 reviewable; do not invent completion or human approval to export them.
 
-Live microphone permission, output routing/unplug/replug, a real two-speaker
-recording, natural Spanish references and bilingual approval remain explicit
-rehearsal gates. Controlled file replay does not certify these physical or human
-steps. The September 10 overnight work defers live microphone and physical outputs
-until the user returns.
+On September 10, microphone permission was granted and real EN/ES input
+readiness and stop passed, along with EN pause/resume. The room had no detected
+speech; spoken EN/ES microphone captions still need a rehearsal. Output routing
+and unplug/replug, a labeled natural two-speaker recording, locally reviewed
+Spanish church references and bilingual approval remain explicit gates. Public
+EN/ES read-speech references now support separate engineering tests. Controlled
+file replay does not certify physical or human steps. See the
+[operator observations](evaluation/attended_mic_20260910/README.md).

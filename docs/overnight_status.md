@@ -1,5 +1,11 @@
 # September 10 delivery status
 
+> **Follow-up, September 10:** [Current EN/ES work](evaluation/mac_followup_20260910/README.md)
+> adds pinned public speech comparisons, isolated dependency remediation and
+> [real microphone capture/readiness checks](evaluation/attended_mic_20260910/README.md).
+> The quiet-room check produced no spoken captions; that gate remains pending.
+> Older experiment and endurance measurements below retain their original source identities.
+
 The v2026.14 source (`2026.14.0.0`) is tracked by
 [PR #192](https://github.com/wrbell/stark-translate/pull/192), merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z. See [closeout evidence](evaluation/overnight_closeout_20260910/README.md). v2026.13 remains the last published release.
 The operator, reliability, Lite, latency and documentation work is integrated. The English matrix is complete:

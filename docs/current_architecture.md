@@ -12,8 +12,10 @@
 > disconnected; a standalone `sounddevice` record probe stalled too. File-replay
 > sessions on the same build passed. The fix is **implemented** (isolated capture with
 > no-input timeouts, health-derived readiness — § Audio capture and § Operator control
-> plane); the real built-in-mic retest and physical-device checks are deferred to
-> the next attended session (`mac-live-mic-stall`, `issue-131-smoke` in [`backlog.json`](./backlog.json)).
+> plane). [September 10 checks](evaluation/attended_mic_20260910/README.md)
+> passed real EN/ES capture/readiness and stop plus EN pause/resume after permission
+> was granted. The room was quiet: spoken-microphone and physical-device gates
+> remain pending (`mac-live-mic-stall`, `issue-131-smoke` in [`backlog.json`](./backlog.json)).
 
 ## Two-pass live pipeline
 
@@ -94,8 +96,8 @@ retain their original definitions. The sub-second median caption-delivery goal i
 - Mid-session pause/resume/lang_flip/vad/fallback over the shared cooperative control channel
 - Readiness comes from the pipeline health channel: `/api/session/status` reports
   `phase`, `ready` (only when health says `ready` and is not stale) and `stale`; RUNNING is
-  **no longer** inferred from the CSV header. A real built-in-mic session proving this
-  end-to-end is still pending
+  **no longer** inferred from the CSV header. Real built-in-mic capture/readiness
+  passed for EN and ES; spoken-microphone caption accuracy remains pending
 - One model/audio job per operator (`operator_app/work_lease.py`); cleanup touches only owned
   subprocesses, including detached children (`operator_app/processes.py`); explicit runtime
   choices (e.g. TTS off) are preserved for reproducible runs
