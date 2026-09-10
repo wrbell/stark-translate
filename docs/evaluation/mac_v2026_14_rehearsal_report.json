@@ -1,0 +1,907 @@
+{
+  "schema_version": 1,
+  "id": "mac_v2026_14_operator_rehearsal_report",
+  "usage": "evaluation_only",
+  "scope": "Controlled Mac operator workflow rehearsal; not an uninterrupted latency or human-reviewed quality benchmark",
+  "date_local": "2026-09-09",
+  "timezone": "America/Detroit",
+  "verification_method": "Light filesystem, JSON/CSV, SHA-256, and WAV-header reads; no new model inference, playback, training, or test execution during the frozen latency screen",
+  "source_reports": [
+    {
+      "path": ".cache/mac-roadmap/rehearsal_report.json",
+      "sha256": "f7108cc801c873534e2c60a45bb5967b96936955adc8800809462b098c32e535",
+      "size_bytes": 5136
+    },
+    {
+      "path": ".cache/mac-roadmap/tts-smoke/report.json",
+      "sha256": "686c9d0d65db44fda83f2efe6a4813ed564b9277ed685b395911c3b0131eb2ff",
+      "size_bytes": 1339
+    }
+  ],
+  "input_manifests": [
+    {
+      "path": "docs/evaluation/mac_v2026_14_rehearsal.json",
+      "sha256": "fdfb10d0b87832f85fccde722984cce8c53aa557b9021933e737b34b959f15b3",
+      "size_bytes": 889
+    },
+    {
+      "path": "docs/evaluation/mac_v2026_14_verse_rehearsal.json",
+      "sha256": "e38fd61555928a4c22629c55583e5d82db65dd711ed6c465b0962648249e7506",
+      "size_bytes": 769
+    }
+  ],
+  "input_path_warning": "operator_input.wav was deliberately replaced before each restart. Use each session hash and preserved source WAV, not the current mutable file contents.",
+  "sessions": [
+    {
+      "session_id": "20260909_210408_972943_en",
+      "purpose": "hymn/pause/resume/speech",
+      "source_lang": "en",
+      "target_lang": "es",
+      "input_audio_sha256": "c54638487a11cd0e65e8e14722859835a9760d17b01fe4c7f65eb48267266abb",
+      "paused": true,
+      "latency_gate_eligible": false,
+      "exclusion_reason": "Controlled mixed/synthetic operator rehearsal with TTS, outside frozen performance configurations; pause/resume disrupted real-time replay pacing and queue history",
+      "completion": "completed",
+      "exit_code": 0,
+      "finals": 9,
+      "unique_complete_acks": 8,
+      "visible_acks": 11,
+      "receipt_to_render_p50_ms": 12.2,
+      "tts_outputs": 9,
+      "tts_synthesis_p50_ms": 276.7,
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "input_provenance": "historical_english_hymn_and_sermon_with_inserted_silence",
+      "preserved_input_audio": {
+        "path": ".cache/mac-roadmap/rehearsal_en.wav",
+        "sha256": "c54638487a11cd0e65e8e14722859835a9760d17b01fe4c7f65eb48267266abb",
+        "size_bytes": 2176044,
+        "sample_rate_hz": 16000,
+        "channels": 1,
+        "frames": 1088000,
+        "duration_s": 68.0
+      },
+      "recorded_mutable_input_path": ".cache/mac-roadmap/operator_input.wav",
+      "started_at_utc": "2026-09-10T01:04:12.839734+00:00",
+      "ended_at_utc": "2026-09-10T01:07:35.328102+00:00",
+      "recorded_git_sha": "270eaace155ad75d2c0dc230989ac60f36982fb4",
+      "resolved_stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path"
+      },
+      "translation_model": {
+        "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "revision_source": "hf_snapshot_path"
+      },
+      "tts_output_mode": "wav",
+      "final_chunk_ids": [
+        "1",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11"
+      ],
+      "missing_visible_final_ack_chunk_ids": [
+        "1"
+      ],
+      "receipt_to_render_scope": "all_visible_schema2_events_including_partials_and_finals",
+      "browser_clients": 1,
+      "artifact_verification": {
+        "completed_marker_matches_diagnostics": true,
+        "diagnostic_final_ids_match_csv": true,
+        "retained_audio_files_verified": 9,
+        "tts_wav_files_verified": 9
+      },
+      "artifacts": {
+        "session_metadata": {
+          "path": "metrics/session_metadata_20260909_210408_972943_en.json",
+          "sha256": "c4210c062abe34e6f9081aa9933aaae1b48d5b7ab82785e8c31bf69aa8e8193b",
+          "size_bytes": 1795
+        },
+        "session_lifecycle": {
+          "path": "metrics/session_lifecycle_20260909_210408_972943_en.json",
+          "sha256": "8522f6f8e09f8bac7b9f6689e125696c59e686226549bed7692184a965e18169",
+          "size_bytes": 2679
+        },
+        "ab_metrics": {
+          "path": "metrics/ab_metrics_20260909_210408_972943_en.csv",
+          "sha256": "aef393c7bd05844f0a45dc9c8696e01e8557bbeba9156f86dce5b35ea044fca5",
+          "size_bytes": 5359
+        },
+        "diagnostics": {
+          "path": "metrics/diagnostics_20260909_210408_972943_en.jsonl",
+          "sha256": "63f80f58e9f74fd5d872d0f02f6b32741521fc7c286cb294be9cdab2606d732b",
+          "size_bytes": 29975
+        },
+        "display_metrics": {
+          "path": "metrics/display_metrics_20260909_210408_972943_en.jsonl",
+          "sha256": "08aad4949cac5776d1bbc18a1f8fa34a31318c18e80b3add8b44f13dc4621a1b",
+          "size_bytes": 5083
+        },
+        "partials": {
+          "path": "metrics/partials_20260909_210408_972943_en.jsonl",
+          "sha256": "db5dcab4e6785e5952f21994b5121e81676821537fbdb81e870506f2a96928e0",
+          "size_bytes": 3123
+        },
+        "session": {
+          "path": "metrics/session_20260909_210408_972943_en.log",
+          "sha256": "3029cf700c4ca448142927db590636f07b0c7a69c86c2022b6ff150bf4795d5e",
+          "size_bytes": 15134
+        }
+      },
+      "retained_audio": [
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0001.wav",
+          "sha256": "2f54c658cbe2fd5ab3358e80b2880d3baed57cc37ce2220d3efb74efb526c0de",
+          "size_bytes": 49210
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0004.wav",
+          "sha256": "3c4fdc030b57777e83ae8adb8f1e75da2fb880c95edbd7ca72fe94eca36430e2",
+          "size_bytes": 106554
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0005.wav",
+          "sha256": "cb4aa7072472ed36090dc289d6a03c698a558ed662f56fd7df190c7a35f5f282",
+          "size_bytes": 315450
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0006.wav",
+          "sha256": "52fdd2b8ff312c11fb5f15609685bce1515dcb03cbaab0172a6a03db99a9b494",
+          "size_bytes": 329786
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0007.wav",
+          "sha256": "1bb07ae2115cb6dd0f2bafb995e7249812a8daa1f77fdb90e9abfd4f677deaf4",
+          "size_bytes": 483386
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0008.wav",
+          "sha256": "68ff43ad078e40fc6a5c31e8d3a9ec313afaf0cbeca5118ebae71a7d2e83df00",
+          "size_bytes": 512058
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0009.wav",
+          "sha256": "640b87f639fcf26734258c76b4fcd0b5c6e5234400acbfea426344a7c0e41c21",
+          "size_bytes": 434234
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0010.wav",
+          "sha256": "d3fda74304993e8209d56094c21576c9aaf624bb837943b9832d37d493623865",
+          "size_bytes": 510010
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/chunk_0011.wav",
+          "sha256": "33235599b4b08a8565ee85701aefc1e08de5fb1ab9dac58eea29d30cb3c4a635",
+          "size_bytes": 307258
+        }
+      ],
+      "tts_wavs": [
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0001.wav",
+          "sha256": "c94648ea36cbb4184dcfeb2b9b50eff8ae97d98673ec09354238cb9de2f28a8e",
+          "size_bytes": 21036,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 10496,
+          "duration_s": 0.47600907029478456
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0004.wav",
+          "sha256": "45778dd0c4b8a276e3a9b9d9bffe03cf3ddf91227d7eb1a71658d1dac37b9f33",
+          "size_bytes": 24108,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 12032,
+          "duration_s": 0.5456689342403628
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0005.wav",
+          "sha256": "023c0a870d9b246da74e0a8c92a822f22a9c8482de56ae1b768927629af38214",
+          "size_bytes": 80428,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 40192,
+          "duration_s": 1.822766439909297
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0006.wav",
+          "sha256": "1ef15604a81515099ce860a448ecc1c49c0ab4be5bb85b1ba8ba5bea8fbad675",
+          "size_bytes": 174636,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 87296,
+          "duration_s": 3.959002267573696
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0007.wav",
+          "sha256": "fadcff43adb4031d0d41f02aa7896315588fbb378a1fee0d43c5caf258479982",
+          "size_bytes": 326700,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 163328,
+          "duration_s": 7.4071655328798185
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0008.wav",
+          "sha256": "fb934d072ce50ffd9747370eac383dea5f8ca2f82fb2e1132d9e06c2747fbe1a",
+          "size_bytes": 412716,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 206336,
+          "duration_s": 9.357641723356009
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0009.wav",
+          "sha256": "73434a66a97f4de870a74c2b80122dfe72a166311408bb817c5e8c1c0882b74d",
+          "size_bytes": 257068,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 128512,
+          "duration_s": 5.828208616780046
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0010.wav",
+          "sha256": "e8b33af9e23aad68da94b3cb026afdc319c31bde301be66c18671c7fdb750e6d",
+          "size_bytes": 302124,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 151040,
+          "duration_s": 6.849886621315193
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_210408_972943_en/tts/tts_0011.wav",
+          "sha256": "a17907898e77bf632472032875beec04084e04f170efea53eafe8d3d7cf9c1a3",
+          "size_bytes": 200236,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 100096,
+          "duration_s": 4.539501133786848
+        }
+      ],
+      "review": {
+        "saved_revisions": 1,
+        "transcript_approvals": 0,
+        "translation_approvals": 0,
+        "notes_only": true,
+        "sidecar": {
+          "path": "stark_data/corrections/20260909_210408_972943_en.jsonl",
+          "sha256": "eaf7a62cf9ba761fd5942712e39ff30a9f1039b8491757345d7d18df602316c9",
+          "size_bytes": 419
+        },
+        "revisions": [
+          {
+            "corrected_source_text": "Oh si",
+            "corrected_translation_text": "Oh sí",
+            "transcript_approved": false,
+            "translation_approved": false,
+            "excluded": false,
+            "review_note": "Rehearsal draft: live-session review is separate from audience captions. Approvals remain pending.",
+            "source_lang": "en",
+            "session": "20260909_210408_972943_en",
+            "chunk_id": 4,
+            "revision": 1,
+            "review_timestamp": "2026-09-10T01:07:03.469119+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "session_id": "20260909_210738_020946_es",
+      "purpose": "synthetic Spanish restart",
+      "source_lang": "es",
+      "target_lang": "en",
+      "input_audio_sha256": "74de31bf5e8526fdcdad2d238ab3e81aefc55140b2fe3237eaa3b56ddafac0f0",
+      "paused": false,
+      "latency_gate_eligible": false,
+      "exclusion_reason": "Controlled mixed/synthetic operator rehearsal with TTS, outside frozen performance configurations",
+      "completion": "completed",
+      "exit_code": 0,
+      "finals": 1,
+      "unique_complete_acks": 1,
+      "visible_acks": 8,
+      "receipt_to_render_p50_ms": 7.4,
+      "tts_outputs": 1,
+      "tts_synthesis_p50_ms": 728.9,
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "input_provenance": "synthetic_spanish",
+      "preserved_input_audio": {
+        "path": "stark_data/replay/spanish_test_2cor1.wav",
+        "sha256": "74de31bf5e8526fdcdad2d238ab3e81aefc55140b2fe3237eaa3b56ddafac0f0",
+        "size_bytes": 221364,
+        "sample_rate_hz": 16000,
+        "channels": 1,
+        "frames": 110660,
+        "duration_s": 6.91625
+      },
+      "recorded_mutable_input_path": ".cache/mac-roadmap/operator_input.wav",
+      "started_at_utc": "2026-09-10T01:07:42.104121+00:00",
+      "ended_at_utc": "2026-09-10T01:11:59.480910+00:00",
+      "recorded_git_sha": "c9d8e174889d30ab19bafb6f139b6ad70fd2940a",
+      "resolved_stt": {
+        "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "revision_source": "hf_snapshot_path"
+      },
+      "translation_model": {
+        "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "revision_source": "hf_snapshot_path"
+      },
+      "tts_output_mode": "wav",
+      "final_chunk_ids": [
+        "1"
+      ],
+      "missing_visible_final_ack_chunk_ids": [],
+      "receipt_to_render_scope": "all_visible_schema2_events_including_partials_and_finals",
+      "browser_clients": 1,
+      "artifact_verification": {
+        "completed_marker_matches_diagnostics": true,
+        "diagnostic_final_ids_match_csv": true,
+        "retained_audio_files_verified": 1,
+        "tts_wav_files_verified": 1
+      },
+      "artifacts": {
+        "session_metadata": {
+          "path": "metrics/session_metadata_20260909_210738_020946_es.json",
+          "sha256": "c36c25eb4a8b4634a3539a484b8504ab247e1d348dd89fa94fb0a1a7be439002",
+          "size_bytes": 1795
+        },
+        "session_lifecycle": {
+          "path": "metrics/session_lifecycle_20260909_210738_020946_es.json",
+          "sha256": "a166441625581cbe498cd6d2ac641c0df9715465d915108d65922891cd923956",
+          "size_bytes": 2741
+        },
+        "ab_metrics": {
+          "path": "metrics/ab_metrics_20260909_210738_020946_es.csv",
+          "sha256": "fe16e749f19d83e32ce867a49cb8b01ceeb753e33d0105580be4aa174e9ed950",
+          "size_bytes": 1339
+        },
+        "diagnostics": {
+          "path": "metrics/diagnostics_20260909_210738_020946_es.jsonl",
+          "sha256": "adaea572f4c256d76d5470ce0dfdc3bf77c2edbb174013840d3c6ef4a54758ad",
+          "size_bytes": 4167
+        },
+        "display_metrics": {
+          "path": "metrics/display_metrics_20260909_210738_020946_es.jsonl",
+          "sha256": "be4ab606bf1bc841b48533552103fe9378abb404e3f88f1e400359244ff1dc26",
+          "size_bytes": 3641
+        },
+        "partials": {
+          "path": "metrics/partials_20260909_210738_020946_es.jsonl",
+          "sha256": "7b1f97dd62416162291b753ca5a05aaf7ad9d0e04e53e32236a8868051868d53",
+          "size_bytes": 6241
+        },
+        "session": {
+          "path": "metrics/session_20260909_210738_020946_es.log",
+          "sha256": "2819e413f1886687dfb6fe398b30fe9cdb0d3bc98d401abb2b7f6bd8c3f5ec61",
+          "size_bytes": 6602
+        }
+      },
+      "retained_audio": [
+        {
+          "path": "stark_data/live_sessions/20260909_210738_020946_es/chunk_0001.wav",
+          "sha256": "3211295250a3333f459b87f611187d1bf983b6d65e7252a68e91fd80b43c7330",
+          "size_bytes": 471098
+        }
+      ],
+      "tts_wavs": [
+        {
+          "path": "stark_data/live_sessions/20260909_210738_020946_es/tts/tts_0001.wav",
+          "sha256": "cded3a77e1b79253a9467dc124e80d93e0a021b64a374989b4c437031ab6c215",
+          "size_bytes": 243756,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 121856,
+          "duration_s": 5.526349206349207
+        }
+      ],
+      "review": {
+        "saved_revisions": 0,
+        "transcript_approvals": 0,
+        "translation_approvals": 0,
+        "notes_only": true,
+        "sidecar": null,
+        "revisions": []
+      }
+    },
+    {
+      "session_id": "20260909_211201_787725_en",
+      "purpose": "English verse cue/speech/review/stop/summary",
+      "source_lang": "en",
+      "target_lang": "es",
+      "input_audio_sha256": "6e89457fc071a2e4b99baa7fa98b4baaec6a279d0c158874cde6424d51555193",
+      "paused": false,
+      "latency_gate_eligible": false,
+      "exclusion_reason": "Controlled mixed/synthetic operator rehearsal with TTS, outside frozen performance configurations",
+      "completion": "completed",
+      "exit_code": 0,
+      "finals": 8,
+      "unique_complete_acks": 8,
+      "visible_acks": 71,
+      "receipt_to_render_p50_ms": 6.9,
+      "tts_outputs": 8,
+      "tts_synthesis_p50_ms": 162.65,
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "input_provenance": "synthetic_english_verse_cue_and_historical_sermon",
+      "preserved_input_audio": {
+        "path": ".cache/mac-roadmap/rehearsal_en_verses.wav",
+        "sha256": "6e89457fc071a2e4b99baa7fa98b4baaec6a279d0c158874cde6424d51555193",
+        "size_bytes": 1795464,
+        "sample_rate_hz": 16000,
+        "channels": 1,
+        "frames": 897710,
+        "duration_s": 56.106875
+      },
+      "recorded_mutable_input_path": ".cache/mac-roadmap/operator_input.wav",
+      "started_at_utc": "2026-09-10T01:12:05.997284+00:00",
+      "ended_at_utc": "2026-09-10T01:14:18.194366+00:00",
+      "recorded_git_sha": "d82ffe41932e6f6f4712817fda7656b5cbe7318a",
+      "resolved_stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path"
+      },
+      "translation_model": {
+        "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "revision_source": "hf_snapshot_path"
+      },
+      "tts_output_mode": "wav",
+      "final_chunk_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "missing_visible_final_ack_chunk_ids": [],
+      "receipt_to_render_scope": "all_visible_schema2_events_including_partials_and_finals",
+      "browser_clients": 1,
+      "artifact_verification": {
+        "completed_marker_matches_diagnostics": true,
+        "diagnostic_final_ids_match_csv": true,
+        "retained_audio_files_verified": 8,
+        "tts_wav_files_verified": 8
+      },
+      "artifacts": {
+        "session_metadata": {
+          "path": "metrics/session_metadata_20260909_211201_787725_en.json",
+          "sha256": "a9c08397b47e5c83aebdaf3da7e90e5a5df214f82cd9607345f60c789d59a83e",
+          "size_bytes": 1795
+        },
+        "session_lifecycle": {
+          "path": "metrics/session_lifecycle_20260909_211201_787725_en.json",
+          "sha256": "f5cf6a22a9b8f65da2103b54d31df04655b00def8eaf9ae675bde0d2a8158472",
+          "size_bytes": 2679
+        },
+        "ab_metrics": {
+          "path": "metrics/ab_metrics_20260909_211201_787725_en.csv",
+          "sha256": "3a8198c0b817767ad33fad8750a6b6cfb671fec7ada8588cde154c43f1236dc0",
+          "size_bytes": 5225
+        },
+        "diagnostics": {
+          "path": "metrics/diagnostics_20260909_211201_787725_en.jsonl",
+          "sha256": "0d98cffcbfa1fa4da75880ae711744767ccafbd4bfcb63a56c2a29a2b38d80b8",
+          "size_bytes": 28872
+        },
+        "display_metrics": {
+          "path": "metrics/display_metrics_20260909_211201_787725_en.jsonl",
+          "sha256": "03cc0151363af319648500c42c4b0f715f0298f140b76f0da2d5918fc83f8963",
+          "size_bytes": 32638
+        },
+        "partials": {
+          "path": "metrics/partials_20260909_211201_787725_en.jsonl",
+          "sha256": "7ad90860ea95104ae47a3f78a3ff3a7eecd68498e49f6736a74899271c269a1b",
+          "size_bytes": 55294
+        },
+        "session": {
+          "path": "metrics/session_20260909_211201_787725_en.log",
+          "sha256": "e8a6fe9e3c59e466d56d454f6dedb74c38420cf0473e60ac8ea3f4a935df1c56",
+          "size_bytes": 25512
+        }
+      },
+      "retained_audio": [
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0001.wav",
+          "sha256": "38aa80cb62d8aa26c5900d527581ee7084ed1f519a7ae95031c9f6f92351050a",
+          "size_bytes": 407610
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0002.wav",
+          "sha256": "0bc01eea247efeb83bf3cf9e3131a792acc4b1fb4d03f1384ec804330408593c",
+          "size_bytes": 313402
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0003.wav",
+          "sha256": "3c5c3c02977ca1473bb56228625d50cd40644d8fdae440fb1c490d4d7f98a18d",
+          "size_bytes": 325690
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0004.wav",
+          "sha256": "297267ffb2e06901c2b16797d37701e5d78e1f8f8012fea68bd69650df79fd15",
+          "size_bytes": 428090
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0005.wav",
+          "sha256": "04459a57cae0fbccf0940096d84c9c72601fa85fd9fda08023eeaec33c858046",
+          "size_bytes": 512058
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0006.wav",
+          "sha256": "b48b5040f93624bb70665c12563c05b32eeb357fe68ab1c7f5d43c4659d0cbc5",
+          "size_bytes": 499770
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0007.wav",
+          "sha256": "481a093894c844cde32816f84f7526cbf835e016f37d4a587cd5071dee12300f",
+          "size_bytes": 499770
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/chunk_0008.wav",
+          "sha256": "4087c71052b1b438a31b9807d4977115b4aa2538292bf33237167c532a932c94",
+          "size_bytes": 307258
+        }
+      ],
+      "tts_wavs": [
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0001.wav",
+          "sha256": "8c2e7cb764a8ae2f4d51067d5b124f6a49a866be3f49e00a16656c73aa8ea233",
+          "size_bytes": 400940,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 200448,
+          "duration_s": 9.09061224489796
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0002.wav",
+          "sha256": "5e8cb5f10ecb6365f1fafe84a5deb2be2c67dd2a6731a108d8203c4d2cf48dd4",
+          "size_bytes": 82476,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 41216,
+          "duration_s": 1.8692063492063493
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0003.wav",
+          "sha256": "1d21164413917bd40a78a75864b3a5e5af54e68cc8100e1192e3c1fd48a26e55",
+          "size_bytes": 175148,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 87552,
+          "duration_s": 3.9706122448979593
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0004.wav",
+          "sha256": "7f2ce26e97f08fc1f794f4cb9aec311f852ecd29ef082ca7118832f99c2aaf3c",
+          "size_bytes": 298028,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 148992,
+          "duration_s": 6.757006802721088
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0005.wav",
+          "sha256": "c4a0440129d874c66a7262743599f1803d2838d9a4323377f9a99af2f6ce945b",
+          "size_bytes": 311340,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 155648,
+          "duration_s": 7.058866213151927
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0006.wav",
+          "sha256": "8886a48267d513d13f29cfa200bc08d146c66689604f50ee2a4542d56926c9c6",
+          "size_bytes": 342572,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 171264,
+          "duration_s": 7.767074829931973
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0007.wav",
+          "sha256": "06b5c568b80141cb05f1465c8db5fa625a5c4c0dc60896821d286bff4f87f312",
+          "size_bytes": 316972,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 158464,
+          "duration_s": 7.186575963718821
+        },
+        {
+          "path": "stark_data/live_sessions/20260909_211201_787725_en/tts/tts_0008.wav",
+          "sha256": "0fe95671950b97f7b4dda4dac75af2115a7bc17fc268226f40f217be86891d0b",
+          "size_bytes": 192556,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 96256,
+          "duration_s": 4.365351473922902
+        }
+      ],
+      "review": {
+        "saved_revisions": 1,
+        "transcript_approvals": 0,
+        "translation_approvals": 0,
+        "notes_only": true,
+        "sidecar": {
+          "path": "stark_data/corrections/20260909_211201_787725_en.jsonl",
+          "sha256": "fd687d693a88e4307c2f9faddf3a2c6fafc7aebf192712d00adb3f032ddd8a46",
+          "size_bytes": 462
+        },
+        "revisions": [
+          {
+            "corrected_source_text": "Um and then also I noticed too that um",
+            "corrected_translation_text": "Um y también noté que um",
+            "transcript_approved": false,
+            "translation_approved": false,
+            "excluded": false,
+            "review_note": "Draft recovery check during live arrivals. Transcript and translation remain unapproved.",
+            "source_lang": "en",
+            "session": "20260909_211201_787725_en",
+            "chunk_id": 2,
+            "revision": 1,
+            "review_timestamp": "2026-09-10T01:14:17.761008+00:00"
+          }
+        ]
+      }
+    }
+  ],
+  "observed_checks": {
+    "starting_state_until_production_header": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "pause_resume": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "EN_ES_EN_new_session_identity": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "audience_reconnect_language_and_history_reset": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "visible_caption_render_ack": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "verse_from_actual_production_csv": {
+      "status": "John 3:16; stable across repeated UI polls",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "review_live_finalized_only": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "review_note_persistence_and_audience_separation": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "review_draft_survives_polling_and_reload": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "completed_export_requires_approval": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "per_language_TTS_device_persistence": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "normal_stop_drains_and_marks_completed": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "summary_cli_positional_input": {
+      "status": "passed",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    },
+    "summary_spanish_output_format": {
+      "status": "passed on rerun: one three-sentence Spanish translation with no alternate versions or notes",
+      "evidence_type": "recorded_operator_browser_rehearsal",
+      "source": ".cache/mac-roadmap/rehearsal_report.json"
+    }
+  },
+  "summary": {
+    "status": "format_passed_on_rerun",
+    "quality_approval": "pending",
+    "output": {
+      "path": "metrics/summary_20260909_211201_787725_en.json",
+      "sha256": "392e5cc7bb6b56be511573934ed807c93d666633e1a588025b08c8d3cc21ae36",
+      "size_bytes": 1355
+    },
+    "initial_format_failure": {
+      "path": ".cache/mac-roadmap/summary_format_failure_20260909_211201_787725_en.json",
+      "sha256": "e89ce7799c43c54b4ea51b457de11e90f1fe827c232e42d085067fa6e417d055",
+      "size_bytes": 2477
+    },
+    "initial_failure": "Spanish summary included multiple alternate versions and explanatory notes",
+    "verified_rerun": "English summary preserved; Spanish output is one three-sentence translation without alternate options or notes",
+    "result": {
+      "english": "The sermon centered on the profound love of God, highlighted by the scripture John 3:16, which speaks of God giving His only Son for the world. It contrasted the differing destinies of two criminals, illustrating that even in moments of crisis, choices lead to vastly different outcomes. The central message emphasized that recognizing Christ's sacrifice for our sins determines whether one finds salvation or condemnation.",
+      "spanish": "El sermón se centró en el profundo amor de Dios, resaltado por la escritura Juan 3:16, que habla de Dios dando a Su único Hijo por el mundo. Contrastó los diferentes destinos de dos criminales, ilustrando que incluso en momentos de crisis, las decisiones conducen a resultados muy diferentes. El mensaje central enfatizó que reconocer el sacrificio de Cristo por nuestros pecados determina si uno encuentra la salvación o la condenación.",
+      "speakers": null,
+      "format": "3-sentence (undiarized)",
+      "translation_method": "mlx-community/gemma-4-e4b-it-OptiQ-4bit (direct)",
+      "metadata": {
+        "input_files": [
+          "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_20260909_211201_787725_en.csv"
+        ],
+        "model": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "timestamp": "2026-09-09T21:20:06.968602",
+        "total_segments": 8,
+        "total_words": 147,
+        "diarized": false
+      }
+    }
+  },
+  "tts_builtin_device_smoke": {
+    "devices": [
+      {
+        "index": 2,
+        "name": "MacBook Pro Speakers",
+        "channels": 2,
+        "default": true
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "channels": 1,
+        "default": false
+      }
+    ],
+    "voices": {
+      "en": "en_US-lessac-high",
+      "es": "es_MX-claude-high"
+    },
+    "rows": [
+      {
+        "language": "en",
+        "text": "The grace of God is sufficient.",
+        "audio_path": ".cache/mac-roadmap/tts-smoke/en.wav",
+        "audio_duration_s": 1.7647165532879818,
+        "synthesis_ms": 257.7111249556765,
+        "playback_call_ms": 1880.1606250344776,
+        "playback_wait_status": "None",
+        "selected_device": "MacBook Pro Speakers",
+        "artifact": {
+          "path": ".cache/mac-roadmap/tts-smoke/en.wav",
+          "sha256": "ac9114f862eb76b9bb988783fd4e9af8038bda4bde98f45dc6447d8cf808140a",
+          "size_bytes": 77868,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 38912,
+          "duration_s": 1.7647165532879818
+        }
+      },
+      {
+        "language": "es",
+        "text": "La gracia de Dios es suficiente.",
+        "audio_path": ".cache/mac-roadmap/tts-smoke/es.wav",
+        "audio_duration_s": 2.10140589569161,
+        "synthesis_ms": 85.79337497940287,
+        "playback_call_ms": 10.762916004750878,
+        "playback_wait_status": "None",
+        "selected_device": "MacBook Pro Speakers",
+        "artifact": {
+          "path": ".cache/mac-roadmap/tts-smoke/es.wav",
+          "sha256": "cb01aeb600f7b279c39c0cf727a3c6ef7412af6e827ab453b3c7944d3deccd7b",
+          "size_bytes": 92716,
+          "sample_rate_hz": 22050,
+          "channels": 1,
+          "frames": 46336,
+          "duration_s": 2.10140589569161
+        }
+      }
+    ],
+    "limitations": [
+      "No second physical output is available.",
+      "Host playback completion does not validate acoustic quality or onset.",
+      "No physical unplug/replug was performed."
+    ]
+  },
+  "automated_validation": {
+    "evidence_type": "previously_recorded_automated_tests_not_new_execution",
+    "full_suite_log": {
+      "path": ".cache/mac-roadmap/full-tests.log",
+      "sha256": "b34e96d9a5b9881b6030a9c54c19dbf5a13a953c5da6b7797fe815f69f74e817",
+      "size_bytes": 18107
+    },
+    "result": {
+      "passed": 1722,
+      "skipped": 2,
+      "coverage_percent": 57.83
+    },
+    "representative_tests": [
+      "tests/test_operator_review.py",
+      "tests/test_operator_review_browser.py",
+      "tests/test_prepare_finetune_data.py",
+      "tests/test_phase9_3_controls.py",
+      "tests/test_operator_language_ui.py",
+      "tests/test_phase9_2_metrics.py",
+      "tests/test_mac_evaluation.py"
+    ]
+  },
+  "correction_workflow_audit": [
+    {
+      "capability": "Finalized live and post-session review, isolated sidecar revisions",
+      "implementation": [
+        "operator_app/review.py",
+        "tools/review_data.py",
+        "displays/operator/review.js"
+      ],
+      "evidence": "Observed live saved notes and draft recovery; CSV/diagnostics retained originals; automated revision, concurrency and finalized-record checks"
+    },
+    {
+      "capability": "Independent transcript/translation approvals and exclusion",
+      "implementation": [
+        "tools/review_data.py",
+        "tests/test_operator_review.py"
+      ],
+      "evidence": "Automated approval/exclusion tests; rehearsal notes remain unapproved, and completed export was observed to reject missing approvals"
+    },
+    {
+      "capability": "Session-scoped retained audio and language-aware legacy/new records",
+      "implementation": [
+        "tools/review_data.py",
+        "tests/test_operator_review.py"
+      ],
+      "evidence": "All 18 finalized chunk audio files exist; automated path traversal, symlink, unknown-language and Spanish-direction coverage"
+    },
+    {
+      "capability": "Completed-only portable exports with copied WAV files and deterministic identity",
+      "implementation": [
+        "operator_app/review.py",
+        "tools/review_data.py",
+        "tests/test_operator_review.py"
+      ],
+      "evidence": "Automated bundle roundtrip/idempotency; all three real sessions have validated completion evidence; no approved rehearsal bundle was manufactured"
+    },
+    {
+      "capability": "Legacy CLI reuse, revision-safe merges and train/eval isolation",
+      "implementation": [
+        "tools/prepare_finetune_data.py",
+        "tools/merge_corrections.py",
+        "tests/test_operator_review.py",
+        "tests/test_prepare_finetune_data.py"
+      ],
+      "evidence": "Automated CLI compatibility and provenance/split checks; these replay sessions are not training data; no training or approval was performed"
+    }
+  ],
+  "latency_gate": {
+    "eligible": false,
+    "reason": "Controlled mixed/synthetic TTS workflows outside frozen performance settings; first session also paused. Receipt-to-render begins after browser receipt and is not speech-end-to-display latency.",
+    "missing_ack_interpretation": "First-session chunk 1 lacks a visible final ACK. The saved records do not establish its cause; missing evidence is not proof of failed display."
+  },
+  "pending_gates": [
+    "No natural Spanish quality validation",
+    "No two-speaker validation",
+    "No second physical output or physical hotplug test",
+    "Draft notes are test notes; no transcript or translation approvals were fabricated",
+    "Bilingual human approval of transcripts, translations, and summary accuracy remains pending.",
+    "Approved portable training handoff from real live data was not rehearsed; only automated fixtures exercised it."
+  ]
+}
