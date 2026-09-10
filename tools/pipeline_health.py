@@ -10,6 +10,7 @@ import time
 from collections import deque
 from pathlib import Path
 
+from tools.caption_delivery import FinalCaptionHistory, partial_utterance_id
 from tools.session_lifecycle import _path, _write
 
 
@@ -27,6 +28,7 @@ class PipelineHealth:
         self._error_count = 0
         self._required_failures = 0
         self._captions = deque(maxlen=8)
+        self._caption_finals = FinalCaptionHistory()
         self._provider = lambda: {}
         self._control = None
         self._control_seq = 0
@@ -54,6 +56,24 @@ class PipelineHealth:
 
     def caption(self, record):
         with self._lock:
+            if record.get("session_id", self.session) != self.session:
+                return
+            uid = partial_utterance_id(record)
+            if record.get("stage") == "partial" and self._caption_finals.blocks(uid):
+                return
+            if record.get("stage", "complete") == "complete":
+                # Final chunk numbers are not capture utterance identities.
+                self._caption_finals.observe(record.get("utterance_id"))
+                self._captions = deque(
+                    (
+                        row
+                        for row in self._captions
+                        if not (
+                            row.get("stage") == "partial" and self._caption_finals.blocks(partial_utterance_id(row))
+                        )
+                    ),
+                    maxlen=8,
+                )
             self._last_caption = time.monotonic()
             self._captions.append(
                 {

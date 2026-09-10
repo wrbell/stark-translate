@@ -405,6 +405,15 @@
     delete lastMarianPartial[uid];
   });
 
+  function removeProvisional(data) {
+    Object.values(panels).forEach(panel => {
+      panel.querySelectorAll('.chunk.partial').forEach(el => {
+        if (StarkDisplayConnection.replacesPartial(data, Number(el.dataset.utteranceId))) el.remove();
+      });
+      removeChunk(panel, 'stream-' + data.chunk_id);
+    });
+  }
+
   function connect() {
     const ws = new WebSocket(WS_URL);
 
@@ -448,11 +457,7 @@
 
       // [P7-P3-6A] Handle streaming translation messages
       if (data.type === 'translation_start') {
-        // STT completed — clean up ALL orphaned partials (IDs don't match:
-        // partials use utterance_id, finals use chunk_id)
-        Object.values(panels).forEach(p => {
-          p.querySelectorAll('.chunk.partial, .chunk.streaming').forEach(el => el.remove());
-        });
+        removeProvisional(data);
         const en = filterText(data.english || '');
         const conf = data.stt_confidence;
         const confDot = conf !== undefined
@@ -537,12 +542,7 @@
         updateLabels();
       }
 
-      // Remove ALL partial and streaming rows from all columns.
-      // (Partials use utterance_id, finals use chunk_id — IDs never match,
-      // so ID-based removal leaves orphaned partials that duplicate text.)
-      Object.values(panels).forEach(p => {
-        p.querySelectorAll('.chunk.partial, .chunk.streaming').forEach(el => el.remove());
-      });
+      removeProvisional(data);
 
       const en = filterText(data.english || '');
       const esA = filterText(data.spanish_a || '');
@@ -638,7 +638,11 @@
       div = document.createElement('div');
       div.id = domId;
       div.className = 'chunk';
-      panel.appendChild(div);
+      // Keep an older final/stream above a newer utterance's live preview.
+      const streamId = typeof id === 'string' && id.startsWith('stream-');
+      const nextPreview = isPartial ? null : Array.from(panel.children).find(el =>
+        el.classList.contains('partial') || (!streamId && el.id.startsWith(panel.id + '-chunk-stream-')));
+      panel.insertBefore(div, nextPreview || null);
     }
     div.className = isStreaming ? 'chunk streaming' : isPartial ? 'chunk partial' : 'chunk';
     if (isPartial) div.dataset.utteranceId = utteranceId == null ? '' : String(utteranceId);

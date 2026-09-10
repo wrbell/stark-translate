@@ -558,10 +558,13 @@
       chunkData = chunkData.filter(function(c) { return c.stage !== 'partial'; });
     } else {
       chunkData = chunkData.filter(function(c) {
-        return c.stage !== 'partial' && c.chunk_id !== data.chunk_id;
+        return c.stage === 'partial'
+          ? !StarkDisplayConnection.replacesPartial(data, StarkDisplayConnection.partialUtteranceId(c))
+          : c.chunk_id !== data.chunk_id;
       });
     }
-    chunkData.push(data);
+    var nextPartial = data.stage === 'partial' ? -1 : chunkData.findIndex(function(c) { return c.stage === 'partial'; });
+    chunkData.splice(nextPartial < 0 ? chunkData.length : nextPartial, 0, data);
     if (chunkData.length > MAX_CHUNKS) {
       chunkData.shift();
     }
@@ -602,8 +605,6 @@
   }
 
   function renderPanel(container, texts, isNewRender) {
-    // Count existing chunks
-    var existing = container.children.length;
     var needed = texts.length;
 
     // If we have too many, remove from the front
@@ -613,10 +614,9 @@
 
     // Update or create chunks
     for (var i = 0; i < needed; i++) {
-      var childIdx = i - (needed - container.children.length);
-      if (childIdx >= 0 && childIdx < container.children.length) {
+      if (i < container.children.length) {
         // Update existing
-        container.children[childIdx].textContent = texts[i];
+        container.children[i].textContent = texts[i];
       } else {
         // Create new
         var div = document.createElement('div');

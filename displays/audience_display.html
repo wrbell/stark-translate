@@ -392,15 +392,15 @@
 
       // [P7-P3-6A] Handle streaming translation tokens
       if (data.type === 'translation_start') {
-        // STT completed — convert last partial to streaming, or create fresh.
-        // Remove ALL partials/streaming (IDs don't match: partials use utterance_id,
-        // finals use chunk_id — so ID-based matching fails).
+        // Keep only the matching utterance's Marian preview during final decode.
         const en = filter(data.english || '');
-        const lastPartial = sentences.filter(s => s.partial).pop();
-        sentences = sentences.filter(s => !s.partial && !s.streaming);
+        const lastPartial = sentences.filter(s => s.partial && StarkDisplayConnection.replacesPartial(data, s.utterance_id)).pop();
+        sentences = sentences.filter(s => !(s.partial && StarkDisplayConnection.replacesPartial(data, s.utterance_id)) && s.id !== 'stream-' + data.chunk_id);
+        const nextPartial = sentences.findIndex(s => s.partial);
+        const insertAt = nextPartial < 0 ? sentences.length : nextPartial;
         if (lastPartial) {
           // Keep MarianMT Spanish visible until Gemma streams in (no blank flash)
-          sentences.push({
+          sentences.splice(insertAt, 0, {
             id: 'stream-' + data.chunk_id,
             english: en,
             spanish: lastPartial.spanish,
@@ -409,7 +409,7 @@
             streaming: true,
           });
         } else {
-          sentences.push({
+          sentences.splice(insertAt, 0, {
             id: 'stream-' + data.chunk_id,
             english: en,
             spanish: '',
@@ -450,10 +450,8 @@
           sentences.push({ id: 'p-' + data.chunk_id, utterance_id: StarkDisplayConnection.partialUtteranceId(data), english: en, spanish: es, speaker: '', partial: true, streaming: false });
         }
       } else {
-        // Final translation — remove ALL partials and streaming entries.
-        // (Partials use utterance_id, finals use chunk_id — IDs never match,
-        // so ID-based filtering leaves orphaned partials that duplicate text.)
-        sentences = sentences.filter(s => !s.partial && !s.streaming);
+        // Final and preview numbers live in separate namespaces.
+        sentences = sentences.filter(s => !(s.partial && StarkDisplayConnection.replacesPartial(data, s.utterance_id)) && s.id !== 'stream-' + data.chunk_id);
 
         const existing = sentences.find(s => s.id === data.chunk_id);
         if (existing) {
@@ -461,7 +459,8 @@
           existing.spanish = es;
           if (data.speaker) existing.speaker = data.speaker;
         } else {
-          sentences.push({ id: data.chunk_id, english: en, spanish: es, speaker: data.speaker || '', partial: false, streaming: false });
+          const nextPartial = sentences.findIndex(s => s.partial || s.streaming);
+          sentences.splice(nextPartial < 0 ? sentences.length : nextPartial, 0, { id: data.chunk_id, english: en, spanish: es, speaker: data.speaker || '', partial: false, streaming: false });
         }
 
         // Keep all sentences for scroll history (capped at 200 to limit memory)

@@ -396,10 +396,13 @@
       chunkData = chunkData.filter(function(c) { return c.stage !== 'partial'; });
     } else {
       chunkData = chunkData.filter(function(c) {
-        return c.stage !== 'partial' && c.chunk_id !== data.chunk_id;
+        return c.stage === 'partial'
+          ? !StarkDisplayConnection.replacesPartial(data, StarkDisplayConnection.partialUtteranceId(c))
+          : c.chunk_id !== data.chunk_id;
       });
     }
-    chunkData.push(data);
+    var nextPartial = data.stage === 'partial' ? -1 : chunkData.findIndex(function(c) { return c.stage === 'partial'; });
+    chunkData.splice(nextPartial < 0 ? chunkData.length : nextPartial, 0, data);
 
     // Trim to prevent unbounded memory growth
     if (chunkData.length > 200) {

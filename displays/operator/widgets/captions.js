@@ -18,6 +18,10 @@
     const value = message.utterance_id == null ? message.chunk_id : message.utterance_id;
     return Number.isSafeInteger(value) && value > 0 ? value : null;
   }
+  function replacesPartial(message, uid) {
+    return message.utterance_id == null ||
+      (Number.isSafeInteger(message.utterance_id) && message.utterance_id > 0 && message.utterance_id === uid);
+  }
 
   function createModel(options) {
     const limit = (options && options.limit) || 200;
@@ -26,11 +30,31 @@
     let labels = {source: "", target: ""};
     let musicHold = false;
     const discarded = new Set();
+    const finalized = new Set();
+    let retiredThrough = 0;
+
+    function published(uid) {
+      return Number.isSafeInteger(uid) && uid > 0 && (uid <= retiredThrough || finalized.has(uid));
+    }
+
+    function observeFinal(message) {
+      if (!session || message.session_id !== session || (message.stage || "complete") !== "complete") return;
+      const uid = message.utterance_id;
+      if (!Number.isSafeInteger(uid) || uid <= retiredThrough) return;
+      finalized.add(uid);
+      while (finalized.size > 128) {
+        const oldest = Math.min(...finalized);
+        finalized.delete(oldest);
+        retiredThrough = Math.max(retiredThrough, oldest);
+      }
+    }
 
     function reset() {
       sentences = [];
       musicHold = false;
       discarded.clear();
+      finalized.clear();
+      retiredThrough = 0;
     }
 
     // Same guard as the audience display: a new session ID resets history so
@@ -46,7 +70,8 @@
 
     function acceptsCaption(message) {
       if (session && message.session_id !== session) return false;
-      return !(message.stage === "partial" && discarded.has(partialUtteranceId(message)));
+      return !(message.stage === "partial" &&
+        (discarded.has(partialUtteranceId(message)) || published(partialUtteranceId(message))));
     }
 
     function apply(message) {
@@ -76,9 +101,10 @@
         return true;
       }
       if (type === "translation_start") {
-        const lastPartial = sentences.filter(s => s.partial).pop();
-        sentences = sentences.filter(s => !s.partial && !s.streaming);
-        sentences.push({
+        const lastPartial = sentences.filter(s => s.partial && replacesPartial(message, s.utterance_id)).pop();
+        sentences = sentences.filter(s => !(s.partial && replacesPartial(message, s.utterance_id)) && s.id !== "stream-" + message.chunk_id);
+        const nextPartial = sentences.findIndex(s => s.partial);
+        sentences.splice(nextPartial < 0 ? sentences.length : nextPartial, 0, {
           id: "stream-" + message.chunk_id,
           source: message.english || "",
           target: lastPartial ? lastPartial.target : "",
@@ -99,7 +125,7 @@
       const target = message.spanish_a || "";
       if ((message.stage || "complete") === "partial") {
         const uid = partialUtteranceId(message);
-        if (discarded.has(uid)) return false;
+        if (discarded.has(uid) || published(uid)) return false;
         const existing = sentences.find(s => s.id === "p-" + message.chunk_id);
         if (existing) {
           existing.utterance_id = uid;
@@ -111,16 +137,17 @@
         }
         return true;
       }
-      // Finals replace every partial/streaming entry: partial IDs are utterance
-      // IDs while finals use chunk IDs, so they never match by ID.
-      sentences = sentences.filter(s => !s.partial && !s.streaming);
+      // Match capture identity, preserving any newer utterance's preview.
+      observeFinal(message);
+      sentences = sentences.filter(s => !(s.partial && replacesPartial(message, s.utterance_id)) && s.id !== "stream-" + message.chunk_id);
       const existing = sentences.find(s => s.id === message.chunk_id);
       if (existing) {
         existing.source = source;
         existing.target = target;
         if (message.speaker) existing.speaker = message.speaker;
       } else {
-        sentences.push({id: message.chunk_id, source, target, speaker: message.speaker || "", partial: false, streaming: false});
+        const nextPartial = sentences.findIndex(s => s.partial || s.streaming);
+        sentences.splice(nextPartial < 0 ? sentences.length : nextPartial, 0, {id: message.chunk_id, source, target, speaker: message.speaker || "", partial: false, streaming: false});
       }
       if (sentences.length > limit) sentences = sentences.slice(-limit);
       return true;
@@ -130,6 +157,7 @@
       apply,
       reset,
       acceptsCaption,
+      observeFinal,
       sentences: () => sentences.map(s => ({...s})),
       labels: () => ({...labels}),
       musicHold: () => musicHold,

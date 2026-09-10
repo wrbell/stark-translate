@@ -279,7 +279,7 @@
       // [P7-P3-6A] Streaming: update or add streaming chunk
       var found = false;
       for (var i = 0; i < recentChunks.length; i++) {
-        if (recentChunks[i].streaming) {
+        if (recentChunks[i].streaming && recentChunks[i].chunk_id === data.chunk_id) {
           recentChunks[i].spanish = spanish;
           if (english) recentChunks[i].english = english;
           found = true;
@@ -287,8 +287,13 @@
         }
       }
       if (!found) {
-        recentChunks = recentChunks.filter(function(c) { return !c.partial; });
-        recentChunks.push({ spanish: spanish, english: english, partial: false, streaming: true });
+        recentChunks = recentChunks.filter(function(c) {
+          return !(c.partial && StarkDisplayConnection.replacesPartial(data, c.utterance_id));
+        });
+        var nextPartial = recentChunks.findIndex(function(c) { return c.partial; });
+        recentChunks.splice(nextPartial < 0 ? recentChunks.length : nextPartial, 0, {
+          chunk_id: data.chunk_id, spanish: spanish, english: english, partial: false, streaming: true
+        });
       }
     } else if (isPartial) {
       // Update or add partial
@@ -304,9 +309,12 @@
         recentChunks.push({ utterance_id: StarkDisplayConnection.partialUtteranceId(data), spanish: spanish, english: english, partial: true, streaming: false });
       }
     } else {
-      // Remove any partial and streaming, add final
-      recentChunks = recentChunks.filter(function(c) { return !c.partial && !c.streaming; });
-      recentChunks.push({ chunk_id: data.chunk_id, speaker: data.speaker || '', spanish: spanish, english: english, partial: false, streaming: false });
+      recentChunks = recentChunks.filter(function(c) {
+        return !(c.partial && StarkDisplayConnection.replacesPartial(data, c.utterance_id)) &&
+          !(c.streaming && c.chunk_id === data.chunk_id);
+      });
+      var nextPartial = recentChunks.findIndex(function(c) { return c.partial || c.streaming; });
+      recentChunks.splice(nextPartial < 0 ? recentChunks.length : nextPartial, 0, { chunk_id: data.chunk_id, speaker: data.speaker || '', spanish: spanish, english: english, partial: false, streaming: false });
     }
 
     // Keep only last N chunks
@@ -372,6 +380,8 @@
       if (data.type === 'translation_start') {
         // STT completed — show English immediately, create streaming placeholder
         addChunk({
+          chunk_id: data.chunk_id,
+          utterance_id: data.utterance_id,
           english: data.english,
           spanish_a: '',
           spanish_b: '',
@@ -382,6 +392,8 @@
       if (data.type === 'translation_stream') {
         // Progressive Spanish text update
         addChunk({
+          chunk_id: data.chunk_id,
+          utterance_id: data.utterance_id,
           english: '',
           spanish_a: data.partial_spanish_a || '',
           spanish_b: '',

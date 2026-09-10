@@ -1434,6 +1434,7 @@
       const json = JSON.stringify(list);
       if (json === healthCaptionsJson) return;
       healthCaptionsJson = json;
+      if (captionModel) list.forEach(c => captionModel.observeFinal(c));
       healthCaptions = list;
       if (!socketRows().length) renderCaptions();
     }
