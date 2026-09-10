@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-10T13:14:01.599747+00:00",
+  "completed": true,
+  "source_manifest_sha256": "63bf47fb61f529c07a6ff5d6cb782c96822cfe39e1fc3048e8b16385a9cdbd68",
+  "portable_manifest_content_sha256": "ce1aac08d4c6df896ea7618423560b76640c65cef0bf0bc287a90ec9dbc7b5ed",
+  "records": 200,
+  "counts": {
+    "en/development": 50,
+    "en/confirmation": 50,
+    "es/development": 50,
+    "es/confirmation": 50
+  },
+  "full_upstream_sentence_counts": {
+    "development": 150,
+    "confirmation": 350
+  },
+  "cross_partition_sentence_id_overlap": [],
+  "cross_partition_normalized_text_overlap": [],
+  "all_selected_audio_hashes_unique": true,
+  "all_selected_audio_matches_original_archive": true,
+  "sources": [
+    {
+      "file": "data/en_us/dev.tsv",
+      "sha256": "9d57ee7e91e9d4c92edb39f6bbea668ef8dc2a3ff96eb510d5580b2ad05d17ec",
+      "size_bytes": 213065,
+      "rows": 394
+    },
+    {
+      "file": "data/en_us/test.tsv",
+      "sha256": "74c046239374deeb60fa63f258f907388093a32bcaa3140965f70ef05c79f7ca",
+      "size_bytes": 367864,
+      "rows": 647
+    },
+    {
+      "file": "data/es_419/dev.tsv",
+      "sha256": "352b2a5f03f02fe752254fab737f76519963650f4630d2fb63957177aeec927f",
+      "size_bytes": 261638,
+      "rows": 408
+    },
+    {
+      "file": "data/es_419/test.tsv",
+      "sha256": "d107a93a4f54a18ac25cd470bb4cdadce14fb075b0c1d1542258e274d209ec09",
+      "size_bytes": 599882,
+      "rows": 908
+    },
+    {
+      "file": "data/en_us/audio/dev.tar.gz",
+      "sha256": "2658fda72f199e12676ecac9415094667a4e14e149b146e568ea00b2a2f0954c",
+      "size_bytes": 171250900,
+      "selected_original_members_verified": 50
+    },
+    {
+      "file": "data/en_us/audio/test.tar.gz",
+      "sha256": "d9c2e37b41aacd41bc283554a0a82b5476b36887049774ecb2819dcaaa55a356",
+      "size_bytes": 289851356,
+      "selected_original_members_verified": 50
+    },
+    {
+      "file": "data/es_419/audio/dev.tar.gz",
+      "sha256": "94f0f3d9fd89c0496385bf0991f2565410cc489a73dd18cafa0ee0177dc5c815",
+      "size_bytes": 255285841,
+      "selected_original_members_verified": 50
+    },
+    {
+      "file": "data/es_419/audio/test.tar.gz",
+      "sha256": "981802f6c828fd214fcf8bfc1036d80c9184b6eeb5650b3f7882f8affec046c9",
+      "size_bytes": 582112372,
+      "selected_original_members_verified": 50
+    }
+  ],
+  "human_approved_locally": false,
+  "training_eligible": false,
+  "limitations": [
+    "Speaker identity is unavailable; speaker-disjointness is not established.",
+    "Read public speech and parallel annotations do not represent live church conditions.",
+    "Upstream/model-pretraining contamination is unknown; no independent model holdout claim."
+  ],
+  "portable_manifest_sha256": "9de09bead155cef2a62f58ef0be91c43e35ced2e91672fbcfa641f358c498385"
+}

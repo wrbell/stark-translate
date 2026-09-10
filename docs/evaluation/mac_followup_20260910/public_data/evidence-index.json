@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "phase": "prepared_no_inference",
+  "files": [
+    {
+      "path": "tools/mac_followup_quality.py",
+      "sha256": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "size_bytes": 44156
+    },
+    {
+      "path": "tests/test_mac_followup_quality.py",
+      "sha256": "32a5a314e45f02c9675f7caeb8df8f9408bf93f503957a43f204828f37975a34",
+      "size_bytes": 18365
+    },
+    {
+      "path": "docs/evaluation/mac_followup_20260910/public_data/README.md",
+      "sha256": "c4fb9729cd04542aed96ec2e009fff356225f95a87832ab105264b3a57314afe",
+      "size_bytes": 9762
+    },
+    {
+      "path": "docs/evaluation/mac_followup_20260910/public_data/audit.json",
+      "sha256": "8fce423709c8e471fdd190dde76fe7a6b03bdb51380e93601892d73285f26181",
+      "size_bytes": 2804
+    },
+    {
+      "path": "docs/evaluation/mac_followup_20260910/public_data/manifest.json",
+      "sha256": "9de09bead155cef2a62f58ef0be91c43e35ced2e91672fbcfa641f358c498385",
+      "size_bytes": 336677
+    }
+  ],
+  "focused_cpu_tests": {
+    "passed": 21,
+    "models_loaded": false
+  },
+  "human_approved_locally": false,
+  "training_eligible": false
+}
