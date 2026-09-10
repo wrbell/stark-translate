@@ -175,6 +175,11 @@ _caption_delivery = None
 _vad_pool = None
 _marian_memo = ExactTextMemo(0)
 _closed_utterances = set()
+# Publication is distinct from experimental closure at final admission. Keep
+# ordinary previews while a final computes, but never resurrect a published one.
+_published_final_session = None
+_published_final_utterances = set()
+_published_final_floor = 0
 # IDs increase within the capture session. A watermark rejects arbitrarily late
 # provisional work without retaining one tombstone per discarded noise blip.
 _discarded_utterance_id = 0
@@ -2456,6 +2461,46 @@ def _preview_was_discarded(utterance_id):
     return isinstance(utterance_id, int) and 0 < utterance_id <= _discarded_utterance_id
 
 
+def _valid_publication_utterance(utterance_id):
+    return type(utterance_id) is int and 0 < utterance_id <= 2**53 - 1
+
+
+def _preview_was_finalized(utterance_id, session_id=None):
+    session_id = SESSION_ID if session_id is None else session_id
+    return (
+        session_id == _published_final_session
+        and _valid_publication_utterance(utterance_id)
+        and (utterance_id <= _published_final_floor or utterance_id in _published_final_utterances)
+    )
+
+
+def _record_final_publication(data):
+    """Close exact capture identity on the loop immediately before publication.
+
+    Final chunk counters are a different identity and must never be substituted.
+    The retired floor also rejects arbitrarily late results after bounded eviction.
+    """
+    global _published_final_session, _published_final_floor
+    session_id, utterance_id = data.get("session_id"), data.get("utterance_id")
+    if (
+        data.get("type") != "translation"
+        or data.get("stage") != "complete"
+        or session_id != SESSION_ID
+        or not _valid_publication_utterance(utterance_id)
+    ):
+        return
+    if _published_final_session != session_id:
+        _published_final_session = session_id
+        _published_final_utterances.clear()
+        _published_final_floor = 0
+    if utterance_id > _published_final_floor:
+        _published_final_utterances.add(utterance_id)
+    while len(_published_final_utterances) > 128:
+        oldest = min(_published_final_utterances)
+        _published_final_utterances.remove(oldest)
+        _published_final_floor = max(_published_final_floor, oldest)
+
+
 def _next_capture_utterance_id():
     global _last_capture_utterance_id
     _last_capture_utterance_id += 1
@@ -2526,6 +2571,10 @@ async def process_partial(
     to free ~80ms of MLX pool time per partial.
     """
     global _active_partial_future, _partial_sequence
+    request_session = SESSION_ID
+    if _preview_was_finalized(utterance_id, request_session):
+        _latency_event("partial_suppressed_published_final")
+        return
     if _preview_was_discarded(utterance_id):
         _latency_event("partial_suppressed_discarded_utterance")
         return
@@ -2679,6 +2728,9 @@ async def process_partial(
         with _partial_future_lock:
             _active_partial_future = None
 
+        if request_session != SESSION_ID or _preview_was_finalized(utterance_id, request_session):
+            _latency_event("partial_suppressed_published_final")
+            return
         if _preview_was_discarded(utterance_id):
             _latency_event("partial_suppressed_discarded_utterance")
             return
@@ -2726,6 +2778,9 @@ async def process_partial(
 
         # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
+        if request_session != SESSION_ID or _preview_was_finalized(utterance_id, request_session):
+            _latency_event("partial_suppressed_published_final")
+            return
         if _preview_was_discarded(utterance_id) or (
             _preview_ordering_enabled()
             and (
@@ -3792,6 +3847,7 @@ async def broadcast(data):
     if not _caption_message_allowed(data):
         return
     data.setdefault("session_id", SESSION_ID)
+    _record_final_publication(data)
     data.setdefault("caption_delivery_mode", "queued" if _latency.async_captions else "awaited")
     if _health is not None and data.get("type") == "translation":
         _health.caption(data)
@@ -3855,7 +3911,10 @@ def _caption_message_allowed(data):
         data.get("type") == "translation"
         and data.get("stage") == "partial"
         and data.get("session_id", SESSION_ID) == SESSION_ID
-        and _preview_was_discarded(data.get("utterance_id", data.get("chunk_id")))
+        and (
+            _preview_was_discarded(data.get("utterance_id", data.get("chunk_id")))
+            or _preview_was_finalized(data.get("utterance_id"), data.get("session_id", SESSION_ID))
+        )
     )
 
 
