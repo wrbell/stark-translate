@@ -42,10 +42,17 @@ Speech end is estimated from captured VAD-positive frames. Server-final latency 
 
 ## Partial delivery and visible browser timing
 
-First-partial delay starts at the first captured speech frame; one earliest delay is counted per known utterance. Update gaps use chronological emissions, including speaking pauses. Browser receipt-to-render is measured per visible client acknowledgment; speech-end-to-ack includes return-network time. Duplicate or non-v2 acknowledgments are excluded.
+First-partial delay starts at the first captured speech frame; one earliest delay is counted per known utterance. Update gaps use chronological emissions, including speaking pauses. These partial timings end at server readiness, before browser rendering.
 
 | Experiment | Model | Clip / cohort | Source | Metric | n | p50 ms | p95 ms |
 |---|---|---|---|---|---:|---:|---:|
+
+### Visible final latency by browser session and endpoint
+
+Only visible schema-2 final ACKs matched to a unique CSV chunk contribute. Each browser session, capture timing source and endpoint has its own distribution; clients and silence/forced-cut/EOF endpoints are never pooled. Duplicate chunk acknowledgments and unmatched/stale events are excluded. Speech-end-to-ack includes return-network time. Coverage alone does not make a run acceptance eligible; the latency gate remains pending.
+
+| Experiment | Model | Clip / cohort | Session / client | Endpoint / timing source | Metric | n | p50 ms | p95 ms | ACKs / finals |
+|---|---|---|---|---|---|---:|---:|---:|---|
 
 ### Visible final acknowledgment coverage
 

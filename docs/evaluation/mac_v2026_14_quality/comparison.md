@@ -116,576 +116,590 @@ Unreviewed machine transcripts are not WER references. Unconfirmed session recor
 
 ## Real-time server latency
 
-Speech end is estimated from captured VAD-positive frames. Server-final latency ends at payload readiness; it is not browser display latency. Synthetic and natural inputs and endpoint types are separated.
+Speech end is estimated from captured VAD-positive frames. Server-final latency ends at payload readiness; it is not browser display latency. Clips, inference code/config cohorts, source types and endpoints are kept separate. Cohort IDs bind recorded source hashes, package versions and effective settings. A matching lifecycle source hash observed at startup takes precedence over later pipeline-file snapshots; this does not prove imported engine bytecode, and older snapshot timing may be ambiguous.
 
-| Experiment | Model | Language/source | Endpoint | n | p50 ms | p95 ms |
-|---|---|---|---|---:|---:|---:|
+| Experiment | Model | Clip / cohort | Language/source | Endpoint | n | p50 ms | p95 ms |
+|---|---|---|---|---|---:|---:|---:|
 
 ## Partial delivery and visible browser timing
 
-First-partial delay starts at the first captured speech frame. Update gaps are between emitted partials, including speaking pauses. Browser receipt-to-render is measured on the client; speech-end-to-ack is an upper bound including return-network time.
+First-partial delay starts at the first captured speech frame; one earliest delay is counted per known utterance. Update gaps use chronological emissions, including speaking pauses. These partial timings end at server readiness, before browser rendering.
 
-| Experiment | Model | Source | Metric | n | p50 ms | p95 ms |
-|---|---|---|---|---:|---:|---:|
+| Experiment | Model | Clip / cohort | Source | Metric | n | p50 ms | p95 ms |
+|---|---|---|---|---|---:|---:|---:|
+
+### Visible final latency by browser session and endpoint
+
+Only visible schema-2 final ACKs matched to a unique CSV chunk contribute. Each browser session, capture timing source and endpoint has its own distribution; clients and silence/forced-cut/EOF endpoints are never pooled. Duplicate chunk acknowledgments and unmatched/stale events are excluded. Speech-end-to-ack includes return-network time. Coverage alone does not make a run acceptance eligible; the latency gate remains pending.
+
+| Experiment | Model | Clip / cohort | Session / client | Endpoint / timing source | Metric | n | p50 ms | p95 ms | ACKs / finals |
+|---|---|---|---|---|---|---:|---:|---:|---|
+
+### Visible final acknowledgment coverage
+
+Coverage counts each finalized chunk once when any visible client acknowledged it. Missing acknowledgments are missing evidence, not proof of display failure; replay shutdown can race the final browser acknowledgment.
+
+| Experiment | Model | Clip / cohort | Received final chunks | Finalized chunks |
+|---|---|---|---:|---:|
 
 ## Changed translation examples
 
-**church_bilingual_canary_01** — James wrote about faith and works.
+**church_bilingual_063d72c8e57313c9_canary_01** — James wrote about faith and works.
 
 - E4B: Santiago escribió sobre fe y obras.
 - E2B: Jacobo escribió sobre la fe y las obras.
 
-**church_bilingual_canary_05** — Justification is by faith alone, not by works of the law.
+**church_bilingual_063d72c8e57313c9_canary_05** — Justification is by faith alone, not by works of the law.
 
 - E4B: La justificación es por la fe solamente, no por las obras de la ley.
 - E2B: La justificación es por fe solamente, no por obras de la ley.
 
-**church_bilingual_canary_06** — The Holy Spirit convicts the world of sin and righteousness.
+**church_bilingual_063d72c8e57313c9_canary_06** — The Holy Spirit convicts the world of sin and righteousness.
 
 - E4B: El Espíritu Santo convence al mundo de pecado y de justicia.
 - E2B: El Espíritu Santo convence al mundo del pecado y de la justicia.
 
-**church_bilingual_canary_08** — We gather before the mercy seat in prayer.
+**church_bilingual_063d72c8e57313c9_canary_08** — We gather before the mercy seat in prayer.
 
 - E4B: Nos reunimos ante el trono de la misericordia en oración.
 - E2B: Nos reunimos ante el asiento de la misericordia en oración.
 
-**church_bilingual_canary_09** — The table of the Lord is spread for His people.
+**church_bilingual_063d72c8e57313c9_canary_09** — The table of the Lord is spread for His people.
 
 - E4B: La mesa del Señor está extendida para Su pueblo.
 - E2B: La mesa del Señor está extendida para su pueblo.
 
-**church_bilingual_canary_10** — We are gathered to Thy Name on the first day of the week.
+**church_bilingual_063d72c8e57313c9_canary_10** — We are gathered to Thy Name on the first day of the week.
 
 - E4B: Nos reunimos en Tu Nombre el primer día de la semana.
 - E2B: Estamos reunidos en Tu Nombre el primer día de la semana.
 
-**church_bilingual_canary_11** — A little while, and we shall see the Lord.
+**church_bilingual_063d72c8e57313c9_canary_11** — A little while, and we shall see the Lord.
 
 - E4B: En poco tiempo, veremos al Señor.
 - E2B: Un poco más, y veremos al Señor.
 
-**church_bilingual_canary_13** — Christ is the Surety of a better covenant.
+**church_bilingual_063d72c8e57313c9_canary_13** — Christ is the Surety of a better covenant.
 
 - E4B: Cristo es la garantía de un pacto mejor.
 - E2B: Cristo es la garantía de un mejor pacto.
 
-**church_bilingual_canary_14** — This do in remembrance of Me at His table.
+**church_bilingual_063d72c8e57313c9_canary_14** — This do in remembrance of Me at His table.
 
 - E4B: Haced esto en memoria Mía en su mesa.
 - E2B: Esto en memoria de Mí en Su mesa.
 
-**church_bilingual_canary_15** — At the mercy seat we remember His propitiation for our sins.
+**church_bilingual_063d72c8e57313c9_canary_15** — At the mercy seat we remember His propitiation for our sins.
 
 - E4B: En el lugar de misericordia recordamos Su propiciación por nuestros pecados.
 - E2B: En el asiento de misericordia recordamos su propiciación por nuestros pecados.
 
-**church_bilingual_canary_16** — Yet there is room at the gospel feast for the weary soul.
+**church_bilingual_063d72c8e57313c9_canary_16** — Yet there is room at the gospel feast for the weary soul.
 
 - E4B: Aun así hay lugar en el festín del evangelio para el alma cansada.
 - E2B: Pero hay lugar en la cena del evangelio para el alma cansada.
 
-**church_bilingual_verse_00_en** — They look at themselves, then go on their way,
+**church_bilingual_063d72c8e57313c9_verse_00_en** — They look at themselves, then go on their way,
 
 - E4B: Se miran a sí mismos, luego se van por su camino.
 - E2B: Se miran a sí mismos, luego se van.
 
-**church_bilingual_verse_00_es** — El servidor se volvió a contar todo esto a su amo. Entonces, lleno de ira el dueño de casa, dijo a su servidor: “Sal en seguida a las calles y callejuelas de la ciudad; y tráeme aquí los pobres, y lisiados, y ciegos y cojos”.
+**church_bilingual_063d72c8e57313c9_verse_00_es** — El servidor se volvió a contar todo esto a su amo. Entonces, lleno de ira el dueño de casa, dijo a su servidor: “Sal en seguida a las calles y callejuelas de la ciudad; y tráeme aquí los pobres, y lisiados, y ciegos y cojos”.
 
 - E4B: The servant told his master all of this again. Then, filled with anger, the master of the house said to his servant: "Go immediately out into the streets and alleys of the city; and bring me here the poor, the lame, the blind, and the crippled."
 - E2B: The servant recounted all this to his master again. Then, filled with anger, the master of the house said to his servant: "Go immediately to the streets and alleys of the city; and bring me here the poor, the insane, the blind, and the lame."
 
-**church_bilingual_verse_01_en** — The trees of the Lord drink their fill the cedars he planted on Lebanon,
+**church_bilingual_063d72c8e57313c9_verse_01_en** — The trees of the Lord drink their fill the cedars he planted on Lebanon,
 
 - E4B: Los árboles del Señor sacian su sed, los cedros que plantó en Líbano.
 - E2B: Los árboles del Señor beben hasta saciarse los cedros que plantó en el Líbano,
 
-**church_bilingual_verse_01_es** — Llénanse de jugo los árboles de Jehová, los cedros del Líbano que él plantó.
+**church_bilingual_063d72c8e57313c9_verse_01_es** — Llénanse de jugo los árboles de Jehová, los cedros del Líbano que él plantó.
 
 - E4B: Let the trees of the Lord be full of juice, the cedars of Lebanon that he planted.
 - E2B: Let the trees of the Lord be filled with juice, the cedars of Lebanon that he planted.
 
-**church_bilingual_verse_02_en** — From Kibroth-hattaavah the people journeyed unto Hazeroth; and they abode at Hazeroth.
+**church_bilingual_063d72c8e57313c9_verse_02_en** — From Kibroth-hattaavah the people journeyed unto Hazeroth; and they abode at Hazeroth.
 
 - E4B: Desde Kibroth-hattaavah el pueblo viajó a Hazeroth; y allí permanecieron en Hazeroth.
 - E2B: Desde Kibroth-hattaavah el pueblo viajó a Hazeroth; y se hospedaron en Hazeroth.
 
-**church_bilingual_verse_02_es** — No lo hago así con mi siervo Moisés,   el cual es fiel en toda mi casa.
+**church_bilingual_063d72c8e57313c9_verse_02_es** — No lo hago así con mi siervo Moisés,   el cual es fiel en toda mi casa.
 
 - E4B: I do not do this with my servant Moses, who is faithful in my whole house.
 - E2B: I don't do that to my servant Moses, who is faithful in my whole house.
 
-**church_bilingual_verse_03_en** — and from the Nethinim, whom David and the heads gave for the service of the Levites, two hundred and twenty Nethinim, all of them defined by name.
+**church_bilingual_063d72c8e57313c9_verse_03_en** — and from the Nethinim, whom David and the heads gave for the service of the Levites, two hundred and twenty Nethinim, all of them defined by name.
 
 - E4B: y de los Nethinim, a quienes David y los jefes dieron para el servicio de los Levitas, doscientos veinte Nethinim, todos nombrados.
 - E2B: y de los nehtimím, a quienes David y los jefes dieron por el servicio de los levitas, doscientos veinte nehtimím, todos definidos por nombre.
 
-**church_bilingual_verse_03_es** — Pesé y entregué en sus manos seiscientos cincuenta talentos de plata, utensilios de plata por cien talentos, cien talentos de oro,
+**church_bilingual_063d72c8e57313c9_verse_03_es** — Pesé y entregué en sus manos seiscientos cincuenta talentos de plata, utensilios de plata por cien talentos, cien talentos de oro,
 
 - E4B: I weighed and delivered into your hands six hundred fifty talents of silver, silver utensils for one hundred talents, one hundred talents of gold,
 - E2B: I weighed and delivered in his hands six hundred fifty talents of silver, silver utensils for one hundred talents, one hundred talents of gold,
 
-**church_bilingual_verse_04_en** — And the name of the daughter of Asher <FI>is<Fi> Sarah.
+**church_bilingual_063d72c8e57313c9_verse_04_en** — And the name of the daughter of Asher <FI>is<Fi> Sarah.
 
 - E4B: Y el nombre de la hija de Aser es Sara.
 - E2B: Y el nombre de la hija de Asher es Sara.
 
-**church_bilingual_verse_05_en** — If thou lend money to any of my people with thee that is poor, thou shalt not be to him as a creditor; neither shall ye lay upon him interest.
+**church_bilingual_063d72c8e57313c9_verse_05_en** — If thou lend money to any of my people with thee that is poor, thou shalt not be to him as a creditor; neither shall ye lay upon him interest.
 
 - E4B: Si prestas dinero a alguno de mi pueblo que esté pobre contigo, no serás para él como acreedor; ni le imponerás interés.
 - E2B: Si prestas dinero a alguno de mi pueblo con el que está pobre, no serás acreedor de él; ni le pondrás interés.
 
-**church_bilingual_verse_05_es** — No blasfemarás contra Dios, ni maldecirás al príncipe de tu pueblo.
+**church_bilingual_063d72c8e57313c9_verse_05_es** — No blasfemarás contra Dios, ni maldecirás al príncipe de tu pueblo.
 
 - E4B: You shall not blaspheme God, nor curse the prince of your people.
 - E2B: You shall not swear blasphemies against God, nor curse the prince of your people.
 
-**church_bilingual_verse_06_en** — But I counted it necessary to send to you Epaphroditus, my brother and fellow-worker and fellow-soldier, and your messenger and minister to my need;
+**church_bilingual_063d72c8e57313c9_verse_06_en** — But I counted it necessary to send to you Epaphroditus, my brother and fellow-worker and fellow-soldier, and your messenger and minister to my need;
 
 - E4B: Pero consideré necesario enviaros a Epafrodito, mi hermano, compañero de trabajo y compañero de armas, y vuestro mensajero y ministro para mi necesidad;
 - E2B: Pero consideré necesario enviarles a Epafrodito, mi hermano y compañero de trabajo y compañero de soldado, y vuestro mensajero y ministro para mi necesidad;
 
-**church_bilingual_verse_06_es** — Él no es Dios de muertos, sino de vivos. Vosotros estáis, pues, en un gran error”.
+**church_bilingual_063d72c8e57313c9_verse_06_es** — Él no es Dios de muertos, sino de vivos. Vosotros estáis, pues, en un gran error”.
 
 - E4B: He is not a god of the dead, but of the living. You are, therefore, in a great error.
 - E2B: He is not the God of the dead, but of the living. You are, therefore, in a great error.
 
-**church_bilingual_verse_07_en** — And this is the testimony of John, when the Jews sent out of Jerusalem priests and Levites, that they might question him, `Who art thou?'
+**church_bilingual_063d72c8e57313c9_verse_07_en** — And this is the testimony of John, when the Jews sent out of Jerusalem priests and Levites, that they might question him, `Who art thou?'
 
 - E4B: Y este es el testimonio de Juan, cuando los judíos enviaron de Jerusalén sacerdotes y levitas, para que le preguntaran: "¿Quién eres tú?"
 - E2B: Y este es el testimonio de Juan, cuando los judíos enviaron sacerdotes y levitas de Jerusalén para que le cuestionaran, "¿Quién eres?"
 
-**church_bilingual_verse_07_es** — Y éste es el testimonio de Juan, cuando los Judíos enviaron de Jerusalem sacerdotes y Levitas, que le preguntasen: ¿Tú, quién eres?
+**church_bilingual_063d72c8e57313c9_verse_07_es** — Y éste es el testimonio de Juan, cuando los Judíos enviaron de Jerusalem sacerdotes y Levitas, que le preguntasen: ¿Tú, quién eres?
 
 - E4B: And this is the testimony of John, when the Jews sent priests and Levites from Jerusalem to ask him: Who are you?
 - E2B: And this is the testimony of John, when the Jews sent priests and Levites from Jerusalem to ask him: "Who are you?"
 
-**church_bilingual_verse_08_en** — And thou shalt make holy garments for Aaron thy brother, for glory and for beauty.
+**church_bilingual_063d72c8e57313c9_verse_08_en** — And thou shalt make holy garments for Aaron thy brother, for glory and for beauty.
 
 - E4B: Y harás vestiduras santas para Aarón tu hermano, por gloria y por hermosura.
 - E2B: Y harás vestiduras santas para Aarón tu hermano, para gloria y para belleza.
 
-**church_bilingual_verse_08_es** — Tomarán para ello oro, jacinto, púrpura escarlata y carmesí y tejido de lino fino.”
+**church_bilingual_063d72c8e57313c9_verse_08_es** — Tomarán para ello oro, jacinto, púrpura escarlata y carmesí y tejido de lino fino.”
 
 - E4B: They will take for it gold, sapphire, scarlet purple, and fine linen cloth.
 - E2B: They will take gold, jasmine, purple scarlet and crimson and fine linen fabric for it.
 
-**church_bilingual_verse_09_en** — and they said “I will come quickly.”Blessed will he be who lays to heart the words of the prophecy contained in this book.’
+**church_bilingual_063d72c8e57313c9_verse_09_en** — and they said “I will come quickly.”Blessed will he be who lays to heart the words of the prophecy contained in this book.’
 
 - E4B: Y dijeron: "Vendré pronto". Bienaventurado el que atesore las palabras de la profecía contenidas en este libro.
 - E2B: y dijeron “vendré pronto”.Bienaventurado será aquel que medite las palabras de la profecía contenida en este libro.
 
-**church_bilingual_verse_09_es** — ¿No ha dicho la Escritura que el Cristo ha de venir del linaje de David, y de Belén, la aldea de David?”
+**church_bilingual_063d72c8e57313c9_verse_09_es** — ¿No ha dicho la Escritura que el Cristo ha de venir del linaje de David, y de Belén, la aldea de David?”
 
 - E4B: Has the Scripture not said that the Christ is to come from the lineage of David, and from Bethlehem, the town of David?
 - E2B: Hasn't the Scripture said that Christ must come from the lineage of David, and from Bethlehem, the village of David?
 
-**church_bilingual_verse_10_en** — and again it saith, `Rejoice ye nations, with His people;'
+**church_bilingual_063d72c8e57313c9_verse_10_en** — and again it saith, `Rejoice ye nations, with His people;'
 
 - E4B: y de nuevo dice, «Regocijaos, naciones, con Su pueblo;»
 - E2B: y de nuevo dice, "Regocíate, naciones, con su pueblo".
 
-**church_bilingual_verse_10_es** — ¿Y sus hermanas no están todas entre nosotros? Entonces, ¿de dónde le viene todo esto?”
+**church_bilingual_063d72c8e57313c9_verse_10_es** — ¿Y sus hermanas no están todas entre nosotros? Entonces, ¿de dónde le viene todo esto?”
 
 - E4B: And aren't all your sisters among us? So, where does all this come from?
 - E2B: And aren't his sisters all among us? Then, where does all this come from?
 
-**church_bilingual_verse_11_en** — So two or three cities wandered unto one city, to drink water; but they were not satisfied: yet have ye not returned unto me, saith the Lord.
+**church_bilingual_063d72c8e57313c9_verse_11_en** — So two or three cities wandered unto one city, to drink water; but they were not satisfied: yet have ye not returned unto me, saith the Lord.
 
 - E4B: Así dos o tres ciudades vagaron a una ciudad, para beber agua; pero no se saciaron: sin embargo, no habéis vuelto a mí, dice el Señor.
 - E2B: Así que dos o tres ciudades vagaron hacia una ciudad para beber agua; pero no se saciaron: pero no habéis regresado a mí, dice el Señor.
 
-**church_bilingual_verse_11_es** — Al principio del reinado de Joakim, hijo de Josías, rey de Judá, habló Yahvé en estos términos:
+**church_bilingual_063d72c8e57313c9_verse_11_es** — Al principio del reinado de Joakim, hijo de Josías, rey de Judá, habló Yahvé en estos términos:
 
 - E4B: At the beginning of the reign of Joakim, son of Josiah, king of Judah, Yahweh spoke in these terms:
 - E2B: At the beginning of Joakim's reign, son of Josiah, king of Judah, Yahweh spoke in these terms:
 
-**church_bilingual_verse_12_en** — And the God of peace shall bruise Satan under your feet shortly. The grace of our Lord Jesus Christ be with you. Amen.
+**church_bilingual_063d72c8e57313c9_verse_12_en** — And the God of peace shall bruise Satan under your feet shortly. The grace of our Lord Jesus Christ be with you. Amen.
 
 - E4B: Y el Dios de paz aplastará a Satanás bajo vuestros pies pronto. La gracia de nuestro Señor Jesucristo sea con vosotros. Amén.
 - E2B: Y el Dios de paz quebrantará a Satanás bajo vuestros pies pronto. La gracia de nuestro Señor Jesucristo esté con vosotros. Amén.
 
-**church_bilingual_verse_12_es** — Vosotros, al contrario, decís: “Cualquiera que diga a su padre o a su madre: “Es ofrenda (para el Templo) aquello con lo cual yo te podría haber socorrido,
+**church_bilingual_063d72c8e57313c9_verse_12_es** — Vosotros, al contrario, decís: “Cualquiera que diga a su padre o a su madre: “Es ofrenda (para el Templo) aquello con lo cual yo te podría haber socorrido,
 
 - E4B: You, on the contrary, say: "Whoever says to his father or his mother: 'It is an offering (for the Temple) of what I could have helped you with,'
 - E2B: You all, on the contrary, say: "Anyone who tells his father or mother: 'It is an offering (for the Temple) that with which I could have helped you'"
 
-**church_bilingual_verse_13_es** — Recibid mi enseñanza, y no plata; y ciencia antes que el oro escogido.
+**church_bilingual_063d72c8e57313c9_verse_13_es** — Recibid mi enseñanza, y no plata; y ciencia antes que el oro escogido.
 
 - E4B: Receive my teaching, and not silver; and knowledge before chosen gold.
 - E2B: Receive my teaching, and not money; and knowledge before the gold chosen.
 
-**church_bilingual_verse_14_es** — “La Pascua, como sabéis, será dentro de dos días, y el Hijo del hombre va a ser entregado para que lo crucifiquen”.
+**church_bilingual_063d72c8e57313c9_verse_14_es** — “La Pascua, como sabéis, será dentro de dos días, y el Hijo del hombre va a ser entregado para que lo crucifiquen”.
 
 - E4B: "Easter, as you know, will be in two days, and the Son of Man is going to be delivered to be crucified."
 - E2B: Easter, as you know, will be in two days, and the Son of man is going to be handed over to be crucified.
 
-**church_bilingual_verse_15_en** — And by the desire of all the people, the feast went on for another seven days, and they kept the seven days with joy.
+**church_bilingual_063d72c8e57313c9_verse_15_en** — And by the desire of all the people, the feast went on for another seven days, and they kept the seven days with joy.
 
 - E4B: Y por el deseo de todo el pueblo, la fiesta continuó por siete días más, y celebraron los siete días con gozo.
 - E2B: Y por el deseo de todo el pueblo, la fiesta continuó por otros siete días, y guardaron los siete días con gozo.
 
-**church_bilingual_verse_15_es** — Y toda aquella multitud determinó que celebrasen otros siete días; y celebraron otros siete días con alegría.
+**church_bilingual_063d72c8e57313c9_verse_15_es** — Y toda aquella multitud determinó que celebrasen otros siete días; y celebraron otros siete días con alegría.
 
 - E4B: And all that multitude determined that they celebrate for seven more days; and they celebrated for seven more days with joy.
 - E2B: And all that crowd decided to celebrate seven more days; and they celebrated seven more days with joy.
 
-**church_bilingual_verse_16_en** — `Remember that which Amalek hath done to thee in the way, in your going out from Egypt,
+**church_bilingual_063d72c8e57313c9_verse_16_en** — `Remember that which Amalek hath done to thee in the way, in your going out from Egypt,
 
 - E4B: Recuerda lo que Amalec te hizo en el camino, al salir de Egipto.
 - E2B: Acuerda lo que Amalec ha hecho contigo en el camino, cuando salisteis de Egipto,
 
-**church_bilingual_verse_16_es** — El sacerdote recibirá el canasto de tu mano y lo pondrá delante del altar de Yahvé, tu Dios.
+**church_bilingual_063d72c8e57313c9_verse_16_es** — El sacerdote recibirá el canasto de tu mano y lo pondrá delante del altar de Yahvé, tu Dios.
 
 - E4B: The priest will receive the basket from your hand and place it before the altar of Yahweh, your God.
 - E2B: The priest will receive the basket from your hand and place it in front of the altar of Yahweh, your God.
 
-**church_bilingual_verse_17_es** — Que edificáis á Sión con sangre, y á Jerusalem con injusticia;
+**church_bilingual_063d72c8e57313c9_verse_17_es** — Que edificáis á Sión con sangre, y á Jerusalem con injusticia;
 
 - E4B: That you build Zion with blood, and Jerusalem with injustice;
 - E2B: What are you building in Zion with blood, and in Jerusalem with injustice;
 
-**church_bilingual_verse_18_en** — He took them and sent them over the stream with all he had.
+**church_bilingual_063d72c8e57313c9_verse_18_en** — He took them and sent them over the stream with all he had.
 
 - E4B: Los tomó y los envió al otro lado del arroyo con todo lo que tenía.
 - E2B: Los tomó y los envió sobre el arroyo con todo lo que tenía.
 
-**church_bilingual_verse_18_es** — Tomólos pues, y pasólos el arroyo, é hizo pasar lo que tenía.
+**church_bilingual_063d72c8e57313c9_verse_18_es** — Tomólos pues, y pasólos el arroyo, é hizo pasar lo que tenía.
 
 - E4B: So he took them, and he passed them across the stream, and he made pass what he had.
 - E2B: He took them, and passed them through the stream, he made pass what he had.
 
-**church_bilingual_verse_19_en** — And the Lord your God will give to you and to your seed a circumcision of the heart, so that, loving him with all your heart and all your soul, you may have life.
+**church_bilingual_063d72c8e57313c9_verse_19_en** — And the Lord your God will give to you and to your seed a circumcision of the heart, so that, loving him with all your heart and all your soul, you may have life.
 
 - E4B: Y el Señor tu Dios te dará a ti y a tu descendencia una circuncisión del corazón, para que, amándolo con todo tu corazón y con toda tu alma, tengas vida.
 - E2B: Y el Señor tu Dios te dará a ti y a tu descendencia una circuncisión del corazón, para que, amándolo con todo tu corazón y toda tu alma, tengas vida.
 
-**church_bilingual_verse_19_es** — No está en el cielo, de suerte que puedas decir: ‘¿Quién subirá por nosotros al cielo para que nos la traiga y nos la enseñe, y nosotros la pongamos por obra?’
+**church_bilingual_063d72c8e57313c9_verse_19_es** — No está en el cielo, de suerte que puedas decir: ‘¿Quién subirá por nosotros al cielo para que nos la traiga y nos la enseñe, y nosotros la pongamos por obra?’
 
 - E4B: It is not in heaven, luckily you can say: 'Who will go up for us to heaven to bring it to us and show it to us, so that we may put it into practice?'
 - E2B: It is not in heaven, so you can say: 'Who will go up with us to heaven to bring it to us and show it to us, and we will put it into practice?'
 
-**church_bilingual_verse_20_es** — Entonces él se levantó y se fué á su casa.
+**church_bilingual_063d72c8e57313c9_verse_20_es** — Entonces él se levantó y se fué á su casa.
 
 - E4B: So he got up and went to his house.
 - E2B: Then he got up and went to his house.
 
-**church_bilingual_verse_21_es** — Entonces él se levantó y se fué á su casa.
+**church_bilingual_063d72c8e57313c9_verse_21_es** — Entonces él se levantó y se fué á su casa.
 
 - E4B: So he got up and went to his house.
 - E2B: Then he got up and went to his house.
 
-**church_bilingual_verse_22_en** — And he stayeth yet other seven days, and addeth to send forth the dove from the ark;
+**church_bilingual_063d72c8e57313c9_verse_22_en** — And he stayeth yet other seven days, and addeth to send forth the dove from the ark;
 
 - E4B: Y se queda siete días más, y añade para enviar la paloma del arca;
 - E2B: Y permanece otros siete días, y añade a enviar la paloma del arca;
 
-**church_bilingual_verse_22_es** — Y esperó aún otros siete días, y volvió á enviar la paloma fuera del arca.
+**church_bilingual_063d72c8e57313c9_verse_22_es** — Y esperó aún otros siete días, y volvió á enviar la paloma fuera del arca.
 
 - E4B: And he waited another seven days, and sent the dove out of the ark again.
 - E2B: And he waited another seven days, and returned to send the dove out of the ark.
 
-**church_bilingual_verse_23_en** — And in the evening, at sundown, they took to him all who were diseased, and those who had evil spirits.
+**church_bilingual_063d72c8e57313c9_verse_23_en** — And in the evening, at sundown, they took to him all who were diseased, and those who had evil spirits.
 
 - E4B: Y por la tarde, al atardecer, le trajeron todos los enfermos y los que tenían espíritus malignos.
 - E2B: Y en la tarde, al anochecer, le llevaron a él a todos los que estaban enfermos y a los que tenían espíritus malignos.
 
-**church_bilingual_verse_23_es** — Por tanto, así dice, Yahvé, el Señor: He aquí que haré venir sobre ti la espada, y exterminaré en ti hombres y bestias.
+**church_bilingual_063d72c8e57313c9_verse_23_es** — Por tanto, así dice, Yahvé, el Señor: He aquí que haré venir sobre ti la espada, y exterminaré en ti hombres y bestias.
 
 - E4B: Therefore, thus says Yahweh, the Lord: Behold, I will bring the sword upon you, and I will exterminate men and beasts in you.
 - E2B: Therefore, so says Yahweh, the Lord: Behold, I will bring the sword upon you, and I will exterminate men and beasts in you.
 
-**church_bilingual_verse_24_en** — Thou hast turned my mourning to dancing for me, Thou hast loosed my sackcloth, And girdest me <FI>with<Fi> joy.
+**church_bilingual_063d72c8e57313c9_verse_24_en** — Thou hast turned my mourning to dancing for me, Thou hast loosed my sackcloth, And girdest me <FI>with<Fi> joy.
 
 - E4B: Has cambiado mi luto por danza para mí, has quitado mi cilicio, y me vistes de gozo.
 - E2B: Has convertido mi luto en danza por mí, has desatado mi saco y me has atado con gozo.
 
-**church_bilingual_verse_24_es** — Has tornado mi endecha en baile; desataste mi saco, y ceñísteme de alegría.
+**church_bilingual_063d72c8e57313c9_verse_24_es** — Has tornado mi endecha en baile; desataste mi saco, y ceñísteme de alegría.
 
 - E4B: You have tornado my right hand in dance; you have unleashed my sack, and girded me with joy.
 - E2B: You have torn my edge in dance; you unleashed my sack, and tightened me with joy.
 
-**none_bilingual_canary_01** — James wrote about faith and works.
+**none_bilingual_063d72c8e57313c9_canary_01** — James wrote about faith and works.
 
 - E4B: James escribió sobre fe y obras.
 - E2B: James escribió sobre la fe y las obras.
 
-**none_bilingual_canary_03** — The breaking of bread is a solemn remembrance.
+**none_bilingual_063d72c8e57313c9_canary_03** — The breaking of bread is a solemn remembrance.
 
 - E4B: El partir del pan es un solemne recuerdo.
 - E2B: Romper el pan es un solemne recuerdo.
 
-**none_bilingual_canary_05** — Justification is by faith alone, not by works of the law.
+**none_bilingual_063d72c8e57313c9_canary_05** — Justification is by faith alone, not by works of the law.
 
 - E4B: La justificación es por la fe solamente, no por las obras de la ley.
 - E2B: La justificación es por fe solamente, no por obras de la ley.
 
-**none_bilingual_canary_06** — The Holy Spirit convicts the world of sin and righteousness.
+**none_bilingual_063d72c8e57313c9_canary_06** — The Holy Spirit convicts the world of sin and righteousness.
 
 - E4B: El Espíritu Santo convence al mundo de pecado y de justicia.
 - E2B: El Espíritu Santo convence al mundo del pecado y de la justicia.
 
-**none_bilingual_canary_08** — We gather before the mercy seat in prayer.
+**none_bilingual_063d72c8e57313c9_canary_08** — We gather before the mercy seat in prayer.
 
 - E4B: Nos reunimos ante el trono de la misericordia en oración.
 - E2B: Nos reunimos ante el asiento de la misericordia en oración.
 
-**none_bilingual_canary_09** — The table of the Lord is spread for His people.
+**none_bilingual_063d72c8e57313c9_canary_09** — The table of the Lord is spread for His people.
 
 - E4B: La mesa del Señor está extendida para Su pueblo.
 - E2B: La mesa del Señor está extendida para su pueblo.
 
-**none_bilingual_canary_11** — A little while, and we shall see the Lord.
+**none_bilingual_063d72c8e57313c9_canary_11** — A little while, and we shall see the Lord.
 
 - E4B: En poco tiempo, veremos al Señor.
 - E2B: Un poco más, y veremos al Señor.
 
-**none_bilingual_canary_13** — Christ is the Surety of a better covenant.
+**none_bilingual_063d72c8e57313c9_canary_13** — Christ is the Surety of a better covenant.
 
 - E4B: Cristo es la garantía de un pacto mejor.
 - E2B: Cristo es la garantía de un mejor pacto.
 
-**none_bilingual_canary_14** — This do in remembrance of Me at His table.
+**none_bilingual_063d72c8e57313c9_canary_14** — This do in remembrance of Me at His table.
 
 - E4B: Esto se hace en memoria de Mí en su mesa.
 - E2B: Esto es en recuerdo de Mí en Su mesa.
 
-**none_bilingual_canary_15** — At the mercy seat we remember His propitiation for our sins.
+**none_bilingual_063d72c8e57313c9_canary_15** — At the mercy seat we remember His propitiation for our sins.
 
 - E4B: En el asiento de la misericordia recordamos Su propiciación por nuestros pecados.
 - E2B: En el asiento de la misericordia recordamos su propiciación por nuestros pecados.
 
-**none_bilingual_canary_16** — Yet there is room at the gospel feast for the weary soul.
+**none_bilingual_063d72c8e57313c9_canary_16** — Yet there is room at the gospel feast for the weary soul.
 
 - E4B: Sin embargo, hay lugar en el banquete del evangelio para el alma cansada.
 - E2B: Sin embargo, hay espacio en el banquete del evangelio para el alma cansada.
 
-**none_bilingual_verse_00_en** — They look at themselves, then go on their way,
+**none_bilingual_063d72c8e57313c9_verse_00_en** — They look at themselves, then go on their way,
 
 - E4B: Se miran, luego se van de camino,
 - E2B: Se miran a sí mismos, luego se van.
 
-**none_bilingual_verse_00_es** — El servidor se volvió a contar todo esto a su amo. Entonces, lleno de ira el dueño de casa, dijo a su servidor: “Sal en seguida a las calles y callejuelas de la ciudad; y tráeme aquí los pobres, y lisiados, y ciegos y cojos”.
+**none_bilingual_063d72c8e57313c9_verse_00_es** — El servidor se volvió a contar todo esto a su amo. Entonces, lleno de ira el dueño de casa, dijo a su servidor: “Sal en seguida a las calles y callejuelas de la ciudad; y tráeme aquí los pobres, y lisiados, y ciegos y cojos”.
 
 - E4B: The servant told his master all of this again. Then, filled with anger, the master of the house said to his servant: "Go immediately out into the streets and alleys of the city; and bring me here the poor, the lame, the blind, and the crippled."
 - E2B: The servant recounted all this to his master again. Then, filled with anger, the master of the house said to his servant: "Go immediately to the streets and alleys of the city; and bring me here the poor, the insane, the blind, and the lame."
 
-**none_bilingual_verse_01_en** — The trees of the Lord drink their fill the cedars he planted on Lebanon,
+**none_bilingual_063d72c8e57313c9_verse_01_en** — The trees of the Lord drink their fill the cedars he planted on Lebanon,
 
 - E4B: Los árboles del Señor sacian su sed, los cedros que plantó en Líbano.
 - E2B: Los árboles del Señor beben hasta saciarse los cedros que plantó en el Líbano.
 
-**none_bilingual_verse_01_es** — Llénanse de jugo los árboles de Jehová, los cedros del Líbano que él plantó.
+**none_bilingual_063d72c8e57313c9_verse_01_es** — Llénanse de jugo los árboles de Jehová, los cedros del Líbano que él plantó.
 
 - E4B: Let the trees of the Lord be full of juice, the cedars of Lebanon that he planted.
 - E2B: Let the trees of the Lord be filled with juice, the cedars of Lebanon that he planted.
 
-**none_bilingual_verse_02_en** — From Kibroth-hattaavah the people journeyed unto Hazeroth; and they abode at Hazeroth.
+**none_bilingual_063d72c8e57313c9_verse_02_en** — From Kibroth-hattaavah the people journeyed unto Hazeroth; and they abode at Hazeroth.
 
 - E4B: Desde Kibroth-hattaavah el pueblo viajó a Hazeroth; y allí residieron en Hazeroth.
 - E2B: Desde Kibroth-hattaavah el pueblo viajó a Hazeroth; y se alojaron en Hazeroth.
 
-**none_bilingual_verse_02_es** — No lo hago así con mi siervo Moisés,   el cual es fiel en toda mi casa.
+**none_bilingual_063d72c8e57313c9_verse_02_es** — No lo hago así con mi siervo Moisés,   el cual es fiel en toda mi casa.
 
 - E4B: I do not do this with my servant Moses, who is faithful in my whole house.
 - E2B: I don't do that to my servant Moses, who is faithful in my whole house.
 
-**none_bilingual_verse_03_en** — and from the Nethinim, whom David and the heads gave for the service of the Levites, two hundred and twenty Nethinim, all of them defined by name.
+**none_bilingual_063d72c8e57313c9_verse_03_en** — and from the Nethinim, whom David and the heads gave for the service of the Levites, two hundred and twenty Nethinim, all of them defined by name.
 
 - E4B: y de los Nethinim, a quienes David y los jefes dieron para el servicio de los levitas, doscientos veinte Nethinim, todos nombrados.
 - E2B: y de los netinim, a quienes David y los jefes dieron por el servicio de los levitas, doscientos veinte netinim, todos definidos por nombre.
 
-**none_bilingual_verse_03_es** — Pesé y entregué en sus manos seiscientos cincuenta talentos de plata, utensilios de plata por cien talentos, cien talentos de oro,
+**none_bilingual_063d72c8e57313c9_verse_03_es** — Pesé y entregué en sus manos seiscientos cincuenta talentos de plata, utensilios de plata por cien talentos, cien talentos de oro,
 
 - E4B: I weighed and delivered into your hands six hundred fifty talents of silver, silver utensils for one hundred talents, one hundred talents of gold,
 - E2B: I weighed and delivered in his hands six hundred fifty talents of silver, silver utensils for one hundred talents, one hundred talents of gold,
 
-**none_bilingual_verse_04_en** — And the name of the daughter of Asher <FI>is<Fi> Sarah.
+**none_bilingual_063d72c8e57313c9_verse_04_en** — And the name of the daughter of Asher <FI>is<Fi> Sarah.
 
 - E4B: Y el nombre de la hija de Aser es Sara.
 - E2B: Y el nombre de la hija de Asher es Sarah.
 
-**none_bilingual_verse_05_en** — If thou lend money to any of my people with thee that is poor, thou shalt not be to him as a creditor; neither shall ye lay upon him interest.
+**none_bilingual_063d72c8e57313c9_verse_05_en** — If thou lend money to any of my people with thee that is poor, thou shalt not be to him as a creditor; neither shall ye lay upon him interest.
 
 - E4B: Si prestas dinero a alguno de mi pueblo que esté contigo y sea pobre, no serás para él como acreedor; ni le imponerás interés.
 - E2B: Si prestas dinero a alguno de mis pueblos con el que esté pobre, no serás acreedor de él; ni le pondrás interés.
 
-**none_bilingual_verse_05_es** — No blasfemarás contra Dios, ni maldecirás al príncipe de tu pueblo.
+**none_bilingual_063d72c8e57313c9_verse_05_es** — No blasfemarás contra Dios, ni maldecirás al príncipe de tu pueblo.
 
 - E4B: You shall not blaspheme God, nor curse the prince of your people.
 - E2B: You shall not swear blasphemies against God, nor curse the prince of your people.
 
-**none_bilingual_verse_06_en** — But I counted it necessary to send to you Epaphroditus, my brother and fellow-worker and fellow-soldier, and your messenger and minister to my need;
+**none_bilingual_063d72c8e57313c9_verse_06_en** — But I counted it necessary to send to you Epaphroditus, my brother and fellow-worker and fellow-soldier, and your messenger and minister to my need;
 
 - E4B: Pero consideré necesario enviarte Epafrodito, mi hermano y compañero de trabajo y compañero de armas, y tu mensajero y ministro para mi necesidad;
 - E2B: Pero consideré necesario enviarte a Epafrodito, mi hermano, compañero de trabajo y compañero de soldado, y tu mensajero y ministro para mi necesidad;
 
-**none_bilingual_verse_06_es** — Él no es Dios de muertos, sino de vivos. Vosotros estáis, pues, en un gran error”.
+**none_bilingual_063d72c8e57313c9_verse_06_es** — Él no es Dios de muertos, sino de vivos. Vosotros estáis, pues, en un gran error”.
 
 - E4B: He is not a god of the dead, but of the living. You are, therefore, in a great error.
 - E2B: He is not the God of the dead, but of the living. You are, therefore, in a great error.
 
-**none_bilingual_verse_07_en** — And this is the testimony of John, when the Jews sent out of Jerusalem priests and Levites, that they might question him, `Who art thou?'
+**none_bilingual_063d72c8e57313c9_verse_07_en** — And this is the testimony of John, when the Jews sent out of Jerusalem priests and Levites, that they might question him, `Who art thou?'
 
 - E4B: Y este es el testimonio de Juan, cuando los judíos enviaron de Jerusalén sacerdotes y levitas, para que le preguntaran: "¿Quién eres tú?"
 - E2B: Y este es el testimonio de Juan, cuando los judíos enviaron sacerdotes y levitas de Jerusalén para interrogarlo, "¿Quién eres?"
 
-**none_bilingual_verse_07_es** — Y éste es el testimonio de Juan, cuando los Judíos enviaron de Jerusalem sacerdotes y Levitas, que le preguntasen: ¿Tú, quién eres?
+**none_bilingual_063d72c8e57313c9_verse_07_es** — Y éste es el testimonio de Juan, cuando los Judíos enviaron de Jerusalem sacerdotes y Levitas, que le preguntasen: ¿Tú, quién eres?
 
 - E4B: And this is the testimony of John, when the Jews sent priests and Levites from Jerusalem to ask him: Who are you?
 - E2B: And this is the testimony of John, when the Jews sent priests and Levites from Jerusalem to ask him: "Who are you?"
 
-**none_bilingual_verse_08_en** — And thou shalt make holy garments for Aaron thy brother, for glory and for beauty.
+**none_bilingual_063d72c8e57313c9_verse_08_en** — And thou shalt make holy garments for Aaron thy brother, for glory and for beauty.
 
 - E4B: Y harás vestiduras santas para Aarón tu hermano, por gloria y por hermosura.
 - E2B: Y harás vestiduras santas para Aarón tu hermano, para gloria y para belleza.
 
-**none_bilingual_verse_08_es** — Tomarán para ello oro, jacinto, púrpura escarlata y carmesí y tejido de lino fino.”
+**none_bilingual_063d72c8e57313c9_verse_08_es** — Tomarán para ello oro, jacinto, púrpura escarlata y carmesí y tejido de lino fino.”
 
 - E4B: They will take for it gold, sapphire, scarlet purple, and fine linen cloth.
 - E2B: They will take gold, jasmine, purple scarlet and crimson and fine linen fabric for it.
 
-**none_bilingual_verse_09_en** — and they said “I will come quickly.”Blessed will he be who lays to heart the words of the prophecy contained in this book.’
+**none_bilingual_063d72c8e57313c9_verse_09_en** — and they said “I will come quickly.”Blessed will he be who lays to heart the words of the prophecy contained in this book.’
 
 - E4B: y dijeron: "Vendré pronto". Bendito sea aquel que atesore las palabras de la profecía contenidas en este libro.
 - E2B: y dijeron "vendré pronto". Bendito será el que medite las palabras de la profecía contenida en este libro.
 
-**none_bilingual_verse_09_es** — ¿No ha dicho la Escritura que el Cristo ha de venir del linaje de David, y de Belén, la aldea de David?”
+**none_bilingual_063d72c8e57313c9_verse_09_es** — ¿No ha dicho la Escritura que el Cristo ha de venir del linaje de David, y de Belén, la aldea de David?”
 
 - E4B: Has the Scripture not said that the Christ is to come from the lineage of David, and from Bethlehem, the town of David?
 - E2B: Hasn't the Scripture said that Christ must come from the lineage of David, and from Bethlehem, the village of David?
 
-**none_bilingual_verse_10_en** — and again it saith, `Rejoice ye nations, with His people;'
+**none_bilingual_063d72c8e57313c9_verse_10_en** — and again it saith, `Rejoice ye nations, with His people;'
 
 - E4B: y de nuevo dice: "Regocíjense las naciones con Su pueblo;"
 - E2B: y de nuevo dice, "Regocíate, naciones, con su pueblo".
 
-**none_bilingual_verse_10_es** — ¿Y sus hermanas no están todas entre nosotros? Entonces, ¿de dónde le viene todo esto?”
+**none_bilingual_063d72c8e57313c9_verse_10_es** — ¿Y sus hermanas no están todas entre nosotros? Entonces, ¿de dónde le viene todo esto?”
 
 - E4B: And aren't all your sisters among us? So, where does all this come from?
 - E2B: And aren't his sisters all among us? Then, where does all this come from?
 
-**none_bilingual_verse_11_en** — So two or three cities wandered unto one city, to drink water; but they were not satisfied: yet have ye not returned unto me, saith the Lord.
+**none_bilingual_063d72c8e57313c9_verse_11_en** — So two or three cities wandered unto one city, to drink water; but they were not satisfied: yet have ye not returned unto me, saith the Lord.
 
 - E4B: Así dos o tres ciudades vagaron hacia una ciudad, para beber agua; pero no se saciaron: sin embargo, no habéis vuelto a mí, dice el Señor.
 - E2B: Así que dos o tres ciudades vagaron hacia una ciudad para beber agua; pero no se conformaron: pero no habéis vuelto a mí, dice el Señor.
 
-**none_bilingual_verse_11_es** — Al principio del reinado de Joakim, hijo de Josías, rey de Judá, habló Yahvé en estos términos:
+**none_bilingual_063d72c8e57313c9_verse_11_es** — Al principio del reinado de Joakim, hijo de Josías, rey de Judá, habló Yahvé en estos términos:
 
 - E4B: At the beginning of the reign of Joakim, son of Josiah, king of Judah, Yahweh spoke in these terms:
 - E2B: At the beginning of Joakim's reign, son of Josiah, king of Judah, Yahweh spoke in these terms:
 
-**none_bilingual_verse_12_en** — And the God of peace shall bruise Satan under your feet shortly. The grace of our Lord Jesus Christ be with you. Amen.
+**none_bilingual_063d72c8e57313c9_verse_12_en** — And the God of peace shall bruise Satan under your feet shortly. The grace of our Lord Jesus Christ be with you. Amen.
 
 - E4B: Y el Dios de paz aplastará a Satanás bajo tus pies pronto. La gracia de nuestro Señor Jesucristo esté con ustedes. Amén.
 - E2B: Y el Dios de la paz quebrantará a Satanás bajo vuestros pies pronto. La gracia de nuestro Señor Jesucristo esté con vosotros. Amén.
 
-**none_bilingual_verse_12_es** — Vosotros, al contrario, decís: “Cualquiera que diga a su padre o a su madre: “Es ofrenda (para el Templo) aquello con lo cual yo te podría haber socorrido,
+**none_bilingual_063d72c8e57313c9_verse_12_es** — Vosotros, al contrario, decís: “Cualquiera que diga a su padre o a su madre: “Es ofrenda (para el Templo) aquello con lo cual yo te podría haber socorrido,
 
 - E4B: You, on the contrary, say: "Whoever says to his father or his mother: 'It is an offering (for the Temple) of what I could have helped you with,'
 - E2B: You all, on the contrary, say: "Anyone who tells his father or mother: 'It is an offering (for the Temple) that with which I could have helped you'"
 
-**none_bilingual_verse_13_en** — Take my teaching, and not silver; get knowledge in place of the best gold.
+**none_bilingual_063d72c8e57313c9_verse_13_en** — Take my teaching, and not silver; get knowledge in place of the best gold.
 
 - E4B: Toma mi enseñanza, y no plata; adquiere conocimiento en lugar del mejor oro.
 - E2B: Toma mi enseñanza, y no plata; consigue conocimiento en lugar del mejor oro.
 
-**none_bilingual_verse_13_es** — Recibid mi enseñanza, y no plata; y ciencia antes que el oro escogido.
+**none_bilingual_063d72c8e57313c9_verse_13_es** — Recibid mi enseñanza, y no plata; y ciencia antes que el oro escogido.
 
 - E4B: Receive my teaching, and not silver; and knowledge before chosen gold.
 - E2B: Receive my teaching, and not money; and knowledge before the gold chosen.
 
-**none_bilingual_verse_14_es** — “La Pascua, como sabéis, será dentro de dos días, y el Hijo del hombre va a ser entregado para que lo crucifiquen”.
+**none_bilingual_063d72c8e57313c9_verse_14_es** — “La Pascua, como sabéis, será dentro de dos días, y el Hijo del hombre va a ser entregado para que lo crucifiquen”.
 
 - E4B: "Easter, as you know, will be in two days, and the Son of Man is going to be delivered to be crucified."
 - E2B: Easter, as you know, will be in two days, and the Son of man is going to be handed over to be crucified.
 
-**none_bilingual_verse_15_en** — And by the desire of all the people, the feast went on for another seven days, and they kept the seven days with joy.
+**none_bilingual_063d72c8e57313c9_verse_15_en** — And by the desire of all the people, the feast went on for another seven days, and they kept the seven days with joy.
 
 - E4B: Y por el deseo de todo el pueblo, la fiesta continuó por otros siete días, y mantuvieron los siete días con alegría.
 - E2B: Y por el deseo de toda la gente, la fiesta continuó por otros siete días, y mantuvieron los siete días con alegría.
 
-**none_bilingual_verse_15_es** — Y toda aquella multitud determinó que celebrasen otros siete días; y celebraron otros siete días con alegría.
+**none_bilingual_063d72c8e57313c9_verse_15_es** — Y toda aquella multitud determinó que celebrasen otros siete días; y celebraron otros siete días con alegría.
 
 - E4B: And all that multitude determined that they celebrate for seven more days; and they celebrated for seven more days with joy.
 - E2B: And all that crowd decided to celebrate seven more days; and they celebrated seven more days with joy.
 
-**none_bilingual_verse_16_en** — `Remember that which Amalek hath done to thee in the way, in your going out from Egypt,
+**none_bilingual_063d72c8e57313c9_verse_16_en** — `Remember that which Amalek hath done to thee in the way, in your going out from Egypt,
 
 - E4B: Recuerda lo que Amalec te hizo en el camino, al salir de Egipto,
 - E2B: Recuerda lo que Amalec te hizo en el camino, en tu salida de Egipto,
 
-**none_bilingual_verse_16_es** — El sacerdote recibirá el canasto de tu mano y lo pondrá delante del altar de Yahvé, tu Dios.
+**none_bilingual_063d72c8e57313c9_verse_16_es** — El sacerdote recibirá el canasto de tu mano y lo pondrá delante del altar de Yahvé, tu Dios.
 
 - E4B: The priest will receive the basket from your hand and place it before the altar of Yahweh, your God.
 - E2B: The priest will receive the basket from your hand and place it in front of the altar of Yahweh, your God.
 
-**none_bilingual_verse_17_en** — Building up Zion with blood, And Jerusalem with iniquity.
+**none_bilingual_063d72c8e57313c9_verse_17_en** — Building up Zion with blood, And Jerusalem with iniquity.
 
 - E4B: Construyendo Sion con sangre, Y Jerusalén con iniquidad.
 - E2B: Construyendo Sion con sangre, y Jerusalén con iniquidad.
 
-**none_bilingual_verse_17_es** — Que edificáis á Sión con sangre, y á Jerusalem con injusticia;
+**none_bilingual_063d72c8e57313c9_verse_17_es** — Que edificáis á Sión con sangre, y á Jerusalem con injusticia;
 
 - E4B: That you build Zion with blood, and Jerusalem with injustice;
 - E2B: What are you building in Zion with blood, and in Jerusalem with injustice;
 
-**none_bilingual_verse_18_en** — He took them and sent them over the stream with all he had.
+**none_bilingual_063d72c8e57313c9_verse_18_en** — He took them and sent them over the stream with all he had.
 
 - E4B: Los tomó y los envió al otro lado del arroyo con todo lo que tenía.
 - E2B: Los tomó y los envió por el arroyo con todo lo que tenía.
 
-**none_bilingual_verse_18_es** — Tomólos pues, y pasólos el arroyo, é hizo pasar lo que tenía.
+**none_bilingual_063d72c8e57313c9_verse_18_es** — Tomólos pues, y pasólos el arroyo, é hizo pasar lo que tenía.
 
 - E4B: So he took them, and he passed them across the stream, and he made pass what he had.
 - E2B: He took them, and passed them through the stream, he made pass what he had.
 
-**none_bilingual_verse_19_en** — And the Lord your God will give to you and to your seed a circumcision of the heart, so that, loving him with all your heart and all your soul, you may have life.
+**none_bilingual_063d72c8e57313c9_verse_19_en** — And the Lord your God will give to you and to your seed a circumcision of the heart, so that, loving him with all your heart and all your soul, you may have life.
 
 - E4B: Y el Señor tu Dios te dará a ti y a tu descendencia una circuncisión del corazón, para que, amándolo con todo tu corazón y con toda tu alma, tengas vida.
 - E2B: Y el Señor tu Dios te dará y a tu descendencia una circuncisión del corazón, para que, amándolo con todo tu corazón y con toda tu alma, tengas vida.
 
-**none_bilingual_verse_19_es** — No está en el cielo, de suerte que puedas decir: ‘¿Quién subirá por nosotros al cielo para que nos la traiga y nos la enseñe, y nosotros la pongamos por obra?’
+**none_bilingual_063d72c8e57313c9_verse_19_es** — No está en el cielo, de suerte que puedas decir: ‘¿Quién subirá por nosotros al cielo para que nos la traiga y nos la enseñe, y nosotros la pongamos por obra?’
 
 - E4B: It is not in heaven, luckily you can say: 'Who will go up for us to heaven to bring it to us and show it to us, so that we may put it into practice?'
 - E2B: It is not in heaven, so you can say: 'Who will go up with us to heaven to bring it to us and show it to us, and we will put it into practice?'
 
-**none_bilingual_verse_20_es** — Entonces él se levantó y se fué á su casa.
+**none_bilingual_063d72c8e57313c9_verse_20_es** — Entonces él se levantó y se fué á su casa.
 
 - E4B: So he got up and went to his house.
 - E2B: Then he got up and went to his house.
 
-**none_bilingual_verse_21_es** — Entonces él se levantó y se fué á su casa.
+**none_bilingual_063d72c8e57313c9_verse_21_es** — Entonces él se levantó y se fué á su casa.
 
 - E4B: So he got up and went to his house.
 - E2B: Then he got up and went to his house.
 
-**none_bilingual_verse_22_en** — And he stayeth yet other seven days, and addeth to send forth the dove from the ark;
+**none_bilingual_063d72c8e57313c9_verse_22_en** — And he stayeth yet other seven days, and addeth to send forth the dove from the ark;
 
 - E4B: Y se queda siete días más, y añade para enviar la paloma del arca;
 - E2B: Y permanece otros siete días, y añade a enviar la paloma del arca;
 
-**none_bilingual_verse_22_es** — Y esperó aún otros siete días, y volvió á enviar la paloma fuera del arca.
+**none_bilingual_063d72c8e57313c9_verse_22_es** — Y esperó aún otros siete días, y volvió á enviar la paloma fuera del arca.
 
 - E4B: And he waited another seven days, and sent the dove out of the ark again.
 - E2B: And he waited another seven days, and returned to send the dove out of the ark.
 
-**none_bilingual_verse_23_en** — And in the evening, at sundown, they took to him all who were diseased, and those who had evil spirits.
+**none_bilingual_063d72c8e57313c9_verse_23_en** — And in the evening, at sundown, they took to him all who were diseased, and those who had evil spirits.
 
 - E4B: Y por la tarde, al atardecer, le trajeron todos los enfermos y los que tenían espíritus malignos.
 - E2B: Y por la noche, al atardecer, se llevaron a él a todos los que estaban enfermos y a los que tenían espíritus malignos.
 
-**none_bilingual_verse_23_es** — Por tanto, así dice, Yahvé, el Señor: He aquí que haré venir sobre ti la espada, y exterminaré en ti hombres y bestias.
+**none_bilingual_063d72c8e57313c9_verse_23_es** — Por tanto, así dice, Yahvé, el Señor: He aquí que haré venir sobre ti la espada, y exterminaré en ti hombres y bestias.
 
 - E4B: Therefore, thus says Yahweh, the Lord: Behold, I will bring the sword upon you, and I will exterminate men and beasts in you.
 - E2B: Therefore, so says Yahweh, the Lord: Behold, I will bring the sword upon you, and I will exterminate men and beasts in you.
 
-**none_bilingual_verse_24_en** — Thou hast turned my mourning to dancing for me, Thou hast loosed my sackcloth, And girdest me <FI>with<Fi> joy.
+**none_bilingual_063d72c8e57313c9_verse_24_en** — Thou hast turned my mourning to dancing for me, Thou hast loosed my sackcloth, And girdest me <FI>with<Fi> joy.
 
 - E4B: Has convertido mi luto en danza para mí, has quitado mi cilicio y me has ceñido con gozo.
 - E2B: Has convertido mi luto en danza por mí, has desatado mi saco y me has atado con alegría.
 
-**none_bilingual_verse_24_es** — Has tornado mi endecha en baile; desataste mi saco, y ceñísteme de alegría.
+**none_bilingual_063d72c8e57313c9_verse_24_es** — Has tornado mi endecha en baile; desataste mi saco, y ceñísteme de alegría.
 
 - E4B: You have tornado my right hand in dance; you have unleashed my sack, and girded me with joy.
 - E2B: You have torn my edge in dance; you unleashed my sack, and tightened me with joy.
@@ -697,4 +711,4 @@ First-partial delay starts at the first captured speech frame. Update gaps are b
 - Visible-browser render acknowledgments for the sub-second caption-delivery gate.
 - Physical second-output / hotplug and real two-speaker validation.
 
-Recorded failed runs: 0. Failures are retained in comparison.json.
+Recorded failed runs: 0. Excluded incompatible/duplicate runs: 0. Details are retained in comparison.json.

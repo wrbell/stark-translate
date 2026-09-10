@@ -22,7 +22,8 @@
       "canaries_passed": 14,
       "canaries_total": 18,
       "chrf_plus_plus": 45.874311572643236,
-      "peak_metal_bytes": 4411096292
+      "peak_metal_bytes": 4411096292,
+      "runtime_cohort": "063d72c8e57313c9"
     },
     {
       "size": "e2b",
@@ -39,7 +40,8 @@
       "canaries_passed": 0,
       "canaries_total": 0,
       "chrf_plus_plus": 46.0351009548953,
-      "peak_metal_bytes": 4411096292
+      "peak_metal_bytes": 4411096292,
+      "runtime_cohort": "063d72c8e57313c9"
     },
     {
       "size": "e2b",
@@ -56,7 +58,8 @@
       "canaries_passed": 11,
       "canaries_total": 18,
       "chrf_plus_plus": 45.113712724034464,
-      "peak_metal_bytes": 4418904590
+      "peak_metal_bytes": 4418904590,
+      "runtime_cohort": "063d72c8e57313c9"
     },
     {
       "size": "e2b",
@@ -73,7 +76,8 @@
       "canaries_passed": 0,
       "canaries_total": 0,
       "chrf_plus_plus": 46.0351009548953,
-      "peak_metal_bytes": 4418904590
+      "peak_metal_bytes": 4418904590,
+      "runtime_cohort": "063d72c8e57313c9"
     },
     {
       "size": "e4b",
@@ -90,7 +94,8 @@
       "canaries_passed": 15,
       "canaries_total": 18,
       "chrf_plus_plus": 46.86155391461082,
-      "peak_metal_bytes": 6760112944
+      "peak_metal_bytes": 6760112944,
+      "runtime_cohort": "063d72c8e57313c9"
     },
     {
       "size": "e4b",
@@ -107,7 +112,8 @@
       "canaries_passed": 0,
       "canaries_total": 0,
       "chrf_plus_plus": 48.66774652696142,
-      "peak_metal_bytes": 6760112944
+      "peak_metal_bytes": 6760112944,
+      "runtime_cohort": "063d72c8e57313c9"
     },
     {
       "size": "e4b",
@@ -124,7 +130,8 @@
       "canaries_passed": 13,
       "canaries_total": 18,
       "chrf_plus_plus": 44.38744349434152,
-      "peak_metal_bytes": 6744387856
+      "peak_metal_bytes": 6744387856,
+      "runtime_cohort": "063d72c8e57313c9"
     },
     {
       "size": "e4b",
@@ -141,7 +148,8 @@
       "canaries_passed": 0,
       "canaries_total": 0,
       "chrf_plus_plus": 48.66774652696142,
-      "peak_metal_bytes": 6744387856
+      "peak_metal_bytes": 6744387856,
+      "runtime_cohort": "063d72c8e57313c9"
     }
   ],
   "replays": [],
@@ -152,6 +160,7 @@
   "quality_deltas": [
     {
       "policy": "church",
+      "runtime_cohort": "063d72c8e57313c9",
       "source_lang": "en",
       "target_lang": "es",
       "e2b_p50_reduction_percent": 42.093920624536786,
@@ -160,6 +169,7 @@
     },
     {
       "policy": "church",
+      "runtime_cohort": "063d72c8e57313c9",
       "source_lang": "es",
       "target_lang": "en",
       "e2b_p50_reduction_percent": 42.760973894957345,
@@ -168,6 +178,7 @@
     },
     {
       "policy": "none",
+      "runtime_cohort": "063d72c8e57313c9",
       "source_lang": "en",
       "target_lang": "es",
       "e2b_p50_reduction_percent": 38.49848460935241,
@@ -176,6 +187,7 @@
     },
     {
       "policy": "none",
+      "runtime_cohort": "063d72c8e57313c9",
       "source_lang": "es",
       "target_lang": "en",
       "e2b_p50_reduction_percent": 37.43025531089339,
@@ -183,6 +195,8 @@
       "e2b_chrf_delta": -2.6326455720661244
     }
   ],
+  "source_cohorts": {},
   "failures": [],
+  "excluded_runs": [],
   "caption_events": []
 }
