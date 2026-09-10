@@ -186,3 +186,10 @@ def test_release_rejects_version_mismatch():
 def test_mac_bundle_contains_installable_runtime(tmp_path):
     bundle = build_mac_bundle(ROOT, tmp_path, f"v{validate_version(ROOT)}")
     verify_artifact(bundle)
+
+
+def test_source_cli_version_does_not_report_an_old_installed_distribution():
+    from operator_app.cli import _resolve_version
+
+    with patch("operator_app.cli.metadata.version", return_value="2026.7.0.0"):
+        assert _resolve_version() == validate_version(ROOT)

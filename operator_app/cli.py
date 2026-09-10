@@ -33,17 +33,17 @@ from pathlib import Path
 
 
 def _resolve_version() -> str:
-    """Return the installed package version, falling back to pyproject if dev-installed."""
+    """Report this checkout's version, or installed metadata outside a checkout."""
+    import tomllib
+
+    pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+    if pyproject.is_file():
+        config = tomllib.loads(pyproject.read_text())
+        if config.get("project", {}).get("name") == "stark-translate":
+            return config["project"]["version"]
     try:
         return metadata.version("stark-translate")
     except metadata.PackageNotFoundError:
-        # Dev environment: read from pyproject.toml at the repo root.
-        here = Path(__file__).resolve().parent.parent
-        pyproject = here / "pyproject.toml"
-        if pyproject.exists():
-            for line in pyproject.read_text().splitlines():
-                if line.startswith("version = "):
-                    return line.split('"')[1]
         return "0.0.0+dev"
 
 
