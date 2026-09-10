@@ -103,6 +103,19 @@ def run_child(command: list[str], *, cwd: Path, stdout, timeout: float, env: dic
         raise
 
 
+def read_lifecycle(metrics_dir: Path, session_id: str) -> dict:
+    """Read matching source/peak metadata, without claiming completion from it."""
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", session_id):
+        return {}
+    try:
+        record = json.loads((metrics_dir / f"session_lifecycle_{session_id}.json").read_text())
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(record, dict) or record.get("session_id") != session_id or record.get("schema_version") != 1:
+        return {}
+    return record
+
+
 def _pct(xs: list[float], p: float) -> float:
     # Same nearest-rank helper as tools/benchmark_mlx_accel.py.
     if not xs:
@@ -376,6 +389,9 @@ def run_replay(
         "timeout_s": timeout_s,
         "timed_out": timed_out,
     }
+    lifecycle = read_lifecycle(metrics_dir, tag)
+    if lifecycle:
+        report["session_lifecycle"] = lifecycle
     metadata = metrics_dir / f"session_metadata_{tag}.json"
     if metadata.exists():
         report["session_metadata"] = json.loads(metadata.read_text())

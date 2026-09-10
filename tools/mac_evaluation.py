@@ -93,7 +93,23 @@ def _runtime_cohort(run: dict) -> str:
         "stt_backend": metadata.get("stt_backend"),
         "pipeline_arguments": _pipeline_arguments(run),
     }
+    startup_hash = _startup_pipeline_sha256(run)
+    if startup_hash:
+        payload["sources"]["dry_run_ab.py"] = startup_hash
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def _startup_pipeline_sha256(run: dict) -> str | None:
+    lifecycle = run.get("session_lifecycle", {})
+    value = lifecycle.get("pipeline_sha256")
+    if (
+        lifecycle.get("session_id") == run.get("session_id")
+        and lifecycle.get("schema_version") == 1
+        and isinstance(value, str)
+        and re.fullmatch(r"[0-9a-f]{64}", value)
+    ):
+        return value
+    return None
 
 
 def _clip_matches(run: dict, manifest: dict) -> bool:
@@ -739,7 +755,8 @@ def run_replays(args) -> None:
                 or _numeric(argument_value(old_extra, "--replay-speed", previous.get("replay_speed"))) != 1
                 or not (ROOT / "metrics" / f"ab_metrics_{tag}.csv").exists()
                 or previous.get("experiment_settings", {}) != experiment_settings
-                or _runtime_cohort(previous) != _runtime_cohort({**previous, "environment": run_environment})
+                or _runtime_cohort(previous)
+                != _runtime_cohort({**previous, "environment": run_environment, "session_lifecycle": {}})
             ):
                 raise ValueError(f"Replay configuration/source changed for {destination}; use a fresh tag")
             print(f"Already recorded compatible successful replay: {tag}", flush=True)
@@ -949,6 +966,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             )
     groups: dict[tuple, list] = defaultdict(list)
     event_groups: dict[tuple, dict[str, list]] = defaultdict(lambda: defaultdict(list))
+    source_cohorts = {}
     ack_clients: dict[tuple, set] = defaultdict(set)
     ack_coverage: dict[tuple, list] = defaultdict(list)
     counter_sessions: dict[tuple, dict] = defaultdict(dict)
@@ -977,6 +995,19 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
                 {"session_id": run.get("session_id"), "error": "Accelerated replay excluded from latency gate"}
             )
             continue
+        if not run.get("session_lifecycle"):
+            from tools.replay_bench import read_lifecycle
+
+            run["session_lifecycle"] = read_lifecycle(ROOT / "metrics", run["session_id"])
+        cohort = _runtime_cohort(run)
+        startup_hash = _startup_pipeline_sha256(run)
+        source_cohorts[cohort] = {
+            "pipeline_hash_basis": "startup_source_file" if startup_hash else "recorded_environment_snapshot",
+            "startup_pipeline_sha256": startup_hash,
+            "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+            if startup_hash
+            else "Historical snapshot timing may be after inference; identical loaded code is not proved.",
+        }
         group_key = (
             run["experiment"],
             run["size"],
@@ -1086,6 +1117,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             )
             | {"metrics": fields}
         )
+    report["source_cohorts"] = source_cohorts
     report["failures"] = failures
     report["excluded_runs"] = exclusions
     report["caption_events"] = [
@@ -1175,7 +1207,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         "",
         "## Real-time server latency",
         "",
-        "Speech end is estimated from captured VAD-positive frames. Server-final latency ends at payload readiness; it is not browser display latency. Clips, inference code/config cohorts, source types and endpoints are kept separate. Cohort IDs bind recorded source hashes, package versions and effective settings.",
+        "Speech end is estimated from captured VAD-positive frames. Server-final latency ends at payload readiness; it is not browser display latency. Clips, inference code/config cohorts, source types and endpoints are kept separate. Cohort IDs bind recorded source hashes, package versions and effective settings. A matching lifecycle source hash observed at startup takes precedence over later pipeline-file snapshots; this does not prove imported engine bytecode, and older snapshot timing may be ambiguous.",
         "",
         "| Experiment | Model | Clip / cohort | Language/source | Endpoint | n | p50 ms | p95 ms |",
         "|---|---|---|---|---|---:|---:|---:|",

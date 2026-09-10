@@ -498,3 +498,20 @@ def test_experiment_counters_use_latest_session_summary(replay_case, tmp_path):
     events = evaluation.report_results(inputs, tmp_path / "report", manifest)["caption_events"][0]
     assert events["latency_experiment_counters"] == {"warmup_requested": 4, "warmup_executed": 0}
     assert set(events["counter_sessions"]) == {"session"}
+
+
+def test_startup_pipeline_hash_overrides_later_source_snapshot(replay_case, tmp_path):
+    manifest, inputs, metrics, run = replay_case
+    lifecycle = {"schema_version": 1, "session_id": "session", "pipeline_sha256": "a" * 64}
+    evaluation.write_json(metrics / "session_lifecycle_session.json", lifecycle)
+    original_hash = evaluation._runtime_cohort({**run, "session_lifecycle": lifecycle})
+    changed = {**run, "environment": {"source_sha256": {"dry_run_ab.py": "changed after startup"}}}
+    assert evaluation._runtime_cohort({**changed, "session_lifecycle": lifecycle}) == original_hash
+    assert (
+        evaluation._runtime_cohort({**changed, "session_lifecycle": {**lifecycle, "session_id": "other"}})
+        != original_hash
+    )
+    result = evaluation.report_results(inputs, tmp_path / "report", manifest)
+    assert result["source_cohorts"][original_hash]["pipeline_hash_basis"] == "startup_source_file"
+    assert result["source_cohorts"][original_hash]["startup_pipeline_sha256"] == "a" * 64
+    assert "session_lifecycle" not in json.loads((inputs / "replay.json").read_text())
