@@ -13,7 +13,7 @@ touches the MLX GPU pool used by STT/translation.
 
 | Feature | Module(s) | How it is reached today | Certification |
 |---------|-----------|-------------------------|---------------|
-| Live verse highlights | `extract_verses.py` (`VerseExtractor`) | `GET /api/features/verses` tails the session CSV every few seconds (regex only, inline) | Works in the operator rehearsal (`docs/evaluation/mac_v2026_14_rehearsal.md`); no LLM involved |
+| Live verse highlights | `extract_verses.py` (`VerseExtractor`) | `GET /api/features/verses` tails the session CSV every few seconds (regex only, inline) | Workflow exercised in the operator rehearsal; parsing safety has recorded-fragment regressions. Spoken-reference accuracy is not certified; no LLM involved |
 | Post-session summary | `summarize_sermon.py` | `POST /api/features/summary` spawns the script out-of-process against the finished CSV; `GET /api/features/summary/{task_id}` polls | Runs on Gemma 4 E4B OptiQ by default (`settings.translation.mlx_model_gemma4_e4b`); output quality not human-reviewed |
 | Offline diarization | `diarize.py` | Batch CLI over a WAV or a `stark_data/live_sessions/<id>/` directory (pyannote 3.1) | Historical; needs HF token and pyannote agreement |
 | Live diarization (9.6.1 / #133) | `live_diarize.py`, `rolling_buffer.py`, `speaker_labels.py` | `dry_run_ab.py --diarize [--diarize-mode embed\|pyannote] [--diarize-interval-s]`; daemon writes `metrics/diarization_<session>.jsonl`, pipeline attaches `speaker` to finals/CSV/JSONL/WebSocket | **Implemented, gate not run.** Issue acceptance needs a two-speaker dry run with distinct labels and final p95 within +50 ms; no natural two-speaker clip exists yet |
@@ -45,11 +45,32 @@ clustering) have no model imports and are unit-tested
 
 ## Verse extraction
 
-Two regex passes — explicit citations (`Romans 8:28`) and spoken forms (`turn to
-Romans chapter eight`, bare `verse 28` resolved against the last book/chapter) — over
-all 66 book-name variants. Input: pipeline CSV or diarized JSONL. Unit tests:
-`tests/test_verse_extraction.py`. Verse pairs for training come from
-`tools/rebuild_verse_pairs.py`, not from this extractor.
+[`extract_verses.py`](./extract_verses.py) recognizes English-form references such as
+`Romans 8:28`, `Luke twenty three and verse thirty two`, and contextual `verse 28`.
+Spaced and hyphenated compound numbers are matched whole, without backtracking from
+`twenty three` to 20:3. Pattern priority resolves overlaps; accepted matches and book
+mentions update context in original text order. An explicit standalone book mention
+can establish pending context, but changing books never carries the old chapter.
+Hymn/stanza markers clear Bible context. Recognized unfinished number/reference forms, ambiguous
+numbered books and unsupported verse lists are omitted rather than completed by guesswork.
+
+[`bible_reference_bounds.py`](./bible_reference_bounds.py) checks structural bounds
+before reference emission or chapter-context commit. Its metadata-only table covers
+66 books and 1,189 chapters, derived from the existing public-domain
+`bible_data/scrollmapper/formats/sqlite/KJV.db`, SHA-256
+`c208b439188880c442dd77bef936926487d98ef101e11d65759b283368077234`.
+The installed extractor imports this bundled Python module relative to its package;
+no database or repository working directory is needed at runtime. Valid KJV bounds
+do not establish that the reference was spoken or correctly transcribed.
+
+Input remains pipeline CSV or diarized JSONL; original predictions are not rewritten.
+The CSV's historical `english` field is read as supplied, so Spanish-source sessions
+do not gain Spanish reference grammar from the language-direction switch. Other
+versification systems are not implemented. Tests:
+[`test_verse_extraction.py`](../tests/test_verse_extraction.py) and
+[`test_verse_safety.py`](../tests/test_verse_safety.py), including actual recorded
+fragments, the real operator watcher, and imports outside the checkout. Training
+verse pairs still come from `tools/rebuild_verse_pairs.py`, not this extractor.
 
 ## Sermon summary
 

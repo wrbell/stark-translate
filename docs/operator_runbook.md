@@ -60,8 +60,9 @@ one actual audience display. The preview is not proof of projector or phone outp
 - **Switch to Spanish speaker** (or English) restarts the pipeline in the other
   direction. Wait through loading and test the first sentence. The new direction
   gets a new session identity; old captions and correction records stay separate.
-- **Bible references heard** shows detected verses. Treat detection as an aid;
-  confirm the passage before presenting it as authoritative.
+- **Bible references heard** recognizes English references such as “Isaiah fifty
+  three, verse eleven.” Hymn verse numbers and unclear references may be omitted.
+  Confirm the passage before presenting it to the audience.
 - Leave technical controls in **Advanced** to the setup owner. Changing a backend
   or profile in the middle of an event can require a new model load.
 
