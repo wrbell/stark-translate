@@ -93,3 +93,26 @@ def test_p95_is_explicit_nearest_rank_for_tail_guard():
     result = fixed_span_delivery(anchors, [final(0, 1000, 1500), final(2000, 3000, 4130)], sample_rate=1000)
     assert result["p95_ms"] == 1130
     assert "nearest-rank" in result["percentile_method"]
+
+
+def test_endpoint_categories_remain_separate_and_eof_has_no_latency():
+    anchors = [
+        {
+            "id": str(i),
+            "sample_start": i * 2000,
+            "sample_end": i * 2000 + 1000,
+            "speech_end_sample": i * 2000 + 1000,
+            "endpoint_reason": reason,
+        }
+        for i, reason in enumerate(("silence", "max_duration", "eof"))
+    ]
+    result = fixed_span_delivery(
+        anchors,
+        [final(0, 1000, 1500), final(2000, 3000, 4130), final(4000, 5000, 8000)],
+        sample_rate=1000,
+    )
+    categories = result["by_opening_endpoint_reason"]
+    assert categories["silence"]["p50_ms"] == 500
+    assert categories["max_duration"]["p50_ms"] == 1130
+    assert categories["eof"] == {"anchors": 1, "eligible": 0, "n": 0, "p50_ms": None, "p95_ms": None}
+    assert result["n"] == 2

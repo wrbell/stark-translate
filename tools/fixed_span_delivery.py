@@ -87,6 +87,7 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
         results.append(
             {
                 "anchor_id": anchor["id"],
+                "endpoint_reason": anchor.get("endpoint_reason"),
                 "sample_start": start,
                 "sample_end": end,
                 "speech_end_sample": speech_end,
@@ -100,6 +101,19 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
         )
     values = sorted(r["speech_end_to_span_final_ms"] for r in results if r["speech_end_to_span_final_ms"] is not None)
     p95 = values[math.ceil(len(values) * 0.95) - 1] if values else None
+    by_endpoint = {}
+    for reason in sorted({r["endpoint_reason"] or "unknown" for r in results}):
+        rows = [r for r in results if (r["endpoint_reason"] or "unknown") == reason]
+        measured = sorted(
+            r["speech_end_to_span_final_ms"] for r in rows if r["speech_end_to_span_final_ms"] is not None
+        )
+        by_endpoint[reason] = {
+            "anchors": len(rows),
+            "eligible": sum(r["eligible"] for r in rows),
+            "n": len(measured),
+            "p50_ms": statistics.median(measured) if measured else None,
+            "p95_ms": measured[math.ceil(len(measured) * 0.95) - 1] if measured else None,
+        }
     return {
         "schema_version": 1,
         "metric": "fixed_vad_positive_source_server_delivery" if masked else "fixed_source_span_server_delivery",
@@ -112,6 +126,7 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
         ),
         "replay_origin_at_ms": origin,
         "anchors": results,
+        "by_opening_endpoint_reason": by_endpoint,
         "n": len(values),
         "p50_ms": statistics.median(values) if values else None,
         "p95_ms": p95,
