@@ -63,6 +63,7 @@
   }
 
   // ---- preflight ----
+  let preflightRequest = 0;
   function renderChecks(payload) {
     checksEl.innerHTML = "";
     for (const c of payload.checks) {
@@ -89,15 +90,16 @@
   }
 
   async function refreshPreflight() {
+    const request = ++preflightRequest;
     try {
       const selected = readForm();
       const query = new URLSearchParams({backend: selected.backend, lang: selected.lang,
         tts: String(selected.tts), diarize: String(selected.diarize)});
       if (selected.mic_device != null) query.set("input_device", String(selected.mic_device));
       const data = await getJson(`/api/preflight?${query}`);
-      renderChecks(data);
+      if (request === preflightRequest) renderChecks(data);
     } catch (e) {
-      preflightMetaEl.textContent = `preflight error: ${e.message}`;
+      if (request === preflightRequest) preflightMetaEl.textContent = `preflight error: ${e.message}`;
     }
   }
 
@@ -193,22 +195,48 @@
   }
 
   // ---- session status ----
-  function renderStatus(snap) {
+  const languageSelect = form.elements.namedItem("lang");
+  const activeStates = ["starting", "running", "paused", "stopping"];
+  let statusSeen = false;
+  let idleLanguageEdited = false;
+  let statusRenderRevision = 0;
+  languageSelect.addEventListener("change", () => {
+    if (!activeStates.includes(currentState)) idleLanguageEdited = true;
+  });
+
+  function renderStatus(snap, {forcePreflight = false} = {}) {
+    ++statusRenderRevision;
+    const wasActive = activeStates.includes(currentState);
     currentState = snap.state || "idle";
+    const isActive = activeStates.includes(currentState);
+    const confirmedLang = snap.config && snap.config.lang;
+    let languageChanged = false;
+    // Live status owns the direction; a volunteer's next-session choice owns
+    // it while idle. Also recover the previous direction on an initial reload.
+    if ((isActive || wasActive || (!statusSeen && !idleLanguageEdited)) && ["en", "es"].includes(confirmedLang)) {
+      languageChanged = languageSelect.value !== confirmedLang;
+      languageSelect.value = confirmedLang;
+      idleLanguageEdited = false;
+    }
+    statusSeen = true;
+    languageSelect.disabled = isActive;
     setStatePill(currentState);
     updateButtonsForState(currentState);
     statusDetailEl.textContent = JSON.stringify(snap, null, 2);
     const summaryControl = document.getElementById("summary-btn");
     if (summaryControl) summaryControl.disabled = ["starting", "running", "paused", "stopping"].includes(currentState);
     window.dispatchEvent(new CustomEvent("operator-session", {detail: snap}));
+    if (languageChanged || forcePreflight) refreshPreflight();
   }
 
   async function refreshStatus() {
+    const revision = statusRenderRevision;
     try {
       const snap = await getJson("/api/session/status");
-      renderStatus(snap);
+      // A control response may have confirmed a newer direction meanwhile.
+      if (revision === statusRenderRevision) renderStatus(snap);
     } catch (e) {
-      statusDetailEl.textContent = `status error: ${e.message}`;
+      if (revision === statusRenderRevision) statusDetailEl.textContent = `status error: ${e.message}`;
     }
   }
 
@@ -216,7 +244,7 @@
   function readForm() {
     const fd = new FormData(form);
     const body = {
-      lang: fd.get("lang"),
+      lang: languageSelect.value, // Disabled during a session, so absent from FormData.
       backend: fd.get("backend"),
       engine: fd.get("engine"),
       tts: fd.get("tts") === "on",
@@ -263,7 +291,7 @@
     btn.disabled = true;
     try {
       const snap = await postJson(url, body);
-      renderStatus(snap);
+      renderStatus(snap, {forcePreflight: url === "/api/control/lang_flip"});
     } catch (e) {
       statusDetailEl.textContent = `${url} error: ${e.message}`;
     }
