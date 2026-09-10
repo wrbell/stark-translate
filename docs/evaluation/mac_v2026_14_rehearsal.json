@@ -1,0 +1,33 @@
+{
+  "usage": "evaluation_only",
+  "path": ".cache/mac-roadmap/rehearsal_en.wav",
+  "sha256": "c54638487a11cd0e65e8e14722859835a9760d17b01fe4c7f65eb48267266abb",
+  "language": "en",
+  "duration_s": 68,
+  "conditions": [
+    "hymn excerpt (unreviewed)",
+    "silence",
+    "continuous sermon speech",
+    "silence"
+  ],
+  "sections": [
+    {
+      "source": "stark_data/raw/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "offset_s": 600,
+      "duration_s": 15
+    },
+    {
+      "silence_s": 4
+    },
+    {
+      "source": "stark_data/replay/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "source_sha256": "db11fb4c96131390e178e59e29f5d47f550a0e68047e3401f898094d40babd3f",
+      "offset_s": 0,
+      "duration_s": 45
+    },
+    {
+      "silence_s": 4
+    }
+  ],
+  "limits": "Controlled file rehearsal. Natural Spanish, two-speaker and physical audio-device gates remain separate."
+}
