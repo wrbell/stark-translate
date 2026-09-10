@@ -15,12 +15,12 @@ import importlib.metadata
 import json
 import os
 import shutil
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit, urlunsplit
 
 from engines.model_paths import resolve_backend, resolve_marian_ct2, resolve_model_path, resolve_piper_voice
+from operator_app.http_requests import HTTPPolicyError, open_http, read_bounded, validate_http_url
 
 CheckStatus = Literal["pass", "warn", "fail"]
 Check = dict
@@ -199,18 +199,25 @@ def check_adapter_manifest(project_root: Path) -> Check:
 
 def check_llamacpp_server(url: str) -> Check:
     """Probe the configured llama-server URL."""
-    health_url = f"{url.rstrip('/')}/health"
     try:
-        with urllib.request.urlopen(health_url, timeout=2) as resp:
-            body = resp.read().decode("utf-8", errors="replace")
-    except urllib.error.URLError as exc:
+        parsed = urlsplit(validate_http_url(url))
+        health_url = urlunsplit(parsed._replace(path=parsed.path.rstrip("/") + "/health"))
+        with open_http(health_url, timeout=2) as resp:
+            body = read_bounded(resp, limit=16 * 1024).decode("utf-8", errors="replace")
+    except HTTPPolicyError as exc:
+        return _check("llama-server", "fail", f"Invalid llama-server HTTP configuration or response: {exc}")
+    except OSError as exc:
         return _check(
             "llama-server",
             "warn",
             f"Not reachable at {url} ({exc.reason if hasattr(exc, 'reason') else exc}) — "
             "pipeline will use HF NF4 fallback. Start with ./start_server.sh",
         )
-    if '"status":"ok"' in body:
+    try:
+        healthy = json.loads(body).get("status") == "ok"
+    except (ValueError, AttributeError):
+        healthy = False
+    if healthy:
         return _check("llama-server", "pass", f"Healthy at {url}")
     return _check("llama-server", "warn", f"Reachable but unhealthy at {url}: {body[:80]}")
 

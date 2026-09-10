@@ -56,7 +56,8 @@ def _policy(bind_host: str, extra_hosts: str) -> tuple[bool, frozenset[str]]:
     if any("*" in host or "/" in host or "@" in host for host in allowed):
         raise ValueError("STARK_OPERATOR_ALLOWED_HOSTS must list exact hostnames or IP addresses, without ports")
     if not local_only:
-        if bind_host not in {"0.0.0.0", "::"}:
+        # Compare an explicitly configured bind address; no socket is opened here.
+        if bind_host not in {"0.0.0.0", "::"}:  # nosec B104
             allowed.add(bind_host.lower().rstrip("."))
         # Never resolve arbitrary request hosts: that would permit DNS rebinding.
         # Custom proxy/DNS aliases require STARK_OPERATOR_ALLOWED_HOSTS explicitly.

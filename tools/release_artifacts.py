@@ -47,6 +47,7 @@ RUNTIME_REQUIRED = {
     "operator_app/support.py",
     "operator_app/work_lease.py",
     "operator_app/security.py",
+    "operator_app/http_requests.py",
     "stark_translate/profiles.py",
     "displays/operator/index.html",
     "displays/operator/review.js",

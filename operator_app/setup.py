@@ -22,12 +22,14 @@ import hashlib
 import json
 import logging
 import os
+import re
 import sys
 import urllib.request
 from pathlib import Path
 from typing import Any
 
 from engines.model_paths import default_models_dir, resolve_backend, resolve_model_path
+from operator_app.http_requests import open_http, validate_http_url
 
 logger = logging.getLogger("stark-translate.setup")
 
@@ -120,12 +122,15 @@ def _download_direct(url: str, target: Path, expected_size: int | None) -> None:
     Resumes from a ``.partial`` sidecar if present. Honors HTTP Range so
     interrupted 5 GB downloads on flaky church Wi-Fi don't restart from zero.
     """
+    validate_http_url(url)
     target.parent.mkdir(parents=True, exist_ok=True)
     partial = target.with_suffix(target.suffix + ".partial")
 
     start_byte = partial.stat().st_size if partial.exists() else 0
-    if expected_size and start_byte >= expected_size:
-        partial.rename(target)
+    if expected_size is not None and start_byte > expected_size:
+        raise ValueError("Partial model exceeds its expected size; remove the partial and retry")
+    if expected_size is not None and start_byte == expected_size and partial.exists():
+        partial.replace(target)
         return
 
     req = urllib.request.Request(url)
@@ -133,32 +138,59 @@ def _download_direct(url: str, target: Path, expected_size: int | None) -> None:
         req.add_header("Range", f"bytes={start_byte}-")
         logger.info("resuming %s from byte %d", target.name, start_byte)
 
-    try:
-        with urllib.request.urlopen(req) as resp:
-            total = expected_size or int(resp.headers.get("Content-Length") or 0) + start_byte
+    with open_http(req, timeout=30) as resp:
+        length = resp.headers.get("Content-Length")
+        response_size = int(length) if length is not None else None
+        if response_size is not None and response_size < 0:
+            raise ValueError("Invalid negative model response Content-Length")
+        total = expected_size
+        if resp.status == 200:
+            # Servers may ignore Range. Replace the partial from byte zero;
+            # appending a full response would silently duplicate its prefix.
+            start_byte = 0
+            mode = "wb"
+            if total is not None and response_size is not None and response_size != total:
+                raise ValueError("Model response size differs from the expected full file")
+            total = total if total is not None else response_size
+        elif resp.status == 206:
+            match = re.fullmatch(r"bytes (\d+)-(\d+)/(\d+)", resp.headers.get("Content-Range", ""))
+            if not match:
+                raise ValueError("Resumed model response requires an explicit Content-Range")
+            first, last, remote_total = map(int, match.groups())
+            if first != start_byte or not first <= last < remote_total:
+                raise ValueError("Resumed model Content-Range does not match the requested offset")
+            if total is not None and remote_total != total:
+                raise ValueError("Resumed model total differs from its expected size")
+            total = remote_total
+            range_size = last - first + 1
+            if response_size is not None and response_size != range_size:
+                raise ValueError("Resumed model Content-Length differs from its range")
+            response_size = range_size
             mode = "ab" if start_byte else "wb"
-            with partial.open(mode) as f:
-                downloaded = start_byte
-                last_pct = -1
-                while True:
-                    chunk = resp.read(1 << 20)  # 1 MiB
-                    if not chunk:
-                        break
-                    f.write(chunk)
-                    downloaded += len(chunk)
-                    if total:
-                        pct = int(downloaded * 100 / total)
-                        if pct != last_pct and pct % 5 == 0:
-                            logger.info("  %s: %d%% (%d / %d MiB)", target.name, pct, downloaded >> 20, total >> 20)
-                            last_pct = pct
-    except urllib.error.HTTPError as exc:
-        if exc.code == 416 and partial.exists() and expected_size and partial.stat().st_size >= expected_size:
-            # Already complete — server rejected the range request.
-            pass
         else:
-            raise
+            raise ValueError(f"Unexpected HTTP {resp.status} for a model download")
+        with partial.open(mode) as f:
+            downloaded, received, last_pct = start_byte, 0, -1
+            while True:
+                chunk = resp.read(1 << 20)
+                if not chunk:
+                    break
+                if (total is not None and downloaded + len(chunk) > total) or (
+                    response_size is not None and received + len(chunk) > response_size
+                ):
+                    raise ValueError("Model response exceeds its declared size")
+                f.write(chunk)
+                downloaded += len(chunk)
+                received += len(chunk)
+                if total:
+                    pct = int(downloaded * 100 / total)
+                    if pct != last_pct and pct % 5 == 0:
+                        logger.info("  %s: %d%% (%d / %d MiB)", target.name, pct, downloaded >> 20, total >> 20)
+                        last_pct = pct
+            if (response_size is not None and received != response_size) or (total is not None and downloaded != total):
+                raise ValueError("Model response is incomplete; partial retained for retry")
 
-    partial.rename(target)
+    partial.replace(target)
 
 
 # -- HF snapshot wrapper ------------------------------------------------------
@@ -251,9 +283,10 @@ def _head_url(url: str, timeout_s: float) -> tuple[str, str]:
     HF Hub blocks HEAD for some asset URLs but accepts them with a Range
     header that asks for byte 0; we fall back to that on 405.
     """
-    req = urllib.request.Request(url, method="HEAD")
     try:
-        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+        validate_http_url(url)
+        req = urllib.request.Request(url, method="HEAD")
+        with open_http(req, timeout=timeout_s) as resp:
             return ("pass", f"HTTP {resp.status}")
     except urllib.error.HTTPError as exc:
         if exc.code == 405:
@@ -261,7 +294,7 @@ def _head_url(url: str, timeout_s: float) -> tuple[str, str]:
             try:
                 req2 = urllib.request.Request(url)
                 req2.add_header("Range", "bytes=0-0")
-                with urllib.request.urlopen(req2, timeout=timeout_s) as resp:
+                with open_http(req2, timeout=timeout_s) as resp:
                     if resp.status in (200, 206):
                         return ("pass", f"HTTP {resp.status} (range)")
                     return ("fail", f"HTTP {resp.status}")

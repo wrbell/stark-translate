@@ -59,7 +59,8 @@ def cmd_operator(args: argparse.Namespace) -> int:
     from operator_app.security import configure_operator_host
 
     configure_operator_host(args.host)
-    browser_host = "localhost" if args.host in {"0.0.0.0", "::"} else args.host
+    # Select a usable browser address; this comparison does not bind a socket.
+    browser_host = "localhost" if args.host in {"0.0.0.0", "::"} else args.host  # nosec B104
     if ":" in browser_host:
         browser_host = f"[{browser_host}]"
     url = f"http://{browser_host}:{args.port}/operator/"
