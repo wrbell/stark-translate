@@ -110,6 +110,7 @@ PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
 _session_stop_requested = False
 _clean_session_shutdown = False
 _session_model_ids = {}
+_session_main_task = None
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
@@ -4128,10 +4129,11 @@ async def main_async(args):
     global _marian_engine
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
-    global _RUN_AB, _clean_session_shutdown, _session_model_ids
+    global _RUN_AB, _clean_session_shutdown, _session_model_ids, _session_main_task
 
     _RUN_AB = args.run_ab
     _clean_session_shutdown = False
+    _session_main_task = asyncio.current_task()
 
     spec_info = ""
     if args.run_ab and BACKEND == "mlx":
@@ -4755,7 +4757,7 @@ def main():
     import hashlib
     from pathlib import Path
 
-    from tools.session_lifecycle import finish_session, start_session
+    from tools.session_lifecycle import finish_session, request_graceful_stop, start_session
 
     try:
         git_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=Path(__file__).parent, text=True).strip()
@@ -4888,6 +4890,8 @@ def main():
         global _session_stop_requested
         _session_stop_requested = True
         print("\n\nStopping...")
+        if request_graceful_stop(_session_main_task):
+            return
         print_summary()
         sys.exit(0)
 
@@ -4899,6 +4903,9 @@ def main():
         completed = True
     except KeyboardInterrupt:
         print_summary()
+    except asyncio.CancelledError:
+        if not _session_stop_requested:
+            raise
     finally:
         # A completed marker is export evidence: all queued diagnostics must be
         # on disk, and the pipeline must have drained without an abnormal exit.

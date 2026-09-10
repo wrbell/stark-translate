@@ -223,12 +223,22 @@ def require_completed(root: Path, session: str) -> None:
         raise SessionNotComplete(status["reason"])
 
 
+def request_graceful_stop(task) -> bool:
+    """Cancel only the main task so its finally block can drain worker tasks."""
+    if task is None or task.done():
+        return False
+    task.get_loop().call_soon_threadsafe(task.cancel)
+    return True
+
+
 def migrate_completion(root: Path, session: str, report_path: Path) -> dict:
     """Explicitly recover a legacy replay from its successful subprocess report."""
     prior = _read(root, session)
     if prior or _path(root, session, "session_lifecycle", "json").exists():
         raise SessionNotComplete("A lifecycle marker already exists; migration only accepts legacy sessions")
     report = json.loads(report_path.read_text())
+    if not isinstance(report, dict):
+        raise SessionNotComplete("Migration requires a successful subprocess report object")
     command = report.get("command", [])
     valid_command = isinstance(command, list) and all(isinstance(part, str) for part in command)
     valid_command = valid_command and any(Path(part).name == "dry_run_ab.py" for part in command)
@@ -241,7 +251,8 @@ def migrate_completion(root: Path, session: str, report_path: Path) -> dict:
         report.get("session_id") != session
         or type(report.get("returncode")) is not int
         or report["returncode"] != 0
-        or report.get("error")
+        or "error" in report
+        or report.get("timed_out")
         or not valid_command
     ):
         raise SessionNotComplete("Migration requires a successful subprocess report for this exact replay session")
@@ -258,7 +269,7 @@ def migrate_completion(root: Path, session: str, report_path: Path) -> dict:
         "completion_source": "successful_subprocess_report_migration",
         "subprocess_report": {"path": str(report_path.resolve()), **_digest(report_path)},
         "diagnostics": _digest(diagnostics),
-        "git_sha": report.get("metadata", {}).get("git_sha"),
+        "git_sha": report.get("session_metadata", {}).get("git_sha"),
     }
     _write(_path(root, session, "session_lifecycle", "json"), data)
     return data

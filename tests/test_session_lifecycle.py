@@ -1,6 +1,7 @@
 """Completion evidence must come from a drained pipeline, never operator idleness."""
 
 import ast
+import asyncio
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -15,6 +16,7 @@ from tools.session_lifecycle import (
     finish_session,
     migrate_completion,
     require_completed,
+    request_graceful_stop,
     session_status,
     start_session,
 )
@@ -91,14 +93,23 @@ def test_explicit_migration_requires_matching_successful_subprocess(tmp_path):
         "session_id": "example_en",
         "command": ["python", "dry_run_ab.py", "--session-id", "example_en"],
         "returncode": 0,
+        "session_metadata": {"git_sha": "abc123"},
     }
-    for changed in ({"returncode": 1}, {"session_id": "other"}, {"command": ["python"]}, {"error": "failed"}):
+    for changed in (
+        {"returncode": 1},
+        {"session_id": "other"},
+        {"command": ["python"]},
+        {"error": "failed"},
+        {"error": ""},
+        {"timed_out": True},
+    ):
         path.write_text(json.dumps({**report, **changed}))
         with pytest.raises(SessionNotComplete, match="successful subprocess"):
             migrate_completion(tmp_path, "example_en", path)
     path.write_text(json.dumps(report))
     marker = migrate_completion(tmp_path, "example_en", path)
     assert marker["completion_source"] == "successful_subprocess_report_migration"
+    assert marker["git_sha"] == "abc123"
     require_completed(tmp_path, "example_en")
     with pytest.raises(SessionNotComplete, match="already exists"):
         migrate_completion(tmp_path, "example_en", path)
@@ -125,7 +136,7 @@ def test_pipeline_completion_waits_for_io_and_blocks_abnormal_exit(tmp_path, mon
     namespace = {
         "__file__": str(source),
         "subprocess": SimpleNamespace(check_output=lambda *args, **kwargs: "abc", CalledProcessError=RuntimeError),
-        "asyncio": SimpleNamespace(run=lambda result: result),
+        "asyncio": SimpleNamespace(run=lambda result: result, CancelledError=asyncio.CancelledError),
         "main_async": pipeline,
         "args": None,
         "SESSION_ID": "example_en",
@@ -215,3 +226,100 @@ def test_model_metadata_distinguishes_resolved_and_manifest_revisions(tmp_path, 
     assert result["manifest_revision"] == "b" * 40
     assert result["revision_source"] == "hf_snapshot_path"
     assert len(result["config_sha256"]) == 64
+
+
+@pytest.mark.parametrize("forced_stop", [False, True])
+def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(tmp_path, monkeypatch, forced_stop):
+    """Run the production signal handler/finally blocks with inert model stubs."""
+    import sys
+
+    source = Path(__file__).resolve().parents[1] / "dry_run_ab.py"
+    tree = ast.parse(source.read_text())
+    main = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main")
+    main_async = next(
+        node for node in tree.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "main_async"
+    )
+    signal_handler = next(
+        node for node in main.body if isinstance(node, ast.FunctionDef) and node.name == "signal_handler"
+    )
+    shutdown = next(
+        node for node in main_async.body if isinstance(node, ast.Try) and "await audio_loop()" in ast.unparse(node)
+    )
+    wrapper_start = next(
+        i for i, node in enumerate(main.body) if isinstance(node, ast.Try) and "asyncio.run(" in ast.unparse(node)
+    )
+    cleanup = ast.AsyncFunctionDef(
+        name="cleanup",
+        args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+        body=[ast.Global(names=["_clean_session_shutdown"]), shutdown],
+        decorator_list=[],
+    )
+    pool = ThreadPoolExecutor(max_workers=1)
+    monkeypatch.chdir(tmp_path)
+    events = []
+
+    async def done():
+        pass
+
+    async def audio_loop():
+        asyncio.get_running_loop().call_soon(namespace["signal_handler"], 2, None)
+        await asyncio.Event().wait()
+
+    def summary():
+        events.append("summary")
+        pool.submit(_diagnostics, tmp_path)
+
+    async def pipeline(args):
+        namespace["_session_main_task"] = asyncio.current_task()
+        queue = asyncio.Queue()
+        namespace["_pipeline_chunk_queue"] = queue
+
+        async def coordinator():
+            assert await queue.get() is None
+            if forced_stop:
+                raise asyncio.CancelledError("forced stop while draining")
+            events.append("coordinator_drained")
+
+        namespace["pipeline_task"] = asyncio.create_task(coordinator())
+        namespace["rolling_task"] = asyncio.create_task(asyncio.sleep(30))
+        namespace["stream_task"] = asyncio.create_task(asyncio.sleep(30))
+        await namespace["cleanup"]()
+
+    namespace = {
+        "asyncio": asyncio,
+        "sys": sys,
+        "audio_loop": audio_loop,
+        "_session_stop_requested": False,
+        "_clean_session_shutdown": False,
+        "_session_main_task": None,
+        "request_graceful_stop": request_graceful_stop,
+        "_stream_token_queue": None,
+        "speaker_task": None,
+        "_marian_engine": None,
+        "_pytorch_pool": SimpleNamespace(shutdown=lambda **kwargs: None),
+        "_tts_pool": None,
+        "tts_engine": None,
+        "MULTIPROCESS": False,
+        "stop_diarize_daemon": lambda: None,
+        "print_summary": summary,
+        "ws_server": SimpleNamespace(close=lambda: None, wait_closed=done),
+        "tts_ws_server": None,
+        "main_async": pipeline,
+        "args": None,
+        "completed": False,
+        "_io_pool": pool,
+        "_session_model_ids": {},
+        "SESSION_ID": "example_en",
+        "lifecycle_root": tmp_path,
+        "lifecycle": start_session(tmp_path, "example_en"),
+        "finish_session": finish_session,
+    }
+    definitions = ast.fix_missing_locations(ast.Module(body=[signal_handler, cleanup], type_ignores=[]))
+    exec(compile(definitions, str(source), "exec"), namespace)
+    exec(compile(ast.Module(body=main.body[wrapper_start:], type_ignores=[]), str(source), "exec"), namespace)
+    if forced_stop:
+        assert session_status(tmp_path, "example_en")["status"] == "failed"
+        assert "summary" not in events
+    else:
+        require_completed(tmp_path, "example_en")
+        assert events == ["coordinator_drained", "summary"]
