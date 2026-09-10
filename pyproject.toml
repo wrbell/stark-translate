@@ -119,6 +119,7 @@ dev = [
     "vulture>=2.11",
     "httpx>=0.28",                        # for fastapi.testclient
     "build>=1.2",                         # python -m build
+    "pyyaml>=6.0",                       # parse production workflow contracts in tests
 ]
 
 # ---------------------------------------------------------------------------

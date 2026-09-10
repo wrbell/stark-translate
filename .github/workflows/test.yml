@@ -32,7 +32,7 @@ jobs:
         run: sudo apt-get -qq update && sudo apt-get -qq install -y libportaudio2
 
       - name: Install test dependencies
-        run: pip install pytest pytest-cov pydantic pydantic-settings numpy scipy jiwer psutil fastapi httpx openpyxl sounddevice websockets
+        run: pip install pytest pytest-cov pydantic pydantic-settings numpy scipy jiwer psutil fastapi httpx openpyxl sounddevice websockets pyyaml
 
       - name: Run tests
         run: >
