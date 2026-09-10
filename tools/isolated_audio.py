@@ -8,6 +8,7 @@ import subprocess
 import sys
 import threading
 import time
+from collections import deque
 from dataclasses import replace
 from types import SimpleNamespace
 
@@ -85,6 +86,11 @@ class IsolatedInputStream:
         self._last_frame = None
         self._started = None
         self._proc = self._reader = self._watcher = None
+        self.trace = None  # Optional bounded session trace; no PCM is recorded.
+        self._telemetry_lock = threading.Lock()
+        self._frames_received = self._gap_count = 0
+        self._max_pipe_age_ms = self._max_capture_age_ms = 0.0
+        self._source_gaps = deque(maxlen=32)
 
     def __enter__(self):
         # No native calls or wait for permission on the inference event loop.
@@ -108,6 +114,7 @@ class IsolatedInputStream:
         return bytes(result)
 
     def _read(self):
+        expected_sample = self.sample_offset
         try:
             while not self._stop.is_set():
                 size = struct.unpack("!I", self._bytes(4))[0]
@@ -119,6 +126,7 @@ class IsolatedInputStream:
                     raise AudioCaptureError("Invalid capture sample bounds")
                 samples = np.frombuffer(self._bytes(frames * channels * 4), dtype="float32").reshape(frames, channels)
                 self._last_frame = time.monotonic()
+                parsed_at = time.perf_counter()
                 newly_dropped = metadata["dropped"] - self.dropped_samples
                 self.dropped_samples = metadata["dropped"]
                 # perf_counter is a common host monotonic clock. Anchor the ADC
@@ -131,11 +139,50 @@ class IsolatedInputStream:
                     sample_rate=self.rate,
                 )
                 status = f"capture_overflow:{newly_dropped}" if newly_dropped else metadata["status"] or None
+                pipe_age_ms = max(0.0, (parsed_at - metadata["received"]) * 1000)
+                capture_age_ms = max(0.0, (parsed_at - stamp.end) * 1000)
+                with self._telemetry_lock:
+                    self._frames_received += 1
+                    self._max_pipe_age_ms = max(self._max_pipe_age_ms, pipe_age_ms)
+                    self._max_capture_age_ms = max(self._max_capture_age_ms, capture_age_ms)
+                    if stamp.sample_start > expected_sample:
+                        gap = {
+                            "sample_start": expected_sample,
+                            "sample_end": stamp.sample_start,
+                            "sample_rate": self.rate,
+                        }
+                        self._source_gaps.append(gap)
+                        self._gap_count += 1
+                        if self.trace is not None:
+                            self.trace.record("capture_pipe_gap", **gap)
+                    expected_sample = stamp.sample_end
+                if self.trace is not None:
+                    self.trace.record(
+                        "capture_pipe_received",
+                        sample_start=stamp.sample_start,
+                        sample_end=stamp.sample_end,
+                        sample_rate=self.rate,
+                        callback_received_at_ms=(metadata["received"] - self.trace.origin) * 1000,
+                        callback_to_pipe_ms=pipe_age_ms,
+                        capture_age_ms=capture_age_ms,
+                        upstream_dropped_samples=newly_dropped,
+                    )
                 self.callback(samples, frames, stamp, status)
         except Exception as exc:
             if not self._stop.is_set() and self.error is None:
                 self.error = exc if isinstance(exc, AudioCaptureError) else AudioCaptureError(type(exc).__name__)
                 self.finished.set()
+
+    def capture_snapshot(self):
+        with self._telemetry_lock:
+            return {
+                "frames_received": self._frames_received,
+                "upstream_dropped_samples": self.dropped_samples,
+                "max_callback_to_pipe_ms": self._max_pipe_age_ms,
+                "max_capture_age_ms": self._max_capture_age_ms,
+                "source_gaps": list(self._source_gaps),
+                "source_gaps_truncated": self._gap_count > len(self._source_gaps),
+            }
 
     def _watch(self):
         while not self._stop.wait(0.1) and not self.finished.is_set():

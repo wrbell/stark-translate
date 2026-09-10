@@ -82,7 +82,7 @@ import websockets
 
 from settings import settings
 from stark_translate.profiles import apply_profile, resolve_profile
-from tools.capture_handoff import CaptureHandoff
+from tools.capture_handoff import CaptureHandoff, CaptureTransportSummary
 from tools.final_queue_pressure import FinalQueuePressure
 from tools.isolated_audio import AudioCaptureError
 from tools.latency_experiments import LatencyExperiments
@@ -149,6 +149,7 @@ _session_main_task = None
 _health = None
 _RECORD_AUDIO = True
 _capture_handoff = None
+_capture_transport = CaptureTransportSummary()
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
@@ -4530,6 +4531,7 @@ def print_summary():
             "latency_experiment_configuration": _latency.as_dict(),
             "latency_trace": _latency_trace.snapshot(),
             "final_queue_pressure": _final_queue_pressure.snapshot(),
+            "capture_transport": _capture_transport.snapshot(),
             "source_coverage": _source_coverage.snapshot(),
             "replay_client_wait": _replay_client_wait.snapshot(),
         },
@@ -4666,7 +4668,13 @@ async def audio_loop():
                 audio_callback,
                 lambda: not audio_queue.full(),
                 capture_dropped,
-                wait_for_space=os.environ.get("STARK_AUDIO_SOURCE") == "file",
+                trace=_latency_trace,
+                frame_metadata=lambda item: {
+                    "sample_start": item[2].sample_start,
+                    "sample_end": item[2].sample_end,
+                    "sample_rate": item[2].sample_rate,
+                    "capture_end_perf_counter_s": item[2].end,
+                },
             )
 
             def stream_callback(indata, frames, time_info, status, _handoff=_capture_handoff, _input_rate=input_rate):
@@ -4695,12 +4703,23 @@ async def audio_loop():
             )
 
             is_replay = isinstance(stream, FileAudioStream)
+            from tools.isolated_audio import IsolatedInputStream
+
+            # These callbacks run on ordinary transport-reader threads. They
+            # may wait for bounded handoff space; the native child callback
+            # remains nonblocking and still reports real upstream overflows.
+            _capture_handoff.wait_for_space = is_replay or isinstance(stream, IsolatedInputStream)
+            if isinstance(stream, IsolatedInputStream):
+                stream.trace = _latency_trace
             if is_replay:
                 replay_stream = stream
                 stream.resume_from(replay_consumed_samples, callback=stream_callback)
             if hasattr(stream, "sample_offset"):
                 stream.sample_offset = sample_clock.next_sample
             with ExitStack() as capture_context:
+                # Register first: snapshot only after the handoff closes and
+                # the native child/reader have stopped, including pause/error.
+                capture_context.callback(_capture_transport.record, stream, _capture_handoff)
                 capture_context.enter_context(stream)
                 capture_context.enter_context(_capture_handoff)
                 if _health is not None:
@@ -4787,6 +4806,9 @@ async def audio_loop():
                         "audio_dequeued",
                         capture_age_ms=milliseconds(time.perf_counter(), frame_stamp.end),
                         queue_depth=audio_queue.qsize(),
+                        sample_start=frame_stamp.sample_start,
+                        sample_end=frame_stamp.sample_end,
+                        sample_rate=frame_stamp.sample_rate,
                     )
                     vad_started = time.perf_counter()
                     if _vad_pool is not None:
@@ -5920,10 +5942,11 @@ def main():
             args.run_ab = False
 
     global _latency, _latency_trace, _stt_scheduler, _marian_memo, _vad_pool, _source_coverage, _partial_runtime
-    global _final_queue_pressure
+    global _final_queue_pressure, _capture_transport
     _latency = LatencyExperiments.from_env()
     _latency_trace = LatencyTrace(_latency.trace, origin=_SESSION_CLOCK_ORIGIN)
     _final_queue_pressure = FinalQueuePressure(origin=_SESSION_CLOCK_ORIGIN, on_event=_latency_trace.record)
+    _capture_transport = CaptureTransportSummary()
     _source_coverage = SourceCoverage()
     _partial_runtime = PartialRuntimePredictor()
     _marian_memo = ExactTextMemo(_latency.marian_memo)
