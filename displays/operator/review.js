@@ -4,7 +4,7 @@
   let sessions = [], records = [], current = null, dirty = false, busy = false;
   const activeStates = new Set(["starting", "running", "paused", "stopping"]);
   let activeSession = null, pageOffset = 0, staleDraft = null, saveConflict = false;
-  let editVersion = 0, refreshVersion = 0;
+  let editVersion = 0, refreshVersion = 0, exportVersion = 0;
   let selection = {};
   try { selection = JSON.parse(localStorage.getItem("stark-review-selection") || "{}"); } catch (e) { /* optional */ }
   for (const id of ["pending", "flagged"]) {
@@ -20,6 +20,11 @@
     const session = sessions.find(item => item.session === el("session").value);
     el("export").disabled = !session?.exportable || session.session === activeSession;
     el("export").title = session?.reason || "";
+  }
+  function invalidateDownload() {
+    exportVersion += 1;
+    el("download").hidden = true;
+    el("download").removeAttribute("href");
   }
   const message = text => { el("status").textContent = text; };
   const draftKey = () => current ? `stark-review-${current.session}-${current.chunk_id}` : "";
@@ -52,24 +57,32 @@
     el("source-label").textContent = source === "en" ? "English transcript" : source === "es" ? "Spanish transcript" : "Source transcript";
     el("target-label").textContent = source === "en" ? "Spanish translation" : source === "es" ? "English translation" : "Translation";
   }
-  function render(record) {
-    current = record; dirty = false; saveConflict = false; staleDraft = null;
-    el("restore").hidden = true;
-    el("editor").hidden = !record;
-    rememberSelection();
-    if (!record) return;
-    populate(record);
+  function renderMetadata(record, resetAudio = false) {
     const context = record.context || {};
     el("context").textContent = `Before: ${context.previous || "—"}\nAfter: ${context.next || "—"}`;
     el("original").textContent = JSON.stringify({transcript: record.source_text,
       gemma: record.translation_text, marian: record.spanish_marian,
       priority: record.review_priority, confidence: record.stt_confidence, qe: record.qe_a,
       homophones: record.homophone_flags, near_misses: record.near_miss_flags}, null, 2);
-    el("audio").pause();
-    el("audio").removeAttribute("src");
-    el("audio").hidden = !record.audio_available;
-    if (record.audio_available) el("audio").src = `/api/review/${encodeURIComponent(record.session)}/segments/${record.chunk_id}/audio`;
+    const audioChanged = !current || current.audio_available !== record.audio_available;
+    if (resetAudio || (audioChanged && el("audio").paused)) {
+      if (resetAudio) el("audio").pause();
+      el("audio").removeAttribute("src");
+      el("audio").hidden = !record.audio_available;
+      if (record.audio_available) el("audio").src = `/api/review/${encodeURIComponent(record.session)}/segments/${record.chunk_id}/audio`;
+    }
     el("audio-status").textContent = record.audio_available ? "" : "Audio unavailable. Text review is still available; STT audio export will skip this segment.";
+  }
+  function render(record) {
+    if (current && (current.session !== record?.session ||
+        (current.chunk_id === record?.chunk_id && current.revision !== record.revision))) invalidateDownload();
+    dirty = false; saveConflict = false; staleDraft = null;
+    el("restore").hidden = true;
+    el("editor").hidden = !record;
+    if (record) { populate(record); renderMetadata(record, true); }
+    current = record;
+    rememberSelection();
+    if (!record) return;
     try {
       const saved = JSON.parse(localStorage.getItem(draftKey()) || "null");
       if (saved) {
@@ -83,6 +96,7 @@
   }
   function changed() {
     if (!current) return;
+    invalidateDownload();
     dirty = true; editVersion += 1; labels();
     try { localStorage.setItem(draftKey(), JSON.stringify(values())); } catch (e) { /* optional */ }
     message("Unsaved draft — saved locally in this browser.");
@@ -98,6 +112,7 @@
     if (!current || !dirty) return true;
     if (busy) return false;
     busy = true;
+    invalidateDownload();
     // A read started before this write must not repaint the older revision.
     refreshVersion += 1;
     const sentVersion = editVersion;
@@ -120,24 +135,52 @@
     } catch (e) { saveConflict = true; message(`Save failed: ${e.message} Your draft remains in this browser. Refresh to load the current revision.`); return false; }
     finally { busy = false; }
   }
-  async function refreshRecords(preserve = true, loadConflict = false, userRefresh = false) {
+  async function refreshRecords(preserve = true, loadConflict = false, userRefresh = false, advanceAfter = null) {
     const session = el("session").value;
     if (!session) { records = []; render(null); return; }
     if (busy) return;
     const requestedVersion = ++refreshVersion;
     const requestedEditVersion = editVersion;
-    const query = new URLSearchParams({pending_only: el("pending").checked, flagged_only: el("flagged").checked, limit: 200, offset: pageOffset});
+    const query = new URLSearchParams({pending_only: el("pending").checked, flagged_only: el("flagged").checked, limit: 200, offset: advanceAfter ? 0 : pageOffset});
     try {
-      const data = await request(`/api/review/${encodeURIComponent(session)}/segments?${query}`);
+      const fetchPage = () => request(`/api/review/${encodeURIComponent(session)}/segments?${query}`);
+      let data = await fetchPage(), nextAfter = null, fetchedOffset = Number(query.get("offset"));
+      if (advanceAfter) {
+        // Search the fresh priority order: approvals can remove the anchor or
+        // earlier rows, so old page offsets and cached revisions are unsafe.
+        const firstPage = data;
+        while (true) {
+          nextAfter = data.segments.find(record => (record.review_priority || 0) < (advanceAfter.review_priority || 0) ||
+            ((record.review_priority || 0) === (advanceAfter.review_priority || 0) && record.chunk_id > advanceAfter.chunk_id));
+          if (nextAfter) break;
+          if (fetchedOffset + data.segments.length >= data.total || !data.segments.length) {
+            data = firstPage; fetchedOffset = 0; break;
+          }
+          if (requestedVersion !== refreshVersion || requestedEditVersion !== editVersion || el("session").value !== session) return;
+          fetchedOffset += data.segments.length;
+          query.set("offset", fetchedOffset);
+          data = await fetchPage();
+        }
+      }
       if (requestedVersion !== refreshVersion || el("session").value !== session ||
-          requestedEditVersion !== editVersion || (dirty && !loadConflict)) return;
+          requestedEditVersion !== editVersion) return;
+      const refreshedCurrent = data.segments.find(record => current?.session === session && record.chunk_id === current.chunk_id);
+      if (refreshedCurrent && !loadConflict && !advanceAfter) {
+        // Context and availability may change after another live chunk arrives.
+        // Do not repopulate controls, advance revisions, move focus, or restart audio.
+        renderMetadata(refreshedCurrent);
+        current = {...current, context: refreshedCurrent.context,
+          audio_available: el("audio").paused ? refreshedCurrent.audio_available : current.audio_available};
+      }
+      if (dirty && !loadConflict) return;
       records = data.segments;
+      pageOffset = fetchedOffset;
       el("items").replaceChildren(...records.map(record => new Option(
         `#${record.chunk_id} · priority ${record.review_priority || 0} · ${record.source_text.slice(0, 55)}`, String(record.chunk_id))));
       const wantedChunk = current?.session === session ? current.chunk_id
         : selection.session === session ? selection.chunk : null;
       const selected = preserve ? records.find(record => record.chunk_id === wantedChunk) : null;
-      const next = selected || records[0] || null;
+      const next = nextAfter || selected || records[0] || null;
       if (next) el("items").value = String(next.chunk_id);
       // Explicit conflict recovery shows the saved revision and offers the local
       // draft separately; render() never deletes that draft.
@@ -174,6 +217,7 @@
     else if (current) el("items").value = String(current.chunk_id);
   });
   el("session").addEventListener("change", async () => {
+    invalidateDownload();
     if (await save()) { current = null; pageOffset = 0; await refreshRecords(false); }
     else if (current) el("session").value = current.session;
   });
@@ -192,21 +236,22 @@
   }
   el("save").addEventListener("click", save);
   el("next").addEventListener("click", async () => {
-    const index = current ? records.findIndex(r => r.chunk_id === current.chunk_id) : -1;
-    if (await save()) {
-      const next = records[index + 1];
-      if (next) { el("items").value = String(next.chunk_id); render(next); }
-      else { current = null; pageOffset = 0; await refreshRecords(false); }
-    }
+    const anchor = current;
+    if (await save()) await refreshRecords(false, false, false, anchor);
   });
+  el("split").addEventListener("change", invalidateDownload);
   el("export").addEventListener("click", async () => {
     if (!(await save())) return;
+    invalidateDownload();
+    const requestedVersion = exportVersion, session = el("session").value, split = el("split").value;
     el("export").disabled = true;
     try {
-      const result = await request(`/api/review/${encodeURIComponent(el("session").value)}/export`, "POST", {split: el("split").value});
+      const result = await request(`/api/review/${encodeURIComponent(session)}/export`, "POST", {split});
+      if (requestedVersion !== exportVersion || session !== el("session").value || split !== el("split").value) return;
       el("download").href = result.download_url; el("download").hidden = false;
+      el("download").textContent = `Download ${session} ${split} bundle`;
       message(`Export ready: ${result.stt_samples.en} English and ${result.stt_samples.es} Spanish audio clips; ${result.translation_pairs} translation pairs.`);
-    } catch (e) { message(`Export failed: ${e.message}`); }
+    } catch (e) { if (requestedVersion === exportVersion) message(`Export failed: ${e.message}`); }
     finally { updateExport(); }
   });
   window.addEventListener("operator-session", event => {
@@ -215,5 +260,5 @@
   });
   window.addEventListener("beforeunload", event => { if (dirty) { event.preventDefault(); event.returnValue = ""; } });
   refreshSessions();
-  setInterval(() => { if (!dirty && !busy) refreshSessions(); }, 5000);
+  setInterval(() => { if (!busy) { if (dirty) refreshRecords(); else refreshSessions(); } }, 5000);
 })();
