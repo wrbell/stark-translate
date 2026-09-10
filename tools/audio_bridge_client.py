@@ -160,6 +160,8 @@ class FileAudioStream:
     Mono is duplicated across requested channels. The final block is zero-padded;
     ``finished`` denotes natural EOF (not an early stop). Callback failures are
     exposed as ``error`` and also signal completion so consumers cannot hang.
+    Sample coordinates use the resampled callback rate and cover only real
+    recording samples; virtual EOF silence and block padding are counted apart.
     """
 
     def __init__(
@@ -212,6 +214,7 @@ class FileAudioStream:
         if source_rate != samplerate and samples.size:
             divisor = math.gcd(int(source_rate), samplerate)
             samples = resample_poly(samples, samplerate // divisor, int(source_rate) // divisor)
+        self._audio_sample_count = len(samples)
         self._samples = np.concatenate(
             [np.clip(samples, -1, 1).astype(np.float32), np.zeros(round(tail_silence_s * samplerate), np.float32)]
         )
@@ -266,10 +269,16 @@ class FileAudioStream:
                 # Real-time replay uses the same block-availability boundary as
                 # capture. Accelerated replay is a functional, not latency, run.
                 scale = self.speed if self.speed > 0 else 1
+                sample_start = min(offset, self._audio_sample_count)
+                sample_end = min(offset + self.blocksize, self._audio_sample_count)
                 stamp = CaptureStamp(
                     started + offset / self.samplerate / scale,
                     started + (offset + self.blocksize) / self.samplerate / scale,
                     "replay_realtime" if self.speed == 1 else "replay_nonrealtime",
+                    sample_start=sample_start,
+                    sample_end=sample_end,
+                    sample_rate=self.samplerate,
+                    padding_samples=self.blocksize - (sample_end - sample_start),
                 )
                 self._callback(block, self.blocksize, stamp, None)
         except Exception as exc:

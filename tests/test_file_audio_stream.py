@@ -47,6 +47,7 @@ def test_replay_blocks_tail_and_completion(wav_path, rate, channels):
     def callback(data, frames, time_info, status):
         assert frames == 512
         from tools.pipeline_timing import CaptureStamp
+
         assert isinstance(time_info, CaptureStamp) and status is None
         assert time_info.end > time_info.start
         blocks.append(data)
@@ -86,6 +87,34 @@ def test_env_dispatch(wav_path, monkeypatch):
     assert stream.speed == 50
     with stream:
         assert stream.finished.wait(3)
+
+
+@pytest.mark.parametrize("source_rate,target_rate", [(16000, 16000), (8000, 16000)])
+def test_replay_sample_bounds_exclude_virtual_tail_and_last_block_padding(
+    tmp_path, real_scipy, source_rate, target_rate
+):
+    path = tmp_path / "short.wav"
+    real_scipy.write(path, source_rate, np.ones(5, np.int16) * 1000)
+    stamps = []
+    with FileAudioStream(
+        path,
+        samplerate=target_rate,
+        blocksize=4,
+        tail_silence_s=8 / target_rate,
+        speed=0,
+        callback=lambda data, frames, stamp, status: stamps.append(stamp),
+    ) as stream:
+        assert stream.finished.wait(1)
+    audio_count = 5 * target_rate // source_rate
+    assert stream._audio_sample_count == audio_count
+    assert sum(stamp.sample_end - stamp.sample_start for stamp in stamps) == audio_count
+    assert all(stamp.sample_rate == target_rate for stamp in stamps)
+    assert all(0 <= stamp.sample_start <= stamp.sample_end <= audio_count for stamp in stamps)
+    assert all(stamp.sample_end - stamp.sample_start + stamp.padding_samples == 4 for stamp in stamps)
+    assert [stamp.sample_start for stamp in stamps] == sorted(stamp.sample_start for stamp in stamps)
+    assert any(0 < stamp.padding_samples < 4 for stamp in stamps)
+    assert stamps[-1].sample_start == stamps[-1].sample_end == audio_count
+    assert stamps[-1].padding_samples == 4
 
 
 @pytest.mark.parametrize("speed", [0, -1])
