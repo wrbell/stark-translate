@@ -35,6 +35,16 @@
       "path": "run-summary.json",
       "sha256": "04268dceb501593a8383bd943faa3d805330fe4955fc8d4502c9bdcfaf055680",
       "size_bytes": 15289
+    },
+    {
+      "path": "raw/ab_metrics_integrity_v3_baseline_e4b_r0_fleurs_development_en_en.csv",
+      "sha256": "ca7e2c3241eb45bdb8ab9cd2fd960313c0489d5eeae7f65df85aa1ba0dbf6cc3",
+      "size_bytes": 4710
+    },
+    {
+      "path": "raw/ab_metrics_integrity_v3_baseline_anchor_e4b_r0_fleurs_development_en_en.csv",
+      "sha256": "2adbe27218387b503d974a07090f9c12c8c94c167038ea1e944248a56cd6c05c",
+      "size_bytes": 4719
     }
   ],
   "raw_payloads_unmodified": true,
