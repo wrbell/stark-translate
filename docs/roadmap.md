@@ -60,9 +60,12 @@ audio frames arrived and the audience display stayed disconnected; a separate
 completed. The fix (isolated capture with no-input timeouts, health-derived readiness,
 owned-process cleanup) is **implemented and integrated**. With microphone permission
 allowed, real EN and ES capture/readiness/stop and EN pause/resume passed on September 10.
-The room had no detected speech; spoken-microphone EN/ES and physical-device gates
-remain pending. A separate controlled file replay reached a visibly observed Chrome
-caption. [Exact operator evidence](evaluation/attended_mic_20260910/README.md) keeps
+The initial room had no detected speech. Later synthetic acoustic EN completed
+with captions; Spanish and a traced retest failed on source loss. The retest lost
+no parent-handoff frames but retained 160 ms upstream loss. Exact microphone
+name/host-API selection now passes a separate bounded native identity probe,
+which saved no audio and ran no STT. Sustained live capture remains unvalidated.
+A separate controlled file replay reached a visibly observed Chrome caption. [Exact operator evidence](evaluation/attended_mic_20260910/README.md) keeps
 those observations separate (`mac-live-mic-stall`, `issue-131-smoke`).
 
 Day-of-event workflow: [`operator_runbook.md`](./operator_runbook.md) (with recorded UI evidence). First-time install:
@@ -78,7 +81,7 @@ Status, priority, dependencies and acceptance for every item below are in
 ### Mac — source integrated, remaining certification
 
 1. **PR #192 source merge completed** (`pr-192-integration`): [actual closeout records](evaluation/overnight_closeout_20260910/README.md) bind the merge and final-head CI. Earlier frozen source `752ab9a` passed 2,363 CPU-suite tests, four skips, 63.80% coverage and three GPU regressions; its wheel matches all 152 runtime members. The original Standard hour failed source-bound validation. The fresh full-service Standard hour completed with all 563 final spans/WAV headers and 2,814 preview spans consistent, 7,594 successful writes and observed cleanup. CPU Lite also completed with 468 final/271 preview spans consistent, all 1,979 writes complete and cleanup observed. Sparse first previews and large observed tails prevent a fast-production recommendation. Keep these functional cohorts, remote CI and source review separate from the completed screen. The unused 350-second slice is not a cohort. See [current evidence](mac_implementation_status.md) and PR #192 for actual source integration; publication remains separate.
-2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): the stall fix is implemented — `tools/isolated_audio.py` / `capture_worker.py` (disposable PortAudio child, 5 s no-input and 3 s idle timeouts), `tools/pipeline_health.py` readiness consumed by the operator. Real capture/readiness passed for EN/ES after microphone permission; the quiet room produced no speech. What remains is live EN and ES **spoken utterances** with the audience display connected. #131 closes only on its original full acceptance.
+2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): the stall fix is implemented — `tools/isolated_audio.py` / `capture_worker.py` (disposable PortAudio child, 5 s no-input and 3 s idle timeouts), `tools/pipeline_health.py` readiness consumed by the operator. Real capture/readiness passed for EN/ES after microphone permission. Later synthetic acoustic EN completed, but Spanish retained upstream sample loss; exact device identity resolution passed its separate bounded probe. Preserve the failed receipts and resolve sustained capture before claiming the live gate. Further microphone/output testing is deferred by the current user instruction. #131 closes only on its original full acceptance.
 3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): the [96-run screen](evaluation/overnight_screen_20260910/README.md) completed with 672 finals and 0/28 selected arms. The sub-second goal was not met on this 45-second English cohort; E4B defaults remain unchanged. No ordinary confirmation or combination of these arms is justified. Pursue [new measured hypotheses](latency_next_experiments.md), keeping tiny endpoint counts, control drift, unreviewed references and locked-native-screen/DOM telemetry separate from certification.
 4. **Human and device gates:** locally reviewed Spanish church references, blinded bilingual review, natural two-speaker audio (#133) and second physical output. Public natural EN/ES read-speech references are now available for engineering comparisons; they do not supply church review. Original #132 permits independent physical or virtual routing, while the separate physical-device gate requires real outputs. The laptop runbook rehearsal (#134) is complete and closed, with full hymn/spoken input, setup-to-first-caption timing and a written note retained in the [closeout evidence](evaluation/overnight_closeout_20260910/README.md). #193/#194 track remaining hymn/quality work; live microphone testing remains under #131.
 5. **Active learning evidence (#137):** Review/export is implemented and fixture-tested. A real human correction from a recorded Sunday must reach a dated corpus and be merged; the documented first retrain may be a dry run. Draft notes and generated text are not approved pairs.
@@ -89,11 +92,20 @@ Status, priority, dependencies and acceptance for every item below are in
 The [Mac follow-up report](evaluation/mac_followup_20260910/README.md) retains a
 43-item original-acceptance audit, pinned public development/confirmation data,
 three-repeat STT comparisons, exact-output decoder trials, and full isolated
-application dependency feasibility. Live paired screens and fixed-reference
-E4B/E2B translation are distinct experiments in progress. Public Spanish
+application dependency feasibility. The fixed-reference E4B/E2B translation
+comparison completed twelve runs: E2B is faster in isolated translation but
+retains 11/18 lexical canaries versus E4B 13/18. These are not caption latency
+or bilingual meaning approval. New paired pipeline screens remain in progress. Public Spanish
 Parakeet passed the development WER tolerance for an opt-in pipeline trial;
 Whisper remains the Spanish default. No follow-up result yet establishes the
 sub-second caption goal.
+
+[Hymn source repairs](evaluation/mac_followup_20260910/hymn-source-repairs.md)
+now preserve existing text delimiters and accepted speech onset after music hold.
+CI passed on Python 3.11/3.12 and lint. The 15-frame music recovery threshold
+and 0.7-second final minimum are unchanged. #193/#194 remain open for natural
+transition labels and bilingual quality validation; prepared silent experiments
+do not substitute for approval.
 
 ### Equal-priority deployment targets
 

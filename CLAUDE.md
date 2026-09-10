@@ -89,6 +89,12 @@ microphone capture or human-heard output. See [quiet-room receipts](docs/evaluat
 [synthetic checks and identity probe](docs/evaluation/tts_routing_20260910/README.md),
 and `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
 
+The [hymn source repairs](docs/evaluation/mac_followup_20260910/hymn-source-repairs.md)
+preserve existing whitespace through correction and retain the first 14 speech
+frames when music-hold recovery accepts an onset. Classification thresholds and
+minimum-final policy remain unchanged. CI on `ffa34c5` passed Python 3.11/3.12
+and lint; #193/#194 still need natural boundary labels and bilingual review.
+
 ## Environment split
 
 | Machine | Role | Guide |
