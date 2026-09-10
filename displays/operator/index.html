@@ -87,6 +87,7 @@
         </div>
         <div class="level" aria-hidden="true"><div class="level-bar" id="mic-level-bar"></div></div>
         <p class="hint" id="mic-test-status" role="status" aria-live="polite">Microphone test is not available from this operator service yet. After starting, say a sentence and watch for the first caption.</p>
+        <p class="hint" id="device-note" hidden>The audio devices on this computer have not been validated by the setup owner yet. Run these tests before the event; a passing test measures sound at the server and cannot confirm what you hear.</p>
       </div>
     </div>
 
@@ -121,6 +122,7 @@
         <div>
           <h2 id="live-title">Not running</h2>
           <p class="hint" id="live-subtitle">Start captions from the Prepare tab.</p>
+          <p class="meta" id="live-event" hidden></p>
         </div>
         <div class="live-meta">
           <span id="live-language"></span>
@@ -136,6 +138,8 @@
         <button id="flip-btn" class="ghost" disabled>Switch to Spanish speaker</button>
       </div>
       <p class="hint">Switching the speaker's language restarts captions. Allow about a minute.</p>
+      <div class="level live-level" aria-hidden="true" hidden><div class="level-bar" id="live-level-bar"></div></div>
+      <p class="meta" id="live-level-text" hidden></p>
       <ul class="health" id="health-list" hidden></ul>
       <p class="hint" id="pipeline-readiness" hidden></p>
     </div>
@@ -203,11 +207,22 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="summary-card">
       <h2>Session summary</h2>
-      <p class="hint">After a session ends, create an English and Spanish summary of what was said. This uses the computer's language model, so wait until captions are stopped.</p>
-      <div class="actions"><button id="summary-btn" class="ghost">Create summary</button></div>
-      <pre class="status" id="summary-status">No summary requested yet.</pre>
+      <p class="hint">After a session ends, create an English and Spanish summary of what was said. This uses the computer's language model, so wait until captions are stopped. Very short sessions show the recorded text itself instead of a summary.</p>
+      <div class="actions">
+        <button id="summary-btn" class="ghost">Create summary</button>
+        <button id="summary-cancel" class="ghost" hidden>Cancel</button>
+      </div>
+      <p class="hint" id="summary-status" role="status" aria-live="polite">No summary requested yet.</p>
+      <div id="summary-result" hidden>
+        <p class="summary-notice" id="summary-notice" hidden></p>
+        <h3>English</h3>
+        <p class="summary-text" id="summary-english"></p>
+        <h3>Spanish</h3>
+        <p class="summary-text" id="summary-spanish"></p>
+        <p class="meta" id="summary-meta"></p>
+      </div>
     </div>
 
     <div class="card" id="storage-card">
@@ -278,6 +293,7 @@
     <div class="card">
       <h2>Technical settings</h2>
       <p class="hint">Leave these on their defaults for a normal event. They apply to the next session you start.</p>
+      <p class="hint lite-note" id="lite-note" hidden>A Lite profile is selected on the Prepare tab: backend, engine, A/B and diarization are fixed by that profile.</p>
       <div class="advanced-form">
         <label>Backend
           <select name="backend" form="config-form">
@@ -357,6 +373,10 @@
       <pre class="status" id="preflight-detail">not checked yet</pre>
       <h2>Server capabilities</h2>
       <pre class="status" id="capabilities-detail">not probed yet</pre>
+      <h2>Other display pages</h2>
+      <ul class="file-list" id="other-displays" hidden></ul>
+      <h2>Raw summary result</h2>
+      <pre class="status" id="summary-raw">no summary yet</pre>
     </div>
   </section>
 </main>

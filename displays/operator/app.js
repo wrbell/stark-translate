@@ -1,10 +1,10 @@
 // Operator UI controller — layperson layout (Prepare / Live / Sessions / Help / Advanced).
 //
-// Talks to the FastAPI control plane in operator_app/main.py. Every endpoint
-// beyond the v2026.6 contract (/api/capabilities, /api/storage, /api/support/*,
-// audio tests, readiness/health/outcome fields on /api/session/status) is
-// optional: a 404/405 or a missing field degrades to "not available" text and
-// never to simulated success.
+// Talks to the FastAPI control plane in operator_app/main.py. Everything beyond
+// the v2026.6 contract (/api/capabilities, /api/storage, /api/support/*,
+// /api/audio/test-*, readiness/health/outcome/work fields on
+// /api/session/status) is optional: a 404/405 or a missing field degrades to
+// "not available" text and never to simulated success.
 //
 // `StarkOperator.create(deps)` wires the page; the browser bootstraps it at
 // load time, and the Node tests inject a fake document/fetch instead.
@@ -18,17 +18,34 @@
   const AGE_TICK_MS = 1000;
   const STALE_AFTER_MS = 6000;
   const REQUEST_TIMEOUT_MS = 5000;
+  const CONTROL_ACK_TIMEOUT_MS = 15000;
   const ACTIVE_STATES = ["starting", "running", "paused", "stopping"];
+  // Product profiles installed code can select. Selecting one is not a claim
+  // that its models are installed or its hardware certified: readiness decides.
   const KNOWN_PROFILES = {
-    full: "Full quality (default)",
-    "lite-cpu": "Lite — no graphics card",
-    "lite-cuda-8gb": "Lite — 8 GB graphics card",
+    standard: {
+      label: "Standard (full models for this computer)",
+      description: "Uses the models installed for this computer's standard setup.",
+    },
+    "lite-cpu": {
+      label: "Lite — no graphics card",
+      description: "Small speech model and fast processor-only translation for every caption. Needs about 8 GB of memory.",
+    },
+    "lite-cpu-quality": {
+      label: "Lite quality — no graphics card, slower final captions",
+      description: "Adds a slower processor-only model that improves the final translation. Needs about 16 GB of memory.",
+    },
+    "lite-cuda-8gb": {
+      label: "Lite — 8 GB NVIDIA graphics card",
+      description: "For an 8 GB NVIDIA card (original RTX 2070 class). Readiness checks the card; this hardware has not been certified yet.",
+    },
   };
+  const LEGACY_PROFILE_IDS = {full: "standard"};
   const LANG_TEXT = {en: "English speaker → Spanish captions", es: "Spanish speaker → English captions"};
   const CHECK_TEXT = {
     GPU: {title: "Computer hardware", warn: "No graphics acceleration was found. Captions will work but arrive more slowly."},
     "Runtime dependencies": {title: "Software installation", fail: "The installation on this computer is incomplete. Ask the setup owner."},
-    Models: {title: "Language models", fail: "Language models are missing on this computer. Ask the setup owner to run setup."},
+    Models: {title: "Language models", fail: "Language models are missing on this computer. Ask the setup owner to run setup for this profile."},
     Microphone: {title: "Microphone", fail: "Plug in the USB microphone, then click Check again."},
     "Adapter manifest": {
       title: "Custom vocabulary (optional)",
@@ -36,6 +53,10 @@
       fail: "The custom vocabulary file is damaged. Ask the setup owner.",
     },
     "llama-server": {title: "Translation server", warn: "The translation server is not running. Captions will use a slower path."},
+    "Managed llama-server": {title: "Translation server (managed)", fail: "The managed translation server is not installed for this profile. Ask the setup owner."},
+    "Lite hardware": {title: "Computer memory and cores", fail: "This computer is below the memory or processor floor for the chosen profile."},
+    "Lite CUDA": {title: "NVIDIA graphics card", fail: "The NVIDIA card could not be verified for this profile."},
+    Diarization: {title: "Speaker labels", fail: "Speaker labels are not available with a Lite profile. Turn them off under Advanced."},
   };
   const PHASE_TEXT = {
     loading_models: "loading language models",
@@ -44,8 +65,12 @@
     warmup: "warming up",
     listening: "listening for speech",
     ready: "ready",
+    paused: "paused",
     starting: "starting",
     stopping: "stopping",
+    input_error: "microphone problem — no sound can be captured",
+    unknown: "status unknown",
+    idle: "not running",
   };
 
   // ---- pure helpers (exported for tests) ----------------------------------
@@ -139,8 +164,8 @@
   }
 
   function describeError(error) {
-    const info = {status: error && error.status, code: null, message: "", checks: null, work: null};
     const detail = error && error.detail;
+    const info = {status: error && error.status, code: null, message: "", checks: null, work: null, raw: detail};
     if (detail && typeof detail === "object" && !Array.isArray(detail)) {
       info.code = detail.code || null;
       info.message = detail.message || detail.detail || JSON.stringify(detail);
@@ -160,20 +185,28 @@
     return /^(localhost|127(\.\d+){3}|\[::1\]|::1|0\.0\.0\.0)$/i.test(String(host || ""));
   }
 
-  function audienceLinks(location, options) {
-    const opts = options || {};
-    const pageHost = (location && location.hostname) || "localhost";
-    const host = opts.lanHost || pageHost;
-    const httpPort = Number(opts.httpPort) || 8080;
-    const wsPort = Number(opts.wsPort) || 8765;
-    const audience = opts.audienceUrl || `http://${host}:${httpPort}/displays/audience_display.html`;
+  function hostOf(url) {
+    const match = /^[a-z]+:\/\/(\[[^\]]+\]|[^/:?#]+)/i.exec(String(url || ""));
+    return match ? match[1] : "";
+  }
+
+  // Server-advertised audience URLs win; otherwise derive from the page host.
+  function audienceLinks(location, capabilities) {
+    const caps = capabilities || {};
+    const urls = caps.audience_urls && typeof caps.audience_urls === "object" ? caps.audience_urls : {};
+    const ports = caps.display_ports && typeof caps.display_ports === "object" ? caps.display_ports : {};
+    const host = (location && location.hostname) || "localhost";
+    const httpPort = Number(ports.http) || 8080;
+    const wsPort = Number(ports.websocket) || 8765;
     const query = wsPort !== 8765 ? `?port=${wsPort}` : "";
-    const mobile = opts.mobileUrl || `http://${host}:${httpPort}/displays/mobile_display.html${query}`;
-    const shareable = !isLocalHost(host);
+    const audience = urls.audience || `http://${host}:${httpPort}/displays/audience_display.html${query}`;
+    const mobile = urls.mobile || `http://${host}:${httpPort}/displays/mobile_display.html${query}`;
+    const shareHost = hostOf(mobile) || host;
+    const shareable = !isLocalHost(shareHost);
     const note = shareable
       ? "Phones on the same Wi-Fi can open this link while captions are running."
       : "This link only works on this computer. To get a link phones can use, open the operator page with the computer's network address, or click the audience display's header for its own QR code.";
-    return {audience, mobile, shareable, note, host, httpPort, wsPort};
+    return {audience, mobile, church: urls.church || null, obs: urls.obs || null, shareable, note, host: shareHost, httpPort, wsPort};
   }
 
   function formatAge(seconds) {
@@ -200,27 +233,79 @@
     return `${(value / 1024 / 1024 / 1024).toFixed(1)} GB`;
   }
 
+  function normalizeProfileId(id) {
+    const key = id == null ? "" : String(id);
+    return Object.hasOwn(LEGACY_PROFILE_IDS, key) ? LEGACY_PROFILE_IDS[key] : key;
+  }
+
+  function isLiteProfile(id) {
+    const key = normalizeProfileId(id);
+    return !!key && key !== "standard";
+  }
+
+  function profileLabel(id) {
+    const key = normalizeProfileId(id);
+    return (KNOWN_PROFILES[key] && KNOWN_PROFILES[key].label) || key;
+  }
+
+  const BACKEND_TEXT = {mlx: "Apple graphics", cuda: "NVIDIA graphics card", cpu: "processor only", auto: "automatic"};
+  function backendLabel(id) {
+    const key = String(id || "").toLowerCase();
+    return BACKEND_TEXT[key] || key;
+  }
+
+  // Accepts the real contract (a list of ids) and, for compatibility, objects
+  // with {id, label, description, available}. Unknown ids keep their raw name.
   function pickProfiles(capabilities) {
     const raw = capabilities && Array.isArray(capabilities.profiles) ? capabilities.profiles : [];
     const out = [];
+    const seen = new Set();
     for (const entry of raw) {
       const profile = typeof entry === "string" ? {id: entry} : entry;
-      if (!profile || !Object.hasOwn(KNOWN_PROFILES, profile.id)) continue;
+      if (!profile || profile.id == null) continue;
+      const id = normalizeProfileId(profile.id);
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      const known = KNOWN_PROFILES[id] || {};
       out.push({
-        id: profile.id,
-        label: profile.label || KNOWN_PROFILES[profile.id],
-        description: profile.description || "",
+        id,
+        label: profile.label || known.label || id,
+        description: profile.description || known.description || "",
         available: profile.available !== false,
+        lite: isLiteProfile(id),
       });
     }
     return out;
   }
 
-  function endpointOf(flag, fallback) {
-    if (!flag) return null;
-    if (typeof flag === "object" && flag.url) return String(flag.url);
-    if (typeof flag === "string" && flag.startsWith("/")) return flag;
-    return fallback;
+  function defaultProfileId(capabilities, profiles) {
+    const wanted = normalizeProfileId(capabilities && capabilities.default_profile);
+    if (wanted && profiles.some(p => p.id === wanted)) return wanted;
+    return profiles.length ? profiles[0].id : "standard";
+  }
+
+  function profileNameOf(value) {
+    if (!value) return "";
+    if (typeof value === "string") return normalizeProfileId(value);
+    if (typeof value === "object") return normalizeProfileId(value.name || value.profile || "");
+    return "";
+  }
+
+  function levelPercent(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return null;
+    return Math.max(0, Math.min(100, Math.round(number * 100)));
+  }
+
+  function describeLevel(peak, rms) {
+    const percent = levelPercent(peak);
+    if (percent === null) return {percent: null, text: "The test finished, but no level was reported."};
+    const average = levelPercent(rms);
+    const measured = `Measured peak ${percent}%${average !== null ? ` (average ${average}%)` : ""} of full scale.`;
+    if (percent === 0) return {percent, text: `${measured} No sound was detected: check the microphone, its cable and the microphone permission.`};
+    if (percent < 5) return {percent, text: `${measured} Very quiet: move the microphone closer to the speaker or raise its gain.`};
+    if (percent > 90) return {percent, text: `${measured} Too loud and may distort: move the microphone away or lower its gain.`};
+    return {percent, text: `${measured} Sound was detected at a usable level.`};
   }
 
   // ---- the page controller ------------------------------------------------
@@ -264,15 +349,20 @@
       attentionAdvice: $("attention-advice"), attentionStop: $("attention-stop"), attentionDismiss: $("attention-dismiss"),
       form: $("config-form"), micSelect: $("mic-device"), micHint: $("mic-hint"), outputSelect: $("output-device"),
       micTestBtn: $("mic-test-btn"), outputTestBtn: $("output-test-btn"), micLevelBar: $("mic-level-bar"), micTestStatus: $("mic-test-status"),
+      deviceNote: $("device-note"),
       readinessSummary: $("readiness-summary"), checks: $("checks"), preflightRefresh: $("preflight-refresh"), preflightMeta: $("preflight-meta"),
-      profileField: $("profile-field"), profileSelect: $("profile-select"), profileHint: $("profile-hint"),
+      profileField: $("profile-field"), profileSelect: $("profile-select"), profileHint: $("profile-hint"), liteNote: $("lite-note"),
       startHint: $("start-hint"), startBtn: $("start-btn"), startStatus: $("start-status"),
-      liveTitle: $("live-title"), liveSubtitle: $("live-subtitle"), liveLanguage: $("live-language"), liveElapsed: $("live-elapsed"),
+      liveTitle: $("live-title"), liveSubtitle: $("live-subtitle"), liveEvent: $("live-event"), liveLanguage: $("live-language"), liveElapsed: $("live-elapsed"),
+      liveLevelBar: $("live-level-bar"), liveLevelText: $("live-level-text"),
       pauseBtn: $("pause-btn"), resumeBtn: $("resume-btn"), stopBtn: $("stop-btn"), flipBtn: $("flip-btn"), fallbackBtn: $("fallback-btn"),
       healthList: $("health-list"), pipelineReadiness: $("pipeline-readiness"),
       captionStatus: $("caption-status"), captionView: $("caption-view"), captionEndpoint: $("caption-endpoint"),
       audienceOpen: $("audience-open"), audienceCopy: $("audience-copy"), audienceUrl: $("audience-url"), audienceNote: $("audience-note"), audienceQr: $("audience-qr"),
-      versesList: $("verses-list"), summaryBtn: $("summary-btn"), summaryStatus: $("summary-status"),
+      otherDisplays: $("other-displays"),
+      versesList: $("verses-list"),
+      summaryBtn: $("summary-btn"), summaryCancel: $("summary-cancel"), summaryStatus: $("summary-status"), summaryResult: $("summary-result"),
+      summaryNotice: $("summary-notice"), summaryEnglish: $("summary-english"), summarySpanish: $("summary-spanish"), summaryMeta: $("summary-meta"), summaryRaw: $("summary-raw"),
       storageSummary: $("storage-summary"), storageSessions: $("storage-sessions"), storagePreview: $("storage-cleanup-preview"), storageCleanup: $("storage-cleanup"), storageStatus: $("storage-status"),
       supportSession: $("support-session"), supportText: $("support-include-text"), supportAudio: $("support-include-audio"),
       supportPreview: $("support-preview"), supportExport: $("support-export"), supportDownload: $("support-download"), supportStatus: $("support-status"), supportFiles: $("support-files"),
@@ -282,7 +372,7 @@
       statusDetail: $("status-detail"), preflightDetail: $("preflight-detail"), capabilitiesDetail: $("capabilities-detail"),
     };
     const form = el.form;
-    const formControls = () => Array.from(form.elements).filter(control => control.name && control.tagName !== "BUTTON");
+    const formControls = () => Array.from(form.elements).filter(target => target.name && target.tagName !== "BUTTON");
     const control = name => form.elements.namedItem(name);
     const languageSelect = control("lang");
     const languageOutputs = ["en", "es"].map(lang => $(`output-device-${lang}`));
@@ -303,6 +393,10 @@
     }
     function hasOption(select, value) {
       return Array.from(select.options).some(opt => opt.value === value);
+    }
+    function selectedLabel(select, fallback) {
+      const option = Array.from(select.options).find(opt => opt.value === select.value);
+      return option && select.value ? option.textContent : fallback;
     }
 
     // ---- tabs -------------------------------------------------------------
@@ -419,7 +513,6 @@
     let preflightRequest = 0;
     let preflightOk = false;
     let preflightChecked = false;
-    let lastPreflightAt = null;
 
     function renderChecks(payload) {
       const checks = Array.isArray(payload.checks) ? payload.checks : [];
@@ -449,13 +542,17 @@
         el.checks.appendChild(li);
       }
       const summary = readinessSummary(payload);
-      lastPreflightAt = now();
       preflightChecked = true;
       preflightOk = summary.ok;
       setText(el.readinessSummary, summary.text);
       el.readinessSummary.className = "readiness-summary " + summary.tone;
       const counts = summary.counts;
-      setText(el.preflightMeta, `${counts.pass} pass · ${counts.warn} warn · ${counts.fail} fail`);
+      const checkedProfile = profileNameOf(payload.effective_profile && payload.effective_profile.profile)
+        || profileNameOf(payload.profile);
+      const scope = checkedProfile
+        ? ` · checked for ${profileLabel(checkedProfile)}${payload.backend ? ` on ${backendLabel(payload.backend)}` : ""}`
+        : payload.backend ? ` · ${backendLabel(payload.backend)}` : "";
+      setText(el.preflightMeta, `${counts.pass} pass · ${counts.warn} warn · ${counts.fail} fail${scope}`);
       setText(el.preflightDetail, JSON.stringify(payload, null, 2));
       updateButtonsForState(currentState);
       renderStatePill();
@@ -478,11 +575,13 @@
         const query = new SearchParams({backend: selected.backend, lang: selected.lang,
           tts: String(selected.tts), diarize: String(selected.diarize)});
         if (selected.mic_device != null) query.set("input_device", String(selected.mic_device));
+        // The same profile the start request will carry, so both agree.
+        if (selected.profile) query.set("profile", selected.profile);
         const data = await getJson(`/api/preflight?${query}`, {timeout: true});
         if (request === preflightRequest) renderChecks(data);
       } catch (e) {
         // A failed check must clear any earlier "ready" verdict immediately.
-        if (request === preflightRequest) preflightFailed(e.message);
+        if (request === preflightRequest) preflightFailed(describeError(e).message);
       }
     }
     el.preflightRefresh.addEventListener("click", () => {
@@ -597,7 +696,9 @@
     let capabilities = {};
     let capabilitiesRequest = 0;
     let capabilitiesJson = null;
+    let capabilitiesSeen = false;
     let profilesSupported = false;
+    let serverDefaultProfile = "standard";
     const PROFILE_KEY = "stark-operator-profile";
 
     function applyCapabilities(data) {
@@ -608,11 +709,16 @@
       if (json === capabilitiesJson) return;
       capabilitiesJson = json;
       capabilities = next;
+      capabilitiesSeen = true;
       setText(el.capabilitiesDetail, Object.keys(capabilities).length ? JSON.stringify(capabilities, null, 2) : "none advertised");
+      const before = effectiveProfileId();
       renderProfiles();
+      if (effectiveProfileId() !== before) refreshPreflight();
       renderAudience();
       renderAudioTests();
+      renderStorageAvailability();
       setText(el.captionEndpoint, captionUrl());
+      updateButtonsForState(currentState);
     }
     async function probeCapabilities() {
       const request = ++capabilitiesRequest;
@@ -625,114 +731,157 @@
         else setText(el.capabilitiesDetail, `capabilities unavailable: ${e.message}`);
       }
     }
+    const featureFlag = name => (capabilitiesSeen && Object.hasOwn(capabilities, name) ? capabilities[name] !== false : null);
 
+    // The select's empty option follows the operator service's default
+    // (STARK_PROFILE, e.g. a Lite launcher). A persisted explicit choice
+    // overrides it only while the server still offers that profile.
+    function effectiveProfileId() {
+      if (!profilesSupported) return "";
+      return el.profileSelect.value || serverDefaultProfile;
+    }
     function renderProfiles() {
       const profiles = pickProfiles(capabilities);
       profilesSupported = profiles.length > 0;
       const select = el.profileSelect;
       if (!profilesSupported) {
+        serverDefaultProfile = "standard";
         el.profileField.hidden = true;
         el.profileHint.hidden = true;
         select.replaceChildren(makeOption("Default for this computer", ""));
         select.value = "";
+        applyProfileConstraints();
         return;
       }
-      const previous = select.value || readStorage(PROFILE_KEY) || "";
-      select.replaceChildren(makeOption("Default for this computer", ""));
+      serverDefaultProfile = defaultProfileId(capabilities, profiles);
+      const confirmed = ACTIVE_STATES.includes(currentState) && currentSnap && currentSnap.config
+        ? profileNameOf(currentSnap.config.profile) : "";
+      const persisted = normalizeProfileId(readStorage(PROFILE_KEY) || "");
+      const explicit = persisted && profiles.some(p => p.id === persisted) ? persisted : "";
+      select.replaceChildren(makeOption(`Server default: ${profileLabel(serverDefaultProfile)}`, ""));
       for (const profile of profiles) {
         const option = makeOption(profile.available ? profile.label : `${profile.label} — not available here`, profile.id);
         if (!profile.available) option.disabled = true;
         select.appendChild(option);
       }
-      select.value = hasOption(select, previous) ? previous : "";
+      if (confirmed) {
+        if (!hasOption(select, confirmed)) select.appendChild(makeOption(profileLabel(confirmed), confirmed));
+        select.value = confirmed;
+      } else {
+        select.value = explicit;
+      }
       el.profileField.hidden = false;
-      const chosen = profiles.find(profile => profile.id === select.value);
-      setText(el.profileHint, chosen && chosen.description ? chosen.description : "Lite profiles use smaller models for computers with less memory.");
+      const effective = effectiveProfileId();
+      const chosen = profiles.find(profile => profile.id === effective);
+      const parts = [chosen && chosen.description ? chosen.description : ""];
+      if (confirmed) parts.push("This is the profile of the running session.");
+      else if (!select.value) parts.push("Following the operator service's default. Readiness below confirms whether its models are installed.");
+      setText(el.profileHint, parts.filter(Boolean).join(" "));
       el.profileHint.hidden = false;
+      applyProfileConstraints();
     }
     el.profileSelect.addEventListener("change", () => {
       writeStorage(PROFILE_KEY, el.profileSelect.value);
       renderProfiles();
     });
 
-    // ---- microphone / speaker tests (capability-gated) --------------------
+    // A Lite profile owns the backend, engine, A/B and speaker-label settings;
+    // leaving them editable would send a contradictory (e.g. MLX) request.
+    function applyProfileConstraints() {
+      const lite = profilesSupported && isLiteProfile(effectiveProfileId());
+      const active = ACTIVE_STATES.includes(currentState);
+      const bound = ["backend", "engine", "run_ab", "diarize"].map(control).filter(Boolean);
+      if (lite && !active) {
+        const backend = control("backend");
+        if (backend && backend.value !== "auto") backend.value = "auto";
+        for (const name of ["run_ab", "diarize"]) {
+          const box = control(name);
+          if (box) box.checked = false;
+        }
+      }
+      for (const target of bound) target.disabled = active || lite;
+      if (el.liteNote) el.liteNote.hidden = !lite;
+    }
+
+    // ---- microphone / speaker tests (real, idle-only, work-leased) ---------
     let audioTestBusy = false;
     let audioTestResultShown = false; // a finished test's result line stays until the capability changes
+    function audioTestsSupported() {
+      return capabilities.audio_tests === true;
+    }
     function renderAudioTests() {
-      const audio = capabilities.audio || {};
-      const micUrl = endpointOf(audio.input_test, "/api/audio/input-test");
-      const outUrl = endpointOf(audio.output_test, "/api/audio/output-test");
-      el.micTestBtn.disabled = !micUrl || audioTestBusy || ACTIVE_STATES.includes(currentState);
-      el.micTestBtn.dataset.url = micUrl || "";
-      if (!micUrl) {
+      const supported = audioTestsSupported();
+      const idleOnly = capabilities.audio_tests_require_idle !== false;
+      const blocked = idleOnly && (ACTIVE_STATES.includes(currentState) || !!workBusy);
+      el.micTestBtn.disabled = !supported || audioTestBusy || blocked;
+      el.outputTestBtn.hidden = !supported;
+      el.outputTestBtn.disabled = !supported || audioTestBusy || blocked;
+      if (!supported) {
         audioTestResultShown = false;
         setText(el.micTestStatus, "Microphone test is not available from this operator service yet. After starting, say a sentence and watch for the first caption.");
       } else if (!audioTestBusy && !audioTestResultShown) {
-        setText(el.micTestStatus, "Click Test microphone, then speak normally for a few seconds.");
+        setText(el.micTestStatus, blocked
+          ? "Audio tests are available when no session or other job is running."
+          : "Click Test microphone, then speak normally for two seconds. Nothing is recorded or saved.");
       }
-      el.outputTestBtn.hidden = !outUrl;
-      el.outputTestBtn.disabled = !outUrl || audioTestBusy || ACTIVE_STATES.includes(currentState);
-      el.outputTestBtn.dataset.url = outUrl || "";
+      if (el.deviceNote) el.deviceNote.hidden = !supported || capabilities.audio_devices_validated !== false;
     }
 
-    function renderLevel(result) {
-      const peak = Number(result.level_peak != null ? result.level_peak : result.level_rms);
-      if (!Number.isFinite(peak)) {
-        el.micLevelBar.style.width = "0%";
-        return "The server finished the test but did not report a level.";
-      }
-      const percent = Math.max(0, Math.min(100, Math.round(peak * 100)));
-      el.micLevelBar.style.width = `${percent}%`;
-      el.micLevelBar.classList.toggle("hot", percent > 90);
-      if (percent === 0) return "No sound was detected. Check the microphone and its cable.";
-      if (percent < 5) return `Very quiet (${percent}%). Move the microphone closer to the speaker.`;
-      if (percent > 90) return `Too loud (${percent}%). Move the microphone away or lower its gain.`;
-      return `Sound detected (${percent}% of full scale).`;
+    function renderLevelBar(percent) {
+      const width = percent === null ? 0 : percent;
+      el.micLevelBar.style.width = `${width}%`;
+      el.micLevelBar.classList.toggle("hot", width > 90);
     }
 
-    async function runAudioTest(button, statusPrefix, body) {
-      const url = button.dataset.url;
-      if (!url || audioTestBusy) return;
+    async function runAudioTest(kind) {
+      if (!audioTestsSupported() || audioTestBusy) return;
+      const input = kind === "input";
+      const url = input ? "/api/audio/test-input" : "/api/audio/test-output";
+      const select = input ? el.micSelect : el.outputSelect;
+      const device = select.value ? Number(select.value) : null;
+      const deviceName = selectedLabel(select, input ? "the computer's default microphone" : "the computer's default speakers");
+      const body = input ? {device, duration_s: 2} : {device, duration_s: 0.4};
+      const label = input ? "Microphone test" : "Speaker test";
       audioTestBusy = true;
       renderAudioTests();
-      setText(el.micTestStatus, `${statusPrefix} — waiting for the server…`);
+      updateButtonsForState(currentState);
+      setText(el.micTestStatus, input
+        ? `Listening for 2 seconds on ${deviceName}… speak normally.`
+        : `Playing a short test tone on ${deviceName}…`);
       try {
-        let result = await postJson(url, body);
-        let polls = 0;
-        while (result && result.state === "pending" && result.poll_url && polls < 30) {
-          setText(el.micTestStatus, `${statusPrefix} — still running on the server…`);
-          await new Promise(resolve => setTimeoutImpl(resolve, 1000));
-          result = await getJson(result.poll_url);
-          polls += 1;
-        }
-        if (!result || result.state === "pending") {
-          setText(el.micTestStatus, `${statusPrefix} did not finish. The server never reported a result.`);
-        } else if (result.state === "failed" || result.ok === false) {
-          setText(el.micTestStatus, `${statusPrefix} failed: ${result.message || result.error || "no reason given"}.`);
-        } else if (button === el.micTestBtn) {
-          setText(el.micTestStatus, `${renderLevel(result)}${result.message ? ` ${result.message}` : ""}`);
+        const result = await postJson(url, body);
+        if (!result || result.ok !== true) {
+          setText(el.micTestStatus, `${label} did not report a result. Nothing can be confirmed.`);
+        } else if (input) {
+          const level = describeLevel(result.peak, result.rms);
+          renderLevelBar(level.percent);
+          const seconds = Number(result.duration_s) || 2;
+          setText(el.micTestStatus, `${level.text} Listened for ${seconds} s on ${deviceName}${result.recorded === false ? "; nothing was recorded or saved" : ""}.`);
         } else {
-          setText(el.micTestStatus, result.message || "Speaker test finished on the server. Confirm you heard it.");
+          setText(el.micTestStatus, `The server finished playing a short tone on ${deviceName}. The software cannot tell whether it was audible — confirm you heard it.`);
         }
       } catch (e) {
         const info = describeError(e);
-        setText(el.micTestStatus, isMissingEndpoint(e)
-          ? `${statusPrefix} is not available from this operator service.`
-          : `${statusPrefix} failed: ${info.message}`);
+        if (input) renderLevelBar(null);
+        if (info.code === "work_busy") {
+          setText(el.micTestStatus, `The operator service is ${humanWork(info.work) === "busy" ? "busy" : humanWork(info.work)}. Try again when it finishes.`);
+        } else if (info.code === "audio_unavailable" || info.status === 422) {
+          setText(el.micTestStatus, `${label} could not use ${deviceName}: ${info.message}`);
+        } else if (isMissingEndpoint(e)) {
+          setText(el.micTestStatus, `${label} is not available from this operator service.`);
+        } else {
+          setText(el.micTestStatus, `${label} failed: ${info.message}`);
+        }
       } finally {
         audioTestBusy = false;
         audioTestResultShown = true;
         renderAudioTests();
+        updateButtonsForState(currentState);
+        refreshStatus();
       }
     }
-    el.micTestBtn.addEventListener("click", () => {
-      const mic = el.micSelect.value;
-      runAudioTest(el.micTestBtn, "Microphone test", {device: mic ? Number(mic) : null, seconds: 3});
-    });
-    el.outputTestBtn.addEventListener("click", () => {
-      const device = el.outputSelect.value;
-      runAudioTest(el.outputTestBtn, "Speaker test", {device: device ? Number(device) : null, lang: languageSelect.value === "es" ? "en" : "es"});
-    });
+    el.micTestBtn.addEventListener("click", () => runAudioTest("input"));
+    el.outputTestBtn.addEventListener("click", () => runAudioTest("output"));
 
     // ---- session status ---------------------------------------------------
     let currentState = "idle";
@@ -745,6 +894,7 @@
     let lastStatusOkAt = null;
     let lastStatusError = "";
     let workBusy = null;
+    let pendingControl = null; // {kind: "pause"|"resume", target, since}
 
     languageSelect.addEventListener("change", () => {
       if (!ACTIVE_STATES.includes(currentState)) idleLanguageEdited = true;
@@ -760,7 +910,9 @@
     function syncSessionConfig(config, force) {
       let changed = false;
       for (const target of formControls()) {
-        if (target.name === "lang") continue;
+        // The direction and the profile are shown from the confirmed session
+        // separately; the profile follows the server default when idle.
+        if (target.name === "lang" || target.name === "profile") continue;
         const key = target.name === "output_device" ? "tts_device" : target.name;
         if (!Object.hasOwn(config, key) || (!force && (statusSeen || idleEditedFields.has(target.name)))) continue;
         const value = config[key];
@@ -832,33 +984,50 @@
 
     function renderHealth(snap) {
       const health = snap && snap.health;
-      if (!health || typeof health !== "object") {
+      const active = ACTIVE_STATES.includes(currentState);
+      if (!health || typeof health !== "object" || !active) {
         el.healthList.hidden = true;
         el.healthList.replaceChildren();
+        renderLiveLevel(null);
         return;
       }
       const items = [];
-      if (health.input_age_s != null) {
-        const age = Number(health.input_age_s);
-        items.push({text: Number.isFinite(age) ? `Sound last heard ${formatAge(age)}` : "Sound: unknown", bad: Number.isFinite(age) && age > 30});
+      const inputAge = Number(health.input_age_s);
+      if (health.input_seen === false || (health.input_age_s == null && Object.hasOwn(health, "input_seen"))) {
+        items.push({text: "No sound heard yet", bad: currentState === "running"});
+      } else if (health.input_age_s != null) {
+        items.push({text: Number.isFinite(inputAge) ? `Sound last heard ${formatAge(inputAge)}` : "Sound: unknown", bad: Number.isFinite(inputAge) && inputAge > 30});
       }
       if (health.caption_age_s != null) {
         const age = Number(health.caption_age_s);
         items.push({text: Number.isFinite(age) ? `Last caption ${formatAge(age)}` : "Captions: none yet", bad: false});
+      } else if (Object.hasOwn(health, "caption_age_s")) {
+        items.push({text: "No captions yet", bad: false});
       }
       if (health.clients != null) items.push({text: `Displays connected: ${health.clients}`, bad: Number(health.clients) === 0});
       if (health.queues && typeof health.queues === "object") {
         const backlog = Object.values(health.queues).reduce((sum, v) => sum + (Number(v) || 0), 0);
         items.push({text: `Backlog: ${backlog}`, bad: backlog > 5});
       }
-      if (health.errors != null) {
-        const errors = typeof health.errors === "number" ? health.errors : Array.isArray(health.errors) ? health.errors.length : null;
-        if (errors != null) items.push({text: `Errors: ${errors}`, bad: errors > 0});
+      const errors = health.error_count != null ? Number(health.error_count)
+        : typeof health.errors === "number" ? health.errors
+        : Array.isArray(health.errors) ? health.errors.length : null;
+      if (errors != null && Number.isFinite(errors)) items.push({text: `Errors: ${errors}`, bad: errors > 0});
+      const recording = health.recording;
+      if (recording && typeof recording === "object") {
+        if (recording.audio_enabled === false) items.push({text: "Not recording audio", bad: false});
+        else if (recording.ok === false || Number(recording.required_failures) > 0) items.push({text: "Recording problems — review audio may be incomplete", bad: true});
+        else items.push({text: "Recording audio", bad: false});
+      } else if (recording != null) {
+        items.push({text: recording ? "Recording audio" : "Not recording audio", bad: false});
       }
-      if (health.recording != null) items.push({text: health.recording ? "Recording audio" : "Not recording audio", bad: false});
       if (health.persistence && typeof health.persistence === "object" && health.persistence.ok === false) {
-        items.push({text: `Saving problems: ${health.persistence.reason || "see Help"}`, bad: true});
+        items.push({text: `Saving problems: ${health.persistence.reason || "some session files failed to save"}`, bad: true});
       }
+      if (health.storage && typeof health.storage === "object" && health.storage.low_space === true) {
+        items.push({text: `Low disk space (${formatBytes(health.storage.free_bytes)} free)`, bad: true});
+      }
+      if (Number(health.publish_failures) > 0) items.push({text: `Status updates failing: ${health.publish_failures}`, bad: true});
       el.healthList.replaceChildren(...items.map(item => {
         const li = doc.createElement("li");
         if (item.bad) li.className = "bad";
@@ -868,6 +1037,18 @@
         return li;
       }));
       el.healthList.hidden = items.length === 0;
+      renderLiveLevel(Object.hasOwn(health, "input_level") ? health.input_level : null);
+    }
+
+    function renderLiveLevel(level) {
+      if (!el.liveLevelBar || !el.liveLevelText) return;
+      const percent = level == null ? null : levelPercent(level);
+      const parent = el.liveLevelBar.parentNode;
+      if (parent) parent.hidden = percent === null;
+      el.liveLevelText.hidden = percent === null;
+      el.liveLevelBar.style.width = `${percent === null ? 0 : percent}%`;
+      el.liveLevelBar.classList.toggle("hot", percent !== null && percent > 90);
+      if (percent !== null) setText(el.liveLevelText, `Sound level ${percent}%`);
     }
 
     function renderReadiness(snap) {
@@ -877,8 +1058,12 @@
         return;
       }
       let text = readiness.ready ? "Captions are ready." : `Getting ready: ${humanPhase(readiness.phase)}.`;
-      if (!readiness.ready && readiness.reason) text += ` ${readiness.reason}`;
-      if (readiness.stale) text = `Stale (last update ${formatAge(Number(readiness.age_s))}) — ${text}`;
+      const plainPhase = String(readiness.phase || "").toLowerCase().replace(/[_-]+/g, " ");
+      const reason = String(readiness.reason || "").trim();
+      if (!readiness.ready && reason && reason.toLowerCase() !== plainPhase) text += ` ${reason}`;
+      if (readiness.stale) {
+        text = `The caption process has not reported for ${formatAge(Number(readiness.age_s))}${readiness.reason ? ` — ${readiness.reason}` : ""}.`;
+      }
       setText(el.pipelineReadiness, text);
       el.pipelineReadiness.hidden = false;
     }
@@ -900,17 +1085,27 @@
             : snap.outcome === "completed" ? "The last session finished normally. Start captions from the Prepare tab."
             : "Start captions from the Prepare tab.";
       }
+      if (pendingControl && ACTIVE_STATES.includes(currentState)) {
+        const waited = now() - pendingControl.since;
+        subtitle = `${pendingControl.kind === "pause" ? "Pausing" : "Resuming"}… waiting for the caption process to confirm.`;
+        if (waited > CONTROL_ACK_TIMEOUT_MS) subtitle += " No confirmation yet; the status may be stale.";
+      }
       if (stale) {
         subtitle = `The page has lost contact with the operator service (last known: ${title.toLowerCase()}). ${lastStatusError}`.trim();
         title = "Not connected";
       }
       setText(el.liveTitle, title);
       setText(el.liveSubtitle, subtitle);
-      const lang = snap.config && snap.config.lang;
-      setText(el.liveLanguage, ACTIVE_STATES.includes(currentState) && LANG_TEXT[lang] ? LANG_TEXT[lang] : "");
-      if (snap.effective_profile && ACTIVE_STATES.includes(currentState)) {
-        el.liveLanguage.textContent += ` · profile: ${snap.effective_profile}`;
+      if (el.liveEvent) {
+        const event = ACTIVE_STATES.includes(currentState) || currentState === "error" ? snap.last_event || "" : "";
+        setText(el.liveEvent, event);
+        el.liveEvent.hidden = !event;
       }
+      const lang = snap.config && snap.config.lang;
+      let meta = ACTIVE_STATES.includes(currentState) && LANG_TEXT[lang] ? LANG_TEXT[lang] : "";
+      const profile = profileNameOf(snap.effective_profile) || (snap.config ? profileNameOf(snap.config.profile) : "");
+      if (profile && ACTIVE_STATES.includes(currentState)) meta += `${meta ? " · " : ""}profile: ${profileLabel(profile)}`;
+      setText(el.liveLanguage, meta);
       renderElapsed();
       renderHealth(snap);
       renderReadiness(snap);
@@ -931,12 +1126,14 @@
     function renderStatus(snap, options) {
       const opts = options || {};
       ++statusRenderRevision;
+      const previousState = currentState;
       const wasActive = ACTIVE_STATES.includes(currentState);
       currentState = snap.state || "idle";
       currentError = snap.error || null;
       currentSnap = snap;
       workBusy = snap.work && typeof snap.work === "object" && snap.work.kind ? snap.work : null;
       const isActive = ACTIVE_STATES.includes(currentState);
+      if (pendingControl && (currentState === pendingControl.target || currentState !== pendingControl.from)) pendingControl = null;
       const confirmedLang = snap.config && snap.config.lang;
       const configChanged = snap.config ? syncSessionConfig(snap.config, isActive || wasActive) : false;
       let languageChanged = false;
@@ -952,13 +1149,16 @@
       statusSeen = true;
       for (const target of formControls()) target.disabled = isActive;
       if (snap.capabilities && typeof snap.capabilities === "object") applyCapabilities(snap.capabilities);
+      if (isActive !== wasActive || previousState !== currentState) renderProfiles();
+      else applyProfileConstraints();
       renderStatePill();
       renderConnectionAge();
       updateButtonsForState(currentState);
       renderLive();
       renderAudioTests();
+      updateHealthCaptions(snap);
       setText(el.statusDetail, JSON.stringify(snap, null, 2));
-      if (el.summaryBtn) el.summaryBtn.disabled = isActive || !!summaryPollTimer;
+      renderSummaryButtons();
       if (currentState === "error") {
         // Keep a request failure visible until dismissed; the state error
         // returns on the next poll after that.
@@ -1001,15 +1201,16 @@
       const isIdle = state === "idle" || state === "error";
       const isRunning = state === "running";
       const isPaused = state === "paused";
-      el.startBtn.disabled = !isIdle || !preflightOk || stale || !!workBusy;
+      el.startBtn.disabled = !isIdle || !preflightOk || stale || !!workBusy || audioTestBusy;
       // Stop stays available in "error": the process may still be alive.
       el.stopBtn.disabled = state === "idle" || state === "stopping";
-      el.pauseBtn.disabled = !isRunning || stale;
-      el.resumeBtn.disabled = !isPaused || stale;
+      el.pauseBtn.disabled = !isRunning || stale || !!pendingControl;
+      el.resumeBtn.disabled = !isPaused || stale || !!pendingControl;
       el.flipBtn.disabled = !isRunning || stale;
       el.fallbackBtn.disabled = !isRunning || stale;
       if (el.attentionStop) el.attentionStop.disabled = el.stopBtn.disabled;
-      setText(el.startHint, workBusy ? `The operator service is ${humanWork(workBusy)}. Start becomes available when it finishes.`
+      setText(el.startHint, audioTestBusy ? "Wait for the audio test to finish."
+        : workBusy ? `The operator service is ${humanWork(workBusy)}. Start becomes available when it finishes.`
         : stale ? "Start is unavailable while the page is not connected to the operator service."
         : !isIdle ? "Captions are running. Use the Live tab to pause or stop."
         : preflightOk ? "Everything looks ready." : "Start becomes available when every check above is green or yellow.");
@@ -1040,7 +1241,8 @@
         const device = value(`tts_device_${lang}`);
         if (device) body[`tts_device_${lang}`] = readTtsRoute(control(`tts_device_${lang}`));
       }
-      if (profilesSupported && el.profileSelect.value) body.profile = el.profileSelect.value;
+      const profile = effectiveProfileId();
+      if (profile) body.profile = profile;
       return body;
     }
 
@@ -1053,24 +1255,29 @@
 
     function handleStartError(e) {
       const info = describeError(e);
+      setText(el.startStatus, "Not started.");
       if (info.code === "preflight_failed") {
         if (info.checks) renderChecks({checks: info.checks, ok: false});
         else preflightFailed(info.message);
         showAttention({title: "Can't start yet", text: info.message, advice: "Fix the red items on the Prepare tab, then try again."});
         showTab("prepare");
-        setText(el.startStatus, "Not started.");
       } else if (info.code === "work_busy") {
         showAttention({tone: "info", title: "The operator service is busy", text: info.message,
           advice: `It is ${humanWork(info.work)}. Wait for it to finish, then try again.`});
-        setText(el.startStatus, "Not started.");
+      } else if (info.code === "profile_unavailable") {
+        showAttention({title: "This profile is not installed", text: info.message,
+          advice: "Choose the server default profile on the Prepare tab, or ask the setup owner to install the selected profile."});
+        showTab("prepare");
+      } else if (info.status === 422 && typeof info.raw === "string") {
+        showAttention({title: "The selected settings can't be used together", text: info.message,
+          advice: "Check the profile on the Prepare tab and the technical settings under Advanced, then try again."});
+        showTab("prepare");
       } else if (info.status === 409) {
         showAttention({tone: "info", title: "Captions are already running or stopping", text: info.message,
           advice: "Check the Live tab. If the status looks wrong, wait a few seconds and try again."});
-        setText(el.startStatus, "Not started.");
       } else {
         showAttention({title: "Couldn't start captions", text: info.message,
           advice: "Check the Prepare tab. If it keeps failing, the Help tab explains how to send details to the setup owner."});
-        setText(el.startStatus, "Not started.");
       }
     }
 
@@ -1093,6 +1300,7 @@
     async function stopSession() {
       el.stopBtn.disabled = true;
       if (el.attentionStop) el.attentionStop.disabled = true;
+      pendingControl = null;
       try {
         const snap = await postJson("/api/session/stop");
         acceptControlResponse(snap);
@@ -1106,10 +1314,14 @@
     el.stopBtn.addEventListener("click", stopSession);
     el.attentionStop.addEventListener("click", stopSession);
 
-    async function controlClick(url, body, btn, label) {
+    async function controlClick(url, body, btn, label, ack) {
       btn.disabled = true;
+      const from = currentState;
       try {
         const snap = await postJson(url, body);
+        // Pause/resume are acknowledged by the caption process later; until
+        // the polled state changes, say so instead of pretending it happened.
+        if (ack && snap.state === from) pendingControl = {kind: ack.kind, target: ack.target, from, since: now()};
         acceptControlResponse(snap, {forcePreflight: url === "/api/control/lang_flip"});
       } catch (e) {
         showAttention({title: `Couldn't ${label}`, text: describeError(e).message, advice: "The status below is being refreshed. Try again in a moment."});
@@ -1117,37 +1329,66 @@
         refreshStatus();
       }
     }
-    el.pauseBtn.addEventListener("click", () => controlClick("/api/control/pause", null, el.pauseBtn, "pause captions"));
-    el.resumeBtn.addEventListener("click", () => controlClick("/api/control/resume", null, el.resumeBtn, "resume captions"));
+    el.pauseBtn.addEventListener("click", () => controlClick("/api/control/pause", null, el.pauseBtn, "pause captions", {kind: "pause", target: "paused"}));
+    el.resumeBtn.addEventListener("click", () => controlClick("/api/control/resume", null, el.resumeBtn, "resume captions", {kind: "resume", target: "running"}));
     el.flipBtn.addEventListener("click", () => controlClick("/api/control/lang_flip", null, el.flipBtn, "switch the speaker language"));
     el.fallbackBtn.addEventListener("click", () => controlClick("/api/control/fallback", {engine: "hf"}, el.fallbackBtn, "switch to the fallback engine"));
 
-    // ---- caption preview (independent of diarization) ---------------------
+    // ---- caption preview (WebSocket when open, status-feed captions otherwise)
     const captionModel = captionsLib ? captionsLib.createModel({limit: 50}) : null;
     let captionClient = null;
     let captionSocketState = "closed";
+    let healthCaptions = [];
+    let healthCaptionsJson = "[]";
 
     function urlParam(name) {
       try { return new SearchParams(loc.search || "").get(name); } catch (e) { return null; }
     }
     function captionUrl() {
-      const audience = capabilities.audience || {};
-      const port = Number(audience.ws_port) || Number(urlParam("caption_port")) || 8765;
+      const ports = capabilities.display_ports || {};
+      const port = Number(ports.websocket) || Number(urlParam("caption_port")) || 8765;
       const host = loc.hostname || "localhost";
       const proto = loc.protocol === "https:" ? "wss" : "ws";
       return `${proto}://${host}:${port}`;
+    }
+    function socketCaptionsLive() {
+      return captionSocketState === "open" && !!captionClient;
+    }
+    function socketRows() {
+      return socketCaptionsLive() && captionModel ? captionModel.sentences() : [];
+    }
+    function captionRows() {
+      const live = socketRows();
+      if (live.length) return live.slice(-6);
+      return healthCaptions.slice(-6).map(c => ({
+        source: c.english || "", target: c.spanish_a || "", speaker: c.speaker || "",
+        partial: c.stage === "partial", streaming: false,
+      }));
+    }
+    function updateHealthCaptions(snap) {
+      const list = snap && snap.health && Array.isArray(snap.health.captions) && ACTIVE_STATES.includes(currentState)
+        ? snap.health.captions : [];
+      const json = JSON.stringify(list);
+      if (json === healthCaptionsJson) return;
+      healthCaptionsJson = json;
+      healthCaptions = list;
+      if (!socketRows().length) renderCaptions();
     }
     function renderCaptionStatus() {
       if (!ACTIVE_STATES.includes(currentState)) {
         setText(el.captionStatus, "Caption preview connects while captions are running.");
         return;
       }
-      if (captionSocketState === "open") {
+      if (socketCaptionsLive()) {
         const labels = captionModel ? captionModel.labels() : {};
         const pair = labels.source && labels.target ? ` (${labels.source} → ${labels.target})` : "";
         setText(el.captionStatus, captionModel && captionModel.musicHold()
           ? `Connected${pair} — music or silence detected, waiting for speech.`
-          : `Connected${pair}. Partial lines are in italics until the final caption replaces them.`);
+          : !socketRows().length && healthCaptions.length
+            ? `Connected${pair}. Showing the latest captions from the status feed until new ones arrive.`
+            : `Connected${pair}. Partial lines are in italics until the final caption replaces them.`);
+      } else if (healthCaptions.length) {
+        setText(el.captionStatus, "Showing the latest captions from the status feed (updates every few seconds).");
       } else {
         setText(el.captionStatus, currentState === "starting"
           ? "Waiting for the caption service to come up…"
@@ -1158,7 +1399,7 @@
     const captionKey = () => `${currentState}:${captionSocketState}`;
     function renderCaptions() {
       captionViewKey = captionKey();
-      const sentences = captionModel ? captionModel.sentences().slice(-6) : [];
+      const sentences = captionRows();
       el.captionView.replaceChildren();
       if (!sentences.length) {
         const li = doc.createElement("li");
@@ -1195,8 +1436,8 @@
         captionClient = captionsLib.connect(captionUrl(), captionModel, {
           WebSocket: WS, setTimeout: setTimeoutImpl, clearTimeout: clearTimeoutImpl, retryMs: 3000,
           onChange: () => renderCaptions(),
-          // A socket state change only touches the status line, not the list.
-          onStatus: state => { captionSocketState = state; renderCaptionStatus(); captionViewKey = captionKey(); },
+          // Opening or losing the socket switches the caption source, so re-render.
+          onStatus: state => { captionSocketState = state; renderCaptions(); },
         });
         changed = true;
       } else if (!active && captionClient) {
@@ -1214,11 +1455,7 @@
     // ---- audience display links -------------------------------------------
     let audienceInfo = null;
     function renderAudience() {
-      const audience = capabilities.audience || {};
-      audienceInfo = audienceLinks(loc, {
-        httpPort: audience.http_port, wsPort: audience.ws_port, lanHost: audience.lan_host || audience.lan_ip,
-        audienceUrl: audience.audience_url, mobileUrl: audience.mobile_url,
-      });
+      audienceInfo = audienceLinks(loc, capabilities);
       setText(el.audienceUrl, audienceInfo.mobile);
       setText(el.audienceNote, `${audienceInfo.note} The audience pages are served only while captions are running.`);
       el.audienceCopy.disabled = !audienceInfo.shareable;
@@ -1227,6 +1464,20 @@
         try { drawn = qr.draw(el.audienceQr, audienceInfo.mobile, 176); } catch (e) { drawn = false; }
       }
       if (el.audienceQr) el.audienceQr.hidden = !drawn;
+      if (el.otherDisplays) {
+        const extras = [["Church display", audienceInfo.church], ["Streaming overlay", audienceInfo.obs]].filter(([, url]) => url);
+        el.otherDisplays.replaceChildren(...extras.map(([name, url]) => {
+          const li = doc.createElement("li");
+          const link = doc.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.textContent = `${name}: ${url}`;
+          li.appendChild(link);
+          return li;
+        }));
+        el.otherDisplays.hidden = extras.length === 0;
+      }
     }
     el.audienceOpen.addEventListener("click", () => {
       if (audienceInfo) openWindow(audienceInfo.audience);
@@ -1326,7 +1577,7 @@
       };
     }
 
-    // ---- verses + summary (Phase 9.6) --------------------------------------
+    // ---- verses (Phase 9.6) -------------------------------------------------
     function renderVerses(highlights) {
       if (!el.versesList) return;
       el.versesList.replaceChildren();
@@ -1361,37 +1612,103 @@
       }
     }
 
+    // ---- session summary (bilingual text; raw JSON only under Advanced) -----
+    let summaryTask = null;
     let summaryPollTimer = null;
+
+    function renderSummaryButtons() {
+      const running = summaryTask && ["pending", "running"].includes(summaryTask.state);
+      const blocked = ACTIVE_STATES.includes(currentState) || (!!workBusy && !running);
+      el.summaryBtn.disabled = blocked || !!running;
+      setText(el.summaryBtn, summaryTask && summaryTask.state === "error" ? "Try again" : "Create summary");
+      el.summaryCancel.hidden = !running;
+      el.summaryCancel.disabled = !running;
+    }
+
+    function renderSummaryResult(result) {
+      const data = result && typeof result === "object" ? result : {};
+      const metadata = data.metadata && typeof data.metadata === "object" ? data.metadata : {};
+      const excerpt = metadata.content_mode === "excerpt" || data.format === "short-session excerpt";
+      setText(el.summaryEnglish, data.english || "(no English text)");
+      setText(el.summarySpanish, data.spanish || "(no Spanish text)");
+      const notice = data.notice || "";
+      setText(el.summaryNotice, notice);
+      el.summaryNotice.hidden = !notice;
+      const parts = [];
+      parts.push(excerpt ? "Excerpt of the recorded text, not a summary" : `Model summary${data.format ? ` (${data.format})` : ""}`);
+      if (data.translation_method) parts.push(`translation: ${data.translation_method}`);
+      if (metadata.total_words != null) parts.push(`${metadata.total_words} words`);
+      if (metadata.human_reviewed === false) parts.push("not reviewed by a person — treat as a draft");
+      setText(el.summaryMeta, parts.join(" · "));
+      el.summaryResult.hidden = false;
+      setText(el.summaryRaw, JSON.stringify(data, null, 2));
+    }
+
+    function renderSummaryTask(task) {
+      summaryTask = task;
+      const state = task.state;
+      if (state === "done") {
+        setText(el.summaryStatus, "Finished.");
+        renderSummaryResult(task.result);
+      } else if (state === "error") {
+        setText(el.summaryStatus, `Summary failed: ${task.error || "no reason given"}${task.return_code != null ? ` (exit code ${task.return_code})` : ""}. Click Try again to retry.`);
+        el.summaryResult.hidden = true;
+        setText(el.summaryRaw, JSON.stringify(task, null, 2));
+      } else {
+        setText(el.summaryStatus, `Working on the summary (${state})… This can take a few minutes on the computer's language model.`);
+        el.summaryResult.hidden = true;
+      }
+      renderSummaryButtons();
+    }
+
+    function stopSummaryPolling() {
+      if (summaryPollTimer) { clearIntervalImpl(summaryPollTimer); summaryPollTimer = null; }
+    }
+
     async function pollSummary(taskId) {
       try {
         const task = await getJson(`/api/features/summary/${taskId}`);
-        const state = task.state === "done" ? "Finished" : task.state === "error" ? "Failed" : `In progress (${task.state})`;
-        setText(el.summaryStatus, `${state}\n` + JSON.stringify({return_code: task.return_code, error: task.error, result: task.result || null}, null, 2));
-        if (task.state === "done" || task.state === "error") {
-          if (summaryPollTimer) { clearIntervalImpl(summaryPollTimer); summaryPollTimer = null; }
-          el.summaryBtn.disabled = ACTIVE_STATES.includes(currentState);
-        }
+        if (!summaryTask || summaryTask.task_id !== taskId) return; // an older task's reply
+        renderSummaryTask(task);
+        if (task.state === "done" || task.state === "error") stopSummaryPolling();
       } catch (e) {
-        setText(el.summaryStatus, `Couldn't check the summary task: ${e.message}`);
+        setText(el.summaryStatus, `Couldn't check the summary task: ${describeError(e).message}`);
       }
     }
+
     el.summaryBtn.addEventListener("click", async () => {
       el.summaryBtn.disabled = true;
       setText(el.summaryStatus, "Requesting a summary…");
       try {
         const task = await postJson("/api/features/summary", {});
-        setText(el.summaryStatus, `Summary task ${task.task_id} started (${task.state}). This can take a few minutes.`);
-        if (summaryPollTimer) clearIntervalImpl(summaryPollTimer);
+        stopSummaryPolling();
+        renderSummaryTask(task);
         summaryPollTimer = setIntervalImpl(() => pollSummary(task.task_id), 2000);
       } catch (e) {
-        setText(el.summaryStatus, `Couldn't start a summary: ${describeError(e).message}`);
+        const info = describeError(e);
+        setText(el.summaryStatus, info.code === "work_busy"
+          ? `The operator service is ${humanWork(info.work)}. Try again when it finishes.`
+          : `Couldn't start a summary: ${info.message}`);
+        renderSummaryButtons();
         el.summaryBtn.disabled = ACTIVE_STATES.includes(currentState);
+      }
+    });
+    el.summaryCancel.addEventListener("click", async () => {
+      if (!summaryTask) return;
+      el.summaryCancel.disabled = true;
+      try {
+        const task = await postJson(`/api/features/summary/${summaryTask.task_id}/cancel`);
+        renderSummaryTask(task);
+        if (task.state === "done" || task.state === "error") stopSummaryPolling();
+        else setText(el.summaryStatus, "Cancel requested… waiting for the summary task to stop.");
+      } catch (e) {
+        setText(el.summaryStatus, `Couldn't cancel the summary: ${describeError(e).message}`);
+        renderSummaryButtons();
       }
     });
 
     // ---- disk space + cleanup (optional endpoints) -------------------------
     let storageRequest = 0;
-    let storageSupported = null;
     let cleanupPreview = null;
     let cleanupVersion = 0;
     let storageSessionsList = [];
@@ -1400,14 +1717,34 @@
       if (typeof item === "string") return item;
       return item.session_id || item.session || item.id || "";
     }
+    function sessionCompleted(item) {
+      return typeof item !== "object" || item.status == null || item.status === "completed";
+    }
+    function renderStorageAvailability() {
+      if (featureFlag("storage") === false) {
+        setText(el.storageSummary, "Disk space details are not available from this operator service.");
+        el.storagePreview.disabled = true;
+        el.storageCleanup.disabled = true;
+      }
+      if (featureFlag("support") === false) {
+        setText(el.supportStatus, "Support bundles are not available from this operator service. Send the error text from the top of the page instead.");
+        el.supportPreview.disabled = true;
+        el.supportExport.disabled = true;
+      } else if (featureFlag("support") === true) {
+        el.supportPreview.disabled = false;
+      }
+    }
     function renderStorage(data) {
-      storageSupported = true;
       const parts = [];
       if (data.free_bytes != null) parts.push(`Free: ${formatBytes(data.free_bytes)}`);
-      if (data.used_bytes != null) parts.push(`Used by sessions: ${formatBytes(data.used_bytes)}`);
+      if (data.used_bytes != null) parts.push(`Used: ${formatBytes(data.used_bytes)}`);
       storageSessionsList = Array.isArray(data.sessions) ? data.sessions : [];
       if (typeof data.sessions === "number") parts.push(`${data.sessions} sessions stored`);
       else if (storageSessionsList.length) parts.push(`${storageSessionsList.length} sessions stored`);
+      if (data.low_space === true) parts.push("Low disk space — free some space before the next session");
+      // The server's scope sentence belongs with the summary; the status line
+      // is reserved for the outcome of the operator's last action.
+      if (data.cleanup_scope) parts.push(String(data.cleanup_scope));
       setText(el.storageSummary, parts.length ? parts.join(" · ") : "Disk space details were not reported.");
       el.storageSessions.replaceChildren(...storageSessionsList.map(item => {
         const li = doc.createElement("li");
@@ -1416,6 +1753,7 @@
         box.type = "checkbox";
         box.value = sessionIdOf(item);
         box.dataset.session = box.value;
+        box.disabled = !sessionCompleted(item);
         label.appendChild(box);
         const text = doc.createElement("span");
         const status = typeof item === "object" && item.status ? ` · ${item.status}` : "";
@@ -1424,15 +1762,17 @@
         li.appendChild(label);
         const bytes = doc.createElement("span");
         bytes.className = "bytes";
-        bytes.textContent = typeof item === "object" && item.bytes != null ? formatBytes(item.bytes) : "";
+        const size = typeof item === "object" ? (item.cleanup_bytes != null ? item.cleanup_bytes : item.bytes) : null;
+        bytes.textContent = size != null ? `logs ${formatBytes(size)}` : "";
         li.appendChild(bytes);
         return li;
       }));
-      el.storagePreview.disabled = storageSessionsList.length === 0;
+      el.storagePreview.disabled = !storageSessionsList.some(sessionCompleted);
       el.storageCleanup.disabled = true;
       cleanupPreview = null;
     }
     async function refreshStorage() {
+      if (featureFlag("storage") === false) return;
       const request = ++storageRequest;
       try {
         const data = await getJson("/api/storage", {timeout: true});
@@ -1440,33 +1780,38 @@
       } catch (e) {
         if (request !== storageRequest) return;
         if (isMissingEndpoint(e)) {
-          storageSupported = false;
           setText(el.storageSummary, "Disk space details are not available from this operator service version.");
           el.storagePreview.disabled = true;
           el.storageCleanup.disabled = true;
         } else {
-          setText(el.storageSummary, `Couldn't read disk space: ${e.message}`);
+          setText(el.storageSummary, `Couldn't read disk space: ${describeError(e).message}`);
         }
       }
     }
     function selectedStorageSessions() {
       const boxes = Array.from(el.storageSessions.querySelectorAll('input[type="checkbox"]'));
-      const chosen = boxes.filter(box => box.checked).map(box => box.value);
-      return chosen.length ? chosen : boxes.map(box => box.value);
+      const chosen = boxes.filter(box => box.checked && !box.disabled).map(box => box.value);
+      return chosen.length ? chosen : boxes.filter(box => !box.disabled).map(box => box.value);
     }
     el.storagePreview.addEventListener("click", async () => {
       const version = ++cleanupVersion;
       el.storagePreview.disabled = true;
       el.storageCleanup.disabled = true;
       cleanupPreview = null;
+      const sessions = selectedStorageSessions();
+      if (!sessions.length) {
+        setText(el.storageStatus, "Only completed sessions can be cleaned up, and none are listed.");
+        el.storagePreview.disabled = false;
+        return;
+      }
       setText(el.storageStatus, "Asking the server what can be removed…");
       try {
-        const preview = await postJson("/api/storage/cleanup/preview", {session_ids: selectedStorageSessions()});
+        const preview = await postJson("/api/storage/cleanup/preview", {session_ids: sessions});
         if (version !== cleanupVersion) return;
         cleanupPreview = preview;
         const files = Array.isArray(preview.files) ? preview.files : [];
         setText(el.storageStatus, files.length
-          ? `${files.length} file${files.length === 1 ? "" : "s"} (${formatBytes(preview.bytes)}) can be removed. Audio, diagnostics, reviews and exports are kept. Click Delete the listed files to confirm.`
+          ? `${files.length} log file${files.length === 1 ? "" : "s"} (${formatBytes(preview.bytes)}) can be removed. Original audio, diagnostics, corrections and exports are kept. Click Delete the listed files to confirm.`
           : "Nothing to remove for the chosen sessions.");
         el.storageCleanup.disabled = files.length === 0;
       } catch (e) {
@@ -1475,7 +1820,7 @@
           ? "Cleanup is not available from this operator service version."
           : `Couldn't preview cleanup: ${describeError(e).message}`);
       } finally {
-        if (version === cleanupVersion) el.storagePreview.disabled = storageSessionsList.length === 0;
+        if (version === cleanupVersion) el.storagePreview.disabled = !storageSessionsList.some(sessionCompleted);
       }
     });
     el.storageCleanup.addEventListener("click", async () => {
@@ -1487,10 +1832,9 @@
       try {
         const result = await postJson("/api/storage/cleanup", {preview_id: previewId});
         if (version !== cleanupVersion) return;
-        const removed = Array.isArray(result.files) ? result.files.length : result.removed != null ? result.removed : null;
-        setText(el.storageStatus, removed != null
-          ? `Removed ${removed} file${removed === 1 ? "" : "s"}${result.bytes != null ? ` (${formatBytes(result.bytes)})` : ""}.`
-          : "Cleanup finished.");
+        const bytes = result.removed_bytes != null ? result.removed_bytes : result.bytes;
+        const count = Array.isArray(result.files) ? result.files.length : result.removed;
+        setText(el.storageStatus, `Removed ${count != null ? `${count} file${count === 1 ? "" : "s"}` : "the listed logs"}${bytes != null ? ` (${formatBytes(bytes)})` : ""}. Original audio, diagnostics, corrections and exports were kept.`);
         cleanupPreview = null;
         refreshStorage();
       } catch (e) {
@@ -1503,6 +1847,7 @@
     let supportSessionsRequest = 0;
     let supportVersion = 0;
     let supportPreview = null;
+    let latestReviewSession = "";
 
     async function refreshSupportSessions() {
       const request = ++supportSessionsRequest;
@@ -1510,15 +1855,20 @@
         const data = await getJson("/api/review/sessions", {timeout: true});
         if (request !== supportSessionsRequest) return;
         const previous = el.supportSession.value;
-        el.supportSession.replaceChildren(makeOption("Most recent session", ""));
-        for (const s of data.sessions || []) {
+        const sessions = data.sessions || [];
+        latestReviewSession = sessions.length ? sessions[0].session : "";
+        el.supportSession.replaceChildren(makeOption(latestReviewSession ? `Most recent session (${latestReviewSession})` : "Most recent session", ""));
+        for (const s of sessions) {
           const status = s.active ? "live" : s.status || "";
           el.supportSession.appendChild(makeOption(`${s.session}${status ? ` · ${status}` : ""}`, s.session));
         }
         el.supportSession.value = hasOption(el.supportSession, previous) ? previous : "";
       } catch (e) {
-        // The list is a convenience; "most recent" still works without it.
+        // The list is a convenience; the current session id still works without it.
       }
+    }
+    function supportSessionId() {
+      return el.supportSession.value || latestReviewSession || (currentSnap && currentSnap.session_id) || "";
     }
     function invalidateSupport() {
       supportVersion += 1;
@@ -1531,15 +1881,16 @@
     el.supportPreview.addEventListener("click", async () => {
       invalidateSupport();
       const version = supportVersion;
+      const sessionId = supportSessionId();
+      el.supportFiles.replaceChildren();
+      if (!sessionId) {
+        setText(el.supportStatus, "No session to describe yet. Run a session first, or choose one from the list.");
+        return;
+      }
       el.supportPreview.disabled = true;
       setText(el.supportStatus, "Asking the server what the bundle would contain…");
-      el.supportFiles.replaceChildren();
       try {
-        const body = {
-          session_id: el.supportSession.value || (currentSnap && currentSnap.session_id) || null,
-          include_text: !!el.supportText.checked,
-          include_audio: !!el.supportAudio.checked,
-        };
+        const body = {session_id: sessionId, include_text: !!el.supportText.checked, include_audio: !!el.supportAudio.checked};
         const preview = await postJson("/api/support/preview", body);
         if (version !== supportVersion) return;
         supportPreview = preview;
@@ -1556,8 +1907,10 @@
           return li;
         }));
         const privacy = typeof preview.privacy === "string" ? preview.privacy
-          : preview.privacy && typeof preview.privacy === "object" ? Object.entries(preview.privacy).map(([k, v]) => `${k}: ${v}`).join("; ") : "";
-        setText(el.supportStatus, `${files.length} file${files.length === 1 ? "" : "s"}, ${formatBytes(preview.bytes)}.${privacy ? ` ${privacy}` : ""}`);
+          : preview.privacy && typeof preview.privacy === "object"
+            ? [preview.privacy.message, preview.privacy.text_included ? "Includes caption text." : "", preview.privacy.audio_included ? "Includes audio clips." : ""].filter(Boolean).join(" ")
+            : "";
+        setText(el.supportStatus, `${files.length} file${files.length === 1 ? "" : "s"}, ${formatBytes(preview.bytes)}, for session ${sessionId}.${privacy ? ` ${privacy}` : ""}`);
         el.supportExport.disabled = !preview.preview_id;
       } catch (e) {
         if (version !== supportVersion) return;
@@ -1594,8 +1947,10 @@
     renderFlipLabel();
     renderStatePill();
     renderAudience();
+    renderProfiles();
     renderAudioTests();
     renderCaptions();
+    renderSummaryButtons();
     setText(el.captionEndpoint, captionUrl());
     updateButtonsForState(currentState);
 
@@ -1612,7 +1967,7 @@
       timers.push(setIntervalImpl(() => { if (!ACTIVE_STATES.includes(currentState)) refreshPreflight(); }, PREFLIGHT_INTERVAL_MS));
       timers.push(setIntervalImpl(refreshStatus, STATUS_INTERVAL_MS));
       timers.push(setIntervalImpl(refreshVerses, VERSE_INTERVAL_MS));
-      timers.push(setIntervalImpl(() => { renderConnectionAge(); renderElapsed(); }, AGE_TICK_MS));
+      timers.push(setIntervalImpl(() => { renderConnectionAge(); renderElapsed(); if (pendingControl) renderLive(); }, AGE_TICK_MS));
     }
 
     return {
@@ -1632,6 +1987,7 @@
       refreshStorage,
       refreshSupportSessions,
       renderConnectionAge,
+      renderSummaryTask,
       captionModel,
       get state() { return currentState; },
       get connection() { return connection; },
@@ -1639,12 +1995,15 @@
       get activeTab() { return activeTab; },
       get capabilities() { return capabilities; },
       get captionClient() { return captionClient; },
+      get effectiveProfile() { return effectiveProfileId(); },
+      get pendingControl() { return pendingControl; },
     };
   }
 
   global.StarkOperator = {
     create, friendlyCheck, readinessSummary, describeState, describeError, audienceLinks,
-    formatAge, formatDuration, formatBytes, pickProfiles, humanPhase, ACTIVE_STATES,
+    formatAge, formatDuration, formatBytes, pickProfiles, defaultProfileId, normalizeProfileId, isLiteProfile,
+    profileLabel, humanPhase, describeLevel, ACTIVE_STATES,
   };
 
   if (!global.__STARK_OPERATOR_MANUAL__ && global.document && global.document.getElementById("config-form")) {

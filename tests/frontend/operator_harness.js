@@ -59,6 +59,45 @@ function preflightPayload(overrides = {}) {
   return {checks, ok: counts.fail === 0, status_counts: counts, backend: "mlx", ...overrides};
 }
 
+// The capabilities contract emitted by operator_app/main.py (GET /api/capabilities).
+function realCapabilities(overrides = {}) {
+  const host = overrides.host || "localhost";
+  const http = overrides.http || 8080;
+  const ws = overrides.ws || 8765;
+  const base = `http://${host}:${http}/displays`;
+  const caps = {
+    profiles: ["standard", "lite-cpu", "lite-cpu-quality", "lite-cuda-8gb"],
+    default_profile: "standard",
+    preflight_required: true,
+    audio_tests: true,
+    audio_tests_require_idle: true,
+    audio_devices_validated: false,
+    support: true,
+    storage: true,
+    display_ports: {http, websocket: ws},
+    audience_urls: {
+      audience: `${base}/audience_display.html?port=${ws}`,
+      church: `${base}/church_display.html?port=${ws}`,
+      mobile: `${base}/mobile_display.html?port=${ws}`,
+      obs: `${base}/obs_overlay.html?port=${ws}`,
+    },
+  };
+  for (const key of Object.keys(overrides)) if (!["host", "http", "ws"].includes(key)) caps[key] = overrides[key];
+  return caps;
+}
+
+// The health block tools/pipeline_health.py publishes and the runner copies into /api/session/status.
+function realHealth(overrides = {}) {
+  return {
+    schema_version: 1, session_id: "s1", updated_at: 1.0, phase: "ready", input_seen: true, input_age_s: 0.4,
+    caption_age_s: 2.5, input_level: 0.31, errors: [], error_count: 0, captions: [],
+    recording: {audio_enabled: true, required_failures: 0, ok: true}, control_sequence: 0, publish_failures: 0,
+    persistence: {ok: true, completed: 3, failed: 0, pending: 0}, storage: {free_bytes: 50 * 1024 ** 3, low_space: false},
+    queues: {audio: 0, capture_handoff: 0, finals: 0, stream_tokens: 0}, clients: 1, age_s: 0.2, stale: false,
+    ...overrides,
+  };
+}
+
 function createHarness(options = {}) {
   const html = fs.readFileSync(path.join(OPERATOR, "index.html"), "utf8");
   const dom = createDom(html);
@@ -112,12 +151,15 @@ function createHarness(options = {}) {
       fetchLog.push({url, init});
       const pathOnly = url.split("?")[0];
       const method = (init.method || "GET").toUpperCase();
+      // Prefer the most specific route so "/x/{id}/cancel" is not swallowed by "/x".
+      let best = null;
       for (const [key, handler] of routes) {
         const [routeMethod, routePath] = key.split(" ");
-        if (routeMethod === method && (pathOnly === routePath || pathOnly.startsWith(routePath + "/") || (routePath.endsWith("*") && pathOnly.startsWith(routePath.slice(0, -1))))) {
-          return handler(url, init);
-        }
+        const matches = routeMethod === method && (pathOnly === routePath || pathOnly.startsWith(routePath + "/") ||
+          (routePath.endsWith("*") && pathOnly.startsWith(routePath.slice(0, -1))));
+        if (matches && (!best || routePath.length > best.routePath.length)) best = {routePath, handler};
       }
+      if (best) return best.handler(url, init);
       if (method === "GET" && pathOnly === "/api/preflight") return response(state.preflight);
       if (method === "GET" && pathOnly === "/api/session/status") return response(state.status);
       if (method === "GET" && pathOnly === "/api/devices") return response(state.devices);
@@ -168,4 +210,4 @@ function createHarness(options = {}) {
   };
 }
 
-module.exports = {createHarness, settle, deferred, response, FakeWebSocket, preflightPayload, ROOT};
+module.exports = {createHarness, settle, deferred, response, FakeWebSocket, preflightPayload, realCapabilities, realHealth, ROOT};
