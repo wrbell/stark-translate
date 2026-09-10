@@ -22,6 +22,16 @@ no release or package publication is authorized for this follow-up. The
   outputs remained exact. Median paired savings were 15.13 ms (9.18%), with
   positive medians in all three repeats. This isolated gain is below the
   15%/150 ms promotion gate; no production integration or caption gain is claimed.
+- [Compiled decoder trial](profiling/compile-development-r1.json): all 18 triplets
+  completed, but exact-output checks failed in six and first-call cost produced
+  a worse tail. Compilation did not improve on joint evaluation at the paired
+  median. This candidate is rejected; no runtime switch was added.
+- [Fixed-reference E4B/E2B translation](translation-comparison.md): all twelve
+  runs completed with unchanged outputs across repeats, no empty outputs or
+  exhausted budgets. E2B reduced isolated translation time but scored 11/18
+  lexical canaries versus E4B 13/18, with slightly lower reference chrF in both
+  directions. The report retains every canary and changed public examples.
+  A separate unreviewed blinded packet is prepared; its key stays private.
 - [Attended operator checks](../attended_mic_20260910/README.md): EN and ES
   microphone readiness/stop and EN pause/resume passed. The room had no detected
   speech. A separately labeled file replay produced a visible bilingual final;
@@ -39,7 +49,7 @@ no release or package publication is authorized for this follow-up. The
   [Sixty original candidate triples](../../../training/candidates/README.md)
   remain unapproved. Missing WSL artifacts/holdouts are not treated as passing.
 
-## First development result
+## Development STT result
 
 | Language | Engine | Corpus WER, all three repeats | Per-repeat whole-recording STT p50 |
 |---|---|---:|---:|
@@ -78,7 +88,13 @@ Median improvement must reach 15% or 150 ms against **both** controls in at leas
 two of three repeats. The tail guard uses explicit nearest-rank p95, permitting
 at most the larger of 5% or 100 ms regression. At least 100 eligible observations
 are required for a p95 claim. Preview source coverage may lose at most two
-percentage points. Missing/duplicate runs, inference failures, source loss,
+percentage points. First-preview delay and update-gap p95 must also avoid
+regression beyond the larger of 5% or 100 ms; missing evidence cannot silently
+become a zero, and no-preview controls are explicitly N/A. These additional
+responsiveness guards were declared before this follow-up replay cohort.
+Actual selected STT and loaded model identities must match each declared arm;
+only the explicit Spanish Parakeet experiment may change that STT selection.
+Missing/duplicate runs, inference failures, source loss,
 unbounded queues, memory regressions or quality-gate failures cannot qualify.
 The declared memory guard permits at most the larger of 10% or 256 MiB above
 each control's separate process-lifetime RSS/Metal peak (never summed).
@@ -94,8 +110,7 @@ server-side engineering screen. Nothing here changes a production default.
 
 ## Remaining execution
 
-Run the bounded live-pipeline and fixed-transcript translation comparisons,
-conditional compiled Parakeet investigation, smaller CPU STT comparison, and untouched
+Run the bounded live-pipeline comparisons, smaller CPU STT comparison, and untouched
 confirmation for qualifying candidates. Retain negative results. Integrate
 appropriate checks and documentation, rebuild/verify artifacts, run final
 Standard and CPU Lite full-service rehearsals, review the final changes, and

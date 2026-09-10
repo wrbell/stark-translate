@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "completed": true,
+  "manifest_sha256": "9de09bead155cef2a62f58ef0be91c43e35ced2e91672fbcfa641f358c498385",
+  "task": "translate",
+  "partition": "development",
+  "serial": true,
+  "runs": [
+    {
+      "file": "translate_e4b_en_development_r0.json",
+      "sha256": "5edebb80b6f7305ee3bc9be9f0880c1e703406ade85665a9a3ffe2cd2d09483f",
+      "engine": "e4b",
+      "source_lang": "en",
+      "repeat": 0,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e2b_en_development_r0.json",
+      "sha256": "d24c48188a642f849412d98b497c13c95ffbc56c22e15ef6ccc418206c8d22b0",
+      "engine": "e2b",
+      "source_lang": "en",
+      "repeat": 0,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e4b_es_development_r0.json",
+      "sha256": "86b935d1540a2d5e0ac2b529c6691f8f8ad3f1a110dd0b4cc0238bb2d2dacac9",
+      "engine": "e4b",
+      "source_lang": "es",
+      "repeat": 0,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e2b_es_development_r0.json",
+      "sha256": "7645ea07597bd25f6f02176d7e910192bb2ee4d7e17116e38015ec06e518452b",
+      "engine": "e2b",
+      "source_lang": "es",
+      "repeat": 0,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e2b_en_development_r1.json",
+      "sha256": "0a7be8e8eaa292ecfd395bb6ac467dae3bc92692e97bdbd43d92236ab11c48cf",
+      "engine": "e2b",
+      "source_lang": "en",
+      "repeat": 1,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e4b_en_development_r1.json",
+      "sha256": "8da1217f53e2897546860c0cdd1af6ae2450bf28c0c6acf924d1aaca7c705af2",
+      "engine": "e4b",
+      "source_lang": "en",
+      "repeat": 1,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e2b_es_development_r1.json",
+      "sha256": "e11fe9621e81ee882e74b0640d6f689d3f71aada0da9c7d75ec1237e3c4cb7e1",
+      "engine": "e2b",
+      "source_lang": "es",
+      "repeat": 1,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e4b_es_development_r1.json",
+      "sha256": "a7d6af102b1bbe9078414cb63ad6ab7e754dd14bd553f6bb0e0b461a09af0d5a",
+      "engine": "e4b",
+      "source_lang": "es",
+      "repeat": 1,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e4b_en_development_r2.json",
+      "sha256": "a4962f8ebb0bf49adec980cdd91e95d9ef5a0108ae254181f3548601e4ee400e",
+      "engine": "e4b",
+      "source_lang": "en",
+      "repeat": 2,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e2b_en_development_r2.json",
+      "sha256": "c85d73adb5f19341a883310bddf2946bbd5509486624a9e05599e12fb9e50f93",
+      "engine": "e2b",
+      "source_lang": "en",
+      "repeat": 2,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e4b_es_development_r2.json",
+      "sha256": "cfb2875f1c1dd523c0ef9cdca70a604348550c35811c768998e157ac3cdcb9ef",
+      "engine": "e4b",
+      "source_lang": "es",
+      "repeat": 2,
+      "returncode": 0,
+      "completed": true
+    },
+    {
+      "file": "translate_e2b_es_development_r2.json",
+      "sha256": "e90f0c96b05b6d517b5daf591d7b9e56a3f64f5328b4468a82c79a1827dbfb95",
+      "engine": "e2b",
+      "source_lang": "es",
+      "repeat": 2,
+      "returncode": 0,
+      "completed": true
+    }
+  ],
+  "planned_runs": 12,
+  "environment": {
+    "code_sha": "12546164d4bbd148d901384b390b01bc912c865a",
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_sha256": {
+      "dry_run_ab.py": "c708e5557035dd480b6b1665e68aa91af0c6947354e28791f64b62895c583872",
+      "settings.py": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568",
+      "engines/mlx_engine.py": "22aa8ebf4b79780958b9f1707b1f79c98d6298ee56a92f5f6384e9263b06da14",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+      "tools/pipeline_timing.py": "729cc42443c5373751da704920c8eca99afa747fd5447cc874bf55c5a2b13f9a",
+      "tools/mac_evaluation.py": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": null,
+      "numpy": "2.3.5",
+      "soundfile": "0.14.0",
+      "faster-whisper": null,
+      "pydantic-settings": "2.13.1"
+    },
+    "created_at": "2026-09-10T14:03:34.393958+00:00",
+    "quality_source_sha256": {
+      "tools/mac_followup_quality.py": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "models.lock.json": "ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273",
+      "settings.py": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568",
+      "engines/__init__.py": "45034d1776f5ee1ad620a8b09e654431f0c179b0c8c9320c8a2882fa1d4393fd",
+      "engines/_locks.py": "80bb52edd8441e66e9ed96c24a750c2694e20dcd9ecce3e4121d0ab878daaf90",
+      "engines/active_learning.py": "ca1f5c59afb7cd212393e26c55ea056491217a56274947c82a50effa87ffe5a6",
+      "engines/audio_devices.py": "994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5",
+      "engines/base.py": "a1292b5809bce689579c398040e268d3dacb56a0c9961ca4354c017cb43bc269",
+      "engines/cuda_engine.py": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "engines/factory.py": "fef3dc82b0ac990346e20a0aae0f9288207d0fc8581d606d973b160dac7500f0",
+      "engines/hf_whisper_engine.py": "d468ed490459f421c0efa5d2be7494f3f3c7c0541297442abc5aea40ca3036f7",
+      "engines/llamacpp_engine.py": "259900c54808b5abb3fee7b2f901ac218a68e4e4cbe1baf2ede71c6bbc8aac93",
+      "engines/marian_hf_engine.py": "715e4aeddccf18a62702caad443499506425fb96df57606976b1987d46d03e1c",
+      "engines/mlx_engine.py": "22aa8ebf4b79780958b9f1707b1f79c98d6298ee56a92f5f6384e9263b06da14",
+      "engines/mlx_generation_lock.py": "3e9adc6a10366676220ad844e2ca3b6efacfb8d5f61c13cf5b4016b4454a700a",
+      "engines/mlx_spec.py": "0a33aa9d8d8f51ba1a61b38f97a9003d2d924768802a820947d2cfe534e5692a",
+      "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+      "engines/parakeet_engine.py": "833031c842e60af19322f5809a51a4df8721b6664ca65b9ff7fe6ab30c86d1c8",
+      "engines/parakeet_mlx_engine.py": "a2e463974659ef671acc46a1935e13326d44b5f2886704fda22ecb2516e71582",
+      "engines/prefix_cache.py": "c675326e46bd6fa1fbaf126dc06495af1c06e5317396efe79139e3f96b8cd1e0",
+      "engines/spec_decode_logger.py": "c4b1b3fb0f3163687fda5ae9ebbdf2a61ca27e81290e7cbf6349f42ba9709abb",
+      "engines/stt_fallback.py": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/tts_engine.py": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3"
+    },
+    "normalization": {
+      "version": 1,
+      "description": "NFKC + casefold; Unicode punctuation becomes spaces; whitespace collapsed; accents and digits retained; no number expansion, STT corrections or reference-dependent rewriting"
+    }
+  },
+  "human_approved_locally": false
+}
