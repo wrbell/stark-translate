@@ -1,5 +1,6 @@
 """Portable correction imports must preserve provenance and newer human edits."""
 
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -147,3 +148,29 @@ def test_whisper_separate_output_preserves_original_training_examples(tmp_path):
     assert (output / "old.wav").read_bytes() == b"existing-wave"
     assert len(read_jsonl(original / "metadata.jsonl")) == 1
     assert merge_whisper(corrections, original, output_dir=output)["after"] == 2
+
+
+def test_whisper_destination_symlink_cannot_write_outside_corpus(tmp_path):
+    corrections = whisper_export(tmp_path / "corrections")
+    target = tmp_path / "train"
+    target.mkdir()
+    outside = tmp_path / "unrelated.wav"
+    outside.write_bytes(b"keep me")
+    name = "al_" + hashlib.sha256(b"live_en__1").hexdigest()[:24] + ".wav"
+    (target / name).symlink_to(outside)
+    with pytest.raises(ValueError, match="destination audio"):
+        merge_whisper(corrections, target)
+    assert outside.read_bytes() == b"keep me"
+    assert not (target / "metadata.jsonl").exists()
+
+
+@pytest.mark.parametrize("revision", [-1, 1.5, "invalid", True])
+def test_malformed_first_revision_cannot_enter_either_corpus(tmp_path, revision):
+    path = tmp_path / "corrections.jsonl"
+    atomic_jsonl(path, [pair(revision=revision)])
+    with pytest.raises(ValueError, match="revision"):
+        merge_translation(path, tmp_path / "train.jsonl")
+    with pytest.raises(ValueError, match="revision"):
+        merge_whisper(whisper_export(tmp_path / "audio", revision=revision), tmp_path / "train")
+    assert not (tmp_path / "train.jsonl").exists()
+    assert not (tmp_path / "train").exists()

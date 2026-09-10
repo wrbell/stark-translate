@@ -53,15 +53,19 @@ def _training_only(path: Path, rows: list[dict], *, require_live: bool = False) 
         )
 
 
-def _accept_revision(existing: dict, incoming: dict, fields: tuple[str, ...]) -> bool:
-    """Ignore older exports and reject identity/content conflicts before writing."""
+def _revision(row: dict) -> int:
     try:
-        old_revision = int(existing.get("revision") or 0)
-        new_revision = int(incoming.get("revision") or 0)
-        if min(old_revision, new_revision) < 0:
+        value = int(str(row.get("revision") or 0))
+        if value < 0:
             raise ValueError
     except (ValueError, TypeError) as exc:
         raise ValueError("Correction revision must be a nonnegative integer") from exc
+    return value
+
+
+def _accept_revision(existing: dict, incoming: dict, fields: tuple[str, ...]) -> bool:
+    """Ignore older exports and reject identity/content conflicts before writing."""
+    old_revision, new_revision = _revision(existing), _revision(incoming)
     sample = incoming.get("sample_id", "unknown")
     old_hash, new_hash = existing.get("audio_sha256"), incoming.get("audio_sha256")
     if old_hash and new_hash and old_hash != new_hash:
@@ -103,6 +107,7 @@ def merge_translation(
     seen = {tuple(part.lower() for part in _pair(row)) for row in existing}
     added = updated = stale = 0
     for row in corrections:
+        _revision(row)
         en, es = _pair(row)
         if not en or not es:
             continue
@@ -211,6 +216,7 @@ def merge_whisper(
     ids = {row.get("sample_id"): index for index, row in enumerate(existing) if row.get("sample_id")}
     prepared = []
     for row in corr_rows:
+        _revision(row)
         source_name = row.get("file_name") or row.get("audio") or ""
         transcript = (row.get("transcription") or row.get("sentence") or row.get("text") or "").strip()
         if not source_name or not transcript:
@@ -225,6 +231,8 @@ def merge_whisper(
             raise ValueError(f"Audio hash mismatch: {source_name}")
         sample = row.get("sample_id") or f"audio-{audio_hash}-{language}"
         name = "al_" + hashlib.sha256(sample.encode()).hexdigest()[:24] + ".wav"
+        if not (out_dir / name).resolve().is_relative_to(out_dir.resolve()):
+            raise ValueError("Correction destination audio must stay within the training corpus")
         item = {
             **row,
             "file_name": name,
