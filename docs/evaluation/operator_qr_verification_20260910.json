@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "reference": {
+    "encoder": "qrcodegen",
+    "version": "1.8.0",
+    "source": "https://github.com/nayuki/QR-Code-generator/blob/v1.8.0/python/qrcodegen.py",
+    "source_sha256": "b089855caf16185c61421ea4927c1b213cf9468940d71fa8ab11ef83662dcc84",
+    "parameters": {
+      "mode": "byte",
+      "ecc": "L",
+      "mask": 0,
+      "boost_ecc": false
+    },
+    "matrix_hash_encoding": "SHA256 over row-major bytes, each module one byte of value 0 or 1",
+    "generation_call": "QrCode.encode_segments([QrSegment.make_bytes(text.encode(\"utf-8\"))], QrCode.Ecc.LOW, minversion=1, maxversion=9, mask=0, boostecl=False)"
+  },
+  "cases": [
+    {
+      "name": "v1_minimum",
+      "text": "a",
+      "version": 1,
+      "utf8_bytes": 1,
+      "size": 21,
+      "matrix_sha256": "e0eaa9451b23803acd598cdcd8d99adde8caa43b11da279e22533be2510d2a6d",
+      "decoded": "a",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v1_maximum",
+      "text": "a+/B-=:a+/9_=:a-?",
+      "version": 1,
+      "utf8_bytes": 17,
+      "size": 21,
+      "matrix_sha256": "54762eb81703aa0d84e6306ac47163114637b1999f57459d9f00f60d7d48727e",
+      "decoded": "a+/B-=:a+/9_=:a-?",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v2_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9",
+      "version": 2,
+      "utf8_bytes": 18,
+      "size": 25,
+      "matrix_sha256": "1d8a64ecaa3572f28d88ee25484a1a9d36a79e8183296d16803582fa6d42f12e",
+      "decoded": "a+/B-=:a+/9_=:a-?9",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v2_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:",
+      "version": 2,
+      "utf8_bytes": 32,
+      "size": 25,
+      "matrix_sha256": "947127af42a19e5f6ade16938b6cdceac41b437b4be728b8f50211de17cc9d81",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v3_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a",
+      "version": 3,
+      "utf8_bytes": 33,
+      "size": 29,
+      "matrix_sha256": "b713213aceb6e137a430c016739e44e3c5c5f913f7bfb621ff29706d2016034b",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v3_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/",
+      "version": 3,
+      "utf8_bytes": 53,
+      "size": 29,
+      "matrix_sha256": "e143eb1778f3da3de041260f9ea96e1d3385f7f9b36526489b4d1775d6c0ec80",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v4_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B",
+      "version": 4,
+      "utf8_bytes": 54,
+      "size": 33,
+      "matrix_sha256": "8c9392eeae65e1f3a49d1959a68d1a7dc8abe63333fb3b80efd19cf77e6d4dc8",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v4_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/",
+      "version": 4,
+      "utf8_bytes": 78,
+      "size": 33,
+      "matrix_sha256": "67311eb2f0d9b169a62a91a68c1307545c69996bf5ff4315bd776f1bd31b17bb",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v5_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B",
+      "version": 5,
+      "utf8_bytes": 79,
+      "size": 37,
+      "matrix_sha256": "ee4700794e8fe134fe4f991d77239bc7ed6d7c87278085a9c79f3c54cf0723ee",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v5_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=",
+      "version": 5,
+      "utf8_bytes": 106,
+      "size": 37,
+      "matrix_sha256": "3c715400c254bd288ff42a95247a31cedff7403125662bc4265bfcba0f21dc76",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v6_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:",
+      "version": 6,
+      "utf8_bytes": 107,
+      "size": 41,
+      "matrix_sha256": "b7587096fbef8ea1e8fb23f718c4e39d1ee650391b95126fa999fe17ad36e566",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v6_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+",
+      "version": 6,
+      "utf8_bytes": 134,
+      "size": 41,
+      "matrix_sha256": "5e5d96beb55ae418a8f0a898c9ce21abd88261f4719de054600096c79d032788",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v7_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/",
+      "version": 7,
+      "utf8_bytes": 135,
+      "size": 45,
+      "matrix_sha256": "433d7231defc7da92417589be637496c5e0c0651ad2dd65a721c9a6dcc035511",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v7_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B",
+      "version": 7,
+      "utf8_bytes": 154,
+      "size": 45,
+      "matrix_sha256": "50ab49b193ab5dca64f90c19fb82c755dbf40e6f53c8283dcf7a34c8efc5de4c",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v8_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-",
+      "version": 8,
+      "utf8_bytes": 155,
+      "size": 49,
+      "matrix_sha256": "a22d71f1cb56cae4d00d2e8acdb7224bdc16da7606730ac9a3b0d630c112e32f",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v8_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?",
+      "version": 8,
+      "utf8_bytes": 192,
+      "size": 49,
+      "matrix_sha256": "2ee13f8ade2ecc01e257324a183c3c89d182d20e850837e693fafcc754a655c9",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v9_minimum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9",
+      "version": 9,
+      "utf8_bytes": 193,
+      "size": 53,
+      "matrix_sha256": "ef0987f1502cfb4193a2c09eea1c3297502a428f2a846fe6ada2572dbc516680",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "v9_maximum",
+      "text": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-",
+      "version": 9,
+      "utf8_bytes": 230,
+      "size": 53,
+      "matrix_sha256": "8fb9159078c09d5523321e75723c3e488e408e10d0390c7e095ad4af13a053c4",
+      "decoded": "a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-=:a+/9_=:a-?9_=/B-?9a+/B-",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "phone_url",
+      "text": "http://192.168.1.20:8080/displays/mobile_display.html?port=8765",
+      "version": 4,
+      "utf8_bytes": 63,
+      "size": 33,
+      "matrix_sha256": "9b90d02d3d130b79c853dc8cb1ea3ceb79cf5ffba5c6b3da4eda66c7647fc651",
+      "decoded": "http://192.168.1.20:8080/displays/mobile_display.html?port=8765",
+      "decoded_bytes_match": true
+    },
+    {
+      "name": "utf8",
+      "text": "https://stark.local/?t=salvación🙏",
+      "version": 3,
+      "utf8_bytes": 37,
+      "size": 29,
+      "matrix_sha256": "0b61d12d9f8cb8ef4e11f036c2b38c7e6e08e96fe1cd50579db426a1123d0cec",
+      "decoded": "https://stark.local/?t=salvación🙏",
+      "decoded_bytes_match": true
+    }
+  ],
+  "widget_sha256": "70e9337f3eb05eabc56e12e8959cea4ea9eea9fa8626bee6dad098557e5b4114",
+  "decoder": {
+    "package": "zxing-cpp",
+    "version": "3.1.1",
+    "pillow_version": "12.3.0",
+    "quiet_modules": 4,
+    "scale": 6
+  },
+  "matrix_matches": 20,
+  "decode_matches": 20,
+  "versions": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "physical_phone_scan_executed": false,
+  "original_widget_commit": "a45c39b558754d416bf906ca5f007d84f508304c",
+  "original_widget_sha256": "2ce6ba98a6aa0f88384c0f70fedb783c68e2c29f0fa15609f0eb7d56f76ebc30",
+  "audience_uses_shared_widget": true,
+  "audience_html_sha256": "c5dab4b9caec8cc401d1d57515c1b54e690a211d1317253d423635f650fee613",
+  "regressions": {
+    "command": "python -m pytest tests/test_operator_qr_oracle.py -q",
+    "passed": 3,
+    "coverage": [
+      "20 independently encoded matrix hashes including all version boundaries",
+      "canvas modules and four-module quiet zone",
+      "UTF-8 byte capacity and oversize rejection",
+      "audience overlay loads shared local widget; text survives oversize; canvas recovers"
+    ]
+  },
+  "original_decoder_evidence": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/qr-decoded.json",
+    "sha256": "7170032bc9ff36d2c89363162f11fb143118515a75b969216697b1a27b74cdd7",
+    "failing_versions": [
+      7,
+      8,
+      9
+    ]
+  },
+  "scope": "Software encoder and decoder correctness; no physical phone-camera, LAN access or live pipeline acceptance claim"
+}

@@ -116,6 +116,25 @@
     }
   }
 
+  // Versions 7+ carry an 18-bit BCH-protected version number in two 3x6
+  // regions. Reserve both before data placement and masking.
+  function placeVersion(grid, reserved, version) {
+    if (version < 7) return;
+    let remainder = version << 12;
+    for (let bit = 17; bit >= 12; bit--) {
+      if ((remainder >> bit) & 1) remainder ^= 0x1f25 << (bit - 12);
+    }
+    const encoded = (version << 12) | remainder;
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < 3; col++) {
+        const other = grid.length - 11 + col;
+        const value = (encoded >> (row * 3 + col)) & 1;
+        grid[row][other] = value; grid[other][row] = value;
+        reserved[row][other] = true; reserved[other][row] = true;
+      }
+    }
+  }
+
   function placeFormat(grid, bits) {
     const size = grid.length;
     const first = [[8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8], [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8]];
@@ -161,7 +180,10 @@
     }
     for (const r of ALIGNMENT[ver] || []) {
       for (const c of ALIGNMENT[ver] || []) {
-        if (reserved[r][c]) continue;
+        // Only finder corners suppress alignment. From version 7 onward,
+        // intermediate centers on row/column 6 replace the timing pattern.
+        if ((r === 6 && (c === 6 || c === size - 7)) ||
+            (r === size - 7 && c === 6)) continue;
         placeAlignment(grid, reserved, r, c);
       }
     }
@@ -171,6 +193,7 @@
     }
     reserved[8][8] = true;
     grid[size - 8][8] = 1; reserved[size - 8][8] = true;
+    placeVersion(grid, reserved, ver);
 
     const dataBits = [];
     for (const byte of all) for (let i = 7; i >= 0; i--) dataBits.push((byte >> i) & 1);
