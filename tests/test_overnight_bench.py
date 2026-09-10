@@ -5,7 +5,38 @@ import json
 
 import pytest
 
-from tools.overnight_bench import compare_outputs, coverage_missing, inspect_run, ranges, schedule
+from tools.overnight_bench import compare_outputs, coverage_missing, inspect_run, preview_browsers, ranges, schedule
+
+
+def test_visible_preview_join_rejects_unknown_duplicate_and_hidden_events():
+    partials = [
+        {"event_id": "s:partial:1", "utterance_id": 1, "text_es": "Dios"},
+        {"event_id": "s:partial:2", "utterance_id": 1, "text_es": "Dios ama"},
+    ]
+    ack = {
+        "event": "caption_rendered",
+        "event_id": "s:partial:1",
+        "session_id": "s",
+        "visible": True,
+        "stage": "partial",
+        "client_id": "audience",
+        "speech_start_to_preview_ack_upper_bound_ms": 650,
+        "receive_to_render_ms": 20,
+    }
+    result = preview_browsers(
+        partials,
+        [
+            ack,
+            ack,
+            {**ack, "event_id": "unknown"},
+            {**ack, "event_id": "s:partial:2", "visible": False},
+            {**ack, "session_id": "other"},
+        ],
+        "s",
+    )
+    assert result["cohorts"][0]["visible_preview_events"] == 1
+    assert result["cohorts"][0]["first_preview_ack_upper_bound_ms"] == {"n": 1, "p50": 650, "p95": 650}
+    assert result["emitted_translated_preview_events"] == 2
 
 
 def test_coverage_union_accounts_for_overlap_and_internal_holes():

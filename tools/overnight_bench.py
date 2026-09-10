@@ -74,6 +74,47 @@ def segment_key(row):
     return tuple(str(row.get(key, "")) for key in ("sample_start", "sample_end", "sample_rate", "endpoint_reason"))
 
 
+def preview_browsers(partials, acknowledgments, session):
+    """Join exact preview IDs; keep every visible browser in its own cohort."""
+    emitted = {
+        row["event_id"]: row for row in partials if row.get("event_id") and str(row.get("text_es") or "").strip()
+    }
+    clients = defaultdict(dict)
+    for ack in acknowledgments:
+        if (
+            ack.get("event") != "caption_rendered"
+            or ack.get("session_id") != session
+            or ack.get("visible") is not True
+            or ack.get("stage") != "partial"
+            or ack.get("event_id") not in emitted
+            or not isinstance(ack.get("client_id"), str)
+        ):
+            continue
+        client = clients[ack["client_id"]]
+        client.setdefault(ack["event_id"], ack)
+    rows = []
+    for client_id, events in sorted(clients.items()):
+        first = {}
+        render = []
+        for event_id, ack in events.items():
+            uid = emitted[event_id].get("utterance_id")
+            delay = number(ack.get("speech_start_to_preview_ack_upper_bound_ms"))
+            if uid is not None and delay is not None:
+                first[uid] = min(first.get(uid, delay), delay)
+            if (overhead := number(ack.get("receive_to_render_ms"))) is not None:
+                render.append(overhead)
+        rows.append(
+            {
+                "client_id": client_id,
+                "visible_preview_events": len(events),
+                "emitted_translated_preview_events": len(emitted),
+                "first_preview_ack_upper_bound_ms": stats(list(first.values())),
+                "receive_to_render_ms": stats(render),
+            }
+        )
+    return {"cohorts": rows, "emitted_translated_preview_events": len(emitted), "available": bool(rows)}
+
+
 def inspect_run(report: dict, metrics: Path) -> dict:
     session = report["session_id"]
     csv_path = metrics / f"ab_metrics_{session}.csv"
@@ -124,6 +165,7 @@ def inspect_run(report: dict, metrics: Path) -> dict:
             number(row.get("processed_audio_s", row.get("buffer_s"))) or 0 for row in partials
         ),
         "browser": _report_browser_acknowledgments(rows, acknowledgments, session),
+        "preview_browser": preview_browsers(partials, acknowledgments, session),
         "hardware_profile": hardware,
         "resource_snapshots": [record["resources"] for record in diagnostic_records if record.get("resources")],
         "session_summary": summary,
