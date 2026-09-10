@@ -2,17 +2,22 @@
 
 import csv
 import json
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
+from tools import overnight_bench as bench
 from tools.overnight_bench import compare_outputs, coverage_missing, inspect_run, preview_browsers, ranges, schedule
 
 
 def test_visible_preview_join_rejects_unknown_duplicate_and_hidden_events():
     partials = [
-        {"event_id": "s:partial:1", "utterance_id": 1, "text_es": "Dios"},
-        {"event_id": "s:partial:2", "utterance_id": 1, "text_es": "Dios ama"},
+        {"event_id": "s:partial:1", "utterance_id": 1, "text_es": "Dios", "preview_revision": 1},
+        {"event_id": "s:partial:2", "utterance_id": 1, "text_es": "Dios ama", "preview_revision": 2},
     ]
+    for row in partials:
+        row.update(session_id="s", timing_schema_version=2, timing_source="replay_realtime")
     ack = {
         "event": "caption_rendered",
         "event_id": "s:partial:1",
@@ -22,6 +27,10 @@ def test_visible_preview_join_rejects_unknown_duplicate_and_hidden_events():
         "client_id": "audience",
         "speech_start_to_preview_ack_upper_bound_ms": 650,
         "receive_to_render_ms": 20,
+        "timing_schema_version": 2,
+        "timing_source": "replay_realtime",
+        "preview_revision": 1,
+        "utterance_id": 1,
     }
     result = preview_browsers(
         partials,
@@ -37,6 +46,22 @@ def test_visible_preview_join_rejects_unknown_duplicate_and_hidden_events():
     assert result["cohorts"][0]["visible_preview_events"] == 1
     assert result["cohorts"][0]["first_preview_ack_upper_bound_ms"] == {"n": 1, "p50": 650, "p95": 650}
     assert result["emitted_translated_preview_events"] == 2
+
+
+def test_final_only_browser_has_explicitly_missing_preview_coverage():
+    partial = {"session_id": "s", "event_id": "s:p:1", "text_es": "Dios", "timing_source": "replay_realtime"}
+    ack = {
+        "session_id": "s",
+        "event": "caption_rendered",
+        "visible": True,
+        "stage": "complete",
+        "timing_schema_version": 2,
+        "client_id": "audience",
+    }
+    result = preview_browsers([partial], [ack], "s")
+    assert result["client_count"] == 1 and not result["available"]
+    assert result["cohorts"][0]["first_preview_ack_upper_bound_ms"]["n"] == 0
+    assert result["cohorts"][0]["missing_preview_event_ids"] == ["s:p:1"]
 
 
 def test_coverage_union_accounts_for_overlap_and_internal_holes():
@@ -85,7 +110,7 @@ def test_read_production_records_keeps_endpoint_and_preview_definitions_separate
         {"utterance_id": 1, "text_es": "Dios ama", "speech_start_to_partial_ms": 1100, "emitted_at_ms": 1100},
         {"utterance_id": 2, "text_es": "Gracia", "speech_start_to_partial_ms": 600, "emitted_at_ms": 9000},
     ]
-    (tmp_path / f"partials_{session}.jsonl").write_text("\n".join(json.dumps(row) for row in partials))
+    (tmp_path / f"partials_{session}.jsonl").write_text("\n".join(json.dumps(row) for row in reversed(partials)))
     (tmp_path / f"diagnostics_{session}.jsonl").write_text(
         json.dumps({"event": "session_summary", "chunks_completed": 3})
     )
@@ -141,3 +166,160 @@ def test_schedule_alternates_models_configurations_and_brackets_with_anchors():
     ]
     with pytest.raises(ValueError, match="first baseline"):
         list(schedule({**spec, "experiments": [{"name": "prefix"}]}, 3))
+
+
+def test_configuration_is_standard_tts_off_and_independent_of_ambient_operator_state(monkeypatch):
+    monkeypatch.setenv("STARK_PROFILE", "lite-cpu")
+    monkeypatch.setenv("STARK_SESSION_KIND", "synthetic")
+    monkeypatch.setenv("STARK_TTS_ENABLED", "true")
+    monkeypatch.setenv("STARK_TRANSLATE_MARIAN_BACKEND", "hf")
+    monkeypatch.setenv("STARK_EXPERIMENT_INCREMENTAL_STT", "stream")
+    args, env, expected = bench.configuration(
+        {}, {"env": {"STARK_EXPERIMENT_FIRST_PREVIEW_S": "0.35"}}, {"lang": "en", "provenance": "church_replay"}, "e4b"
+    )
+    assert bench.argument_value(args, "--profile") == "standard" and "--no-tts" in args
+    assert "STARK_PROFILE" not in env and "STARK_TTS_ENABLED" not in env
+    assert "STARK_TRANSLATE_MARIAN_BACKEND" not in env
+    assert env["STARK_SESSION_KIND"] == "replay" and env["HF_HUB_OFFLINE"] == "1"
+    assert expected["first_preview_s"] == 0.35 and expected["incremental_stt"] == "off"
+    with pytest.raises(ValueError, match="unknown"):
+        bench.configuration({}, {"env": {"STARK_EXPERIMENT_FRIST_PREVIEW_S": "0.3"}}, {"lang": "en"}, "e4b")
+    with pytest.raises(ValueError, match="standard"):
+        bench.configuration({}, {"arguments": ["--profile", "lite-cpu"]}, {"lang": "en"}, "e4b")
+
+
+def completed_fixture(tmp_path, session, expected, clip):
+    metrics = tmp_path / "metrics"
+    metrics.mkdir(exist_ok=True)
+    row = {
+        "chunk_id": "1",
+        "utterance_id": "1",
+        "sample_start": "0",
+        "sample_end": "16000",
+        "sample_rate": "16000",
+        "speech_end_sample": "16000",
+        "endpoint_reason": "silence",
+        "timing_source": "replay_realtime",
+        "timing_schema_version": "2",
+        "speech_end_to_final_ms": "800",
+        "english": "God loves us.",
+        "spanish_a": "Dios nos ama.",
+    }
+    with (metrics / f"ab_metrics_{session}.csv").open("w", newline="") as output:
+        writer = csv.DictWriter(output, fieldnames=list(row))
+        writer.writeheader()
+        writer.writerow(row)
+    diagnostics = metrics / f"diagnostics_{session}.jsonl"
+    diagnostics.write_text(
+        json.dumps({"event": "session_summary", "chunks_completed": 1, "latency_experiment_configuration": expected})
+        + "\n"
+    )
+    return {
+        "session_id": session,
+        "returncode": 0,
+        "session_lifecycle": {
+            "status": "completed",
+            "session_id": session,
+            "schema_version": 1,
+            "exit_code": 0,
+            "pipeline_sha256": "code",
+            "diagnostics": {"sha256": bench.fingerprint(diagnostics), "size_bytes": diagnostics.stat().st_size},
+        },
+        "session_metadata": {
+            "session_id": session,
+            "session_kind": "replay",
+            "input_audio_sha256": clip["sha256"],
+            "source_lang": clip["lang"],
+            "replay_speed": 1,
+            "profile": {"name": "standard"},
+            "backend": "mlx",
+            "latency_experiment_configuration": expected,
+        },
+    }
+
+
+def test_completed_word_alone_cannot_hide_changed_diagnostics(tmp_path):
+    clip = {"lang": "en", "sha256": "input"}
+    result = completed_fixture(tmp_path, "s", {}, clip)
+    observed = inspect_run(result, tmp_path / "metrics")
+    source = {"all_code_sha256": {"dry_run_ab.py": "code"}}
+    assert bench.completion_errors(result, observed, tmp_path / "metrics", {}, clip, source) == []
+    (tmp_path / "metrics/diagnostics_s.jsonl").write_text("changed")
+    assert "unchanged" in bench.completion_errors(result, observed, tmp_path / "metrics", {}, clip, source)[0]
+
+
+def test_runner_records_source_change_and_stops_before_more_inference(tmp_path, monkeypatch):
+    audio = tmp_path / "audio.wav"
+    audio.write_bytes(b"fixture input")
+    clip = {
+        "id": "clip",
+        "path": "audio.wav",
+        "sha256": bench.fingerprint(audio),
+        "lang": "en",
+        "provenance": "church_replay",
+    }
+    spec = {"clips": [clip], "sizes": ["e4b"], "experiments": [{"name": "baseline"}]}
+    path = tmp_path / "spec.json"
+    path.write_text(json.dumps(spec))
+    source = {"all_code_sha256": {"dry_run_ab.py": "code"}, "versions": {}}
+    monkeypatch.setattr(bench, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        bench, "source_snapshot", Mock(side_effect=[source, source, {**source, "versions": {"mlx": "changed"}}])
+    )
+
+    def replay(clip, wav, session, *args, **kwargs):
+        expected = bench.LatencyExperiments.from_env(kwargs["env"]).as_dict()
+        return completed_fixture(tmp_path, session, expected, clip)
+
+    child = Mock(side_effect=replay)
+    monkeypatch.setattr(bench, "run_replay", child)
+    destination = tmp_path / "runs"
+    with pytest.raises(RuntimeError, match="Stopping"):
+        bench.run(
+            SimpleNamespace(
+                spec=path,
+                output=destination,
+                tag="smoke",
+                repeats=1,
+                ws_port=8765,
+                http_port=8080,
+                timeout=240,
+                continue_on_error=False,
+            )
+        )
+    child.assert_called_once()
+    result = json.loads((destination / "smoke_baseline_e4b_r0_clip_en.json").read_text())
+    assert not result["completion_validation"]["valid"]
+    assert "during inference" in result["error"]
+
+
+def test_report_excludes_failed_fast_samples_instead_of_rewarding_them(tmp_path):
+    inputs = tmp_path / "runs"
+    inputs.mkdir()
+    for repeat, failed, latency in [(0, False, 1000), (1, True, 10)]:
+        item = {
+            "session_id": f"s{repeat}",
+            "experiment": "baseline",
+            "repeat": repeat,
+            "size": "e4b",
+            "clip_id": "clip",
+            "completion_validation": {"valid": not failed},
+            "observed": {
+                "finals": [],
+                "coverage_intervals_s": [],
+                "endpoint_samples_ms": {"silence|replay_realtime": [latency]},
+                "first_preview_samples_ms": [latency],
+                "within_utterance_gap_samples_ms": [],
+                "browser": {},
+                "preview_browser": {},
+            },
+        }
+        if failed:
+            item["error"] = "recording failed"
+        (inputs / f"{repeat}.json").write_text(json.dumps(item))
+    bench.report(SimpleNamespace(input=inputs, output=tmp_path / "report"))
+    result = json.loads((tmp_path / "report/comparison.json").read_text())
+    assert result["eligible_runs"] == 1 and len(result["excluded_sessions"]) == 1
+    group = result["groups"][0]
+    assert group["endpoints"]["silence|replay_realtime"] == {"n": 1, "p50": 1000, "p95": 1000}
+    assert group["first_preview_ms"]["p50"] == 1000 and group["failures"] == 1
