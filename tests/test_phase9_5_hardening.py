@@ -145,8 +145,12 @@ class TestLaunchdPlist:
         with path.open("rb") as f:
             doc = plistlib.load(f)
         assert doc.get("Label") == "com.starkroad.translate"
+        # The checked-in plist is reference-only; installation renders actual paths.
+        from operator_app.launchd import launchd_plist
+
+        doc = launchd_plist(path.parent.parent, Path("/test/venv/bin/python"))
         assert "ProgramArguments" in doc
-        assert any("uvicorn" in a for a in doc["ProgramArguments"])
+        assert "operator_app.cli" in doc["ProgramArguments"]
         assert doc.get("RunAtLoad") is True
         assert doc.get("KeepAlive", {}).get("SuccessfulExit") is False
 

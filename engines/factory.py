@@ -35,7 +35,9 @@ def _resolve_ct2_whisper_model(explicit_model_id: str | None) -> str:
     if _WHISPER_CT2_ACTIVE_PATH.exists() and (_WHISPER_CT2_ACTIVE_PATH / "model.bin").exists():
         logger.info("STT: using local CT2 fine-tune at %s", _WHISPER_CT2_ACTIVE_PATH)
         return str(_WHISPER_CT2_ACTIVE_PATH)
-    return "large-v3-turbo"
+    from engines.model_paths import resolve_model_path
+
+    return resolve_model_path("large-v3-turbo") or "large-v3-turbo"
 
 
 def _resolve_ct2_marian_model(direction: str, explicit_path: str | None) -> str | None:
@@ -441,14 +443,18 @@ def create_tts_engine(voices: dict[str, str] | None = None) -> TTSEngine:
 
     Args:
         voices:  Dict mapping language codes to Piper voice names.
-                 Default: ``{"es": "es_ES-carlfm-high"}``.
+                 Default: configured EN/ES voices from settings.
 
     Returns:
         An *unloaded* ``TTSEngine`` instance.  Call ``.load()`` to initialise.
     """
     from engines.mlx_engine import PiperTTSEngine
 
-    return PiperTTSEngine(voices=voices or {"es": "es_ES-carlfm-high"})
+    if voices is None:
+        from settings import settings
+
+        voices = dict(settings.tts.voices)
+    return PiperTTSEngine(voices=voices)
 
 
 def _detect_backend() -> str:

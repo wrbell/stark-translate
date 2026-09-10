@@ -1,65 +1,188 @@
 {
-  "$schema_comment": "Manifest of model files stark-translate setup downloads + verifies. Decoupled from app version. Bump when an adapter or model id changes. URLs pin to specific HF commit SHAs for full reproducibility — never resolve/main/.",
-  "version": "2026.7.0",
-  "updated": "2026-04-25",
+  "$schema_comment": "Runtime model manifest. HF snapshots and direct files pin exact revisions. Mac setup installs Parakeet EN, Whisper ES, Gemma E4B and Marian; optional groups are selected with setup --include.",
+  "version": "2026.13.1",
+  "updated": "2026-09-09",
   "models": {
     "gemma-4-e2b-it-q4km.gguf": {
       "type": "direct",
       "url": "https://huggingface.co/wbell7/stark-translate-models/resolve/053575db60e30a0c2152233fda33d1a620e97ce5/gemma-4-e2b-it-q4km-v2026.7-base.gguf",
       "size_bytes": 3427877920,
       "sha256": "62adb571af12205e1e6ce0f2a4bd2835441f3e9a47d782af1539c0bc8831107f",
-      "required_for": ["cuda", "cpu"],
+      "required_for": [
+        "cpu"
+      ],
       "filename": "gemma-4-e2b-it-q4km.gguf",
-      "comment": "Gemma 4 E2B Q4_K_M GGUF — production translation model (low-VRAM fallback). v2026.7 base — no fine-tuning. Custom quant with bf16 PLE preserved."
+      "comment": "Gemma 4 E2B Q4_K_M GGUF \u2014 production translation model (low-VRAM fallback). v2026.7 base \u2014 no fine-tuning. Custom quant with bf16 PLE preserved.",
+      "optional_group": "e2b"
     },
     "gemma-4-e4b-it-q4km.gguf": {
       "type": "direct",
       "url": "https://huggingface.co/wbell7/stark-translate-models/resolve/9d19661c8e62ae76e3443ee42b3fddaca72b2496/gemma-4-e4b-it-q4km-v2026.7-base.gguf",
       "size_bytes": 5335289984,
       "sha256": "82a735b9e9d4fd26ab2c3d31a01b9b49b171144e1c8b114003dc09baebc867ca",
-      "required_for": ["cuda"],
+      "required_for": [
+        "cuda"
+      ],
       "filename": "gemma-4-e4b-it-q4km.gguf",
-      "comment": "Gemma 4 E4B Q4_K_M GGUF — production default (best quality 7/8 canary). v2026.7 base — no fine-tuning. Custom quant with bf16 PLE preserved."
+      "comment": "Gemma 4 E4B Q4_K_M GGUF \u2014 production default (best quality 7/8 canary). v2026.7 base \u2014 no fine-tuning. Custom quant with bf16 PLE preserved."
     },
     "whisper-large-v3-turbo": {
       "type": "hf-snapshot",
-      "repo_id": "openai/whisper-large-v3-turbo",
-      "revision": "main",
+      "repo_id": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "revision": "0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf",
       "subdir": "whisper-large-v3-turbo",
-      "required_for": ["cuda", "cpu", "mlx"],
-      "comment": "STT model. mlx path uses mlx-community/whisper-large-v3-turbo (separate snapshot below)."
+      "required_for": [
+        "cuda",
+        "cpu"
+      ],
+      "comment": "CTranslate2 Whisper Turbo for CUDA/CPU.",
+      "aliases": [
+        "large-v3-turbo",
+        "turbo"
+      ],
+      "required_files": [
+        "config.json",
+        "model.bin",
+        "tokenizer.json"
+      ]
     },
     "mlx-whisper-large-v3-turbo": {
       "type": "hf-snapshot",
       "repo_id": "mlx-community/whisper-large-v3-turbo",
-      "revision": "main",
+      "revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
       "subdir": "mlx-whisper-large-v3-turbo",
-      "required_for": ["mlx"],
+      "required_for": [
+        "mlx"
+      ],
       "comment": "MLX-converted Whisper Turbo for Apple Silicon."
     },
     "translategemma-4b-it-mlx": {
       "type": "hf-snapshot",
       "repo_id": "mlx-community/translategemma-4b-it-4bit",
-      "revision": "main",
+      "revision": "5788ec08c047f3f2e17808101b8d9566ac930d58",
       "subdir": "translategemma-4b-it-mlx",
-      "required_for": ["mlx"],
-      "comment": "MLX 4-bit TranslateGemma 4B — Mac translation A model (E2B/E4B GGUF is CUDA-only)."
+      "required_for": [],
+      "comment": "MLX 4-bit TranslateGemma 4B \u2014 Mac translation A model (E2B/E4B GGUF is CUDA-only).",
+      "optional_group": "translategemma",
+      "required_files": [
+        "config.json",
+        "tokenizer_config.json",
+        "tokenizer.json"
+      ]
     },
     "marian-en-es": {
       "type": "hf-snapshot",
       "repo_id": "Helsinki-NLP/opus-mt-en-es",
-      "revision": "main",
+      "revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
       "subdir": "marian-en-es",
-      "required_for": ["cuda", "cpu", "mlx"],
-      "comment": "MarianMT for fast EN→ES partials."
+      "required_for": [
+        "cuda",
+        "cpu",
+        "mlx"
+      ],
+      "comment": "MarianMT for fast EN\u2192ES partials.",
+      "required_files": [
+        "config.json",
+        "tokenizer_config.json",
+        "vocab.json",
+        "source.spm",
+        "target.spm"
+      ]
     },
     "marian-es-en": {
       "type": "hf-snapshot",
       "repo_id": "Helsinki-NLP/opus-mt-es-en",
-      "revision": "main",
+      "revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
       "subdir": "marian-es-en",
-      "required_for": ["cuda", "cpu", "mlx"],
-      "comment": "MarianMT for fast ES→EN partials."
+      "required_for": [
+        "cuda",
+        "cpu",
+        "mlx"
+      ],
+      "comment": "MarianMT for fast ES\u2192EN partials.",
+      "required_files": [
+        "config.json",
+        "tokenizer_config.json",
+        "vocab.json",
+        "source.spm",
+        "target.spm"
+      ]
+    },
+    "mlx-parakeet-v3": {
+      "type": "hf-snapshot",
+      "repo_id": "mlx-community/parakeet-tdt-0.6b-v3",
+      "revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+      "subdir": "mlx-parakeet-v3",
+      "required_for": [
+        "mlx"
+      ],
+      "required_files": [
+        "config.json",
+        "tokenizer.model"
+      ]
+    },
+    "mlx-gemma4-e4b": {
+      "type": "hf-snapshot",
+      "repo_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "subdir": "mlx-gemma4-e4b",
+      "required_for": [
+        "mlx"
+      ],
+      "required_files": [
+        "config.json",
+        "tokenizer_config.json",
+        "tokenizer.json"
+      ]
+    },
+    "mlx-gemma4-e2b": {
+      "type": "hf-snapshot",
+      "repo_id": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+      "revision": "0f3495e3e826e95fa21002c327805b840568f489",
+      "subdir": "mlx-gemma4-e2b",
+      "required_for": [],
+      "optional_group": "e2b",
+      "required_files": [
+        "config.json",
+        "tokenizer_config.json",
+        "tokenizer.json"
+      ]
+    },
+    "piper-en": {
+      "type": "hf-snapshot",
+      "repo_id": "rhasspy/piper-voices",
+      "revision": "1162a9173d0ce503555aed757976b7a9912eae4c",
+      "subdir": "piper-en",
+      "required_for": [],
+      "optional_group": "tts",
+      "allow_patterns": [
+        "en/en_US/lessac/high/en_US-lessac-high.onnx",
+        "en/en_US/lessac/high/en_US-lessac-high.onnx.json"
+      ],
+      "required_files": [
+        "en/en_US/lessac/high/en_US-lessac-high.onnx",
+        "en/en_US/lessac/high/en_US-lessac-high.onnx.json"
+      ],
+      "weights_required": false,
+      "voice": "en_US-lessac-high"
+    },
+    "piper-es": {
+      "type": "hf-snapshot",
+      "repo_id": "rhasspy/piper-voices",
+      "revision": "1162a9173d0ce503555aed757976b7a9912eae4c",
+      "subdir": "piper-es",
+      "required_for": [],
+      "optional_group": "tts",
+      "allow_patterns": [
+        "es/es_MX/claude/high/es_MX-claude-high.onnx",
+        "es/es_MX/claude/high/es_MX-claude-high.onnx.json"
+      ],
+      "required_files": [
+        "es/es_MX/claude/high/es_MX-claude-high.onnx",
+        "es/es_MX/claude/high/es_MX-claude-high.onnx.json"
+      ],
+      "weights_required": false,
+      "voice": "es_MX-claude-high"
     }
   }
 }

@@ -18,21 +18,18 @@ cd "$ROOT"
 
 HOST="${HOST:-0.0.0.0}"
 PORT="${PORT:-9000}"
-VENV="${VENV:-$ROOT/venv}"
+source "$ROOT/scripts/runtime_env.sh"
+PYTHON="$(stark_resolve_python "$ROOT")"
 
 export STARK_PROJECT_ROOT="$ROOT"
 export STARK_OPERATOR_LOG_DIR="${STARK_OPERATOR_LOG_DIR:-$ROOT/metrics}"
 
 mkdir -p "$STARK_OPERATOR_LOG_DIR"
 
-UVICORN="$VENV/bin/uvicorn"
-if [ ! -x "$UVICORN" ]; then
-    UVICORN="$(command -v uvicorn || true)"
-fi
-if [ -z "$UVICORN" ]; then
-    echo "ERROR: uvicorn not found. Activate venv or run ./bootstrap.sh." >&2
+if ! "$PYTHON" -c 'import uvicorn' >/dev/null 2>&1; then
+    echo "ERROR: uvicorn missing in $PYTHON. Run ./bootstrap.sh." >&2
     exit 2
 fi
 
 echo "starting operator at http://$HOST:$PORT (logs: $STARK_OPERATOR_LOG_DIR)"
-exec "$UVICORN" operator_app.main:app --host "$HOST" --port "$PORT"
+exec "$PYTHON" -m uvicorn operator_app.main:app --host "$HOST" --port "$PORT"

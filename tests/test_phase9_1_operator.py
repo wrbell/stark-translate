@@ -43,12 +43,13 @@ class TestPreflight:
             assert isinstance(c["name"], str)
             assert isinstance(c["detail"], str)
 
-    def test_check_models_warns_when_missing(self, tmp_path):
+    def test_check_models_fails_when_missing(self, tmp_path):
         from operator_app.preflight import check_models
 
-        result = check_models(tmp_path)
-        assert result["status"] == "warn"
-        assert "No Gemma 4 GGUFs" in result["detail"]
+        with patch("operator_app.preflight.resolve_model_path", return_value=None):
+            result = check_models(tmp_path)
+        assert result["status"] == "fail"
+        assert "Missing local models" in result["detail"]
 
     def test_check_models_passes_when_both_present(self, tmp_path):
         from operator_app.preflight import check_models
@@ -57,7 +58,8 @@ class TestPreflight:
         models.mkdir()
         (models / "gemma-4-e2b-it-q4km.gguf").touch()
         (models / "gemma-4-e4b-it-q4km.gguf").touch()
-        result = check_models(tmp_path)
+        with patch("operator_app.preflight.resolve_model_path", return_value="/cached"):
+            result = check_models(tmp_path)
         assert result["status"] == "pass"
 
     def test_check_adapter_manifest_fails_on_invalid_json(self, tmp_path):

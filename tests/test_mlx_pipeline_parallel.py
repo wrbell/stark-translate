@@ -65,9 +65,16 @@ class TestMlxDependencyPins:
     """Ensure packaging requires mlx-lm with thread-local generation stream."""
 
     def test_pyproject_mlx_lm_min_version(self):
-        text = Path("pyproject.toml").read_text()
-        assert "mlx-lm>=0.31.3" in text
-        assert "mlx>=0.31.2" in text
+        import tomllib
+
+        from packaging.requirements import Requirement
+
+        config = tomllib.loads(Path("pyproject.toml").read_text())
+        requirements = {req.name: req for req in map(Requirement, config["project"]["optional-dependencies"]["mlx"])}
+        assert "0.31.3" in requirements["mlx-lm"].specifier
+        assert "0.31.2" not in requirements["mlx-lm"].specifier
+        assert "0.32.2" in requirements["mlx"].specifier
+        assert "0.31.1" not in requirements["mlx"].specifier
 
     def test_requirements_mac_mlx_lm_min_version(self):
         text = Path("requirements-mac.txt").read_text()

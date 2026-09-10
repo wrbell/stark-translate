@@ -106,6 +106,8 @@ def cmd_setup(args: argparse.Namespace) -> int:
     return bootstrap_models(
         models_dir=models_dir,
         refresh=args.refresh,
+        backend=args.backend,
+        include=args.include,
         allow_patterns=args.allow if args.allow else None,
     )
 
@@ -116,7 +118,14 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     from operator_app.preflight import run_all_checks
 
     project_root = Path(os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
-    payload = run_all_checks(project_root=project_root)
+    payload = run_all_checks(
+        project_root=project_root,
+        backend=args.backend,
+        lang=args.lang,
+        tts=args.tts,
+        diarize=args.diarize,
+        models_dir=Path(args.models_dir) if args.models_dir else None,
+    )
 
     if args.json:
         print(json.dumps(payload, indent=2))
@@ -129,6 +138,17 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         glyph = {"pass": "✓", "warn": "!", "fail": "✗"}[check["status"]]
         print(f"  {glyph} {check['name']}: {check['detail']}")
     return 0 if payload["ok"] else 1
+
+
+def cmd_launchd(args: argparse.Namespace) -> int:
+    from operator_app.launchd import manage_launchd
+
+    return manage_launchd(
+        args.action,
+        project_root=Path(args.project_root),
+        python=Path(args.python) if args.python else None,
+        output=Path(args.output) if args.output else None,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -181,11 +201,25 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Emit JSON instead of human-readable output (with --check)",
     )
+    p_setup.add_argument("--backend", choices=["auto", "mlx", "cuda", "cpu"], default="auto")
+    p_setup.add_argument("--include", nargs="*", choices=["e2b", "tts", "translategemma"], default=[])
     p_setup.set_defaults(func=cmd_setup)
 
     p_doctor = sub.add_parser("doctor", help="Run preflight checks (same as operator UI)")
     p_doctor.add_argument("--json", action="store_true", help="Emit JSON instead of human-readable text")
+    p_doctor.add_argument("--backend", choices=["auto", "mlx", "cuda", "cpu"], default="auto")
+    p_doctor.add_argument("--lang", choices=["en", "es"], default="en")
+    p_doctor.add_argument("--models-dir")
+    p_doctor.add_argument("--tts", action="store_true")
+    p_doctor.add_argument("--diarize", action="store_true")
     p_doctor.set_defaults(func=cmd_doctor)
+
+    p_service = sub.add_parser("launchd", help="Explicit macOS login service install/uninstall or preview")
+    p_service.add_argument("action", choices=["render", "install", "uninstall"])
+    p_service.add_argument("--project-root", default=os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
+    p_service.add_argument("--python", help="Absolute venv interpreter path (default: current interpreter)")
+    p_service.add_argument("--output", help="Plist destination; render prints to stdout when omitted")
+    p_service.set_defaults(func=cmd_launchd)
 
     p_ver = sub.add_parser("version", help="Print installed version")
     p_ver.set_defaults(func=cmd_version)

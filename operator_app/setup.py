@@ -21,33 +21,17 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import os
-import platform
 import sys
 import urllib.request
 from pathlib import Path
 from typing import Any
 
+from engines.model_paths import default_models_dir, resolve_backend, resolve_model_path
+
 logger = logging.getLogger("stark-translate.setup")
 
 
 # -- cache dir resolution -----------------------------------------------------
-
-
-def default_models_dir() -> Path:
-    """Platform-appropriate model cache root."""
-    override = os.environ.get("STARK_MODELS_DIR")
-    if override:
-        return Path(override).expanduser()
-
-    if platform.system() == "Windows":
-        base = os.environ.get("LOCALAPPDATA") or str(Path.home())
-        return Path(base) / "stark-translate" / "models"
-
-    xdg = os.environ.get("XDG_CACHE_HOME")
-    if xdg:
-        return Path(xdg) / "stark-translate" / "models"
-    return Path.home() / ".cache" / "stark-translate" / "models"
 
 
 # -- lockfile loading ---------------------------------------------------------
@@ -286,6 +270,8 @@ def bootstrap_models(
     refresh: bool = False,
     allow_patterns: list[str] | None = None,
     project_root: Path | None = None,
+    backend: str | None = None,
+    include: list[str] | None = None,
 ) -> int:
     """Run the model setup flow. Returns process exit code."""
     if models_dir is None:
@@ -301,6 +287,14 @@ def bootstrap_models(
 
     lockfile_version = lockfile.get("version", "?")
     models = lockfile.get("models", {})
+    if backend is not None:
+        selected_backend = resolve_backend(backend)
+        selected_groups = set(include or [])
+        models = {
+            k: v
+            for k, v in models.items()
+            if selected_backend in v.get("required_for", []) or v.get("optional_group") in selected_groups
+        }
     if not models:
         logger.error("models.lock.json is empty")
         return 2
@@ -332,8 +326,24 @@ def bootstrap_models(
                 n_done += 1
             elif kind == "hf-snapshot":
                 target_dir = models_dir / entry["subdir"]
+                cached = resolve_model_path(key, models_dir=models_dir, project_root=project_root, local_only=True)
+                if not refresh and cached and Path(cached) != target_dir and not entry.get("allow_patterns"):
+                    logger.info("[skip] %s — using existing snapshot %s", key, cached)
+                    n_skipped += 1
+                    continue
                 marker = target_dir / ".installed"
-                if not refresh and marker.exists():
+                marker_matches = False
+                if marker.exists():
+                    try:
+                        installed = json.loads(marker.read_text())
+                        marker_matches = (
+                            installed.get("repo_id") == entry["repo_id"]
+                            and installed.get("revision") == entry.get("revision", "main")
+                            and installed.get("lockfile_version") == lockfile_version
+                        )
+                    except (OSError, ValueError):
+                        pass
+                if not refresh and marker_matches and cached is not None:
                     logger.info("[skip] %s — already installed", key)
                     n_skipped += 1
                     continue
@@ -342,7 +352,7 @@ def bootstrap_models(
                     repo_id=entry["repo_id"],
                     revision=entry.get("revision", "main"),
                     target_dir=target_dir,
-                    allow_patterns=allow_patterns,
+                    allow_patterns=allow_patterns or entry.get("allow_patterns"),
                 )
                 marker.write_text(
                     json.dumps(
