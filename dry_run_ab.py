@@ -5326,20 +5326,23 @@ def main():
     import hashlib
     from pathlib import Path
 
-    parser = argparse.ArgumentParser(description="Live A/B bilingual speech-to-text dry run")
+    parser = argparse.ArgumentParser(description="Live English/Spanish transcription and translation")
     parser.add_argument(
         "--no-record-audio",
         action="store_true",
         help="Keep captions/diagnostics without retaining microphone WAV files",
     )
     parser.add_argument(
-        "--ab", action="store_true", dest="run_ab", help="Load both 4B and 12B for A/B comparison (default: 4B only)"
+        "--ab",
+        action="store_true",
+        dest="run_ab",
+        help="Load both model variants for A/B comparison (default: one model)",
     )
     parser.add_argument(
         "--backend",
         choices=["auto", "mlx", "cuda", "cpu"],
         default="auto",
-        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA)",
+        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA), cpu",
     )
     parser.add_argument(
         "--engine",
