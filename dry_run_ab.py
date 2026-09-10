@@ -3261,12 +3261,12 @@ async def _pipeline_translate_and_finalize(
         if low_conf_words:
             words_str = ", ".join(f"'{w['word']}'({w['probability']:.0%})" for w in low_conf_words[:5])
             print(f"  >> LOW CONF WORDS: {words_str}")
-        # Compare last MarianMT partial against Gemma final + word stability
-        last_marian = partial_translations.pop(cid, None)
-        if last_marian is None:
-            # utterance_id doesn't match chunk_id — try recent entries
-            for uid in list(partial_translations.keys()):
-                last_marian = partial_translations.pop(uid, None)
+        # Preview maps use capture utterance IDs; final chunk IDs can diverge
+        # after discarded or filtered utterances. Take this exact pair before
+        # the next await, retaining newer utterances' previews and measurements.
+        uid = timing.utterance_id
+        last_marian = partial_translations.pop(uid, None) if uid is not None else None
+        marian_lat = partial_latencies.pop(uid, None) if uid is not None else None
         word_stability_pct = None
         if last_marian and spanish_a:
             check_marian_divergence(cid, last_marian, spanish_a)
@@ -3363,13 +3363,8 @@ async def _pipeline_translate_and_finalize(
         # [P7-5D] Move I/O to background threads — prevents disk writes from
         # blocking the main processing loop (saves 10-30ms on the critical path).
         #
-        # Extract MarianMT latency BEFORE submitting to pool — both CSV and
-        # JSONL writers need it, and .pop() from one would race with the other.
-        marian_lat = partial_latencies.pop(cid, None)
-        if marian_lat is None:
-            for uid in list(partial_latencies.keys()):
-                marian_lat = partial_latencies.pop(uid, None)
-
+        # Both writers receive the same exact-utterance preview measurement
+        # captured above; a missing utterance identity stays unavailable.
         _io_pool.submit(write_csv_row, result_data, marian_lat)
 
         # Save audio + structured diagnostics for fine-tuning pipeline
@@ -3625,6 +3620,8 @@ async def process_final(audio_data, finalized_utterance_id=None):
         for state in (
             _partial_emitted_sequence,
             _partial_source_text,
+            partial_translations,
+            partial_latencies,
             _pause_epochs,
             _speculative_candidates,
             _speculation_attempts,
