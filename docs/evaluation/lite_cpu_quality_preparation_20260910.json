@@ -1,0 +1,159 @@
+{
+  "scope": "download/install/hash/version verification only; no server started or model inference",
+  "runtime": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+  "profile": "lite-cpu-quality",
+  "model": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/gemma-4-e2b-it-q4km.gguf",
+    "size_bytes": 3427877920,
+    "sha256": "62adb571af12205e1e6ce0f2a4bd2835441f3e9a47d782af1539c0bc8831107f"
+  },
+  "native": {
+    "executable": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/native/b10883/Darwin-arm64-cpu/llama-b10883/llama-server",
+    "executable_sha256": "d707b6db4c1397a7383176fba12d339e5b33c7513669d74c8fbc2a76f6979a72",
+    "inventory": {
+      "revision": "91f6a6cf361385700bbe15981f0f39909df77498",
+      "build": "b10883",
+      "platform": "Darwin-arm64-cpu",
+      "cuda_architectures": null,
+      "executable": "llama-b10883/llama-server",
+      "files": {
+        "llama-b10883/llama-mtmd-debug": "95aedf8df825ffa3ec77eb62f9bf695f9cd81a74a7336060a528dc526a557050",
+        "llama-b10883/llama-tokenize": "35c8809e943f4460858f4ccf265ea7066a05c944da0bfee5329b081a230ac76e",
+        "llama-b10883/llama-cli": "76eae98242c4f95904200a8475976ae9e25316fc1ae14b1be733b8444d59983c",
+        "llama-b10883/llama-batched-bench": "8fd2ad28a3a2b8fe40be9b27577876a68af50b996a559dd6abd66975099dfe70",
+        "llama-b10883/libggml-rpc.0.dylib": "8aa05332ff6ca32deff5a96e6e152919788dee4acd052f80839f8386b4c7e07b",
+        "llama-b10883/llama-minicpmv-cli": "4baffe08bb410686ee032b1b2ff9a948bbde3fdc014dddf750f36978e3b40589",
+        "llama-b10883/libllama.0.dylib": "aedc6f9ae2ff3a38bcbf6db297965541ac1fd94b8e8f928d44f712f35823d5bd",
+        "llama-b10883/libmtmd.0.dylib": "dcc86d57d64ed4f7f9e30fc11a0938a9dd754ff1ea4fbc103f159d7e26cd39cc",
+        "llama-b10883/LICENSE": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d",
+        "llama-b10883/libggml.dylib": "98fa46f0bcd8c75a335f733c38cb79f911bc39412ba15ef52fee3ac051c14069",
+        "llama-b10883/libggml.0.dylib": "98fa46f0bcd8c75a335f733c38cb79f911bc39412ba15ef52fee3ac051c14069",
+        "llama-b10883/libllama-common.0.4.0.dylib": "0b33efdf0a0a30e42b37aa68e09766ece6dd6fd8f4fd1e444d2369a7df9e18af",
+        "llama-b10883/libmtmd.0.4.0.dylib": "dcc86d57d64ed4f7f9e30fc11a0938a9dd754ff1ea4fbc103f159d7e26cd39cc",
+        "llama-b10883/libllama.0.4.0.dylib": "aedc6f9ae2ff3a38bcbf6db297965541ac1fd94b8e8f928d44f712f35823d5bd",
+        "llama-b10883/llama-results": "b59a13b57cf80bb0016a1d074725b2ef0efe0c948a7e8a325eaa29e2cd78d80d",
+        "llama-b10883/libmtmd.dylib": "dcc86d57d64ed4f7f9e30fc11a0938a9dd754ff1ea4fbc103f159d7e26cd39cc",
+        "llama-b10883/libggml-base.0.23.0.dylib": "86b819107dadac7a2a977310bb53a1276ac640207ace40788e60e09e1e51fe4a",
+        "llama-b10883/libllama-server-impl.dylib": "7eb7e0bb12115a0431e22160cc3fc05d535c0f781cbc21a0c256ab26a80709b0",
+        "llama-b10883/llama-gguf-split": "aac59b5b9e22e5814286219dccce5f57953b05a8dd5ba96f966db0b11bbc70d2",
+        "llama-b10883/libggml-base.dylib": "86b819107dadac7a2a977310bb53a1276ac640207ace40788e60e09e1e51fe4a",
+        "llama-b10883/llama-perplexity": "a20c6e50a62953590608762c00e85d69241222d17dfeab1942fb7cbfd4574909",
+        "llama-b10883/llama-imatrix": "01eb826efc2982e0cbe119f96dabca517b4faaf5cfb20bfb8d4afcd046fad6b5",
+        "llama-b10883/llama-fit-params": "a08c4016b54e5c014c2e54b8b977ba990c63d89497b6561b453f5ae5202e4b6c",
+        "llama-b10883/ggml-rpc-server": "99e258b7c0094556cfae6593e53ac3003854d85f71a95362c156dcfaeedf3e8c",
+        "llama-b10883/llama-qwen2vl-cli": "9be4a36b2587c0216009b1ed59ac79b1e4dd2e885f326e8aeffac8aa37761d31",
+        "llama-b10883/libggml-blas.dylib": "414856968dcddae3a67e0f9c6dc012e5c4db13320c4d7ea5924dc1ad192dcfd6",
+        "llama-b10883/llama-gemma3-cli": "f7f9126b0881654bdb4c9ceab6de40f42e31998fa0c775505b5979ef7e8e567e",
+        "llama-b10883/libggml-metal.0.dylib": "0a498d7fa95e6ae270a96a2927f365c17372e1cef97fa8d6c637148e343ee683",
+        "llama-b10883/libllama-completion-impl.dylib": "a31599b9c21cd5b59d8b234f760a33f9e82bcd30c870b64dfc2a2f74f9e8c32e",
+        "llama-b10883/libllama-bench-impl.dylib": "4f56bb0b1c086c0da6b3c358ba7d7999f82bc76d4503c1d17783ef55b61b73b6",
+        "llama-b10883/libllama-common.0.dylib": "0b33efdf0a0a30e42b37aa68e09766ece6dd6fd8f4fd1e444d2369a7df9e18af",
+        "llama-b10883/libggml.0.23.0.dylib": "98fa46f0bcd8c75a335f733c38cb79f911bc39412ba15ef52fee3ac051c14069",
+        "llama-b10883/libllama.dylib": "aedc6f9ae2ff3a38bcbf6db297965541ac1fd94b8e8f928d44f712f35823d5bd",
+        "llama-b10883/libllama-perplexity-impl.dylib": "160f9eae0c5720f74c29dd1c922901ed23741498b8d9b8bc1f9a08630164831c",
+        "llama-b10883/libggml-cpu.dylib": "e63a7b4f8eaa5bbd8e93e524d1a828de22a42bead57ae79cfab46e2339571fb2",
+        "llama-b10883/libggml-cpu.0.23.0.dylib": "e63a7b4f8eaa5bbd8e93e524d1a828de22a42bead57ae79cfab46e2339571fb2",
+        "llama-b10883/llama-mtmd-cli": "b61a6f2b996b6068f36399ac5b54503856071596aef5ff3e665d311ead7e7884",
+        "llama-b10883/ggml-metal-tuning": "31d2792c792b35cd00e878bfb8d775b59710ce4c9a5da154eb4861d48b22b087",
+        "llama-b10883/libggml-metal.dylib": "0a498d7fa95e6ae270a96a2927f365c17372e1cef97fa8d6c637148e343ee683",
+        "llama-b10883/llama-cvector-generator": "165316ab7bbc2d754808850c510a6596b2fda1b7ad8cf186931427d5010141f1",
+        "llama-b10883/libllama-quantize-impl.dylib": "8005805741e80e78f801d48ee5c22a0bbbf0bda0536b3f3927e66e7749ee7cda",
+        "llama-b10883/libggml-metal.0.23.0.dylib": "0a498d7fa95e6ae270a96a2927f365c17372e1cef97fa8d6c637148e343ee683",
+        "llama-b10883/llama-completion": "2091333ea035d33736c7355dfe73efdfa05a0a5bf321897f2a86e2317f33a45e",
+        "llama-b10883/llama-bench": "26700f6752ceaad48804db45d70f1abe5ea77ab25496bd667bf085392c0e016d",
+        "llama-b10883/libggml-blas.0.23.0.dylib": "414856968dcddae3a67e0f9c6dc012e5c4db13320c4d7ea5924dc1ad192dcfd6",
+        "llama-b10883/libggml-rpc.0.23.0.dylib": "8aa05332ff6ca32deff5a96e6e152919788dee4acd052f80839f8386b4c7e07b",
+        "llama-b10883/libllama-cli-impl.dylib": "1cf2adb08ae408a0c8edec4cbc06317fa7da430e4793ee48a97ef1a2675d0415",
+        "llama-b10883/llama-server": "d707b6db4c1397a7383176fba12d339e5b33c7513669d74c8fbc2a76f6979a72",
+        "llama-b10883/libllama-batched-bench-impl.dylib": "e37eb3a0d6fea179ee5a2b1732abe3fd72c85575a10461bbf4fb227615acaa3f",
+        "llama-b10883/llama-llava-cli": "9a77293c34faa94ae6955f9b1da3dca9fa55cf09fcd0fff87c96f5ec44b9d547",
+        "llama-b10883/libllama-common.dylib": "0b33efdf0a0a30e42b37aa68e09766ece6dd6fd8f4fd1e444d2369a7df9e18af",
+        "llama-b10883/llama-tts": "e1a08ab5e9e4159aed191f11b536c21212e2442a97bd89cfb994906b1bcafc69",
+        "llama-b10883/llama-quantize": "0ece83905109d9a3345c3e5b81f32082d30c59bb802a0762ce9439767b0fc1d7",
+        "llama-b10883/llama-export-lora": "325a1a576e7014c3cbe539df48334eb74913e6801c0a28204e5c971f21681372",
+        "llama-b10883/libggml-base.0.dylib": "86b819107dadac7a2a977310bb53a1276ac640207ace40788e60e09e1e51fe4a",
+        "llama-b10883/libllama-fit-params-impl.dylib": "f343f24e0e721a35dd0dc0c9e8884c737697f416affe3d8a0984b0310e21de7d",
+        "llama-b10883/libggml-blas.0.dylib": "414856968dcddae3a67e0f9c6dc012e5c4db13320c4d7ea5924dc1ad192dcfd6",
+        "llama-b10883/libggml-rpc.dylib": "8aa05332ff6ca32deff5a96e6e152919788dee4acd052f80839f8386b4c7e07b",
+        "llama-b10883/libggml-cpu.0.dylib": "e63a7b4f8eaa5bbd8e93e524d1a828de22a42bead57ae79cfab46e2339571fb2",
+        "llama-b10883/llama": "60413f11d5fdcb2fdb4bb5d9aed1f9b80d02e6714e8bbde5fe3199a1c4bda865"
+      }
+    },
+    "archive_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/native/b10883/archives/llama-b10883-bin-macos-arm64.tar.gz",
+    "archive_sha256": "a83a885bf2fa4ffb7c11b3c8c6ed7e7ff8f7bd61733b1d4fa2ce8ec7cb587588",
+    "version_command": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/native/b10883/Darwin-arm64-cpu/llama-b10883/llama-server",
+      "--version"
+    ],
+    "version_stdout": "",
+    "version_stderr": "version: 0.4.0-dev (build 10883, commit 91f6a6cf3)\nbuilt with AppleClang 21.0.0.21000101 for Darwin arm64\n",
+    "version_returncode": 0
+  },
+  "setup_command": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+    "-I",
+    "-m",
+    "operator_app.cli",
+    "setup",
+    "--profile",
+    "lite-cpu-quality",
+    "--models-dir",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+    "--converter-python",
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python"
+  ],
+  "source_commit": "0d5a875",
+  "default_cpu_profile_changed": false,
+  "evidence": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-quality-setup.log": {
+      "size_bytes": 3460,
+      "sha256": "e1ea8724a528b4ac8544cb2222f9420c782fa01f9ff28d9c1b72d40ecda9414d"
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-native-version.txt": {
+      "size_bytes": 106,
+      "sha256": "2e20502a4a6217cee1052f0721c51c802e382df039758eb9658d522fd1b326c9"
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-quality-setup-offline.log": {
+      "size_bytes": 1384,
+      "sha256": "5aad7359287953bd6e746ffa5301c3f8a010a0676677999d527f4cc957c9eb89"
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-quality-preparation.json": {
+      "size_bytes": 9243,
+      "sha256": "35b0723f9e4965e0014ab293a6efccf3287ec10f3456089d803fab8074ca24a5"
+    }
+  },
+  "schema_version": 1,
+  "setup_environment": {
+    "cwd": "/private/tmp",
+    "STARK_PROJECT_ROOT": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-data",
+    "HF_HUB_OFFLINE": null,
+    "TRANSFORMERS_OFFLINE": null
+  },
+  "offline_setup": {
+    "command": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+      "-I",
+      "-m",
+      "operator_app.cli",
+      "setup",
+      "--profile",
+      "lite-cpu-quality",
+      "--models-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models",
+      "--offline"
+    ],
+    "environment": {
+      "STARK_PROJECT_ROOT": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-data",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1"
+    },
+    "cwd": "/private/tmp",
+    "returncode": 0,
+    "installed": 0,
+    "reused": 7,
+    "failed": 0
+  },
+  "model_inference_executed": false,
+  "quality_or_latency_gate_passed": false,
+  "e4b_downloaded": false
+}

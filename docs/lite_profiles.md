@@ -200,3 +200,30 @@ Lite profiles always select their pinned artifact and never inherit that adapter
 preference. This correction has targeted loader contract tests. The completed Lite replays
 above identify the earlier installed pipeline hash; this follow-up did not rerun
 the models.
+
+
+## Optional CPU quality artifacts prepared on 2026-09-10
+
+The same isolated environment completed explicit `lite-cpu-quality` setup without
+changing the default CPU profile. It installed the pinned E2B GGUF and native
+llama.cpp archive, reused the six other selected model entries, and failed none.
+An offline repeat reused all seven model entries and the verified native runtime.
+No conversion or working environment changes were needed. E4B was not downloaded.
+
+The E2B Q4_K_M file is 3,427,877,920 bytes with SHA-256
+`62adb571af12205e1e6ce0f2a4bd2835441f3e9a47d782af1539c0bc8831107f`.
+The macOS arm64 archive is pinned to llama.cpp `b10883`, commit
+`91f6a6cf361385700bbe15981f0f39909df77498`, with SHA-256
+`a83a885bf2fa4ffb7c11b3c8c6ed7e7ff8f7bd61733b1d4fa2ce8ec7cb587588`.
+The installed `llama-server` executable SHA-256 is
+`d707b6db4c1397a7383176fba12d339e5b33c7513669d74c8fbc2a76f6979a72`.
+Its version command returned `0.4.0-dev` (build 10883, commit `91f6a6cf3`),
+built with AppleClang 21.0.0.21000101 for Darwin arm64.
+
+The [preparation evidence](evaluation/lite_cpu_quality_preparation_20260910.json)
+contains exact setup commands, environment, native file inventory and raw log
+hashes. This is download, offline reuse, integrity and executable-version
+verification only. No native server or E2B model inference was started; CPU-quality
+memory, output fidelity, latency and real RTX 2070 behavior remain unmeasured.
+The environment still identifies source `0d5a875`; install the integrated source
+before collecting new performance evidence.
