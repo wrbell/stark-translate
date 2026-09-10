@@ -92,10 +92,12 @@ focused checks have passed; the final full-suite and artifact checks remain pend
   and the worker's first forward pass.
 - Ruff lint/format and mypy pass. Official HTML5 Tidy 5.8.0 reports zero warnings
   or errors across all five displays; it was built only in the repository cache.
-- CI-configured Bandit passes with zero medium/high findings. An expanded run
-  retaining B615 reports **26 medium unpinned Hugging Face download findings**;
-  this remaining pinning work is not covered by the CI pass. Vulture reports
-  three advisory findings.
+- CI-configured Bandit passes with zero medium/high findings. The final expanded
+  run retaining B615 reports **27 medium findings**: the original 26 call sites
+  with their documented local/fallback limitations, plus the managed CT2 source
+  download whose revision is guarded by a full 40-character commit check. That
+  additional static-analysis report is not a new unpinned path; the earlier
+  pinning debt remains outside the CI pass. Vulture reports three advisory findings.
 - CI-filtered Mac, Windows and NVIDIA requirement audits report zero known
   vulnerabilities. This scope does not certify every optional package or model.
 - VAD/setup regression subset: **119 passed**, including real JIT and ONNX CPU

@@ -1,8 +1,11 @@
 # v2026.14 Mac security-check scope and B615 triage
 
-The configured CI checks passed. The expanded model-download scan still reports
-26 medium B615 findings; they are not 26 equivalent live Mac downloads, and they
-have not all been resolved. This review changed no runtime code or model artifacts.
+The configured CI checks passed. The final expanded model-download scan reports
+27 medium B615 findings: the original 26 call sites described below, plus one
+new download whose revision is explicitly guarded by a full-commit check.
+The additional report is a static-analysis false positive for pinning; the
+original 26 findings and their remaining limitations have not all been resolved.
+This review changed no runtime code, suppressions or model artifacts.
 
 ## What was checked
 
@@ -18,11 +21,12 @@ checks. It does not scan `dry_run_ab.py`, `workers.py`, `operator_app/`, `script
 or `training/`. Passing it is not a whole-repository security assessment.
 
 The expanded run retained B615 while keeping the same source roots and other
-exclusions. Its preserved JSON, `.cache/mac-roadmap/bandit-expanded.json`, was
-generated at `2026-09-10T00:59:24Z`: 26 reported medium findings, all B615 with
+exclusions. Its final JSON, `.cache/mac-roadmap/bandit-expanded-final.json`, was
+generated at `2026-09-10T02:35:10Z`: 27 reported medium findings, all B615 with
 high confidence, zero high findings and no scan errors. The metrics also count
-27 low-severity observations below the reporting threshold; the triage below
-covers the 26 reported findings only.
+28 low-severity observations below the reporting threshold. The original
+`bandit-expanded.json` remains preserved (26 reports at `2026-09-10T00:59:24Z`).
+The final configured CI result is `.cache/mac-roadmap/bandit-ci-final.json`.
 
 The [dependency-audit workflow](../../.github/workflows/security.yml) was also
 reproduced for Mac, Windows and NVIDIA requirement files. All three filtered
@@ -34,7 +38,7 @@ environment, all transitive packages, model contents or upstream model code.
 The workflow's change filter watches `requirements*.txt`, so a `pyproject.toml`
 dependency-only change does not itself trigger that audit on a pull request.
 
-## All 26 B615 call sites
+## Original 26 B615 call sites
 
 Line numbers identify the reviewed source; later edits may move them. Counts
 are call sites, not distinct models or evidence of malicious artifacts.
@@ -50,6 +54,16 @@ are call sites, not distinct models or evidence of malicious artifacts.
 | Conversion and corpus tooling | 7 | `tools/convert_models_to_both.py`: 165, 354, 473, 490, 522, 577; `tools/build_v1_corpus.py`: 116 | Six snapshot/model/tokenizer calls belong to manual export or LoRA-merge preparation; the seventh streams the OPUS training corpus. These are real unpinned fetches when those tools run. Deferring training or conversion does not fix their reproducibility. |
 | **Total** | **26** | | |
 
+The 27th report is `tools/marian_ct2_setup.py:69`, which calls
+`snapshot_download(repo_id=repo_id, revision=selected_revision)`. Before any
+remote call, lines 43–46 require `selected_revision` to be a string matching
+`[0-9a-f]{40}` or raise `ValueError`. The revision comes from the pinned manifest
+or an explicit full-commit override; it cannot be an omitted revision or moving
+branch at this call. Local paths return earlier and do not reach the download.
+Bandit does not establish that guard when evaluating the variable argument, so
+this report does not add an unpinned-download path. No `nosec` suppression was
+added. A full commit pins the requested source; it does not certify model safety.
+
 ## What the Mac manifest does and does not protect
 
 [models.lock.json](../../models.lock.json) pins full Hub commit IDs for the Mac
@@ -61,7 +75,7 @@ pinned Hub snapshot directory. Existing user-supplied paths remain valid overrid
 
 The Mac Gemma loader (`engines/mlx_engine.py`: 709, 728), MLX Whisper loaders and
 Parakeet (`engines/parakeet_mlx_engine.py`: 159) all use that resolver. These wrapper
-APIs do not appear in the 26 B615 findings. Prepared, matching local caches avoid
+APIs do not appear in the 27 B615 findings. Prepared, matching local caches avoid
 their network fallback; their absence from Bandit is not independent proof of
 pinning. In normal inference mode the resolver returns the original ID on a
 cache miss, and the downstream library can fetch its default revision. Preflight
