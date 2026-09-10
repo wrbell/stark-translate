@@ -345,8 +345,8 @@ def _validate_hello(hello: dict) -> bool:
     if int(hello.get("channels", DEFAULT_CHANNELS)) != 1:
         return False
     sr = int(hello.get("sample_rate", DEFAULT_SAMPLE_RATE))
-    # Whisper is 16 kHz; allow 16/24/48 kHz and let the consumer downsample
-    # if it cares. For now only 16 kHz is wired into the pipeline.
-    if sr not in (16000, 24000, 48000):
+    # Subscribers receive bare PCM, without per-frame rate metadata. Enforce
+    # the only wired protocol rate so consumers never misinterpret 24/48 kHz.
+    if sr != DEFAULT_SAMPLE_RATE:
         return False
     return True

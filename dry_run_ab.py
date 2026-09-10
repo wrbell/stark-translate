@@ -2164,7 +2164,7 @@ _io_pool = PersistenceExecutor(max_workers=2, max_pending=256)
 
 
 def audio_callback(indata, frames, time_info, status):
-    """sounddevice callback — resample from mic rate to 16kHz and push to queue."""
+    """Resample from the captured source rate to 16 kHz and push to queue."""
     if status:
         if _health is not None:
             _health.error(
@@ -2173,7 +2173,16 @@ def audio_callback(indata, frames, time_info, status):
         if str(status).startswith("capture_overflow:"):
             _io_pool.record_failure("audio_capture", "samples_dropped")
         print(f"  Audio status: {status}", file=sys.stderr)
-    stamp = capture_stamp(frames, MIC_SAMPLE_RATE, time_info)
+    # File and isolated mic stamps carry their actual callback rate. The
+    # WebSocket protocol already delivers 16 kHz PCM, regardless of mic settings.
+    input_rate = (
+        time_info.sample_rate
+        if isinstance(time_info, CaptureStamp) and time_info.sample_rate
+        else SAMPLE_RATE
+        if os.environ.get("STARK_AUDIO_SOURCE") == "ws"
+        else MIC_SAMPLE_RATE
+    )
+    stamp = capture_stamp(frames, input_rate, time_info)
     raw = indata[:, 0].copy()
     # Clamp to [-1, 1] — some mics deliver out-of-range samples that break VAD
     raw = np.clip(raw, -1.0, 1.0)
@@ -2181,16 +2190,16 @@ def audio_callback(indata, frames, time_info, status):
     if MIC_GAIN != 1.0:
         raw = np.clip(raw * MIC_GAIN, -1.0, 1.0)
     # [P7-5A] Use decimate instead of resample — faster for integer factor (48k/16k = 3x)
-    if MIC_SAMPLE_RATE != SAMPLE_RATE:
+    if input_rate != SAMPLE_RATE:
         from scipy.signal import decimate
 
-        factor = MIC_SAMPLE_RATE // SAMPLE_RATE  # 48000 // 16000 = 3
-        if MIC_SAMPLE_RATE % SAMPLE_RATE == 0 and factor > 1:
+        factor = input_rate // SAMPLE_RATE
+        if input_rate % SAMPLE_RATE == 0 and factor > 1:
             raw = decimate(raw, factor, zero_phase=False).astype(np.float32)
         else:
             from scipy.signal import resample
 
-            target_len = int(len(raw) * SAMPLE_RATE / MIC_SAMPLE_RATE)
+            target_len = int(len(raw) * SAMPLE_RATE / input_rate)
             raw = resample(raw, target_len).astype(np.float32)
     if _health is not None:
         _health.input(float(np.sqrt(np.mean(raw * raw))))
@@ -4371,6 +4380,7 @@ async def audio_loop():
             from tools.audio_bridge_client import FileAudioStream, open_audio_stream
 
             capture_loop = asyncio.get_running_loop()
+            input_rate = SAMPLE_RATE if os.environ.get("STARK_AUDIO_SOURCE") == "ws" else MIC_SAMPLE_RATE
 
             def capture_dropped():
                 _io_pool.record_failure("audio_capture", "handoff_overflow")
@@ -4385,10 +4395,10 @@ async def audio_loop():
                 wait_for_space=os.environ.get("STARK_AUDIO_SOURCE") == "file",
             )
 
-            def stream_callback(indata, frames, time_info, status, _handoff=_capture_handoff):
+            def stream_callback(indata, frames, time_info, status, _handoff=_capture_handoff, _input_rate=input_rate):
                 # Capture before loop handoff; device callbacks must never touch
                 # asyncio.Queue from their producer thread. Copy PortAudio's buffer.
-                stamp = sample_clock.capture(frames, MIC_SAMPLE_RATE, time_info)
+                stamp = sample_clock.capture(frames, _input_rate, time_info)
                 if os.environ.get("STARK_AUDIO_SOURCE") == "ws":
                     stamp = CaptureStamp(
                         stamp.start,
@@ -4403,10 +4413,10 @@ async def audio_loop():
 
             stream = replay_stream or open_audio_stream(
                 callback=stream_callback,
-                samplerate=MIC_SAMPLE_RATE,
+                samplerate=input_rate,
                 channels=1,
                 dtype="float32",
-                blocksize=int(MIC_SAMPLE_RATE * 0.032),  # ~32ms frames
+                blocksize=int(input_rate * 0.032),  # ~32ms frames
                 device=MIC_DEVICE,
             )
 

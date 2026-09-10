@@ -457,3 +457,111 @@ def test_actual_file_pipeline_pause_resumes_cursor_without_duplicate_samples(tmp
             pool.shutdown(wait=True)
 
     asyncio.run(exercise())
+
+
+def test_actual_websocket_decoder_reaches_pipeline_at_16khz(monkeypatch):
+    """Exercise real PCM decoding, capture handoff and the production callback."""
+    from types import SimpleNamespace
+
+    import dry_run_ab as d
+    from tools import audio_bridge_client
+
+    pcm = (np.arange(512, dtype=np.int16) - 256).astype("<i2")
+    streams = []
+    consumed = []
+    original_factory = audio_bridge_client.open_audio_stream
+
+    def tracked_factory(**kwargs):
+        assert kwargs["samplerate"] == 16000
+        assert kwargs["blocksize"] == 512
+        stream = original_factory(**kwargs)
+        assert isinstance(stream, audio_bridge_client.WebsocketAudioStream)
+        streams.append(stream)
+        return stream
+
+    class Transport:
+        def __init__(self):
+            self.sent = 0
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def recv(self, timeout):
+            if self.sent < 2:
+                self.sent += 1
+                return pcm.tobytes()
+            streams[0]._stop.wait(0.01)
+            raise TimeoutError
+
+    monkeypatch.setenv("STARK_AUDIO_SOURCE", "ws")
+    monkeypatch.setitem(
+        sys.modules, "websockets.sync.client", SimpleNamespace(connect=lambda *args, **kwargs: Transport())
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "websockets.exceptions",
+        SimpleNamespace(ConnectionClosed=type("ConnectionClosed", (Exception,), {})),
+    )
+    monkeypatch.setattr(audio_bridge_client, "open_audio_stream", tracked_factory)
+    monkeypatch.setattr(d, "MIC_SAMPLE_RATE", 48000)
+    monkeypatch.setattr(d, "MIC_GAIN", 1.0)
+    monkeypatch.setattr(d, "_health", None)
+    monkeypatch.setattr(d, "_warmup_pending", False)
+    monkeypatch.setattr(d, "_last_warmup_time", float("inf"))
+    monkeypatch.setattr(d, "is_speech", lambda frame, *args: consumed.append(frame.copy()) or False)
+    monkeypatch.setattr(d.sd, "PortAudioError", type("PortAudioError", (Exception,), {}))
+
+    async def exercise():
+        emitted = []
+
+        class ObservedQueue(asyncio.Queue):
+            def put_nowait(self, item):
+                emitted.append(item)
+                super().put_nowait(item)
+
+        monkeypatch.setattr(d, "audio_queue", ObservedQueue())
+        monkeypatch.setattr(d, "_pipeline_chunk_queue", asyncio.Queue())
+        task = asyncio.create_task(d.audio_loop())
+        try:
+            async with asyncio.timeout(2):
+                while len(consumed) < 2:
+                    await asyncio.sleep(0.01)
+            assert len(emitted) == 2
+            for index, frame in enumerate(emitted):
+                np.testing.assert_array_equal(frame.samples, pcm.astype(np.float32) / 32768.0)
+                assert frame.sample_rate == 16000
+                assert (frame.sample_start, frame.sample_end) == (index * 512, (index + 1) * 512)
+                assert frame.stamp.end - frame.stamp.start == pytest.approx(0.032, abs=1e-8)
+                assert frame.stamp.source == "bridge_receipt_estimate"
+                np.testing.assert_array_equal(consumed[index], frame.samples)
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+        assert not streams[0]._thread.is_alive()
+        assert streams[0]._frames_received == 2
+        assert streams[0]._frames_dropped == 0
+
+    asyncio.run(exercise())
+
+
+@pytest.mark.parametrize("source,rate", [("file", 48000), ("mic", 24000)])
+def test_production_callback_preserves_stamped_source_clock(monkeypatch, real_scipy, source, rate):
+    import dry_run_ab as d
+    from tools.pipeline_timing import CaptureStamp
+
+    frames = int(rate * 0.032)
+    stamp = CaptureStamp(10.0, 10.032, "file_playback" if source == "file" else "portaudio_adc", 0, frames, rate)
+    monkeypatch.setenv("STARK_AUDIO_SOURCE", source)
+    monkeypatch.setattr(d, "MIC_SAMPLE_RATE", 48000)
+    monkeypatch.setattr(d, "MIC_GAIN", 1.0)
+    monkeypatch.setattr(d, "_health", None)
+    monkeypatch.setattr(d, "audio_queue", asyncio.Queue())
+    d.audio_callback(np.zeros((frames, 1), np.float32), frames, stamp, None)
+    frame = d.audio_queue.get_nowait()
+    assert len(frame.samples) == 512
+    assert frame.stamp is stamp
+    assert frame.sample_rate == rate
+    assert frame.sample_end == frames
