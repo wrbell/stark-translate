@@ -5,7 +5,6 @@
 > installed dependency candidate and operator/device findings. Final experiments,
 > artifact rehearsals and merge validation remain in progress; defaults are unchanged.
 
-
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
 > (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
 > The last published release recorded here is **v2026.13**. Source integration,
@@ -77,9 +76,19 @@ and 3 s idle timeout that fail the session (`AudioCaptureError`), and operator r
 comes from `tools/pipeline_health.py` phases (`loading → listening → ready`,
 `input_error`) rather than file presence. The September 10 attended EN and ES
 microphone sessions both received real frames, reached ready and stopped cleanly;
-EN pause/resume and language restart also passed. The room had no detected speech,
-so spoken microphone captions remain pending. A separate file replay produced a
-visible bilingual final. See [actual session receipts](docs/evaluation/attended_mic_20260910/README.md)
+EN pause/resume and language restart also passed. These quiet-room runs did not
+establish spoken caption quality. Later synthetic speaker-to-microphone checks
+produced captions in both languages: English completed cleanly; Spanish and a
+traced retest failed because capture lost samples. The retest lost no parent
+handoff frames but still lost 160 ms upstream. Keep that failure open.
+
+Exact microphone name and host API now cross preflight, restart and capture;
+the native child resolves the current index and rejects missing/ambiguous input.
+A two-second native probe passed stale-index resolution and missing-name rejection,
+with no saved audio or STT. Native inference workers also drain before EOF summaries
+and model unloading, preserving queued TTS. These repairs do not certify sustained
+microphone capture or human-heard output. See [quiet-room receipts](docs/evaluation/attended_mic_20260910/README.md),
+[synthetic checks and identity probe](docs/evaluation/tts_routing_20260910/README.md),
 and `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
 
 ## Environment split
