@@ -152,3 +152,6 @@ metrics/mac_roadmap/
 metrics/display_metrics_*.jsonl
 # Session review data is private operational data, exported explicitly as bundles.
 stark_data/corrections/
+
+# Local overnight execution records; selected immutable reports live in docs/evaluation.
+/metrics/overnight_*/
