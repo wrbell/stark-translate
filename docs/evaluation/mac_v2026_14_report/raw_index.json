@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "purpose": "Frozen observations and provenance; audio remains outside the report bundle.",
+  "files": [
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r0_replay_0_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r0_replay_0_en.json",
+      "sha256": "a2dcd5bb15d099a3355a259d99d72da1dd5b22d210a39aee2b3c5dba2c06f70f"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r0_replay_0_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r0_replay_0_en.csv",
+      "sha256": "6f336d763442d16eddaa884c4184e81010a6f4b8cead34aa8b86c655ecce1254"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r0_replay_0_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r0_replay_0_en.jsonl",
+      "sha256": "fe61b80a34de6a3a9cbee6bca2a34e30439f2ad437273429d5e25a08e9ccca84"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r0_replay_1_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r0_replay_1_en.json",
+      "sha256": "3e6c6a855b075319ee30af6f721ef02b3193ed88fa6d997070def0525dfce9d6"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r0_replay_1_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r0_replay_1_en.csv",
+      "sha256": "3293a3adda024dfedbdab0d9d7293082a7b51f13df70b0db28c948d85bf5e1f9"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r0_replay_1_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r0_replay_1_en.jsonl",
+      "sha256": "332ac21478f1c40a01b3678275edc53ad35d41b7190635564b55781ecbde11d5"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r0_replay_2_es.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r0_replay_2_es.json",
+      "sha256": "09c36fb11e0da6a4cf79314fbc523c016666df21ce0c1d0a52c076fad4bcc555"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r0_replay_2_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r0_replay_2_es.csv",
+      "sha256": "5bfb17561b2ce76e04bd85330335eebfa357ab8e006d99d10b616de448f5fdae"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r0_replay_2_es.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r0_replay_2_es.jsonl",
+      "sha256": "c4e89c19b7cd89faeffbe7f6de051338e6365ce746e22b6fb458b468532ecffb"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r1_replay_0_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r1_replay_0_en.json",
+      "sha256": "7ade2f57eca47e61127ac5a9a2aa68efe7f79c9bfb558a42ed0a91dbc3348c21"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r1_replay_0_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r1_replay_0_en.csv",
+      "sha256": "76fbcb201c0130cf893d7309ce22abd3d149f32f1e52ef99c954b73000dc7673"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r1_replay_0_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r1_replay_0_en.jsonl",
+      "sha256": "690fd4aedcd2b46af71b2550ba5e6adab24b23f0a3be9bf100a3a1934b871293"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r1_replay_1_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r1_replay_1_en.json",
+      "sha256": "2e5c0f9038df468c57a464ea202784cb6cd367bc9891c5c3df6d2bb6a58ad406"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r1_replay_1_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r1_replay_1_en.csv",
+      "sha256": "1c1eee1d6a0fbf11372d4d087a4ba88e37e969b62668ad73fc74b378d900490e"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r1_replay_1_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r1_replay_1_en.jsonl",
+      "sha256": "03eabba21b3051ec6bccb0455c517f1baaf34cce72dcaa2462fcd77889d7ac1a"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r1_replay_2_es.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r1_replay_2_es.json",
+      "sha256": "8579aa1fe51f1eeabe4e09467553b81528d66ae43b7f81f2caf2a9e212341c10"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r1_replay_2_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r1_replay_2_es.csv",
+      "sha256": "c61fca1e8b459afbd5f4f7b3cdef7db383de99c474a000fe8f68675bf406c0af"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r1_replay_2_es.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r1_replay_2_es.jsonl",
+      "sha256": "dab9db6e9b2251cf23b002c29fda29d8d544f214343855afe855bc8137f9875e"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r2_replay_0_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r2_replay_0_en.json",
+      "sha256": "112cf8121b7dd0bbcbb1bdefe7e212cfcafbbbc2822ac6eece007c3d9ae56af8"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r2_replay_0_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r2_replay_0_en.csv",
+      "sha256": "0a6a5e802184a8812a6f4c91ac1512150c34506d18c0bc3762883098d2d9b6ca"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r2_replay_0_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r2_replay_0_en.jsonl",
+      "sha256": "e54ccfa2683a1dcc53d12891c56d6ee50bc8aa1da7c0d37a56ad32ff697416c9"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r2_replay_1_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r2_replay_1_en.json",
+      "sha256": "a6b8bd35ca75388b7b0994f08ead5d4d2ce9ffd59a7e2df433ff1ae35065fdb8"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r2_replay_1_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r2_replay_1_en.csv",
+      "sha256": "530a7657586c39a97c367f11b7a14d11c66df63969c9d558e33c68a1a8a32fe7"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r2_replay_1_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r2_replay_1_en.jsonl",
+      "sha256": "60541ad5839174a17e0573266c7a3cfe9d99aaecadb9ea21ff9a1afd99895ac1"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e2b_r2_replay_2_es.json",
+      "report_path": "raw/baseline/mac14_baseline_e2b_r2_replay_2_es.json",
+      "sha256": "03487b2f89d55fb06af138a53e2c0fc667eca22da950564d18df674d1e9cb85b"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e2b_r2_replay_2_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e2b_r2_replay_2_es.csv",
+      "sha256": "68576e27bb94581d5ceebe897907015eec7157c51f89b47bf74bfb8cbbbb2d0a"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e2b_r2_replay_2_es.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e2b_r2_replay_2_es.jsonl",
+      "sha256": "28e234b4268201432751a5d8fac671aae291fb4de482d76d55b1692576b2553e"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r0_replay_0_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r0_replay_0_en.json",
+      "sha256": "7c06b0cbbe79070582a45a9b7ec002d7ab63c249c73ea4f7715aab1fcca2a672"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r0_replay_0_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r0_replay_0_en.csv",
+      "sha256": "8f220ab340618f307755368a82c320c40f64904f603bfdb40815d1ae7f8f6b16"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r0_replay_0_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r0_replay_0_en.jsonl",
+      "sha256": "67162dc3cc8a9675ebb0fbbf3c1992b2dea0c7b33566df82fbb9620ccf67dc53"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r0_replay_1_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r0_replay_1_en.json",
+      "sha256": "74c88ec8492478e73275bccd42909dc8fc756015d300abff5447df1d84e1d55e"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r0_replay_1_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r0_replay_1_en.csv",
+      "sha256": "c07fbf94f62d232af2612dfadc7a147d34e802be380144831efc614365e0f4af"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r0_replay_1_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r0_replay_1_en.jsonl",
+      "sha256": "6c268d5ee807134d4be85b7f169ed6064e274a969ba15a0176ee0cc768375dca"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r0_replay_2_es.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r0_replay_2_es.json",
+      "sha256": "80c1323e1d1ea24394b1881b776d39ac74ee670b8b5b7a5f7bbabe3c72585e18"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r0_replay_2_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r0_replay_2_es.csv",
+      "sha256": "ab67dda54fef709436ff4698355e7eeaebf10cd895e4638dbff9e9f08b5deea0"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r0_replay_2_es.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r0_replay_2_es.jsonl",
+      "sha256": "49ec63616042a22e72d70242e746c0bff63fda8d14519c7c5fce0d7eea6f211d"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r1_replay_0_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r1_replay_0_en.json",
+      "sha256": "a2687ced0138f1079040ac32cd6f2293f71d909ff6e2dbb6d2087e41c8b5fdd2"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r1_replay_0_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r1_replay_0_en.csv",
+      "sha256": "a565a7d518eb9a9fffcc10eb97b6a263a3e15aeb37881e898063621ac7f4ae74"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r1_replay_0_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r1_replay_0_en.jsonl",
+      "sha256": "3ed591eefa50ad156869156a7e8dcce498375f9ef71273751a0e485b7fa85d1c"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r1_replay_1_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r1_replay_1_en.json",
+      "sha256": "3f0e87b93a041320247ffe0176f8b55357ca35c0659ea9bc2016478fa65043a2"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r1_replay_1_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r1_replay_1_en.csv",
+      "sha256": "d5c3708e0753b63a976c1d5f593febd453b9233c14c703b303812c4d5c8565bd"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r1_replay_1_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r1_replay_1_en.jsonl",
+      "sha256": "993154665c03807d725a674d5d780d00e06f079acd9fb70a4deeaf14cf94da80"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r1_replay_2_es.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r1_replay_2_es.json",
+      "sha256": "2c11463157d0611b8347d1f7d562a561a53ce7faf7339df25b4051dc81a9125e"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r1_replay_2_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r1_replay_2_es.csv",
+      "sha256": "8bdc41701a9d869bc72e31016d947518af414db33aa19e59b2180af828ac4e60"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r1_replay_2_es.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r1_replay_2_es.jsonl",
+      "sha256": "6c7b6599742af56aa7dc5a536feb5f93affcdca53ccadba59223adea3e2ba794"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r2_replay_0_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r2_replay_0_en.json",
+      "sha256": "42a1cbe50135576b3421c2e5d096c4eac5edaafa6f600e37de1b120124666c9d"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r2_replay_0_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r2_replay_0_en.csv",
+      "sha256": "c81b697896ec3e9cd9d12e554e45fe60a6d1c35a44aaa46319fbf25730d83849"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r2_replay_0_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r2_replay_0_en.jsonl",
+      "sha256": "3205240b8d7911bed03a8deef0981185f2f494e92d590e67c88e019513639415"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r2_replay_1_en.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r2_replay_1_en.json",
+      "sha256": "eb705e0f143f5cc2cea3089533ddae29991113324f6260363a3f8969b000be2a"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r2_replay_1_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r2_replay_1_en.csv",
+      "sha256": "7f9420d28039098746941ad97210797ed4ab49a6dbdb24bc8678c46e178000f0"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r2_replay_1_en.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r2_replay_1_en.jsonl",
+      "sha256": "5b988c8efaa2c7eaff9b96bc9e6cfc4e6f5604e35f8d23295c55012b4b549b60"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/baseline/mac14_baseline_e4b_r2_replay_2_es.json",
+      "report_path": "raw/baseline/mac14_baseline_e4b_r2_replay_2_es.json",
+      "sha256": "152df77d86ede3fa306e45da66dbd2f27985a1d892aa95aa859ec56b25d92edf"
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14_baseline_e4b_r2_replay_2_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14_baseline_e4b_r2_replay_2_es.csv",
+      "sha256": "8affbc78622ff68f2a05db10e82523a9f36b3deb8a84618f9885d8949816c5c2"
+    },
+    {
+      "original_path": "metrics/partials_mac14_baseline_e4b_r2_replay_2_es.jsonl",
+      "report_path": "raw/timing/partials_mac14_baseline_e4b_r2_replay_2_es.jsonl",
+      "sha256": "b56ace9d24147c065bf60f84618361749a55f167feb157b6161d681c40936cad"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/stt/stt_mlx.json",
+      "report_path": "raw/stt/stt_mlx.json",
+      "sha256": "290d31158b28ce4c086139d007eb4151791950c43a7be8608a2569a7124436c1"
+    },
+    {
+      "original_path": "metrics/mac_roadmap/stt/stt_parakeet-mlx.json",
+      "report_path": "raw/stt/stt_parakeet-mlx.json",
+      "sha256": "f2c0c15538042abb504a0af1580061e77c62f0f7751c3716366d93253d968415"
+    }
+  ]
+}

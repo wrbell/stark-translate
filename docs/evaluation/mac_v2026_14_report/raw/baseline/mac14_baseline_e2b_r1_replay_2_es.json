@@ -1,0 +1,275 @@
+{
+  "session_id": "mac14_baseline_e2b_r1_replay_2_es",
+  "clip": {
+    "path": "stark_data/replay/spanish_test_2cor1.wav",
+    "sha256": "74de31bf5e8526fdcdad2d238ab3e81aefc55140b2fe3237eaa3b56ddafac0f0",
+    "duration": 6.91625,
+    "lang": "es",
+    "offset_s": 0,
+    "rms": 0.1445,
+    "id": "replay_2",
+    "provenance": "synthetic_piper",
+    "reference_status": "unreviewed",
+    "conditions": [
+      "speech"
+    ]
+  },
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+    "/Users/willem/Code/vibes/SRTranslate/dry_run_ab.py",
+    "--backend",
+    "mlx",
+    "--no-ab",
+    "--lang",
+    "es",
+    "--audio-file",
+    "/Users/willem/Code/vibes/SRTranslate/stark_data/replay/spanish_test_2cor1.wav",
+    "--session-id",
+    "mac14_baseline_e2b_r1_replay_2_es",
+    "--ws-port",
+    "8885",
+    "--http-port",
+    "8886",
+    "--model-family",
+    "gemma4",
+    "--gemma4-size",
+    "e2b",
+    "--no-mts",
+    "--stt-backend",
+    "mlx",
+    "--partial-interval",
+    "0.6"
+  ],
+  "returncode": 0,
+  "replay_speed": 1.0,
+  "realtime_latency_eligible": true,
+  "session_metadata": {
+    "session_id": "mac14_baseline_e2b_r1_replay_2_es",
+    "source_lang": "es",
+    "target_lang": "en",
+    "session_kind": "replay",
+    "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/stark_data/replay/spanish_test_2cor1.wav",
+    "input_audio_sha256": "74de31bf5e8526fdcdad2d238ab3e81aefc55140b2fe3237eaa3b56ddafac0f0",
+    "audio_source": "file",
+    "timing_schema_version": 2,
+    "backend": "mlx",
+    "model_family": "gemma4",
+    "model_a": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+    "model_b": null,
+    "stt_backend": "mlx",
+    "vad": {
+      "threshold": 0.3,
+      "silence_trigger": 0.5,
+      "max_utterance": 8.0,
+      "partial_interval": 0.6,
+      "backend": "torch"
+    },
+    "translation": {
+      "idle_warmup_only": false,
+      "final_aware_partials": false,
+      "routing_policy": "legacy",
+      "terminology_prompt": "none",
+      "mlx_model_4b": "mlx-community/translategemma-4b-it-4bit",
+      "mlx_model_12b": "mlx-community/translategemma-12b-it-4bit",
+      "mlx_model_gemma4_e4b": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "mlx_model_gemma4_e2b": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+      "mlx_drafter_gemma4": "mlx-community/gemma-4-e4b-it-assistant-bf16",
+      "mlx_mts": false,
+      "cuda_model_4b": "google/translategemma-4b-it",
+      "cuda_model_12b": "google/translategemma-12b-it",
+      "marian_model": "Helsinki-NLP/opus-mt-en-es",
+      "marian_backend": "auto",
+      "marian_compute_type": "int8_float16",
+      "marian_max_new_tokens": 128,
+      "marian_warmup_passes": 2,
+      "marian_eager_both": false,
+      "model_family": "gemma4",
+      "num_draft_tokens": 3,
+      "default_source_lang": "en",
+      "default_target_lang": "es",
+      "turboquant": false,
+      "turboquant_key_bits": 3,
+      "turboquant_val_bits": 4
+    },
+    "replay_speed": 1.0,
+    "git_sha": "f34f5ebb1b338ff457d1d5a364fb5c852c49fdd7"
+  },
+  "chunk_count": 1,
+  "partial_count": 5,
+  "metrics": {
+    "speech_end_to_final_ms": {
+      "n": 1,
+      "p50": 2994.9,
+      "p95": 2994.9,
+      "mean": 2994.9
+    },
+    "vad_wait_ms": {
+      "n": 1,
+      "p50": 516.7,
+      "p95": 516.7,
+      "mean": 516.7
+    },
+    "stt_queue_wait_ms": {
+      "n": 1,
+      "p50": 5.8,
+      "p95": 5.8,
+      "mean": 5.8
+    },
+    "translation_queue_wait_ms": {
+      "n": 1,
+      "p50": 0.1,
+      "p95": 0.1,
+      "mean": 0.1
+    },
+    "finalization_overhead_ms": {
+      "n": 1,
+      "p50": 2.2,
+      "p95": 2.2,
+      "mean": 2.2
+    },
+    "broadcast_ms": {
+      "n": 1,
+      "p50": 0.0,
+      "p95": 0.0,
+      "mean": 0.0
+    },
+    "true_e2e_ms": {
+      "n": 1,
+      "p50": 9547.1,
+      "p95": 9547.1,
+      "mean": 9547.1
+    },
+    "e2e_latency_ms": {
+      "n": 1,
+      "p50": 2475.9,
+      "p95": 2475.9,
+      "mean": 2475.9
+    },
+    "stt_latency_ms": {
+      "n": 1,
+      "p50": 1650.8,
+      "p95": 1650.8,
+      "mean": 1650.8
+    },
+    "latency_a_ms": {
+      "n": 1,
+      "p50": 818.1,
+      "p95": 818.1,
+      "mean": 818.1
+    },
+    "silence_delay_ms": {
+      "n": 1,
+      "p50": 7071.2,
+      "p95": 7071.2,
+      "mean": 7071.2
+    },
+    "queue_wait_ms": {
+      "n": 1,
+      "p50": 5.6,
+      "p95": 5.6,
+      "mean": 5.6
+    },
+    "marian_pt_ms": {
+      "n": 1,
+      "p50": 67.5,
+      "p95": 67.5,
+      "mean": 67.5
+    },
+    "gen_tokens_a": {
+      "n": 1,
+      "p50": 23.0,
+      "p95": 23.0,
+      "mean": 23.0
+    },
+    "prefill_ms_a": {
+      "n": 1,
+      "p50": 64.76470903726295,
+      "p95": 64.76470903726295,
+      "mean": 64.76470903726295
+    },
+    "ttft_ms_a": {
+      "n": 1,
+      "p50": 267.8208339493722,
+      "p95": 267.8208339493722,
+      "mean": 267.8208339493722
+    },
+    "decode_ms_a": {
+      "n": 1,
+      "p50": 550.3077080356888,
+      "p95": 550.3077080356888,
+      "mean": 550.3077080356888
+    },
+    "partial_total_ms": {
+      "n": 5,
+      "p50": 825.3985419869423,
+      "p95": 1189.1907079843804,
+      "mean": 868.8237999915145
+    }
+  },
+  "timing_schema_versions": [
+    "2"
+  ],
+  "metric_definitions": {
+    "speech_end_to_final_ms": "last VAD-positive capture frame end to final payload ready; not browser rendering",
+    "e2e_latency_ms": "legacy queue submission to translation/QE completion",
+    "true_e2e_ms": "legacy first speech observation to translation/QE completion",
+    "silence_delay_ms": "legacy first speech observation to queue submission (includes speaking)",
+    "partial_total_ms": "STT plus Marian compute only; excludes cadence, queue and delivery"
+  },
+  "speech_end_by_endpoint": {
+    "silence": {
+      "n": 1,
+      "p50": 2994.9,
+      "p95": 2994.9,
+      "mean": 2994.9
+    }
+  },
+  "partial_capture_to_ready_ms": {
+    "n": 5,
+    "p50": 832.4,
+    "p95": 1195.1,
+    "mean": 874.72
+  },
+  "marian_only_share": 0.0,
+  "marian_only_observations": 1,
+  "marian_only_source": "tps_a == 0 proxy",
+  "special_token_outputs": 0,
+  "special_token_counts": {
+    "<turn|>": 0,
+    "<|channel>": 0
+  },
+  "overlap_pct": 0.0,
+  "size": "e2b",
+  "experiment": "baseline",
+  "repeat": 1,
+  "clip_id": "replay_2",
+  "language": "es",
+  "provenance": "synthetic_piper",
+  "manifest_sha256": "b9a3e6d03c34a1832a21a5be8604f31b93b826a32360e74c7652625308d0adf6",
+  "environment": {
+    "code_sha": "f34f5ebb1b338ff457d1d5a364fb5c852c49fdd7",
+    "tracked_diff_sha256": "c64c288880f25f497a0d6af3650de2af8aa47266266a8535f7c4d9ae5bc74472",
+    "source_sha256": {
+      "dry_run_ab.py": "fde1e4bf8c9d4c6d3ce1eeb97af65d615cb4da7fc21ad1a1fb1c53a7ccf70e73",
+      "settings.py": "58da818e27ce1698f7c7385272a5456bbcea92308a5aa7275be6c828290c3b75",
+      "engines/mlx_engine.py": "fb82b4fd563322842b855a3039d86315e160b33e17fb704f3d5763a763546362",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/model_paths.py": "c79368e47b7b62693e36d55be9ab72430783953587b963cc5e943063343a54a1",
+      "tools/pipeline_timing.py": "04760fa7a555df39119e615ab0dfec397411df92c83867709732b03574be6595",
+      "tools/mac_evaluation.py": "9512d7189e1910b64347e79932d57bb80302d97b94632cf2b4254dfae4ba6661"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": "2.6.0"
+    },
+    "created_at": "2026-09-10T00:34:52.347738+00:00"
+  },
+  "experiment_settings": {}
+}

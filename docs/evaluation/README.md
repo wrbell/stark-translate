@@ -36,7 +36,7 @@ python tools/mac_evaluation.py stt --manifest docs/evaluation/mac_v2026_14_manif
 python tools/mac_evaluation.py quality --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --output metrics/mac_roadmap/quality_new --runs 3 --policies none church
 python tools/mac_evaluation.py replay --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --output metrics/mac_roadmap/baseline_new --tag unique_run --runs 3
 python tools/mac_evaluation.py experiments --manifest docs/evaluation/mac_v2026_14_screening.json --spec docs/evaluation/mac_v2026_14_experiments.json --output metrics/mac_roadmap/experiments --tag unique_screen --runs 3
-python tools/mac_evaluation.py report --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --input metrics/mac_roadmap --output docs/evaluation/mac_v2026_14_report
+python tools/mac_evaluation.py report --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --input metrics/mac_roadmap/baseline_new --output docs/evaluation/baseline_new
 ```
 
 The original quality runs used v1. `realign-references` created v2 and
@@ -45,6 +45,15 @@ timing and original run hash. Reports skip quality runs with a different manifes
 hash. Do not use the original v1 reference-based scores.
 
 ## Read the results
+
+[Baseline and STT overview](mac_v2026_14_report/README.md) links the combined
+Markdown/JSON report and frozen raw observations. Its input staging directory
+contains only `baseline`, `quality_v2` and `stt` from `metrics/mac_roadmap`, so
+the Hindi probe and 45-second experiments remain separate. To reproduce that
+combined report, place those three directories under one input directory and
+pass it to `report` with the v2 manifest. Timing CSV/JSONL paths are relative to
+the repository's `metrics` directory; `raw_index.json` maps the archived copies
+back to their original paths.
 
 [Translation comparison](mac_v2026_14_quality/comparison.md) includes all 18
 canaries, latency cost, chrF++, and actual changed outputs. Canary checks require
@@ -62,6 +71,9 @@ Client receipt-to-render is local browser overhead; speech-end-to-ack is an uppe
 bound including return-network time. Hidden tabs and accelerated replay cannot
 pass caption-delivery gates. Legacy `e2e_latency_ms` remains processing time.
 
-Hindi is an independent offline zero-shot probe (`quality --target hi`), with no
-reference score or live-language integration. Physical output-device, natural
+[Hindi](mac_v2026_14_hindi/README.md) is an independent offline zero-shot probe
+(`quality --target hi`), with no reference score or live-language integration.
+The [operator rehearsal](mac_v2026_14_rehearsal.md) records actual browser,
+session, summary and TTS behavior separately from benchmark acceptance.
+Physical output-device, natural
 Spanish, two-speaker and bilingual review gates are explicitly separate.

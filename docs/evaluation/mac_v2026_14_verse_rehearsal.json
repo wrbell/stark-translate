@@ -1,0 +1,17 @@
+{
+  "usage": "evaluation_only",
+  "provenance": "mixed_synthetic_piper_and_historical_english",
+  "path": ".cache/mac-roadmap/rehearsal_en_verses.wav",
+  "sha256": "6e89457fc071a2e4b99baa7fa98b4baaec6a279d0c158874cde6424d51555193",
+  "duration_s": 56.106875,
+  "source_lang": "en",
+  "synthetic_cue": {
+    "voice": "en_US-lessac-high",
+    "text": "Please turn to John chapter three verse sixteen. For God so loved the world that he gave his only begotten Son."
+  },
+  "natural_clip": {
+    "path": "stark_data/replay/mac_screening_45s.wav",
+    "sha256": "7e5510ea9296ec86523535fe72882be593d3ac39c59bd3385bd875bf18944a0a"
+  },
+  "purpose": "Operator verse detection, EN restart, review and summary rehearsal; excluded from quality and uninterrupted latency gates."
+}
