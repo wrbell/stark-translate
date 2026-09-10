@@ -75,8 +75,9 @@ its previous bounded negative result does not justify another overnight sweep.
    memory/queue/persistence/completion checks and a written rehearsal note. Include a
    complete recorded hymn and spoken material when assessing the laptop-stand-in
    rehearsal issue. Controlled audio is not physical microphone certification.
-6. Run the separate offline Hindi audio baseline and archive every actual output;
-   it does not add live Hindi or establish Hindi translation accuracy.
+6. The separately requested offline Hindi R&D baseline is already archived. No
+   further Hindi work belongs to this EN↔ES latency program; it does not add live
+   Hindi or establish Hindi translation accuracy.
 7. Refresh reports, release-independent installation evidence, backlog and guides;
    run the full checks and review, then merge validated source through PR #192.
 
@@ -97,3 +98,9 @@ Package publishing, release tags and PyPI are pending by user choice. Source pus
 PR review, justified issue closure and merge into main are authorized. Natural
 Spanish, two-speaker recordings, bilingual approvals, WSL training and actual
 x86/RTX2070 execution remain explicit external dependencies.
+
+Browser collection limitation observed at 05:46 UTC: the Mac native-app surface
+reported a locked screen while the audience document still reported `visible` and
+continued rendering acknowledgements. Lock onset was not observed. Reports must
+distinguish this browser protocol telemetry from an attended physical display
+check; server latency and source coverage remain independently measurable.

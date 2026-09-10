@@ -56,9 +56,15 @@ an existing development environment match the new installer.
 
 The source review found an audience HTTP root exposing non-display files and an
 operator server binding all interfaces by default without browser-origin checks.
-Fixes are being integrated and require real HTTP/WebSocket regression checks plus
-a browser recheck. A separate concurrent Stop/new-Start ownership race is also
-being repaired. Final commit/test evidence belongs in the completed delivery note.
+The audience now serves an explicit display-asset allowlist (`tools/display_server.py`);
+39 actual HTTP regression cases cover traversal, aliases, symlinks and private paths.
+The operator defaults to localhost and validates Host, browser Origin and control
+WebSocket requests (`operator_app/security.py`). An integrated browser recheck
+remained connected; local API access returned 200 and a foreign Origin returned 403.
+Generation-checked controls also prevent a queued Stop from acting on a newly
+started session. Review exports omit private drafts, notes and unapproved target
+text; cached/downloaded bundles are validated against that export contract.
+The final delivery note records the complete integrated checks.
 
 No secret values, transcripts, audio or authentication material are included in
 these dependency audit files. Publication of packages/tags remains pending.

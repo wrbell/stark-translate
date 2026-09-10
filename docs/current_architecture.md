@@ -1,12 +1,12 @@
 # Current architecture — v2026.14 candidate (local branch)
 
 > **Scope:** Inference and operator contracts on `codex/mac-reliability-roadmap`
-> (version `2026.14.0.0`, HEAD `c5fb689` at the time of writing), proposed in draft
+> (version `2026.14.0.0`), proposed in draft
 > [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open, **not merged**.
 > **Main** remains at v2026.13 until the authorized final merge. Do not describe
 > candidate-branch behavior as shipped on main/PyPI without integration evidence.
 > The overnight worktrees (latency experiments, Lite profiles, operator UI, reliability,
-> issue evidence, docs) are **integrated** on this branch and under parent validation;
+> issue evidence, docs) are integrated on this branch; final runtime and endurance validation continues;
 > the contracts below include them ([`overnight_status.md`](./overnight_status.md)).
 >
 > **Live microphone (2026-09-09 → 10):** built-in microphone session
@@ -75,7 +75,7 @@ retain their original definitions. The sub-second median caption-delivery goal i
 
 ## Operator control plane
 
-- FastAPI + vanilla JS at `http://host:9000/operator/` (`operator_app/main.py`); page
+- FastAPI + vanilla JS at `http://127.0.0.1:9000/operator/` (`operator_app/main.py`); page
   organized for lay volunteers (start/stop, mic and voice choice, audience link + QR,
   health list, caption preview, troubleshooting, support export)
 - Pre-flight gates Start (`/api/preflight`, profile-aware via `operator_app/lite_preflight.py`);
@@ -92,25 +92,36 @@ retain their original definitions. The sub-second median caption-delivery goal i
 - Live Review with independent transcript/translation approval and export guards
   (`/api/review/...`); scoped support bundles and regenerable-log cleanup
   (`/api/support/...`, `/api/storage/...`, `operator_app/support.py`)
-- Session lifecycle: explicit completion after worker/drain on SIGINT/SIGTERM
-- Day-of workflow: [`operator_runbook.md`](./operator_runbook.md) (root-owned UI evidence)
+- Operator HTTP/WebSocket access defaults to localhost, with Host and browser Origin
+  validation. Explicit remote binding warns that controls and private session data are
+  unauthenticated; it is not a public hosting configuration. Audience HTTP serves only
+  eight required display assets, independently of the operator (`tools/display_server.py`).
+- Review exports use a separate approved projection: private drafts/notes and unapproved
+  target text never enter bundles. Schema 2 export IDs bind that projection; cached files
+  and download members are validated, and older unsafe downloads require re-export.
+- Session lifecycle: explicit completion after worker/drain on SIGINT/SIGTERM;
+  generation-checked controls cannot stop a newer session after waiting on an old one.
+- Day-of workflow: [`operator_runbook.md`](./operator_runbook.md) (recorded browser evidence)
 
 ## Model resolution and setup
 
 - `stark-translate setup --backend mlx` — pinned manifest, managed Marian CT2 cache
 - Reuses complete local CT2 adapters or converts both HF directions atomically
 - Default Piper voices match EN/ES profile; VAD loads bundled Silero weights
+- MLX Whisper resolves the selected primary/fallback settings through the shared resolver.
+  Automatic Distil fallback is English-only; Spanish load failures surface visibly, and
+  low-confidence Spanish output is never retried on an English-only model.
 - Do **not** recreate the operator's working `stt_env`
 
 Details: [`mac_implementation_status.md`](./mac_implementation_status.md),
-[`packaging/macos.md`](./packaging/macos.md) (lite agent owns cross-platform packaging prose).
+[`packaging/macos.md`](./packaging/macos.md) (installation paths and artifact checks).
 
 ## Opt-in experiments (not defaults)
 
 | Experiment | Status | Notes |
 |------------|--------|-------|
 | Gemma 4 MTP / `--mts` | Off (#177); live `--mts` **rejected before load** by `validate_live_mts` | Offline probe only: byte-identical; ≤14% win at low acceptance |
-| Latency experiments (`tools/latency_experiments.py`) | Opt-in, validated before startup | Provisional previews, fixed-prefix cache, bounded allocator, pause speculation — evidence via `tools/overnight_bench.py` (parent-owned) |
+| Latency experiments (`tools/latency_experiments.py`) | Opt-in, validated before startup | Provisional previews, fixed-prefix cache, bounded allocator, pause speculation — evidence via `tools/overnight_bench.py` (frozen source and recorded browser telemetry) |
 | Conservative Marian routing | Opt-in | 24/24 synthetic routing probes passed |
 | Shorter silence / faster cadence | Rejected | 48-run screen — caption/content regressions |
 | ONNX VAD | Opt-in | Packaged JIT default passed CPU loads |
@@ -134,7 +145,7 @@ Per user decision (2026-09-09 overnight plan):
   finals) and `lite-cpu-quality` (adds Gemma 4 E2B Q4_K_M via CPU `llama-server`), Torch-free
   `lite-cpu` extra, `stark-translate-lite` entry point, lite preflight admission floors,
   pinned artifacts in `models.lock.json`. Evidence so far: isolated Mac CPU install +
-  synthetic EN/ES caption/TTS replays and E2B/native-runtime download-and-verify
+  synthetic EN/ES caption/TTS replays and an installed CPU E2B inference smoke
   ([`lite_profiles.md`](./lite_profiles.md)). x86 CPU performance, natural-speech quality
   and any latency gate: **pending**
 - **Native Windows / RTX 2070** — `lite-cuda-8gb` implemented (Whisper turbo CT2

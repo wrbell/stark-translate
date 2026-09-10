@@ -34,7 +34,7 @@ return **unloaded** engines — call `.load()` before `.transcribe()` / `.transl
 | Role | Selection | Source |
 |------|-----------|--------|
 | STT EN | `ParakeetMLXEngine`, `mlx-community/parakeet-tdt-0.6b-v3` | `dry_run_ab.py` picks `parakeet-mlx` for `--lang en` when available; `--stt-backend mlx` forces Whisper |
-| STT ES | `MLXWhisperEngine`, `mlx-community/whisper-large-v3-turbo`; fallback `wbell7/distil-whisper-large-v3.5-mlx` on low confidence | `settings.stt` |
+| STT ES | `MLXWhisperEngine`, `mlx-community/whisper-large-v3-turbo`; Spanish never retries the English-only Distil fallback | `settings.stt` |
 | Partials | `MarianCT2Engine` int8 on CPU (`intra_threads=4`) from `adapters/marian_ct2/<dir>/active` or the managed setup cache; `MarianHFEngine` if no CT2 artifact | `factory.create_translation_engine(engine_type="marian")` |
 | Finals | `MLXGemmaEngine`, `mlx-community/gemma-4-e4b-it-OptiQ-4bit`; `--gemma4-size e2b` → E2B OptiQ | `settings.translation.model_family = "gemma4"` |
 | Opt-out | `--model-family translategemma` → `mlx-community/translategemma-4b-it-4bit` (+12B with `--ab`) | `resolve_mlx_translation_model_id()` |
@@ -70,14 +70,18 @@ these rules (#176).
 - **mlx ≥ 0.31.2 / mlx-lm ≥ 0.31.3:** thread-local streams allow `ThreadPoolExecutor(max_workers=2)` overlap of STT(N+1) with translation(N) in one process. `--multiprocess` (separate Metal contexts) remains an escape hatch only.
 - **Materialize on the load thread:** `warm_mlx_model()` runs `mx.eval` on weights and the first Gemma forward on the loading thread before pool handoff; skipping it reproduces the first-forward crash covered by `tests_gpu/test_mlx_worker_first_forward.py`.
 - **One lock per model:** `mlx_generation_lock.py` serializes generation on a single model while distinct models overlap.
-- **PyTorch lock:** `MarianHFEngine` and the Silero VAD share `_pytorch_lock`; concurrent PyTorch forwards from different threads corrupt the Metal heap. Keep VAD on the asyncio thread.
+- **PyTorch lock:** `MarianHFEngine` and the Silero VAD share `_pytorch_lock`; concurrent PyTorch forwards from different threads corrupt the Metal heap. Default VAD remains on the asyncio thread; serialized worker VAD is an opt-in experiment.
 - **Metal cache:** engines set `mx.set_cache_limit(256 MB)` (`cache_limit_mb`).
 
 ## Confidence and fallback (quality layer 3)
 
 `MLXWhisperEngine` defaults: `fallback_threshold=-1.2` (avg_logprob below → retry
 with the fallback model), `hallucination_threshold=2.4` (compression ratio above →
-retry), `fallback_on_low_conf=True`. Fallback events are logged by
+retry), `fallback_on_low_conf=True`. Automatic fallback is English-only. Spanish keeps
+the primary result on low confidence and fails visibly if its selected multilingual
+model cannot load. Engine callers can pass `session_language="es"` to guard startup;
+Spanish inference also rejects an engine that already selected an English fallback.
+Custom fallback IDs do not establish multilingual support. Fallback events are logged by
 `active_learning.py`. `ParakeetMLXEngine` derives `avg_logprob` / word probabilities
 from TDT token confidences — a proxy, not a calibrated Whisper probability — and does
 not use the Whisper fallback chain.

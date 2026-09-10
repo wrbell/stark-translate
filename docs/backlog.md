@@ -48,11 +48,11 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 ### `issue-134-sunday-dry-run` — Dry-run with the operator runbook (#134)
 
 - **Priority:** P0 · **Machine:** mac · **Certification:** pending
-- **Depends on:** `issue-131-smoke`
+- **Depends on:** none
 - **Sources:** [#134](https://github.com/wrbell/stark-translate/issues/134), `docs/operator_runbook.md`
 - **Issue acceptance (verbatim intent):** Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.
 - **Acceptance:** Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.
-- **Notes:** The controlled hymn/pause/restart rehearsal used file replay and TTS and did not record a setup-to-first-caption time or a dry-run note, so it does not yet satisfy the issue. Depends on #131 only because the runbook walk-through is expected to use the microphone path once it is proven.
+- **Notes:** The laptop-stand-in recorded rehearsal is independent of the deferred live-microphone gate. Earlier short mixed clips did not include a full hymn; a complete service replay and setup-to-first-caption note remain required.
 - **Next action:** Complete the laptop-stand-in full recorded hymn/spoken rehearsal, record setup-to-first-caption timing, and publish the UX note. Live microphone is a separate tomorrow gate.
 
 ### `pr-192-integration` — Validate the integrated candidate branch and finish the authorized merge of draft PR #192
@@ -149,7 +149,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 ### `physical-second-output` — Second physical audio output: selection, unplug/replug, audible playback
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
-- **Depends on:** `issue-132-tts-routing`
+- **Depends on:** none
 - **Sources:** `docs/mac_implementation_status.md`
 - **Acceptance:** EN and ES TTS routed to two distinct real outputs, device choice persists across restart, unplug/replug re-resolves the named route, and playback is audibly verified.
 - **Notes:** User deferred physical-device checks until tomorrow.

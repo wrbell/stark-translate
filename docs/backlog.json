@@ -120,16 +120,14 @@
       "certification": "pending",
       "priority": "P0",
       "machine": "mac",
-      "dependencies": [
-        "issue-131-smoke"
-      ],
+      "dependencies": [],
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/134",
         "docs/operator_runbook.md"
       ],
       "issue_acceptance": "Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.",
       "acceptance": "Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.",
-      "notes": "The controlled hymn/pause/restart rehearsal used file replay and TTS and did not record a setup-to-first-caption time or a dry-run note, so it does not yet satisfy the issue. Depends on #131 only because the runbook walk-through is expected to use the microphone path once it is proven.",
+      "notes": "The laptop-stand-in recorded rehearsal is independent of the deferred live-microphone gate. Earlier short mixed clips did not include a full hymn; a complete service replay and setup-to-first-caption note remain required.",
       "next_action": "Complete the laptop-stand-in full recorded hymn/spoken rehearsal, record setup-to-first-caption timing, and publish the UX note. Live microphone is a separate tomorrow gate."
     },
     {
@@ -161,9 +159,7 @@
       "certification": "pending",
       "priority": "P1",
       "machine": "mac",
-      "dependencies": [
-        "issue-132-tts-routing"
-      ],
+      "dependencies": [],
       "sources": [
         "docs/mac_implementation_status.md"
       ],
