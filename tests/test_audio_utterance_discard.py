@@ -12,6 +12,7 @@ import pytest
 
 from tools.latency_experiments import LatencyExperiments
 from tools.latency_scheduler import PartialRuntimePredictor
+from tools.latency_trace import LatencyTrace
 from tools.pipeline_timing import AudioFrame, CaptureStamp
 from tools.source_coverage import SourceCoverage
 
@@ -112,6 +113,36 @@ async def capture(pipeline, monkeypatch, frames, queue_type=asyncio.Queue, resum
     monkeypatch.setattr(d, "process_final", save)
     await asyncio.wait_for(d.audio_loop(), 2)
     return finals
+
+
+def test_music_trace_explains_actual_streak_resets_without_reclassifying_frames(pipeline, monkeypatch):
+    trace = LatencyTrace(enabled=True, capacity=1000)
+    monkeypatch.setattr(pipeline, "_latency_trace", trace)
+    monkeypatch.setattr(pipeline, "MUSIC_HOLDOFF", 0.096)
+    monkeypatch.setattr(pipeline, "MUSIC_THRESHOLD", 0.15)
+    kinds = [(False, True), (False, True), (False, False), (False, True), (True, True)]
+    kinds += [(False, True)] * 3 + [(True, False)] * 25 + [(False, False)] * 20
+    frames = [frame(i * 1536, speech, loud) for i, (speech, loud) in enumerate(kinds)]
+    finals = asyncio.run(capture(pipeline, monkeypatch, frames))
+    events = [row for row in trace.snapshot()["events"] if row["event"] == "vad_complete"]
+    # The actual capture loop consumes each controlled VAD decision once. Its
+    # source-bound trace distinguishes energy resets from speech resets.
+    assert len(events) == len(frames)
+    assert [row["music_nonspeech_frames"] for row in events[:8]] == [1, 2, 0, 1, 0, 1, 2, 3]
+    assert [row["vad_positive"] for row in events] == [speech for speech, _ in kinds]
+    assert [row["frame_rms"] for row in events] == pytest.approx([0.3 if loud else 0.1 for _, loud in kinds])
+    for index, row in enumerate(events):
+        assert (row["sample_start"], row["sample_end"], row["sample_rate"]) == (index * 1536, (index + 1) * 1536, 48000)
+        assert row["processed_samples"] == 512 and row["processing_sample_rate"] == 16000
+        assert row["padding_samples"] == 0 and row["elapsed_ms"] >= 0
+        assert row["music_holdoff_frames"] == 3 and row["music_resume_frames"] == 15
+        assert row["music_threshold"] == 0.15
+    assert events[7]["music_hold_active_before_transition"] is False
+    assert events[8]["music_hold_active_before_transition"] is True
+    assert events[22]["music_speech_frames"] == 15
+    assert events[22]["music_hold_active_before_transition"] is True
+    assert events[23]["music_hold_active_before_transition"] is False
+    assert len(finals) == 1 and finals[0][2].sample_start == 8 * 1536
 
 
 @pytest.mark.parametrize("pause_frames,threshold_ms", [(5, 160), (8, 240)])

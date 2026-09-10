@@ -4628,7 +4628,7 @@ async def audio_loop():
     music_hold_active = False
     music_nonspeech_frames = 0  # consecutive non-speech high-RMS frames
     music_speech_frames = 0  # consecutive speech frames (for exiting music hold)
-    music_holdoff_frames = int(MUSIC_HOLDOFF * SAMPLE_RATE / 512)  # ~2s
+    music_holdoff_frames = int(MUSIC_HOLDOFF * SAMPLE_RATE / 512)  # nominal 5s by default
     music_resume_frames = int(0.5 * SAMPLE_RATE / 512)  # ~0.5s speech to exit
     music_hold_start_frame = 0
     music_capture_frames = 0  # never reset by utterance finalization or operator pause
@@ -4836,7 +4836,7 @@ async def audio_loop():
                         )
                     else:
                         has_speech = is_speech(audio_frame, vad_model, vad_utils)
-                    _latency_trace.record("vad_complete", elapsed_ms=(time.perf_counter() - vad_started) * 1000)
+                    vad_elapsed_ms = (time.perf_counter() - vad_started) * 1000
 
                     frame_count += 1
                     music_capture_frames += 1
@@ -4853,6 +4853,29 @@ async def audio_loop():
                         # Silence (no speech, low RMS)
                         music_nonspeech_frames = 0
                         music_speech_frames = 0
+
+                    # Extend the existing opt-in event, using the exact decision
+                    # and RMS already consumed here; never run VAD a second time.
+                    # VAD elapsed retains its original call/worker-wait scope.
+                    _latency_trace.record(
+                        "vad_complete",
+                        elapsed_ms=vad_elapsed_ms,
+                        sample_start=frame_stamp.sample_start,
+                        sample_end=frame_stamp.sample_end,
+                        sample_rate=frame_stamp.sample_rate,
+                        padding_samples=frame_stamp.padding_samples,
+                        processed_samples=len(audio_frame),
+                        processing_sample_rate=SAMPLE_RATE,
+                        vad_positive=bool(has_speech),
+                        vad_threshold=VAD_THRESHOLD,
+                        frame_rms=frame_rms,
+                        music_threshold=MUSIC_THRESHOLD,
+                        music_holdoff_frames=music_holdoff_frames,
+                        music_resume_frames=music_resume_frames,
+                        music_nonspeech_frames=music_nonspeech_frames,
+                        music_speech_frames=music_speech_frames,
+                        music_hold_active_before_transition=music_hold_active,
+                    )
 
                     # Enter music hold
                     if not music_hold_active and music_nonspeech_frames >= music_holdoff_frames:
