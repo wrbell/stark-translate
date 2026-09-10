@@ -5303,7 +5303,7 @@ def main():
     )
     parser.add_argument(
         "--tts",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=False,
         help="Enable TTS audio output of translated text (Piper ONNX)",
     )
