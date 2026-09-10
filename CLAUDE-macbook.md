@@ -179,9 +179,12 @@ Spoken microphone captions, physical second output and hotplug remain pending; #
 | YouTube caption comparison | `tools/live_caption_monitor.py` | Cross-system WER = disagreement |
 | Translation QE | `tools/translation_qe.py` | Tier 1 heuristics, Tier 2 back-translation, Tier 3 LaBSE |
 
-Open Mac gates: natural Spanish references, blinded bilingual review, visible-browser
-timing run, two-speaker diarization clip, second physical output, Sunday dry run —
-[`docs/backlog.json`](docs/backlog.json).
+Open Mac gates include locally reviewed church Spanish references, blinded bilingual
+review, physical display timing, two-speaker diarization and a second physical output.
+Public FLEURS EN/ES engineering comparisons and the laptop Sunday rehearsal (#134)
+have separate recorded evidence; they do not satisfy the remaining human/device gates.
+See [`docs/backlog.json`](docs/backlog.json). The current user instruction prohibits
+further microphone or output playback testing for the rest of this session.
 
 ---
 
@@ -190,7 +193,7 @@ timing run, two-speaker diarization clip, second physical output, Sunday dry run
 | Issue | Fix |
 |-------|-----|
 | Session fails with "Microphone delivered no samples" or health shows `input_error` | Isolated capture timed out (above). Check microphone permission for the launching app, the operator's idle device probe, and `metrics/session_<id>.log`; run `--audio-file` to confirm the rest of the pipeline |
-| Operator shows RUNNING with no partials | Should no longer happen (readiness comes from `pipeline_health`); if it does, capture the session id and health snapshot — it is evidence for `mac-live-mic-stall` |
+| Operator shows RUNNING with no partials | RUNNING means frames are arriving; silence or filtered input can produce no captions. Inspect the input level, frame/heartbeat health and session log. Stale input or an `input_error` indicates capture failure; no-caption silence alone does not |
 | Preflight fails on models | `stark-translate setup --backend mlx` (add `--include ...`); set `STARK_MODELS_DIR` at launch if setup used `--models-dir` |
 | Marian preflight fails | Setup needs a complete CT2 artifact for the selected direction; rerun setup or `scripts/convert_marian_ct2.py` |
 | Gemma output truncated or runs to `max_tokens` | Stop-token regression (#172) — verify `ensure_stop_tokens` logs "added=" for the family; never hand-edit `_eos_token_ids` |

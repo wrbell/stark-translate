@@ -316,7 +316,7 @@ and [`evaluation/README.md`](./evaluation/README.md).
 | Decision | When | Options / owner |
 |----------|------|-----------------|
 | Hindi/Chinese timing | Later user decision | Separate R&D; offline Hindi church-audio baseline archived (#138), live path not started; no overnight action |
-| Natural Spanish recording source | User decision | Needed before any Spanish WER/quality claim |
+| Church Spanish recording source | Local source and independent review pending | Public FLEURS Spanish already supports separately labeled engineering WER; church terminology and locally approved quality remain unvalidated |
 | E2B as default | After blinded bilingual review | Speed vs meaning/terminology tradeoff |
 | Production hardware | Before future production-device certification | Dedicated church PC vs portable Mac; the laptop #134 rehearsal is already complete |
 | PyPI publication and release tag | After PR #192 merge | User choice; trusted publisher mapping pending |

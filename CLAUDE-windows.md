@@ -93,8 +93,10 @@ Execute [`docs/wsl_pipeline_refresh.md`](docs/wsl_pipeline_refresh.md); this is 
 
 Before starting: `nvidia-smi` OK, venv active, sermon WAVs under `stark_data/raw/`, W16
 located at `adapters/whisper_turbo_ct2/active` (CT2) or `adapters/whisper_turbo/active` (LoRA).
-`run_w17_curriculum.sh` passes `o_proj` in its module list while `train_whisper.py` documents
-`out_proj` — confirm against the model before the first W17 run.
+`run_w17_curriculum.sh` now uses `out_proj`. Its mandatory CPU preflight validates
+the actual model configuration, source adapter tensors and intended corpus before
+training. Mac source/fixture checks passed; run the preflight on the real WSL
+artifacts before the first W17 run.
 
 ## A5. Training programs (summary — flags in `training/CLAUDE.md`)
 
@@ -258,8 +260,8 @@ Do not reuse A2000 (Ada) latency figures for the 2070 (Turing, no BF16). Backlog
 | `demucs` OOM in Phase 4 | Use `--skip-demucs` for a first pass or process shorter files |
 | `pyannote` auth error | Hugging Face token with the accepted pyannote user agreement (`--diarize` is optional) |
 | Deepgram "No API key" | `STARK_DEEPGRAM__API_KEY` (double underscore) or `--api-key` |
-| `run_gemma4_e4b_domain_sft.sh` trains on the wrong corpus | Export `STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl` (default is the misaligned v1 path) |
-| W17 PEFT "target modules not found" | Module name mismatch (`o_proj` vs `out_proj`) — fix the `MODULES` array to match `train_whisper.py` |
+| Domain SFT preflight rejects the corpus | The script defaults to `bible_data/aligned/verse_pairs_train_v2.jsonl` and rejects v1/missing configured inputs. Set explicit paths to the intended prepared corpora; do not bypass the guard |
+| W17 PEFT "target modules not found" | The recipe now uses `out_proj` and preflight rejects `o_proj`. Inspect the selected model config and source adapter rank/tensors with the real WSL preflight before training |
 | `export_ct2.py` sanity gate fails | Try `--quantization int8_bfloat16` or `float16` to isolate; canary clips must exist under `stark_data/whisper_dataset_deepgram/eval/` |
 | Adapter won't load on Mac | Both `adapter_config.json` and `adapter_model.safetensors` present; Whisper LoRA is CPU-CT2 only on Mac |
 | Lite `doctor` fails admission | Check cores/RAM/VRAM floors in B1; pick the matching profile explicitly, it will not auto-downgrade |

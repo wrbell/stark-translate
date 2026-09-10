@@ -86,8 +86,11 @@ Session artifacts under `metrics/` (`session_*.log`, `ab_metrics_*.csv`,
 for a status claim. The 2026-09-09 built-in-mic stall (`20260909_233204_799019_en`) versus
 the passing file replays (`..._233546_027169_en`, `..._233823_034893_es`) is the
 canonical example: same build, different `audio_source`, different conclusion. The
-capture/readiness fix that followed is integrated; the mic retest that would close it has
-not been run yet. Lite CPU smoke evidence (synthetic inputs, hashes, commands) is in
+capture/readiness fix that followed is integrated. Later real readiness and synthetic
+acoustic tests ran, but the Spanish retest retained upstream sample loss; see
+[device evidence](../docs/evaluation/tts_routing_20260910/README.md). Full microphone
+acceptance remains pending, and further microphone/output testing is prohibited
+by the user for this session. Lite CPU smoke evidence (synthetic inputs, hashes, commands) is in
 [`docs/evaluation/lite_cpu_smoke_20260910.json`](../docs/evaluation/lite_cpu_smoke_20260910.json)
 and is not a natural-speech quality or latency claim.
 

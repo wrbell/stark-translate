@@ -11,10 +11,11 @@
 [![Security](https://github.com/wrbell/stark-translate/actions/workflows/security.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/wrbell/stark-translate/graph/badge.svg)](https://codecov.io/gh/wrbell/stark-translate)
 
-Fully on-device, live bilingual speech-to-text for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). English/Spanish, real-time mic input, browser display. No cloud APIs, no internet required at runtime.
+Fully on-device, live bilingual speech-to-text for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). English/Spanish, real-time mic input, browser display. Inference uses no cloud APIs and works offline after the selected models are prepared locally.
 
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
-> (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> (`2026.14.0.0`), with prior integration in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
+> and the active follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > The last published release recorded here is **v2026.13**. Source integration,
 > release publication and service certification are separate; PyPI/package artifacts
 > and release tags remain pending by user choice.
@@ -135,7 +136,7 @@ Pinned in `models.lock.json`; resolution order (explicit path → `STARK_MODELS_
 |------|-------------------|--------------|-------|
 | VAD | Silero 6.2.1 (torch; ONNX opt-in) | same | 0.5 s silence trigger, 8 s max utterance |
 | STT EN | Parakeet TDT 0.6B v3 (`parakeet-mlx`) | Whisper large-v3-turbo + W16 LoRA → CT2 int8_float16 | Mac `--stt-backend mlx` forces Whisper |
-| STT ES | mlx-whisper large-v3-turbo; low-confidence fallback `wbell7/distil-whisper-large-v3.5-mlx` | same CT2 model | Confidence thresholds in `settings.py` |
+| STT ES | mlx-whisper large-v3-turbo | same CT2 model | English-only Distil fallback is rejected for Spanish; confidence thresholds in `settings.py` |
 | Partial translation | Marian opus-mt en-es / es-en → CT2 int8 on CPU (HF fallback) | Marian CT2 int8_float16 on GPU | [Marian benchmark](docs/archive/v2026.8/MARIAN_BENCHMARK.md) |
 | Final translation | Gemma 4 E4B OptiQ 4-bit (`--gemma4-size e2b` opt-in) | Gemma 4 E4B Q4_K_M via llama.cpp (`start_server.sh`), E2B for low VRAM | [CUDA benchmark](docs/archive/v2026.5/BENCHMARK.md); HF NF4 is legacy |
 | Opt-out translation | TranslateGemma 4B / 12B 4-bit (`--model-family translategemma`, `--ab`) | — | Historical default; see [`docs/mlx_cuda_parity.md`](./docs/mlx_cuda_parity.md) |
