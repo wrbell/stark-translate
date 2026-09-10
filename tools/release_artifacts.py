@@ -20,6 +20,7 @@ MAC_ROOTS = (
     "scripts",
     "launchd",
     "tests",
+    "training",
     "docs",
     "dry_run_ab.py",
     "workers.py",
@@ -45,6 +46,7 @@ RUNTIME_REQUIRED = {
     "tools/audio_bridge_client.py",
     "tools/review_data.py",
     "tools/session_lifecycle.py",
+    "training/theological_canaries.py",
     "features/live_diarize.py",
     "displays/audience_display.html",
     "dry_run_ab.py",
@@ -88,6 +90,7 @@ def build_mac_bundle(root: Path, output_dir: Path, tag: str) -> Path:
                     and not path.is_symlink()
                     and "__pycache__" not in path.parts
                     and path.suffix != ".pyc"
+                    and (item != "training" or path.suffix in {".py", ".sh", ".md"})
                 ):
                     archive.write(path, path.relative_to(root))
     verify_artifact(output)

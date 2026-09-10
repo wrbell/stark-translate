@@ -134,6 +134,8 @@ packages = ["stark_translate", "operator_app", "engines", "tools", "features"]
 "scripts/runtime_env.sh" = "scripts/runtime_env.sh"
 "start_server.sh" = "start_server.sh"
 "run_operator.sh" = "run_operator.sh"
+"training/__init__.py" = "training/__init__.py"
+"training/theological_canaries.py" = "training/theological_canaries.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -149,6 +151,9 @@ include = [
     "displays",
     "scripts",
     "tests",
+    "training/*.py",
+    "training/*.sh",
+    "training/*.md",
     "settings.py",
     "dry_run_ab.py",
     "models.lock.json",

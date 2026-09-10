@@ -14,6 +14,7 @@ def main() -> None:
     import operator_app
     from operator_app.main import app
     from operator_app.setup import load_lockfile
+    from training.theological_canaries import canary_sentences
 
     package = Path(operator_app.__file__).resolve()
     if not package.is_relative_to(Path(sys.prefix).resolve()):
@@ -23,6 +24,7 @@ def main() -> None:
         "dry_run_ab.py",
         "workers.py",
         "tools/session_lifecycle.py",
+        "training/theological_canaries.py",
         "displays/audience_display.html",
         "displays/caption_telemetry.js",
         "displays/display_connection.js",
@@ -37,6 +39,7 @@ def main() -> None:
         raise RuntimeError(f"Installed operator endpoints failed: {responses}")
     manifest = load_lockfile()
     assert "mlx-parakeet-v3" in manifest["models"]
+    assert canary_sentences(1)[0]["en"]
     print(
         json.dumps(
             {
