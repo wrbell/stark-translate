@@ -9,7 +9,7 @@
 > Current setup uses bundled Silero 6.2.1 and automatically reuses or converts
 > both pinned Marian CT2 directions. The packaging guide supersedes the older
 > environment snapshot below. All 24 synthetic routing probes passed, followed
-> by 1,785 CPU tests (4 skipped, 59.05% coverage). Final artifacts remain pending;
+> by 1,790 CPU tests (4 skipped, 59.07% coverage). Final artifacts remain pending;
 > natural Spanish, human review and physical-device gates remain open.
 > New latency uses captured speech end to payload readiness and visible-browser
 > acknowledgments. Legacy processing timings cannot establish the sub-second goal.

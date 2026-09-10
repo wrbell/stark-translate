@@ -88,8 +88,8 @@ have no reference score. Predictions and measured timings were preserved.
 
 ## Completed validation
 
-- Final CPU suite after the VAD/CT2 setup changes: **1,785 passed, 4 skipped**,
-  59.05% coverage against the 50% gate. An earlier rerun exposed a stale packaging
+- Final CPU suite after the VAD/CT2 setup changes: **1,790 passed, 4 skipped**,
+  59.07% coverage against the 50% gate. An earlier rerun exposed a stale packaging
   test that rejected the new derived-CT2 manifest type; its schema assertion was
   corrected and the complete suite rerun. The failure log was retained.
 - Earlier cached MLX GPU regression suite: **3 passed**, covering E4B EOS/canary

@@ -9,7 +9,7 @@
 > 0.6 s partial cadence remain default, and MTP stays off. Packaged offline VAD
 > and automatic pinned Marian CT2 setup passed focused/real CPU checks. Separate
 > [24-run synthetic routing probes](docs/evaluation/mac_v2026_14_routing/README.md)
-> passed; the final CPU suite is 1,785 passed/4 skipped (59.05% coverage).
+> passed; the final CPU suite is 1,790 passed/4 skipped (59.07% coverage).
 > Final release artifacts remain pending. Archived
 > `e2e_latency_ms` is processing time, not speech-end-to-display. Human natural
 > Spanish/two-speaker/bilingual review and physical output tests remain gates.
