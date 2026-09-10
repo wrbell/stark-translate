@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "abort-receipt.json",
+      "size_bytes": 1499,
+      "sha256": "07d357444bc5f9cd262aab06a4b83a8c91f28e64e6d0bbd5d0a09869a24fc436"
+    },
+    {
+      "path": "archive_cohort.py.txt",
+      "size_bytes": 6595,
+      "sha256": "9930721c3ff27b7e6fd68b551a2ee5673de2502e291ac793caef15ba045a8ef6"
+    },
+    {
+      "path": "archive_v1_v4.py.txt",
+      "size_bytes": 9703,
+      "sha256": "7c1f125ed4879248bf418c8a6f2c8e0b9970867c5dd433e7d213b8e065901640"
+    },
+    {
+      "path": "input-inventory.json",
+      "size_bytes": 6167,
+      "sha256": "e0b23b15a57b73103a9694f3d42786c757aa3776e721391ae9eb06c43a0f3b8f"
+    },
+    {
+      "path": "interpretation.json",
+      "size_bytes": 1579,
+      "sha256": "51479e186274efe6f5ebbe4b759b4d41bf95c7bf7cfca1db9ed0f4056abfbc89"
+    },
+    {
+      "path": "interrupted-v1-run/ab_metrics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.csv",
+      "size_bytes": 2418,
+      "sha256": "ea6f64278ede378296ffa40d30609faebdbeefe7ffa5eb3cbc9cde31d6e11c36"
+    },
+    {
+      "path": "interrupted-v1-run/diagnostics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.jsonl",
+      "size_bytes": 550263,
+      "sha256": "8afde09fe84d2f18066afdcede5e6af9f4afb10564211810160413d525449efb"
+    },
+    {
+      "path": "interrupted-v1-run/hardware_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+      "size_bytes": 262,
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67"
+    },
+    {
+      "path": "interrupted-v1-run/health_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+      "size_bytes": 2290,
+      "sha256": "8a319484f0d4e228785c0571d5dbbcc1ac011e6c302f9f25f2830f18c244e9d1"
+    },
+    {
+      "path": "interrupted-v1-run/partials_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.jsonl",
+      "size_bytes": 24264,
+      "sha256": "ca2a7b4374aac4c8c381018d5bbbbf3f62a1c8952c1c94ee5ac563d5b9722e56"
+    },
+    {
+      "path": "interrupted-v1-run/replay_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.log",
+      "size_bytes": 10067,
+      "sha256": "710fe79ff95ce5f241a5dc03b2a07765472e350de072c4352e776f546f178627"
+    },
+    {
+      "path": "interrupted-v1-run/session_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.log",
+      "size_bytes": 745,
+      "sha256": "6ee28b5960a3f7418a933e3e28159542b43b5b677f5f1bb3c7a6d6041bd1ea2b"
+    },
+    {
+      "path": "interrupted-v1-run/session_lifecycle_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+      "size_bytes": 3396,
+      "sha256": "f11f8a54752455ecc344ead466a590e97b691b9a4d9f9b8e0ad954d6ad130e4a"
+    },
+    {
+      "path": "interrupted-v1-run/session_metadata_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+      "size_bytes": 4762,
+      "sha256": "b5328ab2662a1beb0fa361b45aea527c51410771fac6f1e03b52ef26a0894042"
+    },
+    {
+      "path": "measurement-pilot-v4/evidence-index.json",
+      "size_bytes": 3030,
+      "sha256": "4d3d4b4236981e0654b1631c785488339ebfdcd703470983b4d018b4c53128c5"
+    },
+    {
+      "path": "measurement-pilot-v4/protocol.json",
+      "size_bytes": 5810,
+      "sha256": "d559b649fa706b62a844638f3ad25441693e5a98eb0f1de32b450a93ef967b9f"
+    },
+    {
+      "path": "measurement-pilot-v4/provenance.json",
+      "size_bytes": 58280,
+      "sha256": "4a5e85c0290c20505750e1fce62921bf975a2700adabdaf96f538dc5945c1cde"
+    },
+    {
+      "path": "measurement-pilot-v4/raw-evidence.tar.gz",
+      "size_bytes": 738867,
+      "sha256": "9db412da6ba9c3c16bdf005e8a65e9b521d4f4bf4ae7b8c6441ebabb146052e2"
+    },
+    {
+      "path": "measurement-pilot-v4/run-summary.json",
+      "size_bytes": 21030,
+      "sha256": "1883064d1b8e2d51ab63d288297cda318d8e8ee53066ef7b1774af4179e519bd"
+    },
+    {
+      "path": "measurement-pilot-v4/runner.log",
+      "size_bytes": 416,
+      "sha256": "3ec56fd964cc5ca526898a74f7f88ddcea466efdde2bdca2a6fe1b18dd922c65"
+    },
+    {
+      "path": "measurement-pilot-v4/source-code.tar.gz",
+      "size_bytes": 1157694,
+      "sha256": "e316836753049a4cabf0abec65e864b9cc8cbce465fbc0ef8e44a49f8d4f3e4f"
+    },
+    {
+      "path": "standard-screen-normalized-v1/evidence-index.json",
+      "size_bytes": 10132,
+      "sha256": "018a51b8fe2bb1f943395894f3e49911706e6e2cb29808562425305b1ae64c7b"
+    },
+    {
+      "path": "standard-screen-normalized-v1/protocol.json",
+      "size_bytes": 12067,
+      "sha256": "5cc2cce38ec3d648b0684d3969e13079a419f6e962d832f7c4aec0e7a64e5a3b"
+    },
+    {
+      "path": "standard-screen-normalized-v1/provenance.json",
+      "size_bytes": 125369,
+      "sha256": "f527189cf4ee62cb4ff634dee455b94cd7339984b2e13279c822358c4205b8c7"
+    },
+    {
+      "path": "standard-screen-normalized-v1/raw-evidence.tar.gz",
+      "size_bytes": 3183176,
+      "sha256": "36a83af73dcc630ad74c556046bc43d9c162f82211ad7f372b2b0ce1f07ec6c8"
+    },
+    {
+      "path": "standard-screen-normalized-v1/run-summary.json",
+      "size_bytes": 95385,
+      "sha256": "2f06134065093b6aeadafebf28cbc0ec6614372b4b8de6ad631bd09577011f82"
+    },
+    {
+      "path": "standard-screen-normalized-v1/runner.log",
+      "size_bytes": 3596,
+      "sha256": "82de9d0b467c007d1ec280ba85132351a49abc03eaff944c6c8c305ec48fb5a8"
+    },
+    {
+      "path": "standard-screen-normalized-v1/source-code.tar.gz",
+      "size_bytes": 1143764,
+      "sha256": "b9873c328f43feffcc417ec555c2d4a66d7ed3751001ace906b4477422a902af"
+    }
+  ]
+}

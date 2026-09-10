@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "inventory_complete": true,
+  "arms": [
+    {
+      "experiment": "cadence_09",
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "final_queue_sustained_growth",
+        "final_queue_wait_regression",
+        "first_preview_tail_regression",
+        "median_gain_below_gate",
+        "missing_preview_responsiveness",
+        "preview_source_coverage_loss",
+        "tail_regression"
+      ]
+    },
+    {
+      "experiment": "cadence_09",
+      "size": "e2b",
+      "clip_id": "fleurs_development_es",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "final_queue_sustained_growth",
+        "final_queue_wait_regression",
+        "first_preview_tail_regression",
+        "median_gain_below_gate",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression",
+        "update_gap_tail_regression"
+      ]
+    },
+    {
+      "experiment": "cadence_12",
+      "size": "e2b",
+      "clip_id": "fleurs_development_en",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "first_preview_tail_regression",
+        "preview_source_coverage_loss",
+        "update_gap_tail_regression"
+      ]
+    },
+    {
+      "experiment": "cadence_12",
+      "size": "e2b",
+      "clip_id": "fleurs_development_es",
+      "qualified_for_confirmation": false,
+      "complete_three_repeats": true,
+      "all_repeats_nonlatency_guards_passed": false,
+      "passed_repeats": [],
+      "mean_conservative_gain_ms": null,
+      "p95_claim_eligible": false,
+      "rejection_reasons": [
+        "final_queue_sustained_growth",
+        "final_queue_wait_regression",
+        "first_preview_tail_regression",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression",
+        "update_gap_tail_regression"
+      ]
+    }
+  ],
+  "qualified_count": 0,
+  "defaults_changed": false,
+  "limitations": "Engineering selection only. Historical references remain unavailable; independent public confirmation and bilingual review are required. Never pool repeat counts for p95 eligibility.",
+  "source_report": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1-report.json",
+    "sha256": "852c44a45a94b3b4147e2b59fbccd5cb6a86b3ddb98b4c7f22cb91768178b17f",
+    "size_bytes": 534966
+  }
+}

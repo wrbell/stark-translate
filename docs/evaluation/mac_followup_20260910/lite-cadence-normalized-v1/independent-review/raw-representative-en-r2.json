@@ -1,0 +1,626 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-09-10T18:18:40.385224+00:00",
+  "scope": "JSON-only representative English repeat-2 cadence_09 audit; exactly opening baseline, candidate and closing baseline_anchor raw cells plus matching report pair.",
+  "harness_label_note": "e2b and model_family gemma4 are harness/config labels. Actual lite-cpu bindings are faster-whisper small int8 on CPU, Marian CT2 int8 finals and ONNX Silero; no Gemma model loaded or requested for finals.",
+  "common_actual_models": {
+    "stt": {
+      "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+      "manifest_revision": null,
+      "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+      "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+      "revision_source": "setup_install_marker",
+      "source_repo_id": "Systran/faster-whisper-small",
+      "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+      "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+      "model_bin_size_bytes": 483546902
+    },
+    "marian": {
+      "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+      "manifest_revision": null,
+      "resolved_revision": null,
+      "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+      "revision_source": "unknown",
+      "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+      "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+      "model_bin_size_bytes": 79567635,
+      "export_manifest": {
+        "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+        "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+        "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+        "ct2_quantization": "int8",
+        "direction": "en-es",
+        "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+        "model_bin_hash_matches": true
+      }
+    }
+  },
+  "common_source": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_en.wav",
+    "recorded_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+    "source_lang": "en",
+    "target_lang": "es",
+    "audio_source": "file",
+    "replay_speed": 1.0,
+    "gain": 1.0,
+    "no_tts": true,
+    "browser_clients": 0,
+    "audio_read_or_rehashed": false
+  },
+  "cells": [
+    {
+      "arm": "baseline",
+      "raw_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1/followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.json",
+      "session_id": "followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en",
+      "partial_interval_s": 0.6,
+      "loaded_model_roles": [
+        "stt",
+        "marian"
+      ],
+      "requested_stt": {
+        "requested_id": "whisper-small",
+        "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+        "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+        "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+      },
+      "actual_stt_resolved_matches_requested": true,
+      "profile": {
+        "name": "lite-cpu",
+        "backend": "cpu",
+        "stt_model": "whisper-small",
+        "stt_compute_type": "int8",
+        "stt_threads": 3,
+        "stt_workers": 1,
+        "marian_threads": 1,
+        "final_engine": "marian",
+        "translation_model": null,
+        "vad_backend": "onnx",
+        "ram_floor_gb": 8,
+        "physical_core_floor": 4,
+        "vram_floor_gb": 0
+      },
+      "final_routes": {
+        "marian": 6,
+        "gemma_requests": 0
+      },
+      "previews": {
+        "emitted": 7,
+        "utterances_with_preview": 4,
+        "known_final_utterances": 6,
+        "final_utterances_without_preview": [
+          "3",
+          "7"
+        ],
+        "first_preview_by_utterance_ms": {
+          "1": 3904.6,
+          "4": 7128.6,
+          "5": 4021.2,
+          "6": 3971.1
+        },
+        "update_gap_sample_count": 3,
+        "unique_source_samples": 875520,
+        "unique_source_seconds": 18.24,
+        "partial_stt_started": 17
+      },
+      "capture_and_finals": {
+        "returncode": 0,
+        "completion_errors": [],
+        "final_count": 6,
+        "covered_final_source_s": 34.71999999999999,
+        "handoff_dropped_frames": 0,
+        "upstream_dropped_samples": 0,
+        "source_complete": true,
+        "expected_source_samples": 2253120,
+        "source_rate": 48000,
+        "reader_eof": true,
+        "capture_queues_drained": true,
+        "capture_gaps": [],
+        "unclassified_intervals": [],
+        "recorded_replay_integrity_status": "passed"
+      },
+      "queue": {
+        "final_input_waits_ms": [
+          0.05537504330277443,
+          0.05829194560647011,
+          0.05341705400496721,
+          0.1008340623229742,
+          0.07120904047042131,
+          0.07441604975610971
+        ],
+        "disjoint_last_three_minus_first_three_mean_ms": 0.026458369878431164,
+        "final_input_max_wait_ms": 0.1008340623229742,
+        "max_pending": 1,
+        "terminal_outstanding": 0,
+        "stt_final_waits_ms": [
+          1600.5,
+          1028.5,
+          0.1,
+          87.9,
+          99.3,
+          6542.8
+        ]
+      },
+      "quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "human_approved_locally": false,
+        "training_eligible": false
+      }
+    },
+    {
+      "arm": "cadence_09",
+      "raw_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1/followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.json",
+      "session_id": "followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en",
+      "partial_interval_s": 0.9,
+      "loaded_model_roles": [
+        "stt",
+        "marian"
+      ],
+      "requested_stt": {
+        "requested_id": "whisper-small",
+        "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+        "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+        "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+      },
+      "actual_stt_resolved_matches_requested": true,
+      "profile": {
+        "name": "lite-cpu",
+        "backend": "cpu",
+        "stt_model": "whisper-small",
+        "stt_compute_type": "int8",
+        "stt_threads": 3,
+        "stt_workers": 1,
+        "marian_threads": 1,
+        "final_engine": "marian",
+        "translation_model": null,
+        "vad_backend": "onnx",
+        "ram_floor_gb": 8,
+        "physical_core_floor": 4,
+        "vram_floor_gb": 0
+      },
+      "final_routes": {
+        "marian": 6,
+        "gemma_requests": 0
+      },
+      "previews": {
+        "emitted": 1,
+        "utterances_with_preview": 1,
+        "known_final_utterances": 6,
+        "final_utterances_without_preview": [
+          "3",
+          "4",
+          "5",
+          "6",
+          "7"
+        ],
+        "first_preview_by_utterance_ms": {
+          "1": 4267.8
+        },
+        "update_gap_sample_count": 0,
+        "unique_source_samples": 133632,
+        "unique_source_seconds": 2.784,
+        "partial_stt_started": 7
+      },
+      "capture_and_finals": {
+        "returncode": 0,
+        "completion_errors": [],
+        "final_count": 6,
+        "covered_final_source_s": 34.71999999999999,
+        "handoff_dropped_frames": 0,
+        "upstream_dropped_samples": 0,
+        "source_complete": true,
+        "expected_source_samples": 2253120,
+        "source_rate": 48000,
+        "reader_eof": true,
+        "capture_queues_drained": true,
+        "capture_gaps": [],
+        "unclassified_intervals": [],
+        "recorded_replay_integrity_status": "passed"
+      },
+      "queue": {
+        "final_input_waits_ms": [
+          0.5341250216588378,
+          0.18454098608344793,
+          0.9121670154854655,
+          353.60237502027303,
+          0.1760829472914338,
+          0.2728330437093973
+        ],
+        "disjoint_last_three_minus_first_three_mean_ms": 117.47348599601537,
+        "final_input_max_wait_ms": 353.60237502027303,
+        "max_pending": 1,
+        "terminal_outstanding": 0,
+        "stt_final_waits_ms": [
+          212.9,
+          1013.3,
+          6002.5,
+          354.0,
+          446.2,
+          3180.9
+        ]
+      },
+      "quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "human_approved_locally": false,
+        "training_eligible": false
+      }
+    },
+    {
+      "arm": "baseline_anchor",
+      "raw_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1/followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+      "session_id": "followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en",
+      "partial_interval_s": 0.6,
+      "loaded_model_roles": [
+        "stt",
+        "marian"
+      ],
+      "requested_stt": {
+        "requested_id": "whisper-small",
+        "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+        "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+        "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+      },
+      "actual_stt_resolved_matches_requested": true,
+      "profile": {
+        "name": "lite-cpu",
+        "backend": "cpu",
+        "stt_model": "whisper-small",
+        "stt_compute_type": "int8",
+        "stt_threads": 3,
+        "stt_workers": 1,
+        "marian_threads": 1,
+        "final_engine": "marian",
+        "translation_model": null,
+        "vad_backend": "onnx",
+        "ram_floor_gb": 8,
+        "physical_core_floor": 4,
+        "vram_floor_gb": 0
+      },
+      "final_routes": {
+        "marian": 6,
+        "gemma_requests": 0
+      },
+      "previews": {
+        "emitted": 6,
+        "utterances_with_preview": 3,
+        "known_final_utterances": 6,
+        "final_utterances_without_preview": [
+          "3",
+          "4",
+          "7"
+        ],
+        "first_preview_by_utterance_ms": {
+          "1": 3994.9,
+          "5": 4184.3,
+          "6": 4055.9
+        },
+        "update_gap_sample_count": 3,
+        "unique_source_samples": 612864,
+        "unique_source_seconds": 12.768,
+        "partial_stt_started": 16
+      },
+      "capture_and_finals": {
+        "returncode": 0,
+        "completion_errors": [],
+        "final_count": 6,
+        "covered_final_source_s": 34.71999999999999,
+        "handoff_dropped_frames": 0,
+        "upstream_dropped_samples": 0,
+        "source_complete": true,
+        "expected_source_samples": 2253120,
+        "source_rate": 48000,
+        "reader_eof": true,
+        "capture_queues_drained": true,
+        "capture_gaps": [],
+        "unclassified_intervals": [],
+        "recorded_replay_integrity_status": "passed"
+      },
+      "queue": {
+        "final_input_waits_ms": [
+          0.6929580122232437,
+          0.09749992750585079,
+          0.18400000408291817,
+          0.10699999984353781,
+          0.13454107102006674,
+          0.09662494994699955
+        ],
+        "disjoint_last_three_minus_first_three_mean_ms": -0.2120973076671362,
+        "final_input_max_wait_ms": 0.6929580122232437,
+        "max_pending": 1,
+        "terminal_outstanding": 0,
+        "stt_final_waits_ms": [
+          1737.5,
+          1253.7,
+          209.1,
+          221.4,
+          228.9,
+          6417.7
+        ]
+      },
+      "quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "human_approved_locally": false,
+        "training_eligible": false
+      }
+    }
+  ],
+  "preview_coverage_comparisons": [
+    {
+      "control": "baseline",
+      "control_preview_source_samples": 875520,
+      "candidate_overlap_samples": 133632,
+      "missing_control_preview_source_samples": 741888,
+      "missing_control_preview_source_seconds": 15.456,
+      "missing_fraction": 0.8473684210526315
+    },
+    {
+      "control": "baseline_anchor",
+      "control_preview_source_samples": 612864,
+      "candidate_overlap_samples": 133632,
+      "missing_control_preview_source_samples": 479232,
+      "missing_control_preview_source_seconds": 9.984,
+      "missing_fraction": 0.7819548872180451
+    }
+  ],
+  "report_pair": {
+    "report_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1-report.json",
+    "status": "rejected",
+    "reasons": [
+      "final_queue_sustained_growth",
+      "final_queue_wait_regression",
+      "median_gain_below_gate",
+      "missing_preview_responsiveness",
+      "preview_source_coverage_loss",
+      "tail_regression"
+    ],
+    "runtime_identity_errors": [
+      [],
+      [],
+      []
+    ],
+    "queue_comparisons": [
+      {
+        "field": "disjoint_queue_wait_growth_ms",
+        "control": 0.026458369878431164,
+        "candidate": 117.47348599601537
+      },
+      {
+        "field": "stt_queue_wait_ms",
+        "control_p95_ms": 6542.8,
+        "candidate_p95_ms": 6002.5
+      },
+      {
+        "field": "translation_queue_wait_ms",
+        "control_p95_ms": 0.2,
+        "candidate_p95_ms": 0.2
+      },
+      {
+        "field": "generation_lock_wait_ms_a",
+        "control_p95_ms": null,
+        "candidate_p95_ms": null,
+        "control_sample_count": 0,
+        "candidate_sample_count": 0,
+        "control_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "candidate_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "status": "not_applicable_no_gemma_in_one_or_both_runs"
+      },
+      {
+        "field": "disjoint_queue_wait_growth_ms",
+        "control": -0.2120973076671362,
+        "candidate": 117.47348599601537
+      },
+      {
+        "field": "stt_queue_wait_ms",
+        "control_p95_ms": 6417.7,
+        "candidate_p95_ms": 6002.5
+      },
+      {
+        "field": "translation_queue_wait_ms",
+        "control_p95_ms": 0.3,
+        "candidate_p95_ms": 0.2
+      },
+      {
+        "field": "generation_lock_wait_ms_a",
+        "control_p95_ms": null,
+        "candidate_p95_ms": null,
+        "control_sample_count": 0,
+        "candidate_sample_count": 0,
+        "control_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "candidate_route_counts": {
+          "gemma": 0,
+          "marian": 6,
+          "unknown": 0
+        },
+        "status": "not_applicable_no_gemma_in_one_or_both_runs"
+      }
+    ],
+    "preview_responsiveness": [
+      [
+        {
+          "field": "first_preview",
+          "status": "compared",
+          "control": {
+            "n": 4,
+            "p50": 3996.1499999999996,
+            "p95": 7128.6
+          },
+          "candidate": {
+            "n": 1,
+            "p50": 4267.8,
+            "p95": 4267.8
+          },
+          "matched_source": [],
+          "matched_control": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "matched_candidate": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        },
+        {
+          "field": "update_gap",
+          "status": "missing_candidate_samples",
+          "control": {
+            "n": 3,
+            "p50": 1941.7070000000003,
+            "p95": 2029.592999999999
+          },
+          "candidate": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "matched_source": [],
+          "matched_control": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "matched_candidate": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        }
+      ],
+      [
+        {
+          "field": "first_preview",
+          "status": "compared",
+          "control": {
+            "n": 3,
+            "p50": 4055.9,
+            "p95": 4184.3
+          },
+          "candidate": {
+            "n": 1,
+            "p50": 4267.8,
+            "p95": 4267.8
+          },
+          "matched_source": [],
+          "matched_control": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "matched_candidate": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        },
+        {
+          "field": "update_gap",
+          "status": "missing_candidate_samples",
+          "control": {
+            "n": 3,
+            "p50": 1948.3910000000014,
+            "p95": 2041.8419999999987
+          },
+          "candidate": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "matched_source": [],
+          "matched_control": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "matched_candidate": {
+            "n": 0,
+            "p50": null,
+            "p95": null
+          },
+          "p95_claim_eligible": false,
+          "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+          "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+        }
+      ]
+    ],
+    "fixed_vad_source_delivery": {
+      "opening": {
+        "n": 6,
+        "p50_ms": 2512.9039999999986,
+        "p95_ms": 8426.326999999997,
+        "status": "complete"
+      },
+      "candidate": {
+        "n": 6,
+        "p50_ms": 5342.453000000001,
+        "p95_ms": 10728.281000000003,
+        "status": "complete"
+      },
+      "closing": {
+        "n": 6,
+        "p50_ms": 2855.2625000000007,
+        "p95_ms": 8380.224000000002,
+        "status": "complete"
+      }
+    },
+    "p95_claim_eligible": false
+  },
+  "interpretation": [
+    "Preview source coverage loss is missing previewed source relative to controls, not captured audio loss: all three report complete source accounting, zero capture/handoff loss and six completed finals.",
+    "The candidate emits one preview and no within-utterance updates, so both update-gap comparisons are missing_candidate_samples; there are no exact-source first-preview matches.",
+    "Candidate final-input maximum wait grows to 353.602 ms versus 0.101/0.693 ms. Disjoint three-item mean wait growth is 117.473 ms versus 0.026/-0.212 ms, despite lower descriptive final STT wait maxima (6002.5 versus 6542.8/6417.7 ms). Distinguish final-input queue metrics from STT wait.",
+    "Corrected production-final WER remains 11/102 (10.7843%) and chrF 54.67508 under the identical public reference contract; this is not human-reviewed service quality.",
+    "Only six eligible final anchors per run and one candidate first preview: no p95 performance claim or promotion. This representative cell cannot summarize all repeats/languages."
+  ],
+  "operations": "No tests, repository imports, native/model/audio/device/install/Git/archive operations. No source or public documentation edits; new scratch receipt only."
+}

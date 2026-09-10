@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "raw-evidence.tar.gz",
+      "sha256": "36a83af73dcc630ad74c556046bc43d9c162f82211ad7f372b2b0ce1f07ec6c8",
+      "size_bytes": 3183176,
+      "members": [
+        {
+          "path": "raw/ab_metrics_followup_std_v1_baseline_e2b_r0_fleurs_development_en_en.csv",
+          "sha256": "821654d112121a2512fbc671771cbcd961e64baddaf0f661bc02f8c2b0939b8b",
+          "size_bytes": 4686
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_baseline_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "cf99c1766b1163ec5a155745dde8ee4254a4105be9d26710ea0705159d338168",
+          "size_bytes": 4441
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_baseline_e4b_r0_fleurs_development_en_en.csv",
+          "sha256": "a7d440a5b77b40fd95c2acd5ebc333194d6b3d73fa4b8bd0b87217fa34c361ff",
+          "size_bytes": 4712
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_baseline_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "671a3f113107f3352d6f8356a46cbb9c6d9436a543a95795d06af7b7dc00ad1d",
+          "size_bytes": 4449
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_en_en.csv",
+          "sha256": "cfc026646568b32b264fd2255d82fd9dcde3e0af774e747c6e83cf755e2ccf17",
+          "size_bytes": 5562
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "64a7c3d2e0e6ce0de670f58732a892003bc05279eedf0cefe9911d82d9afba4a",
+          "size_bytes": 5176
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_en_en.csv",
+          "sha256": "085994e7a8788a67353deae3c815f0b0ed1b22871ab30d010101aa77ac8a48d5",
+          "size_bytes": 5572
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "2d86a1322275bd8e63ebad0444a4617d42ce15fbbf9e2b1ac9b8bf1e70139ba8",
+          "size_bytes": 5166
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_en_en.csv",
+          "sha256": "67d828d202e18ffa88488e46ab8b2a64621612b3a0aee341d56e39152534960e",
+          "size_bytes": 4733
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "5de3c18a69a589947144dc09b1f0d5a362477e7d32580f9a98e1bfbfa5015583",
+          "size_bytes": 4888
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_en_en.csv",
+          "sha256": "63fb52125366f40465755e919166b721c49e263e4a7af7937d14b4fa04b796e4",
+          "size_bytes": 4728
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "cda2b33d8e04742d09eb3ef1a31916d266498cb6a8c94a898f1513b32ee19c8b",
+          "size_bytes": 4868
+        },
+        {
+          "path": "raw/ab_metrics_followup_std_v1_early_4s_160ms_e4b_r0_fleurs_development_en_en.csv",
+          "sha256": "c050e40919e7908fb7a9fd49bcd348f4132dbefe239d77ab4e0f05e463b9a671",
+          "size_bytes": 4735
+        },
+        {
+          "path": "raw/followup_std_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "cfcfd5589b06979965d2b96de09947d2cf3101d30604658e3162077bfec556d7",
+          "size_bytes": 2530833
+        },
+        {
+          "path": "raw/followup_std_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "2e343cea390366e328bb8d5ea967a8831344f0a0697774696390be77f694ac85",
+          "size_bytes": 2397252
+        },
+        {
+          "path": "raw/followup_std_v1_baseline_e4b_r0_fleurs_development_en_en.json",
+          "sha256": "3ad931ed3bbf34b817707df3472b20c5acaa12fedfc7524d3196f5712a8aa781",
+          "size_bytes": 2512256
+        },
+        {
+          "path": "raw/followup_std_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "82028a2cbbfd6518495b629adf8e26b491fd56a2d369e7fc4f37e375466cbf7b",
+          "size_bytes": 2394097
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "b5f549c11c6e2b65bc4b3ba307afe74ed96f2e7c1fd896480c2c948410a49232",
+          "size_bytes": 2548996
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "3176053844425cb39e73c3713b8fdabd0105be6bb146bd25b7f51986571b5842",
+          "size_bytes": 2414376
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_en_en.json",
+          "sha256": "23049d4f88df49368a91810eb04a63ab4d50d1fcf953f701254106e3499a8748",
+          "size_bytes": 2523084
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "9bdc95f9fe72d65a8de32003035b1ebdee87c995300644c96ab3b2c0ca0c5e7c",
+          "size_bytes": 2373003
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "397e0fbc601a89831395db2c2edf66d3be5606bc46fcb5448d21fd3560d34cf4",
+          "size_bytes": 2529343
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "7ee6a87c84989b7e56ebd5f816a65ef512df4da57c0e4f28114a05b656989f69",
+          "size_bytes": 2467370
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_en_en.json",
+          "sha256": "fb516536b487608591dded053cba477fc40bd79009bcd21b64819b66f421d43a",
+          "size_bytes": 2518852
+        },
+        {
+          "path": "raw/followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "d0e3a382573f3dd6bd78bbd8bb705a3ebd635538d50ae749db1efb52c366bf37",
+          "size_bytes": 2426580
+        },
+        {
+          "path": "raw/followup_std_v1_early_4s_160ms_e4b_r0_fleurs_development_en_en.json",
+          "sha256": "e2dca5eeb3651ca7af2b9984230e1ea2b1b5e06b89aa100d72b176dc54eb1223",
+          "size_bytes": 2496074
+        },
+        {
+          "path": "raw/provenance.json",
+          "sha256": "f527189cf4ee62cb4ff634dee455b94cd7339984b2e13279c822358c4205b8c7",
+          "size_bytes": 125369
+        },
+        {
+          "path": "raw/session_followup_std_v1_baseline_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "1065fc3ba18334e4aa5fc056a03b7198167e97609f3dcdb213ae120f81acb479",
+          "size_bytes": 733
+        },
+        {
+          "path": "raw/session_followup_std_v1_baseline_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "bbfd694b5c7458219f4f97a5c8597ade41c44e1cd1f7ebfe58dae52ae2c14f57",
+          "size_bytes": 346
+        },
+        {
+          "path": "raw/session_followup_std_v1_baseline_e4b_r0_fleurs_development_en_en.log",
+          "sha256": "6de22bb330264af2510f68fe091b75da2f58cb7132353ab52430b0d740aa31c1",
+          "size_bytes": 733
+        },
+        {
+          "path": "raw/session_followup_std_v1_baseline_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "57792c54d1791a58d881bbb69b89ba949fa2e843b6100b2f15d44a1d3fb23c25",
+          "size_bytes": 346
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "58d1e5e366a0037856b78497bd914896508c285d32dd34c14dd444c7b42f4ed3",
+          "size_bytes": 2690
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "97b6038c2a9696dbd1b920cd158b240110b1fed3ad1fc5dcdbd71c7a1c42070e",
+          "size_bytes": 2303
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_en_en.log",
+          "sha256": "ec03ab90b2a0731c1c3eeb832dd6f6d321fe8a4bd624f8426fbb0c7c1fc01375",
+          "size_bytes": 2690
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "d922cba8b4140665a8f95457d6894646beccd1d3de1883b5624b49bc30fe2e0d",
+          "size_bytes": 2303
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "dd03992e7ba0821f8d4455bfb2ccafbb964b924e04b042bd76850354ee8feace",
+          "size_bytes": 2690
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "13c1267d61d260860c00a24df2a0c753b446c8161c3343c981ef30263308bb29",
+          "size_bytes": 2303
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_en_en.log",
+          "sha256": "e07745ef53e31a6c7163da694e171ed7e4fa80ea43403e3e364066b33b1de624",
+          "size_bytes": 2690
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "16651a4f3399b005b2169310bf9a295277dd47f3cec9edd2b3accc465da10e85",
+          "size_bytes": 2303
+        },
+        {
+          "path": "raw/session_followup_std_v1_early_4s_160ms_e4b_r0_fleurs_development_en_en.log",
+          "sha256": "db7f7bea82a775febb2e3d37970d1863001724bd839a2e7b5fb127fa8ac3a360",
+          "size_bytes": 1912
+        }
+      ]
+    },
+    {
+      "path": "runner.log",
+      "sha256": "82de9d0b467c007d1ec280ba85132351a49abc03eaff944c6c8c305ec48fb5a8",
+      "size_bytes": 3596
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "f527189cf4ee62cb4ff634dee455b94cd7339984b2e13279c822358c4205b8c7",
+      "size_bytes": 125369
+    },
+    {
+      "path": "run-summary.json",
+      "sha256": "2f06134065093b6aeadafebf28cbc0ec6614372b4b8de6ad631bd09577011f82",
+      "size_bytes": 95385
+    }
+  ],
+  "raw_payloads_unmodified": true,
+  "audio_included": false
+}

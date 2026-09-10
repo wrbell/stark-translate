@@ -1,0 +1,26 @@
+{
+  "copied_at": "2026-09-10T18:20:02.432801+00:00",
+  "files": [
+    {
+      "path": "audit_report.py.txt",
+      "sha256": "8216212536d9fc83cd211b2b81e649d8b9bdcc61a4a5fbe6a78f3c0f25184eb4",
+      "size_bytes": 9697
+    },
+    {
+      "path": "completed-decision.json",
+      "sha256": "59004a9133e81d285a0bd7ba207eb1cf214452e2bc8ef3810b723da068a6683b",
+      "size_bytes": 2024
+    },
+    {
+      "path": "raw-representative-e2b-r0.json",
+      "sha256": "ed6ee91ddaaf476b82b8601079e8c8fc0fcba60507945598172757207752eb1f",
+      "size_bytes": 14403
+    },
+    {
+      "path": "report-review.json",
+      "sha256": "5114af7d20d5b48468410ac59cfb2d8cdbdc35bd6979c976df8bdd64b2fe7d0e",
+      "size_bytes": 12020
+    }
+  ],
+  "new_inference": false
+}

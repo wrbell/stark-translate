@@ -1,0 +1,207 @@
+"""Bounded JSON/source audit; no inference, native packages, audio or archives."""
+
+import ast
+import datetime
+import hashlib
+import importlib.util
+import json
+import math
+import re
+import statistics
+import sys
+from collections import defaultdict
+from itertools import pairwise
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+CACHE = ROOT / ".cache/mac-en-es-closeout"
+RUNTIME = CACHE / "runtime"
+OUTPUT = Path(__file__).resolve().parent
+bindings = {}
+
+
+def read(path):
+    data = path.read_bytes()
+    bindings[str(path)] = {"sha256": hashlib.sha256(data).hexdigest(), "size_bytes": len(data)}
+    return json.loads(data)
+
+
+def source(path):
+    data = path.read_bytes()
+    bindings[str(path)] = {"sha256": hashlib.sha256(data).hexdigest(), "size_bytes": len(data)}
+    return data
+
+
+def load(path, name):
+    source(path)
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def functions(path, names, namespace):
+    tree = ast.parse(source(path))
+    selected = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name in names]
+    assert {node.name for node in selected} == names
+    future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
+    tree = ast.fix_missing_locations(ast.Module(body=[future, *selected], type_ignores=[]))
+    exec(compile(tree, str(path), "exec"), namespace)
+
+
+report_path = CACHE / "spanish-parakeet-normalized-v1-report.json"
+selection_path = CACHE / "spanish-parakeet-normalized-v1-selection.json"
+report, selection = read(report_path), read(selection_path)
+provenance = read(CACHE / "spanish-parakeet-normalized-v1/provenance.json")
+spec = read(ROOT / "docs/evaluation/mac_followup_20260910/protocol/spanish-parakeet-screen.json")
+assert spec == provenance["spec"]
+assert (
+    bindings[str(ROOT / "docs/evaluation/mac_followup_20260910/protocol/spanish-parakeet-screen.json")]["sha256"]
+    == provenance["spec_sha256"]
+)
+assert report["run_count"] == report["expected_runs"] == 18
+assert report["inventory_complete"] is True and report["inventory_errors"] == []
+selector = load(RUNTIME / "tools/mac_followup_selection.py", "spanish_review_selector")
+assert selector.select(report) == {k: v for k, v in selection.items() if k != "source_report"}
+assert selection["source_report"]["sha256"] == bindings[str(report_path)]["sha256"]
+assert selection["source_report"]["size_bytes"] == bindings[str(report_path)]["size_bytes"]
+assert selection["qualified_count"] == 0
+assert {(p["size"], p["repeat"]) for p in report["pairs"]} == {(s, r) for s in ("e2b", "e4b") for r in range(3)}
+
+pairs = []
+for pair in report["pairs"]:
+    for role in ("opening", "candidate", "closing"):
+        result = pair[role]
+        values = sorted(a["speech_end_to_span_final_ms"] for a in result["anchors"] if a["eligible"] and a["covered"])
+        assert result["n"] == len(values) == 6
+        assert statistics.median(values) == result["p50_ms"]
+        assert values[math.ceil(0.95 * len(values)) - 1] == result["p95_ms"]
+        assert result["status"] == "complete"
+    assert pair["runtime_identity_errors"] == [[], [], []]
+    assert pair["p95_claim_eligible"] is False
+    gains = [pair[role]["p50_ms"] - pair["candidate"]["p50_ms"] for role in ("opening", "closing")]
+    median_gate = all(
+        gain >= 150 or gain >= pair[role]["p50_ms"] * 0.15 for role, gain in zip(("opening", "closing"), gains)
+    )
+    assert median_gate == ("median_gain_below_gate" not in pair["reasons"])
+    assert all(pair["candidate"]["p95_ms"] < pair[role]["p95_ms"] for role in ("opening", "closing"))
+    assert pair["status"] == "rejected"
+    pairs.append(
+        {
+            "size": pair["size"],
+            "repeat": pair["repeat"],
+            "p50_ms": {role: pair[role]["p50_ms"] for role in ("opening", "candidate", "closing")},
+            "conservative_median_gain_ms": min(gains),
+            "median_gate_passed": median_gate,
+            "rejection_reasons": pair["reasons"],
+            "eligible_fixed_span_count_per_run": 6,
+            "p95_claim_eligible": False,
+        }
+    )
+
+namespace = {"math": math, "re": re, "statistics": statistics, "defaultdict": defaultdict, "pairwise": pairwise}
+functions(RUNTIME / "tools/mac_evaluation.py", {"stats", "_numeric"}, namespace)
+functions(
+    RUNTIME / "tools/overnight_bench.py",
+    {"translated_preview", "ranges", "coverage_missing", "number", "merge_ranges"},
+    namespace,
+)
+functions(
+    RUNTIME / "tools/mac_followup_latency.py", {"runtime_errors", "preview_evidence", "preview_comparisons"}, namespace
+)
+quality = load(RUNTIME / "tools/mac_followup_quality.py", "spanish_review_quality")
+
+representatives, raw_runs = [], []
+for role in ("baseline", "parakeet_es", "baseline_anchor"):
+    path = CACHE / "spanish-parakeet-normalized-v1" / f"followup_es_pk_v1_{role}_e4b_r1_fleurs_development_es_es.json"
+    run = read(path)
+    raw_runs.append(run)
+    assert run["returncode"] == 0 and run["completion_errors"] == [] and not run["timed_out"]
+    assert run["replay_integrity"]["status"] == "passed" and run["replay_integrity"]["errors"] == []
+    assert namespace["runtime_errors"](run, run["requested_runtime"]) == []
+    assert run["session_metadata"]["audio_source"] == "file" and run["session_metadata"]["source_lang"] == "es"
+    command = run["command"]
+    assert "--audio-file" in command and "--no-tts" in command and command[command.index("--gain") + 1] == "1"
+    assert run["source_identity"] == provenance["source_identity"]
+    caption = run["caption_quality"]
+    assert quality.word_errors(caption["source_reference"], caption["source_hypothesis"]) == caption["wer_counts"]
+    ledger = run["observed"]["session_summary"]["source_coverage"]
+    assert (
+        ledger["complete"] is True
+        and ledger["eof"]["reader_eof"] is True
+        and ledger["eof"]["capture_queues_drained"] is True
+    )
+    assert ledger["eof"]["source_samples"] == ledger["expected_source_samples"] == 2284800
+    pressure = run["observed"]["session_summary"]["final_queue_pressure"]
+    assert pressure["terminal_outstanding"] == 0 and not pressure["bookkeeping_truncated"]
+    count = min(16, pressure["dequeued"] // 2)
+    growth = statistics.mean(pressure["last_window_wait_ms"][-count:]) - statistics.mean(
+        pressure["first_window_wait_ms"][:count]
+    )
+    representatives.append(
+        {
+            "session_id": run["session_id"],
+            "requested_stt": run["requested_runtime"]["stt"],
+            "actual_stt": run["session_lifecycle"]["models"]["stt"],
+            "recorded_stt_backend": run["session_metadata"]["stt_backend"],
+            "file_input_no_tts_gain_1": True,
+            "runtime_errors_recomputed": [],
+            "caption_wer_counts_recomputed": caption["wer_counts"],
+            "reference_contract_sha256": caption["reference_contract_sha256"],
+            "complete_source_samples": ledger["expected_source_samples"],
+            "terminal_queue_outstanding": pressure["terminal_outstanding"],
+            "final_queue_max_wait_ms": pressure["max_wait_ms"],
+            "disjoint_queue_growth_ms": growth,
+        }
+    )
+
+pair = next(p for p in report["pairs"] if p["size"] == "e4b" and p["repeat"] == 1)
+for number, (role, control) in enumerate(zip(("opening", "closing"), (raw_runs[0], raw_runs[2]))):
+    comparison, errors = namespace["preview_comparisons"](control, raw_runs[1])
+    assert comparison == pair["preview_responsiveness"][number]
+    assert set(errors) <= set(pair["reasons"])
+    reference = namespace["ranges"](
+        [row for row in control["observed"]["partials"] if namespace["translated_preview"](row)]
+    )
+    current = namespace["ranges"](
+        [row for row in raw_runs[1]["observed"]["partials"] if namespace["translated_preview"](row)]
+    )
+    loss = namespace["coverage_missing"](reference, current) / sum(b - a for a, b in reference)
+    assert loss == pair["preview_missing_fractions"][number]
+    assert loss > 0.02
+
+for path, binding in bindings.items():
+    relative = Path(path).relative_to(RUNTIME) if Path(path).is_relative_to(RUNTIME) else None
+    if relative is not None:
+        assert provenance["source"]["all_code_sha256"][str(relative)] == binding["sha256"]
+assert not any(name in sys.modules for name in ("numpy", "torch", "mlx", "sounddevice", "faster_whisper"))
+receipt = {
+    "schema_version": 1,
+    "reviewed_at": datetime.datetime.now(datetime.UTC).isoformat(),
+    "status": "passed",
+    "source_revision": provenance["source"]["code_sha"],
+    "source_identity": provenance["source_identity"],
+    "bindings": bindings,
+    "report_selector_reproduced": True,
+    "pair_metric_anchor_recomputations": 18,
+    "median_gate_pass_count": sum(pair["median_gate_passed"] for pair in pairs),
+    "qualified_arms": 0,
+    "pairs": pairs,
+    "representative_e4b_repeat_1": representatives,
+    "raw_preview_and_coverage_reproduced": True,
+    "limits": "Six report pairs; three E4B repeat-1 raw cells. Other raw cells not reloaded here. No native/model/audio/device/archive/Git/build/install calls.",
+    "confirmation_decision": "Neither rejected Spanish arm authorizes confirmation, combination or a default change.",
+}
+with (OUTPUT / "report-review.json").open("x") as stream:
+    json.dump(receipt, stream, indent=2)
+    stream.write("\n")
+print(
+    json.dumps(
+        {
+            "status": receipt["status"],
+            "median_gate_pass_count": receipt["median_gate_pass_count"],
+            "qualified_arms": 0,
+            "representative_rows": len(representatives),
+        }
+    )
+)

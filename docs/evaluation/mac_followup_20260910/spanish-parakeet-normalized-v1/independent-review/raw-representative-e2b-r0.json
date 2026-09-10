@@ -1,0 +1,341 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-09-10T17:46:41.428127+00:00",
+  "scope": "Independent JSON-only audit of Spanish E2B repeat 0 opening, candidate and closing; no other raw cells inspected.",
+  "report_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1-report.json",
+  "report_pair": {
+    "experiment": "parakeet_es",
+    "size": "e2b",
+    "repeat": 0,
+    "clip_id": "fleurs_development_es",
+    "status": "rejected",
+    "reasons": [
+      "matched_first_preview_tail_regression"
+    ],
+    "runtime_identity_errors": [
+      [],
+      [],
+      []
+    ],
+    "p95_claim_eligible": false
+  },
+  "cells": [
+    {
+      "arm": "baseline",
+      "raw": {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1/followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+        "sha256": "eee40652a5f3ae566c1f44cbdb1a424b2cbce5b880db71f77abb7224c40750cd"
+      },
+      "session_id": "followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es",
+      "requested_stt_backend": "mlx",
+      "actual_stt_backend": "mlx",
+      "requested_stt": {
+        "requested_id": "mlx-community/whisper-large-v3-turbo",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379",
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb"
+      },
+      "actual_stt": {
+        "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "manifest_revision": null,
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379"
+      },
+      "resolved_stt_identity_matches": true,
+      "completion": {
+        "returncode": 0,
+        "timed_out": false,
+        "errors": [],
+        "lifecycle_status": "completed",
+        "recorded_replay_integrity_status": "passed",
+        "recorded_replay_integrity_errors": []
+      },
+      "runtime": {
+        "audio_source": "file",
+        "session_kind": "replay",
+        "language": "es",
+        "target_language": "en",
+        "replay_speed": 1.0,
+        "command_no_tts": true,
+        "command_gain": 1.0,
+        "requested_gain": 1.0,
+        "observed_final_gains": [
+          1.0
+        ]
+      },
+      "quality": {
+        "status": "available",
+        "wer": 0.025,
+        "wer_counts": {
+          "errors": 2,
+          "reference_words": 80,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.025
+        },
+        "chrf": 63.624505751768055,
+        "final_count": 6,
+        "human_approved_locally": false,
+        "training_eligible": false
+      },
+      "first_preview_by_utterance_ms": {
+        "1": 6895.4,
+        "2": 3287.3,
+        "4": 1405.2,
+        "5": 2637.8
+      }
+    },
+    {
+      "arm": "parakeet_es",
+      "raw": {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1/followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.json",
+        "sha256": "721dc2aa5958388709358a420547d52203dd05f3e77c029561ab46c8b548ccc4"
+      },
+      "session_id": "followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es",
+      "requested_stt_backend": "parakeet-mlx",
+      "actual_stt_backend": "parakeet-mlx",
+      "requested_stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15"
+      },
+      "actual_stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+      },
+      "resolved_stt_identity_matches": true,
+      "completion": {
+        "returncode": 0,
+        "timed_out": false,
+        "errors": [],
+        "lifecycle_status": "completed",
+        "recorded_replay_integrity_status": "passed",
+        "recorded_replay_integrity_errors": []
+      },
+      "runtime": {
+        "audio_source": "file",
+        "session_kind": "replay",
+        "language": "es",
+        "target_language": "en",
+        "replay_speed": 1.0,
+        "command_no_tts": true,
+        "command_gain": 1.0,
+        "requested_gain": 1.0,
+        "observed_final_gains": [
+          1.0
+        ]
+      },
+      "quality": {
+        "status": "available",
+        "wer": 0.0125,
+        "wer_counts": {
+          "errors": 1,
+          "reference_words": 80,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0125
+        },
+        "chrf": 63.26327230147642,
+        "final_count": 6,
+        "human_approved_locally": false,
+        "training_eligible": false
+      },
+      "first_preview_by_utterance_ms": {
+        "1": 1715.4,
+        "2": 742.1,
+        "3": 2752.6,
+        "4": 1489.4,
+        "5": 1410.0,
+        "7": 1338.7
+      }
+    },
+    {
+      "arm": "baseline_anchor",
+      "raw": {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1/followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+        "sha256": "7d837e5e0066005a37f9fc707b301c57e0cf9351ef9eee06785c7ac8ec44a12f"
+      },
+      "session_id": "followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es",
+      "requested_stt_backend": "mlx",
+      "actual_stt_backend": "mlx",
+      "requested_stt": {
+        "requested_id": "mlx-community/whisper-large-v3-turbo",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379",
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb"
+      },
+      "actual_stt": {
+        "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "manifest_revision": null,
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379"
+      },
+      "resolved_stt_identity_matches": true,
+      "completion": {
+        "returncode": 0,
+        "timed_out": false,
+        "errors": [],
+        "lifecycle_status": "completed",
+        "recorded_replay_integrity_status": "passed",
+        "recorded_replay_integrity_errors": []
+      },
+      "runtime": {
+        "audio_source": "file",
+        "session_kind": "replay",
+        "language": "es",
+        "target_language": "en",
+        "replay_speed": 1.0,
+        "command_no_tts": true,
+        "command_gain": 1.0,
+        "requested_gain": 1.0,
+        "observed_final_gains": [
+          1.0
+        ]
+      },
+      "quality": {
+        "status": "available",
+        "wer": 0.025,
+        "wer_counts": {
+          "errors": 2,
+          "reference_words": 80,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.025
+        },
+        "chrf": 63.624505751768055,
+        "final_count": 6,
+        "human_approved_locally": false,
+        "training_eligible": false
+      },
+      "first_preview_by_utterance_ms": {
+        "1": 3846.9,
+        "2": 2949.2,
+        "4": 1294.1,
+        "5": 2861.6
+      }
+    }
+  ],
+  "common_source": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_es.wav",
+    "recorded_sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae",
+    "same_recorded_identity_all_three": true,
+    "audio_read_or_rehashed_by_this_review": false
+  },
+  "common_translation": {
+    "requested_id": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+    "actual": {
+      "requested_id": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+      "manifest_revision": "0f3495e3e826e95fa21002c327805b840568f489",
+      "resolved_revision": "0f3495e3e826e95fa21002c327805b840568f489",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-it-OptiQ-4bit/snapshots/0f3495e3e826e95fa21002c327805b840568f489",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "e5bbd625c64572f5f7e201bea5e4a703884aceb27f58a3fb484a786edb6b5f8b"
+    },
+    "requested_and_actual_resolved_identities_match_all_three": true
+  },
+  "reference_identity": {
+    "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+    "reference_ids": [
+      "fleurs-es-development-1638-6927013055416209547",
+      "fleurs-es-development-1592-3930211725609960196",
+      "fleurs-es-development-1624-8750634895258922350",
+      "fleurs-es-development-1587-563233278035086965",
+      "fleurs-es-development-1554-13392988470145802268"
+    ],
+    "ordered_contracts_equal_all_three": true,
+    "source_and_translation_reference_texts_equal_all_three": true,
+    "quality_scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+    "reference_words": 80,
+    "human_approved_locally": false,
+    "training_eligible": false,
+    "term_opportunities": 0,
+    "term_recall": null,
+    "verification": "Compared complete reference contracts and reference IDs across the three JSON cells; checked WER count sums and errors/reference_words arithmetic. Scores were not recomputed from audio or rerun through the quality module."
+  },
+  "primary_and_fallback": {
+    "recorded_primary_bindings_match_requests": true,
+    "baseline_local_path_requested_id_note": "Whisper lifecycle requested_id is the resolved snapshot path; its resolved path, revision and config hash exactly match the requested Hub identity.",
+    "primary_fallback_substitution_observed": false,
+    "configured_whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+    "configured_fallback_on_low_conf": true,
+    "interpretation": "The raw cells record the requested primary model, not Distil. The only fallback-named fields found recursively are session_metadata.stt_settings.whisper_fallback, fallback_on_low_conf and fallback_threshold. These settings do not establish fallback use; the raw cells contain no explicit per-call fallback-use event. This audit does not execute or fault-inject startup fallback behavior."
+  },
+  "matched_first_preview": {
+    "metric": "speech_start_to_partial_ms",
+    "scope": "Server emission; exact source sample bounds, not browser acknowledgment or physical display.",
+    "comparisons": [
+      {
+        "control": "baseline",
+        "source_bounds": [
+          1285632,
+          1314816,
+          48000
+        ],
+        "control_ms": 1405.2,
+        "candidate_ms": 1489.4,
+        "delta_ms": 84.2,
+        "permitted_increase_ms": 100.0,
+        "guard_passes": true,
+        "excess_over_guard_ms": 0,
+        "matched_count_per_run": 1,
+        "unmatched_cohort_control_summary": {
+          "n": 4,
+          "p50": 2962.55,
+          "p95": 6895.4
+        },
+        "unmatched_cohort_candidate_summary": {
+          "n": 6,
+          "p50": 1449.7,
+          "p95": 2752.6
+        },
+        "p95_claim_eligible": false
+      },
+      {
+        "control": "baseline_anchor",
+        "source_bounds": [
+          1285632,
+          1314816,
+          48000
+        ],
+        "control_ms": 1294.1,
+        "candidate_ms": 1489.4,
+        "delta_ms": 195.3,
+        "permitted_increase_ms": 100.0,
+        "guard_passes": false,
+        "excess_over_guard_ms": 95.3,
+        "matched_count_per_run": 1,
+        "unmatched_cohort_control_summary": {
+          "n": 4,
+          "p50": 2905.3999999999996,
+          "p95": 3846.9
+        },
+        "unmatched_cohort_candidate_summary": {
+          "n": 6,
+          "p50": 1449.7,
+          "p95": 2752.6
+        },
+        "p95_claim_eligible": false
+      }
+    ],
+    "interpretation": "Candidate improves aggregate first-preview summaries, but the closing-anchor exact-source comparison exceeds the observed guard by 95.3 ms. This is the report rejection reason. Only one exact matched first preview exists per control/candidate comparison; descriptive p95 fields at n=1 cannot support a p95 performance claim. The protocol requires at least 100 eligible samples in each individual run, with no pooling."
+  },
+  "limitations": [
+    "Representative repeat 0/E2B only; parent separately audits all report pairs.",
+    "Quality is corrected production-final WER over 80 words, not isolated engine WER or human church-service approval.",
+    "Recorded replay integrity passed; this review did not independently inspect audio or prove waveform equality.",
+    "Explicit --no-tts and file input establish replay configuration; no microphone, speaker output, browser visibility or sustained device behavior was tested.",
+    "No audio, native imports, models, weights, tests, Git, archives or process operations were used. Only three raw JSON files and the matching small report fields were read."
+  ]
+}

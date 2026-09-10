@@ -7,6 +7,19 @@ no release or package publication is authorized for this follow-up. The
 
 ## Completed evidence
 
+- [Standard endpoint/deadline screen](standard-screen-result.md): 96 technically
+  valid replays, zero of 24 arms qualified. Median-only improvements failed other
+  quality, preview, queue or memory guards; defaults remain unchanged.
+- [Spanish Parakeet screen](spanish-parakeet-result.md): 18 valid replays, zero
+  of two arms qualified. Faster final delivery did not preserve all preview and
+  queue guards. Both cohorts now include immutable raw and source archives.
+- [CPU Lite cadence screen](lite-cadence-result.md): 24 technically valid replays,
+  zero of four arms qualified. Longer cadence helped some final medians but
+  reduced preview coverage; CPU Marian finals and 0.6-second cadence remain.
+- [Capture loss accounting](capture-loss-accounting.md): observed worker FIFO loss,
+  unknown PortAudio overflow and terminal accounting are separate. Mocked checks
+  passed; no additional live reliability certification is claimed.
+
 - [Current source validation](current-source-validation.md): Python 3.11/3.12
   suites and lint passed on `476e349`, including the startup fallback cases.
   Dependency-audit jobs were skipped; no new audit clearance is claimed. The
@@ -71,16 +84,20 @@ not started while preserving queued TTS already promised by published finals.
 The separate v4 integrity pilot on `eddb0ad` completed three Spanish E4B runs
 (opening control, `early_2s_160ms`, closing control) with passing integrity and
 source-ledger checks. This verifies the shutdown repair in those runs; it does
-not establish a speed improvement. A fresh 96-run Standard v2 cohort started
-at 15:33 UTC on frozen `eddb0ad`; completion and results remain pending, separate
-from v1 and the v4 pilot. Local receipts remain under
+not establish a speed improvement. The fresh 96-run Standard v2 cohort ran
+from 15:33 to 17:19 UTC on frozen `eddb0ad`; all runs passed technical integrity.
+The [selection result](standard-screen-result.md) rejects all 24 model/language
+arms despite median-only gains in half of the candidate repeats. It remains
+separate from v1 and the v4 pilot. Local receipts for those earlier cohorts remain under
 `.cache/mac-en-es-closeout/standard-screen-normalized-v1` and
 `.cache/mac-en-es-closeout/measurement-pilot-v4`, with the v1 abort receipt beside
 those directories.
 
 The [device follow-up](../tts_routing_20260910/README.md) retains successful
 native TTS routing and a retest with zero parent-handoff drops but remaining
-upstream microphone loss; its mixed-input evidence contains no incidental text.
+worker callback FIFO loss; its mixed-input evidence contains no incidental text.
+The [accounting repair](capture-loss-accounting.md) preserves that failed
+measurement and distinguishes it from unknown PortAudio driver loss.
 The [input identity repair](../tts_routing_20260910/CAPTURE_ANALYSIS.md#input-device-identity-follow-up)
 in `d8c3f05` binds exact microphone name and host API through preflight,
 start/restart and microphone tests, resolving the index inside the native child.
@@ -114,9 +131,10 @@ translation and rendering. They are not caption-delivery latency. Spanish's
 0.914-percentage-point WER increase is inside the predeclared maximum of one
 absolute point or 5% relative, whichever is larger. Both hit the only Spanish
 glossary opportunity; that denominator cannot certify church terminology.
-The [conditional Spanish pipeline screen](protocol/spanish-parakeet-screen.json)
-is therefore eligible to run. Whisper remains the Spanish default, and untouched
-confirmation plus bilingual review are still required.
+The [Spanish pipeline screen](spanish-parakeet-result.md) subsequently completed
+18 runs. Median-only gains passed in five of six comparisons, but preview and
+queue guards rejected both arms. Whisper remains the Spanish default; these
+results authorize no confirmation or combination.
 
 ## Frozen replay protocol
 

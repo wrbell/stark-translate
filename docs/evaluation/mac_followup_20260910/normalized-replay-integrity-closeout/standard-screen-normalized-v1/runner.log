@@ -1,0 +1,49 @@
+Starting followup_std_v1_baseline_e4b_r0_fleurs_development_en_en
+Finished followup_std_v1_baseline_e4b_r0_fleurs_development_en_en: OK
+Starting followup_std_v1_baseline_e2b_r0_fleurs_development_en_en
+Finished followup_std_v1_baseline_e2b_r0_fleurs_development_en_en: OK
+Starting followup_std_v1_baseline_e4b_r0_fleurs_development_es_es
+Finished followup_std_v1_baseline_e4b_r0_fleurs_development_es_es: OK
+Starting followup_std_v1_baseline_e2b_r0_fleurs_development_es_es
+Finished followup_std_v1_baseline_e2b_r0_fleurs_development_es_es: OK
+Starting followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_en_en
+Finished followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_en_en: OK
+Starting followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_en_en
+Finished followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_en_en: OK
+Starting followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_es_es
+Finished followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_es_es: ['Replay PCM/identity integrity failed: physical_trace: Missing keyed partial physical result; physical_trace: unmatched started/finished identities']
+Starting followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_es_es
+Finished followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_es_es: OK
+Starting followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_en_en
+Finished followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_en_en: OK
+Starting followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_en_en
+Finished followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_en_en: OK
+Starting followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_es_es
+Finished followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_es_es: OK
+Starting followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_es_es
+Finished followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_es_es: OK
+Starting followup_std_v1_early_4s_160ms_e4b_r0_fleurs_development_en_en
+Finished followup_std_v1_early_4s_160ms_e4b_r0_fleurs_development_en_en: OK
+Starting followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_latency.py", line 897, in <module>
+    main()
+  File "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_latency.py", line 893, in main
+    (run if args.command == "run" else report)(args)
+  File "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_latency.py", line 506, in run
+    result = run_replay(
+             ^^^^^^^^^^^
+  File "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/replay_bench.py", line 447, in run_replay
+    result = run_child(command, cwd=ROOT, stdout=log, timeout=timeout_s, env=env)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/replay_bench.py", line 76, in run_child
+    return subprocess.CompletedProcess(command, process.wait(timeout=timeout))
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/willem/anaconda3/lib/python3.11/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/willem/anaconda3/lib/python3.11/subprocess.py", line 2047, in _wait
+    time.sleep(delay)
+KeyboardInterrupt

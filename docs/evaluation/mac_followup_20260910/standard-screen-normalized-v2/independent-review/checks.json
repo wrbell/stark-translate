@@ -1,0 +1,34 @@
+{
+  "scope": "Independent stdlib analysis of existing report/selection, provenance and filenames; no production imports or audio/model reads. Selected raw runs reviewed separately.",
+  "report_sha256": "67bfa237f21f04440b807c6a5da5e1049e5c4aea32f35d6a162d658c8719b48e",
+  "runner_revision": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "source_identity": "e22411047861089b919965328dcc24ba9e06b170e4c0fe28b280a81436a20047",
+  "inventory": 96,
+  "checks": {
+    "anchor_distribution_checks": 216,
+    "pair_guard_checks": 72,
+    "arm_checks": 24
+  },
+  "qualified": 0,
+  "reasons": {
+    "memory_regression": 40,
+    "preview_source_coverage_loss": 55,
+    "production_caption_wer_regression": 6,
+    "tail_regression": 25,
+    "first_preview_tail_regression": 42,
+    "matched_first_preview_tail_regression": 23,
+    "update_gap_tail_regression": 22,
+    "matched_update_gap_tail_regression": 24,
+    "median_gain_below_gate": 36,
+    "final_queue_sustained_growth": 9,
+    "final_queue_wait_regression": 11,
+    "stage_queue_tail_regression": 22,
+    "final_queue_high_water_regression": 1,
+    "missing_preview_responsiveness": 1
+  },
+  "median_only_gate_passes": 36,
+  "all_guard_passes": 0,
+  "term_opportunities": [
+    0
+  ]
+}

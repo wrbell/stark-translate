@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only retained JSON and source review; no inference, devices, tests, native imports or archive verification.",
+  "report": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-cadence-normalized-v1-report.json",
+    "sha256": "852c44a45a94b3b4147e2b59fbccd5cb6a86b3ddb98b4c7f22cb91768178b17f",
+    "size_bytes": 534966
+  },
+  "selection_report_binding_matches": true,
+  "archive_report_bytes_match": true,
+  "technical_summary_counts": {
+    "runs": 24,
+    "returncode_zero": 24,
+    "integrity_passed": 24,
+    "source_accounting_complete": 24,
+    "completed": 24,
+    "empty_completion_errors": 24
+  },
+  "qualified_count": 0,
+  "pair_rejection_reason_counts": {
+    "first_preview_tail_regression": 9,
+    "median_gain_below_gate": 6,
+    "preview_source_coverage_loss": 12,
+    "final_queue_sustained_growth": 6,
+    "final_queue_wait_regression": 5,
+    "tail_regression": 5,
+    "update_gap_tail_regression": 8,
+    "missing_preview_responsiveness": 1,
+    "stage_queue_tail_regression": 2
+  },
+  "distribution_checks": [
+    {
+      "experiment": "cadence_09",
+      "repeat": 0,
+      "clip_id": "fleurs_development_en",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2808.1630000000005,
+      "p95_ms": 7298.987000000001,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 0,
+      "clip_id": "fleurs_development_en",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 2597.394000000001,
+      "p95_ms": 6540.0740000000005,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 0,
+      "clip_id": "fleurs_development_en",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2574.6399999999994,
+      "p95_ms": 7620.111999999994,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 0,
+      "clip_id": "fleurs_development_es",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2813.031000000001,
+      "p95_ms": 5586.398999999998,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 0,
+      "clip_id": "fleurs_development_es",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 2999.6794999999993,
+      "p95_ms": 4095.9219999999987,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 0,
+      "clip_id": "fleurs_development_es",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 3007.2265000000007,
+      "p95_ms": 3710.3870000000024,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 0,
+      "clip_id": "fleurs_development_en",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2808.1630000000005,
+      "p95_ms": 7298.987000000001,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 0,
+      "clip_id": "fleurs_development_en",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 1943.5059999999994,
+      "p95_ms": 2215.6860000000015,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 0,
+      "clip_id": "fleurs_development_en",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2574.6399999999994,
+      "p95_ms": 7620.111999999994,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 0,
+      "clip_id": "fleurs_development_es",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2813.031000000001,
+      "p95_ms": 5586.398999999998,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 0,
+      "clip_id": "fleurs_development_es",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 2531.8295,
+      "p95_ms": 3756.2019999999975,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 0,
+      "clip_id": "fleurs_development_es",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 3007.2265000000007,
+      "p95_ms": 3710.3870000000024,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 1,
+      "clip_id": "fleurs_development_en",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2502.878499999997,
+      "p95_ms": 4818.260999999999,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 1,
+      "clip_id": "fleurs_development_en",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 1970.9765000000007,
+      "p95_ms": 2265.920000000002,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 1,
+      "clip_id": "fleurs_development_en",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2496.8870000000006,
+      "p95_ms": 6144.955000000002,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 1,
+      "clip_id": "fleurs_development_es",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2979.299000000001,
+      "p95_ms": 3722.16,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 1,
+      "clip_id": "fleurs_development_es",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 2493.749499999998,
+      "p95_ms": 4060.862000000001,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 1,
+      "clip_id": "fleurs_development_es",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2831.245500000001,
+      "p95_ms": 5634.620999999999,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 1,
+      "clip_id": "fleurs_development_en",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2502.878499999997,
+      "p95_ms": 4818.260999999999,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 1,
+      "clip_id": "fleurs_development_en",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 2861.7909999999974,
+      "p95_ms": 3701.1860000000015,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 1,
+      "clip_id": "fleurs_development_en",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2496.8870000000006,
+      "p95_ms": 6144.955000000002,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 1,
+      "clip_id": "fleurs_development_es",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2979.299000000001,
+      "p95_ms": 3722.16,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 1,
+      "clip_id": "fleurs_development_es",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 3039.7850000000008,
+      "p95_ms": 4107.825000000001,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 1,
+      "clip_id": "fleurs_development_es",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2831.245500000001,
+      "p95_ms": 5634.620999999999,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 2,
+      "clip_id": "fleurs_development_en",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2512.9039999999986,
+      "p95_ms": 8426.326999999997,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 2,
+      "clip_id": "fleurs_development_en",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 5342.453000000001,
+      "p95_ms": 10728.281000000003,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 2,
+      "clip_id": "fleurs_development_en",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2855.2625000000007,
+      "p95_ms": 8380.224000000002,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 2,
+      "clip_id": "fleurs_development_es",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 3264.951500000003,
+      "p95_ms": 4111.741000000002,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 2,
+      "clip_id": "fleurs_development_es",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 3474.8780000000006,
+      "p95_ms": 5384.6759999999995,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_09",
+      "repeat": 2,
+      "clip_id": "fleurs_development_es",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 3372.7880000000005,
+      "p95_ms": 4018.3669999999984,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 2,
+      "clip_id": "fleurs_development_en",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 2512.9039999999986,
+      "p95_ms": 8426.326999999997,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 2,
+      "clip_id": "fleurs_development_en",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 1944.3520000000026,
+      "p95_ms": 5527.328000000001,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 2,
+      "clip_id": "fleurs_development_en",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 2855.2625000000007,
+      "p95_ms": 8380.224000000002,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 2,
+      "clip_id": "fleurs_development_es",
+      "role": "opening",
+      "n": 6,
+      "p50_ms": 3264.951500000003,
+      "p95_ms": 4111.741000000002,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 2,
+      "clip_id": "fleurs_development_es",
+      "role": "candidate",
+      "n": 6,
+      "p50_ms": 2892.4609999999993,
+      "p95_ms": 4216.251999999997,
+      "agrees_with_report": true
+    },
+    {
+      "experiment": "cadence_12",
+      "repeat": 2,
+      "clip_id": "fleurs_development_es",
+      "role": "closing",
+      "n": 6,
+      "p50_ms": 3372.7880000000005,
+      "p95_ms": 4018.3669999999984,
+      "agrees_with_report": true
+    }
+  ],
+  "distribution_scope": "36 paired role distributions reference 24 distinct runs because controls are reused; no counts pooled.",
+  "runtime_identity_error_lists": 0,
+  "raw_representatives": {
+    "english": "cadence_09 repeat 2 opening/candidate/closing; child raw-representative-en-r2.json",
+    "spanish": "cadence_12 repeat 1 opening/candidate/closing; direct retained JSON inspection"
+  },
+  "actual_models": "Lite CPU faster-whisper-small int8 plus Marian CT2 int8 partials and finals; six Marian final routes in each representative; no Gemma model. e2b is harness label.",
+  "p95_per_run_eligible_count": 6,
+  "p95_claim_eligible": false,
+  "decision": "No cadence arm qualifies for confirmation or a combined cadence/deadline trial. Independent Lite deadlines retain baseline cadence 0.6 seconds. No defaults changed."
+}

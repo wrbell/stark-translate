@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "raw-evidence.tar.gz",
+      "sha256": "9db412da6ba9c3c16bdf005e8a65e9b521d4f4bf4ae7b8c6441ebabb146052e2",
+      "size_bytes": 738867,
+      "members": [
+        {
+          "path": "raw/ab_metrics_integrity_v4_baseline_anchor_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "567b4038b125ab37bd75b9a156d779c812a2c2c6267e3bb6f76cb434c0f8e31e",
+          "size_bytes": 4494
+        },
+        {
+          "path": "raw/ab_metrics_integrity_v4_baseline_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "732bc9a615c90a9000a732c621496bf1394a036359ce531c88ffa89a2a425167",
+          "size_bytes": 4497
+        },
+        {
+          "path": "raw/ab_metrics_integrity_v4_early_2s_160ms_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "418b0c814329d006f45baaf1de5490082151e24221a25f54ee445f31ea5c95a4",
+          "size_bytes": 5179
+        },
+        {
+          "path": "raw/integrity_v4_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "70b445aa48dcc4228e3df92d539a6ac1e769544c69621cc4f6a434036c41b305",
+          "size_bytes": 2410027
+        },
+        {
+          "path": "raw/integrity_v4_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "43fb12d0f13015677bbff684c13b8ee28ff76d7a8e869760b058b87f6b5d8c04",
+          "size_bytes": 2452598
+        },
+        {
+          "path": "raw/integrity_v4_early_2s_160ms_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "d0416bb4aa4e274f8573903f2bf48e6c442eaf7ec62cca50b391f0d7c0373b15",
+          "size_bytes": 2419516
+        },
+        {
+          "path": "raw/provenance.json",
+          "sha256": "4a5e85c0290c20505750e1fce62921bf975a2700adabdaf96f538dc5945c1cde",
+          "size_bytes": 58280
+        },
+        {
+          "path": "raw/session_integrity_v4_baseline_anchor_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "8f712068c7d24e7987f3798267c7c1dc23533157c1fb8d449875da6736c1ee90",
+          "size_bytes": 354
+        },
+        {
+          "path": "raw/session_integrity_v4_baseline_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "fb2e308618af317d1e3c88ffc88018fe0ff7e812a8fac6551d585f8dc5e20e9c",
+          "size_bytes": 340
+        },
+        {
+          "path": "raw/session_integrity_v4_early_2s_160ms_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "9869a26dffb8e9025a3cd8a795c72c4122f0270a9851f71c84cf1c3434b0d1fd",
+          "size_bytes": 2297
+        }
+      ]
+    },
+    {
+      "path": "runner.log",
+      "sha256": "3ec56fd964cc5ca526898a74f7f88ddcea466efdde2bdca2a6fe1b18dd922c65",
+      "size_bytes": 416
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "4a5e85c0290c20505750e1fce62921bf975a2700adabdaf96f538dc5945c1cde",
+      "size_bytes": 58280
+    },
+    {
+      "path": "run-summary.json",
+      "sha256": "1883064d1b8e2d51ab63d288297cda318d8e8ee53066ef7b1774af4179e519bd",
+      "size_bytes": 21030
+    }
+  ],
+  "raw_payloads_unmodified": true,
+  "audio_included": false
+}

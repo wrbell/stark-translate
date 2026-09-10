@@ -1,0 +1,1365 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "raw-evidence.tar.gz",
+      "sha256": "d9f4c6b3223165b6f74a5d4a06d48ea0e24a71148a989b307d4b5633cfb8625c",
+      "size_bytes": 10475412,
+      "members": [
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.csv",
+          "sha256": "72620df39b9ccfd9e3ea9fe881aac68141a8bcb8ef8e9fd62f95ec4b296b2ae0",
+          "size_bytes": 4255
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "12ade69eb15d5ec743a486cfadcd16da6bed7c6bd6cbb8ab1e8ff441126a7b93",
+          "size_bytes": 4007
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.csv",
+          "sha256": "3e48e8da1519c915369215d99706bb7b60218ded9134c266f7a136bb5bb5d23f",
+          "size_bytes": 4252
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "cf2a9b8b55dc650ff3f65ed4a0596e391e57436a1b786fba78543d0b95983a84",
+          "size_bytes": 4033
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.csv",
+          "sha256": "9e05c07825da305f5c9c746389e09f581b580e96a48afa94df1ba4ad4166692a",
+          "size_bytes": 4240
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "c49143ced44014b6961a0dc4ebfb73c22d4f6f9c2fe4c26858fc217c3e1aafe6",
+          "size_bytes": 4011
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.csv",
+          "sha256": "5c66e9031b80e6250e9aaf9097d6543f2191e3b2f95ca54f06aa37698a14c79e",
+          "size_bytes": 4236
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "8196232937fbd21b3a70a7e39a1b6f83a62d544afdd309acb790cc0c98a088a5",
+          "size_bytes": 4033
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.csv",
+          "sha256": "205ceefc989ba2ee4bcf6b3635880c7aa16e60535edfd506d0e6a08a819dd1e0",
+          "size_bytes": 4251
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "52b63a61e96cd3dbb4188d3bd48dc833daa35381d24d7a6381568b42d0950bd2",
+          "size_bytes": 4007
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.csv",
+          "sha256": "509e55c7809f3d80dda359bd83113a242600c3426da51602d6bbcd2848790674",
+          "size_bytes": 4252
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "ebe65c68528c2148db01cf4913c0e611d206814bbfe107c2bd86abeb58f13191",
+          "size_bytes": 4009
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.csv",
+          "sha256": "f19f13e5f3c53a113a2006e9d697b199d7571abcb831838ebd48915d98f39712",
+          "size_bytes": 4247
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "8b7f7644d7cffe293dab19f0a834920904d88f429a93500964d2a207afa67756",
+          "size_bytes": 4013
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.csv",
+          "sha256": "f6f7b022f332511dfe4d4e5cf036c8646dc1d1ba8fe0bdaf956cd6240ea64782",
+          "size_bytes": 4235
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "713231f8d95433289bfe115622ab1569beb22af4044f3e41e344b494fdbb64fa",
+          "size_bytes": 4013
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.csv",
+          "sha256": "a1b54b518bc701bef2b0cd1baca71398ae5be9a89194f16bb373e3c0765abea2",
+          "size_bytes": 4205
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "aa5bea25014118d565dcbde86bfafdcaac152ac751cbdbc8eb7f52fd0541e017",
+          "size_bytes": 4014
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.csv",
+          "sha256": "d64345a7cf16c69ee3758831c6714f489b2ad6f57a3710f3fe091e3ace862c40",
+          "size_bytes": 4259
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "0255af14b3d22171d7903577101e5acbfe3e71585540aa2ed044afe32918c3b4",
+          "size_bytes": 4004
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.csv",
+          "sha256": "44689e37eb6ebd441eda17004e73d7f56f93c43f0b3ca3c91e563ac964b9a525",
+          "size_bytes": 4240
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "0f09e2b21d2aa6a7686812b7ed36d631931cae74a6bd9bc781cd21791eba5569",
+          "size_bytes": 4010
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.csv",
+          "sha256": "cdc6e117c15360caa3f24d9b0d1d8f26c97f2b7d9b1e7b3bb0fd2f7e9a2f7244",
+          "size_bytes": 4264
+        },
+        {
+          "path": "raw/ab_metrics_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "a2cd1d4afe92a1aabe8400900ff97ac2ffa1cea616dca10e37d814dc6574488c",
+          "size_bytes": 4014
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "2cf97203f285d6bb0305d2e4fb319d55be87c59ca7e4165edd07461aad905dcf",
+          "size_bytes": 1499486
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "ab01ace6e556c2488877e75bea826b25c4cbaa1a751aba67866638679bf71527",
+          "size_bytes": 1517096
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "1c09abdd99f8b2964ac110c064f2348b049244ed04e72ab1440133b0a74bf660",
+          "size_bytes": 1499415
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "aec5200109c12826fe638ba042b00e9abf1378925c6e3540888e1e7e86fb889d",
+          "size_bytes": 1517683
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "1da463c055f972d87116ac03b2221a645d9b0a913700be802903880dd6e51968",
+          "size_bytes": 1495189
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "f7b86fe89b7520ab388c1e9da88265ed3c886e807a58f03581972d9ded7e66cf",
+          "size_bytes": 1512542
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "84f1c1cf888668832575ee86e2202c8b51b4d6ba017fa0dc32c564859b97bb40",
+          "size_bytes": 1498804
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "59c966650ac26b309e923446c8824bd26bd3ef5126dde1cf4842b6baa823c28b",
+          "size_bytes": 1517527
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "9edf66d481897143a8a0ebc27f9fc00f976a0b5a51bad8aa7838302345b5e239",
+          "size_bytes": 1499108
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "51f4d35e720532b3b199aad336c657dae8072c2ad2b96a59ea97a9d437145058",
+          "size_bytes": 1517430
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "e3cea3d46b6adb930bdefbae336aec901a20a979fcf5c213cb5caf01861e9995",
+          "size_bytes": 1498983
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "d0302f529ba6037a7144a1d6d7de060b5ac3c10612d0359484d848ee13437e35",
+          "size_bytes": 1516803
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "e7d20c993d825f1d2a565728e90bde3e5009fca8a2d6df651452ad29791ca215",
+          "size_bytes": 1490015
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "c7571e7f48114b2b10f48b0ef7b4b223594dcf0099e19bf1f53a2df2cc0a8dc8",
+          "size_bytes": 1515926
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "87356cb553ab8ed8f5a3b476736b7bf99ad748e4ae3ceadd41d229c8888d1ec0",
+          "size_bytes": 1493980
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "31e0d398dc8c7353638b3b7a85cb417726876312a09dc5d310e0f4d0bc70e93c",
+          "size_bytes": 1514319
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "c141bc7be82019115c37030ebcb869b0b0dfe49efe2406a8ea31ea7ee6c32988",
+          "size_bytes": 1481837
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "df33c81ce1a467cf773ac83d47e20400e6b01aeb15a1dd970a7db3ac845840bb",
+          "size_bytes": 1510748
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "efdd0e174fde3537b7e2d663bb6488d98de17025730be967d31c802a1e28b390",
+          "size_bytes": 1490312
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "e1e7f20fab77c06718e16911514a601f695f3c37a2f43081dd29fa225dbc4807",
+          "size_bytes": 1509631
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "2e1ed2d1805dd4168d6846c373ba2fa45cfba358121e0fb8c1349ef89e8c5832",
+          "size_bytes": 1491893
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "df936357b27f9891832bbd693c49051e0f691fee35fa30a6d88834eff34b9bf5",
+          "size_bytes": 1509422
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "96720b6d07d9df324133eec8c0c91531c429cbed863e13f1f28ed8d5ecd2e259",
+          "size_bytes": 1491101
+        },
+        {
+          "path": "raw/diagnostics_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "d71a429230fd7ff4866e22ec3e0de031533f3cc4b06026151ce1977a90e1ffbd",
+          "size_bytes": 1507921
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "2dfe3c081b3889d258742966557e5a8202645468c211fbc7d5e8d6961e6bfc55",
+          "size_bytes": 2354474
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "68f405185f2363e12f787669f5b73ce93ed3e0de7b51d7773060f182ba2d3e01",
+          "size_bytes": 2379918
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "309ec0a871a32d95a34c6a6067da77d4c246237e93fe0c5c0b6c783131343985",
+          "size_bytes": 2354474
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "88072e011b25cf913a0f6170b6570067a2b6ce983e13c197bafc0212979f3b2e",
+          "size_bytes": 2382640
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "56759a01f7b0feb66de8bb978dc996c59ab17da88a88354a374d5b35721d03d3",
+          "size_bytes": 2347437
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "52c0f30b31c793ed118080ee48a8d0a1b2ffe6e99e88e2cea00bee2a0b528370",
+          "size_bytes": 2374728
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "70620a823c77fdcb72fa29ca174c3912f2a914edddccdcc17530150f59636b2d",
+          "size_bytes": 2351619
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "42aaa6f0abb4f9bda85786df51acd02dc53f35fac47e0430bbc69bf25114fd92",
+          "size_bytes": 2382257
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "0cdc7d781857cceb05f9612d32844c33bc5f099ab98706d74593c4d23ee261e4",
+          "size_bytes": 2353974
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "d19ccb722b7b40972b6a19d8412b197c4da7ca4d19c3345aaad73d7826d4aac4",
+          "size_bytes": 2380074
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "bc03def836dbbb2c7046c38b246a29b9e9fce9152066948a71fe5674f5661c89",
+          "size_bytes": 2353797
+        },
+        {
+          "path": "raw/followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "7eaac112762df35bc6ba182e59399d544037c8e0c653e1d2b866eba891f28b02",
+          "size_bytes": 2377378
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "340385f79936296491e9d3700a51d96766638f7dd7c044bbe56ef8ecd1d33186",
+          "size_bytes": 2336488
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "6f10042ec5005498da38c3d5d73c43e4853cee4041c0e4cd31f4f3866e68bf34",
+          "size_bytes": 2379419
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "820c3f3b933905c0dff67afe630490932d6aefa23281e148a925b50fd649e4be",
+          "size_bytes": 2342056
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "efc7cd959318df26f4e173a3c862626dd5c8c67fe70c7fe2a62837ee61ed1a90",
+          "size_bytes": 2377778
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "a3cffc45e873d84df136fc4d828b4c1b5b9abe19dce4f198d2e4fe942d40880c",
+          "size_bytes": 2316036
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "5340379850799f810f0e5bb58e479ae9ff5611249ea038def77c16af9bdd075a",
+          "size_bytes": 2368691
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "0dbb1b16ec810365336b6264dfda962f07b089ddd01eabce6c9b8b412d57b68f",
+          "size_bytes": 2342901
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "4572080606d4973be891a587e378ce6aee29f7ea1e060f575e3ccd0e472ec915",
+          "size_bytes": 2367666
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "b8c3cb33b77468ffbd81e085f78d241ec9bd10edf6d7222a0fec3c43febe492e",
+          "size_bytes": 2342356
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "f2bef892b8bb84d0dd0d434f4ed31799093409b0024195e84adbb0b7ab2b1a34",
+          "size_bytes": 2365423
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "d155d9821e6cfb98178689851ae6d7bf5c72d2950fad495a19363c4aa2eda0d2",
+          "size_bytes": 2341704
+        },
+        {
+          "path": "raw/followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "4b249697293c50c976d2c97d60ee480b450a1b1c3a79cfb9fd17fcedf2a62d5b",
+          "size_bytes": 2363978
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "d499be1f822fe2dd74881baca78727ababb1e2a2781e178e6b2d9f8b0ee6e6bd",
+          "size_bytes": 3981
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "c1a4e3910de440f457abcf488bad08f7db737d802ea68cebc64f4f666aaa8764",
+          "size_bytes": 3746
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "7bdcd0dad09a766024a29908a457b4ffb35cd019d9e6ca0679405f6781ee03a0",
+          "size_bytes": 3982
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "a1d266cce3a820bf465535b84731efd78037b39ba40f527bd186b3e702586ac6",
+          "size_bytes": 3747
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "98338b206bab5f3167c177d8d758cac1d39796a5816a599e63afe3a955fe04fe",
+          "size_bytes": 3982
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "8e6cb0f44da71e2c50b3fda1f707ece2c8ef25324035bf1b8ec173b3be547737",
+          "size_bytes": 3748
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "b9c784329ed176438f1bd179ef7de9477488b45db71da28e408e262663776cc3",
+          "size_bytes": 3933
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "fa14affb75001a3ff52145d08786d8b8a0d21e9f4ddcdb34a9b0a5411def80ce",
+          "size_bytes": 3698
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "5fe898daa645c9679c74238f956d231c2d6fb5961e7492956e4dfde419649ed2",
+          "size_bytes": 3932
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "f20ccbef3ad42225ec184ad8319390aaadeb6e128d8bf9eac625b967cf5b4388",
+          "size_bytes": 3695
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "e5530a6e882e31f7a06b477ae470d92a5c3ac8295a263c0ef5135fcdfa17fdf2",
+          "size_bytes": 3933
+        },
+        {
+          "path": "raw/health_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "cc8ce9044780354168b21a59f524f556fc6c13289843957dae548cf18d7fc89f",
+          "size_bytes": 3697
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "00690e4eddcd4af3d7bd72ccf8a28e71f0604bd59ea0a91616dd5c8ab0d035fc",
+          "size_bytes": 3946
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "433df080f1169c360e273a1f1fe0f850a471a54c4ae0b37d1a16f25cdec1e811",
+          "size_bytes": 3711
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "373e0bfc0ffc45e2c7273aa686dd924afcbb74777a65641277f7a810a98e88af",
+          "size_bytes": 3946
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "3630707d54ba19e958a66f2d5e101fa9766efcf4799e078b1060f816d6270ff3",
+          "size_bytes": 3712
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "9f92547f7bb2891cba5944328d9a05f40b15c820fcaa02e7a6415bbfc68b18cf",
+          "size_bytes": 3947
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "7f6137547251d0f641c3ca0d9dce9f80ae21c186467b69435093cc4efa4b6a12",
+          "size_bytes": 3710
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "c7c5442fc8e640cbec5c96a71aa33e9f92559dc050a60bf5896cc239d9af0fef",
+          "size_bytes": 3947
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "9c4a014fce0de667f3076dafb112117cf5cbc6fe136e811668e684e31f5f1182",
+          "size_bytes": 3712
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "86cee96e54ec4c3781f1e0af7d6c5d124c5fa2531c2a643a73beab1b436b5da6",
+          "size_bytes": 3946
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "42f0ae5749e0b0519970f2bd591a0484b03c9de6611e4bdbe48c520f00e2eabe",
+          "size_bytes": 3711
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "22f93ce4a73f8ebd8bc42ddde613a9caafaf92c21687cafded87355b31e7caf6",
+          "size_bytes": 3945
+        },
+        {
+          "path": "raw/health_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "297100c74f87e04b0780e0f4c5744621cb0e37f6001c6f2f8f2d1b659168b637",
+          "size_bytes": 3711
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "bfebc02a9c272087600073a92364c5af47f2a571dba2287878246aca1b7db8f6",
+          "size_bytes": 10720
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "04f64e24c3e1ebc47c0d7edc82622562ac5cc498e7e377a0ec183aa7ef137b49",
+          "size_bytes": 10567
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "a3069bf8ec7be775846a9e575cf55231726db558bf6349f548a176ba98fd6cdd",
+          "size_bytes": 10729
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "ffb1fbef19920dec2b1ef832710ee4101c66f864009601b803d8b8ef7c88e7c9",
+          "size_bytes": 12062
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "9bfce9a58513356e83b0540bc4f6ac6aa66886e970a1d449fafcbc4245e5af0c",
+          "size_bytes": 9178
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "b6bc875a05f43730a6523e528b366022c4b970981e6015a4301dda6ea7ee9e69",
+          "size_bytes": 10552
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "dc6840ccafac91e653eaadaaec8ea037e2aa581fc96ced320c0af141200a330e",
+          "size_bytes": 9100
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "58b81efaa3d02940a986dd06701f530fe30b9c232b30cd3853d5401ec87c51d2",
+          "size_bytes": 11946
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "a969057de765b741a68380ae4a478d2f3596a87e76903b469cd3c99cfd87a198",
+          "size_bytes": 10625
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "fd0f136b72ee42848807328eff784cc96af0538ce687823d1b9b3655855d7785",
+          "size_bytes": 10492
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "07d0475b16bfc725482b0aef89024e38938eccd6d0109f9e6c9461c90549aef3",
+          "size_bytes": 10627
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "6ebd03635e7f2e9166c365f77f48023ddc171ffdb436cf7f051016ff9194cfbf",
+          "size_bytes": 8869
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "3c3be532ed3ad287d3c1d094a08fb8b0f2af17478fc03feb8d784d5c3a355e4d",
+          "size_bytes": 7341
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "2c4de0740af8dfd0aecaa38d3681c4acf46a12cc9d4ec26e9957c6213e2d3553",
+          "size_bytes": 11775
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "a2586867aa8ccefddc312baf7bd5376893c1747e2ee9eb26e725777f071827f0",
+          "size_bytes": 7287
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "7df63f75a97a7392bc9195ede9c38aba05de5c58defd6497c2d82bc964400357",
+          "size_bytes": 11777
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "f447915b660d98ce7e4a3291cfc676a5f8927c397f89b510171320dc7fc57c86",
+          "size_bytes": 1452
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "2f49f8fccf14af1029ad240149701860dd65f2e5a25cf9de476c91c2f3aea00a",
+          "size_bytes": 8761
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.jsonl",
+          "sha256": "7fe4e8020357854433cd230ab135b7525b6041dca3029cd0189b3a45b93f5725",
+          "size_bytes": 11945
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "3b734268f46c49f576e479b8f6ec7f23968e0b0111e4a330d61fa62a0fce430d",
+          "size_bytes": 10321
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.jsonl",
+          "sha256": "656016c560be43d3c93d57d787017df2be0287422c66df1080d53df0b867ac05",
+          "size_bytes": 10434
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "8d1272db3c1e9913cc6a1f7edc078520dafc3fe2395d9a2788bab6d0bfd9e415",
+          "size_bytes": 8764
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.jsonl",
+          "sha256": "cc2742206623521eb853a39cb8b5f6e0b641f1ac23cf417f71a87f47e49239ad",
+          "size_bytes": 10452
+        },
+        {
+          "path": "raw/partials_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "51e99f4648f040809a7e96f740c1fb2ef88d72075f9ab1be226f891907c8c3b1",
+          "size_bytes": 8766
+        },
+        {
+          "path": "raw/provenance.json",
+          "sha256": "c5f26d4e151476ad0d5aaaaeb93d456067e95c76206f53b0146452709d85eb81",
+          "size_bytes": 75435
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "dd058cb8083fbd3ba17b4293bbd23d0d0123e730566dfb0f784faaa339bbf045",
+          "size_bytes": 19844
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "0a06dd3bc27e9b2f834943ce70bb58fefa56d99538a3f8cdd8c23bd89d739075",
+          "size_bytes": 11315
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "4e6a348721e99bac5c93837d165b58b86cd96f23a1517e06d81ef3c23888cd06",
+          "size_bytes": 19447
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "80d3d2da9d2c9a7595627e5f627451837c226d09527f3a7c318dec1af9a09c1b",
+          "size_bytes": 10772
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "cd22def50cdb6e2aa6ff9084af4d78cc48f88eb42bee65695054015a3de509ce",
+          "size_bytes": 19910
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "8af0cb855d8f59a341a2893d5622dcf713137f1d8dfeeaee7317e1ddf4f6cbda",
+          "size_bytes": 11311
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "1d8db017ac09f8fab6054e8aa5cb832b390f6ddcb75c8aab5b818b9b6d46c0a8",
+          "size_bytes": 19461
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "12fee0325f91e1b15cd7a9f76d6939e3877ab0cd855fd32b511cb45f8d0d1e32",
+          "size_bytes": 10996
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "306dac717a9482b2a3aef30dbd6ecba8efdc91847ec1cd12e7be260d0482ba7d",
+          "size_bytes": 19931
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "76f7282f552294f419af8a3b3816af190e23b1d1f2271754e36918bc17bf8af9",
+          "size_bytes": 10829
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "002fdc12abc12a9f1fd7bd1d4dbf595c81cc64ccac58daf9140e470f01ca5a62",
+          "size_bytes": 19489
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "d978de3923f140451d35afdbf81573b7623f2dbc7d5bd29c2521b649599f1a5a",
+          "size_bytes": 10878
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "e99e5e30096fa82dc4b40e730c82eee25fe806efb3b664b0b3ae3be203dfb4b6",
+          "size_bytes": 19882
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "96afc07d8ee079e98567b469a4ba1695b51cf0d97d833f5b6fa1d40834dbdae4",
+          "size_bytes": 10963
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "40af6d13fcc696d839dea1459f010686e9bfb8a583405b26db8d18a97d77e2a3",
+          "size_bytes": 19403
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "3049d40e1412bd64c3addf1f50a33a3f4f6f7ab4a605c1d25c770a359884b384",
+          "size_bytes": 10947
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "cb9af855bb2045ca1132dd65a70247193a8b5783418b1c3df4b9e4d323e98fbf",
+          "size_bytes": 19878
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "c3da60afcf0725b3adf7e6a982613560101dae9b528547d145359ef976ce6080",
+          "size_bytes": 11261
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "fa5223dc2d69abe89e08e26a09da73a0e56da9bdc1a6af802d09d1aa7abd3ff0",
+          "size_bytes": 19411
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "47893e239179407293e346bfc9ef6fb5b140b05e7e0b3dcbe3284103e77cf8db",
+          "size_bytes": 10722
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "8f77a0583e54248fd713618a49be52fd9d122bf1d2bb0a81c0d04774ac8e0b66",
+          "size_bytes": 19824
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "52957741fbda56d4f11898d5cb9bac672dbf6c7a80040b0e34ebfe4e80df445d",
+          "size_bytes": 11264
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "1f6fbc4d62131526362903acae0fb3ac4281e315e3046ac5e6d6800f163bbb76",
+          "size_bytes": 19445
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "5b7f98fb24d428ec1db3a1177e8c703ea39c3ae637196398addc421aea822ea0",
+          "size_bytes": 10529
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "9c2316d57fd67a6079332a7e32c8d9a444f474ef1c5db15adbdf3c0f82b1cd4e",
+          "size_bytes": 19863
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "6f68e74ede753b1b38bdc154a8f9c6bdb0183619f7fd719308dc05adf3a0efa8",
+          "size_bytes": 10350
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "f836b304524e49fa4f4758e0c574e5ef9f0100fda5df6c70e7e065704ded63a8",
+          "size_bytes": 19453
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "bb6b7fe0ab3bac10012efeb60b7fb5f34359747c9a3ccf0db9097d3bc873371f",
+          "size_bytes": 10518
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "7a3fb54933300576bd6c010f8a14e303aca8a05d67c91e298ca6b506901c1b80",
+          "size_bytes": 19894
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "0bdcbd91dacde7dfbc133b87a683d1ad13e030258eff933b0eb1cd55e84e00ac",
+          "size_bytes": 10328
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "f01da725cc582a6e801ac6b8a7a9de22af6b0b9cfbc3b22848d60fd4a19697d7",
+          "size_bytes": 19419
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "6117e8308d2f137e94499cf9db53d81440abf5befe2255b97e244fad49363eb0",
+          "size_bytes": 10518
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "8dd6f32c0b952f66b3219cb83e345f4cb0c5d38e6dc9d27474e28e32bf2553d1",
+          "size_bytes": 19887
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "7891d9f4ad6022fdf5be2f35996d09366ecae0687ca6205321267c4ce1925aaa",
+          "size_bytes": 9350
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "140a19fb20264b4fd089072a378a54dc4418aa5b8d4b9ab37116f22bc536ab6a",
+          "size_bytes": 19478
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "484f2df04eb6225abd653bd9b7e35ad50ed57266e1bf6833fe885c212deeb2de",
+          "size_bytes": 10223
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "694d6addd57b99ab73657d8701a33cbbe8b960834fc1c15c019b7937b8cec5f8",
+          "size_bytes": 19868
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "cb6afb4bb1b7f1650ccd7343627641471ad7b68be3e1f3f317c356d1dad96593",
+          "size_bytes": 10962
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "c70e94bef2a1cee75f86807ff0d8027b922e502fda328188589cc3c409070626",
+          "size_bytes": 19445
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "d004d41e48ab280c80715504b78bd265c8dfc63789a88b175112a0e7e008335a",
+          "size_bytes": 10124
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "314b7e4537b414a955bbc4000a865758cb037c097c766c1dd1e5a0bbccebfda2",
+          "size_bytes": 19792
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "a673e1b0e5e552b4434b17f693670feb93bad0624ead45bdaaf350caa6fbb8ef",
+          "size_bytes": 10662
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "11fed53412a79adedbf9a66e07e07f725fc7f4c583c538d654f27d8471f87aa5",
+          "size_bytes": 19447
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "7190e9fadf0fba344738b03781cd70a4e653cb7b3146a45db3dc157129c22655",
+          "size_bytes": 9930
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "3d7c04f685f38135b33addce0d49f46bfd3e37ea84de3f887d8f8507c96f91ce",
+          "size_bytes": 19865
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "64b4e8d7521752049055b20b80afa1f0207cd36e16cf0f3ce3dd4450fa7caddd",
+          "size_bytes": 10856
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "2be9083ebffa68eb06e2b6c89a8cde42fa0d0126cd9019427ad8d30e6612b5a6",
+          "size_bytes": 19497
+        },
+        {
+          "path": "raw/replay_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "0515991adfb61c24dcbe90fe219fc14968fbba336815df0c751f2f263102e16a",
+          "size_bytes": 9932
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "0a79cab8ca0e08157400d0bd2d57dbcd755a1f7b49486772edb28e9a314280d6",
+          "size_bytes": 749
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "19932a87341eafce013a5f79bc71ab8a0936377be274a3071d6ffb6caf8c4ff2",
+          "size_bytes": 362
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "4f3c3aa3a2e2fc9317ccccc6b84f4b37c25f582497db50e742415afa0430ae3e",
+          "size_bytes": 749
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "388929603556b5ec4e5cac774cf552c81c30f1ad45976ae92e17b9761add8896",
+          "size_bytes": 362
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "74e120f98d0b5696330a7bb5dc658af25b2863d38d022da9ddd97f26df029831",
+          "size_bytes": 749
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "e324efd9df33a176277611991ec31f444bcc3c2524d7b2f7359b79aa1edc22da",
+          "size_bytes": 362
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "db2aeed637fb8ecca6e610e1cc90659acae111889aca5ba40566aaf523f88ab8",
+          "size_bytes": 735
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "f7da1c0575ad72a4fc176cd3a32c761efc71e280bf16c2c15321bd95111f3f36",
+          "size_bytes": 348
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "262a75b36bfebdebc626650190e1c0046f7b1aee028894002c4efc30c19543cb",
+          "size_bytes": 735
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "9b52a0602795fc04c66c2cb85c5f5bb06cb642cea20f6ab3874fe167971e0fa3",
+          "size_bytes": 348
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "e6d345eddd3a00b33097c5f99ddfb4167fa1856cb17f3d7755374ffdc0e09616",
+          "size_bytes": 735
+        },
+        {
+          "path": "raw/session_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "a723e21539f67bdc8d676e92be66e4eb9ead0d52af710945bee2392952094eca",
+          "size_bytes": 348
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "0cec264c74f78d45d6d37b91295d082fd392372dcb5d8cc2f82f99a7264b4a89",
+          "size_bytes": 739
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "4416de3f0ced21e5b169e637440d208938a7bc13bddb979ebf23ec541767576f",
+          "size_bytes": 352
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "21abfde8147142d4b0ba64f6bd8a838cad596de8f0f22ce202443646785c18de",
+          "size_bytes": 739
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "a2cff48bd2b50476f48f36b516ccb92ea68dbdf10e869502eee5f08c2a5955c0",
+          "size_bytes": 352
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "dd8b2ad861cba354ced389348bd4d310485f4ad3f322fcd433bb0c4244d766b5",
+          "size_bytes": 739
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "d8132970acd6025ef1425ee802d8f053e54d159740a65226ab1320e639a245e0",
+          "size_bytes": 352
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.log",
+          "sha256": "0953a0a516e2569f062f0ca1e600c2e66f8b40d6eb6bc08460491e2f53e76b7f",
+          "size_bytes": 739
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "753329b1ddd4d0829d953a6fbb32e503f9a1c1e092bc025a434cbc429393526b",
+          "size_bytes": 352
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.log",
+          "sha256": "778b5e775a1fc2e60c104c4b0f1d0e00fcaa0fdc5a7bdf318db7c9cf530214a2",
+          "size_bytes": 739
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "290abe06f4a96019099cec06259744369b3f0db1a2c164e207e905d75e0f502a",
+          "size_bytes": 352
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.log",
+          "sha256": "a4b7a95a9bd06735fb8768d6ba0e0f0ab9ec67477b5a23b1f44271ae64a15d7b",
+          "size_bytes": 739
+        },
+        {
+          "path": "raw/session_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "bf440200f522b01c065fa53aab9036e1af6ee6bfb9145d7ceb51461e6af00bfe",
+          "size_bytes": 352
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "32028b33885e7d7ea7b242c3386b9abfd8c15541e0fc6238d8fe99e5d565dfe6",
+          "size_bytes": 3095
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "ed87d2c39a8692823edac1b5293b8f687a3526651bd1aa8031b728aaa3beb352",
+          "size_bytes": 3095
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "69eed48f548f182cbce9e0753fe11cb8376574a024d7575dd15e1eabc46531e4",
+          "size_bytes": 3095
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "2f8e14146e3758c217cff80d9892ec01ddc32a85804e1f4452854eeac933c47f",
+          "size_bytes": 3095
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "2954ef71e3fb70975a177bc52f219a779cca0a45b916f0a4067d6f232882511d",
+          "size_bytes": 3095
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "e3b4b346d9aed2886624ad5c19ecd71c583ba0e5359750052ef5463bb2541bb7",
+          "size_bytes": 3095
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "e356652123a13765c99a31862d6455fe07797a3995068e4c1e9e696f59590a5d",
+          "size_bytes": 3088
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "d6123f9b6e539583a9d03c43b03fe8287148e705f7524dc54fa097780ca7e5c7",
+          "size_bytes": 3088
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "41ae768b54fbddd5cd8dfb9ec5af4ea9cfc73b947cc9cfd01d85cc8b83c4d9c6",
+          "size_bytes": 3088
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "5563ace5cc0010eafe5c97ec8fdaa7c067c72037e390b462c78078634d63e89b",
+          "size_bytes": 3088
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "1adb292964213638108fbc844f104187d631234f0eac9c60898f065bfcf783e4",
+          "size_bytes": 3088
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "6092fbaf08844774b67caf1a93358e9c9432cc9ff964a78b17b5f057af084ba0",
+          "size_bytes": 3088
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "35a0d5fcc25f6527097fc4c32f55a25d6733846279e8a88da1db83301f76a39f",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "30f64d9ffc392225f3134d7a5e9bee1652dd2c5a42a86a1d977ab1bb6ffec0f3",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "f649e12daeee9b156140edb73e2a94c79ab2d381ec4c671dca3d4beaba923991",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "2e4f685c0a38d232d0fe6efad2ae98be693e787fcc81d712a087e8bf1a008b25",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "2d5052b627b6fbe1cab3a79748f18c101d4b803193f566ab4c10ba0d71cfcf91",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "6d5944aecaf61ba74212783d0f143dad5d1d5e7ff34b1ae5416fd1fb52025cf2",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "bcb8c4e7f25b0f3c20e1211070111b4998869d6d8d703110ecbac9c78bb5ebf4",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "5d3d5cd095c0dd73807a1d8bec20fe3a885d7b0835fa5d601afdfe345321e886",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "61f864a93f53618aa0184dac8bb68762e7ceb02f863877be6e68f4321eda3859",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "0792ff1324d2c1eebbd237459e375df916302f2e3f2ca5104031464df528b2fb",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "21bf3f8a770675f2feb2f62e4f3289061a8966c7ef46a0cbb6796f9de678007a",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_lifecycle_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "a2674a2d02be5b199b01e4e2ae2fa54b2032a5dfa7e57097bd04daaa42aa5604",
+          "size_bytes": 3090
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "be1a650ff93718e21567df33f7e99fe3294fb1e261127ebae61bdf6d68fcf986",
+          "size_bytes": 6547
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "323b28d5526c9d36506ecb80f1a061b0728c55606325b58cff1e895b14bb2caa",
+          "size_bytes": 6547
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "8317b7ab540268d4c7aec74d63c2010e65ea385211bb07ee55c71a706cb4844f",
+          "size_bytes": 6547
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "4b6f139af01e37becf4ef6e5e214b9fe24378f4ee6902b7f2e2b78afb35b2d37",
+          "size_bytes": 6547
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "387d201de7ca394085d77cbbe90c083d12195e3320fe21967e7f71793dde4c62",
+          "size_bytes": 6547
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "3a2ce87f5a558dbedf6e08b3a9f45d375e46f4dcd7cb55dee12a06367878e3f5",
+          "size_bytes": 6547
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "f6178162760667884637c7f21bd4e3ad7dc79431f1410e57023e80fcd60c9121",
+          "size_bytes": 6540
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "09c5b748260fe32d34f11af9edb11cb31e1aa4cfd1ba0d6f083ba0b377c1f042",
+          "size_bytes": 6540
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "a1b9fb58c544ffdb0406d59625a0a8ce17e5d1802b5a060551220a583c85705a",
+          "size_bytes": 6540
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "0a67f68bb625fa9f016e3d744d519a68d809db25e82a64f2ddf370adf68f7865",
+          "size_bytes": 6540
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "bfab0ee90aee5c926022ff9a88f97394d57bd4423a5308be164bdc612158c1cd",
+          "size_bytes": 6540
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "d2a828ceee97208b8623d5bb913ee259df290b9719dcfe2b3eaba40fe088a29f",
+          "size_bytes": 6540
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "c415e31726a6ba2a33838b6b5922dce056eb162a12936237872a79832261bd99",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_09_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "55953b5f71070ade76f04e05cec068f9ee47509e7d2f868f1961d8b17ecf4aac",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "ef730e52704913f2250a035626060d7b734e8e540bfe9b261ff5df1ea08f10a1",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_09_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "6e2543e2d09bd05b461977f56bb20a1917b57ad80af5f5524a4b4a37c26518f4",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "1bcc60d4a8c1b074e3852271f6d9a803cdfc7f0137b042482113240cec1dc15f",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_09_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bd5fa2da7cb52499e8448399bbfb41691cd0b1ffa58baadf9ae54a610aedada5",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_en_en.json",
+          "sha256": "d7cbb041ff5d6a6f73a41b9348fd999bc30e98a546c274809d0d82e68044ab8f",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_12_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "b90e616ecb023e005aea30303ac48e0d9b285180cd38b5e1e8381ce12a554116",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_en_en.json",
+          "sha256": "2aa0429aa9c81107766140358036052f572a7c4e1bf3a1f97b3d83f5cbb36a2f",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_12_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "85eea7ab46da31df9dc59eeea6e748e0192216260906fd809f8fd481ccf6c416",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_en_en.json",
+          "sha256": "0152801cc0ee410e99f4f115c573e709ef5cfdc72ec049e93f29610acb165196",
+          "size_bytes": 6542
+        },
+        {
+          "path": "raw/session_metadata_followup_lite_v1_cadence_12_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "b93151c9ad8de63080d88283ea67c086bcccf9ec4cd56e1b77d1ad71ff583477",
+          "size_bytes": 6542
+        }
+      ]
+    },
+    {
+      "path": "runner.log",
+      "sha256": "3b626d2ede719f471405dab5233a219c188ccb9e07a7719e5eb75a31f35c546a",
+      "size_bytes": 3444
+    },
+    {
+      "path": "report.json",
+      "sha256": "852c44a45a94b3b4147e2b59fbccd5cb6a86b3ddb98b4c7f22cb91768178b17f",
+      "size_bytes": 534966
+    },
+    {
+      "path": "selection.json",
+      "sha256": "d32ac77b70a533ea2d04aa469dad67f148ad59b51c0b086df8302f156ff07904",
+      "size_bytes": 3058
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "c5f26d4e151476ad0d5aaaaeb93d456067e95c76206f53b0146452709d85eb81",
+      "size_bytes": 75435
+    },
+    {
+      "path": "run-summary.json",
+      "sha256": "a15ec57739e3276caeb456ae72e43c0e52df304cccc834f58cedbb65cc00eb01",
+      "size_bytes": 163824
+    }
+  ],
+  "raw_payloads_unmodified": true,
+  "audio_included": false,
+  "missing_terminal_artifacts": []
+}

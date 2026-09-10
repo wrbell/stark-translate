@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "runs": [
+    {
+      "session_id": "integrity_v4_baseline_anchor_e4b_r0_fleurs_development_es_es",
+      "experiment": "baseline_anchor",
+      "repeat": 0,
+      "size": "e4b",
+      "clip_id": "fleurs_development_es",
+      "source_lang": "es",
+      "source_identity": "e22411047861089b919965328dcc24ba9e06b170e4c0fe28b280a81436a20047",
+      "clip_sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 14,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "silence|replay_realtime": [
+          3236.7,
+          7238.2,
+          2020.8,
+          6691.5,
+          1940.8
+        ],
+        "smart_cut|replay_realtime": [
+          9508.7
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes. Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds. Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. \u00c9l dijo que construy\u00f3 un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes. Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds. Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. \u00c9l dijo que construy\u00f3 un timbre Wi-Fi.",
+        "translation_hypothesis": "Safaris are probably the biggest tourist attraction in Africa and the most memorable part for many visitors. When you traveled abroad for the first time, people were probably patient and understanding. Well, they knew that travelers need to adapt to a new country. Inland navigable waterways can be a good theme for a vacation. The first cases of the disease during this season were recorded towards the end of July. He said he built a Wi-Fi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 2,
+          "reference_words": 80,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.025
+        },
+        "wer": 0.025,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            371,
+            323
+          ],
+          [
+            327,
+            370,
+            259
+          ],
+          [
+            326,
+            369,
+            216
+          ],
+          [
+            325,
+            368,
+            192
+          ],
+          [
+            324,
+            367,
+            170
+          ],
+          [
+            323,
+            366,
+            152
+          ]
+        ],
+        "chrf": 65.36571423345205,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "standard",
+          "backend": "mlx",
+          "stt_model": null,
+          "stt_compute_type": null,
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": null,
+          "translation_model": null,
+          "vad_backend": null,
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "mlx",
+        "stt": {
+          "requested_id": "mlx-community/whisper-large-v3-turbo",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+          "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379",
+          "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb"
+        },
+        "translation_a": {
+          "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+          "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3",
+          "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3"
+        },
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "torch",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "integrity_v4_baseline_e4b_r0_fleurs_development_es_es",
+      "experiment": "baseline",
+      "repeat": 0,
+      "size": "e4b",
+      "clip_id": "fleurs_development_es",
+      "source_lang": "es",
+      "source_identity": "e22411047861089b919965328dcc24ba9e06b170e4c0fe28b280a81436a20047",
+      "clip_sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 6,
+      "partial_count": 23,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "silence|replay_realtime": [
+          3231.7,
+          3828.6,
+          3139.8,
+          3603.6,
+          3820.7
+        ],
+        "smart_cut|replay_realtime": [
+          6618.1
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes. Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds. Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. \u00c9l dijo que construy\u00f3 un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes. Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds. Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. \u00c9l dijo que construy\u00f3 un timbre Wi-Fi.",
+        "translation_hypothesis": "Safaris are probably the biggest tourist attraction in Africa and the most memorable part for many visitors. When you traveled abroad for the first time, people were probably patient and understanding. Well, they knew that travelers need to adapt to a new country. Inland navigable waterways can be a good theme for a vacation. The first cases of the disease during this season were recorded towards the end of July. He said he built a Wi-Fi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 2,
+          "reference_words": 80,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.025
+        },
+        "wer": 0.025,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            371,
+            323
+          ],
+          [
+            327,
+            370,
+            259
+          ],
+          [
+            326,
+            369,
+            216
+          ],
+          [
+            325,
+            368,
+            192
+          ],
+          [
+            324,
+            367,
+            170
+          ],
+          [
+            323,
+            366,
+            152
+          ]
+        ],
+        "chrf": 65.36571423345205,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "standard",
+          "backend": "mlx",
+          "stt_model": null,
+          "stt_compute_type": null,
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": null,
+          "translation_model": null,
+          "vad_backend": null,
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "mlx",
+        "stt": {
+          "requested_id": "mlx-community/whisper-large-v3-turbo",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+          "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379",
+          "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb"
+        },
+        "translation_a": {
+          "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+          "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3",
+          "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3"
+        },
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "torch",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    },
+    {
+      "session_id": "integrity_v4_early_2s_160ms_e4b_r0_fleurs_development_es_es",
+      "experiment": "early_2s_160ms",
+      "repeat": 0,
+      "size": "e4b",
+      "clip_id": "fleurs_development_es",
+      "source_lang": "es",
+      "source_identity": "e22411047861089b919965328dcc24ba9e06b170e4c0fe28b280a81436a20047",
+      "clip_sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae",
+      "returncode": 0,
+      "error": null,
+      "completion_errors": [],
+      "lifecycle_status": "completed",
+      "integrity_status": "passed",
+      "final_count": 8,
+      "partial_count": 8,
+      "source_accounting_complete": true,
+      "endpoint_samples_ms": {
+        "early_clause|replay_realtime": [
+          3704.1,
+          4328.2,
+          1895.5,
+          2758.6,
+          3177.2,
+          3716.7,
+          1662.9,
+          2258.6
+        ]
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes. Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds. Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. \u00c9l dijo que construy\u00f3 un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes. Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds. Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. \u00c9l dijo que construy\u00f3 un timbre Wi-Fi.",
+        "translation_hypothesis": "Safaris are probably the biggest tourist attraction in Africa and the most memorable part for many visitors. When you traveled abroad for the first time, People were probably patient and understanding. Well, they knew that travelers need to adapt to a new country. Inland navigable waterways can be a good theme for a vacation. The first cases of the disease during this season were registered towards the end of July. He said he built a Wi-Fi bell.",
+        "final_count": 8,
+        "wer_counts": {
+          "errors": 2,
+          "reference_words": 80,
+          "substitutions": 1,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.025
+        },
+        "wer": 0.025,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            373,
+            322
+          ],
+          [
+            327,
+            372,
+            261
+          ],
+          [
+            326,
+            371,
+            214
+          ],
+          [
+            325,
+            370,
+            190
+          ],
+          [
+            324,
+            369,
+            168
+          ],
+          [
+            323,
+            368,
+            150
+          ]
+        ],
+        "chrf": 64.93759294762656,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "runtime_contract": {
+        "schema_version": 1,
+        "profile": {
+          "name": "standard",
+          "backend": "mlx",
+          "stt_model": null,
+          "stt_compute_type": null,
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": null,
+          "translation_model": null,
+          "vad_backend": null,
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "mlx",
+        "stt": {
+          "requested_id": "mlx-community/whisper-large-v3-turbo",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+          "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379",
+          "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb"
+        },
+        "translation_a": {
+          "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+          "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3",
+          "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3"
+        },
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "torch",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "p95_claim_eligible": false,
+      "p95_note": "Use paired report per-run eligible fixed-span counts; never pool repeats or endpoints."
+    }
+  ],
+  "defaults_changed": false
+}

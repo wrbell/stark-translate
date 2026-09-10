@@ -1,0 +1,150 @@
+{
+  "copied_at": "2026-09-10T18:20:02.442005+00:00",
+  "files": [
+    {
+      "path": "index.json",
+      "sha256": "fed5aa0416cf94156c9b8fb140743eef9113b690dde6302405149df4a275f20b",
+      "size_bytes": 7676
+    },
+    {
+      "path": "stt_ct2-base_en_development_r0.json",
+      "sha256": "7ca18c2ebb459d8d42b547aab6cd0713c2e5c36629e13bf211d3d4b89898ae98",
+      "size_bytes": 19960
+    },
+    {
+      "path": "stt_ct2-base_en_development_r0.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-base_en_development_r1.json",
+      "sha256": "42b9fb0620f7665e5e96326cc804b538b8100f292c7b98bb187013ab151d2ba9",
+      "size_bytes": 19960
+    },
+    {
+      "path": "stt_ct2-base_en_development_r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-base_en_development_r2.json",
+      "sha256": "d47cee95369a4550522f949f87e4e1a807c86f33e4f7c63b847d2cee7c07620f",
+      "size_bytes": 19960
+    },
+    {
+      "path": "stt_ct2-base_en_development_r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-base_es_development_r0.json",
+      "sha256": "ca0e4920d6bd8f2a98aa441e40d12f79222ceb1085f1c5191ea8acd5e32cb1e9",
+      "size_bytes": 19963
+    },
+    {
+      "path": "stt_ct2-base_es_development_r0.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-base_es_development_r1.json",
+      "sha256": "7b57fd7eb6b2c78f836ff47d9458404a274c427c69e8ee694ffa795001163e93",
+      "size_bytes": 19964
+    },
+    {
+      "path": "stt_ct2-base_es_development_r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-base_es_development_r2.json",
+      "sha256": "257620a8b386190d37f810fff01a45e53b4660ba0a044bcc4c57faef406e3e7d",
+      "size_bytes": 19963
+    },
+    {
+      "path": "stt_ct2-base_es_development_r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-small_en_development_r0.json",
+      "sha256": "9e1570a2566dbf318bec8964da4603c8bf18fa570b4f2a356675d6332ea2c471",
+      "size_bytes": 22042
+    },
+    {
+      "path": "stt_ct2-small_en_development_r0.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-small_en_development_r1.json",
+      "sha256": "cf886b70a0d9008eedfbf2abc6b61495d1af46a34cef1d3e03140e767be9daac",
+      "size_bytes": 22043
+    },
+    {
+      "path": "stt_ct2-small_en_development_r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-small_en_development_r2.json",
+      "sha256": "c975a4d60a73fca7aaf6087d09933d8c9c6b34c21057b09c6c6e97c1ba10a078",
+      "size_bytes": 22043
+    },
+    {
+      "path": "stt_ct2-small_en_development_r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-small_es_development_r0.json",
+      "sha256": "93fc28f9ea63fc345c7254ab244031e6b4cb71e52161fa3e4e7d9bfbc13abf62",
+      "size_bytes": 22046
+    },
+    {
+      "path": "stt_ct2-small_es_development_r0.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-small_es_development_r1.json",
+      "sha256": "fed2bbc810abfa2534b63ad61ddf08276216bbc644d7af659cee293b2c2a5a0f",
+      "size_bytes": 22046
+    },
+    {
+      "path": "stt_ct2-small_es_development_r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "stt_ct2-small_es_development_r2.json",
+      "sha256": "cb1e459625749fbd6267a43eb77e626221405998db9560319359d2e31169285d",
+      "size_bytes": 22046
+    },
+    {
+      "path": "stt_ct2-small_es_development_r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "serial-model-followups-state.json",
+      "sha256": "780c25d36afca909b7a1828cbde5e82b2309a1a111d5661fcb1be3203b740050",
+      "size_bytes": 180
+    },
+    {
+      "path": "serial-model-followups.log",
+      "sha256": "31acf5ab4cd3dfa939e31d5b5d339d393cada602c67b71542f25b7d26d4a926d",
+      "size_bytes": 6818
+    },
+    {
+      "path": "stt-cpu-development-v1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    }
+  ],
+  "status": "failed_before_evaluation_item_transcription",
+  "raw_results_preserved": true,
+  "failure": "SoundFile missing in original Lite environment; 600 item errors, no evaluation audio transcribed. Model load and silence warmup occurred.",
+  "defaults_changed": false,
+  "devices_used": false
+}

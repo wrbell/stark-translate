@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "scope": "Independent narrative and metadata review; original archive-index.json unchanged",
+  "original_archive_index_sha256": "55ebcaec868bdb7fe5c2ffcfc1a7e5d20840da2cd7fe9c46a655fb673b744b88",
+  "files": [
+    {
+      "path": "README.md",
+      "size_bytes": 6134,
+      "sha256": "e1fcfd807b4c051ce5f58ee83c53448832453a2f40c78f9861d8f1c20b82b8b5"
+    },
+    {
+      "path": "metadata-review.json",
+      "size_bytes": 5256,
+      "sha256": "02e841ddffe7db5b075a9d1fa2eb62d398b0ee8960b95db9b7e0aa61fba7c0c6"
+    },
+    {
+      "path": "review_metadata.py",
+      "size_bytes": 10872,
+      "sha256": "033f30697e62922ce3daa0c72f2ff1382aa49d84bcc0b3fa957f966be0e725de"
+    }
+  ],
+  "validation": {
+    "small_file_hashes_passed": 23,
+    "deferred_payloads": 5,
+    "local_links_passed": 19,
+    "final_source_recheck_matches_retained_receipt": true,
+    "ast_parse": "passed",
+    "ruff_check": "passed",
+    "archive_payloads_read": false
+  }
+}

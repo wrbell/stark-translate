@@ -1,0 +1,16 @@
+{
+  "copied_at": "2026-09-10T18:20:02.430031+00:00",
+  "files": [
+    {
+      "path": "checks.json",
+      "sha256": "942d6803981585d3e9b2b61005a129ceeee47dee54207eeacfc6158703d05098",
+      "size_bytes": 1234
+    },
+    {
+      "path": "review.md",
+      "sha256": "cc910ff7d3131172236ad0f4a059f0a78b034933e6a3aa3a760898aeb89d9474",
+      "size_bytes": 6588
+    }
+  ],
+  "new_inference": false
+}
