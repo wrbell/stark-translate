@@ -146,7 +146,7 @@ class TestCli:
         mock_run.assert_called_once()
         kwargs = mock_run.call_args.kwargs
         assert kwargs["port"] == 9999
-        assert kwargs["host"] == "0.0.0.0"
+        assert kwargs["host"] == "127.0.0.1"
 
 
 # -- setup module ------------------------------------------------------------
