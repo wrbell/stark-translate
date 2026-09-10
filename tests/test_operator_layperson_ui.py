@@ -47,7 +47,7 @@ for (const tab of tabs) {
   assert.strictEqual(panel.getAttribute('aria-labelledby'), tab.id);
 }
 // Implementation vocabulary is confined to the Advanced tab. The Prepare panel is scanned before the
-// server's own check details render: those raw details stay visible on purpose for the setup owner.
+// server's own check details render: raw details remain available to the setup owner in disclosures.
 const jargon = [/\bvad\b/i, /backend/i, /\bmlx\b/i, /\bcuda\b/i, /llama/i, /diariz/i, /a\/b/i, /\bhf\b/i, /vram/i,
   /\bp50\b/i, /websocket/i, /\bengine\b/i, /preflight/i, /subprocess/i, /sigstop/i, /gemma/i, /whisper/i, /parakeet/i];
 const scan = name => {
@@ -113,7 +113,7 @@ assert.strictEqual(h.app.preflightOk, false);
 assert.strictEqual(h.el('start-btn').disabled, true);
 assert(h.text('readiness-summary').startsWith("Couldn't check readiness"), h.text('readiness-summary'));
 assert.strictEqual(h.text('state-pill'), 'Not ready');
-// A failing server check is explained in plain words while the raw detail stays visible.
+// A failing server check is explained in plain words while the raw detail remains available.
 h.route('GET', '/api/preflight', () => response(preflightPayload({checks: [
   {name: 'Microphone', status: 'fail', detail: 'No input devices found'},
   {name: 'Models', status: 'pass', detail: 'mlx-parakeet-v3, mlx-gemma4-e4b'}]})));
@@ -389,7 +389,7 @@ await h.setStatus({state: 'starting', session_id: 's1', started_at: '2026-09-09T
 assert(h.text('pipeline-readiness').includes('loading language models'), h.text('pipeline-readiness'));
 assert(h.text('pipeline-readiness').includes('weights still loading'));
 const health = h.el('health-list').children.map(li => li.textContent);
-assert(health.includes('No sound heard yet'), health);
+assert(health.includes('Waiting for the audio feed'), health);
 assert(health.includes('No captions yet'), health);
 assert(health.includes('Displays connected: 0'));
 assert(health.includes('Backlog: 2'));

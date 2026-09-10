@@ -164,6 +164,8 @@ main {
 .checks .name { font-weight: 600; font-size: 15px; }
 .checks .advice { font-size: 14px; }
 .checks .detail { color: var(--text-dim); font-size: 13px; }
+.checks details { margin-top: 4px; overflow-wrap: anywhere; }
+.checks summary { cursor: pointer; color: var(--text-dim); font-size: 13px; }
 
 .meta { font-size: 12px; color: var(--text-dim); margin-top: 12px; }
 

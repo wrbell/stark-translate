@@ -43,9 +43,9 @@
   const LEGACY_PROFILE_IDS = {full: "standard"};
   const LANG_TEXT = {en: "English speaker → Spanish captions", es: "Spanish speaker → English captions"};
   const CHECK_TEXT = {
-    GPU: {title: "Computer hardware", warn: "No graphics acceleration was found. Captions will work but arrive more slowly."},
-    "Runtime dependencies": {title: "Software installation", fail: "The installation on this computer is incomplete. Ask the setup owner."},
-    Models: {title: "Language models", fail: "Language models are missing on this computer. Ask the setup owner to run setup for this profile."},
+    GPU: {title: "Computer hardware", pass: "Graphics acceleration is available on this computer.", warn: "No graphics acceleration was found. Captions will work but arrive more slowly."},
+    "Runtime dependencies": {title: "Software installation", pass: "The required software is installed.", fail: "The installation on this computer is incomplete. Ask the setup owner."},
+    Models: {title: "Language models", pass: "Speech recognition and translation models are installed.", fail: "Language models are missing on this computer. Ask the setup owner to run setup for this profile."},
     Microphone: {title: "Microphone", fail: "Plug in the USB microphone, then click Check again."},
     "Adapter manifest": {
       title: "Custom vocabulary (optional)",
@@ -564,7 +564,16 @@
         const detail = doc.createElement("div");
         detail.className = "detail";
         detail.textContent = c.detail;
-        body.appendChild(detail);
+        if (c.advice && c.detail) {
+          const disclosure = doc.createElement("details");
+          const summary = doc.createElement("summary");
+          summary.textContent = "Technical details";
+          disclosure.appendChild(summary);
+          disclosure.appendChild(detail);
+          body.appendChild(disclosure);
+        } else {
+          body.appendChild(detail);
+        }
         li.appendChild(dot);
         li.appendChild(body);
         el.checks.appendChild(li);
@@ -1026,9 +1035,9 @@
       const items = [];
       const inputAge = Number(health.input_age_s);
       if (health.input_seen === false || (health.input_age_s == null && Object.hasOwn(health, "input_seen"))) {
-        items.push({text: "No sound heard yet", bad: currentState === "running"});
+        items.push({text: "Waiting for the audio feed", bad: currentState === "running"});
       } else if (health.input_age_s != null) {
-        items.push({text: Number.isFinite(inputAge) ? `Sound last heard ${formatAge(inputAge)}` : "Sound: unknown", bad: Number.isFinite(inputAge) && inputAge > 30});
+        items.push({text: Number.isFinite(inputAge) ? `Audio feed updated ${formatAge(inputAge)}` : "Audio feed: unknown", bad: Number.isFinite(inputAge) && inputAge > 30});
       }
       if (health.caption_age_s != null) {
         const age = Number(health.caption_age_s);
