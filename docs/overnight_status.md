@@ -1,16 +1,18 @@
 # September 10 delivery status
 
 > **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
-> [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
-> installed dependency candidate and operator/device findings. Final experiments,
-> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+> [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) records completed
+> source-accounted screens and silent hymn diagnostics, with no screened arm qualified.
+> Defaults are unchanged. Current artifact, service and merge results are recorded in
+> [implementation status](mac_implementation_status.md).
 
 
-> **Follow-up, September 10:** [Current EN/ES work](evaluation/mac_followup_20260910/README.md)
-> adds pinned public speech comparisons, isolated dependency remediation and
-> [real microphone capture/readiness checks](evaluation/attended_mic_20260910/README.md).
-> The quiet-room check produced no spoken captions; that gate remains pending.
-> Older experiment and endurance measurements below retain their original source identities.
+> The [c13 source and hymn evidence](evaluation/mac_followup_20260910/final-c13f51f/README.md)
+> is separate from the earlier measurements below, which retain their original sources.
+> The natural hymn control never entered music hold; the text experiment used supplied
+> boundaries, without human approval. Earlier quiet-room microphone readiness passed,
+> while later Spanish acoustic checks retained capture loss; sustained live acceptance
+> remains a separate gate.
 
 The v2026.14 source (`2026.14.0.0`) is tracked by
 [PR #192](https://github.com/wrbell/stark-translate/pull/192), merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z. See [closeout evidence](evaluation/overnight_closeout_20260910/README.md). v2026.13 remains the last published release.
@@ -24,7 +26,7 @@ publication and release tags remain pending by user choice.
 
 | Need | Current document |
 |---|---|
-| Actual merge/issue closures, final CI and bootstrap ZIP | [closeout evidence](evaluation/overnight_closeout_20260910/README.md) |
+| Earlier PR #192 merge/issue closures, CI and bootstrap ZIP | [closeout evidence](evaluation/overnight_closeout_20260910/README.md) |
 | Implemented behavior, validation and unresolved gates | [Mac implementation status](mac_implementation_status.md) |
 | Every remaining task with acceptance and ownership | [Machine-readable backlog](backlog.json), [rendered backlog](backlog.md) |
 | Volunteer operation and recovery | [Operator runbook](operator_runbook.md) |

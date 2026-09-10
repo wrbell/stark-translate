@@ -2,9 +2,9 @@
 
 > **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
 > [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
-> Standard, Spanish Parakeet and CPU Lite cadence/deadline screens, with no qualified arms.
-> CPU Whisper-base failed its separate accuracy gate. Final artifact rehearsals
-> and merge validation remain pending. Defaults are unchanged.
+> screens with no qualified arms, CPU Whisper-base rejection and silent hymn diagnostics.
+> Defaults are unchanged. Current artifact, service and merge results are recorded in
+> [implementation status](docs/mac_implementation_status.md).
 
 
 [![Lint](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml)
@@ -38,6 +38,14 @@ also completed 24 runs with 0/4 qualified arms at unchanged 0.6-second cadence.
 Rejected arms cannot enter confirmation or combinations.
 
 The [earlier September 10 overnight screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
+
+The completed c13 [source checks](docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md),
+[350-second hymn control](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
+and [102-call text comparison](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
+are separate evidence. The natural control never entered music hold; supplied text
+boundaries remain hypotheses. #193/#194 still require natural labels and bilingual
+review. [Installed delivery](docs/evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+keeps artifact, pipeline, monitor and full-service acceptance separate.
 
 EN↔ES remains the active speed priority. The installed Standard and CPU Lite
 full-service runs on `752ab9a` completed with consistent retained source spans,
@@ -314,7 +322,9 @@ the retained Spanish failure; no native audio test was performed for this repair
 visible-browser timing certification, two-speaker diarization gate, physical second
 output, WSL training cycle, Lite x86 CPU / RTX 2070 hardware performance — tracked
 in [`docs/backlog.json`](docs/backlog.json). The laptop runbook rehearsal is complete
-and #134 is closed; hymn/quality follow-ups #193/#194 remain open.
+and #134 is closed. The original [per-language routing acceptance for #132](docs/evaluation/mac_followup_20260910/tts-routing-acceptance.md)
+is met; closure follows reviewed merge, with physical output and audibility checked
+separately. Hymn/quality follow-ups #193/#194 remain open.
 
 ## License
 

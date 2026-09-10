@@ -7,9 +7,9 @@
     "local_branch": "codex/mac-en-es-closeout",
     "local_base": "958bb5c9425473256038bae04ce95ee1c32c7ae8",
     "local_version": "2026.14.0.0",
-    "draft_pr": "[PR #196](https://github.com/wrbell/stark-translate/pull/196) — open draft Mac EN↔ES follow-up on codex/mac-en-es-closeout; not merged. Experiments, final artifact checks and review remain in progress.",
+    "draft_pr": "[PR #196](https://github.com/wrbell/stark-translate/pull/196) — open draft Mac EN↔ES follow-up on codex/mac-en-es-closeout; not merged. Bounded experiment screens and c13 source checks are complete; final delivery reporting, Lite service and merge review remain in progress.",
     "publication": "User authorized source merge after validation. PyPI, GHCR, release uploads and new tags remain pending by user choice.",
-    "distinction": "PR #192 integration and its immutable test/artifact/service evidence remain complete. PR #196 is a separate active follow-up with its own source identities. Final-source validation and merge are pending; neither source integration nor file replay certifies human or physical-device gates.",
+    "distinction": "PR #192 integration and its immutable evidence remain complete. PR #196 is a separate follow-up with completed source-bound experiments and c13 source validation. Installed delivery reconciliation and source merge remain pending; neither integration nor file replay certifies human or physical-device gates.",
     "pr_state": "open",
     "previous_integration": {
       "main_release_tag": "v2026.13",
@@ -381,8 +381,8 @@
     {
       "id": "overnight-operator-ui",
       "title": "Operator UI caption and QR widgets",
-      "status": "implemented",
-      "certification": "pending",
+      "status": "validated",
+      "certification": "met",
       "priority": "P2",
       "machine": "mac",
       "dependencies": [],
@@ -390,17 +390,18 @@
         "displays/operator/widgets/captions.js",
         "displays/operator/widgets/qr.js",
         "displays/operator/widgets/sparkline.js",
-        "docs/operator_runbook.md"
+        "docs/operator_runbook.md",
+        "docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md"
       ],
       "acceptance": "Widgets integrated, HTML5 Tidy clean, and the operator runbook updated with root-recorded UI evidence.",
-      "notes": "Actual integrated browser sessions exercised EN↔ES switching, Pause/Resume/Stop, unapproved draft recovery and metadata-only support download. Repaired Standard added a full natural-service Live/hymn/prayer view, preserved draft revision 1 with both approvals false, and an actual long-summary UI result disclosing omitted middle content. No successful reload or human summary-fidelity approval is inferred. QR oracle/decoder checks and all six HTML5 Tidy checks passed; final production caption guards are covered by the frozen 752 suite.",
-      "next_action": "Finalize the current runbook/evidence links and blocking UX issue mapping. Keep live microphone, physical outputs and human quality in their separate gates."
+      "notes": "Actual integrated browser sessions exercised EN↔ES switching, Pause/Resume/Stop, unapproved draft recovery and metadata-only support download. Repaired Standard added a full natural-service Live/hymn/prayer view, preserved draft revision 1 with both approvals false, and an actual long-summary UI result disclosing omitted middle content. No successful reload or human summary-fidelity approval is inferred. QR oracle/decoder checks and all six HTML5 Tidy checks passed; final production caption guards are covered by the frozen 752 suite. The c13f51f source validation binds current integrated behavior, real production regressions and all six HTML5 Tidy checks to this unchanged implementation acceptance. The current runbook links root-recorded operator evidence. Native capture, physical outputs and human approval remain separate pending gates.",
+      "next_action": "Retain implementation evidence and pursue only the separately listed native capture, physical output and human-quality gates when their required inputs are available."
     },
     {
       "id": "overnight-reliability",
       "title": "Process supervision, work leases and isolated audio capture",
-      "status": "implemented",
-      "certification": "pending",
+      "status": "validated",
+      "certification": "met",
       "priority": "P1",
       "machine": "mac",
       "dependencies": [],
@@ -412,11 +413,12 @@
         "tools/isolated_audio.py",
         "tools/pipeline_health.py",
         "docs/evaluation/mac_followup_20260910/capture-loss-accounting.md",
-        "docs/evaluation/mac_followup_20260910/stop-cancellation.md"
+        "docs/evaluation/mac_followup_20260910/stop-cancellation.md",
+        "docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md"
       ],
       "acceptance": "Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.",
-      "notes": "Integrated health/readiness, owned-process cleanup, work leases, bounded capture handoff, required-write ledger and support/logging contracts are tested. Repaired installed Standard completed all 7,594 required writes with zero pending/failed and verified pipeline/descendant cleanup. Original source-bound failure remains recorded; the 752 buffer-discard and authoritative-final guards address its discovered reliability defects with regression coverage. Real-microphone behavior still needs the next attended retest; file evidence does not certify it. d7ed43d closes FIFO/native-overflow accounting holes through pause/stop, including losses with no subsequent frame and statuses parsed but not consumed. Unknown native sample loss stays null; ordinary Stop-tail residue stays informational. Mocked 45 tests/20 subtests and independent review passed; native reliability is still unvalidated. Python 3.11 wait_for could swallow the first Stop as queue.get completed; the same-task asyncio.timeout repair preserves the 0.1-second idle timeout. A deterministic in-memory restoration reproduces the old failure; focused production-loop/capture checks pass 88 tests plus 20 subtests.",
-      "next_action": "Bind final-source CPU/static tests and fresh installed Standard/Lite rehearsals to this follow-up. Preserve prior completed 752ab9a Standard and Lite receipts; further live microphone/output testing is deferred by user instruction."
+      "notes": "Integrated health/readiness, owned-process cleanup, work leases, bounded capture handoff, required-write ledger and support/logging contracts are tested. Repaired installed Standard completed all 7,594 required writes with zero pending/failed and verified pipeline/descendant cleanup. Original source-bound failure remains recorded; the 752 buffer-discard and authoritative-final guards address its discovered reliability defects with regression coverage. Real-microphone behavior still needs the next attended retest; file evidence does not certify it. d7ed43d closes FIFO/native-overflow accounting holes through pause/stop, including losses with no subsequent frame and statuses parsed but not consumed. Unknown native sample loss stays null; ordinary Stop-tail residue stays informational. Mocked 45 tests/20 subtests and independent review passed; native reliability is still unvalidated. Python 3.11 wait_for could swallow the first Stop as queue.get completed; the same-task asyncio.timeout repair preserves the 0.1-second idle timeout. A deterministic in-memory restoration reproduces the old failure; focused production-loop/capture checks pass 88 tests plus 20 subtests. The c13f51f source validation binds current integrated behavior, real production regressions and all six HTML5 Tidy checks to this unchanged implementation acceptance. The current runbook links root-recorded operator evidence. Native capture, physical outputs and human approval remain separate pending gates.",
+      "next_action": "Retain implementation evidence and pursue only the separately listed native capture, physical output and human-quality gates when their required inputs are available."
     },
     {
       "id": "issue-135-mac-ab",
@@ -602,7 +604,7 @@
     },
     {
       "id": "mac-cpu-test-suite",
-      "title": "Frozen 752ab9a CPU, GPU and prescribed static validation",
+      "title": "Source-bound CPU, GPU and prescribed static validation",
       "status": "validated",
       "certification": "met",
       "priority": "P0",
@@ -612,11 +614,12 @@
         "docs/mac_implementation_status.md",
         ".github/workflows/test.yml",
         "docs/evaluation/overnight_validation_20260910.json",
-        "docs/evaluation/mac_followup_20260910/capture-source-validation.md"
+        "docs/evaluation/mac_followup_20260910/capture-source-validation.md",
+        "docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md"
       ],
       "acceptance": "Recorded pass/skip/coverage in mac_implementation_status.md above the test.yml coverage gate.",
-      "notes": "Frozen 752ab9a351815feee4b8cd155f732c588cb30a6c passed 2,363 CPU-suite tests with four skips and 63.80% coverage. Three separate real GPU regressions passed in 21.16 s. Ruff/format, mypy engines/settings, widened CI-scope Bandit and all six HTML5 Tidy checks passed. The earlier 2,213-test receipt is historical and must remain unchanged when the current validation companion is refreshed. Subsequent capture repair/fake-interface correction passed full f7b959d CI: 2,834 tests, six skips, 20 subtests and 66.49% coverage on both Python 3.11/3.12. Six earlier d7ed43d fixture failures remain preserved. Installed Lite audit covered 60 dependencies with zero known vulnerabilities; [eval] and unchanged broader environments were not cleared.",
-      "next_action": "Bind current documentation to the 752 validation receipt. Later docs/workflow tests and final-head CI must have their own identities; repeat runtime checks only when subsequent changes warrant them."
+      "notes": "Frozen 752ab9a351815feee4b8cd155f732c588cb30a6c passed 2,363 CPU-suite tests with four skips and 63.80% coverage. Three separate real GPU regressions passed in 21.16 s. Ruff/format, mypy engines/settings, widened CI-scope Bandit and all six HTML5 Tidy checks passed. The earlier 2,213-test receipt is historical and must remain unchanged when the current validation companion is refreshed. Subsequent capture repair/fake-interface correction passed full f7b959d CI: 2,834 tests, six skips, 20 subtests and 66.49% coverage on both Python 3.11/3.12. Six earlier d7ed43d fixture failures remain preserved. Installed Lite audit covered 60 dependencies with zero known vulnerabilities; [eval] and unchanged broader environments were not cleared. Final inference source c13f51f passed 2,837 local CPU tests, four skips and 20 subtests at 66.62% coverage; three actual MLX tests and all 11 static commands passed. Separate isolated pre-commit passed seven hooks. Exact-head GitHub Python 3.11/3.12 each passed 2,835 tests, six skips and 20 subtests at 66.49%; its successful coverage-comment step had a separately repaired JSON-input reporting annotation.",
+      "next_action": "Keep each source-bound validation receipt intact. Validate the later monitor/reporting and documentation changes separately; source integration and security/human/device acceptance remain distinct."
     },
     {
       "id": "packaging-artifacts-local",
@@ -750,11 +753,12 @@
         "docs/evaluation/mac_v2026_14_security.md",
         "docs/evaluation/security_feasibility_20260910/README.md",
         "docs/evaluation/mac_followup_20260910/live-hf-pinning.md",
-        "docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json"
+        "docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json",
+        "docs/evaluation/mac_followup_20260910/final-c13f51f/model-source-continuity.md"
       ],
       "acceptance": "Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).",
-      "notes": "Mac MLX primary/fallback Whisper, Parakeet, Gemma/draft, workers, operator summary and optional live SpeechBrain/Pyannote paths now resolve local overrides or registered immutable snapshots. Selected HF setup entries require full commits before any cache mutation. Optional Pyannote segmentation access remains HTTP 403. The complete source inventory distinguishes 105 offline residual calls, 13 optional alternative live calls and one unverified legacy Piper API; no global B615 clearance or native diarization certification is claimed. Source review and CI are still resolving final follow-up changes.",
-      "next_action": "Complete final source review, refresh loader inventory hashes after any repair, and bind CI/installed tests to the resulting code. Preserve documented alternative-backend/offline residuals as separate scope; do not describe every runtime as fully pinned."
+      "notes": "Mac MLX primary/fallback Whisper, Parakeet, Gemma/draft, workers, operator summary and optional live SpeechBrain/Pyannote paths now resolve local overrides or registered immutable snapshots. Selected HF setup entries require full commits before any cache mutation. Optional Pyannote segmentation access remains HTTP 403. The complete source inventory distinguishes 105 offline residual calls, 13 optional alternative live calls and one unverified legacy Piper API; no global B615 clearance or native diarization certification is claimed. The additive c13f51f continuity review matches all 173 original call sites; 207/211 inventoried source files are byte-identical and the four changed files preserve loader behavior. The original inventory remains unchanged. Selected source and actual Gemma checks passed without clearing the broader residuals.",
+      "next_action": "Resolve or explicitly scope the remaining 13 optional alternative-live residuals separately from 105 offline calls and the legacy Piper loader. Preserve the gated segmentation HTTP 403 dependency and installed-audit limitations; do not describe all runtimes as fully pinned."
     },
     {
       "id": "multilingual-expansion",
@@ -808,7 +812,7 @@
     },
     {
       "id": "mac-torch-security-migration",
-      "title": "Resolve pinned Mac Torch dependency advisories",
+      "title": "Patched Mac Torch/audio candidate feasibility",
       "status": "validated",
       "certification": "met",
       "priority": "P1",
@@ -876,14 +880,15 @@
         "https://github.com/wrbell/stark-translate/issues/194",
         "docs/evaluation/overnight_endurance_20260910/README.md",
         "https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md",
-        "docs/evaluation/mac_followup_20260910/hymn-source-repairs.md"
+        "docs/evaluation/mac_followup_20260910/hymn-source-repairs.md",
+        "docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md"
       ],
       "acceptance": "With independently reviewed source boundaries and bilingual references, preserve the intended subject/title boundary on the retained natural hymn example without hard-coded word substitutions. Compare unchanged controls, report subject/negation/name/theological meaning errors and preview/final latency before any prompt or context promotion.",
       "evidence": [
         "Repaired Standard session 20260910_043120_839144_en, chunk 3, source 414.592–422.592 s, installed 752ab9a: the recognized string includes “Eternity Time will soon end”, but the Spanish final says “La eternidad pronto terminará.” QE 1.0 did not flag the changed meaning. Audio punctuation and the bilingual reference remain unreviewed."
       ],
-      "notes": "Open quality follow-up #194 from the completed #134 rehearsal. Retained evidence is not an approved correction, model-default promotion or attribution of the whole error to one pipeline stage. Earlier operator UX blockers were fixed separately. Commit 7c06b27 preserves existing text delimiters through correction; it cannot reconstruct absent STT boundaries. A silent paired raw/delimited E4B/E2B experiment is prepared; source-fix CI on ffa34c5 passed Python 3.11/3.12 and lint.",
-      "next_action": "Run the bounded raw/delimited and contrastive-input comparison through the actual correction stage, retaining outputs and timing. Obtain independent audio-boundary/bilingual review before any prompt or context promotion."
+      "notes": "Open quality follow-up #194 from the completed #134 rehearsal. Retained evidence is not an approved correction, model-default promotion or attribution of the whole error to one pipeline stage. Earlier operator UX blockers were fixed separately. Commit 7c06b27 preserves existing text delimiters through correction; it cannot reconstruct absent STT boundaries. A silent paired raw/delimited E4B/E2B experiment completed 102 calls across 34 cells, each with three repeats; raw title/subject errors and supplied delimiter hypotheses are retained without approval; source-fix CI on ffa34c5 passed Python 3.11/3.12 and lint.",
+      "next_action": "Obtain independent audio-boundary and bilingual review of the completed raw/delimited comparison before any prompt or context promotion. Supplied punctuation is a hypothesis; no audio boundary was inferred or approved."
     },
     {
       "id": "hymn-capture-suppression",
@@ -898,14 +903,15 @@
         "docs/evaluation/overnight_endurance_20260910/README.md",
         "https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md",
         "docs/evaluation/mac_followup_20260910/hymn-source-repairs.md",
-        "docs/evaluation/mac_followup_20260910/hymn-annotation-protocol.md"
+        "docs/evaluation/mac_followup_20260910/hymn-annotation-protocol.md",
+        "docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md"
       ],
       "acceptance": "On a bounded, human-labeled natural hymn→speech transition, measure unwanted captions, suppressed legitimate speech and recovery alongside unchanged controls and partial/final latency. Include quiet prayer and short valid EN/ES replies; no global short-word blacklist or inferred reference labels from generated captions.",
       "evidence": [
         "Repaired Standard emitted hymn-context fragments including “It dies a” and “Changing uh” while process health remained normal. No music-hold event was recorded. Current energy/VAD logic is a heuristic, not a validated music classifier; absence of its event does not establish exactly why the streak threshold was not met."
       ],
-      "notes": "Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately. Commit 26f854c retains accepted speech onset without changing the existing 15-frame recovery decision; pending/recovered source dispositions and pause-spanning hold logs are explicit. Regression CI on ffa34c5 passed Python 3.11/3.12 and lint.",
-      "next_action": "Run the prepared single silent E4B 350-second diagnostic in a reserved model window using actual VAD/RMS/source/EOF trace fields. Keep acoustic labels uncertain until independently reviewed. Further microphone or speaker testing is prohibited this session; detector changes require unchanged controls and legitimate-speech/quality guards."
+      "notes": "Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately. Commit 26f854c retains accepted speech onset without changing the existing 15-frame recovery decision; pending/recovered source dispositions and pause-spanning hold logs are explicit. Regression CI on ffa34c5 passed Python 3.11/3.12 and lint. The c13f51f 350-second file control completed with 18 finals and all 114 required writes; no music hold activated. Exact VAD/RMS streak accounting explains that observation, without acoustic labels or validating recovery from a natural hold.",
+      "next_action": "Independently label the prepared natural search regions, including quiet speech and short replies. Only then compare bounded opt-in detector thresholds against unchanged controls; the completed control and fixed-decision arithmetic do not certify a classifier or justify defaults."
     }
   ]
 }

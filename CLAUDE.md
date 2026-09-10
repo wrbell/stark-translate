@@ -2,12 +2,14 @@
 
 > **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
 > [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
-> Standard, Spanish Parakeet and CPU Lite cadence/deadline screens, with no qualified arms.
-> CPU Whisper-base failed its separate accuracy gate. Final artifact rehearsals
-> and merge validation remain pending. Defaults are unchanged.
+> screens with no qualified arms, CPU Whisper-base rejection and silent hymn diagnostics.
+> Defaults are unchanged. Current artifact, service and merge results are recorded in
+> [implementation status](docs/mac_implementation_status.md).
 
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
-> (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> (`2026.14.0.0`), with historical integration in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
+> and the active follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
+> Current integration and delivery state is recorded in [implementation status](docs/mac_implementation_status.md).
 > The last published release recorded here is **v2026.13**. Source integration,
 > release publication and service certification are separate; PyPI/package artifacts
 > and release tags remain pending by user choice. Do not recreate `stt_env`.
@@ -105,10 +107,12 @@ shutdown-only losses. It does not certify native capture reliability or resolve
 the retained Spanish failure; no native audio test was performed for this repair.
 
 The [hymn source repairs](docs/evaluation/mac_followup_20260910/hymn-source-repairs.md)
-preserve existing whitespace through correction and retain the first 14 speech
-frames when music-hold recovery accepts an onset. Classification thresholds and
-minimum-final policy remain unchanged. CI on `ffa34c5` passed Python 3.11/3.12
-and lint; #193/#194 still need natural boundary labels and bilingual review.
+preserve existing whitespace and retain the first 14 speech frames when music-hold
+recovery accepts an onset. The completed [350-second natural file control](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
+never entered music hold; the [102-call text packet](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
+used supplied boundary hypotheses. Neither approves automatic singing detection or
+bilingual meaning. Thresholds and defaults are unchanged; #193/#194 remain open.
+Current source checks are in the [c13 validation record](docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md).
 
 ## Environment split
 
@@ -189,10 +193,13 @@ Latest recorded suite counts live only in
 - [x] Phases 0–3, 5–6, 9 — infrastructure, data, first fine-tunes, operator UI
 - [ ] Phase 4 — WSL full preprocess ([`docs/wsl_pipeline_refresh.md`](docs/wsl_pipeline_refresh.md))
 - [ ] Phase 7–8 — Mac A/B (#135), active learning evidence (#137)
-- [ ] Phase 10 — Remaining human/device gates: live-mic smoke EN/ES (#131, fix
-      capture/readiness retest passed; spoken captions pending), diarization (#133) and physical second output
-      (#132). The laptop runbook rehearsal is complete and #134 is closed; see
+- [ ] Phase 10 — Remaining human/device gates: sustained live EN/ES microphone
+      captions (#131), natural two-speaker diarization (#133), physical output,
+      human audibility and unplug/replug checks. The original per-language
+      [routing acceptance for #132](docs/evaluation/mac_followup_20260910/tts-routing-acceptance.md)
+      is met; issue closure follows reviewed merge. These separate physical checks
+      do not expand that issue's physical-or-virtual routing requirement.
+      The laptop runbook rehearsal is complete and #134 is closed; see
       [closeout evidence](docs/evaluation/overnight_closeout_20260910/README.md).
-      TTS routing and live diarization are implemented; their acceptance is not certified.
 
 Statuses, priorities, dependencies and acceptance per item: [`docs/backlog.json`](docs/backlog.json).

@@ -1,9 +1,10 @@
 # Roadmap — Stark Road Bilingual Speech-to-Text
 
 > **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
-> [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
-> installed dependency candidate and operator/device findings. Final experiments,
-> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+> [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) records completed
+> source-accounted screens and silent hymn diagnostics. No screened arm qualified;
+> defaults remain unchanged. Final artifact, service and merge status is recorded in
+> [implementation status](mac_implementation_status.md).
 
 
 > Living document tracking the project from Mac prototype through Windows training to
@@ -22,7 +23,7 @@
 ## Current State (2026-09-10)
 
 ```
-Mac (M3 Pro 18 GB, MLX) — the only target exercised so far
+Mac (M3 Pro 18 GB, MLX) — the target exercised in this follow-up
   STT:        Parakeet TDT v3 (EN) · mlx-whisper large-v3-turbo (ES)
   Partials:   Marian CT2 int8 on CPU, every 0.6 s of speech (HF fallback)
   Finals:     Gemma 4 E4B OptiQ on 0.5 s silence (E2B opt-in, TranslateGemma opt-out)
@@ -89,23 +90,26 @@ Status, priority, dependencies and acceptance for every item below are in
 
 ### Current follow-up evidence
 
-The [Mac follow-up report](evaluation/mac_followup_20260910/README.md) retains a
-43-item original-acceptance audit, pinned public development/confirmation data,
-three-repeat STT comparisons, exact-output decoder trials, and full isolated
-application dependency feasibility. The fixed-reference E4B/E2B translation
-comparison completed twelve runs: E2B is faster in isolated translation but
-retains 11/18 lexical canaries versus E4B 13/18. These are not caption latency
-or bilingual meaning approval. New paired pipeline screens remain in progress. Public Spanish
-Parakeet passed the development WER tolerance for an opt-in pipeline trial;
-Whisper remains the Spanish default. No follow-up result yet establishes the
-sub-second caption goal.
+The [Mac follow-up report](evaluation/mac_followup_20260910/README.md) retains the
+original-acceptance audit, pinned public development/confirmation data, STT and
+fixed-reference translation comparisons, decoder trials and an isolated
+application dependency candidate. E2B was faster in isolated translation with
+lower reference overlap and fewer passing lexical canaries; those results do not
+measure caption delivery or establish bilingual meaning approval. Standard,
+Spanish Parakeet, CPU Lite cadence and independent Lite deadline screens are now
+complete, with no qualified arms. CPU Whisper-base failed its separate WER guard
+in both languages. E4B, Spanish Whisper and the 0.6-second partial cadence remain
+the defaults; no follow-up result establishes the sub-second caption goal.
 
 [Hymn source repairs](evaluation/mac_followup_20260910/hymn-source-repairs.md)
-now preserve existing text delimiters and accepted speech onset after music hold.
-CI passed on Python 3.11/3.12 and lint. The 15-frame music recovery threshold
-and 0.7-second final minimum are unchanged. #193/#194 remain open for natural
-transition labels and bilingual quality validation; prepared silent experiments
-do not substitute for approval.
+preserve existing text delimiters and accepted speech onset after music hold.
+The 15-frame recovery threshold and 0.7-second final minimum are unchanged.
+Both silent diagnostic packets have executed: the natural file control never
+entered music hold, and the text comparison used supplied boundary hypotheses.
+See the completed [natural control](evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
+and [text packet](evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md).
+#193/#194 remain open for independently reviewed natural transition boundaries
+and bilingual meaning; these diagnostics do not approve a detector or prompt change.
 
 ### Equal-priority deployment targets
 
@@ -251,7 +255,7 @@ Scripts ready: `prepare_piper_dataset.py`, `train_piper.py`, `export_piper_onnx.
 
 - Done — dedicated hardware auto-start (systemd unit, launchd plist, `bootstrap.sh`)
 - Done — post-sermon summary trigger and live verse highlights in the operator UI (workflow evidence in the rehearsal; bilingual accuracy review pending)
-- **Implemented, acceptance pending** — 9.4.1 multi-channel TTS routing (#132): per-language device map, `--tts-device-en/es`, hotplug retry, persisted operator selectors, hardware-independent tests. Physical two-output verification is the open half.
+- **Original routing acceptance supported** — 9.4.1 multi-channel TTS routing (#132): per-language operator selection/persistence, native host-output routing and engine tests have [retained evidence](evaluation/mac_followup_20260910/tts-routing-acceptance.md). Physical unplug/replug, human audibility and a complete caption-triggered native-TTS session remain separate pending checks; they do not extend the original issue’s physical-or-virtual routing acceptance. Issue closure follows reviewed merge.
 - **Implemented, gate not run** — 9.6.1 live diarization (#133): `--diarize`, rolling buffer, separate daemon, `speaker` on finals. Needs a two-speaker clip and the +50 ms p95 check ([`live_diarization.md`](./live_diarization.md)).
 - **Completed — laptop runbook rehearsal (#134).** The original 06:49 UTC Standard hour remains failed source-bound evidence. Repaired Standard and CPU Lite completed with consistent retained spans, required writes and cleanup; the [endurance report](evaluation/overnight_endurance_20260910/README.md) keeps their quality limits and selected waveform checks explicit. The actual source merge and #134 closure are recorded in the [closeout evidence](evaluation/overnight_closeout_20260910/README.md). #193/#194 retain hymn/quality follow-ups; live microphone certification remains under #131. Continuous improvement follows Phases 6/8.
 

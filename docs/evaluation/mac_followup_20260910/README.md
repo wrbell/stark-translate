@@ -7,6 +7,17 @@ no release or package publication is authorized for this follow-up. The
 
 ## Completed evidence
 
+- [Final c13 source validation](final-c13f51f/source-validation.md): completed CPU,
+  static, text-only GPU and pre-commit evidence, with exact-source CI kept separate.
+- [Natural hymn control](final-c13f51f/hymn-capture.md): the 350-second silent file
+  replay completed without entering music hold; it does not validate hold recovery.
+- [Hymn text-boundary packet](final-c13f51f/hymn-boundary.md): 102 calls through the
+  actual correction stage, using supplied raw/newline/quoted hypotheses. Natural
+  boundaries and bilingual meaning still require independent review.
+- [Model-source continuity](final-c13f51f/model-source-continuity.md): additive c13
+  evidence preserves the earlier inventory and its optional/offline residuals;
+  it does not claim a global B615 clearance.
+
 - [Standard endpoint/deadline screen](standard-screen-result.md): 96 technically
   valid replays, zero of 24 arms qualified. Median-only improvements failed other
   quality, preview, queue or memory guards; defaults remain unchanged.
@@ -126,8 +137,10 @@ post-fix live-pipeline capture reliability remains unvalidated.
 
 The [hymn source repairs](hymn-source-repairs.md) preserve existing text
 delimiters and accepted speech onset after music hold; Python 3.11/3.12 CI and
-lint passed on `ffa34c5`. Paired text-boundary experiments and source-linked
-transition annotations are being prepared separately from human quality approval.
+lint passed on `ffa34c5`. The [350-second natural control](final-c13f51f/hymn-capture.md)
+and [102-call text packet](final-c13f51f/hymn-boundary.md) have now executed.
+The control never entered music hold and the supplied delimiters remain hypotheses;
+#193/#194 still require natural transition labels and bilingual meaning review.
 
 The user now prohibits microphone capture and output playback for the rest of
 this session. Further physical checks, including the prepared integrated TTS
@@ -204,10 +217,19 @@ Nothing here changes a production model default.
 
 The bounded Standard, Spanish Parakeet, CPU Lite cadence/deadline and smaller
 CPU STT comparisons have completed without a qualifying candidate. Untouched
-confirmation is therefore unused; all negative results are retained. Finish
-the silent hymn diagnostics, source checks, artifact verification and fresh
-Standard/CPU Lite full-service rehearsals, then review and merge after validation. External/human/device/CUDA gates keep their actual
-pending status; the sub-second caption-delivery goal is not yet established.
+confirmation is therefore unused; all negative results are retained. Silent hymn
+diagnostics and c13 source checks are also complete.
+
+The [installed-delivery report](final-c13f51f/installed-delivery.md) separates completed
+artifact, operator and EN/ES smoke checks from full-service acceptance. The c13
+Standard pipeline completed its required writes. A separate 128 MiB monitor
+reconstruction recovered the terminal read, but the original terminal validator
+then failed its nonempty-preview check on one blank translated preview. Preserve
+both the original monitor failure and this application failure. The preview
+repair and new-source Standard/Lite full rehearsals are tracked in
+[implementation status](../../mac_implementation_status.md), alongside actual
+terminal acceptance, archive verification and reviewed merge. External human/device/CUDA
+gates remain separate; the sub-second caption-delivery goal is not established.
 
 [Completed evidence index](completed-evidence-index.json) binds the retained raw
 quality/profiling files. Initial STT/profiling used frozen runtime `c1a9041`; joint evaluation used

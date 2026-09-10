@@ -5,6 +5,13 @@ Whisper Turbo for Spanish, Gemma 4 E4B OptiQ for finals and Marian for partials.
 A signed `.app` remains deferred. The PyPI release needs its trusted publisher
 configured; use a checkout, complete Mac ZIP, or verified wheel until publication succeeds.
 
+The c13 [installed-delivery record](../evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+records fresh isolated Standard/Lite installs, four operator checks and four EN/ES
+file smokes. It preserves failed earlier attempts and the installed audit findings.
+Current full-service acceptance and merge state are tracked in
+[implementation status](../mac_implementation_status.md); a completed pipeline
+alone does not establish successful monitoring or a certified service.
+
 ## Install from a checkout or Mac ZIP
 
 Use Python 3.11 or newer and install ffmpeg/PortAudio with your system package manager.
@@ -27,7 +34,7 @@ and translation scoring. Mac installs constrain MLX/OptiQ/Parakeet and PyTorch
 to the verified minor versions; upgrading those lines requires another replay gate. Diarization is still opt-in and its model/latency gate
 must pass before use at a service.
 
-The [current installed-dependency audit](../evaluation/overnight_security/README.md)
+The [earlier installed-dependency audit](../evaluation/overnight_security/README.md)
 records two unresolved findings in the pinned Mac Torch line and the incompatible
 audio-wheel upgrade attempt. The Lite runtime has a separate clean audit; neither
 that result nor filtered CI certifies the full Mac dependency set. A separate
@@ -43,7 +50,9 @@ No macOS login service is installed unless `--install-launchd` is supplied.
 
 `setup --backend mlx` fetches only Mac defaults, including both language directions.
 Use `--include e2b`, `--include tts`, or `--include translategemma` for optional
-profiles. E2B is a faster, separately evaluated profile; it does not replace E4B.
+model groups. E2B is an opt-in final model; the [fixed-reference comparison](../evaluation/mac_followup_20260910/translation-comparison.md)
+found faster isolated translation with a quality tradeoff. That result does not
+establish faster caption delivery or replace the E4B default.
 Piper setup downloads only the EN/ES voice and configuration files. Standard setup
 also accepts optional `--include whisper-fallback`, `--include diarization`
 (SpeechBrain model), and `--include diarization-pyannote`. Optional runtime packages

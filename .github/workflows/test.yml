@@ -55,5 +55,5 @@ jobs:
         if: github.event_name == 'pull_request' && matrix.python-version == '3.11'
         uses: MishaKav/pytest-coverage-comment@v1
         with:
-          pytest-coverage-path: coverage.json
+          pytest-json-coverage-path: coverage.json
           junitxml-path: ""

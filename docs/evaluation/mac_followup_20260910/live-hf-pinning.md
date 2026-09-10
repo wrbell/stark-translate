@@ -95,7 +95,7 @@ API compatibility was reviewed against Pyannote 3.3.2 source and SpeechBrain 1.0
 source / installed 1.1.1 source. Native compatibility remains unexecuted, and
 immutable source selection does not replace trust in checkpoint/YAML contents.
 
-## Validation and remaining execution
+## Validation and current source continuity
 
 The original sixteen tiny stdlib source fixtures passed: offline behavior, exact pinned download
 arguments, cache reuse, explicit local overrides, partial snapshot rejection,
@@ -129,8 +129,8 @@ passed all four new startup cases. The full Python 3.11 suite recorded 2,812
 passed, one failed, six skipped and two warnings, with 66.24% coverage in 126.60 s.
 Its sole failure was a stale documentation assertion hardcoding PR #192; the
 coordinator reported the same failure on Python 3.12. Commit `476e349` repairs
-that assertion without changing runtime files; its full CI remains pending here.
-The earlier failed full suite is not relabeled as passing. Mocked tests do not
+that assertion without changing runtime files; its [subsequent full CI](https://github.com/wrbell/stark-translate/actions/runs/34506381777)
+passed. The earlier failed full suite is not relabeled as passing. Mocked tests do not
 establish native model or installed-artifact behavior.
 
 The refreshed [inventory](live-hf-source-inventory.json) binds `476e349`, whose
@@ -143,7 +143,18 @@ and receipt `bf5fd0822d28e64a93635616d8fdd2256eb2f82ed95e426d92bc64c67a917385`
 bytes remain with both Markdown files in
 `.cache/mac-en-es-closeout/live-pinning-preparation/before-startup-fallback-20260910T170347Z/`.
 
-Final installed-artifact EN/ES tests still require a reserved execution window,
-explicit file input and `--no-tts`. Diarization remains off by default, and its
-native compatibility, two-speaker reference/quality and latency gates remain
-separate. No physical audio or human-review claims follow from this change.
+The additive [c13 source-continuity record](final-c13f51f/model-source-continuity.md)
+retains this `476e349` snapshot: 207 of its 211 source files are byte-identical,
+and all 173 recorded sites match, including unchanged loader ASTs in the changed
+capture/Stop source. The two new non-test sources add no identified model loader.
+This is a bounded delta review, not a new exhaustive inventory or B615 scan.
+The 13 optional-live residual sites, 105 training/export/evaluation residuals and
+one unverified legacy Piper loader remain separate unresolved scope.
+
+[Current source validation](final-c13f51f/source-validation.md) records completed
+CPU/static checks and three actual text-only Gemma GPU regressions. The separate
+[installed-delivery record](final-c13f51f/installed-delivery.md) covers fresh EN/ES
+file smokes with explicit `--no-tts`; full-service acceptance is tracked independently.
+Diarization remains off by default. SpeechBrain/Pyannote native compatibility,
+gated segmentation access, natural two-speaker references and latency remain
+separate gates. No global security, physical audio or human-review claim follows.

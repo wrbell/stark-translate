@@ -223,11 +223,15 @@ Evaluation bundles are rejected by training mergers. Retain the bundle manifest
 with any training run. Older sessions without successful completion evidence remain
 reviewable; do not invent completion or human approval to export them.
 
-On September 10, microphone permission was granted and real EN/ES input
-readiness and stop passed, along with EN pause/resume. The room had no detected
-speech; spoken EN/ES microphone captions still need a rehearsal. Output routing
-and unplug/replug, a labeled natural two-speaker recording, locally reviewed
-Spanish church references and bilingual approval remain explicit gates. Public
-EN/ES read-speech references now support separate engineering tests. Controlled
-file replay does not certify physical or human steps. See the
-[operator observations](evaluation/attended_mic_20260910/README.md).
+The September 10 [attended checks](evaluation/attended_mic_20260910/README.md)
+passed EN/ES microphone input readiness and Stop, plus EN pause/resume, in a quiet
+room without detected speech. Later [synthetic acoustic checks](evaluation/tts_routing_20260910/README.md)
+produced captions: English completed, while Spanish retained capture loss. The
+[capture-accounting repair](evaluation/mac_followup_20260910/capture-loss-accounting.md)
+reports that loss more accurately; sustained live spoken-caption acceptance is
+still pending. The [routing audit](evaluation/mac_followup_20260910/tts-routing-acceptance.md)
+supports the original per-language output-routing requirement. Integrated native
+TTS, human audibility and physical unplug/replug remain separate pending checks,
+as do natural two-speaker labels, locally reviewed Spanish church references and
+bilingual approval. Public EN/ES read-speech and controlled file replays support
+engineering checks without certifying those physical or human steps.

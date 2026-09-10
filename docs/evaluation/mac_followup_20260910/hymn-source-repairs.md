@@ -44,8 +44,11 @@ passed the Python 3.11 and 3.12 suites; lint also passed. These are controlled
 regression checks, not native capture or meaning-quality certification. No new
 microphone or playback test accompanied these changes.
 
-Remaining Mac work includes a source-linked transition annotation packet and
-paired raw/delimited E4B/E2B experiments through the actual correction stage.
-Input delimiter hypotheses must be labeled as such, not presented as approved
-audio boundaries. No prompt, model default, short-word blacklist or human approval
-was added.
+The c13 [350-second natural file control](final-c13f51f/hymn-capture.md) and
+[102-call E4B/E2B boundary packet](final-c13f51f/hymn-boundary.md) have executed.
+The control never entered music hold, so it cannot validate the recovery threshold
+on a natural transition. The text packet passed supplied raw/newline/quoted
+hypotheses through the actual correction stage; those delimiters are not approved
+audio boundaries. Natural transition annotations and independent bilingual meaning
+review remain required under #193/#194. No prompt, model default, short-word
+blacklist or human approval was added. See the separate [current source checks](final-c13f51f/source-validation.md).

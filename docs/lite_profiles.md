@@ -21,12 +21,21 @@ The initial budget leaves three CT2 STT threads, one STT worker and one Marian
 thread. Final output quality and sustained backlog must be measured independently
 for each tier. No latency gate has passed for Lite yet.
 
-The [installed natural-English service rehearsal](evaluation/overnight_endurance_20260910/README.md)
+The earlier [installed natural-English service rehearsal](evaluation/overnight_endurance_20260910/README.md)
 completed on this Mac's CPU with consistent retained spans, required writes and
 process cleanup. First translated previews were sparse and observed final latency
 tails were large. Lite is functionally exercised, but cannot be recommended as a
 fast production profile today; the observational Standard/Lite results are not a
 causal paired comparison or a human-quality certificate.
+
+The later c13 [installed-delivery record](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+keeps fresh Standard/Lite artifacts, EN/ES file smokes and installed dependency
+audits separate from full-service acceptance. A separate monitor reconstruction
+recovered the terminal read, but the Standard service still failed one blank
+translated-preview check; the original failures remain preserved. The preview
+repair and new-source Standard/Lite full rehearsals are tracked in
+[implementation status](mac_implementation_status.md). These Mac checks do not
+certify x86/RTX 2070 hardware, a RAM floor or service quality.
 
 **2026-09-10 cadence update:** the
 [normalized CPU Lite screen](evaluation/mac_followup_20260910/lite-cadence-result.md)

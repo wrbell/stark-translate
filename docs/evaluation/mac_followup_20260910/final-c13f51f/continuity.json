@@ -1,0 +1,3448 @@
+{
+  "schema_version": 1,
+  "kind": "additive_source_inventory_continuity_not_replacement",
+  "source_revision": "c13f51f1346b1581079b3457e34cb4d5fd0c2565",
+  "previous_source_revision": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+  "created_at_utc": "2026-09-10T20:50:24.110151+00:00",
+  "original_inventory": {
+    "path": "docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json",
+    "sha256": "05a44356ad8f3b9d4bb89c412405895556cb886565c4af6ea001993a3dae7498",
+    "size_bytes": 316042
+  },
+  "original_markdown": {
+    "path": "docs/evaluation/mac_followup_20260910/live-hf-source-inventory.md",
+    "sha256": "20526587d6ba71b12f2a9cc9d83c14a51f706dc905c6fdd5b4bffb73724d7451",
+    "size_bytes": 8898
+  },
+  "original_pinning_receipt": {
+    "path": "docs/evaluation/mac_followup_20260910/live-hf-pinning-receipts.json",
+    "sha256": "f684b9a666b1ecc624b49c39a57b230945ba542c9707fa06269e3ec7ba0c6a4e",
+    "size_bytes": 22736
+  },
+  "original_counts": {
+    "scanned_source_files": 211,
+    "excluded_test_files": 169,
+    "call_sites": 173,
+    "by_role": {
+      "core_mac_live": 15,
+      "optional_live": 27,
+      "training_export_evaluation": 130,
+      "operator_triggered_offline_batch": 1,
+      "setup": 3
+    },
+    "by_pinning_scope": {
+      "targeted_core_mac_and_worker_pinning": 13,
+      "conditional_local_lite_residual_other_backends": 1,
+      "residual_optional_or_offline": 112,
+      "local_load": 11,
+      "already_hardened": 4,
+      "targeted_shared_loading_helper": 1,
+      "targeted_live_pyannote_components": 1,
+      "targeted_live_pyannote_pipeline": 1,
+      "targeted_live_ecapa_pinning": 1,
+      "targeted_live_pyannote_embedding": 1,
+      "targeted_summary_loading": 2,
+      "hardened_setup_revision_validation": 1,
+      "downstream_local_load": 11,
+      "residual_data_pinning": 5,
+      "already_hardened_setup": 1,
+      "already_hardened_data_download": 1,
+      "packaged_local_load": 1,
+      "local_data_load": 4,
+      "unverified_legacy_named_loader": 1
+    },
+    "residual_unpinned_or_conditional_sites": 118,
+    "unknown_legacy_named_loader_sites": 1,
+    "no_residual_unpinned_source_identified": 54,
+    "residual_sites_by_role": {
+      "optional_live": 13,
+      "training_export_evaluation": 105
+    },
+    "explicit_trust_remote_code_arguments": 0,
+    "explicit_trust_repo_true_arguments": 2
+  },
+  "counts_semantics": "Original counts belong to the 476e349 schema-2 inventory. This companion matches those recorded sites against c13 and inspects the tracked delta; it does not publish a new exhaustive call-site count. Roles can overlap and must not be summed as disjoint totals.",
+  "continuity_summary": {
+    "original_source_files": 211,
+    "byte_identical_source_files": 207,
+    "changed_original_source_files": 4,
+    "deleted_original_source_files": 0,
+    "original_call_sites_matched": 173,
+    "sites_in_byte_identical_files": 169,
+    "sites_in_changed_files_ast_matched": 4,
+    "added_non_test_python_sources_inspected": 2,
+    "new_loader_sites_identified_in_delta": 0,
+    "new_exhaustive_inventory_call_site_count": null,
+    "model_manifest_unchanged": true
+  },
+  "current_source_hashes_for_original_scope": {
+    "bootstrap.sh": "33e74f60338a881a67990c016b32befa5e0bcc185713a71aab9b9cfb3641678e",
+    "docker/entrypoint.sh": "a9b466de9359bacb5d890774b0aa4dd24edf53136bb876b26e8f4a115132ef7f",
+    "docs/evaluation/mac_v2026_14_routing/build_audio.py": "c7a9cd2980f1a1f08dbe24c1e6f4fbfbf306d79ccb831cda3608f7e35f5eec39",
+    "docs/evaluation/mac_v2026_14_screening/plot.py": "6878d7e84aff003505b79192e3e55bd460e64aa185ea14e29e7f1dc184cc1ad5",
+    "docs/evaluation/overnight_endurance_20260910/raw/evidence_common.py": "c006c8f2043f153a1688ba5b51b48087dee8117ea4a927ef7387b9535173ad61",
+    "docs/evaluation/overnight_endurance_20260910/raw/package_endurance.py": "0613db2613d4ee53f926ae5be29d8b974ffbfc533a7ac93119a767a7afdfa065",
+    "docs/evaluation/overnight_endurance_20260910/raw/verify_endurance.py": "bb52959705509a219421a3858a7c71aef7bad3420932dcfedca4eeba795ece30",
+    "docs/evaluation/overnight_screen_20260910/verify_evidence.py": "7c72ba8a97c21c4f5a81301cdef358dda690334fb1cd9f73d7c71424ef322c94",
+    "docs/evaluation/tts_routing_20260910/probe.py": "9906f0ae66d85d75b366e43e6c683e535ec1acaf882a2098662a341639aa49ac",
+    "docs/evaluation/tts_routing_20260910/raw/routes-r0-probe.py": "63aeb6f3af4b452195b4fcb821f92eff7376e75d4e95f566d8ce403dc2c9b08c",
+    "dry_run_ab.py": "04c687d392b2f02a72e46e99626283206387df53950c3fba8ec2616e6c3438af",
+    "engines/__init__.py": "45034d1776f5ee1ad620a8b09e654431f0c179b0c8c9320c8a2882fa1d4393fd",
+    "engines/_locks.py": "80bb52edd8441e66e9ed96c24a750c2694e20dcd9ecce3e4121d0ab878daaf90",
+    "engines/active_learning.py": "ca1f5c59afb7cd212393e26c55ea056491217a56274947c82a50effa87ffe5a6",
+    "engines/audio_devices.py": "994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5",
+    "engines/base.py": "a1292b5809bce689579c398040e268d3dacb56a0c9961ca4354c017cb43bc269",
+    "engines/cuda_engine.py": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+    "engines/factory.py": "fef3dc82b0ac990346e20a0aae0f9288207d0fc8581d606d973b160dac7500f0",
+    "engines/hf_whisper_engine.py": "d468ed490459f421c0efa5d2be7494f3f3c7c0541297442abc5aea40ca3036f7",
+    "engines/llamacpp_engine.py": "259900c54808b5abb3fee7b2f901ac218a68e4e4cbe1baf2ede71c6bbc8aac93",
+    "engines/marian_hf_engine.py": "715e4aeddccf18a62702caad443499506425fb96df57606976b1987d46d03e1c",
+    "engines/mlx_engine.py": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+    "engines/mlx_generation_lock.py": "3e9adc6a10366676220ad844e2ca3b6efacfb8d5f61c13cf5b4016b4454a700a",
+    "engines/mlx_spec.py": "0a33aa9d8d8f51ba1a61b38f97a9003d2d924768802a820947d2cfe534e5692a",
+    "engines/model_paths.py": "e0d820fab595adeaee041f0a09b36f2c4ad9e127f1551f0e8a7592808410c189",
+    "engines/parakeet_engine.py": "833031c842e60af19322f5809a51a4df8721b6664ca65b9ff7fe6ab30c86d1c8",
+    "engines/parakeet_mlx_engine.py": "a1872fd8febc03a2d753024d068736e6b7c4aa6277c80a91d0d61f31eda3b62a",
+    "engines/prefix_cache.py": "c675326e46bd6fa1fbaf126dc06495af1c06e5317396efe79139e3f96b8cd1e0",
+    "engines/spec_decode_logger.py": "c4b1b3fb0f3163687fda5ae9ebbdf2a61ca27e81290e7cbf6349f42ba9709abb",
+    "engines/stt_fallback.py": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4",
+    "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+    "engines/tts_engine.py": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+    "features/bible_reference_bounds.py": "af14823f93d99c9cd1a6bb3fe01735994c50bc7a29a542dd2ed09eab18e959d9",
+    "features/diarize.py": "2c6d3238e291146d080535327ab0fc514b02553075df7355b311fda660868755",
+    "features/extract_verses.py": "027d5738497ffe4ae0df558310e86a3faef2716067871bdd4855da8573d28a22",
+    "features/live_diarize.py": "c985f203a93875eda7f3240dc077ec1b57c5c41a612af79ce25d2659ce293a79",
+    "features/rolling_buffer.py": "ac35dd88ebb4a3e17cb81f948c7e48a759e26a17087f6abbc9d25cd4797db207",
+    "features/speaker_labels.py": "6ce8c4cac5c09ea845a3a7ccfaf69c9c829490e7e060319a6be417b96e703524",
+    "features/summarize_sermon.py": "e2adcad965cb9214e08f39383464971abca961268ded2599381902c2fb8134c6",
+    "operator_app/__init__.py": "f612c80e04f892a4a79d7499d7c67dce40d963c0f681e37e85a6512936a23a7d",
+    "operator_app/audio.py": "b1d6e993b2cd2201dbc15d8341edb685911920c5a534024a53fd903e82bc3bba",
+    "operator_app/audio_ingest.py": "78b121317bdeac352367e295216b98d12ef92586a3fc4baa397fead1447f30e7",
+    "operator_app/audio_tests.py": "96fcd99c16f0b7213b3b0f42a1125666d5f70db8dae2e0571837399d236f20ae",
+    "operator_app/cli.py": "64b3bd07647ba1ae7c0a6c7b792101e32c43517539f3b5401d093b99b4fcf156",
+    "operator_app/features.py": "56d651aa5b56420237ef358f6e79f934e5c6f8c5ffdcb1c4b8680f48e4d53ac0",
+    "operator_app/http_requests.py": "24fb129975ce6b7b3063ddcf4e6f5addb6cb75967f9f84e73a2f06f7884bb322",
+    "operator_app/launchd.py": "980bd522dd2f00d629ed8981af126ac1942568a1b1b94123e13221aa2e49a66a",
+    "operator_app/lite_preflight.py": "fe01bbf207fa7d58bcace7eb3a9aea49f8d3c508d8d173ac774e8e14383ff731",
+    "operator_app/main.py": "d1d98ce990e30d44279bb80c6b82ac2d7e14bc37b99487198e01afddb413ed25",
+    "operator_app/metrics.py": "cb0b35dae6c0aff85e6c3982bc54569d54d2ec31974d6f80d92e32df6c235642",
+    "operator_app/pipeline_manager.py": "0307930eee0a6656b1e2d5d2c0d2b8d46073e508bba63f4f0e409516b9f2b865",
+    "operator_app/preflight.py": "f8d693de3c89412891b6f59c3dad0d1793b8d5160e21fe42d05a11d0bcc91b07",
+    "operator_app/processes.py": "f63e21aec479f7fc20fa08f8cea983798170cc1d43646a9e46de4dec465a66f7",
+    "operator_app/review.py": "be79d4b432428dde8c06f2ba8ee40107016adfa7b1047670ebeb1ff75b3bf2ec",
+    "operator_app/security.py": "b39935ebec2ed8ca4e72db9e41f59dc243284b5ef4f09943509131a588360d89",
+    "operator_app/setup.py": "a17a378b73e501a8796f6e6cf3a766863bc5f83e6ef27987a0ca4fa358f30097",
+    "operator_app/support.py": "d402f03b8a78822d6b9f966da34328cf84ce4df2cdd005faa3648bf6519afd7b",
+    "operator_app/work_lease.py": "3453bff371778b2096b62d563498755cffa60a151b3c0b7afa2936b652e0d1ba",
+    "run_operator.sh": "b232a63cdfcd9d6df237e809dd6a6a5067174f3c7934a2ad9f0eb0a57a7c0182",
+    "scripts/benchmarks/aggregate_stt_phase4.py": "845fb90c1c5970293fde3285345448c66d164f7472b01041fa00f37f7e9ed888",
+    "scripts/benchmarks/bench_translate_t1_t4.py": "278883ae399668d0224568ac844435add020f2b88c11c0fe17f007270f4e496c",
+    "scripts/benchmarks/build_stt_bench_manifest.py": "4304cdcfa20f1ba5d778a84d6cbaae8479539371c65c81d8354c298c1cba611d",
+    "scripts/benchmarks/vram_sampler.py": "af828cbf17059f6f337afe74e09dcfc4d2fe7327a8906867ea9f51f1457c7962",
+    "scripts/convert_marian_ct2.py": "d781a2649dac1d80f6ec1faf0df12271b96a8a8613da97dc47e285a747c881f5",
+    "scripts/cuda/bench_mtp.sh": "ba45289aef049baa8d3b05bd3c65ffc48de4500872a00f8d97b9b8c90acac00d",
+    "scripts/cuda/build_llamacpp.sh": "8c4299ca6d14dc16e52fbbfb31b24dd3f0a9aa72a10e8f475e4daebb868863c0",
+    "scripts/cuda/convert_gemma4_assistant_gguf.sh": "e122ca7bff2d12172a5be2749e3e44c0a240c30b9318afdec701e2eba6dd9137",
+    "scripts/cuda/retest_flash_attn.sh": "051ea375012edb364cc7771ccf90cc7934c730520eb44669b04d743743ce5ce6",
+    "scripts/dry_run_rehearsal.sh": "b37ea639af468f7835a02696b3b80d6ef8cc3c3b9a9bf9176adee013afbd4e5b",
+    "scripts/runtime_env.sh": "5dabf851f74e585ffca78c3133d51bfbf0f65f16406395dc2942386775c64fa5",
+    "settings.py": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568",
+    "stark_translate/__init__.py": "70ef3d5f79653e3f21cef1b9cfed7f06de2184d8d97c6e236fd742f3e517c14c",
+    "stark_translate/profiles.py": "049d59d41519f73712e24382e38c6b3e9cfad1a46b8510f17eb4adf1cd7d4cd2",
+    "start_server.sh": "1d0be6d730108bec50ec84afd532d05abe43bba3d4e5bff3b264a5391c2a5055",
+    "tools/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tools/audio_bridge.py": "dc8570b25bee02e4584744748e04fcd48fbcf61a64f2593c5830ed4483875375",
+    "tools/audio_bridge_client.py": "4aaf954bb54aaa116256c6cc0e6e6b89a1fffcbcac6a6ec6cbc6aad82bdbc27e",
+    "tools/batch_translate.py": "2d360dca100cc652e2b9dfc71a481d017b1c759c6755de54ac6a3db7a9fa31e3",
+    "tools/benchmark_identity.py": "25469a018c74856b28f062b6135fde2db40f589253f5e49e8a184bf7c5230e4c",
+    "tools/benchmark_latency.py": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+    "tools/benchmark_mlx_accel.py": "3297356f81ee4cda46f7240e377412418cb5268de6c81e16b5076062ac850c33",
+    "tools/benchmark_parakeet_en.py": "2fbeac93aa0539e9a0ecc870abe91cc4874e213ed0da60831d6e78264371a85b",
+    "tools/benchmark_stt_engines.py": "993fbb15a82f84d24734ad214d109cf7f674271d923344f9ac45b87c9d65770c",
+    "tools/benchmark_translate_engines.py": "25b035ca073533e41b6991cf514a0193c98feaad46e98747794d8e10247c392c",
+    "tools/build_eval_sets.py": "ce4890a24a62bfd0000aaaf20e8715db495f6c178abda9f789f604e47c5f7e17",
+    "tools/build_preference_triples.py": "f826bbbb660f5e8f5a913f0db6e46bc57f2e79dccc20ac9291118689350b25c8",
+    "tools/build_v1_corpus.py": "022e121c2bcb0f83959a2aefa5f73303c7a849eb7a1e260ffd174a6c0cb154a0",
+    "tools/caption_delivery.py": "b4b3d9b2a0609663e0ca5cdb9582f2674f809d4a9174926900013d0596adb399",
+    "tools/capture_handoff.py": "919821343a3b785976bc91d01e0e43a9d4d71689a10739d886893c4ff40ada4a",
+    "tools/capture_worker.py": "536ea3516cbafb110da63077362dd2acc53fa49783aa5717c0f3904631469547",
+    "tools/check_dependency_audit.py": "857ad80e6668b26f5da441ee565f67ba92e45270bdc7734da76aad830ef1f83a",
+    "tools/convert_models_to_both.py": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+    "tools/deploy_adapters.py": "c12d86919ee35b5b30abffbe6c95d08b011d158bdeaf5172fbcf66a3f0492321",
+    "tools/display_server.py": "74b753157fc09e5f2deca3fc9ecf9c7514209513658d972bd4b9903cc3428cef",
+    "tools/download_roundtrip_texts.py": "43e5b7656d7735519b0a9f8edfa9f67d72c5919838c588dc2200364fc21193d7",
+    "tools/endurance_monitor.py": "77ad71b6f05817a29f03bfc9470a61526f028d7783f19ac62840d89abf6536ba",
+    "tools/export_review.py": "7ae6db09fd6224057005393a922007626b7a4d9bed95ec2ce081ead567cc8845",
+    "tools/final_queue_pressure.py": "ecab7486747a25bc8346e230f8720c88b2881d2e5e6a9ea2885f76e06f3f061a",
+    "tools/fix_platense_alignment.py": "33706e1ae41d04e5315b225f3d9e1afd7b416de81b9798b95832bea1a1ef5836",
+    "tools/fixed_span_delivery.py": "4320ff14f6f9a638a61d96399152feda4ae49943bce10ec182b0a628663af7f1",
+    "tools/glossary.py": "e16675119b8de9391e72c637144c937aa66bd8d80fe174834dce51ce2559ace8",
+    "tools/health_check.py": "af4eccb1ab35249e683428e1e2ae8a342d9c604fb5f4291c23019c469b539a2b",
+    "tools/incremental_stt.py": "728239da6ae2e3577ca800e81dba2eb859c9c8aeee48ecac3784bc9dc159fd8f",
+    "tools/input_devices.py": "789b8b2b30cb57298e9dcf090980df1cb9d75a93104d6a927cf35c78fae981d5",
+    "tools/installed_smoke.py": "a27c027fa11d678e935b2551477c872d90ea6893daa66ac2ca95f60dd3f55ebf",
+    "tools/isolated_audio.py": "6038f5ae5ff540edda9e1989979fbc4cffdb4d831cade68965012db073906217",
+    "tools/kpi_report.py": "4cea8865ddbef9b39558ecbf1181e9d085b5bf6ecb07495d23fa34679b849e9e",
+    "tools/latency_experiments.py": "08e9ae7582c46a1698dcf8d03167bf5b1890c8b6676fdebda3a5ba15f5f54ce9",
+    "tools/latency_scheduler.py": "5b33d03aad2f009301f36e31b9ae822d8818560981ac26aaed884b7a65055857",
+    "tools/latency_trace.py": "630f03aa5b1fdb378967be979cef7623e1c3881a712b0ddf00573e6dd77e4dfa",
+    "tools/live_caption_monitor.py": "a2f03d04cd2f1692051907f15df866a5b8ff7235ee128ce3314f1e7fa52e2cda",
+    "tools/llama_runtime.py": "b3ea001637e085ec3be71cdd67ffa1b92627ba1591865c0e24594d4237a2a03e",
+    "tools/lock_data.py": "0c269604c3162b89aeb25a917018d1de28e5b60a01541ad8db813eb9b6c23ca3",
+    "tools/mac_bilingual_review.py": "06ed4782dab3f13d27dac97d54c33377038ed9efbd76a3042548a07fce351c2d",
+    "tools/mac_evaluation.py": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a",
+    "tools/mac_followup_latency.py": "ac12808b61279f6bc452a3943fa54f4775ba26ffec5b983d5b45bdd74f35908d",
+    "tools/mac_followup_quality.py": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+    "tools/mac_followup_selection.py": "a6553a89914f665c0f7e18fa862ad66eae29ec306830a08d12b63286f6f23045",
+    "tools/manage_adapters.py": "19673009d1fde3183889b1cda7d69d683d5fcf48941d0d124df4c43d801119e4",
+    "tools/marian_ct2_setup.py": "e9b4243904018880aaa625761c5556a89a2f899dd091a3a3427a9db2b4fc0c31",
+    "tools/merge_corrections.py": "49e1aa9633e1362f31e7d9a7ab2798f1ed41f31f1b684441fec0800f5dbb0777",
+    "tools/mine_hallucination_phrases.py": "b8b167966b27621e5d1f18932e12b65f08da1bb21ba503f33b3ec30d1c968c9c",
+    "tools/mts_acceptance_probe.py": "fc6221e647b56c5452887ce170fba64b09c0ed18ee132638e4016e1542c1635f",
+    "tools/music_recovery.py": "ac4dbf98d7b72f38eafec45d9b62a9a1ccfaeeeecc0906da98f01d26634fd11c",
+    "tools/offline_hindi.py": "9e06515f9fb386e2f67c59f08ad2db95e0b3c447f179ffef3b0d523b267efa5c",
+    "tools/operational_logging.py": "e479d09108278ea80f223af781436b2a773a259171bd9732c04b19265044fb56",
+    "tools/overnight_analysis.py": "5bf246c2111590d74ecaa6c672236a5904bb5f6bbea85bc77a1841168d1e1f25",
+    "tools/overnight_bench.py": "49549ce0daae0d9ec7d7c0b37870b30682e5dd536dde90f3359bf7ec7e93a700",
+    "tools/parakeet_compile_eval.py": "50c9e3ad7501c9298919ff597f7609ecdf79581adbc42f4c04f4e39c56d4f6bc",
+    "tools/parakeet_joint_eval.py": "e1b649b5efa0bbf1f0183eff8f7446eae2f3c25d78d533ca10e0cf5453e0c5d8",
+    "tools/parakeet_profile.py": "aadce7b722d1c0931f9a206a009d2e683f0d422b683ad57d0bfd6f717ab00ec0",
+    "tools/persistence.py": "8b7cd14a297e8fed6ee4a7090b0e5fe0421d62b6462ad128d1189529e05d8b57",
+    "tools/pipeline_health.py": "57e297c408bb59d09632f1619191a9d96189fc51cdfbe8392ef34e8517d587cc",
+    "tools/pipeline_timing.py": "729cc42443c5373751da704920c8eca99afa747fd5447cc874bf55c5a2b13f9a",
+    "tools/prepare_finetune_data.py": "e825c87367d15bf26682a8c7f27b8d0efd928f9f9e5e9875e6c7759a78e96891",
+    "tools/preview_candidates.py": "98b78f3fd4bb4c9975b85dbe7e563d0601a5b985cb8ee977406b668f18e193db",
+    "tools/public_replay.py": "f10490f53fc5df1f669bb917ca07763db9696807263e8935d57b231f7c1432a7",
+    "tools/public_speech.py": "06a20d8c300f4ce06a5af40535d033f3810270f9ead84b268dc366efa66852a3",
+    "tools/rebuild_verse_pairs.py": "57112dcfb9f7f83dfa1b0e60482d2b0f1974c0c7a010ea5047b234c740cabde4",
+    "tools/release_artifacts.py": "5f0b20398d2d24b09eacb60c7eae348986defd4394831da021a10a55af7c3f2a",
+    "tools/render_backlog.py": "4648251c701b835f3a67ea02aaf0f3afc4fc316185c4d98a2278fd291e1f5fdd",
+    "tools/replay_bench.py": "e0567cc87c9925f37039727f995bcfccde330e882f61f0acf2e4c19a63f5862d",
+    "tools/replay_client_barrier.py": "bc1bcb48e7fadabd52227360e437822fe5ac393e2811257b31fcff7e886f55d8",
+    "tools/replay_integrity.py": "7c3b3e3f44d3526a16c6da840dbe496787642e9910c187b3925ff88ad165acc1",
+    "tools/review_data.py": "227038073de8d335eb893ced8ab320055dfb311f6a6e0249e7858b518fd4b102",
+    "tools/roundtrip_test.py": "709211d117a1aaeb9e34853d9f9f2cf0e68feaa93b261749f3331722ae953530",
+    "tools/score_comet22.py": "0b4aaeab8e7a330b60fe2fa5c6ca874d2a031cd545ba5a7e486bad02d4e3838b",
+    "tools/session_lifecycle.py": "20776a6a4fdeddd5329cd50a45ee794b7f82e3d90a472d3fac46676c77d3a385",
+    "tools/sort_sermons.py": "9e1d8e22b4b946d437c7f92efe95032d2c9f65b65b0d40f1f662e8ee4f60bbfa",
+    "tools/source_coverage.py": "83181bc4c27e0f58fd85c50408e41387be793b617f16d731ab7af8d934c99227",
+    "tools/stt_benchmark.py": "9a0a4ee12cde57cf09347ecffb6765eed45668d8dc7ae1a5eb4bb6d656e9b090",
+    "tools/stt_roundtrip_compare.py": "aed0d12a0d125a129b75689462578eebfcbf9696d9788a3d36cecc0baa098d2c",
+    "tools/test_adaptive_model.py": "58862c625d02a650848717bf0f4f387540a7581a724b441f85de00a69239bf40",
+    "tools/training_preflight.py": "24a399d4cd8fd871cd0e466a640162582c220ce9259e04cc9df5faec8a223c82",
+    "tools/translation_qe.py": "3595963b30d9ef160910c0cfe7edae310ba91772cf7901633704ef5c0e83217e",
+    "tools/vad_runtime.py": "3a4101e59d9e06bee3019dd8d37208c1ed8d185831384d64a7908beda764521d",
+    "tools/validate_session.py": "c0fe5e645de1d68f045acd3127775e65ba07e4efe51ac23710291f69cf9684e1",
+    "training/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "training/align_deepgram_chunks.py": "ad94c03e62277ac673d7c6908aab6d74401d30b64ff49adf7bbfb85a7f4ecb00",
+    "training/assess_quality.py": "3fc7b6b30526641188199c2e121eec9b1237c142e52270ab9f9c31d3da0116cc",
+    "training/benchmark_gemma4.py": "28868d9131b519db127e99cce886366df9876fca831e7af7802a8a1010aa79f2",
+    "training/benchmark_quantize.py": "1c83ba7ddaa71fc152c9fcf12fa9acb7f7dd6c6a9f01ed940c94295dcc7f0888",
+    "training/build_glossary.py": "cfd01c5df804a04777a4fafe880e6fec62adee48aee07b701f25ea5862676d75",
+    "training/build_hard_subset.py": "2bda446ebdcad295d4ff3ab8a7bb6f9ac90ddc3f6c434057d8b89ec55d3da966",
+    "training/build_imatrix_corpus.py": "af0793d61047435f6eb584bd11e8a246ef34e935d9e38103cc7a8e150771e3f1",
+    "training/candidates/build_jacobo_candidates.py": "e0f25c4b14ebe401450459f4dbd70d830a7245999a428aee1c0c04e06c8c4c72",
+    "training/download_from_catalog.sh": "2aa597ece5cb1cde68961175fa538adfd6b1d1cf13a15df8fb6cbcf3c81175e6",
+    "training/download_sermons.py": "2e7d443923a2b2b8c229eca867366e69ff693681e0e251511bd2b8c1d6d2910a",
+    "training/eval_whisper_wer.py": "80c271b1cb7c4f6a234e75bb2126e9e45853b42e745eeb74f6f298fd6e65b0a6",
+    "training/evaluate_piper.py": "8b8ed680512b9561a484b530b03ba5f9271bea5577f2989fd9767fcb3ad46c2a",
+    "training/evaluate_sermon.py": "6925e306b81dd4a74d650adf5355ea48deff25b3b32e3ef25c53f3947bea8acb",
+    "training/evaluate_translation.py": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+    "training/export_ct2.py": "7ba64268a007b4e2bfbae61cbd9ed45e0fe516fb29528c63446cdd69ae03bee9",
+    "training/export_gguf.py": "e71f599c20352e04d918ebfa1bfb6f98668012e5a7372db4845069985d7e1709",
+    "training/export_piper_onnx.py": "b3debcab336eaa2c59e5caef89fe37589da425425ed5e555ea774d0c9d606738",
+    "training/filter_chunks_by_confidence.py": "769c3b87e354e9b9c4f2177b4b24ee6452d8121e2800b22cc326c124287c13bd",
+    "training/filter_transcripts.py": "be7a0917d9783a40dbeda08fff4f684171b5288341239320e3c25ea769aa6642",
+    "training/generate_hybrid_synthetic.py": "d6319fe142b89dbcd84924ef52fa5f207e87bf5b05e98da0e42e9ea3d29a831d",
+    "training/glossary_annotate.py": "587c66c0b15a30438b1d7f5f88a7f467a5802b82a0680f36d3ba188b75c284c7",
+    "training/launch_b_after_a6.sh": "0c37122fa84827f0ebd946a6e76fe6042bba1a2457f98246ffa185175209b686",
+    "training/mine_hard_examples.py": "67e74b2f10a3f936bf964ab382aceae5e292a3d85773e4dbe692ffc5d463e3c2",
+    "training/prepare_bible_corpus.py": "79c67178fd22ec0af13aecc0e53a14e7918d3bc787044be18cb91fd900cf3b73",
+    "training/prepare_hymn_corpus.py": "31e4b76a7fa14d40581ef687171d29450b297ee9df366de7ee358a23d12ba3e3",
+    "training/prepare_piper_dataset.py": "255db3f41b6436f8f9222056d784e073f7e2675aaf15af0b0860f5a5f80f6923",
+    "training/prepare_whisper_dataset.py": "9e5fdd3daaa38a7671c8b0258dc76bbfe7b81fa655cbe83ca9e7d5c2605e6ee8",
+    "training/preprocess_audio.py": "7920a2ce5fad8e185619f9d34d01423932be1721d53bc1f7269ea4ab75920ca6",
+    "training/qe_filter.py": "d72644ae19cad7f8e1fd594582f2e98333c4e15d392b54abeaae790af1c1538e",
+    "training/recover_shards.py": "a9734bddd898aaa5e2a1243ec9da28e661c4c251d1efdaafd5f1b0253c5c5fcc",
+    "training/run_ablation.sh": "f253a69184efbb0f8d26cd38a68173e5f37a28642423fdec62403f87ac0f54b5",
+    "training/run_b_series.sh": "fb6703fd2958b726f3f22fe6ff485e5d7973ce90ba7593993e7d8295f07019b9",
+    "training/run_gemma4_e4b_domain_sft.sh": "a7a4e86cb97de43f7e6bfd145147feb5359b22994097bf447f03c2da1b112b04",
+    "training/run_hybrid_ratio.sh": "9135c47de984718b3be5f951d78fa7e8106dc085c5670fce8a16d5836dd4d659",
+    "training/run_hybrid_scale.sh": "22a5d61317b114bb2d804e244b90ac47c66970cdf1d1c1595c0d6f8412ca74d7",
+    "training/run_phase25.sh": "7a385db4999f0fac46ccbb7d25c5a124484da068a2216277882d58c0bc07a7be",
+    "training/run_phase4_corpus.py": "dbcdd2d5d57d9d4ec6a09ae07717f08b122971ea1cacba596ba2e27e9aa62758",
+    "training/run_phase4_preprocess.sh": "3ce22dc1adcbc7ad0bee076ae761b2cf58001eab9af2460aa28d8c4763423186",
+    "training/run_scale.sh": "6f080f34fb1097bb9cb487a127264da9a09a2e5aa3484a57985e9650ea4557d5",
+    "training/run_scaled_s6.sh": "776cebb45d47585470a85716685815284c6860e375e0a160f7afc7f48499f6f9",
+    "training/run_w17_curriculum.sh": "083caaf8c20faa765016fc05489bf8157c2acf5ba9ee9e0d0f87b0fbb19f6930",
+    "training/run_whisper_ablation.sh": "678e20d2ab3a7f6739347ff6f7d09da756417fbc12ac217c695e45609ae680cb",
+    "training/theological_canaries.py": "a655f3f3eeeeedf70a3e2393a58e3749d01aaedc5aceaad792c303a26e79e5a4",
+    "training/train_gemma.py": "356ca95c8e4a4bc09900c4f227026cd52732ab2018ab03f3e56a0808008f7325",
+    "training/train_gemma4.py": "3442df47a960f6211dce08a09ca83e078ee859b0f794a3ea15cb22f9b1afba8b",
+    "training/train_gemma4_cpo.py": "6dfa44ae27b5313b45b8f46d59313d89b57527bee5eb2930f9a0ce65ee1c5e4c",
+    "training/train_marian.py": "7fb4b9f1340776ae72f64552e3d9c2005573a6d711c34f7219d15610557931f7",
+    "training/train_piper.py": "4c25adf28bac742fed092559653aa93b1dad8d4ee5285d1b8eff8e6cde4b0bb0",
+    "training/train_whisper.py": "74475c19cd455104cf4d3f84bf78e3ef6b410dc4c51bff4570cdd9f37d356ac5",
+    "training/transcribe_church.py": "e3a9cde8c18cf2a8bda9ff07dff7038540d61cb947c159c7961d6c5b82f7334d",
+    "training/transcribe_sermons.sh": "d1c10d3660c1963f638fb45bd179ae16569c0ff17371767ead827ed50c9808b1",
+    "training/transcribe_with_deepgram.py": "f7a7c58e131cb09db23c4de26171e5799be34997d8aae3e0b9a50893a30e5d45",
+    "workers.py": "11bc686f45581f184a3c85114ef17959693d918a37def13e240872101a78a909"
+  },
+  "changed_files": [
+    {
+      "path": "dry_run_ab.py",
+      "old_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
+      "current_sha256": "04c687d392b2f02a72e46e99626283206387df53950c3fba8ec2616e6c3438af",
+      "loader_sites_in_original_inventory": 4,
+      "loader_policy_change_identified": false,
+      "scope": "Capture status/required-failure reconciliation and cancellation-safe queue wait; existing load_whisper, partial STT and final STT function ASTs unchanged."
+    },
+    {
+      "path": "tools/capture_handoff.py",
+      "old_sha256": "8c82c6c01f1fd5227d345edf3c07bc970037b58817f63bbc60c695ad227626a8",
+      "current_sha256": "919821343a3b785976bc91d01e0e43a9d4d71689a10739d886893c4ff40ada4a",
+      "loader_sites_in_original_inventory": 0,
+      "loader_policy_change_identified": false,
+      "scope": "Additive aggregate capture accounting across closed segments."
+    },
+    {
+      "path": "tools/capture_worker.py",
+      "old_sha256": "5ed19921770640b793992163c5b499f19a04e7c79a3391a3487f48de9635c870",
+      "current_sha256": "536ea3516cbafb110da63077362dd2acc53fa49783aa5717c0f3904631469547",
+      "loader_sites_in_original_inventory": 0,
+      "loader_policy_change_identified": false,
+      "scope": "Capture metadata, POSIX stop/finally terminal receipt; native stream and queue remain, no model acquisition."
+    },
+    {
+      "path": "tools/isolated_audio.py",
+      "old_sha256": "ccfdd8a949232608fd51a5507b552e43c5b63d76005ecd336b788180796d6c5f",
+      "current_sha256": "6038f5ae5ff540edda9e1989979fbc4cffdb4d831cade68965012db073906217",
+      "loader_sites_in_original_inventory": 0,
+      "loader_policy_change_identified": false,
+      "scope": "Validated capture metadata and private terminal receipts at close; no model acquisition."
+    }
+  ],
+  "dry_run_changed_symbols": [
+    {
+      "symbol": "_record_capture_transport",
+      "old_lines": null,
+      "current_lines": [
+        2256,
+        2271
+      ]
+    },
+    {
+      "symbol": "audio_callback",
+      "old_lines": [
+        2199,
+        2246
+      ],
+      "current_lines": [
+        2199,
+        2253
+      ]
+    },
+    {
+      "symbol": "audio_loop",
+      "old_lines": [
+        4600,
+        5224
+      ],
+      "current_lines": [
+        4625,
+        5253
+      ]
+    }
+  ],
+  "unchanged_loader_and_qe_functions": {
+    "load_whisper": {
+      "old_lines": [
+        1143,
+        1262
+      ],
+      "current_lines": [
+        1143,
+        1262
+      ],
+      "ast_unchanged": true,
+      "ast_sha256": "a3efd79b0ab6b186b408d6c4700c4670fe848c90a4eb0e555b090d7f50ecd4e6"
+    },
+    "process_partial": {
+      "old_lines": [
+        2579,
+        2955
+      ],
+      "current_lines": [
+        2604,
+        2980
+      ],
+      "ast_unchanged": true,
+      "ast_sha256": "eab37be76c10474efeb70636acb71a33e0657a26722a5c09e6e92a15868e8b2d"
+    },
+    "process_partial._partial_stt": {
+      "old_lines": [
+        2653,
+        2730
+      ],
+      "current_lines": [
+        2678,
+        2755
+      ],
+      "ast_unchanged": true,
+      "ast_sha256": "584f59cff0b9ca398e89a7913e2a4a35b78b5772eef579cec8f2ab27919fbe71"
+    },
+    "_run_stt_mlx": {
+      "old_lines": [
+        3040,
+        3093
+      ],
+      "current_lines": [
+        3065,
+        3118
+      ],
+      "ast_unchanged": true,
+      "ast_sha256": "9bd6cff9b189351fef51f39690a247a69a0444161b226f1c13e737a97959abbe"
+    },
+    "qe_score": {
+      "old_lines": [
+        1796,
+        1800
+      ],
+      "current_lines": [
+        1796,
+        1800
+      ],
+      "ast_unchanged": true,
+      "ast_sha256": "87bff8984e6749e68e41310d4aa52639a82601a31a8278a1e5e11c89c1b14841"
+    }
+  },
+  "recorded_site_continuity": [
+    {
+      "recorded_site_id": "dry_run_ab.py:1188",
+      "path": "dry_run_ab.py",
+      "enclosing_symbol": "load_whisper",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1188,
+      "old_end_line": 1188,
+      "current_line": 1188,
+      "current_end_line": 1188,
+      "current_source_sha256": "04c687d392b2f02a72e46e99626283206387df53950c3fba8ec2616e6c3438af",
+      "match": "call_expression_and_enclosing_function_ast_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "dry_run_ab.py:1198",
+      "path": "dry_run_ab.py",
+      "enclosing_symbol": "load_whisper",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1198,
+      "old_end_line": 1198,
+      "current_line": 1198,
+      "current_end_line": 1198,
+      "current_source_sha256": "04c687d392b2f02a72e46e99626283206387df53950c3fba8ec2616e6c3438af",
+      "match": "call_expression_and_enclosing_function_ast_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "dry_run_ab.py:2684",
+      "path": "dry_run_ab.py",
+      "enclosing_symbol": "process_partial._partial_stt",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 2684,
+      "old_end_line": 2691,
+      "current_line": 2709,
+      "current_end_line": 2716,
+      "current_source_sha256": "04c687d392b2f02a72e46e99626283206387df53950c3fba8ec2616e6c3438af",
+      "match": "call_expression_and_enclosing_function_ast_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "dry_run_ab.py:3051",
+      "path": "dry_run_ab.py",
+      "enclosing_symbol": "_run_stt_mlx",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 3051,
+      "old_end_line": 3058,
+      "current_line": 3076,
+      "current_end_line": 3083,
+      "current_source_sha256": "04c687d392b2f02a72e46e99626283206387df53950c3fba8ec2616e6c3438af",
+      "match": "call_expression_and_enclosing_function_ast_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:131",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "FasterWhisperEngine.load",
+      "call": "WhisperModel",
+      "old_line": 131,
+      "old_end_line": 138,
+      "current_line": 131,
+      "current_end_line": 138,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "conditional_local_lite_residual_other_backends",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:327",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "FasterWhisperEngine._load_fallback_model",
+      "call": "WhisperModel",
+      "old_line": 327,
+      "old_end_line": 331,
+      "current_line": 327,
+      "current_end_line": 331,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:444",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "CUDAGemmaEngine.load",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 444,
+      "old_end_line": 444,
+      "current_line": 444,
+      "current_end_line": 444,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:445",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "CUDAGemmaEngine.load",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 445,
+      "old_end_line": 450,
+      "current_line": 445,
+      "current_end_line": 450,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:668",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "CUDAGemmaStreamingEngine.load",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 668,
+      "old_end_line": 668,
+      "current_line": 668,
+      "current_end_line": 668,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:669",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "CUDAGemmaStreamingEngine.load",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 669,
+      "old_end_line": 674,
+      "current_line": 669,
+      "current_end_line": 674,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:696",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "CUDAGemmaStreamingEngine.load",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 696,
+      "old_end_line": 701,
+      "current_line": 696,
+      "current_end_line": 701,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/cuda_engine.py:1071",
+      "path": "engines/cuda_engine.py",
+      "enclosing_symbol": "MarianCT2Engine.load",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 1071,
+      "old_end_line": 1071,
+      "current_line": 1071,
+      "current_end_line": 1071,
+      "current_source_sha256": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live",
+        "optional_live"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/hf_whisper_engine.py:102",
+      "path": "engines/hf_whisper_engine.py",
+      "enclosing_symbol": "HFWhisperEngine.load",
+      "call": "AutoProcessor.from_pretrained",
+      "old_line": 102,
+      "old_end_line": 102,
+      "current_line": 102,
+      "current_end_line": 102,
+      "current_source_sha256": "d468ed490459f421c0efa5d2be7494f3f3c7c0541297442abc5aea40ca3036f7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/hf_whisper_engine.py:103",
+      "path": "engines/hf_whisper_engine.py",
+      "enclosing_symbol": "HFWhisperEngine.load",
+      "call": "AutoModelForSpeechSeq2Seq.from_pretrained",
+      "old_line": 103,
+      "old_end_line": 107,
+      "current_line": 103,
+      "current_end_line": 107,
+      "current_source_sha256": "d468ed490459f421c0efa5d2be7494f3f3c7c0541297442abc5aea40ca3036f7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/hf_whisper_engine.py:114",
+      "path": "engines/hf_whisper_engine.py",
+      "enclosing_symbol": "HFWhisperEngine.load",
+      "call": "AutoModelForSpeechSeq2Seq.from_pretrained",
+      "old_line": 114,
+      "old_end_line": 118,
+      "current_line": 114,
+      "current_end_line": 118,
+      "current_source_sha256": "d468ed490459f421c0efa5d2be7494f3f3c7c0541297442abc5aea40ca3036f7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/marian_hf_engine.py:74",
+      "path": "engines/marian_hf_engine.py",
+      "enclosing_symbol": "MarianHFEngine.load",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 74,
+      "old_end_line": 74,
+      "current_line": 74,
+      "current_end_line": 74,
+      "current_source_sha256": "715e4aeddccf18a62702caad443499506425fb96df57606976b1987d46d03e1c",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "already_hardened",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/marian_hf_engine.py:75",
+      "path": "engines/marian_hf_engine.py",
+      "enclosing_symbol": "MarianHFEngine.load",
+      "call": "MarianMTModel.from_pretrained",
+      "old_line": 75,
+      "old_end_line": 75,
+      "current_line": 75,
+      "current_end_line": 75,
+      "current_source_sha256": "715e4aeddccf18a62702caad443499506425fb96df57606976b1987d46d03e1c",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "already_hardened",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/mlx_engine.py:227",
+      "path": "engines/mlx_engine.py",
+      "enclosing_symbol": "MLXWhisperEngine.load",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 227,
+      "old_end_line": 231,
+      "current_line": 227,
+      "current_end_line": 231,
+      "current_source_sha256": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/mlx_engine.py:245",
+      "path": "engines/mlx_engine.py",
+      "enclosing_symbol": "MLXWhisperEngine.load",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 245,
+      "old_end_line": 249,
+      "current_line": 245,
+      "current_end_line": 249,
+      "current_source_sha256": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/mlx_engine.py:368",
+      "path": "engines/mlx_engine.py",
+      "enclosing_symbol": "MLXWhisperEngine._raw_transcribe",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 368,
+      "old_end_line": 375,
+      "current_line": 368,
+      "current_end_line": 375,
+      "current_source_sha256": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/mlx_engine.py:445",
+      "path": "engines/mlx_engine.py",
+      "enclosing_symbol": "MLXWhisperEngine._load_fallback_model",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 445,
+      "old_end_line": 449,
+      "current_line": 445,
+      "current_end_line": 449,
+      "current_source_sha256": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/mlx_engine.py:827",
+      "path": "engines/mlx_engine.py",
+      "enclosing_symbol": "MLXGemmaEngine.load",
+      "call": "mlx_load",
+      "old_line": 827,
+      "old_end_line": 827,
+      "current_line": 827,
+      "current_end_line": 827,
+      "current_source_sha256": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/mlx_engine.py:846",
+      "path": "engines/mlx_engine.py",
+      "enclosing_symbol": "MLXGemmaEngine.load",
+      "call": "mlx_load",
+      "old_line": 846,
+      "old_end_line": 846,
+      "current_line": 846,
+      "current_end_line": 846,
+      "current_source_sha256": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/mlx_spec.py:80",
+      "path": "engines/mlx_spec.py",
+      "enclosing_symbol": "load_gemma4_drafter",
+      "call": "drafter_cls.from_pretrained",
+      "old_line": 80,
+      "old_end_line": 80,
+      "current_line": 80,
+      "current_end_line": 80,
+      "current_source_sha256": "0a33aa9d8d8f51ba1a61b38f97a9003d2d924768802a820947d2cfe534e5692a",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/model_paths.py:192",
+      "path": "engines/model_paths.py",
+      "enclosing_symbol": "resolve_model_for_loading",
+      "call": "snapshot_download",
+      "old_line": 192,
+      "old_end_line": 192,
+      "current_line": 192,
+      "current_end_line": 192,
+      "current_source_sha256": "e0d820fab595adeaee041f0a09b36f2c4ad9e127f1551f0e8a7592808410c189",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live",
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_shared_loading_helper",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/parakeet_engine.py:70",
+      "path": "engines/parakeet_engine.py",
+      "enclosing_symbol": "ParakeetEngine.load",
+      "call": "nemo_asr.models.ASRModel.from_pretrained",
+      "old_line": 70,
+      "old_end_line": 70,
+      "current_line": 70,
+      "current_end_line": 70,
+      "current_source_sha256": "833031c842e60af19322f5809a51a4df8721b6664ca65b9ff7fe6ab30c86d1c8",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "engines/parakeet_mlx_engine.py:159",
+      "path": "engines/parakeet_mlx_engine.py",
+      "enclosing_symbol": "ParakeetMLXEngine.load",
+      "call": "from_pretrained",
+      "old_line": 159,
+      "old_end_line": 159,
+      "current_line": 159,
+      "current_end_line": 159,
+      "current_source_sha256": "a1872fd8febc03a2d753024d068736e6b7c4aa6277c80a91d0d61f31eda3b62a",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/tts_engine.py:42",
+      "path": "engines/tts_engine.py",
+      "enclosing_symbol": "PiperTTSEngine.load",
+      "call": "PiperVoice.load",
+      "old_line": 42,
+      "old_end_line": 42,
+      "current_line": 42,
+      "current_end_line": 42,
+      "current_source_sha256": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/tts_engine.py:47",
+      "path": "engines/tts_engine.py",
+      "enclosing_symbol": "PiperTTSEngine.load",
+      "call": "PiperVoice.load",
+      "old_line": 47,
+      "old_end_line": 47,
+      "current_line": 47,
+      "current_end_line": 47,
+      "current_source_sha256": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/tts_engine.py:167",
+      "path": "engines/tts_engine.py",
+      "enclosing_symbol": "PiperTTSEngine._ensure_voice_downloaded",
+      "call": "hf_hub_download",
+      "old_line": 167,
+      "old_end_line": 167,
+      "current_line": 167,
+      "current_end_line": 167,
+      "current_source_sha256": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "already_hardened",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "engines/tts_engine.py:168",
+      "path": "engines/tts_engine.py",
+      "enclosing_symbol": "PiperTTSEngine._ensure_voice_downloaded",
+      "call": "hf_hub_download",
+      "old_line": 168,
+      "old_end_line": 168,
+      "current_line": 168,
+      "current_end_line": 168,
+      "current_source_sha256": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "already_hardened",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "features/diarize.py:293",
+      "path": "features/diarize.py",
+      "enclosing_symbol": "run_diarization",
+      "call": "Pipeline.from_pretrained",
+      "old_line": 293,
+      "old_end_line": 296,
+      "current_line": 293,
+      "current_end_line": 296,
+      "current_source_sha256": "2c6d3238e291146d080535327ab0fc514b02553075df7355b311fda660868755",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "features/diarize.py:362",
+      "path": "features/diarize.py",
+      "enclosing_symbol": "transcribe_segments",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 362,
+      "old_end_line": 362,
+      "current_line": 362,
+      "current_end_line": 362,
+      "current_source_sha256": "2c6d3238e291146d080535327ab0fc514b02553075df7355b311fda660868755",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "features/diarize.py:409",
+      "path": "features/diarize.py",
+      "enclosing_symbol": "transcribe_segments",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 409,
+      "old_end_line": 416,
+      "current_line": 409,
+      "current_end_line": 416,
+      "current_source_sha256": "2c6d3238e291146d080535327ab0fc514b02553075df7355b311fda660868755",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "features/diarize.py:575",
+      "path": "features/diarize.py",
+      "enclosing_symbol": "main",
+      "call": "Inference",
+      "old_line": 575,
+      "old_end_line": 579,
+      "current_line": 575,
+      "current_end_line": 579,
+      "current_source_sha256": "2c6d3238e291146d080535327ab0fc514b02553075df7355b311fda660868755",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "features/live_diarize.py:91",
+      "path": "features/live_diarize.py",
+      "enclosing_symbol": "_load_pyannote",
+      "call": "Model.from_pretrained",
+      "old_line": 91,
+      "old_end_line": 91,
+      "current_line": 91,
+      "current_end_line": 91,
+      "current_source_sha256": "c985f203a93875eda7f3240dc077ec1b57c5c41a612af79ce25d2659ce293a79",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_live_pyannote_components",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "features/live_diarize.py:94",
+      "path": "features/live_diarize.py",
+      "enclosing_symbol": "_load_pyannote",
+      "call": "SpeakerDiarization",
+      "old_line": 94,
+      "old_end_line": 94,
+      "current_line": 94,
+      "current_end_line": 94,
+      "current_source_sha256": "c985f203a93875eda7f3240dc077ec1b57c5c41a612af79ce25d2659ce293a79",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_live_pyannote_pipeline",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "features/live_diarize.py:259",
+      "path": "features/live_diarize.py",
+      "enclosing_symbol": "_load_speechbrain_embedder",
+      "call": "EncoderClassifier.from_hparams",
+      "old_line": 259,
+      "old_end_line": 266,
+      "current_line": 259,
+      "current_end_line": 266,
+      "current_source_sha256": "c985f203a93875eda7f3240dc077ec1b57c5c41a612af79ce25d2659ce293a79",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_live_ecapa_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "features/live_diarize.py:301",
+      "path": "features/live_diarize.py",
+      "enclosing_symbol": "_load_pyannote_embedder",
+      "call": "Inference",
+      "old_line": 301,
+      "old_end_line": 301,
+      "current_line": 301,
+      "current_end_line": 301,
+      "current_source_sha256": "c985f203a93875eda7f3240dc077ec1b57c5c41a612af79ce25d2659ce293a79",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_live_pyannote_embedding",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "features/summarize_sermon.py:271",
+      "path": "features/summarize_sermon.py",
+      "enclosing_symbol": "load_summarization_model",
+      "call": "load",
+      "old_line": 271,
+      "old_end_line": 271,
+      "current_line": 271,
+      "current_end_line": 271,
+      "current_source_sha256": "e2adcad965cb9214e08f39383464971abca961268ded2599381902c2fb8134c6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "operator_triggered_offline_batch"
+      ],
+      "historical_pinning_scope": "targeted_summary_loading",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "features/summarize_sermon.py:454",
+      "path": "features/summarize_sermon.py",
+      "enclosing_symbol": "translate_with_translategemma",
+      "call": "load",
+      "old_line": 454,
+      "old_end_line": 454,
+      "current_line": 454,
+      "current_end_line": 454,
+      "current_source_sha256": "e2adcad965cb9214e08f39383464971abca961268ded2599381902c2fb8134c6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "targeted_summary_loading",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "operator_app/setup.py:212",
+      "path": "operator_app/setup.py",
+      "enclosing_symbol": "_download_hf_snapshot",
+      "call": "snapshot_download",
+      "old_line": 212,
+      "old_end_line": 217,
+      "current_line": 212,
+      "current_end_line": 217,
+      "current_source_sha256": "a17a378b73e501a8796f6e6cf3a766863bc5f83e6ef27987a0ca4fa358f30097",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "setup"
+      ],
+      "historical_pinning_scope": "hardened_setup_revision_validation",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "scripts/convert_marian_ct2.py:136",
+      "path": "scripts/convert_marian_ct2.py",
+      "enclosing_symbol": "snapshot_hf_model",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 136,
+      "old_end_line": 136,
+      "current_line": 136,
+      "current_end_line": 136,
+      "current_source_sha256": "d781a2649dac1d80f6ec1faf0df12271b96a8a8613da97dc47e285a747c881f5",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "scripts/convert_marian_ct2.py:137",
+      "path": "scripts/convert_marian_ct2.py",
+      "enclosing_symbol": "snapshot_hf_model",
+      "call": "MarianMTModel.from_pretrained",
+      "old_line": 137,
+      "old_end_line": 137,
+      "current_line": 137,
+      "current_end_line": 137,
+      "current_source_sha256": "d781a2649dac1d80f6ec1faf0df12271b96a8a8613da97dc47e285a747c881f5",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "scripts/convert_marian_ct2.py:205",
+      "path": "scripts/convert_marian_ct2.py",
+      "enclosing_symbol": "sanity_test_ct2",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 205,
+      "old_end_line": 205,
+      "current_line": 205,
+      "current_end_line": 205,
+      "current_source_sha256": "d781a2649dac1d80f6ec1faf0df12271b96a8a8613da97dc47e285a747c881f5",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "scripts/cuda/convert_gemma4_assistant_gguf.sh:76",
+      "path": "scripts/cuda/convert_gemma4_assistant_gguf.sh",
+      "enclosing_symbol": "shell_or_embedded_python",
+      "call": "huggingface-cli download \"${repo}\" --local-dir \"${dest}\"",
+      "old_line": 76,
+      "old_end_line": 76,
+      "current_line": 76,
+      "current_end_line": 76,
+      "current_source_sha256": "e122ca7bff2d12172a5be2749e3e44c0a240c30b9318afdec701e2eba6dd9137",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "scripts/cuda/convert_gemma4_assistant_gguf.sh:80",
+      "path": "scripts/cuda/convert_gemma4_assistant_gguf.sh",
+      "enclosing_symbol": "shell_or_embedded_python",
+      "call": "snapshot_download",
+      "old_line": 80,
+      "old_end_line": 80,
+      "current_line": 80,
+      "current_end_line": 80,
+      "current_source_sha256": "e122ca7bff2d12172a5be2749e3e44c0a240c30b9318afdec701e2eba6dd9137",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/batch_translate.py:161",
+      "path": "tools/batch_translate.py",
+      "enclosing_symbol": "segment_audio_vad",
+      "call": "torch.hub.load",
+      "old_line": 161,
+      "old_end_line": 161,
+      "current_line": 161,
+      "current_end_line": 161,
+      "current_source_sha256": "2d360dca100cc652e2b9dfc71a481d017b1c759c6755de54ac6a3db7a9fa31e3",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:208",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "_load_mlx_whisper",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 208,
+      "old_end_line": 208,
+      "current_line": 208,
+      "current_end_line": 208,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:226",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "_load_mlx_gemma",
+      "call": "load",
+      "old_line": 226,
+      "old_end_line": 226,
+      "current_line": 226,
+      "current_end_line": 226,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:293",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "_load_vad",
+      "call": "torch.hub.load",
+      "old_line": 293,
+      "old_end_line": 293,
+      "current_line": 293,
+      "current_end_line": 293,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:309",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "_load_marian",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 309,
+      "old_end_line": 309,
+      "current_line": 309,
+      "current_end_line": 309,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:310",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "_load_marian",
+      "call": "MarianMTModel.from_pretrained",
+      "old_line": 310,
+      "old_end_line": 310,
+      "current_line": 310,
+      "current_end_line": 310,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:338",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "_load_ct2_marian",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 338,
+      "old_end_line": 338,
+      "current_line": 338,
+      "current_end_line": 338,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:422",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_stt_suite._run_stt",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 422,
+      "old_end_line": 422,
+      "current_line": 422,
+      "current_end_line": 422,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:427",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_stt_suite._run_stt",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 427,
+      "old_end_line": 427,
+      "current_line": 427,
+      "current_end_line": 427,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:961",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_metal_cache",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 961,
+      "old_end_line": 961,
+      "current_line": 961,
+      "current_end_line": 961,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:966",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_metal_cache",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 966,
+      "old_end_line": 966,
+      "current_line": 966,
+      "current_end_line": 966,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1020",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1020,
+      "old_end_line": 1020,
+      "current_line": 1020,
+      "current_end_line": 1020,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1028",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1028,
+      "old_end_line": 1028,
+      "current_line": 1028,
+      "current_end_line": 1028,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1039",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1039,
+      "old_end_line": 1039,
+      "current_line": 1039,
+      "current_end_line": 1039,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1048",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1048,
+      "old_end_line": 1048,
+      "current_line": 1048,
+      "current_end_line": 1048,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1061",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1061,
+      "old_end_line": 1061,
+      "current_line": 1061,
+      "current_end_line": 1061,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1068",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1068,
+      "old_end_line": 1068,
+      "current_line": 1068,
+      "current_end_line": 1068,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1082",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1082,
+      "old_end_line": 1082,
+      "current_line": 1082,
+      "current_end_line": 1082,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_latency.py:1093",
+      "path": "tools/benchmark_latency.py",
+      "enclosing_symbol": "bench_e2e_suite",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1093,
+      "old_end_line": 1093,
+      "current_line": 1093,
+      "current_end_line": 1093,
+      "current_source_sha256": "27418c49ad2c82d29fc8a105e51d330b45053bef15a45acc4346ba56e861f7b7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_translate_engines.py:254",
+      "path": "tools/benchmark_translate_engines.py",
+      "enclosing_symbol": "run_cometkiwi",
+      "call": "download_model",
+      "old_line": 254,
+      "old_end_line": 254,
+      "current_line": 254,
+      "current_end_line": 254,
+      "current_source_sha256": "25b035ca073533e41b6991cf514a0193c98feaad46e98747794d8e10247c392c",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/benchmark_translate_engines.py:255",
+      "path": "tools/benchmark_translate_engines.py",
+      "enclosing_symbol": "run_cometkiwi",
+      "call": "load_from_checkpoint",
+      "old_line": 255,
+      "old_end_line": 255,
+      "current_line": 255,
+      "current_end_line": 255,
+      "current_source_sha256": "25b035ca073533e41b6991cf514a0193c98feaad46e98747794d8e10247c392c",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/build_preference_triples.py:205",
+      "path": "tools/build_preference_triples.py",
+      "enclosing_symbol": "cmd_score",
+      "call": "download_model",
+      "old_line": 205,
+      "old_end_line": 205,
+      "current_line": 205,
+      "current_end_line": 205,
+      "current_source_sha256": "f826bbbb660f5e8f5a913f0db6e46bc57f2e79dccc20ac9291118689350b25c8",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/build_preference_triples.py:206",
+      "path": "tools/build_preference_triples.py",
+      "enclosing_symbol": "cmd_score",
+      "call": "load_from_checkpoint",
+      "old_line": 206,
+      "old_end_line": 206,
+      "current_line": 206,
+      "current_end_line": 206,
+      "current_source_sha256": "f826bbbb660f5e8f5a913f0db6e46bc57f2e79dccc20ac9291118689350b25c8",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/build_v1_corpus.py:116",
+      "path": "tools/build_v1_corpus.py",
+      "enclosing_symbol": "sample_opus",
+      "call": "load_dataset",
+      "old_line": 116,
+      "old_end_line": 116,
+      "current_line": 116,
+      "current_end_line": 116,
+      "current_source_sha256": "022e121c2bcb0f83959a2aefa5f73303c7a849eb7a1e260ffd174a6c0cb154a0",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_data_pinning",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:165",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_whisper_mlx",
+      "call": "snapshot_download",
+      "old_line": 165,
+      "old_end_line": 165,
+      "current_line": 165,
+      "current_end_line": 165,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:228",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_whisper_ct2",
+      "call": "ctranslate2.converters.TransformersConverter",
+      "old_line": 228,
+      "old_end_line": 239,
+      "current_line": 228,
+      "current_end_line": 239,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:271",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "validate_whisper_mlx",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 271,
+      "old_end_line": 275,
+      "current_line": 271,
+      "current_end_line": 275,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:294",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "validate_whisper_ct2",
+      "call": "WhisperModel",
+      "old_line": 294,
+      "old_end_line": 298,
+      "current_line": 294,
+      "current_end_line": 298,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:354",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_gemma_mlx",
+      "call": "snapshot_download",
+      "old_line": 354,
+      "old_end_line": 354,
+      "current_line": 354,
+      "current_end_line": 354,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:473",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_gemma_cuda",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 473,
+      "old_end_line": 477,
+      "current_line": 473,
+      "current_end_line": 477,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:480",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_gemma_cuda",
+      "call": "PeftModel.from_pretrained",
+      "old_line": 480,
+      "old_end_line": 480,
+      "current_line": 480,
+      "current_end_line": 480,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:490",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_gemma_cuda",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 490,
+      "old_end_line": 490,
+      "current_line": 490,
+      "current_end_line": 490,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:522",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_gemma_cuda",
+      "call": "snapshot_download",
+      "old_line": 522,
+      "old_end_line": 522,
+      "current_line": 522,
+      "current_end_line": 522,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/convert_models_to_both.py:577",
+      "path": "tools/convert_models_to_both.py",
+      "enclosing_symbol": "export_marian_pytorch",
+      "call": "snapshot_download",
+      "old_line": 577,
+      "old_end_line": 577,
+      "current_line": 577,
+      "current_end_line": 577,
+      "current_source_sha256": "eed4df728514671de80e7383ee17541b60bec18381655a16c96b1403bc717d90",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/health_check.py:102",
+      "path": "tools/health_check.py",
+      "enclosing_symbol": "_load_mlx",
+      "call": "load",
+      "old_line": 102,
+      "old_end_line": 102,
+      "current_line": 102,
+      "current_end_line": 102,
+      "current_source_sha256": "af4eccb1ab35249e683428e1e2ae8a342d9c604fb5f4291c23019c469b539a2b",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/kpi_report.py:228",
+      "path": "tools/kpi_report.py",
+      "enclosing_symbol": "_run_cometkiwi",
+      "call": "download_model",
+      "old_line": 228,
+      "old_end_line": 228,
+      "current_line": 228,
+      "current_end_line": 228,
+      "current_source_sha256": "4cea8865ddbef9b39558ecbf1181e9d085b5bf6ecb07495d23fa34679b849e9e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/kpi_report.py:229",
+      "path": "tools/kpi_report.py",
+      "enclosing_symbol": "_run_cometkiwi",
+      "call": "load_from_checkpoint",
+      "old_line": 229,
+      "old_end_line": 229,
+      "current_line": 229,
+      "current_end_line": 229,
+      "current_source_sha256": "4cea8865ddbef9b39558ecbf1181e9d085b5bf6ecb07495d23fa34679b849e9e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/live_caption_monitor.py:885",
+      "path": "tools/live_caption_monitor.py",
+      "enclosing_symbol": "capture_and_transcribe_live",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 885,
+      "old_end_line": 890,
+      "current_line": 885,
+      "current_end_line": 890,
+      "current_source_sha256": "a2f03d04cd2f1692051907f15df866a5b8ff7235ee128ce3314f1e7fa52e2cda",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/live_caption_monitor.py:920",
+      "path": "tools/live_caption_monitor.py",
+      "enclosing_symbol": "capture_and_transcribe_live",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 920,
+      "old_end_line": 926,
+      "current_line": 920,
+      "current_end_line": 926,
+      "current_source_sha256": "a2f03d04cd2f1692051907f15df866a5b8ff7235ee128ce3314f1e7fa52e2cda",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/live_caption_monitor.py:1546",
+      "path": "tools/live_caption_monitor.py",
+      "enclosing_symbol": "run_wav",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 1546,
+      "old_end_line": 1553,
+      "current_line": 1546,
+      "current_end_line": 1553,
+      "current_source_sha256": "a2f03d04cd2f1692051907f15df866a5b8ff7235ee128ce3314f1e7fa52e2cda",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/marian_ct2_setup.py:69",
+      "path": "tools/marian_ct2_setup.py",
+      "enclosing_symbol": "resolve_hf_source",
+      "call": "snapshot_download",
+      "old_line": 69,
+      "old_end_line": 69,
+      "current_line": 69,
+      "current_end_line": 69,
+      "current_source_sha256": "e9b4243904018880aaa625761c5556a89a2f899dd091a3a3427a9db2b4fc0c31",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "setup"
+      ],
+      "historical_pinning_scope": "already_hardened_setup",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/marian_ct2_setup.py:117",
+      "path": "tools/marian_ct2_setup.py",
+      "enclosing_symbol": "verify_ct2_artifact.embedded_python",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 117,
+      "old_end_line": 117,
+      "current_line": 117,
+      "current_end_line": 117,
+      "current_source_sha256": "e9b4243904018880aaa625761c5556a89a2f899dd091a3a3427a9db2b4fc0c31",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "setup"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/mts_acceptance_probe.py:152",
+      "path": "tools/mts_acceptance_probe.py",
+      "enclosing_symbol": "run_probe",
+      "call": "mlx_load",
+      "old_line": 152,
+      "old_end_line": 152,
+      "current_line": 152,
+      "current_end_line": 152,
+      "current_source_sha256": "fc6221e647b56c5452887ce170fba64b09c0ed18ee132638e4016e1542c1635f",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/public_speech.py:104",
+      "path": "tools/public_speech.py",
+      "enclosing_symbol": "download",
+      "call": "hf_hub_download",
+      "old_line": 104,
+      "old_end_line": 110,
+      "current_line": 104,
+      "current_end_line": 110,
+      "current_source_sha256": "06a20d8c300f4ce06a5af40535d033f3810270f9ead84b268dc366efa66852a3",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "already_hardened_data_download",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/score_comet22.py:50",
+      "path": "tools/score_comet22.py",
+      "enclosing_symbol": "score_with_comet",
+      "call": "download_model",
+      "old_line": 50,
+      "old_end_line": 50,
+      "current_line": 50,
+      "current_end_line": 50,
+      "current_source_sha256": "0b4aaeab8e7a330b60fe2fa5c6ca874d2a031cd545ba5a7e486bad02d4e3838b",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/score_comet22.py:51",
+      "path": "tools/score_comet22.py",
+      "enclosing_symbol": "score_with_comet",
+      "call": "load_from_checkpoint",
+      "old_line": 51,
+      "old_end_line": 51,
+      "current_line": 51,
+      "current_end_line": 51,
+      "current_source_sha256": "0b4aaeab8e7a330b60fe2fa5c6ca874d2a031cd545ba5a7e486bad02d4e3838b",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/score_comet22.py:100",
+      "path": "tools/score_comet22.py",
+      "enclosing_symbol": "main",
+      "call": "download_model",
+      "old_line": 100,
+      "old_end_line": 100,
+      "current_line": 100,
+      "current_end_line": 100,
+      "current_source_sha256": "0b4aaeab8e7a330b60fe2fa5c6ca874d2a031cd545ba5a7e486bad02d4e3838b",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/score_comet22.py:101",
+      "path": "tools/score_comet22.py",
+      "enclosing_symbol": "main",
+      "call": "load_from_checkpoint",
+      "old_line": 101,
+      "old_end_line": 101,
+      "current_line": 101,
+      "current_end_line": 101,
+      "current_source_sha256": "0b4aaeab8e7a330b60fe2fa5c6ca874d2a031cd545ba5a7e486bad02d4e3838b",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/stt_benchmark.py:148",
+      "path": "tools/stt_benchmark.py",
+      "enclosing_symbol": "bench_mlx_whisper",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 148,
+      "old_end_line": 148,
+      "current_line": 148,
+      "current_end_line": 148,
+      "current_source_sha256": "9a0a4ee12cde57cf09347ecffb6765eed45668d8dc7ae1a5eb4bb6d656e9b090",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/stt_benchmark.py:161",
+      "path": "tools/stt_benchmark.py",
+      "enclosing_symbol": "bench_mlx_whisper",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 161,
+      "old_end_line": 161,
+      "current_line": 161,
+      "current_end_line": 161,
+      "current_source_sha256": "9a0a4ee12cde57cf09347ecffb6765eed45668d8dc7ae1a5eb4bb6d656e9b090",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/stt_benchmark.py:166",
+      "path": "tools/stt_benchmark.py",
+      "enclosing_symbol": "bench_mlx_whisper",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 166,
+      "old_end_line": 166,
+      "current_line": 166,
+      "current_end_line": 166,
+      "current_source_sha256": "9a0a4ee12cde57cf09347ecffb6765eed45668d8dc7ae1a5eb4bb6d656e9b090",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/test_adaptive_model.py:404",
+      "path": "tools/test_adaptive_model.py",
+      "enclosing_symbol": "load_ct2_marian",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 404,
+      "old_end_line": 404,
+      "current_line": 404,
+      "current_end_line": 404,
+      "current_source_sha256": "58862c625d02a650848717bf0f4f387540a7581a724b441f85de00a69239bf40",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/test_adaptive_model.py:423",
+      "path": "tools/test_adaptive_model.py",
+      "enclosing_symbol": "load_gemma_4b",
+      "call": "load",
+      "old_line": 423,
+      "old_end_line": 423,
+      "current_line": 423,
+      "current_end_line": 423,
+      "current_source_sha256": "58862c625d02a650848717bf0f4f387540a7581a724b441f85de00a69239bf40",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/translation_qe.py:93",
+      "path": "tools/translation_qe.py",
+      "enclosing_symbol": "_load_backtranslation",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 93,
+      "old_end_line": 93,
+      "current_line": 93,
+      "current_end_line": 93,
+      "current_source_sha256": "3595963b30d9ef160910c0cfe7edae310ba91772cf7901633704ef5c0e83217e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/translation_qe.py:94",
+      "path": "tools/translation_qe.py",
+      "enclosing_symbol": "_load_backtranslation",
+      "call": "MarianMTModel.from_pretrained",
+      "old_line": 94,
+      "old_end_line": 94,
+      "current_line": 94,
+      "current_end_line": 94,
+      "current_source_sha256": "3595963b30d9ef160910c0cfe7edae310ba91772cf7901633704ef5c0e83217e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/translation_qe.py:115",
+      "path": "tools/translation_qe.py",
+      "enclosing_symbol": "tier2_score",
+      "call": "bert_score",
+      "old_line": 115,
+      "old_end_line": 115,
+      "current_line": 115,
+      "current_end_line": 115,
+      "current_source_sha256": "3595963b30d9ef160910c0cfe7edae310ba91772cf7901633704ef5c0e83217e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/translation_qe.py:139",
+      "path": "tools/translation_qe.py",
+      "enclosing_symbol": "_load_labse",
+      "call": "SentenceTransformer",
+      "old_line": 139,
+      "old_end_line": 139,
+      "current_line": 139,
+      "current_end_line": 139,
+      "current_source_sha256": "3595963b30d9ef160910c0cfe7edae310ba91772cf7901633704ef5c0e83217e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "tools/vad_runtime.py:55",
+      "path": "tools/vad_runtime.py",
+      "enclosing_symbol": "load_packaged_vad",
+      "call": "load_silero_vad",
+      "old_line": 55,
+      "old_end_line": 55,
+      "current_line": 55,
+      "current_end_line": 55,
+      "current_source_sha256": "3a4101e59d9e06bee3019dd8d37208c1ed8d185831384d64a7908beda764521d",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "core_mac_live",
+        "optional_live"
+      ],
+      "historical_pinning_scope": "packaged_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "tools/validate_session.py:263",
+      "path": "tools/validate_session.py",
+      "enclosing_symbol": "segment_audio_vad",
+      "call": "torch.hub.load",
+      "old_line": 263,
+      "old_end_line": 263,
+      "current_line": 263,
+      "current_end_line": 263,
+      "current_source_sha256": "c0fe5e645de1d68f045acd3127775e65ba07e4efe51ac23710291f69cf9684e1",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/align_deepgram_chunks.py:419",
+      "path": "training/align_deepgram_chunks.py",
+      "enclosing_symbol": "_build_preprocessed_cache",
+      "call": "WhisperProcessor.from_pretrained",
+      "old_line": 419,
+      "old_end_line": 419,
+      "current_line": 419,
+      "current_end_line": 419,
+      "current_source_sha256": "ad94c03e62277ac673d7c6908aab6d74401d30b64ff49adf7bbfb85a7f4ecb00",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/assess_quality.py:384",
+      "path": "training/assess_quality.py",
+      "enclosing_symbol": "cross_check",
+      "call": "WhisperModel",
+      "old_line": 384,
+      "old_end_line": 384,
+      "current_line": 384,
+      "current_end_line": 384,
+      "current_source_sha256": "3fc7b6b30526641188199c2e121eec9b1237c142e52270ab9f9c31d3da0116cc",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/benchmark_gemma4.py:102",
+      "path": "training/benchmark_gemma4.py",
+      "enclosing_symbol": "load_model_nf4",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 102,
+      "old_end_line": 102,
+      "current_line": 102,
+      "current_end_line": 102,
+      "current_source_sha256": "28868d9131b519db127e99cce886366df9876fca831e7af7802a8a1010aa79f2",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/benchmark_gemma4.py:107",
+      "path": "training/benchmark_gemma4.py",
+      "enclosing_symbol": "load_model_nf4",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 107,
+      "old_end_line": 112,
+      "current_line": 107,
+      "current_end_line": 112,
+      "current_source_sha256": "28868d9131b519db127e99cce886366df9876fca831e7af7802a8a1010aa79f2",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/benchmark_gemma4.py:460",
+      "path": "training/benchmark_gemma4.py",
+      "enclosing_symbol": "run_benchmark",
+      "call": "download_model",
+      "old_line": 460,
+      "old_end_line": 460,
+      "current_line": 460,
+      "current_end_line": 460,
+      "current_source_sha256": "28868d9131b519db127e99cce886366df9876fca831e7af7802a8a1010aa79f2",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/benchmark_gemma4.py:461",
+      "path": "training/benchmark_gemma4.py",
+      "enclosing_symbol": "run_benchmark",
+      "call": "load_from_checkpoint",
+      "old_line": 461,
+      "old_end_line": 461,
+      "current_line": 461,
+      "current_end_line": 461,
+      "current_source_sha256": "28868d9131b519db127e99cce886366df9876fca831e7af7802a8a1010aa79f2",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/benchmark_quantize.py:60",
+      "path": "training/benchmark_quantize.py",
+      "enclosing_symbol": "",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 60,
+      "old_end_line": 60,
+      "current_line": 60,
+      "current_end_line": 60,
+      "current_source_sha256": "1c83ba7ddaa71fc152c9fcf12fa9acb7f7dd6c6a9f01ed940c94295dcc7f0888",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/benchmark_quantize.py:61",
+      "path": "training/benchmark_quantize.py",
+      "enclosing_symbol": "",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 61,
+      "old_end_line": 61,
+      "current_line": 61,
+      "current_end_line": 61,
+      "current_source_sha256": "1c83ba7ddaa71fc152c9fcf12fa9acb7f7dd6c6a9f01ed940c94295dcc7f0888",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/benchmark_quantize.py:165",
+      "path": "training/benchmark_quantize.py",
+      "enclosing_symbol": "",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 165,
+      "old_end_line": 165,
+      "current_line": 165,
+      "current_end_line": 165,
+      "current_source_sha256": "1c83ba7ddaa71fc152c9fcf12fa9acb7f7dd6c6a9f01ed940c94295dcc7f0888",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/benchmark_quantize.py:168",
+      "path": "training/benchmark_quantize.py",
+      "enclosing_symbol": "",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 168,
+      "old_end_line": 168,
+      "current_line": 168,
+      "current_end_line": 168,
+      "current_source_sha256": "1c83ba7ddaa71fc152c9fcf12fa9acb7f7dd6c6a9f01ed940c94295dcc7f0888",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/eval_whisper_wer.py:53",
+      "path": "training/eval_whisper_wer.py",
+      "enclosing_symbol": "evaluate_adapter",
+      "call": "WhisperProcessor.from_pretrained",
+      "old_line": 53,
+      "old_end_line": 53,
+      "current_line": 53,
+      "current_end_line": 53,
+      "current_source_sha256": "80c271b1cb7c4f6a234e75bb2126e9e45853b42e745eeb74f6f298fd6e65b0a6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/eval_whisper_wer.py:58",
+      "path": "training/eval_whisper_wer.py",
+      "enclosing_symbol": "evaluate_adapter",
+      "call": "WhisperForConditionalGeneration.from_pretrained",
+      "old_line": 58,
+      "old_end_line": 62,
+      "current_line": 58,
+      "current_end_line": 62,
+      "current_source_sha256": "80c271b1cb7c4f6a234e75bb2126e9e45853b42e745eeb74f6f298fd6e65b0a6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/eval_whisper_wer.py:76",
+      "path": "training/eval_whisper_wer.py",
+      "enclosing_symbol": "evaluate_adapter",
+      "call": "PeftModel.from_pretrained",
+      "old_line": 76,
+      "old_end_line": 76,
+      "current_line": 76,
+      "current_end_line": 76,
+      "current_source_sha256": "80c271b1cb7c4f6a234e75bb2126e9e45853b42e745eeb74f6f298fd6e65b0a6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/eval_whisper_wer.py:97",
+      "path": "training/eval_whisper_wer.py",
+      "enclosing_symbol": "evaluate_adapter",
+      "call": "load_dataset",
+      "old_line": 97,
+      "old_end_line": 97,
+      "current_line": 97,
+      "current_end_line": 97,
+      "current_source_sha256": "80c271b1cb7c4f6a234e75bb2126e9e45853b42e745eeb74f6f298fd6e65b0a6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_data_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/evaluate_piper.py:213",
+      "path": "training/evaluate_piper.py",
+      "enclosing_symbol": "load_piper_voice",
+      "call": "PiperVoice.load",
+      "old_line": 213,
+      "old_end_line": 213,
+      "current_line": 213,
+      "current_end_line": 213,
+      "current_source_sha256": "8b8ed680512b9561a484b530b03ba5f9271bea5577f2989fd9767fcb3ad46c2a",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/evaluate_piper.py:219",
+      "path": "training/evaluate_piper.py",
+      "enclosing_symbol": "load_piper_voice",
+      "call": "PiperVoice.load",
+      "old_line": 219,
+      "old_end_line": 219,
+      "current_line": 219,
+      "current_end_line": 219,
+      "current_source_sha256": "8b8ed680512b9561a484b530b03ba5f9271bea5577f2989fd9767fcb3ad46c2a",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "unverified_legacy_named_loader",
+      "historical_residual_remote_risk": null
+    },
+    {
+      "recorded_site_id": "training/evaluate_piper.py:303",
+      "path": "training/evaluate_piper.py",
+      "enclosing_symbol": "transcribe_audio",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 303,
+      "old_end_line": 308,
+      "current_line": 303,
+      "current_end_line": 308,
+      "current_source_sha256": "8b8ed680512b9561a484b530b03ba5f9271bea5577f2989fd9767fcb3ad46c2a",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_sermon.py:389",
+      "path": "training/evaluate_sermon.py",
+      "enclosing_symbol": "evaluate_sermon",
+      "call": "download_model",
+      "old_line": 389,
+      "old_end_line": 389,
+      "current_line": 389,
+      "current_end_line": 389,
+      "current_source_sha256": "6925e306b81dd4a74d650adf5355ea48deff25b3b32e3ef25c53f3947bea8acb",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_sermon.py:390",
+      "path": "training/evaluate_sermon.py",
+      "enclosing_symbol": "evaluate_sermon",
+      "call": "load_from_checkpoint",
+      "old_line": 390,
+      "old_end_line": 390,
+      "current_line": 390,
+      "current_end_line": 390,
+      "current_source_sha256": "6925e306b81dd4a74d650adf5355ea48deff25b3b32e3ef25c53f3947bea8acb",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/evaluate_sermon.py:458",
+      "path": "training/evaluate_sermon.py",
+      "enclosing_symbol": "evaluate_sermon",
+      "call": "download_model",
+      "old_line": 458,
+      "old_end_line": 458,
+      "current_line": 458,
+      "current_end_line": 458,
+      "current_source_sha256": "6925e306b81dd4a74d650adf5355ea48deff25b3b32e3ef25c53f3947bea8acb",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_sermon.py:459",
+      "path": "training/evaluate_sermon.py",
+      "enclosing_symbol": "evaluate_sermon",
+      "call": "load_from_checkpoint",
+      "old_line": 459,
+      "old_end_line": 459,
+      "current_line": 459,
+      "current_end_line": 459,
+      "current_source_sha256": "6925e306b81dd4a74d650adf5355ea48deff25b3b32e3ef25c53f3947bea8acb",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:44",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "load_gemma_model",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 44,
+      "old_end_line": 46,
+      "current_line": 44,
+      "current_end_line": 46,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:53",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "load_gemma_model",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 53,
+      "old_end_line": 58,
+      "current_line": 53,
+      "current_end_line": 58,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:61",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "load_gemma_model",
+      "call": "PeftModel.from_pretrained",
+      "old_line": 61,
+      "old_end_line": 61,
+      "current_line": 61,
+      "current_end_line": 61,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:74",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "load_marian_model",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 74,
+      "old_end_line": 74,
+      "current_line": 74,
+      "current_end_line": 74,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:75",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "load_marian_model",
+      "call": "MarianMTModel.from_pretrained",
+      "old_line": 75,
+      "old_end_line": 75,
+      "current_line": 75,
+      "current_end_line": 75,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:205",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "evaluate_biblical_translation",
+      "call": "download_model",
+      "old_line": 205,
+      "old_end_line": 205,
+      "current_line": 205,
+      "current_end_line": 205,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:206",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "evaluate_biblical_translation",
+      "call": "load_from_checkpoint",
+      "old_line": 206,
+      "old_end_line": 206,
+      "current_line": 206,
+      "current_end_line": 206,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:450",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "evaluate_deepl_reference",
+      "call": "download_model",
+      "old_line": 450,
+      "old_end_line": 450,
+      "current_line": 450,
+      "current_end_line": 450,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/evaluate_translation.py:451",
+      "path": "training/evaluate_translation.py",
+      "enclosing_symbol": "evaluate_deepl_reference",
+      "call": "load_from_checkpoint",
+      "old_line": 451,
+      "old_end_line": 451,
+      "current_line": 451,
+      "current_end_line": 451,
+      "current_source_sha256": "d611f8342433891450b751a1f30076f0c7f8d4a859b3102ac367cbdb2acfb7bd",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/export_ct2.py:116",
+      "path": "training/export_ct2.py",
+      "enclosing_symbol": "merge_adapter_to_bf16",
+      "call": "AutoModelForSpeechSeq2Seq.from_pretrained",
+      "old_line": 116,
+      "old_end_line": 120,
+      "current_line": 116,
+      "current_end_line": 120,
+      "current_source_sha256": "7ba64268a007b4e2bfbae61cbd9ed45e0fe516fb29528c63446cdd69ae03bee9",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/export_ct2.py:124",
+      "path": "training/export_ct2.py",
+      "enclosing_symbol": "merge_adapter_to_bf16",
+      "call": "PeftModel.from_pretrained",
+      "old_line": 124,
+      "old_end_line": 124,
+      "current_line": 124,
+      "current_end_line": 124,
+      "current_source_sha256": "7ba64268a007b4e2bfbae61cbd9ed45e0fe516fb29528c63446cdd69ae03bee9",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/export_ct2.py:143",
+      "path": "training/export_ct2.py",
+      "enclosing_symbol": "merge_adapter_to_bf16",
+      "call": "AutoProcessor.from_pretrained",
+      "old_line": 143,
+      "old_end_line": 143,
+      "current_line": 143,
+      "current_end_line": 143,
+      "current_source_sha256": "7ba64268a007b4e2bfbae61cbd9ed45e0fe516fb29528c63446cdd69ae03bee9",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/export_ct2.py:144",
+      "path": "training/export_ct2.py",
+      "enclosing_symbol": "merge_adapter_to_bf16",
+      "call": "WhisperFeatureExtractor.from_pretrained",
+      "old_line": 144,
+      "old_end_line": 144,
+      "current_line": 144,
+      "current_end_line": 144,
+      "current_source_sha256": "7ba64268a007b4e2bfbae61cbd9ed45e0fe516fb29528c63446cdd69ae03bee9",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/export_ct2.py:220",
+      "path": "training/export_ct2.py",
+      "enclosing_symbol": "sanity_test_ct2",
+      "call": "WhisperModel",
+      "old_line": 220,
+      "old_end_line": 220,
+      "current_line": 220,
+      "current_end_line": 220,
+      "current_source_sha256": "7ba64268a007b4e2bfbae61cbd9ed45e0fe516fb29528c63446cdd69ae03bee9",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/export_gguf.py:61",
+      "path": "training/export_gguf.py",
+      "enclosing_symbol": "merge_adapter_to_bf16",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 61,
+      "old_end_line": 65,
+      "current_line": 61,
+      "current_end_line": 65,
+      "current_source_sha256": "e71f599c20352e04d918ebfa1bfb6f98668012e5a7372db4845069985d7e1709",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/export_gguf.py:69",
+      "path": "training/export_gguf.py",
+      "enclosing_symbol": "merge_adapter_to_bf16",
+      "call": "PeftModel.from_pretrained",
+      "old_line": 69,
+      "old_end_line": 69,
+      "current_line": 69,
+      "current_end_line": 69,
+      "current_source_sha256": "e71f599c20352e04d918ebfa1bfb6f98668012e5a7372db4845069985d7e1709",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/export_gguf.py:81",
+      "path": "training/export_gguf.py",
+      "enclosing_symbol": "merge_adapter_to_bf16",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 81,
+      "old_end_line": 81,
+      "current_line": 81,
+      "current_end_line": 81,
+      "current_source_sha256": "e71f599c20352e04d918ebfa1bfb6f98668012e5a7372db4845069985d7e1709",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/export_piper_onnx.py:278",
+      "path": "training/export_piper_onnx.py",
+      "enclosing_symbol": "validate_exported_model",
+      "call": "PiperVoice.load",
+      "old_line": 278,
+      "old_end_line": 278,
+      "current_line": 278,
+      "current_end_line": 278,
+      "current_source_sha256": "b3debcab336eaa2c59e5caef89fe37589da425425ed5e555ea774d0c9d606738",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/mine_hard_examples.py:114",
+      "path": "training/mine_hard_examples.py",
+      "enclosing_symbol": "mine",
+      "call": "WhisperProcessor.from_pretrained",
+      "old_line": 114,
+      "old_end_line": 114,
+      "current_line": 114,
+      "current_end_line": 114,
+      "current_source_sha256": "67e74b2f10a3f936bf964ab382aceae5e292a3d85773e4dbe692ffc5d463e3c2",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/mine_hard_examples.py:115",
+      "path": "training/mine_hard_examples.py",
+      "enclosing_symbol": "mine",
+      "call": "WhisperForConditionalGeneration.from_pretrained",
+      "old_line": 115,
+      "old_end_line": 119,
+      "current_line": 115,
+      "current_end_line": 119,
+      "current_source_sha256": "67e74b2f10a3f936bf964ab382aceae5e292a3d85773e4dbe692ffc5d463e3c2",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/mine_hard_examples.py:123",
+      "path": "training/mine_hard_examples.py",
+      "enclosing_symbol": "mine",
+      "call": "PeftModel.from_pretrained",
+      "old_line": 123,
+      "old_end_line": 123,
+      "current_line": 123,
+      "current_end_line": 123,
+      "current_source_sha256": "67e74b2f10a3f936bf964ab382aceae5e292a3d85773e4dbe692ffc5d463e3c2",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/prepare_bible_corpus.py:149",
+      "path": "training/prepare_bible_corpus.py",
+      "enclosing_symbol": "download_biblenlp",
+      "call": "load_dataset",
+      "old_line": 149,
+      "old_end_line": 149,
+      "current_line": 149,
+      "current_end_line": 149,
+      "current_source_sha256": "79c67178fd22ec0af13aecc0e53a14e7918d3bc787044be18cb91fd900cf3b73",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_data_pinning",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/prepare_bible_corpus.py:166",
+      "path": "training/prepare_bible_corpus.py",
+      "enclosing_symbol": "download_helsinki",
+      "call": "load_dataset",
+      "old_line": 166,
+      "old_end_line": 166,
+      "current_line": 166,
+      "current_end_line": 166,
+      "current_source_sha256": "79c67178fd22ec0af13aecc0e53a14e7918d3bc787044be18cb91fd900cf3b73",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_data_pinning",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/preprocess_audio.py:261",
+      "path": "training/preprocess_audio.py",
+      "enclosing_symbol": "vad_chunk",
+      "call": "torch.hub.load",
+      "old_line": 261,
+      "old_end_line": 261,
+      "current_line": 261,
+      "current_end_line": 261,
+      "current_source_sha256": "7920a2ce5fad8e185619f9d34d01423932be1721d53bc1f7269ea4ab75920ca6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/preprocess_audio.py:328",
+      "path": "training/preprocess_audio.py",
+      "enclosing_symbol": "diarize_speakers",
+      "call": "Pipeline.from_pretrained",
+      "old_line": 328,
+      "old_end_line": 331,
+      "current_line": 328,
+      "current_end_line": 331,
+      "current_source_sha256": "7920a2ce5fad8e185619f9d34d01423932be1721d53bc1f7269ea4ab75920ca6",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/qe_filter.py:77",
+      "path": "training/qe_filter.py",
+      "enclosing_symbol": "score_pairs",
+      "call": "download_model",
+      "old_line": 77,
+      "old_end_line": 77,
+      "current_line": 77,
+      "current_end_line": 77,
+      "current_source_sha256": "d72644ae19cad7f8e1fd594582f2e98333c4e15d392b54abeaae790af1c1538e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/qe_filter.py:78",
+      "path": "training/qe_filter.py",
+      "enclosing_symbol": "score_pairs",
+      "call": "load_from_checkpoint",
+      "old_line": 78,
+      "old_end_line": 78,
+      "current_line": 78,
+      "current_end_line": 78,
+      "current_source_sha256": "d72644ae19cad7f8e1fd594582f2e98333c4e15d392b54abeaae790af1c1538e",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "downstream_local_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/train_gemma.py:201",
+      "path": "training/train_gemma.py",
+      "enclosing_symbol": "_load_replay_pairs",
+      "call": "load_dataset",
+      "old_line": 201,
+      "old_end_line": 206,
+      "current_line": 201,
+      "current_end_line": 206,
+      "current_source_sha256": "356ca95c8e4a4bc09900c4f227026cd52732ab2018ab03f3e56a0808008f7325",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_data_pinning",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_gemma.py:383",
+      "path": "training/train_gemma.py",
+      "enclosing_symbol": "fine_tune_gemma",
+      "call": "AutoTokenizer.from_pretrained",
+      "old_line": 383,
+      "old_end_line": 383,
+      "current_line": 383,
+      "current_end_line": 383,
+      "current_source_sha256": "356ca95c8e4a4bc09900c4f227026cd52732ab2018ab03f3e56a0808008f7325",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_gemma.py:389",
+      "path": "training/train_gemma.py",
+      "enclosing_symbol": "fine_tune_gemma",
+      "call": "AutoModelForCausalLM.from_pretrained",
+      "old_line": 389,
+      "old_end_line": 395,
+      "current_line": 389,
+      "current_end_line": 395,
+      "current_source_sha256": "356ca95c8e4a4bc09900c4f227026cd52732ab2018ab03f3e56a0808008f7325",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_gemma4.py:210",
+      "path": "training/train_gemma4.py",
+      "enclosing_symbol": "train",
+      "call": "FastModel.from_pretrained",
+      "old_line": 210,
+      "old_end_line": 215,
+      "current_line": 210,
+      "current_end_line": 215,
+      "current_source_sha256": "3442df47a960f6211dce08a09ca83e078ee859b0f794a3ea15cb22f9b1afba8b",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_gemma4_cpo.py:95",
+      "path": "training/train_gemma4_cpo.py",
+      "enclosing_symbol": "train",
+      "call": "FastModel.from_pretrained",
+      "old_line": 95,
+      "old_end_line": 100,
+      "current_line": 95,
+      "current_end_line": 100,
+      "current_source_sha256": "6dfa44ae27b5313b45b8f46d59313d89b57527bee5eb2930f9a0ce65ee1c5e4c",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_gemma4_cpo.py:109",
+      "path": "training/train_gemma4_cpo.py",
+      "enclosing_symbol": "train",
+      "call": "PeftModel.from_pretrained",
+      "old_line": 109,
+      "old_end_line": 109,
+      "current_line": 109,
+      "current_end_line": 109,
+      "current_source_sha256": "6dfa44ae27b5313b45b8f46d59313d89b57527bee5eb2930f9a0ce65ee1c5e4c",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_marian.py:61",
+      "path": "training/train_marian.py",
+      "enclosing_symbol": "fine_tune_marian",
+      "call": "MarianTokenizer.from_pretrained",
+      "old_line": 61,
+      "old_end_line": 61,
+      "current_line": 61,
+      "current_end_line": 61,
+      "current_source_sha256": "7fb4b9f1340776ae72f64552e3d9c2005573a6d711c34f7219d15610557931f7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_marian.py:62",
+      "path": "training/train_marian.py",
+      "enclosing_symbol": "fine_tune_marian",
+      "call": "MarianMTModel.from_pretrained",
+      "old_line": 62,
+      "old_end_line": 62,
+      "current_line": 62,
+      "current_end_line": 62,
+      "current_source_sha256": "7fb4b9f1340776ae72f64552e3d9c2005573a6d711c34f7219d15610557931f7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_marian.py:65",
+      "path": "training/train_marian.py",
+      "enclosing_symbol": "fine_tune_marian",
+      "call": "load_dataset",
+      "old_line": 65,
+      "old_end_line": 65,
+      "current_line": 65,
+      "current_end_line": 65,
+      "current_source_sha256": "7fb4b9f1340776ae72f64552e3d9c2005573a6d711c34f7219d15610557931f7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_data_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/train_marian.py:71",
+      "path": "training/train_marian.py",
+      "enclosing_symbol": "fine_tune_marian",
+      "call": "load_dataset",
+      "old_line": 71,
+      "old_end_line": 71,
+      "current_line": 71,
+      "current_end_line": 71,
+      "current_source_sha256": "7fb4b9f1340776ae72f64552e3d9c2005573a6d711c34f7219d15610557931f7",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_data_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/train_whisper.py:81",
+      "path": "training/train_whisper.py",
+      "enclosing_symbol": "prepare_mixed_dataset",
+      "call": "load_dataset",
+      "old_line": 81,
+      "old_end_line": 85,
+      "current_line": 81,
+      "current_end_line": 85,
+      "current_source_sha256": "74475c19cd455104cf4d3f84bf78e3ef6b410dc4c51bff4570cdd9f37d356ac5",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_data_pinning",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_whisper.py:334",
+      "path": "training/train_whisper.py",
+      "enclosing_symbol": "fine_tune_whisper",
+      "call": "WhisperProcessor.from_pretrained",
+      "old_line": 334,
+      "old_end_line": 334,
+      "current_line": 334,
+      "current_end_line": 334,
+      "current_source_sha256": "74475c19cd455104cf4d3f84bf78e3ef6b410dc4c51bff4570cdd9f37d356ac5",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_whisper.py:338",
+      "path": "training/train_whisper.py",
+      "enclosing_symbol": "fine_tune_whisper",
+      "call": "WhisperForConditionalGeneration.from_pretrained",
+      "old_line": 338,
+      "old_end_line": 343,
+      "current_line": 338,
+      "current_end_line": 343,
+      "current_source_sha256": "74475c19cd455104cf4d3f84bf78e3ef6b410dc4c51bff4570cdd9f37d356ac5",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/train_whisper.py:457",
+      "path": "training/train_whisper.py",
+      "enclosing_symbol": "fine_tune_whisper",
+      "call": "load_dataset",
+      "old_line": 457,
+      "old_end_line": 457,
+      "current_line": 457,
+      "current_end_line": 457,
+      "current_source_sha256": "74475c19cd455104cf4d3f84bf78e3ef6b410dc4c51bff4570cdd9f37d356ac5",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "local_data_load",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "training/transcribe_church.py:47",
+      "path": "training/transcribe_church.py",
+      "enclosing_symbol": "transcribe_with_transformers",
+      "call": "pipeline",
+      "old_line": 47,
+      "old_end_line": 52,
+      "current_line": 47,
+      "current_end_line": 52,
+      "current_source_sha256": "e3a9cde8c18cf2a8bda9ff07dff7038540d61cb947c159c7961d6c5b82f7334d",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/transcribe_church.py:168",
+      "path": "training/transcribe_church.py",
+      "enclosing_symbol": "transcribe_with_faster_whisper",
+      "call": "WhisperModel",
+      "old_line": 168,
+      "old_end_line": 168,
+      "current_line": 168,
+      "current_end_line": 168,
+      "current_source_sha256": "e3a9cde8c18cf2a8bda9ff07dff7038540d61cb947c159c7961d6c5b82f7334d",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "training/transcribe_sermons.sh:143",
+      "path": "training/transcribe_sermons.sh",
+      "enclosing_symbol": "shell_or_embedded_python",
+      "call": "model = WhisperModel",
+      "old_line": 143,
+      "old_end_line": 143,
+      "current_line": 143,
+      "current_end_line": 143,
+      "current_source_sha256": "d1c10d3660c1963f638fb45bd179ae16569c0ff17371767ead827ed50c9808b1",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "training_export_evaluation"
+      ],
+      "historical_pinning_scope": "residual_optional_or_offline",
+      "historical_residual_remote_risk": true
+    },
+    {
+      "recorded_site_id": "workers.py:47",
+      "path": "workers.py",
+      "enclosing_symbol": "stt_worker_main",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 47,
+      "old_end_line": 51,
+      "current_line": 47,
+      "current_end_line": 51,
+      "current_source_sha256": "11bc686f45581f184a3c85114ef17959693d918a37def13e240872101a78a909",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    },
+    {
+      "recorded_site_id": "workers.py:65",
+      "path": "workers.py",
+      "enclosing_symbol": "stt_worker_main",
+      "call": "mlx_whisper.transcribe",
+      "old_line": 65,
+      "old_end_line": 72,
+      "current_line": 65,
+      "current_end_line": 72,
+      "current_source_sha256": "11bc686f45581f184a3c85114ef17959693d918a37def13e240872101a78a909",
+      "match": "source_file_byte_identical",
+      "historical_roles": [
+        "optional_live"
+      ],
+      "historical_pinning_scope": "targeted_core_mac_and_worker_pinning",
+      "historical_residual_remote_risk": false
+    }
+  ],
+  "added_sources_inspected": [
+    {
+      "path": "tools/capture_protocol.py",
+      "sha256": "01a7f1df657359638c8e7e462d4103c79f145453c5e9e9135e7f17b28628a06a",
+      "size_bytes": 7132,
+      "imports": [
+        "__future__",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "tempfile"
+      ],
+      "model_download_or_loader_call_sites_identified": 0,
+      "classification": "stdlib metadata-only capture receipt validation",
+      "basis": "Complete source inspection; not an exhaustive transitive audit or new repo-wide call inventory."
+    },
+    {
+      "path": "docs/evaluation/mac_followup_20260910/normalized-replay-integrity-closeout/review_metadata.py",
+      "sha256": "033f30697e62922ce3daa0c72f2ff1382aa49d84bcc0b3fa957f966be0e725de",
+      "size_bytes": 10872,
+      "imports": [
+        "argparse",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib"
+      ],
+      "model_download_or_loader_call_sites_identified": 0,
+      "classification": "offline stdlib archive-metadata reviewer; no archive/audio/model contents read",
+      "basis": "Complete source inspection; not an exhaustive transitive audit or new repo-wide call inventory."
+    }
+  ],
+  "excluded_tests": {
+    "original_count": 169,
+    "added": [
+      "tests/test_capture_accounting.py"
+    ],
+    "current_excluded_same_glob_count": 170,
+    "executed": false
+  },
+  "dependency_delta": {
+    "path": "pyproject.toml",
+    "current_sha256": "1c25e0c170b46df6115257e3672fc9530ffc2457e7577840b57f4df1c855404d",
+    "change": "The eval extra adds soundfile>=0.12. No model ID, revision, loader selection or Standard Torch constraint changes; this is not a dependency security clearance."
+  },
+  "manifest": {
+    "path": "models.lock.json",
+    "sha256": "3736cfc8c71bb8492d3812e6da6eceabf7f027af7ea14086923277cb5639037f",
+    "matches_original_inventory": true
+  },
+  "historical_residual_scope": {
+    "optional_live_sites": 13,
+    "optional_live_by_file": {
+      "engines/cuda_engine.py": 7,
+      "engines/hf_whisper_engine.py": 3,
+      "engines/parakeet_engine.py": 1,
+      "tools/live_caption_monitor.py": 2
+    },
+    "training_export_evaluation_sites": 105,
+    "unverified_legacy_named_loader_sites": 1,
+    "legacy_site": "training/evaluate_piper.py:219 PiperVoice.load",
+    "interpretation": "All residual-bearing files retain the recorded bytes; none of these findings is cleared by the capture/Stop changes. Selected Mac MLX/shared setup paths stay distinct from optional CPU/CUDA/HF/NeMo/monitor paths and offline tooling."
+  },
+  "startup_fallback_note": "fb44a0f English acquisition-failure fallback and Spanish/unpinned-ID guards were already present in the 476e349 inventory. load_whisper remains AST-identical at c13; this companion does not relabel that fix as new.",
+  "native_boundaries": "No new imports, tests, native/model/device calls, network accesses or model-byte reads occurred here. Optional SpeechBrain/Pyannote inference and gated segmentation availability remain unproven by this source continuity; the earlier HTTP403 evidence is unchanged.",
+  "later_validation_links": {
+    "source_validation": ".cache/mac-en-es-closeout/final-sequence-v1",
+    "installed_smoke_metadata": ".cache/mac-en-es-closeout/final-delivery-v5-smoke-review/analysis.json",
+    "qualification": "These are separate source-specific runtime receipts, not part of the inventory scan and not full-service/optional-diarization certification."
+  },
+  "method": [
+    "Hash only original listed small source files and models.lock.json, preserving baseline inventory bytes.",
+    "Read Git source-name delta between exact commits; inspect all four changed existing sources plus two new non-test Python sources and dependency line.",
+    "Compare actual AST call expressions and enclosing functions for the four recorded sites in changed dry_run_ab.py; byte-match all other recorded sites.",
+    "Record exact old/current line references and source SHA-256; no application modules imported."
+  ],
+  "limits": [
+    "This delta inspection is not a full new Bandit/B615 scan, transitive library audit or security certification.",
+    "Source pinning does not certify model trust, semantic quality, gated access, native compatibility, or device reliability.",
+    "Current snapshot hashes for local source do not attest to model weight bytes.",
+    "Full-service delivery receipts were still pending when this companion was prepared."
+  ]
+}

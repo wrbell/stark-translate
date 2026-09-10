@@ -1,9 +1,10 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
 > **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
-> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
-> installed dependency candidate and operator/device findings. Final experiments,
-> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
+> source-accounted screens and silent hymn diagnostics. No screened arm qualified;
+> defaults remain unchanged. Final artifact, service and merge status is recorded in
+> [implementation status](docs/mac_implementation_status.md).
 
 
 > **Machine:** MacBook Pro M3 Pro (Mac15,6), 18 GB unified memory, 12-core CPU, 18-core GPU,
@@ -108,7 +109,7 @@ python dry_run_ab.py                                   # EN→ES, mic, Mac defau
 python dry_run_ab.py --lang es                         # ES→EN
 python dry_run_ab.py --audio-file clip.wav --session-id demo_en   # file replay, exits after drain
 python dry_run_ab.py --dry-run-text "For God so loved the world"  # no mic
-python dry_run_ab.py --gemma4-size e2b                 # separately evaluated fast finals
+python dry_run_ab.py --gemma4-size e2b                 # opt-in model; compare latency and quality
 python dry_run_ab.py --tts --tts-output local --tts-device-en "MacBook Pro Speakers" --tts-device-es "BlackHole 2ch"
 python dry_run_ab.py --diarize --diarize-mode embed    # live speaker labels (gate not run, #133)
 ```
@@ -141,10 +142,16 @@ What changed (integrated on the candidate branch, `c5fb689`):
   `operator_app/work_lease.py` allows one model/audio job per operator.
 
 **Attended September 10 retest:** EN and ES real microphone sessions reached ready
-and stopped cleanly; EN pause/resume and language restart passed. No speech was detected
-in the quiet room. [Exact receipts](docs/evaluation/attended_mic_20260910/README.md)
-separate mic capture from the controlled replay that delivered a visible bilingual final.
-Spoken microphone captions, physical second output and hotplug remain pending; #131 is open.
+and stopped cleanly; EN pause/resume and language restart passed. The initial
+quiet room had no detected speech. [Exact quiet-room receipts](docs/evaluation/attended_mic_20260910/README.md)
+keep capture separate from the controlled replay with a visible bilingual final.
+Later [synthetic acoustic checks](docs/evaluation/tts_routing_20260910/README.md)
+produced captions: English completed, but Spanish and its traced retest failed.
+The retest measured five dropped worker FIFO callbacks, not a measured PortAudio
+driver overflow. The [accounting repair](docs/evaluation/mac_followup_20260910/capture-loss-accounting.md)
+preserves that failure and reports FIFO loss separately from native overflow
+with an unknown sample count. Sustained live microphone acceptance remains
+pending under #131; physical output and hotplug are separate gates.
 
 ---
 
@@ -154,7 +161,7 @@ Spoken microphone captions, physical second output and hotplug remain pending; #
 - **Stop tokens:** `ensure_stop_tokens()` adds the family's turn terminator and preserves loader EOS ids; Gemma 4 uses `<turn|>`, TranslateGemma `<end_of_turn>`. The old "add id 106 by hand" fix must not be applied to Gemma 4. Details: [`engines/CLAUDE.md`](engines/CLAUDE.md).
 - **Marian/VAD PyTorch:** share `_pytorch_lock`; VAD stays on the asyncio thread.
 - **Confidence flagging:** English Whisper finals can retry with the fallback model when `avg_logprob < -1.2` or `compression_ratio > 2.4`; automatic fallback is disabled for Spanish so English-only Distil cannot produce Spanish results. Words with probability `< 0.5` are listed as low-confidence; fallback events go to the active-learning JSONL. Parakeet confidence is a TDT proxy and does not use this fallback chain.
-- **Music hold:** `--music-threshold` / `--music-holdoff` configure an energy/VAD heuristic: sustained high-energy audio classified as non-speech can hold new STT and emit `music_hold`. It can miss singing; the fresh Standard hour retained hymn-region fragments without recorded hold events. For attended live use, **Pause** before or during congregational singing and **Resume** before spoken prayer/preaching. See the [runbook](docs/operator_runbook.md); automatic singing suppression is not validated.
+- **Music hold:** `--music-threshold` / `--music-holdoff` configure an energy/VAD heuristic: sustained high-energy audio classified as non-speech can hold new STT and emit `music_hold`. It can miss singing; the earlier installed Standard hour retained hymn-region fragments without recorded hold events. For attended live use, **Pause** before or during congregational singing and **Resume** before spoken prayer/preaching. See the [runbook](docs/operator_runbook.md); automatic singing suppression is not validated.
 - **Timing:** schema 2 `speech_end_to_final_ms` (server) and `speech_end_to_ack_upper_bound_ms` (visible browser, includes return network) — legacy `e2e_latency_ms` is processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/README.md); measured history: [`docs/archive/v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md).
 
 ---

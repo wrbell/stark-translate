@@ -8,10 +8,10 @@
 
 - **Main release:** `v2026.13` — Verified main is 958bb5c9425473256038bae04ce95ee1c32c7ae8. PR #192 remains merged; the new PR #196 follow-up is still a draft. v2026.13 remains the last published release.
 - **Local candidate:** `2026.14.0.0` on `codex/mac-en-es-closeout` (base `958bb5c9425473256038bae04ce95ee1c32c7ae8`)
-- **Draft PR:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) — open draft Mac EN↔ES follow-up on codex/mac-en-es-closeout; not merged. Experiments, final artifact checks and review remain in progress.
+- **Draft PR:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) — open draft Mac EN↔ES follow-up on codex/mac-en-es-closeout; not merged. Bounded experiment screens and c13 source checks are complete; final delivery reporting, Lite service and merge review remain in progress.
 - **Publication:** User authorized source merge after validation. PyPI, GHCR, release uploads and new tags remain pending by user choice.
 
-PR #192 integration and its immutable test/artifact/service evidence remain complete. PR #196 is a separate active follow-up with its own source identities. Final-source validation and merge are pending; neither source integration nor file replay certifies human or physical-device gates.
+PR #192 integration and its immutable evidence remain complete. PR #196 is a separate follow-up with completed source-bound experiments and c13 source validation. Installed delivery reconciliation and source merge remain pending; neither integration nor file replay certifies human or physical-device gates.
 
 ## Status vocabulary
 
@@ -62,21 +62,21 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
-- **Sources:** [#193](https://github.com/wrbell/stark-translate/issues/193), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`, `docs/evaluation/mac_followup_20260910/hymn-annotation-protocol.md`
+- **Sources:** [#193](https://github.com/wrbell/stark-translate/issues/193), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`, `docs/evaluation/mac_followup_20260910/hymn-annotation-protocol.md`, `docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md`
 - **Acceptance:** On a bounded, human-labeled natural hymn→speech transition, measure unwanted captions, suppressed legitimate speech and recovery alongside unchanged controls and partial/final latency. Include quiet prayer and short valid EN/ES replies; no global short-word blacklist or inferred reference labels from generated captions.
 - **Evidence:** Repaired Standard emitted hymn-context fragments including “It dies a” and “Changing uh” while process health remained normal. No music-hold event was recorded. Current energy/VAD logic is a heuristic, not a validated music classifier; absence of its event does not establish exactly why the streak threshold was not met.
-- **Notes:** Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately. Commit 26f854c retains accepted speech onset without changing the existing 15-frame recovery decision; pending/recovered source dispositions and pause-spanning hold logs are explicit. Regression CI on ffa34c5 passed Python 3.11/3.12 and lint.
-- **Next action:** Run the prepared single silent E4B 350-second diagnostic in a reserved model window using actual VAD/RMS/source/EOF trace fields. Keep acoustic labels uncertain until independently reviewed. Further microphone or speaker testing is prohibited this session; detector changes require unchanged controls and legitimate-speech/quality guards.
+- **Notes:** Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately. Commit 26f854c retains accepted speech onset without changing the existing 15-frame recovery decision; pending/recovered source dispositions and pause-spanning hold logs are explicit. Regression CI on ffa34c5 passed Python 3.11/3.12 and lint. The c13f51f 350-second file control completed with 18 finals and all 114 required writes; no music hold activated. Exact VAD/RMS streak accounting explains that observation, without acoustic labels or validating recovery from a natural hold.
+- **Next action:** Independently label the prepared natural search regions, including quiet speech and short replies. Only then compare bounded opt-in detector thresholds against unchanged controls; the completed control and fixed-decision arithmetic do not certify a classifier or justify defaults.
 
 ### `hymn-translation-boundary` — Preserve title/sentence meaning in natural hymn captions (#194)
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
 - **Depends on:** `bilingual-blinded-review`
-- **Sources:** [#194](https://github.com/wrbell/stark-translate/issues/194), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`
+- **Sources:** [#194](https://github.com/wrbell/stark-translate/issues/194), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`, `docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md`
 - **Acceptance:** With independently reviewed source boundaries and bilingual references, preserve the intended subject/title boundary on the retained natural hymn example without hard-coded word substitutions. Compare unchanged controls, report subject/negation/name/theological meaning errors and preview/final latency before any prompt or context promotion.
 - **Evidence:** Repaired Standard session 20260910_043120_839144_en, chunk 3, source 414.592–422.592 s, installed 752ab9a: the recognized string includes “Eternity Time will soon end”, but the Spanish final says “La eternidad pronto terminará.” QE 1.0 did not flag the changed meaning. Audio punctuation and the bilingual reference remain unreviewed.
-- **Notes:** Open quality follow-up #194 from the completed #134 rehearsal. Retained evidence is not an approved correction, model-default promotion or attribution of the whole error to one pipeline stage. Earlier operator UX blockers were fixed separately. Commit 7c06b27 preserves existing text delimiters through correction; it cannot reconstruct absent STT boundaries. A silent paired raw/delimited E4B/E2B experiment is prepared; source-fix CI on ffa34c5 passed Python 3.11/3.12 and lint.
-- **Next action:** Run the bounded raw/delimited and contrastive-input comparison through the actual correction stage, retaining outputs and timing. Obtain independent audio-boundary/bilingual review before any prompt or context promotion.
+- **Notes:** Open quality follow-up #194 from the completed #134 rehearsal. Retained evidence is not an approved correction, model-default promotion or attribution of the whole error to one pipeline stage. Earlier operator UX blockers were fixed separately. Commit 7c06b27 preserves existing text delimiters through correction; it cannot reconstruct absent STT boundaries. A silent paired raw/delimited E4B/E2B experiment completed 102 calls across 34 cells, each with three repeats; raw title/subject errors and supplied delimiter hypotheses are retained without approval; source-fix CI on ffa34c5 passed Python 3.11/3.12 and lint.
+- **Next action:** Obtain independent audio-boundary and bilingual review of the completed raw/delimited comparison before any prompt or context promotion. Supplied punctuation is a hypothesis; no audio boundary was inferred or approved.
 
 ### `packaging-artifacts-local` — v2026.14 wheel, sdist and Mac ZIP local validation
 
@@ -109,10 +109,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P2 · **Machine:** both · **Certification:** pending
 - **Depends on:** none
-- **Sources:** `docs/evaluation/mac_v2026_14_security.md`, `docs/evaluation/security_feasibility_20260910/README.md`, `docs/evaluation/mac_followup_20260910/live-hf-pinning.md`, `docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json`
+- **Sources:** `docs/evaluation/mac_v2026_14_security.md`, `docs/evaluation/security_feasibility_20260910/README.md`, `docs/evaluation/mac_followup_20260910/live-hf-pinning.md`, `docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json`, `docs/evaluation/mac_followup_20260910/final-c13f51f/model-source-continuity.md`
 - **Acceptance:** Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).
-- **Notes:** Mac MLX primary/fallback Whisper, Parakeet, Gemma/draft, workers, operator summary and optional live SpeechBrain/Pyannote paths now resolve local overrides or registered immutable snapshots. Selected HF setup entries require full commits before any cache mutation. Optional Pyannote segmentation access remains HTTP 403. The complete source inventory distinguishes 105 offline residual calls, 13 optional alternative live calls and one unverified legacy Piper API; no global B615 clearance or native diarization certification is claimed. Source review and CI are still resolving final follow-up changes.
-- **Next action:** Complete final source review, refresh loader inventory hashes after any repair, and bind CI/installed tests to the resulting code. Preserve documented alternative-backend/offline residuals as separate scope; do not describe every runtime as fully pinned.
+- **Notes:** Mac MLX primary/fallback Whisper, Parakeet, Gemma/draft, workers, operator summary and optional live SpeechBrain/Pyannote paths now resolve local overrides or registered immutable snapshots. Selected HF setup entries require full commits before any cache mutation. Optional Pyannote segmentation access remains HTTP 403. The complete source inventory distinguishes 105 offline residual calls, 13 optional alternative live calls and one unverified legacy Piper API; no global B615 clearance or native diarization certification is claimed. The additive c13f51f continuity review matches all 173 original call sites; 207/211 inventoried source files are byte-identical and the four changed files preserve loader behavior. The original inventory remains unchanged. Selected source and actual Gemma checks passed without clearing the broader residuals.
+- **Next action:** Resolve or explicitly scope the remaining 13 optional alternative-live residuals separately from 105 offline calls and the legacy Piper loader. Preserve the gated segmentation HTTP 403 dependency and installed-audit limitations; do not describe all runtimes as fully pinned.
 
 ## Pending Input Or Hardware
 
@@ -325,15 +325,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Profile/setup/doctor/launcher integration and isolated Mac CPU synthetic EN/ES smokes are recorded. Natural English session 20260910_053518_894101_en completed on 752 with 468 finals/271 previews consistent, 1,979 writes complete and cleanup. First translated preview coverage 174/468 and large observed final tails do not support fast-production recommendation. Three selected waveform windows match; no all-source coverage, x86/RAM-floor or human-quality certification. Frozen eddb0ad cadence screen completed 24 runs but selected 0/4 arms because of preview loss. Separate CPU STT quality v2 completed 600 items: base WER 8.97% versus small 5.38% EN, 11.52% versus 5.21% ES, above the frozen tolerance in all repeats. Shorter base calls do not qualify a pipeline trial. Original missing-SoundFile failures remain separate; fresh evaluation dependencies preserve all prior versions. Independent CPU Lite deadline screen completed 24 technically valid runs at 0.6-second cadence, selecting 0/4 EN/ES arms. No independently qualified components exist for confirmation or combination; defaults remain unchanged.
 - **Next action:** Complete fresh final-source installed Standard and CPU Lite service rehearsals and document the unmet speed goal. No rejected Standard/Spanish/Lite/base candidate enters confirmation or a combination. Human meaning, visible display, x86/RAM-floor and device certification retain their separate requirements.
 
-### `overnight-reliability` — Process supervision, work leases and isolated audio capture
-
-- **Priority:** P1 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `operator_app/processes.py`, `operator_app/work_lease.py`, `operator_app/support.py`, `tools/capture_worker.py`, `tools/isolated_audio.py`, `tools/pipeline_health.py`, `docs/evaluation/mac_followup_20260910/capture-loss-accounting.md`, `docs/evaluation/mac_followup_20260910/stop-cancellation.md`
-- **Acceptance:** Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.
-- **Notes:** Integrated health/readiness, owned-process cleanup, work leases, bounded capture handoff, required-write ledger and support/logging contracts are tested. Repaired installed Standard completed all 7,594 required writes with zero pending/failed and verified pipeline/descendant cleanup. Original source-bound failure remains recorded; the 752 buffer-discard and authoritative-final guards address its discovered reliability defects with regression coverage. Real-microphone behavior still needs the next attended retest; file evidence does not certify it. d7ed43d closes FIFO/native-overflow accounting holes through pause/stop, including losses with no subsequent frame and statuses parsed but not consumed. Unknown native sample loss stays null; ordinary Stop-tail residue stays informational. Mocked 45 tests/20 subtests and independent review passed; native reliability is still unvalidated. Python 3.11 wait_for could swallow the first Stop as queue.get completed; the same-task asyncio.timeout repair preserves the 0.1-second idle timeout. A deterministic in-memory restoration reproduces the old failure; focused production-loop/capture checks pass 88 tests plus 20 subtests.
-- **Next action:** Bind final-source CPU/static tests and fresh installed Standard/Lite rehearsals to this follow-up. Preserve prior completed 752ab9a Standard and Lite receipts; further live microphone/output testing is deferred by user instruction.
-
 ### `issue-137-active-learning` — Active learning — low-confidence to operator correction (#137)
 
 - **Priority:** P2 · **Machine:** both · **Certification:** pending
@@ -343,15 +334,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** An operator approves a correction from a recorded Sunday session, the pair reaches a dated corpus with provenance, and the documented correction → merge → smoke-retrain workflow is exercised. The first retrain may be a dry run; a merger dry run alone is not the retrain step.
 - **Notes:** Review drafts survived save/reload on a real replay while original diagnostics remained unchanged. The actual unapproved correction was rejected by scratch training/evaluation export; merger now rejects explicit unapproved, excluded, evaluation-only and protected holdout targets. Conditional correction→merge→CPU trainer-preflight commands are documented. No human-approved Sunday correction or smoke-retrain execution is fabricated.
 - **Next action:** After human approval of a recorded Sunday correction, run the documented scratch export/merge and actual trainer CPU preflight with real WSL inputs, retaining dated provenance. Live mic is not an extra prerequisite for reviewing a recorded session.
-
-### `overnight-operator-ui` — Operator UI caption and QR widgets
-
-- **Priority:** P2 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `displays/operator/widgets/captions.js`, `displays/operator/widgets/qr.js`, `displays/operator/widgets/sparkline.js`, `docs/operator_runbook.md`
-- **Acceptance:** Widgets integrated, HTML5 Tidy clean, and the operator runbook updated with root-recorded UI evidence.
-- **Notes:** Actual integrated browser sessions exercised EN↔ES switching, Pause/Resume/Stop, unapproved draft recovery and metadata-only support download. Repaired Standard added a full natural-service Live/hymn/prayer view, preserved draft revision 1 with both approvals false, and an actual long-summary UI result disclosing omitted middle content. No successful reload or human summary-fidelity approval is inferred. QR oracle/decoder checks and all six HTML5 Tidy checks passed; final production caption guards are covered by the frozen 752 suite.
-- **Next action:** Finalize the current runbook/evidence links and blocking UX issue mapping. Keep live microphone, physical outputs and human quality in their separate gates.
 
 ### `wsl-training-recipe-checks` — Repair unexecuted W17 projection and domain-corpus recipe assumptions
 
@@ -374,14 +356,14 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** The laptop stand-in used the installed 752ab9a Standard runtime on the uncropped 3,640.053 s natural English service. Session 20260910_043120_839144_en completed exit 0 with consistent bounds for 563 finals and 2,814 previews, all 7,594 required writes complete and observed cleanup. Actual SPA hymn→prayer chronology, prepared operator launch-to-first-server-preview 436.790088 s and actual Start-to-first-server-preview 420.492–420.762 s (including 403.1448125 s of source zeros), operator/helper steps and a post-Stop long summary are retained. First-install/download time was not measured; the summary omitted the transcript middle and is not human-reviewed. Original b65 failures stay separate. The written report and verified archive are linked; remaining hymn behavior is mapped to #193 and #194 as quality follow-ups; earlier operator UX blockers were fixed. #134 closed COMPLETED at 2026-09-10T11:57:48Z after the recorded source merge.
 - **Next action:** Rehearsal acceptance is met. Continue open hymn/quality follow-ups #193/#194 and separate microphone/device/human gates without relabeling them as #134 requirements.
 
-### `mac-cpu-test-suite` — Frozen 752ab9a CPU, GPU and prescribed static validation
+### `mac-cpu-test-suite` — Source-bound CPU, GPU and prescribed static validation
 
 - **Priority:** P0 · **Machine:** mac · **Certification:** met
 - **Depends on:** none
-- **Sources:** `docs/mac_implementation_status.md`, `.github/workflows/test.yml`, `docs/evaluation/overnight_validation_20260910.json`, `docs/evaluation/mac_followup_20260910/capture-source-validation.md`
+- **Sources:** `docs/mac_implementation_status.md`, `.github/workflows/test.yml`, `docs/evaluation/overnight_validation_20260910.json`, `docs/evaluation/mac_followup_20260910/capture-source-validation.md`, `docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md`
 - **Acceptance:** Recorded pass/skip/coverage in mac_implementation_status.md above the test.yml coverage gate.
-- **Notes:** Frozen 752ab9a351815feee4b8cd155f732c588cb30a6c passed 2,363 CPU-suite tests with four skips and 63.80% coverage. Three separate real GPU regressions passed in 21.16 s. Ruff/format, mypy engines/settings, widened CI-scope Bandit and all six HTML5 Tidy checks passed. The earlier 2,213-test receipt is historical and must remain unchanged when the current validation companion is refreshed. Subsequent capture repair/fake-interface correction passed full f7b959d CI: 2,834 tests, six skips, 20 subtests and 66.49% coverage on both Python 3.11/3.12. Six earlier d7ed43d fixture failures remain preserved. Installed Lite audit covered 60 dependencies with zero known vulnerabilities; [eval] and unchanged broader environments were not cleared.
-- **Next action:** Bind current documentation to the 752 validation receipt. Later docs/workflow tests and final-head CI must have their own identities; repeat runtime checks only when subsequent changes warrant them.
+- **Notes:** Frozen 752ab9a351815feee4b8cd155f732c588cb30a6c passed 2,363 CPU-suite tests with four skips and 63.80% coverage. Three separate real GPU regressions passed in 21.16 s. Ruff/format, mypy engines/settings, widened CI-scope Bandit and all six HTML5 Tidy checks passed. The earlier 2,213-test receipt is historical and must remain unchanged when the current validation companion is refreshed. Subsequent capture repair/fake-interface correction passed full f7b959d CI: 2,834 tests, six skips, 20 subtests and 66.49% coverage on both Python 3.11/3.12. Six earlier d7ed43d fixture failures remain preserved. Installed Lite audit covered 60 dependencies with zero known vulnerabilities; [eval] and unchanged broader environments were not cleared. Final inference source c13f51f passed 2,837 local CPU tests, four skips and 20 subtests at 66.62% coverage; three actual MLX tests and all 11 static commands passed. Separate isolated pre-commit passed seven hooks. Exact-head GitHub Python 3.11/3.12 each passed 2,835 tests, six skips and 20 subtests at 66.49%; its successful coverage-comment step had a separately repaired JSON-input reporting annotation.
+- **Next action:** Keep each source-bound validation receipt intact. Validate the later monitor/reporting and documentation changes separately; source integration and security/human/device acceptance remain distinct.
 
 ### `mac-defaults-frozen` — Retain Mac defaults after separate 48-run and 96-run English screens
 
@@ -424,7 +406,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing.
 - **Next action:** Close #132 after the final reviewed merge using the retained acceptance audit. Keep integrated caption-triggered playback, human audibility, far-end reception and physical unplug/replug as separate follow-ups. No microphone capture or output playback is permitted for the rest of this session.
 
-### `mac-torch-security-migration` — Resolve pinned Mac Torch dependency advisories
+### `mac-torch-security-migration` — Patched Mac Torch/audio candidate feasibility
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** met
 - **Depends on:** none
@@ -441,6 +423,24 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** Merged into the PR branch behind opt-in flags with tests; a frozen-screen replay shows a matched delivery improvement on both models or the experiment is recorded as rejected.
 - **Notes:** Opt-in implementation and tests are integrated. The complete 96-run screen recorded the negative outcome: 0/28 experiment/model arms selected; all remain opt-in, with no ordinary confirmation or combination justified. This meets this item's acceptance alternative of recording rejected experiments, not the separate sub-second or quality gates.
 - **Next action:** Retain negative evidence and unchanged defaults. Any follow-up needs a new explicit hypothesis and separate evidence.
+
+### `overnight-reliability` — Process supervision, work leases and isolated audio capture
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** met
+- **Depends on:** none
+- **Sources:** `operator_app/processes.py`, `operator_app/work_lease.py`, `operator_app/support.py`, `tools/capture_worker.py`, `tools/isolated_audio.py`, `tools/pipeline_health.py`, `docs/evaluation/mac_followup_20260910/capture-loss-accounting.md`, `docs/evaluation/mac_followup_20260910/stop-cancellation.md`, `docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md`
+- **Acceptance:** Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.
+- **Notes:** Integrated health/readiness, owned-process cleanup, work leases, bounded capture handoff, required-write ledger and support/logging contracts are tested. Repaired installed Standard completed all 7,594 required writes with zero pending/failed and verified pipeline/descendant cleanup. Original source-bound failure remains recorded; the 752 buffer-discard and authoritative-final guards address its discovered reliability defects with regression coverage. Real-microphone behavior still needs the next attended retest; file evidence does not certify it. d7ed43d closes FIFO/native-overflow accounting holes through pause/stop, including losses with no subsequent frame and statuses parsed but not consumed. Unknown native sample loss stays null; ordinary Stop-tail residue stays informational. Mocked 45 tests/20 subtests and independent review passed; native reliability is still unvalidated. Python 3.11 wait_for could swallow the first Stop as queue.get completed; the same-task asyncio.timeout repair preserves the 0.1-second idle timeout. A deterministic in-memory restoration reproduces the old failure; focused production-loop/capture checks pass 88 tests plus 20 subtests. The c13f51f source validation binds current integrated behavior, real production regressions and all six HTML5 Tidy checks to this unchanged implementation acceptance. The current runbook links root-recorded operator evidence. Native capture, physical outputs and human approval remain separate pending gates.
+- **Next action:** Retain implementation evidence and pursue only the separately listed native capture, physical output and human-quality gates when their required inputs are available.
+
+### `overnight-operator-ui` — Operator UI caption and QR widgets
+
+- **Priority:** P2 · **Machine:** mac · **Certification:** met
+- **Depends on:** none
+- **Sources:** `displays/operator/widgets/captions.js`, `displays/operator/widgets/qr.js`, `displays/operator/widgets/sparkline.js`, `docs/operator_runbook.md`, `docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md`
+- **Acceptance:** Widgets integrated, HTML5 Tidy clean, and the operator runbook updated with root-recorded UI evidence.
+- **Notes:** Actual integrated browser sessions exercised EN↔ES switching, Pause/Resume/Stop, unapproved draft recovery and metadata-only support download. Repaired Standard added a full natural-service Live/hymn/prayer view, preserved draft revision 1 with both approvals false, and an actual long-summary UI result disclosing omitted middle content. No successful reload or human summary-fidelity approval is inferred. QR oracle/decoder checks and all six HTML5 Tidy checks passed; final production caption guards are covered by the frozen 752 suite. The c13f51f source validation binds current integrated behavior, real production regressions and all six HTML5 Tidy checks to this unchanged implementation acceptance. The current runbook links root-recorded operator evidence. Native capture, physical outputs and human approval remain separate pending gates.
+- **Next action:** Retain implementation evidence and pursue only the separately listed native capture, physical output and human-quality gates when their required inputs are available.
 
 ### `issue-176-multiprocess` — --multiprocess workers use shared Gemma 4 prompts and stop rules (#176)
 
@@ -462,5 +462,5 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 | Pending Input Or Hardware | 13 |
 | Experimental | 1 |
 | Deferred | 5 |
-| Implemented | 7 |
-| Validated | 9 |
+| Implemented | 5 |
+| Validated | 11 |

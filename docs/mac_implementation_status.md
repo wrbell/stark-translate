@@ -1,9 +1,10 @@
 # Mac implementation status — September 10 source and evidence
 
-> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
-> [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
-> installed dependency candidate and operator/device findings. Final experiments,
-> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) remains a draft.
+> The [EN↔ES experiment screens](evaluation/mac_followup_20260910/README.md),
+> c13 source validation and silent hymn diagnostics are complete. No arm qualified
+> for a default change. Installed delivery reconciliation and merge review remain
+> in progress; the exact source and acceptance limits are recorded below.
 
 
 > **Follow-up, September 10:** [Current EN/ES work](evaluation/mac_followup_20260910/README.md)
@@ -54,6 +55,35 @@ The [completed 96-run screen](evaluation/overnight_screen_20260910/README.md) se
   and release version/tag identity checks.
 
 ## Evidence and active validation
+
+The [c13f51f source validation](evaluation/mac_followup_20260910/final-c13f51f/source-validation.md)
+records 2,837 local passing tests, four skips, 20 subtests and 66.62% coverage;
+three actual text-only MLX checks, 11 prescribed static commands and seven isolated
+pre-commit hooks also passed. Exact-head GitHub Python 3.11/3.12 jobs each passed
+2,835 tests, six skips and 20 subtests with 66.49% coverage. Their coverage-comment
+format annotation is a separate reporting defect, addressed by selecting the
+action's JSON input. Later monitor and documentation checks retain their own identities.
+
+The final installed c13 wheel, sdist and Mac ZIP passed build/member checks,
+outside-checkout installation for both Standard and CPU Lite, four read-only
+operator launches and all four EN↔ES file smokes. The Standard full-service
+pipeline completed all 3,946 writes and 563 finals without cleanup intervention.
+Its monitor rejected the valid 91.2 MB diagnostics at a 64 MiB read limit;
+a separate bounded-reader report recovered those artifacts while retaining the
+original failure. The unchanged terminal validator then passed 46/47 checks and
+failed on one blank translated preview out of 2,562. The [producer repair](evaluation/mac_followup_20260910/final-c13f51f/empty-preview-repair.md)
+preserves the prior caption and logs that rejection explicitly; 21 focused
+production-coroutine checks passed. Fresh repaired-source
+Standard/Lite rehearsals remain pending; c13 is not relabeled as fully passed.
+See [installed delivery](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md).
+
+The [350-second hymn control](evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
+completed without entering music hold. The [102-call boundary comparison](evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
+retains raw title/subject errors and supplied delimiter hypotheses. Neither
+establishes human acoustic labels or bilingual approval; #193/#194 remain open.
+The [loader continuity note](evaluation/mac_followup_20260910/final-c13f51f/model-source-continuity.md)
+binds the selected source review without clearing optional/offline residuals.
+
 
 The [integrated browser rehearsal](evaluation/overnight_operator_rehearsal.md)
 records actual EN→ES→EN captions, John 3:16, Pause/Resume, Stop, draft reload,
