@@ -54,7 +54,6 @@ import argparse
 import asyncio
 import atexit
 import csv
-import http.server
 import json
 import logging
 import multiprocessing
@@ -1041,12 +1040,10 @@ def get_local_ip():
 
 
 def start_http_server(port, directory):
-    """Start a simple HTTP server in a background thread."""
-    handler = lambda *args, **kwargs: http.server.SimpleHTTPRequestHandler(*args, directory=directory, **kwargs)
-    server = http.server.HTTPServer(("0.0.0.0", port), handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    return server
+    """Serve only allowlisted audience pages/assets to the LAN."""
+    from tools.display_server import start_display_server
+
+    return start_display_server(port, directory)
 
 
 # ---------------------------------------------------------------------------
