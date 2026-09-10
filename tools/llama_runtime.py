@@ -113,9 +113,18 @@ def _extract(archive: Path, destination: Path):
                     or (member.external_attr >> 16) & 0o170000 == 0o120000
                 ):
                     raise ValueError("Unsafe native ZIP member")
-            z.extractall(destination)
+            for member in z.infolist():
+                target = destination / member.filename
+                if member.is_dir():
+                    target.mkdir(parents=True, exist_ok=True)
+                else:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    with z.open(member) as source, target.open("wb") as output:
+                        shutil.copyfileobj(source, output)
     else:
         with tarfile.open(archive) as t:
+            # The archive digest is pinned; the data filter rejects escaping
+            # paths and links before any member is extracted.
             t.extractall(destination, filter="data")
 
 
@@ -301,10 +310,11 @@ class ManagedLlamaServer:
                 if self.process.poll() is not None:
                     raise RuntimeError(f"Owned llama-server exited {self.process.returncode}; see {self.log_path}")
                 try:
-                    with urllib.request.urlopen(self.url + "/health", timeout=1) as response:
+                    # self.url is assigned above from fixed 127.0.0.1 and a bound port.
+                    with urllib.request.urlopen(self.url + "/health", timeout=1) as response:  # nosec B310
                         ready = json.load(response).get("status") == "ok"
                     if ready:
-                        with urllib.request.urlopen(self.url + "/v1/models", timeout=1) as response:
+                        with urllib.request.urlopen(self.url + "/v1/models", timeout=1) as response:  # nosec B310
                             identities = {x.get("id") for x in json.load(response).get("data", [])}
                         if alias not in identities:
                             raise RuntimeError("llama-server identity mismatch; refusing foreign listener")

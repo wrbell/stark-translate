@@ -138,3 +138,16 @@ def test_offline_native_setup_does_not_download(tmp_path, monkeypatch):
         runtime.install_native("cpu", tmp_path, offline=True)
     download.assert_not_called()
     assert not list(runtime.native_root(tmp_path).glob(".native-*"))
+
+
+def test_archive_extracts_only_validated_regular_zip_members(tmp_path):
+    archive = tmp_path / "native.zip"
+    with zipfile.ZipFile(archive, "w") as z:
+        z.writestr("bundle/", b"")
+        z.writestr("bundle/llama-server.exe", b"verified binary")
+        z.writestr("bundle/runtime.dll", b"verified library")
+    destination = tmp_path / "unpacked"
+    destination.mkdir()
+    runtime._extract(archive, destination)
+    assert (destination / "bundle" / "llama-server.exe").read_bytes() == b"verified binary"
+    assert (destination / "bundle" / "runtime.dll").read_bytes() == b"verified library"
