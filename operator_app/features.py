@@ -126,6 +126,10 @@ class VerseHighlightWatcher:
             self._scan_once()
 
     def _scan_once(self) -> None:
+        with self._lock:
+            self._scan_rows()
+
+    def _scan_rows(self) -> None:
         self._ensure_extractor()
         if self._extractor is None or not self._csv_path.exists():
             return
@@ -223,11 +227,13 @@ class SummaryTaskRunner:
             with self._lock:
                 task.state = "running"
 
+            script = self._project_root / "features" / "summarize_sermon.py"
+            if not script.is_file():
+                script = Path(__file__).resolve().parent.parent / "features" / "summarize_sermon.py"
             argv = [
                 sys.executable,
                 "-u",
-                str(self._project_root / "features" / "summarize_sermon.py"),
-                "--input",
+                str(script),
                 task.csv_path,
                 "--output",
                 task.output_path,
@@ -255,14 +261,14 @@ class SummaryTaskRunner:
                     task.state = "error"
                     task.error = (completed.stderr or "")[-500:]
                     return
-                task.state = "done"
                 # Try to load the JSON output; if it parses, attach.
                 try:
                     import json
 
-                    if Path(task.output_path).exists():
-                        task.result = json.loads(Path(task.output_path).read_text())
+                    task.result = json.loads(Path(task.output_path).read_text())
+                    task.state = "done"
                 except Exception as exc:
+                    task.state = "error"
                     task.error = f"output parse failed: {exc}"
         except Exception as exc:
             logger.exception("summary task %s crashed", task.task_id)
@@ -443,6 +449,8 @@ def get_verse_watcher(
     with _lock:
         if csv_path is None:
             return _verse_watcher
+        if _verse_watcher is not None and _verse_watcher._csv_path.resolve() == Path(csv_path).resolve():
+            return _verse_watcher
         # rebind: stop existing, start fresh
         if _verse_watcher is not None:
             try:
@@ -474,6 +482,8 @@ def get_diarize_watcher(
     global _diarize_watcher
     with _lock:
         if jsonl_path is None:
+            return _diarize_watcher
+        if _diarize_watcher is not None and _diarize_watcher._jsonl_path.resolve() == Path(jsonl_path).resolve():
             return _diarize_watcher
         if _diarize_watcher is not None:
             try:

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import math
 import os
 import platform
 import signal
@@ -34,6 +35,41 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 _IS_WINDOWS = platform.system() == "Windows"
+
+
+def _number(record: dict, *keys: str) -> float | None:
+    for key in keys:
+        if record.get(key) not in (None, ""):
+            try:
+                value = float(record[key])
+                return value if math.isfinite(value) else None
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def parse_metrics_row(record: dict) -> dict:
+    """Map real and historical CSV schemas without inventing missing measurements."""
+    version = record.get("timing_schema_version") or "legacy"
+    if str(version) != "legacy":
+        basis = "speech_end_to_final_ms"
+        total = _number(record, basis)
+    elif "e2e_latency_ms" in record:
+        basis = "legacy_e2e_latency_ms"
+        total = _number(record, "e2e_latency_ms")
+    else:
+        basis = "legacy_total_ms"
+        total = _number(record, "latency_ms", "total_ms")
+    return {
+        "chunk_id": int(record["chunk_id"]),
+        "stt_ms": _number(record, "stt_latency_ms", "stt_ms"),
+        "translate_ms": _number(record, "latency_a_ms", "translate_ms"),
+        "total_ms": total,
+        "confidence": _number(record, "stt_confidence", "confidence"),
+        "text_len": len(str(record.get("english") or "")),
+        "timing_schema_version": str(version),
+        "latency_basis": basis,
+    }
 
 
 @dataclass
@@ -103,10 +139,13 @@ class PipelineRunner:
                 raise SessionAlreadyRunningError(self._status.session_id)
 
             self._stop_event.clear()
-            session_id = f"{datetime.now():%Y%m%d_%H%M%S}_{config.lang}"
+            session_id = f"{datetime.now():%Y%m%d_%H%M%S_%f}_{config.lang}"
             csv_path = str(self._project_root / "metrics" / f"ab_metrics_{session_id}.csv")
             log_path = str(self._project_root / "metrics" / f"session_{session_id}.log")
             self._config = config
+            from operator_app.metrics import get_collector
+
+            get_collector().reset_session(session_id)
             self._status = SessionStatus(
                 state="starting",
                 session_id=session_id,
@@ -134,6 +173,7 @@ class PipelineRunner:
         with self._lock:
             if self._status.state == "idle":
                 return self._snapshot()
+            was_paused = self._status.state == "paused"
             self._status.state = "stopping"
             self._status.last_event = "stop requested"
             self._stop_event.set()
@@ -142,6 +182,8 @@ class PipelineRunner:
         # Politely SIGTERM first; SIGKILL after grace period if needed.
         if proc is not None and proc.poll() is None:
             try:
+                if was_paused and not _IS_WINDOWS:
+                    os.kill(proc.pid, signal.SIGCONT)
                 proc.terminate()
             except ProcessLookupError:
                 pass
@@ -229,12 +271,15 @@ class PipelineRunner:
 
     # -- internals ------------------------------------------------------------
 
-    def _build_argv(self, config: SessionConfig) -> list[str]:
+    def _build_argv(self, config: SessionConfig, session_id: str | None = None) -> list[str]:
         """Translate ``SessionConfig`` to a ``dry_run_ab.py`` invocation."""
+        script = self._project_root / "dry_run_ab.py"
+        if not script.is_file():
+            script = Path(__file__).resolve().parent.parent / "dry_run_ab.py"
         argv = [
             sys.executable,
             "-u",
-            str(self._project_root / "dry_run_ab.py"),
+            str(script),
             "--lang",
             config.lang,
             "--backend",
@@ -244,6 +289,8 @@ class PipelineRunner:
             "--log-level",
             config.log_level,
         ]
+        if session_id is not None:
+            argv += ["--session-id", session_id]
         if config.engine != "auto":
             argv += ["--engine", config.engine]
         if config.run_ab:
@@ -269,16 +316,20 @@ class PipelineRunner:
 
     def _run(self, config: SessionConfig, session_id: str) -> None:
         try:
-            argv = self._build_argv(config)
+            argv = self._build_argv(config, session_id)
             logger.info("spawning pipeline: %s", " ".join(argv))
             try:
-                proc = subprocess.Popen(
-                    argv,
-                    cwd=str(self._project_root),
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    start_new_session=True,
-                )
+                log_path = Path(self._status.log_path)
+                log_path.parent.mkdir(parents=True, exist_ok=True)
+                # Capture startup failures before the pipeline's own logger is initialized.
+                with log_path.open("a", encoding="utf-8") as output:
+                    proc = subprocess.Popen(
+                        argv,
+                        cwd=str(self._project_root),
+                        stdout=output,
+                        stderr=subprocess.STDOUT,
+                        start_new_session=True,
+                    )
             except OSError as exc:
                 with self._lock:
                     self._status.state = "error"
@@ -307,6 +358,14 @@ class PipelineRunner:
                 else:
                     self._status.state = "error"
                     self._status.error = f"subprocess exited rc={return_code} unexpectedly"
+                    try:
+                        with log_path.open("rb") as output:
+                            output.seek(max(0, log_path.stat().st_size - 1500))
+                            detail = output.read().decode("utf-8", errors="replace").strip()
+                        if detail:
+                            self._status.error += f"\n{detail}"
+                    except OSError:
+                        pass
                     self._status.last_event = f"subprocess crashed rc={return_code}"
         except Exception as exc:
             logger.exception("pipeline session %s crashed in runner", session_id)
@@ -331,6 +390,7 @@ class PipelineRunner:
                 if f is None and csv_path is not None and csv_path.exists():
                     f = csv_path.open("r")
                     reader = csv.reader(f)
+                if reader is not None and header is None:
                     try:
                         header = next(reader)
                     except StopIteration:
@@ -349,14 +409,7 @@ class PipelineRunner:
                             continue
                         record = dict(zip(header, row, strict=False))
                         try:
-                            collector.record_segment(
-                                chunk_id=int(float(record.get("chunk_id", 0) or 0)),
-                                stt_ms=float(record.get("stt_ms") or 0),
-                                translate_ms=float(record.get("translate_ms") or 0),
-                                total_ms=float(record.get("latency_ms") or record.get("total_ms") or 0),
-                                confidence=float(record.get("confidence") or 0),
-                                text_len=len(str(record.get("english", "") or "")),
-                            )
+                            collector.record_segment(**parse_metrics_row(record))
                         except (ValueError, TypeError):
                             collector.record_error()
                     if not advanced:

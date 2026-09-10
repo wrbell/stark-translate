@@ -35,6 +35,7 @@ from operator_app.pipeline_manager import (
     get_runner,
 )
 from operator_app.preflight import run_all_checks
+from operator_app.review import router as review_router
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,7 @@ app = FastAPI(
     description="Live pipeline control plane (Phase 9).",
     lifespan=_lifespan,
 )
+app.include_router(review_router)
 
 
 # -- request models -----------------------------------------------------------
@@ -134,9 +136,13 @@ def healthz() -> dict:
 
 
 @app.get("/api/preflight")
-def api_preflight() -> dict:
+def api_preflight(
+    backend: str = "auto", lang: str = "en", tts: bool = False, diarize: bool = False, input_device: int | None = None
+) -> dict:
     """Run all preflight checks. Cheap enough to poll every few seconds."""
-    return run_all_checks(project_root=PROJECT_ROOT)
+    return run_all_checks(
+        project_root=PROJECT_ROOT, backend=backend, lang=lang, tts=tts, diarize=diarize, input_device=input_device
+    )
 
 
 @app.get("/api/devices")
@@ -275,6 +281,7 @@ def api_features_verses(
         watcher = get_verse_watcher()
     if watcher is None:
         return {"highlights": [], "since_chunk": since_chunk}
+    watcher.force_scan()
     highlights = watcher.snapshot(since_chunk=since_chunk)
     return {"highlights": highlights, "since_chunk": since_chunk}
 
@@ -291,6 +298,8 @@ def api_features_summary(
     with a task_id; poll ``GET /api/features/summary/{id}``.
     """
     snap = runner.status()
+    if snap.state in ("starting", "running", "paused", "stopping"):
+        raise HTTPException(status_code=409, detail="Stop the live session before generating a summary")
     csv_path = req.csv_path or snap.csv_path
     if not csv_path:
         raise HTTPException(status_code=400, detail="no csv_path available — pass one or start a session first")
@@ -435,6 +444,8 @@ async def ws_control(websocket: WebSocket) -> None:
 
 
 _operator_static = PROJECT_ROOT / "displays" / "operator"
+if not _operator_static.is_dir():
+    _operator_static = Path(__file__).resolve().parent.parent / "displays" / "operator"
 if _operator_static.exists():
     app.mount("/operator", StaticFiles(directory=str(_operator_static), html=True), name="operator")
 else:

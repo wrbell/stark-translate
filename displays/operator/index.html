@@ -31,7 +31,7 @@
       </div>
       <div class="feature-block">
         <h3>Post-session summary</h3>
-        <p class="hint">Runs <code>features/summarize_sermon.py</code> as a subprocess; outputs a 5-sentence EN/ES summary.</p>
+        <p class="hint">Generate an English and Spanish summary after the session ends.</p>
         <button id="summary-btn" class="ghost">Generate summary</button>
         <pre class="status" id="summary-status">no task yet</pre>
       </div>
@@ -145,9 +145,46 @@
     </div>
     <pre class="status" id="status-detail">idle</pre>
   </section>
+  <section class="panel review-panel" id="review-panel">
+    <h2>Review and corrections</h2>
+    <p class="hint">Review saved final segments while a session runs or afterward. Your edits stay in this review workspace; audience captions keep their original text.</p>
+    <label>Session <select id="review-session"><option value="">No sessions yet</option></select></label>
+    <div class="actions">
+      <label class="inline"><input id="review-pending" type="checkbox" checked> Pending only</label>
+      <label class="inline"><input id="review-flagged" type="checkbox" checked> Flagged only</label>
+      <button id="review-refresh" class="ghost">Refresh</button>
+      <button id="review-previous-page" class="ghost">Previous page</button>
+      <button id="review-next-page" class="ghost">Next page</button>
+      <button id="review-restore" class="ghost" hidden>Restore my local draft</button>
+    </div>
+    <p id="review-status" class="hint" role="status" aria-live="polite">Choose a session to review.</p>
+    <div class="review-grid">
+      <label>Finalized segments <select id="review-items" size="8" aria-label="Finalized segments"></select></label>
+      <div id="review-editor" hidden>
+        <p id="review-context" class="hint"></p>
+        <audio id="review-audio" controls preload="none"></audio>
+        <p id="review-audio-status" class="hint"></p>
+        <label>Spoken language <select id="review-language"><option value="">Unknown — choose to approve</option><option value="en">English</option><option value="es">Spanish</option></select></label>
+        <label><span id="review-source-label">Transcript</span><textarea id="review-source" rows="4"></textarea></label>
+        <label class="inline"><input id="review-transcript-approved" type="checkbox"> Transcript checked against audio</label>
+        <label><span id="review-target-label">Translation</span><textarea id="review-target" rows="4"></textarea></label>
+        <label class="inline"><input id="review-translation-approved" type="checkbox"> Translation checked by a bilingual reviewer</label>
+        <details><summary>Original predictions and flags</summary><pre id="review-original" class="status"></pre></details>
+        <label>Review notes <textarea id="review-note" rows="2"></textarea></label>
+        <label class="inline"><input id="review-excluded" type="checkbox"> Exclude this segment from exports</label>
+        <div class="actions"><button id="review-save" class="ghost">Save draft</button><button id="review-next" class="primary">Save and next</button></div>
+      </div>
+    </div>
+    <div class="actions">
+      <label>Export purpose <select id="review-split"><option value="train">Training — reviewed live audio</option><option value="eval">Evaluation — held apart from training</option></select></label>
+      <button id="review-export" class="ghost">Export completed session</button>
+      <a id="review-download" hidden>Download review bundle</a>
+    </div>
+  </section>
 </main>
 
 <script src="widgets/sparkline.js"></script>
 <script src="app.js"></script>
+<script src="review.js"></script>
 </body>
 </html>

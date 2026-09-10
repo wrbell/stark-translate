@@ -39,6 +39,7 @@ def _make_diag_record(**overrides) -> dict:
     rec = {
         "chunk_id": 1,
         "session": "20260301_113532",
+        "source_lang": "en",
         "timestamp": "2026-03-01T11:37:01.960449",
         "audio_path": "stark_data/live_sessions/20260301_113532/chunk_0001.wav",
         "mic_gain": 8.48,
@@ -608,7 +609,8 @@ class TestExportWhisper:
         with open(meta_path) as f:
             reader = list(csv.DictReader(f))
         assert len(reader) == 1
-        assert reader[0]["file_name"] == "church_live/chunk_0001.wav"
+        assert reader[0]["file_name"] == "church_live/20260301_113532__1.wav"
+        assert not (out / "train" / reader[0]["file_name"]).is_symlink()
         assert reader[0]["transcription"] == "For God so loved the world."
         assert reader[0]["accent"] == "church_live"
 
@@ -665,9 +667,10 @@ class TestExportWhisper:
             train_rows = list(csv.DictReader(f))
         with open(out / "eval" / "metadata.csv") as f:
             eval_rows = list(csv.DictReader(f))
-        # 20 records * 0.2 = 4 eval, 16 train
-        assert len(eval_rows) == 4
-        assert len(train_rows) == 16
+        # A session stays together; chunk-level random splitting leaks speaker/context.
+        assert len(eval_rows) + len(train_rows) == 20
+        assert len(eval_rows) in (0, 20)
+        assert not ({r["sample_id"] for r in eval_rows} & {r["sample_id"] for r in train_rows})
 
 
 # ---------------------------------------------------------------------------

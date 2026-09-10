@@ -51,7 +51,7 @@
   const fallbackBtn = document.getElementById("fallback-btn");
 
   function updateButtonsForState(state) {
-    const isIdle = state === "idle";
+    const isIdle = state === "idle" || state === "error";
     const isRunning = state === "running";
     const isPaused = state === "paused";
     startBtn.disabled = !isIdle || !preflightOk;
@@ -90,7 +90,11 @@
 
   async function refreshPreflight() {
     try {
-      const data = await getJson("/api/preflight");
+      const selected = readForm();
+      const query = new URLSearchParams({backend: selected.backend, lang: selected.lang,
+        tts: String(selected.tts), diarize: String(selected.diarize)});
+      if (selected.mic_device != null) query.set("input_device", String(selected.mic_device));
+      const data = await getJson(`/api/preflight?${query}`);
       renderChecks(data);
     } catch (e) {
       preflightMetaEl.textContent = `preflight error: ${e.message}`;
@@ -194,6 +198,9 @@
     setStatePill(currentState);
     updateButtonsForState(currentState);
     statusDetailEl.textContent = JSON.stringify(snap, null, 2);
+    const summaryControl = document.getElementById("summary-btn");
+    if (summaryControl) summaryControl.disabled = ["starting", "running", "paused", "stopping"].includes(currentState);
+    window.dispatchEvent(new CustomEvent("operator-session", {detail: snap}));
   }
 
   async function refreshStatus() {
@@ -280,6 +287,7 @@
 
   const latencyHistory = [];
   const confidenceHistory = [];
+  let metricsCohort = "";
 
   function renderMetrics(snap) {
     const r = snap.resources || {};
@@ -293,17 +301,25 @@
     metricVramEl.textContent = r.vram_mib_current ? Math.round(r.vram_mib_current) : "—";
     metricCpuEl.textContent = r.cpu_percent_current != null ? r.cpu_percent_current.toFixed(1) : "—";
 
-    if (lat.n) {
+    const cohort = `${snap.session_id}:${lat.timing_schema_version}:${lat.basis}`;
+    if (cohort !== metricsCohort) {
+      latencyHistory.length = 0;
+      confidenceHistory.length = 0;
+      metricsCohort = cohort;
+    }
+    if (lat.total_ms_p50 != null) {
       latencyHistory.push(lat.total_ms_p50);
       if (latencyHistory.length > 60) latencyHistory.shift();
+    }
+    if (lat.confidence_mean != null) {
       confidenceHistory.push(lat.confidence_mean);
       if (confidenceHistory.length > 60) confidenceHistory.shift();
-      metricLatencyEl.textContent = `${Math.round(lat.total_ms_p50)} / ${Math.round(lat.total_ms_p95)}`;
-      metricConfidenceEl.textContent = lat.confidence_mean.toFixed(2);
-    } else {
-      metricLatencyEl.textContent = "— / —";
-      metricConfidenceEl.textContent = "—";
     }
+    metricLatencyEl.textContent = lat.total_ms_p50 != null
+      ? `${Math.round(lat.total_ms_p50)} / ${Math.round(lat.total_ms_p95)}` : "— / —";
+    metricConfidenceEl.textContent = lat.confidence_mean != null ? lat.confidence_mean.toFixed(2) : "—";
+    metricLatencyEl.title = lat.basis === "speech_end_to_final_ms"
+      ? "Speech end to final caption" : "Historical pipeline timing; not speech-end latency";
     drawSparkline(latencySpark, latencyHistory, { color: "#2f6b1a", fill: "rgba(47,107,26,0.08)" });
     drawSparkline(confidenceSpark, confidenceHistory, { color: "#8a4500", min: 0, max: 1 });
 
@@ -428,7 +444,7 @@
         state: task.state,
         return_code: task.return_code,
         error: task.error,
-        result_keys: task.result ? Object.keys(task.result) : null,
+        result: task.result || null,
       }, null, 2);
       if (task.state === "done" || task.state === "error") {
         if (summaryPollTimer) { clearInterval(summaryPollTimer); summaryPollTimer = null; }
@@ -452,6 +468,8 @@
       summaryBtn.disabled = false;
     }
   });
+
+  form.addEventListener("change", refreshPreflight);
 
   // ---- bootstrap ----
   refreshPreflight();

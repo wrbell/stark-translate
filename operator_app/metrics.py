@@ -36,11 +36,13 @@ class _Segment:
     """One pipeline segment — STT + translate + display."""
 
     chunk_id: int
-    stt_ms: float
-    translate_ms: float
-    total_ms: float
-    confidence: float
+    stt_ms: float | None
+    translate_ms: float | None
+    total_ms: float | None
+    confidence: float | None
     text_len: int
+    timing_schema_version: str
+    latency_basis: str
 
 
 class MetricsCollector:
@@ -64,6 +66,7 @@ class MetricsCollector:
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
         self._started_at: float | None = None
+        self._session_id: str | None = None
 
     # -- lifecycle ------------------------------------------------------------
 
@@ -83,25 +86,36 @@ class MetricsCollector:
 
     # -- ingest hooks (called by pipeline) ------------------------------------
 
+    def reset_session(self, session_id: str) -> None:
+        with self._lock:
+            self._session_id = session_id
+            self._segments.clear()
+            self._queue_depth = 0
+            self._error_count = 0
+
     def record_segment(
         self,
         *,
         chunk_id: int,
-        stt_ms: float,
-        translate_ms: float,
-        total_ms: float,
-        confidence: float,
+        stt_ms: float | None,
+        translate_ms: float | None,
+        total_ms: float | None,
+        confidence: float | None,
         text_len: int = 0,
+        timing_schema_version: str = "legacy",
+        latency_basis: str = "legacy_total_ms",
     ) -> None:
         with self._lock:
             self._segments.append(
                 _Segment(
                     chunk_id=chunk_id,
-                    stt_ms=float(stt_ms),
-                    translate_ms=float(translate_ms),
-                    total_ms=float(total_ms),
-                    confidence=float(confidence),
+                    stt_ms=float(stt_ms) if stt_ms is not None else None,
+                    translate_ms=float(translate_ms) if translate_ms is not None else None,
+                    total_ms=float(total_ms) if total_ms is not None else None,
+                    confidence=float(confidence) if confidence is not None else None,
                     text_len=int(text_len),
+                    timing_schema_version=timing_schema_version,
+                    latency_basis=latency_basis,
                 )
             )
 
@@ -124,20 +138,31 @@ class MetricsCollector:
             queue_depth = self._queue_depth
             error_count = self._error_count
             started_at = self._started_at
+            session_id = self._session_id
 
         # Latency aggregates from the last N segments.
         if segs:
-            totals = [s.total_ms for s in segs]
-            stt = [s.stt_ms for s in segs]
-            translate = [s.translate_ms for s in segs]
-            confidences = [s.confidence for s in segs]
+            # Show the newest timing cohort; unlike units/definitions never mix.
+            latest = segs[-1]
+            segs = [
+                s
+                for s in segs
+                if (s.timing_schema_version, s.latency_basis) == (latest.timing_schema_version, latest.latency_basis)
+            ]
+            totals = [s.total_ms for s in segs if s.total_ms is not None]
+            stt = [s.stt_ms for s in segs if s.stt_ms is not None]
+            translate = [s.translate_ms for s in segs if s.translate_ms is not None]
+            confidences = [s.confidence for s in segs if s.confidence is not None]
             latency = {
                 "n": len(segs),
-                "total_ms_p50": round(statistics.median(totals), 1),
-                "total_ms_p95": round(_p95(totals), 1),
-                "stt_ms_p50": round(statistics.median(stt), 1),
-                "translate_ms_p50": round(statistics.median(translate), 1),
-                "confidence_mean": round(statistics.mean(confidences), 3),
+                "timing_schema_version": latest.timing_schema_version,
+                "basis": latest.latency_basis,
+                "measured_n": len(totals),
+                "total_ms_p50": round(statistics.median(totals), 1) if totals else None,
+                "total_ms_p95": round(_p95(totals), 1) if totals else None,
+                "stt_ms_p50": round(statistics.median(stt), 1) if stt else None,
+                "translate_ms_p50": round(statistics.median(translate), 1) if translate else None,
+                "confidence_mean": round(statistics.mean(confidences), 3) if confidences else None,
             }
         else:
             latency = {"n": 0}
@@ -175,6 +200,7 @@ class MetricsCollector:
 
         return {
             "ts": time.time(),
+            "session_id": session_id,
             "uptime_s": round(time.time() - started_at, 1) if started_at else 0.0,
             "queue_depth": queue_depth,
             "error_count": error_count,

@@ -1,53 +1,54 @@
 #!/usr/bin/env python3
-"""Merge human/auto corrections into Whisper and translation training sets.
+"""Import reviewed training exports without duplicates or evaluation leakage.
 
-Closes the Phase 8 active-learning loop gap after
-``prepare_finetune_data.py apply-corrections`` / ``export-whisper`` /
-``export-translation``.
-
-Usage::
-
-    # Merge Whisper audiofolder export into the master train set
-    python tools/merge_corrections.py whisper \\
-        --corrections stark_data/corrections/whisper_export \\
-        --train-dir stark_data/whisper_dataset_deepgram/train \\
-        --replay-ratio 0.3
-
-    # Merge translation JSONL pairs
-    python tools/merge_corrections.py translation \\
-        --corrections stark_data/corrections/pairs.jsonl \\
-        --train-jsonl bible_data/sermon_pairs_train.jsonl
+Whisper accepts metadata.jsonl or the historical metadata.csv audiofolder.
+Pass a language directory (or a review bundle root); Spanish imports require
+--language es and must target a separate Spanish training corpus.
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
+import hashlib
 import json
 import shutil
-from datetime import UTC, datetime
+import sys
 from pathlib import Path
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from tools.review_data import atomic_jsonl, sha256_file
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _load_jsonl(path: Path) -> list[dict]:
-    rows: list[dict] = []
     if not path.exists():
-        return rows
-    with open(path, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            rows.append(json.loads(line))
-    return rows
+        return []
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        for row in rows:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    atomic_jsonl(path, rows)
+
+
+def _training_only(path: Path, rows: list[dict]) -> None:
+    if {"eval", "test", "holdout"} & set(path.parts):
+        raise ValueError("Evaluation data must not be imported into a training corpus")
+    if any(row.get("split", "train") != "train" or row.get("dataset_split", "train") != "train" for row in rows):
+        raise ValueError("Export contains evaluation/unknown split records; import training records only")
+    if any(row.get("is_eval") or row.get("session_kind") in ("replay", "synthetic") for row in rows):
+        raise ValueError("Evaluation/replay records must not be imported into a training corpus")
+
+
+def _pair(row: dict) -> tuple[str, str]:
+    if row.get("en") or row.get("es"):
+        return (row.get("en") or "").strip(), (row.get("es") or "").strip()
+    source = (row.get("source_text") or row.get("corrected_english") or "").strip()
+    target = (row.get("target_text") or row.get("corrected_spanish") or "").strip()
+    return (target, source) if row.get("source_lang") == "es" else (source, target)
 
 
 def merge_translation(
@@ -57,41 +58,68 @@ def merge_translation(
     output: Path | None = None,
     dedupe: bool = True,
 ) -> dict:
-    """Append correction pairs into a translation JSONL train set."""
     corrections = _load_jsonl(corrections_path)
+    _training_only(corrections_path, corrections)
+    _training_only(output or train_jsonl, [])
     existing = _load_jsonl(train_jsonl)
     before = len(existing)
-
-    seen: set[tuple[str, str]] = set()
-    if dedupe:
-        for row in existing:
-            en = (row.get("en") or row.get("source_text") or "").strip().lower()
-            es = (row.get("es") or row.get("target_text") or "").strip().lower()
-            if en and es:
-                seen.add((en, es))
-
-    added = 0
+    ids = {row.get("sample_id"): index for index, row in enumerate(existing) if row.get("sample_id")}
+    seen = {tuple(part.lower() for part in _pair(row)) for row in existing}
+    added = updated = 0
     for row in corrections:
-        en = (row.get("en") or row.get("source_text") or row.get("corrected_english") or "").strip()
-        es = (row.get("es") or row.get("target_text") or row.get("corrected_spanish") or "").strip()
+        en, es = _pair(row)
         if not en or not es:
             continue
-        key = (en.lower(), es.lower())
-        if dedupe and key in seen:
+        pair_key = (en.lower(), es.lower())
+        item = {**row, "en": en, "es": es, "source": "active_learning", "split": "train"}
+        sample = row.get("sample_id")
+        if sample in ids:
+            index = ids[sample]
+            if existing[index] != item:
+                existing[index] = item
+                updated += 1
             continue
-        existing.append({"en": en, "es": es, "source": "active_learning"})
-        seen.add(key)
+        if dedupe and pair_key in seen:
+            continue
+        existing.append(item)
+        if sample:
+            ids[sample] = len(existing) - 1
+        seen.add(pair_key)
         added += 1
-
     out = output or train_jsonl
     _write_jsonl(out, existing)
     return {
         "mode": "translation",
         "before": before,
         "added": added,
+        "updated": updated,
         "after": len(existing),
         "output": str(out),
+        "dedupe": dedupe,
     }
+
+
+def _read_metadata(path: Path) -> list[dict]:
+    if path.suffix == ".csv":
+        with path.open(newline="", encoding="utf-8") as source:
+            return list(csv.DictReader(source))
+    return _load_jsonl(path)
+
+
+def _metadata(directory: Path, language: str, *, required: bool = True) -> Path:
+    # Explicit supported layouts only; never choose an arbitrary nested eval file.
+    for base in (
+        directory,
+        directory / "whisper" / "train" / language,
+        directory / "train" / language,
+        directory / "train",
+    ):
+        for name in ("metadata.jsonl", "metadata.csv"):
+            if (base / name).is_file():
+                return base / name
+    if required:
+        raise FileNotFoundError(f"No training metadata.jsonl or metadata.csv under {directory}")
+    return directory / "metadata.jsonl"
 
 
 def merge_whisper(
@@ -101,90 +129,131 @@ def merge_whisper(
     output_dir: Path | None = None,
     replay_ratio: float = 0.3,
     seed: int = 42,
+    language: str = "en",
 ) -> dict:
-    """Merge a corrections audiofolder into the Whisper train directory.
-
-    Expects HuggingFace audiofolder layout: ``*.wav`` + ``metadata.jsonl``
-    (columns: ``file_name``, ``transcription``) under *corrections_dir*.
-    """
-    meta_path = corrections_dir / "metadata.jsonl"
-    if not meta_path.exists():
-        # Also accept export from prepare_finetune_data (nested)
-        candidates = list(corrections_dir.glob("**/metadata.jsonl"))
-        if not candidates:
-            raise FileNotFoundError(f"No metadata.jsonl under {corrections_dir}")
-        meta_path = candidates[0]
-        corrections_dir = meta_path.parent
-
-    corr_rows = _load_jsonl(meta_path)
+    if language not in ("en", "es"):
+        raise ValueError("language must be en or es")
+    manifest = corrections_dir / "manifest.json"
+    if manifest.exists() and json.loads(manifest.read_text()).get("split") != "train":
+        raise ValueError("Evaluation bundles cannot be merged into training")
+    meta_path = _metadata(corrections_dir, language)
+    corr_rows = _read_metadata(meta_path)
+    _training_only(meta_path, corr_rows)
     out_dir = output_dir or train_dir
-    out_dir.mkdir(parents=True, exist_ok=True)
-
+    _training_only(out_dir, [])
     train_meta = out_dir / "metadata.jsonl"
-    existing = _load_jsonl(train_meta) if train_meta.exists() else []
+    if not train_meta.exists() and (out_dir / "metadata.csv").exists():
+        train_meta = out_dir / "metadata.csv"
+    existing = _read_metadata(train_meta) if train_meta.exists() else []
+    if any((row.get("source_lang") or "en") != language for row in [*corr_rows, *existing]):
+        raise ValueError("Audio language does not match --language; use a separate corpus per language")
     before = len(existing)
-    _ = seed, replay_ratio  # reserved for future stratified downsample of existing
-
-    added = 0
-    stamp = datetime.now(UTC).strftime("%Y%m%d")
-    for i, row in enumerate(corr_rows):
-        src_name = row.get("file_name") or row.get("audio") or ""
-        text = (row.get("transcription") or row.get("sentence") or row.get("text") or "").strip()
-        if not src_name or not text:
+    # IDs are preserved across exports. Content hashes dedupe legacy exports.
+    ids = {row.get("sample_id"): index for index, row in enumerate(existing) if row.get("sample_id")}
+    prepared = []
+    for row in corr_rows:
+        source_name = row.get("file_name") or row.get("audio") or ""
+        transcript = (row.get("transcription") or row.get("sentence") or row.get("text") or "").strip()
+        if not source_name or not transcript:
             continue
-        src = corrections_dir / src_name
-        if not src.exists():
-            continue
-        dest_name = f"al_{stamp}_{i:05d}{src.suffix or '.wav'}"
-        dest = out_dir / dest_name
-        shutil.copy2(src, dest)
-        existing.append({"file_name": dest_name, "transcription": text, "source": "active_learning"})
-        added += 1
+        src = (meta_path.parent / source_name).resolve()
+        if not src.is_relative_to(meta_path.parent.resolve()):
+            raise ValueError("Correction audio must stay within its export directory")
+        if not src.is_file():
+            raise FileNotFoundError(f"Correction audio missing: {source_name}")
+        audio_hash = sha256_file(src)
+        if row.get("audio_sha256") and row["audio_sha256"] != audio_hash:
+            raise ValueError(f"Audio hash mismatch: {source_name}")
+        sample = row.get("sample_id") or f"audio-{audio_hash}-{language}"
+        name = "al_" + hashlib.sha256(sample.encode()).hexdigest()[:24] + ".wav"
+        item = {
+            **row,
+            "file_name": name,
+            "transcription": transcript,
+            "sample_id": sample,
+            "audio_sha256": audio_hash,
+            "source_lang": language,
+            "split": "train",
+            "source": "active_learning",
+        }
+        prepared.append((src, item))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    added = updated = 0
+    for src, item in prepared:
+        sample = item["sample_id"]
+        if sample in ids:
+            index = ids[sample]
+            same = all(
+                str(existing[index].get(key) or "") == str(item.get(key) or "")
+                for key in existing[index].keys() | item.keys()
+            )
+            if same and (out_dir / item["file_name"]).exists():
+                continue
+            existing[index] = item
+            updated += 1
+        else:
+            ids[sample] = len(existing)
+            existing.append(item)
+            added += 1
+        shutil.copy2(src, out_dir / item["file_name"])
+    if train_meta.suffix == ".csv":
+        # Retain historical corpus metadata format rather than create two competing files.
+        fields = list(dict.fromkeys(key for row in existing for key in row))
+        import io
+        import os
+        import tempfile
 
-    _write_jsonl(train_meta, existing)
+        stream = io.StringIO()
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(existing)
+        fd, name = tempfile.mkstemp(dir=train_meta.parent, suffix=".tmp")
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as dest:
+            dest.write(stream.getvalue())
+        os.replace(name, train_meta)
+    else:
+        _write_jsonl(train_meta, existing)
+    _ = seed  # Compatibility only; replay sampling belongs to the training stage.
     return {
         "mode": "whisper",
         "before": before,
         "added": added,
+        "updated": updated,
         "after": len(existing),
         "output": str(out_dir),
         "replay_ratio": replay_ratio,
+        "language": language,
     }
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    sub = p.add_subparsers(dest="cmd", required=True)
-
-    p_tr = sub.add_parser("translation", help="Merge EN→ES correction pairs into train JSONL")
-    p_tr.add_argument("--corrections", type=Path, required=True)
-    p_tr.add_argument("--train-jsonl", type=Path, required=True)
-    p_tr.add_argument("--output", type=Path, default=None)
-    p_tr.add_argument("--no-dedupe", action="store_true")
-
-    p_wh = sub.add_parser("whisper", help="Merge corrections audiofolder into Whisper train dir")
-    p_wh.add_argument("--corrections", type=Path, required=True)
-    p_wh.add_argument("--train-dir", type=Path, required=True)
-    p_wh.add_argument("--output-dir", type=Path, default=None)
-    p_wh.add_argument("--replay-ratio", type=float, default=0.3)
-
-    args = p.parse_args(argv)
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="cmd", required=True)
+    translation = commands.add_parser("translation", help="Merge EN/ES correction pairs into train JSONL")
+    translation.add_argument("--corrections", type=Path, required=True)
+    translation.add_argument("--train-jsonl", type=Path, required=True)
+    translation.add_argument("--output", type=Path, default=None)
+    translation.add_argument("--no-dedupe", action="store_true")
+    whisper = commands.add_parser("whisper", help="Merge corrections audiofolder into a language-specific train dir")
+    whisper.add_argument("--corrections", type=Path, required=True)
+    whisper.add_argument("--train-dir", type=Path, required=True)
+    whisper.add_argument("--output-dir", type=Path, default=None)
+    whisper.add_argument(
+        "--replay-ratio", type=float, default=0.3, help="Recorded for compatibility; no downsampling occurs"
+    )
+    whisper.add_argument("--language", choices=["en", "es"], default="en")
+    args = parser.parse_args(argv)
     if args.cmd == "translation":
-        summary = merge_translation(
-            args.corrections,
-            args.train_jsonl,
-            output=args.output,
-            dedupe=not args.no_dedupe,
-        )
+        result = merge_translation(args.corrections, args.train_jsonl, output=args.output, dedupe=not args.no_dedupe)
     else:
-        summary = merge_whisper(
+        result = merge_whisper(
             args.corrections,
             args.train_dir,
             output_dir=args.output_dir,
             replay_ratio=args.replay_ratio,
+            language=args.language,
         )
-
-    print(json.dumps(summary, indent=2))
+    print(json.dumps(result, indent=2))
     return 0
 
 

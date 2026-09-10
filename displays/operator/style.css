@@ -198,3 +198,14 @@ button.ghost:hover:not(:disabled) { background: #f0f0ee; }
   main { grid-template-columns: 1fr; }
   .metric-row { grid-template-columns: 1fr; }
 }
+
+.review-panel { grid-column: 1 / -1; }
+.review-grid { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(260px, 2fr); gap: 20px; }
+.review-panel label { display: block; margin: 10px 0; }
+.review-panel label.inline { display: inline-flex; gap: 6px; align-items: center; }
+.review-panel select, .review-panel textarea { width: 100%; padding: 8px; font: inherit; box-sizing: border-box; }
+.review-panel select[size] { min-height: 250px; }
+.review-panel audio { width: 100%; }
+#review-context { white-space: pre-line; }
+#review-status { min-height: 1.5em; }
+@media (max-width: 700px) { .review-grid { grid-template-columns: 1fr; } }
