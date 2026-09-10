@@ -273,6 +273,8 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
     """Run the production signal handler/finally blocks with inert model stubs."""
     import sys
 
+    from tools.replay_client_barrier import ReplayClientBarrier
+
     source = Path(__file__).resolve().parents[1] / "dry_run_ab.py"
     tree = ast.parse(source.read_text())
     main = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main")
@@ -356,6 +358,7 @@ def test_actual_stop_handler_drains_pipeline_and_only_then_marks_complete(
         "_incremental_stt": None,
         "_vad_pool": None,
         "_caption_delivery": None,
+        "_replay_client_wait": ReplayClientBarrier(),
         "_session_model_ids": {},
         "SESSION_ID": "example_en",
         "lifecycle_root": tmp_path,

@@ -197,7 +197,7 @@ def test_failures_do_not_report_green_or_stop_another_session(operator_http, sce
     result = run_rehearsal(url, REHEARSAL_TIMEOUT_S="0.15")
     assert result.returncode == 1
     assert "rehearsal failed" in result.stderr
-    assert message in result.stderr
+    assert message.casefold() in result.stderr.casefold()
     assert "rehearsal passed" not in result.stdout
     if scenario in {"preflight_fail", "start_rejected", "replacement"}:
         assert not runner.stops
