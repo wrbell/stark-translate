@@ -14,6 +14,9 @@ RSS sums are sampled process RSS, not unique physical RAM or a lifetime tree pea
 Source interval gaps are unclassified unless an optional JSON list of external
 {start_s, end_s, label} annotations is supplied; no silence/music inference runs.
 Reports omit caption text, process environments and raw logs.
+CSV/JSONL snapshots default to 64 MiB per artifact. For large retained research
+traces, explicitly select --max-artifact-mib 128 (hard maximum 256 MiB). This bounds
+input bytes, not total parser memory; small metadata JSON retains its 4 MiB limit.
 """
 
 from __future__ import annotations
@@ -37,6 +40,9 @@ from itertools import pairwise
 from pathlib import Path
 
 from tools.session_lifecycle import _path
+
+DEFAULT_MAX_ARTIFACT_BYTES = 64 * 1024 * 1024
+HARD_MAX_ARTIFACT_BYTES = 256 * 1024 * 1024
 
 
 class OwnershipError(ValueError):
@@ -270,15 +276,21 @@ def health_snapshot(root, session, wall):
     return result
 
 
-def _snapshot(path, issues, evidence):
+def _validate_artifact_limit(value):
+    if type(value) is not int or not 1 <= value <= HARD_MAX_ARTIFACT_BYTES:
+        raise ValueError(f"max_artifact_bytes must be an integer from 1 to {HARD_MAX_ARTIFACT_BYTES}")
+
+
+def _snapshot(path, issues, evidence, *, max_artifact_bytes=DEFAULT_MAX_ARTIFACT_BYTES):
+    _validate_artifact_limit(max_artifact_bytes)
     try:
         before = path.stat()
-        if before.st_size > 64 * 1024 * 1024:
-            raise ValueError("Artifact exceeds 64 MiB monitor limit")
+        if before.st_size > max_artifact_bytes:
+            raise ValueError(f"Artifact exceeds {max_artifact_bytes} byte monitor limit")
         with path.open("rb") as stream:
-            data = stream.read(64 * 1024 * 1024 + 1)
-        if len(data) > 64 * 1024 * 1024:
-            raise ValueError("Artifact exceeds 64 MiB monitor limit")
+            data = stream.read(max_artifact_bytes + 1)
+        if len(data) > max_artifact_bytes:
+            raise ValueError(f"Artifact exceeds {max_artifact_bytes} byte monitor limit")
         after = path.stat()
         evidence[path.name] = {
             "sha256": hashlib.sha256(data).hexdigest(),
@@ -293,9 +305,9 @@ def _snapshot(path, issues, evidence):
     return ""
 
 
-def _records(path, session, issues, evidence):
+def _records(path, session, issues, evidence, *, max_artifact_bytes=DEFAULT_MAX_ARTIFACT_BYTES):
     rows = []
-    for line in _snapshot(path, issues, evidence).splitlines():
+    for line in _snapshot(path, issues, evidence, max_artifact_bytes=max_artifact_bytes).splitlines():
         try:
             row = json.loads(line)
             if not isinstance(row, dict):
@@ -362,14 +374,15 @@ def source_coverage(rows, duration=None, annotations=()):
     }
 
 
-def artifact_summary(root, session, identity, annotations=()):
+def artifact_summary(root, session, identity, annotations=(), *, max_artifact_bytes=DEFAULT_MAX_ARTIFACT_BYTES):
     """Read artifacts once at monitor exit; group incompatible clocks/schema/sources separately."""
+    _validate_artifact_limit(max_artifact_bytes)
     issues = {"missing_files": [], "read_errors": [], "malformed_rows": 0, "wrong_session_rows": 0}
     diagnostics_path = _path(root, session, "diagnostics", "jsonl")
     partials_path = _path(root, session, "partials", "jsonl")
     evidence = {}
-    diagnostics = _records(diagnostics_path, session, issues, evidence)
-    partials = _records(partials_path, session, issues, evidence)
+    diagnostics = _records(diagnostics_path, session, issues, evidence, max_artifact_bytes=max_artifact_bytes)
+    partials = _records(partials_path, session, issues, evidence, max_artifact_bytes=max_artifact_bytes)
     metadata = _json(_path(root, session, "session_metadata", "json"))
     if metadata.get("session_id") != session:
         metadata = {}
@@ -487,7 +500,12 @@ def artifact_summary(root, session, identity, annotations=()):
     csv_path = _path(root, session, "ab_metrics", "csv")
     csv_ids = []
     try:
-        csv_ids = [row.get("chunk_id") for row in csv.DictReader(io.StringIO(_snapshot(csv_path, issues, evidence)))]
+        csv_ids = [
+            row.get("chunk_id")
+            for row in csv.DictReader(
+                io.StringIO(_snapshot(csv_path, issues, evidence, max_artifact_bytes=max_artifact_bytes))
+            )
+        ]
     except csv.Error as exc:
         issues["read_errors"].append({"file": csv_path.name, "error": type(exc).__name__})
     consistency = (
@@ -517,6 +535,7 @@ def artifact_summary(root, session, identity, annotations=()):
         "pipeline_lifetime_memory": marker.get("memory"),
         "source": source,
         "artifact_scope": "full session files as read at monitor exit; may include time before attachment",
+        "max_artifact_bytes": max_artifact_bytes,
         "artifact_evidence": evidence,
         "read_issues": issues,
         "final_count": len(finals),
@@ -609,8 +628,10 @@ def monitor(
     stop_file=None,
     stop_event=None,
     annotations=(),
+    max_artifact_bytes=DEFAULT_MAX_ARTIFACT_BYTES,
     ps=None,
 ):
+    _validate_artifact_limit(max_artifact_bytes)
     if not all(math.isfinite(v) for v in (duration, interval, exit_grace)) or not (
         0.1 <= interval <= 60 and 0 < duration <= 86400 and 0 <= exit_grace <= 60 and duration / interval <= 20000
     ):
@@ -636,6 +657,7 @@ def monitor(
         "interval_s": interval,
         "exit_grace_s": exit_grace,
         "monitor_only": True,
+        "max_artifact_bytes": max_artifact_bytes,
         "annotations": list(annotations),
     }
     _publish(output / "report.json", report)
@@ -678,7 +700,9 @@ def monitor(
         reason = "monitor_error"
     report.update(stop_reason=reason, ended_at=datetime.now(UTC).isoformat(), measurements=summarize_samples(samples))
     try:
-        report["artifacts"] = artifact_summary(root, session, identity, annotations)
+        report["artifacts"] = artifact_summary(
+            root, session, identity, annotations, max_artifact_bytes=max_artifact_bytes
+        )
     except Exception as exc:
         report["artifact_error"] = {"type": type(exc).__name__, "message": str(exc)}
     completed = (
@@ -703,9 +727,17 @@ def main():
     parser.add_argument("--exit-grace-seconds", type=float, default=10)
     parser.add_argument("--stop-file", type=Path)
     parser.add_argument(
+        "--max-artifact-mib",
+        type=int,
+        default=DEFAULT_MAX_ARTIFACT_BYTES // (1024 * 1024),
+        help="Maximum CSV/JSONL artifact size in MiB (1-256; default: 64); input bytes, not total parser memory",
+    )
+    parser.add_argument(
         "--annotations", type=Path, help="External source interval labels; no automatic silence/music classification"
     )
     args = parser.parse_args()
+    if not 1 <= args.max_artifact_mib <= HARD_MAX_ARTIFACT_BYTES // (1024 * 1024):
+        parser.error("--max-artifact-mib must be between 1 and 256")
     annotations = []
     if args.annotations:
         annotations = json.loads(args.annotations.read_text())
@@ -733,6 +765,7 @@ def main():
             stop_file=args.stop_file,
             stop_event=stop,
             annotations=annotations,
+            max_artifact_bytes=args.max_artifact_mib * 1024 * 1024,
         )
         print(json.dumps({"report": str(args.output / "report.json"), "status": result["monitor_status"]}))
         return {"completed": 0, "partial": 2, "error": 1}[result["monitor_status"]]

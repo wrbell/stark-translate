@@ -274,6 +274,85 @@ def test_artifacts_completion_and_small_sample_percentiles(tmp_path, identity):
     assert cohort["server_update_times_ms"] == [1700, 1800, 2000, 3000]
     assert result["pipeline_lifetime_memory"]["scope"] == "pipeline_process_lifetime"
     assert "rss_sum_bytes" not in result["pipeline_lifetime_memory"]
+    assert result["max_artifact_bytes"] == 64 * 1024 * 1024
+
+
+def test_larger_single_summary_line_requires_explicit_artifact_limit(tmp_path, identity):
+    artifacts(
+        tmp_path,
+        finals=[row(), {"session": "session", "event": "session_summary", "fixture_padding": "x" * 2048}],
+    )
+    path = tmp_path / "metrics/diagnostics_session.jsonl"
+    original = path.read_bytes()
+    limit = len(original)
+    rejected = monitor.artifact_summary(tmp_path, "session", identity, max_artifact_bytes=limit - 1)
+    assert rejected["max_artifact_bytes"] == limit - 1
+    assert rejected["read_issues"]["read_errors"] == [{"file": path.name, "error": "ValueError"}]
+    assert rejected["completion"]["verified"] is False
+    assert path.name not in rejected["artifact_evidence"]
+
+    accepted = monitor.artifact_summary(tmp_path, "session", identity, max_artifact_bytes=limit)
+    assert accepted["max_artifact_bytes"] == limit
+    assert accepted["completion"]["verified"] is True
+    assert accepted["read_issues"]["read_errors"] == []
+    assert accepted["cohorts"][0]["final_count"] == 1
+    assert accepted["artifact_evidence"][path.name] == {
+        "sha256": hashlib.sha256(original).hexdigest(),
+        "size_bytes": limit,
+        "stable_during_read": True,
+    }
+    assert path.read_bytes() == original
+
+
+@pytest.mark.parametrize("filename", ["partials_session.jsonl", "ab_metrics_session.csv"])
+def test_artifact_limit_also_bounds_partials_and_csv(tmp_path, identity, filename):
+    artifacts(tmp_path)
+    path = tmp_path / "metrics" / filename
+    limit = (tmp_path / "metrics/diagnostics_session.jsonl").stat().st_size
+    with path.open("ab") as stream:
+        stream.write(b" " * (limit + 1))
+    result = monitor.artifact_summary(tmp_path, "session", identity, max_artifact_bytes=limit)
+    assert result["read_issues"]["read_errors"] == [{"file": filename, "error": "ValueError"}]
+    assert result["completion"]["verified"] is False
+    assert filename not in result["artifact_evidence"]
+
+
+def test_snapshot_rechecks_actual_read_size_after_file_grows(tmp_path, monkeypatch):
+    path = tmp_path / "growing.jsonl"
+    path.write_bytes(b"12345678")
+    original_open = Path.open
+
+    def grow_before_read(target, mode="r", *args, **kwargs):
+        if target == path and mode == "rb":
+            with original_open(target, "ab") as stream:
+                stream.write(b"9")
+        return original_open(target, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", grow_before_read)
+    issues, evidence = {"missing_files": [], "read_errors": []}, {}
+    assert monitor._snapshot(path, issues, evidence, max_artifact_bytes=8) == ""
+    assert issues["read_errors"] == [{"file": path.name, "error": "ValueError"}]
+    assert evidence == {}
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, 1.5, "128", None, 256 * 1024 * 1024 + 1])
+def test_artifact_limit_rejects_invalid_api_values_before_io(tmp_path, limit):
+    with pytest.raises(ValueError, match="max_artifact_bytes"):
+        monitor._snapshot(tmp_path / "absent", {}, {}, max_artifact_bytes=limit)
+    with pytest.raises(ValueError, match="max_artifact_bytes"):
+        monitor.artifact_summary(tmp_path, "session", {}, max_artifact_bytes=limit)
+    with pytest.raises(ValueError, match="max_artifact_bytes"):
+        monitor.monitor(tmp_path, "session", 42, tmp_path / "never-created", max_artifact_bytes=limit)
+    assert not (tmp_path / "never-created").exists()
+
+
+def test_snapshot_accepts_hard_limit_without_allocating_a_large_fixture(tmp_path):
+    path = tmp_path / "tiny.jsonl"
+    path.write_text("{}\n")
+    issues, evidence = {"missing_files": [], "read_errors": []}, {}
+    assert monitor._snapshot(path, issues, evidence, max_artifact_bytes=256 * 1024 * 1024) == "{}\n"
+    assert not issues["read_errors"]
+    assert evidence[path.name]["size_bytes"] == 3
 
 
 @pytest.mark.parametrize(
@@ -331,10 +410,86 @@ def test_monitor_stop_is_partial_preserves_pipeline_and_never_overwrites(tmp_pat
     assert result["measurements"]["rss_sum_bytes"]["max"] == 100
     assert before == {p: p.read_bytes() for p in before}
     assert result == json.loads((output / "report.json").read_text())
+    assert result["max_artifact_bytes"] == result["artifacts"]["max_artifact_bytes"] == 64 * 1024 * 1024
     with pytest.raises(FileExistsError):
         monitor.monitor(tmp_path, "session", 42, output, stop_event=stop, ps=ps)
     with pytest.raises(ValueError, match="separate"):
         monitor.monitor(tmp_path, "session", 42, tmp_path / "metrics/monitor", stop_event=stop, ps=ps)
+
+
+def test_monitor_passes_artifact_override_and_records_it_in_both_report_scopes(tmp_path):
+    artifacts(tmp_path, completed=False)
+    stop = threading.Event()
+    stop.set()
+    result = monitor.monitor(
+        tmp_path,
+        "session",
+        42,
+        tmp_path / "out",
+        stop_event=stop,
+        ps=FakePS(FakeProcess(42, 100)),
+        max_artifact_bytes=8192,
+    )
+    assert result["max_artifact_bytes"] == result["artifacts"]["max_artifact_bytes"] == 8192
+    assert result["artifacts"]["read_issues"]["read_errors"] == []
+    assert result == json.loads((tmp_path / "out/report.json").read_text())
+
+
+@pytest.mark.parametrize("mib", [64, 128, 256])
+def test_cli_passes_explicit_artifact_limit(monkeypatch, tmp_path, mib):
+    argv = [
+        "endurance_monitor",
+        "--root",
+        str(tmp_path),
+        "--session",
+        "session",
+        "--pid",
+        "42",
+        "--output",
+        str(tmp_path / "out"),
+    ]
+    if mib != 64:
+        argv += ["--max-artifact-mib", str(mib)]
+    monkeypatch.setattr(sys, "argv", argv)
+    called = []
+
+    def fake_monitor(*args, **kwargs):
+        called.append(kwargs)
+        return {"monitor_status": "completed"}
+
+    monkeypatch.setattr(monitor, "monitor", fake_monitor)
+    assert monitor.main() == 0
+    assert called[0]["max_artifact_bytes"] == mib * 1024 * 1024
+
+
+@pytest.mark.parametrize("mib", ["0", "257", "-1", "1.5"])
+def test_cli_rejects_invalid_artifact_limit_before_monitor(monkeypatch, tmp_path, mib):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "endurance_monitor",
+            "--root",
+            str(tmp_path),
+            "--session",
+            "session",
+            "--pid",
+            "42",
+            "--output",
+            str(tmp_path / "out"),
+            "--max-artifact-mib",
+            mib,
+        ],
+    )
+
+    def forbidden_monitor(*args, **kwargs):
+        pytest.fail("invalid CLI limit must not attach")
+
+    monkeypatch.setattr(monitor, "monitor", forbidden_monitor)
+    with pytest.raises(SystemExit) as exc:
+        monitor.main()
+    assert exc.value.code == 2
+    assert not (tmp_path / "out").exists()
 
 
 def test_deadline_and_stop_file_control_only_monitor(tmp_path):
