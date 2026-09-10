@@ -109,6 +109,26 @@ def test_failed_refresh_keeps_previous_pointer_and_artifact(tmp_path, monkeypatc
     assert not list(pointer.parent.glob(".staging-*"))
 
 
+def test_interrupt_after_pointer_replace_preserves_selected_artifact(tmp_path, monkeypatch):
+    data = prepare_sources(tmp_path, monkeypatch)
+    entry = data["models"]["marian-ct2-en-es"]
+    cache = tmp_path / "cache"
+    prior, _ = managed.ensure_managed_marian(entry, project_root=tmp_path, models_dir=cache)
+    replace = managed.os.replace
+
+    def interrupt_after_replace(source, destination):
+        replace(source, destination)
+        raise KeyboardInterrupt("interrupted after publishing active pointer")
+
+    monkeypatch.setattr(managed.os, "replace", interrupt_after_replace)
+    with pytest.raises(KeyboardInterrupt, match="after publishing"):
+        managed.ensure_managed_marian(entry, project_root=tmp_path, models_dir=cache, refresh=True)
+    selected = resolve_marian_ct2("en-es", project_root=tmp_path, models_dir=cache)
+    assert selected is not None and selected != str(prior)
+    assert all((Path(selected) / name).is_file() for name in MARIAN_CT2_REQUIRED_FILES)
+    assert prior.is_dir()
+
+
 def test_managed_manifest_revision_mismatch_is_not_ready(tmp_path, monkeypatch):
     data = prepare_sources(tmp_path, monkeypatch)
     entry = data["models"]["marian-ct2-en-es"]

@@ -147,7 +147,7 @@ def ensure_managed_marian(
     staging = Path(tempfile.mkdtemp(prefix=".staging-", dir=managed))
     artifact_name = "build-" + uuid.uuid4().hex
     artifact = managed / artifact_name
-    published = False
+    retain_artifact = False
     pointer_tmp = managed / (".active-" + uuid.uuid4().hex + ".tmp")
     try:
         conversion = convert_source(source, staging, entry["quantization"], direction)
@@ -170,13 +170,16 @@ def ensure_managed_marian(
         (staging / "export_manifest.json").write_text(json.dumps(exported, indent=2) + "\n")
         staging.rename(artifact)
         pointer_tmp.write_text(json.dumps({"directory": artifact_name, "manifest_version": manifest["version"]}) + "\n")
+        # Retain before replacement: an interrupt immediately after os.replace
+        # must not delete the artifact now selected by active.json. A failed
+        # replacement may leave an unused build, while the prior pointer stays valid.
+        retain_artifact = True
         os.replace(pointer_tmp, managed / "active.json")
-        published = True
         return artifact.resolve(), True
     finally:
         if staging.exists():
             shutil.rmtree(staging)
         if pointer_tmp.exists():
             pointer_tmp.unlink()
-        if not published and artifact.exists():
+        if not retain_artifact and artifact.exists():
             shutil.rmtree(artifact)
