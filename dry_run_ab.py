@@ -1124,8 +1124,9 @@ def _resolve_mlx_stt_backend() -> str:
 def load_whisper(backend="mlx"):
     """Load Whisper STT model for the given backend.
 
-    MLX backend: uses mlx-whisper with whisper-large-v3-turbo (default)
-                 or distil-whisper-large-v3.5 (fallback).
+    MLX backend: uses the selected settings.stt.whisper_model (Turbo by default).
+                 The configured startup fallback is EN-only; Spanish fails
+                 visibly if its primary model cannot load.
     CUDA backend: uses faster-whisper with large-v3-turbo on GPU.
     CPU backend: uses faster-whisper with large-v3-turbo on CPU.
 
@@ -1157,22 +1158,24 @@ def load_whisper(backend="mlx"):
         mx.set_cache_limit(256 * 1024 * 1024)
 
         from engines.model_paths import resolve_model_path
+        from engines.stt_fallback import require_mlx_fallback_language
 
-        model_id = resolve_model_path(WHISPER_MODEL_TURBO)
+        model_id = resolve_model_path(settings.stt.whisper_model)
         print(f"[2/6] Loading {model_id} (MLX)...")
         t0 = time.time()
         try:
             # Warm up — first call downloads and compiles the model
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
-            print(f"  Whisper Turbo ready ({time.time() - t0:.1f}s)")
+            print(f"  Whisper ready ({time.time() - t0:.1f}s)")
         except Exception as e:
-            print(f"  Turbo load failed ({e}), falling back to distil...")
-            model_id = resolve_model_path(WHISPER_MODEL_DISTIL)
+            require_mlx_fallback_language(SOURCE_LANG, settings.stt.whisper_fallback)
+            print(f"  Whisper load failed ({e}), falling back to {settings.stt.whisper_fallback}...")
+            model_id = resolve_model_path(settings.stt.whisper_fallback)
             t0 = time.time()
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
-            print(f"  Whisper Distil ready ({time.time() - t0:.1f}s)")
+            print(f"  Whisper fallback ready ({time.time() - t0:.1f}s)")
         # Materialize cached Whisper weights for pool-thread use (MLX >= 0.31.2).
         if hasattr(mx, "synchronize"):
             mx.synchronize()

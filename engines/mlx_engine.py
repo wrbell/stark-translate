@@ -27,6 +27,7 @@ from engines.base import (
     TranslationResult,
 )
 from engines.model_paths import resolve_model_path
+from engines.stt_fallback import require_mlx_fallback_language
 from engines.translation_prompts import (
     build_chat_messages,
     chat_template_extra_kwargs,
@@ -176,6 +177,10 @@ class MLXWhisperEngine(STTEngine):
                                  as hallucination and retried (default: 2.4).
         fallback_on_low_conf:    Enable/disable the quality-based fallback retry
                                  (default: True).
+        session_language:       Language used to guard startup fallback (default:
+                                 English). Automatic fallback is EN-only, including
+                                 custom fallback IDs. Spanish primary output is kept
+                                 on low confidence without an incompatible retry.
     """
 
     def __init__(
@@ -186,6 +191,7 @@ class MLXWhisperEngine(STTEngine):
         fallback_threshold: float = -1.2,
         hallucination_threshold: float = 2.4,
         fallback_on_low_conf: bool = True,
+        session_language: str = "en",
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
@@ -198,6 +204,8 @@ class MLXWhisperEngine(STTEngine):
         self._fallback_threshold = fallback_threshold
         self._hallucination_threshold = hallucination_threshold
         self._fallback_on_low_conf = fallback_on_low_conf
+        self._session_language = session_language
+        self._startup_used_fallback = False
         self._fallback_loaded = False
         self._loaded = False
 
@@ -223,6 +231,7 @@ class MLXWhisperEngine(STTEngine):
             )
             logger.info("Whisper ready (%s) (%.1fs)", self._model_id, time.time() - t0)
         except Exception as exc:
+            require_mlx_fallback_language(self._session_language, self._fallback_model_id)
             logger.warning(
                 "Primary model %s failed (%s), falling back to %s",
                 self._model_id,
@@ -237,6 +246,7 @@ class MLXWhisperEngine(STTEngine):
                 condition_on_previous_text=False,
             )
             logger.info("Whisper ready (%s) (%.1fs)", self._model_id, time.time() - t0)
+            self._startup_used_fallback = True
 
         # Warmup already eval'd graphs on this thread; synchronize so the
         # mlx-whisper cache is safe for pool workers (MLX >= 0.31.2 TLS streams).
@@ -270,6 +280,11 @@ class MLXWhisperEngine(STTEngine):
         if not self._loaded:
             raise RuntimeError("Engine not loaded -- call load() first")
 
+        # A default-English caller may later request Spanish on the same engine.
+        # Never run that request on a fallback selected during startup.
+        if self._startup_used_fallback:
+            require_mlx_fallback_language(language, self._fallback_model_id)
+
         primary_result = self._raw_transcribe(
             audio,
             model_repo=self._model_id,
@@ -280,7 +295,7 @@ class MLXWhisperEngine(STTEngine):
         )
 
         # -- quality-based fallback retry ------------------------------------
-        if not self._fallback_on_low_conf:
+        if not self._fallback_on_low_conf or language != "en":
             return primary_result
 
         needs_fallback = self._should_fallback(primary_result)
