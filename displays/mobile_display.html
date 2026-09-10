@@ -541,6 +541,10 @@
   // ── Chunk storage ──
   // Store raw data so we can re-render when model toggles
   var chunkData = [];
+  const acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    chunkData = [];
+    renderLatestChunks();
+  });
 
   function addChunk(data) {
     if (data.stage === 'partial') {
@@ -693,6 +697,7 @@
       } catch (e) {
         return;
       }
+      if (!acceptSession(data)) return;
       // Handle language config — swap panel labels
       if (data.type === 'lang_config') {
         var suffix = useModelB ? ' (B)' : ' (A)';

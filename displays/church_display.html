@@ -285,6 +285,10 @@
 
   // Store raw data so we can re-render on model switch
   let chunkData = [];
+  const acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    chunkData = [];
+    rerenderChunks();
+  });
 
   // ── Profanity filter (same regex as ab_display.html) ──
   const BLOCKED_WORDS = /\b(asshole|bitch|bastard|crap|cunt|dick|fuck|fucking|fucked|motherfucker|piss|shit|shitty|slut)\b/gi;
@@ -429,6 +433,7 @@
       } catch (e) {
         return;
       }
+      if (!acceptSession(data)) return;
       // lang_config: acknowledged but no visible labels to swap in this display
       if (data.type === 'lang_config') return;
       if (data.type === 'speaker_update') {

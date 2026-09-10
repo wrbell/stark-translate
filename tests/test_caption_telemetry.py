@@ -68,6 +68,8 @@ for (const name of ['audience_display','ab_display','mobile_display','church_dis
   const html = fs.readFileSync('displays/' + name + '.html', 'utf8');
   assert(html.includes('src="display_connection.js"'));
   assert(html.includes('StarkDisplayConnection.websocketUrl('));
+  assert(html.includes('StarkDisplayConnection.sessionGuard('));
+  assert(html.includes('if (!acceptSession(data)) return;'));
   assert(html.includes('src="caption_telemetry.js"'));
   assert(html.includes('StarkCaptionTelemetry.wrap(ws,'));
   for (const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) new vm.Script(match[1]);
@@ -99,5 +101,23 @@ assert.strictEqual(config.websocketUrl(securePage), 'wss://captions.example:9999
 assert.strictEqual(config.mobileUrl(securePage), 'https://captions.example/displays/mobile_display.html?port=9999');
 assert.strictEqual(config.websocketUrl(new URL('http://[::1]/?port=1')), 'ws://[::1]:1');
 assert(fs.readFileSync('displays/audience_display.html', 'utf8').includes('StarkDisplayConnection.mobileUrl(location)'));
+let history = [], resets = 0;
+const accept = config.sessionGuard(() => { history = []; resets++; });
+assert(accept({type: 'lang_config', session_id: 'old_en'}));
+history.push({chunk_id: 1, text: 'Old sermon'});
+assert(accept({type: 'lang_config', session_id: 'old_en'})); // reconnect retains history
+assert.strictEqual(history.length, 1);
+assert.strictEqual(resets, 1);
+assert(accept({type: 'speaker_update', session_id: 'old_en', chunk_id: 1}));
+assert(accept({type: 'lang_config', session_id: 'new_es'}));
+assert.strictEqual(history.length, 0);
+assert.strictEqual(resets, 2);
+history.push({chunk_id: 1, text: 'Nuevo sermón'});
+for (const type of ['speaker_update', 'translation', 'translation_start', 'translation_stream']) {
+  assert(!accept({type, session_id: 'old_en', chunk_id: 1}));
+  assert(!accept({type, chunk_id: 1}));
+  assert(accept({type, session_id: 'new_es', chunk_id: 1}));
+}
+assert.strictEqual(history[0].text, 'Nuevo sermón');
 """
     subprocess.run([node, "-e", script], cwd=Path(__file__).resolve().parents[1], check=True, capture_output=True)

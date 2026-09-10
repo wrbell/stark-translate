@@ -196,6 +196,14 @@
   var clearTimer = null;
   var statusFadeTimer = null;
   var recentChunks = []; // store last N chunks for multi-line display
+  var acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    recentChunks = [];
+    if (clearTimer) clearTimeout(clearTimer);
+    spanishText.textContent = englishText.textContent = '';
+    spanishText.classList.remove('visible', 'partial', 'streaming');
+    englishText.classList.remove('visible', 'partial');
+    container.classList.add('empty');
+  });
 
   // ── Profanity filter ──
   // Allow biblical terms: "ass" (donkey), "damn" (damnation), "whore" (KJV), "hell"
@@ -348,6 +356,7 @@
       } catch (e) {
         return;
       }
+      if (!acceptSession(data)) return;
 
       if (data.type === 'speaker_update') {
         var existing = recentChunks.find(function(c) { return c.chunk_id === data.chunk_id; });

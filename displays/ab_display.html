@@ -386,6 +386,17 @@
 
   // Track last MarianMT partial per utterance for column B (non-AB mode)
   let lastMarianPartial = {};
+  const acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    Object.values(panels).forEach(panel => { panel.innerHTML = ''; });
+    chunks = sumA = sumB = sumSTT = sumE2E = sameCount = 0;
+    sumTpsA = sumTpsB = tpsCountA = tpsCountB = sumMarian = marianCount = 0;
+    latenciesMarian = []; latenciesSTT = []; latenciesA = []; latenciesB = []; latenciesE2E = [];
+    lastMarianPartial = {};
+    modelA = modelB = null;
+    hasAB = false;
+    document.querySelectorAll('.stat-val, .latency').forEach(el => { el.textContent = '—'; });
+    $('chunkCount').textContent = '0';
+  });
 
   function connect() {
     const ws = new WebSocket(WS_URL);
@@ -405,6 +416,7 @@
 
     ws.onmessage = StarkCaptionTelemetry.wrap(ws, (evt) => {
       const data = JSON.parse(evt.data);
+      if (!acceptSession(data)) return;
 
       if (data.type === 'speaker_update') {
         document.querySelectorAll('[data-final-chunk="' + data.chunk_id + '"]').forEach(function(el) {

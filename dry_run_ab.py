@@ -3140,6 +3140,7 @@ async def ws_handler(websocket, path=None):
             json.dumps(
                 {
                     "type": "lang_config",
+                    "session_id": SESSION_ID,
                     "source_lang": SOURCE_LANG,
                     "target_lang": TARGET_LANG,
                     "source_label": "Español" if SOURCE_LANG == "es" else "English",

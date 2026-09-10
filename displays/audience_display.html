@@ -285,6 +285,12 @@
   let sentences = [];
   let autoScrollEn = true;
   let autoScrollEs = true;
+  const acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    sentences = [];
+    autoScrollEn = autoScrollEs = true;
+    document.getElementById('musicHold').classList.remove('visible');
+    render();
+  });
 
   // Pause auto-scroll when user scrolls up, resume at bottom
   function setupAutoScroll(el, setter) {
@@ -356,6 +362,7 @@
 
     ws.onmessage = StarkCaptionTelemetry.wrap(ws, (evt) => {
       const data = JSON.parse(evt.data);
+      if (!acceptSession(data)) return;
 
       if (data.type === 'speaker_update') {
         const sentence = sentences.find(s => s.id === data.chunk_id);
