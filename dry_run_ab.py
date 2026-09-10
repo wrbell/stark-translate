@@ -4799,7 +4799,11 @@ async def audio_loop():
                     # Get audio frame from sounddevice callback, run VAD inline.
                     # VAD is <1ms so running it on the asyncio thread is fine.
                     try:
-                        audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
+                        # Keep queue consumption in this task: Python 3.11's
+                        # wait_for can swallow Stop when its child get() has
+                        # just completed as cancellation arrives.
+                        async with asyncio.timeout(0.1):
+                            audio_frame = await audio_queue.get()
                     except TimeoutError:
                         if getattr(stream, "error", None) is not None:
                             if isinstance(stream.error, AudioCaptureError):

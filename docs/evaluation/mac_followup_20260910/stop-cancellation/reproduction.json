@@ -1,0 +1,25 @@
+{
+  "python": "3.11.11",
+  "results": [
+    {
+      "mode": "wait_for",
+      "first_stop_completed": false,
+      "buffer_samples": 12800,
+      "pending_cancel_requests": 1,
+      "cleanup": {
+        "cancellation_observed": true,
+        "buffer_samples": 12800
+      }
+    },
+    {
+      "mode": "timeout",
+      "first_stop_completed": true,
+      "buffer_samples": 12800,
+      "pending_cancel_requests": 1,
+      "cleanup": {
+        "cancellation_observed": true,
+        "buffer_samples": 12800
+      }
+    }
+  ]
+}

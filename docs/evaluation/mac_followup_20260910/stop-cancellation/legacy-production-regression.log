@@ -1,0 +1,178 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_control_or_disconnect_preserves_truthful_buffer_outcome[stop_last_get] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x102c5d190>
+tmp_path = PosixPath('/private/var/folders/2k/f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-402/test_control_or_disconnect_pre0')
+operation = 'stop_last_get'
+
+    @pytest.mark.parametrize("operation", ["stop", "stop_last_get", "pause", "disconnect"])
+    def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tmp_path, operation):
+        from types import SimpleNamespace
+    
+        import dry_run_ab as d
+        from tools import audio_bridge_client
+        from tools.isolated_audio import AudioCaptureError
+        from tools.persistence import PersistenceExecutor
+        from tools.pipeline_health import PipelineHealth
+    
+        async def exercise():
+            class ControlledQueue(asyncio.Queue):
+                received = 0
+    
+                async def get(self):
+                    frame = await super().get()
+                    self.received += 1
+                    if operation == "stop_last_get" and self.received == 25:
+                        # Deliver Stop when the last get has completed. A child
+                        # task created by wait_for can swallow this cancellation
+                        # on Python 3.11, leaving the full buffer unfinalized.
+                        asyncio.get_running_loop().call_soon(task.cancel)
+                    return frame
+    
+            queue = ControlledQueue()
+            for _ in range(25):
+                queue.put_nowait(np.ones(512, np.float32) * 0.1)
+            stream = MagicMock(spec=["__enter__", "__exit__"])
+            stream.error = None
+            stream.finished = threading.Event()
+            health = PipelineHealth(tmp_path, "control_en")
+            pool = PersistenceExecutor(max_workers=1)
+            monkeypatch.setattr(audio_bridge_client, "open_audio_stream", lambda **kwargs: stream)
+            monkeypatch.setattr(d.sd, "PortAudioError", type("PortAudioError", (Exception,), {}))
+            monkeypatch.setattr(d, "_health", health)
+            monkeypatch.setattr(d, "_io_pool", pool)
+            monkeypatch.setattr(d, "audio_queue", queue)
+            monkeypatch.setattr(d, "_pipeline_chunk_queue", asyncio.Queue())
+            monkeypatch.setattr(d, "EXIT_AFTER_REPLAY", False)
+            monkeypatch.setattr(d, "_session_stop_requested", operation in {"stop", "stop_last_get"})
+            monkeypatch.setattr(d, "is_speech", lambda *args: True)
+            monkeypatch.setattr(d, "_vad_pool", None)
+            monkeypatch.setattr(d, "process_final", AsyncMock())
+            monkeypatch.setattr(d, "process_partial", AsyncMock())
+            monkeypatch.setattr(d, "_warmup_pending", False)
+            monkeypatch.setattr(d, "_last_warmup_time", float("inf"))
+            monkeypatch.setattr(d, "vad_model", SimpleNamespace(reset_states=lambda: None))
+            task = asyncio.create_task(d.audio_loop())
+            try:
+                for _ in range(100):
+                    if queue.empty():
+                        break
+                    await asyncio.sleep(0.01)
+                assert queue.empty()
+                if operation == "stop":
+                    task.cancel()
+                elif operation == "stop_last_get":
+                    pass  # The final get schedules the only Stop needed to flush.
+                elif operation == "pause":
+                    health.paused = True
+                else:
+                    stream.error = AudioCaptureError("disconnected")
+                for _ in range(100):
+                    if d.process_final.await_count or pool.snapshot()["failed"]:
+                        break
+                    await asyncio.sleep(0.01)
+                if operation == "disconnect":
+                    assert not d.process_final.await_count
+                    assert not pool.snapshot()["ok"]
+                    assert health.snapshot()["recording"]["required_failures"] == 1
+                else:
+                    assert d.process_final.await_count == 1
+                    assert len(d.process_final.await_args.args[0]) == 25 * 512
+                    assert pool.snapshot()["ok"]
+            finally:
+                task.cancel()
+                await asyncio.gather(task, return_exceptions=True)
+                pool.shutdown(wait=True)
+    
+>       asyncio.run(exercise())
+
+tests/test_file_audio_stream.py:406: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../anaconda3/lib/python3.11/asyncio/runners.py:190: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../../anaconda3/lib/python3.11/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../anaconda3/lib/python3.11/asyncio/base_events.py:654: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def exercise():
+        class ControlledQueue(asyncio.Queue):
+            received = 0
+    
+            async def get(self):
+                frame = await super().get()
+                self.received += 1
+                if operation == "stop_last_get" and self.received == 25:
+                    # Deliver Stop when the last get has completed. A child
+                    # task created by wait_for can swallow this cancellation
+                    # on Python 3.11, leaving the full buffer unfinalized.
+                    asyncio.get_running_loop().call_soon(task.cancel)
+                return frame
+    
+        queue = ControlledQueue()
+        for _ in range(25):
+            queue.put_nowait(np.ones(512, np.float32) * 0.1)
+        stream = MagicMock(spec=["__enter__", "__exit__"])
+        stream.error = None
+        stream.finished = threading.Event()
+        health = PipelineHealth(tmp_path, "control_en")
+        pool = PersistenceExecutor(max_workers=1)
+        monkeypatch.setattr(audio_bridge_client, "open_audio_stream", lambda **kwargs: stream)
+        monkeypatch.setattr(d.sd, "PortAudioError", type("PortAudioError", (Exception,), {}))
+        monkeypatch.setattr(d, "_health", health)
+        monkeypatch.setattr(d, "_io_pool", pool)
+        monkeypatch.setattr(d, "audio_queue", queue)
+        monkeypatch.setattr(d, "_pipeline_chunk_queue", asyncio.Queue())
+        monkeypatch.setattr(d, "EXIT_AFTER_REPLAY", False)
+        monkeypatch.setattr(d, "_session_stop_requested", operation in {"stop", "stop_last_get"})
+        monkeypatch.setattr(d, "is_speech", lambda *args: True)
+        monkeypatch.setattr(d, "_vad_pool", None)
+        monkeypatch.setattr(d, "process_final", AsyncMock())
+        monkeypatch.setattr(d, "process_partial", AsyncMock())
+        monkeypatch.setattr(d, "_warmup_pending", False)
+        monkeypatch.setattr(d, "_last_warmup_time", float("inf"))
+        monkeypatch.setattr(d, "vad_model", SimpleNamespace(reset_states=lambda: None))
+        task = asyncio.create_task(d.audio_loop())
+        try:
+            for _ in range(100):
+                if queue.empty():
+                    break
+                await asyncio.sleep(0.01)
+            assert queue.empty()
+            if operation == "stop":
+                task.cancel()
+            elif operation == "stop_last_get":
+                pass  # The final get schedules the only Stop needed to flush.
+            elif operation == "pause":
+                health.paused = True
+            else:
+                stream.error = AudioCaptureError("disconnected")
+            for _ in range(100):
+                if d.process_final.await_count or pool.snapshot()["failed"]:
+                    break
+                await asyncio.sleep(0.01)
+            if operation == "disconnect":
+                assert not d.process_final.await_count
+                assert not pool.snapshot()["ok"]
+                assert health.snapshot()["recording"]["required_failures"] == 1
+            else:
+>               assert d.process_final.await_count == 1
+E               AssertionError: assert 0 == 1
+E                +  where 0 = <AsyncMock id='4363974992'>.await_count
+E                +    where <AsyncMock id='4363974992'> = <module 'dry_run_ab' from '/Users/willem/Code/vibes/SRTranslate/dry_run_ab.py'>.process_final
+
+tests/test_file_audio_stream.py:398: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+Listening... (Ctrl+C to stop)
+
+------------------------------ Captured log call -------------------------------
+DEBUG    stark:dry_run_ab.py:4979 vad_speech_start utterance_id=1 frame=1
+=========================== short test summary info ============================
+FAILED tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[stop_last_get]
+1 failed in 1.48s

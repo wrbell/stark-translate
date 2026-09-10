@@ -324,7 +324,7 @@ def test_file_callback_wakes_async_queue_from_reader_thread(monkeypatch):
     asyncio.run(exercise(), debug=True)
 
 
-@pytest.mark.parametrize("operation", ["stop", "pause", "disconnect"])
+@pytest.mark.parametrize("operation", ["stop", "stop_last_get", "pause", "disconnect"])
 def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tmp_path, operation):
     from types import SimpleNamespace
 
@@ -335,7 +335,20 @@ def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tm
     from tools.pipeline_health import PipelineHealth
 
     async def exercise():
-        queue = asyncio.Queue()
+        class ControlledQueue(asyncio.Queue):
+            received = 0
+
+            async def get(self):
+                frame = await super().get()
+                self.received += 1
+                if operation == "stop_last_get" and self.received == 25:
+                    # Deliver Stop when the last get has completed. A child
+                    # task created by wait_for can swallow this cancellation
+                    # on Python 3.11, leaving the full buffer unfinalized.
+                    asyncio.get_running_loop().call_soon(task.cancel)
+                return frame
+
+        queue = ControlledQueue()
         for _ in range(25):
             queue.put_nowait(np.ones(512, np.float32) * 0.1)
         stream = MagicMock(spec=["__enter__", "__exit__"])
@@ -350,8 +363,9 @@ def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tm
         monkeypatch.setattr(d, "audio_queue", queue)
         monkeypatch.setattr(d, "_pipeline_chunk_queue", asyncio.Queue())
         monkeypatch.setattr(d, "EXIT_AFTER_REPLAY", False)
-        monkeypatch.setattr(d, "_session_stop_requested", operation == "stop")
+        monkeypatch.setattr(d, "_session_stop_requested", operation in {"stop", "stop_last_get"})
         monkeypatch.setattr(d, "is_speech", lambda *args: True)
+        monkeypatch.setattr(d, "_vad_pool", None)
         monkeypatch.setattr(d, "process_final", AsyncMock())
         monkeypatch.setattr(d, "process_partial", AsyncMock())
         monkeypatch.setattr(d, "_warmup_pending", False)
@@ -366,6 +380,8 @@ def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tm
             assert queue.empty()
             if operation == "stop":
                 task.cancel()
+            elif operation == "stop_last_get":
+                pass  # The final get schedules the only Stop needed to flush.
             elif operation == "pause":
                 health.paused = True
             else:

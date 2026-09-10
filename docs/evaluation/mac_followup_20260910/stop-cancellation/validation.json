@@ -1,0 +1,76 @@
+{
+  "scope": "Silent mocked production-loop tests and stdlib cancellation reproduction; no native capture, output playback or models.",
+  "python_stdlib_fixture": "3.11.11",
+  "checks": [
+    {
+      "argv": [
+        "stt_env/bin/python",
+        "-m",
+        "pytest",
+        "tests/test_file_audio_stream.py",
+        "tests/test_audio_utterance_discard.py",
+        "tests/test_capture_accounting.py",
+        "tests/test_capture_transport.py",
+        "tests/test_capture_sample_positions.py",
+        "tests/test_music_capture_resume.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "tests_passed": 88,
+      "subtests_passed": 20,
+      "elapsed_seconds": 12.56,
+      "log": ".cache/mac-en-es-closeout/stop-cancellation-review/focused-pytest.log"
+    },
+    {
+      "argv": [
+        "stt_env/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "legacy_wait_for",
+        "tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[stop_last_get]",
+        "-q"
+      ],
+      "environment": {
+        "PYTHONPATH": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/stop-cancellation-review"
+      },
+      "exit_code": 1,
+      "expected_failure": true,
+      "observed": "process_final.await_count == 0 instead of 1",
+      "source_mutation": false,
+      "mechanism": "AST restoration of exactly former wait_for line in in-memory production audio_loop; all other production function code and test unchanged.",
+      "log": ".cache/mac-en-es-closeout/stop-cancellation-review/legacy-production-regression.log"
+    }
+  ],
+  "preliminary_command_error": "Initial pytest invocation named nonexistent tests/test_capture_handoff.py; exit4 and no tests collected. Corrected suite uses actual test_capture_transport.py.",
+  "files": {
+    "dry_run_ab.py": {
+      "sha256": "04c687d392b2f02a72e46e99626283206387df53950c3fba8ec2616e6c3438af",
+      "bytes": 270264
+    },
+    "tests/test_file_audio_stream.py": {
+      "sha256": "23fe167b02a52696572db80caf0bdaeffa10f9689e85c96110e69bfe7adbebfd",
+      "bytes": 24524
+    },
+    ".cache/mac-en-es-closeout/stop-cancellation-review/reproduce.py": {
+      "sha256": "2712f6eb6f4ea86d8e31ec6f7360910e61393e0bcc358e80783f6712bbe783e6",
+      "bytes": 1919
+    },
+    ".cache/mac-en-es-closeout/stop-cancellation-review/reproduction.json": {
+      "sha256": "c16d7226a887b00c48aa3f73d9dee8636ec1df19ab95babd71bdb8f0bba2a916",
+      "bytes": 525
+    },
+    ".cache/mac-en-es-closeout/stop-cancellation-review/legacy_wait_for.py": {
+      "sha256": "c220a7aabde10666c225ecd7ece785a242d7c479f7167d6049cda7f7714518d8",
+      "bytes": 1251
+    },
+    ".cache/mac-en-es-closeout/stop-cancellation-review/legacy-production-regression.log": {
+      "sha256": "dbeb66013d2dc8edbfe1eddaa4d10c8bfe188ff70c8b8f13d72f7ff604d3f870",
+      "bytes": 9090
+    },
+    ".cache/mac-en-es-closeout/stop-cancellation-review/focused-pytest.log": {
+      "sha256": "a9e9c5a861026db6e5f2ee42eb06a9d767edfda0042a3202c499cca622f2f8c8",
+      "bytes": 172
+    }
+  }
+}

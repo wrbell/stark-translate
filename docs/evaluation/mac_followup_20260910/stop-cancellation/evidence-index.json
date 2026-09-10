@@ -1,0 +1,41 @@
+{
+  "files": [
+    {
+      "path": "ci-980c8ea-failed.log",
+      "sha256": "7a2b6cdb50d441922fbe0af0e06dd17be9794fb50775e8a304937b6c87e7a73b",
+      "size_bytes": 471502
+    },
+    {
+      "path": "focused-pytest.log",
+      "sha256": "a9e9c5a861026db6e5f2ee42eb06a9d767edfda0042a3202c499cca622f2f8c8",
+      "size_bytes": 172
+    },
+    {
+      "path": "legacy-production-regression.log",
+      "sha256": "dbeb66013d2dc8edbfe1eddaa4d10c8bfe188ff70c8b8f13d72f7ff604d3f870",
+      "size_bytes": 9090
+    },
+    {
+      "path": "legacy_wait_for.py.txt",
+      "sha256": "c220a7aabde10666c225ecd7ece785a242d7c479f7167d6049cda7f7714518d8",
+      "size_bytes": 1251
+    },
+    {
+      "path": "reproduce.py.txt",
+      "sha256": "2712f6eb6f4ea86d8e31ec6f7360910e61393e0bcc358e80783f6712bbe783e6",
+      "size_bytes": 1919
+    },
+    {
+      "path": "reproduction.json",
+      "sha256": "c16d7226a887b00c48aa3f73d9dee8636ec1df19ab95babd71bdb8f0bba2a916",
+      "size_bytes": 525
+    },
+    {
+      "path": "validation.json",
+      "sha256": "0d45ffd88e3b01963a216a9c73c6cd9c92f86b7e7ae1a41ac88a9a81812f2c56",
+      "size_bytes": 3059
+    }
+  ],
+  "native_devices_used": false,
+  "model_inference": false
+}
