@@ -18,6 +18,8 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
+from tools.session_lifecycle import require_completed, session_status
+
 _LOCK = threading.RLock()
 _SESSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,159}$")
 
@@ -172,10 +174,13 @@ class ReviewStore:
                 continue
             if not records:
                 continue
+            lifecycle = session_status(self.root, session)
             sessions.append(
                 {
                     "session": session,
-                    "active": session == active_session,
+                    **lifecycle,
+                    "active": session == active_session or lifecycle["active"],
+                    "exportable": session != active_session and lifecycle["exportable"],
                     "segments": len(records),
                     "pending": sum(
                         not r["excluded"] and not (r["transcript_approved"] and r["translation_approved"])
@@ -192,6 +197,11 @@ class ReviewStore:
         if not path.exists():
             raise FileNotFoundError("Session diagnostics not found")
         edits = latest_corrections(self.sidecar_path(session))
+        confirmations = {
+            row.get("session"): row
+            for row in read_jsonl(self.corrections / "session_provenance.jsonl")
+            if row.get("session_kind") == "live"
+        }
         records = {}
         for row in read_jsonl(path, complete_only=True):
             if "event" in row or "chunk_id" not in row or row.get("is_final") is False:
@@ -202,6 +212,9 @@ class ReviewStore:
                 continue
             row["session"] = session
             row["chunk_id"] = chunk
+            if (not row.get("session_kind") or row["session_kind"] == "unknown") and session in confirmations:
+                row["session_kind"] = "live"
+                row["provenance_confirmation"] = confirmations[session]
             records[chunk] = normalize_record(row, edits.get(chunk))
         return [records[k] for k in sorted(records)]
 
@@ -294,6 +307,7 @@ class ReviewStore:
         if split not in ("train", "eval"):
             raise ValueError("Export split must be train or eval")
         with _LOCK, _file_lock(self.corrections):
+            require_completed(self.root, session)
             records = [
                 r
                 for r in self.records(session)
@@ -354,6 +368,8 @@ class ReviewStore:
                         "split": split,
                         "source_lang": rec["source_lang"],
                         "target_lang": rec["target_lang"],
+                        "session_kind": rec["session_kind"],
+                        "provenance_confirmation": rec.get("provenance_confirmation"),
                     }
                     if rec["transcript_approved"] and provenance["audio_sha256"]:
                         language = rec["source_lang"]

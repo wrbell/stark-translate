@@ -5,6 +5,22 @@
   const activeStates = new Set(["starting", "running", "paused", "stopping"]);
   let activeSession = null, pageOffset = 0, staleDraft = null, saveConflict = false;
   let editVersion = 0, refreshVersion = 0;
+  let selection = {};
+  try { selection = JSON.parse(localStorage.getItem("stark-review-selection") || "{}"); } catch (e) { /* optional */ }
+  for (const id of ["pending", "flagged"]) {
+    if (typeof selection[id] === "boolean") el(id).checked = selection[id];
+  }
+  pageOffset = Number.isInteger(selection.offset) && selection.offset >= 0 ? selection.offset : 0;
+  function rememberSelection() {
+    selection = {session: el("session").value, chunk: current?.chunk_id, offset: pageOffset,
+      pending: el("pending").checked, flagged: el("flagged").checked};
+    try { localStorage.setItem("stark-review-selection", JSON.stringify(selection)); } catch (e) { /* optional */ }
+  }
+  function updateExport() {
+    const session = sessions.find(item => item.session === el("session").value);
+    el("export").disabled = !session?.exportable || session.session === activeSession;
+    el("export").title = session?.reason || "";
+  }
   const message = text => { el("status").textContent = text; };
   const draftKey = () => current ? `stark-review-${current.session}-${current.chunk_id}` : "";
   async function request(url, method = "GET", body) {
@@ -40,6 +56,7 @@
     current = record; dirty = false; saveConflict = false; staleDraft = null;
     el("restore").hidden = true;
     el("editor").hidden = !record;
+    rememberSelection();
     if (!record) return;
     populate(record);
     const context = record.context || {};
@@ -81,11 +98,15 @@
     if (!current || !dirty) return true;
     if (busy) return false;
     busy = true;
+    // A read started before this write must not repaint the older revision.
+    refreshVersion += 1;
     const sentVersion = editVersion;
     try {
       const result = await request(`/api/review/${encodeURIComponent(current.session)}/segments/${current.chunk_id}`, "PUT", values());
       const key = draftKey();
       current = {...current, ...result};
+      records = records.map(record => record.session === current.session && record.chunk_id === current.chunk_id
+        ? current : record);
       if (sentVersion !== editVersion) {
         // An edit made while saving belongs to the next server revision.
         try { localStorage.setItem(key, JSON.stringify(values())); } catch (e) { /* optional */ }
@@ -99,38 +120,52 @@
     } catch (e) { saveConflict = true; message(`Save failed: ${e.message} Your draft remains in this browser. Refresh to load the current revision.`); return false; }
     finally { busy = false; }
   }
-  async function refreshRecords(preserve = true) {
+  async function refreshRecords(preserve = true, loadConflict = false, userRefresh = false) {
     const session = el("session").value;
     if (!session) { records = []; render(null); return; }
     if (busy) return;
     const requestedVersion = ++refreshVersion;
+    const requestedEditVersion = editVersion;
     const query = new URLSearchParams({pending_only: el("pending").checked, flagged_only: el("flagged").checked, limit: 200, offset: pageOffset});
     try {
       const data = await request(`/api/review/${encodeURIComponent(session)}/segments?${query}`);
-      if (requestedVersion !== refreshVersion || el("session").value !== session || dirty) return;
+      if (requestedVersion !== refreshVersion || el("session").value !== session ||
+          requestedEditVersion !== editVersion || (dirty && !loadConflict)) return;
       records = data.segments;
       el("items").replaceChildren(...records.map(record => new Option(
         `#${record.chunk_id} · priority ${record.review_priority || 0} · ${record.source_text.slice(0, 55)}`, String(record.chunk_id))));
-      const selected = preserve && current && current.session === session
-        ? records.find(record => record.chunk_id === current.chunk_id) : null;
+      const wantedChunk = current?.session === session ? current.chunk_id
+        : selection.session === session ? selection.chunk : null;
+      const selected = preserve ? records.find(record => record.chunk_id === wantedChunk) : null;
       const next = selected || records[0] || null;
       if (next) el("items").value = String(next.chunk_id);
-      if (!preserve || !dirty) render(next);
+      // Explicit conflict recovery shows the saved revision and offers the local
+      // draft separately; render() never deletes that draft.
+      const sameSegment = current && next && current.session === next.session && current.chunk_id === next.chunk_id;
+      const unchanged = sameSegment && current.revision === next.revision && current.source_text === next.source_text;
+      const playing = sameSegment && !el("audio").paused && !userRefresh && !loadConflict;
+      if (loadConflict || (!unchanged && !playing)) render(next);
+      rememberSelection();
       if (!dirty && !staleDraft) message(`${data.total} matching finalized segments · showing ${records.length ? pageOffset + 1 : 0}–${pageOffset + records.length}.`);
       el("previous-page").disabled = pageOffset === 0;
       el("next-page").disabled = pageOffset + records.length >= data.total;
-      el("export").disabled = session === activeSession;
+      updateExport();
     } catch (e) { message(e.message); }
   }
-  async function refreshSessions() {
+  async function refreshSessions(userRefresh = false) {
+    const requestedVersion = ++refreshVersion;
+    const requestedEditVersion = editVersion;
     try {
-      const data = await request("/api/review/sessions"); sessions = data.sessions;
-      const selected = el("session").value;
-      el("session").replaceChildren(...sessions.map(s => new Option(`${s.session}${s.active ? " · LIVE" : ""} · ${s.pending} pending`, s.session)));
+      const data = await request("/api/review/sessions");
+      if (requestedVersion !== refreshVersion || requestedEditVersion !== editVersion || dirty || busy) return;
+      sessions = data.sessions;
+      const selected = el("session").value || selection.session;
+      el("session").replaceChildren(...sessions.map(s => new Option(`${s.session}${s.active ? " · LIVE"
+        : !s.exportable ? ` · ${s.status || "completion unknown"}` : ""} · ${s.pending} pending`, s.session)));
       if (sessions.some(s => s.session === selected)) el("session").value = selected;
       else if (sessions.length) el("session").value = (sessions.find(s => !s.active) || sessions[0]).session;
       activeSession = (sessions.find(s => s.active) || {}).session || null;
-      await refreshRecords();
+      await refreshRecords(true, false, userRefresh);
     } catch (e) { message(e.message); }
   }
   el("items").addEventListener("change", async () => {
@@ -144,8 +179,8 @@
   });
   for (const id of ["pending", "flagged"]) el(id).addEventListener("change", async () => { if (await save()) { pageOffset = 0; await refreshRecords(); } });
   el("refresh").addEventListener("click", async () => {
-    if (saveConflict) await refreshRecords(false);
-    else if (await save()) await refreshSessions();
+    if (saveConflict) await refreshRecords(true, true);
+    else if (await save()) await refreshSessions(true);
   });
   el("restore").addEventListener("click", () => {
     if (staleDraft) { populate(staleDraft); el("restore").hidden = true; changed(); }
@@ -172,11 +207,11 @@
       el("download").href = result.download_url; el("download").hidden = false;
       message(`Export ready: ${result.stt_samples.en} English and ${result.stt_samples.es} Spanish audio clips; ${result.translation_pairs} translation pairs.`);
     } catch (e) { message(`Export failed: ${e.message}`); }
-    finally { el("export").disabled = el("session").value === activeSession; }
+    finally { updateExport(); }
   });
   window.addEventListener("operator-session", event => {
     activeSession = activeStates.has(event.detail.state) ? event.detail.session_id : null;
-    el("export").disabled = el("session").value === activeSession;
+    updateExport();
   });
   window.addEventListener("beforeunload", event => { if (dirty) { event.preventDefault(); event.returnValue = ""; } });
   refreshSessions();

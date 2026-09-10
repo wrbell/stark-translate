@@ -34,13 +34,48 @@ def _write_jsonl(path: Path, rows: list[dict]) -> None:
     atomic_jsonl(path, rows)
 
 
-def _training_only(path: Path, rows: list[dict]) -> None:
-    if {"eval", "test", "holdout"} & set(path.parts):
+def _training_only(path: Path, rows: list[dict], *, require_live: bool = False) -> None:
+    if {"eval", "test", "holdout"} & (set(path.parts) | set(path.resolve().parts)):
         raise ValueError("Evaluation data must not be imported into a training corpus")
     if any(row.get("split", "train") != "train" or row.get("dataset_split", "train") != "train" for row in rows):
         raise ValueError("Export contains evaluation/unknown split records; import training records only")
-    if any(row.get("is_eval") or row.get("session_kind") in ("replay", "synthetic") for row in rows):
+    if any(
+        str(row.get("is_eval", "")).lower() in ("true", "1", "yes")
+        or row.get("session_kind") in ("replay", "synthetic")
+        for row in rows
+    ):
         raise ValueError("Evaluation/replay records must not be imported into a training corpus")
+    if require_live and any(row.get("session_kind") != "live" for row in rows):
+        raise ValueError(
+            "Correction training imports require explicit live-session provenance. "
+            "Re-export with prepare_finetune_data --confirm-live-session SESSION after verifying the source, "
+            "or keep unknown data in evaluation."
+        )
+
+
+def _accept_revision(existing: dict, incoming: dict, fields: tuple[str, ...]) -> bool:
+    """Ignore older exports and reject identity/content conflicts before writing."""
+    try:
+        old_revision = int(existing.get("revision") or 0)
+        new_revision = int(incoming.get("revision") or 0)
+        if min(old_revision, new_revision) < 0:
+            raise ValueError
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Correction revision must be a nonnegative integer") from exc
+    sample = incoming.get("sample_id", "unknown")
+    old_hash, new_hash = existing.get("audio_sha256"), incoming.get("audio_sha256")
+    if old_hash and new_hash and old_hash != new_hash:
+        raise ValueError(f"Conflicting audio identity for sample {sample}; use a distinct session/sample ID")
+    if new_revision < old_revision:
+        return False
+    if (
+        new_revision == old_revision
+        and "revision" in existing
+        and "revision" in incoming
+        and any(str(existing.get(key) or "") != str(incoming.get(key) or "") for key in fields)
+    ):
+        raise ValueError(f"Conflicting content at revision {new_revision} for sample {sample}; re-export latest")
+    return True
 
 
 def _pair(row: dict) -> tuple[str, str]:
@@ -59,13 +94,14 @@ def merge_translation(
     dedupe: bool = True,
 ) -> dict:
     corrections = _load_jsonl(corrections_path)
-    _training_only(corrections_path, corrections)
+    _training_only(corrections_path, corrections, require_live=True)
     _training_only(output or train_jsonl, [])
     existing = _load_jsonl(train_jsonl)
+    _training_only(train_jsonl, existing)
     before = len(existing)
     ids = {row.get("sample_id"): index for index, row in enumerate(existing) if row.get("sample_id")}
     seen = {tuple(part.lower() for part in _pair(row)) for row in existing}
-    added = updated = 0
+    added = updated = stale = 0
     for row in corrections:
         en, es = _pair(row)
         if not en or not es:
@@ -75,8 +111,12 @@ def merge_translation(
         sample = row.get("sample_id")
         if sample in ids:
             index = ids[sample]
+            if not _accept_revision(existing[index], item, ("en", "es", "source_lang")):
+                stale += 1
+                continue
             if existing[index] != item:
                 existing[index] = item
+                seen = {tuple(part.lower() for part in _pair(saved)) for saved in existing}
                 updated += 1
             continue
         if dedupe and pair_key in seen:
@@ -93,6 +133,7 @@ def merge_translation(
         "before": before,
         "added": added,
         "updated": updated,
+        "stale_skipped": stale,
         "after": len(existing),
         "output": str(out),
         "dedupe": dedupe,
@@ -138,16 +179,34 @@ def merge_whisper(
         raise ValueError("Evaluation bundles cannot be merged into training")
     meta_path = _metadata(corrections_dir, language)
     corr_rows = _read_metadata(meta_path)
-    _training_only(meta_path, corr_rows)
+    _training_only(meta_path, corr_rows, require_live=True)
     out_dir = output_dir or train_dir
     _training_only(out_dir, [])
     train_meta = out_dir / "metadata.jsonl"
     if not train_meta.exists() and (out_dir / "metadata.csv").exists():
         train_meta = out_dir / "metadata.csv"
-    existing = _read_metadata(train_meta) if train_meta.exists() else []
+    source_meta = train_meta
+    if not train_meta.exists() and output_dir is not None and train_dir.resolve() != out_dir.resolve():
+        source_meta = _metadata(train_dir, language, required=False)
+        train_meta = out_dir / source_meta.name
+    existing = _read_metadata(source_meta) if source_meta.exists() else []
+    _training_only(source_meta, existing)
     if any((row.get("source_lang") or "en") != language for row in [*corr_rows, *existing]):
         raise ValueError("Audio language does not match --language; use a separate corpus per language")
     before = len(existing)
+    base_copies = []
+    if source_meta.parent.resolve() != out_dir.resolve():
+        for row in existing:
+            name = row.get("file_name") or row.get("audio") or ""
+            source_audio = (source_meta.parent / name).resolve()
+            destination = (out_dir / name).resolve()
+            if not name or not source_audio.is_relative_to(source_meta.parent.resolve()):
+                raise ValueError("Existing corpus audio must stay within its directory")
+            if not destination.is_relative_to(out_dir.resolve()):
+                raise ValueError("Existing corpus audio must stay within the output directory")
+            if not source_audio.is_file():
+                raise FileNotFoundError(f"Existing corpus audio missing: {name}")
+            base_copies.append((source_audio, destination))
     # IDs are preserved across exports. Content hashes dedupe legacy exports.
     ids = {row.get("sample_id"): index for index, row in enumerate(existing) if row.get("sample_id")}
     prepared = []
@@ -177,12 +236,15 @@ def merge_whisper(
             "source": "active_learning",
         }
         prepared.append((src, item))
-    out_dir.mkdir(parents=True, exist_ok=True)
-    added = updated = 0
+    added = updated = stale = 0
+    copies = []
     for src, item in prepared:
         sample = item["sample_id"]
         if sample in ids:
             index = ids[sample]
+            if not _accept_revision(existing[index], item, ("transcription", "audio_sha256", "source_lang")):
+                stale += 1
+                continue
             same = all(
                 str(existing[index].get(key) or "") == str(item.get(key) or "")
                 for key in existing[index].keys() | item.keys()
@@ -195,7 +257,12 @@ def merge_whisper(
             ids[sample] = len(existing)
             existing.append(item)
             added += 1
-        shutil.copy2(src, out_dir / item["file_name"])
+        copies.append((src, out_dir / item["file_name"]))
+    # Validate every revision before any audio or metadata can be changed.
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for src, destination in [*base_copies, *copies]:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, destination)
     if train_meta.suffix == ".csv":
         # Retain historical corpus metadata format rather than create two competing files.
         fields = list(dict.fromkeys(key for row in existing for key in row))
@@ -219,6 +286,7 @@ def merge_whisper(
         "before": before,
         "added": added,
         "updated": updated,
+        "stale_skipped": stale,
         "after": len(existing),
         "output": str(out_dir),
         "replay_ratio": replay_ratio,

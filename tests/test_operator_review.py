@@ -17,12 +17,19 @@ from operator_app.review import router
 from tools.merge_corrections import merge_translation, merge_whisper
 from tools.prepare_finetune_data import cmd_export_translation, cmd_export_whisper, load_diagnostics
 from tools.review_data import ReviewConflict, ReviewStore, atomic_jsonl, normalize_record, read_jsonl
+from tools.session_lifecycle import finish_session, start_session
+
+
+def mark_completed(store, session):
+    marker = json.loads((store.metrics / f"session_lifecycle_{session}.json").read_text())
+    finish_session(store.root, session, run_id=marker["run_id"])
 
 
 @pytest.fixture
 def review(tmp_path):
     store = ReviewStore(tmp_path)
     session = "20260909_120000_en"
+    start_session(tmp_path, session)
     audio = tmp_path / "stark_data" / "live_sessions" / session / "chunk_0001.wav"
     audio.parent.mkdir(parents=True)
     audio.write_bytes(b"RIFFtest-wave")
@@ -104,6 +111,7 @@ def test_missing_audio_allows_translation_but_not_stt_export(review):
     audio.unlink()
     saved = store.save(session, 1, approved())
     assert not saved["audio_available"]
+    mark_completed(store, session)
     result = store.export(session)
     assert result["stt_samples"] == {"en": 0, "es": 0}
     assert result["translation_pairs"] == 1
@@ -112,6 +120,7 @@ def test_missing_audio_allows_translation_but_not_stt_export(review):
 def test_portable_bundle_roundtrip_and_idempotent_merges(review, tmp_path):
     store, session, audio, _ = review
     store.save(session, 1, approved())
+    mark_completed(store, session)
     result = store.export(session)
     assert store.export(session)["bundle_id"] == result["bundle_id"]
     moved = tmp_path / "moved"
@@ -146,6 +155,7 @@ def test_independent_approvals_exclusion_and_spanish_direction(review):
             translation_approved=False,
         ),
     )
+    mark_completed(store, session)
     first = store.export(session)
     assert first["stt_samples"] == {"en": 0, "es": 1} and first["translation_pairs"] == 0
     store.save(
@@ -176,6 +186,7 @@ def test_non_live_sessions_cannot_train(review, kind):
     store, session, _, row = review
     atomic_jsonl(store.diagnostics_path(session), [{**row, "session_kind": kind}])
     store.save(session, 1, approved())
+    mark_completed(store, session)
     with pytest.raises(ValueError, match="provenance"):
         store.export(session)
     result = store.export(session, split="eval")
@@ -186,6 +197,7 @@ def test_non_live_sessions_cannot_train(review, kind):
 def test_session_cannot_cross_eval_train_split(review):
     store, session, _, _ = review
     store.save(session, 1, approved())
+    mark_completed(store, session)
     result = store.export(session, split="eval")
     with pytest.raises(ReviewConflict):
         store.export(session, split="train")
@@ -215,6 +227,7 @@ def test_api_live_save_audio_and_completed_export(review):
         assert client.put(endpoint, json=approved()).status_code == 409
         assert client.post(f"/api/review/{session}/export", json={}).status_code == 409
         runner._status.state = "idle"
+        mark_completed(store, session)
         exported = client.post(f"/api/review/{session}/export", json={})
         assert exported.status_code == 200
         assert client.get(exported.json()["download_url"]).status_code == 200
@@ -260,8 +273,10 @@ def test_existing_cli_exports_read_sidecars_and_real_merger(review, tmp_path):
 def test_long_valid_session_export_is_downloadable(review):
     store, _, _, row = review
     session = "s" * 160
+    start_session(store.root, session)
     atomic_jsonl(store.diagnostics_path(session), [{**row, "session": session, "audio_path": None}])
     store.save(session, 1, approved())
+    mark_completed(store, session)
     runner = PipelineRunner(store.root)
     app = FastAPI()
     app.include_router(router)
@@ -325,12 +340,14 @@ def test_generic_spanish_correction_pair_direction_and_replay_rejection(tmp_path
 def test_multiple_sessions_same_chunk_id_do_not_collide(review, tmp_path):
     store, session, _, row = review
     second = "20260909_130000_en"
+    start_session(tmp_path, second)
     second_audio = tmp_path / "stark_data" / "live_sessions" / second / "chunk_0001.wav"
     second_audio.parent.mkdir(parents=True)
     second_audio.write_bytes(b"second-wave")
     atomic_jsonl(store.diagnostics_path(second), [{**row, "session": second, "audio_path": str(second_audio)}])
     for sid in [session, second]:
         store.save(sid, 1, approved())
+        mark_completed(store, sid)
         result = store.export(sid)
         merge_whisper(Path(result["archive"]).with_suffix(""), tmp_path / "train")
     rows = read_jsonl(tmp_path / "train" / "metadata.jsonl")
@@ -349,6 +366,7 @@ def test_unknown_language_requires_explicit_choice_for_approval(review):
 def test_translation_approval_alone_does_not_promote_unreviewed_transcript(review):
     store, session, _, _ = review
     store.save(session, 1, approved(transcript_approved=False))
+    mark_completed(store, session)
     with pytest.raises(ValueError, match="No exportable"):
         store.export(session)
 
@@ -356,6 +374,7 @@ def test_translation_approval_alone_does_not_promote_unreviewed_transcript(revie
 def test_csv_training_corpus_repeat_merge_is_idempotent(review, tmp_path):
     store, session, _, _ = review
     store.save(session, 1, approved())
+    mark_completed(store, session)
     bundle = Path(store.export(session)["archive"]).with_suffix("")
     train = tmp_path / "train"
     train.mkdir()
