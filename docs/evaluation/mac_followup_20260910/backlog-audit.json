@@ -1660,9 +1660,9 @@
       "canonical_issue_acceptance": null,
       "dependencies": [],
       "audit_classification": "autonomous",
-      "finding": "A compatible isolated Torch2.13/TorchAudio2.11 install, CPU imports/VAD and full installed audit now pass. The old missing same-number audio wheel rationale is stale; full application EN/ES validation and intentional constraints migration remain.",
-      "next_action": "Prepare a separate full application candidate with revised experimental constraints, then serial real EN/ES regressions and fresh installed audit; leave stt_env untouched.",
-      "required_receipt": "Full candidate dependency inventory and audit, project imports/VAD, real EN/ES inference and applicable diarization checks; no waiver for old installed Torch advisories.",
+      "finding": "The full isolated application wheel with Torch 2.13/TorchAudio 2.11 and all selected mlx/diarization dependencies passes complete installation, native imports/VAD, extra metadata consistency, zero-finding installed audit (123 third-party distributions; one unpublished first-party skip), and sequential normalized EN/ES replay. Each language has six nonempty finals, matching retained WAVs, successful required persistence and complete source/EOF accounting. Old stt_env remains intact. Candidate feasibility is established; production constraints/artifact promotion and separate service/performance gates remain.",
+      "next_action": "Prepare reviewed Mac-only dependency metadata and a named complete arm64/Python3.11 constraint file from the remediated closure; preserve non-Mac/CUDA bounds and deprecated requirements-mac snapshot. In a reserved window, build current final source into a new runtime and repeat package/import/audit/ENES checks before switching a launcher. Never update stt_env in place.",
+      "required_receipt": "Existing full candidate inventory, installed audit, imports/VAD and real EN/ES functionality are retained. Production promotion needs new final-source artifact identity, fresh installed full audit and selected-extra checks, outside-checkout smoke and replay; optional diarization and matched-source performance/human/device claims require their own evidence.",
       "local_evidence_snapshot": [
         {
           "path": "docs/evaluation/overnight_security/README.md",
@@ -1683,9 +1683,35 @@
           "path": "docs/evaluation/security_feasibility_20260910/raw/candidate-runtime-receipts.json",
           "exists": true,
           "sha256": "f5bedaac7f88c48310eeadb87fd389b0cb5951e46cb1a98f57304911f930c84c"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/torch-full-application-candidate.md",
+          "exists": true,
+          "sha256": "7483f4fb9ad5538c52f050d1225a97b46e115a3f557740c9535263a60ed3aff5",
+          "recorded_at": "2026-09-10T14:57:55.939884+00:00"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/torch_candidate/normalized_r1/normalized-r1-summary.json",
+          "exists": true,
+          "sha256": "d50b8aad0a7c3aa1cdefe29075ac6d40c4bee71b6a321c3bca9e308fff7c1f09",
+          "recorded_at": "2026-09-10T14:57:55.939884+00:00"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/torch_candidate/remediated/result-summary.json",
+          "exists": true,
+          "sha256": "2569187ac475bbf1d0657d34ea55eaf584a6c5cd65ab96ebe031f5c9ce541596",
+          "recorded_at": "2026-09-10T14:57:55.939884+00:00"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/torch_candidate/remediated/installed-audit.json",
+          "exists": true,
+          "sha256": "03e8ce7649210e166f0a99ff0882f34ded8e628bd42c65b851e0d34f4e7d3512",
+          "recorded_at": "2026-09-10T14:57:55.939884+00:00"
         }
       ],
-      "live_github_issues": []
+      "live_github_issues": [],
+      "followup_updated_at": "2026-09-10T14:57:55.939884+00:00",
+      "previous_finding_at_initial_snapshot": "A compatible isolated Torch2.13/TorchAudio2.11 install, CPU imports/VAD and full installed audit now pass. The old missing same-number audio wheel rationale is stale; full application EN/ES validation and intentional constraints migration remain."
     },
     {
       "id": "windows-msi-bootstrap",

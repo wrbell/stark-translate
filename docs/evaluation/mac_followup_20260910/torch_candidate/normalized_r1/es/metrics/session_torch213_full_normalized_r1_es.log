@@ -1,0 +1,1 @@
+{"schema_version": 1, "at": "2026-09-10T14:42:25.822711+00:00", "level": "INFO", "logger": "stark", "session_id": null, "task_id": null, "event": "log", "stage": null, "message": "Session torch213_full_normalized_r1_es started — log file: metrics/session_torch213_full_normalized_r1_es.log"}

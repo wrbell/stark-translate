@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "session_id": "torch213_full_normalized_r1_en",
+  "updated_at": 1789051329.026293,
+  "phase": "completed",
+  "input_seen": true,
+  "input_age_s": 0.18090408301213756,
+  "caption_age_s": 1.4470812079962343,
+  "input_level": 0.0,
+  "errors": [],
+  "error_count": 0,
+  "captions": [
+    {
+      "session_id": "torch213_full_normalized_r1_en",
+      "utterance_id": 6,
+      "chunk_id": 5,
+      "stage": "complete",
+      "english": "The Arabs also brought Ibson to the lands, and it took in a big way in Comros and Mayat.",
+      "spanish_a": "Los \u00e1rabes tambi\u00e9n trajeron Ibson a las tierras, y se arraig\u00f3 mucho en Comros y Mayat.",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    },
+    {
+      "session_id": "torch213_full_normalized_r1_en",
+      "utterance_id": 7,
+      "chunk_id": 6,
+      "stage": "complete",
+      "english": "It's worth half an hour to stroll about the intriguing village.",
+      "spanish_a": "Vale la pena media hora para pasear por el intrigante pueblo.",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    }
+  ],
+  "recording": {
+    "audio_enabled": true,
+    "required_failures": 0,
+    "ok": true
+  },
+  "control_sequence": 0,
+  "publish_failures": 0,
+  "persistence": {
+    "submitted": 59,
+    "completed": 59,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "storage": {
+    "free_bytes": 241082904576,
+    "low_space": false
+  },
+  "queues": {
+    "audio": 0,
+    "capture_handoff": 0,
+    "finals": 0,
+    "stream_tokens": 1
+  },
+  "clients": 0,
+  "replay_client_wait": {
+    "requested_seconds": 0.0,
+    "actual_wait_seconds": 0.0,
+    "status": "disabled",
+    "connected_clients": 0,
+    "visibility_confirmed": false
+  }
+}

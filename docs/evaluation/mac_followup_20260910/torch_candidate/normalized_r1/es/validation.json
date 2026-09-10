@@ -1,0 +1,320 @@
+{
+  "session_id": "torch213_full_normalized_r1_es",
+  "status": "passed_functionality",
+  "checks": {
+    "child_exit_and_cleanup": true,
+    "lifecycle_completed": true,
+    "required_persistence": true,
+    "required_recording": true,
+    "finals_nonempty": true,
+    "previews_nonempty": true,
+    "diagnostics_match_finals": true,
+    "retained_audio_matches_finals": true,
+    "source_metadata": true,
+    "source_accounting_complete": true,
+    "eof_and_drain": true,
+    "entire_source_duration": true,
+    "stt_identity": true,
+    "final_model_identity": true,
+    "marian_actual_backend": true,
+    "marian_source_direction_and_hash": true,
+    "torch_vad": true,
+    "frozen_installed_artifact": true,
+    "fixed_gain": true
+  },
+  "started_at": "2026-09-10T14:42:21.790803+00:00",
+  "ended_at": "2026-09-10T14:43:36.881419+00:00",
+  "final_count": 6,
+  "partial_record_count": 10,
+  "retained_audio_chunks": 6,
+  "persistence": {
+    "submitted": 24,
+    "completed": 24,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "source_coverage": {
+    "schema_version": 1,
+    "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+    "sample_rate": 48000,
+    "expected_source_samples": 2284800,
+    "eof": {
+      "source_samples": 2284800,
+      "reader_eof": true,
+      "capture_queues_drained": true
+    },
+    "dropped_records": 0,
+    "unknown_bounds": 0,
+    "duplicate_observed_samples": 0,
+    "observed_samples_beyond_eof": 0,
+    "capture_gaps": [],
+    "unclassified_intervals": [],
+    "complete": true,
+    "observed": [
+      {
+        "start": 0,
+        "end": 86016,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 86016,
+        "end": 294912,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 294912,
+        "end": 297984,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 297984,
+        "end": 428544,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 428544,
+        "end": 450048,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 450048,
+        "end": 658944,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 658944,
+        "end": 774144,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 774144,
+        "end": 787968,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 787968,
+        "end": 940032,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 940032,
+        "end": 956928,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 956928,
+        "end": 1118208,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1118208,
+        "end": 1139712,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1139712,
+        "end": 1285632,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 1285632,
+        "end": 1489920,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1489920,
+        "end": 1511424,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1511424,
+        "end": 1677312,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 1677312,
+        "end": 1827840,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1827840,
+        "end": 1835520,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1835520,
+        "end": 1933824,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1933824,
+        "end": 1955328,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1955328,
+        "end": 1958400,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 1958400,
+        "end": 1972224,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1972224,
+        "end": 1993728,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1993728,
+        "end": 2104320,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 2104320,
+        "end": 2202624,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 2202624,
+        "end": 2224128,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 2224128,
+        "end": 2284800,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      }
+    ],
+    "outcomes": [
+      {
+        "start": 86016,
+        "end": 450048,
+        "utterance_id": 1,
+        "state": "final_ready"
+      },
+      {
+        "start": 658944,
+        "end": 940032,
+        "utterance_id": 2,
+        "state": "final_ready"
+      },
+      {
+        "start": 940032,
+        "end": 1139712,
+        "utterance_id": 3,
+        "state": "final_ready"
+      },
+      {
+        "start": 1285632,
+        "end": 1511424,
+        "utterance_id": 4,
+        "state": "final_ready"
+      },
+      {
+        "start": 1677312,
+        "end": 1955328,
+        "utterance_id": 5,
+        "state": "final_ready"
+      },
+      {
+        "start": 1958400,
+        "end": 1993728,
+        "utterance_id": 6,
+        "state": "rejected_low_energy"
+      },
+      {
+        "start": 2104320,
+        "end": 2224128,
+        "utterance_id": 7,
+        "state": "final_ready"
+      }
+    ]
+  },
+  "actual_models": {
+    "stt": {
+      "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+      "manifest_revision": null,
+      "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379"
+    },
+    "translation_a": {
+      "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+    },
+    "marian": {
+      "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/es-en/active",
+      "manifest_revision": null,
+      "resolved_revision": null,
+      "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/es-en/active",
+      "revision_source": "unknown",
+      "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+      "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+      "model_bin_size_bytes": 79567635,
+      "export_manifest": {
+        "sha256": "239246b3f0d951edef1c14be3f1e37e6c0c6486dce3cba06bd96a84e9abab076",
+        "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+        "source_revision": null,
+        "ct2_quantization": "int8",
+        "direction": "es-en",
+        "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+        "model_bin_hash_matches": true
+      }
+    }
+  },
+  "stt_identity_crosscheck": {
+    "expected_repo_id": "mlx-community/whisper-large-v3-turbo",
+    "expected_manifest_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+    "recorded_requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+    "snapshot_namespace_matches": true
+  },
+  "selected_marian_setting": "ct2",
+  "runner_sha256": "9973a40bf2b86367611b97f6ea3c30297493c3771d459b91f60723b65f92507a",
+  "protocol_sha256": "5cc2cce38ec3d648b0684d3969e13079a419f6e962d832f7c4aec0e7a64e5a3b",
+  "pipeline_sha256": "598f9a17f77695d072c04b0a8895143ae610dbd68de8c694f7a49f89cba0e7fc",
+  "wheel_sha256": "48ae49c1214f8a0bcabcc018794b675ece271114da172b7cf81c0696f88c7786",
+  "notes": [
+    "Full installed candidate functionality only; older frozen source precludes causal performance comparison.",
+    "Initial checker required repo IDs for all STT records; ES raw snapshot path is now verified against the frozen manifest namespace, revision and config hash. Initial failure is retained.",
+    "Legacy CT2 export has an unknown upstream revision, with exact model.bin hash and matching declared source/direction retained.",
+    "Source completeness is machine accounting, not acoustic speech recall or bilingual quality approval.",
+    "No visible browser, attended microphone, speaker or TTS route was exercised."
+  ]
+}

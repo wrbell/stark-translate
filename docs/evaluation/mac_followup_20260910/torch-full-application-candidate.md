@@ -5,14 +5,17 @@ The isolated full application candidate with Torch **2.13.0** and TorchAudio
 bundled CPU VAD. After fixing six non-model dependency pins in a second fresh
 venv, its full installed audit returns **zero known findings for 123 third-party
 distributions**. The unpublished first-party `stark-translate` entry is explicitly
-skipped. Real EN/ES candidate replay has been prepared but **has not run**;
-production migration and service certification remain pending.
+skipped. In a later reserved window, installed **EN and ES replay functionality
+passed** on normalized public development clips. Production migration,
+performance regression and service certification remain pending.
 
 This extends the [minimal runtime feasibility](../security_feasibility_20260910/README.md).
 The 144-package working `stt_env` inventory and production `pyproject.toml`
 [remain unchanged after both installations](torch_candidate/working-environment-preserved-final.json). Existing
-packaged runtimes were not installation targets. No STT, Gemma or speaker model
-was loaded in this task; only three silence frames ran through bundled CPU VAD.
+packaged runtimes were not installation targets. The installation checks loaded
+no STT, Gemma or speaker model; only three silence frames ran through bundled
+CPU VAD. The subsequent replays loaded the existing STT and Gemma models without
+further installation.
 
 ## Frozen application and complete dependencies
 
@@ -178,36 +181,62 @@ resolved-requirements.txt`. Each stage refuses to overwrite an earlier receipt.
 Restoration and future reproduction commands are prepared recipes; they are not
 additional completed installations.
 
-## Pending EN/ES regression gate
+## Completed installed EN/ES functionality
 
-The [replay runner](torch_candidate/remediated/replay_candidate.py.txt) defaults
-to printing a plan. The frozen [English](torch_candidate/remediated/replay-plan-en.json)
-and [Spanish](torch_candidate/remediated/replay-plan-es.json) plans were generated
-without inference. They select Standard, E4B OptiQ, Torch VAD, EN Parakeet and ES
-Whisper Turbo with drafting disabled, using the existing five-recording public
-**development** clips and existing model caches. Confirmation data and training
-corpora are not used. Audio, pipeline, wheel and model-manifest hashes are checked
-before execution.
+The [validated receipts](torch_candidate/normalized_r1/normalized-r1-summary.json)
+record sequential installed candidate replays from scratch working directories
+outside the checkout source. Both used Standard, E4B OptiQ, Torch VAD, fixed
+`--gain 1`, drafting disabled and offline caches. English used Parakeet; Spanish
+used Whisper Turbo. Each normalized input contains five public **development**
+recordings. Original clips, confirmation data, corpora and evaluation approvals
+were preserved.
 
-Only after the coordinator explicitly reserves a model window, run these
-sequentially from the repository root:
+| Session | Actual process interval, UTC | Finals / previews | Required writes | Source accounting |
+|---|---|---:|---:|---|
+| `torch213_full_normalized_r1_en` | 14:40:50.480826–14:42:11.134022 | 6 / 45 | 59 / 59 | 2,253,120 samples at 48 kHz; complete EOF |
+| `torch213_full_normalized_r1_es` | 14:42:21.790803–14:43:36.881419 | 6 / 10 | 24 / 24 | 2,284,800 samples at 48 kHz; complete EOF |
 
-```bash
-TORCH_CANDIDATE_DIR="$PWD/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated"
-/Users/willem/anaconda3/bin/python3.11 -S "$TORCH_CANDIDATE_DIR/replay_candidate.py" \
-  --lang en --label r1 --execute --reserved-model-window
-/Users/willem/anaconda3/bin/python3.11 -S "$TORCH_CANDIDATE_DIR/replay_candidate.py" \
-  --lang es --label r1 --execute --reserved-model-window
-```
+Both exited 0 with completed lifecycle, empty process groups, nonempty final
+source/translation text, six retained audio chunks, no failed/pending writes,
+reader EOF and drained capture queues. Source accounting has no capture gaps,
+unclassified intervals, unknown bounds, duplicates or dropped records. These are
+machine decisions, not proof that all acoustic speech was recognized correctly.
 
-Each run gets an exclusive output directory under the candidate's `replay-work`,
-unique session ID, bounded process group, offline caches and retained failures.
-The initial machine checks require clean exit/lifecycle/persistence, expected
-backend/model, nonempty final source/translation and previews. Then inspect full
-source/disposition/EOF accounting, actual resolved model identities, recorded
-WAVs, memory and caption delivery traces. Compare transcript WER and bilingual
-translation quality against the frozen original spans. Preserve timing failures
-and tails; do not use whole-recording STT time as caption-delivery latency.
+The [CPU-only receipt checker](torch_candidate/normalized_r1/validate_normalized_replays.py.txt)
+passes 19 checks per language. It verifies the actual pinned STT/Gemma snapshot
+revisions, installed Torch VAD artifact, wheel/pipeline hashes and CT2 partial
+backend. The legacy Marian adapters took precedence over the supplied managed
+cache. Their direction, source model and declared model.bin hashes match the
+recorded bytes; their upstream source revisions remain unknown. No HF partial
+translator fallback occurred.
+
+The EN runner initially used the stale `STARK_TRANSLATE__MARIAN_BACKEND` name,
+which was ignored: effective settings report `auto`, while actual diagnostics
+report `ct2-int8`. ES uses the corrected `STARK_TRANSLATE_MARIAN_BACKEND=ct2` and
+also reports `ct2-int8`. Both exact [EN](torch_candidate/normalized_r1/en/plan.json)
+and [ES](torch_candidate/normalized_r1/es/plan.json) plans and runner source hashes
+are retained. An initial checker required a repo-ID string for ES STT, whose
+lifecycle instead records the local snapshot path; that
+[failed check](torch_candidate/normalized_r1/normalized-r1-summary-initial-checker.json)
+is preserved. The final checker verifies its exact repository namespace, pinned
+revision and config hash without changing runtime output.
+
+The earlier [English](torch_candidate/remediated/replay-plan-en.json) and
+[Spanish](torch_candidate/remediated/replay-plan-es.json) plans remain unexecuted.
+New print-only plans are also retained, separately from each actual session plan.
+The protocol file changed between EN and ES; each executed plan retains its own
+protocol hash and full clip/span definition. These are separate functionality
+receipts, not pooled latency cohorts. The installed source remains the older
+frozen artifact identified above.
+
+The current [replay runner](torch_candidate/normalized_r1/replay_candidate.py.txt)
+defaults to printing a plan; execution requires a new coordinator reservation,
+`--execute --reserved-model-window`, and a unique label. It checks frozen input,
+installed source, wheel and model-manifest hashes, enforces a 600-second timeout
+per language and refuses output-directory reuse. Raw WAVs remain in the scratch
+session directories; their hashes and sizes are in each archived receipt.
+
+## Pending performance and service gates
 
 A performance/no-regression claim additionally requires alternating controls
 with the **same frozen application source, models, audio, thread limits and
@@ -217,6 +246,73 @@ source work may differ from this frozen wheel, so it is not automatically a
 matched control. Successful replay alone will not certify attended microphone,
 physical output, browser ACKs, speaker embeddings or human translation quality.
 
+## Bounded source migration recommendation
+
+These results justify preparing a **new Mac arm64 Python 3.11 runtime** with the
+tested dependency closure. They do not justify upgrading `stt_env` in place or
+publishing the candidate wheel. A source-only change can enable this closure
+while leaving the existing interpreter and launch configuration intact. Rebuild
+the final reviewed source in a reserved window before installing or switching a
+production runtime; the candidate wheel predates subsequent application fixes.
+
+The narrow proposed `pyproject.toml` edits are:
+
+- In `[project.optional-dependencies].mlx`, replace `torch>=2.10,<2.11` with
+  `torch==2.13.0`. Preserve every MLX/STT model and package constraint.
+- In `diarization`, replace the single TorchAudio requirement with the three
+  requirements below. This binds the tested Mac pair even when `diarization`
+  is installed without `mlx`, and preserves the existing non-Apple-Silicon
+  TorchAudio range. Leave the CUDA, CPU and training requirements unchanged.
+
+```toml
+"torch==2.13.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+"torchaudio==2.11.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+"torchaudio>=2.10,<2.11; sys_platform != 'darwin' or platform_machine != 'arm64'",
+```
+
+The unusual version pair is evidence-based: this installed TorchAudio wheel
+declares **no Torch requirement**. `pip check` alone cannot certify its ABI;
+native imports and real inference provide the additional local evidence. The
+actual Torch wheel is `cp311-cp311-macosx_14_0_arm64`, and TorchAudio is
+`cp311-cp311-macosx_11_0_arm64`. This closure is limited to the tested Python 3.11
+Apple Silicon environment on macOS 14 or later. Python 3.12, Intel Mac,
+Linux/CUDA and Windows installation/runtime compatibility are not established
+by these receipts; keep the project's broader Python declaration unchanged
+until separately testing each advertised channel.
+
+For reproducible Mac installation, add a clearly named new constraint file
+such as `constraints/macos-arm64-py311-runtime.txt` containing the exact retained
+[remediated constraints](torch_candidate/remediated/constraints.txt), and make
+the Mac packaging/install command consume it. The six audit fixes must survive:
+Pillow 12.3.0, pydantic-settings 2.14.2, Pygments 2.20.0, python-dotenv 1.2.2,
+Requests 2.33.0 and urllib3 2.7.0. A Torch-only metadata edit does not enforce
+these transitive fixes. Keep the full dependency closure, not only those six
+lines. Regenerate the hash-locked install requirements for the **new** first-party
+wheel, replacing its path/hash; do not label the existing candidate's wheel URLs
+as a portable multi-platform lock. `models.lock.json` requires no change.
+
+`requirements-mac.txt` is explicitly a deprecated snapshot/cache input. It
+contains Torch 2.10, TorchAudio 2.10 and TorchVision 0.25, along with a different
+set of versions from the candidate. The safest option is to retain it as an
+historical snapshot and point new runtime instructions to the named constraints
+and wheel extras. Do not combine `-r requirements-mac.txt` with the new Mac
+extras, or update only its Torch line: that leaves contradictory pins. Replacing
+the whole file is a larger, separate migration requiring an archival copy and
+review of CI/cache consumers. TorchVision was absent from the passing full
+candidate and is not a runtime dependency in `pyproject.toml`; there is no
+validated replacement TorchVision pin to invent.
+
+The exact next acceptance sequence is a fresh final-source wheel/ZIP/sdist,
+outside-checkout package smoke, installed `pip check` plus selected-extra
+metadata validation, full installed audit, native imports/VAD and the same
+bounded EN/ES functionality check. Optional speaker inference needs its own
+candidate check before claiming diarization support. Matched-source performance
+and bilingual quality review remain separate gates. Switching the launcher to
+the fresh runtime and retaining the previous executable path supplies rollback
+without touching `stt_env`. A Mac installed audit must cover all installed
+distributions; the legacy Linux CI audit strips Torch packages and cannot
+substitute for it.
+
 All retained files and hashes are enumerated in the
 [evidence index](torch_candidate/evidence-index.json). Production dependency
-constraints remain unchanged pending the actual EN/ES candidate gate and review.
+constraints remain unchanged pending candidate review and the remaining gates.

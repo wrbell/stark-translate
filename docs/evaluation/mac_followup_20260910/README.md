@@ -42,7 +42,9 @@ no release or package publication is authorized for this follow-up. The
   51-package audit. The [full-application candidate](torch-full-application-candidate.md)
   also passed installation, native imports and CPU VAD; its remediated audit
   found zero known issues across 123 third-party distributions, with the
-  unpublished application explicitly skipped. Actual EN/ES replay remains pending.
+  unpublished application explicitly skipped. Installed normalized EN and ES replays
+  passed model identity, persistence, saved audio and complete source/EOF checks;
+  matched-source performance and final-source packaging remain pending.
 - Training recipes now perform real CPU config/data checks before GPU startup,
   preserve source LoRA tensors during explicit expansion, correctly initialize
   new DoRA magnitudes, and materialize W17's JSON selection into an audio dataset.

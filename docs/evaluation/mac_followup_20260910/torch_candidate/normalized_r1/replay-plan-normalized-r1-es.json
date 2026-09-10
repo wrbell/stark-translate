@@ -1,0 +1,168 @@
+{
+  "argv": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/venv/bin/python",
+    "-m",
+    "dry_run_ab",
+    "--profile",
+    "standard",
+    "--backend",
+    "mlx",
+    "--no-ab",
+    "--lang",
+    "es",
+    "--stt-backend",
+    "mlx",
+    "--model-family",
+    "gemma4",
+    "--gemma4-size",
+    "e4b",
+    "--vad-backend",
+    "torch",
+    "--no-mts",
+    "--audio-file",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_es.wav",
+    "--gain",
+    "1",
+    "--replay-speed",
+    "1",
+    "--exit-after-replay",
+    "--session-id",
+    "torch213_full_normalized_r1_es",
+    "--ws-port",
+    "18965",
+    "--http-port",
+    "18966"
+  ],
+  "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/replay-work/torch213_full_normalized_r1_es",
+  "session_id": "torch213_full_normalized_r1_es",
+  "clip": {
+    "id": "fleurs_development_es",
+    "lang": "es",
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_es.wav",
+    "sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae",
+    "duration": 47.6,
+    "sample_rate": 16000,
+    "provenance": "fleurs_development_read_speech_concatenation",
+    "level_normalization": "rms-0.08",
+    "reference_status": "upstream_public_annotations_not_local_approval",
+    "spans": [
+      {
+        "id": "fleurs-es-development-1638-6927013055416209547",
+        "sample_start": 0,
+        "sample_end": 168960,
+        "original_audio_sha256": "89b130dd9614c385a64cc108128293352b21e6c137c589cc7fd19d68823634e0",
+        "level_transform": {
+          "rule": "rms-0.08",
+          "gain": 2.03178456291453,
+          "original_rms": 0.039374253284631,
+          "original_peak": 0.3380175828933716,
+          "output_rms": 0.07999999888881319,
+          "output_peak": 0.6867789030075073,
+          "clipping": false
+        },
+        "reference": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors.",
+        "padding_after_samples": 16000
+      },
+      {
+        "id": "fleurs-es-development-1592-3930211725609960196",
+        "sample_start": 184960,
+        "sample_end": 394240,
+        "original_audio_sha256": "21ea8214d7e42eba4316dbd4d9754560b990d3c680888b6a27ae0b99027e8668",
+        "level_transform": {
+          "rule": "rms-0.08",
+          "gain": 0.7930809296290099,
+          "original_rms": 0.1008724292959896,
+          "original_peak": 1.0,
+          "output_rms": 0.07999999962569342,
+          "output_peak": 0.7930809259414673,
+          "clipping": false
+        },
+        "reference": "Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds.",
+        "translation_reference": "When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt.",
+        "padding_after_samples": 16000
+      },
+      {
+        "id": "fleurs-es-development-1624-8750634895258922350",
+        "sample_start": 410240,
+        "sample_end": 519680,
+        "original_audio_sha256": "3725e882548b7058a1634cdbbdb4f910cd6f9d4f4b4d9b1560f1921479f4dc14",
+        "level_transform": {
+          "rule": "rms-0.08",
+          "gain": 1.7990311076669767,
+          "original_rms": 0.04446838059612308,
+          "original_peak": 0.44692176580429077,
+          "output_rms": 0.08000000136404455,
+          "output_peak": 0.804026186466217,
+          "clipping": false
+        },
+        "reference": "Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones.",
+        "translation_reference": "Inland waterways can be a good theme to base a holiday around.",
+        "padding_after_samples": 16000
+      },
+      {
+        "id": "fleurs-es-development-1587-563233278035086965",
+        "sample_start": 535680,
+        "sample_end": 659520,
+        "original_audio_sha256": "dbdca0be1d3c552bc6b5bf359a22429cf87c196a315b3ceebc8f408dc99aa233",
+        "level_transform": {
+          "rule": "rms-0.08",
+          "gain": 1.5750028101708964,
+          "original_rms": 0.050793560165978094,
+          "original_peak": 0.48982203006744385,
+          "output_rms": 0.07999999895984251,
+          "output_peak": 0.7714710831642151,
+          "clipping": false
+        },
+        "reference": "Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio.",
+        "translation_reference": "The first cases of the disease this season were reported in late July.",
+        "padding_after_samples": 16000
+      },
+      {
+        "id": "fleurs-es-development-1554-13392988470145802268",
+        "sample_start": 675520,
+        "sample_end": 745600,
+        "original_audio_sha256": "efb05420d238ceb86f11aaa31a012e7594206684ab26b4730f6429203a373c01",
+        "level_transform": {
+          "rule": "rms-0.08",
+          "gain": 0.9649543312664158,
+          "original_rms": 0.08290547791521614,
+          "original_peak": 0.7410763502120972,
+          "output_rms": 0.07999999876440005,
+          "output_peak": 0.7151048183441162,
+          "clipping": false
+        },
+        "reference": "\u00c9l dijo que construy\u00f3 un timbre wifi.",
+        "translation_reference": "He built a WiFi door bell, he said.",
+        "padding_after_samples": 16000
+      }
+    ]
+  },
+  "runner_sha256": "68284f6ea70156a2f05088e0c4e9a23c1273037ab13a94c6fb8ce74d42ea6e7a",
+  "explicit_environment": {
+    "PYTHONNOUSERSITE": "1",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "STARK_PROJECT_ROOT": "/Users/willem/Code/vibes/SRTranslate",
+    "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-roadmap/ct2-setup-validation/managed",
+    "STARK_TRANSLATE__MARIAN_BACKEND": "ct2",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "STARK_EXPERIMENT_TRACE": "true"
+  },
+  "expected_models": {
+    "stt": "mlx-community/whisper-large-v3-turbo",
+    "final": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+    "partial": "Helsinki-NLP/opus-mt-es-en",
+    "partial_backend": "ct2",
+    "vad": "torch"
+  },
+  "protocol_sha256": "eb158452c3ffd759fbcfffeee71cd836c62a84bb5bb9672fed6e59a893fbcb17",
+  "wheel_sha256": "48ae49c1214f8a0bcabcc018794b675ece271114da172b7cf81c0696f88c7786",
+  "pipeline_sha256": "598f9a17f77695d072c04b0a8895143ae610dbd68de8c694f7a49f89cba0e7fc",
+  "model_manifest_sha256": "ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273",
+  "executed": false,
+  "scope": "Installed older frozen candidate file-replay functionality and dependency-security feasibility only; no causal latency claims; semantic review, browser ACKs, attended devices and matched-control regression pending."
+}

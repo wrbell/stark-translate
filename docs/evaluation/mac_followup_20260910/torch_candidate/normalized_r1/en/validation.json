@@ -1,0 +1,357 @@
+{
+  "session_id": "torch213_full_normalized_r1_en",
+  "status": "passed_functionality",
+  "checks": {
+    "child_exit_and_cleanup": true,
+    "lifecycle_completed": true,
+    "required_persistence": true,
+    "required_recording": true,
+    "finals_nonempty": true,
+    "previews_nonempty": true,
+    "diagnostics_match_finals": true,
+    "retained_audio_matches_finals": true,
+    "source_metadata": true,
+    "source_accounting_complete": true,
+    "eof_and_drain": true,
+    "entire_source_duration": true,
+    "stt_identity": true,
+    "final_model_identity": true,
+    "marian_actual_backend": true,
+    "marian_source_direction_and_hash": true,
+    "torch_vad": true,
+    "frozen_installed_artifact": true,
+    "fixed_gain": true
+  },
+  "started_at": "2026-09-10T14:40:50.480826+00:00",
+  "ended_at": "2026-09-10T14:42:11.134022+00:00",
+  "final_count": 6,
+  "partial_record_count": 45,
+  "retained_audio_chunks": 6,
+  "persistence": {
+    "submitted": 59,
+    "completed": 59,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "source_coverage": {
+    "schema_version": 1,
+    "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+    "sample_rate": 48000,
+    "expected_source_samples": 2253120,
+    "eof": {
+      "source_samples": 2253120,
+      "reader_eof": true,
+      "capture_queues_drained": true
+    },
+    "dropped_records": 0,
+    "unknown_bounds": 0,
+    "duplicate_observed_samples": 0,
+    "observed_samples_beyond_eof": 0,
+    "capture_gaps": [],
+    "unclassified_intervals": [],
+    "complete": true,
+    "observed": [
+      {
+        "start": 0,
+        "end": 62976,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 62976,
+        "end": 109056,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 109056,
+        "end": 112128,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 112128,
+        "end": 274944,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 274944,
+        "end": 278016,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 278016,
+        "end": 433152,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 433152,
+        "end": 454656,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 454656,
+        "end": 645120,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 645120,
+        "end": 757248,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 757248,
+        "end": 778752,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 778752,
+        "end": 792576,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 792576,
+        "end": 827904,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 827904,
+        "end": 838656,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 838656,
+        "end": 913920,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 913920,
+        "end": 921600,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 921600,
+        "end": 983040,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 983040,
+        "end": 989184,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 989184,
+        "end": 1118208,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1118208,
+        "end": 1139712,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1139712,
+        "end": 1230336,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 1230336,
+        "end": 1443840,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1443840,
+        "end": 1448448,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1448448,
+        "end": 1577472,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1577472,
+        "end": 1598976,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1598976,
+        "end": 1686528,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 1686528,
+        "end": 1804800,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1804800,
+        "end": 1814016,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1814016,
+        "end": 1939968,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 1939968,
+        "end": 1961472,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 1961472,
+        "end": 2032128,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      },
+      {
+        "start": 2032128,
+        "end": 2182656,
+        "state": "buffered",
+        "vad_positive": true
+      },
+      {
+        "start": 2182656,
+        "end": 2204160,
+        "state": "buffered",
+        "vad_positive": false
+      },
+      {
+        "start": 2204160,
+        "end": 2253120,
+        "state": "vad_non_speech",
+        "vad_positive": false
+      }
+    ],
+    "outcomes": [
+      {
+        "start": 62976,
+        "end": 433152,
+        "utterance_id": 1,
+        "state": "final_ready"
+      },
+      {
+        "start": 433152,
+        "end": 454656,
+        "utterance_id": 2,
+        "state": "discarded_short_silence"
+      },
+      {
+        "start": 645120,
+        "end": 778752,
+        "utterance_id": 3,
+        "state": "final_ready"
+      },
+      {
+        "start": 792576,
+        "end": 1139712,
+        "utterance_id": 4,
+        "state": "final_ready"
+      },
+      {
+        "start": 1230336,
+        "end": 1598976,
+        "utterance_id": 5,
+        "state": "final_ready"
+      },
+      {
+        "start": 1686528,
+        "end": 1961472,
+        "utterance_id": 6,
+        "state": "final_ready"
+      },
+      {
+        "start": 2032128,
+        "end": 2204160,
+        "utterance_id": 7,
+        "state": "final_ready"
+      }
+    ]
+  },
+  "actual_models": {
+    "stt": {
+      "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+      "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+      "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+    },
+    "translation_a": {
+      "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+    },
+    "marian": {
+      "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+      "manifest_revision": null,
+      "resolved_revision": null,
+      "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+      "revision_source": "unknown",
+      "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+      "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+      "model_bin_size_bytes": 79567635,
+      "export_manifest": {
+        "sha256": "a2252e22ba84cde86261163aacb51708f62c3defae3a52a928fd428c4a4ae789",
+        "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+        "source_revision": null,
+        "ct2_quantization": "int8",
+        "direction": "en-es",
+        "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+        "model_bin_hash_matches": true
+      }
+    }
+  },
+  "stt_identity_crosscheck": {
+    "expected_repo_id": "mlx-community/parakeet-tdt-0.6b-v3",
+    "expected_manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+    "recorded_requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+    "snapshot_namespace_matches": true
+  },
+  "selected_marian_setting": "auto",
+  "runner_sha256": "68284f6ea70156a2f05088e0c4e9a23c1273037ab13a94c6fb8ce74d42ea6e7a",
+  "protocol_sha256": "eb158452c3ffd759fbcfffeee71cd836c62a84bb5bb9672fed6e59a893fbcb17",
+  "pipeline_sha256": "598f9a17f77695d072c04b0a8895143ae610dbd68de8c694f7a49f89cba0e7fc",
+  "wheel_sha256": "48ae49c1214f8a0bcabcc018794b675ece271114da172b7cf81c0696f88c7786",
+  "notes": [
+    "Full installed candidate functionality only; older frozen source precludes causal performance comparison.",
+    "Initial checker required repo IDs for all STT records; ES raw snapshot path is now verified against the frozen manifest namespace, revision and config hash. Initial failure is retained.",
+    "Legacy CT2 export has an unknown upstream revision, with exact model.bin hash and matching declared source/direction retained.",
+    "Source completeness is machine accounting, not acoustic speech recall or bilingual quality approval.",
+    "No visible browser, attended microphone, speaker or TTS route was exercised.",
+    "The first EN runner used an ignored double-underscore backend environment name; auto selected ct2-int8 as independently recorded. ES uses the corrected single-underscore setting. Earlier print-only plans remain unexecuted."
+  ]
+}

@@ -1,0 +1,193 @@
+10:42:25 [INFO] Session torch213_full_normalized_r1_es started — log file: metrics/session_torch213_full_normalized_r1_es.log
+/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/venv/lib/python3.11/site-packages/tools/audio_bridge_client.py:199: WavFileWarning: Chunk (non-data) not understood, skipping it.
+  source_rate, samples = wavfile.read(path)
+============================================================
+  Bilingual A/B Dry Run
+  Backend: MLX
+  Language: Spanish→English
+  Mode: 4B only
+  WebSocket: ws://localhost:18965
+============================================================
+
+[1/6] Loading packaged Silero VAD...
+  VAD ready (silero-vad 6.2.1, torch)
+[2/6] Loading /Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb (MLX)...
+  Whisper ready (2.0s)
+[3/6] Loading Gemma 4 models (MLX)...
+  Loading Approach A (mlx-community/gemma-4-e4b-it-OptiQ-4bit)...
+  Prompt cache skipped (gemma4 instruct path)
+[4/6] Loading Helsinki-NLP/opus-mt-es-en (Marian partial translator)...
+  Marian ready (ct2-int8, 0.4s)
+  Hardware profile: metrics/hardware_torch213_full_normalized_r1_es.json
+    arm | 12P+0E cores | 18.0GB RAM | Apple M3 Pro
+[6/6] Starting servers...
+  CSV: metrics/ab_metrics_torch213_full_normalized_r1_es.csv
+  WebSocket ready on port 18965
+  HTTP server ready on port 18966
+
+  Local displays:
+    A/B display:       file:///Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/venv/lib/python3.11/site-packages/displays/ab_display.html
+    Audience display:  file:///Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/venv/lib/python3.11/site-packages/displays/audience_display.html
+
+  Mobile / LAN access:
+    http://192.168.1.51:18966/displays/mobile_display.html
+    http://192.168.1.51:18966/displays/audience_display.html
+  [P7-P3-6A] Streaming translation broadcaster started
+  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)
+
+Listening... (Ctrl+C to stop)
+
+  [status] frames=85 speech=29 buf=0.9s silence=0 rms=0.0498  [status] frames=193 speech=136 buf=4.4s silence=1 rms=0.0023  [status] frames=287 speech=221 buf=7.4s silence=8 rms=0.0005
+  [FIX] cancelled queued partial (final arriving)
+  [FIX] partial cancelled (final arrived)
+============================================================
+Chunk #1 | STT: 1677ms | EN: Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes.
+  [ws] No clients connected, skipping broadcast
+  [status] frames=69 speech=0 buf=0.0s silence=69 rms=0.0016  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  >> NEAR-MISS (fuzzy 80%): 'probable' -> 'parable'?
+  +1202ms A (25 t/s) tok=20 pre=147ms ttft=366ms fin=stop: Safaris are probably the biggest tourist attraction in Africa and the most memorable part for many visitors.
+  Processing: 4120ms | utterance-start→processing: 11702ms | conf: 0.97 | QE: A=0.7
+  [ws] No clients connected, skipping broadcast
+  [FILTER] hallucination partial suppressed: 'cuando usted.' — VAD-floor chunk (dur=0.61s, conf=0.00)
+  [status] frames=181 speech=46 buf=1.5s silence=0 rms=0.1142  partial (803ms, Marian:42ms): Cuando usted viajó al extranjero la primera vez, | When you first traveled abroad,            [ws] No clients connected, skipping broadcast
+  partial (808ms, Marian:34ms): Cuando usted viajó al extranjero la primera vez, las personas... | When you first traveled abroad, people...            [ws] No clients connected, skipping broadcast
+  [status] frames=275 speech=131 buf=4.5s silence=0 rms=0.1029  partial (1537ms, Marian:38ms): Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron... | When you first traveled abroad, people were probably...            [ws] No clients connected, skipping broadcast
+  partial (914ms, Marian:54ms): Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. | When you first traveled abroad, people were probably patient and understanding.            [ws] No clients connected, skipping broadcast
+  [status] frames=379 speech=224 buf=7.8s silence=0 rms=0.0760
+  [SMART-CUT] #2: 5.9s of 8.0s buffer
+  [FIX] cancelled queued partial (final arriving)
+  [FIX] partial cancelled (final arrived)
+============================================================
+Chunk #2 | STT: 1529ms | EN: Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas.
+  [ws] No clients connected, skipping broadcast
+
+  [FIX] cancelled queued partial (final arriving)
+  [FIX] partial cancelled (final arrived)  [P7-6C] OVERLAP: STT #3 starting while Translation #2 still running
+  [status] frames=24 speech=0 buf=0.0s silence=24 rms=0.0051  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+
+============================================================
+Chunk #3 | STT: 1031ms | EN: Pues sabían que los viajeros necesitan adaptarse a un nuevo país. [overlapped]
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +2750ms A (20 t/s) tok=17 pre=777ms ttft=1894ms fin=stop: When you traveled abroad for the first time, people were probably patient and understanding.
+  Processing: 4528ms | utterance-start→processing: 12499ms | conf: 0.97 | QE: A=0.55 | ws: 82%
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +973ms A (25 t/s) tok=15 pre=146ms ttft=356ms fin=stop: Well, they knew that travelers need to adapt to a new country.
+  Processing: 2949ms | utterance-start→processing: 7794ms | conf: 0.92 | QE: A=0.7
+  [ws] No clients connected, skipping broadcast
+  [status] frames=118 speech=24 buf=0.8s silence=0 rms=0.1259  partial (769ms, Marian:32ms): Los canales. | The channels.            [ws] No clients connected, skipping broadcast
+  partial (756ms, Marian:30ms): Los canales navegables internos. | The internal navigable channels.            [ws] No clients connected, skipping broadcast
+  [status] frames=212 speech=118 buf=3.8s silence=0 rms=0.0119  partial (843ms, Marian:42ms): Los canales navegables internos pueden ser una buena temática. | Internal navigable channels can be a good topic.            [ws] No clients connected, skipping broadcast
+
+  [FIX] cancelled queued partial (final arriving)
+  [FIX] partial cancelled (final arrived)  [status] frames=34 speech=0 buf=0.0s silence=34 rms=0.0000
+============================================================
+Chunk #4 | STT: 2086ms | EN: Los canales navegables internos pueden ser una buena temática para las vacaciones.
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +924ms A (26 t/s) tok=14 pre=148ms ttft=351ms fin=stop: Inland navigable waterways can be a good theme for a vacation.
+  Processing: 3124ms | utterance-start→processing: 7833ms | conf: 0.98 | QE: A=0.7 | ws: 62%
+  [ws] No clients connected, skipping broadcast
+  [FILTER] hallucination partial suppressed: 'Los primeros canales.' — VAD-floor chunk (dur=0.61s, conf=0.50)
+  [status] frames=158 speech=51 buf=1.6s silence=0 rms=0.1323  partial (763ms, Marian:29ms): Los primeros casos de la enfermedad... | The first cases of the disease...            [ws] No clients connected, skipping broadcast
+  partial (1587ms, Marian:40ms): Los primeros casos de la enfermedad durante esta temporada | The first cases of the disease during this season            [ws] No clients connected, skipping broadcast
+  [status] frames=252 speech=140 buf=4.6s silence=0 rms=0.0817  partial (883ms, Marian:67ms): Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. | The first cases of the disease during this season were recorded towards the end of July.            [ws] No clients connected, skipping broadcast
+
+  [FILTER] low-energy partial skipped (RMS=0.0039)
+  [status] frames=31 speech=0 buf=0.0s silence=31 rms=0.0038
+============================================================
+Chunk #5 | STT: 2220ms | EN: Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio.
+  [ws] No clients connected, skipping broadcast
+  [FILTER] low-energy final #6 skipped (RMS=0.0035)
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +1086ms A (25 t/s) tok=18 pre=150ms ttft=351ms fin=stop: The first cases of the disease during this season were recorded towards the end of July.
+  Processing: 3330ms | utterance-start→processing: 9125ms | conf: 0.96 | QE: A=0.55 | ws: 100%
+  [ws] No clients connected, skipping broadcast
+  [FILTER] hallucination partial suppressed: 'Él dijo que...' — VAD-floor chunk (dur=0.61s, conf=0.54)
+  [status] frames=133 speech=62 buf=2.0s silence=0 rms=0.0048
+  [FIX] cancelled queued partial (final arriving)
+  [FIX] partial cancelled (final arrived)
+============================================================
+Chunk #7 | STT: 2068ms | EN: Él dijo que construyó un timbre Wi-Fi.
+  [ws] No clients connected, skipping broadcast
+  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)
+  +81ms A (0 t/s): He said he built a Wi-Fi bell.
+  Processing: 2153ms | utterance-start→processing: 4651ms | conf: 0.93 | QE: A=0.7
+  [ws] No clients connected, skipping broadcast
+  [status] frames=77 speech=0 buf=0.0s silence=77 rms=0.0000
+  [P7-6C] Pipeline stats: 1/7 chunks overlapped (14%)
+
+============================================================
+SESSION SUMMARY — 6 chunks
+============================================================
+  STT avg:     1768ms (median 1872ms)
+  A (4B) avg:  1170ms (median 1030ms)
+  B (12B):     not loaded
+  Processing:  6/7 (85.7%) — empty_stt=0, hallucination=0, dedup=0
+  Utterance-start→processing: avg=8934ms (median 8479ms)
+  Stability:   avg=81% (3 chunks with partials)
+  CSV saved:   metrics/ab_metrics_torch213_full_normalized_r1_es.csv
+============================================================
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DIAGNOSTICS SUMMARY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Homophone flags: 0 (clean)
+
+  Near-miss flags: 1
+    #1: 'probable' -> 'parable' (fuzzy) in: Es probable que los safaris sean el mayor atractivo turístic
+
+  Bad sentence splits: 0 (clean)
+
+  Marian/Gemma avg similarity: 68% (0 high-divergence)
+    #4 (38%): MT='Internal navigable channels can be a goo' | TG='Inland navigable waterways can be a good'
+    #2 (67%): MT='When you first traveled abroad, people w' | TG='When you traveled abroad for the first t'
+    #5 (100%): MT='The first cases of the disease during th' | TG='The first cases of the disease during th'
+
+  Utterance durations: avg=5.1s, <1s=0, >6s=1, min=2.5s, max=7.6s
+
+  Low confidence chunks: 0 (clean)
+
+  Empty STT drops: 0 (clean)
+
+  Force-cuts: 1 (1 smart, 0 hard)
+    #2: smart at 5.9s of 8.0s buffer
+
+  Music holds: 0
+
+  STT corrections: 0
+
+  Resource usage (current):
+    Process RAM: 0.4GB
+    System RAM:  12.8GB / 18GB (84%)
+    CPU:         21%
+
+  [P7-6C] Pipeline overlap: 1/7 chunks (14%) had STT(N) overlapping Translation(N-1)
+
+  Fine-tuning data: stark_data/live_sessions/torch213_full_normalized_r1_es/
+  Review queue:     metrics/diagnostics_torch213_full_normalized_r1_es.jsonl
+  Mic gain used:    1.0x
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  WS stats:    connections=0 disconnections=0 send_failures=0

@@ -2,6 +2,8 @@
 
 All 43 canonical entries were compared with current source/evidence and live original GitHub issue text. This is an advisory snapshot; `docs/backlog.json` and GitHub issue states were not changed. The [machine-readable audit](backlog-audit.json) preserves every original acceptance, source hashes, original issue bodies, concrete next action and required receipt.
 
+The Torch migration entry has a targeted follow-up after the 14:40–14:43 UTC full candidate replays; its previous finding is preserved in JSON. Other entries retain the original audit snapshot.
+
 Snapshot: `c1a9041a48adc7c55e123eb39db02edb2a6fa6bd` plus the current follow-up working tree. PR #192 is merged; #134 and #176 are closed completed, while #177 is closed as a negative investigation. No publication, human/device gate or model-default promotion follows from those closures.
 
 | Classification | Entries |
@@ -14,7 +16,7 @@ Snapshot: `c1a9041a48adc7c55e123eb39db02edb2a6fa6bd` plus the current follow-up 
 | user decision | 3 |
 | deferred user | 2 |
 
-The remaining work is not entirely blocked on users or hardware. Local autonomy remains for the frozen EN/ES speed/quality experiments, current-artifact packaging checks, wider fallback-source classification, full isolated Torch application validation and documentation reconciliation. Source/widget/reliability acceptance also needs root reconciliation against already-recorded receipts.
+The remaining work is not entirely blocked on users or hardware. Local autonomy remains for the frozen EN/ES speed/quality experiments, current-artifact packaging checks, wider fallback-source classification, Mac dependency-source migration after successful isolated full-application validation, and documentation reconciliation. Source/widget/reliability acceptance also needs root reconciliation against already-recorded receipts.
 
 New training preparation repairs the W17 module/config/initialization path and v2 corpus selection and supplies actual CPU trainer-data preflights. Sixty original unapproved Jacobo/Santiago candidates exist, with zero exact overlaps across eight available exclusion files; the required v2 holdout is absent. WSL inspection, approval, CPO continuation and quality gates remain pending.
 
@@ -25,7 +27,7 @@ Original-gate distinctions requiring root attention:
 - #134 expressly permits a laptop stand-in and is already closed. Microphone and physical-display gates remain separate.
 - #137 permits the first retrain to be a dry run, but a merger dry run alone is not that step. A real approved Sunday correction is still absent.
 - #174/#175 closure reflects source/documentation fixes; the broader CUDA experiments still require target hardware.
-- Torch 2.13/TorchAudio 2.11 now has an isolated import/VAD/audit receipt. The earlier same-version audio-wheel failure is not the current compatibility boundary; full application EN/ES validation remains.
+- Torch 2.13/TorchAudio 2.11 now passes full isolated application install/import/VAD/audit and real normalized EN/ES replay. The [candidate receipts and bounded migration recommendation](torch-full-application-candidate.md) supersede the earlier same-version audio-wheel failure. Production source/runtime promotion remains; no service or performance certification follows.
 - Public EN/ES read-speech annotations enable separate engineering comparisons; they do not supply locally approved church references, speaker labels or microphone evidence.
 
 | Item | Classification | Next action |
@@ -68,7 +70,7 @@ Original-gate distinctions requiring root attention:
 | `multilingual-expansion` | user decision | Await explicit expansion scope/priority; do not train or integrate languages as an EN/ES side effect. |
 | `macos-shortcuts` | deferred user | No action until adopted by the user. |
 | `docs-refresh-remaining` | autonomous | Root reconcile this 43-item audit into current guides/backlog, then run renderer validation, link checks and documentation tests. |
-| `mac-torch-security-migration` | autonomous | Prepare a separate full application candidate with revised experimental constraints, then serial real EN/ES regressions and fresh installed audit; leave stt_env untouched. |
+| `mac-torch-security-migration` | autonomous | Review Mac-only dependency metadata and the complete tested constraint file, then validate a fresh final-source runtime before changing a launcher; preserve stt_env and non-Mac/CUDA constraints. Full isolated candidate EN/ES/audit evidence is complete. |
 | `windows-msi-bootstrap` | external hardware | On a clean Windows account with matching package availability, exercise install, Start Menu launch, setup/models, EN/ES, offline relaunch and uninstall. |
 | `wsl-training-recipe-checks` | mixed | Refresh stale source-defect notes; on WSL run both --dry-run recipes with actual W16/config/v2 corpus and retain the resulting CPU reports. |
 | `hymn-translation-boundary` | mixed | Keep the raw regression input unchanged, obtain independent boundary/bilingual review, then compare bounded raw/delimited input with identical models and semantic/latency controls. |
