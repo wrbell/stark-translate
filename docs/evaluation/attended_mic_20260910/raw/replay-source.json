@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-09-10T13:28:03.243826+00:00",
+  "source_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+  "source_sha256": "ca258b91c9ea8187048829899cac1e60277ee258631cc58ce7b156a8e4cb1b43",
+  "replay_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/attended_operator_replay_en.wav",
+  "replay_sha256": "2d480f8f5f95543622fcd39ca06bdd40a9a398653d905ca22bcb397d222dcba1",
+  "source_duration_seconds": 3.282675736961451,
+  "added_leading_silence_seconds": 4,
+  "added_trailing_silence_seconds": 3,
+  "label": "Controlled file replay from retained operator-rehearsal audio. Original speaker/natural-speech provenance is not independently established; never count as real microphone speech or human quality evidence."
+}

@@ -6,7 +6,7 @@
 
 - Importing a `tools/` module must not load a model. Anything needing inference spawns `dry_run_ab.py` or an isolated worker (`mac_evaluation.py` pattern), one model process at a time.
 - **Measurement:** report schema 2 `speech_end_to_final_ms` (server, payload-ready) separately from `speech_end_to_ack_upper_bound_ms` (visible browser, includes return network). Legacy `e2e_latency_ms` ≠ speech-end-to-display. Never pool cohorts with different manifest hashes.
-- **References:** predicted transcripts never count as references. Use `mac_evaluation.py annotate` for human-reviewed text; natural Spanish and two-speaker references do not exist yet.
+- **References:** predicted transcripts never count as references. Use `mac_evaluation.py annotate` for human-reviewed text; public natural EN/ES read-speech references now exist in `docs/evaluation/mac_followup_20260910/public_data/`; they are evaluation-only and not local approval. Church Spanish and verified two-speaker references remain pending.
 - **Review/export:** corrections are revisioned sidecars; only completed sessions with explicit approvals export; evaluation/training splits never cross. Fixtures are not approved correction data (#137 evidence pending).
 - **Health check:** `health_check.py --backend mlx` runs 8 of the 18 canaries by default; run before `manage_adapters.py activate`.
 - **YouTube alignment:** `find_global_offset_by_text()` for large offsets; treat `_wer is None` as no data. Cross-system WER is disagreement, not accuracy.

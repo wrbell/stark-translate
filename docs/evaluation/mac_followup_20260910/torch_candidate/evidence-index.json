@@ -1,0 +1,281 @@
+{
+  "recorded_at": "2026-09-10T14:03:37.187891+00:00",
+  "status": "CPU feasibility passed; real EN/ES candidate replay not executed; production constraints unchanged",
+  "artifacts": [
+    {
+      "path": "build-window-receipt.json",
+      "sha256": "f8f210cc0411205cf06a8b940ed1515e1e441cedb248fab596667787e6df8aa4",
+      "size_bytes": 1165
+    },
+    {
+      "path": "frozen-source-changes.patch",
+      "sha256": "2d15c3907e4711987674cec9a5a89f08411dbf815d0fab61c4314ae849a6373c",
+      "size_bytes": 15456
+    },
+    {
+      "path": "initial/command-receipts.json",
+      "sha256": "2eeae0588ce78d80a48964c30b08fda9ed3e840c509a64576133d4de07c8dafe",
+      "size_bytes": 8326
+    },
+    {
+      "path": "initial/constraints.txt",
+      "sha256": "435ef56c13afd35ea7823a2f4c81f9d3562071f667ac650999b84c5908dfc05e",
+      "size_bytes": 2109
+    },
+    {
+      "path": "initial/execute.py.txt",
+      "sha256": "129a61d9af612c6a493b551f6cd37585024a2a3b4061e2dcc044815a1d392909",
+      "size_bytes": 6231
+    },
+    {
+      "path": "initial/full-application-install.log",
+      "sha256": "7adb1f8171b7c6fa6c1483e2d72f7066ef0c09a031ec455d46b7803d4c6af4cb",
+      "size_bytes": 55368
+    },
+    {
+      "path": "initial/full-application-resolution.log",
+      "sha256": "23a532ce20344d55f8e9d397af4ed431b28e67bec2113b1341e35ed2f2b78376",
+      "size_bytes": 25150
+    },
+    {
+      "path": "initial/full-installed-audit.log",
+      "sha256": "ddb53dd1f9bea12ead393b0df959a310981c738b8eb7fe130c108b921814ff95",
+      "size_bytes": 45
+    },
+    {
+      "path": "initial/installed-audit.json",
+      "sha256": "1192997c46a876ade8fe26c1135ff10622fc70e24c8cac85839c58ce079e6ffa",
+      "size_bytes": 87254
+    },
+    {
+      "path": "initial/installed-inventory.log",
+      "sha256": "990f2008be2339178a35fb50345f205dc9fb4f3f861811be0e3f041b5f72a947",
+      "size_bytes": 5375
+    },
+    {
+      "path": "initial/installed-metadata-consistency.json",
+      "sha256": "c9a9bb819d263979420c98315c696b1302fcdcc7aaaa1bad861a9e997e0f6163",
+      "size_bytes": 3807
+    },
+    {
+      "path": "initial/installed-metadata-consistency.log",
+      "sha256": "c9a9bb819d263979420c98315c696b1302fcdcc7aaaa1bad861a9e997e0f6163",
+      "size_bytes": 3807
+    },
+    {
+      "path": "initial/installer-bootstrap.log",
+      "sha256": "689b6427b9855d08f2fb4740fcc1c87ec1d2c5c2b026e8685ea8a56c5227b604",
+      "size_bytes": 1009
+    },
+    {
+      "path": "initial/native-imports-vad.json",
+      "sha256": "f719fd6fa900c571e20d45d8067cf985f35b901cc165b610a601c48fcc98488f",
+      "size_bytes": 3230
+    },
+    {
+      "path": "initial/native-imports-vad.log",
+      "sha256": "f719fd6fa900c571e20d45d8067cf985f35b901cc165b610a601c48fcc98488f",
+      "size_bytes": 3230
+    },
+    {
+      "path": "initial/native_smoke.py.txt",
+      "sha256": "70014580f6f1e4040892a0bfa52eca79906efef3918670092e9b61e6f6327bc5",
+      "size_bytes": 1850
+    },
+    {
+      "path": "initial/pip-check.log",
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "size_bytes": 30
+    },
+    {
+      "path": "initial/pip-resolution.json",
+      "sha256": "ec16e7418196368fab95dc92e725721fba92500c025936e1ef0a3010b4ffdaa5",
+      "size_bytes": 1555882
+    },
+    {
+      "path": "initial/resolved-requirements.txt",
+      "sha256": "7a9f8a97cb83dfbbbaaae5e227de68922ed65e46902092ef068c94213249ab4c",
+      "size_bytes": 29202
+    },
+    {
+      "path": "initial/venv-create.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "initial/verify_install.py.txt",
+      "sha256": "c1c18c65bf5a83f2928752cfbb64db92ad82e9943fe9558987fd3d3fbe93b1c2",
+      "size_bytes": 1793
+    },
+    {
+      "path": "initial/wheel-metadata.json",
+      "sha256": "29c81b2b6848b1ce3741a31a5f073046fee2673ff88711055026a8a7fdfd1cef",
+      "size_bytes": 3686
+    },
+    {
+      "path": "metadata-closure.json",
+      "sha256": "2d4d3776bfd93dbaba8561d7cdf9d76dfab54e8247288aa31ccb77ad0ac3376d",
+      "size_bytes": 122139
+    },
+    {
+      "path": "preparation.json",
+      "sha256": "7f4221f2207dd003c6db270e10868a8d3d045243acb0a0ad63bcc75edbd28fa3",
+      "size_bytes": 24899
+    },
+    {
+      "path": "prepare.py.txt",
+      "sha256": "cf607221ab4f826a9cd6b6f2c81d899c71e55de4d6e47b2e962dc2fc831f6b0b",
+      "size_bytes": 5768
+    },
+    {
+      "path": "pyproject.candidate.diff",
+      "sha256": "e0791ff85dac5ee2b1a150c9e404ac5235159c1af4ee821fadd3e6ae83d0bcdd",
+      "size_bytes": 711
+    },
+    {
+      "path": "remediated/command-receipts.json",
+      "sha256": "f84762aa1bfe4ca98459f976dee5f09d865195f372cfbf7827a2efe469b9d408",
+      "size_bytes": 8711
+    },
+    {
+      "path": "remediated/constraints.txt",
+      "sha256": "25c6b79eee79814ad741962489b09a90d681f162481d79cacfa45ba3dfc2117a",
+      "size_bytes": 2109
+    },
+    {
+      "path": "remediated/execute.py.txt",
+      "sha256": "845cfdcc379f1a26610ec3dfe67a51a48731f8b787fee96a3eecc2f5246f205d",
+      "size_bytes": 6267
+    },
+    {
+      "path": "remediated/full-application-install.log",
+      "sha256": "d7e1c4f08ac768e126b2a0bb75457827a0a3b434b2b922e452f407fe0d86e90b",
+      "size_bytes": 51214
+    },
+    {
+      "path": "remediated/full-application-resolution.log",
+      "sha256": "d5b42e3b875ab25f6fef4ef2bec063848d052df190dcf080b5386e488e4afe52",
+      "size_bytes": 25274
+    },
+    {
+      "path": "remediated/full-installed-audit.log",
+      "sha256": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955",
+      "size_bytes": 31
+    },
+    {
+      "path": "remediated/installed-audit.json",
+      "sha256": "03e8ce7649210e166f0a99ff0882f34ded8e628bd42c65b851e0d34f4e7d3512",
+      "size_bytes": 7082
+    },
+    {
+      "path": "remediated/installed-inventory.log",
+      "sha256": "a2bd3c6dc97bcf2dc46365c5ecc4bcd0eb82582e8a32724780b105489ace1112",
+      "size_bytes": 5375
+    },
+    {
+      "path": "remediated/installed-metadata-consistency.json",
+      "sha256": "3ab59c963af5716a5f3c691481f6f19a525b4af565423674f283759a7d7ddbff",
+      "size_bytes": 3829
+    },
+    {
+      "path": "remediated/installed-metadata-consistency.log",
+      "sha256": "3ab59c963af5716a5f3c691481f6f19a525b4af565423674f283759a7d7ddbff",
+      "size_bytes": 3829
+    },
+    {
+      "path": "remediated/installer-bootstrap.log",
+      "sha256": "dd5cf65e7252dbbbb6528617b3d77ff483b7b8ed6488f0b1903e6d075f0dce56",
+      "size_bytes": 696
+    },
+    {
+      "path": "remediated/native-imports-vad.json",
+      "sha256": "13d82bc99357de77cd89889dde53af3ba2d53fc9b09e4e6806de669052c82e04",
+      "size_bytes": 3362
+    },
+    {
+      "path": "remediated/native-imports-vad.log",
+      "sha256": "13d82bc99357de77cd89889dde53af3ba2d53fc9b09e4e6806de669052c82e04",
+      "size_bytes": 3362
+    },
+    {
+      "path": "remediated/native_smoke.py.txt",
+      "sha256": "70014580f6f1e4040892a0bfa52eca79906efef3918670092e9b61e6f6327bc5",
+      "size_bytes": 1850
+    },
+    {
+      "path": "remediated/pip-check.log",
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "size_bytes": 30
+    },
+    {
+      "path": "remediated/pip-resolution.json",
+      "sha256": "909a9e50c696f6bd0fb8f21b2a9d51a76a7277af68cb4e3a933b220ccd303864",
+      "size_bytes": 1558041
+    },
+    {
+      "path": "remediated/pypi-fix-metadata.json",
+      "sha256": "f386a320011892476a38b14a48cdf37706972523a53ec6771f25abe81fcebbf6",
+      "size_bytes": 42704
+    },
+    {
+      "path": "remediated/remediation-plan.json",
+      "sha256": "125082ff89d2bf2d423e25909a938d2c701c1dca423a20af16f1a42b8f430bba",
+      "size_bytes": 815
+    },
+    {
+      "path": "remediated/replay-plan-en.json",
+      "sha256": "190eea4fdfae4c62b9bf1aa3329d550ea9263e116382acb371b649464580712a",
+      "size_bytes": 4979
+    },
+    {
+      "path": "remediated/replay-plan-es.json",
+      "sha256": "2a3e659d92343a85d9240d7f8d5413df1193ec17f41518e47a74385f9c0a313f",
+      "size_bytes": 4598
+    },
+    {
+      "path": "remediated/replay_candidate.py.txt",
+      "sha256": "65fc1b37049255673b235b47126ad73630da608ce622724baf3c77dd23b9f55a",
+      "size_bytes": 7257
+    },
+    {
+      "path": "remediated/resolved-requirements.txt",
+      "sha256": "835640e731deb1b5913c609a568aaf6c66b247c076625ec69d3c029cd3ad3e8d",
+      "size_bytes": 29213
+    },
+    {
+      "path": "remediated/result-summary.json",
+      "sha256": "2569187ac475bbf1d0657d34ea55eaf584a6c5cd65ab96ebe031f5c9ce541596",
+      "size_bytes": 898
+    },
+    {
+      "path": "remediated/venv-create.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "remediated/verify_install.py.txt",
+      "sha256": "c1c18c65bf5a83f2928752cfbb64db92ad82e9943fe9558987fd3d3fbe93b1c2",
+      "size_bytes": 1793
+    },
+    {
+      "path": "remediated/wheel-metadata.json",
+      "sha256": "fc94893b233eda3fe4321bcc0c0c61e44c27825dec775c328d36055907a61572",
+      "size_bytes": 3697
+    },
+    {
+      "path": "restore_source.py.txt",
+      "sha256": "cd664e2bcc4f69604272e62e51beffdb62a5b461ebff40902b4fe5989a163f6e",
+      "size_bytes": 2711
+    },
+    {
+      "path": "working-environment-preserved-final.json",
+      "sha256": "1887f65accf7b984dfd14824b60085b0c4d0e09ed872aad5f4db7057f100bdb9",
+      "size_bytes": 4063
+    },
+    {
+      "path": "working-environment-preserved.json",
+      "sha256": "1fb1017680f78899b2841a5d893e76f7a57c63f6881487a33216530cf94fdd4d",
+      "size_bytes": 4234
+    }
+  ]
+}

@@ -112,7 +112,7 @@ Displays: `http://localhost:8080/displays/audience_display.html` (projector),
 Ports: 8080 HTTP, 8765 captions, 9000 operator. Protocol and timing semantics:
 [`displays/CLAUDE.md`](displays/CLAUDE.md).
 
-### Built-in microphone stall (2026-09-09) — fix implemented, live retest deferred
+### Built-in microphone stall (2026-09-09) — capture retest passed; spoken captions pending
 
 Session `20260909_233204_799019_en` (`audio_source: mic`) loaded all models, printed
 "Listening...", served the audience page, then received no audio frames; its lifecycle
@@ -134,8 +134,11 @@ What changed (integrated on the candidate branch, `c5fb689`):
 - **Ownership:** `operator_app/processes.py` cleans only owned subprocesses;
   `operator_app/work_lease.py` allows one model/audio job per operator.
 
-**Not yet proven:** a real built-in-microphone session on this Mac (deferred to the next attended session),
-physical second output, hotplug. Until then #131 stays `in_progress`.
+**Attended September 10 retest:** EN and ES real microphone sessions reached ready
+and stopped cleanly; EN pause/resume and language restart passed. No speech was detected
+in the quiet room. [Exact receipts](docs/evaluation/attended_mic_20260910/README.md)
+separate mic capture from the controlled replay that delivered a visible bilingual final.
+Spoken microphone captions, physical second output and hotplug remain pending; #131 is open.
 
 ---
 

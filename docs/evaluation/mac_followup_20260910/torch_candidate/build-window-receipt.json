@@ -1,0 +1,20 @@
+{
+  "activity": "Wheel build performed before explicit reserved build window; retained transparently.",
+  "exact_process_start_utc": null,
+  "exact_process_end_utc": null,
+  "reason_exact_times_unavailable": "Original exec result reported duration but process was not timestamp-instrumented.",
+  "exec_wall_seconds": 0.157205583,
+  "exit_code": 0,
+  "preparation_ended_utc": "2026-09-10T13:38:38.689530Z",
+  "wheel_filesystem_birth_utc": "2026-09-10T13:38:48.163687Z",
+  "wheel_filesystem_mtime_utc": "2026-09-10T13:38:48.217319Z",
+  "conservative_activity_window_utc": [
+    "2026-09-10T13:38:38.689530Z",
+    "2026-09-10T13:38:49Z"
+  ],
+  "coordinator_verified_last_quality_worker_end_utc": "2026-09-10T13:38:20.896462Z",
+  "coordinator_overlap_finding": "No overlap: quality worker ended before conservative build window.",
+  "wheel_sha256": "48ae49c1214f8a0bcabcc018794b675ece271114da172b7cf81c0696f88c7786",
+  "subsequent_policy": "No further builds, resolves, installs or runtime tests without coordinator reserved window.",
+  "later_install_window": "Explicitly authorized by coordinator after benchmark pause; command-receipts.json records actual times."
+}

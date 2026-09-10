@@ -1,0 +1,20 @@
+--- production/pyproject.toml
++++ scratch/pyproject.toml
+@@ -73,7 +73,7 @@
+ 
+ # MLX / Apple Silicon. arm64 only.
+ mlx = [
+-    "torch>=2.10,<2.11",
++    "torch==2.13.0",
+     "silero-vad==6.2.1",
+     "onnxruntime>=1.20",
+     "ctranslate2>=4.7.1",
+@@ -92,7 +92,7 @@
+ # Optional multilingual STT engine; combine with the mlx extra on Apple Silicon.
+ parakeet-mlx = ["parakeet-mlx>=0.5.2"]
+ eval = ["sacrebleu>=2.5", "jiwer>=3"]
+-diarization = ["speechbrain>=1.0", "torchaudio>=2.10,<2.11", "soundfile>=0.12", "scikit-learn>=1.4"]
++diarization = ["speechbrain>=1.0", "torchaudio==2.11.0", "soundfile>=0.12", "scikit-learn>=1.4"]
+ 
+ # CPU fallback — no GPU acceleration. Slow but works on any machine.
+ cpu = [

@@ -1,0 +1,31 @@
+"""Reserved CPU imports and bundled VAD only: no STT/Gemma/speaker inference."""
+import importlib
+import importlib.metadata as md
+import json
+import math
+import sys
+from pathlib import Path
+BASE=Path(__file__).resolve().parent
+modules={}
+for name in ['torch','torchaudio','speechbrain.inference.speaker','transformers','mlx_whisper','parakeet_mlx',
+             'operator_app.cli','engines.factory','engines.mlx_engine','engines.parakeet_mlx_engine','tools.vad_runtime']:
+    module=importlib.import_module(name)
+    modules[name]=str(getattr(module,'__file__',None))
+    assert str(BASE/'venv') in modules[name],(name,modules[name])
+from transformers import MarianMTModel, MarianTokenizer, WhisperForConditionalGeneration
+import torch
+from tools.vad_runtime import load_packaged_vad
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
+assert md.version('torch')=='2.13.0'
+assert md.version('torchaudio')=='2.11.0'
+vad,_,provenance=load_packaged_vad('torch')
+vad.reset_states()
+with torch.no_grad(): probabilities=[float(vad(torch.zeros(512,dtype=torch.float32),16000).item()) for _ in range(3)]
+assert all(math.isfinite(x) and 0<=x<=1 for x in probabilities)
+result={'status':'passed','scope':'Installed full application native imports and three CPU bundled-VAD silence frames; no STT/Gemma/speaker model loaded.',
+        'modules':modules,'model_classes_imported':[MarianMTModel.__name__,MarianTokenizer.__name__,WhisperForConditionalGeneration.__name__],
+        'vad_provenance':provenance,'silence_probabilities':probabilities,'python':sys.version,
+        'versions':{name:md.version(name) for name in ['torch','torchaudio','mlx','mlx-metal','mlx-lm','mlx-whisper','mlx-optiq','parakeet-mlx','transformers','speechbrain']}}
+(BASE/'native-imports-vad.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result,indent=2))

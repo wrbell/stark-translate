@@ -1,0 +1,554 @@
+{
+  "recorded_utc": "2026-09-10T13:34:21.981394+00:00",
+  "sessions": [
+    {
+      "session_id": "20260910_092405_457769_en",
+      "audio_source": "mic",
+      "session_kind": "live",
+      "lifecycle_status": "completed",
+      "exit_code": 0,
+      "started_utc": "2026-09-10T13:24:09.969857+00:00",
+      "ended_utc": "2026-09-10T13:25:40.792466+00:00",
+      "persistence": {
+        "submitted": 2,
+        "completed": 2,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "final_count": 0,
+      "capture_status_samples": [
+        {
+          "frames": 80,
+          "speech": 0,
+          "rms": 0.0019
+        },
+        {
+          "frames": 172,
+          "speech": 0,
+          "rms": 0.0011
+        },
+        {
+          "frames": 266,
+          "speech": 0,
+          "rms": 0.0012
+        },
+        {
+          "frames": 360,
+          "speech": 0,
+          "rms": 0.0012
+        },
+        {
+          "frames": 454,
+          "speech": 0,
+          "rms": 0.0012
+        },
+        {
+          "frames": 546,
+          "speech": 0,
+          "rms": 0.0012
+        },
+        {
+          "frames": 633,
+          "speech": 0,
+          "rms": 0.0013
+        },
+        {
+          "frames": 735,
+          "speech": 0,
+          "rms": 0.0013
+        },
+        {
+          "frames": 829,
+          "speech": 0,
+          "rms": 0.0016
+        },
+        {
+          "frames": 917,
+          "speech": 0,
+          "rms": 0.0018
+        },
+        {
+          "frames": 1006,
+          "speech": 0,
+          "rms": 0.0073
+        },
+        {
+          "frames": 1,
+          "speech": 0,
+          "rms": 0.0006
+        },
+        {
+          "frames": 96,
+          "speech": 0,
+          "rms": 0.0013
+        },
+        {
+          "frames": 190,
+          "speech": 0,
+          "rms": 0.0011
+        },
+        {
+          "frames": 284,
+          "speech": 0,
+          "rms": 0.0011
+        },
+        {
+          "frames": 378,
+          "speech": 0,
+          "rms": 0.0014
+        },
+        {
+          "frames": 472,
+          "speech": 0,
+          "rms": 0.0013
+        },
+        {
+          "frames": 566,
+          "speech": 0,
+          "rms": 0.0019
+        },
+        {
+          "frames": 660,
+          "speech": 0,
+          "rms": 0.0018
+        },
+        {
+          "frames": 754,
+          "speech": 0,
+          "rms": 0.0015
+        }
+      ],
+      "display_acks": [],
+      "final_timing": []
+    },
+    {
+      "session_id": "20260910_092544_206252_es",
+      "audio_source": "mic",
+      "session_kind": "live",
+      "lifecycle_status": "completed",
+      "exit_code": 0,
+      "started_utc": "2026-09-10T13:25:48.819879+00:00",
+      "ended_utc": "2026-09-10T13:26:48.251170+00:00",
+      "persistence": {
+        "submitted": 2,
+        "completed": 2,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "final_count": 0,
+      "capture_status_samples": [
+        {
+          "frames": 61,
+          "speech": 0,
+          "rms": 0.0017
+        },
+        {
+          "frames": 152,
+          "speech": 0,
+          "rms": 0.0018
+        },
+        {
+          "frames": 253,
+          "speech": 0,
+          "rms": 0.0009
+        },
+        {
+          "frames": 347,
+          "speech": 0,
+          "rms": 0.0015
+        },
+        {
+          "frames": 441,
+          "speech": 0,
+          "rms": 0.0014
+        },
+        {
+          "frames": 529,
+          "speech": 0,
+          "rms": 0.0011
+        },
+        {
+          "frames": 630,
+          "speech": 0,
+          "rms": 0.0012
+        },
+        {
+          "frames": 724,
+          "speech": 0,
+          "rms": 0.002
+        },
+        {
+          "frames": 818,
+          "speech": 0,
+          "rms": 0.0026
+        },
+        {
+          "frames": 907,
+          "speech": 0,
+          "rms": 0.0018
+        },
+        {
+          "frames": 1002,
+          "speech": 0,
+          "rms": 0.0017
+        },
+        {
+          "frames": 1096,
+          "speech": 0,
+          "rms": 0.0017
+        }
+      ],
+      "display_acks": [],
+      "final_timing": []
+    },
+    {
+      "session_id": "20260910_092824_526799_en",
+      "audio_source": "file",
+      "session_kind": "replay",
+      "lifecycle_status": "completed",
+      "exit_code": 0,
+      "started_utc": "2026-09-10T13:28:28.564888+00:00",
+      "ended_utc": "2026-09-10T13:29:37.670725+00:00",
+      "persistence": {
+        "submitted": 10,
+        "completed": 10,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "final_count": 1,
+      "capture_status_samples": [
+        {
+          "frames": 92,
+          "speech": 0,
+          "rms": 0.0
+        },
+        {
+          "frames": 186,
+          "speech": 50,
+          "rms": 0.177
+        },
+        {
+          "frames": 30,
+          "speech": 0,
+          "rms": 0.0
+        },
+        {
+          "frames": 156,
+          "speech": 0,
+          "rms": 0.0
+        }
+      ],
+      "display_acks": [
+        {
+          "session_id": "20260910_092824_526799_en",
+          "chunk_id": 1,
+          "utterance_id": 1,
+          "preview_kind": "periodic",
+          "preview_revision": 2,
+          "timing_source": "replay_realtime",
+          "caption_delivery_mode": "awaited",
+          "caption_queue_wait_ms": 0.0,
+          "captured_start_at_ms": 16791.42,
+          "captured_end_at_ms": 18007.42,
+          "speech_end_at_ms": 18007.42,
+          "sample_start": 208896,
+          "sample_end": 267264,
+          "sample_rate": 48000,
+          "speech_end_sample": 267264,
+          "padding_samples": 0,
+          "event": "caption_rendered",
+          "event_id": "20260910_092824_526799_en:partial:2",
+          "stage": "partial",
+          "client_id": "21589014544",
+          "visible": true,
+          "receive_to_render_ms": 229.9,
+          "send_to_ack_ms": 233.3,
+          "speech_end_to_ack_upper_bound_ms": null,
+          "speech_start_to_preview_ack_upper_bound_ms": 1727.0,
+          "captured_end_to_preview_ack_upper_bound_ms": 511.0,
+          "speech_end_to_preview_ack_upper_bound_ms": 511.0,
+          "timing_schema_version": 2
+        },
+        {
+          "session_id": "20260910_092824_526799_en",
+          "chunk_id": 1,
+          "utterance_id": 1,
+          "preview_kind": "periodic",
+          "preview_revision": 3,
+          "timing_source": "replay_realtime",
+          "caption_delivery_mode": "awaited",
+          "caption_queue_wait_ms": 0.0,
+          "captured_start_at_ms": 16791.42,
+          "captured_end_at_ms": 18615.42,
+          "speech_end_at_ms": 18615.42,
+          "sample_start": 208896,
+          "sample_end": 296448,
+          "sample_rate": 48000,
+          "speech_end_sample": 296448,
+          "padding_samples": 0,
+          "event": "caption_rendered",
+          "event_id": "20260910_092824_526799_en:partial:3",
+          "stage": "partial",
+          "client_id": "21589014544",
+          "visible": true,
+          "receive_to_render_ms": 311.2,
+          "send_to_ack_ms": 2259.9,
+          "speech_end_to_ack_upper_bound_ms": null,
+          "speech_start_to_preview_ack_upper_bound_ms": 4604.7,
+          "captured_end_to_preview_ack_upper_bound_ms": 2780.7,
+          "speech_end_to_preview_ack_upper_bound_ms": 2780.7,
+          "timing_schema_version": 2
+        },
+        {
+          "session_id": "20260910_092824_526799_en",
+          "chunk_id": 1,
+          "utterance_id": 1,
+          "preview_kind": null,
+          "preview_revision": null,
+          "timing_source": "replay_realtime",
+          "caption_delivery_mode": "awaited",
+          "caption_queue_wait_ms": 0.0,
+          "captured_start_at_ms": null,
+          "captured_end_at_ms": null,
+          "speech_end_at_ms": null,
+          "sample_start": 208896,
+          "sample_end": 327168,
+          "sample_rate": 48000,
+          "speech_end_sample": 305664,
+          "padding_samples": 0,
+          "event": "caption_rendered",
+          "event_id": "20260910_092824_526799_en:5",
+          "stage": "complete",
+          "client_id": "21589014544",
+          "visible": true,
+          "receive_to_render_ms": 18.9,
+          "send_to_ack_ms": 21.0,
+          "speech_end_to_ack_upper_bound_ms": 4837.8,
+          "speech_start_to_preview_ack_upper_bound_ms": null,
+          "captured_end_to_preview_ack_upper_bound_ms": null,
+          "speech_end_to_preview_ack_upper_bound_ms": null,
+          "timing_schema_version": 2
+        }
+      ],
+      "final_timing": [
+        {
+          "chunk_id": "1",
+          "speech_end_to_final_ms": "4816.7"
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "source": "metrics/hardware_20260910_092405_457769_en.json",
+      "retained": "hardware_20260910_092405_457769_en.json",
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+      "size_bytes": 262
+    },
+    {
+      "source": "metrics/health_20260910_092405_457769_en.json",
+      "retained": "health_20260910_092405_457769_en.json",
+      "sha256": "ac06ecd831cf0884ee8dfe68bf54a12a6e24af58f6eb4dd93dcdbd320bcad31b",
+      "size_bytes": 997
+    },
+    {
+      "source": "metrics/session_metadata_20260910_092405_457769_en.json",
+      "retained": "session_metadata_20260910_092405_457769_en.json",
+      "sha256": "39b80f195a7a71b1e4078ff8a8375655ea0f762e0d73f9da87981a079a0223e9",
+      "size_bytes": 4598
+    },
+    {
+      "source": "metrics/partials_20260910_092405_457769_en.jsonl",
+      "retained": "partials_20260910_092405_457769_en.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "source": "metrics/control_20260910_092405_457769_en.json",
+      "retained": "control_20260910_092405_457769_en.json",
+      "sha256": "ee104632238d5351769f8e527b1653ee4fb08eb4d6fc88dbfeeb6556f4f01db9",
+      "size_bytes": 106
+    },
+    {
+      "source": "metrics/ab_metrics_20260910_092405_457769_en.csv",
+      "retained": "ab_metrics_20260910_092405_457769_en.csv",
+      "sha256": "55edc108a36f5e7b1854191c3b897c4fcbb97c955df456f40d6c810e58d52566",
+      "size_bytes": 860
+    },
+    {
+      "source": "metrics/session_lifecycle_20260910_092405_457769_en.json",
+      "retained": "session_lifecycle_20260910_092405_457769_en.json",
+      "sha256": "97c131e71bf146223391e1f7da184befd643de3b227b33d3892adda0f73b6c4d",
+      "size_bytes": 3263
+    },
+    {
+      "source": "metrics/diagnostics_20260910_092405_457769_en.jsonl",
+      "retained": "diagnostics_20260910_092405_457769_en.jsonl",
+      "sha256": "0613aed6e8c91e2d8f92ccce913fbee8046353a243e0d13fe2353b59dc96b64c",
+      "size_bytes": 2599
+    },
+    {
+      "source": "metrics/session_20260910_092405_457769_en.log",
+      "retained": "session_20260910_092405_457769_en.log",
+      "sha256": "a7aa55b822240b5af3c7d09e1a0da586c1660fce91c7f162891e2ebeb873af0c",
+      "size_bytes": 17712
+    },
+    {
+      "source": "metrics/session_lifecycle_20260910_092544_206252_es.json",
+      "retained": "session_lifecycle_20260910_092544_206252_es.json",
+      "sha256": "f4ae74507eae42a166cdb7329fc551f7dd495b74cd6b65c2ec8eb3cb27e07000",
+      "size_bytes": 3326
+    },
+    {
+      "source": "metrics/control_20260910_092544_206252_es.json",
+      "retained": "control_20260910_092544_206252_es.json",
+      "sha256": "f5541ef8c14f88d9f177d9081f1cf0896fd9878121d635d8fd3cbb7b74a49b1d",
+      "size_bytes": 106
+    },
+    {
+      "source": "metrics/partials_20260910_092544_206252_es.jsonl",
+      "retained": "partials_20260910_092544_206252_es.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "source": "metrics/session_20260910_092544_206252_es.log",
+      "retained": "session_20260910_092544_206252_es.log",
+      "sha256": "b586f60aa18e20da6b558d6a1575987fc6a85386f392b859616ec9b9ebd50955",
+      "size_bytes": 16207
+    },
+    {
+      "source": "metrics/ab_metrics_20260910_092544_206252_es.csv",
+      "retained": "ab_metrics_20260910_092544_206252_es.csv",
+      "sha256": "55edc108a36f5e7b1854191c3b897c4fcbb97c955df456f40d6c810e58d52566",
+      "size_bytes": 860
+    },
+    {
+      "source": "metrics/session_metadata_20260910_092544_206252_es.json",
+      "retained": "session_metadata_20260910_092544_206252_es.json",
+      "sha256": "4ab5084716a4179da46e6fad30f35c25e7c12d27a5e67bde9efd9512a89649ce",
+      "size_bytes": 4598
+    },
+    {
+      "source": "metrics/diagnostics_20260910_092544_206252_es.jsonl",
+      "retained": "diagnostics_20260910_092544_206252_es.jsonl",
+      "sha256": "9824f2aa02afd853e9daece86ae957085cfe6682d6db038c71622f33a0699937",
+      "size_bytes": 2497
+    },
+    {
+      "source": "metrics/health_20260910_092544_206252_es.json",
+      "retained": "health_20260910_092544_206252_es.json",
+      "sha256": "23914928b64af8080c1acf96065103b7bc213ed619c814fa38ba0f0d661e5127",
+      "size_bytes": 997
+    },
+    {
+      "source": "metrics/hardware_20260910_092544_206252_es.json",
+      "retained": "hardware_20260910_092544_206252_es.json",
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+      "size_bytes": 262
+    },
+    {
+      "source": "metrics/display_metrics_20260910_092824_526799_en.jsonl",
+      "retained": "display_metrics_20260910_092824_526799_en.jsonl",
+      "sha256": "1a8ff8186507144d3f1f88820ad754b18d80c919eb8936cd2770b0f78102cbfd",
+      "size_bytes": 2602
+    },
+    {
+      "source": "metrics/summary_20260910_092824_526799_en.json",
+      "retained": "summary_20260910_092824_526799_en.json",
+      "sha256": "70a0de9668dcf70e0e272caf9d96ce95659a1213eddf12b5fe099453c4b084de",
+      "size_bytes": 768
+    },
+    {
+      "source": "metrics/diagnostics_20260910_092824_526799_en.jsonl",
+      "retained": "diagnostics_20260910_092824_526799_en.jsonl",
+      "sha256": "27fb1e13aff75bc4df4fd32453c53e49582980b0b526ddc0e352e7fedb524372",
+      "size_bytes": 5988
+    },
+    {
+      "source": "metrics/session_lifecycle_20260910_092824_526799_en.json",
+      "retained": "session_lifecycle_20260910_092824_526799_en.json",
+      "sha256": "9f6be53341095bdc4726b14ecbcef63c2a275da74e750df601da23032eb34e25",
+      "size_bytes": 3265
+    },
+    {
+      "source": "metrics/control_20260910_092824_526799_en.json",
+      "retained": "control_20260910_092824_526799_en.json",
+      "sha256": "d17beea6f901f86a383f570d4bc6041ae7359fc85e3c66afbbb6cdcaed08da48",
+      "size_bytes": 106
+    },
+    {
+      "source": "metrics/session_metadata_20260910_092824_526799_en.json",
+      "retained": "session_metadata_20260910_092824_526799_en.json",
+      "sha256": "3c8c6eed10c83cf82e03b3e4880140432064978aa008939e9453f46167ad2f5f",
+      "size_bytes": 4755
+    },
+    {
+      "source": "metrics/hardware_20260910_092824_526799_en.json",
+      "retained": "hardware_20260910_092824_526799_en.json",
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+      "size_bytes": 262
+    },
+    {
+      "source": "metrics/health_20260910_092824_526799_en.json",
+      "retained": "health_20260910_092824_526799_en.json",
+      "sha256": "9b03853f8d14b33e27b77c91e10cfc7ceb5ac4d48c28937ebe3e5ea388a93ea6",
+      "size_bytes": 1325
+    },
+    {
+      "source": "metrics/partials_20260910_092824_526799_en.jsonl",
+      "retained": "partials_20260910_092824_526799_en.jsonl",
+      "sha256": "cba8b4df32bff878bdbf26ef51a56b0de2e0f26cc11bb1a62b780f6cc99fc508",
+      "size_bytes": 2644
+    },
+    {
+      "source": "metrics/ab_metrics_20260910_092824_526799_en.csv",
+      "retained": "ab_metrics_20260910_092824_526799_en.csv",
+      "sha256": "c90f822ba6e710fa73e22a0a775b0e22e5ddd9af142d5ae11a088bae0eeb530b",
+      "size_bytes": 1347
+    },
+    {
+      "source": "metrics/session_20260910_092824_526799_en.log",
+      "retained": "session_20260910_092824_526799_en.log",
+      "sha256": "f2b35091b60ae5c605c43c5ac6be93d37cbd245c74efd693d28460c97a89b31f",
+      "size_bytes": 30992
+    }
+  ],
+  "review_revisions": [
+    {
+      "corrected_source_text": "The grace of God brings salvation.",
+      "corrected_translation_text": "La gracia de Dios trae la salvaci\u00f3n.",
+      "transcript_approved": false,
+      "translation_approved": false,
+      "excluded": false,
+      "review_note": "Operator rehearsal 2026-09-10: saved draft persistence check only; no human transcript or bilingual approval.",
+      "source_lang": "en",
+      "session": "20260910_092824_526799_en",
+      "chunk_id": 1,
+      "revision": 1,
+      "review_timestamp": "2026-09-10T13:31:07.215675+00:00"
+    },
+    {
+      "corrected_source_text": "The grace of God brings salvation.",
+      "corrected_translation_text": "La gracia de Dios trae la salvaci\u00f3n.",
+      "transcript_approved": false,
+      "translation_approved": false,
+      "excluded": false,
+      "review_note": "Operator rehearsal 2026-09-10: saved draft and local reload recovery verified; no human transcript or bilingual approval.",
+      "source_lang": "en",
+      "session": "20260910_092824_526799_en",
+      "chunk_id": 1,
+      "revision": 2,
+      "review_timestamp": "2026-09-10T13:32:20.634564+00:00"
+    }
+  ]
+}

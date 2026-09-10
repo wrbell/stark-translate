@@ -38,6 +38,11 @@ processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/READ
 
 The [completed September 10 screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
 
+The [current EN↔ES follow-up](docs/evaluation/mac_followup_20260910/README.md)
+adds audited public bilingual references, source-accounted experiments, conditional
+Parakeet profiling, CPU training preflight repairs and isolated dependency migration.
+Model/default promotion still requires its recorded gates.
+
 EN↔ES remains the active speed priority. The installed Standard and CPU Lite
 full-service runs on `752ab9a` completed with consistent retained source spans,
 required writes and process cleanup. Lite was functional on this Mac, but sparse
@@ -64,8 +69,12 @@ from the CSV header. The fix is **implemented**: PortAudio runs in a disposable 
 (`tools/isolated_audio.py`, `tools/capture_worker.py`) with a 5 s no-input startup timeout
 and 3 s idle timeout that fail the session (`AudioCaptureError`), and operator readiness
 comes from `tools/pipeline_health.py` phases (`loading → listening → ready`,
-`input_error`) rather than file presence. The **real built-in-mic retest is deferred to
-the next attended session**; file replay passes. See `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
+`input_error`) rather than file presence. The September 10 attended EN and ES
+microphone sessions both received real frames, reached ready and stopped cleanly;
+EN pause/resume and language restart also passed. The room had no detected speech,
+so spoken microphone captions remain pending. A separate file replay produced a
+visible bilingual final. See [actual session receipts](docs/evaluation/attended_mic_20260910/README.md)
+and `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
 
 ## Environment split
 
@@ -147,7 +156,7 @@ Latest recorded suite counts live only in
 - [ ] Phase 4 — WSL full preprocess ([`docs/wsl_pipeline_refresh.md`](docs/wsl_pipeline_refresh.md))
 - [ ] Phase 7–8 — Mac A/B (#135), active learning evidence (#137)
 - [ ] Phase 10 — Remaining human/device gates: live-mic smoke EN/ES (#131, fix
-      implemented, retest deferred), diarization (#133) and physical second output
+      capture/readiness retest passed; spoken captions pending), diarization (#133) and physical second output
       (#132). The laptop runbook rehearsal is complete and #134 is closed; see
       [closeout evidence](docs/evaluation/overnight_closeout_20260910/README.md).
       TTS routing and live diarization are implemented; their acceptance is not certified.

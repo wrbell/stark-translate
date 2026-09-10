@@ -1,0 +1,92 @@
+"""Read-only source/dependency snapshot and offline metadata closure. No installs/imported ML."""
+import difflib
+import hashlib
+import importlib.metadata as md
+import json
+import shutil
+import subprocess
+import sys
+import tomllib
+from collections import deque
+from datetime import datetime, timezone
+from pathlib import Path
+
+from packaging.markers import default_environment
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
+
+ROOT = Path.cwd()
+OUT = ROOT / '.cache/mac-en-es-closeout/full-application-torch-candidate'
+SOURCE = OUT / 'source'
+if SOURCE.exists():
+    raise SystemExit('Refusing to overwrite the existing frozen source snapshot')
+original = (ROOT / 'pyproject.toml').read_text()
+assert original.count('"torch>=2.10,<2.11"') == 1
+assert original.count('"torchaudio>=2.10,<2.11"') == 1
+revised = original.replace('"torch>=2.10,<2.11"', '"torch==2.13.0"').replace('"torchaudio>=2.10,<2.11"', '"torchaudio==2.11.0"')
+config = tomllib.loads(revised)
+wheel = config['tool']['hatch']['build']['targets']['wheel']
+roots = [*wheel['packages'], *wheel['force-include'], 'pyproject.toml', 'README.md', 'LICENSE']
+tracked = subprocess.check_output(['git','ls-files','-z','--',*roots]).decode().split('\0')
+files=[]
+for name in sorted(set(tracked)-{''}):
+    path=ROOT/name
+    if not path.is_file(): continue
+    target=SOURCE/name
+    target.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(path,target)
+    files.append({'path':name,'source_sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
+(SOURCE/'pyproject.toml').write_text(revised)
+(OUT/'pyproject.candidate.diff').write_text(''.join(difflib.unified_diff(original.splitlines(True),revised.splitlines(True),fromfile='production/pyproject.toml',tofile='scratch/pyproject.toml')))
+
+def distributions(path=None):
+    return {canonicalize_name(d.metadata['Name']):d for d in (md.distributions() if path is None else md.distributions(path=path)) if d.metadata['Name']}
+base=distributions()
+minimal=distributions([str(ROOT/'.cache/mac-en-es-closeout/security-candidate-runtime/lib/python3.11/site-packages')])
+providers=dict(base)
+for name,d in minimal.items():
+    if name not in providers or name in {'torch','torchaudio','setuptools','pip'}:
+        providers[name]=d
+requirements=list(config['project']['dependencies'])
+for extra in ('mlx','diarization'): requirements.extend(config['project']['optional-dependencies'][extra])
+requirements.append('jiwer=='+base['jiwer'].version)
+queue=deque((r,'project',set()) for r in requirements)
+selected={}
+expanded={}
+issues=[]
+while queue:
+    raw,parent,extras=queue.popleft()
+    req=Requirement(raw)
+    if req.marker and not any(req.marker.evaluate({**default_environment(),'extra':extra}) for extra in (extras or {''})):
+        continue
+    name=canonicalize_name(req.name)
+    dist=providers.get(name)
+    if dist is None:
+        issues.append({'dependency':raw,'required_by':parent,'problem':'not available in either inspected metadata inventory'})
+        continue
+    if req.specifier and dist.version not in req.specifier:
+        issues.append({'dependency':raw,'required_by':parent,'selected':dist.version,'problem':'version constraint mismatch'})
+    entry=selected.setdefault(name,{'name':dist.metadata['Name'],'version':dist.version,'required_by':[],
+        'metadata_sha256':hashlib.sha256(dist.read_text('METADATA').encode()).hexdigest(),
+        'requires_dist':dist.requires or [],'provenance':'minimal_torch_candidate' if dist is minimal.get(name) else 'working_stt_env'})
+    entry['required_by'].append({'package':parent,'requirement':raw})
+    requested=set(req.extras)
+    seen=expanded.get(name)
+    if seen is None or not requested <= seen:
+        expanded[name]=(seen or set())|requested
+        queue.extend((child,name,expanded[name]) for child in dist.requires or [])
+(OUT/'constraints.txt').write_text(''.join(f"{name}=={entry['version']}\n" for name,entry in sorted(selected.items())))
+(OUT/'metadata-closure.json').write_text(json.dumps({'status':'metadata_consistent' if not issues else 'metadata_conflicts',
+    'method':'Offline closure of installed distribution METADATA for scratch project [mlx,diarization] plus jiwer; not a pip resolver/download/install receipt.',
+    'target_environment':default_environment(),'issues':issues,'packages':list(selected.values())},indent=2)+'\n')
+manifest={'created_at':datetime.now(timezone.utc).isoformat(),'source_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+    'source_worktree_snapshot':True,'source_root':str(ROOT),'scratch_source':str(SOURCE),'copied_files':files,
+    'production_pyproject_sha256':hashlib.sha256(original.encode()).hexdigest(),'candidate_pyproject_sha256':hashlib.sha256(revised.encode()).hexdigest(),
+    'model_manifest_sha256':hashlib.sha256((ROOT/'models.lock.json').read_bytes()).hexdigest(),
+    'extra_selection':['mlx','diarization'],'explicit_additional_dependency':'jiwer=='+base['jiwer'].version,
+    'constraints_sha256':hashlib.sha256((OUT/'constraints.txt').read_bytes()).hexdigest(),
+    'metadata_package_count':len(selected),'metadata_issues':issues,
+    'pip_resolution':'pending_reserved_window','full_install':'pending','native_imports_vad':'pending','real_en_es_replay':'pending','full_installed_audit':'pending',
+    'production_files_modified':False,'existing_environments_modified':False,'models_loaded':False}
+(OUT/'preparation.json').write_text(json.dumps(manifest,indent=2)+'\n')
+print(json.dumps({'copied_files':len(files),'packages':len(selected),'issues':issues,'ml_versions':{n:selected[n]['version'] for n in ('torch','torchaudio','mlx','mlx-metal','mlx-lm','mlx-whisper','mlx-optiq','parakeet-mlx','transformers','setuptools')}},indent=2))

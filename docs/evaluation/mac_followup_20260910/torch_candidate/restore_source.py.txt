@@ -1,0 +1,48 @@
+"""Restore the frozen candidate source and recipe into a NEW scratch directory; no build/install/imports."""
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--name', required=True, help='New directory name under .cache/mac-en-es-closeout')
+args = parser.parse_args()
+if not re.fullmatch(r'[A-Za-z0-9_-]{1,80}', args.name):
+    parser.error('Use a simple new scratch directory name')
+root = Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip())
+manifest = json.loads((HERE / 'preparation.json').read_text())
+base = root / '.cache/mac-en-es-closeout' / args.name
+base.mkdir(parents=True, exist_ok=False)
+source = base / 'source'
+source.mkdir()
+for item in manifest['copied_files']:
+    name = item['path']
+    target = source / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(['git', 'show', f"{manifest['source_head']}:{name}"], cwd=root,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    target.write_bytes(result.stdout)
+subprocess.run(['/usr/bin/patch', '--batch', '-p1', '-d', str(source), '-i',
+                str(HERE / 'frozen-source-changes.patch')], check=True)
+for item in manifest['copied_files']:
+    assert hashlib.sha256((source / item['path']).read_bytes()).hexdigest() == item['source_sha256'], item['path']
+project = source / 'pyproject.toml'
+original = project.read_text()
+revised = original.replace('"torch>=2.10,<2.11"', '"torch==2.13.0"').replace(
+    '"torchaudio>=2.10,<2.11"', '"torchaudio==2.11.0"')
+assert hashlib.sha256(revised.encode()).hexdigest() == manifest['candidate_pyproject_sha256']
+project.write_text(revised)
+shutil.copyfile(HERE / 'preparation.json', base / 'preparation.json')
+shutil.copyfile(HERE / 'remediated/constraints.txt', base / 'constraints.txt')
+for name in ['execute.py', 'native_smoke.py', 'verify_install.py', 'replay_candidate.py']:
+    text = (HERE / 'remediated' / (name + '.txt')).read_text()
+    if name == 'execute.py':
+        text = text.replace("CACHE=BASE.with_name('full-application-torch-candidate')/'pip-cache'", "CACHE=BASE/'pip-cache'")
+    (base / name).write_text(text)
+print(json.dumps({'source': str(source), 'copied_files_verified': len(manifest['copied_files']),
+                  'candidate_pyproject_sha256': hashlib.sha256(project.read_bytes()).hexdigest(),
+                  'next_step': 'Reserve a build/resolve/install window; build wheel from this frozen source, verify metadata and wheel hash, then use execute.py stages.'}, indent=2))

@@ -1,0 +1,11 @@
+{
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "processor": "arm",
+  "cpu_count_physical": 12,
+  "cpu_count_logical": 12,
+  "ram_total_gb": 18.0,
+  "python_version": "3.11.11",
+  "gpu_model": "Apple M3 Pro",
+  "gpu_cores": "18",
+  "metal_support": "unknown"
+}

@@ -277,10 +277,15 @@ merge and justified issue closures. PyPI/package/release tags remain pending.
 **Live microphone (2026-09-09 → 10):** the built-in-mic session stalled after model load
 (no audio frames, operator showed RUNNING from the CSV header) while file replay passed. The
 fix — PortAudio in a disposable child with a no-input timeout, and operator readiness from
-the pipeline health channel — is implemented; the real built-in-mic retest is deferred to
-the next attended session (`mac-live-mic-stall`, #131).
+the pipeline health channel — is implemented. Attended EN and ES microphone sessions now
+receive real frames, reach ready and stop cleanly. The room was quiet, so spoken captions
+remain pending. [Session evidence](docs/evaluation/attended_mic_20260910/README.md) distinguishes
+these mic checks from the separate visible-caption file replay.
 
-**Open gates:** live microphone EN/ES retest, natural Spanish references, bilingual review,
+The [current EN↔ES follow-up](docs/evaluation/mac_followup_20260910/README.md) includes
+audited public English/Spanish speech, new latency experiments and CPU training preflight.
+
+**Open gates:** spoken microphone EN/ES captions, church-specific Spanish references, bilingual review,
 visible-browser timing certification, two-speaker diarization gate, physical second
 output, WSL training cycle, Lite x86 CPU / RTX 2070 hardware performance — tracked
 in [`docs/backlog.json`](docs/backlog.json). The laptop runbook rehearsal is complete

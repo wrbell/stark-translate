@@ -1,0 +1,103 @@
+{
+  "captured_utc": "2026-09-10T13:25:22.163874+00:00",
+  "status": {
+    "state": "running",
+    "session_id": "20260910_092405_457769_en",
+    "started_at": "2026-09-10T09:24:05",
+    "config": {
+      "lang": "en",
+      "profile": "standard",
+      "record_audio": true,
+      "stt_backend": "auto",
+      "model_family": null,
+      "gemma4_size": null,
+      "low_vram": false,
+      "backend": "auto",
+      "engine": "auto",
+      "tts": false,
+      "run_ab": false,
+      "vad_threshold": 0.3,
+      "mic_device": 1,
+      "mic_gain": null,
+      "log_level": "INFO",
+      "tts_output_mode": "ws",
+      "tts_device": null,
+      "diarize": false,
+      "tts_device_en": null,
+      "tts_device_es": null
+    },
+    "last_event": "Resume requested; waiting for pipeline acknowledgment",
+    "pid": 7026,
+    "csv_path": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_20260910_092405_457769_en.csv",
+    "log_path": "/Users/willem/Code/vibes/SRTranslate/metrics/session_20260910_092405_457769_en.log",
+    "readiness": {
+      "phase": "ready",
+      "ready": true,
+      "reason": "ready",
+      "updated_at": 1789046721.6637828,
+      "age_s": 0.4995450973510742,
+      "stale": false
+    },
+    "health": {
+      "schema_version": 1,
+      "session_id": "20260910_092405_457769_en",
+      "updated_at": 1789046721.6637828,
+      "phase": "ready",
+      "input_seen": true,
+      "input_age_s": 0.02948483295040205,
+      "caption_age_s": null,
+      "input_level": 0.0015468122437596321,
+      "errors": [],
+      "error_count": 0,
+      "captions": [],
+      "recording": {
+        "audio_enabled": true,
+        "required_failures": 0,
+        "ok": true
+      },
+      "control_sequence": 1789046714252904000,
+      "publish_failures": 0,
+      "persistence": {
+        "submitted": 1,
+        "completed": 1,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "storage": {
+        "free_bytes": 244467994624,
+        "low_space": false
+      },
+      "queues": {
+        "audio": 0,
+        "capture_handoff": 0,
+        "finals": 0,
+        "stream_tokens": 0
+      },
+      "clients": 2,
+      "replay_client_wait": {
+        "requested_seconds": 0.0,
+        "actual_wait_seconds": 0.0,
+        "status": "disabled",
+        "connected_clients": 0,
+        "visibility_confirmed": false
+      },
+      "age_s": 0.4995450973510742,
+      "stale": false,
+      "operational_logging": {
+        "queued": 0,
+        "dropped": 0,
+        "write_failures": 0
+      }
+    },
+    "work": {
+      "kind": "live session",
+      "id": "e830534ba0f54ccc9d19dc4f90ff13f9"
+    },
+    "effective_profile": {
+      "name": "standard"
+    }
+  }
+}

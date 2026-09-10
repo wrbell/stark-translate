@@ -1,0 +1,17 @@
+{
+  "scope": "Fresh second venv, same frozen full project wheel, six non-model security fixes only",
+  "first_candidate": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate",
+  "original_audit_sha256": "1192997c46a876ade8fe26c1135ff10622fc70e24c8cac85839c58ce079e6ffa",
+  "original_inventory_sha256": "990f2008be2339178a35fb50345f205dc9fb4f3f861811be0e3f041b5f72a947",
+  "fixes": {
+    "pillow": "12.3.0",
+    "pydantic-settings": "2.14.2",
+    "pygments": "2.20.0",
+    "python-dotenv": "1.2.2",
+    "requests": "2.33.0",
+    "urllib3": "2.7.0"
+  },
+  "constraints_sha256": "25c6b79eee79814ad741962489b09a90d681f162481d79cacfa45ba3dfc2117a",
+  "wheel_sha256": "48ae49c1214f8a0bcabcc018794b675ece271114da172b7cf81c0696f88c7786",
+  "torch_mlx_stt_pins_changed": false
+}

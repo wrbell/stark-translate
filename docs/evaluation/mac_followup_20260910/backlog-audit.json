@@ -1,0 +1,1840 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-10T13:33:08.922957+00:00",
+  "scope": "all 43 canonical backlog entries; advisory snapshot, no canonical edit or issue mutation",
+  "source_head": "c1a9041a48adc7c55e123eb39db02edb2a6fa6bd",
+  "working_tree_snapshot": true,
+  "backlog_sha256": "0bfe6d52148f513abfb3252724ac34f861d36d9c15b31a388a9de368970f044c",
+  "method": "Read current canonical acceptance, live original GitHub issue bodies/state and PR192 metadata; inspect referenced local evidence and relevant source contracts; hash local evidence as a snapshot. In-progress follow-up inference is not assumed complete.",
+  "classification_definitions": {
+    "met": "Existing bounded acceptance has retained evidence; no new certification implied.",
+    "autonomous": "Concrete source, evidence or serial local execution remains possible without user/device input.",
+    "mixed": "Autonomous preparation/testing plus an explicit human, device or artifact dependency remains.",
+    "human_or_device": "Original acceptance needs a person, attended microphone/display or physical output.",
+    "external_hardware": "Requires actual WSL/A2000, x86/no-GPU or native Windows hardware execution.",
+    "user_decision": "Further scope/publication is expressly parked pending a user decision.",
+    "deferred_user": "Optional or previously rejected work is intentionally not active."
+  },
+  "counts": {
+    "met": 7,
+    "human_or_device": 5,
+    "mixed": 12,
+    "autonomous": 7,
+    "external_hardware": 7,
+    "user_decision": 3,
+    "deferred_user": 2
+  },
+  "pr192_live_receipt": {
+    "headRefOid": "ab66ad2929e61171e4ab9c7c77685ba1ac988577",
+    "mergeCommit": {
+      "oid": "3e935fe39b96e7b0aa62a74711307f2b3e31a18c"
+    },
+    "mergedAt": "2026-09-10T11:57:22Z",
+    "number": 192,
+    "state": "MERGED",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:43:21Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765731/job/102856295318",
+        "name": "commitlint",
+        "startedAt": "2026-09-10T11:43:08Z",
+        "status": "COMPLETED",
+        "workflowName": "Commitlint"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:43:21Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765875/job/102856296793",
+        "name": "label",
+        "startedAt": "2026-09-10T11:43:08Z",
+        "status": "COMPLETED",
+        "workflowName": "Label PRs"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:43:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765788/job/102856295677",
+        "name": "lint",
+        "startedAt": "2026-09-10T11:43:08Z",
+        "status": "COMPLETED",
+        "workflowName": "Lint"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:43:18Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765725/job/102856295657",
+        "name": "detect-changes",
+        "startedAt": "2026-09-10T11:43:08Z",
+        "status": "COMPLETED",
+        "workflowName": "Security"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:45:40Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765721/job/102856296051",
+        "name": "test (3.11)",
+        "startedAt": "2026-09-10T11:43:09Z",
+        "status": "COMPLETED",
+        "workflowName": "Test"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:46:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765721/job/102856295734",
+        "name": "test (3.12)",
+        "startedAt": "2026-09-10T11:43:09Z",
+        "status": "COMPLETED",
+        "workflowName": "Test"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:43:18Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765725/job/102856360713",
+        "name": "audit",
+        "startedAt": "2026-09-10T11:43:19Z",
+        "status": "COMPLETED",
+        "workflowName": "Security"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:44:12Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765725/job/102856358713",
+        "name": "audit-lite",
+        "startedAt": "2026-09-10T11:43:21Z",
+        "status": "COMPLETED",
+        "workflowName": "Security"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:44:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34472765725/job/102856610546",
+        "name": "security",
+        "startedAt": "2026-09-10T11:44:15Z",
+        "status": "COMPLETED",
+        "workflowName": "Security"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:51:18Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://cursor.com/agents/bc-55f41019-1638-4abb-aa83-a8f3fcea0593",
+        "name": "Cursor Approval Agent: Pull Request Router and Approver",
+        "startedAt": "2026-09-10T11:43:04Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:50:48Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://cursor.com/docs/bugbot",
+        "name": "Cursor Bugbot",
+        "startedAt": "2026-09-10T11:43:12Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T11:49:59Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://cursor.com/agents/bc-89b4eb48-06d2-4495-aee2-7776da0940e4",
+        "name": "Cursor Security Agent: Security Reviewer",
+        "startedAt": "2026-09-10T11:43:02Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "url": "https://github.com/wrbell/stark-translate/pull/192"
+  },
+  "no_canonical_changes": true,
+  "no_github_mutations": true,
+  "preparation_validation": {
+    "suite": "tests/test_training_preflight.py + test_build_preference_triples.py + test_build_v1_corpus.py + test_correction_import_safety.py + test_documentation.py",
+    "result": "115 passed in 14.35 seconds after the public-evaluation exclusion check; Ruff, format, shell syntax, diff whitespace and canonical render/link checks passed.",
+    "gpu_training_or_model_calls": false,
+    "actual_default_path_preflights": "Both exit 2 before GPU imports: missing local Whisper config and missing required v2 holdout; receipts under .cache/mac-en-es-closeout/training-preflight/"
+  },
+  "items": [
+    {
+      "id": "pr-192-integration",
+      "title": "Integrated source merged through PR #192",
+      "priority": "P0",
+      "canonical_status": "validated",
+      "canonical_certification": "met",
+      "canonical_acceptance_unchanged": "PR #192 marked ready with integrated operator, Lite, latency and failure-recovery changes, CI green on the final head, and root-recorded evidence; main advances only at the authorized merge, without publishing a release.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "met",
+      "finding": "Live GitHub confirms PR #192 merged at the recorded commit; final reviewed checks passed, with audit explicitly skipped and audit-lite successful. New follow-up work is a distinct change.",
+      "next_action": "Retain the immutable PR192 receipt; handle this follow-up branch under its own review and validation identity.",
+      "required_receipt": "PR192 merge receipt and its exact reviewed-head CI; no release publication inferred.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/overnight_status.md",
+          "exists": true,
+          "sha256": "606ab139a2f260a3cccdcb5322bdd84855b57ae5b603c1d57797cdf8594ff114"
+        },
+        {
+          "path": "docs/evaluation/overnight_screen_20260910/README.md",
+          "exists": true,
+          "sha256": "b1f888fda06ac57ee863a84ed3aa870f94b82b15e6db01b652df435f04d387ac"
+        },
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        },
+        {
+          "path": "docs/evaluation/overnight_closeout_20260910/README.md",
+          "exists": true,
+          "sha256": "172aee471b1639da7891040c4ddc0b6b3de942a543c97ef43384dea51ab84213"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "mac-live-mic-stall",
+      "title": "Built-in microphone capture stalled; operator showed RUNNING without audio",
+      "priority": "P0",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "A live built-in-microphone session produces partial and final captions on the audience display; operator status reflects actual audio frames rather than the CSV header; a stalled input stream is detected and surfaced within seconds.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "human_or_device",
+      "finding": "Isolated capture has 5 s startup and 3 s idle deadlines; health phases derive readiness from frames. No attended built-in microphone receipt against the fix exists.",
+      "next_action": "At the user-deferred attended session, run built-in capture through operator and audience pages and provoke a stalled/disconnected input.",
+      "required_receipt": "Session identity with audio_source=mic, frame readiness, partial/final payloads and audience observation, input_error timing and clean cleanup.",
+      "local_evidence_snapshot": [
+        {
+          "path": "tools/isolated_audio.py",
+          "exists": true,
+          "sha256": "70300199fea5be3ef803d0a8dbafb1724caebcb0d506b2f0d8acf7edfcdebccd"
+        },
+        {
+          "path": "tools/capture_worker.py",
+          "exists": true,
+          "sha256": "6ddec8840532e680bc8ab9415993847cad46f80235acfa07c36cbb47e7405fe2"
+        },
+        {
+          "path": "tools/pipeline_health.py",
+          "exists": true,
+          "sha256": "57e297c408bb59d09632f1619191a9d96189fc51cdfbe8392ef34e8517d587cc"
+        },
+        {
+          "path": "operator_app/pipeline_manager.py",
+          "exists": true,
+          "sha256": "74920f76011d361107b1eff63442693d333875d0c0df1be0397b6309b528e290"
+        },
+        {
+          "path": "docs/current_architecture.md",
+          "exists": true,
+          "sha256": "c6fee0d7142d0a1a4d3051c37deb5d2e7f49e039641249c3b1a5736835ff32fe"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "issue-131-smoke",
+      "title": "Post-dormancy boot and operator smoke (#131)",
+      "priority": "P0",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Live built-in-microphone EN→ES and ES→EN utterances render a partial and a final on the audience display with clean session logs; controlled file replay alone does not satisfy the issue.",
+      "canonical_issue_acceptance": "Operator UI loads, one partial + one final appear on audience display, no uncaught errors in the session log — including one live mic utterance EN→ES and ES→EN and confirmation that the factory prefers the configured adapters.",
+      "dependencies": [
+        "mac-live-mic-stall"
+      ],
+      "audit_classification": "human_or_device",
+      "finding": "Live issue Do explicitly includes one microphone utterance in each direction and W16 preference. Replay and installed setup evidence cover only parts; Mac auto EN deliberately uses Parakeet.",
+      "next_action": "Run attended live EN and ES microphone utterances; inspect the configured faster-whisper adapter preference separately from Mac auto EN policy.",
+      "required_receipt": "Actual microphone session/log and audience partial+final evidence for both directions, green setup/preflight and applicable factory preference receipt.",
+      "local_evidence_snapshot": [],
+      "live_github_issues": [
+        {
+          "number": 131,
+          "url": "https://github.com/wrbell/stark-translate/issues/131",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "P0: Post-internship recon — boot v2026.7 and smoke the operator",
+          "original_body": "Last ship was 2026-05-03 (v2026.7). Nothing has run in ~3 months. Before any new work, confirm the stack still boots.\n\n## Do\n- Fresh `stark-translate setup` on Mac and/or CUDA box\n- `stark-translate operator` → pre-flight gates all green\n- `--dry-run-text` plus one live mic utterance EN→ES and ES→EN\n- Confirm W16 CT2 adapter still preferred by factory (`adapters/whisper_turbo_ct2/active/`)\n- Note any model-download, llama-server, or display breakage\n\n## Done when\nOperator UI loads, one partial + one final appear on audience display, no uncaught errors in the session log.",
+          "original_body_sha256": "c3f45d348b7c3c1f1ed4dc0c130bc50b7c9f49ecb61888fdb141a86ec7b01e41"
+        }
+      ]
+    },
+    {
+      "id": "issue-134-sunday-dry-run",
+      "title": "Dry-run with the operator runbook (#134)",
+      "priority": "P0",
+      "canonical_status": "validated",
+      "canonical_certification": "met",
+      "canonical_acceptance_unchanged": "Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.",
+      "canonical_issue_acceptance": "Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.",
+      "dependencies": [],
+      "audit_classification": "met",
+      "finding": "Live issue is CLOSED; its laptop stand-in allowance, complete hymn/spoken workload and written report/follow-ups match the retained Standard rehearsal. No additional microphone or physical-display requirement is present in the original issue.",
+      "next_action": "Keep #134 closed; continue #193/#194 under their own original acceptance.",
+      "required_receipt": "Existing installed-752 rehearsal and issue134-closed.json; later observations must retain separate workload identities.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/operator_runbook.md",
+          "exists": true,
+          "sha256": "397b174a0b9135917a057555e4873291c55eab21fe07d7efc03e963d5e3ad303"
+        },
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        },
+        {
+          "path": "docs/evaluation/overnight_closeout_20260910/README.md",
+          "exists": true,
+          "sha256": "172aee471b1639da7891040c4ddc0b6b3de942a543c97ef43384dea51ab84213"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 134,
+          "url": "https://github.com/wrbell/stark-translate/issues/134",
+          "state": "CLOSED",
+          "closed_at": "2026-09-10T11:57:48Z",
+          "title": "P0: Sunday dry-run with the operator runbook",
+          "original_body": "Operator control plane shipped in v2026.6 (`docs/operator_runbook.md`, systemd/launchd, `bootstrap.sh`). It has never been proven on a real Sunday.\n\n## Do\n- Walk the runbook on church hardware or a laptop stand-in\n- Time setup → first caption, and note operator-only vs helper-needed steps\n- Capture one full hymn + one spoken segment\n- File follow-ups for anything a non-technical operator would get stuck on\n\n## Done when\nA written dry-run note exists (what worked, what broke, time-to-first-caption) and any blocking UX holes have their own issues.",
+          "original_body_sha256": "4e91836b679fce140dbcab1efa1558f4b57ea054adbf359cdf4bf1118db0cf46"
+        },
+        {
+          "number": 193,
+          "url": "https://github.com/wrbell/stark-translate/issues/193",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "Reduce fragment captions during congregational hymns without suppressing spoken transitions",
+          "original_body": "The installed Standard rehearsal emitted fragment captions such as “It dies a,” “Yeah,” “Uh,” and “Changing uh” after hymn 36 was announced. Process health stayed normal. No music-hold event appeared in the inspected prefix. The [rehearsal evidence](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md) retains the exact outputs, source windows and runtime identity: session `20260910_043120_839144_en`, source `752ab9a`, EN→ES with Parakeet and E4B.\n\nThe current hold requires about five consecutive seconds of loud, VAD-negative audio. It is an energy/VAD heuristic, not a music classifier. The sparse logs cannot establish why the required streak did not occur. Parakeet's confidence and no-speech fields are proxies, so these fragments can pass current filters.\n\n- Label a bounded natural hymn→speech transition and retain uncertain labels; generated captions are not references.\n- Measure unwanted captions, suppressed legitimate speech and recovery at the spoken transition. Include quiet prayer and short valid EN/ES replies.\n- Compare any detector or scheduling change with unchanged controls; report partial/final latency and negative results. Do not globally blacklist short words to manufacture a pass.\n\nUntil automatic handling is validated, the operator can Pause after the hymn announcement and Resume when spoken prayer or the message begins. This is a follow-up from #134; #137 owns any later human-approved corrections.\n",
+          "original_body_sha256": "efafcd8e82b55af7325177986e13c8f4881dad7a4425af50dd34e46d61ba519f"
+        },
+        {
+          "number": 194,
+          "url": "https://github.com/wrbell/stark-translate/issues/194",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "Preserve hymn-title boundaries and theological meaning in final translation",
+          "original_body": "A hymn title followed by a sentence lost its boundary in final translation. The English model input contains “Eternity Time will soon end,” but the Spanish final says “La eternidad pronto terminará.” The sentence subject changes from time to eternity. The full original input, preview and final are retained in the [rehearsal evidence](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), session `20260910_043120_839144_en`, chunk 3, source 414.592–422.592 s, installed `752ab9a` (Parakeet/E4B, EN→ES).\n\nThe record has STT confidence 0.98 and lightweight QE 1.0; neither checks this meaning error. Audio punctuation and a bilingual reference still need independent review.\n\n- Preserve the raw STT string as a regression input. Establish the title/sentence boundary and an approved reference without rewriting original diagnostics.\n- Compare raw and explicitly delimited input with identical models/settings, separating STT punctuation from translation behavior.\n- Test subject, negation, names and theological meaning across existing canaries and natural EN/ES examples. Include sentences where eternity really is the subject; avoid a hard-coded word substitution.\n- Report semantic changes and preview/final latency before promoting any prompt or context change.\n\nThis is a quality follow-up discovered during #134's rehearsal. Human correction and training approval remain separate under #137.\n",
+          "original_body_sha256": "afa1ef2862fd9f8d3b927016cab47d4fbedf1fd5b01f78c17061341f38df0370"
+        }
+      ]
+    },
+    {
+      "id": "issue-132-tts-routing",
+      "title": "Multi-channel TTS routing code and tests (9.4.1 / #132)",
+      "priority": "P1",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Hardware-independent part: per-language output map (`--tts-device-en/es`, `STARK_TTS_OUTPUT_DEVICES`), operator persistence and hotplug retry covered by tests. Physical part: an operator routes EN and ES to two real outputs and hears each — tracked as `physical-second-output`.",
+      "canonical_issue_acceptance": "Operator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.",
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "Per-language routing, device selection and tests exist. Original #132 allows physical or virtual routing; canonical backlog links closure to an additional two-real-output item. No independent routing receipt exists yet.",
+      "next_action": "Root should distinguish original virtual-or-physical independent routing acceptance from the separate physical-second-output gate; demonstrate selected independent routes when available.",
+      "required_receipt": "Observed EN and ES routing to distinct selected outputs plus existing tests. Separate physical audibility/replug receipt remains necessary for physical-second-output.",
+      "local_evidence_snapshot": [
+        {
+          "path": "tests/test_tts_multichannel.py",
+          "exists": true,
+          "sha256": "92455d5cb5151c60496880208bc7b74594fb9d0fef1f5601f459a07c2376f5f7"
+        },
+        {
+          "path": "tests/test_phase9_4_1_tts_device.py",
+          "exists": true,
+          "sha256": "acdbb54cf6ab4779e39991ea6a8d40c4a39dffee85e6cac5c6a63b112e8207f5"
+        },
+        {
+          "path": "settings.py",
+          "exists": true,
+          "sha256": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 132,
+          "url": "https://github.com/wrbell/stark-translate/issues/132",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "P1: 9.4.1 Multi-channel TTS routing",
+          "original_body": "Deferred from v2026.6 as patch 9.4.1. UI output dropdown is preview-only.\n\n## Do\n- Add output-device support to `PiperTTSEngine`\n- Wire `--tts-output local` (and multi-channel routing via AudioFetch / virtual cables)\n- Enable the operator UI dropdown for real devices\n\n## Done when\nOperator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.",
+          "original_body_sha256": "21d2b877d5bc99a917064a61610c3f52b3874df87a239aaecc09755d87327d5d"
+        }
+      ]
+    },
+    {
+      "id": "physical-second-output",
+      "title": "Second physical audio output: selection, unplug/replug, audible playback",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "EN and ES TTS routed to two distinct real outputs, device choice persists across restart, unplug/replug re-resolves the named route, and playback is audibly verified.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "human_or_device",
+      "finding": "The canonical item explicitly requires two real outputs and audible verification; mocked enumeration, generated WAVs and browser activity cannot meet it.",
+      "next_action": "At the attended session, route each language to a distinct real output, restart, unplug/replug and verify audible playback.",
+      "required_receipt": "Device list, persisted route settings, session identity and operator-observed channel/reconnect/audibility results.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "issue-133-diarize-gate",
+      "title": "Live diarization on a rolling buffer (9.6.1 / #133)",
+      "priority": "P1",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "With `--diarize`, a natural two-speaker clip yields distinct speaker labels on finals, final p95 stays within +50 ms of `--diarize` off (tools/replay_bench.py), and the offline pyannote path still runs.",
+      "canonical_issue_acceptance": "Two-speaker dry-run shows distinct speaker labels on finals without blowing p95 caption latency. Offline path still works.",
+      "dependencies": [
+        "natural-two-speaker"
+      ],
+      "audit_classification": "mixed",
+      "finding": "Rolling diarization and displayed speaker fields exist. Natural labeled two-speaker evidence and the latency/offline-path comparison remain absent; +50 ms is a local guard beyond the original issue wording.",
+      "next_action": "Obtain a labeled natural two-speaker clip, then run the opt-in on/off comparison and offline-path check with one model process at a time.",
+      "required_receipt": "Distinct final speaker labels, identical workload hashes, p95 comparison against off and offline-path receipt; record any additional +50 ms local rule explicitly.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/live_diarization.md",
+          "exists": true,
+          "sha256": "05bda2530f31da12acba6f1fa585603bf29eabdcd185b393730577a74182d155"
+        },
+        {
+          "path": "features/live_diarize.py",
+          "exists": true,
+          "sha256": "dc456cfef411a95d58dd41e85508428a8c9851715782b168830476d145d6bb10"
+        },
+        {
+          "path": "features/speaker_labels.py",
+          "exists": true,
+          "sha256": "6ce8c4cac5c09ea845a3a7ccfaf69c9c829490e7e060319a6be417b96e703524"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 133,
+          "url": "https://github.com/wrbell/stark-translate/issues/133",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "P1: 9.6.1 Live diarization on a rolling buffer",
+          "original_body": "Deferred from v2026.6 as patch 9.6.1. `features/diarize.py` is offline-only; UI surface was deferred.\n\n## Do\n- Run diarization on a rolling live audio buffer (not post-session)\n- Attribute captions to speaker turns in the operator + audience displays\n- Keep it off by default (`--diarize`) so latency-sensitive Sundays stay clean\n\n## Done when\nTwo-speaker dry-run shows distinct speaker labels on finals without blowing p95 caption latency. Offline path still works.",
+          "original_body_sha256": "fc8f2f93c16a8923227bcada502b84a47e7f26ec77bdbb9af96e04a62a46b517"
+        }
+      ]
+    },
+    {
+      "id": "natural-two-speaker",
+      "title": "Natural two-speaker audio with human transition labels",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "A natural church clip with two speakers and human-labeled speaker transitions available for the diarization gate and the service rehearsal.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "human_or_device",
+      "finding": "No church two-speaker recording with approved transition labels is established. The public FLEURS set has no verified speaker identities and cannot substitute.",
+      "next_action": "Obtain a natural church two-speaker segment and human-marked transitions, retaining uncertain regions.",
+      "required_receipt": "Audio hash, provenance, reviewer approval and explicit turn boundaries.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/public_data/README.md",
+          "exists": true,
+          "sha256": "c4fb9729cd04542aed96ec2e009fff356225f95a87832ab105264b3a57314afe"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "natural-spanish-refs",
+      "title": "Human-reviewed natural Spanish references",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "At least 50 approved natural utterances per language; no WER or natural-audio acceptance claim before approval.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "New public natural read-speech references support autonomous model comparisons, but are evaluation-only and not locally approved church references. The original 50-approved-per-language gate remains pending.",
+      "next_action": "Use the audited public set for separate engineering evidence now; obtain and annotate church/natural utterances with local human approval for this gate.",
+      "required_receipt": "At least 50 approved utterances per language with audio/reference provenance and approval; keep public read-speech results separately labeled.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        },
+        {
+          "path": "docs/evaluation/README.md",
+          "exists": true,
+          "sha256": "2e5b20608abc3a0efdd48607a90592d0827ebbc47c1b6bcdcaa999d6062e1571"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/public_data/audit.json",
+          "exists": true,
+          "sha256": "8fce423709c8e471fdd190dde76fe7a6b03bdb51380e93601892d73285f26181"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "bilingual-blinded-review",
+      "title": "Blinded bilingual review of meaning errors and terminology",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "A bilingual reviewer completes blind_review.jsonl for the E4B/E2B comparison; the E2B speed tradeoff is accepted or rejected on meaning and terminology, not canary counts alone.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "human_or_device",
+      "finding": "Blind forms exist; no bilingual reviewer completion is established. Canary/chrF improvements cannot approve meaning or terminology.",
+      "next_action": "Supply the existing blinded form to a bilingual reviewer while keeping the key separate; retain every decision.",
+      "required_receipt": "Completed blind_review.jsonl with provenance and explicit E4B/E2B meaning/terminology decision.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/mac_v2026_14_quality/comparison.md",
+          "exists": true,
+          "sha256": "c4209da48eb51bd994bdd91538b854f8b63bc00df20a9cf03cad722128cebe76"
+        },
+        {
+          "path": "docs/evaluation/README.md",
+          "exists": true,
+          "sha256": "2e5b20608abc3a0efdd48607a90592d0827ebbc47c1b6bcdcaa999d6062e1571"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "visible-browser-timing-run",
+      "title": "Frozen timing run with a visible browser (non-zero ACK coverage)",
+      "priority": "P1",
+      "canonical_status": "in_progress",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Replay on the unlocked Mac with the audience display connected records schema 2 speech_end_to_final_ms and non-zero visible final ACK coverage for the acceptance configuration.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "Existing screen/endurance browser-DOM ACKs do not certify the explicit unlocked-Mac criterion. Current serial replay engineering can collect new payload/ACK data, but no new physical receipt is assumed in this snapshot.",
+      "next_action": "Finish separate schema-2 replay evidence; when the user-deferred unlocked/attended condition is available, record the actual audience display visibility.",
+      "required_receipt": "Matched session/workload hashes, speech_end_to_final_ms and nonzero visible final ACK coverage plus unlocked-Mac observation.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/mac_v2026_14_screening/README.md",
+          "exists": true,
+          "sha256": "46c61db517fda4a53a804755251b3ee3ca9fea80eb9af096533390d47c2570b2"
+        },
+        {
+          "path": "docs/evaluation/mac_v2026_14_routing/README.md",
+          "exists": true,
+          "sha256": "ec61fe499c55febb0b1d263f99f9e1763b70053ce8065449a5e30c3755574649"
+        },
+        {
+          "path": "docs/evaluation/overnight_screen_20260910/README.md",
+          "exists": true,
+          "sha256": "b1f888fda06ac57ee863a84ed3aa870f94b82b15e6db01b652df435f04d387ac"
+        },
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "caption-delivery-goal",
+      "title": "Sub-second median speech-end-to-caption delivery",
+      "priority": "P0",
+      "canonical_status": "in_progress",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Median schema 2 speech_end_to_final_ms under 1000 ms on the frozen real-time baseline with visible ACKs, without regressing final quality; natural-speech quality certification (references, bilingual review) is a separate gate and must not be pooled with historical cohorts.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "visible-browser-timing-run"
+      ],
+      "audit_classification": "autonomous",
+      "finding": "The completed 96-run screen rejected all arms; source and existing results do not support sub-second promotion. New public data/protocols allow distinct controlled engineering work without relabeling old negatives.",
+      "next_action": "Complete the frozen new EN/ES development protocol, preserve negative arms, freeze a selector before untouched confirmation, and compare schema-2 latency with quality guards.",
+      "required_receipt": "Per-language/model/workload run identities, median final delivery under 1000 ms if achieved, ACK coverage, quality comparison and separate human-quality gate.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        },
+        {
+          "path": "docs/evaluation/README.md",
+          "exists": true,
+          "sha256": "2e5b20608abc3a0efdd48607a90592d0827ebbc47c1b6bcdcaa999d6062e1571"
+        },
+        {
+          "path": "docs/archive/v2026.13/MAC_LATENCY.md",
+          "exists": true,
+          "sha256": "63f410d941dc2f03ed85f3923e401a9b99aa46eba817b9165e1e14602e946d8d"
+        },
+        {
+          "path": "docs/evaluation/overnight_screen_20260910/README.md",
+          "exists": true,
+          "sha256": "b1f888fda06ac57ee863a84ed3aa870f94b82b15e6db01b652df435f04d387ac"
+        },
+        {
+          "path": "docs/latency_next_experiments.md",
+          "exists": true,
+          "sha256": "94e2186a996ae7c0fc54e432e61b4b367c9021dd75d795026508a64881e8bfbd"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/protocol/standard-screen.json",
+          "exists": true,
+          "sha256": "7f9103c4456b822387a84deae9b95c888a712266d5a4cd1305b9c81c93fb5ae7"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/public_data/audit.json",
+          "exists": true,
+          "sha256": "8fce423709c8e471fdd190dde76fe7a6b03bdb51380e93601892d73285f26181"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "overnight-latency-scheduling",
+      "title": "Opt-in bounded scheduling and caption delivery instrumentation",
+      "priority": "P1",
+      "canonical_status": "validated",
+      "canonical_certification": "met",
+      "canonical_acceptance_unchanged": "Merged into the PR branch behind opt-in flags with tests; a frozen-screen replay shows a matched delivery improvement on both models or the experiment is recorded as rejected.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "met",
+      "finding": "This acceptance explicitly permits a recorded rejection. Opt-in code and the complete negative screen satisfy that alternative without satisfying caption-delivery-goal.",
+      "next_action": "Preserve the rejected results and unchanged defaults; permit only a distinct explicitly frozen hypothesis.",
+      "required_receipt": "Existing negative screen and source/test receipt, not a new performance certification.",
+      "local_evidence_snapshot": [
+        {
+          "path": "tools/latency_experiments.py",
+          "exists": true,
+          "sha256": "7138d558a9cf49fe8a251b3577f12c9463a10f1087bdeb50c8c21fb1748aef78"
+        },
+        {
+          "path": "tools/latency_scheduler.py",
+          "exists": true,
+          "sha256": "5b33d03aad2f009301f36e31b9ae822d8818560981ac26aaed884b7a65055857"
+        },
+        {
+          "path": "tools/caption_delivery.py",
+          "exists": true,
+          "sha256": "b4b3d9b2a0609663e0ca5cdb9582f2674f809d4a9174926900013d0596adb399"
+        },
+        {
+          "path": "tools/overnight_bench.py",
+          "exists": true,
+          "sha256": "49549ce0daae0d9ec7d7c0b37870b30682e5dd536dde90f3359bf7ec7e93a700"
+        },
+        {
+          "path": "docs/current_architecture.md",
+          "exists": true,
+          "sha256": "c6fee0d7142d0a1a4d3051c37deb5d2e7f49e039641249c3b1a5736835ff32fe"
+        },
+        {
+          "path": "docs/evaluation/overnight_screen_20260910/README.md",
+          "exists": true,
+          "sha256": "b1f888fda06ac57ee863a84ed3aa870f94b82b15e6db01b652df435f04d387ac"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "lite-cpu-inference",
+      "title": "Lite CPU inference profiles (no GPU) — implementation",
+      "priority": "P1",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "A documented CPU-only profile installs from the `lite-cpu` extra, passes setup/preflight, and runs EN/ES replay end to end on a machine without a GPU; smoke evidence recorded. Performance on an x86 CPU host and natural-speech quality are certified separately.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "Torch-free install and CPU-only Mac functional runs exist; sparse previews and long tails are recorded. A Mac with GPU execution disabled is not proof of representative x86/no-GPU hardware behavior.",
+      "next_action": "Finish separate CPU development/confirmation evidence and inspect sparse previews; run setup/doctor and EN/ES on representative no-GPU x86 hardware when available.",
+      "required_receipt": "CPU-only functional receipts, independent per-language quality/latency results, then actual target-hardware/RAM-floor evidence before production recommendation.",
+      "local_evidence_snapshot": [
+        {
+          "path": "stark_translate/profiles.py",
+          "exists": true,
+          "sha256": "049d59d41519f73712e24382e38c6b3e9cfad1a46b8510f17eb4adf1cd7d4cd2"
+        },
+        {
+          "path": "operator_app/lite_preflight.py",
+          "exists": true,
+          "sha256": "fe01bbf207fa7d58bcace7eb3a9aea49f8d3c508d8d173ac774e8e14383ff731"
+        },
+        {
+          "path": "tools/llama_runtime.py",
+          "exists": true,
+          "sha256": "b3ea001637e085ec3be71cdd67ffa1b92627ba1591865c0e24594d4237a2a03e"
+        },
+        {
+          "path": "docs/lite_profiles.md",
+          "exists": true,
+          "sha256": "b2ae0c5bd2978acd594717723374fbade3fc851bcd5aa57f9af54c758faecc4a"
+        },
+        {
+          "path": "docs/evaluation/lite_cpu_smoke_20260910.json",
+          "exists": true,
+          "sha256": "a03f83a4cb0890f160d4a201b2818fa1444e58b1ca60a80c42d461e23d9db4e1"
+        },
+        {
+          "path": "docs/evaluation/lite_cpu_quality_preparation_20260910.json",
+          "exists": true,
+          "sha256": "cb058ede339253ec1e21e1bee40a0d660fe64e90b070fd5b5a204c2f5098b374"
+        },
+        {
+          "path": "docs/evaluation/lite_cpu_quality_smoke_20260910.json",
+          "exists": true,
+          "sha256": "9f36497127154a3af7af2597dc61dbd61f7a7ca2fd9801714112820aa8b901e9"
+        },
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/protocol/lite-screen.json",
+          "exists": true,
+          "sha256": "7bb7839c89ced67aebb5d8a1de0017e507737959ed74ffda8b37d76f214f8338"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "rtx2070-native-validation",
+      "title": "Native Windows / RTX 2070 inference — certification on hardware",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Setup, preflight and an EN/ES replay complete on a 2070-class native Windows machine with the lite-cuda-8gb profile (Whisper turbo CT2 int8_float16 + Marian + Gemma 4 E2B via CUDA llama-server), tier selection recorded; MSI or source install path documented.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "lite-cpu-inference"
+      ],
+      "audit_classification": "external_hardware",
+      "finding": "The profile and pinned runtime acquisition exist. No native Windows/RTX2070 execution receipt exists; Mac source tests do not certify it.",
+      "next_action": "On a 2070-class native Windows host, run setup/doctor/operator with lite-cuda-8gb and EN/ES replay.",
+      "required_receipt": "Hardware/driver/runtime identities, selected tier, setup/model checks and EN/ES captions/cleanup, plus source/MSI install route.",
+      "local_evidence_snapshot": [
+        {
+          "path": "stark_translate/profiles.py",
+          "exists": true,
+          "sha256": "049d59d41519f73712e24382e38c6b3e9cfad1a46b8510f17eb4adf1cd7d4cd2"
+        },
+        {
+          "path": "docs/lite_profiles.md",
+          "exists": true,
+          "sha256": "b2ae0c5bd2978acd594717723374fbade3fc851bcd5aa57f9af54c758faecc4a"
+        },
+        {
+          "path": "docs/archive/research/rtx2070_feasibility.md",
+          "exists": true,
+          "sha256": "820d85d74b08570b72303312fefffc9ddc9952f7edf93814e37c171acf651576"
+        },
+        {
+          "path": "packaging/windows/README.md",
+          "exists": true,
+          "sha256": "da32cc66a1ce2959637929f2b773b2112f1bd78c46460488676cbe9be1806666"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "overnight-operator-ui",
+      "title": "Operator UI caption and QR widgets",
+      "priority": "P2",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Widgets integrated, HTML5 Tidy clean, and the operator runbook updated with root-recorded UI evidence.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "autonomous",
+      "finding": "Existing root-recorded SPA, QR decoder and HTML5 receipts appear to address the literal widget acceptance. Canonical status still says implemented/pending, so acceptance reconciliation is source/documentation work.",
+      "next_action": "Root should reconcile the current runbook, widget sources, Tidy/QR receipts and UI evidence against this bounded acceptance; retain unrelated device/quality gates.",
+      "required_receipt": "Explicit root acceptance note tied to existing widget/UI/static receipts; no new physical or human claim.",
+      "local_evidence_snapshot": [
+        {
+          "path": "displays/operator/widgets/captions.js",
+          "exists": true,
+          "sha256": "5e9d0534cccf20f9d95d8d901a60d4d83bd4fd6a6c41409dacc579b5eac8aada"
+        },
+        {
+          "path": "displays/operator/widgets/qr.js",
+          "exists": true,
+          "sha256": "70e9337f3eb05eabc56e12e8959cea4ea9eea9fa8626bee6dad098557e5b4114"
+        },
+        {
+          "path": "displays/operator/widgets/sparkline.js",
+          "exists": true,
+          "sha256": "5ce3c33ea6f5185410e049e917c415ef4cf66771bc74137e9a1ae310408b701f"
+        },
+        {
+          "path": "docs/operator_runbook.md",
+          "exists": true,
+          "sha256": "397b174a0b9135917a057555e4873291c55eab21fe07d7efc03e963d5e3ad303"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "overnight-reliability",
+      "title": "Process supervision, work leases and isolated audio capture",
+      "priority": "P1",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "autonomous",
+      "finding": "Health/readiness, process ownership, leases and capture failure contracts are implemented/tested. Both repaired Standard and Lite endurance are already complete; next_action still says finish Lite.",
+      "next_action": "Refresh the stale Lite next action and root-review source/test acceptance; preserve the distinct real-microphone item as pending.",
+      "required_receipt": "Existing health/capture/process tests and durable-write/cleanup receipts from each completed independent cohort.",
+      "local_evidence_snapshot": [
+        {
+          "path": "operator_app/processes.py",
+          "exists": true,
+          "sha256": "f63e21aec479f7fc20fa08f8cea983798170cc1d43646a9e46de4dec465a66f7"
+        },
+        {
+          "path": "operator_app/work_lease.py",
+          "exists": true,
+          "sha256": "3453bff371778b2096b62d563498755cffa60a151b3c0b7afa2936b652e0d1ba"
+        },
+        {
+          "path": "operator_app/support.py",
+          "exists": true,
+          "sha256": "d402f03b8a78822d6b9f966da34328cf84ce4df2cdd005faa3648bf6519afd7b"
+        },
+        {
+          "path": "tools/capture_worker.py",
+          "exists": true,
+          "sha256": "6ddec8840532e680bc8ab9415993847cad46f80235acfa07c36cbb47e7405fe2"
+        },
+        {
+          "path": "tools/isolated_audio.py",
+          "exists": true,
+          "sha256": "70300199fea5be3ef803d0a8dbafb1724caebcb0d506b2f0d8acf7edfcdebccd"
+        },
+        {
+          "path": "tools/pipeline_health.py",
+          "exists": true,
+          "sha256": "57e297c408bb59d09632f1619191a9d96189fc51cdfbe8392ef34e8517d587cc"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "issue-135-mac-ab",
+      "title": "Deploy W16 + v2-cpo to Mac and live A/B vs stock (#135)",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Copy W16 CT2 and v2-cpo artifacts to the Mac; perform the original live stock/adapted STT and translation A/B, at least the issue's five-canary health check, terminology audit and a written ship/no-ship note. The current eight/eighteen-item sets are additional coverage, not a rewritten original criterion.",
+      "canonical_issue_acceptance": "A short A/B note with canary scores and a ship decision. If no-ship, stock E4B stays default and this closes.",
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "Original live stock/adapted STT and translation A/B, five-canary minimum and explicit ship/no-ship note are still absent. Public E4B/E2B comparisons are a different experiment.",
+      "next_action": "Locate/transfer W16 CT2 and v2-cpo artifacts, verify them, then perform the specified Mac live A/B and terminology/health checks.",
+      "required_receipt": "Artifact identities, both specified stock/adapted comparisons, original canary minimum and written ship/no-ship decision; no-ship may close the original issue.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/gemma4_tuning/v3_directions.md",
+          "exists": true,
+          "sha256": "d57fb09da4243af94ce8ced858199b3c7bc12b3f9986d6d1371c492b1da7840b"
+        },
+        {
+          "path": "docs/wsl_pipeline_refresh.md",
+          "exists": true,
+          "sha256": "2e11fe7b214f7a38438d3f92fe27fd05d8e6cd8dde4db5f2492c79dc0d5e927b"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 135,
+          "url": "https://github.com/wrbell/stark-translate/issues/135",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "P1: Deploy W16 + v2-cpo to Mac and live A/B vs stock",
+          "original_body": "W16 (7.25% WER) is production CUDA STT. v2-cpo is statistical parity with stock E4B on COMET-22 (−0.0008) but was never A/B'd live on Mac.\n\nRoadmap Phase 5.\n\n## Do\n- Copy W16 CT2 + v2-cpo GGUF/adapters onto the M3 Pro\n- Live A/B: stock E4B vs v2-cpo, off-the-shelf turbo vs W16\n- 5-canary health check + theological term audit (`tools/health_check.py`)\n- Decide ship/no-ship for v2-cpo (latency win vs Jacobo miss)\n\n## Done when\nA short A/B note with canary scores and a ship decision. If no-ship, stock E4B stays default and this closes.",
+          "original_body_sha256": "a9a6cd8a09dec41bb7a0a59d339d14618aeeee7a5169d1fb119dd4be47e6d8ae"
+        }
+      ]
+    },
+    {
+      "id": "issue-136-jacobo-cpo",
+      "title": "Jacobo canary — targeted preference triples (#136)",
+      "priority": "P2",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "50–100 hand-crafted preference triples, one CPO continue from v2 (`training/train_gemma4_cpo.py --init-adapter`), re-scored 8-canary set and 500-verse holdout, Jacobo passing or a documented reason.",
+      "canonical_issue_acceptance": "Jacobo canary passes (or we document why it cannot) and COMET-22 does not regress vs v2-cpo.",
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "Sixty original unapproved candidates are now prepared (20 cores × 3 frames); eight local exclusion sources show zero exact overlaps. Missing v2 holdout, bilingual approval, continuation and re-scoring remain.",
+      "next_action": "On WSL, audit against required v2 holdouts, obtain bilingual review, export a separate approved/scored pool, continue from v2-cpo and re-score eight canaries/500 verses.",
+      "required_receipt": "Approved candidate provenance, CPO run/config/artifact identity, Jacobo result or documented inability and COMET-22 non-regression versus v2-cpo.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/gemma4_tuning/v3_directions.md",
+          "exists": true,
+          "sha256": "d57fb09da4243af94ce8ced858199b3c7bc12b3f9986d6d1371c492b1da7840b"
+        },
+        {
+          "path": "tools/build_preference_triples.py",
+          "exists": true,
+          "sha256": "f826bbbb660f5e8f5a913f0db6e46bc57f2e79dccc20ac9291118689350b25c8"
+        },
+        {
+          "path": "training/candidates/README.md",
+          "exists": true,
+          "sha256": "383f9838177e137964e409b3f9581b2eb0e60aaf99a665ee61f493fe2b324066"
+        },
+        {
+          "path": "training/candidates/jacobo_candidates_20260910.manifest.json",
+          "exists": true,
+          "sha256": "d2792ed1ce47ae5bb3431272b41c331525a1531c049f4e3cd6b75166533bd4f0"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 136,
+          "url": "https://github.com/wrbell/stark-translate/issues/136",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "P2: Jacobo canary — targeted preference triples",
+          "original_body": "v2-cpo closed 88% of the COMET gap to prod but still misses the Jacobo canary (\"James and John, sons of Zebedee\" → Santiago not Jacobo). Both CPO candidates said Santiago, so CometKiwi could not rank.\n\nFrom `docs` v3_directions Tier 1.\n\n## Do\n- Hand-craft 50–100 preference triples for failing canaries / glossary disambiguation\n- One short CPO continue from v2 (`training/train_gemma4_cpo.py --init-adapter`)\n- Re-score the 8-canary set + 500-verse holdout\n\n## Done when\nJacobo canary passes (or we document why it cannot) and COMET-22 does not regress vs v2-cpo.",
+          "original_body_sha256": "5e5f3b79d5e25401d1ce26fad64fc1b4565ff61fec2e6f0c974b34f744d92b37"
+        }
+      ]
+    },
+    {
+      "id": "issue-137-active-learning",
+      "title": "Active learning — low-confidence to operator correction (#137)",
+      "priority": "P2",
+      "canonical_status": "implemented",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "An operator approves a correction from a recorded Sunday session, the pair reaches a dated corpus with provenance, and the documented correction → merge → smoke-retrain workflow is exercised. The first retrain may be a dry run; a merger dry run alone is not the retrain step.",
+      "canonical_issue_acceptance": "An operator can correct a caption and that pair lands in a dated corrections corpus. Retrain script documented even if the first retrain is a dry run.",
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "Safe review/export/merge exists. Genuine trainer-config/data CPU dry-runs are now available, but no real human-approved Sunday correction reaches a dated corpus. Candidate/fixture success cannot close this issue.",
+      "next_action": "After human approval, export one recorded-Sunday correction, merge into a scratch dated training corpus, then execute the appropriate actual recipe CPU preflight/dry-run.",
+      "required_receipt": "Approved correction provenance, dated export and merger lineage plus trainer-config/data dry-run receipt; original diagnostics/holdouts unchanged.",
+      "local_evidence_snapshot": [
+        {
+          "path": "operator_app/review.py",
+          "exists": true,
+          "sha256": "be79d4b432428dde8c06f2ba8ee40107016adfa7b1047670ebeb1ff75b3bf2ec"
+        },
+        {
+          "path": "tools/review_data.py",
+          "exists": true,
+          "sha256": "227038073de8d335eb893ced8ab320055dfb311f6a6e0249e7858b518fd4b102"
+        },
+        {
+          "path": "tools/merge_corrections.py",
+          "exists": true,
+          "sha256": "fced1e5f4438e66620f594b0a81a63859b2291069d33b61825a4a75e3288ea13"
+        },
+        {
+          "path": "tests/test_operator_review.py",
+          "exists": true,
+          "sha256": "788d067defecd830bba8c58e98a81aa75e8a281eef24249bbcbfa9b94e8d3e6a"
+        },
+        {
+          "path": "tests/test_correction_import_safety.py",
+          "exists": true,
+          "sha256": "ef74d9ee6c1e3d5aa528d54e52447e394a37cac0f8ab2b16d9e9e0ea0e8b2379"
+        },
+        {
+          "path": "tools/training_preflight.py",
+          "exists": true,
+          "sha256": "4b68e9462e408e865ad0204000ffee972feaca3d252adefc75303a45db196bbc"
+        },
+        {
+          "path": "tests/test_training_preflight.py",
+          "exists": true,
+          "sha256": "12640825b7b9050057770099a18f12df85a29ca193f91e5e81e8879bb5424c78"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 137,
+          "url": "https://github.com/wrbell/stark-translate/issues/137",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "P2: Active learning — low-confidence to operator correction",
+          "original_body": "Roadmap Phase 6. Route low-confidence segments to operator review, merge corrections, retrain 2–4 cycles.\n\n## Do\n- Flag low-confidence STT / translation in the operator UI\n- Correction workflow that writes training-shaped JSONL\n- One closed loop on a recorded Sunday (correct → merge → smoke retrain)\n\n## Done when\nAn operator can correct a caption and that pair lands in a dated corrections corpus. Retrain script documented even if the first retrain is a dry run.",
+          "original_body_sha256": "9da29e63a12ff4db69a591af73588880ba227f186eebc4e812eae326615779af"
+        }
+      ]
+    },
+    {
+      "id": "issue-138-hindi-zero-shot",
+      "title": "Hindi zero-shot baseline on church audio (#138)",
+      "priority": "P3",
+      "canonical_status": "deferred",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Written baseline note on church audio (does zero-shot Hindi work; is a QLoRA week worth it) with a QLoRA go/no-go. The issue asks for the live pipeline; the offline audio tool provides the baseline measurement only — a live Hindi target is not integrated.",
+      "canonical_issue_acceptance": "A short baseline note: does zero-shot Hindi even work on church audio, and is a QLoRA week worth it this semester — via target_lang_code=\"hi\" through the live pipeline, noting SOV partial garble, with 8 canaries and a few verse pairs.",
+      "dependencies": [],
+      "audit_classification": "user_decision",
+      "finding": "Live #138 remains open. Offline church-audio measurements exist; live target, reviewed Hindi/verse references and QLoRA judgment remain absent. EN/ES-only priority parks further work.",
+      "next_action": "Await a later explicit Hindi R&D decision; preserve the offline baseline without claiming live acceptance.",
+      "required_receipt": "If resumed: original live Hindi/SOV observations, canaries/verses and explicit QLoRA go/no-go note.",
+      "local_evidence_snapshot": [
+        {
+          "path": "tools/offline_hindi.py",
+          "exists": true,
+          "sha256": "9e06515f9fb386e2f67c59f08ad2db95e0b3c447f179ffef3b0d523b267efa5c"
+        },
+        {
+          "path": "docs/evaluation/mac_v2026_14_hindi/README.md",
+          "exists": true,
+          "sha256": "e8683628a774de91143df263e91dc9cd2ba5ead6c2b6c40402b7229231ca8870"
+        },
+        {
+          "path": "docs/archive/research/multi_lingual.md",
+          "exists": true,
+          "sha256": "d076c311ae5b892b403300bc60b1931eae3a6083751e2671f08e895ef2231df3"
+        },
+        {
+          "path": "docs/evaluation/overnight_hindi/README.md",
+          "exists": true,
+          "sha256": "ceaae2ec1f5e7a2bd2f059e92525f8dad01eba08aabcfd7b9662e611b37caa41"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 138,
+          "url": "https://github.com/wrbell/stark-translate/issues/138",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "P3: Hindi zero-shot baseline",
+          "original_body": "Phase 8 start. TranslateGemma already speaks Hindi; this is a one-day zero-shot, not a full QLoRA.\n\n## Do\n- `target_lang_code=\"hi\"` through the live pipeline\n- Note SOV partial-garble (plan: Hindi→EN partial + Hindi final)\n- 8-canary + a handful of verse pairs, chrF++/COMET if cheap\n\n## Done when\nA short baseline note: does zero-shot Hindi even work on church audio, and is a QLoRA week worth it this semester.",
+          "original_body_sha256": "9c87688e72d5ecc50e3faf7e9bbaeebe91e9f9f88957904c7457faed1cbb0cb6"
+        }
+      ]
+    },
+    {
+      "id": "issue-176-multiprocess",
+      "title": "--multiprocess workers use shared Gemma 4 prompts and stop rules (#176)",
+      "priority": "P3",
+      "canonical_status": "validated",
+      "canonical_certification": "met",
+      "canonical_acceptance_unchanged": "workers.translation_worker_main builds engines through MLXGemmaEngine with the parent-selected model_family, so Gemma 4 never receives TranslateGemma prompts and stop handling is shared; a live --multiprocess run is not part of the acceptance.",
+      "canonical_issue_acceptance": "Route workers.py through engines/translation_prompts build_chat_messages + ensure_stop_tokens (skipping the prompt cache for gemma4), or deprecate --multiprocess.",
+      "dependencies": [],
+      "audit_classification": "met",
+      "finding": "Live #176 is CLOSED. workers delegates to MLXGemmaEngine with the parent model family and skips incompatible Gemma4 prompt cache; real pipe-loop contract tests cover the permitted shared-engine alternative.",
+      "next_action": "Keep closure and maintain prompt/stop contracts during related edits; no new multiprocess performance claim.",
+      "required_receipt": "Existing source/pipe-test evidence and issue176-closed.json.",
+      "local_evidence_snapshot": [
+        {
+          "path": "workers.py",
+          "exists": true,
+          "sha256": "cae3dd60493b5773cafbf58c82a5367cb35974ac5e1413a48c4e1f3ceae18f90"
+        },
+        {
+          "path": "engines/translation_prompts.py",
+          "exists": true,
+          "sha256": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59"
+        },
+        {
+          "path": "tests/test_worker_translation_contract.py",
+          "exists": true,
+          "sha256": "60630f59fc125990f557f288f881511787fc17c58ebac1da1c33a9c1ce45245f"
+        },
+        {
+          "path": "docs/issue_closure_audit.md",
+          "exists": true,
+          "sha256": "653737b8147ab41df9ad9944a0b910e737aafa78afa7fc38c7e47d9df2bfd69e"
+        },
+        {
+          "path": "docs/evaluation/overnight_closeout_20260910/README.md",
+          "exists": true,
+          "sha256": "172aee471b1639da7891040c4ddc0b6b3de942a543c97ef43384dea51ab84213"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 176,
+          "url": "https://github.com/wrbell/stark-translate/issues/176",
+          "state": "CLOSED",
+          "closed_at": "2026-09-10T11:57:50Z",
+          "title": "bug(mlx): --multiprocess workers.py still builds TranslateGemma prompts (stale for gemma4 default)",
+          "original_body": "`workers.py` (the `--multiprocess` escape hatch, `dry_run_ab.py` ~L4036-4045) hardcodes the TranslateGemma structured chat template (~L245-290) and unconditionally builds a prompt cache. Since PR #171 made `gemma4` (Gemma 4 OptiQ E4B) the Mac default, running `--multiprocess` would feed an OptiQ E4B a TranslateGemma-shaped prompt.\n\nOptions: (a) route `workers.py` through `engines/translation_prompts.py::build_chat_messages` + `ensure_stop_tokens` (see the EOS issue) and skip the prompt cache for gemma4; or (b) deprecate `--multiprocess` now that MLX ≥ 0.31.2 gives thread-local streams and the in-process `max_workers=2` overlap is the production path (PR #168). Low priority; not on the latency critical path.\n",
+          "original_body_sha256": "3a3e2b48f3b057d1138a52326d6fb539037dcc85a8df8d75543de37ab78951fd"
+        }
+      ]
+    },
+    {
+      "id": "issue-177-mtp",
+      "title": "Gemma 4 MTP assistant drafter on MLX (#177)",
+      "priority": "P3",
+      "canonical_status": "deferred",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Record the original timeboxed investigation and each promotion gate. Only greedy-identical output, canary ≥7/8, medium p50 ≤0.85× the post-EOS baseline and acceptance ≥30% together permit promotion; otherwise keep MTP off.",
+      "canonical_issue_acceptance": "Greedy-identical output; canary ≥7/8; medium p50 ≤0.85× post-EOS-fix E4B; drafter acceptance ≥30%. Otherwise MTP stays off; low acceptance was a timeboxed implementation investigation.",
+      "dependencies": [],
+      "audit_classification": "deferred_user",
+      "finding": "Live #177 is CLOSED as a documented negative investigation; speed gate failed and canary promotion evidence is incomplete. Keeping MTP rejected before loads is correct.",
+      "next_action": "Keep MTP off; resume only for a distinct later hypothesis with all original promotion gates.",
+      "required_receipt": "If resumed: greedy identity, canary ≥7/8, p50 ≤0.85× baseline and acceptance ≥30%; historical closure is not promotion.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/archive/v2026.13/MAC_LATENCY.md",
+          "exists": true,
+          "sha256": "63f410d941dc2f03ed85f3923e401a9b99aa46eba817b9165e1e14602e946d8d"
+        },
+        {
+          "path": "docs/mlx_mtp_notes.md",
+          "exists": true,
+          "sha256": "7bc4337d5cad981530e4d6a8b678bd152b3a6578e9943560e01d964e2e70a89b"
+        },
+        {
+          "path": "engines/mlx_spec.py",
+          "exists": true,
+          "sha256": "0a33aa9d8d8f51ba1a61b38f97a9003d2d924768802a820947d2cfe534e5692a"
+        },
+        {
+          "path": "tools/mts_acceptance_probe.py",
+          "exists": true,
+          "sha256": "fc6221e647b56c5452887ce170fba64b09c0ed18ee132638e4016e1542c1635f"
+        },
+        {
+          "path": "dry_run_ab.py",
+          "exists": true,
+          "sha256": "85d30a5322be047c041db15045e619e9a84fe56cc4fd3a664aae38860d865063"
+        },
+        {
+          "path": "docs/evaluation/overnight_closeout_20260910/README.md",
+          "exists": true,
+          "sha256": "172aee471b1639da7891040c4ddc0b6b3de942a543c97ef43384dea51ab84213"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 177,
+          "url": "https://github.com/wrbell/stark-translate/issues/177",
+          "state": "CLOSED",
+          "closed_at": "2026-09-10T11:57:53Z",
+          "title": "feat(mlx): Gemma 4 MTP drafter (MTS) via mlx-optiq runtime — --mts has never loaded",
+          "original_body": "## Problem\n`--mts` / `STARK_TRANSLATE_MLX_MTS` (Gemma 4 assistant-drafter speculative decoding) has never actually run. mlx-lm 0.31.3 has no `gemma4_assistant` model class (upstream PR ml-explore/mlx-lm#1276 is still open), so `load_mlx_gemma(MLX_DRAFT_MODEL_ID)` raises `Model type gemma4_assistant not supported` — swallowed at `dry_run_ab.py` ~L1218 — and `tools/benchmark_mlx_accel.py`'s `e4b_mts` config records `LOAD FAIL` (`metrics/mlx_accel_20260830_154923.json`).\n\n## Plan (branch `feat/mlx-spec-mtp`)\nUse mlx-optiq's `optiq.runtime.spec` (already installed, 0.4.34): `GemmaAssistantDrafter.from_pretrained(...)` + `spec_generate(...)` operate on the same mlx-lm `gemma4.Model` instance and yield per-token `from_draft` events (streamable, acceptance telemetry). New `engines/mlx_spec.py` wrapper; route `MLXGemmaEngine.translate_streaming` and `dry_run_ab.translate_mlx_streaming` through it (drop the non-streaming MTS fallback); add `e4b_mts` gamma sweep + byte-identical greedy check to the bench; probe script `tools/mts_acceptance_probe.py`.\n\n## Gate\nIdentical output vs greedy; canary ≥ 7/8; medium p50 ≤ 0.85× the post-EOS-fix E4B; acceptance ≥ 30 % (llama.cpp reports 70–87 % on this drafter, so lower Metal acceptance is treated as an implementation issue to chase, time-boxed). Otherwise `mlx_mts` stays off. Drafter: `mlx-community/gemma-4-e4b-it-assistant-bf16` (Google).\n",
+          "original_body_sha256": "22528111a68d13719d63137a18eda6a5906f59ea79a8edcba6e4e3a09d778caa"
+        }
+      ]
+    },
+    {
+      "id": "conservative-marian-routing",
+      "title": "Conservative Marian partial routing",
+      "priority": "P3",
+      "canonical_status": "experimental",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Natural Spanish references plus human review show no quality loss when Marian handles allowlisted phrases; until then `--routing-policy conservative` stays opt-in.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "natural-spanish-refs"
+      ],
+      "audit_classification": "mixed",
+      "finding": "Only synthetic routing function checks are established. Natural Spanish and human meaning review remain requirements; new public results are separate engineering evidence.",
+      "next_action": "Keep routing opt-in; compare allowlisted phrase routing using independent natural references, then obtain bilingual quality review.",
+      "required_receipt": "Matched control/routing outputs and latency with natural Spanish references plus human no-quality-loss decision.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/mac_v2026_14_routing/README.md",
+          "exists": true,
+          "sha256": "ec61fe499c55febb0b1d263f99f9e1763b70053ce8065449a5e30c3755574649"
+        },
+        {
+          "path": "settings.py",
+          "exists": true,
+          "sha256": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568"
+        },
+        {
+          "path": "docs/evaluation/mac_followup_20260910/public_data/README.md",
+          "exists": true,
+          "sha256": "c4fb9729cd04542aed96ec2e009fff356225f95a87832ab105264b3a57314afe"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "mac-defaults-frozen",
+      "title": "Retain Mac defaults after separate 48-run and 96-run English screens",
+      "priority": "P0",
+      "canonical_status": "validated",
+      "canonical_certification": "met",
+      "canonical_acceptance_unchanged": "Recorded screening decisions retain E4B, 0.5 s silence and 0.6 s cadence unless a matched both-model improvement and the separate quality gate justify a change. Rejected arms do not justify an unmeasured combined configuration.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "met",
+      "finding": "Both prior negative screens support retaining E4B, 0.5 s silence and 0.6 s cadence. New runs must not be pooled with them or retroactively change their decision.",
+      "next_action": "Keep defaults frozen until a distinct matched improvement and separate quality review meet promotion criteria.",
+      "required_receipt": "Existing negative-screen decisions; any later promotion requires its own frozen controls and quality receipt.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/mac_v2026_14_screening/README.md",
+          "exists": true,
+          "sha256": "46c61db517fda4a53a804755251b3ee3ca9fea80eb9af096533390d47c2570b2"
+        },
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        },
+        {
+          "path": "docs/evaluation/overnight_screen_20260910/README.md",
+          "exists": true,
+          "sha256": "b1f888fda06ac57ee863a84ed3aa870f94b82b15e6db01b652df435f04d387ac"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "mac-reliability-implementation",
+      "title": "v2026.14 Mac reliability source integrated in main",
+      "priority": "P0",
+      "canonical_status": "validated",
+      "canonical_certification": "met",
+      "canonical_acceptance_unchanged": "Merged to main through PR #192 with the human, device and visible-browser gates recorded as still open.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "met",
+      "finding": "Live PR merge and explicit open hardware/human gates satisfy source integration acceptance. Follow-up changes remain a separate review.",
+      "next_action": "Retain merged-source evidence and work on the separate device/human gates.",
+      "required_receipt": "PR192 merge receipt with separate gate inventory.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        },
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        },
+        {
+          "path": "docs/evaluation/overnight_closeout_20260910/README.md",
+          "exists": true,
+          "sha256": "172aee471b1639da7891040c4ddc0b6b3de942a543c97ef43384dea51ab84213"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "mac-cpu-test-suite",
+      "title": "Frozen 752ab9a CPU, GPU and prescribed static validation",
+      "priority": "P0",
+      "canonical_status": "validated",
+      "canonical_certification": "met",
+      "canonical_acceptance_unchanged": "Recorded pass/skip/coverage in mac_implementation_status.md above the test.yml coverage gate.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "met",
+      "finding": "This item is explicitly a historical frozen-752 validation receipt, not the current working tree suite. Final PR192 CI has a different identity and recorded counts.",
+      "next_action": "Keep frozen counts unchanged; bind each follow-up test/static/model receipt to its own source and scope.",
+      "required_receipt": "Existing overnight_validation_20260910.json; separate current-head checks as warranted by changed code.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        },
+        {
+          "path": ".github/workflows/test.yml",
+          "exists": true,
+          "sha256": "4dd9fb459f699a9cffd4425599edd692b2f3b704a41a515b1b4d51fd24f347ef"
+        },
+        {
+          "path": "docs/evaluation/overnight_validation_20260910.json",
+          "exists": true,
+          "sha256": "560702ed495cef729727b722b351fcab82494cf9430101228420b7c8fff8f502"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "packaging-artifacts-local",
+      "title": "v2026.14 wheel, sdist and Mac ZIP local validation",
+      "priority": "P1",
+      "canonical_status": "in_progress",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Outside-checkout install, launcher checks and installed EN/ES inference recorded with artifact hashes.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "autonomous",
+      "finding": "Mechanical artifacts and outside-checkout launch evidence exist, with installed Standard/Lite natural English runs. Current follow-up source changes need their own build/runtime identity before claiming current-artifact EN/ES acceptance.",
+      "next_action": "After source stabilizes, rebuild and compare artifact contents, install outside checkout, run required EN/ES smoke under serial scheduling and record hashes.",
+      "required_receipt": "New wheel/sdist/Mac ZIP hashes, runtime-member correspondence, outside-checkout launcher checks and actual installed EN/ES receipts; no upload.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/mac_v2026_14_installation.md",
+          "exists": true,
+          "sha256": "84599e46f4dd62cb4478290eef65d52ef72e08b2b9094744dd0d277d0efc1de1"
+        },
+        {
+          "path": "docs/evaluation/overnight_artifact_validation_20260910.json",
+          "exists": true,
+          "sha256": "986e9bc40bcd29f10453b4525245c3122b12cc6f5f756e6a2192b87c891566ac"
+        },
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "pypi-publication",
+      "title": "PyPI trusted publisher, public artifact uploads and release tag",
+      "priority": "P2",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Trusted publisher mapped (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi), a new version tag pushed, and the PyPI workflow green.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "pr-192-integration"
+      ],
+      "audit_classification": "user_decision",
+      "finding": "Live PR192 merge is complete; it does not authorize release tags or PyPI/GHCR uploads. Publication remains explicitly deferred by user choice.",
+      "next_action": "Await the separate publication decision and trusted-publisher mapping.",
+      "required_receipt": "If authorized: exact version/tag, trusted publisher configuration and successful publish workflow/artifact hashes.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/mac_implementation_status.md",
+          "exists": true,
+          "sha256": "7fc99a0ffb1f5b8db22295cf2abed5a3a887cb4d04b908f8366839f86220aa15"
+        },
+        {
+          "path": ".github/workflows/pypi.yml",
+          "exists": true,
+          "sha256": "924cb65897d74d8c213d33211224df8a68c102594907d5e87015f478c48a9ea3"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "wsl-phase4",
+      "title": "Phase 4 full audio preprocessing on WSL",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "`phase4_status.json` written for the sermon corpus on WSL storage.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "external_hardware",
+      "finding": "The wrapper/status writer exists. A dry-run discovery receipt cannot assert ready_for_training; source requires real completion with no errors.",
+      "next_action": "On WSL storage execute runbook §1 using the real sermon corpus, preserving cutoff/holdout splits.",
+      "required_receipt": "phase4_status.json with dry_run=false, errors=0, completed>0 and ready_for_training=true plus corpus identity.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/wsl_pipeline_refresh.md",
+          "exists": true,
+          "sha256": "2e11fe7b214f7a38438d3f92fe27fd05d8e6cd8dde4db5f2492c79dc0d5e927b"
+        },
+        {
+          "path": "training/run_phase4_preprocess.sh",
+          "exists": true,
+          "sha256": "3ce22dc1adcbc7ad0bee076ae761b2cf58001eab9af2460aa28d8c4763423186"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "wsl-e4b-domain-sft",
+      "title": "Gemma 4 E4B domain SFT → GGUF on WSL",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "8-canary sanity on the exported GGUF passes and the artifact is ready for Mac/CUDA transfer.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "wsl-phase4"
+      ],
+      "audit_classification": "external_hardware",
+      "finding": "Recipe now defaults to v2 and mandatory CPU config/data/holdout preflight; original UNTESTED headers are historical and must not erase April experiment history. Real domain SFT/export remains unrun.",
+      "next_action": "After real corpus availability, run the Gemma recipe preflight on WSL then domain SFT and GGUF export/sanity.",
+      "required_receipt": "Real corpus/holdout hashes, training and export manifests, artifact hash and eight-canary gate. CPU fixtures are preparation only.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/wsl_pipeline_refresh.md",
+          "exists": true,
+          "sha256": "2e11fe7b214f7a38438d3f92fe27fd05d8e6cd8dde4db5f2492c79dc0d5e927b"
+        },
+        {
+          "path": "training/run_gemma4_e4b_domain_sft.sh",
+          "exists": true,
+          "sha256": "a7a4e86cb97de43f7e6bfd145147feb5359b22994097bf447f03c2da1b112b04"
+        },
+        {
+          "path": "docs/gemma4_tuning/overview.md",
+          "exists": true,
+          "sha256": "2f92914582d2303ab983adc41ddd92a789d1943850b3e0c59f15d5d9692599f4"
+        },
+        {
+          "path": "tools/training_preflight.py",
+          "exists": true,
+          "sha256": "4b68e9462e408e865ad0204000ffee972feaca3d252adefc75303a45db196bbc"
+        },
+        {
+          "path": "training/CLAUDE.md",
+          "exists": true,
+          "sha256": "4375bbba5de97c63ea5d315e818ee8e0a0935b14cd0553b16e0b374afcdb87f6"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "wsl-w17-export",
+      "title": "W17 Whisper DoRA + hard-mix → CT2",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "tools/benchmark_stt_engines.py gate: W17 fresh-eval WER ≤ W16.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "wsl-phase4"
+      ],
+      "audit_classification": "external_hardware",
+      "finding": "Projection typo, source tensor compatibility, explicit expansion, post-load DoRA rebasing, required replay and subset-to-audiofolder wiring are repaired. No W17 training/export or target hardware benchmark is established.",
+      "next_action": "Run real WSL W16/config/corpus preflight, then mine/align/train/export and compare with W16 under the original benchmark.",
+      "required_receipt": "Source adapter/config/corpus hashes, required replay and training logs, CT2 artifact and fresh-eval WER ≤W16 with local broader quality/latency guards identified.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/wsl_pipeline_refresh.md",
+          "exists": true,
+          "sha256": "2e11fe7b214f7a38438d3f92fe27fd05d8e6cd8dde4db5f2492c79dc0d5e927b"
+        },
+        {
+          "path": "training/run_w17_curriculum.sh",
+          "exists": true,
+          "sha256": "083caaf8c20faa765016fc05489bf8157c2acf5ba9ee9e0d0f87b0fbb19f6930"
+        },
+        {
+          "path": "tools/training_preflight.py",
+          "exists": true,
+          "sha256": "4b68e9462e408e865ad0204000ffee972feaca3d252adefc75303a45db196bbc"
+        },
+        {
+          "path": "tests/test_training_preflight.py",
+          "exists": true,
+          "sha256": "12640825b7b9050057770099a18f12df85a29ca193f91e5e81e8879bb5424c78"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "cuda-latency-proposal",
+      "title": "CUDA latency proposal execution on the A2000",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "llama.cpp b10883 built, MTP opt-in bench, `-fa on` retest, W16 HF fp16 and Parakeet probes recorded with the proposal's tables filled in.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "external_hardware",
+      "finding": "Matching b10883 pins/no-draft default are source work; original #174 is closed but the broader CUDA measurements remain absent. A closed pin-fix issue does not prove benchmarks ran.",
+      "next_action": "On A2000 WSL execute the proposal build, MTP/flash-attention and W16/Parakeet probes; keep release uploads separately authorized.",
+      "required_receipt": "Actual hardware/runtime versions and populated proposal tables with model/workload hashes, canaries, latency and VRAM.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/cuda_latency_proposal.md",
+          "exists": true,
+          "sha256": "486b648fdfe92fb26fa21362e0986b388a484a74369d68b2e03503d2bc311913"
+        },
+        {
+          "path": "scripts/cuda/bench_mtp.sh",
+          "exists": true,
+          "sha256": "ba45289aef049baa8d3b05bd3c65ffc48de4500872a00f8d97b9b8c90acac00d"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 174,
+          "url": "https://github.com/wrbell/stark-translate/issues/174",
+          "state": "CLOSED",
+          "closed_at": "2026-09-09T21:19:57Z",
+          "title": "chore(cuda): llama.cpp pin mismatch (Dockerfile b8783 vs start_server.sh b9022) — bump both for Gemma 4 MTP",
+          "original_body": "`Dockerfile` L20 pins `ARG LLAMA_CPP_REF=b8783` while `start_server.sh` documents/pins build **b9022** (2026-05-04). The GHCR image therefore ships the older build on which `--flash-attn on` regressed Gemma 4 E4B by +56 % (`docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md`).\n\nUpstream is at b10883 (2026-09-09) and includes Gemma 4 MTP drafter support (E2B/E4B assistants, PR #24282, 2026-06-08; fix 2026-09-01) and further Gemma 4 attention work.\n\nProposed: bump both pins to the same tag (≥ b10883), rebuild the GHCR image, and re-run the v2026.9 `-fa on` experiment (5 minutes) plus the MTP bench. Part of the CUDA latency proposal; needs the WSL/A2000 box.\n",
+          "original_body_sha256": "c46afcd356d724940c58a8f550195bf5e276c7c9fdce2ee1ffc0f49fe9de0d8d"
+        }
+      ]
+    },
+    {
+      "id": "v2026-9-followups",
+      "title": "llama.cpp deferred optimizations (-fa, -c 2048, prompt-cache reuse)",
+      "priority": "P3",
+      "canonical_status": "deferred",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Each experiment meets the proposal's latency gate without canary regression.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "cuda-latency-proposal"
+      ],
+      "audit_classification": "external_hardware",
+      "finding": "Live #175 is CLOSED for missing-reference/documentation repair. The deferred flash-attention, context and prompt-cache experiments remain part of the CUDA proposal.",
+      "next_action": "When WSL is available, execute each remaining hypothesis under proposal gates; retain negative results.",
+      "required_receipt": "Separate per-experiment control/canary/latency receipts; no inference of completion from the closed documentation issue.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md",
+          "exists": true,
+          "sha256": "1443fb063fd66b1d41a6e41e0ae7f52d86150a0f7d2acd46340aec210bd6a718"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 175,
+          "url": "https://github.com/wrbell/stark-translate/issues/175",
+          "state": "CLOSED",
+          "closed_at": "2026-09-09T20:49:19Z",
+          "title": "docs: v2026.9 FOLLOWUPS.md is referenced but missing — fold followups into roadmap",
+          "original_body": "`docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md` says twice that deferred items live in `docs/archive/v2026.9/FOLLOWUPS.md`, but that file does not exist in the repo. The three followups survive only inside GEMMA_OPTIM_PHASE2.md § Followups:\n\n1. Re-test `-fa on` against a newer llama.cpp build (the +56 % E4B regression was on b8782).\n2. Larger context (`-c 2048`) bench.\n3. Per-request / intra-request prompt-cache reuse for streaming partials (Gemma 4 SWA forces full re-prefill per request today).\n\nFix: fold these into `docs/roadmap.md` (done in the close-out PR) and either add the missing file or fix the two references. Items 1–3 are also folded into the CUDA latency proposal.\n",
+          "original_body_sha256": "5a174260a4cbd491b465872e059817a33a122050b7b82bee6a26c9b6cdc4970d"
+        }
+      ]
+    },
+    {
+      "id": "security-b615-pinning",
+      "title": "Remaining unpinned Hugging Face download paths (B615)",
+      "priority": "P2",
+      "canonical_status": "deferred",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "autonomous",
+      "finding": "Live Marian HF and Piper fallback calls now pass validated pinned revisions; loader-argument tests pass. Scoped Bandit still reports four dynamic-argument findings, and the broader optional/training inventory is not closed.",
+      "next_action": "Root-review live fallback changes and document justified operator-only remaining paths; rerun the explicit wider inventory without claiming B615 globally clear.",
+      "required_receipt": "Source/loader-argument tests, unskipped scoped/wider scan results and explicit remaining-path classification.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/mac_v2026_14_security.md",
+          "exists": true,
+          "sha256": "5d4e73623bb6f3c7ec7f221b94746ee4f92a47f361c513ef0ca22fe56d39c053"
+        },
+        {
+          "path": "docs/evaluation/security_feasibility_20260910/README.md",
+          "exists": true,
+          "sha256": "d14d8554b6031607358597527fe8e312e7863e32b8cdd8b44e55b62f4fc93fb5"
+        },
+        {
+          "path": "docs/evaluation/security_feasibility_20260910/raw/source-validation.json",
+          "exists": true,
+          "sha256": "2633bda1a308c642a371a65fa778e96740768b2be00ddd22145bf14be213bf36"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "multilingual-expansion",
+      "title": "Hindi and Chinese adaptation (roadmap Phase 8)",
+      "priority": "P3",
+      "canonical_status": "deferred",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Per the roadmap: chrF++/COMET gates, adapter switching and display updates per language.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "issue-138-hindi-zero-shot"
+      ],
+      "audit_classification": "user_decision",
+      "finding": "No Hindi/Chinese training or live expansion acceptance is established; user has prioritized EN/ES and parked further multilingual work.",
+      "next_action": "Await explicit expansion scope/priority; do not train or integrate languages as an EN/ES side effect.",
+      "required_receipt": "If authorized: independent per-language data/review/quality, adapter-switching and display gates.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/roadmap.md",
+          "exists": true,
+          "sha256": "ff1f24fb382e3666ef64afedcfb4e0ae54398c329e9617a12c655cb02cc42819"
+        },
+        {
+          "path": "docs/archive/research/multi_lingual.md",
+          "exists": true,
+          "sha256": "d076c311ae5b892b403300bc60b1931eae3a6083751e2671f08e895ef2231df3"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "macos-shortcuts",
+      "title": "macOS Shortcuts voice-command triggers",
+      "priority": "P3",
+      "canonical_status": "deferred",
+      "canonical_certification": "not_applicable",
+      "canonical_acceptance_unchanged": "Optional convenience; documented only if adopted.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "deferred_user",
+      "finding": "Optional convenience is not selected for this EN/ES completion scope and has no acceptance implementation requirement yet.",
+      "next_action": "No action until adopted by the user.",
+      "required_receipt": "If adopted: documented shortcut behavior and user-triggered validation.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/roadmap.md",
+          "exists": true,
+          "sha256": "ff1f24fb382e3666ef64afedcfb4e0ae54398c329e9617a12c655cb02cc42819"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "docs-refresh-remaining",
+      "title": "Documentation refresh — remaining areas after the overnight docs pass",
+      "priority": "P2",
+      "canonical_status": "in_progress",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "Every README/CLAUDE/AGENTS guide describes current behavior from source, historical numbers live only under dated archive links, and tests/test_documentation.py plus render/link checks pass.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "pr-192-integration"
+      ],
+      "audit_classification": "autonomous",
+      "finding": "The training guides are now corrected, but canonical backlog still contains stale recipe/corpus and security-next-action descriptions. Historical receipts must remain unchanged.",
+      "next_action": "Root reconcile this 43-item audit into current guides/backlog, then run renderer validation, link checks and documentation tests.",
+      "required_receipt": "Exact guide/backlog diff plus render_backlog validate/render --check/check-links and test_documentation receipt.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/overnight_status.md",
+          "exists": true,
+          "sha256": "606ab139a2f260a3cccdcb5322bdd84855b57ae5b603c1d57797cdf8594ff114"
+        },
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        },
+        {
+          "path": "training/AGENTS.md",
+          "exists": true,
+          "sha256": "1d17655ab7bdc3d0c80624b0360b69c699df14f107d5e20c512f61cb029d91b6"
+        },
+        {
+          "path": "training/CLAUDE.md",
+          "exists": true,
+          "sha256": "4375bbba5de97c63ea5d315e818ee8e0a0935b14cd0553b16e0b374afcdb87f6"
+        },
+        {
+          "path": "docs/wsl_pipeline_refresh.md",
+          "exists": true,
+          "sha256": "2e11fe7b214f7a38438d3f92fe27fd05d8e6cd8dde4db5f2492c79dc0d5e927b"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "mac-torch-security-migration",
+      "title": "Resolve pinned Mac Torch dependency advisories",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "A compatible patched Mac Torch/audio dependency set passes installed imports, VAD and real EN/ES inference, with an explicit full installed audit result. No incompatible forced install or changed frozen benchmark environment.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "autonomous",
+      "finding": "A compatible isolated Torch2.13/TorchAudio2.11 install, CPU imports/VAD and full installed audit now pass. The old missing same-number audio wheel rationale is stale; full application EN/ES validation and intentional constraints migration remain.",
+      "next_action": "Prepare a separate full application candidate with revised experimental constraints, then serial real EN/ES regressions and fresh installed audit; leave stt_env untouched.",
+      "required_receipt": "Full candidate dependency inventory and audit, project imports/VAD, real EN/ES inference and applicable diarization checks; no waiver for old installed Torch advisories.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/overnight_security/README.md",
+          "exists": true,
+          "sha256": "33a5d3af430afca6116540e4d67e37992c15e90958fb363ac4d9593bfd5ed2f6"
+        },
+        {
+          "path": "pyproject.toml",
+          "exists": true,
+          "sha256": "c78d55389d632aa2670835941b6db2577e73ce69de88aa4c828d829a6caaa3b3"
+        },
+        {
+          "path": "docs/evaluation/security_feasibility_20260910/README.md",
+          "exists": true,
+          "sha256": "d14d8554b6031607358597527fe8e312e7863e32b8cdd8b44e55b62f4fc93fb5"
+        },
+        {
+          "path": "docs/evaluation/security_feasibility_20260910/raw/candidate-runtime-receipts.json",
+          "exists": true,
+          "sha256": "f5bedaac7f88c48310eeadb87fd389b0cb5951e46cb1a98f57304911f930c84c"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "windows-msi-bootstrap",
+      "title": "Prove and repair native Windows MSI first-launch bootstrap",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "A clean Windows account installs the MSI, obtains matching runtime/profile dependencies and models, starts the operator from Start Menu, produces EN/ES captions and relaunches offline; uninstall and signing state are recorded.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "pypi-publication"
+      ],
+      "audit_classification": "external_hardware",
+      "finding": "MSI bytes were inspected on Mac; first launch/extras/profile wiring on Windows remains unproved. Matching package availability/publication is a separate dependency.",
+      "next_action": "On a clean Windows account with matching package availability, exercise install, Start Menu launch, setup/models, EN/ES, offline relaunch and uninstall.",
+      "required_receipt": "Windows install/bootstrap logs, version/artifact hashes, caption/session evidence, offline relaunch, uninstall and signing state.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/packaging/windows.md",
+          "exists": true,
+          "sha256": "d73c084b3717985d3b3c1fcc3bd2ea9c86a99f679e2887a683d4c429c00b698e"
+        },
+        {
+          "path": "packaging/windows/README.md",
+          "exists": true,
+          "sha256": "da32cc66a1ce2959637929f2b773b2112f1bd78c46460488676cbe9be1806666"
+        },
+        {
+          "path": ".github/workflows/release-win.yml",
+          "exists": true,
+          "sha256": "4d5c13e43d151167e3dacf4e02eba6757414966024dea9018872b8ff0495a6bf"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "wsl-training-recipe-checks",
+      "title": "Repair unexecuted W17 projection and domain-corpus recipe assumptions",
+      "priority": "P2",
+      "canonical_status": "deferred",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "W17 uses real Whisper projection module names and compatible initialization shape/rank; domain SFT resolves the intended versioned corpus explicitly and rejects missing configured inputs before training. A dry-run command/data inspection is recorded on WSL.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "wsl-phase4"
+      ],
+      "audit_classification": "mixed",
+      "finding": "Autonomous source repair and real parser/config/data dry-runs are implemented and fixture-tested, including real Turbo geometry. Actual Mac defaults fail before GPU imports because local config/v2 holdout are absent. Original acceptance explicitly still asks for WSL inspection.",
+      "next_action": "Refresh stale source-defect notes; on WSL run both --dry-run recipes with actual W16/config/v2 corpus and retain the resulting CPU reports.",
+      "required_receipt": "Local source/tests plus actual WSL preflight reports with file hashes; do not mark met from Mac fixture success.",
+      "local_evidence_snapshot": [
+        {
+          "path": "training/run_w17_curriculum.sh",
+          "exists": true,
+          "sha256": "083caaf8c20faa765016fc05489bf8157c2acf5ba9ee9e0d0f87b0fbb19f6930"
+        },
+        {
+          "path": "training/run_gemma4_e4b_domain_sft.sh",
+          "exists": true,
+          "sha256": "a7a4e86cb97de43f7e6bfd145147feb5359b22994097bf447f03c2da1b112b04"
+        },
+        {
+          "path": "training/CLAUDE.md",
+          "exists": true,
+          "sha256": "4375bbba5de97c63ea5d315e818ee8e0a0935b14cd0553b16e0b374afcdb87f6"
+        },
+        {
+          "path": "tools/training_preflight.py",
+          "exists": true,
+          "sha256": "4b68e9462e408e865ad0204000ffee972feaca3d252adefc75303a45db196bbc"
+        },
+        {
+          "path": "tests/test_training_preflight.py",
+          "exists": true,
+          "sha256": "12640825b7b9050057770099a18f12df85a29ca193f91e5e81e8879bb5424c78"
+        },
+        {
+          "path": "training/candidates/README.md",
+          "exists": true,
+          "sha256": "383f9838177e137964e409b3f9581b2eb0e60aaf99a665ee61f493fe2b324066"
+        }
+      ],
+      "live_github_issues": []
+    },
+    {
+      "id": "hymn-translation-boundary",
+      "title": "Preserve title/sentence meaning in natural hymn captions (#194)",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "With independently reviewed source boundaries and bilingual references, preserve the intended subject/title boundary on the retained natural hymn example without hard-coded word substitutions. Compare unchanged controls, report subject/negation/name/theological meaning errors and preview/final latency before any prompt or context promotion.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [
+        "bilingual-blinded-review"
+      ],
+      "audit_classification": "mixed",
+      "finding": "Original #194 remains open. The exact raw subject-boundary error is retained; generated punctuation and high QE do not establish reference truth.",
+      "next_action": "Keep the raw regression input unchanged, obtain independent boundary/bilingual review, then compare bounded raw/delimited input with identical models and semantic/latency controls.",
+      "required_receipt": "Approved source boundary/reference, unchanged original diagnostic identity, controls including genuine eternity-subject cases, meaning error review and preview/final timing.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 194,
+          "url": "https://github.com/wrbell/stark-translate/issues/194",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "Preserve hymn-title boundaries and theological meaning in final translation",
+          "original_body": "A hymn title followed by a sentence lost its boundary in final translation. The English model input contains “Eternity Time will soon end,” but the Spanish final says “La eternidad pronto terminará.” The sentence subject changes from time to eternity. The full original input, preview and final are retained in the [rehearsal evidence](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), session `20260910_043120_839144_en`, chunk 3, source 414.592–422.592 s, installed `752ab9a` (Parakeet/E4B, EN→ES).\n\nThe record has STT confidence 0.98 and lightweight QE 1.0; neither checks this meaning error. Audio punctuation and a bilingual reference still need independent review.\n\n- Preserve the raw STT string as a regression input. Establish the title/sentence boundary and an approved reference without rewriting original diagnostics.\n- Compare raw and explicitly delimited input with identical models/settings, separating STT punctuation from translation behavior.\n- Test subject, negation, names and theological meaning across existing canaries and natural EN/ES examples. Include sentences where eternity really is the subject; avoid a hard-coded word substitution.\n- Report semantic changes and preview/final latency before promoting any prompt or context change.\n\nThis is a quality follow-up discovered during #134's rehearsal. Human correction and training approval remain separate under #137.\n",
+          "original_body_sha256": "afa1ef2862fd9f8d3b927016cab47d4fbedf1fd5b01f78c17061341f38df0370"
+        }
+      ]
+    },
+    {
+      "id": "hymn-capture-suppression",
+      "title": "Reduce unwanted hymn captions without losing short spoken replies (#193)",
+      "priority": "P1",
+      "canonical_status": "pending_input_or_hardware",
+      "canonical_certification": "pending",
+      "canonical_acceptance_unchanged": "On a bounded, human-labeled natural hymn→speech transition, measure unwanted captions, suppressed legitimate speech and recovery alongside unchanged controls and partial/final latency. Include quiet prayer and short valid EN/ES replies; no global short-word blacklist or inferred reference labels from generated captions.",
+      "canonical_issue_acceptance": null,
+      "dependencies": [],
+      "audit_classification": "mixed",
+      "finding": "Original #193 remains open. Unwanted fragments and missing music-hold events are retained, but sparse logs do not identify the causal threshold failure and predictions cannot label the audio.",
+      "next_action": "Label a bounded hymn→speech transition with uncertain regions, then compare candidate detector/scheduling with unchanged controls including quiet prayer/short EN/ES replies.",
+      "required_receipt": "Human audio labels, false caption/suppressed valid speech/recovery counts and partial/final latency; no short-word blacklist.",
+      "local_evidence_snapshot": [
+        {
+          "path": "docs/evaluation/overnight_endurance_20260910/README.md",
+          "exists": true,
+          "sha256": "edf50f3820034076b36911490e40b3177624955705e08d41265b6cb52f8e88e8"
+        }
+      ],
+      "live_github_issues": [
+        {
+          "number": 193,
+          "url": "https://github.com/wrbell/stark-translate/issues/193",
+          "state": "OPEN",
+          "closed_at": null,
+          "title": "Reduce fragment captions during congregational hymns without suppressing spoken transitions",
+          "original_body": "The installed Standard rehearsal emitted fragment captions such as “It dies a,” “Yeah,” “Uh,” and “Changing uh” after hymn 36 was announced. Process health stayed normal. No music-hold event appeared in the inspected prefix. The [rehearsal evidence](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md) retains the exact outputs, source windows and runtime identity: session `20260910_043120_839144_en`, source `752ab9a`, EN→ES with Parakeet and E4B.\n\nThe current hold requires about five consecutive seconds of loud, VAD-negative audio. It is an energy/VAD heuristic, not a music classifier. The sparse logs cannot establish why the required streak did not occur. Parakeet's confidence and no-speech fields are proxies, so these fragments can pass current filters.\n\n- Label a bounded natural hymn→speech transition and retain uncertain labels; generated captions are not references.\n- Measure unwanted captions, suppressed legitimate speech and recovery at the spoken transition. Include quiet prayer and short valid EN/ES replies.\n- Compare any detector or scheduling change with unchanged controls; report partial/final latency and negative results. Do not globally blacklist short words to manufacture a pass.\n\nUntil automatic handling is validated, the operator can Pause after the hymn announcement and Resume when spoken prayer or the message begins. This is a follow-up from #134; #137 owns any later human-approved corrections.\n",
+          "original_body_sha256": "efafcd8e82b55af7325177986e13c8f4881dad7a4425af50dd34e46d61ba519f"
+        }
+      ]
+    }
+  ]
+}

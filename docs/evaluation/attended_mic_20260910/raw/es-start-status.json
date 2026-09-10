@@ -1,0 +1,89 @@
+{
+  "captured_utc": "2026-09-10T13:26:09.568745+00:00",
+  "status": {
+    "state": "starting",
+    "session_id": "20260910_092544_206252_es",
+    "started_at": "2026-09-10T09:25:44",
+    "config": {
+      "lang": "es",
+      "profile": "standard",
+      "record_audio": true,
+      "stt_backend": "auto",
+      "model_family": null,
+      "gemma4_size": null,
+      "low_vram": false,
+      "backend": "auto",
+      "engine": "auto",
+      "tts": false,
+      "run_ab": false,
+      "vad_threshold": 0.3,
+      "mic_device": 1,
+      "mic_gain": null,
+      "log_level": "INFO",
+      "tts_output_mode": "ws",
+      "tts_device": null,
+      "diarize": false,
+      "tts_device_en": null,
+      "tts_device_es": null
+    },
+    "last_event": "loading models; waiting for pipeline metrics header",
+    "pid": 7675,
+    "csv_path": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_20260910_092544_206252_es.csv",
+    "log_path": "/Users/willem/Code/vibes/SRTranslate/metrics/session_20260910_092544_206252_es.log",
+    "readiness": {
+      "phase": "loading",
+      "ready": false,
+      "reason": "loading",
+      "updated_at": 1789046769.1697521,
+      "age_s": 0.39829492568969727,
+      "stale": false
+    },
+    "health": {
+      "schema_version": 1,
+      "session_id": "20260910_092544_206252_es",
+      "updated_at": 1789046769.1697521,
+      "phase": "loading",
+      "input_seen": false,
+      "input_age_s": null,
+      "caption_age_s": null,
+      "input_level": 0.0,
+      "errors": [],
+      "error_count": 0,
+      "captions": [],
+      "recording": {
+        "audio_enabled": true,
+        "required_failures": 0,
+        "ok": true
+      },
+      "control_sequence": 0,
+      "publish_failures": 0,
+      "persistence": {
+        "submitted": 0,
+        "completed": 0,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "storage": {
+        "free_bytes": 245547216896,
+        "low_space": false
+      },
+      "age_s": 0.39829492568969727,
+      "stale": false,
+      "operational_logging": {
+        "queued": 0,
+        "dropped": 0,
+        "write_failures": 0
+      }
+    },
+    "work": {
+      "kind": "live session",
+      "id": "2fa5b8a84d6446669ef226eaf5f6f81f"
+    },
+    "effective_profile": {
+      "name": "standard"
+    }
+  }
+}

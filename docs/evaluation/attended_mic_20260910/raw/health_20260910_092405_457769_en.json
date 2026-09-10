@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_092405_457769_en",
+  "updated_at": 1789046740.788314,
+  "phase": "completed",
+  "input_seen": true,
+  "input_age_s": 0.30635133298346773,
+  "caption_age_s": null,
+  "input_level": 0.0018700516084209085,
+  "errors": [],
+  "error_count": 0,
+  "captions": [],
+  "recording": {
+    "audio_enabled": true,
+    "required_failures": 0,
+    "ok": true
+  },
+  "control_sequence": 1789046740456689000,
+  "publish_failures": 0,
+  "persistence": {
+    "submitted": 2,
+    "completed": 2,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "storage": {
+    "free_bytes": 245546438656,
+    "low_space": false
+  },
+  "queues": {
+    "audio": 0,
+    "capture_handoff": 0,
+    "finals": 0,
+    "stream_tokens": 1
+  },
+  "clients": 0,
+  "replay_client_wait": {
+    "requested_seconds": 0.0,
+    "actual_wait_seconds": 0.0,
+    "status": "disabled",
+    "connected_clients": 0,
+    "visibility_confirmed": false
+  }
+}

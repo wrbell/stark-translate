@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-09-10T13:53:49.043139+00:00",
+  "installed_packages": 124,
+  "changes": {
+    "pillow": {
+      "before": "12.1.1",
+      "after": "12.3.0"
+    },
+    "pydantic-settings": {
+      "before": "2.13.1",
+      "after": "2.14.2"
+    },
+    "pygments": {
+      "before": "2.19.2",
+      "after": "2.20.0"
+    },
+    "python-dotenv": {
+      "before": "1.2.1",
+      "after": "1.2.2"
+    },
+    "requests": {
+      "before": "2.32.5",
+      "after": "2.33.0"
+    },
+    "urllib3": {
+      "before": "2.6.3",
+      "after": "2.7.0"
+    }
+  },
+  "audit_entries": 124,
+  "vulnerability_count": 0,
+  "skips": [
+    {
+      "name": "stark-translate",
+      "skip_reason": "Dependency not found on PyPI and could not be audited: stark-translate (2026.14.0.0)"
+    }
+  ],
+  "candidate_wheel_unchanged": true,
+  "replay_status": "prepared_not_executed",
+  "production_promotion": false
+}

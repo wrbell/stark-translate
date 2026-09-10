@@ -1,0 +1,30 @@
+"""Verify installed versions and selected extras without importing runtime libraries."""
+import hashlib
+import importlib.metadata as md
+import json
+import sys
+from pathlib import Path
+from packaging.requirements import Requirement
+from packaging.markers import default_environment
+from packaging.utils import canonicalize_name
+BASE=Path(__file__).resolve().parent
+resolution=json.loads((BASE/'pip-resolution.json').read_text())
+installed={canonicalize_name(d.metadata['Name']):d for d in md.distributions() if d.metadata['Name']}
+for row in resolution['install']:
+    name=canonicalize_name(row['metadata']['name'])
+    assert installed[name].version==row['metadata']['version'],name
+issues=[]
+for name,d in installed.items():
+    for raw in d.requires or []:
+        req=Requirement(raw)
+        extras={'','mlx','diarization'} if name=='stark-translate' else {''}
+        if req.marker and not any(req.marker.evaluate({**default_environment(),'extra':e}) for e in extras): continue
+        found=installed.get(canonicalize_name(req.name))
+        if found is None or (req.specifier and found.version not in req.specifier): issues.append({'package':name,'requirement':raw,'installed':None if found is None else found.version})
+assert not issues,issues
+result={'status':'passed','executable':sys.executable,'prefix':sys.prefix,'resolved_package_count':len(resolution['install']),
+    'installed_package_count':len(installed),'selected_project_extras':['mlx','diarization'],'metadata_issues':issues,
+    'resolution_sha256':hashlib.sha256((BASE/'pip-resolution.json').read_bytes()).hexdigest(),
+    'installed':{name:d.version for name,d in sorted(installed.items())}}
+(BASE/'installed-metadata-consistency.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result,indent=2))
