@@ -187,7 +187,13 @@ class PipelineRunner:
             self._thread = threading.Thread(
                 target=self._run, args=(config, session_id), name=f"pipeline-{session_id}", daemon=True
             )
-            self._thread.start()
+            try:
+                self._thread.start()
+            except BaseException:
+                self._lease.release(self._lease_token)
+                self._lease_token = None
+                self._status.state, self._status.outcome = "error", "failed"
+                raise
             if config.diarize:
                 try:
                     from operator_app.features import get_diarize_watcher
@@ -342,6 +348,9 @@ class PipelineRunner:
             "--log-level",
             config.log_level,
         ]
+        from settings import settings
+
+        argv += ["--http-port", str(settings.server.http_port), "--ws-port", str(settings.server.ws_port)]
         if session_id is not None:
             argv += ["--session-id", session_id]
         for option_name in ("stt_backend", "model_family", "gemma4_size"):
@@ -350,8 +359,8 @@ class PipelineRunner:
                 argv += ["--" + option_name.replace("_", "-"), str(value)]
         if config.low_vram:
             argv.append("--low-vram")
-        if config.profile != "standard":
-            argv += ["--profile", config.profile]
+        # Explicit selection must override STARK_PROFILE inherited by the child.
+        argv += ["--profile", config.profile]
         if not config.record_audio:
             argv += ["--no-record-audio"]
         if config.engine != "auto":

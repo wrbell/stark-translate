@@ -115,10 +115,13 @@ _managed_llama_server = None
 logger = logging.getLogger("stark")
 logger.setLevel(logging.DEBUG)  # handler levels control actual output
 # Console handler (default INFO, overridden by --log-level)
-_console_handler = logging.StreamHandler(sys.stdout)
-_console_handler.setLevel(logging.INFO)
-_console_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"))
-logger.addHandler(_console_handler)
+_console_handler = next((h for h in logger.handlers if getattr(h, "_stark_console", False)), None)
+if _console_handler is None:
+    _console_handler = logging.StreamHandler(sys.stdout)
+    _console_handler._stark_console = True
+    _console_handler.setLevel(logging.INFO)
+    _console_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"))
+    logger.addHandler(_console_handler)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -3876,6 +3879,8 @@ def _run_tts(engine, text, language, cid, output_mode, loop, speech_end=None, su
         )
 
     except Exception as e:
+        if _health is not None:
+            _health.error("tts", type(e).__name__)
         print(f"  [tts] ERROR: {e}", file=sys.stderr)
 
 
@@ -4408,6 +4413,14 @@ async def audio_loop():
                     _health.phase("listening")
                 while True:
                     if _health is not None and _health.paused:
+                        if len(speech_buffer) / SAMPLE_RATE >= 0.7:
+                            _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
+                                timeline, utterance_id, "pause"
+                            )
+                            await process_final(speech_buffer.copy(), utterance_id)
+                        if not audio_queue.empty():
+                            _io_pool.record_failure("audio_capture", "pause_queued_audio_discarded")
+                            _health.error("capture", "pause_queued_audio_discarded")
                         speech_buffer = np.array([], dtype=np.float32)
                         timeline = AudioTimeline()
                         silence_frames = speech_frame_count = last_partial_len = 0
@@ -4723,6 +4736,17 @@ async def audio_loop():
                         loop = asyncio.get_event_loop()
                         _schedule_warmup(loop)
 
+        except asyncio.CancelledError:
+            # Admit captured speech before main_async sends the coordinator's
+            # sentinel. Pending translation then follows the normal final drain.
+            if _session_stop_requested and len(speech_buffer) / SAMPLE_RATE >= 0.7:
+                _utterance_timings[utterance_id] = ChunkTiming.from_timeline(timeline, utterance_id, "stop")
+                await process_final(speech_buffer.copy(), utterance_id)
+            if not audio_queue.empty():
+                _io_pool.record_failure("audio_capture", "stop_queued_audio_discarded")
+                if _health is not None:
+                    _health.error("capture", "stop_queued_audio_discarded")
+            raise
         except (sd.PortAudioError, AudioCaptureError) as e:
             if len(speech_buffer):
                 _io_pool.record_failure("audio_capture", "interrupted_utterance")

@@ -59,5 +59,8 @@ class CaptureHandoff:
     def __exit__(self, *args):
         with self._condition:
             self._closed = True
+            if self._items:
+                self.dropped += len(self._items)
+                self.on_drop()
             self._items.clear()
             self._condition.notify_all()

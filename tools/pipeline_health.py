@@ -122,6 +122,7 @@ class PipelineHealth:
             self._stop.wait(0.5)
 
     def close(self, outcome):
+        self.paused = False
         self.phase(outcome)
         self._stop.set()
         if self._thread:

@@ -27,9 +27,11 @@ MAX_BUNDLE_BYTES = 100 * 1024 * 1024
 
 
 def _scoped(root, path):
-    root, path = root.resolve(), Path(path)
-    if path.is_symlink() or not path.resolve().is_relative_to(root):
+    root, path = root.resolve(), Path(path).absolute()
+    if not path.is_relative_to(root) or not path.resolve().is_relative_to(root):
         raise ValueError("Path must stay inside this installation")
+    if any(parent.is_symlink() for parent in (path, *path.parents) if parent.is_relative_to(root)):
+        raise ValueError("Support and cleanup paths must not contain symlinks")
     return path
 
 
@@ -157,10 +159,12 @@ def preview_support(root, req):
         directory = _scoped(root, root / "stark_data" / "live_sessions" / req.session_id)
         if directory.is_dir():
             files.extend(_scoped(root, p) for p in sorted(directory.glob("chunk_*.wav")) if p.is_file())
-    entries = [{"path": str(p.relative_to(root)), "bytes": p.stat().st_size, "sha256": _digest(p)} for p in files]
+    entries = [{"path": str(p.relative_to(root)), "bytes": p.stat().st_size} for p in files]
     size = sum(item["bytes"] for item in entries)
     if size > MAX_BUNDLE_BYTES:
         raise ValueError("Support attachments exceed 100 MiB; export metadata only or select a shorter session")
+    for entry, path in zip(entries, files, strict=True):
+        entry["sha256"] = _digest(path)
     payload = {
         "metadata": metadata,
         "files": entries,
@@ -264,7 +268,7 @@ def api_support_export(req: PreviewRequest, runner: PipelineRunner = Depends(get
 def api_support_download(bundle_id: str, runner: PipelineRunner = Depends(get_runner)):
     if not re.fullmatch(r"[0-9a-f]{32}", bundle_id):
         raise HTTPException(status_code=404, detail="Support bundle not found")
-    path = _scoped(runner._project_root, runner._project_root / "metrics" / "support" / f"{bundle_id}.zip")
+    path = _call(_scoped, runner._project_root, runner._project_root / "metrics" / "support" / f"{bundle_id}.zip")
     if not path.is_file():
         raise HTTPException(status_code=404, detail="Support bundle not found")
     return FileResponse(path, media_type="application/zip", filename=f"support-{bundle_id}.zip")

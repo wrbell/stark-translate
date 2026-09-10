@@ -177,14 +177,17 @@ def test_output_devices_endpoint(devices):
     assert response.json()["outputs"] == []
 
 
-def test_start_request_passes_routes_to_session_config():
+def test_start_request_passes_routes_to_session_config(tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
 
     from operator_app.main import app, get_runner
     from operator_app.pipeline_manager import SessionStatus
 
     runner = Mock()
+    runner._project_root = tmp_path
+    runner.status.return_value = SessionStatus(state="idle")
     runner.start.return_value = SessionStatus(state="starting")
+    monkeypatch.setattr("operator_app.main.run_all_checks", lambda **kwargs: {"ok": True, "checks": []})
     app.dependency_overrides[get_runner] = lambda: runner
     try:
         response = TestClient(app).post(

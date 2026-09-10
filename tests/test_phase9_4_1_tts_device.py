@@ -21,12 +21,14 @@ def _reset():
 
 
 @pytest.fixture
-def client():
+def client(monkeypatch):
     from fastapi.testclient import TestClient
 
     from operator_app.main import app
 
-    return TestClient(app)
+    monkeypatch.setattr("operator_app.main.run_all_checks", lambda **kwargs: {"ok": True, "checks": []})
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 # -- PiperTTSEngine.play -----------------------------------------------------

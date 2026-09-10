@@ -309,3 +309,69 @@ def test_file_callback_wakes_async_queue_from_reader_thread(monkeypatch):
         assert queue.empty()
 
     asyncio.run(exercise(), debug=True)
+
+
+@pytest.mark.parametrize("operation", ["stop", "pause", "disconnect"])
+def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tmp_path, operation):
+    from types import SimpleNamespace
+
+    import dry_run_ab as d
+    from tools import audio_bridge_client
+    from tools.isolated_audio import AudioCaptureError
+    from tools.persistence import PersistenceExecutor
+    from tools.pipeline_health import PipelineHealth
+
+    async def exercise():
+        queue = asyncio.Queue()
+        for _ in range(25):
+            queue.put_nowait(np.ones(512, np.float32) * 0.1)
+        stream = MagicMock()
+        stream.error = None
+        stream.finished = threading.Event()
+        health = PipelineHealth(tmp_path, "control_en")
+        pool = PersistenceExecutor(max_workers=1)
+        monkeypatch.setattr(audio_bridge_client, "open_audio_stream", lambda **kwargs: stream)
+        monkeypatch.setattr(d.sd, "PortAudioError", type("PortAudioError", (Exception,), {}))
+        monkeypatch.setattr(d, "_health", health)
+        monkeypatch.setattr(d, "_io_pool", pool)
+        monkeypatch.setattr(d, "audio_queue", queue)
+        monkeypatch.setattr(d, "_pipeline_chunk_queue", asyncio.Queue())
+        monkeypatch.setattr(d, "EXIT_AFTER_REPLAY", False)
+        monkeypatch.setattr(d, "_session_stop_requested", operation == "stop")
+        monkeypatch.setattr(d, "is_speech", lambda *args: True)
+        monkeypatch.setattr(d, "process_final", AsyncMock())
+        monkeypatch.setattr(d, "process_partial", AsyncMock())
+        monkeypatch.setattr(d, "_warmup_pending", False)
+        monkeypatch.setattr(d, "_last_warmup_time", float("inf"))
+        monkeypatch.setattr(d, "vad_model", SimpleNamespace(reset_states=lambda: None))
+        task = asyncio.create_task(d.audio_loop())
+        try:
+            for _ in range(100):
+                if queue.empty():
+                    break
+                await asyncio.sleep(0.01)
+            assert queue.empty()
+            if operation == "stop":
+                task.cancel()
+            elif operation == "pause":
+                health.paused = True
+            else:
+                stream.error = AudioCaptureError("disconnected")
+            for _ in range(100):
+                if d.process_final.await_count or pool.snapshot()["failed"]:
+                    break
+                await asyncio.sleep(0.01)
+            if operation == "disconnect":
+                assert not d.process_final.await_count
+                assert not pool.snapshot()["ok"]
+                assert health.snapshot()["recording"]["required_failures"] == 1
+            else:
+                assert d.process_final.await_count == 1
+                assert len(d.process_final.await_args.args[0]) == 25 * 512
+                assert pool.snapshot()["ok"]
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+            pool.shutdown(wait=True)
+
+    asyncio.run(exercise())

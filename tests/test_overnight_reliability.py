@@ -142,7 +142,7 @@ def test_support_rejects_cross_root_and_symlink(tmp_path):
     audio = tmp_path / "stark_data" / "live_sessions" / "service_en"
     audio.mkdir(parents=True)
     (audio / "chunk_0001.wav").symlink_to(tmp_path / "metrics" / "diagnostics_service_en.jsonl")
-    with pytest.raises(ValueError, match="inside"):
+    with pytest.raises(ValueError, match="symlinks"):
         preview_support(tmp_path, SupportRequest(session_id="service_en", include_audio=True))
 
 
@@ -279,7 +279,7 @@ def test_file_capture_handoff_backpressures_and_close_unblocks_producer():
     finally:
         handoff.__exit__()
         thread.join(timeout=1)
-    assert not thread.is_alive() and handoff.dropped == 0
+    assert not thread.is_alive() and handoff.dropped == 1
 
 
 def test_forced_runner_stop_cleans_child_group_and_reports_incomplete(tmp_path):
@@ -442,3 +442,32 @@ def test_capture_handoff_recovers_after_consumer_error():
         handoff.put("good")
         callbacks.pop()()
         assert failures == [1] and consumed == ["good"] and handoff.qsize() == 0
+
+
+def test_paused_session_reports_final_health_outcome(tmp_path):
+    health = PipelineHealth(tmp_path, "service_en")
+    health.paused = True
+    health.close("interrupted")
+    assert read_health(tmp_path, "service_en")["phase"] == "interrupted"
+
+
+def test_operator_uses_same_effective_display_ports_as_capabilities(tmp_path, monkeypatch):
+    from operator_app.pipeline_manager import PipelineRunner, SessionConfig
+    from settings import settings
+
+    monkeypatch.setattr(settings.server, "http_port", 18080)
+    monkeypatch.setattr(settings.server, "ws_port", 18765)
+    argv = PipelineRunner(tmp_path)._build_argv(SessionConfig(), "service_en")
+    assert argv[argv.index("--http-port") + 1] == "18080"
+    assert argv[argv.index("--ws-port") + 1] == "18765"
+    monkeypatch.setenv("STARK_PROFILE", "lite-cpu")
+    argv = PipelineRunner(tmp_path)._build_argv(SessionConfig(profile="standard"), "service_en")
+    assert argv[argv.index("--profile") + 1] == "standard"
+
+
+def test_support_rejects_parent_symlink_inside_same_installation(tmp_path):
+    complete(tmp_path)
+    (tmp_path / "inside").mkdir()
+    (tmp_path / "stark_data").symlink_to(tmp_path / "inside", target_is_directory=True)
+    with pytest.raises(ValueError, match="symlinks"):
+        preview_support(tmp_path, SupportRequest(session_id="service_en", include_audio=True))
