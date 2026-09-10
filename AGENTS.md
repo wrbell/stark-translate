@@ -1,23 +1,27 @@
 # AGENTS.md — Live Bilingual Speech-to-Text
 
-> **Release lines (2026-09-09):** **main** is v2026.13. The v2026.14 candidate
-> (`2026.14.0.0`) lives on `codex/mac-reliability-roadmap` (base `5154fb9`) and is
-> proposed in draft [PR #192](https://github.com/wrbell/stark-translate/pull/192) —
-> open, **not merged**. Overnight worktrees (docs, lite, latency, operator-ui,
-> reliability) are pending integration into that PR. PyPI/package/release tags are
-> pending by user choice. Do not recreate `stt_env`.
+> **Release lines (2026-09-10):** **main** is v2026.13. The v2026.14 candidate
+> (`2026.14.0.0`) lives on `codex/mac-reliability-roadmap` and is proposed in draft
+> [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open, **not merged**.
+> The overnight worktrees (docs, lite, latency, operator-ui, reliability, issue-evidence)
+> are **integrated** on that branch and are being validated by the parent session; main
+> advances only at the authorized final merge. Source and issue publishing are authorized;
+> PyPI/package artifacts/release tags remain pending by user choice. Do not recreate `stt_env`.
 >
 > Paired human guide: [`CLAUDE.md`](CLAUDE.md) (same content, human-facing links).
+>
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) ·
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
 > Remaining work: [`docs/backlog.json`](docs/backlog.json) (rendered
-> [`docs/backlog.md`](docs/backlog.md)) · Tonight: [`docs/overnight_status.md`](docs/overnight_status.md)
+> [`docs/backlog.md`](docs/backlog.md)) · Overnight: [`docs/overnight_status.md`](docs/overnight_status.md)
 
 On-device live EN↔ES speech-to-text for Stark Road Gospel Hall (Farmington Hills, MI).
 `--lang en` (EN→ES) · `--lang es` (ES→EN) · optional Piper TTS (`--tts`).
 MLX on Apple Silicon for inference; CUDA/WSL for training. Lite CPU and native
-Windows/RTX 2070 inference are equal-priority targets whose implementation is in
-progress (lite worktree) and whose certification on hardware is pending.
+Windows/RTX 2070 inference are equal-priority targets: the profiles are **implemented**
+(`standard` default; opt-in `lite-cpu`, `lite-cpu-quality`, `lite-cuda-8gb`) and passed an
+isolated Mac CPU synthetic smoke; hardware performance and certification are pending
+([`docs/lite_profiles.md`](docs/lite_profiles.md)).
 
 ## Two-pass pipeline (current Mac defaults, from `settings.py` / `engines/factory.py`)
 
@@ -29,29 +33,41 @@ progress (lite worktree) and whose certification on hardware is pending.
 **Policy:** fast revisable partials; careful finals. Sub-second median caption delivery
 is the goal and is **not yet achieved**; it is active Mac engineering with separate
 quality/certification gates (natural references, bilingual review, visible-browser ACKs).
-Schema 2 `speech_end_to_final_ms` = estimated speech end → payload ready;
-`speech_end_to_ack_upper_bound_ms` includes return-network time; legacy
-`e2e_latency_ms` is archived processing time. Definitions:
-[`docs/evaluation/README.md`](docs/evaluation/README.md).
+Schema 2 `speech_end_to_final_ms` = estimated speech end → final payload ready;
+`speech_end_to_ack_upper_bound_ms` = estimated speech end → visible-browser
+acknowledgement (includes return-network time); legacy `e2e_latency_ms` is archived
+processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/README.md).
+
+**Lite profiles** (`stark_translate/profiles.py`, `stark-translate-lite`): Whisper small
+CT2 int8 + Marian CT2 finals on CPU (`lite-cpu`), Gemma 4 E2B Q4_K_M via a session-owned
+`llama-server` (`lite-cpu-quality`, `lite-cuda-8gb`); ONNX Silero; no A/B, drafting,
+multiprocess or live diarization. Selected explicitly, never auto-upgraded.
 
 **CUDA (v2026.8+ on A2000):** W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B via llama.cpp
 (`start_server.sh`, default `--no-draft`, `--mtp` opt-in, pin `b10883`). Benchmarks:
 [`docs/archive/v2026.7/STT_BENCHMARK.md`](docs/archive/v2026.7/STT_BENCHMARK.md),
 [`docs/archive/v2026.8/MARIAN_BENCHMARK.md`](docs/archive/v2026.8/MARIAN_BENCHMARK.md).
+On the Mac, `--mts` (MLX MTP drafter, #177) is **rejected before any model loads**
+(`validate_live_mts`); it stays an offline experiment.
 
-**Known open bug (2026-09-09):** the built-in microphone session stalled after
-"Listening..." while the operator showed RUNNING from the CSV header; file replay
-passed. Live-mic and physical-device checks are deferred to tomorrow. See
-`mac-live-mic-stall` in the backlog.
+**Live microphone (2026-09-09 → 10):** the built-in-mic session
+`20260909_233204_799019_en` stalled after "Listening..." while the operator showed RUNNING
+from the CSV header. The fix is **implemented**: PortAudio runs in a disposable child
+(`tools/isolated_audio.py`, `tools/capture_worker.py`) with a 5 s no-input startup timeout
+and 3 s idle timeout that fail the session (`AudioCaptureError`), and operator readiness
+comes from `tools/pipeline_health.py` phases (`loading → listening → ready`,
+`input_error`) rather than file presence. The **real built-in-mic retest is deferred to
+tomorrow**; file replay passes. See `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
 
 ## Environment split
 
 | Machine | Role | Guide |
 |---------|------|-------|
 | MacBook M3 Pro 18 GB | Inference, operator UI, displays | [`CLAUDE-macbook.md`](CLAUDE-macbook.md) |
-| Windows WSL2 A2000 Ada | Preprocess, fine-tune, export | [`CLAUDE-windows.md`](CLAUDE-windows.md) |
+| Windows desktop, WSL2, A2000 Ada | Preprocess, fine-tune, export, CUDA bench | [`CLAUDE-windows.md`](CLAUDE-windows.md) Part A |
+| Native Windows / RTX 2070 or CPU church PC | Lite inference (`stark-translate-lite`) | [`CLAUDE-windows.md`](CLAUDE-windows.md) Part B, [`docs/lite_profiles.md`](docs/lite_profiles.md) |
 
-Adapters: WSL → copy to Mac `adapters/`. Mac install/readiness:
+Adapters: WSL → export → copy to Mac `adapters/`. Mac install/readiness:
 [`docs/packaging/macos.md`](docs/packaging/macos.md).
 
 ## Six quality layers
@@ -76,7 +92,7 @@ benchmark numbers in guides.
 | v2026.9–11 | llama.cpp tuning, IQ4_XS rejected, imatrix calibration | [`v2026.9/GEMMA_OPTIM_PHASE2.md`](docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md), [`v2026.10/IQ4_XS_BENCHMARK.md`](docs/archive/v2026.10/IQ4_XS_BENCHMARK.md), [`v2026.11/IMATRIX_CALIBRATION.md`](docs/archive/v2026.11/IMATRIX_CALIBRATION.md) |
 | v2026.12 | Gemma 4 OptiQ E4B Mac default; EOS bug #172 fixed | [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
 | v2026.13 (main) | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
-| v2026.14 candidate | Reliability, schema 2, setup, Review/export, screening — **local branch, PR #192 draft** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md) |
+| v2026.14 candidate | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **PR #192 draft, integrated, under validation** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md) |
 
 ## Subdirectory guides
 
@@ -91,10 +107,11 @@ benchmark numbers in guides.
 ## Extension patterns
 
 - New engine → `engines/AGENTS.md` § Adding a New Engine (details in `engines/CLAUDE.md`)
-- New language → `engines/AGENTS.md` + `training/AGENTS.md` (Hindi/Chinese are pending user decisions)
+- New language → `engines/AGENTS.md` + `training/AGENTS.md` (Hindi/Chinese are pending user decisions; `tools/offline_hindi.py` is an offline evaluation baseline, not a live path)
 - New display → `displays/AGENTS.md`
 - Adapter deploy → `tools/AGENTS.md`
 - Active learning → `tools/AGENTS.md`
+- New deployment profile → `stark_translate/profiles.py` + `operator_app/lite_preflight.py` + `models.lock.json` ([`docs/lite_profiles.md`](docs/lite_profiles.md))
 
 ## CI/CD
 
@@ -121,8 +138,9 @@ Latest recorded suite counts live only in
 - [x] Phases 0–3, 5–6, 9 — infrastructure, data, first fine-tunes, operator UI
 - [ ] Phase 4 — WSL full preprocess ([`docs/wsl_pipeline_refresh.md`](docs/wsl_pipeline_refresh.md))
 - [ ] Phase 7–8 — Mac A/B (#135), active learning evidence (#137)
-- [ ] Phase 10 — Human gates: live-mic smoke (#131), diarization gate (#133), physical
-      second output (#132), Sunday dry-run (#134); TTS routing code and live diarization
-      code are implemented, their acceptance is not certified
+- [ ] Phase 10 — Human gates: live-mic smoke EN/ES (#131, fix implemented, retest deferred),
+      diarization gate (#133), physical second output (#132), dry run with laptop stand-in
+      allowed (#134); TTS routing code and live diarization code are implemented, their
+      acceptance is not certified
 
 Statuses, priorities, dependencies and acceptance per item: [`docs/backlog.json`](docs/backlog.json).

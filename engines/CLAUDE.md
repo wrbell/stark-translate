@@ -86,8 +86,24 @@ not use the Whisper fallback chain.
 
 - **Whisper HF spec decode:** requires an explicit, verified draft. distil-large-v3.5 → whisper-large-v3-turbo is incompatible (10× slower, hallucinations; [`docs/archive/v2026.5/spec_decode_research.md`](../docs/archive/v2026.5/spec_decode_research.md)). Off by default.
 - **TranslateGemma 4B → 12B drafting (`--ab --num-draft-tokens`):** legacy A/B path only.
-- **Gemma 4 assistant drafter (`--mts`, #177):** experimental and **off**. The flag routes through `mlx_lm.load`, which cannot load `gemma4_assistant`; the working probe is `engines/mlx_spec.py` over mlx-optiq (`tools/mts_acceptance_probe.py`). Results and the rejected RoPE hypothesis: [`docs/archive/v2026.13/MAC_LATENCY.md`](../docs/archive/v2026.13/MAC_LATENCY.md), [`docs/mlx_mtp_notes.md`](../docs/mlx_mtp_notes.md).
+- **Gemma 4 assistant drafter (`--mts`, #177):** **off, and rejected before any model loads.** `dry_run_ab.py` `validate_live_mts()` raises `LIVE_MTS_UNAVAILABLE` ("Live --mts is unavailable: the supported mlx-lm loader cannot load the Gemma 4 assistant drafter… run with --no-mts") when `--mts` or `STARK_TRANSLATE_MLX_MTS` is set; the live pipeline never continues silently after a drafter failure. The working offline probe is `engines/mlx_spec.py` over mlx-optiq (`tools/mts_acceptance_probe.py`). Results and the rejected RoPE hypothesis: [`docs/archive/v2026.13/MAC_LATENCY.md`](../docs/archive/v2026.13/MAC_LATENCY.md), [`docs/mlx_mtp_notes.md`](../docs/mlx_mtp_notes.md).
 - **CUDA MTP:** `start_server.sh --mtp` opt-in on llama.cpp `b10883`; unbenchmarked on hardware ([`docs/cuda_latency_proposal.md`](../docs/cuda_latency_proposal.md)).
+- **Latency experiments** (`tools/latency_experiments.py`, `tools/latency_scheduler.py`, `tools/incremental_stt.py`, `tools/preview_candidates.py`): opt-in research controls validated before session startup, never promoted by selecting a backend; evidence is collected by `tools/overnight_bench.py` (parent-owned).
+
+## Deployment profiles (`stark_translate/profiles.py`)
+
+`apply_profile()` runs once after CLI overrides and before model loads. `standard` leaves
+the factory's platform selection alone. The Lite profiles (`lite-cpu`, `lite-cpu-quality`,
+`lite-cuda-8gb`) force: `stt.backend = faster-whisper` with the pinned CT2 model
+(`whisper-small` int8 on CPU; `whisper-large-v3-turbo` int8_float16 on CUDA), 3 CT2 threads
+and one STT worker, `local_files_only`, no low-confidence fallback model; `vad.backend =
+onnx`; `marian_backend = ct2` on CPU int8 with one intra-thread; `model_family = gemma4`
+with E2B; finals via `MarianCT2Engine` (`lite-cpu`, `low_vram`) or `LlamaCppEngine`
+against a session-owned `llama-server` started by `tools/llama_runtime.py`
+(`lite-cpu-quality`, `lite-cuda-8gb`); `run_ab`, `multiprocess`, `use_speculative` and
+`mlx_mts` off. Lite never inherits the standard path's W16 CT2 adapter preference. E2B or
+native-runtime failures fail the session; no HF NF4 fallback. Admission floors and
+evidence: [`docs/lite_profiles.md`](../docs/lite_profiles.md).
 
 ## Environment variables (pydantic-settings, `settings.py`)
 
@@ -100,7 +116,8 @@ accepts `STARK_<GROUP>__<FIELD>` with the double-underscore delimiter. Common ke
 | `STARK_STT_BACKEND` / `--stt-backend` | `auto`, `mlx`, `parakeet-mlx`, `faster-whisper`, `hf`, `parakeet` |
 | `STARK_TRANSLATE_MODEL_FAMILY` | `gemma4` (default) or `translategemma` |
 | `STARK_TRANSLATE_MARIAN_BACKEND` | `auto` (CT2 when artifact present), `ct2` (strict), `hf` |
-| `STARK_TRANSLATE_MLX_MTS` | Experimental drafter flag (#177); leave unset |
+| `STARK_TRANSLATE_MLX_MTS` | Drafter flag (#177); when set, `validate_live_mts` aborts the live session before load — leave unset |
+| `STARK_PROFILE` / `--profile` | `standard` (default), `lite-cpu`, `lite-cpu-quality`, `lite-cuda-8gb`; `stark-translate-lite` defaults to `lite-cpu` |
 | `STARK_VAD_BACKEND` | `torch` (default) or `onnx` |
 | `STARK_TTS_OUTPUT_DEVICES` | Per-language local TTS output map (index, name substring or null) |
 | `STARK_MODELS_DIR` | Model cache used by setup and inference (`engines/model_paths.py`) |
@@ -122,7 +139,7 @@ accepts `STARK_<GROUP>__<FIELD>` with the double-underscore delimiter. Common ke
 ## Adding a New Language
 
 - STT: mlx-whisper is multilingual; Parakeet TDT v3 covers EN/ES/others but is only wired for EN dispatch. Add the `--lang` choice in `dry_run_ab.py` and a Marian direction in `factory._marian_direction_from_langs()` (only `en-es` / `es-en` have CT2 adapters today).
-- Translation: Gemma 4 prompts take language names; TranslateGemma takes codes. Hindi/Chinese remain pending user decisions (#138, roadmap Phase 8); the offline Hindi text probe in [`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md) is not a live baseline.
+- Translation: Gemma 4 prompts take language names; TranslateGemma takes codes. Hindi/Chinese remain pending user decisions (#138, roadmap Phase 8). `tools/offline_hindi.py` (church audio → Parakeet English → Gemma Hindi; `prepare` / `transcribe` / `translate --size e4b|e2b` / `report` subcommands, evaluation-only output directories, never starts the live pipeline) is an **offline baseline tool with no live integration**, executed sequentially by the parent session; the earlier text probe is in [`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md).
 - TTS: add a Piper voice to `settings.tts.voices` and the setup `tts` profile.
 
 ## Related
@@ -130,4 +147,5 @@ accepts `STARK_<GROUP>__<FIELD>` with the double-underscore delimiter. Common ke
 - [`docs/current_architecture.md`](../docs/current_architecture.md) — pipeline contracts and schema 2 timing
 - [`docs/mlx_cuda_parity.md`](../docs/mlx_cuda_parity.md) — MLX ↔ CUDA semantic parity checklist
 - [`docs/packaging/models.md`](../docs/packaging/models.md) — model manifest, managed Marian CT2 artifacts
-- [`docs/backlog.json`](../docs/backlog.json) — open engine items (#176 implemented, #177 experimental, lite/2070 in progress)
+- [`docs/lite_profiles.md`](../docs/lite_profiles.md) — Lite profile contract, pinned artifacts, Mac CPU smoke evidence
+- [`docs/backlog.json`](../docs/backlog.json) — open engine items (#176 implemented, #177 rejected-before-load, Lite implemented / hardware pending)

@@ -5,9 +5,10 @@
 > **Role:** inference, operator UI, browser displays, Mac evaluation. Training happens on
 > WSL ([`CLAUDE-windows.md`](./CLAUDE-windows.md)). Parent: [`CLAUDE.md`](./CLAUDE.md).
 >
-> **State (2026-09-09):** main is v2026.13; the v2026.14 candidate is on
+> **State (2026-09-10):** main is v2026.13; the v2026.14 candidate is on
 > `codex/mac-reliability-roadmap` (draft [PR #192](https://github.com/wrbell/stark-translate/pull/192),
-> not merged). Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md);
+> not merged) with all overnight worktrees integrated and under parent validation.
+> Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md);
 > contracts: [`docs/current_architecture.md`](docs/current_architecture.md); remaining work:
 > [`docs/backlog.json`](docs/backlog.json). **Do not recreate `stt_env`.** Validation counts
 > and latency numbers live only in the linked evidence documents.
@@ -23,8 +24,10 @@
 | Partial translation | Marian CT2 int8 on CPU (4 threads) from `adapters/marian_ct2/<dir>/active` or the managed setup cache; HF PyTorch fallback | `STARK_TRANSLATE_MARIAN_BACKEND=hf\|ct2` |
 | Final STT | Same engine as partials; Whisper low-confidence fallback to `wbell7/distil-whisper-large-v3.5-mlx` | `--word-timestamps` (off by default) |
 | Final translation | Gemma 4 E4B OptiQ (`mlx-community/gemma-4-e4b-it-OptiQ-4bit`) | `--gemma4-size e2b`; `--model-family translategemma [--ab]` |
-| TTS (off) | Piper `en_US-lessac-high` / `es_MX-claude-high`; `--tts-output ws\|wav\|both\|local` | `--tts --tts-device-en/--tts-device-es` |
-| Experiments (all off) | `--idle-warmup-only`, `--final-aware-partials`, `--routing-policy conservative`, `--terminology-prompt church`, `--mts` (#177, never loads) | Keep off; see the 48-run screen |
+| TTS (off) | Piper `en_US-lessac-high` / `es_MX-claude-high`; `--tts-output ws\|wav\|both\|local` | `--tts` / explicit `--no-tts` (`c5fb689`), `--tts-device-en/--tts-device-es` |
+| Experiments (all off) | `--idle-warmup-only`, `--final-aware-partials`, `--routing-policy conservative`, `--terminology-prompt church`, latency experiments in `tools/latency_experiments.py` (opt-in, validated before startup) | Keep off; see the 48-run screen and `tools/overnight_bench.py` cohorts |
+| MTP drafter (`--mts`, #177) | **Rejected before any model loads** (`validate_live_mts`: "Live --mts is unavailable"); `--no-mts` is the explicit off switch | Offline experiment only ([`docs/mlx_mtp_notes.md`](docs/mlx_mtp_notes.md)) |
+| Profile | `standard` (default). `stark-translate-lite` / `--profile lite-cpu` runs the CPU Lite profile on this Mac for implementation testing only — it certifies neither an x86 CPU nor a 2070 | [`docs/lite_profiles.md`](docs/lite_profiles.md) |
 
 Policy: fast revisable partials, careful finals. Sub-second median speech-end-to-caption
 is the goal, **not achieved**, and is active engineering (`caption-delivery-goal`).
@@ -77,7 +80,7 @@ modified; the manual converter remains `scripts/convert_marian_ct2.py --quantiza
 ### Memory
 
 Peak usage is recorded per session in `metrics/session_lifecycle_<id>.json`
-(`memory.peak_rss_bytes`, `memory.peak_metal_bytes`); tonight's ES file-replay session
+(`memory.peak_rss_bytes`, `memory.peak_metal_bytes`); the 2026-09-09 ES file-replay session
 `20260909_233823_034893_es` (E4B, Whisper turbo, Marian CT2) recorded roughly 4.2 GB RSS
 and 9.1 GB peak Metal. TranslateGemma A/B (`--ab`) loads two models and is the
 memory-heavy configuration; check the lifecycle file rather than a static table. Metal
@@ -109,16 +112,30 @@ Displays: `http://localhost:8080/displays/audience_display.html` (projector),
 Ports: 8080 HTTP, 8765 captions, 9000 operator. Protocol and timing semantics:
 [`displays/CLAUDE.md`](displays/CLAUDE.md).
 
-### Known issue — built-in microphone stall (2026-09-09)
+### Built-in microphone stall (2026-09-09) — fix implemented, live retest deferred
 
 Session `20260909_233204_799019_en` (`audio_source: mic`) loaded all models, printed
 "Listening...", served the audience page, then received no audio frames; its lifecycle
 file stayed `status: running`, the operator showed RUNNING because the CSV header existed,
 and the audience display stayed disconnected. A standalone `sounddevice` record probe
-stalled too. File-replay sessions on the same build passed. Live-mic and
-physical-output checks are deferred to tomorrow; reliability helpers are being drafted in
-another worktree (`mac-live-mic-stall`, `overnight-reliability`). Until fixed, treat
-RUNNING without partials as a failed start.
+stalled too. File-replay sessions on the same build passed.
+
+What changed (integrated on the candidate branch, `c5fb689`):
+
+- **Isolated capture:** `tools/isolated_audio.py` `IsolatedInputStream` runs PortAudio in a
+  disposable child (`tools/capture_worker.py`); the parent never opens the native device.
+  A **5 s startup timeout** with no samples, or a **3 s idle gap**, raises
+  `AudioCaptureError("Microphone delivered no samples…")` and fails the session instead of
+  hanging. `tools/capture_handoff.py` bounds the callback → asyncio handoff.
+- **Readiness/health:** `tools/pipeline_health.py` publishes `loading → listening → ready`
+  (first input frame), `paused`, `input_error`, with staleness; the operator
+  (`operator_app/pipeline_manager.py`) derives `ready` from this channel, not from the CSV
+  header. `operator_app/audio_tests.py` runs idle-only device probes in disposable processes.
+- **Ownership:** `operator_app/processes.py` cleans only owned subprocesses;
+  `operator_app/work_lease.py` allows one model/audio job per operator.
+
+**Not yet proven:** a real built-in-microphone session on this Mac (deferred to tomorrow),
+physical second output, hotplug. Until then #131 stays `in_progress`.
 
 ---
 
@@ -163,7 +180,8 @@ timing run, two-speaker diarization clip, second physical output, Sunday dry run
 
 | Issue | Fix |
 |-------|-----|
-| RUNNING but no partials, audience disconnected | Known mic stall (above). Check microphone permission for the launching app, `python -m sounddevice`, and `metrics/session_<id>.log`; run `--audio-file` to confirm the rest of the pipeline |
+| Session fails with "Microphone delivered no samples" or health shows `input_error` | Isolated capture timed out (above). Check microphone permission for the launching app, the operator's idle device probe, and `metrics/session_<id>.log`; run `--audio-file` to confirm the rest of the pipeline |
+| Operator shows RUNNING with no partials | Should no longer happen (readiness comes from `pipeline_health`); if it does, capture the session id and health snapshot — it is evidence for `mac-live-mic-stall` |
 | Preflight fails on models | `stark-translate setup --backend mlx` (add `--include ...`); set `STARK_MODELS_DIR` at launch if setup used `--models-dir` |
 | Marian preflight fails | Setup needs a complete CT2 artifact for the selected direction; rerun setup or `scripts/convert_marian_ct2.py` |
 | Gemma output truncated or runs to `max_tokens` | Stop-token regression (#172) — verify `ensure_stop_tokens` logs "added=" for the family; never hand-edit `_eos_token_ids` |

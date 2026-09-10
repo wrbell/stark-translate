@@ -1,408 +1,245 @@
 # training/ — Fine-Tuning & Data Preparation (Windows/WSL)
 
-> Paired with [`AGENTS.md`](./AGENTS.md). All training runs on the **Windows Desktop**
-> (WSL2, A2000 Ada 16 GB, 64 GB RAM); adapters transfer to Mac for inference. Environment
-> setup: [`CLAUDE-windows.md`](../CLAUDE-windows.md). Ordered next steps for the box:
+> Paired with [`AGENTS.md`](./AGENTS.md). Everything here runs on the **WSL2 training
+> desktop** (A2000 Ada 16 GB, 64 GB RAM); exported artifacts move to the inference machines.
+> Environment: [`CLAUDE-windows.md`](../CLAUDE-windows.md) · ordered execution:
 > [`docs/wsl_pipeline_refresh.md`](../docs/wsl_pipeline_refresh.md).
 >
-> **Status (2026-09-09):** no WSL work ran tonight. Phase 4 full preprocess, the Gemma 4
-> E4B domain SFT, W17 and the CUDA latency proposal are all scripted and pending hardware
-> (`docs/backlog.json`: `wsl-phase4`, `wsl-e4b-domain-sft`, `wsl-w17-export`,
-> `cuda-latency-proposal`). Sections marked **historical** record completed runs whose
-> numbers live in the linked documents; do not treat them as current defaults.
-
-## Overview
-
-Domain adaptation programs, in current priority order:
-
-1. **Whisper LoRA** (`train_whisper.py` → `export_ct2.py`) — church sermon STT. **W16** is the deployed CUDA artifact (`adapters/whisper_turbo_ct2/active`, auto-preferred by `FasterWhisperEngine`); **W17** (DoRA + hard-mix curriculum) is scripted in `run_w17_curriculum.sh` and untrained. The Mac EN default is Parakeet MLX, which does not load these adapters — W16 comparisons on Mac run the CPU faster-whisper path (#135).
-2. **Gemma 4 E2B/E4B QLoRA** (`train_gemma4.py` SFT, `train_gemma4_cpo.py` preference optimization, `export_gguf.py`) — the current translation program; plan and results in [`docs/gemma4_tuning/`](../docs/gemma4_tuning/overview.md). v1 → v1.1 → v2-cpo closed most of the COMET-22 gap to stock E4B without crossing it and still fails the Jacobo canary ([`v1_results.md`](../docs/gemma4_tuning/v1_results.md), [`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md); #136). Stock E4B remains the production default on both Mac and CUDA. `train_gemma4.py`, `train_gemma4_cpo.py` and `export_gguf.py` carry `UNTESTED` headers for the full domain run (`run_gemma4_e4b_domain_sft.sh`).
-3. **TranslateGemma QLoRA** (`train_gemma.py`) — **historical** S1–S9 sweep (below); superseded because TranslateGemma is already a translator and the Platense half of its corpus was misaligned.
-4. **MarianMT full fine-tune** (`train_marian.py`) — fallback with a lower ceiling; unused in production.
-
-**Corpus correction (2026-04-29):** `bible_data/aligned/verse_pairs_train.jsonl` joined
-Platense by row order and was misaligned from Psalms onward. Use
-`verse_pairs_train_v2.jsonl` (rebuilt by `tools/rebuild_verse_pairs.py`); postmortem in
-[`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md).
-
-## Audio Preprocessing (10-Step Pipeline)
-
-Raw YouTube church audio → clean training data. Order matters.
-
-1. **Download** — `yt-dlp` from Stark Road Gospel Hall YouTube
-2. **Format** — 16kHz mono WAV via ffmpeg
-3. **Initial quality gate** — SNR (reject < 10 dB), clipping (reject > 1% at ±0.99)
-4. **Classify segments** — `inaSpeechSegmenter` tags speech/music/noise
-5. **Source separation** — `demucs` (`htdemucs`, `--two-stems vocals`)
-6. **Denoise** — ffmpeg bandpass (80Hz–8kHz) + `noisereduce` (non-stationary, `prop_decrease=0.6–0.8`)
-7. **Normalize** — `pyloudnorm` to -16 LUFS, true peak -1 dBTP
-8. **VAD chunking** — `silero-vad`, 1–30s segments, 100ms padding
-9. **Speaker diarization** (optional) — `pyannote-audio` for primary speaker
-10. **Final quality gate** — SNR > 15 dB, duration 1–30s, silence ratio < 50%
-
-**Critical insight:** Don't over-clean. Whisper was trained on noisy audio. Match training noise to expected demo conditions.
-
-## Data Quality Assessment
-
-Before fine-tuning, establish a baseline on 50–100 stratified segments:
-
-| Baseline WER | Strategy |
-|-------------|----------|
-| < 10% | Use directly with confidence-based filtering |
-| 10–20% | Filter worst segments by `avg_logprob` |
-| 20–30% | Weakly supervised pretraining, then fine-tune on clean subset |
-| > 30% | Re-transcribe with Whisper large-v3 instead of YouTube captions |
-
-**Recommendation (historical):** the table above predates the Deepgram oracle. Since the
-W12 runs, Deepgram Nova-3 transcripts (below) are the label source; Whisper large-v3
-re-transcription is only a fallback when Deepgram output is unavailable.
-
-## Biblical Parallel Text Corpus (~155K verse pairs v1 → 265K pairs v2)
-
-**Primary datasets:**
-- `bible-nlp/biblenlp-corpus` (HuggingFace, 833 languages, CC-BY-4.0)
-- `Helsinki-NLP/bible_para` (CC0-1.0)
-- `scrollmapper/bible_databases` (GitHub, SQL/JSON/CSV, numeric verse IDs)
-
-| Pair | Register | License |
-|------|----------|---------|
-| KJV ↔ RVR1909 | Formal-to-formal, archaic | Public domain |
-| ASV ↔ RVR1909 | Formal-to-formal, slightly modern | Public domain |
-| WEB ↔ Español Sencillo | Modern-to-modern | PD / CC BY-SA 4.0 |
-| BBE ↔ RVR1909 | Simplified EN to formal ES | Public domain |
-| YLT ↔ RVR1909 | Hyper-literal EN to formal ES | Public domain |
-
-**COPYRIGHT WARNING:** Do NOT use ESV, NASB, NIV, NLT, NVI, LBLA, RVR1960, or DHH. Fair use caps at ~500 verses — not bulk ML training. Stick to pre-1923 or public-domain translations.
-
-**Supplementary data:** Tiered theological glossary (50 boost + 229 master terms), bilingual catechism excerpts, bilingual sermon transcripts, hybrid synthetic translations (60% 12B + 40% DeepL glossary-enforced).
-
-## Sermon Audio via Pseudo-Labeling (historical — replaced by the Deepgram oracle)
-
-1. Collect 20–50 hours of church audio (soundboard preferred)
-2. Segment into 5–30s chunks via Silero VAD
-3. Run base Distil-Whisper for initial transcriptions (`transcribe_church.py`; no longer the label source)
-4. Filter by confidence (compression ratio > 2.4 or avg log-prob < -1.0 → discard)
-5. Human-correct bottom 20% (prioritize theological terms, biblical names)
-6. Format as HuggingFace Dataset (`audio` + `sentence` columns)
-
-**Data volume thresholds:** 5–10h = vocabulary improvement, 20–50h = strong adaptation (sweet spot), 50–100h+ = production-grade.
-
-## Deepgram Oracle Transcription
-
-Deepgram Nova-3 serves as ground-truth label source for Whisper fine-tuning (replacing pseudo-labels from Distil-Whisper).
-
-- **Script:** `training/transcribe_with_deepgram.py` — async, resume support, 300s timeout for large files (40–160 MB)
-- **Boosted terms:** 50 Tier 1 theological keyterms from `bible_data/glossary/tier1_boost.json` passed via Deepgram `keyterm` parameter
-- **Output:** `.deepgram.json` per sermon with word-level timestamps + confidence scores
-- **Cost:** ~$0.0043/min, ~$9 for 35 hours of audio
-- **Env var:** `STARK_DEEPGRAM__API_KEY`
-
-## Tiered Glossary System
-
-Two-tier glossary replaces the flat 229-term list:
-
-| Tier | Count | Token Budget | Purpose |
-|------|-------|-------------|---------|
-| Tier 1 (Boost) | 50 terms | <420 tokens | Deepgram `keyterm` parameter for STT boosting |
-| Tier 2 (Master) | 229 terms | — | Normalization, active learning, translation glossary enforcement |
-
-- **Script:** `tools/glossary.py` — `load_tier()`, `validate_boost()`, `build_and_save_tiers()`
-- **Build:** `python build_glossary.py --build-tiers   # in training/`
-- **Files:** `bible_data/glossary/tier1_boost.json`, `bible_data/glossary/tier2_master.json`
-
-## Data Organization
-
-Training data is split by a fixed cutoff date for reproducible evaluation.
-
-- **Cutoff:** 2026-03-14 (train on historical sermons, eval on future)
-- **Sort script:** `tools/sort_sermons.py --output-dir stt-data --catalog stark_data/playlist_catalog.json`
-- **Directory structure:** `stt-data/{type}/{year}/` — types: `gospel`, `ministry`, `conference`, `throwback`
-- **Manifest:** `stt-data/manifest.json`
-- **Catalog:** 333 total sermons (35 local + 298 from playlist catalog)
-
-## Whisper LoRA Configuration
-
-Target `q_proj` + `v_proj` (minimum); expand to `k_proj`, `o_proj`, `fc1`, `fc2` for maximum adaptation (W17 recipe).
-
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Rank (r) | 32 | Most validated across Whisper LoRA studies |
-| Alpha | 64 | 2× rank, standard scaling |
-| Target modules | `q_proj`, `v_proj` (W16); + `k_proj`, `o_proj`, `fc1`, `fc2` (W17) | Minimum viable → full acoustic+lexical |
-| DoRA | off (default); `--use-dora` for W17 | ~15–20% VRAM overhead; better domain shift |
-| Dropout | 0.05 | Light regularization |
-| Learning rate | 1e-4 | Standard LoRA |
-| Batch size | 4 (effective 16 via grad accum) | Conservative for 16GB VRAM |
-| Precision | BF16 | Ada native |
-| Gradient checkpointing | Enabled | Essential memory savings |
-| Max steps | 4,000 (or 3–5 epochs) | First cycle |
-| VRAM usage | ~8–10 GB | Comfortable on A2000 Ada |
-
-**W17 curriculum:** `training/run_w17_curriculum.sh` — mine hard examples → WER-bounded subset → train with `--init-from` W16 + `--use-dora` + expanded modules + `--replay-ratio 0.3` → `export_ct2.py` sanity gate. Do **not** hard-only (W15 lesson).
-
-**Gemma 4 E4B domain SFT:** `training/run_gemma4_e4b_domain_sft.sh` — Unsloth QLoRA on S6-style pairs → `export_gguf.py --sanity-test` (8 canaries).
-
-**Phase 4 corpus:** `training/run_phase4_preprocess.sh` wraps `preprocess_audio.py` and writes `stark_data/cleaned/phase4_status.json`.
-
-Mix 70–80% domain data with 20–30% general English (LibriSpeech/Common Voice) for catastrophic forgetting safety.
-
-### Deepgram-Whisper Alignment
-
-- **Script:** `training/align_deepgram_chunks.py` — aligns faster-whisper chunk boundaries with Deepgram word timestamps
-- **Output:** HuggingFace audiofolder dataset for Whisper fine-tuning
-- **Dataset prep:** `prepare_whisper_dataset.py --gt-source deepgram` for direct Deepgram transcript loading (bypasses pseudo-labeling)
-- **Sharded Arrow writes:** `--preprocess-cache` mode streams rows in batches of 1,000 to Arrow shards on disk (`_shards_train/`, `_shards_test/`). Peak RAM ~960 MB of mel data per shard vs 190 GB unbatched. Crash-resume: skips completed shards on re-run.
-- **Memory cap:** 12 GB hard virtual memory limit via `resource.setrlimit(RLIMIT_AS)` — prevents OOM-kill on 75K+ chunk datasets
-- **Crash recovery:** `training/recover_shards.py` rebuilds DatasetDict from completed shards, streaming one shard at a time (never more than one in memory)
-
-### Whisper LoRA Ablation Design (W0–W9) & Scaling (W12–W15)
-
-Full test matrix defined in `docs/archive/training/whisper_tuning_test_matrix.md`.
-
-| Run | Purpose |
-|-----|---------|
-| W0 | Baseline (no fine-tuning) |
-| W1–W6 | Ablation: learning rate, target modules, replay ratio, data size |
-| W7–W9 | Scale winner: epochs, rank |
-
-- **Script:** `training/run_whisper_ablation.sh`
-- **Eval metrics:** overall WER, theological term WER, accent fairness gap, general English regression
-
-### W12 Data Scaling Run
-
-W7 config (lr=1e-4, r=32, q_proj+v_proj, replay=0.3, 1 epoch) on the full Deepgram-aligned dataset:
-
-- **Training data:** 198K chunks from 328 sermons (~290 GB Arrow cache at `/mnt/d/Data/stt-data/whisper_dataset_sttdata/.preprocessed_cache/`)
-- **Fresh eval set:** 4 post-cutoff sermons (2,706 examples, test split) — Gospel+Teaching from 3/22/26 and 3/29/26
-- **Baseline WER on fresh eval:** **21.41%** (normalized)
-- **DO NOT TRAIN ON:** `4Es8SrciqV0`, `vRT5RswIHu8`, `FOVTvZednUQ`, `yOzWGOTvTaA`
-
-### W15 Hard Example Mining & Curriculum Learning
-
-Curriculum learning pipeline for targeted Whisper adaptation:
-
-1. **Mine** — `training/mine_hard_examples.py`: batched fp16 inference over chunk pool, per-chunk WER against Deepgram ground truth, Tier 1 theological term detection, resume support, JSONL output
-   - Key flags: `--adapter`, `--chunks-json`, `--deepgram-dir`, `--audio-dir`, `--output`, `--batch-size`, `--resume`
-2. **Filter** — `training/build_hard_subset.py`: WER-bounded selection (default 0.15–0.80), stratified per-source caps, optional `--include-tier1` to always keep theological chunks
-   - Key flags: `--wer-min`, `--wer-max`, `--target-size`, `--max-per-source`, `--include-tier1`
-3. **Quality rank** — `training/filter_chunks_by_confidence.py`: top-N selection by `logprob`, `confidence`, or `combined` metric, with min/max duration filtering
-4. **Train** — `training/train_whisper.py --init-from <adapter>`: load pre-trained adapter weights with fresh optimizer state (new learning trajectory, no momentum carry-over)
-5. **Repeat** — Re-mine on the updated adapter, filter harder examples, train again. 2–4 cycles typical for convergence.
-
-## Gemma 4 Tuning (current program, WSL)
-
-Plan: [`docs/gemma4_tuning/overview.md`](../docs/gemma4_tuning/overview.md) —
-Phase A infrastructure (`train_gemma4.py`, `export_gguf.py`, `qe_filter.py`,
-`glossary_annotate.py`), B spike, C domain SFT (v1), D preference optimization (v2,
-`train_gemma4_cpo.py` with CometKiwi-XL-ranked triples from
-`tools/build_preference_triples.py`), E deploy (`tools/manage_adapters.py`,
-8-canary `tools/health_check.py`, Mac A/B #135).
-
-Architecture rules that shaped the trainers: E2B is a MatFormer slice of E4B, so
-**train each size separately**; freeze Per-Layer Embeddings and the vision/audio towers;
-train with `enable_thinking=False`; QLoRA through Unsloth to fit 16 GB.
-
-Outcome so far ([`v1_results.md`](../docs/gemma4_tuning/v1_results.md)): v1 passed the
-smoke gates but failed canary parity; v1.1 (corpus v2) and v2-cpo reached statistical
-parity with stock E4B on the formal-Spanish holdout without beating it; the Jacobo/Santiago
-disambiguation still fails (#136). What would move the needle next is ranked in
-[`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md) (few-shot prompt
-disambiguation, inference-time re-ranking, targeted preference triples). **Ship
-decision:** stock Gemma 4 E4B stays the default until a Mac A/B note says otherwise.
-
-## TranslateGemma QLoRA Configuration (historical)
-
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Rank (r) | 16 | Validated for domain-specific translation |
-| Alpha | 16 | 1× rank for QLoRA |
-| Target modules | `all-linear` | All linear layers |
-| Quantization | NF4, double quant, BF16 compute | Standard QLoRA |
-| Batch size | 1 (effective 4 via grad accum) | Safe for 16GB |
-| Learning rate | 2e-4 | Standard QLoRA rate |
-| Epochs | 3 | ~155K verse pairs |
-| Packing | Enabled | Multiple verses per sequence |
-| Optimizer | `paged_adamw_32bit` | Memory-efficient |
-| Max seq length | 512 | Verses rarely exceed 200 tokens |
-| VRAM usage | ~10–12 GB | Comfortable on A2000 Ada |
-
-**TranslateGemma chat template** requires `source_lang_code` and `target_lang_code` fields exactly.
-
-**MarianMT** (`Helsinki-NLP/opus-mt-en-es`, ~298MB, ~80ms) supports full fine-tuning without LoRA — lower quality ceiling but faster iteration.
-
-### TranslateGemma S1–S9 Results Summary
-
-Three-phase sweep to find optimal QLoRA configuration:
-
-**Phase 1 — Config sweep (S1–S3):** Learning rate, steps, NEFTune noise. **S1 won** (lr=1e-5, 50 steps).
-
-**Phase 2 — Ratio sweep (S4–S6):** Verse/sermon mix ratio. **S6 won** (balanced 1:1 verse/sermon, COMET proximity to 12B baseline = -0.0002).
-
-**Phase 3 — Scale-up (S7–S9):** Data scaling from 1,800 to 10,000 sermon pairs.
-
-| Run | Data | Key Result |
-|-----|------|------------|
-| S6 | 1,800 verse + 1,800 sermon (balanced) | **Winner** — COMET prox 12B = -0.0002 |
-| S7 | 5,000 60/40 hybrid | Control for S8 |
-| S8 | 5,000 100% DeepL | Tests if 12B adds value |
-| S9 | 10,000 100% DeepL | Diminishing returns test |
-
-**Key finding:** Verse pairs are NOT harmful — balanced ratio + more data is the formula.
-
-**Hybrid data composition:** 60% TranslateGemma 12B translations + 40% DeepL glossary-enforced translations.
-
-**Data provenance:** All runs tracked in `hybrid_runs/data_provenance.md` with per-sermon chunk breakdowns. `generate_hybrid_synthetic.py` saves `_provenance.json` sidecars and supports `--train-only` to prevent eval data leakage.
-
-### Gemma 4 Benchmark
-
-`training/benchmark_gemma4.py` compares next-gen models against current TranslateGemma:
-
-| Shortname | Model | Prompt Type |
-|-----------|-------|-------------|
-| `tg4b` | `google/translategemma-4b-it` | translategemma |
-| `tg12b` | `google/translategemma-12b-it` | translategemma |
-| `e2b` | `google/gemma-4-e2b-it` | gemma4_instruct |
-| `e4b` | `google/gemma-4-e4b-it` | gemma4_instruct |
-
-Three evaluation tiers: Tier 1 (Bible verse holdout, BLEU/chrF++/COMET), Tier 2 (Deepgram sermon chunks, COMET-QE + hallucination ratio), Tier 3 (8 theological canary sentences, term accuracy).
-
-> **VRAM caveat (v2026.5):** the result file `metrics/gemma4_benchmark/comparison.json` reports VRAM via `torch.cuda.max_memory_allocated()`, which undercounts on Gemma 4 by ~2× (misses bnb scratch buffers + bf16 PLE embeddings). Treat those numbers as PyTorch-allocator lower bounds, not actual card usage. For accurate per-model VRAM see `docs/archive/v2026.5/BENCHMARK.md` Phase 1A (continuous nvidia-smi sampling).
-
-### Phase 1A — llama.cpp vs HF (v2026.5, 2026-04-25)
-
-`bench_translate_t1_t4.py` extends the Gemma 4 benchmark with three **GGUF/llama.cpp** configs (T2: E2B Q4_K_M, T3: E4B Q4_K_M, T4: E4B + E2B speculative) plus the four HF NF4 configs above. **Result: GGUF wins by 5–9× speedup AND 4× VRAM reduction.** T3 (E4B Q4_K_M) is the new production default for CUDA. T4 spec decode is a single-GPU loss — bookkeeping overhead eats the speedup at α=0.65 acceptance. Full matrix + per-canary disambiguation table in `docs/archive/v2026.5/BENCHMARK.md`.
-
-## Theological Vocabulary Challenges
-
-| English | Spanish Options | Context Rule |
-|---------|----------------|--------------|
-| Atonement | *expiación* vs *propiciación* | Removal of sin vs. appeasing wrath |
-| Covenant | *pacto* (Protestant) vs *alianza* (Catholic) | Match audience |
-| Righteousness | *justicia* | Also "justice" — theological context needed |
-| James (apostle) | *Jacobo* | Person context (Mark 3:17) |
-| James (epistle) | *Santiago* | Book/letter context |
-| Sanctification | *santificación* | Consistent |
-| Grace | *gracia* | Also "humor/charm" — theological context needed |
-
-**Mitigation:** Tiered glossary system (50 Tier 1 boost terms + 229 Tier 2 master terms) for soft constraint training, Deepgram keyterm boosting, dictionary augmentation, and spot-checking. See **Tiered Glossary System** section above.
-
-## Evaluation Strategy
-
-**Automatic metrics:** SacreBLEU + chrF++ + COMET (use all three).
-
-**Holdout:** ~3,100 verses (10%) stratified by genre — Pentateuch, History, Poetry, Prophecy, Gospels, Epistles, Apocalyptic. Multiple Spanish references (RVR1909 + Español Sencillo).
-
-**Human evaluation:** Adequacy, fluency, theological precision (most critical, not captured by auto metrics).
-
-**Expected improvement targets:**
-- SacreBLEU: +3–8 points | chrF++: +2–5 | COMET: +0.02–0.05
-- Theological term accuracy: 80%+ (vs. ~40–60% base)
-- Whisper WER: 10–30% relative reduction
-
-## Anti-Forgetting Safeguards
-
-- LoRA preserves base weights (disable adapter = instant baseline recovery)
-- Replay buffer: 70% general-domain + 30% church-domain
-- Learning rate 40× lower than pretraining (~6.25e-5 for Whisper-large)
-- Elastic Weight Consolidation if forgetting persists
-- **Curriculum learning:** Clean → medium → hard samples. Yields ~5–7% additional WER reduction.
-
-## Compute Timeline
-
-Total estimate: **~48–73 GPU-hrs**, **~33–53 human-hrs** over ~5 weeks.
-
-| Task | Wall Clock | VRAM |
-|------|-----------|------|
-| Bible corpus download + alignment | ~15 min | CPU |
-| Sermon audio download (50 hrs) | ~1–2 hrs | Network |
-| Audio preprocessing (10-step) | ~4–6 hrs | GPU (demucs bottleneck) |
-| Pseudo-labeling (Whisper large-v3) | ~3–5 hrs | ~8 GB |
-| Human correction (bottom 20%) | ~15–25 hrs | Manual |
-| Distil-Whisper LoRA (20h audio) | ~5–8 hrs | ~8–10 GB |
-| Distil-Whisper LoRA (50h audio) | ~11–15 hrs | ~8–10 GB |
-| TranslateGemma 4B QLoRA | ~8–12 hrs | ~10–12 GB |
-| TranslateGemma 12B QLoRA | ~18–27 hrs | ~14–15 GB |
-| Deepgram Oracle transcription (35h) | ~70 min | API (no GPU) |
-| Whisper ablation W1–W6 (6 runs) | ~6–10 hrs | ~8–10 GB |
-| Whisper scale W7–W9 (3 runs) | ~4–8 hrs | ~8–10 GB |
-| TranslateGemma S7 scaled (5K chunks) | ~4–6 hrs | ~10–12 GB |
-| Evaluation (BLEU/WER/COMET) | ~30–60 min | ~6 GB |
-
-**Cycle timing:** Cycle 1 ~40–62 hrs (includes data prep). Cycles 2–5 ~17–30 hrs each.
-
-**Key bottlenecks:** Human correction dominates cycle 1. TranslateGemma 12B tight on VRAM (~14–15 GB peak). Demucs is the data-prep GPU bottleneck — run overnight.
-
-## Observed Benchmarks (A2000 Ada 16GB, WSL2)
-
-Actual wall-clock times from ablation runs (2026-03-20/21).
-
-| Task | Time | VRAM | Notes |
-|------|------|------|-------|
-| faster-whisper large-v3 (word timestamps, fp16) | ~8x real-time | ~5 GB | 146 min audio = 19 min (614s + 513s) |
-| TranslateGemma 4B load (4-bit QLoRA) | ~3-5 min | ~6-8 GB | |
-| TranslateGemma 12B load (4-bit) | ~5-8 min | ~7 GB | Fits comfortably on 16GB |
-| TranslateGemma translation (4B or 12B) | ~2-3s/input | — | Same speed for both |
-| COMET scoring (wmt22-comet-da) | ~3-5 min / 200 pairs | ~2-3 GB | |
-| train_gemma.py (per step) | ~4s | ~10-12 GB | |
-| evaluate_translation.py (500 verses) | ~47 min | ~6-8 GB | ~5.4s/verse |
-| evaluate_sermon.py (28 inputs, 3 models) | ~20-30 min | ~8 GB peak | Sequential model loading |
-| A1 training (50 steps) | ~5 min | ~10 GB | |
-| B4 training (1114 steps) | ~63 min | ~10 GB | |
-| Deepgram Nova-3 API (per sermon) | ~2 min / 60-min sermon | API | ~$0.0043/min, 300s timeout for 40–160 MB files |
-| faster-whisper large-v3 batch (33 files) | ~191 min total | ~5 GB peak | Batch transcription pipeline |
-
-## Related Work
-
-- eBible Corpus (2023): NLLB-600M outperformed SMT and OpenNMT on Bible translation
-- "From Priest to Doctor" (COLING 2025): Bible-trained models carry strong domain transfer
-- BibleNLP community (`biblenlp.github.io`): 833-language ecosystem
-- No published Whisper fine-tuning for church/religious speech — genuine research gap
-- Domain-adapted Whisper: aviation WER 70%→28% (LoRA), industrial jargon ~1–2% WER after 5 epochs
-
----
-
-## Adapter Export
-
-Two export tools, mirroring each other's CLI structure:
+> **Status (2026-09-10):** no WSL job has run since the Gemma 4 v2-cpo iteration
+> (2026-04-30). Phase 4 full preprocess, the E4B domain SFT recipe, W17 and the CUDA latency
+> proposal are scripted and **pending hardware time** (`docs/backlog.json`: `wsl-phase4`,
+> `wsl-e4b-domain-sft`, `wsl-w17-export`, `cuda-latency-proposal`). Flags and defaults below
+> were read from the scripts' `argparse` definitions at commit `c5fb689`; sections marked
+> **historical** describe completed runs whose numbers live only in the linked evidence.
+> Native Windows / RTX 2070 **inference** is a separate Lite runtime, not a training concern
+> ([`docs/lite_profiles.md`](../docs/lite_profiles.md)).
+
+## Programs and their state
+
+| Program | Scripts | State | Evidence |
+|---------|---------|-------|----------|
+| **Whisper LoRA (STT)** | `train_whisper.py` → `export_ct2.py` | **W16** deployed as the CUDA STT (`adapters/whisper_turbo_ct2/active`, auto-preferred by `FasterWhisperEngine` and by the standard CPU/CUDA STT default). **W17** (DoRA + hard-mix) scripted in `run_w17_curriculum.sh`, untrained. Mac EN default is Parakeet MLX, which loads no LoRA; Mac ES is mlx-whisper, also no LoRA — W16 comparisons on the Mac use the CPU faster-whisper path (#135). | [`docs/archive/v2026.7/STT_BENCHMARK.md`](../docs/archive/v2026.7/STT_BENCHMARK.md) |
+| **Gemma 4 E2B/E4B QLoRA + CPO (translation)** | `train_gemma4.py`, `train_gemma4_cpo.py`, `export_gguf.py`, `tools/build_preference_triples.py`, `qe_filter.py`, `glossary_annotate.py` | Spike, v1, v1.1 and v2-cpo **ran** (2026-04-29/30); v2-cpo reached statistical parity with stock E4B and still fails the Jacobo canary (#136). Stock E4B remains the default on Mac and CUDA. The production recipe `run_gemma4_e4b_domain_sft.sh` has **not** been run. The three scripts still carry `UNTESTED` file headers written before the first run — read them as "review before each run", not as "never executed". | [`docs/gemma4_tuning/v1_results.md`](../docs/gemma4_tuning/v1_results.md), [`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md) |
+| **TranslateGemma QLoRA** | `train_gemma.py`, `run_ablation.sh`, `run_b_series.sh`, `run_hybrid_*.sh`, `run_scale*.sh` | **Historical** S1–S9 sweep; superseded (TranslateGemma is already a translator; its Platense corpus half was misaligned). | [`docs/archive/training/gemma_tuning_test_matrix.md`](../docs/archive/training/gemma_tuning_test_matrix.md) |
+| **Marian full fine-tune** | `train_marian.py` | Fallback with a lower ceiling; unused in production. Marian is deployed **stock** as the CT2 int8 partial translator. | — |
+| **Piper TTS** | `prepare_piper_dataset.py`, `train_piper.py`, `export_piper_onnx.py`, `evaluate_piper.py` | Scripted; production uses stock Piper voices. | — |
+
+**Corpus rule:** `bible_data/aligned/verse_pairs_train.jsonl` (v1) joined Platense by row order
+and is misaligned from Psalms onward. Train on `bible_data/aligned/verse_pairs_train_v2.jsonl`
+(rebuilt by `tools/rebuild_verse_pairs.py`); postmortem
+[`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md). Note that
+`run_gemma4_e4b_domain_sft.sh` defaults `STARK_GEMMA4_VERSE` to the **v1 path** — export
+`STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl` (or `STARK_GEMMA4_TRAIN`)
+before running it.
+
+## Data pipeline
+
+### Phase 1–2 — Download and 10-step preprocess (`preprocess_audio.py`)
+
+Raw YouTube church audio → clean chunks. `preprocess_audio.py --input DIR --output DIR
+[--download --urls FILE] [--skip-demucs] [--diarize|--skip-diarize] [--resume]`. Steps, in
+order: download (`yt-dlp`) → 16 kHz mono WAV → SNR/clipping gate → `inaSpeechSegmenter`
+speech/music/noise → `demucs` (`htdemucs`, `--two-stems vocals`) → bandpass + `noisereduce`
+→ `pyloudnorm` (−16 LUFS, −1 dBTP) → Silero VAD chunking → optional `pyannote` diarization →
+final gate (SNR, duration, silence ratio). Don't over-clean: Whisper was trained on noisy
+audio, and training noise should match service conditions.
+
+**Phase 4 corpus run:** `training/run_phase4_preprocess.sh` (env `STARK_RAW_DIR`,
+`STARK_CLEANED_DIR`) wraps `run_phase4_corpus.py --input --output --resume [--skip-demucs]
+[--diarize] [--dry-run]` and writes `stark_data/cleaned/phase4_status.json`. Gate:
+`ready_for_training: true`, `errors == 0`, `completed > 0`; `--dry-run` does not satisfy it.
+
+### Phase 3 — Quality assessment (`assess_quality.py`)
+
+Subcommands `sample`, `review`, `cross-check`, `evaluate` (`--input`, `--n`, `--seed`,
+`--output`, `--model`, `--spot-check`). Establish a baseline on 50–100 stratified segments
+before training. The original strategy table (WER band → filtering strategy) predates the
+Deepgram oracle and is kept in the archive; today the label source is Deepgram, so the
+decision is about filtering, not re-transcription.
+
+### Phase 4 — Labels
+
+- **Deepgram Nova-3 oracle (current):** `transcribe_with_deepgram.py --input DIR --output DIR
+  [--boost-terms FILE] [--lang] [--max-concurrent N] [--resume] [--api-key KEY]`; key from
+  `STARK_DEEPGRAM__API_KEY` (nested `STARK_` settings). Boosted terms = the 50 Tier 1 keyterms
+  in `bible_data/glossary/tier1_boost.json`. Output `.deepgram.json` per sermon with word
+  timestamps and confidence; large files use a 300 s request timeout.
+- **Whisper pseudo-labels (historical fallback):** `transcribe_church.py --input --output
+  [--model] [--backend transformers|faster-whisper] [--batch-size] [--resume] [--oracle
+  whisper|deepgram]`. Only when Deepgram output is unavailable.
+- **Dataset build:** `prepare_whisper_dataset.py --gt-source deepgram` (default `whisper`)
+  with `--chunks-dir`, `--transcripts-dir`, `--output`, `--eval-ratio`, `--seed`,
+  `--no-filter`, `--no-balance`, `--copy`.
+- **Alignment at scale:** `align_deepgram_chunks.py --whisper-chunks --deepgram-dir
+  --audio-dir --output [--whisper-model] [--min-chars] [--eval-sources ...]
+  [--preprocess-cache]`. `--preprocess-cache` streams 1,000-row Arrow shards
+  (`_shards_train/`, `_shards_test/`), resumes past completed shards, and sets a 12 GB
+  `RLIMIT_AS` cap; `recover_shards.py` rebuilds a `DatasetDict` from completed shards one at
+  a time.
+
+### Phase 4b — Bible parallel corpus (`prepare_bible_corpus.py`)
+
+`--db-dir`, `--source`, `--output`, `--multi-ref`. Public-domain pairs only: KJV/ASV/WEB/BBE/YLT
+↔ RVR1909, Platense, Español Sencillo (CC BY-SA). **Never** ESV, NASB, NIV, NLT, NVI, LBLA,
+RVR1960, DHH. Sources: `bible-nlp/biblenlp-corpus`, `Helsinki-NLP/bible_para`,
+`scrollmapper/bible_databases`. Holdout: `tools/build_eval_sets.py` (`--verse-count`,
+`--train-path`, `--test-path`, `--seed`, `--dry-run`) — the current v2 holdout is
+`bible_data/aligned/verse_pairs_test_v2.jsonl` (500 verses).
+
+### Glossary (`build_glossary.py`, `tools/glossary.py`)
+
+Two tiers: Tier 1 boost (50 terms, Deepgram `keyterm`), Tier 2 master (229 terms,
+normalization, QE, active learning). Build with `python training/build_glossary.py
+--build-tiers` (`--boost-size`, `--master-size`, `--from-hymns`, `--merge-hymn-allowlist`,
+`--augment`). Files: `bible_data/glossary/tier1_boost.json`, `tier2_master.json`.
+`tools/glossary.py` exposes `load_tier()`, `validate_boost()`, `build_and_save_tiers()`.
+
+### Data organization
+
+- Fixed cutoff **2026-03-14**: train on earlier sermons, evaluate on later ones.
+  `tools/sort_sermons.py --output-dir stt-data --catalog stark_data/playlist_catalog.json`
+  lays out `stt-data/{gospel,ministry,conference,throwback}/{year}/` plus `manifest.json`.
+- Never train on the fresh-eval sermons (`4Es8SrciqV0`, `vRT5RswIHu8`, `FOVTvZednUQ`,
+  `yOzWGOTvTaA`).
+- `tools/lock_data.py` records SHA-256 lockfiles for training inputs.
+
+## Whisper LoRA (`train_whisper.py`)
+
+Defaults from the parser: `--model openai/whisper-large-v3-turbo`, `--target-modules q_proj
+v_proj`, `--lora-r 32`, `--lora-alpha 64`, `--batch-size 4`, `--grad-accum 4` (effective 16),
+`--epochs 3`, `--lr 1e-4`, `--replay-ratio 0.3` (general-English replay, 0 disables),
+`--accent-balance` on, bf16 + gradient checkpointing. Extras: `--init-from ADAPTER` (load
+adapter weights, fresh optimizer — curriculum), `--use-dora`, `--eval-chunked`, `--resume`.
+Extended module set per the parser help: `q_proj v_proj k_proj out_proj fc1 fc2`.
+
+**W17 recipe** (`run_w17_curriculum.sh`, env `STARK_WHISPER_DATASET`, `STARK_W16_ADAPTER`,
+`STARK_HARD_MINED`, `STARK_HARD_SUBSET`, `STARK_W17_OUT`, `STARK_W17_CT2`): mine → WER-bounded
+subset (0.15–0.80, `--include-tier1`) → train with `--init-from` W16, `--use-dora`, expanded
+modules, `--replay-ratio 0.3`, 1 epoch → `export_ct2.py` sanity gate → `manage_adapters.py
+register --model whisper_turbo_ct2`. Never train hard-only (W15 lesson,
+[`docs/archive/v2026.5/w15_postmortem.md`](../docs/archive/v2026.5/w15_postmortem.md)).
+**Check before running:** the script's `MODULES` array names `o_proj`, while
+`train_whisper.py` documents Whisper's attention output projection as `out_proj`; confirm
+the module name against the loaded model before the first W17 run.
+
+**Hard-example mining (W15 lineage):**
+
+1. `mine_hard_examples.py --adapter --chunks-json --deepgram-dir --audio-dir --output
+   [--model] [--batch-size] [--tier1-glossary bible_data/glossary/tier1_boost.json]
+   [--resume]` — per-chunk WER vs Deepgram, Tier 1 term detection, JSONL.
+2. `build_hard_subset.py --mined --chunks-json --output [--wer-min 0.15] [--wer-max 0.80]
+   [--target-size 10000] [--max-per-source] [--include-tier1]`.
+3. `filter_chunks_by_confidence.py --input --output [--metric logprob|confidence|combined]
+   [--target-size] [--min-duration] [--max-duration]`.
+4. `train_whisper.py --init-from <adapter>` → re-mine → repeat (2–4 cycles typical).
+
+**Evaluation:** `eval_whisper_wer.py --adapter --eval-set [--model] [--max-samples]
+[--output] [--sweep]`; engine-level bench `tools/benchmark_stt_engines.py --variant ...
+--manifest tools/stt_bench_manifest.json` (41 clips). Gate for W17: match or beat W16 on
+overall and Tier 1 WER with no p95 regression — reference numbers only in the v2026.7
+benchmark document.
+
+**Ablation history (W0–W15):** matrix in
+[`docs/archive/training/whisper_tuning_test_matrix.md`](../docs/archive/training/whisper_tuning_test_matrix.md);
+W12 trained the W7 config on the full Deepgram-aligned set (198K chunks / 328 sermons); the
+Arrow cache lives under `/mnt/d/Data/stt-data/whisper_dataset_sttdata/.preprocessed_cache/`.
+
+## Gemma 4 tuning (`train_gemma4.py`, `train_gemma4_cpo.py`, `export_gguf.py`)
+
+Plan and results: [`docs/gemma4_tuning/`](../docs/gemma4_tuning/overview.md). Rules baked
+into the trainers: E2B is a MatFormer slice of E4B, so **train each size separately**;
+freeze Per-Layer Embeddings and the vision/audio towers; apply `enable_thinking=False` to every
+example; QLoRA through Unsloth to fit 16 GB.
+
+| Script | Parser defaults (c5fb689) |
+|--------|---------------------------|
+| `train_gemma4.py` | `--base unsloth/gemma-4-E4B-it` (`unsloth/gemma-4-E2B-it` for E2B); data via `--train-data` or `--verse-pairs` / `--sermon-pairs` / `--glossary-pairs` (`--max-pairs`); `--lora-r 8`, `--lora-alpha 8`, `--lr 2e-4`, `--epochs 2` (`--max-steps` overrides), `--per-device-batch-size 2`, `--grad-accum 8`, `--max-seq-length 1024`, `--packing` on, `--warmup-steps 5`, `--save-steps`, `--seed` |
+| `train_gemma4_cpo.py` | `--triples` (required, `{prompt, chosen, rejected}` JSONL), `--init-adapter` (continue an SFT LoRA), `--beta 0.1`, `--epochs 1`, `--lora-r 8` (ignored with `--init-adapter`), `--max-prompt-length`, `--max-seq-length` |
+| `export_gguf.py` | `--adapter`, `--base`, `--output`, `--qtype Q4_K_M`, `--outtype`, `--llama-cpp-dir`, `--sanity-test` (`--sanity-n 8` canaries through a temporary `llama-server` on `--sanity-port`, non-empty output + expected substrings), `--skip-merge`, `--skip-quantize`, `--keep-intermediate` |
+| `tools/build_preference_triples.py` | `generate` (llama-server HTTP: `--server-url`, `--model`, `--candidates`, `--temperature`, `--max-tokens`) and `score` (CometKiwi-XL, `--margin`) |
+| `qe_filter.py` | CometKiwi threshold filter for synthetic sermon pairs (`--threshold`, `--rejected-output`, `--scores-output`) |
+
+**Production recipe:** `training/run_gemma4_e4b_domain_sft.sh` → `train_gemma4.py` (r=8,
+α=8, 2 epochs, lr 2e-4, packing) → `export_gguf.py --qtype Q4_K_M --sanity-test` →
+`models/gemma-4-e4b-it-q4km-domain.gguf`. Set `STARK_GEMMA4_VERSE` to the v2 corpus first
+(see Corpus rule). Ship rule: stock Gemma 4 E4B stays the default until a Mac A/B note
+(#135) says otherwise; next experiments are ranked in
+[`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md) (few-shot disambiguation in
+the prompt, re-ranking, better preference pools).
+
+## TranslateGemma QLoRA (historical, `train_gemma.py`)
+
+Flags `--bible-data`, `--glossary-data`, `--sermon-data`, `--lora-r`, `--lora-alpha`,
+`--epochs`, `--lr`, `--max-seq-length`, `--max-pairs`, `--max-steps`, `--neftune`,
+`--replay-ratio`, `--lora-dropout`, `--glossary-oversample`, `--resume`. The S1–S9 sweep
+(config → verse/sermon ratio → scale; S6 balanced 1:1 winner at COMET parity with the 12B
+base) trained on the misaligned v1 corpus and is superseded by the Gemma 4 program.
+Results and the hybrid 60/40 12B-vs-DeepL data design:
+[`docs/archive/training/gemma_tuning_test_matrix.md`](../docs/archive/training/gemma_tuning_test_matrix.md),
+[`docs/archive/training/benchmark_training.md`](../docs/archive/training/benchmark_training.md).
+`generate_hybrid_synthetic.py` (`--ratio-deepl`, `--train-only`, `_provenance.json`
+sidecars) and `benchmark_gemma4.py` (`--models tg4b tg12b e2b e4b`, `--skip-comet`) belong to
+this era; the llama.cpp-vs-HF comparison that made Q4_K_M the CUDA default is in
+[`docs/archive/v2026.5/BENCHMARK.md`](../docs/archive/v2026.5/BENCHMARK.md).
+
+## Theological vocabulary
+
+| English | Spanish options | Rule |
+|---------|-----------------|------|
+| Atonement | *expiación* vs *propiciación* | Removal of sin vs appeasing wrath |
+| Covenant | *pacto* vs *alianza* | Protestant vs Catholic register — match audience |
+| James | *Jacobo* (person) vs *Santiago* (epistle) | Context — the open canary (#136) |
+| Breaking of bread | *partimiento del pan* | Fixed phrase |
+| Righteousness / grace | *justicia* / *gracia* | Theological sense over everyday sense |
+
+Mitigations: tiered glossary, Deepgram keyterms, canary set `theological_canaries.py`
+(18 entries; `tools/health_check.py --n-canaries` defaults to 8, `export_gguf.py --sanity-n`
+to 8), few-shot prompt examples proposed in `v3_directions.md`.
+
+## Evaluation
+
+- **Translation:** `evaluate_translation.py --adapter --base-model --test [--max-samples]
+  [--compare-base] [--glossary-only] [--marian] [--deepl-key] [--output-file]` — SacreBLEU,
+  chrF++, COMET; `evaluate_sermon.py --chunks --adapter --base-model [--ceiling-model]
+  [--segment] [--deepl-key]` for sermon chunks. Holdout: v2 500-verse set; sermon eval 422
+  chunks (`v1_results.md`). Human review of adequacy/fluency/theological precision remains
+  the deciding gate and has not been run.
+- **STT:** `eval_whisper_wer.py`, `tools/benchmark_stt_engines.py`, Parakeet bench
+  `tools/benchmark_parakeet_en.py [--manifest] [--limit] [--skip-parakeet] [--device]`.
+- **Go/no-go (from the plan):** WER > 10 % relative improvement minimum; canary ≥ 7/8 with
+  8/8 target; stop when the worst metric improves < 2 % relative for two consecutive cycles.
+
+## Adapter export and transfer
 
 | Tool | Purpose |
 |------|---------|
-| `training/export_gguf.py` | Gemma translation: merge LoRA → bf16 HF → GGUF f16 → Q4_K_M (via llama.cpp). Used by the v2026.5 `LlamaCppEngine` translation path. |
-| `training/export_ct2.py` (v2026.7) | Whisper STT: merge LoRA → bf16 HF → CTranslate2 (via `ct2-transformers-converter`). Output loads via `faster_whisper.WhisperModel` and slots into `FasterWhisperEngine` with no engine-side change. Default quantization `int8_float16` (Ampere/Ada sweet spot). Built-in sanity test runs 5 canary clips through the converted model and aborts if WER drift exceeds 0.30. |
+| `export_gguf.py` | Gemma: merge LoRA → bf16 HF → GGUF f16 → Q4_K_M via llama.cpp; feeds `LlamaCppEngine` (CUDA) — MLX uses the safetensors adapter directory directly (`--adapter-dir`). |
+| `export_ct2.py` | Whisper: merge LoRA → HF → CTranslate2 (`--quantization int8_float16` default; `int8` for CPU/Lite-style deployments). Built-in sanity gate transcribes **5 canary clips** from `stark_data/whisper_dataset_deepgram/eval/` and aborts when WER exceeds `--sanity-wer-max 0.30`; `--no-sanity` skips it. Output loads in `FasterWhisperEngine` unchanged. |
+| `tools/manage_adapters.py` | `register --adapter DIR --model NAME [--version V] [--eval-file JSON]` (version defaults to the directory name; SHA-256 of `adapter_model.safetensors` recorded), `activate --model --version [--base-model] [--max-latency]` (runs `health_check.py`), `rollback`, `list`, `export --model --target user@host:path` (rsync). Manifest `adapters/manifest.json` holds `versions`, `active`, `previous` per model. |
+| `tools/deploy_adapters.py` | `--cycle N --models ... --endpoints local|mac-dev [--all-adapters] [--dry-run] [--rollback] [--skip-health]` — version → transfer → health check → activate → verify, local/rsync endpoints ([`docs/deploy.md`](../docs/deploy.md) for what is implemented vs designed). |
 
-Run `python training/export_ct2.py --help` for the full CLI (mirrors `export_gguf.py`).
+Transfer path: WSL `fine_tuned_*/` or `adapters/<model>/<version>/` → scp/rsync/USB → Mac
+`adapters/`; then `python tools/health_check.py --backend mlx --adapter DIR` before
+activation. Details and the Mac-side consumers: [`CLAUDE-windows.md`](../CLAUDE-windows.md)
+§ Model Transfer to Mac.
 
-## Adapter Transfer
+## Adding a new language corpus
 
-After training, LoRA adapters must be transferred to inference machines:
+Hindi and Chinese remain **pending user decisions** (#138). `tools/offline_hindi.py`
+(church audio → Parakeet English → Gemma Hindi, evaluation only; see
+[`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md))
+is an offline baseline tool, not a live integration, and no Hindi training data has been
+prepared. When a decision lands ([`docs/archive/research/multi_lingual.md`](../docs/archive/research/multi_lingual.md)):
 
-1. **Location**: Adapters saved to `fine_tuned_*/` dirs on WSL (safetensors format)
-2. **Transfer to Mac**: Copy adapter dir to `adapters/{model}/active/` (see [`docs/deploy.md`](../docs/deploy.md) for the rsync pipeline; SSH keys per machine still pending)
-3. **Validate on Mac**: `python tools/health_check.py --backend mlx --adapter <dir>` — 8 canaries by default (of 18 in `theological_canaries.py`), expected substrings + latency < 5 s per sentence + word-ratio hallucination band
-4. **Version naming**: `cycle{N}_{YYYYMMDD}_{sha256[:8]}` (SHA-256 over `adapter_model.safetensors`)
-5. **Manifest**: `adapters/manifest.json` tracks all versions with training metrics (final loss, eval WER, epochs, data size)
-6. **Rollback**: Two-slot system — `active/` + `previous/`. Swap back if health check fails post-activation.
+1. Aligned verse pairs from `bible-nlp/biblenlp-corpus` (Hindi IRV `hin2017`, Chinese CUV-S `cmn-cu89s`).
+2. `prepare_bible_corpus.py` → JSONL with `source_lang_code`, `target_lang_code`, `source_text`, `target_text`, `verse_id`.
+3. Glossary of 100–150 terms via `build_glossary.py` as template (honorifics, denominational terms).
+4. QLoRA at higher rank (r=32) and longer `--max-seq-length` for Hindi token fertility.
+5. Evaluate with chrF++ first (morphology, no-space scripts), then COMET and term accuracy; `--tokenize zh` for Chinese SacreBLEU.
+6. Same copyright rules as Spanish.
 
-## Adding a New Language Corpus
+## Related work (unchanged)
 
-Hindi and Chinese remain **pending user decisions** (#138, roadmap Phase 8); the offline
-Hindi text probe in [`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md)
-is not the requested church-audio baseline. When a decision lands
-(see [`docs/archive/research/multi_lingual.md`](../docs/archive/research/multi_lingual.md)):
-
-1. **Find aligned verse pairs** — `bible-nlp/biblenlp-corpus` has 833 languages (CC-BY-4.0). Hindi IRV: `hin2017` (~31K verses). Chinese CUV-S: `cmn-cu89s` (~31K verses, public domain).
-2. **Prepare with `prepare_bible_corpus.py`** — input: two translation dirs, output: JSONL pairs with `source_lang_code`, `target_lang_code`, `source_text`, `target_text`, `verse_id`.
-3. **Build theological glossary** (100–150 terms minimum) using `training/build_glossary.py` as template. Include honorifics (Hindi तू for divine address) and denomination-specific terms (Chinese 圣灵 not 圣神).
-4. **QLoRA config**: Same as Spanish but **r=32** (new language direction needs higher rank). `max_seq_length=768` for Hindi (2.5–3.5x token fertility), 512 for Chinese.
-5. **Evaluation**: chrF++ (primary — handles morphology and no-space scripts), COMET, theological term accuracy. Use `--tokenize zh` for Chinese SacreBLEU.
-6. **Copyright**: Same rules apply — only pre-1923 or explicitly public domain translations. No ESV, NASB, NIV, NLT, NVI, LBLA, RVR1960, DHH.
-
-## Go/No-Go Gates
-
-Quick reference for training convergence criteria (from `docs/archive/research/accent_tuning_plan.md` and evaluation strategy above):
-
-- **WER improvement**: > 10% relative (minimum), > 20% relative (target)
-- **BLEU improvement**: > +2 points (minimum), > +4 points (target)
-- **Theological term accuracy**: > 65% (minimum), > 80% (target)
-- **Accent fairness gap**: < 10% absolute (minimum), < 5% absolute (target)
-- **Stop condition**: Improvement < 2% relative for 2 consecutive cycles on worst-performing metric
+eBible Corpus (2023); "From Priest to Doctor" (COLING 2025); BibleNLP community; domain-adapted
+Whisper reports (aviation, industrial jargon). No published Whisper fine-tuning for church
+speech — the gap this project addresses.

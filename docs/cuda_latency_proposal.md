@@ -1,11 +1,18 @@
 # CUDA inference-latency proposal (A2000 Ada 16 GB / WSL2)
 
-> **Status:** proposal + ready-to-run scripts. **Not executed on hardware.**
+> **Status:** proposal + ready-to-run scripts. **Not executed on hardware** (unchanged as of
+> 2026-09-10 — the WSL box has not run a job since 2026-04-30; backlog `cuda-latency-proposal`).
 > **Audience:** next WSL session on the RTX A2000 Ada 16 GB box (CUDA 12.6).
-> **Pin:** llama.cpp tag **`b10883`** (2026-09-09) in both `start_server.sh` and `Dockerfile`.
+> **Pin:** llama.cpp tag **`b10883`** (2026-09-09) in `start_server.sh`, `Dockerfile` and `tools/llama_runtime.py`.
 > **Policy:** Google (Gemma 4 + official assistants), NVIDIA (Parakeet), OpenAI Whisper, Helsinki-NLP opus-mt only.
+> **Scope:** the A2000 (Ada, sm_89) CUDA path only. It is **not** the RTX 2070 Lite target
+> (`lite-cuda-8gb`, Turing sm_75, E2B only — [`lite_profiles.md`](./lite_profiles.md)) and
+> not the Mac: the MLX live path rejects `--mts` before any model loads
+> (`validate_live_mts` in `dry_run_ab.py`; MTP stays an offline experiment,
+> [`mlx_mtp_notes.md`](./mlx_mtp_notes.md), #177). Every number in §0 is a v2026.5–9
+> archive measurement with its source column; §1–§6 figures are arithmetic projections.
 
-Scripts (all header-marked unexecuted): `scripts/cuda/build_llamacpp.sh`, `convert_gemma4_assistant_gguf.sh`, `bench_mtp.sh`, `retest_flash_attn.sh`. Client changes in `engines/` / `dry_run_ab.py` are specified here, **not** implemented in this patch.
+Scripts (all header-marked unexecuted): `scripts/cuda/build_llamacpp.sh`, `convert_gemma4_assistant_gguf.sh`, `bench_mtp.sh`, `retest_flash_attn.sh`. Client changes in `engines/` / `dry_run_ab.py` are specified here, **not** implemented. Server-side switches that do exist: `start_server.sh --no-draft` (default), `--mtp` (opt-in, `SPEC_N=3`, f16 KV), `--flash-attn`, `--e2b-draft` (legacy loss); Docker `STARK_LLAMA_MTP=1` (`docker/entrypoint.sh`).
 
 ---
 

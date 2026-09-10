@@ -1,20 +1,22 @@
 # Current architecture — v2026.14 candidate (local branch)
 
 > **Scope:** Inference and operator contracts on `codex/mac-reliability-roadmap`
-> (base `5154fb9`, version `2026.14.0.0`), proposed in draft
+> (version `2026.14.0.0`, HEAD `c5fb689` at the time of writing), proposed in draft
 > [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open, **not merged**.
 > **Main** remains at v2026.13 until the authorized final merge. Do not describe
-> local-only behavior as shipped on main/PyPI without integration evidence.
-> Overnight worktrees (latency scheduling, lite CPU, operator UI, reliability) are
-> **pending integration** and are not part of these contracts yet
-> ([`overnight_status.md`](./overnight_status.md)).
+> candidate-branch behavior as shipped on main/PyPI without integration evidence.
+> The overnight worktrees (latency experiments, Lite profiles, operator UI, reliability,
+> issue evidence, docs) are **integrated** on this branch and under parent validation;
+> the contracts below include them ([`overnight_status.md`](./overnight_status.md)).
 >
-> **Known open bug (2026-09-09):** built-in microphone session
+> **Live microphone (2026-09-09 → 10):** built-in microphone session
 > `20260909_233204_799019_en` stalled after model load — no audio frames, lifecycle
 > stuck at `running`, operator showed RUNNING from the CSV header, audience stayed
 > disconnected; a standalone `sounddevice` record probe stalled too. File-replay
-> sessions on the same build passed. Live-mic and physical-device checks are deferred
-> to tomorrow (`mac-live-mic-stall` in [`backlog.json`](./backlog.json)).
+> sessions on the same build passed. The fix is **implemented** (isolated capture with
+> no-input timeouts, health-derived readiness — § Audio capture and § Operator control
+> plane); the real built-in-mic retest and physical-device checks are deferred to
+> tomorrow (`mac-live-mic-stall`, `issue-131-smoke` in [`backlog.json`](./backlog.json)).
 
 ## Two-pass live pipeline
 
@@ -37,6 +39,23 @@ Mic 48 kHz → resample 16 kHz → Silero VAD (packaged 6.2.1, no Torch Hub)
 overlaps translation on N. MLX ≥ 0.31.2 thread-local streams; first Gemma
 forward and weight materialization on the load thread (`warm_mlx_model`).
 
+**Audio capture (reliability, integrated 2026-09-10):** the live microphone is opened by a
+disposable PortAudio child (`tools/capture_worker.py`) behind
+`tools/isolated_audio.IsolatedInputStream`; the parent process never touches the native
+device. No samples within `startup_timeout` (5 s) or an idle gap over `idle_timeout` (3 s)
+raise `AudioCaptureError` and fail the session instead of hanging. Callback → asyncio handoff
+is bounded (`tools/capture_handoff.py`, overflow counted as a capture failure). File replay
+(`STARK_AUDIO_SOURCE=file`) and the Docker bridge (`STARK_AUDIO_SOURCE=ws`) use the same
+loop. Pause closes the capture child; buffered speech ≥ 0.7 s is finalized before pausing.
+
+**Health/control channel:** `tools/pipeline_health.py` writes a low-rate snapshot (`phase`
+∈ `loading, listening, ready, paused, input_error, …`, input/caption ages, error counts,
+last captions) and accepts pause/resume/stop control; readers mark it `stale` after 3 s.
+Deployment profiles (`stark_translate/profiles.py`): `standard` (default) keeps the
+selection above; `lite-cpu`, `lite-cpu-quality`, `lite-cuda-8gb` replace it with pinned
+faster-whisper CT2 + ONNX Silero + Marian CT2 and Marian or Gemma 4 E2B finals through a
+session-owned `llama-server` ([`lite_profiles.md`](./lite_profiles.md)).
+
 **CUDA training box (separate):** faster-whisper W16 CT2 + Marian CT2 + Gemma 4
 E4B via llama.cpp. See [`CLAUDE-windows.md`](../CLAUDE-windows.md) and
 [`docs/cuda_latency_proposal.md`](./cuda_latency_proposal.md).
@@ -46,7 +65,8 @@ E4B via llama.cpp. See [`CLAUDE-windows.md`](../CLAUDE-windows.md) and
 | Field | Meaning | Use |
 |-------|---------|-----|
 | `speech_end_to_final_ms` | Estimated speech end → final payload ready | Primary pipeline latency |
-| `speech_end_to_ack_upper_bound_ms` | Visible browser render + return network | Upper bound on delivery |
+| `speech_end_to_ack_upper_bound_ms` | Estimated speech end → visible browser's acknowledgement (render + return network included); visible tabs only | Upper bound on delivery |
+| `send_to_ack_ms` / `receive_to_render_ms` | Server send → ACK; browser receive → paint (client-reported) | Diagnostics, not the delivery gate |
 | `e2e_latency_ms` (legacy) | Processing after submission | **Archived only** — not speech-end-to-display |
 
 Historical v2026.13 tables in [`docs/archive/v2026.13/MAC_LATENCY.md`](./archive/v2026.13/MAC_LATENCY.md)
@@ -55,13 +75,24 @@ retain their original definitions. The sub-second median caption-delivery goal i
 
 ## Operator control plane
 
-- FastAPI + vanilla JS at `http://host:9000/operator/` (`operator_app/main.py`)
-- Pre-flight gates Start; mid-session pause/resume/lang_flip/vad/fallback
+- FastAPI + vanilla JS at `http://host:9000/operator/` (`operator_app/main.py`); page
+  organized for lay volunteers (start/stop, mic and voice choice, audience link + QR,
+  health list, caption preview, troubleshooting, support export)
+- Pre-flight gates Start (`/api/preflight`, profile-aware via `operator_app/lite_preflight.py`);
+  capability gating (`/api/capabilities`); idle-only device probes
+  (`/api/audio/test-input|test-output`, native calls in disposable processes)
+- Mid-session pause/resume/lang_flip/vad/fallback over the shared cooperative control channel
+- Readiness comes from the pipeline health channel: `/api/session/status` reports
+  `phase`, `ready` (only when health says `ready` and is not stale) and `stale`; RUNNING is
+  **no longer** inferred from the CSV header. A real built-in-mic session proving this
+  end-to-end is still pending
+- One model/audio job per operator (`operator_app/work_lease.py`); cleanup touches only owned
+  subprocesses, including detached children (`operator_app/processes.py`); explicit runtime
+  choices (e.g. TTS off) are preserved for reproducible runs
 - Live Review with independent transcript/translation approval and export guards
+  (`/api/review/...`); scoped support bundles and regenerable-log cleanup
+  (`/api/support/...`, `/api/storage/...`, `operator_app/support.py`)
 - Session lifecycle: explicit completion after worker/drain on SIGINT/SIGTERM
-- Known gap: RUNNING is derived from the session CSV header, so a stalled capture
-  (tonight's mic bug) is not detected — pipeline-health/capture-worker helpers are
-  being drafted in the reliability worktree, pending integration
 - Day-of workflow: [`operator_runbook.md`](./operator_runbook.md) (root-owned UI evidence)
 
 ## Model resolution and setup
@@ -78,7 +109,8 @@ Details: [`mac_implementation_status.md`](./mac_implementation_status.md),
 
 | Experiment | Status | Notes |
 |------------|--------|-------|
-| Gemma 4 MTP / `--mts` | Off (#177) | Byte-identical; ≤14% win at low acceptance |
+| Gemma 4 MTP / `--mts` | Off (#177); live `--mts` **rejected before load** by `validate_live_mts` | Offline probe only: byte-identical; ≤14% win at low acceptance |
+| Latency experiments (`tools/latency_experiments.py`) | Opt-in, validated before startup | Provisional previews, fixed-prefix cache, bounded allocator, pause speculation — evidence via `tools/overnight_bench.py` (parent-owned) |
 | Conservative Marian routing | Opt-in | 24/24 synthetic routing probes passed |
 | Shorter silence / faster cadence | Rejected | 48-run screen — caption/content regressions |
 | ONNX VAD | Opt-in | Packaged JIT default passed CPU loads |
@@ -97,12 +129,17 @@ Details: [`mac_implementation_status.md`](./mac_implementation_status.md),
 
 Per user decision (2026-09-09 overnight plan):
 
-- **Mac MLX** — primary inference path documented here
-- **Lite CPU inference** — implementation in progress in the lite worktree (CPU
-  profile, lite preflight, llama runtime helper); certification pending integration
-  and hardware
-- **Native Windows / RTX 2070** — MSI/Docker workflows exist; validation on the
-  2070 pending hardware
+- **Mac MLX** — primary inference path documented here (`standard` profile)
+- **Lite CPU inference** — **implemented**: `lite-cpu` (Whisper small CT2 int8, Marian CT2
+  finals) and `lite-cpu-quality` (adds Gemma 4 E2B Q4_K_M via CPU `llama-server`), Torch-free
+  `lite-cpu` extra, `stark-translate-lite` entry point, lite preflight admission floors,
+  pinned artifacts in `models.lock.json`. Evidence so far: isolated Mac CPU install +
+  synthetic EN/ES caption/TTS replays and E2B/native-runtime download-and-verify
+  ([`lite_profiles.md`](./lite_profiles.md)). x86 CPU performance, natural-speech quality
+  and any latency gate: **pending**
+- **Native Windows / RTX 2070** — `lite-cuda-8gb` implemented (Whisper turbo CT2
+  int8_float16 + Marian + E2B via CUDA `llama-server`, pinned Windows CUDA 12.4 archives);
+  MSI is a scaffold plan; **nothing has run on a 2070 or native Windows yet**
 
 ## CI/CD
 
@@ -116,6 +153,7 @@ count against the filesystem, so update the guides when workflows change.
 | Doc | Role |
 |-----|------|
 | [`backlog.json`](./backlog.json) | Machine-readable remaining work |
-| [`overnight_status.md`](./overnight_status.md) | Overnight doc worktree status |
+| [`overnight_status.md`](./overnight_status.md) | Overnight documentation deliverables and unfinished areas |
+| [`lite_profiles.md`](./lite_profiles.md) | Lite profile contract, pinned artifacts, CPU smoke evidence |
 | [`evaluation/README.md`](./evaluation/README.md) | Manifests, cohort boundaries |
 | [`roadmap.md`](./roadmap.md) | Long-range phases and archived metrics |

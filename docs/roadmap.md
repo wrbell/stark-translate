@@ -3,7 +3,7 @@
 > Living document tracking the project from Mac prototype through Windows training to
 > production deployment.
 >
-> **Last updated:** 2026-09-09 (overnight docs worktree, base `5154fb9`).
+> **Last updated:** 2026-09-10 (overnight docs pass 3, on the integrated candidate branch at `c5fb689`).
 >
 > **Remaining tasks (canonical):** [`backlog.json`](./backlog.json) · rendered
 > [`backlog.md`](./backlog.md) · contracts [`current_architecture.md`](./current_architecture.md)
@@ -13,36 +13,48 @@
 
 ---
 
-## Current State (2026-09-09)
+## Current State (2026-09-10)
 
 ```
-Mac (M3 Pro 18 GB, MLX) — the only target exercised tonight
+Mac (M3 Pro 18 GB, MLX) — the only target exercised so far
   STT:        Parakeet TDT v3 (EN) · mlx-whisper large-v3-turbo (ES)
   Partials:   Marian CT2 int8 on CPU, every 0.6 s of speech (HF fallback)
   Finals:     Gemma 4 E4B OptiQ on 0.5 s silence (E2B opt-in, TranslateGemma opt-out)
   VAD:        packaged Silero 6.2.1; ONNX opt-in
-  Operator:   FastAPI + vanilla JS control plane (:9000), Review/export, preflight
+  Capture:    PortAudio in a disposable child, 5 s no-input / 3 s idle timeouts (mic-stall fix)
+  Operator:   FastAPI + vanilla JS control plane (:9000) for lay volunteers; readiness from
+              the pipeline health channel; Review/export; support bundles; preflight
   Setup:      stark-translate setup / doctor, models.lock.json, managed Marian CT2 cache
-  Timing:     schema 2 speech_end_to_final_ms + visible-browser ACK upper bound
+  Timing:     schema 2 speech_end_to_final_ms + speech-end → visible-browser ACK upper bound
+  MTP:        --mts rejected before load (#177); offline probe only
+
+Lite (implemented; hardware performance pending)
+  Profiles:   standard (default) · lite-cpu · lite-cpu-quality · lite-cuda-8gb
+  Runtime:    Torch-free lite-cpu extra, stark-translate-lite, ONNX Silero, Whisper small CT2,
+              Marian CT2 finals or Gemma 4 E2B via session-owned llama-server (b10883)
+  Evidence:   isolated Mac CPU synthetic EN+ES caption/TTS smoke; E2B GGUF + native runtime
+              download/verify only — no x86 CPU, native Windows or RTX 2070 run yet
 
 Windows / WSL (A2000 Ada 16 GB, CUDA)
   Inference:  W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B Q4_K_M via llama.cpp b10883
-  Training:   Phase 4 preprocess, E4B domain SFT, W17 — scripted, not run
+  Training:   Phase 4 preprocess, E4B domain SFT, W17 — scripted, not run since 2026-04-30
   Latency:    CUDA proposal scripts header-marked unexecuted
 
 Release lines
   main:       v2026.13 (PRs #180–191)
   candidate:  2026.14.0.0 on codex/mac-reliability-roadmap → draft PR #192 (open, not merged)
-  overnight:  docs / lite / latency / operator-ui / reliability worktrees pending integration
+  overnight:  docs / lite / latency / operator-ui / reliability / issue-evidence worktrees
+              integrated on the candidate branch; parent validating
   publishing: source + issues + final merge authorized; PyPI / tags pending by user choice
 ```
 
-**Tonight's open bug:** the built-in-microphone session (`20260909_233204_799019_en`)
+**Live microphone:** the 2026-09-09 built-in-microphone session (`20260909_233204_799019_en`)
 stalled after "Listening..." — the operator showed RUNNING from the CSV header while no
 audio frames arrived and the audience display stayed disconnected; a separate
 `sounddevice` record probe stalled too. File-replay EN/ES sessions on the same build
-completed. Live-mic and physical-device checks are deferred to tomorrow
-(`mac-live-mic-stall`, `issue-131-smoke`).
+completed. The fix (isolated capture with no-input timeouts, health-derived readiness,
+owned-process cleanup) is **implemented and integrated**; the real built-in-mic retest and
+physical-device checks are deferred to tomorrow (`mac-live-mic-stall`, `issue-131-smoke`).
 
 Day-of-event workflow: [`operator_runbook.md`](./operator_runbook.md) (UI evidence
 refreshed by root after integration). First-time install:
@@ -57,16 +69,17 @@ Status, priority, dependencies and acceptance for every item below are in
 
 ### Mac — integrate, then certify
 
-1. **PR #192 integration** (`pr-192-integration`): root reconciles the overnight worktrees onto the reliability branch, re-runs the CPU suite and marks the draft ready. Main advances from v2026.13 only at that merge.
-2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): diagnose the CoreAudio/`InputStream` stall, make operator state depend on actual frames and health signals (reliability worktree drafts `pipeline_health.py`, `capture_worker.py`, `isolated_audio.py`), then run live EN and ES utterances with the audience display connected. #131 closes only on live-mic evidence.
-3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): active engineering on the frozen 45-second English screen — opt-in bounded scheduling and caption-delivery instrumentation are committed in the latency worktree, incremental STT/preview candidates are drafted. Measurement needs a visible browser (`visible-browser-timing-run`); natural-speech quality certification is a separate gate and does not block the engineering experiments.
-4. **Human and device gates:** natural Spanish references, blinded bilingual review, natural two-speaker audio (#133 gate), second physical output (#132 acceptance), Sunday dry run with a laptop stand-in (#134: full hymn + spoken segment + setup-to-first-caption timing + written note).
+1. **PR #192 validation and merge** (`pr-192-integration`): the overnight worktrees are integrated on the candidate branch; the parent re-runs the CPU suite, collects operator/benchmark/installation evidence and marks the draft ready. Main advances from v2026.13 only at that merge.
+2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): the stall fix is implemented — `tools/isolated_audio.py` / `capture_worker.py` (disposable PortAudio child, 5 s no-input and 3 s idle timeouts), `tools/pipeline_health.py` readiness consumed by the operator. What remains is the **real built-in-mic retest** with live EN and ES utterances and the audience display connected (deferred to tomorrow). #131 closes only on that evidence.
+3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): active engineering on the frozen 45-second English screen — opt-in latency experiments (`tools/latency_experiments.py`: provisional previews, exact fixed-prefix cache, bounded allocator, pause speculation), bounded scheduling and caption-delivery instrumentation are integrated; `tools/overnight_bench.py` pairs runs with a visible audience browser. Measurement needs a visible browser (`visible-browser-timing-run`); natural-speech quality certification is a separate gate and does not block the engineering experiments.
+4. **Human and device gates:** natural Spanish references, blinded bilingual review, natural two-speaker audio (#133 gate), second physical output (#132 acceptance), dry run with a laptop stand-in permitted (#134: full hymn + spoken segment + setup-to-first-caption timing + written note — no new live-mic or human-walkthrough requirement beyond the issue text).
 5. **Active learning evidence (#137):** Review/export is implemented and fixture-tested; one real operator correction from a recorded session, exported and merged (dry run acceptable), is still required.
+6. **Hindi baseline (#138):** `tools/offline_hindi.py` (church audio → Parakeet EN → Gemma Hindi, evaluation only) exists and is executed sequentially by the parent; no live integration; the language decision remains the user's.
 
 ### Equal-priority deployment targets
 
-- **Lite CPU inference** (`lite-cpu-inference`): implementation in progress in the lite worktree (profiles, lite preflight, TTS engine, llama runtime helpers); packaging prose owned by that agent. Certification on a CPU-only host is a separate step.
-- **Native Windows / RTX 2070** (`rtx2070-native-validation`): pending hardware after the lite profile lands; the v2026.13 MSI digest was verified without Windows execution.
+- **Lite CPU inference** (`lite-cpu-inference`): **implemented and integrated** — `stark_translate/profiles.py` (`lite-cpu`, `lite-cpu-quality`), `operator_app/lite_preflight.py`, Torch-free `lite-cpu` extra, `stark-translate-lite`, pinned Whisper small / Marian / E2B / Silero ONNX artifacts, `tools/llama_runtime.py`. Evidence: isolated Mac CPU synthetic EN+ES caption/TTS smoke and E2B/native-runtime preparation ([`lite_profiles.md`](./lite_profiles.md)). Performance and natural-speech quality on an x86 CPU host: pending hardware.
+- **Native Windows / RTX 2070** (`rtx2070-native-validation`): `lite-cuda-8gb` implemented (pinned Windows CUDA 12.4 llama.cpp archives, sm_75 Linux build option); nothing has run on a 2070 or native Windows; the v2026.13 MSI digest was verified without Windows execution and the MSI remains a scaffold plan.
 
 ### WSL — pipeline refresh (pending hardware)
 
@@ -171,9 +184,11 @@ Deferred: macOS Shortcuts voice triggers.
 ### Phase 8: Multilingual Expansion (Hindi & Chinese) — pending user decision
 
 Gemma 4 and TranslateGemma support Hindi and Chinese; fine-tuning is domain adaptation
-only. The offline Hindi text probe
+only. The earlier offline Hindi text probe
 ([`evaluation/mac_v2026_14_hindi/README.md`](./evaluation/mac_v2026_14_hindi/README.md))
-is not the church-audio baseline #138 asks for.
+was not the church-audio baseline #138 asks for; `tools/offline_hindi.py` now produces that
+offline audio baseline (Parakeet English → Gemma Hindi, evaluation-only, run sequentially by
+the parent). There is still **no live Hindi path**, and the language decision remains open.
 
 | Step | What |
 |------|------|
@@ -258,7 +273,7 @@ and [`evaluation/README.md`](./evaluation/README.md).
 
 | Decision | When | Options / owner |
 |----------|------|-----------------|
-| Hindi/Chinese timing | User decision | Hindi first (higher demand); live church-audio baseline first (#138) |
+| Hindi/Chinese timing | User decision | Hindi first (higher demand); offline church-audio baseline tool exists (#138), live path not started |
 | Natural Spanish recording source | User decision | Needed before any Spanish WER/quality claim |
 | E2B as default | After blinded bilingual review | Speed vs meaning/terminology tradeoff |
 | Production hardware | Before the Sunday dry run | Dedicated church PC vs portable Mac; laptop stand-in acceptable for #134 |

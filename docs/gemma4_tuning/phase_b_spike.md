@@ -1,5 +1,8 @@
 # Phase B — Spike
 
+> **As-written plan (2026-04); executed 2026-04-29.** Outcome (smoke gates passed, canary
+> 6/8): [`v1_results.md`](./v1_results.md) § Phase B. Status table in [`overview.md`](./overview.md).
+
 **Goal:** end-to-end smoke test with the new tooling before committing a full training run.
 
 **Wall clock:** 1–2 days.

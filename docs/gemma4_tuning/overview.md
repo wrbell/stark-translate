@@ -1,5 +1,22 @@
 # Gemma 4 Tuning — Overview
 
+> **Where this program stands (2026-09-10).** The phase documents in this directory are the
+> **as-written plan (2026-04)**; [`v1_results.md`](./v1_results.md) records what actually ran
+> and [`v3_directions.md`](./v3_directions.md) what to try next. Nothing has run on the WSL
+> box since the v2-cpo iteration (2026-04-30).
+>
+> | Phase | State | Evidence |
+> |-------|-------|----------|
+> | A — Infrastructure | Done: `training/train_gemma4.py`, `train_gemma4_cpo.py`, `export_gguf.py`, `qe_filter.py`, `glossary_annotate.py`, `tools/build_preference_triples.py` (the trainers still carry pre-run `UNTESTED` headers — treat as "review before each run") | [`phase_a_infrastructure.md`](./phase_a_infrastructure.md), `v1_results.md` |
+> | B — Spike | Ran; passed smoke gates, failed canary parity (6/8) | `v1_results.md` |
+> | C — Domain SFT v1 / v1.1 | Ran on corpus v1 then v2; parity with stock E4B on COMET-22, Jacobo canary failing (#136) | `v1_results.md` |
+> | D — Preference optimization (v2-cpo) | Ran; statistical parity with stock E4B, not better | `v1_results.md` |
+> | E — Deploy | **Not done.** Stock Gemma 4 E4B remains the production default on Mac (OptiQ) and CUDA (Q4_K_M); no tuned adapter is registered or A/B'd (#135). `phase_e_deploy.md` describes registry/health-check extensions that were partly superseded — see its banner | [`phase_e_deploy.md`](./phase_e_deploy.md) |
+> | Production recipe | `training/run_gemma4_e4b_domain_sft.sh` scripted, **never run**; its verse default is the misaligned v1 path — set `STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl` | [`../wsl_pipeline_refresh.md`](../wsl_pipeline_refresh.md) §2 |
+>
+> Ship rule: the default only changes after a Mac A/B note (#135). Backlog items:
+> `wsl-e4b-domain-sft`, `issue-135-mac-ab`, `issue-136-jacobo-cpo`.
+
 Plan for fine-tuning Gemma 4 **E2B** and **E4B** as better English↔Spanish translators for the Stark Road live translation pipeline. Replaces / supersedes the TranslateGemma S1–S9 sweep documented in `docs/archive/training/gemma_tuning_test_matrix.md`.
 
 ## Goal

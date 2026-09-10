@@ -2,22 +2,22 @@
 
 > **Canonical machine-readable source:** [`backlog.json`](./backlog.json).
 > Regenerate this file with `python tools/render_backlog.py render`.
-> **Last updated:** 2026-09-09
+> **Last updated:** 2026-09-10
 
 ## Integration status
 
 - **Main release:** `v2026.13` — main at 09e4679; v2026.13 PRs #180–191 merged. main stays v2026.13 until the authorized final merge.
-- **Local candidate:** `2026.14.0.0` on `codex/mac-reliability-roadmap` (base `5154fb9`)
-- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — OPEN DRAFT, base `main` ← `codex/mac-reliability-roadmap`; not merged. Root is integrating overnight operator, lite, latency and failure-recovery work before marking it ready.
+- **Local candidate:** `2026.14.0.0` on `codex/mac-reliability-roadmap` (base `5154fb9 (branch HEAD c5fb689 at the 2026-09-10 docs pass)`)
+- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — OPEN DRAFT, base `main` ← `codex/mac-reliability-roadmap`; not merged. The overnight docs, lite, latency, operator-ui, reliability and issue-evidence worktrees are integrated on the branch and under parent validation before it is marked ready.
 - **Publication:** Source and issue publishing and the final merge to main are authorized by the user. PyPI publication, package artifacts and release tags remain pending by user choice.
 
-Items marked implemented or validated exist on the local reliability branch (or in an overnight worktree awaiting integration) unless noted as main-only. Nothing below is released on main or PyPI until root supplies merge/tag evidence. Certification records whether the item's own acceptance was met; implementation alone does not close an issue.
+Items marked implemented or validated exist on the local reliability branch (all overnight worktrees are integrated as of 2026-09-10) unless noted as main-only. Nothing below is released on main or PyPI until the parent supplies merge/tag evidence. Certification records whether the item's own acceptance was met; implementation alone does not close an issue.
 
 ## Status vocabulary
 
 | Status | Meaning |
 |--------|---------|
-| `in_progress` | Active engineering right now; code may live uncommitted in an overnight worktree and is pending integration. |
+| `in_progress` | Active engineering right now; code may still be changing on the branch and its acceptance is not yet met. |
 | `pending_input_or_hardware` | Blocked on human input, approved references, or hardware/device access. |
 | `experimental` | Opt-in path that stays off by default until a measured, reviewed gain exists. |
 | `deferred` | Intentionally postponed; often a pending user decision. |
@@ -30,7 +30,7 @@ Items marked implemented or validated exist on the local reliability branch (or 
 
 - EN STT: `parakeet-mlx (mlx-community/parakeet-tdt-0.6b-v3)` · ES STT: `mlx-whisper large-v3-turbo`
 - Partials: `Marian CT2 int8 on CPU (adapters/marian_ct2 or managed cache; HF fallback)` · Finals: `Gemma 4 E4B OptiQ (mlx-community/gemma-4-e4b-it-OptiQ-4bit)`
-- Silence `0.5` s · partial cadence `0.6` s · MTP `off (--mts never loads under mlx-lm 0.31.x; engines/mlx_spec.py probe only)`
+- Silence `0.5` s · partial cadence `0.6` s · MTP `off (#177); a live --mts / STARK_TRANSLATE_MLX_MTS request is rejected before any model loads (dry_run_ab.validate_live_mts); engines/mlx_spec.py offline probe only`
 
 See [`current_architecture.md`](./current_architecture.md) and [`mac_implementation_status.md`](./mac_implementation_status.md) for contracts and evidence.
 
@@ -42,67 +42,17 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Depends on:** `visible-browser-timing-run`
 - **Sources:** `docs/mac_implementation_status.md`, `docs/evaluation/README.md`, `docs/archive/v2026.13/MAC_LATENCY.md`
 - **Acceptance:** Median schema 2 speech_end_to_final_ms under 1000 ms on the frozen real-time baseline with visible ACKs, without regressing final quality; natural-speech quality certification (references, bilingual review) is a separate gate and must not be pooled with historical cohorts.
-- **Notes:** Active Mac engineering: the latency worktree committed opt-in bounded scheduling and caption-delivery instrumentation (codex/overnight-latency 1a8470c) and is drafting incremental STT/preview candidates; none of it is integrated or measured yet. Independent engineering experiments proceed on the frozen English screen without waiting for Spanish references; the 48-run screen rejected shorter silence and combined tweaks under the current pipeline.
-- **Next action:** Integrate and measure the scheduling experiment on the frozen screen with a visible browser; keep every change opt-in until a matched gain is shown on both models.
+- **Notes:** Active Mac engineering: opt-in latency experiments, bounded scheduling and caption-delivery instrumentation are integrated on the candidate branch (overnight-latency-scheduling) but not yet measured with a visible browser. Independent engineering experiments proceed on the frozen English screen without waiting for Spanish references; the 48-run screen rejected shorter silence and combined tweaks under the current pipeline.
+- **Next action:** Measure the integrated experiments on the frozen screen with a visible browser (tools/overnight_bench.py); keep every change opt-in until a matched gain is shown on both models.
 
-### `issue-131-smoke` — Post-dormancy boot and operator smoke (#131)
-
-- **Priority:** P0 · **Machine:** mac · **Certification:** pending
-- **Depends on:** `mac-live-mic-stall`
-- **Sources:** [#131](https://github.com/wrbell/stark-translate/issues/131)
-- **Issue acceptance (verbatim intent):** Operator UI loads, one partial + one final appear on audience display, no uncaught errors in the session log — including one live mic utterance EN→ES and ES→EN and confirmation that the factory prefers the configured adapters.
-- **Acceptance:** Live built-in-microphone EN→ES and ES→EN utterances render a partial and a final on the audience display with clean session logs; controlled file replay alone does not satisfy the issue.
-- **Evidence:** Controlled file-replay EN and ES sessions rendered captions and exited 0; review draft recovery passed (2026-09-09, base 5154fb9).
-- **Evidence:** Live microphone attempt stalled the same night (see mac-live-mic-stall).
-- **Next action:** After the mic stall fix, run one live EN and one live ES utterance through the operator UI with the audience display connected and keep the session logs as evidence; root closes #131 only then.
-
-### `mac-live-mic-stall` — Built-in microphone capture stalled; operator showed RUNNING without audio
-
-- **Priority:** P0 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `operator_app/pipeline_manager.py`, `tools/audio_bridge_client.py`, `docs/overnight_status.md`
-- **Acceptance:** A live built-in-microphone session produces partial and final captions on the audience display; operator status reflects actual audio frames rather than the CSV header; a stalled input stream is detected and surfaced within seconds.
-- **Evidence:** 2026-09-09 23:32 session 20260909_233204_799019_en (audio_source=mic): models loaded, 'Listening...' printed, audience page fetched, then no frames; session_lifecycle stayed status=running; partials file empty.
-- **Evidence:** Operator UI derived RUNNING from the CSV header while the audience display stayed disconnected; a separate sounddevice sd.rec probe also stalled.
-- **Evidence:** File-replay sessions 20260909_233546_027169_en and 20260909_233823_034893_es (audio_source=file) completed with exit 0 on the same build; they do not exercise the microphone path.
-- **Notes:** User explicitly deferred live microphone and physical-device checks until tomorrow. The reliability worktree is drafting isolated capture/health helpers; nothing is integrated yet.
-- **Next action:** Reproduce with CoreAudio permission and device enumeration logging, add a frame-arrival health check that fails Start when no audio arrives, then re-run live EN and ES microphone sessions.
-
-### `pr-192-integration` — Integrate overnight work into draft PR #192 and finish the authorized merge
+### `pr-192-integration` — Validate the integrated candidate branch and finish the authorized merge of draft PR #192
 
 - **Priority:** P0 · **Machine:** any · **Certification:** pending
 - **Depends on:** none
 - **Sources:** [PR #192](https://github.com/wrbell/stark-translate/pull/192), `docs/overnight_status.md`
 - **Acceptance:** PR #192 marked ready with integrated operator, lite, latency and failure-recovery changes, CI green, and root-recorded evidence; main advances from v2026.13 only at that merge.
-- **Notes:** Root owns integration and GitHub delivery. Source/issue publishing and the final merge are authorized; PyPI, package artifacts and release tags stay pending.
-- **Next action:** Root: reconcile the overnight worktrees (docs, lite, latency, operator-ui, reliability, issue-evidence) onto the PR branch and re-run the CPU suite before marking ready.
-
-### `lite-cpu-inference` — Lite CPU inference profile (no GPU) — implementation
-
-- **Priority:** P1 · **Machine:** any · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `docs/packaging/pypi.md`, `docs/overnight_status.md`
-- **Acceptance:** A documented CPU-only profile installs from the `cpu` extra, passes setup/preflight, and runs EN/ES file replay end to end on a machine without a GPU; smoke evidence recorded.
-- **Notes:** The lite worktree has uncommitted profile, preflight, TTS engine and llama runtime changes plus setup/preflight edits; not integrated. Packaging documentation is owned by the lite agent. Implementation is distinct from certification on target hardware.
-- **Next action:** Lite agent finishes and tests the profile; root integrates; then smoke on a CPU-only host.
-
-### `overnight-latency-scheduling` — Opt-in bounded scheduling and caption delivery instrumentation
-
-- **Priority:** P1 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `docs/overnight_status.md`
-- **Acceptance:** Merged into the PR branch behind opt-in flags with tests; a frozen-screen replay shows a matched delivery improvement on both models or the experiment is recorded as rejected.
-- **Notes:** codex/overnight-latency commit 1a8470c adds tools/latency_scheduler.py, tools/caption_delivery.py, tools/latency_experiments.py, tools/latency_trace.py and tests; uncommitted incremental_stt.py / preview_candidates.py drafts exist. Not on the PR branch.
-- **Next action:** Root integrates; then run tools/mac_evaluation.py experiments with a visible browser.
-
-### `overnight-reliability` — Process supervision, work leases and isolated audio capture
-
-- **Priority:** P1 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `docs/overnight_status.md`
-- **Acceptance:** Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.
-- **Notes:** Uncommitted processes.py, work_lease.py, support.py, capture_worker.py, isolated_audio.py, pipeline_health.py, persistence.py, operational_logging.py in the reliability worktree. Directly relevant to mac-live-mic-stall; not integrated.
-- **Next action:** Root integrates behind tests; verify against a real microphone tomorrow.
+- **Notes:** All overnight worktrees (docs, lite, latency, operator-ui, reliability, issue-evidence) are integrated on codex/mac-reliability-roadmap as of 2026-09-10; the parent is validating and collecting operator, benchmark, installation and release evidence. Source/issue publishing and the final merge are authorized; PyPI, package artifacts and release tags stay pending.
+- **Next action:** Parent: finish validation and evidence refresh, run the CPU suite, mark PR #192 ready and merge; then tag/publish only when the user approves.
 
 ### `docs-refresh-remaining` — Documentation refresh — remaining areas after the overnight docs pass
 
@@ -110,17 +60,8 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Depends on:** `pr-192-integration`
 - **Sources:** `docs/overnight_status.md`
 - **Acceptance:** Every README/CLAUDE/AGENTS guide describes current behavior from source, historical numbers live only under dated archive links, and tests/test_documentation.py plus render/link checks pass.
-- **Notes:** Areas the overnight docs pass did not finish are listed in docs/overnight_status.md § Unfinished; docs/operator_runbook.md and docs/packaging/* are owned elsewhere.
-- **Next action:** Root audits; owners of the runbook and packaging docs refresh their files after integration.
-
-### `overnight-operator-ui` — Operator UI caption and QR widgets
-
-- **Priority:** P2 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `docs/overnight_status.md`, `docs/operator_runbook.md`
-- **Acceptance:** Widgets integrated, HTML5 Tidy clean, and the operator runbook updated with root-recorded UI evidence.
-- **Notes:** Uncommitted captions.js / qr.js widgets and index/style edits in the operator-ui worktree. Runbook evidence is root-owned.
-- **Next action:** Root integrates and refreshes docs/operator_runbook.md.
+- **Notes:** Three docs passes covered README, root/subdirectory CLAUDE+AGENTS, CLAUDE-macbook, CLAUDE-windows (Part A WSL training / Part B native Windows Lite), training guide, deploy, wsl_pipeline_refresh, cuda_latency_proposal, gemma4_tuning, roadmap, current_architecture. Remaining: docs/mac_pipeline_refresh.md (2026-08-30), docs/packaging/windows.md (MSI scaffold plan), and the parent-owned runbook / implementation-status / evaluation evidence.
+- **Next action:** Parent audits the pass-3 commit; owners refresh the runbook, packaging and evidence documents after validation.
 
 ## Pending Input Or Hardware
 
@@ -130,9 +71,9 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Depends on:** `issue-131-smoke`
 - **Sources:** [#134](https://github.com/wrbell/stark-translate/issues/134), `docs/operator_runbook.md`
 - **Issue acceptance (verbatim intent):** Walk the runbook on church hardware or a laptop stand-in; time setup → first caption; capture one full hymn plus one spoken segment; a written dry-run note exists (what worked, what broke, time-to-first-caption) and blocking UX holes have their own issues.
-- **Acceptance:** Written dry-run note with setup-to-first-caption timing, one full hymn and one spoken segment captured through the live microphone, and follow-up issues filed for non-technical operator blockers. A laptop stand-in is acceptable; church hardware is not mandatory.
-- **Notes:** The controlled hymn/pause/restart rehearsal used file replay and TTS; it does not provide the live-mic timing or the human walk-through the issue requires.
-- **Next action:** Schedule a laptop stand-in walk-through once live mic capture works; record time-to-first-caption and file UX issues.
+- **Acceptance:** Per the issue text: walk the runbook on church hardware or a laptop stand-in (stand-in explicitly permitted); time setup → first caption; capture one full hymn plus one spoken segment; write the dry-run note (what worked, what broke, time-to-first-caption) and file follow-up issues for blocking UX holes. The issue does not add a live-microphone or human-walkthrough requirement beyond that text.
+- **Notes:** The controlled hymn/pause/restart rehearsal used file replay and TTS and did not record a setup-to-first-caption time or a dry-run note, so it does not yet satisfy the issue. Depends on #131 only because the runbook walk-through is expected to use the microphone path once it is proven.
+- **Next action:** Schedule the laptop stand-in walk-through: time setup → first caption, capture a full hymn and a spoken segment, write the note, file UX issues.
 
 ### `bilingual-blinded-review` — Blinded bilingual review of meaning errors and terminology
 
@@ -191,10 +132,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P1 · **Machine:** windows · **Certification:** pending
 - **Depends on:** `lite-cpu-inference`
-- **Sources:** `docs/archive/research/rtx2070_feasibility.md`, `packaging/windows/README.md`
-- **Acceptance:** Setup, preflight and an EN/ES file replay complete on a 2070-class Windows machine with llama.cpp E2B/E4B tier selection recorded; MSI or source install path documented.
-- **Notes:** The v2026.13 MSI digest and embedded version were verified without Windows execution.
-- **Next action:** Run on the target hardware after the lite profile lands.
+- **Sources:** `stark_translate/profiles.py`, `docs/lite_profiles.md`, `docs/archive/research/rtx2070_feasibility.md`, `packaging/windows/README.md`
+- **Acceptance:** Setup, preflight and an EN/ES replay complete on a 2070-class native Windows machine with the lite-cuda-8gb profile (Whisper turbo CT2 int8_float16 + Marian + Gemma 4 E2B via CUDA llama-server), tier selection recorded; MSI or source install path documented.
+- **Notes:** lite-cuda-8gb is implemented with pinned Windows CUDA 12.4 llama.cpp archives (tools/llama_runtime.py, b10883) and an sm_75 native build option (setup --build-native, Linux); the v2026.13 MSI digest was verified without Windows execution; the MSI remains a scaffold plan. Nothing has run on a 2070 or native Windows.
+- **Next action:** Run setup/doctor/operator with --profile lite-cuda-8gb on the target hardware; record results in docs/lite_profiles.md.
 
 ### `visible-browser-timing-run` — Frozen timing run with a visible browser (non-zero ACK coverage)
 
@@ -264,9 +205,9 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P3 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
-- **Sources:** [#177](https://github.com/wrbell/stark-translate/issues/177), `docs/archive/v2026.13/MAC_LATENCY.md`, `docs/mlx_mtp_notes.md`, `engines/mlx_spec.py`, `tools/mts_acceptance_probe.py`
+- **Sources:** [#177](https://github.com/wrbell/stark-translate/issues/177), `docs/archive/v2026.13/MAC_LATENCY.md`, `docs/mlx_mtp_notes.md`, `engines/mlx_spec.py`, `tools/mts_acceptance_probe.py`, `dry_run_ab.py`
 - **Acceptance:** Acceptance rate and latency win on the frozen screen justify an opt-in default; output stays byte-identical to the target model.
-- **Notes:** `--mts` still routes through mlx_lm and never loads (no gemma4_assistant class). The engines/mlx_spec.py probe over mlx-optiq produced byte-identical output at low acceptance with a bounded latency win; the RoPE-offset hypothesis was rejected. Numbers: see the archive link.
+- **Notes:** Live `--mts` (or STARK_TRANSLATE_MLX_MTS) is rejected by dry_run_ab.validate_live_mts before any model loads — the flag never routes to mlx_lm anymore; `--no-mts` is the explicit off. The engines/mlx_spec.py offline probe over mlx-optiq produced byte-identical output at low acceptance with a bounded latency win; the RoPE-offset hypothesis was rejected. Numbers: see the archive link.
 - **Next action:** Keep off; revisit only if upstream mlx-lm adds the assistant model class or acceptance improves.
 
 ## Deferred
@@ -284,11 +225,11 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P3 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
-- **Sources:** [#138](https://github.com/wrbell/stark-translate/issues/138), `docs/evaluation/mac_v2026_14_hindi/README.md`, `docs/archive/research/multi_lingual.md`
+- **Sources:** [#138](https://github.com/wrbell/stark-translate/issues/138), `tools/offline_hindi.py`, `docs/evaluation/mac_v2026_14_hindi/README.md`, `docs/archive/research/multi_lingual.md`
 - **Issue acceptance (verbatim intent):** A short baseline note: does zero-shot Hindi even work on church audio, and is a QLoRA week worth it this semester — via target_lang_code="hi" through the live pipeline, noting SOV partial garble, with 8 canaries and a few verse pairs.
-- **Acceptance:** Hindi target through the live pipeline on church audio with a written baseline note and QLoRA go/no-go; the existing offline text-only probe does not satisfy this.
-- **Notes:** Offline text Hindi generation exists for 43 English inputs on both models with no references or live integration. Hindi/Chinese timing remains a pending user decision.
-- **Next action:** None until the user schedules Hindi; keep the offline probe labeled as such.
+- **Acceptance:** Written baseline note on church audio (does zero-shot Hindi work; is a QLoRA week worth it) with a QLoRA go/no-go. The issue asks for the live pipeline; the offline audio tool provides the baseline measurement only — a live Hindi target is not integrated.
+- **Notes:** tools/offline_hindi.py (prepare → transcribe with Parakeet EN → translate with Gemma 4 E4B/E2B → report) now produces an offline church-audio Hindi baseline; the parent runs it sequentially after other benchmarks. The earlier text-only probe (43 English inputs) is superseded for this purpose. No live Hindi integration exists; Hindi/Chinese timing remains a pending user decision.
+- **Next action:** Parent: run tools/offline_hindi.py on the church-audio set and write the baseline note; the user then decides whether a QLoRA week is scheduled.
 
 ### `macos-shortcuts` — macOS Shortcuts voice-command triggers
 
@@ -317,14 +258,38 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 ## Implemented
 
+### `issue-131-smoke` — Post-dormancy boot and operator smoke (#131)
+
+- **Priority:** P0 · **Machine:** mac · **Certification:** pending
+- **Depends on:** `mac-live-mic-stall`
+- **Sources:** [#131](https://github.com/wrbell/stark-translate/issues/131)
+- **Issue acceptance (verbatim intent):** Operator UI loads, one partial + one final appear on audience display, no uncaught errors in the session log — including one live mic utterance EN→ES and ES→EN and confirmation that the factory prefers the configured adapters.
+- **Acceptance:** Live built-in-microphone EN→ES and ES→EN utterances render a partial and a final on the audience display with clean session logs; controlled file replay alone does not satisfy the issue.
+- **Evidence:** Controlled file-replay EN and ES sessions rendered captions and exited 0; review draft recovery passed (2026-09-09, base 5154fb9).
+- **Evidence:** Live microphone attempt stalled the same night (see mac-live-mic-stall); the capture/readiness fix is integrated but untested against a real microphone.
+- **Next action:** Run one live EN and one live ES built-in-mic utterance through the operator UI with the audience display connected and keep the session logs as evidence; the issue requires live mic — file replay does not close it.
+
+### `mac-live-mic-stall` — Built-in microphone capture stalled; operator showed RUNNING without audio
+
+- **Priority:** P0 · **Machine:** mac · **Certification:** pending
+- **Depends on:** none
+- **Sources:** `tools/isolated_audio.py`, `tools/capture_worker.py`, `tools/pipeline_health.py`, `operator_app/pipeline_manager.py`, `docs/current_architecture.md`
+- **Acceptance:** A live built-in-microphone session produces partial and final captions on the audience display; operator status reflects actual audio frames rather than the CSV header; a stalled input stream is detected and surfaced within seconds.
+- **Evidence:** 2026-09-09 23:32 session 20260909_233204_799019_en (audio_source=mic): models loaded, 'Listening...' printed, audience page fetched, then no frames; session_lifecycle stayed status=running; partials file empty.
+- **Evidence:** Operator UI derived RUNNING from the CSV header while the audience display stayed disconnected; a separate sounddevice sd.rec probe also stalled.
+- **Evidence:** File-replay sessions 20260909_233546_027169_en and 20260909_233823_034893_es (audio_source=file) completed with exit 0 on the same build; they do not exercise the microphone path.
+- **Evidence:** Fix integrated 2026-09-10: tools/isolated_audio.py runs PortAudio in a disposable child (tools/capture_worker.py) and raises AudioCaptureError after 5 s without first samples or 3 s idle; tools/pipeline_health.py phases loading → listening → ready feed operator readiness (stale after 3 s); unit tests cover the modules. No live microphone session has been run against the fix.
+- **Notes:** Fix implemented and integrated (reliability worktree → candidate branch); the real built-in-microphone retest and physical-device checks are deferred to tomorrow at the user's request.
+- **Next action:** Tomorrow: run a live built-in-mic session through the operator UI with the audience display connected; confirm readiness flips only on real frames and that an unplugged/blocked input surfaces as input_error within seconds; record the session id here.
+
 ### `mac-reliability-implementation` — v2026.14 Mac reliability program on the local branch
 
 - **Priority:** P0 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
 - **Sources:** `docs/mac_implementation_status.md`, [PR #192](https://github.com/wrbell/stark-translate/pull/192)
 - **Acceptance:** Merged to main through PR #192 with the human, device and visible-browser gates recorded as still open.
-- **Notes:** Operator session identity, schema 2 timing, setup/resolver, Review/export, opt-in experiments and packaging guards are implemented and locally validated; integration is the remaining step.
-- **Next action:** Root: finish PR #192.
+- **Notes:** Operator session identity, schema 2 timing, setup/resolver, Review/export, opt-in experiments and packaging guards are implemented and locally validated; the overnight worktrees are integrated; parent validation, evidence refresh and the merge remain.
+- **Next action:** Parent: finish validation and merge PR #192.
 
 ### `issue-132-tts-routing` — Multi-channel TTS routing code and tests (9.4.1 / #132)
 
@@ -347,6 +312,35 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Code is in: rolling buffer, separate daemon (`embed` or `pyannote` mode), speaker on finals/CSV/JSONL/WebSocket. The gate has not been run; it needs HF_TOKEN or SpeechBrain ECAPA plus labeled two-speaker audio.
 - **Next action:** Run the replay_bench gate on a two-speaker clip once one exists; keep default off.
 
+### `lite-cpu-inference` — Lite CPU inference profiles (no GPU) — implementation
+
+- **Priority:** P1 · **Machine:** any · **Certification:** pending
+- **Depends on:** none
+- **Sources:** `stark_translate/profiles.py`, `operator_app/lite_preflight.py`, `tools/llama_runtime.py`, `docs/lite_profiles.md`, `docs/evaluation/lite_cpu_smoke_20260910.json`, `docs/evaluation/lite_cpu_quality_preparation_20260910.json`
+- **Acceptance:** A documented CPU-only profile installs from the `lite-cpu` extra, passes setup/preflight, and runs EN/ES replay end to end on a machine without a GPU; smoke evidence recorded. Performance on an x86 CPU host and natural-speech quality are certified separately.
+- **Evidence:** 2026-09-10: isolated Mac CPU install of the Torch-free lite-cpu extra; stark-translate-lite setup/doctor; synthetic EN and ES caption + TTS replays completed (docs/evaluation/lite_cpu_smoke_20260910.json).
+- **Evidence:** 2026-09-10: lite-cpu-quality preparation — pinned Gemma 4 E2B Q4_K_M GGUF and native llama.cpp b10883 downloaded and hash/version-verified; no E2B inference run (docs/evaluation/lite_cpu_quality_preparation_20260910.json).
+- **Notes:** Profiles standard (default), lite-cpu, lite-cpu-quality and lite-cuda-8gb are integrated (stark_translate/profiles.py, --profile on operator/setup/doctor, STARK_PROFILE, lite preflight admission floors, session-owned llama-server). Evidence so far is synthetic Mac CPU smoke only; no x86 CPU host, no natural speech, no latency or memory gate.
+- **Next action:** Smoke and time the lite-cpu and lite-cpu-quality profiles on an actual CPU-only x86 host with natural EN/ES audio; record in docs/lite_profiles.md.
+
+### `overnight-latency-scheduling` — Opt-in bounded scheduling and caption delivery instrumentation
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** pending
+- **Depends on:** none
+- **Sources:** `tools/latency_experiments.py`, `tools/latency_scheduler.py`, `tools/caption_delivery.py`, `tools/overnight_bench.py`, `docs/current_architecture.md`
+- **Acceptance:** Merged into the PR branch behind opt-in flags with tests; a frozen-screen replay shows a matched delivery improvement on both models or the experiment is recorded as rejected.
+- **Notes:** Integrated on the candidate branch: tools/latency_scheduler.py, tools/caption_delivery.py, tools/latency_experiments.py (provisional previews, exact fixed-prefix cache, bounded allocator, pause speculation; validated before startup), tools/latency_trace.py, tools/overnight_bench.py and tests. All experiments stay opt-in; no matched delivery improvement has been measured yet.
+- **Next action:** Parent: run the experiment matrix with tools/overnight_bench.py and a visible audience browser; record accept/reject per experiment.
+
+### `overnight-reliability` — Process supervision, work leases and isolated audio capture
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** pending
+- **Depends on:** none
+- **Sources:** `operator_app/processes.py`, `operator_app/work_lease.py`, `operator_app/support.py`, `tools/capture_worker.py`, `tools/isolated_audio.py`, `tools/pipeline_health.py`
+- **Acceptance:** Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.
+- **Notes:** Integrated on the candidate branch with tests: processes.py (owned-process cleanup), work_lease.py, support.py (support bundles), capture_worker.py / isolated_audio.py (disposable PortAudio child, no-input timeouts), pipeline_health.py (phase/readiness channel consumed by the operator), tools/persistence.py, tools/operational_logging.py. Operator readiness now derives from health rather than the CSV header. Behaviour against a real microphone is unverified until tomorrow's retest (mac-live-mic-stall).
+- **Next action:** Verify against the real built-in microphone tomorrow; then flip certification with the session id.
+
 ### `issue-137-active-learning` — Active learning — low-confidence to operator correction (#137)
 
 - **Priority:** P2 · **Machine:** both · **Certification:** pending
@@ -356,6 +350,15 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** A human operator corrects and approves at least one real caption from a recorded session, the approved pair exports to a dated corrections corpus with provenance, and tools/merge_corrections.py is run (dry run acceptable) on that export.
 - **Notes:** Live/post-session Review, independent transcript/translation approval, revisioned drafts, portable bundles and evaluation/training separation are implemented and tested with fixtures. No human approval has been recorded; fixtures are not approved correction data.
 - **Next action:** After a live-mic session, have the operator approve one real correction, export it, and run `tools/merge_corrections.py translation` (and `whisper`) against a scratch copy of the training JSONL; keep the export and merged output as evidence.
+
+### `overnight-operator-ui` — Operator UI caption and QR widgets
+
+- **Priority:** P2 · **Machine:** mac · **Certification:** pending
+- **Depends on:** none
+- **Sources:** `displays/operator/widgets/captions.js`, `displays/operator/widgets/qr.js`, `displays/operator/widgets/sparkline.js`, `docs/operator_runbook.md`
+- **Acceptance:** Widgets integrated, HTML5 Tidy clean, and the operator runbook updated with root-recorded UI evidence.
+- **Notes:** captions.js / qr.js / sparkline.js widgets and the lay-operator layout are integrated on the candidate branch. Runbook UI evidence is parent-owned and pending.
+- **Next action:** Parent refreshes docs/operator_runbook.md with browser evidence from the integrated build.
 
 ### `issue-176-multiprocess` — --multiprocess workers use shared Gemma 4 prompts and stop rules (#176)
 
@@ -377,7 +380,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Sources:** `docs/mac_implementation_status.md`, `.github/workflows/test.yml`
 - **Acceptance:** Recorded pass/skip/coverage in mac_implementation_status.md above the test.yml coverage gate.
 - **Notes:** Counts are recorded only in mac_implementation_status.md; guides link there instead of repeating numbers.
-- **Next action:** Re-run after integrating the overnight worktrees.
+- **Next action:** Parent re-runs the suite on the integrated branch and refreshes the recorded counts in mac_implementation_status.md.
 
 ### `mac-defaults-frozen` — Retain Mac defaults after the 48-run English screen
 
@@ -401,9 +404,9 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 | Status | Count |
 |--------|------:|
-| In Progress | 9 |
+| In Progress | 3 |
 | Pending Input Or Hardware | 14 |
 | Experimental | 2 |
 | Deferred | 5 |
-| Implemented | 5 |
+| Implemented | 11 |
 | Validated | 3 |

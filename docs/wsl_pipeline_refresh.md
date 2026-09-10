@@ -2,15 +2,20 @@
 
 > **Audience:** Willem on the Windows/WSL training desktop (A2000 Ada 16GB)
 > **Purpose:** Ordered execution checklist for the 2026-08 pipeline refresh — run this when the WSL box is ready, without re-deriving context from chat.
-> **Related:** [`CLAUDE-windows.md`](../CLAUDE-windows.md) (env setup) · [`CLAUDE.md`](../CLAUDE.md) (project Next Steps) · [`docs/roadmap.md`](./roadmap.md) (living roadmap) · [`mac_pipeline_refresh.md`](./mac_pipeline_refresh.md) (Mac / MLX same-day path, no WSL) · [`cuda_latency_proposal.md`](./cuda_latency_proposal.md) (inference latency, §7 below)
+> **Related:** [`CLAUDE-windows.md`](../CLAUDE-windows.md) (env setup, Part A) · [`training/CLAUDE.md`](../training/CLAUDE.md) (verified flags) · [`docs/roadmap.md`](./roadmap.md) · [`mac_pipeline_refresh.md`](./mac_pipeline_refresh.md) (Mac / MLX same-day path, no WSL) · [`cuda_latency_proposal.md`](./cuda_latency_proposal.md) (inference latency, §7 below)
 >
-> **Last updated:** 2026-09-09
+> **Last updated:** 2026-09-10 — **none of §1–§7 has been executed yet**; the WSL box has
+> not run a job since 2026-04-30. This runbook is training/CUDA-bench work on the A2000. It
+> is **not** the native Windows / RTX 2070 Lite inference path, which is a separate runtime
+> ([`lite_profiles.md`](./lite_profiles.md), `CLAUDE-windows.md` Part B). Commands were
+> checked against the scripts' argument parsers at commit `c5fb689`.
 
 ---
 
-## Already landed in code (PR / branch)
+## Already landed in code
 
-Live software for this refresh is on branch `cursor/pipeline-refresh-e609` (PR #162):
+The refresh software merged through PR #162 (`8ed38c5`) and is on `main` (v2026.13) and the
+v2026.14 candidate branch:
 
 | Area | What shipped |
 |------|----------------|
@@ -57,15 +62,17 @@ Follow full setup in [`CLAUDE-windows.md`](../CLAUDE-windows.md) (`~/stt_train_e
 ```bash
 source ~/stt_train_env/bin/activate
 cd ~/path/to/stark-translate   # or your clone
-git checkout cursor/pipeline-refresh-e609   # or main after merge
-nvidia-smi                                  # A2000 Ada, ~16 GB visible
+git checkout main              # or codex/mac-reliability-roadmap (v2026.14 candidate, PR #192 draft)
+nvidia-smi                     # A2000 Ada, ~16 GB visible
 
 # Data presence
 ls stark_data/raw/*.wav stark_data/raw/*/*.wav 2>/dev/null | head
 # Optional overrides used by scripts:
 #   STARK_RAW_DIR, STARK_CLEANED_DIR
-#   STARK_WHISPER_DATASET, STARK_W16_ADAPTER, STARK_DEEPGRAM_DIR
-#   STARK_GEMMA4_TRAIN / STARK_GEMMA4_VERSE / STARK_GEMMA4_SERMON
+#   STARK_WHISPER_DATASET, STARK_W16_ADAPTER, STARK_DEEPGRAM_DIR, STARK_AUDIO_DIR
+#   STARK_HARD_MINED, STARK_HARD_SUBSET, STARK_W17_OUT, STARK_W17_CT2
+#   STARK_GEMMA4_TRAIN / STARK_GEMMA4_VERSE / STARK_GEMMA4_SERMON / STARK_GEMMA4_ADAPTER / STARK_GEMMA4_GGUF
+export STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl   # REQUIRED: script default is the misaligned v1 path
 ```
 
 **Gate:** `nvidia-smi` OK; venv active; sermon WAVs discoverable; W16 CT2 or LoRA path known if re-exporting STT (`adapters/whisper_turbo_ct2/active` or `adapters/whisper_turbo/active`).
@@ -87,11 +94,19 @@ Writes `stark_data/cleaned/phase4_status.json` and `preprocessing_log.json`.
 
 ## 2. Gemma 4 E4B domain SFT → GGUF
 
-Needs S6-style verse/sermon JSONL (defaults: `bible_data/verse_pairs_train.jsonl`, `bible_data/sermon_pairs_train.jsonl`) or `STARK_GEMMA4_TRAIN`.
+Needs S6-style verse/sermon JSONL or a pre-mixed `STARK_GEMMA4_TRAIN`. The script's
+built-in defaults are `bible_data/verse_pairs_train.jsonl` and
+`bible_data/sermon_pairs_train.jsonl`; the verse default points at the **misaligned v1
+corpus**, so export `STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl`
+first ([`platense_alignment_bug.md`](./platense_alignment_bug.md)). Trainer defaults:
+`--base unsloth/gemma-4-E4B-it --lora-r 8 --lora-alpha 8 --epochs 2 --lr 2e-4 --packing`
+(`train_gemma4.py` still carries a pre-run `UNTESTED` header — review before each run; the
+v1/v1.1/v2-cpo experiments in [`gemma4_tuning/v1_results.md`](./gemma4_tuning/v1_results.md)
+used it successfully).
 
 ```bash
 training/run_gemma4_e4b_domain_sft.sh
-# trains Unsloth QLoRA → export_gguf.py --qtype Q4_K_M --sanity-test
+# trains Unsloth QLoRA → export_gguf.py --qtype Q4_K_M --sanity-test (--sanity-n 8)
 ```
 
 Optional CPO follow-up after SFT (preference triples from live QE / Marian divergence):
@@ -113,18 +128,24 @@ Do **not** hard-only (W15 lesson). Replay stays ~0.3; init from W16.
 # Ensure STARK_W16_ADAPTER / paths match your layout
 training/run_w17_curriculum.sh
 
-python tools/benchmark_stt_engines.py
-# uses tools/stt_bench_manifest.json (41 clips); compare to docs/archive/v2026.7/STT_BENCHMARK.md
+python tools/benchmark_stt_engines.py --manifest tools/stt_bench_manifest.json
+# 41 clips; compare to docs/archive/v2026.7/STT_BENCHMARK.md
 ```
 
-**Gate (must beat or match W16, no latency regression):**
+**Before the first run:** `run_w17_curriculum.sh` lists `o_proj` in its `MODULES` array while
+`train_whisper.py` documents Whisper's attention output projection as `out_proj`; confirm the
+module name against the loaded model (PEFT fails on unknown targets).
 
-| Metric | W16 reference | W17 must |
-|--------|---------------|----------|
-| Overall WER (41-clip) | 11.00% | ≤ 11.00% |
-| Tier-1 theological WER | 8.70% | ≤ 8.70% |
-| Fresh-eval WER | 7.25% | ≤ 7.25% |
-| STT p95 (A2000) | ~413 ms | ≤ ~413 ms |
+**Gate (must beat or match W16, no latency regression).** Reference values are the W16
+rows of [`docs/archive/v2026.7/STT_BENCHMARK.md`](./archive/v2026.7/STT_BENCHMARK.md)
+(41-clip bench, beam 1, A2000 Ada, `int8_float16`):
+
+| Metric | W16 reference (v2026.7 bench) | W17 must |
+|--------|-------------------------------|----------|
+| Overall WER (41-clip) | 11.00% | ≤ W16 |
+| Tier-1 theological WER | 8.70% | ≤ W16 |
+| Fresh-eval WER | 7.25% | ≤ W16 |
+| STT p95 (A2000) | ~413 ms | ≤ W16 |
 
 Then activate CT2:
 
@@ -135,14 +156,17 @@ python tools/manage_adapters.py activate --model whisper_turbo_ct2 --version <w1
 
 ---
 
-## 4. Parakeet EN-only bench (optional — do not flip bilingual default)
+## 4. Parakeet EN-only bench on CUDA (optional — do not flip the CUDA bilingual default)
 
 ```bash
 pip install 'nemo_toolkit[asr]'   # WSL CUDA env only
-python tools/benchmark_parakeet_en.py
+python tools/benchmark_parakeet_en.py [--manifest tools/stt_bench_manifest.json] [--limit N] [--device cuda]
 ```
 
-**Gate to adopt for `--lang en` / `STARK_STT__BACKEND=parakeet` only:** mean WER ≤ W17/W16 **and** p95 ≤ Whisper on the same holdout. Spanish / bilingual path stays Whisper + W16/W17 CT2.
+**Gate to adopt for CUDA `--lang en` / `STARK_STT__BACKEND=parakeet` only:** mean WER ≤ W17/W16
+**and** p95 ≤ Whisper on the same holdout. The CUDA Spanish / bilingual path stays Whisper +
+W16/W17 CT2. (The **Mac** already uses Parakeet TDT v3 via `parakeet-mlx` for `--lang en` —
+that decision is independent of this CUDA bench.)
 
 ---
 

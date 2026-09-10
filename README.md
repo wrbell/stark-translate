@@ -7,9 +7,10 @@
 
 Fully on-device, live bilingual speech-to-text for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). English/Spanish, real-time mic input, browser display. No cloud APIs, no internet required at runtime.
 
-> **Release lines (2026-09-09):** **main** is v2026.13. The v2026.14 candidate lives on
-> `codex/mac-reliability-roadmap` and is proposed in draft
-> [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open, not merged.
+> **Release lines (2026-09-10):** **main** is v2026.13. The v2026.14 candidate lives on
+> `codex/mac-reliability-roadmap` (all overnight worktrees integrated, under validation)
+> and is proposed in draft [PR #192](https://github.com/wrbell/stark-translate/pull/192) —
+> open, not merged.
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) · evidence:
 > [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) · remaining work:
 > [`docs/backlog.json`](docs/backlog.json) (rendered as [`docs/backlog.md`](docs/backlog.md)).
@@ -75,7 +76,20 @@ python3.11 -m venv venv
 venv/bin/python -m pip install '.[cuda]'
 venv/bin/stark-translate setup --backend cuda
 venv/bin/stark-translate operator
+
+# Lite (CPU-only or RTX 2070 church PC; Torch-free runtime, separate venv)
+python3.11 -m venv .venv-lite && .venv-lite/bin/python -m pip install '.[lite-cpu,tts]'   # or '.[lite-cuda,tts]'
+python3.11 -m venv .venv-lite-build && .venv-lite-build/bin/python -m pip install '.[lite-build]'
+.venv-lite/bin/stark-translate-lite setup --models-dir /absolute/lite-models \
+  --converter-python /absolute/.venv-lite-build/bin/python --include tts       # --profile lite-cuda-8gb on a 2070
+STARK_MODELS_DIR=/absolute/lite-models .venv-lite/bin/stark-translate-lite doctor --json
+STARK_MODELS_DIR=/absolute/lite-models .venv-lite/bin/stark-translate-lite operator
 ```
+
+`stark-translate-lite` defaults to the `lite-cpu` profile (Whisper small CT2 int8 + Marian
+CT2 finals); `--profile lite-cpu-quality` / `lite-cuda-8gb` add Gemma 4 E2B through a
+session-owned `llama-server`. Profiles never auto-upgrade; contract and evidence in
+[`docs/lite_profiles.md`](docs/lite_profiles.md).
 
 `setup` downloads the pinned models from `models.lock.json` and builds the Marian CT2
 int8 artifacts; existing `adapters/marian_ct2/<dir>/active` directories are reused
@@ -134,7 +148,8 @@ Guide: [`training/CLAUDE.md`](./training/CLAUDE.md).
 | Smaller-memory Apple Silicon | `--gemma4-size e2b` | Intended path, not validated |
 | NVIDIA A2000 Ada 16 GB (WSL) | W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B Q4_K_M | Benchmarked v2026.5–8 (archives above) |
 | NVIDIA 6–8 GB | Gemma 4 E2B / E4B Q4_K_M via llama.cpp | Per [`docs/archive/v2026.5/BENCHMARK.md`](./docs/archive/v2026.5/BENCHMARK.md) VRAM figures; not separately certified |
-| RTX 2070 native Windows, lite CPU | Windows MSI + CPU profile | In progress in other worktrees; certification pending hardware |
+| Lite CPU (x86 or Apple, ≥ 4 cores / 8 GiB) | `stark-translate-lite` → `lite-cpu` (Whisper small CT2 int8 + Marian CT2 finals), `lite-cpu-quality` adds Gemma 4 E2B via CPU llama.cpp | Implemented; isolated Mac CPU synthetic EN+ES caption/TTS smoke passed ([`docs/lite_profiles.md`](docs/lite_profiles.md)); x86 CPU performance and quality not measured |
+| RTX 2070 8 GB, native Windows | `lite-cuda-8gb` (Whisper turbo CT2 int8_float16 + Marian + Gemma 4 E2B via CUDA llama.cpp) | Implemented; pinned E2B GGUF / native runtime setup verified on the Mac only; **nothing run on a 2070 yet**; MSI is a scaffold plan |
 
 > **CUDA HF NF4 not recommended:** Gemma 4 HF NF4 keeps bf16 Per-Layer Embeddings resident;
 > use llama.cpp Q4_K_M. Details in the v2026.5 benchmark.
@@ -163,8 +178,9 @@ dry_run_ab.py                  Main pipeline: mic → VAD → STT → translate 
 settings.py                    Unified config (pydantic-settings, STARK_ prefix)
 models.lock.json               Pinned model sources consumed by `stark-translate setup`
 
-operator_app/                  FastAPI control plane (:9000), setup/doctor CLI, preflight, review
-stark_translate/               Package entry (`stark-translate` console script)
+operator_app/                  FastAPI control plane (:9000), setup/doctor CLI, preflight, review,
+                               support bundles, idle-only audio tests, lite preflight, owned-process cleanup
+stark_translate/               Package entry; profiles.py (standard / lite-cpu / lite-cpu-quality / lite-cuda-8gb)
 engines/                       STT + translation + TTS engine layer (see engines/CLAUDE.md)
   base.py                      ABCs and result dataclasses
   mlx_engine.py                Apple Silicon MLX Whisper + Gemma
@@ -179,8 +195,8 @@ displays/                      Static browser displays + operator SPA (displays/
 
 training/                      Windows/WSL training scripts (see training/CLAUDE.md)
   train_whisper.py             Whisper LoRA/DoRA (curriculum, --init-from)
-  train_gemma4.py              Gemma 4 QLoRA SFT (UNTESTED at full scale)
-  train_gemma4_cpo.py          Gemma 4 CPO preference optimization
+  train_gemma4.py              Gemma 4 QLoRA SFT (used for v1/v1.1; production recipe not yet run)
+  train_gemma4_cpo.py          Gemma 4 CPO preference optimization (v2-cpo)
   export_ct2.py / export_gguf.py   Whisper → CT2, Gemma → GGUF
   align_deepgram_chunks.py     Deepgram-Whisper alignment (sharded Arrow)
   mine_hard_examples.py        Hard example mining
@@ -192,6 +208,10 @@ tools/                         Evaluation, monitoring, review tooling (see tools
   translation_qe.py            3-tier translation quality estimation
   manage_adapters.py           Adapter lifecycle (register, activate, rollback)
   health_check.py              Theological canary adapter verification (8 of 18 by default)
+  isolated_audio.py            PortAudio in a disposable child; no-input timeouts (mic-stall fix)
+  pipeline_health.py           Low-rate health/control channel read by the operator
+  llama_runtime.py             Pinned native llama.cpp install + session-owned llama-server (Lite)
+  offline_hindi.py             Offline church-audio Hindi baseline (evaluation only, #138)
   render_backlog.py            Backlog validation/rendering/link check
 
 features/                      Diarization, verse extraction, summary (wired through operator_app)
@@ -206,9 +226,10 @@ docs/                          Architecture, evaluation, backlog, dated archives
 | [`docs/current_architecture.md`](./docs/current_architecture.md) | Current inference/operator contracts (v2026.14 candidate) |
 | [`docs/backlog.json`](./docs/backlog.json) | Machine-readable remaining tasks (render: `tools/render_backlog.py`) |
 | [`docs/mac_implementation_status.md`](./docs/mac_implementation_status.md) | Local validation evidence and open gates |
-| [`docs/overnight_status.md`](./docs/overnight_status.md) | Overnight worktree status and unfinished areas |
+| [`docs/overnight_status.md`](./docs/overnight_status.md) | Overnight documentation deliverables and unfinished areas |
+| [`docs/lite_profiles.md`](./docs/lite_profiles.md) | Lite profiles contract, pinned artifacts, CPU smoke evidence |
 | [`CLAUDE-macbook.md`](./CLAUDE-macbook.md) | Mac inference environment |
-| [`CLAUDE-windows.md`](./CLAUDE-windows.md) | Windows/WSL training environment |
+| [`CLAUDE-windows.md`](./CLAUDE-windows.md) | Windows: WSL training (Part A) and native Lite inference (Part B) |
 | [`engines/`](./engines/CLAUDE.md) | Engine layer — paired `AGENTS.md` in each subdirectory |
 | [`training/`](./training/CLAUDE.md) | Fine-tuning and data pipeline |
 | [`tools/`](./tools/CLAUDE.md) | Evaluation, QE, adapter deployment |
@@ -225,19 +246,25 @@ TTS routing, live diarization code behind `--diarize`. See [`docs/archive/`](doc
 for version-specific benchmarks — legacy `e2e_latency_ms` is processing time, not
 speech-end-to-display.
 
-**v2026.14 candidate (draft [PR #192](https://github.com/wrbell/stark-translate/pull/192), not merged):**
-operator reliability, schema 2 timing, reproducible setup, Review/export, frozen screening —
-evidence in [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md). Source
-publishing and the final merge are authorized; PyPI/package/release tags remain pending.
+**v2026.14 candidate (draft [PR #192](https://github.com/wrbell/stark-translate/pull/192), open, not merged):**
+operator reliability (isolated capture, health channel, work lease, owned-process cleanup),
+schema 2 timing, reproducible setup, Review/export, frozen screening, Lite profiles, opt-in
+latency experiments, the lay-volunteer operator page and the offline Hindi baseline tool —
+all overnight worktrees are integrated on the branch and under validation; evidence in
+[`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) and
+[`docs/lite_profiles.md`](docs/lite_profiles.md). Source publishing and the final merge are
+authorized; PyPI/package/release tags remain pending.
 
-**Known open bug (2026-09-09):** the built-in microphone session stalled after model load
-(no audio frames, operator showed RUNNING, audience disconnected) while file-replay sessions
-passed; live-mic and physical-device checks are deferred to tomorrow.
+**Live microphone (2026-09-09 → 10):** the built-in-mic session stalled after model load
+(no audio frames, operator showed RUNNING from the CSV header) while file replay passed. The
+fix — PortAudio in a disposable child with a no-input timeout, and operator readiness from
+the pipeline health channel — is implemented; the real built-in-mic retest is deferred to
+tomorrow (`mac-live-mic-stall`, #131).
 
-**Open gates:** live microphone, natural Spanish references, bilingual review, visible-browser
-timing run, two-speaker diarization gate, physical second output, Sunday dry run (#134), WSL
-training cycle, lite CPU and RTX 2070 certification — tracked in
-[`docs/backlog.json`](docs/backlog.json).
+**Open gates:** live microphone EN/ES retest, natural Spanish references, bilingual review,
+visible-browser timing run, two-speaker diarization gate, physical second output, dry run
+(#134, laptop stand-in allowed), WSL training cycle, Lite x86 CPU / RTX 2070 hardware
+performance — tracked in [`docs/backlog.json`](docs/backlog.json).
 
 ## License
 

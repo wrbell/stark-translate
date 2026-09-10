@@ -27,10 +27,14 @@
 ## Evidence discipline
 
 A status claim needs `metrics/` artifacts (`session_*.log`, `session_lifecycle_*.json`,
-`session_metadata_*.json` with `audio_source`). Tonight: mic session
+`session_metadata_*.json` with `audio_source`). 2026-09-09: mic session
 `20260909_233204_799019_en` stalled (lifecycle stuck `running`); file replays
-`..._233546_027169_en` / `..._233823_034893_es` completed. Cite the session id, never
-"tests passed", when describing live behavior.
+`..._233546_027169_en` / `..._233823_034893_es` completed. The isolated-capture /
+health fix (`isolated_audio.py`, `pipeline_health.py`) is integrated; a real mic session
+proving it is still pending. Cite the session id, never "tests passed", when describing
+live behavior. `speech_end_to_ack_upper_bound_ms` = estimated speech end → visible-browser
+ACK (includes return network); `send_to_ack_ms` is the server-send → ACK span.
+Lite: `docs/evaluation/lite_cpu_smoke_20260910.json` is a synthetic CPU smoke, not a gate.
 
 ## Backlog
 

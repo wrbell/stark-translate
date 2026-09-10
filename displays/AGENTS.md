@@ -9,7 +9,8 @@
 - `speech_end_to_ack_upper_bound_ms` is recorded only for visible tabs and includes return-network time. Hidden tabs and accelerated replay cannot satisfy caption-delivery gates.
 - Handle `lang_config` first: it carries `session_id`; a changed id resets history. `english` / `spanish_a` are source/target slots, not languages.
 - Legacy `e2e_latency_ms` / `true_e2e_ms` are processing measurements; do not label them speech-end-to-display in any UI or doc.
-- Operator SPA state must not infer RUNNING from file presence (tonight's built-in-mic stall showed RUNNING with no frames). Reliability work for this is uncommitted in another worktree; do not claim it is integrated.
+- Operator SPA state must not infer RUNNING from file presence. Since 2026-09-10 `ready` comes from the `tools/pipeline_health.py` channel (`phase`, `stale`) surfaced by `/api/session/status`; keep it that way. The fix is integrated but the real built-in-mic retest is still pending — do not describe #131 as validated.
+- Review/support endpoints live under `/api/review/...`, `/api/support/...`, `/api/storage/...`, `/api/audio/test-input|test-output`; the overnight widgets (`widgets/captions.js`, `qr.js`, `sparkline.js`) are integrated.
 
 ## Message types
 

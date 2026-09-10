@@ -25,10 +25,17 @@
 | Finals | `MLXGemmaEngine` — `mlx-community/gemma-4-e4b-it-OptiQ-4bit`; E2B via `--gemma4-size e2b` |
 | TTS | `PiperTTSEngine` — `en_US-lessac-high`, `es_MX-claude-high` |
 | VAD | packaged Silero 6.2.1 (`tools/vad_runtime.py`); ONNX opt-in |
-| MTP / `--mts` | **off**, experimental (#177) — never loads through mlx-lm |
+| MTP / `--mts` | **off** (#177) — `validate_live_mts` rejects it before any model loads; `--no-mts` is the explicit off switch |
+| Profile | `standard` default; `lite-cpu` / `lite-cpu-quality` / `lite-cuda-8gb` via `--profile` or `STARK_PROFILE` (`stark_translate/profiles.py`) |
 
 CUDA finals: `LlamaCppEngine` + `start_server.sh` (`--no-draft` default, `--mtp` opt-in, pin `b10883`).
-W16 Whisper CT2 auto-preferred at `adapters/whisper_turbo_ct2/active`.
+W16 Whisper CT2 auto-preferred at `adapters/whisper_turbo_ct2/active` on the standard path only.
+
+Lite profiles force faster-whisper CT2 (`whisper-small` int8 CPU or turbo int8_float16 CUDA),
+ONNX Silero, Marian CT2 int8 partials, and finals from Marian (`lite-cpu`) or Gemma 4 **E2B**
+Q4_K_M through a session-owned `llama-server` (`tools/llama_runtime.py`); A/B, drafting,
+multiprocess, STT fallback models and live diarization are off. Contract and evidence:
+[`docs/lite_profiles.md`](../docs/lite_profiles.md).
 
 ## Env vars
 
@@ -41,10 +48,11 @@ top-level settings object also accepts `STARK_<GROUP>__<FIELD>`. Full table in
 
 | Item | State |
 |------|-------|
-| #176 `--multiprocess` shared prompts/stop rules | implemented in `workers.py` (wraps `MLXGemmaEngine`); root closes after merge |
-| #177 Gemma 4 assistant drafter | experimental, off; `engines/mlx_spec.py` probe only |
-| Lite CPU profile / RTX 2070 | implementation in progress in the lite worktree; certification on hardware pending |
+| #176 `--multiprocess` shared prompts/stop rules | implemented in `workers.py` (wraps `MLXGemmaEngine`); closure evidence is the parent's |
+| #177 Gemma 4 assistant drafter | off; live `--mts` rejected before load; `engines/mlx_spec.py` offline probe only |
+| Lite CPU profile / RTX 2070 | **implemented and integrated**; isolated Mac CPU synthetic EN+ES caption/TTS smoke passed; pinned E2B GGUF + native llama.cpp setup verified (download/integrity only); x86 CPU, native Windows and 2070 performance **pending hardware** |
 | W16 + v2-cpo Mac A/B (#135) | pending artifact transfer from WSL |
+| Hindi (#138) | `tools/offline_hindi.py` offline baseline exists (evaluation only); no live integration; language decision pending |
 
 Canonical list: [`docs/backlog.json`](../docs/backlog.json).
 

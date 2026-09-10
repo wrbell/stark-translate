@@ -20,13 +20,16 @@ Importing any module must not load a model; scripts that need one spawn
 | Live session monitoring | `live_caption_monitor.py`, `kpi_report.py`, `validate_session.py`, `translation_qe.py`, `mine_hallucination_phrases.py` | Post-session KPIs ([`docs/metrics.md`](../docs/metrics.md) — targets there predate schema 2) |
 | Review, corrections, active learning | `review_data.py`, `export_review.py`, `merge_corrections.py` (`translation`, `whisper`), `session_lifecycle.py`, `lock_data.py`, `build_eval_sets.py`, `prepare_finetune_data.py`, `glossary.py` | Shared normalizer with the operator Review UI; see contracts below |
 | Adapter lifecycle | `manage_adapters.py` (`register`, `activate`, `rollback`, `list`, `export`), `deploy_adapters.py`, `health_check.py`, `convert_models_to_both.py` | Design: [`docs/deploy.md`](../docs/deploy.md) |
-| Setup / runtime helpers | `marian_ct2_setup.py`, `vad_runtime.py`, `installed_smoke.py`, `release_artifacts.py`, `audio_bridge.py`, `audio_bridge_client.py` | Used by `stark-translate setup/doctor`, packaging checks and the Docker audio bridge |
+| Setup / runtime helpers | `marian_ct2_setup.py`, `vad_runtime.py`, `installed_smoke.py`, `release_artifacts.py`, `audio_bridge.py`, `audio_bridge_client.py`, `llama_runtime.py` | Used by `stark-translate setup/doctor`, packaging checks, the Docker audio bridge, and the Lite session-owned `llama-server` (pinned `b10883` archives, hash-verified; [`docs/lite_profiles.md`](../docs/lite_profiles.md)) |
+| Reliability (integrated 2026-09-10) | `isolated_audio.py` (`IsolatedInputStream`, `probe_audio`), `capture_worker.py`, `capture_handoff.py`, `pipeline_health.py`, `persistence.py`, `operational_logging.py`, `caption_delivery.py` | Disposable PortAudio child with 5 s startup / 3 s idle no-input timeouts; low-rate health/control channel read by the operator; acknowledged background persistence; bounded per-client caption writers. Real built-in-mic retest pending |
+| Latency research (opt-in) | `latency_experiments.py`, `latency_scheduler.py`, `latency_trace.py`, `incremental_stt.py`, `preview_candidates.py`, `overnight_bench.py` | Explicit controls validated before startup, never promoted by backend selection; `overnight_bench.py` runs serial paired experiments with a visible audience browser and refuses to fabricate missing ACKs (evidence is parent-owned) |
+| Offline Hindi baseline | `offline_hindi.py` (`prepare`, `transcribe`, `translate --size e4b|e2b`, `report`), `offline_hindi_manifest.json` | Church audio → Parakeet English → Gemma Hindi, evaluation-only, new output directory per attempt; **no live integration** (#138 decision pending) |
 | Corpus builders | `build_v1_corpus.py`, `build_preference_triples.py`, `rebuild_verse_pairs.py`, `fix_platense_alignment.py`, `batch_translate.py`, `download_roundtrip_texts.py`, `sort_sermons.py` | Gemma 4 tuning data ([`docs/gemma4_tuning/`](../docs/gemma4_tuning/overview.md)); Platense realignment postmortem in [`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md) |
 | Documentation | `render_backlog.py` (`validate`, `render [--check]`, `check-links`) | Canonical backlog [`docs/backlog.json`](../docs/backlog.json); tests in `tests/test_documentation.py` |
 
 ## Measurement rules
 
-- Server `speech_end_to_final_ms` (schema 2) stops at payload readiness; `speech_end_to_ack_upper_bound_ms` adds the browser and return-network hop and exists only for visible tabs. Legacy `e2e_latency_ms` / `true_e2e_ms` are processing measurements. Definitions: [`docs/evaluation/README.md`](../docs/evaluation/README.md), [`docs/archive/v2026.13/MAC_LATENCY.md`](../docs/archive/v2026.13/MAC_LATENCY.md).
+- Server `speech_end_to_final_ms` (schema 2) stops at payload readiness; `speech_end_to_ack_upper_bound_ms` is measured from the **estimated speech end to the visible browser's acknowledgement** (so it includes render and return-network time) and exists only for visible tabs; `send_to_ack_ms` is the narrower server-send → ACK span. Legacy `e2e_latency_ms` / `true_e2e_ms` are processing measurements. Definitions: [`docs/evaluation/README.md`](../docs/evaluation/README.md), [`docs/archive/v2026.13/MAC_LATENCY.md`](../docs/archive/v2026.13/MAC_LATENCY.md).
 - `pipeline_timing.py` speech end = end of the last VAD-positive frame; no timestamp is comparable across hosts.
 - Replay reports separate language/provenance, silence vs smart vs hard cuts, EOF handling and timing schema; never pool cohorts with different manifest hashes.
 - Frozen screens (`mac_v2026_14_screening.json`, 45 s) bound experiments; they do not replace the full historical baseline or natural-speech quality gates.
@@ -73,9 +76,13 @@ directories and never modifies them (`marian_ct2_setup.py`).
 Session artifacts under `metrics/` (`session_*.log`, `ab_metrics_*.csv`,
 `diagnostics_*.jsonl`, `display_metrics_*.jsonl`, `session_lifecycle_*.json`,
 `session_metadata_*.json` with `audio_source` mic/file) are the only acceptable basis
-for a status claim. Tonight's built-in-mic stall (`20260909_233204_799019_en`) versus
+for a status claim. The 2026-09-09 built-in-mic stall (`20260909_233204_799019_en`) versus
 the passing file replays (`..._233546_027169_en`, `..._233823_034893_es`) is the
-canonical example: same build, different `audio_source`, different conclusion.
+canonical example: same build, different `audio_source`, different conclusion. The
+capture/readiness fix that followed is integrated; the mic retest that would close it has
+not been run yet. Lite CPU smoke evidence (synthetic inputs, hashes, commands) is in
+[`docs/evaluation/lite_cpu_smoke_20260910.json`](../docs/evaluation/lite_cpu_smoke_20260910.json)
+and is not a natural-speech quality or latency claim.
 
 ## Backlog pointers
 

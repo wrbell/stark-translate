@@ -1,37 +1,55 @@
 # training/AGENTS.md — Fine-Tuning & Data (Agent Guide)
 
-> Paired with [`CLAUDE.md`](./CLAUDE.md) (10-step preprocess, LoRA/QLoRA configs, hard
-> mining, Gemma 4 tuning program, historical TranslateGemma sweep, go/no-go gates).
-> All training runs on **WSL/A2000**; adapters transfer to Mac for inference only.
-> Nothing in `training/` ran tonight; every WSL item is pending hardware.
+> Paired with [`CLAUDE.md`](./CLAUDE.md) (programs and their state, data pipeline with
+> verified flags, Whisper LoRA / W17, Gemma 4 tuning, historical TranslateGemma sweep,
+> export and transfer). All training runs on **WSL/A2000**; exported artifacts move to the
+> inference machines. No WSL job has run since 2026-04-30; every WSL item is pending
+> hardware time. Native Windows / RTX 2070 **inference** is the separate Lite runtime
+> ([`docs/lite_profiles.md`](../docs/lite_profiles.md)), not a training topic.
 
 ## Agent constraints
 
-- **Training cutoff:** 2026-03-14 (`CLAUDE.md` § Data Organization) — never train on post-cutoff eval sermons or the fresh-eval set.
-- **Copyright:** public-domain Bible pairs only — no ESV/NASB/NIV/NLT/NVI/LBLA/RVR1960/DHH bulk training.
-- **Corpus version:** use `verse_pairs_train_v2.jsonl`; v1 has the Platense misalignment (`docs/platense_alignment_bug.md`).
-- **Holdout safety:** Review/export tests must not overwrite local holdout; write beside the target dataset. Correction imports keep evaluation and training separate (`tests/test_correction_import_safety.py`).
-- **Gemma 4:** train E2B and E4B separately; freeze PLE and the vision/audio towers; `enable_thinking=False` on every example; QLoRA via Unsloth. `train_gemma4.py` / `train_gemma4_cpo.py` / `export_gguf.py` are marked `UNTESTED` for the full domain run — say so when citing them.
-- **Ship rule:** stock Gemma 4 E4B stays the default until a Mac A/B note (#135) says otherwise; v2-cpo is at parity, not better, and fails the Jacobo canary (#136).
-- **Phase 4:** requires sermon WAVs on WSL — status file `stark_data/cleaned/phase4_status.json`.
-- Do not paste WER/COMET numbers into guides; link the evidence document that defines the measurement.
+- **Training cutoff:** 2026-03-14 — never train on post-cutoff eval sermons or the four
+  fresh-eval video ids listed in `CLAUDE.md` § Data organization.
+- **Copyright:** public-domain Bible pairs only — no ESV/NASB/NIV/NLT/NVI/LBLA/RVR1960/DHH.
+- **Corpus version:** `bible_data/aligned/verse_pairs_train_v2.jsonl`; v1 has the Platense
+  misalignment. `run_gemma4_e4b_domain_sft.sh` defaults to the v1 path — set
+  `STARK_GEMMA4_VERSE` (or `STARK_GEMMA4_TRAIN`) before running it.
+- **Holdout safety:** Review/export must not overwrite local holdout; correction imports keep
+  evaluation and training separate (`tests/test_correction_import_safety.py`).
+- **Gemma 4:** train E2B and E4B separately; freeze PLE and vision/audio towers;
+  `enable_thinking=False` on every example; QLoRA via Unsloth. `train_gemma4.py`,
+  `train_gemma4_cpo.py`, `export_gguf.py` ran for the v1/v1.1/v2-cpo experiments but keep
+  pre-run `UNTESTED` headers — cite them as "review before each run".
+- **W17:** `run_w17_curriculum.sh` names `o_proj`; `train_whisper.py` documents `out_proj`.
+  Verify the module name before the first run; never train hard-only.
+- **Ship rule:** stock Gemma 4 E4B stays the default until a Mac A/B note (#135) says
+  otherwise; v2-cpo is at parity and fails the Jacobo canary (#136).
+- **Quoting flags:** every CLI flag in `CLAUDE.md` was read from the script's `argparse`
+  block at `c5fb689`; re-check with `--help` after pulling.
+- Do not paste WER/COMET/latency numbers into guides; link the evidence document that
+  defines the measurement.
 
 ## Pipeline order (WSL runbook)
 
-1. Phase 4 preprocess → 2. Gemma 4 E4B domain SFT → GGUF → 3. W17 Whisper DoRA + hard-mix → CT2 → 4. optional Parakeet EN bench → 5. Mac transfer + Phase 7 evaluate → 6. active learning cycle.
+1. Phase 4 preprocess → 2. Gemma 4 E4B domain SFT → GGUF → 3. W17 Whisper DoRA + hard-mix →
+CT2 → 4. optional Parakeet EN bench on CUDA → 5. Mac transfer + Phase 7 evaluate →
+6. active learning cycle → 7. CUDA latency proposal.
 Runbook: [`docs/wsl_pipeline_refresh.md`](../docs/wsl_pipeline_refresh.md).
 
 ## Artifacts and where their numbers live
 
 | Artifact | State | Evidence |
 |----------|-------|----------|
-| W16 Whisper LoRA → CT2 | Deployed CUDA STT (`adapters/whisper_turbo_ct2/active`) | [`docs/archive/v2026.7/STT_BENCHMARK.md`](../docs/archive/v2026.7/STT_BENCHMARK.md) |
+| W16 Whisper LoRA → CT2 | Deployed CUDA STT (`adapters/whisper_turbo_ct2/active`); Mac uses Parakeet/mlx-whisper without LoRA | [`docs/archive/v2026.7/STT_BENCHMARK.md`](../docs/archive/v2026.7/STT_BENCHMARK.md) |
 | W17 | Scripted (`run_w17_curriculum.sh`), untrained | — |
-| Gemma 4 v1 / v1.1 / v2-cpo | Trained on WSL; parity with stock E4B, Jacobo failing | [`docs/gemma4_tuning/v1_results.md`](../docs/gemma4_tuning/v1_results.md) |
-| E4B domain SFT (`run_gemma4_e4b_domain_sft.sh`) | Scripted, pending Phase 4 corpus | — |
+| Gemma 4 spike / v1 / v1.1 / v2-cpo | Trained 2026-04-29/30; parity with stock E4B, Jacobo failing | [`docs/gemma4_tuning/v1_results.md`](../docs/gemma4_tuning/v1_results.md) |
+| E4B domain SFT (`run_gemma4_e4b_domain_sft.sh`) | Scripted, not run; needs v2 corpus env var | — |
 | TranslateGemma S1–S9 (S6 winner) | Historical, superseded | [`docs/archive/training/gemma_tuning_test_matrix.md`](../docs/archive/training/gemma_tuning_test_matrix.md) |
+| Hindi / Chinese corpora | Not prepared; pending user decision (#138). `tools/offline_hindi.py` is an evaluation-only baseline, no live path | [`docs/evaluation/mac_v2026_14_hindi/README.md`](../docs/evaluation/mac_v2026_14_hindi/README.md) |
 
 ## Backlog
 
 `wsl-phase4`, `wsl-e4b-domain-sft`, `wsl-w17-export`, `cuda-latency-proposal`,
-`issue-135-mac-ab`, `issue-136-jacobo-cpo` in [`docs/backlog.json`](../docs/backlog.json).
+`issue-135-mac-ab`, `issue-136-jacobo-cpo`, `issue-138-hindi-zero-shot` in
+[`docs/backlog.json`](../docs/backlog.json).

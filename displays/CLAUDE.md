@@ -72,19 +72,30 @@ satisfy caption-delivery gates; see
 
 ## Operator SPA (port 9000)
 
-`app.js` drives session start/stop/pause/resume, language flip, VAD threshold, fallback
-toggle, preflight (`/api/preflight`), device lists (`/api/devices`,
-`/api/audio/output-devices`), metrics (`/api/metrics`) and feature panels
-(`/api/features/verses`, `/api/features/summary`). `review.js` edits finalized chunks
-during or after a session through `/{session}/segments` and exports approved corrections
-via `/{session}/export` — original predictions and audio are never rewritten.
+`index.html` is organized for lay volunteers (start/stop captions, microphone and voice
+choice, audience display / phone link with an inline QR, health list, caption preview,
+troubleshooting `<details>`, support export). `app.js` drives session start/stop/pause/resume,
+language flip, VAD threshold, fallback toggle, preflight (`/api/preflight`), capability
+gating (`/api/capabilities`), device lists (`/api/devices`, `/api/audio/output-devices`),
+idle-only device probes (`/api/audio/test-input`, `/api/audio/test-output` — native calls
+run in disposable processes), status (`/api/session/status`, which now carries the pipeline
+health `phase`/`ready`/`stale` fields), metrics (`/api/metrics`) and feature panels
+(`/api/features/verses`, `/api/features/summary`). `widgets/captions.js`, `widgets/qr.js`
+and `widgets/sparkline.js` are the integrated overnight widgets. `review.js` edits finalized
+chunks during or after a session through `/api/review/{session}/segments` and exports
+approved corrections via `/api/review/{session}/export` — original predictions and audio
+are never rewritten. `/api/support/preview|export` builds scoped support bundles and
+`/api/storage/cleanup` removes only regenerable completed-session logs
+(`operator_app/support.py`).
 
-**Known gap (2026-09-09):** session state showed RUNNING once the pipeline printed the
-CSV header while the built-in microphone never delivered frames and the audience display
-stayed disconnected. Status must derive from live audio/health signals; tracked as
-`mac-live-mic-stall` and `overnight-reliability` in
-[`docs/backlog.json`](../docs/backlog.json). Overnight operator-UI widgets
-(captions/QR) are uncommitted in another worktree and not yet integrated.
+**Readiness (fixed 2026-09-10, live retest pending):** on 2026-09-09 the SPA showed RUNNING
+once the pipeline printed the CSV header while the built-in microphone never delivered
+frames. `PipelineRunner` now reads `tools/pipeline_health.py` (`loading → listening →
+ready` on the first input frame, `paused`, `input_error`; `stale` after 3 s without a
+heartbeat) and reports `ready` only from that channel; the pipeline itself fails a capture
+that delivers no samples within 5 s (`tools/isolated_audio.py`). Polls that return an
+unchanged status do not churn the live region. A real built-in-mic session has not yet been
+re-run — `mac-live-mic-stall` / `issue-131-smoke` in [`docs/backlog.json`](../docs/backlog.json).
 
 ## Access
 
