@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "scope": "Independent completed-96 analysis checks; no production or reference-quality certification",
+  "input": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/screen-analysis-final/analysis.json",
+    "sha256": "0ce884b43839ce4e9a01dbb0dba7e3211906338f049439f572c2acfb24dc0442",
+    "size_bytes": 11448592
+  },
+  "timestamps": {
+    "read_started_at_utc": "2026-09-10T06:45:05.966061+00:00",
+    "analysis_read_finished_at_utc": "2026-09-10T06:45:05.968619+00:00",
+    "audit_finished_at_utc": "2026-09-10T06:45:06.947460+00:00"
+  },
+  "script_sha256": "bbbf14bae0e29889ce8b1e75d154a9e26c478b29088ebf4253b655f926494bed",
+  "sessions": 96,
+  "finals": 672,
+  "checks": {
+    "matrix": 4,
+    "classification": 193,
+    "promotion": 57,
+    "hash": 481,
+    "size": 480,
+    "raw": 192,
+    "identity": 384,
+    "distribution": 4992,
+    "preview": 192,
+    "browser": 960,
+    "binding": 288,
+    "coverage": 96,
+    "pair": 3276,
+    "samples": 2516,
+    "paired_stats": 7548,
+    "pool": 2604,
+    "eligibility": 61
+  },
+  "total_checks": 24324,
+  "endpoint_counts": {
+    "smart_cut": 384,
+    "hard_cut": 96,
+    "silence": 96,
+    "silence_replay_tail": 96
+  },
+  "discrepancies": [],
+  "passed": true,
+  "limitations": [
+    "Per-session socket binding is not independently verified physical browser identity.",
+    "Tiny endpoint cohorts cannot establish a stable population p95.",
+    "Matched caption-window coverage is not acoustic recall or reference quality.",
+    "Invalid-session, preview-order, and execution-evidence fields are inspected as recorded gates; this is not independent model-execution certification.",
+    "Packaging/other host activity windows require external annotation and quiet confirmation."
+  ]
+}

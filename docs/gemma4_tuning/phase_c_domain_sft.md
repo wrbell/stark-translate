@@ -1,5 +1,11 @@
 # Phase C — Domain SFT (v1 ship target)
 
+> **As-written plan (2026-04); executed as v1 and v1.1 (2026-04-29).** The +2 COMET-22 goal
+> was **not** met — v1.1 reached parity with stock E4B and the Jacobo canary still fails
+> (#136): [`v1_results.md`](./v1_results.md). The corpus mix table below predates the Platense
+> realignment; use `bible_data/aligned/verse_pairs_train_v2.jsonl`. Status table in
+> [`overview.md`](./overview.md).
+
 **Goal:** ship Gemma 4 E4B and E2B adapters that beat stock by **≥ +2 COMET-22** with **≥ 7/8 canary** and no regression.
 
 **Wall clock:** ~1 week.

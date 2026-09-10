@@ -1,0 +1,582 @@
+{
+  "schema_version": 1,
+  "purpose": "Unchanged observations for 24 completed synthetic routing runs; source audio remains outside the report and is identified by manifest hash.",
+  "files": [
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.json",
+      "sha256": "aa3dd81a369d9d585d87f82e7489db2e6a9387d9900e352692831fceea8dd94b",
+      "size_bytes": 12593
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.csv",
+      "sha256": "51faa52ed34ed616a68e9b38c45f7f9505ff736b2030ca68fca6eaff236037c2",
+      "size_bytes": 1939
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "da6bca3faf1560a3f0b8d5aeb97745ded445d8cec19707108a945376f1b67a78",
+      "size_bytes": 5207
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "921a19e5cd5465238dadd20feb2cec92f9d8a6184fdb83578f42a377ed98c10c",
+      "size_bytes": 9225
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.json",
+      "sha256": "cc9e264cf606bc4e6e79293094fb1df91eda7c0dded0c23a0ffa2b2c67781348",
+      "size_bytes": 12638
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.csv",
+      "sha256": "caec2c174044a32ee5aae71f815bea463422571922cb5a4bab4d8ede168eb9e3",
+      "size_bytes": 1872
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "22e853892ebcfe70bdcfb577372bf8886199b726aa37e0969ed238e16263dc86",
+      "size_bytes": 1711
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "ffec591041ecc82b468137d66c1df367dc7e0e28cb8800bc86e35bf744f8de29",
+      "size_bytes": 8714
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.json",
+      "sha256": "802e8e3912d140ddec901968a3a3af3953b94d3cde33f645cc220cb329bbc8dd",
+      "size_bytes": 12636
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.csv",
+      "sha256": "cf4e5463cfac51dd52e2618ba9781fb87fdc1322f3d6ec67fd6c44f2d164b0ad",
+      "size_bytes": 1937
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "bea2d7cb683d760232c0906f79c19be389148dddc0a5cd435400edc81e7b240f",
+      "size_bytes": 5212
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "9f616c5dbfa75ff64288534cc41c8adce3d7dcad31b4d43efbb3fb3534388f04",
+      "size_bytes": 9225
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.json",
+      "sha256": "84ad37c42129eedf46b154b8e1ebf399bf5e0991f193847889580327bbdeaded",
+      "size_bytes": 12680
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.csv",
+      "sha256": "e8813662b719eadc959c8dabb90964d3522ceb80f8edb8440093aceb9358646d",
+      "size_bytes": 1873
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "ca8ebb0ccb71575a0382c8f8d61c33c1aac69f92ee2e5ae312a94bbf383730e7",
+      "size_bytes": 1709
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "75503b099920f334af751917ff6c02d8d3f5ac16f2bf45c502c5bbdebb13a342",
+      "size_bytes": 8714
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.json",
+      "sha256": "a3ca9b618db4e38512969c6620d57bfe969fc4a924cb6613801a7ae0adb10b2d",
+      "size_bytes": 12637
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.csv",
+      "sha256": "3eb6ada955ea1601fad39167e7cb160416fbc5a0596df9a68a784636163bf2c0",
+      "size_bytes": 1942
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "60cee66e73ebf2653b2dd5c63e7ba45e56bacc6c18443b8a4dcb93361e1bf741",
+      "size_bytes": 5203
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "c3cf3d5acf240fd73a6a9ae30f7f597f85b9909607504521fa431cb07ef2687e",
+      "size_bytes": 9241
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.json",
+      "sha256": "f92a4084c0582799f5dfd3772963a155ccb9f8e15c82674da1619cb2a0366c9c",
+      "size_bytes": 12612
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.csv",
+      "sha256": "15ffa35eb40e3e13acdc1afd209aadeaaf4e0271a2975048b2be5ef4ac200f01",
+      "size_bytes": 1871
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "7f802f13b79ee21b8681a27816d4aecea42d9a372bf1650972a316bddb7dbc31",
+      "size_bytes": 1711
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "eb80170879dfc731cfdee59174fb427bf80d3062d2028cd3d58b77adbb3aa0ca",
+      "size_bytes": 8715
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.json",
+      "sha256": "21247e3bbf42fe398ecab91f24191d4b94155c454aff8bf9217f8ea5fba1757d",
+      "size_bytes": 12556
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.csv",
+      "sha256": "c372a5cc47e2523512d745580236d27350cfd95d5ffd801aa6bbad9262c223b0",
+      "size_bytes": 1942
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "28eba196a4c590b68395e4199d3703fcd756d19a15e65812ed9a2617dff0dc1e",
+      "size_bytes": 4330
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "6cf14e636654f9e3734698222417073ab578b395d48799aa732a043366d00c49",
+      "size_bytes": 9232
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.json",
+      "sha256": "58a103183364fe9cc8c7f1c4afd73749a75a54b54c0f6271d6ff1a55477ad8af",
+      "size_bytes": 12680
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.csv",
+      "sha256": "12672072561377c359ff9d33a2a53fcb614373c394c713d77ca1b58ea5a5ff20",
+      "size_bytes": 1873
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "ca9b03a96dcdfa23c816f14cf5e3e962168a29863760ff16a382efaf4c407f27",
+      "size_bytes": 1709
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "62f8d6785ee848809a0b8f4f91ddc8037bf9c54e51f1b66ca6b5209c23dc6160",
+      "size_bytes": 8714
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.json",
+      "sha256": "0bba601ac64af7d9ff70ee53fb661fa42abc7822b56bf0e3e49072ff24154e10",
+      "size_bytes": 12632
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.csv",
+      "sha256": "03c13e5384428aecc8905bab7e6bcb6dc395e9ac875eb6c34376460b64db3fa4",
+      "size_bytes": 1942
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "41784bcb9016c0ddaf77de02750d90a26712f051d27e50b3436beed9c6065ace",
+      "size_bytes": 4328
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "2d2cd339b3a92553a7c8322d2f688b8a44e35d17fd2017a9a975f4f71f9ca690",
+      "size_bytes": 9235
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.json",
+      "sha256": "976f774898c019fdc6fb222e514ee55698c35991db526e53eb0ad23832fbcc88",
+      "size_bytes": 12672
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.csv",
+      "sha256": "0eb8d4a07b56f935b33511c44e6ca4a6610c2c0a968e1fcdcdbf0aa9d7997da5",
+      "size_bytes": 1873
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "dd8b5c806ba6cb541facac0c938d66286d3a1968b4d081634f939088da054087",
+      "size_bytes": 1711
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "3869af58fe3f95ea72d01a9e4e2cfddcbb9a01491318b3ed485ac69dd7b2bdc5",
+      "size_bytes": 8719
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.json",
+      "sha256": "9bfbea15eb60d21623dd1e8d7a7b2b1c78f9f1738b52e2d906cde1740eb6add9",
+      "size_bytes": 12628
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.csv",
+      "sha256": "54a8539826b2abbe629687746d35338faaa34fbc6818adc1bac80dea9efc9647",
+      "size_bytes": 1934
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "9cb169fb10a38f3f9a0f6887f8b19c85a1e3f75a955ff27ebd77d04df6f33329",
+      "size_bytes": 3456
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "ea974b717661736959a8e460eea3ce09fe5cc28e2b2e5b40efc2691d189f08a2",
+      "size_bytes": 9166
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_conservative/mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_conservative/mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.json",
+      "sha256": "d3cc44830f2e0176e73396814d7565a2afc7c46dca595948f3ddc51a0c8e405f",
+      "size_bytes": 12676
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.csv",
+      "sha256": "d33a93a880ebec3eb2b80fded4d8619835f7f1a826d0ea1fdfaa3d1a146370ba",
+      "size_bytes": 1879
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "7acdb1d69d94c11403381b58bcb976fddc527106c304a4a0a2de1d0319b8bda4",
+      "size_bytes": 1710
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "4bf445c23432286590720e1c6dac4914513bc6fbee643de78708cb20bb7ca6b4",
+      "size_bytes": 8721
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.json",
+      "sha256": "b1da613064ca331d431f8813c766fbc41b98655f03aacd4b9d5121fe0c52b817",
+      "size_bytes": 12453
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.csv",
+      "sha256": "28b4eaaa0abcbc1a3062c1c175cdbad03520452471bcbb80d29f1b5b071e1149",
+      "size_bytes": 1873
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "fbfdab96aac9100ed4071072d1460efb50da76240a694ff4682296079d1d2922",
+      "size_bytes": 4301
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "9f92434027100bec404c1c247f89360e5da2aed994e96ac4eee6a019625ab07f",
+      "size_bytes": 8931
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.json",
+      "sha256": "141cc5763c343b0c2fdaeb46580536171575863a67914499ca48ff8f62c21507",
+      "size_bytes": 12437
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.csv",
+      "sha256": "4523b2bf32b2fd0ad7d48ff4e83ec95ea9bc350ec34334e9c190fed509187603",
+      "size_bytes": 1807
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "a83b3a7802be7852ffd72e73053dae5d9315d47a31aea85ffa0d939e6be8afea",
+      "size_bytes": 1698
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "6f5ce0f4ebb56acb3bbdfc8ca18ae76376bf5f3ec181ea90e3a64037a1569df3",
+      "size_bytes": 8435
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.json",
+      "sha256": "46ab01d0a9f826ebe0d113a5ef319323860250278f800c2293693862cdfdc9db",
+      "size_bytes": 12404
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.csv",
+      "sha256": "8d26bb20b3bb8c731c53242b112647ff5547d3dad33d462206c1cc3fd2817b13",
+      "size_bytes": 1871
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "35eae803655231b06386bc13d7aea44fca485e78a0c6d7ea8145a121454c04b8",
+      "size_bytes": 6044
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "18c1823a5a084086ac4bfe737f45780feaa91626bba3dadbf3aa46845a380548",
+      "size_bytes": 8940
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.json",
+      "sha256": "26c32fa3824fb31fed6f11201eba6b7bcb01048481b5c72509e3ff7d692a60ab",
+      "size_bytes": 12390
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.csv",
+      "sha256": "41aa69c485bd8e74d26ab093161da1c4bb567c88b2e48af2aaf65a58579e2aac",
+      "size_bytes": 1807
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "ae8918ab3574611012ddd5f2bb69364496189d2979a69007b9fb4b8e04f214e6",
+      "size_bytes": 1698
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "961ac258a6d15b5b762e299df56e226c5e42b3046f4b21af203226c51e653374",
+      "size_bytes": 8437
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.json",
+      "sha256": "f61e786d1a7ada5891a975b62b35b1481bdc84bdf1b472d360d6863098bb7213",
+      "size_bytes": 12364
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.csv",
+      "sha256": "1f7a401f84db4ed37d9778e71b34a926cb39c21e7a97cf0a3dcd33d7a2a8d427",
+      "size_bytes": 1869
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "ccd6ca242021d844ca97ce0deec52d5b83b5ebbe520803bde69fe87690ac8e84",
+      "size_bytes": 6041
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "3f59beab19446df8997618528e1dd44887ecfe89264d70a9b6c12e48a9eb420f",
+      "size_bytes": 8934
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.json",
+      "sha256": "e5ff1b90ebf69c8deffb365ff8352d0a67f53120446bf3618ab5bfe247dc90b6",
+      "size_bytes": 12445
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.csv",
+      "sha256": "d5326303f6049a822412e1652e7be6b09afb04580dab8eee0a080c9e24f2d23c",
+      "size_bytes": 1807
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "85ee095856b8845c4e7ab98962d7373fbbe22abfd83c5b175ba0ec475ae83916",
+      "size_bytes": 1696
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "1d303266af042c47f38da1756464b9e8422601bddd60e9fe82963ec63c781210",
+      "size_bytes": 8436
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.json",
+      "sha256": "68b12b943b318d8ae9259ad0466e574b4a2fecd31a8ff8f7c5e8cc2e1b89970a",
+      "size_bytes": 12427
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.csv",
+      "sha256": "d869938df906d37c5c0ab27b637b0dacd8664a88e0eb553cfa946a273eec988e",
+      "size_bytes": 1871
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "d05d4e67a7f41449ce06a8de74a92b361b5ee59ca2635b1ed8f413488afa3ffc",
+      "size_bytes": 6047
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en.jsonl",
+      "sha256": "72bb4c771f858414a62b44c8a031c4e8deceb59817a3adc146d3be4177b39171",
+      "size_bytes": 8954
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.json",
+      "sha256": "15ce11957f097c94ff7b7547d4232ef01cacdce615d612f3f8da4574488bc8df",
+      "size_bytes": 12420
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.csv",
+      "sha256": "a7c8f36ef5db978cfbaf436b530f9d1e45d2b5fe8b71f5b9a42c2c9cf1ad909f",
+      "size_bytes": 1806
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "906aec8b1cb5a5d700bb5f9620b273647c128dba0c803c734c390117701cc602",
+      "size_bytes": 1698
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es.jsonl",
+      "sha256": "c8fc0556f0d1bb8f70d9df8ebc776a58778195a0f651e4195b54fb56f4a13b8e",
+      "size_bytes": 8438
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.json",
+      "sha256": "9810ea45df938b1b87eecacf035d659cc4b0b25dcdc25cee02cd739f4e39866f",
+      "size_bytes": 12376
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.csv",
+      "sha256": "d1116dd74656765f8f406bf9778ccbecbc247dc12bc4cd86cdd44c817199f2b6",
+      "size_bytes": 1875
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "68d2659558461d7d4a36edadc5e53a9592e6d177a5add2226abd501cbe3f15fc",
+      "size_bytes": 4296
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en.jsonl",
+      "sha256": "2be95e92c32c000fd72580e6b91634c95e94d1d941b81446afbee03781b32abb",
+      "size_bytes": 8940
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.json",
+      "sha256": "3c988c62f0733cb60c2ece3d1e385f528d714fad1b6b08696c21174dc54acac5",
+      "size_bytes": 12422
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.csv",
+      "sha256": "e9fd99416f804534fdeace92a6d5008118e11e07c5669e31208d174b8b22a349",
+      "size_bytes": 1806
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "ea96d985b0a398d0afcddf76cc0fc13aba172129f0fa6605be761d816e9c3360",
+      "size_bytes": 1698
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es.jsonl",
+      "sha256": "560f45509e90392628796388652ba51d3fbd712083daa336bc3506cf02d63e20",
+      "size_bytes": 8438
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.json",
+      "sha256": "25cb28fafe726af7982023dd958de3f2789142ece25e2d8b9005373604d87836",
+      "size_bytes": 12392
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.csv",
+      "sha256": "3711bfae18c0c8074c6380cbfc6eb1f473f85d217ec65068f2a61b7b497a5c30",
+      "size_bytes": 1859
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "77c9db2e463d7a7889c81a9ce137fe36ccfb2892bccc7d94255ad0c85888e0fb",
+      "size_bytes": 3453
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en.jsonl",
+      "sha256": "fde332ffdb6384710e8436c41aa5e5b07cd4aeb2c1cd74f684e80ef2b28bd223",
+      "size_bytes": 8892
+    },
+    {
+      "original_path": "metrics/mac_roadmap/routing/routing_legacy/mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.json",
+      "report_path": "raw/runs/routing_legacy/mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.json",
+      "sha256": "2393b66f9f991e97bdf390cb8b0aa7df2e80b1864d05a78b507d0f17055a060a",
+      "size_bytes": 12419
+    },
+    {
+      "original_path": "metrics/ab_metrics_mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.csv",
+      "report_path": "raw/timing/ab_metrics_mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.csv",
+      "sha256": "09e8656498e4de52fd94f9479cc64536fd8cafa3ac81ca80ead28e913041627f",
+      "size_bytes": 1795
+    },
+    {
+      "original_path": "metrics/partials_mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/timing/partials_mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "07f576117d243723114a66ef4d765e8b6ac421997812e3528106fbda0b050c17",
+      "size_bytes": 855
+    },
+    {
+      "original_path": "metrics/diagnostics_mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.jsonl",
+      "report_path": "raw/diagnostics/diagnostics_mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es.jsonl",
+      "sha256": "c47b9e49a00f731cc60163a3a92d0e67396624f93048ab671dda7feb35ba6bcd",
+      "size_bytes": 8401
+    }
+  ]
+}

@@ -1,0 +1,1681 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "code_note": "English Pause/Stop/restart runs used integrated 35ae886; subsequent frontend truthfulness fix423ec32 verified by reload. Runtime hashes in each session are authoritative.",
+  "actions_ms_epoch": {
+    "start": 1789015152833,
+    "pause": 1789015196059,
+    "resume": 1789015208684,
+    "stop": 1789015232945
+  },
+  "sessions": [
+    {
+      "session_id": "20260910_003912_869693_en",
+      "source": "controlled file replay; physical devices not tested",
+      "lifecycle": {
+        "schema_version": 1,
+        "session_id": "20260910_003912_869693_en",
+        "run_id": "ddc9167eefbd40969592c4f6561f2e76",
+        "status": "completed",
+        "pid": 32226,
+        "hostname": "Invicta91.local",
+        "started_at": "2026-09-10T04:39:16.587632+00:00",
+        "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+        "source": {
+          "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+          "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+          "package_version": "2026.7.0.0",
+          "package_artifact_hashes": {},
+          "package_vcs_commit": null
+        },
+        "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+        "persistence": {
+          "submitted": 148,
+          "completed": 148,
+          "pending": 0,
+          "failed": 0,
+          "capacity": 256,
+          "ok": true,
+          "failures": []
+        },
+        "exit_code": 0,
+        "ended_at": "2026-09-10T04:40:33.789171+00:00",
+        "memory": {
+          "scope": "pipeline_process_lifetime",
+          "peak_rss_bytes": 2180726784,
+          "peak_metal_bytes": 9264546914
+        },
+        "models": {
+          "stt": {
+            "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+            "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+            "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+            "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+            "revision_source": "hf_snapshot_path",
+            "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+          },
+          "translation_a": {
+            "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+            "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "revision_source": "hf_snapshot_path",
+            "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+          },
+          "marian": {
+            "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+            "manifest_revision": null,
+            "resolved_revision": null,
+            "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+            "revision_source": "unknown",
+            "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+            "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_size_bytes": 79567635,
+            "export_manifest": {
+              "sha256": "a2252e22ba84cde86261163aacb51708f62c3defae3a52a928fd428c4a4ae789",
+              "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+              "source_revision": null,
+              "ct2_quantization": "int8",
+              "direction": "en-es",
+              "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+              "model_bin_hash_matches": true
+            }
+          }
+        },
+        "diagnostics": {
+          "size_bytes": 27097,
+          "sha256": "d3165ec4b6680bb321c92cd2c4a66f15e7fefda7b3eb1a9ad0c73fad01a1af20"
+        }
+      },
+      "metadata": {
+        "session_id": "20260910_003912_869693_en",
+        "source_lang": "en",
+        "target_lang": "es",
+        "session_kind": "replay",
+        "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+        "input_audio_sha256": "6e89457fc071a2e4b99baa7fa98b4baaec6a279d0c158874cde6424d51555193",
+        "audio_source": "file",
+        "timing_schema_version": 2,
+        "backend": "mlx",
+        "model_family": "gemma4",
+        "model_a": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "profile": {
+          "name": "standard",
+          "backend": "auto",
+          "stt_model": null,
+          "stt_compute_type": null,
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": null,
+          "translation_model": null,
+          "vad_backend": null,
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "profile_artifacts": null,
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 4,
+          "num_workers": 1,
+          "local_files_only": false,
+          "whisper_cuda_model": "large-v3-turbo",
+          "whisper_cuda_compute_type": "int8_float16",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": true,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "auto",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "managed_llama": null,
+        "model_b": null,
+        "stt_backend": "auto",
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "torch",
+          "artifact": {
+            "source": "installed_package",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "torch",
+            "opset_version": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/stt_env/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+            "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+            "size_bytes": 2272526
+          }
+        },
+        "translation": {
+          "idle_warmup_only": false,
+          "final_aware_partials": false,
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_model_4b": "mlx-community/translategemma-4b-it-4bit",
+          "mlx_model_12b": "mlx-community/translategemma-12b-it-4bit",
+          "mlx_model_gemma4_e4b": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "mlx_model_gemma4_e2b": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+          "mlx_drafter_gemma4": "mlx-community/gemma-4-e4b-it-assistant-bf16",
+          "mlx_mts": false,
+          "cuda_model_4b": "google/translategemma-4b-it",
+          "cuda_model_12b": "google/translategemma-12b-it",
+          "marian_model": "Helsinki-NLP/opus-mt-en-es",
+          "marian_device": "auto",
+          "marian_intra_threads": 4,
+          "marian_backend": "auto",
+          "marian_compute_type": "int8_float16",
+          "marian_max_new_tokens": 128,
+          "marian_warmup_passes": 2,
+          "marian_eager_both": false,
+          "model_family": "gemma4",
+          "num_draft_tokens": 3,
+          "default_source_lang": "en",
+          "default_target_lang": "es",
+          "turboquant": false,
+          "turboquant_key_bits": 3,
+          "turboquant_val_bits": 4
+        },
+        "replay_speed": 1.0,
+        "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+        "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+        "package_version": "2026.7.0.0",
+        "package_artifact_hashes": {},
+        "package_vcs_commit": null,
+        "latency_experiment_configuration": {
+          "latest_partial": false,
+          "async_captions": false,
+          "marian_memo": 0,
+          "first_preview_s": 0.0,
+          "pause_preview_ms": 0.0,
+          "speculate_pause_ms": 0.0,
+          "clause_preview_s": 0.0,
+          "vad_worker": false,
+          "incremental_stt": "off",
+          "rolling_window_s": 4.0,
+          "mlx_cache_mb": 256,
+          "gemma_prefix_cache": false,
+          "trace": false
+        }
+      },
+      "finals": [
+        {
+          "chunk_id": "1",
+          "timestamp": "2026-09-10T00:39:41.744049",
+          "english": "Please turn to John chapter 3, verse 16. For God so loved the world that he gave his only begotten Son.",
+          "spanish_a": "Por favor, pasa a Juan capítulo 3, versículo 16. Porque de tal manera amó Dios al mundo que ha dado a su Hijo unigénito.",
+          "spanish_b": "",
+          "stt_latency_ms": "2854.1",
+          "latency_a_ms": "1650.6",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "4619.7",
+          "true_e2e_ms": "10991.9",
+          "silence_delay_ms": "6372.2",
+          "queue_wait_ms": "52.4",
+          "stt_confidence": "0.99",
+          "tps_a": "28.0",
+          "tps_b": "0.0",
+          "qe_a": "1.0",
+          "qe_b": "",
+          "utterance_dur": "6.37",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "0.52",
+          "marian_pt_ms": "96.8",
+          "partial_stt_ms": "153.7",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "0.591",
+          "gen_tokens_a": "37",
+          "prompt_tokens_a": "54",
+          "prefill_ms_a": "114.97291701380163",
+          "ttft_ms_a": "309.8217910155654",
+          "decode_ms_a": "1340.7507090014406",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "1",
+          "endpoint_reason": "silence",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "5119.1",
+          "vad_wait_ms": "493.7",
+          "stt_queue_wait_ms": "53.6",
+          "translation_queue_wait_ms": "1.3",
+          "finalization_overhead_ms": "5.0",
+          "broadcast_ms": "0.7",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "55296",
+          "sample_end": "360960",
+          "sample_rate": "48000",
+          "speech_end_sample": "339456",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        },
+        {
+          "chunk_id": "2",
+          "timestamp": "2026-09-10T00:39:48.365865",
+          "english": "Um and then also I noticed too that um",
+          "spanish_a": "Um y también noté que um",
+          "spanish_b": "",
+          "stt_latency_ms": "153.5",
+          "latency_a_ms": "1447.0",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "1613.4",
+          "true_e2e_ms": "8686.4",
+          "silence_delay_ms": "7072.9",
+          "queue_wait_ms": "0.1",
+          "stt_confidence": "0.97",
+          "tps_a": "27.6",
+          "tps_b": "0.0",
+          "qe_a": "0.7",
+          "qe_b": "",
+          "utterance_dur": "4.9",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "0.29",
+          "marian_pt_ms": "66.7",
+          "partial_stt_ms": "264.7",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "0.25",
+          "gen_tokens_a": "8",
+          "prompt_tokens_a": "35",
+          "prefill_ms_a": "160.4962080018595",
+          "ttft_ms_a": "1128.993415972218",
+          "decode_ms_a": "318.0440419819206",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "2",
+          "endpoint_reason": "smart_cut",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "4732.9",
+          "vad_wait_ms": "3118.8",
+          "stt_queue_wait_ms": "0.2",
+          "translation_queue_wait_ms": "0.2",
+          "finalization_overhead_ms": "0.5",
+          "broadcast_ms": "1.3",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "440832",
+          "sample_end": "675840",
+          "sample_rate": "48000",
+          "speech_end_sample": "675840",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        },
+        {
+          "chunk_id": "3",
+          "timestamp": "2026-09-10T00:39:52.941585",
+          "english": "that um when it comes to these two criminals, their their life started out",
+          "spanish_a": "que um cuando se trata de estos dos criminales, su vida comenzó",
+          "spanish_b": "",
+          "stt_latency_ms": "186.3",
+          "latency_a_ms": "1079.0",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "1276.6",
+          "true_e2e_ms": "9306.6",
+          "silence_delay_ms": "8030.0",
+          "queue_wait_ms": "0.1",
+          "stt_confidence": "0.99",
+          "tps_a": "31.1",
+          "tps_b": "0.0",
+          "qe_a": "0.85",
+          "qe_b": "",
+          "utterance_dur": "5.09",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "0.53",
+          "marian_pt_ms": "65.2",
+          "partial_stt_ms": "158.1",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "0.556",
+          "gen_tokens_a": "15",
+          "prompt_tokens_a": "41",
+          "prefill_ms_a": "167.82241698820144",
+          "ttft_ms_a": "556.6985000041313",
+          "decode_ms_a": "522.2705000196584",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "3",
+          "endpoint_reason": "smart_cut",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "4220.6",
+          "vad_wait_ms": "2942.0",
+          "stt_queue_wait_ms": "0.3",
+          "translation_queue_wait_ms": "0.1",
+          "finalization_overhead_ms": "1.9",
+          "broadcast_ms": "1.5",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "675840",
+          "sample_end": "920064",
+          "sample_rate": "48000",
+          "speech_end_sample": "920064",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        },
+        {
+          "chunk_id": "4",
+          "timestamp": "2026-09-10T00:39:57.672311",
+          "english": "uh at least up until this moment their their lives uh uh ended the same but each one had a different destination.",
+          "spanish_a": "uh al menos hasta este momento sus vidas uh uh terminaron igual pero cada uno tenía un destino diferente.",
+          "spanish_b": "",
+          "stt_latency_ms": "166.0",
+          "latency_a_ms": "1091.6",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "1284.1",
+          "true_e2e_ms": "8949.1",
+          "silence_delay_ms": "7665.0",
+          "queue_wait_ms": "12.6",
+          "stt_confidence": "0.99",
+          "tps_a": "34.0",
+          "tps_b": "0.0",
+          "qe_a": "1.0",
+          "qe_b": "",
+          "utterance_dur": "7.55",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "0.74",
+          "marian_pt_ms": "90.0",
+          "partial_stt_ms": "172.6",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "0.875",
+          "gen_tokens_a": "22",
+          "prompt_tokens_a": "49",
+          "prefill_ms_a": "116.52862501796334",
+          "ttft_ms_a": "420.73066701414064",
+          "decode_ms_a": "670.8627920015715",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "4",
+          "endpoint_reason": "pause",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "1399.3",
+          "vad_wait_ms": "112.9",
+          "stt_queue_wait_ms": "12.7",
+          "translation_queue_wait_ms": "0.0",
+          "finalization_overhead_ms": "2.2",
+          "broadcast_ms": "0.3",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "920064",
+          "sample_end": "1282560",
+          "sample_rate": "48000",
+          "speech_end_sample": "1282560",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        },
+        {
+          "chunk_id": "5",
+          "timestamp": "2026-09-10T00:40:20.618942",
+          "english": "Um and you can and we can see that uh one of them uh e th the the criminal on on the right even says uh this man has done nothing wrong.",
+          "spanish_a": "Um y podemos y podemos ver que eh uno de ellos eh e el el criminal de la derecha incluso dice eh este hombre no ha hecho nada malo.",
+          "spanish_b": "",
+          "stt_latency_ms": "1367.9",
+          "latency_a_ms": "1414.5",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "3069.9",
+          "true_e2e_ms": "11038.3",
+          "silence_delay_ms": "7968.5",
+          "queue_wait_ms": "87.2",
+          "stt_confidence": "0.97",
+          "tps_a": "28.8",
+          "tps_b": "0.0",
+          "qe_a": "1.0",
+          "qe_b": "",
+          "utterance_dur": "8.0",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "0.5",
+          "marian_pt_ms": "75.0",
+          "partial_stt_ms": "163.5",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "0.682",
+          "gen_tokens_a": "31",
+          "prompt_tokens_a": "59",
+          "prefill_ms_a": "115.55783299263567",
+          "ttft_ms_a": "315.4861659859307",
+          "decode_ms_a": "1099.0268749883398",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "5",
+          "endpoint_reason": "hard_cut",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "3083.1",
+          "vad_wait_ms": "11.8",
+          "stt_queue_wait_ms": "92.1",
+          "translation_queue_wait_ms": "157.3",
+          "finalization_overhead_ms": "1.3",
+          "broadcast_ms": "1.1",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "1300992",
+          "sample_end": "1684992",
+          "sample_rate": "48000",
+          "speech_end_sample": "1684992",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        },
+        {
+          "chunk_id": "6",
+          "timestamp": "2026-09-10T00:40:27.735403",
+          "english": "And uh he knew that this man was was Christ. He knew that this man was there",
+          "spanish_a": "Y eh él sabía que este hombre era Cristo. Sabía que este hombre estaba allí",
+          "spanish_b": "",
+          "stt_latency_ms": "204.0",
+          "latency_a_ms": "1784.0",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "1996.2",
+          "true_e2e_ms": "9967.4",
+          "silence_delay_ms": "7971.2",
+          "queue_wait_ms": "0.1",
+          "stt_confidence": "0.99",
+          "tps_a": "29.9",
+          "tps_b": "0.0",
+          "qe_a": "1.0",
+          "qe_b": "",
+          "utterance_dur": "6.46",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "0.73",
+          "marian_pt_ms": "33.0",
+          "partial_stt_ms": "143.6",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "1.0",
+          "gen_tokens_a": "18",
+          "prompt_tokens_a": "44",
+          "prefill_ms_a": "192.7898750291206",
+          "ttft_ms_a": "1157.6575410435908",
+          "decode_ms_a": "626.3175419881009",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "6",
+          "endpoint_reason": "smart_cut",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "3543.5",
+          "vad_wait_ms": "1546.5",
+          "stt_queue_wait_ms": "0.2",
+          "translation_queue_wait_ms": "0.1",
+          "finalization_overhead_ms": "0.7",
+          "broadcast_ms": "1.5",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "1694208",
+          "sample_end": "2004480",
+          "sample_rate": "48000",
+          "speech_end_sample": "2004480",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        },
+        {
+          "chunk_id": "7",
+          "timestamp": "2026-09-10T00:40:33.714656",
+          "english": "to uh die for our sins, your s um my sins and your sins. And so tonight uh one of these two criminals is",
+          "spanish_a": "para morir por nuestros pecados, tus pecados y tus pecados. Y así esta noche uno de estos dos criminales es",
+          "spanish_b": "",
+          "stt_latency_ms": "488.4",
+          "latency_a_ms": "1168.2",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "1669.9",
+          "true_e2e_ms": "9521.9",
+          "silence_delay_ms": "7852.0",
+          "queue_wait_ms": "8.8",
+          "stt_confidence": "0.98",
+          "tps_a": "30.9",
+          "tps_b": "0.0",
+          "qe_a": "1.0",
+          "qe_b": "",
+          "utterance_dur": "7.81",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "Y",
+          "marian_similarity": "0.5",
+          "marian_pt_ms": "48.0",
+          "partial_stt_ms": "175.9",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "1.0",
+          "gen_tokens_a": "24",
+          "prompt_tokens_a": "52",
+          "prefill_ms_a": "173.44666697317734",
+          "ttft_ms_a": "370.70658296579495",
+          "decode_ms_a": "797.4932920187712",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "7",
+          "endpoint_reason": "silence",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "2162.7",
+          "vad_wait_ms": "491.9",
+          "stt_queue_wait_ms": "9.1",
+          "translation_queue_wait_ms": "0.0",
+          "finalization_overhead_ms": "0.8",
+          "broadcast_ms": "0.6",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "2004480",
+          "sample_end": "2379264",
+          "sample_rate": "48000",
+          "speech_end_sample": "2357760",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        },
+        {
+          "chunk_id": "8",
+          "timestamp": "2026-09-10T00:40:33.731905",
+          "english": "Currently in the",
+          "spanish_a": "Actualmente en la",
+          "spanish_b": "",
+          "stt_latency_ms": "214.9",
+          "latency_a_ms": "16.3",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "712.2",
+          "true_e2e_ms": "1347.2",
+          "silence_delay_ms": "635.0",
+          "queue_wait_ms": "0.7",
+          "stt_confidence": "0.9",
+          "tps_a": "0.0",
+          "tps_b": "0.0",
+          "qe_a": "1.0",
+          "qe_b": "",
+          "utterance_dur": "0.8",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "Y",
+          "marian_similarity": "0.33",
+          "marian_pt_ms": "12.7",
+          "partial_stt_ms": "142.4",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "1.0",
+          "gen_tokens_a": "",
+          "prompt_tokens_a": "",
+          "prefill_ms_a": "",
+          "ttft_ms_a": "",
+          "decode_ms_a": "",
+          "finish_reason_a": "",
+          "draft_tokens_a": "",
+          "draft_accept_a": "",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "8",
+          "endpoint_reason": "stop",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "740.0",
+          "vad_wait_ms": "27.1",
+          "stt_queue_wait_ms": "0.8",
+          "translation_queue_wait_ms": "479.6",
+          "finalization_overhead_ms": "0.6",
+          "broadcast_ms": "0.5",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "2388480",
+          "sample_end": "2426880",
+          "sample_rate": "48000",
+          "speech_end_sample": "2426880",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        }
+      ],
+      "browser": {
+        "cohorts": [
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21665960400",
+            "schema": "2",
+            "endpoint": "hard_cut",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 0,
+              "finalized_chunks": 1,
+              "missing_final_chunks": [
+                "5"
+              ]
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21665960400",
+            "schema": "2",
+            "endpoint": "pause",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 0,
+              "finalized_chunks": 1,
+              "missing_final_chunks": [
+                "4"
+              ]
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21665960400",
+            "schema": "2",
+            "endpoint": "silence",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 0,
+              "finalized_chunks": 2,
+              "missing_final_chunks": [
+                "1",
+                "7"
+              ]
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21665960400",
+            "schema": "2",
+            "endpoint": "smart_cut",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 0,
+              "finalized_chunks": 3,
+              "missing_final_chunks": [
+                "2",
+                "3",
+                "6"
+              ]
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21665960400",
+            "schema": "2",
+            "endpoint": "stop",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 0,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 0,
+              "finalized_chunks": 1,
+              "missing_final_chunks": [
+                "8"
+              ]
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21676359760",
+            "schema": "2",
+            "endpoint": "hard_cut",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 1,
+                "p50": 10.7,
+                "p95": 10.7
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 1,
+                "p50": 3094.6,
+                "p95": 3094.6
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 1,
+              "finalized_chunks": 1,
+              "missing_final_chunks": []
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21676359760",
+            "schema": "2",
+            "endpoint": "pause",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 1,
+                "p50": 14.4,
+                "p95": 14.4
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 1,
+                "p50": 1415.1,
+                "p95": 1415.1
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 1,
+              "finalized_chunks": 1,
+              "missing_final_chunks": []
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21676359760",
+            "schema": "2",
+            "endpoint": "silence",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 1,
+                "p50": 8.7,
+                "p95": 8.7
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 1,
+                "p50": 2172.3,
+                "p95": 2172.3
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 1,
+              "finalized_chunks": 2,
+              "missing_final_chunks": [
+                "1"
+              ]
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21676359760",
+            "schema": "2",
+            "endpoint": "smart_cut",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 3,
+                "p50": 9.7,
+                "p95": 9.8
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 3,
+                "p50": 4230.8,
+                "p95": 4743.5
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 3,
+              "finalized_chunks": 3,
+              "missing_final_chunks": []
+            }
+          },
+          {
+            "session_id": "20260910_003912_869693_en",
+            "client_id": "21676359760",
+            "schema": "2",
+            "endpoint": "stop",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 1,
+                "p50": 8.2,
+                "p95": 8.2
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 1,
+                "p50": 790.2,
+                "p95": 790.2
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 1,
+              "finalized_chunks": 1,
+              "missing_final_chunks": []
+            }
+          }
+        ],
+        "client_count": 2,
+        "unmatched_final_acks": 0,
+        "coverage": {
+          "session_id": "20260910_003912_869693_en",
+          "received_final_chunks": 7,
+          "finalized_chunks": 8,
+          "missing_final_chunks": [
+            "1"
+          ],
+          "available": true
+        }
+      },
+      "artifacts": {
+        "ab_metrics_20260910_003912_869693_en.csv": {
+          "sha256": "2dabc281981bf4a17b6354a07737e73613bea0072c21cebcdfff14d6ffc50465",
+          "bytes": 5331
+        },
+        "diagnostics_20260910_003912_869693_en.jsonl": {
+          "sha256": "d3165ec4b6680bb321c92cd2c4a66f15e7fefda7b3eb1a9ad0c73fad01a1af20",
+          "bytes": 27097
+        },
+        "display_metrics_20260910_003912_869693_en.jsonl": {
+          "sha256": "021dad6776ed802703b8d0e36670a068ca4eb0d849c166c46be97bbdf52e1cb9",
+          "bytes": 56881
+        },
+        "session_lifecycle_20260910_003912_869693_en.json": {
+          "sha256": "7698b6e1e6ab86de2a89693d7b1b8fe76b69eec610e4c6ca07f859509257e45d",
+          "bytes": 3180
+        },
+        "session_metadata_20260910_003912_869693_en.json": {
+          "sha256": "89f29067a7dcb3c7264e7b4bc85e6e6e001e0a20174b847b556d637d37ab9c1e",
+          "bytes": 4363
+        }
+      }
+    },
+    {
+      "session_id": "20260910_004130_713413_es",
+      "source": "controlled file replay; physical devices not tested",
+      "lifecycle": {
+        "schema_version": 1,
+        "session_id": "20260910_004130_713413_es",
+        "run_id": "1e568b1719b94af495a31754277f1821",
+        "status": "completed",
+        "pid": 34142,
+        "hostname": "Invicta91.local",
+        "started_at": "2026-09-10T04:41:34.592952+00:00",
+        "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+        "source": {
+          "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+          "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+          "package_version": "2026.7.0.0",
+          "package_artifact_hashes": {},
+          "package_vcs_commit": null
+        },
+        "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+        "persistence": {
+          "submitted": 10,
+          "completed": 10,
+          "pending": 0,
+          "failed": 0,
+          "capacity": 256,
+          "ok": true,
+          "failures": []
+        },
+        "exit_code": 0,
+        "ended_at": "2026-09-10T04:42:19.920022+00:00",
+        "memory": {
+          "scope": "pipeline_process_lifetime",
+          "peak_rss_bytes": 4046815232,
+          "peak_metal_bytes": 9382786038
+        },
+        "models": {
+          "stt": {
+            "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+            "manifest_revision": null,
+            "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+            "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+            "revision_source": "hf_snapshot_path",
+            "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379"
+          },
+          "translation_a": {
+            "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+            "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "revision_source": "hf_snapshot_path",
+            "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+          },
+          "marian": {
+            "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/es-en/active",
+            "manifest_revision": null,
+            "resolved_revision": null,
+            "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/es-en/active",
+            "revision_source": "unknown",
+            "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+            "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_size_bytes": 79567635,
+            "export_manifest": {
+              "sha256": "239246b3f0d951edef1c14be3f1e37e6c0c6486dce3cba06bd96a84e9abab076",
+              "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+              "source_revision": null,
+              "ct2_quantization": "int8",
+              "direction": "es-en",
+              "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+              "model_bin_hash_matches": true
+            }
+          }
+        },
+        "diagnostics": {
+          "size_bytes": 4288,
+          "sha256": "b67fe09e2edaf92832facac4cd2e979917c999ce8e153b75f07a488d78011541"
+        }
+      },
+      "metadata": {
+        "session_id": "20260910_004130_713413_es",
+        "source_lang": "es",
+        "target_lang": "en",
+        "session_kind": "replay",
+        "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+        "input_audio_sha256": "cb01aeb600f7b279c39c0cf727a3c6ef7412af6e827ab453b3c7944d3deccd7b",
+        "audio_source": "file",
+        "timing_schema_version": 2,
+        "backend": "mlx",
+        "model_family": "gemma4",
+        "model_a": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "profile": {
+          "name": "standard",
+          "backend": "auto",
+          "stt_model": null,
+          "stt_compute_type": null,
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": null,
+          "translation_model": null,
+          "vad_backend": null,
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "profile_artifacts": null,
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 4,
+          "num_workers": 1,
+          "local_files_only": false,
+          "whisper_cuda_model": "large-v3-turbo",
+          "whisper_cuda_compute_type": "int8_float16",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": true,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "auto",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "managed_llama": null,
+        "model_b": null,
+        "stt_backend": "auto",
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "torch",
+          "artifact": {
+            "source": "installed_package",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "torch",
+            "opset_version": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/stt_env/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+            "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+            "size_bytes": 2272526
+          }
+        },
+        "translation": {
+          "idle_warmup_only": false,
+          "final_aware_partials": false,
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_model_4b": "mlx-community/translategemma-4b-it-4bit",
+          "mlx_model_12b": "mlx-community/translategemma-12b-it-4bit",
+          "mlx_model_gemma4_e4b": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "mlx_model_gemma4_e2b": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+          "mlx_drafter_gemma4": "mlx-community/gemma-4-e4b-it-assistant-bf16",
+          "mlx_mts": false,
+          "cuda_model_4b": "google/translategemma-4b-it",
+          "cuda_model_12b": "google/translategemma-12b-it",
+          "marian_model": "Helsinki-NLP/opus-mt-en-es",
+          "marian_device": "auto",
+          "marian_intra_threads": 4,
+          "marian_backend": "auto",
+          "marian_compute_type": "int8_float16",
+          "marian_max_new_tokens": 128,
+          "marian_warmup_passes": 2,
+          "marian_eager_both": false,
+          "model_family": "gemma4",
+          "num_draft_tokens": 3,
+          "default_source_lang": "en",
+          "default_target_lang": "es",
+          "turboquant": false,
+          "turboquant_key_bits": 3,
+          "turboquant_val_bits": 4
+        },
+        "replay_speed": 1.0,
+        "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+        "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+        "package_version": "2026.7.0.0",
+        "package_artifact_hashes": {},
+        "package_vcs_commit": null,
+        "latency_experiment_configuration": {
+          "latest_partial": false,
+          "async_captions": false,
+          "marian_memo": 0,
+          "first_preview_s": 0.0,
+          "pause_preview_ms": 0.0,
+          "speculate_pause_ms": 0.0,
+          "clause_preview_s": 0.0,
+          "vad_worker": false,
+          "incremental_stt": "off",
+          "rolling_window_s": 4.0,
+          "mlx_cache_mb": 256,
+          "gemma_prefix_cache": false,
+          "trace": false
+        }
+      },
+      "finals": [
+        {
+          "chunk_id": "1",
+          "timestamp": "2026-09-10T00:41:49.443500",
+          "english": "La gracia de Dios es suficiente.",
+          "spanish_a": "God's grace is enough.",
+          "spanish_b": "",
+          "stt_latency_ms": "2377.0",
+          "latency_a_ms": "36.3",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "2417.6",
+          "true_e2e_ms": "4652.3",
+          "silence_delay_ms": "2234.6",
+          "queue_wait_ms": "2.9",
+          "stt_confidence": "0.91",
+          "tps_a": "0.0",
+          "tps_b": "0.0",
+          "qe_a": "0.7",
+          "qe_b": "",
+          "utterance_dur": "2.43",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "1.0",
+          "marian_pt_ms": "31.8",
+          "partial_stt_ms": "544.0",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "1.0",
+          "gen_tokens_a": "",
+          "prompt_tokens_a": "",
+          "prefill_ms_a": "",
+          "ttft_ms_a": "",
+          "decode_ms_a": "",
+          "finish_reason_a": "",
+          "draft_tokens_a": "",
+          "draft_accept_a": "",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "es",
+          "target_lang": "en",
+          "session_kind": "replay",
+          "utterance_id": "1",
+          "endpoint_reason": "silence",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "2909.9",
+          "vad_wait_ms": "491.3",
+          "stt_queue_wait_ms": "3.1",
+          "translation_queue_wait_ms": "0.1",
+          "finalization_overhead_ms": "1.0",
+          "broadcast_ms": "2.3",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "4608",
+          "sample_end": "100868",
+          "sample_rate": "48000",
+          "speech_end_sample": "99840",
+          "padding_samples": "20476",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        }
+      ],
+      "browser": {
+        "cohorts": [
+          {
+            "session_id": "20260910_004130_713413_es",
+            "client_id": "21980706576",
+            "schema": "2",
+            "endpoint": "silence",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 1,
+                "p50": 13.4,
+                "p95": 13.4
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 1,
+                "p50": 2926.0,
+                "p95": 2926.0
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 1,
+              "finalized_chunks": 1,
+              "missing_final_chunks": []
+            }
+          }
+        ],
+        "client_count": 1,
+        "unmatched_final_acks": 0,
+        "coverage": {
+          "session_id": "20260910_004130_713413_es",
+          "received_final_chunks": 1,
+          "finalized_chunks": 1,
+          "missing_final_chunks": [],
+          "available": true
+        }
+      },
+      "artifacts": {
+        "ab_metrics_20260910_004130_713413_es.csv": {
+          "sha256": "3cf9d4e79b34f0faefa6ccdb490e00e0e01ff52efd4fc49c359d2fcf689d0854",
+          "bytes": 1245
+        },
+        "diagnostics_20260910_004130_713413_es.jsonl": {
+          "sha256": "b67fe09e2edaf92832facac4cd2e979917c999ce8e153b75f07a488d78011541",
+          "bytes": 4288
+        },
+        "display_metrics_20260910_004130_713413_es.jsonl": {
+          "sha256": "e9f2790a399e2288311a08f63601b443ec377db4e155c2e37da3f1b60531ac31",
+          "bytes": 2591
+        },
+        "session_lifecycle_20260910_004130_713413_es.json": {
+          "sha256": "b73b35da15fe6c77e0ab3d6237d4fb5914d1a119357ed139f7eb22433587e1a0",
+          "bytes": 3240
+        },
+        "session_metadata_20260910_004130_713413_es.json": {
+          "sha256": "0f7af3f87408f0485d85d48cfbd82293a7d4c3440cce3545ab2657747d7c16c3",
+          "bytes": 4363
+        }
+      }
+    },
+    {
+      "session_id": "20260910_004221_108762_en",
+      "source": "controlled file replay; physical devices not tested",
+      "lifecycle": {
+        "schema_version": 1,
+        "session_id": "20260910_004221_108762_en",
+        "run_id": "62ab48c3ee4f49088bb715533b581efd",
+        "status": "completed",
+        "pid": 35062,
+        "hostname": "Invicta91.local",
+        "started_at": "2026-09-10T04:42:24.805468+00:00",
+        "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+        "source": {
+          "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+          "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+          "package_version": "2026.7.0.0",
+          "package_artifact_hashes": {},
+          "package_vcs_commit": null
+        },
+        "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+        "persistence": {
+          "submitted": 10,
+          "completed": 10,
+          "pending": 0,
+          "failed": 0,
+          "capacity": 256,
+          "ok": true,
+          "failures": []
+        },
+        "exit_code": 0,
+        "ended_at": "2026-09-10T04:43:18.608337+00:00",
+        "memory": {
+          "scope": "pipeline_process_lifetime",
+          "peak_rss_bytes": 3494625280,
+          "peak_metal_bytes": 8723689316
+        },
+        "models": {
+          "stt": {
+            "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+            "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+            "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+            "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+            "revision_source": "hf_snapshot_path",
+            "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+          },
+          "translation_a": {
+            "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+            "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+            "revision_source": "hf_snapshot_path",
+            "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+          },
+          "marian": {
+            "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+            "manifest_revision": null,
+            "resolved_revision": null,
+            "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+            "revision_source": "unknown",
+            "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+            "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_size_bytes": 79567635,
+            "export_manifest": {
+              "sha256": "a2252e22ba84cde86261163aacb51708f62c3defae3a52a928fd428c4a4ae789",
+              "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+              "source_revision": null,
+              "ct2_quantization": "int8",
+              "direction": "en-es",
+              "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+              "model_bin_hash_matches": true
+            }
+          }
+        },
+        "diagnostics": {
+          "size_bytes": 4912,
+          "sha256": "37ca69582886c0b8e8c38a3562c5d0cac7ae4d878add73cc2f7850273a6ee076"
+        }
+      },
+      "metadata": {
+        "session_id": "20260910_004221_108762_en",
+        "source_lang": "en",
+        "target_lang": "es",
+        "session_kind": "replay",
+        "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+        "input_audio_sha256": "ca258b91c9ea8187048829899cac1e60277ee258631cc58ce7b156a8e4cb1b43",
+        "audio_source": "file",
+        "timing_schema_version": 2,
+        "backend": "mlx",
+        "model_family": "gemma4",
+        "model_a": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "profile": {
+          "name": "standard",
+          "backend": "auto",
+          "stt_model": null,
+          "stt_compute_type": null,
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": null,
+          "translation_model": null,
+          "vad_backend": null,
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "profile_artifacts": null,
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 4,
+          "num_workers": 1,
+          "local_files_only": false,
+          "whisper_cuda_model": "large-v3-turbo",
+          "whisper_cuda_compute_type": "int8_float16",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": true,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "auto",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "managed_llama": null,
+        "model_b": null,
+        "stt_backend": "auto",
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "torch",
+          "artifact": {
+            "source": "installed_package",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "torch",
+            "opset_version": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/stt_env/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+            "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+            "size_bytes": 2272526
+          }
+        },
+        "translation": {
+          "idle_warmup_only": false,
+          "final_aware_partials": false,
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_model_4b": "mlx-community/translategemma-4b-it-4bit",
+          "mlx_model_12b": "mlx-community/translategemma-12b-it-4bit",
+          "mlx_model_gemma4_e4b": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+          "mlx_model_gemma4_e2b": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+          "mlx_drafter_gemma4": "mlx-community/gemma-4-e4b-it-assistant-bf16",
+          "mlx_mts": false,
+          "cuda_model_4b": "google/translategemma-4b-it",
+          "cuda_model_12b": "google/translategemma-12b-it",
+          "marian_model": "Helsinki-NLP/opus-mt-en-es",
+          "marian_device": "auto",
+          "marian_intra_threads": 4,
+          "marian_backend": "auto",
+          "marian_compute_type": "int8_float16",
+          "marian_max_new_tokens": 128,
+          "marian_warmup_passes": 2,
+          "marian_eager_both": false,
+          "model_family": "gemma4",
+          "num_draft_tokens": 3,
+          "default_source_lang": "en",
+          "default_target_lang": "es",
+          "turboquant": false,
+          "turboquant_key_bits": 3,
+          "turboquant_val_bits": 4
+        },
+        "replay_speed": 1.0,
+        "git_sha": "35ae8869bad204014dc74e810a9e62ac3eadeee7",
+        "pipeline_sha256": "0f4fe16357052b3d3978407dedeb3a0fdb52ca0a0161b9cfcf0f75f890c8ab6f",
+        "package_version": "2026.7.0.0",
+        "package_artifact_hashes": {},
+        "package_vcs_commit": null,
+        "latency_experiment_configuration": {
+          "latest_partial": false,
+          "async_captions": false,
+          "marian_memo": 0,
+          "first_preview_s": 0.0,
+          "pause_preview_ms": 0.0,
+          "speculate_pause_ms": 0.0,
+          "clause_preview_s": 0.0,
+          "vad_worker": false,
+          "incremental_stt": "off",
+          "rolling_window_s": 4.0,
+          "mlx_cache_mb": 256,
+          "gemma_prefix_cache": false,
+          "trace": false
+        }
+      },
+      "finals": [
+        {
+          "chunk_id": "1",
+          "timestamp": "2026-09-10T00:42:38.078739",
+          "english": "The grace of God brings salvation.",
+          "spanish_a": "La gracia de Dios trae la salvación.",
+          "spanish_b": "",
+          "stt_latency_ms": "975.4",
+          "latency_a_ms": "574.0",
+          "latency_b_ms": "0.0",
+          "e2e_latency_ms": "2227.4",
+          "true_e2e_ms": "4687.1",
+          "silence_delay_ms": "2459.7",
+          "queue_wait_ms": "564.0",
+          "stt_confidence": "0.99",
+          "tps_a": "36.5",
+          "tps_b": "0.0",
+          "qe_a": "1.0",
+          "qe_b": "",
+          "utterance_dur": "2.46",
+          "homophone_flags": "",
+          "near_miss_flags": "",
+          "bad_split": "",
+          "marian_similarity": "0.56",
+          "marian_pt_ms": "34.2",
+          "partial_stt_ms": "119.9",
+          "marian_backend": "ct2-int8",
+          "word_stability_pct": "0.625",
+          "gen_tokens_a": "10",
+          "prompt_tokens_a": "33",
+          "prefill_ms_a": "88.72933400562033",
+          "ttft_ms_a": "279.1867909836583",
+          "decode_ms_a": "294.8208340094425",
+          "finish_reason_a": "stop",
+          "draft_tokens_a": "0",
+          "draft_accept_a": "0.0",
+          "speaker": "",
+          "timing_schema_version": "2",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay",
+          "utterance_id": "1",
+          "endpoint_reason": "silence",
+          "timing_source": "replay_realtime",
+          "speech_end_to_final_ms": "2715.2",
+          "vad_wait_ms": "486.9",
+          "stt_queue_wait_ms": "565.0",
+          "translation_queue_wait_ms": "0.1",
+          "finalization_overhead_ms": "0.8",
+          "broadcast_ms": "0.8",
+          "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/operator_input.wav",
+          "sample_start": "16896",
+          "sample_end": "135168",
+          "sample_rate": "48000",
+          "speech_end_sample": "113664",
+          "padding_samples": "0",
+          "cached_prompt_tokens_a": "",
+          "prompt_cache_prepare_ms_a": "",
+          "generation_lock_wait_ms_a": "",
+          "prompt_cache_hit_a": "",
+          "caption_delivery_mode": "awaited"
+        }
+      ],
+      "browser": {
+        "cohorts": [
+          {
+            "session_id": "20260910_004221_108762_en",
+            "client_id": "21973149648",
+            "schema": "2",
+            "endpoint": "silence",
+            "timing_source": "replay_realtime",
+            "metrics": {
+              "receive_to_render_ms": {
+                "n": 1,
+                "p50": 11.9,
+                "p95": 11.9
+              },
+              "speech_end_to_ack_upper_bound_ms": {
+                "n": 1,
+                "p50": 2727.9,
+                "p95": 2727.9
+              }
+            },
+            "final_ack_coverage": {
+              "received_final_chunks": 1,
+              "finalized_chunks": 1,
+              "missing_final_chunks": []
+            }
+          }
+        ],
+        "client_count": 1,
+        "unmatched_final_acks": 0,
+        "coverage": {
+          "session_id": "20260910_004221_108762_en",
+          "received_final_chunks": 1,
+          "finalized_chunks": 1,
+          "missing_final_chunks": [],
+          "available": true
+        }
+      },
+      "artifacts": {
+        "ab_metrics_20260910_004221_108762_en.csv": {
+          "sha256": "4f89df3c2ed718f3520be1fc9d6fa6a0fe696c1ff832e933c965addb8b48ccd9",
+          "bytes": 1331
+        },
+        "diagnostics_20260910_004221_108762_en.jsonl": {
+          "sha256": "37ca69582886c0b8e8c38a3562c5d0cac7ae4d878add73cc2f7850273a6ee076",
+          "bytes": 4912
+        },
+        "display_metrics_20260910_004221_108762_en.jsonl": {
+          "sha256": "bf8029564117b39c2139e9075e00ec2fb547a17ba6746cfc9f096df5cb5c7a3c",
+          "bytes": 2588
+        },
+        "session_lifecycle_20260910_004221_108762_en.json": {
+          "sha256": "8ff062304e4a0f7a344f40af9fdc0e708ea4a0b0fcd0faacd9ad713d73e97907",
+          "bytes": 3177
+        },
+        "session_metadata_20260910_004221_108762_en.json": {
+          "sha256": "f5c2909fda513d77c87b784a9d1c12f04641c297c6d07e58d5a4a3f57429a7a5",
+          "bytes": 4363
+        }
+      }
+    }
+  ],
+  "human_approvals": false,
+  "microphone_test": "deferred by user",
+  "physical_output_test": "deferred by user",
+  "complete_hymn_test": "not part of these short rehearsals",
+  "support_bundle": {
+    "sha256": "69628553eb68796c42bfa691781c832ff88656bb3944074f4fd6741cb75d0721",
+    "members": [
+      "metadata.json"
+    ],
+    "metadata_bytes": 2090,
+    "caption_text_audio_homepaths_absent": true
+  },
+  "summary": {
+    "english": "The grace of God brings salvation.",
+    "spanish": "La gracia de Dios trae la salvación.",
+    "speakers": null,
+    "format": "short-session excerpt",
+    "translation_method": "recorded prediction",
+    "notice": "Too little text for a sermon summary; original excerpts and translations are shown. Translations are unreviewed predictions.",
+    "metadata": {
+      "input_files": [
+        "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_20260910_004221_108762_en.csv"
+      ],
+      "model": null,
+      "timestamp": "2026-09-10T00:45:22.708172",
+      "total_segments": 1,
+      "total_words": 6,
+      "diarized": false,
+      "source_languages": [
+        "en"
+      ],
+      "content_mode": "excerpt",
+      "transcript_truncated": false,
+      "human_reviewed": false
+    }
+  }
+}

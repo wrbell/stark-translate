@@ -4,6 +4,17 @@
 > `tools/benchmark_mlx_accel.py` (isolated) and `tools/replay_bench.py` (live pipeline
 > replaying real sermon audio). Every claim links to the PR that produced it.
 
+> **Measurement correction (2026-09-09):** historical numbers below are preserved,
+> but the original speech-end → display label was incorrect. Legacy
+> `e2e_latency_ms` measures pipeline submission → processing completion, before
+> WebSocket broadcast. `true_e2e_ms` measures first speech observed by the VAD
+> loop → processing completion; it includes the utterance itself.
+> `silence_delay_ms` measures that first observation → submission, so it also
+> includes speech duration and is not an isolated silence/VAD delay. None of
+> these fields measures browser rendering. The new capture/speech-end, queue,
+> broadcast, and browser acknowledgement boundaries are documented in
+> [Mac implementation status](../../mac_implementation_status.md).
+
 ## 0. What was wrong (three production bugs on `main`)
 
 All three made **every live Mac final fail or run long**; together they explain the
@@ -32,17 +43,18 @@ same bug plus thinking-on, not PLE garbage). health_check 8-slice: 6/8 both befo
 
 Clips: 150 s of `Gospel_Message_(12_14_25)` @ 20:30 and `Gospel_Message_(2_8_26)` @ 19:30
 (speech-dense windows chosen with Silero VAD; the 10-minute mark is a hymn and trips the
-music hold). `e2e_latency_ms` = speech end → final on display. `true_e2e_ms` also counts the
-utterance's own duration (up to 8 s) and is not the user-facing number.
+music hold). The following legacy processing values are `e2e_latency_ms`
+(submission → processing completion), not speech-end → display measurements.
+`true_e2e_ms` also counts the utterance's own duration (up to 8 s).
 
 | Clip | metric | pre-fix (main + #181 warm only) | post #181 + #184 | Δ |
 |---|---|---|---|---|
-| 12_14_25 (26 finals) | e2e p50 / p95 | 4803 / 8939 | **4016 / 7944** | −16 % |
+| 12_14_25 (26 finals) | legacy processing p50 / p95 | 4803 / 8939 | **4016 / 7944** | −16 % |
 | | STT p50 (whisper turbo) | 1207 | 1179 | −2 % |
 | | Gemma p50 (tokens, TTFT) | 2464 | 2147 (21 tok, TTFT 605 ms) | −13 % |
 | | Marian HF partial p50 | 380 | 335 | |
 | | partial total p50 | 1079 | 1074 | |
-| 2_8_26 (30 finals) | e2e p50 / p95 | 3742 / 6641 | **2858 / 4365** | −24 % |
+| 2_8_26 (30 finals) | legacy processing p50 / p95 | 3742 / 6641 | **2858 / 4365** | −24 % |
 | | STT p50 | 982 | 999 | |
 | | Gemma p50 (tokens, TTFT) | 1556 | 1202 (16 tok, TTFT 314 ms) | −23 % |
 | | Marian HF partial p50 | 345 | 281 | |
@@ -80,16 +92,16 @@ Live replay A/B (`--stt-backend parakeet-mlx`, same clips, HF Marian partials, `
 
 | Clip | metric | whisper-turbo (post #181/#184) | **parakeet-mlx** | Δ |
 |---|---|---|---|---|
-| 12_14_25 (26 finals) | e2e p50 / p95 | 4016 / 7944 | **1631 / 2708** | −59 % |
+| 12_14_25 (26 finals) | legacy processing p50 / p95 | 4016 / 7944 | **1631 / 2708** | −59 % |
 | | STT p50 | 1179 | **247** | −79 % |
 | | Gemma p50 (TTFT, tokens) | 2147 (605, 21) | **1128 (328, 22)** | −47 % — GPU no longer contended |
 | | partial total p50 (count) | 1074 (76) | **446 (206)** | −58 %, 2.7× more partials |
-| 2_8_26 (30 finals) | e2e p50 / p95 | 2858 / 4365 | **1008 / 1394** | −65 % |
+| 2_8_26 (30 finals) | legacy processing p50 / p95 | 2858 / 4365 | **1008 / 1394** | −65 % |
 | | STT p50 | 999 | **240** | −76 % |
 | | Gemma p50 (TTFT, tokens) | 1202 (314, 16) | **726 (273, 17)** | −40 % |
 | | partial total p50 (count) | 917 (63) | **380 (201)** | −59 % |
 
-Speech-end → final is now ≈ 1.0–1.6 s p50 (was 3.7–4.8 s on the 2026-08-30 code). The partial
+Legacy processing (submission → completion) is now ≈ 1.0–1.6 s p50 (was 3.7–4.8 s on the 2026-08-30 code). The partial
 path is now bounded by HF Marian on CPU (270–300 ms); see §5. WER gate vs whisper on a
 Mac-runnable set — `tools/stt_roundtrip_compare.py` (Piper → STT, identical audio for both engines):
 
@@ -112,9 +124,9 @@ set (or the WSL 41-clip manifest) is still owed before calling this final.
 so the historical PyTorch/libomp crash does not apply. Factory now downgrades
 `int8_float16` → `int8` off-CUDA (CT2 rejects int8_float16 on CPU) and caps `intra_threads` at 4
 off-CUDA: with the default thread count (12) CT2 saturated the CPU at 0.4 s partial cadence and
-starved VAD/asyncio/MLX dispatch (run D below: TTFT p95 2.4–5.1 s, e2e p95 6–7 s).
+starved VAD/asyncio/MLX dispatch (run D below: TTFT p95 2.4–5.1 s, legacy processing p95 6–7 s).
 
-| Run (parakeet STT) | Marian | threads | VAD | 12_14_25 e2e p50/p95 | partial p50 | 2_8_26 e2e p50/p95 | partial p50 |
+| Run (parakeet STT) | Marian | threads | VAD | 12_14_25 legacy processing p50/p95 | partial p50 | 2_8_26 legacy processing p50/p95 | partial p50 |
 |---|---|---|---|---|---|---|---|
 | B | HF CPU | — | 0.5 / 0.6 | 1631 / 2708 | 446 | 1008 / 1394 | 380 |
 | C | CT2 int8 | default | 0.5 / 0.6 | 1671 / 3836 | **262** | 1266 / 2294 | **195** |
@@ -124,10 +136,11 @@ starved VAD/asyncio/MLX dispatch (run D below: TTFT p95 2.4–5.1 s, e2e p95 6�
 | **G (E4B, shipped default)** | CT2 int8 | 4 | 0.5 / 0.6 | **1544 / 2576** | **237** | **1222 / 2851** | **191** |
 
 Marian partial p50 dropped 270–300 ms (HF) → 52–94 ms (CT2). **VAD verdict:** the 0.4 s partial
-cadence (D/F) adds ~30 % more Parakeet calls and pushes E4B TTFT/e2e up (GPU contention); the 0.35 s
-silence trigger only helps utterances that end by silence (clip 2 silence_delay −450 ms). Defaults stay
+cadence (D/F) adds ~30 % more Parakeet calls and pushes E4B TTFT/legacy processing up (GPU contention).
+The 0.35 s silence trigger changed clip 2's recorded `silence_delay_ms` by −450 ms,
+but that interval includes utterance duration and does not isolate VAD waiting. Defaults stay
 0.5 s / 0.6 s. E2B finals (canary 11/18 vs E4B 13/18) tolerate the faster cadence and are the
-fast-mode option (`--gemma4-size e2b`: 863–1208 ms e2e p50).
+fast-mode option (`--gemma4-size e2b`: 863–1208 ms legacy processing p50).
 
 ## 6. Reproduce
 

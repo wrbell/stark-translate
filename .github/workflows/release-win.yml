@@ -25,6 +25,18 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validate release identity
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq "tag" -or "${{ inputs.tag }}" -ne "") {
+              python tools/release_artifacts.py validate --tag $env:RELEASE_TAG
+          } else {
+              python tools/release_artifacts.py validate
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Read version from pyproject.toml
         id: version
         shell: pwsh
@@ -35,7 +47,7 @@ jobs:
           } else {
               throw "version not found in pyproject.toml"
           }
-          if ("${{ inputs.tag }}" -ne "") { $v = "${{ inputs.tag }}".TrimStart('v') }
+
           "value=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Building stark-translate==$v"
 
@@ -84,6 +96,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
-          $msi = Get-ChildItem dist/*.msi | Select-Object -First 1
+          $files = @(Get-ChildItem dist/*.msi)
+          if ($files.Count -ne 1) { throw "Expected exactly one MSI" }
+          $msi = $files[0]
+          if ($msi.Name -notlike "*${{ steps.version.outputs.value }}*") { throw "MSI version differs from tag" }
           # `gh release upload` is idempotent with --clobber when re-running.
           gh release upload "${{ github.ref_name }}" $msi.FullName --clobber

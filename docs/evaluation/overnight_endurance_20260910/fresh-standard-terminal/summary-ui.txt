@@ -1,0 +1,10 @@
+heading "Session summary" [level=2]
+    - paragraph: After a session ends, create an English and Spanish summary of what was said. This uses the computer's language model, so wait until captions are stopped. Very short sessions show the recorded text itself instead of a summary.
+    - button "Create summary"
+    - status: Finished.
+    - paragraph: This summary uses the beginning and end of the transcript; the middle was omitted.
+    - heading "English" [level=3]
+    - paragraph: The service began with hymns and a prayer of thanks, followed by a reading from Luke 23:32-36 concerning two criminals crucified alongside Jesus. The speaker contrasted the two criminals, emphasizing that all people are sinners, and stressed that salvation is achieved not through good works, but by trusting in Christ's sacrifice. The message concluded with an invitation to accept Jesus Christ's righteousness through faith, leading into a final hymn.
+    - heading "Spanish" [level=3]
+    - paragraph: El servicio comenzó con himnos y una oración de agradecimiento, seguido de una lectura de Lucas 23:32-36 sobre dos criminales crucificados junto a Jesús. El orador contrastó a los dos criminales, enfatizando que todas las personas son pecadoras, y subrayó que la salvación se logra no por buenas obras, sino confiando en el sacrificio de Cristo. El mensaje concluyó con una invitación a aceptar la justicia de Jesucristo por la fe, dando paso a un himno final.
+    - paragraph: "Model summary (up to 3 sentences (undiarized)) · translation: mlx-community/gemma-4-e4b-it-OptiQ-4bit (direct) · 6746 words · not reviewed by a person — treat as a draft"

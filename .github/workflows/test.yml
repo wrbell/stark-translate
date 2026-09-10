@@ -28,8 +28,11 @@ jobs:
             requirements-windows.txt
             pyproject.toml
 
+      - name: Install native audio import dependency
+        run: sudo apt-get -qq update && sudo apt-get -qq install -y libportaudio2
+
       - name: Install test dependencies
-        run: pip install pytest pytest-cov pydantic pydantic-settings numpy scipy jiwer psutil fastapi httpx openpyxl
+        run: pip install '.[dev]' scipy jiwer openpyxl
 
       - name: Run tests
         run: >

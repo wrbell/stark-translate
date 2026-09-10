@@ -1,0 +1,1155 @@
+{
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+    "/Users/willem/Code/vibes/SRTranslate/tools/mac_evaluation.py",
+    "_stt-worker",
+    "--manifest",
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_v2026_14_manifest_v2.json",
+    "--output",
+    "/Users/willem/Code/vibes/SRTranslate/metrics/mac_roadmap/stt/stt_parakeet-mlx.json",
+    "--engine",
+    "parakeet-mlx",
+    "--runs",
+    "3"
+  ],
+  "manifest_sha256": "3f000c1cd4d1fedf063ab98b1f7b81fa5b8be60a095531f086a4de3c96cd6716",
+  "environment": {
+    "code_sha": "e04d9bcfc733125417d54c9ac950e3d8c89800e7",
+    "tracked_diff_sha256": "5b28acf73060d0dbadee83ba0415fb2089085bd00424952283db15070f6f5018",
+    "source_sha256": {
+      "dry_run_ab.py": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "settings.py": "58da818e27ce1698f7c7385272a5456bbcea92308a5aa7275be6c828290c3b75",
+      "engines/mlx_engine.py": "1f62e38eba9b6605fc4ffc8665c7e2a00e47008f3d617a09bea3c6e4c7329ceb",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/model_paths.py": "0db290cce1932173356be3203c58422d22ea105df3883ae6629b2a2da1ad1d36",
+      "tools/pipeline_timing.py": "cd47a816ecc04d7f26dc1cf6fc090d0fa91cb70c387a542a83a838f6fb1e3dbc",
+      "tools/mac_evaluation.py": "20da9dbd7d50a5799c74ba976f5eff0da30efb85b16d9ecbac08b9df00b693c7"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": "2.6.0"
+    },
+    "created_at": "2026-09-10T01:18:54.444063+00:00"
+  },
+  "completed": true,
+  "rows": [
+    {
+      "id": "20260322_182719_en_1",
+      "lang": "en",
+      "audio_sha256": "b79c7ef7632b30ee525f504ec993a6b53be770f95745c43e93400ea75dd25f83",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "You know, somehow the",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        98.40837499359623,
+        83.25016696471721,
+        84.38741700956598
+      ]
+    },
+    {
+      "id": "20260322_182719_en_16",
+      "lang": "en",
+      "audio_sha256": "e84d2435ef8d9f334a1ccdd92976933096bad9c140efadd552708db9454c11b5",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "But he uh he didn't know about heaven or hell, but we go someplace and he says, I cannot for the life of me figure out where.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        179.04983297921717,
+        175.2903750166297,
+        180.32170896185562
+      ]
+    },
+    {
+      "id": "20260322_182719_en_33",
+      "lang": "en",
+      "audio_sha256": "329ca90882129ec96120394fab268f1edc2406c32e1fb365ebf0236760eed5eb",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "they sort of summarized the two basic thoughts of, well, I don't know.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        133.60716705210507,
+        132.91587500134483,
+        133.87687498470768
+      ]
+    },
+    {
+      "id": "20260322_182719_en_50",
+      "lang": "en",
+      "audio_sha256": "842ce8ed0758737d93bbc44a1b106f7290fd4f93be72051a13deb7645c46567b",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "And the ugly truth is this.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        96.91616601776332,
+        98.69858296588063,
+        97.6665000198409
+      ]
+    },
+    {
+      "id": "20260322_182719_en_71",
+      "lang": "en",
+      "audio_sha256": "2990a99b3a4d1cd9313affe54e68cb8b2c634e55481a4a01eadde6b35b338c01",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Those rags like you know when you clean s something that's and the rags are just you know, I'm not getting this clean.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        182.1040419745259,
+        183.91062505543232,
+        179.8042500158772
+      ]
+    },
+    {
+      "id": "20260322_182719_en_90",
+      "lang": "en",
+      "audio_sha256": "15188eff0768147a394e025d7e7e4885bb31337e852216dd0832ba2b4fbccff3",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        85.35766700515524,
+        87.14279200648889,
+        85.06491599837318
+      ]
+    },
+    {
+      "id": "20260322_182719_en_112",
+      "lang": "en",
+      "audio_sha256": "a0b8fc4c415c569b502672a6e3066f1fcac6ab22d87f9b663addf2ee3054f580",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "There's none of us that can put our way or hope our way in there.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        145.3792080283165,
+        138.57291702879593,
+        141.09154196921736
+      ]
+    },
+    {
+      "id": "20260322_182719_en_128",
+      "lang": "en",
+      "audio_sha256": "47ba99d2a74a7c9eea7ca8dae87c6d75c6d930648b5b521791e466ff957e5057",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        82.64570799656212,
+        82.78662496013567,
+        81.95374999195337
+      ]
+    },
+    {
+      "id": "20260322_182719_en_143",
+      "lang": "en",
+      "audio_sha256": "fab0044918168bc0c2f5fdb455edc37e397d60d62212771223c5a18246ca41d9",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Blessed us with all spiritual blessings in heavenly places in Christ, according as He hath chosen us.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        156.88374999444932,
+        167.13974997401237,
+        167.12204198120162
+      ]
+    },
+    {
+      "id": "20260322_182719_en_160",
+      "lang": "en",
+      "audio_sha256": "bae0b6be31f23a42666a20741251a22f8f2dff6a5785976f67265369ddb3a1b9",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "To redeem us from our sin.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        86.56675001839176,
+        87.03983394661918,
+        86.4330839831382
+      ]
+    },
+    {
+      "id": "20260322_182719_en_176",
+      "lang": "en",
+      "audio_sha256": "17f9809ff3ce038467c066d125a5907b1bf1ad46ce9a98911886dbf88e97a019",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "As as Christians we do. Yeah.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        90.6347919953987,
+        90.86966601898894,
+        93.46537501551211
+      ]
+    },
+    {
+      "id": "20260322_182138_en_6",
+      "lang": "en",
+      "audio_sha256": "fcd13d2538d908799385ad16f4eea9563553cb1e0fd4d6e7943dc65305ab8289",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "um a span of years, but it is an instant. You will be saved instantly for eternity.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        143.85975000914186,
+        142.71491701947525,
+        146.4625420048833
+      ]
+    },
+    {
+      "id": "20260322_182138_en_24",
+      "lang": "en",
+      "audio_sha256": "d0ff05127ef7eaeeb10c24307554c88f38adfa7eb94fb1a52ee7d51b6c54f753",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "He is not here, but he is risen. Friend, this work is done. He's he has paid the price on the cross, he has died for your sins.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        181.0738749918528,
+        180.59400003403425,
+        182.8608340001665
+      ]
+    },
+    {
+      "id": "20260322_182138_en_39",
+      "lang": "en",
+      "audio_sha256": "50b0d6745534f76e6a21e93f4b1d6bd575e64b19384ec74c4671abcc7cfafa16",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "If you look at the sermon",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        89.39366700360551,
+        85.61266696779057,
+        86.32804203080013
+      ]
+    },
+    {
+      "id": "20260322_182138_en_53",
+      "lang": "en",
+      "audio_sha256": "37f03866296c0d6f4b29f2e6fafaad15dc2efc3a940354d5014f008162db3c92",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "And we pray just like those people that you might look to the one salvation that God has provided for you.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        135.5696249520406,
+        136.5754579892382,
+        140.18033299362287
+      ]
+    },
+    {
+      "id": "20260322_180535_en_4",
+      "lang": "en",
+      "audio_sha256": "dd7cdf4c485bb38d09a970d504e3f118111eff67f733c8234e3068428192261a",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        124.3339580250904,
+        123.88041598023847,
+        125.20908302394673
+      ]
+    },
+    {
+      "id": "20260322_180535_en_18",
+      "lang": "en",
+      "audio_sha256": "781fbd6ef2d84efc23042c99649e5610b74081c69ab4ad34552b76793fe616bd",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "by the way of the Red Sea to go round the land of Edom.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        115.77870900509879,
+        115.88662501890212,
+        116.13412504084408
+      ]
+    },
+    {
+      "id": "20260322_180535_en_35",
+      "lang": "en",
+      "audio_sha256": "946755fc9aa295124ccdb9ad5ad4e828c48f289ad8c534070148552d96a34b23",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "So like I said, I would like to speak about three things in the meeting tonight, and it is our sin, God's salvation, and Christ's sufficient word.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        174.2400829680264,
+        177.9814590117894,
+        182.3012920212932
+      ]
+    },
+    {
+      "id": "20260322_180535_en_51",
+      "lang": "en",
+      "audio_sha256": "c38195f4994e76f0306e35b2e5eca6e9d07b7ffb1f0a9e3523bf47171f295398",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "The sin it it brings death. And we read that the r the wages of sin is death. And this is not only physical death.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        164.11800001515076,
+        163.43733301619068,
+        163.8161669834517
+      ]
+    },
+    {
+      "id": "20260322_180535_en_66",
+      "lang": "en",
+      "audio_sha256": "1e405b80c8c74b8bdfc265fcb8a73e2457a1723595bf9355bfdada83eca41e45",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "They it it was no it was no use, it was no help, and it could do nothing to save them from their sins. And it kind of like that.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        175.84291601087898,
+        166.53204202884808,
+        165.12824996607378
+      ]
+    },
+    {
+      "id": "20260301_180046_en_2",
+      "lang": "en",
+      "audio_sha256": "fae573c81026fd144b25f28711c497ddf0fa67f0087d3f9a245301a8c1a302ca",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "And the cause and the cause.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        105.94029095955193,
+        105.50720797618851,
+        103.18458295660093
+      ]
+    },
+    {
+      "id": "20260301_180046_en_27",
+      "lang": "en",
+      "audio_sha256": "3376d868d84679a8cbeaa2d075a9f2f29e1d959d31edc1ce2213688fb282fed8",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "At the cross, at the cross, where I first saw",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        134.50404204195365,
+        136.1609169980511,
+        138.4675829904154
+      ]
+    },
+    {
+      "id": "20260301_180046_en_43",
+      "lang": "en",
+      "audio_sha256": "c609faa2305dbe06ea97c71feb37e2e2739654f78b7e0e50a82909b6e776b2b7",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "We're traveling all to have no more. Will you go? Will you go?",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        153.6880419589579,
+        154.8317500273697,
+        157.18999999808148
+      ]
+    },
+    {
+      "id": "20260301_180046_en_58",
+      "lang": "en",
+      "audio_sha256": "f1a07728a78c9e7b5a57f4b744ceb20a6047d60e4bcb01bd9c5a8f952eaa0577",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Packing. It's an odd one, but packing. What should I bring with?",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        156.58033400541171,
+        155.1922500366345,
+        157.66462497413158
+      ]
+    },
+    {
+      "id": "20260301_180046_en_72",
+      "lang": "en",
+      "audio_sha256": "f07921f4f81d0b1692f4fdd971624de78add37758cfe59866e1fa9cd0e3b63aa",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Now if you want to talk about your initial spot.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        103.26808301033452,
+        102.0363750285469,
+        103.1410830328241
+      ]
+    },
+    {
+      "id": "20260301_180046_en_87",
+      "lang": "en",
+      "audio_sha256": "44196edab03f06488ad68c0c930da7e3cc4011e83ec0e85d90ca3bef4abb387d",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "That leads unto death. Many are traveling upon that road. And then there's a smaller road.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        138.35662498604506,
+        140.601874969434,
+        138.19154200609773
+      ]
+    },
+    {
+      "id": "20260301_180046_en_101",
+      "lang": "en",
+      "audio_sha256": "02f64c1987a817f929e22da2a7ba6a0edb6c6fe5cec0282fe5c58de1c446a8f2",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "was created for the devil and his angels.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        92.90016698651016,
+        93.73095800401643,
+        94.3047910113819
+      ]
+    },
+    {
+      "id": "20260301_180046_en_115",
+      "lang": "en",
+      "audio_sha256": "2c6f85c6e368d511114b632885056250ee975175534b4074087f293393751a34",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "And the fact of the matter is is that what we're hacking to try and get into heaven",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        130.16549998428673,
+        130.87170897051692,
+        133.61837499542162
+      ]
+    },
+    {
+      "id": "20260301_180046_en_130",
+      "lang": "en",
+      "audio_sha256": "f87ae7f65d3f244d0a1154870c053ae9f7a290f6a90e07d98a253398d367ba02",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Do not go to the left or to the right, but stay on that straight path that we sang about.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        134.55179100856185,
+        129.33058402268216,
+        128.0605000210926
+      ]
+    },
+    {
+      "id": "20260301_180046_en_144",
+      "lang": "en",
+      "audio_sha256": "aec1f78b60cdf815b109125c29eff87ebe0f799e357d650ed36f1c08b9e7f1bf",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Now what?",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        85.72170900879428,
+        87.13979198364541,
+        87.45891699800268
+      ]
+    },
+    {
+      "id": "20260301_180046_en_159",
+      "lang": "en",
+      "audio_sha256": "955a17a57faa74691e18e4a9f6c0bd66312e3c4bed86fafb60891c657314996f",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "The Son of Man came to seek and to save that which was lost. The healing didn't stop there, the healing continued through salvation.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        158.57387497089803,
+        158.2660840358585,
+        160.18187504960224
+      ]
+    },
+    {
+      "id": "20260301_180046_en_174",
+      "lang": "en",
+      "audio_sha256": "76831b8ab19a5e6f9b13442994b710023e2b86d4a1b522f48fcedce44fe871e0",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "You see the preparation that God has made in order to redeem us.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        107.7960419934243,
+        106.78408300736919,
+        108.83566696429625
+      ]
+    },
+    {
+      "id": "20260301_180046_en_189",
+      "lang": "en",
+      "audio_sha256": "23a7cde9a440cd5004ff13908e4b98110dcbd653528d39bf9bb748e12d32e9f4",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "And you trust in the Lord with all your heart.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        95.30495799845085,
+        93.82045798702165,
+        92.682791990228
+      ]
+    },
+    {
+      "id": "20260301_180046_en_205",
+      "lang": "en",
+      "audio_sha256": "1bcb0f4a03da11e12417d88ce72d7ecf17925c7a17ff9ac1790b083b661beda9",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "It is not of your own doing, it is a gift of God, not a result of works, so that no one may boast.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        147.40683301351964,
+        145.31749999150634,
+        145.67720796912909
+      ]
+    },
+    {
+      "id": "20260301_180046_en_220",
+      "lang": "en",
+      "audio_sha256": "a0389b990de4bd0bc374cf846d93ac0be47c5566baab54c99ab5e3b57a78fc7f",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "I will go.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        75.83295798394829,
+        75.78562496928498,
+        74.76950000273064
+      ]
+    },
+    {
+      "id": "20260301_180046_en_234",
+      "lang": "en",
+      "audio_sha256": "a727d09e23ce361f5230f4ae3e1c49c54e9dc4dd34f1083f7dfbd4424ea2d869",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Truly I say to you, I do not know you. Watch therefore, for you know neither the day nor the hour.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        151.58216701820493,
+        156.7840839852579,
+        161.13895800663158
+      ]
+    },
+    {
+      "id": "20260301_180046_en_250",
+      "lang": "en",
+      "audio_sha256": "85533a883081e6e38ab154107c81a9830ea7a5880fb8a4951c778d1238b692c1",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "You can be here in this community, you can be here a part of this church, you can live a long life in church.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        151.3309589936398,
+        151.18074999190867,
+        153.00616703461856
+      ]
+    },
+    {
+      "id": "20260301_180046_en_268",
+      "lang": "en",
+      "audio_sha256": "3629acbff98ce25de7be03020cc276ea430a409cd3a8087577785399a5dca916",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "In in thankfulness to God, Moses wrote this this song.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        130.3492920123972,
+        130.60612499248236,
+        131.9034170010127
+      ]
+    },
+    {
+      "id": "20260301_180046_en_284",
+      "lang": "en",
+      "audio_sha256": "676171f95f1bdfa80a5af2ea2ea8602543106d801c395f9a04ac939997083c3c",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Took ex the the same statement verbatim. And we read this in in Isaiah chapter twelve. I think maybe",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        160.75449995696545,
+        154.98204197501764,
+        151.72454196726903
+      ]
+    },
+    {
+      "id": "20260301_180046_en_302",
+      "lang": "en",
+      "audio_sha256": "59c0b451ce7c62fef8f57ea971b7508e32dd41db44000074bc1d261467c4ae96",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Kingdom. The Lord is my salvation. And and nothing",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        129.58062498364598,
+        131.87575002666563,
+        132.68754200544208
+      ]
+    },
+    {
+      "id": "20260301_180046_en_318",
+      "lang": "en",
+      "audio_sha256": "27dec6a6db41afb907e6f188998e388daea9043f346e71ac583faa7bac7f9552",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Is that your experience today?",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        89.72187503241003,
+        89.610833034385,
+        90.76262498274446
+      ]
+    },
+    {
+      "id": "20260301_180046_en_333",
+      "lang": "en",
+      "audio_sha256": "d36e5cef88ebef3d33a9cdfaeda12b2ad437c03c7739656a98d6e0e24b982a59",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "He's my song, he's my joy.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        101.60391597310081,
+        99.73658301169053,
+        101.246792008169
+      ]
+    },
+    {
+      "id": "20260301_180046_en_349",
+      "lang": "en",
+      "audio_sha256": "9f4952e288cfad321131324f52a1408ea0e76437bc7e6935a8c1211beba91d00",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "So salvation is not something that I just possess.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        114.86054200213403,
+        114.06849999912083,
+        113.29399998066947
+      ]
+    },
+    {
+      "id": "20260301_180046_en_366",
+      "lang": "en",
+      "audio_sha256": "8ace7888822aed4ef793cdccd454905f1ddb435b620644d58842710d948d9557",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "He's my strength, he's my he's he's he's uh something that gives me the greatest joy is Christ.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        165.19004199653864,
+        167.99170896410942,
+        171.44508304772899
+      ]
+    },
+    {
+      "id": "20260301_180046_en_383",
+      "lang": "en",
+      "audio_sha256": "43c144c245d0a58724ddbf31b1ad69eeebbcfeea37bdc39b4c9c345fc27ff655",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Or it's to some it's it's my works. Being a good good person equates to",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        146.04700001655146,
+        151.54929197160527,
+        147.0641249907203
+      ]
+    },
+    {
+      "id": "20260301_180046_en_400",
+      "lang": "en",
+      "audio_sha256": "fd1cbd72bd28b406c68d36a0990f8026cf206dd3b009020cd39690cf62045d70",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "And he is one that you can fully trust. He's one that cannot fail. And you can put your trust in.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        150.71404102491215,
+        151.54508402338251,
+        153.65937497699633
+      ]
+    },
+    {
+      "id": "20260301_180046_en_415",
+      "lang": "en",
+      "audio_sha256": "6594905751341fc3b128f3acb8a470c25a676f2c02dca45c9084e3410265adfc",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "You're accountable to God for your sin. God's verdict is that you are guilty.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        135.98187500610948,
+        135.68429101724178,
+        132.40599998971447
+      ]
+    },
+    {
+      "id": "20260301_180046_en_430",
+      "lang": "en",
+      "audio_sha256": "0e2d95c1274c188432eb6668535f2c1237b1e007643cef43a210e1dadc47e3ac",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "You have a hunger and a thirst that can never be satisfied with anything in the world.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        128.28370794886723,
+        128.38804197963327,
+        125.74220797978342
+      ]
+    },
+    {
+      "id": "20260301_180046_en_446",
+      "lang": "en",
+      "audio_sha256": "36375f094132d6077f0f5f28f5abf92d7adc207bbf469dc01e0093d3a52669ca",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Take him as as your savior.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        91.82962501654401,
+        89.18812498450279,
+        91.69633401324973
+      ]
+    },
+    {
+      "id": "20260301_180046_en_462",
+      "lang": "en",
+      "audio_sha256": "49fce43b6503912d62c3e182d3077fdb40ed90fdeadc8b81717e430a6e53cf1c",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "It affirms the certainty that Christ is the answer to your need.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        122.97399999806657,
+        124.11095801508054,
+        127.29120795847848
+      ]
+    },
+    {
+      "id": "20260301_185327_es_1",
+      "lang": "es",
+      "audio_sha256": "19a32e20ab4922350262ffaea5f0f7db91d16ca699db83a270102b242c7c441b",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "I don't know. Um",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        95.15883401036263,
+        92.56708301836625,
+        91.3245829869993
+      ]
+    },
+    {
+      "id": "20260301_185327_es_3",
+      "lang": "es",
+      "audio_sha256": "ff99955454840f51d8c4bc776110847605d527155f4165ed92ab07dc6ce55fe4",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Buenas tardes, aquí estamos en Stark Road Gospel Hall y quiero decirte",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        128.46779101528227,
+        132.94058298924938,
+        134.64966701576486
+      ]
+    },
+    {
+      "id": "20260301_185327_es_4",
+      "lang": "es",
+      "audio_sha256": "61a5bc21eff78adae1c09f759d388d144621798048dcf968d55553529e327c29",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "las buenas nuevas de la salvación en Cristo Jesús.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        113.67208295268938,
+        112.43966600159183,
+        112.56483301986009
+      ]
+    },
+    {
+      "id": "20260301_185327_es_5",
+      "lang": "es",
+      "audio_sha256": "231750abec55ac6d757ec7de0806d3b4ecaf82843d8d1267c5a28829edd2f00f",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "That's not bad. Keep going.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        132.72404100280255,
+        131.0772909782827,
+        131.3843330135569
+      ]
+    },
+    {
+      "id": "20260301_185327_es_6",
+      "lang": "es",
+      "audio_sha256": "7c47115ecd99212bc9541993a7993d9f16735dd0a9b670b5a6f12bdb5b166c0d",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "ah desde la gloria vino el Salvador para salvar al pecador",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        124.9217499862425,
+        127.42924998747185,
+        124.41387498984113
+      ]
+    },
+    {
+      "id": "20260301_185327_es_7",
+      "lang": "es",
+      "audio_sha256": "8210d31cc4b5460dbff096e68ee30d5f583ca6fc6a2190350fc11a1e2b4427db",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "y hasta la cruz fue con gran amor, él murió por mi",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        113.69241698412225,
+        113.94012498203665,
+        115.20383297465742
+      ]
+    },
+    {
+      "id": "20260301_185132_es_2",
+      "lang": "es",
+      "audio_sha256": "12ee62c48624785c7d3a404060cad23966a3f606080c13331afdcc66d0c43474",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Realize how gross they're like. Flip it or they fall it falls off. Nasty.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        216.47987503092736,
+        212.9194590379484,
+        210.59274999424815
+      ]
+    },
+    {
+      "id": "20260301_185132_es_3",
+      "lang": "es",
+      "audio_sha256": "f6cdb80ced9d7e4680eb04e24e1f7d66eb29ee9e80c3dfba1222efeebe0fa058",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Alright. Um I have not run this in Spanish before, so I need you to yell at it.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        136.4757499541156,
+        137.39608298055828,
+        140.96833299845457
+      ]
+    },
+    {
+      "id": "20260301_185132_es_4",
+      "lang": "es",
+      "audio_sha256": "b60020b41eff8e1eac4d0bcb926dedbd6e12863509b713fc2f95521326f58638",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "What do you what am I trying to do? Yell at it in Spanish. Like where do I type? Nowhere. Talk to it.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        183.82120900787413,
+        183.95279196556658,
+        169.09012501128018
+      ]
+    },
+    {
+      "id": "20260301_185132_es_5",
+      "lang": "es",
+      "audio_sha256": "f1cbd56d0f66a3bb7ce3802e2a30abf959864f8cb3c5a42d1d04077a83746126",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "Oh my god.",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        109.70845801057294,
+        111.17604200262576,
+        111.14758299663663
+      ]
+    },
+    {
+      "id": "20260301_185132_es_6",
+      "lang": "es",
+      "audio_sha256": "f01b69acac12ca387822b6c75afa5dbdc3a205e2097c05a7a2ce61a00f1d2b20",
+      "language_control": "auto",
+      "reference": null,
+      "hypothesis": "I have not run this in Spanish mode yet. Yeah. What do I s like just?",
+      "wer_counts": null,
+      "reference_status": "pending",
+      "provenance": "unconfirmed_live_session",
+      "terms": [],
+      "term_hits": [],
+      "latency_ms": [
+        183.2577500026673,
+        194.76841698633507,
+        187.71845800802112
+      ]
+    }
+  ],
+  "timeout_s": 1800,
+  "engine": "parakeet-mlx",
+  "model_id": "mlx-community/parakeet-tdt-0.6b-v3",
+  "supported_languages": [
+    "en",
+    "es"
+  ],
+  "language_control": "auto",
+  "resolved_model": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+  "model_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+  "peak_rss_bytes": 1415364608,
+  "peak_metal_bytes": 2200358468,
+  "returncode": 0
+}

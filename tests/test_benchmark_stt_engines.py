@@ -167,6 +167,7 @@ def test_mocked_benchmark_preserves_schema(tmp_path, monkeypatch, device, sample
         sampler.return_value.stop.return_value = {"max_mib": 1024, "max_gb": 1.0, "n_samples": 1, "median_mib": 1024}
     monkeypatch.setattr(bench, "VramSampler", sampler)
     key = "parakeet_mlx" if device == "mlx" else "fw_int8_offshelf"
+    fake_engine.model_id = bench.VARIANTS[key]["model_id"]
     clips = [
         {
             "id": "mock",

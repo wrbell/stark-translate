@@ -1,11 +1,30 @@
 # Automated Adapter Deployment System
 
-> Implementation plan for versioned LoRA adapter deployment from the training desktop
-> (WSL/CUDA) to inference endpoints (Mac + NVIDIA church machines). Includes health
-> checks, hot-reload, and automatic rollback.
+> Design document (2026-08-30) for versioned LoRA adapter deployment from the training
+> desktop (WSL/CUDA) to inference endpoints. The sections below §"Status vs implementation"
+> are the **original design** and are kept for the rationale; where the shipped scripts
+> differ, the table wins.
 
-**Status:** Implemented (`tools/deploy_adapters.py` + `tools/manage_adapters.py` + 8-canary `health_check.py`). Remote rsync endpoints still need SSH keys configured per machine.
-**Date:** 2026-08-30
+## Status vs implementation (verified against source, 2026-09-10)
+
+| Design element | Implemented as of `c5fb689` | Notes |
+|----------------|-----------------------------|-------|
+| Registry + manifest | `tools/manage_adapters.py register|activate|rollback|list|export`; `adapters/manifest.json` with per-model `versions`, `active`, `previous`, `path`, safetensors SHA-256 | Version id defaults to the adapter directory name (`--version` overrides). The `cycle{N}_{YYYYMMDD}_{sha256[:8]}` format in §1.1 is **not enforced**. |
+| Deploy pipeline | `tools/deploy_adapters.py --cycle N --models ... --endpoints local|mac-dev [--all-adapters] [--dry-run] [--rollback] [--skip-health]`: VERSION → TRANSFER (rsync or local copy to `staging/`) → HEALTH CHECK → ACTIVATE (`active/` → `previous/` rename) → VERIFY | Endpoints default to `local`/`mac-dev` on `127.0.0.1`; extra endpoints come from `manifest.json["endpoints"]`. The CONVERT phase (§3.2 Phase 2) is **not** implemented — export with `training/export_ct2.py` / `export_gguf.py` first. |
+| Health check | `tools/health_check.py --adapter --backend mlx|cuda [--base-model] [--model-family] [--n-canaries 8] [--max-latency 5.0] [--output]` over `training/theological_canaries.py` (18 entries) | Replaces the five hard-coded sentences in §4; pass = expected substrings + latency bound + word-ratio hallucination band. |
+| Mac hot-reload (SIGUSR1) | **Not implemented** — no `SIGUSR1` handler or `reload()` in `dry_run_ab.py` / `engines/mlx_engine.py` | Restart the session (operator Stop/Start) after activating an adapter. |
+| NVIDIA restart via `systemctl` | Not wired; `start_server.sh` must be relaunched to point `llama-server` at a new GGUF | — |
+| `status.json`, `deploy_log.jsonl`, session adapter metadata | Deploy records are appended to `manifest.json["deployments"]` by `deploy_adapters.py`; no separate `status.json` / `deploy_log.jsonl`, and per-session adapter versions are **not** logged in the diagnostics JSONL as sketched in §7.3 | — |
+| Remote endpoints | rsync over SSH is coded; **SSH keys are not configured** on any machine | Local/dry-run only so far. |
+| Mac consumers | Gemma adapters load through `mlx_lm.load(..., adapter_path=)` via `--adapter-dir`; Whisper LoRA is **not** loadable by Parakeet MLX / mlx-whisper — CT2 exports run through `FasterWhisperEngine` on CPU | See `CLAUDE-windows.md` § A7. |
+
+No adapter has been deployed to a church machine; the registry has only been exercised
+locally and in tests (`tests/test_manage_adapters.py`). Backlog: `issue-135-mac-ab`,
+`wsl-w17-export`.
+
+---
+
+## Original design (2026-08-30)
 
 ---
 

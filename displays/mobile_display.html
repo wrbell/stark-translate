@@ -460,12 +460,13 @@
   </div>
 </div>
 
+<script src="display_connection.js"></script>
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
   'use strict';
 
-  const wsHost = location.hostname || 'localhost';
-  const WS_URL = 'ws://' + wsHost + ':8765';
+  const WS_URL = StarkDisplayConnection.websocketUrl(location);
   const RECONNECT_MS = 2000;
   const MAX_CHUNKS = 15;
 
@@ -540,9 +541,30 @@
   // ── Chunk storage ──
   // Store raw data so we can re-render when model toggles
   var chunkData = [];
+  const acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    chunkData = [];
+    renderLatestChunks();
+  }, function(uid) {
+    var kept = chunkData.filter(function(c) {
+      return !(c.stage === 'partial' && StarkDisplayConnection.partialUtteranceId(c) === uid);
+    });
+    if (kept.length === chunkData.length) return;
+    chunkData = kept;
+    renderLatestChunks();
+  });
 
   function addChunk(data) {
-    chunkData.push(data);
+    if (data.stage === 'partial') {
+      chunkData = chunkData.filter(function(c) { return c.stage !== 'partial'; });
+    } else {
+      chunkData = chunkData.filter(function(c) {
+        return c.stage === 'partial'
+          ? !StarkDisplayConnection.replacesPartial(data, StarkDisplayConnection.partialUtteranceId(c))
+          : c.chunk_id !== data.chunk_id;
+      });
+    }
+    var nextPartial = data.stage === 'partial' ? -1 : chunkData.findIndex(function(c) { return c.stage === 'partial'; });
+    chunkData.splice(nextPartial < 0 ? chunkData.length : nextPartial, 0, data);
     if (chunkData.length > MAX_CHUNKS) {
       chunkData.shift();
     }
@@ -552,7 +574,7 @@
   function renderLatestChunks() {
     // Render English
     renderPanel(englishChunks, chunkData.map(function(d) {
-      return filterText(d.english);
+      return (d.speaker ? d.speaker + ': ' : '') + filterText(d.english);
     }), false);
 
     // Render Spanish
@@ -569,7 +591,7 @@
 
   function renderSpanishPanel() {
     var texts = chunkData.map(function(d) {
-      return filterText(useModelB ? d.spanish_b : d.spanish_a);
+      return (d.speaker ? d.speaker + ': ' : '') + filterText(useModelB ? (d.spanish_b || d.spanish_a) : d.spanish_a);
     });
     renderPanel(spanishChunks, texts, true);
   }
@@ -583,8 +605,6 @@
   }
 
   function renderPanel(container, texts, isNewRender) {
-    // Count existing chunks
-    var existing = container.children.length;
     var needed = texts.length;
 
     // If we have too many, remove from the front
@@ -594,10 +614,9 @@
 
     // Update or create chunks
     for (var i = 0; i < needed; i++) {
-      var childIdx = i - (needed - container.children.length);
-      if (childIdx >= 0 && childIdx < container.children.length) {
+      if (i < container.children.length) {
         // Update existing
-        container.children[childIdx].textContent = texts[i];
+        container.children[i].textContent = texts[i];
       } else {
         // Create new
         var div = document.createElement('div');
@@ -678,13 +697,14 @@
       ws.close();
     };
 
-    ws.onmessage = function(evt) {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, function(evt) {
       var data;
       try {
         data = JSON.parse(evt.data);
       } catch (e) {
         return;
       }
+      if (!acceptSession(data)) return;
       // Handle language config — swap panel labels
       if (data.type === 'lang_config') {
         var suffix = useModelB ? ' (B)' : ' (A)';
@@ -692,15 +712,26 @@
         $('enLabel').textContent = data.source_label;
         return;
       }
+      if (data.type === 'speaker_update') {
+        var existing = chunkData.find(function(c) { return c.chunk_id === data.chunk_id && c.stage !== 'partial'; });
+        if (existing) {
+          existing.speaker = data.speaker || '';
+          renderLatestChunks();
+        }
+        return;
+      }
       if (data.type !== 'translation') return;
 
       addChunk({
         chunk_id: data.chunk_id,
+        utterance_id: data.utterance_id,
+        stage: data.stage || 'complete',
+        speaker: data.speaker || '',
         english: data.english || '',
         spanish_a: data.spanish_a || '',
         spanish_b: data.spanish_b || ''
       });
-    };
+    });
   }
 
   connect();

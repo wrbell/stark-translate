@@ -54,6 +54,9 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("convert_marian_ct2")
 
@@ -123,22 +126,19 @@ def detect_direction(model_id: str) -> str:
     )
 
 
-def snapshot_hf_model(model_id: str, output_dir: Path) -> None:
-    """Download the HF Marian model + tokenizer files into output_dir.
-
-    Uses transformers' ``snapshot_download`` semantics via from_pretrained +
-    save_pretrained, so any HF cache hits are reused automatically.
-    """
+def snapshot_hf_model(model_id: str, output_dir: Path, revision: str | None = None) -> dict:
+    """Materialize the shared pinned HF source; explicit local paths remain supported."""
     from transformers import MarianMTModel, MarianTokenizer
 
-    log.info("snapshotting %s into %s", model_id, output_dir)
-    t0 = time.perf_counter()
-    tokenizer = MarianTokenizer.from_pretrained(model_id)
-    model = MarianMTModel.from_pretrained(model_id)
+    from tools.marian_ct2_setup import resolve_hf_source
+
+    source, provenance = resolve_hf_source(model_id, revision=revision)
+    tokenizer = MarianTokenizer.from_pretrained(str(source), local_files_only=True)
+    model = MarianMTModel.from_pretrained(str(source), local_files_only=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     model.save_pretrained(str(output_dir), safe_serialization=True)
     tokenizer.save_pretrained(str(output_dir))
-    log.info("snapshot done in %.1fs", time.perf_counter() - t0)
+    return provenance
 
 
 def run_ct2_converter(
@@ -148,16 +148,15 @@ def run_ct2_converter(
     copy_files: list[str],
     force: bool = True,
 ) -> None:
-    binary = shutil.which("ct2-transformers-converter")
-    if not binary:
-        raise SystemExit("ct2-transformers-converter not on PATH. Install ctranslate2: pip install ctranslate2>=4.5")
     present = [f for f in copy_files if (src_dir / f).exists()]
     missing = [f for f in copy_files if not (src_dir / f).exists()]
     if missing:
         log.info("copy_files skipped (not in snapshot dir): %s", missing)
 
     cmd = [
-        binary,
+        sys.executable,
+        "-m",
+        "ctranslate2.converters.transformers",
         "--model",
         str(src_dir),
         "--output_dir",
@@ -263,6 +262,7 @@ def write_manifest(
     direction: str,
     quantization: str,
     sanity: dict | None,
+    source_provenance: dict | None = None,
 ) -> Path:
     model_bin = output_dir / "model.bin"
     manifest = {
@@ -276,6 +276,7 @@ def write_manifest(
         "model_bin_sha256": sha256_file(model_bin) if model_bin.exists() else None,
         "files": sorted(p.name for p in output_dir.iterdir() if p.is_file()),
         "sanity": sanity,
+        **(source_provenance or {"source_revision": None}),
     }
     manifest_path = output_dir / "export_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
@@ -291,6 +292,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         required=True,
         help="HF Marian model id (e.g. Helsinki-NLP/opus-mt-en-es).",
     )
+    p.add_argument("--revision", help="Full HF source commit for an explicitly selected custom repository.")
     p.add_argument(
         "--output",
         type=Path,
@@ -355,14 +357,15 @@ def main(argv: list[str] | None = None) -> int:
                 args.quantization,
                 args.sanity_min_canary,
             )
-        write_manifest(args.output, args.model_id, direction, args.quantization, sanity_result)
+        if not (args.output / "export_manifest.json").exists():
+            write_manifest(args.output, args.model_id, direction, args.quantization, sanity_result)
         return 0
 
     snapshot_root = Path(tempfile.mkdtemp(prefix="convert_marian_ct2_snapshot_"))
 
     try:
         log.info("=== STEP 1/3: snapshot HF model ===")
-        snapshot_hf_model(args.model_id, snapshot_root)
+        source_provenance = snapshot_hf_model(args.model_id, snapshot_root, args.revision)
 
         log.info("=== STEP 2/3: convert HF -> CTranslate2 (%s) ===", args.quantization)
         run_ct2_converter(snapshot_root, args.output, args.quantization, MARIAN_COPY_FILES)
@@ -379,7 +382,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             log.warning("STEP 3/3 skipped (--no-sanity). Quality not verified.")
 
-        write_manifest(args.output, args.model_id, direction, args.quantization, sanity_result)
+        write_manifest(args.output, args.model_id, direction, args.quantization, sanity_result, source_provenance)
     finally:
         if not args.keep_snapshot:
             log.info("removing snapshot dir %s", snapshot_root)

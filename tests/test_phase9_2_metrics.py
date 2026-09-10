@@ -36,7 +36,7 @@ class TestMetricsCollector:
         c = MetricsCollector()
         snap = c.snapshot()
         assert "ts" in snap
-        assert snap["queue_depth"] == 0
+        assert snap["queue_depth"] is None
         assert snap["error_count"] == 0
         assert snap["latency"] == {"n": 0}
         assert snap["resources"]["vram_mib_recent"] == []
@@ -65,6 +65,29 @@ class TestMetricsCollector:
             c.record_segment(chunk_id=i, stt_ms=10, translate_ms=10, total_ms=20, confidence=1.0)
         snap = c.snapshot()
         assert snap["latency"]["n"] == 60  # SEGMENT_BUFFER cap
+
+    @pytest.mark.parametrize(
+        "totals,expected_p50,expected_p95",
+        [
+            ([2044], 2044, 2044),
+            ([2204, 2044], 2124, 2204),
+            ([2204, 1800, 2044], 2044, 2204),
+            (list(range(20, 0, -1)), 10.5, 19),
+        ],
+    )
+    def test_latency_percentiles_use_nearest_rank(self, totals, expected_p50, expected_p95):
+        from operator_app.metrics import MetricsCollector
+
+        collector = MetricsCollector()
+        for chunk_id, total_ms in enumerate(totals, start=1):
+            collector.record_segment(
+                chunk_id=chunk_id, stt_ms=None, translate_ms=None, total_ms=total_ms, confidence=None
+            )
+
+        latency = collector.snapshot()["latency"]
+        assert latency["total_ms_p50"] == expected_p50
+        assert latency["total_ms_p95"] == expected_p95
+        assert latency["total_ms_p95"] >= latency["total_ms_p50"]
 
     def test_queue_depth_and_errors(self):
         from operator_app.metrics import MetricsCollector

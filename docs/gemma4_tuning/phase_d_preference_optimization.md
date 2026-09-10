@@ -1,5 +1,10 @@
 # Phase D — Preference Optimization (v2 ship target)
 
+> **As-written plan (2026-04); executed as v2-cpo (2026-04-30).** CPO on top of v1.1 landed at
+> statistical parity with stock E4B (no over-rejection, so ARPO was not indicated):
+> [`v1_results.md`](./v1_results.md) § v2-cpo. Next ideas: [`v3_directions.md`](./v3_directions.md).
+> Status table in [`overview.md`](./overview.md).
+
 **Goal:** layer CPO / ARPO on top of v1 SFT for **+0.5–1.5 COMET-22 over v1**, with no canary regression.
 
 **Wall clock:** ~1 week.

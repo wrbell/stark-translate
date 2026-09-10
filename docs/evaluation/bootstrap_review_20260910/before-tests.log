@@ -1,0 +1,64 @@
+FF......FFFFFF                                                           [100%]
+=================================== FAILURES ===================================
+_ test_bootstrap_creates_explicit_relative_target_even_if_directory_exists[False] _
+tests/test_bootstrap_flow.py:127: in test_bootstrap_creates_explicit_relative_target_even_if_directory_exists
+    assert result.returncode == 0, result.stderr
+E   AssertionError: ERROR: selected Python is not executable: new env/bin/python
+E     
+E   assert 2 == 0
+E    +  where 2 = CompletedProcess(args=['/bin/bash', '/private/var/folders/2k/f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-...oject/bootstrap.sh'], returncode=2, stdout='', stderr='ERROR: selected Python is not executable: new env/bin/python\n').returncode
+_ test_bootstrap_creates_explicit_relative_target_even_if_directory_exists[True] _
+tests/test_bootstrap_flow.py:127: in test_bootstrap_creates_explicit_relative_target_even_if_directory_exists
+    assert result.returncode == 0, result.stderr
+E   AssertionError: ERROR: selected Python is not executable: new env/bin/python
+E     
+E   assert 2 == 0
+E    +  where 2 = CompletedProcess(args=['/bin/bash', '/private/var/folders/2k/f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-...oject/bootstrap.sh'], returncode=2, stdout='', stderr='ERROR: selected Python is not executable: new env/bin/python\n').returncode
+_ test_services_are_installed_only_after_successful_setup_and_doctor[systemd] __
+tests/test_bootstrap_flow.py:166: in test_services_are_installed_only_after_successful_setup_and_doctor
+    assert setup_at < doctor_at < min(records.index(row) for row in actual_services)
+E   assert 10 < 3
+E    +  where 3 = min(<generator object test_services_are_installed_only_after_successful_setup_and_doctor.<locals>.<genexpr> at 0x102395380>)
+_ test_services_are_installed_only_after_successful_setup_and_doctor[launchd] __
+tests/test_bootstrap_flow.py:166: in test_services_are_installed_only_after_successful_setup_and_doctor
+    assert setup_at < doctor_at < min(records.index(row) for row in actual_services)
+E   assert 5 < 3
+E    +  where 3 = min(<generator object test_services_are_installed_only_after_successful_setup_and_doctor.<locals>.<genexpr> at 0x102394900>)
+_____ test_failed_setup_or_doctor_never_mutates_services[setup-3-systemd] ______
+tests/test_bootstrap_flow.py:175: in test_failed_setup_or_doctor_never_mutates_services
+    assert service_records(records) == []
+E   AssertionError: assert [{'args': ['c.../shims/sudo'}] == []
+E     
+E     Left contains 6 more items, first extra item: {'args': ['cp', '/private/var/folders/2k/f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-326/test_failed_setu...ar/folders/2k/f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-326/test_failed_setup_or_doctor_ne0/shims/sudo'}
+E     Use -v to get more diff
+_____ test_failed_setup_or_doctor_never_mutates_services[setup-3-launchd] ______
+tests/test_bootstrap_flow.py:175: in test_failed_setup_or_doctor_never_mutates_services
+    assert service_records(records) == []
+E   AssertionError: assert [{'args': ['-.../bin/python'}] == []
+E     
+E     Left contains one more item: {'args': ['-m', 'operator_app.cli', 'launchd', 'install', '--project-root', '/private/var/folders/2k/f5x6pscx3jx0cfsjz.../f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-326/test_failed_setup_or_doctor_ne1/project/venv/bin/python'}
+E     Use -v to get more diff
+_____ test_failed_setup_or_doctor_never_mutates_services[doctor-5-systemd] _____
+tests/test_bootstrap_flow.py:175: in test_failed_setup_or_doctor_never_mutates_services
+    assert service_records(records) == []
+E   AssertionError: assert [{'args': ['c.../shims/sudo'}] == []
+E     
+E     Left contains 6 more items, first extra item: {'args': ['cp', '/private/var/folders/2k/f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-326/test_failed_setu...ar/folders/2k/f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-326/test_failed_setup_or_doctor_ne2/shims/sudo'}
+E     Use -v to get more diff
+_____ test_failed_setup_or_doctor_never_mutates_services[doctor-5-launchd] _____
+tests/test_bootstrap_flow.py:175: in test_failed_setup_or_doctor_never_mutates_services
+    assert service_records(records) == []
+E   AssertionError: assert [{'args': ['-.../bin/python'}] == []
+E     
+E     Left contains one more item: {'args': ['-m', 'operator_app.cli', 'launchd', 'install', '--project-root', '/private/var/folders/2k/f5x6pscx3jx0cfsjz.../f5x6pscx3jx0cfsjz3c0jgf40000gn/T/pytest-of-willem/pytest-326/test_failed_setup_or_doctor_ne3/project/venv/bin/python'}
+E     Use -v to get more diff
+=========================== short test summary info ============================
+FAILED tests/test_bootstrap_flow.py::test_bootstrap_creates_explicit_relative_target_even_if_directory_exists[False]
+FAILED tests/test_bootstrap_flow.py::test_bootstrap_creates_explicit_relative_target_even_if_directory_exists[True]
+FAILED tests/test_bootstrap_flow.py::test_services_are_installed_only_after_successful_setup_and_doctor[systemd]
+FAILED tests/test_bootstrap_flow.py::test_services_are_installed_only_after_successful_setup_and_doctor[launchd]
+FAILED tests/test_bootstrap_flow.py::test_failed_setup_or_doctor_never_mutates_services[setup-3-systemd]
+FAILED tests/test_bootstrap_flow.py::test_failed_setup_or_doctor_never_mutates_services[setup-3-launchd]
+FAILED tests/test_bootstrap_flow.py::test_failed_setup_or_doctor_never_mutates_services[doctor-5-systemd]
+FAILED tests/test_bootstrap_flow.py::test_failed_setup_or_doctor_never_mutates_services[doctor-5-launchd]
+8 failed, 6 passed in 6.22s

@@ -1,633 +1,178 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
-> **Machine:** M3 Pro MacBook (Mac15,6), 18GB unified memory, 12-core CPU (6P+6E), 18-core GPU, Metal 4, MLX acceleration
-> **Role:** Inference, live demos, quality monitoring, browser displays, A/B testing
-> **Parent doc:** [`CLAUDE.md`](./CLAUDE.md)
-
-**TTS (9.4.1):** `--tts --tts-output local --tts-device-en "MacBook Pro Speakers" --tts-device-es "BlackHole 2ch"` routes each translation language independently. The operator UI saves per-language output choices; named routes retry after USB hotplug, then fall back to system output. See [the operator runbook](docs/operator_runbook.md#route-tts-to-a-second-output-941).
-
----
-
-## Hardware Profile (Verified)
-
-| Spec | Value |
-|------|-------|
-| Model | MacBook Pro (Mac15,6, MRX43LL/A) |
-| Chip | Apple M3 Pro |
-| CPU | 12 cores (6 performance + 6 efficiency) |
-| GPU | 18 cores |
-| Memory | 18 GB unified (17.2 GB usable) |
-| Metal | Metal 4 |
-| L2 Cache | 4 MB |
-| Display | 3024x1964 Retina XDR (14") |
-| iogpu wired limit | 0 (unlimited GPU memory) |
-
-### Inference Memory Budget
-
-| Component | Framework | Memory |
-|-----------|-----------|--------|
-| Distil-Whisper large-v3 | mlx-whisper | ~1.5 GB |
-| **Gemma 4 E4B OptiQ (Mac default)** | mlx-lm | ~3–4 GB |
-| TranslateGemma 4B 4-bit (opt-out) | mlx-lm | ~2.5 GB |
-| TranslateGemma 12B 4-bit (A/B) | mlx-lm | ~7 GB |
-| MarianMT CT2 int8 | ctranslate2 | ~76 MB |
-| MarianMT PyTorch | transformers | ~300 MB |
-| Silero VAD | PyTorch | ~2 MB |
-| **Total (Gemma4 E4B default)** | | **~5–6 GB** |
-| **Total (TG A/B mode)** | | **~11.3 GB** |
-| **Headroom (18 GB, A/B)** | | **~6.7 GB** |
-
-With 18 GB unified memory, default Gemma 4 OptiQ E4B fits easily; TG A/B mode (~11.3 GB) still leaves headroom.
-
-**Important:** PyTorch/MPS with bitsandbytes 4-bit is CUDA-only (~18s/weight on MPS). PyTorch fp16 on MPS causes inf/nan with TranslateGemma. MLX (OptiQ / 4-bit) is the correct approach for Apple Silicon inference.
+> **Machine:** MacBook Pro M3 Pro (Mac15,6), 18 GB unified memory, 12-core CPU, 18-core GPU,
+> macOS 26 (`platform` recorded per session in `metrics/hardware_<session>.json`).
+> **Role:** inference, operator UI, browser displays, Mac evaluation. Training happens on
+> WSL ([`CLAUDE-windows.md`](./CLAUDE-windows.md)). Parent: [`CLAUDE.md`](./CLAUDE.md).
+>
+> **Source (2026-09-10):** v2026.14 (`2026.14.0.0`), tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> The last published release recorded here is v2026.13. Source integration and
+> published artifacts are separate from the acceptance evidence below.
+> Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md);
+> contracts: [`docs/current_architecture.md`](docs/current_architecture.md); remaining work:
+> [`docs/backlog.json`](docs/backlog.json). **Do not recreate `stt_env`.** Validation counts
+> and latency numbers live only in the linked evidence documents.
 
 ---
 
-## Environment Setup
+## Current defaults (from `settings.py`, `engines/factory.py`, `dry_run_ab.py`)
 
-### Prerequisites
+| Stage | Default | Override |
+|-------|---------|----------|
+| VAD | Packaged Silero 6.2.1 (torch), threshold 0.3, silence 0.5 s, max utterance 8 s | `--vad-threshold`, `--silence-trigger`, `--vad-backend onnx` |
+| Partial STT (every 0.6 s of speech) | `--lang en`: Parakeet TDT v3 MLX · `--lang es`: mlx-whisper large-v3-turbo | `--partial-interval`, `--stt-backend mlx` (force Whisper for EN) |
+| Partial translation | Marian CT2 int8 on CPU (4 threads) from `adapters/marian_ct2/<dir>/active` or the managed setup cache; HF PyTorch fallback | `STARK_TRANSLATE_MARIAN_BACKEND=hf\|ct2` |
+| Final STT | Same engine as partials; Whisper automatic fallback is English-only. Spanish keeps multilingual Turbo and never retries English-only Distil | `--word-timestamps` (off by default); confidence thresholds unchanged |
+| Final translation | Gemma 4 E4B OptiQ (`mlx-community/gemma-4-e4b-it-OptiQ-4bit`) | `--gemma4-size e2b`; `--model-family translategemma [--ab]` |
+| TTS (off) | Piper `en_US-lessac-high` / `es_MX-claude-high`; `--tts-output ws\|wav\|both\|local` | `--tts` / explicit `--no-tts` (`c5fb689`), `--tts-device-en/--tts-device-es` |
+| Experiments (all off) | `--idle-warmup-only`, `--final-aware-partials`, `--routing-policy conservative`, `--terminology-prompt church`, latency experiments in `tools/latency_experiments.py` (opt-in, validated before startup) | Keep off; the [completed 96-run screen](docs/evaluation/overnight_screen_20260910/README.md) selected no experimental arms |
+| MTP drafter (`--mts`, #177) | **Rejected before any model loads** (`validate_live_mts`: "Live --mts is unavailable"); `--no-mts` is the explicit off switch | Offline experiment only ([`docs/mlx_mtp_notes.md`](docs/mlx_mtp_notes.md)) |
+| Profile | `standard` (default). `stark-translate-lite` / `--profile lite-cpu` runs the CPU Lite profile on this Mac for implementation testing only — it certifies neither an x86 CPU nor a 2070 | [`docs/lite_profiles.md`](docs/lite_profiles.md) |
 
-- macOS 14+ (Sonoma or later for Metal/MLX support)
-- Grant mic access: **System Settings → Privacy & Security → Microphone**
-- Homebrew installed
+Policy: fast revisable partials, careful finals. Sub-second median speech-end-to-caption
+is the goal, **not achieved**, and is active engineering (`caption-delivery-goal`).
 
-### Verified Environment
+---
 
-- Python 3.11.11
-- MLX 0.32.2, mlx-lm 0.31.3, mlx-whisper 0.4.3, mlx-optiq 0.4.34 (verified 2026-09-09)
-- PyTorch 2.10.0 (used for Silero VAD and MarianMT PyTorch backend only)
-- CTranslate2 4.7.1 (MarianMT int8 backend; the arm64 wheel no longer links libomp — the live Mac path still uses HF/PyTorch Marian until `adapters/marian_ct2/` is populated)
+## Environment
 
-### Installation
+### Verified packages (2026-09-09, `stt_env`)
+
+Python 3.11.11 · MLX 0.32.2 · mlx-lm 0.31.3 · mlx-whisper 0.4.3 · mlx-optiq 0.4.34 ·
+parakeet-mlx 0.5.x · PyTorch 2.10.0 (Silero VAD, Marian HF fallback only) ·
+CTranslate2 4.7.1 (Marian int8 on CPU) · silero-vad 6.2.1. Pins live in
+`pyproject.toml` `[mlx]`; upgrading the MLX/OptiQ/Parakeet or PyTorch lines requires
+another replay gate.
+
+### Installation (checkout or Mac source ZIP)
+
+Authoritative steps: [`docs/packaging/macos.md`](docs/packaging/macos.md).
 
 ```bash
-# Update Homebrew
-brew update
 brew install ffmpeg portaudio
-
-# Create virtualenv
-python3.11 -m venv stt_env
-source stt_env/bin/activate
-
-# Install via the v2026.7 PyPI extras (preferred):
-pip install '.[mlx]'        # or `uv tool install 'stark-translate[mlx]'` for tool install
-# Legacy frozen-version path (deprecated; for reproducing v2026.6 behavior):
-# pip install -r requirements-mac.txt
-
-# HuggingFace login (required for TranslateGemma model access)
-huggingface-cli login
-
-# Download all models
-stark-translate setup
+python3.11 -m venv venv                      # or keep using the existing stt_env
+venv/bin/python -m pip install '.[mlx]'      # add ,eval or ,diarization as needed
+venv/bin/stark-translate setup --backend mlx                # Mac defaults, both directions
+venv/bin/stark-translate setup --backend mlx --include e2b tts translategemma   # optional profiles
+venv/bin/stark-translate doctor --backend mlx --lang en     # preflight without loading Metal models
+venv/bin/stark-translate doctor --backend mlx --lang es
+VENV="$PWD/venv" ./run_operator.sh           # operator UI on http://localhost:9000/operator/
 ```
 
-The `requirements-mac.txt` file is the frozen-version snapshot; key packages:
+`bootstrap.sh --skip-systemd` performs install + setup + preflight in one step;
+`stark-translate launchd render|install|uninstall` manages the optional login service.
+`requirements-mac.txt` is **deprecated** (v2026.7) and kept only as a pip-cache key.
+Hugging Face login is only needed for gated repos (pyannote); the default Mac models are
+public. Grant microphone access under **System Settings → Privacy & Security → Microphone**
+for the terminal or launcher that runs the pipeline.
 
-```
-# Core inference (MLX-based, NOT PyTorch for main inference)
-mlx                                     # Apple ML framework
-mlx-lm                                  # TranslateGemma 4B/12B 4-bit inference
-mlx-whisper                             # Distil-Whisper STT inference
-ctranslate2                             # MarianMT int8 for fast partial translations
+### Models (`models.lock.json`)
 
-# Audio & VAD (still uses PyTorch for Silero VAD)
-torch torchvision torchaudio
-sounddevice silero-vad
+`setup --backend mlx` fetches only the Mac defaults for both directions: Parakeet TDT
+0.6B v3, whisper-large-v3-turbo, Gemma 4 E4B OptiQ, Marian opus-mt en-es / es-en sources
+plus derived int8 CT2 artifacts. Optional `--include` profiles add Gemma 4 E2B OptiQ,
+Piper EN/ES voices, and TranslateGemma 4B. Resolution order for setup and inference is
+shared (`engines/model_paths.py`): explicit path → `--models-dir` / `STARK_MODELS_DIR` →
+project `models/` → Hugging Face cache; pinned snapshots already in the HF cache are
+reused. Existing `adapters/marian_ct2/*/active` directories are used first and never
+modified; the manual converter remains `scripts/convert_marian_ct2.py --quantization int8`.
 
-# Translation (PyTorch MarianMT runs in parallel with CT2 for comparison)
-transformers sentencepiece protobuf
-websockets                              # WebSocket server for browser displays
+### Memory
 
-# Evaluation & monitoring
-jiwer sacrebleu
-faster-whisper                          # CTranslate2-based confidence scores
-peft                                    # For loading LoRA/QLoRA adapters
-
-# Translation QE
-unbabel-comet                           # CometKiwi
-sentence-transformers                   # LaBSE
-
-# YouTube caption monitoring
-youtube-transcript-api streamlink innertube
-```
-
-### First-Run Model Downloads
-
-Run `stark-translate setup` to download and verify all models. Uses Wi-Fi — total ~12 GB for A/B mode:
-
-| Model | Framework | Size | Purpose |
-|-------|-----------|------|---------|
-| `wbell7/distil-whisper-large-v3.5-mlx` | mlx-whisper | ~1.5 GB | STT |
-| `mlx-community/gemma-4-e4b-it-OptiQ-4bit` | mlx-lm | OptiQ 4-bit | Translation (Mac default) |
-| `mlx-community/translategemma-4b-it-4bit` | mlx-lm | ~2.2 GB disk, ~2.5 GB RAM | Translation A (TG opt-out) |
-| `mlx-community/translategemma-12b-it-4bit` | mlx-lm | ~6.6 GB disk, ~7 GB RAM | Translation B (TG A/B) |
-| `Helsinki-NLP/opus-mt-en-es` (CT2 int8) | ctranslate2 | ~76 MB | Fast partial translation |
-| `Helsinki-NLP/opus-mt-en-es` (PyTorch) | transformers | ~300 MB | Comparison logging |
-| `Unbabel/wmt22-cometkiwi-da` | comet | ~580 MB | Translation QE |
-| `sentence-transformers/LaBSE` | sentence-transformers | ~470 MB | Cross-lingual similarity |
-| `Helsinki-NLP/opus-mt-es-en` | transformers | ~75 MB | Back-translation |
-
-**Memory note:** Both Gemma models fit simultaneously in MLX 4-bit (~2.5 + ~7 + ~1.5 GB Whisper + ~0.3 GB MarianMT = ~11.3 GB), leaving ~6.7 GB for macOS. Monitor with `mx.metal.get_active_memory()`.
-
-**Critical EOS fix:** TranslateGemma requires adding `<end_of_turn>` (id=106) to `tokenizer._eos_token_ids`. The default EOS token `<eos>` (id=1) is never generated, causing 256 pad tokens (~5s wasted). This fix is applied in `dry_run_ab.py`.
+Peak usage is recorded per session in `metrics/session_lifecycle_<id>.json`
+(`memory.peak_rss_bytes`, `memory.peak_metal_bytes`); the 2026-09-09 ES file-replay session
+`20260909_233823_034893_es` (E4B, Whisper turbo, Marian CT2) recorded roughly 4.2 GB RSS
+and 9.1 GB peak Metal. TranslateGemma A/B (`--ab`) loads two models and is the
+memory-heavy configuration; check the lifecycle file rather than a static table. Metal
+cache limit is 256 MB per engine (`cache_limit_mb`).
 
 ---
 
-## Core Pipeline (`dry_run_ab.py`)
+## Running
 
-### Two-Pass Architecture
+**Operator UI (recommended):** `./run_operator.sh` → `http://localhost:9000/operator/`.
+Start/Stop/Pause, language flip, VAD threshold, fallback toggle, preflight, device lists,
+verse highlights, summary, Review/export. Session artifacts land in `metrics/`.
 
-```
-Mic (48kHz) → Resample 16kHz → Silero VAD ─┐
-                                             │
-         ┌───────────────────────────────────┘
-         │
-         ├─ PARTIAL (on 1s of new speech, while speaking)
-         │    mlx-whisper STT (~500ms)
-         │    MarianMT CT2 int8 EN→ES (~50ms)      ← italic in display
-         │    Total: ~580ms
-         │
-         └─ FINAL (on silence gap or 8s max utterance)
-              mlx-whisper STT (~500ms, word timestamps)
-              Gemma 4 OptiQ E4B EN→ES (~2–3s)         ← Mac default
-              TranslateGemma 4B/12B via --model-family translategemma [--ab]
-                                   │
-                                   ▼
-                        WebSocket (0.0.0.0:8765)
-                                   │
-            ┌──────────┬───────────┼───────────┐
-            ▼          ▼           ▼           ▼
-        Audience    A/B/C       Mobile      CSV +
-        Display    Compare     Display     Diagnostics
-       (projector) (operator)  (QR code)    (JSONL)
-```
-
-### Key Details
-
-- **Optional STT:** `ParakeetMLXEngine` (`mlx-community/parakeet-tdt-0.6b-v3`, `.[mlx,parakeet-mlx]`) adds EN/ES batch and streaming STT; benchmark with `--variant parakeet_mlx --device mlx`. Live dispatch and WER gate follow separately (#178).
-- **STT:** `mlx-whisper` with `wbell7/distil-whisper-large-v3.5-mlx`, word timestamps on finals only (disabled for partials to save ~100-200ms)
-- **Fast translation:** MarianMT CT2 int8 (`ct2_opus_mt_en_es/`, 76MB). PyTorch variant runs in parallel for comparison logging
-- **Quality translation:** Gemma 4 OptiQ E4B via `mlx-lm` (Mac default); TranslateGemma with `--model-family translategemma` (12B with `--ab`)
-- **Speculative decoding:** Gemma-4 assistant MTS via `--mts`; TG 4B can draft 12B with `--ab --num-draft-tokens`
-- **Serving:** HTTP on `0.0.0.0:8080` (`--http-port`) serves display HTML to phones. WebSocket on `0.0.0.0:8765` pushes transcriptions
-- **Metal cache:** `mx.set_cache_limit(256 * 1024 * 1024)` prevents cache growth with word_timestamps
-- **Model pre-warming:** 1-token forward pass during silence gaps to avoid cold-start latency
-- **Background I/O:** WAV/JSONL/CSV writes run on background threads to avoid blocking inference
-
-### Metrics
-
-Logs approach, latency (STT/translate/E2E), tokens/sec, confidence scores, WER, BLEU, text pairs → CSV and JSONL export. Both pipelines process each audio chunk in parallel via `asyncio.gather` + `run_in_executor`.
-
-### Understanding the Fine-Tuned Adapters
-
-The Mac loads LoRA/QLoRA adapters trained on the Windows desktop. These are small (~60–120 MB) parameter patches that customize the base models for church content without modifying the original weights.
-
-**Whisper LoRA adapter** (`whisper_ablation/W12_198k/` or `W15_hard/`): Trained on 198K Deepgram-aligned chunks from 328 sermons (W12 data scaling) with curriculum learning via hard example mining (W15). Adapts both encoder (reverberant church acoustics, PA system artifacts) and decoder (theological vocabulary: "sanctification," "propitiation," biblical proper names). W12 baseline WER on fresh eval: 21.41%.
-
-**TranslateGemma QLoRA adapter** (`hybrid_runs/S6_balanced/`): S1-S9 ablation winner. Trained on balanced 1:1 verse/sermon data (60% 12B + 40% DeepL glossary-enforced translations). COMET proximity to 12B base = -0.0002 (effectively tied). Improves translation of biblical terminology, proper name conventions (James→Santiago for the epistle, James→Jacobo for the apostle), and religious register.
-
-Both adapters are produced by the training pipeline documented in [`CLAUDE-windows.md`](./CLAUDE-windows.md). The full fine-tuning strategy, data sources, and research basis are in [`training/CLAUDE.md`](./training/CLAUDE.md).
-
-**Toggling adapters:** You can instantly compare fine-tuned vs. base model performance:
-
-```python
-# Fine-tuned inference
-output_ft = model.generate(**inputs)
-
-# Disable adapter → base model inference
-model.disable_adapter_layers()
-output_base = model.generate(**inputs)
-
-# Re-enable adapter
-model.enable_adapter_layers()
-```
-
-### Loading Fine-Tuned Models
-
-After receiving LoRA adapters from the WSL training machine, place folders in project root. MLX supports loading adapters via `adapter_path=`:
-
-```python
-import mlx_lm
-
-# --- TranslateGemma with LoRA adapter ---
-model, tokenizer = mlx_lm.load(
-    "mlx-community/translategemma-4b-it-4bit",
-    adapter_path="./fine_tuned_gemma_mi_A"  # LoRA adapter folder
-)
-```
-
-**Live path:** pass the same folder to the dry-run CLI (wired into `load_mlx_gemma` / `MLXGemmaEngine`):
+**Direct CLI (debugging / replay):**
 
 ```bash
-python dry_run_ab.py --backend mlx --adapter-dir ./fine_tuned_gemma_mi_A
-# Optional: --adapter-dir-b for 12B in --ab mode; --turboquant for KV compression
+source stt_env/bin/activate            # or venv
+python dry_run_ab.py                                   # EN→ES, mic, Mac defaults
+python dry_run_ab.py --lang es                         # ES→EN
+python dry_run_ab.py --audio-file clip.wav --session-id demo_en   # file replay, exits after drain
+python dry_run_ab.py --dry-run-text "For God so loved the world"  # no mic
+python dry_run_ab.py --gemma4-size e2b                 # separately evaluated fast finals
+python dry_run_ab.py --tts --tts-output local --tts-device-en "MacBook Pro Speakers" --tts-device-es "BlackHole 2ch"
+python dry_run_ab.py --diarize --diarize-mode embed    # live speaker labels (gate not run, #133)
 ```
 
-**Phase 7 health gate on Mac** (no CUDA/bitsandbytes):
+Displays: `http://localhost:8080/displays/audience_display.html` (projector),
+`ab_display.html` (operator comparison), `mobile_display.html` (phones via QR).
+Ports: 8080 HTTP, 8765 captions, 9000 operator. Protocol and timing semantics:
+[`displays/CLAUDE.md`](displays/CLAUDE.md).
 
-```bash
-python tools/health_check.py --backend mlx --n-canaries 8 --adapter ./fine_tuned_gemma_mi_A
-```
+### Built-in microphone stall (2026-09-09) — fix implemented, live retest deferred
 
-Same-day Mac refresh checklist (filter validation, TurboQuant, what *not* to run without WSL): [`docs/mac_pipeline_refresh.md`](./docs/mac_pipeline_refresh.md).
+Session `20260909_233204_799019_en` (`audio_source: mic`) loaded all models, printed
+"Listening...", served the audience page, then received no audio frames; its lifecycle
+file stayed `status: running`, the operator showed RUNNING because the CSV header existed,
+and the audience display stayed disconnected. A standalone `sounddevice` record probe
+stalled too. File-replay sessions on the same build passed.
 
-For Whisper LoRA adapters, the PyTorch/PEFT path is still needed for evaluation (mlx-whisper does not yet support LoRA directly):
+What changed (integrated on the candidate branch, `c5fb689`):
 
-```python
-from transformers import WhisperForConditionalGeneration
-from peft import PeftModel
+- **Isolated capture:** `tools/isolated_audio.py` `IsolatedInputStream` runs PortAudio in a
+  disposable child (`tools/capture_worker.py`); the parent never opens the native device.
+  A **5 s startup timeout** with no samples, or a **3 s idle gap**, raises
+  `AudioCaptureError("Microphone delivered no samples…")` and fails the session instead of
+  hanging. `tools/capture_handoff.py` bounds the callback → asyncio handoff.
+- **Readiness/health:** `tools/pipeline_health.py` publishes `loading → listening → ready`
+  (first input frame), `paused`, `input_error`, with staleness; the operator
+  (`operator_app/pipeline_manager.py`) derives `ready` from this channel, not from the CSV
+  header. `operator_app/audio_tests.py` runs idle-only device probes in disposable processes.
+- **Ownership:** `operator_app/processes.py` cleans only owned subprocesses;
+  `operator_app/work_lease.py` allows one model/audio job per operator.
 
-base_whisper = WhisperForConditionalGeneration.from_pretrained(
-    "distil-whisper/distil-large-v3", device_map="auto")
-model_whisper = PeftModel.from_pretrained(base_whisper, "./fine_tuned_whisper_mi")
-```
-
-**Adapter sizes:** ~60 MB each (Whisper LoRA), ~80-120 MB (Gemma QLoRA). Transfer via USB, AirDrop, or scp.
-
-### Running
-
-```bash
-# Activate environment
-cd project_dir
-source stt_env/bin/activate
-
-# Run — 4B only (default, ~4.3 GB RAM)
-python dry_run_ab.py
-
-# Run — A/B mode with both 4B and 12B (~11.3 GB RAM)
-python dry_run_ab.py --ab
-
-# Key flags
-#   --http-port 8080    HTTP server for LAN/phone access
-#   --ws-port 8765      WebSocket server port
-#   --vad-threshold 0.3 VAD sensitivity (0-1)
-#   --gain auto         Mic gain (auto-calibrates)
-#   --num-draft-tokens  Enable speculative decoding (4B drafts for 12B)
-
-# Open displays
-open http://localhost:8080/displays/audience_display.html
-open http://localhost:8080/displays/ab_display.html
-# Phones: scan QR on audience display or go to http://<LAN-IP>:8080/displays/mobile_display.html
-```
+**Not yet proven:** a real built-in-microphone session on this Mac (deferred to the next attended session),
+physical second output, hotplug. Until then #131 stays `in_progress`.
 
 ---
 
-## Confidence Scoring (integrated in `dry_run_ab.py`)
+## Pipeline notes
 
-### Using `faster-whisper` for Segment + Word Confidence
-
-```python
-from faster_whisper import WhisperModel
-
-model = WhisperModel("distil-whisper/distil-large-v3", device="cpu",
-                     compute_type="float16")  # MPS not yet supported; use CPU
-
-segments, info = model.transcribe(audio_path, word_timestamps=True)
-
-for segment in segments:
-    # Segment-level signals
-    print(f"avg_logprob: {segment.avg_logprob:.3f}")
-    print(f"no_speech_prob: {segment.no_speech_prob:.3f}")
-    print(f"compression_ratio: {segment.compression_ratio:.2f}")
-
-    # Word-level confidence
-    for word in segment.words:
-        print(f"  '{word.word}' prob={word.probability:.3f} "
-              f"[{word.start:.2f}-{word.end:.2f}]")
-```
-
-**Note:** `faster-whisper` uses CTranslate2 which currently requires CPU on macOS. For MPS inference with confidence, use `whisper-timestamped` instead, which wraps the standard Whisper model.
-
-### Flagging Thresholds
-
-```python
-def should_flag(segment):
-    """Returns (flag_for_review: bool, auto_reject: bool, reasons: list)"""
-    reasons = []
-    reject = False
-    flag = False
-
-    if segment.avg_logprob < -1.0 and segment.no_speech_prob > 0.6:
-        reject = True
-        reasons.append("silent_hallucination")
-    if segment.compression_ratio > 2.4:
-        reject = True
-        reasons.append("repetition_hallucination")
-    if segment.avg_logprob < -0.5:
-        flag = True
-        reasons.append("low_confidence")
-    if segment.compression_ratio > 2.0:
-        flag = True
-        reasons.append("high_compression")
-    if any(w.probability < 0.3 for w in segment.words):
-        flag = True
-        reasons.append("low_word_confidence")
-
-    return flag, reject, reasons
-```
-
-### Building the Review Queue
-
-Score every segment, sort by composite quality, route the bottom 5–15% to human review. Log flagged segments to `metrics/confidence_flags.jsonl`:
-
-```json
-{"timestamp": "2026-02-08T10:23:45", "segment_start": 45.2, "segment_end": 48.7,
- "text": "and he said unto them", "avg_logprob": -0.62, "compression_ratio": 1.9,
- "low_conf_words": [{"word": "unto", "prob": 0.24}], "flag_reasons": ["low_confidence", "low_word_confidence"]}
-```
+- **Overlap:** STT(N+1) runs concurrently with translation(N) on a 2-worker pool (mlx ≥ 0.31.2 thread-local streams). Weights and the first Gemma forward are materialized on the load thread (`warm_mlx_model`). `--multiprocess` is an escape hatch that now shares the same prompt/stop helpers (#176).
+- **Stop tokens:** `ensure_stop_tokens()` adds the family's turn terminator and preserves loader EOS ids; Gemma 4 uses `<turn|>`, TranslateGemma `<end_of_turn>`. The old "add id 106 by hand" fix must not be applied to Gemma 4. Details: [`engines/CLAUDE.md`](engines/CLAUDE.md).
+- **Marian/VAD PyTorch:** share `_pytorch_lock`; VAD stays on the asyncio thread.
+- **Confidence flagging:** English Whisper finals can retry with the fallback model when `avg_logprob < -1.2` or `compression_ratio > 2.4`; automatic fallback is disabled for Spanish so English-only Distil cannot produce Spanish results. Words with probability `< 0.5` are listed as low-confidence; fallback events go to the active-learning JSONL. Parakeet confidence is a TDT proxy and does not use this fallback chain.
+- **Music hold:** `--music-threshold` / `--music-holdoff` configure an energy/VAD heuristic: sustained high-energy audio classified as non-speech can hold new STT and emit `music_hold`. It can miss singing; the fresh Standard hour retained hymn-region fragments without recorded hold events. For attended live use, **Pause** before or during congregational singing and **Resume** before spoken prayer/preaching. See the [runbook](docs/operator_runbook.md); automatic singing suppression is not validated.
+- **Timing:** schema 2 `speech_end_to_final_ms` (server) and `speech_end_to_ack_upper_bound_ms` (visible browser, includes return network) — legacy `e2e_latency_ms` is processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/README.md); measured history: [`docs/archive/v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md).
 
 ---
 
-## Live YouTube Caption Comparison (`tools/live_caption_monitor.py`)
+## Adapters on the Mac
 
-### Architecture
-
-Two parallel streams with time-aligned comparison:
-
-```
-┌─────────────────┐     ┌──────────────────┐
-│  Local Mic/Audio │     │ YouTube Livestream│
-│  via sounddevice │     │  via streamlink   │
-└────────┬────────┘     └────────┬─────────┘
-         │                       │
-    ┌────▼────┐            ┌─────▼──────┐
-    │ Whisper  │            │ InnerTube  │
-    │  (MLX)   │            │  Captions  │
-    └────┬────┘            └─────┬──────┘
-         │                       │
-         └───────┬───────────────┘
-                 │
-         ┌───────▼───────┐
-         │ Time-Aligned   │
-         │ WER Comparison │
-         └───────┬───────┘
-                 │
-         ┌───────▼───────┐
-         │  JSONL Logs +  │
-         │  Streamlit Viz │
-         └───────────────┘
-```
-
-### Fetching YouTube Captions
-
-**During livestream** — poll InnerTube timed-text endpoint:
-
-```python
-import innertube
-
-client = innertube.InnerTube("WEB")
-# Fetch player data for live video
-player = client.player(video_id="LIVE_VIDEO_ID")
-# Extract caption track URLs from player response
-# Poll every 5-10 seconds for new segments
-```
-
-**After stream ends** — retrieve full regenerated caption track:
-
-```python
-from youtube_transcript_api import YouTubeTranscriptApi
-
-transcript = YouTubeTranscriptApi.get_transcript("VIDEO_ID", languages=['en'])
-# Returns list of {'text': str, 'start': float, 'duration': float}
-```
-
-Or via yt-dlp:
-
-```bash
-yt-dlp --write-auto-subs --sub-lang en --skip-download "VIDEO_URL"
-```
-
-### Windowed Comparison
-
-```python
-import jiwer
-
-def compare_window(local_text, youtube_text):
-    """Compare two transcript strings for a 30-second window."""
-    transforms = jiwer.Compose([
-        jiwer.RemovePunctuation(),
-        jiwer.ToLowerCase(),
-        jiwer.RemoveMultipleSpaces(),
-        jiwer.Strip(),
-    ])
-    result = jiwer.process_words(youtube_text, local_text,
-                                  reference_transform=transforms,
-                                  hypothesis_transform=transforms)
-    return {
-        'wer': result.wer,
-        'cer': jiwer.cer(youtube_text, local_text),
-        'insertions': result.insertions,
-        'deletions': result.deletions,
-        'substitutions': result.substitutions,
-    }
-```
-
-**Interpreting results:** Cross-system WER reflects disagreement, not your true error rate. Track trends over time; flag windows where WER spikes above 20%.
+- **Gemma (MLX):** `--adapter-dir DIR` (primary) and `--adapter-dir-b DIR` (12B in `--ab`) pass `adapter_path=` to `mlx_lm.load`. Gate before use: `python tools/health_check.py --backend mlx --adapter DIR` (8 canaries by default).
+- **Whisper LoRA (W16/W17):** mlx-whisper and Parakeet do not load LoRA. The exported CT2 model runs through `FasterWhisperEngine` on CPU (`--backend cpu --stt-backend faster-whisper`) for A/B (#135); PyTorch/PEFT loading is for offline evaluation only.
+- **Registry:** `tools/manage_adapters.py register/activate/rollback` (`active` / `previous` slots), `docs/deploy.md`.
+- **Transfer:** copy from WSL by scp/USB into `adapters/`; sizes and training provenance in [`training/CLAUDE.md`](training/CLAUDE.md).
 
 ---
 
-## Translation Quality Estimation (`tools/translation_qe.py`)
+## Evaluation on the Mac (no WSL required)
 
-### Tier 1: Always-On Scoring (~150–300ms per segment)
+| Task | Tool | Notes |
+|------|------|-------|
+| Frozen quality/latency comparison | `tools/mac_evaluation.py` | Manifests and reports in [`docs/evaluation/README.md`](docs/evaluation/README.md); one model process at a time |
+| Replay matrix on real audio | `tools/replay_bench.py` | Sequential `dry_run_ab.py --audio-file` runs |
+| Synthetic STT gate | `tools/stt_roundtrip_compare.py` | Piper → STT → WER + term recall; not natural audio |
+| Adapter gate | `tools/health_check.py --backend mlx` | 8 of 18 canaries |
+| YouTube caption comparison | `tools/live_caption_monitor.py` | Cross-system WER = disagreement |
+| Translation QE | `tools/translation_qe.py` | Tier 1 heuristics, Tier 2 back-translation, Tier 3 LaBSE |
 
-```python
-from comet import download_model, load_from_checkpoint
-from sentence_transformers import SentenceTransformer
-import numpy as np
-
-# Load models (once at startup)
-cometkiwi_path = download_model("Unbabel/wmt22-cometkiwi-da")
-cometkiwi = load_from_checkpoint(cometkiwi_path)
-labse = SentenceTransformer("sentence-transformers/LaBSE")
-
-def score_translation(source_en: str, translated_es: str) -> dict:
-    # CometKiwi (reference-free)
-    comet_input = [{"src": source_en, "mt": translated_es}]
-    comet_score = cometkiwi.predict(comet_input, batch_size=1).scores[0]
-
-    # LaBSE cross-lingual similarity
-    embeddings = labse.encode([source_en, translated_es])
-    labse_sim = np.dot(embeddings[0], embeddings[1]) / (
-        np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1]))
-
-    # Length ratio (Spanish typically 15-25% longer)
-    len_ratio = len(translated_es.split()) / max(len(source_en.split()), 1)
-    len_ratio_ok = 0.9 <= len_ratio <= 1.6
-
-    # Untranslated detection
-    source_words = set(source_en.lower().split())
-    trans_words = set(translated_es.lower().split())
-    overlap = len(source_words & trans_words) / max(len(source_words), 1)
-    likely_untranslated = overlap > 0.7  # High overlap = probably not translated
-
-    return {
-        'comet_qe': comet_score,
-        'labse_similarity': float(labse_sim),
-        'length_ratio': len_ratio,
-        'length_ratio_ok': len_ratio_ok,
-        'likely_untranslated': likely_untranslated,
-        'tier1_pass': comet_score > 0.70 and labse_sim > 0.80 and not likely_untranslated
-    }
-```
-
-### Tier 2: Back-Translation (Triggered by Tier 1 Flags)
-
-```python
-from transformers import MarianMTModel, MarianTokenizer
-
-# Load MarianMT es→en (~75MB, fast)
-marian_name = "Helsinki-NLP/opus-mt-es-en"
-marian_tokenizer = MarianTokenizer.from_pretrained(marian_name)
-marian_model = MarianMTModel.from_pretrained(marian_name)
-
-def back_translate_check(source_en: str, translated_es: str) -> dict:
-    # Translate Spanish back to English
-    inputs = marian_tokenizer(translated_es, return_tensors="pt", padding=True)
-    outputs = marian_model.generate(**inputs)
-    back_en = marian_tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-    # Compare original English to back-translated English
-    # (Use BERTScore or simple word overlap as a proxy)
-    from jiwer import wer
-    round_trip_wer = wer(source_en.lower(), back_en.lower())
-
-    return {
-        'back_translated_en': back_en,
-        'round_trip_wer': round_trip_wer,
-        'round_trip_pass': round_trip_wer < 0.30  # < 30% divergence
-    }
-```
-
-### Latency Budget on M3 Pro (18-core GPU, 18GB, MLX)
-
-| Component | Time | Notes |
-|-----------|------|-------|
-| Parakeet TDT v3 STT (EN default, v2026.13) | ~100–250 ms | 3 s → 98 ms, 8 s → 149 ms isolated; 240–250 ms p50 live |
-| mlx-whisper STT (ES sessions / `--stt-backend mlx`) | ~500 ms | 1.0–1.2 s p50 live when it shares the GPU with Gemma |
-| MarianMT CT2 int8, 4 threads (partials) | ~50–90 ms | HF PyTorch fallback 270–380 ms |
-| Gemma 4 E4B OptiQ finals | ~470 / 1390 / 1680 ms (6 / 21 / 33 words) | ~33 tok/s; 0.73–1.13 s p50 live (15–22 tokens) |
-| Gemma 4 E2B OptiQ finals (`--gemma4-size e2b`) | ~310 / 860 / 1000 ms | ~62 tok/s; canary 11/18 vs 13/18 |
-| TranslateGemma-4B (opt-out) | ~650ms | Via mlx-lm |
-| TranslateGemma-12B (A/B) | ~1.4s | Via mlx-lm, --ab mode |
-| CometKiwi scoring | ~100-200ms | |
-| LaBSE similarity | ~50-100ms | |
-| Simple checks | < 5ms | |
-| **Partial path total** | **~580ms** | STT + MarianMT CT2 |
-| **Final path total (4B)** | **~1.3s** | STT + TranslateGemma 4B |
-| **Final path total (12B)** | **~1.9s** | STT + TranslateGemma 12B |
-
-Tier 2 back-translation adds ~50-100ms (MarianMT is small and fast).
-
----
-
-## Browser Displays
-
-The primary UI uses static HTML pages served over HTTP (`--http-port 8080`) with live data pushed via WebSocket (`--ws-port 8765`). All displays auto-detect the WebSocket host for LAN connectivity.
-
-### Display Modes
-
-| Display | File | Purpose |
-|---------|------|---------|
-| **Audience** | `displays/audience_display.html` | Projector-friendly EN/ES side-by-side, fading context, fullscreen toggle, QR code overlay |
-| **A/B/C Compare** | `displays/ab_display.html` | Operator view: Gemma 4B / MarianMT / 12B side-by-side with latency stats |
-| **Mobile** | `displays/mobile_display.html` | Responsive phone/tablet view with model toggle + Spanish-only mode |
-| **Church** | `displays/church_display.html` | Simplified church-oriented layout |
-
-### Accessing Displays
-
-```bash
-# Local (operator)
-open http://localhost:8080/displays/audience_display.html
-open http://localhost:8080/displays/ab_display.html
-
-# LAN (phones, projector)
-# Scan QR code on audience display, or navigate to:
-http://<LAN-IP>:8080/displays/mobile_display.html
-```
-
-### Design Notes
-
-- Fullscreen buttons on audience and A/B/C displays (bottom-right, auto-hide)
-- Scroll history in audience display (all sentences kept, scrollable, auto-scroll with pause)
-- QR code overlay on audience display (click header to toggle)
-- 16px+ fonts for demo readability at projection distance
-- All displays work on phones via LAN without any app installation
-
----
-
-## Post-Transfer Evaluation (`training/evaluate_translation.py`)
-
-After transferring fine-tuned adapters from WSL, verify quality on Mac before live use.
-
-### Quick Smoke Test
-
-```python
-import mlx_lm
-
-# TranslateGemma via MLX (primary inference path)
-model, tokenizer = mlx_lm.load(
-    "mlx-community/translategemma-4b-it-4bit",
-    adapter_path="./fine_tuned_gemma_mi_A"  # optional, if adapter exists
-)
-
-# Add EOS fix
-tokenizer._eos_token_ids.add(106)  # <end_of_turn>
-
-messages = [{"role": "user", "content": [
-    {"type": "text", "source_lang_code": "en", "target_lang_code": "es",
-     "text": "For God so loved the world that he gave his one and only Son."}
-]}]
-input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-output = mlx_lm.generate(model, tokenizer, prompt=input_text, max_tokens=128)
-print("Translation:", output)
-
-# Whisper LoRA smoke test (PyTorch/PEFT, for evaluation only)
-from transformers import WhisperForConditionalGeneration
-from peft import PeftModel
-base_w = WhisperForConditionalGeneration.from_pretrained("distil-whisper/distil-large-v3")
-model_w = PeftModel.from_pretrained(base_w, "./fine_tuned_whisper_mi")
-print("Whisper adapter loaded:", model_w.peft_config)
-```
-
-### Theological Term Spot-Check
-
-Run a targeted check on the terms that generic MT systems get wrong:
-
-```python
-SPOT_CHECK = [
-    ("Christ's atonement covers all sins.", "expiación"),
-    ("The new covenant was sealed in blood.", "pacto"),
-    ("Justified by grace through faith.", "gracia"),
-    ("The righteousness of God is revealed.", "justicia"),
-    ("The epistle of James teaches about works.", "Santiago"),
-    ("James and John left their nets.", "Jacobo"),
-    ("He preached about sanctification.", "santificación"),
-    ("The propitiation for our sins.", "propiciación"),
-]
-
-for en_text, expected_term in SPOT_CHECK:
-    # ... translate with fine-tuned model ...
-    found = expected_term.lower() in translation.lower()
-    print(f"{'✅' if found else '❌'} {en_text[:50]}... → expected '{expected_term}'")
-```
-
-### Batch Evaluation with SacreBLEU/chrF++/COMET
-
-The full `training/evaluate_translation.py` script (same as WSL version) can run on Mac for independent verification. Copy `bible_data/aligned/verse_pairs_test.jsonl` (~3.1K verses) alongside the adapters.
-
-```bash
-# Install evaluation libs (if not already present)
-pip install sacrebleu unbabel-comet
-
-# Run evaluation
-python training/evaluate_translation.py
-```
-
-**Expected improvement targets after fine-tuning:**
-- SacreBLEU: +3–8 points over base TranslateGemma on biblical text
-- chrF++: +2–5 points (character-level, captures Spanish morphology better)
-- COMET: +0.02–0.05 (neural metric, most reliable)
-- Theological term accuracy: 80%+ on spot-check (vs. ~40–60% for base model)
+Open Mac gates: natural Spanish references, blinded bilingual review, visible-browser
+timing run, two-speaker diarization clip, second physical output, Sunday dry run —
+[`docs/backlog.json`](docs/backlog.json).
 
 ---
 
@@ -635,18 +180,20 @@ python training/evaluate_translation.py
 
 | Issue | Fix |
 |-------|-----|
-| Cold boot slowness | Pipeline pre-warms models during silence gaps; first utterance may be slower |
-| Battery throttling | Plug in for A/B tests (~80% speed on battery) |
-| Metal cache growing | `mx.set_cache_limit(256 * 1024 * 1024)` prevents cache growth with word_timestamps |
-| TranslateGemma generates pad tokens | Add `<end_of_turn>` (id=106) to `tokenizer._eos_token_ids` — default EOS (id=1) never generates |
-| High memory in A/B mode | Both models ~11.3 GB; run 4B-only (no `--ab`) if memory-constrained |
-| PyTorch fp16 on MPS fails | Expected — causes inf/nan with TranslateGemma. Use MLX 4-bit (the default) |
-| bitsandbytes on Mac | CUDA-only; do not use on Mac. MLX 4-bit is the correct approach |
-| `faster-whisper` MPS error | CTranslate2 runs on CPU only on macOS; this is fine for confidence scoring |
-| CometKiwi slow | Run on CPU (`device="cpu"` in COMET config) |
-| Phone can't connect | Ensure `--http-port 8080` is accessible; check firewall allows port 8080 and 8765 |
-| WebSocket drops on phone | Displays have auto-reconnect; check that both devices are on same LAN |
-| Fine-tuned model not loading | Verify adapter folder has `adapter_config.json` + weights; use `adapter_path=` with mlx-lm |
-| Translation quality regressed | Compare against base model; check training data quality |
-| Theological terms still wrong | Run spot-check script; may need more glossary training pairs or constrained decoding |
-| YouTube caption fetch fails | Livestream captions may not be available for all videos; fall back to post-stream extraction |
+| Session fails with "Microphone delivered no samples" or health shows `input_error` | Isolated capture timed out (above). Check microphone permission for the launching app, the operator's idle device probe, and `metrics/session_<id>.log`; run `--audio-file` to confirm the rest of the pipeline |
+| Operator shows RUNNING with no partials | Should no longer happen (readiness comes from `pipeline_health`); if it does, capture the session id and health snapshot — it is evidence for `mac-live-mic-stall` |
+| Preflight fails on models | `stark-translate setup --backend mlx` (add `--include ...`); set `STARK_MODELS_DIR` at launch if setup used `--models-dir` |
+| Marian preflight fails | Setup needs a complete CT2 artifact for the selected direction; rerun setup or `scripts/convert_marian_ct2.py` |
+| Gemma output truncated or runs to `max_tokens` | Stop-token regression (#172) — verify `ensure_stop_tokens` logs "added=" for the family; never hand-edit `_eos_token_ids` |
+| Uniform 4-bit Gemma 4 quant produces garbage | Only OptiQ repos are supported (PLE layers) |
+| First Gemma forward crashes off the load thread | `warm_mlx_model` must run on the load thread; see `tests_gpu/test_mlx_worker_first_forward.py` |
+| Metal cache growth | `mx.set_cache_limit(256 MB)` is set per engine; avoid `--word-timestamps` in live sessions |
+| libomp / duplicate OpenMP crash | [`docs/archive/troubleshooting/macos_libomp_fix.md`](docs/archive/troubleshooting/macos_libomp_fix.md) |
+| PyTorch fp16 on MPS inf/nan, bitsandbytes on Mac | Expected — MLX quantized models are the Mac path |
+| `faster-whisper` on Mac | CTranslate2 runs on CPU only here; fine for W16 A/B and confidence checks |
+| Phone can't connect | Same LAN; ports 8080/8765 open; scan the QR on the audience display |
+| Battery throttling | Plug in for measurements |
+
+Earlier versions of this guide (Distil-Whisper model table, TranslateGemma-era latency
+budget, hand-applied EOS fix) are preserved in git history; their measurements are
+archived under [`docs/archive/`](docs/archive/).

@@ -320,10 +320,11 @@
 
 <button class="fs-btn" id="fsBtn" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
 
+<script src="display_connection.js"></script>
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
-  const wsHost = location.hostname || 'localhost';
-  const WS_URL = 'ws://' + wsHost + ':8765';
+  const WS_URL = StarkDisplayConnection.websocketUrl(location);
   const RECONNECT_MS = 2000;
 
   const $ = id => document.getElementById(id);
@@ -385,6 +386,33 @@
 
   // Track last MarianMT partial per utterance for column B (non-AB mode)
   let lastMarianPartial = {};
+  const acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    Object.values(panels).forEach(panel => { panel.innerHTML = ''; });
+    chunks = sumA = sumB = sumSTT = sumE2E = sameCount = 0;
+    sumTpsA = sumTpsB = tpsCountA = tpsCountB = sumMarian = marianCount = 0;
+    latenciesMarian = []; latenciesSTT = []; latenciesA = []; latenciesB = []; latenciesE2E = [];
+    lastMarianPartial = {};
+    modelA = modelB = null;
+    hasAB = false;
+    document.querySelectorAll('.stat-val, .latency').forEach(el => { el.textContent = '—'; });
+    $('chunkCount').textContent = '0';
+  }, function(uid) {
+    Object.values(panels).forEach(panel => {
+      panel.querySelectorAll('.chunk.partial').forEach(el => {
+        if (el.dataset.utteranceId === String(uid)) el.remove();
+      });
+    });
+    delete lastMarianPartial[uid];
+  });
+
+  function removeProvisional(data) {
+    Object.values(panels).forEach(panel => {
+      panel.querySelectorAll('.chunk.partial').forEach(el => {
+        if (StarkDisplayConnection.replacesPartial(data, Number(el.dataset.utteranceId))) el.remove();
+      });
+      removeChunk(panel, 'stream-' + data.chunk_id);
+    });
+  }
 
   function connect() {
     const ws = new WebSocket(WS_URL);
@@ -402,9 +430,18 @@
 
     ws.onerror = () => ws.close();
 
-    ws.onmessage = (evt) => {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, (evt) => {
       const data = JSON.parse(evt.data);
+      if (!acceptSession(data)) return;
 
+      if (data.type === 'speaker_update') {
+        document.querySelectorAll('[data-final-chunk="' + data.chunk_id + '"]').forEach(function(el) {
+          var label = el.querySelector('.speaker-label');
+          if (!label) { label = document.createElement('span'); label.className = 'speaker-label'; el.prepend(label); }
+          label.textContent = data.speaker ? data.speaker + ': ' : '';
+        });
+        return;
+      }
       // Handle language config — swap row labels for source/target
       if (data.type === 'lang_config') {
         const srcLabel = data.source_label;
@@ -420,11 +457,7 @@
 
       // [P7-P3-6A] Handle streaming translation messages
       if (data.type === 'translation_start') {
-        // STT completed — clean up ALL orphaned partials (IDs don't match:
-        // partials use utterance_id, finals use chunk_id)
-        Object.values(panels).forEach(p => {
-          p.querySelectorAll('.chunk.partial, .chunk.streaming').forEach(el => el.remove());
-        });
+        removeProvisional(data);
         const en = filterText(data.english || '');
         const conf = data.stt_confidence;
         const confDot = conf !== undefined
@@ -464,20 +497,20 @@
         const es = filterText(data.spanish_a || '');
 
         // Column C (audience): show italic partial
-        if (en) upsertChunk(panels['c-en'], 'p-' + data.chunk_id, en, confDot, true);
-        if (es) upsertChunk(panels['c-es'], 'p-' + data.chunk_id, es, '', true);
+        if (en) upsertChunk(panels['c-en'], 'p-' + data.chunk_id, en, confDot, true, false, StarkDisplayConnection.partialUtteranceId(data));
+        if (es) upsertChunk(panels['c-es'], 'p-' + data.chunk_id, es, '', true, false, StarkDisplayConnection.partialUtteranceId(data));
 
         // Column B (MarianMT in non-AB mode): show italic partial
         if (!hasAB) {
-          if (en) upsertChunk(panels['b-en'], 'p-' + data.chunk_id, en, confDot, true);
+          if (en) upsertChunk(panels['b-en'], 'p-' + data.chunk_id, en, confDot, true, false, StarkDisplayConnection.partialUtteranceId(data));
           if (es) {
-            upsertChunk(panels['b-es'], 'p-' + data.chunk_id, es, '', true);
-            lastMarianPartial[data.chunk_id] = es;
+            upsertChunk(panels['b-es'], 'p-' + data.chunk_id, es, '', true, false, StarkDisplayConnection.partialUtteranceId(data));
+            lastMarianPartial[StarkDisplayConnection.partialUtteranceId(data)] = es;
           }
         }
 
         // Column A: show English partial only (no Gemma translation yet)
-        if (en) upsertChunk(panels['a-en'], 'p-' + data.chunk_id, en, confDot, true);
+        if (en) upsertChunk(panels['a-en'], 'p-' + data.chunk_id, en, confDot, true, false, StarkDisplayConnection.partialUtteranceId(data));
 
         // Latency for partial
         if (data.latency_a_ms) {
@@ -509,12 +542,7 @@
         updateLabels();
       }
 
-      // Remove ALL partial and streaming rows from all columns.
-      // (Partials use utterance_id, finals use chunk_id — IDs never match,
-      // so ID-based removal leaves orphaned partials that duplicate text.)
-      Object.values(panels).forEach(p => {
-        p.querySelectorAll('.chunk.partial, .chunk.streaming').forEach(el => el.remove());
-      });
+      removeProvisional(data);
 
       const en = filterText(data.english || '');
       const esA = filterText(data.spanish_a || '');
@@ -531,9 +559,9 @@
       } else {
         // Non-AB mode: Column B = MarianMT (keep the last partial as the final)
         if (en) upsertChunk(panels['b-en'], data.chunk_id, en, confDot, false);
-        const marianFinal = lastMarianPartial[data.chunk_id] || '';
+        const marianFinal = lastMarianPartial[StarkDisplayConnection.partialUtteranceId(data)] || '';
         if (marianFinal) upsertChunk(panels['b-es'], data.chunk_id, marianFinal, '', false);
-        delete lastMarianPartial[data.chunk_id];
+        delete lastMarianPartial[StarkDisplayConnection.partialUtteranceId(data)];
       }
 
       // Column C (audience output): show final Gemma (replaces italic partial)
@@ -550,28 +578,30 @@
         $('latB').textContent = fmtMs(data.latency_b_ms);
         $('latBes').textContent = fmtMs(data.latency_b_ms);
       }
-      if (data.e2e_latency_ms) {
-        $('latC').textContent = fmtMs(data.e2e_latency_ms);
-        $('latCes').textContent = fmtMs(data.e2e_latency_ms);
+      const finalReadyMs = data.speech_end_to_final_ms;
+      if (Number.isFinite(finalReadyMs)) {
+        $('latC').textContent = fmtMs(finalReadyMs);
+        $('latCes').textContent = fmtMs(finalReadyMs);
+        $('latC').title = 'Speech-end estimate to final ready (before browser delivery)';
       }
 
       // Stats on complete only
       if (stage === 'complete') {
         const latA = data.latency_a_ms || 0;
         const latB = data.latency_b_ms || 0;
-        const e2e = data.e2e_latency_ms || (latSTT + Math.max(latA, latB));
+        const e2e = Number.isFinite(data.speech_end_to_final_ms) ? data.speech_end_to_final_ms : null;
 
         chunks++;
         sumA += latA;
         sumB += latB;
         sumSTT += latSTT;
-        sumE2E += e2e;
+        if (e2e !== null) sumE2E += e2e;
         if (data.spanish_a === data.spanish_b && data.spanish_b) sameCount++;
 
         latenciesSTT.push(latSTT);
         latenciesA.push(latA);
         if (latB > 0) latenciesB.push(latB);
-        latenciesE2E.push(e2e);
+        if (e2e !== null) latenciesE2E.push(e2e);
 
         const tpsA = data.tps_a || 0;
         const tpsB = data.tps_b || 0;
@@ -582,7 +612,7 @@
         $('avgA').textContent = fmtMs(sumA / chunks);
         $('avgB').textContent = latenciesB.length > 0 ? fmtMs(sumB / latenciesB.length) : '—';
         $('avgSTT').textContent = fmtMs(sumSTT / chunks);
-        $('avgE2E').textContent = fmtMs(sumE2E / chunks);
+        $('avgE2E').textContent = latenciesE2E.length ? fmtMs(sumE2E / latenciesE2E.length) : '—';
         $('sameRate').textContent = hasAB
           ? ((sameCount / chunks) * 100).toFixed(0) + '%' : '—';
 
@@ -598,20 +628,26 @@
         $('tpsA').textContent = tpsCountA > 0 ? (sumTpsA / tpsCountA).toFixed(0) : '—';
         $('tpsB').textContent = tpsCountB > 0 ? (sumTpsB / tpsCountB).toFixed(0) : '—';
       }
-    };
+    });
   }
 
-  function upsertChunk(panel, id, text, prefix, isPartial, isStreaming) {
+  function upsertChunk(panel, id, text, prefix, isPartial, isStreaming, utteranceId) {
     const domId = panel.id + '-chunk-' + id;
     let div = document.getElementById(domId);
     if (!div) {
       div = document.createElement('div');
       div.id = domId;
       div.className = 'chunk';
-      panel.appendChild(div);
+      // Keep an older final/stream above a newer utterance's live preview.
+      const streamId = typeof id === 'string' && id.startsWith('stream-');
+      const nextPreview = isPartial ? null : Array.from(panel.children).find(el =>
+        el.classList.contains('partial') || (!streamId && el.id.startsWith(panel.id + '-chunk-stream-')));
+      panel.insertBefore(div, nextPreview || null);
     }
     div.className = isStreaming ? 'chunk streaming' : isPartial ? 'chunk partial' : 'chunk';
+    if (isPartial) div.dataset.utteranceId = utteranceId == null ? '' : String(utteranceId);
     const isTemporary = typeof id === 'string' && (id.startsWith('p-') || id.startsWith('stream-'));
+    if (!isTemporary) div.dataset.finalChunk = id;
     const label = isTemporary ? '' : '<span class="chunk-num">#' + id + '</span>';
     // [P7-P3-6A] Add streaming cursor for actively streaming text
     const cursor = isStreaming ? '<span class="streaming-cursor"></span>' : '';

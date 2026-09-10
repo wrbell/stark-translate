@@ -1,0 +1,1595 @@
+{
+  "evaluation": {
+    "approved_natural_utterances": {
+      "en": 0,
+      "es": 0
+    },
+    "natural_audio_gate": false
+  },
+  "quality": [],
+  "replays": [
+    {
+      "experiment": "routing_conservative",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "d833d80754638195",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1119.1,
+          "p95": 1343.4
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 491.8,
+          "p95": 515.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.0,
+          "p95": 71.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.1,
+          "p95": 0.4
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 625.2,
+          "p95": 827.3
+        }
+      }
+    },
+    {
+      "experiment": "routing_conservative",
+      "size": "e2b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "1796f95d14b7f5d0",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1920.4,
+          "p95": 1978.2
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 489.9,
+          "p95": 492.1
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.2,
+          "p95": 5.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.2,
+          "p95": 0.2
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 1431.2,
+          "p95": 1485.6
+        }
+      }
+    },
+    {
+      "experiment": "routing_conservative",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "d833d80754638195",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1381.9,
+          "p95": 3252.0
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 492.4,
+          "p95": 574.5
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 4.4,
+          "p95": 615.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.1,
+          "p95": 0.5
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 898.6,
+          "p95": 2741.3
+        }
+      }
+    },
+    {
+      "experiment": "routing_conservative",
+      "size": "e4b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "1796f95d14b7f5d0",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 2031.5,
+          "p95": 2915.2
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 490.0,
+          "p95": 492.7
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.1,
+          "p95": 205.9
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.2,
+          "p95": 0.5
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 1544.6,
+          "p95": 2424.3
+        }
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "17ac8e31b8aae9cf",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 904.8,
+          "p95": 1143.1
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 489.3,
+          "p95": 492.6
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.2,
+          "p95": 5.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.0,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 419.7,
+          "p95": 658.7
+        }
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e2b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "2acd67857d21a690",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1623.8,
+          "p95": 1956.6
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 488.6,
+          "p95": 493.5
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 4.5,
+          "p95": 6.9
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.1,
+          "p95": 0.2
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 1136.4,
+          "p95": 1465.6
+        }
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "17ac8e31b8aae9cf",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 915.9,
+          "p95": 1945.6
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 491.2,
+          "p95": 683.0
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.3,
+          "p95": 6.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.0,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 427.0,
+          "p95": 1315.7
+        }
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e4b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "2acd67857d21a690",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1720.8,
+          "p95": 2972.3
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 492.0,
+          "p95": 610.9
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.5,
+          "p95": 341.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.1,
+          "p95": 3.0
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 1226.9,
+          "p95": 2360.2
+        }
+      }
+    }
+  ],
+  "human_review": "pending",
+  "default_model": "e4b",
+  "latency_gate": "pending_browser_ack",
+  "stt": [],
+  "quality_deltas": [],
+  "source_cohorts": {
+    "d833d80754638195": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "63398f50a561198881dfb9b8123bdc531bfd2adbb6656e153a4b0d1c9fbf4515",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "1796f95d14b7f5d0": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "63398f50a561198881dfb9b8123bdc531bfd2adbb6656e153a4b0d1c9fbf4515",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "17ac8e31b8aae9cf": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "63398f50a561198881dfb9b8123bdc531bfd2adbb6656e153a4b0d1c9fbf4515",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "2acd67857d21a690": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "63398f50a561198881dfb9b8123bdc531bfd2adbb6656e153a4b0d1c9fbf4515",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    }
+  },
+  "failures": [],
+  "excluded_runs": [],
+  "caption_events": [
+    {
+      "experiment": "routing_conservative",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "d833d80754638195",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 18,
+          "p50": 144.39999999999998,
+          "p95": 714.3
+        },
+        "partial_update_gap_ms": {
+          "n": 15,
+          "p50": 637.280999999999,
+          "p95": 2709.2199999999993
+        },
+        "first_partial_ms": {
+          "n": 9,
+          "p50": 920.4,
+          "p95": 1345.7
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 3,
+        "final_marian_routes": 6,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 18,
+        "partial_stt_finished": 23,
+        "partial_stt_started": 23,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 1,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 22,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 10
+      },
+      "counter_sessions": {
+        "mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 8,
+          "partial_stt_finished": 8,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 6,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en": {
+          "warmup_requested": 4,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 6,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en": {
+          "warmup_requested": 11,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 7,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 8,
+          "partial_stt_finished": 8,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 6,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_conservative_e2b_r0_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e2b_r1_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e2b_r2_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "routing_conservative",
+      "size": "e2b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "1796f95d14b7f5d0",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 6,
+          "p50": 580.05,
+          "p95": 588.9
+        },
+        "partial_update_gap_ms": {
+          "n": 3,
+          "p50": 3375.431999999999,
+          "p95": 3380.613000000001
+        },
+        "first_partial_ms": {
+          "n": 6,
+          "p50": 1492.05,
+          "p95": 1804.9
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 3,
+        "final_marian_routes": 6,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 6,
+        "partial_stt_finished": 21,
+        "partial_stt_started": 21,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 3,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 212,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 200
+      },
+      "counter_sessions": {
+        "mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es": {
+          "warmup_requested": 71,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 67,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es": {
+          "warmup_requested": 71,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 67,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es": {
+          "warmup_requested": 70,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 66,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_conservative_e2b_r0_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e2b_r1_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e2b_r2_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "routing_conservative",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "d833d80754638195",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 14,
+          "p50": 155.6,
+          "p95": 424.0
+        },
+        "partial_update_gap_ms": {
+          "n": 11,
+          "p50": 676.9300000000003,
+          "p95": 2830.7349999999988
+        },
+        "first_partial_ms": {
+          "n": 8,
+          "p50": 940.25,
+          "p95": 1338.0
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 3,
+        "final_marian_routes": 6,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 14,
+        "partial_stt_finished": 21,
+        "partial_stt_started": 21,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 3,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 68,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 56
+      },
+      "counter_sessions": {
+        "mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en": {
+          "warmup_requested": 11,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 7,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 5,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en": {
+          "warmup_requested": 16,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 12,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 5,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en": {
+          "warmup_requested": 41,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 37,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 4,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_conservative_e4b_r0_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e4b_r1_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e4b_r2_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "routing_conservative",
+      "size": "e4b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "1796f95d14b7f5d0",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 6,
+          "p50": 583.5,
+          "p95": 617.9
+        },
+        "partial_update_gap_ms": {
+          "n": 3,
+          "p50": 3367.8910000000014,
+          "p95": 3400.5420000000013
+        },
+        "first_partial_ms": {
+          "n": 6,
+          "p50": 1498.15,
+          "p95": 1833.9
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 3,
+        "final_marian_routes": 6,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 6,
+        "partial_stt_finished": 20,
+        "partial_stt_started": 20,
+        "partial_suppressed_after_stt": 1,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 4,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 218,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 206
+      },
+      "counter_sessions": {
+        "mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es": {
+          "warmup_requested": 65,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 61,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 6,
+          "partial_stt_finished": 6,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es": {
+          "warmup_requested": 72,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 68,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        },
+        "mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es": {
+          "warmup_requested": 81,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 77,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 1,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 2,
+          "final_gemma_requests": 1
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_conservative_e4b_r0_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e4b_r1_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_conservative_e4b_r2_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "17ac8e31b8aae9cf",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 19,
+          "p50": 148.5,
+          "p95": 698.4
+        },
+        "partial_update_gap_ms": {
+          "n": 16,
+          "p50": 623.4814999999999,
+          "p95": 2721.045
+        },
+        "first_partial_ms": {
+          "n": 9,
+          "p50": 1159.0,
+          "p95": 1345.8
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 0,
+        "final_marian_routes": 9,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 19,
+        "partial_stt_finished": 23,
+        "partial_stt_started": 23,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 1,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 13,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 1
+      },
+      "counter_sessions": {
+        "mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en": {
+          "warmup_requested": 5,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 1,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 5,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en": {
+          "warmup_requested": 4,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 8,
+          "partial_stt_finished": 8,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 7,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en": {
+          "warmup_requested": 4,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 8,
+          "partial_stt_finished": 8,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 7,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_legacy_e2b_r0_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e2b_r1_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e2b_r2_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e2b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "2acd67857d21a690",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 6,
+          "p50": 577.2,
+          "p95": 589.1
+        },
+        "partial_update_gap_ms": {
+          "n": 3,
+          "p50": 3379.634,
+          "p95": 3381.5300000000007
+        },
+        "first_partial_ms": {
+          "n": 6,
+          "p50": 1489.2,
+          "p95": 1805.1
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 0,
+        "final_marian_routes": 9,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 6,
+        "partial_stt_finished": 21,
+        "partial_stt_started": 21,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 3,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 213,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 201
+      },
+      "counter_sessions": {
+        "mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es": {
+          "warmup_requested": 71,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 67,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es": {
+          "warmup_requested": 71,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 67,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es": {
+          "warmup_requested": 71,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 67,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_legacy_e2b_r0_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e2b_r1_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e2b_r2_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_en",
+      "runtime_cohort": "17ac8e31b8aae9cf",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 16,
+          "p50": 154.55,
+          "p95": 317.3
+        },
+        "partial_update_gap_ms": {
+          "n": 13,
+          "p50": 639.987000000001,
+          "p95": 2850.092999999999
+        },
+        "first_partial_ms": {
+          "n": 8,
+          "p50": 857.5999999999999,
+          "p95": 1344.0
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 0,
+        "final_marian_routes": 9,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 16,
+        "partial_stt_finished": 21,
+        "partial_stt_started": 21,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 3,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 37,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 25
+      },
+      "counter_sessions": {
+        "mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en": {
+          "warmup_requested": 4,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 8,
+          "partial_stt_finished": 8,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 7,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en": {
+          "warmup_requested": 18,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 14,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 7,
+          "partial_stt_finished": 7,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 5,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en": {
+          "warmup_requested": 15,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 11,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 6,
+          "partial_stt_finished": 6,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 4,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_legacy_e4b_r0_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e4b_r1_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e4b_r2_routing_synthetic_en_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "routing_legacy",
+      "size": "e4b",
+      "language": "es",
+      "provenance": "synthetic_piper",
+      "clip_id": "routing_synthetic_es",
+      "runtime_cohort": "2acd67857d21a690",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 5,
+          "p50": 582.6,
+          "p95": 968.8
+        },
+        "partial_update_gap_ms": {
+          "n": 2,
+          "p50": 3041.2654999999995,
+          "p95": 3116.6720000000005
+        },
+        "first_partial_ms": {
+          "n": 5,
+          "p50": 1790.7,
+          "p95": 1798.6
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 0,
+        "final_marian_routes": 9,
+        "final_stt_finished": 9,
+        "final_stt_started": 9,
+        "partial_emitted": 5,
+        "partial_stt_finished": 16,
+        "partial_stt_started": 16,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 8,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 206,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 194
+      },
+      "counter_sessions": {
+        "mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es": {
+          "warmup_requested": 62,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 58,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 5,
+          "partial_stt_finished": 5,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es": {
+          "warmup_requested": 56,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 52,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 5,
+          "partial_stt_finished": 5,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 2,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        },
+        "mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es": {
+          "warmup_requested": 88,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 84,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 6,
+          "partial_stt_finished": 6,
+          "final_stt_started": 3,
+          "final_stt_finished": 3,
+          "partial_emitted": 1,
+          "final_marian_routes": 3,
+          "final_gemma_requests": 0
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 9,
+        "sessions": [
+          {
+            "session_id": "mac14route_routing_legacy_e4b_r0_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e4b_r1_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14route_routing_legacy_e4b_r2_routing_synthetic_es_es",
+            "received_final_chunks": 0,
+            "finalized_chunks": 3,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3"
+            ],
+            "available": true
+          }
+        ]
+      }
+    }
+  ]
+}

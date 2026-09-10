@@ -117,7 +117,7 @@ class TestSummaryTaskRunner:
         stub.write_text(
             "import argparse, json, sys\n"
             "p = argparse.ArgumentParser()\n"
-            "p.add_argument('--input', required=True)\n"
+            "p.add_argument('input')\n"
             "p.add_argument('--output', required=True)\n"
             "args = p.parse_args()\n"
             "with open(args.output, 'w') as f: json.dump({'summary_en': 'hi', 'summary_es': 'hola'}, f)\n"

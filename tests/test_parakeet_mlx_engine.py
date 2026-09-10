@@ -50,10 +50,12 @@ def engine(api):
     return engine
 
 
-def test_load_materializes_and_warms_same_transcribe_path(api):
+def test_load_materializes_and_warms_same_transcribe_path(api, monkeypatch):
+    monkeypatch.setattr("engines.model_paths.resolve_model_path", lambda _: "/installed/parakeet")
     engine = ParakeetMLXEngine(warmup_seconds=0.25, cache_limit_mb=32)
     engine.load()
-    api.loader.assert_called_once_with(engine.model_id, dtype=api.mx.bfloat16)
+    api.loader.assert_called_once_with("/installed/parakeet", dtype=api.mx.bfloat16)
+    assert engine.model_id == "mlx-community/parakeet-tdt-0.6b-v3"
     api.mx.set_cache_limit.assert_called_once_with(32 * 1024 * 1024)
     audio, config = api.mel.call_args.args
     assert audio.dtype == np.float32

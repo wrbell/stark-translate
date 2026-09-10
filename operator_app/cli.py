@@ -2,7 +2,7 @@
 
 Subcommands:
 
-    stark-translate operator [--port 9000] [--host 0.0.0.0] [--no-browser]
+    stark-translate operator [--port 9000] [--host 127.0.0.1] [--no-browser]
         Launch the FastAPI control plane and (by default) open the operator
         UI in the user's default browser.
 
@@ -33,17 +33,17 @@ from pathlib import Path
 
 
 def _resolve_version() -> str:
-    """Return the installed package version, falling back to pyproject if dev-installed."""
+    """Report this checkout's version, or installed metadata outside a checkout."""
+    import tomllib
+
+    pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+    if pyproject.is_file():
+        config = tomllib.loads(pyproject.read_text())
+        if config.get("project", {}).get("name") == "stark-translate":
+            return config["project"]["version"]
     try:
         return metadata.version("stark-translate")
     except metadata.PackageNotFoundError:
-        # Dev environment: read from pyproject.toml at the repo root.
-        here = Path(__file__).resolve().parent.parent
-        pyproject = here / "pyproject.toml"
-        if pyproject.exists():
-            for line in pyproject.read_text().splitlines():
-                if line.startswith("version = "):
-                    return line.split('"')[1]
         return "0.0.0+dev"
 
 
@@ -56,7 +56,14 @@ def cmd_operator(args: argparse.Namespace) -> int:
     """Launch FastAPI on the configured port and open the browser."""
     import uvicorn
 
-    url = f"http://{args.host if args.host != '0.0.0.0' else 'localhost'}:{args.port}/operator/"
+    from operator_app.security import configure_operator_host
+
+    configure_operator_host(args.host)
+    # Select a usable browser address; this comparison does not bind a socket.
+    browser_host = "localhost" if args.host in {"0.0.0.0", "::"} else args.host  # nosec B104
+    if ":" in browser_host:
+        browser_host = f"[{browser_host}]"
+    url = f"http://{browser_host}:{args.port}/operator/"
     if not args.no_browser:
         # Open AFTER uvicorn binds — but uvicorn.run blocks. Use a small thread.
         import threading
@@ -106,7 +113,13 @@ def cmd_setup(args: argparse.Namespace) -> int:
     return bootstrap_models(
         models_dir=models_dir,
         refresh=args.refresh,
+        backend=args.backend,
+        include=args.include,
         allow_patterns=args.allow if args.allow else None,
+        profile=getattr(args, "profile", None),
+        offline=getattr(args, "offline", False),
+        build_native=getattr(args, "build_native", False),
+        converter_python=getattr(args, "converter_python", None),
     )
 
 
@@ -116,7 +129,15 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     from operator_app.preflight import run_all_checks
 
     project_root = Path(os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
-    payload = run_all_checks(project_root=project_root)
+    payload = run_all_checks(
+        project_root=project_root,
+        backend=args.backend,
+        profile=getattr(args, "profile", None),
+        lang=args.lang,
+        tts=args.tts,
+        diarize=args.diarize,
+        models_dir=Path(args.models_dir) if args.models_dir else None,
+    )
 
     if args.json:
         print(json.dumps(payload, indent=2))
@@ -131,6 +152,18 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0 if payload["ok"] else 1
 
 
+def cmd_launchd(args: argparse.Namespace) -> int:
+    from operator_app.launchd import manage_launchd
+
+    return manage_launchd(
+        args.action,
+        project_root=Path(args.project_root),
+        python=Path(args.python) if args.python else None,
+        output=Path(args.output) if args.output else None,
+        profile=getattr(args, "profile", None),
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="stark-translate",
@@ -140,7 +173,9 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(metavar="COMMAND")
 
     p_op = sub.add_parser("operator", help="Launch the FastAPI control plane + browser UI")
-    p_op.add_argument("--host", default="0.0.0.0", help="Bind host (default: 0.0.0.0)")
+    p_op.add_argument(
+        "--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1; remote access has no authentication)"
+    )
     p_op.add_argument("--port", type=int, default=9000, help="Bind port (default: 9000)")
     p_op.add_argument("--no-browser", action="store_true", help="Don't open the browser")
     p_op.add_argument(
@@ -181,20 +216,52 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Emit JSON instead of human-readable output (with --check)",
     )
+    p_setup.add_argument("--backend", choices=["auto", "mlx", "cuda", "cpu"], default="auto")
+    p_setup.add_argument("--include", nargs="*", choices=["e2b", "tts", "translategemma"], default=[])
     p_setup.set_defaults(func=cmd_setup)
 
     p_doctor = sub.add_parser("doctor", help="Run preflight checks (same as operator UI)")
     p_doctor.add_argument("--json", action="store_true", help="Emit JSON instead of human-readable text")
+    p_doctor.add_argument("--backend", choices=["auto", "mlx", "cuda", "cpu"], default="auto")
+    p_doctor.add_argument("--lang", choices=["en", "es"], default="en")
+    p_doctor.add_argument("--models-dir")
+    p_doctor.add_argument("--tts", action="store_true")
+    p_doctor.add_argument("--diarize", action="store_true")
     p_doctor.set_defaults(func=cmd_doctor)
+
+    p_service = sub.add_parser("launchd", help="Explicit macOS login service install/uninstall or preview")
+    p_service.add_argument("action", choices=["render", "install", "uninstall"])
+    p_service.add_argument("--project-root", default=os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
+    p_service.add_argument("--python", help="Absolute venv interpreter path (default: current interpreter)")
+    p_service.add_argument("--output", help="Plist destination; render prints to stdout when omitted")
+    p_service.set_defaults(func=cmd_launchd)
 
     p_ver = sub.add_parser("version", help="Print installed version")
     p_ver.set_defaults(func=cmd_version)
 
+    from stark_translate.profiles import PROFILE_NAMES
+
+    for command in (p_op, p_setup, p_doctor, p_service):
+        command.add_argument("--profile", choices=PROFILE_NAMES, default=os.environ.get("STARK_PROFILE", "standard"))
+    p_setup.add_argument("--offline", action="store_true", help="Use only verified prepared cache; never download")
+    p_setup.add_argument("--build-native", action="store_true", help="Build pinned llama.cpp sm_75 on Linux CUDA")
+    p_setup.add_argument("--converter-python", help="Separate interpreter with lite-build extra for Marian CT2 setup")
     args = parser.parse_args(argv)
+    if hasattr(args, "profile"):
+        os.environ["STARK_PROFILE"] = args.profile
+    if getattr(args, "offline", False):
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
     if args.func is None:
         parser.print_help(sys.stderr)
         return 2
     return args.func(args)
+
+
+def lite_main(argv: list[str] | None = None) -> int:
+    """Same application, explicit CPU product default (including on a Mac)."""
+    os.environ.setdefault("STARK_PROFILE", "lite-cpu")
+    return main(argv)
 
 
 if __name__ == "__main__":

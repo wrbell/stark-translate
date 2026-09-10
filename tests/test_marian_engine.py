@@ -272,7 +272,10 @@ class TestFactoryMarianRouting:
         active = tmp_path / "en-es" / "active"
         active.mkdir(parents=True)
         (active / "model.bin").write_bytes(b"fake")
+        for filename in ("config.json", "vocab.json", "source.spm", "target.spm", "tokenizer_config.json"):
+            (active / filename).write_text("{}")
         monkeypatch.setattr(factory, "_MARIAN_CT2_ROOT", tmp_path)
+        monkeypatch.setenv("STARK_MODELS_DIR", str(tmp_path / "isolated-managed-cache"))
 
         mock_engine = MagicMock()
         with patch("engines.cuda_engine.MarianCT2Engine", return_value=mock_engine) as mock_cls:
@@ -296,7 +299,10 @@ class TestFactoryMarianRouting:
         active = tmp_path / "es-en" / "active"
         active.mkdir(parents=True)
         (active / "model.bin").write_bytes(b"fake")
+        for filename in ("config.json", "vocab.json", "source.spm", "target.spm", "tokenizer_config.json"):
+            (active / filename).write_text("{}")
         monkeypatch.setattr(factory, "_MARIAN_CT2_ROOT", tmp_path)
+        monkeypatch.setenv("STARK_MODELS_DIR", str(tmp_path / "isolated-managed-cache"))
 
         mock_engine = MagicMock()
         with patch("engines.cuda_engine.MarianCT2Engine", return_value=mock_engine) as mock_cls:
@@ -314,6 +320,7 @@ class TestFactoryMarianRouting:
         from engines import factory
 
         monkeypatch.setattr(factory, "_MARIAN_CT2_ROOT", tmp_path)
+        monkeypatch.setenv("STARK_MODELS_DIR", str(tmp_path / "isolated-managed-cache"))
         mock_engine = MagicMock()
         with patch("engines.marian_hf_engine.MarianHFEngine", return_value=mock_engine) as mock_cls:
             factory.create_translation_engine(

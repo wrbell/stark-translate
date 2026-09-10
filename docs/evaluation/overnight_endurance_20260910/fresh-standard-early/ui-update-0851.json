@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_043120_839144_en",
+  "status": "provisional_later_ui_observation",
+  "latest_observed_at_utc": "2026-09-10T08:51:18.761+00:00",
+  "distinct_from_prefix_snapshot_at_utc": "2026-09-10T08:48:26.307832+00:00",
+  "events": [
+    {
+      "event": "live_review_draft_entered",
+      "at": "2026-09-10T08:46:26.943Z",
+      "chunk_id": 1,
+      "transcript_approved": false,
+      "translation_approved": false
+    },
+    {
+      "event": "live_review_new_arrivals_preserved_draft",
+      "at": "2026-09-10T08:51:00.363Z",
+      "initial_pending_count": 33
+    },
+    {
+      "event": "live_review_save_and_next",
+      "at": "2026-09-10T08:51:00.704Z",
+      "chunk_id": 1
+    },
+    {
+      "event": "live_verse_reference_observed",
+      "at": "2026-09-10T08:51:18.761Z"
+    }
+  ],
+  "review": {
+    "initial_list_count": 33,
+    "list_while_editing": 33,
+    "list_count_after_save": 40,
+    "count_interpretation": "List intentionally frozen during editing; underlying records grew, then list refreshed after Save and next. Do not claim displayed count grew while editing.",
+    "selection_after_save_and_next_chunk_id": 2,
+    "operator_reload_attempted": false,
+    "source_of_post_save_navigation_observation": "Coordinator actual SPA observation; no separate post-save AX file supplied in this update.",
+    "saved_sidecar_revision_verified": false,
+    "revision": null,
+    "approval_checkboxes_observed": {
+      "transcript": false,
+      "translation": false
+    },
+    "persisted_approval_values_verified": false,
+    "caption_content_change_claim": "No audience change observed from the note save; actual sidecar revision verification pending.",
+    "private_note_included": false
+  },
+  "verses": {
+    "references_visible": [
+      "Luke 23:32",
+      "Luke 23"
+    ],
+    "earlier_bad_reference_absent": "Luke 20:3",
+    "source": "actual SPA reference-list snapshot",
+    "spoken_reference_accuracy": "not certified"
+  },
+  "evidence": {
+    "action_ledger": {
+      "path": ".cache/overnight-20260910/endurance-preparation/standard-fixed-ui-actions.jsonl",
+      "complete_prefix_bytes": 863,
+      "complete_prefix_sha256": "184b193cca3500253424c7b9c11b21d297f7e60a881fa7b6caf56f17a217b0fc",
+      "not_final_whole_file_hash": true
+    },
+    "verse_ui": {
+      "path": ".cache/overnight-20260910/endurance-preparation/standard-fixed-luke-reference-ui.txt",
+      "captured_bytes": 3356,
+      "sha256": "749c03ccf8c5a2ab0a5ec12f295802b6162444535cd13f6e07802922cff8ad5f"
+    }
+  },
+  "endurance_terminal_outcome": null,
+  "later_verification": {
+    "at_utc": "2026-09-10T09:04:42.820410+00:00",
+    "evidence": "../fresh-standard-terminal/review-audit.json",
+    "revision": 1,
+    "transcript_approved": false,
+    "translation_approved": false,
+    "original_before_save_prefixes_unchanged": true,
+    "scope": "Bounded prefixes captured before saved revision; ongoing file growth is not hashed as a frozen whole. No human approvals or reload test."
+  }
+}

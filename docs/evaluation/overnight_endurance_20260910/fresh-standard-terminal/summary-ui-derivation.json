@@ -1,0 +1,14 @@
+{
+  "source": {
+    "path": ".cache/overnight-20260910/endurance-preparation/standard-fixed-long-summary-ui.txt",
+    "size_bytes": 2028,
+    "sha256": "993e3a39bf3aac9458cfd2953de65c65b54f7c240683b950718d243e8eb80065"
+  },
+  "derived": {
+    "path": ".cache/overnight-20260910/endurance-public-draft/fresh-standard-terminal/summary-ui.txt",
+    "size_bytes": 1653,
+    "sha256": "1a24dc6ca3c25522c56ee2dd0819fa715658cc67f97fdb30d9226485a99e44be"
+  },
+  "transform": "Keep the Session summary section before the Disk space heading; retain all summary text, status and disclosure. No other page sections or private notes included.",
+  "privacy_review": "Read original captured text; selected summary section contains no private correction note."
+}

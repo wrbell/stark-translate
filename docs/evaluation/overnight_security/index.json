@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "files": {
+    "working_mac_audit.json": {
+      "sha256": "fc04ba073111d2faa53197a1cbb99ce2d3b32f30e1867c1fbb72cb9b350e9749",
+      "bytes": 101151
+    },
+    "isolated_mac_audit.json": {
+      "sha256": "67b5bf0cb484ca2b85e448c8580ae030b42a0368890f0d6f1a085693c0a48106",
+      "bytes": 10510
+    },
+    "working-mac-20260910T0755.json": {
+      "sha256": "4f5ae345bb67a6241091944a9917c2dc703b22b86b9b2dc258cf6ef75ef2a11a",
+      "bytes": 101151
+    },
+    "isolated-mac-20260910T0755.json": {
+      "sha256": "86b6c30c7ef67a722091ea2d60902a010cd0d0c9ee08bd59397e25d1293f2128",
+      "bytes": 10510
+    },
+    "lite-20260910T0755.json": {
+      "sha256": "f5a014c612af6353b5a4fdd35525e11e9b5c7a04e10b09362a30983756d50007",
+      "bytes": 3542
+    },
+    "audit-20260910T0755-receipts.json": {
+      "sha256": "77a61aaca2d673b61f9425eb9b7efb20f8e3958ce28f2170e3ebe222747c2ef9",
+      "bytes": 3278
+    }
+  },
+  "latest_snapshot_utc": "2026-09-10T07:55:51.424899+00:00"
+}

@@ -3,151 +3,391 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>stark-translate — Operator</title>
+<title>Live captions — Operator</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="topbar">
-  <h1>stark-translate <span class="version">operator</span></h1>
-  <div class="state-pill" id="state-pill">…</div>
+  <div class="brand">
+    <h1>Live captions <span class="version">operator</span></h1>
+    <p class="connection" id="connection-age">Connecting to the operator service…</p>
+  </div>
+  <div class="state-block">
+    <div class="state-pill" id="state-pill" role="status" aria-live="polite">…</div>
+    <div class="state-detail" id="state-detail"></div>
+  </div>
 </header>
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<main>
-  <section class="card" id="preflight-card">
-    <h2>Pre-flight</h2>
-    <p class="hint">All red checks must clear before you can start a session. Yellow checks are warnings.</p>
-    <ul class="checks" id="checks"></ul>
-    <p class="meta" id="preflight-meta"></p>
+<div class="attention" id="attention" role="alert" hidden>
+  <div class="attention-body">
+    <strong id="attention-title">Needs attention</strong>
+    <pre class="attention-text" id="attention-text"></pre>
+    <p class="attention-advice" id="attention-advice"></p>
+  </div>
+  <div class="attention-actions">
+    <button id="attention-stop" class="danger" hidden>Stop and reset</button>
+    <button id="attention-dismiss" class="ghost">Dismiss</button>
+  </div>
+</div>
+
+<nav class="tabs" role="tablist" aria-label="Operator sections">
+  <button class="tab" role="tab" id="tab-prepare" aria-controls="panel-prepare" aria-selected="true" data-tab="prepare">Prepare</button>
+  <button class="tab" role="tab" id="tab-live" aria-controls="panel-live" aria-selected="false" tabindex="-1" data-tab="live">Live</button>
+  <button class="tab" role="tab" id="tab-sessions" aria-controls="panel-sessions" aria-selected="false" tabindex="-1" data-tab="sessions">Sessions</button>
+  <button class="tab" role="tab" id="tab-help" aria-controls="panel-help" aria-selected="false" tabindex="-1" data-tab="help">Help</button>
+  <button class="tab" role="tab" id="tab-advanced" aria-controls="panel-advanced" aria-selected="false" tabindex="-1" data-tab="advanced">Advanced</button>
+</nav>
+
+<main id="main">
+
+  <!-- ===================== Prepare ===================== -->
+  <section class="panel" id="panel-prepare" role="tabpanel" aria-labelledby="tab-prepare" tabindex="0">
+    <div class="card">
+      <h2>1. Who is speaking?</h2>
+      <form id="config-form">
+        <label>Speaker's language
+          <select name="lang" id="lang-select">
+            <option value="en">English speaker → Spanish captions</option>
+            <option value="es">Spanish speaker → English captions</option>
+          </select>
+        </label>
+        <label>Microphone
+          <select name="mic_device" id="mic-device"><option value="">Automatic (computer default)</option></select>
+        </label>
+        <p class="hint" id="mic-hint">Choose the USB microphone by name, plugged into the same port as last time.</p>
+        <details class="optional" id="tts-options">
+          <summary>Spoken translation (optional)</summary>
+          <label class="inline"><input type="checkbox" name="tts"> Read translations aloud through speakers or headphones</label>
+          <label>How to play the voice
+            <select name="tts_output_mode">
+              <option value="ws">In connected browsers</option>
+              <option value="local">Through speakers connected to this computer</option>
+              <option value="wav">Save to a file only</option>
+              <option value="both">In browsers and save to a file</option>
+            </select>
+          </label>
+          <label>Speakers or headphones
+            <select name="output_device" id="output-device"><option value="">Computer default</option></select>
+          </label>
+          <label>English voice goes to
+            <select name="tts_device_en" id="output-device-en"><option value="">Same as above</option></select>
+          </label>
+          <label>Spanish voice goes to
+            <select name="tts_device_es" id="output-device-es"><option value="">Same as above</option></select>
+          </label>
+          <p class="hint">Speaker choices apply when you start. To change them during a session, stop and start again.</p>
+        </details>
+      </form>
+      <div class="mic-check" id="mic-check">
+        <div class="actions">
+          <button id="mic-test-btn" class="ghost" disabled>Test microphone</button>
+          <button id="output-test-btn" class="ghost" hidden>Test speakers</button>
+        </div>
+        <div class="level" aria-hidden="true"><div class="level-bar" id="mic-level-bar"></div></div>
+        <p class="hint" id="mic-test-status" role="status" aria-live="polite">Microphone test is not available from this operator service yet. After starting, say a sentence and watch for the first caption.</p>
+        <p class="hint" id="device-note" hidden>The audio devices on this computer have not been validated by the setup owner yet. Run these tests before the event; a passing test measures sound at the server and cannot confirm what you hear.</p>
+      </div>
+    </div>
+
+    <div class="card" id="readiness-card">
+      <h2>2. Is everything ready?</h2>
+      <p class="readiness-summary" id="readiness-summary" role="status" aria-live="polite">Checking…</p>
+      <ul class="checks" id="checks"></ul>
+      <div class="actions">
+        <button id="preflight-refresh" class="ghost">Check again</button>
+      </div>
+      <p class="meta" id="preflight-meta"></p>
+    </div>
+
+    <div class="card start-card">
+      <h2>3. Start</h2>
+      <label id="profile-field" hidden>Performance profile
+        <select name="profile" id="profile-select" form="config-form"><option value="">Default for this computer</option></select>
+      </label>
+      <p class="hint" id="profile-hint" hidden></p>
+      <p class="hint" id="start-hint">Start becomes available when every check above is green or yellow.</p>
+      <div class="actions">
+        <button id="start-btn" class="primary big" disabled>Start captions</button>
+      </div>
+      <p class="hint" id="start-status" role="status" aria-live="polite"></p>
+    </div>
   </section>
 
-  <section class="card features" id="features-card">
-    <h2>Features</h2>
-    <div class="feature-row">
-      <div class="feature-block">
-        <h3>Recent verses</h3>
-        <p class="hint">Bible references detected in the live transcript.</p>
-        <ul class="verses" id="verses-list"><li class="empty">none yet</li></ul>
+  <!-- ===================== Live ===================== -->
+  <section class="panel" id="panel-live" role="tabpanel" aria-labelledby="tab-live" tabindex="0" hidden>
+    <div class="card live-card">
+      <div class="live-head">
+        <div>
+          <h2 id="live-title">Not running</h2>
+          <p class="hint" id="live-subtitle">Start captions from the Prepare tab.</p>
+          <p class="meta" id="live-event" hidden></p>
+        </div>
+        <div class="live-meta">
+          <span id="live-language"></span>
+          <span id="live-elapsed"></span>
+        </div>
       </div>
-      <div class="feature-block">
-        <h3>Post-session summary</h3>
-        <p class="hint">Runs <code>features/summarize_sermon.py</code> as a subprocess; outputs a 5-sentence EN/ES summary.</p>
-        <button id="summary-btn" class="ghost">Generate summary</button>
-        <pre class="status" id="summary-status">no task yet</pre>
+      <div class="actions big-actions">
+        <button id="pause-btn" class="ghost big" disabled>Pause</button>
+        <button id="resume-btn" class="primary big" disabled>Resume</button>
+        <button id="stop-btn" class="danger big" disabled>Stop captions</button>
       </div>
+      <div class="actions controls" id="control-row">
+        <button id="flip-btn" class="ghost" disabled>Switch to Spanish speaker</button>
+      </div>
+      <p class="hint">Switching the speaker's language restarts captions. Allow about a minute.</p>
+      <div class="level live-level" aria-hidden="true" hidden><div class="level-bar" id="live-level-bar"></div></div>
+      <p class="meta" id="live-level-text" hidden></p>
+      <ul class="health" id="health-list" hidden></ul>
+      <p class="hint" id="pipeline-readiness" hidden></p>
+    </div>
+
+    <div class="card">
+      <h2>What the audience sees</h2>
+      <p class="hint" id="caption-status" role="status" aria-live="polite">Caption preview connects while captions are running.</p>
+      <ol class="caption-view" id="caption-view" aria-label="Recent captions"></ol>
+    </div>
+
+    <div class="card" id="audience-card">
+      <h2>Projector and phones</h2>
+      <p class="hint">Open the audience display on the projector, or share the phone link with people on the same Wi-Fi.</p>
+      <div class="actions">
+        <button id="audience-open" class="ghost">Open audience display</button>
+        <button id="audience-copy" class="ghost">Copy phone link</button>
+      </div>
+      <p class="link" id="audience-url"></p>
+      <p class="hint" id="audience-note"></p>
+      <canvas id="audience-qr" width="176" height="176" aria-label="QR code for the phone link" hidden></canvas>
+    </div>
+
+    <div class="card">
+      <h2>Bible references heard</h2>
+      <ul class="verses" id="verses-list"><li class="empty">none yet</li></ul>
     </div>
   </section>
 
-  <section class="card observability" id="metrics-card">
-    <h2>Live observability</h2>
-    <p class="hint">Streamed at 1 Hz from <code>/ws/control</code>. Empty until a pipeline starts feeding events.</p>
-    <div class="metric-row">
-      <div class="metric">
-        <div class="metric-label">VRAM (MiB)</div>
-        <div class="metric-value" id="metric-vram">—</div>
-        <canvas class="sparkline" id="spark-vram" width="220" height="40"></canvas>
+  <!-- ===================== Sessions / Review ===================== -->
+  <section class="panel" id="panel-sessions" role="tabpanel" aria-labelledby="tab-sessions" tabindex="0" hidden>
+    <div class="card review-panel" id="review-panel">
+      <h2>Review and corrections</h2>
+      <p class="hint">Review saved final segments while a session runs or afterward. Your edits stay in this review workspace; audience captions keep their original text.</p>
+      <label>Session <select id="review-session"><option value="">No sessions yet</option></select></label>
+      <div class="actions">
+        <label class="inline"><input id="review-pending" type="checkbox" checked> Pending only</label>
+        <label class="inline"><input id="review-flagged" type="checkbox" checked> Flagged only</label>
+        <button id="review-refresh" class="ghost">Refresh</button>
+        <button id="review-previous-page" class="ghost">Previous page</button>
+        <button id="review-next-page" class="ghost">Next page</button>
+        <button id="review-restore" class="ghost" hidden>Restore my local draft</button>
       </div>
-      <div class="metric">
-        <div class="metric-label">CPU (%)</div>
-        <div class="metric-value" id="metric-cpu">—</div>
-        <canvas class="sparkline" id="spark-cpu" width="220" height="40"></canvas>
+      <p id="review-status" class="hint" role="status" aria-live="polite">Choose a session to review.</p>
+      <div class="review-grid">
+        <label>Finalized segments <select id="review-items" size="8" aria-label="Finalized segments"></select></label>
+        <div id="review-editor" hidden>
+          <p id="review-context" class="hint"></p>
+          <audio id="review-audio" controls preload="none"></audio>
+          <p id="review-audio-status" class="hint"></p>
+          <label>Spoken language <select id="review-language"><option value="">Unknown — choose to approve</option><option value="en">English</option><option value="es">Spanish</option></select></label>
+          <label><span id="review-source-label">Transcript</span><textarea id="review-source" rows="4"></textarea></label>
+          <label class="inline"><input id="review-transcript-approved" type="checkbox"> Transcript checked against audio</label>
+          <label><span id="review-target-label">Translation</span><textarea id="review-target" rows="4"></textarea></label>
+          <label class="inline"><input id="review-translation-approved" type="checkbox"> Translation checked by a bilingual reviewer</label>
+          <details><summary>Original predictions and flags</summary><pre id="review-original" class="status"></pre></details>
+          <label>Review notes <textarea id="review-note" rows="2"></textarea></label>
+          <label class="inline"><input id="review-excluded" type="checkbox"> Exclude this segment from exports</label>
+          <div class="actions"><button id="review-save" class="ghost">Save draft</button><button id="review-next" class="primary">Save and next</button></div>
+        </div>
+      </div>
+      <div class="actions">
+        <label>Export purpose <select id="review-split"><option value="train">Training — reviewed live audio</option><option value="eval">Evaluation — held apart from training</option></select></label>
+        <button id="review-export" class="ghost">Export completed session</button>
+        <a id="review-download" hidden>Download review bundle</a>
       </div>
     </div>
-    <div class="metric-row">
-      <div class="metric">
-        <div class="metric-label">Latency p50 / p95 (ms)</div>
-        <div class="metric-value" id="metric-latency">— / —</div>
-        <canvas class="sparkline" id="spark-latency" width="220" height="40"></canvas>
+
+    <div class="card" id="summary-card">
+      <h2>Session summary</h2>
+      <p class="hint">After a session ends, create an English and Spanish summary of what was said. This uses the computer's language model, so wait until captions are stopped. Very short sessions show the recorded text itself instead of a summary.</p>
+      <div class="actions">
+        <button id="summary-btn" class="ghost">Create summary</button>
+        <button id="summary-cancel" class="ghost" hidden>Cancel</button>
       </div>
-      <div class="metric">
-        <div class="metric-label">Confidence mean</div>
-        <div class="metric-value" id="metric-confidence">—</div>
-        <canvas class="sparkline" id="spark-confidence" width="220" height="40"></canvas>
-      </div>
-    </div>
-    <div class="metric-row">
-      <div class="metric">
-        <div class="metric-label">Current speaker</div>
-        <div class="metric-value" id="metric-speaker">—</div>
-        <div class="metric-sub" id="metric-speaker-detail">no diarization data yet</div>
-        <ul class="caption-view" id="caption-view"></ul>
+      <p class="hint" id="summary-status" role="status" aria-live="polite">No summary requested yet.</p>
+      <div id="summary-result" hidden>
+        <p class="summary-notice" id="summary-notice" hidden></p>
+        <h3>English</h3>
+        <p class="summary-text" id="summary-english"></p>
+        <h3>Spanish</h3>
+        <p class="summary-text" id="summary-spanish"></p>
+        <p class="meta" id="summary-meta"></p>
       </div>
     </div>
-    <p class="meta" id="metrics-meta">disconnected</p>
+
+    <div class="card" id="storage-card">
+      <h2>Disk space</h2>
+      <p class="hint" id="storage-summary" role="status" aria-live="polite">Checking disk space…</p>
+      <details>
+        <summary>Review session logs and choose what to clean up</summary>
+        <ul class="file-list" id="storage-sessions"></ul>
+      </details>
+      <div class="actions">
+        <button id="storage-cleanup-preview" class="ghost" disabled>Preview cleanup</button>
+        <button id="storage-cleanup" class="danger" disabled>Delete the listed files</button>
+      </div>
+      <p class="hint" id="storage-status" role="status" aria-live="polite"></p>
+    </div>
   </section>
 
-  <section class="card" id="session-card">
-    <h2>Session</h2>
-    <form id="config-form">
-      <label>Language direction
-        <select name="lang">
-          <option value="en">EN → ES</option>
-          <option value="es">ES → EN</option>
-        </select>
-      </label>
-      <label>Backend
-        <select name="backend">
-          <option value="auto">auto</option>
-          <option value="cuda">cuda</option>
-          <option value="mlx">mlx</option>
-        </select>
-      </label>
-      <label>Engine (CUDA only)
-        <select name="engine">
-          <option value="auto">auto (prefer llamacpp)</option>
-          <option value="llamacpp">llamacpp</option>
-          <option value="hf">hf (legacy)</option>
-        </select>
-      </label>
-      <label>Mic
-        <select name="mic_device" id="mic-device"><option value="">auto-detect</option></select>
-      </label>
-      <label>TTS fallback output
-        <select name="output_device" id="output-device"><option value="">system default</option></select>
-      </label>
-      <label>English TTS output
-        <select name="tts_device_en" id="output-device-en"><option value="">use fallback output</option></select>
-      </label>
-      <label>Spanish TTS output
-        <select name="tts_device_es" id="output-device-es"><option value="">use fallback output</option></select>
-      </label>
-      <label>TTS output mode
-        <select name="tts_output_mode">
-          <option value="ws">ws (browser)</option>
-          <option value="local">local (selected speakers)</option>
-          <option value="wav">wav (file only)</option>
-          <option value="both">both (ws + wav)</option>
-        </select>
-      </label>
-      <label>VAD threshold
-        <input type="number" name="vad_threshold" min="0" max="1" step="0.05" value="0.3">
-      </label>
-      <label class="inline">
-        <input type="checkbox" name="run_ab"> A/B comparison (E4B + E2B)
-      </label>
-      <label class="inline">
-        <input type="checkbox" name="tts"> TTS audio
-      </label>
-      <label class="inline">
-        <input type="checkbox" name="diarize"> Live diarization
-      </label>
-    </form>
-    <p class="hint">TTS output choices apply in local mode when you start a session. Stop and start to change an active session's routing.</p>
-    <div class="actions">
-      <button id="start-btn" class="primary">Start session</button>
-      <button id="stop-btn" class="danger" disabled>Stop session</button>
+  <!-- ===================== Help ===================== -->
+  <section class="panel" id="panel-help" role="tabpanel" aria-labelledby="tab-help" tabindex="0" hidden>
+    <div class="card">
+      <h2>When something goes wrong</h2>
+      <details class="faq">
+        <summary>Start is greyed out</summary>
+        <p>Look at the list under <strong>Is everything ready?</strong> on the Prepare tab. Red items must be fixed before starting; yellow items are warnings. Click <strong>Check again</strong> after fixing something. If the page says it is not connected to the operator service, the service itself needs restarting.</p>
+      </details>
+      <details class="faq">
+        <summary>The page says "Needs attention"</summary>
+        <p>The error text is shown at the top of the page. Click <strong>Stop and reset</strong>, wait until the status says Ready, then start again. If it happens twice, copy the error text and send it to the setup owner, or build a bundle below.</p>
+      </details>
+      <details class="faq">
+        <summary>The page says "Not connected"</summary>
+        <p>The browser has lost contact with the operator service on this computer. Captions may still be running. Wait a few seconds; if it does not recover, refresh this page. If it still says not connected, the operator service has stopped and the setup owner needs to restart it.</p>
+      </details>
+      <details class="faq">
+        <summary>The microphone was unplugged</summary>
+        <p>Plug it back into the same port. A notice appears when the list of audio devices changes. Check the microphone choice on the Prepare tab, then <strong>Stop captions</strong> and <strong>Start captions</strong> again.</p>
+      </details>
+      <details class="faq">
+        <summary>No captions appear, or the audience display says "Reconnecting"</summary>
+        <p>Refresh the audience display's browser tab first. If captions still do not appear within a minute of speaking, stop and start captions. Check that the right microphone is selected and that the speaker is close to it.</p>
+      </details>
+      <details class="faq">
+        <summary>Phones cannot open the link</summary>
+        <p>Phones must be on the same Wi-Fi as this computer, and the link must use the computer's network address rather than "localhost". The audience display can also show its own QR code: click its header.</p>
+      </details>
+      <details class="faq">
+        <summary>Captions are slow or fall behind</summary>
+        <p>Close other programs on this computer, especially anything using the graphics card, then stop and start captions. Slower first captions right after starting are normal while the language models load.</p>
+      </details>
+      <p class="hint">The full operator runbook lives in the project folder at <code>docs/operator_runbook.md</code>. A quick check that the service is alive: open <code>/healthz</code> on this computer's operator address.</p>
     </div>
-    <div class="actions controls" id="control-row">
-      <button id="pause-btn" class="ghost" disabled>Pause</button>
-      <button id="resume-btn" class="ghost" disabled>Resume</button>
-      <button id="flip-btn" class="ghost" disabled>Flip EN↔ES</button>
-      <button id="fallback-btn" class="ghost" disabled>Fallback to HF</button>
+
+    <div class="card" id="support-card">
+      <h2>Send details to the setup owner</h2>
+      <p class="hint">Build a small bundle of logs for troubleshooting. Caption text and audio are left out unless you tick them.</p>
+      <label>Session <select id="support-session"><option value="">Most recent session</option></select></label>
+      <label class="inline"><input type="checkbox" id="support-include-text"> Include caption text</label>
+      <label class="inline"><input type="checkbox" id="support-include-audio"> Include audio clips</label>
+      <div class="actions">
+        <button id="support-preview" class="ghost">Preview bundle</button>
+        <button id="support-export" class="primary" disabled>Create bundle</button>
+        <a id="support-download" hidden>Download bundle</a>
+      </div>
+      <p class="hint" id="support-status" role="status" aria-live="polite">Nothing built yet.</p>
+      <ul class="file-list" id="support-files"></ul>
     </div>
-    <pre class="status" id="status-detail">idle</pre>
+  </section>
+
+  <!-- ===================== Advanced ===================== -->
+  <section class="panel" id="panel-advanced" role="tabpanel" aria-labelledby="tab-advanced" tabindex="0" hidden>
+    <div class="card">
+      <h2>Technical settings</h2>
+      <p class="hint">Leave these on their defaults for a normal event. They apply to the next session you start.</p>
+      <p class="hint lite-note" id="lite-note" hidden>A Lite profile is selected on the Prepare tab: backend, engine, A/B and diarization are fixed by that profile.</p>
+      <div class="advanced-form">
+        <label>Backend
+          <select name="backend" form="config-form">
+            <option value="auto">auto</option>
+            <option value="cuda">cuda</option>
+            <option value="mlx">mlx</option>
+          </select>
+        </label>
+        <label>Engine (CUDA only)
+          <select name="engine" form="config-form">
+            <option value="auto">auto (prefer llamacpp)</option>
+            <option value="llamacpp">llamacpp</option>
+            <option value="hf">hf (legacy)</option>
+          </select>
+        </label>
+        <label>VAD threshold
+          <input type="number" name="vad_threshold" form="config-form" min="0" max="1" step="0.05" value="0.3">
+        </label>
+        <label class="inline">
+          <input type="checkbox" name="run_ab" form="config-form"> A/B comparison (E4B + E2B)
+        </label>
+        <label class="inline">
+          <input type="checkbox" name="diarize" form="config-form"> Live diarization (speaker labels; experimental)
+        </label>
+      </div>
+      <div class="actions controls">
+        <button id="fallback-btn" class="ghost" disabled>Fallback to HF engine</button>
+      </div>
+      <p class="hint">Fallback restarts a CUDA session on the HF engine when llama-server has failed. It is not a Mac control.</p>
+    </div>
+
+    <div class="card observability" id="metrics-card">
+      <h2>Raw metrics</h2>
+      <p class="hint">Streamed at 1 Hz from <code>/ws/control</code>. Empty until a pipeline starts feeding events.</p>
+      <div class="metric-row">
+        <div class="metric">
+          <div class="metric-label">VRAM (MiB)</div>
+          <div class="metric-value" id="metric-vram">—</div>
+          <canvas class="sparkline" id="spark-vram" width="220" height="40"></canvas>
+        </div>
+        <div class="metric">
+          <div class="metric-label">CPU (%)</div>
+          <div class="metric-value" id="metric-cpu">—</div>
+          <canvas class="sparkline" id="spark-cpu" width="220" height="40"></canvas>
+        </div>
+      </div>
+      <div class="metric-row">
+        <div class="metric">
+          <div class="metric-label">Server latency p50 / p95 (ms)</div>
+          <div class="metric-value" id="metric-latency">— / —</div>
+          <canvas class="sparkline" id="spark-latency" width="220" height="40"></canvas>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Confidence mean</div>
+          <div class="metric-value" id="metric-confidence">—</div>
+          <canvas class="sparkline" id="spark-confidence" width="220" height="40"></canvas>
+        </div>
+      </div>
+      <div class="metric-row">
+        <div class="metric">
+          <div class="metric-label">Current speaker (diarization)</div>
+          <div class="metric-value" id="metric-speaker">—</div>
+          <div class="metric-sub" id="metric-speaker-detail">no diarization data yet</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Caption connection</div>
+          <div class="metric-sub" id="caption-endpoint">—</div>
+        </div>
+      </div>
+      <p class="meta" id="metrics-meta">disconnected</p>
+    </div>
+
+    <div class="card">
+      <h2>Raw session status</h2>
+      <pre class="status" id="status-detail">idle</pre>
+      <h2>Raw readiness checks</h2>
+      <pre class="status" id="preflight-detail">not checked yet</pre>
+      <h2>Server capabilities</h2>
+      <pre class="status" id="capabilities-detail">not probed yet</pre>
+      <h2>Other display pages</h2>
+      <ul class="file-list" id="other-displays" hidden></ul>
+      <h2>Raw summary result</h2>
+      <pre class="status" id="summary-raw">no summary yet</pre>
+    </div>
   </section>
 </main>
 
 <script src="widgets/sparkline.js"></script>
+<script src="widgets/qr.js"></script>
+<script src="widgets/captions.js"></script>
 <script src="app.js"></script>
+<script src="review.js"></script>
 </body>
 </html>

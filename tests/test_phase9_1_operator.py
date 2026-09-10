@@ -19,12 +19,33 @@ def _reset_runner():
 
 
 @pytest.fixture
-def client():
+def client(tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
 
+    from operator_app import pipeline_manager
     from operator_app.main import app
 
-    return TestClient(app)
+    monkeypatch.setattr(
+        "operator_app.main.run_all_checks",
+        lambda **kw: {"ok": True, "checks": [], "status_counts": {"pass": 0, "warn": 0, "fail": 0}},
+    )
+    # API lifecycle tests must never launch the real inference pipeline.
+    (tmp_path / "metrics").mkdir()
+    (tmp_path / "dry_run_ab.py").write_text(
+        "import sys, time, json\n"
+        "from pathlib import Path\n"
+        "session = sys.argv[sys.argv.index('--session-id') + 1]\n"
+        "Path(f'metrics/ab_metrics_{session}.csv').write_text('chunk_id,stt_latency_ms\\n')\n"
+        "while True:\n"
+        "    Path(f'metrics/health_{session}.json').write_text(json.dumps(dict(schema_version=1,session_id=session,updated_at=time.time(),phase='ready')))\n"
+        "    time.sleep(0.1)\n"
+    )
+    pipeline_manager._runner = pipeline_manager.PipelineRunner(project_root=tmp_path)
+    try:
+        with TestClient(app) as client:
+            yield client
+    finally:
+        pipeline_manager.reset_runner_for_tests()
 
 
 # -- preflight ---------------------------------------------------------------
@@ -43,12 +64,13 @@ class TestPreflight:
             assert isinstance(c["name"], str)
             assert isinstance(c["detail"], str)
 
-    def test_check_models_warns_when_missing(self, tmp_path):
+    def test_check_models_fails_when_missing(self, tmp_path):
         from operator_app.preflight import check_models
 
-        result = check_models(tmp_path)
-        assert result["status"] == "warn"
-        assert "No Gemma 4 GGUFs" in result["detail"]
+        with patch("operator_app.preflight.resolve_model_path", return_value=None):
+            result = check_models(tmp_path)
+        assert result["status"] == "fail"
+        assert "Missing local models" in result["detail"]
 
     def test_check_models_passes_when_both_present(self, tmp_path):
         from operator_app.preflight import check_models
@@ -57,7 +79,8 @@ class TestPreflight:
         models.mkdir()
         (models / "gemma-4-e2b-it-q4km.gguf").touch()
         (models / "gemma-4-e4b-it-q4km.gguf").touch()
-        result = check_models(tmp_path)
+        with patch("operator_app.preflight.resolve_model_path", return_value="/cached"):
+            result = check_models(tmp_path)
         assert result["status"] == "pass"
 
     def test_check_adapter_manifest_fails_on_invalid_json(self, tmp_path):
@@ -114,7 +137,7 @@ class TestSessionStart:
         assert resp.status_code == 200
         body = resp.json()
         assert body["state"] in ("starting", "running")
-        # Give the thread a moment to flip to "running" via the placeholder loop
+        # Wait for the stub to flush the real readiness header.
         for _ in range(20):
             status = client.get("/api/session/status").json()
             if status["state"] == "running":

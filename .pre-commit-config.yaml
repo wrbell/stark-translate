@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.13
+    rev: v0.15.2
     hooks:
       - id: ruff
         args: [--fix]
@@ -10,7 +10,10 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        # Retained corpora and evaluation artifacts are hash-bound evidence.
+        exclude: ^(bible_data/|stark_data/|docs/archive/|docs/evaluation/|docs/mac_pipeline_refresh_20260830\.md$)
       - id: end-of-file-fixer
+        exclude: ^(bible_data/|stark_data/|docs/archive/|docs/evaluation/|docs/mac_pipeline_refresh_20260830\.md$)
       - id: check-yaml
       - id: check-added-large-files
         args: [--maxkb=500]

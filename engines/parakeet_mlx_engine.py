@@ -153,8 +153,10 @@ class ParakeetMLXEngine(STTEngine):
         from engines.mlx_engine import materialize_mlx_model
 
         mx.set_cache_limit(self._cache_limit_mb * 1024 * 1024)
+        from engines.model_paths import resolve_model_path
+
         logger.info("Loading %s (Parakeet MLX)", self._model_id)
-        self._model = from_pretrained(self._model_id, dtype=getattr(mx, self._dtype))
+        self._model = from_pretrained(resolve_model_path(self._model_id), dtype=getattr(mx, self._dtype))
         try:
             if self._warmup_seconds > 0:
                 self.transcribe(np.zeros(int(self._warmup_seconds * 16000), dtype=np.float32))

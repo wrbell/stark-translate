@@ -1,0 +1,4555 @@
+{
+  "evaluation": {
+    "approved_natural_utterances": {
+      "en": 0,
+      "es": 0
+    },
+    "natural_audio_gate": false
+  },
+  "quality": [],
+  "replays": [
+    {
+      "experiment": "conservative_marian",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3098.95,
+          "p95": 4191.5
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2186.35,
+          "p95": 3085.6
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.6
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.15000000000000002,
+          "p95": 72.4
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 910.75,
+          "p95": 1115.8
+        }
+      }
+    },
+    {
+      "experiment": "conservative_marian",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1289.4,
+          "p95": 1790.1
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 12.0,
+          "p95": 12.4
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 13.2,
+          "p95": 31.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1277.5,
+          "p95": 1776.4
+        }
+      }
+    },
+    {
+      "experiment": "conservative_marian",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1705.95,
+          "p95": 2191.3
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 492.3,
+          "p95": 493.7
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 6.65,
+          "p95": 16.2
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.1,
+          "p95": 0.6
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1216.85,
+          "p95": 1699.4
+        }
+      }
+    },
+    {
+      "experiment": "conservative_marian",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3474.6000000000004,
+          "p95": 4682.3
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2186.65,
+          "p95": 3085.1
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.6
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 57.9
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1305.85,
+          "p95": 1596.5
+        }
+      }
+    },
+    {
+      "experiment": "conservative_marian",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1958.3,
+          "p95": 2734.4
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 5.2,
+          "p95": 13.0
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 14.0,
+          "p95": 190.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.1,
+          "p95": 132.5
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1952.5,
+          "p95": 2727.9
+        }
+      }
+    },
+    {
+      "experiment": "conservative_marian",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 2009.3,
+          "p95": 2210.4
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 488.9,
+          "p95": 493.5
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 6.05,
+          "p95": 12.7
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.1,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1521.55,
+          "p95": 1720.7
+        }
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3057.05,
+          "p95": 3987.8
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2184.2,
+          "p95": 3084.6
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.3
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 79.3
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 853.5,
+          "p95": 988.7
+        }
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1278.6,
+          "p95": 1278.6
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 9.7,
+          "p95": 12.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 12.9,
+          "p95": 13.2
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1265.2,
+          "p95": 1271.6
+        }
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1502.85,
+          "p95": 1683.1
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 488.95000000000005,
+          "p95": 493.8
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 6.5,
+          "p95": 10.2
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1011.6,
+          "p95": 1192.5
+        }
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3629.3,
+          "p95": 4175.0
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2191.05,
+          "p95": 3085.7
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.25,
+          "p95": 1.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 69.6
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1218.6999999999998,
+          "p95": 1775.2
+        }
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1860.5,
+          "p95": 3434.0
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 12.1,
+          "p95": 448.0
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 14.3,
+          "p95": 423.2
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.1,
+          "p95": 145.6
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1846.9,
+          "p95": 2984.5
+        }
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 2075.65,
+          "p95": 2934.3
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 489.3,
+          "p95": 493.4
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 7.6000000000000005,
+          "p95": 11.5
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1586.95,
+          "p95": 2443.8
+        }
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3089.8999999999996,
+          "p95": 3802.3
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2186.1,
+          "p95": 3081.8
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.25,
+          "p95": 0.5
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.05,
+          "p95": 69.7
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 873.3,
+          "p95": 973.6
+        }
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1082.6,
+          "p95": 1131.8
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 9.0,
+          "p95": 11.6
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 11.1,
+          "p95": 12.6
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1076.0,
+          "p95": 1121.7
+        }
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1353.8000000000002,
+          "p95": 1496.6
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 490.95,
+          "p95": 492.5
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 4.65,
+          "p95": 9.7
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.3
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 868.0,
+          "p95": 1003.1
+        }
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3730.25,
+          "p95": 5358.3
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2187.55,
+          "p95": 3085.5
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 1.3
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 71.1
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1361.55,
+          "p95": 2891.1
+        }
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 2414.6,
+          "p95": 2462.1
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 10.8,
+          "p95": 13.1
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 14.9,
+          "p95": 87.1
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 2400.4,
+          "p95": 2452.8
+        }
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1826.3000000000002,
+          "p95": 2756.7
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 490.85,
+          "p95": 689.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 5.75,
+          "p95": 27.9
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.05,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1331.8000000000002,
+          "p95": 2205.7
+        }
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3073.45,
+          "p95": 3785.2
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2183.8,
+          "p95": 3083.1
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.5
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.05,
+          "p95": 73.4
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 868.4000000000001,
+          "p95": 943.6
+        }
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1269.4,
+          "p95": 1276.5
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 8.8,
+          "p95": 12.4
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.3,
+          "p95": 0.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1255.9,
+          "p95": 1266.4
+        }
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1504.0,
+          "p95": 1677.7
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 489.1,
+          "p95": 493.4
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.4,
+          "p95": 0.6
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.6
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1018.4000000000001,
+          "p95": 1184.5
+        }
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3427.5,
+          "p95": 4656.2
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2186.95,
+          "p95": 3084.4
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.25,
+          "p95": 0.5
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 80.5
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1247.0,
+          "p95": 1931.1
+        }
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1924.0,
+          "p95": 1969.6
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 7.9,
+          "p95": 12.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.3,
+          "p95": 0.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1916.6,
+          "p95": 1960.6
+        }
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1959.7,
+          "p95": 2182.3
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 490.7,
+          "p95": 493.3
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.35,
+          "p95": 0.6
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1465.65,
+          "p95": 1689.1
+        }
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3090.6,
+          "p95": 3837.3
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2183.95,
+          "p95": 3084.7
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.3
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 72.0
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 858.2,
+          "p95": 942.2
+        }
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1242.3,
+          "p95": 1285.6
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 5.8,
+          "p95": 12.3
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 10.8,
+          "p95": 12.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.1,
+          "p95": 0.6
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1236.3,
+          "p95": 1272.0
+        }
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1516.0,
+          "p95": 1702.1
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 491.79999999999995,
+          "p95": 493.9
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 6.050000000000001,
+          "p95": 9.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1025.9,
+          "p95": 1209.4
+        }
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3606.9,
+          "p95": 4784.2
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2223.4,
+          "p95": 3087.3
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 2.1
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 79.5
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1205.0500000000002,
+          "p95": 1988.4
+        }
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 2506.1,
+          "p95": 2935.8
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 11.9,
+          "p95": 12.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 14.5,
+          "p95": 23.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 47.6,
+          "p95": 82.6
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 2497.4,
+          "p95": 2922.4
+        }
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 2002.9,
+          "p95": 2823.4
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 487.35,
+          "p95": 492.6
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 7.050000000000001,
+          "p95": 13.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1511.1,
+          "p95": 2337.5
+        }
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1188.8,
+          "p95": 1643.7
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 330.6,
+          "p95": 332.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.3,
+          "p95": 7.6
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.0,
+          "p95": 5.3
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 859.2,
+          "p95": 1310.5
+        }
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3043.1499999999996,
+          "p95": 4757.8
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2186.55,
+          "p95": 3917.3
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.0,
+          "p95": 68.4
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 848.2,
+          "p95": 922.4
+        }
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1293.3,
+          "p95": 1302.6
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 11.9,
+          "p95": 12.1
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 11.9,
+          "p95": 13.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1286.7,
+          "p95": 1289.5
+        }
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1628.9,
+          "p95": 3024.5
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 331.2,
+          "p95": 331.9
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 4.0,
+          "p95": 13.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.1,
+          "p95": 133.3
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 1301.7,
+          "p95": 2696.0
+        }
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3373.95,
+          "p95": 5478.1
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2183.9,
+          "p95": 3915.7
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 56.3
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1236.65,
+          "p95": 1567.2
+        }
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 2016.0,
+          "p95": 2557.3
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 9.5,
+          "p95": 12.0
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 13.1,
+          "p95": 14.6
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 107.6
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 2005.3,
+          "p95": 2544.1
+        }
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1257.6,
+          "p95": 1674.3
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 394.1,
+          "p95": 396.5
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 3.7,
+          "p95": 5.9
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.0,
+          "p95": 0.1
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 864.2,
+          "p95": 1278.0
+        }
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3016.6,
+          "p95": 4965.3
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2187.3,
+          "p95": 3910.4
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.0,
+          "p95": 73.1
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 852.75,
+          "p95": 1053.9
+        }
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1289.1,
+          "p95": 1328.3
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 12.2,
+          "p95": 13.7
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 10.8,
+          "p95": 12.5
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1274.1,
+          "p95": 1318.8
+        }
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 9,
+          "p50": 1652.8,
+          "p95": 2385.0
+        },
+        "vad_wait_ms": {
+          "n": 9,
+          "p50": 394.9,
+          "p95": 396.8
+        },
+        "stt_queue_wait_ms": {
+          "n": 9,
+          "p50": 4.2,
+          "p95": 6.9
+        },
+        "translation_queue_wait_ms": {
+          "n": 9,
+          "p50": 0.0,
+          "p95": 0.7
+        },
+        "e2e_latency_ms": {
+          "n": 9,
+          "p50": 1258.5,
+          "p95": 1987.0
+        }
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3349.1,
+          "p95": 5683.9
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2187.1,
+          "p95": 3917.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.05,
+          "p95": 58.7
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1192.0500000000002,
+          "p95": 1766.4
+        }
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 2073.6,
+          "p95": 3043.3
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 12.2,
+          "p95": 16.3
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 12.4,
+          "p95": 433.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.1,
+          "p95": 130.2
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 2060.3,
+          "p95": 3025.6
+        }
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3087.2,
+          "p95": 3926.0
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2184.75,
+          "p95": 3085.0
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.4
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.1,
+          "p95": 84.2
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 865.15,
+          "p95": 950.3
+        }
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 1293.2,
+          "p95": 1297.3
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 5.4,
+          "p95": 12.2
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 11.5,
+          "p95": 11.8
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1287.4,
+          "p95": 1290.8
+        }
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1496.75,
+          "p95": 1608.4
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 491.15,
+          "p95": 493.9
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 7.35,
+          "p95": 11.2
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1007.3000000000001,
+          "p95": 1116.3
+        }
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "schema": "2",
+      "endpoint": "smart_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 12,
+          "p50": 3428.1,
+          "p95": 5246.0
+        },
+        "vad_wait_ms": {
+          "n": 12,
+          "p50": 2187.0,
+          "p95": 3091.7
+        },
+        "stt_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.2,
+          "p95": 0.5
+        },
+        "translation_queue_wait_ms": {
+          "n": 12,
+          "p50": 0.05,
+          "p95": 89.6
+        },
+        "e2e_latency_ms": {
+          "n": 12,
+          "p50": 1356.35,
+          "p95": 2419.3
+        }
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "schema": "2",
+      "endpoint": "hard_cut",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 3,
+          "p50": 2005.1,
+          "p95": 2733.1
+        },
+        "vad_wait_ms": {
+          "n": 3,
+          "p50": 7.2,
+          "p95": 12.0
+        },
+        "stt_queue_wait_ms": {
+          "n": 3,
+          "p50": 14.2,
+          "p95": 15.5
+        },
+        "translation_queue_wait_ms": {
+          "n": 3,
+          "p50": 0.1,
+          "p95": 62.8
+        },
+        "e2e_latency_ms": {
+          "n": 3,
+          "p50": 1997.7,
+          "p95": 2724.6
+        }
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "schema": "2",
+      "endpoint": "silence",
+      "metrics": {
+        "speech_end_to_final_ms": {
+          "n": 6,
+          "p50": 1975.5,
+          "p95": 2964.0
+        },
+        "vad_wait_ms": {
+          "n": 6,
+          "p50": 490.3,
+          "p95": 644.1
+        },
+        "stt_queue_wait_ms": {
+          "n": 6,
+          "p50": 7.4,
+          "p95": 18.0
+        },
+        "translation_queue_wait_ms": {
+          "n": 6,
+          "p50": 0.05,
+          "p95": 96.8
+        },
+        "e2e_latency_ms": {
+          "n": 6,
+          "p50": 1489.8000000000002,
+          "p95": 2163.5
+        }
+      }
+    }
+  ],
+  "human_review": "pending",
+  "default_model": "e4b",
+  "latency_gate": "pending_browser_ack",
+  "stt": [],
+  "quality_deltas": [],
+  "source_cohorts": {
+    "75d97c4e65cbef53": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "ada3e8e10d7f0d3e": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "03f6856a73cde1f6": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "d81ff9df7ef67153": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "bc7df10a30718535": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "8c42749813225951": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "8acb7971fe82e92c": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    },
+    "27e7ad96f32fbd3f": {
+      "pipeline_hash_basis": "startup_source_file",
+      "startup_pipeline_sha256": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "note": "Source file observed before model loading; imported engine hashes still come from the environment snapshot."
+    }
+  },
+  "failures": [],
+  "excluded_runs": [],
+  "caption_events": [
+    {
+      "experiment": "conservative_marian",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 201,
+          "p50": 206.1,
+          "p95": 545.7
+        },
+        "partial_update_gap_ms": {
+          "n": 198,
+          "p50": 621.7714999999989,
+          "p95": 1221.0470000000005
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 974.0,
+          "p95": 4043.9
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 201,
+        "partial_stt_finished": 220,
+        "partial_stt_started": 220,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 5,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_conservative_marian_e2b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 66,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_conservative_marian_e2b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 68,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_conservative_marian_e2b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 67,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_conservative_marian_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_conservative_marian_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_conservative_marian_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "conservative_marian",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "75d97c4e65cbef53",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 196,
+          "p50": 215.5,
+          "p95": 710.2
+        },
+        "partial_update_gap_ms": {
+          "n": 193,
+          "p50": 628.0119999999952,
+          "p95": 1277.4979999999996
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 868.8,
+          "p95": 4166.5
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 196,
+        "partial_stt_finished": 213,
+        "partial_stt_started": 213,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 12,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_conservative_marian_e4b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 7,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 68,
+          "partial_stt_finished": 68,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 63,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_conservative_marian_e4b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 73,
+          "partial_stt_finished": 73,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 67,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_conservative_marian_e4b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 66,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_conservative_marian_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_conservative_marian_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_conservative_marian_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 190,
+          "p50": 202.8,
+          "p95": 477.0
+        },
+        "partial_update_gap_ms": {
+          "n": 187,
+          "p50": 625.6520000000019,
+          "p95": 1252.059000000001
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 1352.2,
+          "p95": 3678.9
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 190,
+        "partial_stt_finished": 208,
+        "partial_stt_started": 208,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 17,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 0,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_final_aware_partials_e2b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 6,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 69,
+          "partial_stt_finished": 69,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 63,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_final_aware_partials_e2b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 6,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 69,
+          "partial_stt_finished": 69,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 63,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_final_aware_partials_e2b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 5,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 70,
+          "partial_stt_finished": 70,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 64,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_final_aware_partials_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_final_aware_partials_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_final_aware_partials_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "final_aware_partials",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "ada3e8e10d7f0d3e",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 173,
+          "p50": 213.4,
+          "p95": 651.4
+        },
+        "partial_update_gap_ms": {
+          "n": 170,
+          "p50": 628.0764999999974,
+          "p95": 1801.4619999999995
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 1986.4,
+          "p95": 3830.2
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 173,
+        "partial_stt_finished": 191,
+        "partial_stt_started": 191,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 30,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 4,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_final_aware_partials_e4b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 11,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 62,
+          "partial_stt_finished": 62,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 56,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_final_aware_partials_e4b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 10,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 63,
+          "partial_stt_finished": 63,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 57,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_final_aware_partials_e4b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 9,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 66,
+          "partial_stt_finished": 66,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 60,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_final_aware_partials_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_final_aware_partials_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_final_aware_partials_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 206,
+          "p50": 198.85,
+          "p95": 322.2
+        },
+        "partial_update_gap_ms": {
+          "n": 203,
+          "p50": 621.7609999999986,
+          "p95": 1066.8100000000013
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 784.4,
+          "p95": 3657.7
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 206,
+        "partial_stt_finished": 224,
+        "partial_stt_started": 224,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 1,
+        "warmup_executed": 6,
+        "warmup_failed": 0,
+        "warmup_requested": 99,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 93,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 0
+      },
+      "counter_sessions": {
+        "mac14screen_idle_warmup_e2b_r0_screening_45s_en": {
+          "warmup_requested": 33,
+          "warmup_executed": 2,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 31,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_idle_warmup_e2b_r1_screening_45s_en": {
+          "warmup_requested": 33,
+          "warmup_executed": 2,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 31,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 68,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_idle_warmup_e2b_r2_screening_45s_en": {
+          "warmup_requested": 33,
+          "warmup_executed": 2,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 31,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_idle_warmup_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_idle_warmup_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_idle_warmup_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "idle_warmup",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "03f6856a73cde1f6",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 187,
+          "p50": 226.9,
+          "p95": 845.1
+        },
+        "partial_update_gap_ms": {
+          "n": 184,
+          "p50": 626.7065000000002,
+          "p95": 1378.265000000003
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 1334.8,
+          "p95": 4768.0
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 187,
+        "partial_stt_finished": 206,
+        "partial_stt_started": 206,
+        "partial_suppressed_after_stt": 1,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 19,
+        "warmup_executed": 6,
+        "warmup_failed": 0,
+        "warmup_requested": 135,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 129,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 0
+      },
+      "counter_sessions": {
+        "mac14screen_idle_warmup_e4b_r0_screening_45s_en": {
+          "warmup_requested": 47,
+          "warmup_executed": 2,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 45,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 73,
+          "partial_stt_finished": 73,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 67,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_idle_warmup_e4b_r1_screening_45s_en": {
+          "warmup_requested": 44,
+          "warmup_executed": 2,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 42,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 1,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 65,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_idle_warmup_e4b_r2_screening_45s_en": {
+          "warmup_requested": 44,
+          "warmup_executed": 2,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 42,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 0,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 14,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 61,
+          "partial_stt_finished": 61,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 55,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_idle_warmup_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_idle_warmup_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_idle_warmup_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 207,
+          "p50": 194.9,
+          "p95": 462.6
+        },
+        "partial_update_gap_ms": {
+          "n": 204,
+          "p50": 620.6339999999991,
+          "p95": 1059.214
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 783.5,
+          "p95": 3645.0
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 207,
+        "partial_stt_finished": 225,
+        "partial_stt_started": 225,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 0,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_onnx_vad_e2b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_onnx_vad_e2b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_onnx_vad_e2b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_onnx_vad_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_onnx_vad_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_onnx_vad_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "onnx_vad",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "d81ff9df7ef67153",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 199,
+          "p50": 214.1,
+          "p95": 606.8
+        },
+        "partial_update_gap_ms": {
+          "n": 196,
+          "p50": 624.5214999999989,
+          "p95": 1245.4959999999992
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 883.3,
+          "p95": 3913.4
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 199,
+        "partial_stt_finished": 218,
+        "partial_stt_started": 218,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 7,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_onnx_vad_e4b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 73,
+          "partial_stt_finished": 73,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 67,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_onnx_vad_e4b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_onnx_vad_e4b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 5,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 70,
+          "partial_stt_finished": 70,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 63,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_onnx_vad_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_onnx_vad_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_onnx_vad_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 207,
+          "p50": 192.2,
+          "p95": 434.2
+        },
+        "partial_update_gap_ms": {
+          "n": 204,
+          "p50": 621.8639999999978,
+          "p95": 1059.4740000000002
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 782.4,
+          "p95": 3656.2
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 207,
+        "partial_stt_finished": 225,
+        "partial_stt_started": 225,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 0,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_screening_baseline_e2b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_screening_baseline_e2b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_screening_baseline_e2b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_screening_baseline_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_screening_baseline_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_screening_baseline_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "screening_baseline",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "bc7df10a30718535",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 195,
+          "p50": 212.8,
+          "p95": 672.1
+        },
+        "partial_update_gap_ms": {
+          "n": 192,
+          "p50": 622.3520000000026,
+          "p95": 1253.2210000000014
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 1385.5,
+          "p95": 3728.7
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 195,
+        "partial_stt_finished": 213,
+        "partial_stt_started": 213,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 12,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_screening_baseline_e4b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 9,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 66,
+          "partial_stt_finished": 66,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 60,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_screening_baseline_e4b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 73,
+          "partial_stt_finished": 73,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 67,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_screening_baseline_e4b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 68,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_screening_baseline_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_screening_baseline_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_screening_baseline_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 210,
+          "p50": 193.75,
+          "p95": 330.1
+        },
+        "partial_update_gap_ms": {
+          "n": 207,
+          "p50": 621.6620000000003,
+          "p95": 976.7280000000028
+        },
+        "first_partial_ms": {
+          "n": 24,
+          "p50": 773.6,
+          "p95": 4481.9
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 3,
+        "final_stt_finished": 24,
+        "final_stt_started": 24,
+        "partial_emitted": 210,
+        "partial_stt_finished": 222,
+        "partial_stt_started": 222,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 0,
+        "warmup_executed": 15,
+        "warmup_failed": 0,
+        "warmup_requested": 40,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 25
+      },
+      "counter_sessions": {
+        "mac14screen_silence_035_e2b_r0_screening_45s_en": {
+          "warmup_requested": 14,
+          "warmup_executed": 5,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 9,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 70,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_035_e2b_r1_screening_45s_en": {
+          "warmup_requested": 13,
+          "warmup_executed": 5,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 8,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 70,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_035_e2b_r2_screening_45s_en": {
+          "warmup_requested": 13,
+          "warmup_executed": 5,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 8,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 70,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 24,
+        "sessions": [
+          {
+            "session_id": "mac14screen_silence_035_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_035_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_035_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "silence_035",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8c42749813225951",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 201,
+          "p50": 208.1,
+          "p95": 582.2
+        },
+        "partial_update_gap_ms": {
+          "n": 198,
+          "p50": 622.8190000000004,
+          "p95": 1169.451000000001
+        },
+        "first_partial_ms": {
+          "n": 22,
+          "p50": 1293.15,
+          "p95": 4645.9
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 3,
+        "final_stt_finished": 24,
+        "final_stt_started": 24,
+        "partial_emitted": 201,
+        "partial_stt_finished": 215,
+        "partial_stt_started": 215,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 7,
+        "warmup_executed": 15,
+        "warmup_failed": 0,
+        "warmup_requested": 48,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 33
+      },
+      "counter_sessions": {
+        "mac14screen_silence_035_e4b_r0_screening_45s_en": {
+          "warmup_requested": 14,
+          "warmup_executed": 5,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 9,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 68,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_035_e4b_r1_screening_45s_en": {
+          "warmup_requested": 17,
+          "warmup_executed": 5,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 12,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 67,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_035_e4b_r2_screening_45s_en": {
+          "warmup_requested": 17,
+          "warmup_executed": 5,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 12,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 71,
+          "partial_stt_finished": 71,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 66,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 24,
+        "sessions": [
+          {
+            "session_id": "mac14screen_silence_035_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_035_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_035_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 209,
+          "p50": 193.5,
+          "p95": 335.2
+        },
+        "partial_update_gap_ms": {
+          "n": 206,
+          "p50": 620.9475000000002,
+          "p95": 1010.864999999998
+        },
+        "first_partial_ms": {
+          "n": 24,
+          "p50": 779.3499999999999,
+          "p95": 4487.1
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 3,
+        "final_stt_finished": 24,
+        "final_stt_started": 24,
+        "partial_emitted": 209,
+        "partial_stt_finished": 221,
+        "partial_stt_started": 221,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 1,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 32,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 20
+      },
+      "counter_sessions": {
+        "mac14screen_silence_04_e2b_r0_screening_45s_en": {
+          "warmup_requested": 11,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 7,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 73,
+          "partial_stt_finished": 73,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 69,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_04_e2b_r1_screening_45s_en": {
+          "warmup_requested": 10,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 6,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 70,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_04_e2b_r2_screening_45s_en": {
+          "warmup_requested": 11,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 7,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 70,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 24,
+        "sessions": [
+          {
+            "session_id": "mac14screen_silence_04_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_04_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_04_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "silence_04",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "8acb7971fe82e92c",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 205,
+          "p50": 206.4,
+          "p95": 476.9
+        },
+        "partial_update_gap_ms": {
+          "n": 202,
+          "p50": 622.7389999999996,
+          "p95": 1096.7949999999983
+        },
+        "first_partial_ms": {
+          "n": 24,
+          "p50": 877.0999999999999,
+          "p95": 4592.6
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 3,
+        "final_stt_finished": 24,
+        "final_stt_started": 24,
+        "partial_emitted": 205,
+        "partial_stt_finished": 217,
+        "partial_stt_started": 217,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 5,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 30,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 18
+      },
+      "counter_sessions": {
+        "mac14screen_silence_04_e4b_r0_screening_45s_en": {
+          "warmup_requested": 10,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 6,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 73,
+          "partial_stt_finished": 73,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 69,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_04_e4b_r1_screening_45s_en": {
+          "warmup_requested": 10,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 6,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 68,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_silence_04_e4b_r2_screening_45s_en": {
+          "warmup_requested": 10,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 6,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 2,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 8,
+          "final_stt_finished": 8,
+          "partial_emitted": 68,
+          "final_marian_routes": 1,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 24,
+        "sessions": [
+          {
+            "session_id": "mac14screen_silence_04_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_04_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_silence_04_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 8,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e2b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 206,
+          "p50": 200.35,
+          "p95": 455.8
+        },
+        "partial_update_gap_ms": {
+          "n": 203,
+          "p50": 622.7200000000012,
+          "p95": 1069.4889999999996
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 787.2,
+          "p95": 3667.6
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 206,
+        "partial_stt_finished": 224,
+        "partial_stt_started": 224,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 1,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 21,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 9
+      },
+      "counter_sessions": {
+        "mac14screen_terminology_e2b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 1,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 74,
+          "partial_stt_finished": 74,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 68,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_terminology_e2b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_terminology_e2b_r2_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 0,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 75,
+          "partial_stt_finished": 75,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 69,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_terminology_e2b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_terminology_e2b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_terminology_e2b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "terminology",
+      "size": "e4b",
+      "language": "en",
+      "provenance": "church_replay",
+      "clip_id": "screening_45s",
+      "runtime_cohort": "27e7ad96f32fbd3f",
+      "metrics": {
+        "captured_end_to_partial_ms": {
+          "n": 192,
+          "p50": 211.85000000000002,
+          "p95": 660.5
+        },
+        "partial_update_gap_ms": {
+          "n": 189,
+          "p50": 620.7959999999985,
+          "p95": 1374.6529999999984
+        },
+        "first_partial_ms": {
+          "n": 21,
+          "p50": 1396.4,
+          "p95": 4466.6
+        }
+      },
+      "browser_client_sessions": 0,
+      "browser_render_cohorts": [],
+      "unmatched_final_acks": 0,
+      "latency_experiment_counters": {
+        "final_gemma_requests": 21,
+        "final_marian_routes": 0,
+        "final_stt_finished": 21,
+        "final_stt_started": 21,
+        "partial_emitted": 192,
+        "partial_stt_finished": 211,
+        "partial_stt_started": 211,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_in_flight": 14,
+        "warmup_executed": 12,
+        "warmup_failed": 0,
+        "warmup_requested": 25,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_model_lock": 0,
+        "warmup_suppressed_no_pending": 13
+      },
+      "counter_sessions": {
+        "mac14screen_terminology_e4b_r0_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 66,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_terminology_e4b_r1_screening_45s_en": {
+          "warmup_requested": 7,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 3,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 3,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 72,
+          "partial_stt_finished": 72,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 66,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        },
+        "mac14screen_terminology_e4b_r2_screening_45s_en": {
+          "warmup_requested": 11,
+          "warmup_executed": 4,
+          "warmup_failed": 0,
+          "warmup_suppressed_busy": 0,
+          "warmup_suppressed_coalesced": 0,
+          "warmup_suppressed_before_run": 0,
+          "warmup_suppressed_no_pending": 7,
+          "warmup_suppressed_model_lock": 0,
+          "partial_suppressed_final_decode": 0,
+          "partial_suppressed_final_pending": 0,
+          "partial_suppressed_backlog": 0,
+          "partial_suppressed_in_flight": 8,
+          "partial_suppressed_after_stt": 0,
+          "partial_stt_started": 67,
+          "partial_stt_finished": 67,
+          "final_stt_started": 7,
+          "final_stt_finished": 7,
+          "partial_emitted": 60,
+          "final_marian_routes": 0,
+          "final_gemma_requests": 7
+        }
+      },
+      "final_ack_coverage": {
+        "received_final_chunks": 0,
+        "finalized_chunks": 21,
+        "sessions": [
+          {
+            "session_id": "mac14screen_terminology_e4b_r0_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_terminology_e4b_r1_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          },
+          {
+            "session_id": "mac14screen_terminology_e4b_r2_screening_45s_en",
+            "received_final_chunks": 0,
+            "finalized_chunks": 7,
+            "missing_final_chunks": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "available": true
+          }
+        ]
+      }
+    }
+  ]
+}

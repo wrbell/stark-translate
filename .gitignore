@@ -145,3 +145,14 @@ preference/*.jsonl
 # replay clips are local benchmark artifacts (tools/replay_bench.py --prepare)
 stark_data/replay
 stark_data/replay/
+
+# Isolated validation environments and reproducible benchmark working files.
+.cache/
+metrics/mac_roadmap/
+metrics/display_metrics_*.jsonl
+# Session review data is private operational data, exported explicitly as bundles.
+stark_data/corrections/
+
+# Local overnight execution records; selected immutable reports live in docs/evaluation.
+/metrics/overnight_*/
+/metrics/support/

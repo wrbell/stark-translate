@@ -159,6 +159,8 @@
   <div class="text-english" id="englishText"></div>
 </div>
 
+<script src="display_connection.js"></script>
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
   'use strict';
@@ -172,12 +174,10 @@
   // ?lines=3     → max visible lines for Spanish text (default 3)
   var params = new URLSearchParams(window.location.search);
   var useModel = (params.get('model') || 'a').toLowerCase();
-  var wsPort = parseInt(params.get('port') || '8765', 10);
   var showEnglish = params.get('english') !== '0';
   var maxLines = parseInt(params.get('lines') || '3', 10);
 
-  var wsHost = window.location.hostname || 'localhost';
-  var WS_URL = 'ws://' + wsHost + ':' + wsPort;
+  var WS_URL = StarkDisplayConnection.websocketUrl(window.location);
   var RECONNECT_MS = 2000;
   var CLEAR_AFTER_MS = 12000; // Clear text after 12s of no new messages
 
@@ -196,6 +196,19 @@
   var clearTimer = null;
   var statusFadeTimer = null;
   var recentChunks = []; // store last N chunks for multi-line display
+  var acceptSession = StarkDisplayConnection.sessionGuard(function() {
+    recentChunks = [];
+    if (clearTimer) clearTimeout(clearTimer);
+    spanishText.textContent = englishText.textContent = '';
+    spanishText.classList.remove('visible', 'partial', 'streaming');
+    englishText.classList.remove('visible', 'partial');
+    container.classList.add('empty');
+  }, function(uid) {
+    var kept = recentChunks.filter(function(c) { return !(c.partial && c.utterance_id === uid); });
+    if (kept.length === recentChunks.length) return;
+    recentChunks = kept;
+    renderRecent();
+  });
 
   // ── Profanity filter ──
   // Allow biblical terms: "ass" (donkey), "damn" (damnation), "whore" (KJV), "hell"
@@ -266,7 +279,7 @@
       // [P7-P3-6A] Streaming: update or add streaming chunk
       var found = false;
       for (var i = 0; i < recentChunks.length; i++) {
-        if (recentChunks[i].streaming) {
+        if (recentChunks[i].streaming && recentChunks[i].chunk_id === data.chunk_id) {
           recentChunks[i].spanish = spanish;
           if (english) recentChunks[i].english = english;
           found = true;
@@ -274,26 +287,34 @@
         }
       }
       if (!found) {
-        recentChunks = recentChunks.filter(function(c) { return !c.partial; });
-        recentChunks.push({ spanish: spanish, english: english, partial: false, streaming: true });
+        recentChunks = recentChunks.filter(function(c) {
+          return !(c.partial && StarkDisplayConnection.replacesPartial(data, c.utterance_id));
+        });
+        var nextPartial = recentChunks.findIndex(function(c) { return c.partial; });
+        recentChunks.splice(nextPartial < 0 ? recentChunks.length : nextPartial, 0, {
+          chunk_id: data.chunk_id, spanish: spanish, english: english, partial: false, streaming: true
+        });
       }
     } else if (isPartial) {
       // Update or add partial
       var found = false;
       for (var i = 0; i < recentChunks.length; i++) {
         if (recentChunks[i].partial) {
-          recentChunks[i] = { spanish: spanish, english: english, partial: true, streaming: false };
+          recentChunks[i] = { utterance_id: StarkDisplayConnection.partialUtteranceId(data), spanish: spanish, english: english, partial: true, streaming: false };
           found = true;
           break;
         }
       }
       if (!found) {
-        recentChunks.push({ spanish: spanish, english: english, partial: true, streaming: false });
+        recentChunks.push({ utterance_id: StarkDisplayConnection.partialUtteranceId(data), spanish: spanish, english: english, partial: true, streaming: false });
       }
     } else {
-      // Remove any partial and streaming, add final
-      recentChunks = recentChunks.filter(function(c) { return !c.partial && !c.streaming; });
-      recentChunks.push({ spanish: spanish, english: english, partial: false, streaming: false });
+      recentChunks = recentChunks.filter(function(c) {
+        return !(c.partial && StarkDisplayConnection.replacesPartial(data, c.utterance_id)) &&
+          !(c.streaming && c.chunk_id === data.chunk_id);
+      });
+      var nextPartial = recentChunks.findIndex(function(c) { return c.partial || c.streaming; });
+      recentChunks.splice(nextPartial < 0 ? recentChunks.length : nextPartial, 0, { chunk_id: data.chunk_id, speaker: data.speaker || '', spanish: spanish, english: english, partial: false, streaming: false });
     }
 
     // Keep only last N chunks
@@ -301,9 +322,13 @@
       recentChunks.shift();
     }
 
+    renderRecent();
+  }
+
+  function renderRecent() {
     // Render: join recent chunks, most recent at bottom
-    var spanishLines = recentChunks.map(function(c) { return c.spanish; }).filter(Boolean);
-    var englishLines = recentChunks.map(function(c) { return c.english; }).filter(Boolean);
+    var spanishLines = recentChunks.map(function(c) { return (c.speaker ? c.speaker + ': ' : '') + c.spanish; }).filter(Boolean);
+    var englishLines = recentChunks.map(function(c) { return (c.speaker ? c.speaker + ': ' : '') + c.english; }).filter(Boolean);
     var lastIsPartial = recentChunks.length > 0 && recentChunks[recentChunks.length - 1].partial;
     var lastIsStreaming = recentChunks.length > 0 && recentChunks[recentChunks.length - 1].streaming;
 
@@ -337,18 +362,26 @@
       ws.close();
     };
 
-    ws.onmessage = function(evt) {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, function(evt) {
       var data;
       try {
         data = JSON.parse(evt.data);
       } catch (e) {
         return;
       }
+      if (!acceptSession(data)) return;
 
+      if (data.type === 'speaker_update') {
+        var existing = recentChunks.find(function(c) { return c.chunk_id === data.chunk_id; });
+        if (existing) { existing.speaker = data.speaker || ''; renderRecent(); }
+        return;
+      }
       // [P7-P3-6A] Handle streaming translation messages
       if (data.type === 'translation_start') {
         // STT completed — show English immediately, create streaming placeholder
         addChunk({
+          chunk_id: data.chunk_id,
+          utterance_id: data.utterance_id,
           english: data.english,
           spanish_a: '',
           spanish_b: '',
@@ -359,6 +392,8 @@
       if (data.type === 'translation_stream') {
         // Progressive Spanish text update
         addChunk({
+          chunk_id: data.chunk_id,
+          utterance_id: data.utterance_id,
           english: '',
           spanish_a: data.partial_spanish_a || '',
           spanish_b: '',
@@ -372,7 +407,7 @@
       var isPartial = (stage === 'partial');
 
       addChunk(data, isPartial, false);
-    };
+    });
   }
 
   // Start with empty state

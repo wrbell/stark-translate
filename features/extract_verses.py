@@ -8,7 +8,7 @@ Two-pass extraction:
            "the passage in John three sixteen", "verse 28")
 
 Handles all 66 book name variants (1 John, First John, I John, 1Jn, etc.).
-Tracks context: bare "verse 5" resolves to the most recently mentioned book/chapter.
+Tracks explicit book/chapter context; impossible, hymn and unresolved citations are omitted.
 
 Input: CSV (dry_run_ab.py) or JSONL (diarize.py)
 Output: JSON with per-speaker (if diarized) or overall verse references.
@@ -28,6 +28,11 @@ import sys
 from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
+
+try:
+    from .bible_reference_bounds import CHAPTER_VERSE_COUNTS
+except ImportError:  # Legacy direct script entry point.
+    from bible_reference_bounds import CHAPTER_VERSE_COUNTS
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -243,6 +248,31 @@ SPOKEN_NUMBERS = {
 }
 
 
+# Whole compound numbers in either common STT spelling. Atomic NUM below
+# prevents backtracking from "twenty three" to chapter 20, verse 3.
+for _tens, _value in (
+    ("twenty", 20),
+    ("thirty", 30),
+    ("forty", 40),
+    ("fifty", 50),
+    ("sixty", 60),
+    ("seventy", 70),
+    ("eighty", 80),
+    ("ninety", 90),
+):
+    for _unit in ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine"):
+        for _separator in (" ", "-"):
+            SPOKEN_NUMBERS[_tens + _separator + _unit] = str(_value + int(SPOKEN_NUMBERS[_unit]))
+for _word, _number in list(SPOKEN_NUMBERS.items()):
+    if (
+        _word not in ("first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth")
+        and 0 < int(_number) < 100
+    ):
+        for _prefix in ("one hundred ", "one hundred and ", "hundred ", "hundred and "):
+            SPOKEN_NUMBERS[_prefix + _word] = str(100 + int(_number))
+SPOKEN_NUMBERS["one hundred"] = "100"
+
+
 # ---------------------------------------------------------------------------
 # Build Regex Patterns
 # ---------------------------------------------------------------------------
@@ -271,6 +301,7 @@ def _build_book_pattern():
 
 
 BOOK_PATTERN, ALIAS_TO_CANONICAL = _build_book_pattern()
+BOOK_PATTERN = rf"\b(?:{BOOK_PATTERN})\b"
 
 
 def _number_word_pattern():
@@ -282,7 +313,7 @@ def _number_word_pattern():
 NUMBER_WORD_PATTERN = _number_word_pattern()
 
 # A number is either digits or a spoken word
-NUM = rf"(?:\d+|{NUMBER_WORD_PATTERN})"
+NUM = rf"(?>\d+|{NUMBER_WORD_PATTERN})\b"
 
 
 def normalize_number(s):
@@ -302,89 +333,31 @@ def resolve_book(text):
 # Pass 1: Explicit Citation Patterns
 # ---------------------------------------------------------------------------
 
-# Pattern: "Romans 8:28", "1 Corinthians 13:4-7", "Genesis 1:1-3"
-# Also handles "Romans 8:28-30", "Romans 8, verse 28"
-EXPLICIT_PATTERN = re.compile(
-    rf"(?P<book>{BOOK_PATTERN})"
-    rf"\s+"
-    rf"(?P<chapter>\d+)"
-    rf"\s*[:]\s*"
-    rf"(?P<verse_start>\d+)"
-    rf"(?:\s*[-\u2013\u2014]\s*(?P<verse_end>\d+))?",  # optional range
-    re.IGNORECASE,
-)
-
-# Pattern: "Romans 8" (chapter only, no verse)
-# Use \b after the digits to ensure we match the full number (prevents
-# "1 Corinthians 13:4" from matching as chapter "1" followed by "3:4")
-CHAPTER_ONLY_PATTERN = re.compile(
-    rf"(?P<book>{BOOK_PATTERN})"
-    rf"\s+"
-    rf"(?P<chapter>\d+)\b"
-    rf"(?!\s*[:]\s*\d)",  # NOT followed by :verse
-    re.IGNORECASE,
-)
-
-# Pattern: "Romans chapter 8, verse 28" or "Romans chapter 8 verse 28"
+# Fillers are allowed around explicit reference markers, not as guessed digits.
+FILL = r"(?:\s+(?:uh|um))*\s+"
+VERSE_MARK = rf"\s*[,;]?\s*(?:and\s+)?verses?{FILL}"
+RANGE = rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?"
+EXPLICIT_PATTERN = re.compile(rf"(?P<book>{BOOK_PATTERN})\s+(?P<chapter>\d+)\s*:\s*(?P<verse_start>\d+){RANGE}", re.I)
 CHAPTER_VERSE_SPOKEN = re.compile(
-    rf"(?P<book>{BOOK_PATTERN})"
-    rf"\s+chapter\s+(?P<chapter>{NUM})"
-    rf"(?:\s*,?\s*verses?\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?)?",
-    re.IGNORECASE,
+    rf"(?P<book>{BOOK_PATTERN})\s+chapter{FILL}(?P<chapter>{NUM})"
+    rf"(?:{VERSE_MARK}(?P<verse_start>{NUM}){RANGE})?",
+    re.I,
 )
-
-
-# ---------------------------------------------------------------------------
-# Pass 2: Spoken-Form and Contextual Patterns
-# ---------------------------------------------------------------------------
-
-# "turn to Romans chapter eight"
-# "the passage in John three sixteen"
-# "if you look at Genesis chapter one"
-# Accepts both "chapter N" and bare "N N" (spoken digits/words) after the book name
-SPOKEN_INTRO_PATTERN = re.compile(
-    rf"(?:turn\s+to|look\s+at|go\s+to|read(?:ing)?\s+(?:from|in)?|"
-    rf"passage\s+(?:in|from)|found\s+in|written\s+in|says?\s+in|"
-    rf"recorded\s+in|according\s+to|back\s+(?:to|in)|over\s+(?:to|in)|"
-    rf"from\s+the\s+book\s+of)"
-    rf"\s+"
-    rf"(?P<book>{BOOK_PATTERN})"
-    rf"(?:"
-    rf"  \s+chapter\s+(?P<chapter>{NUM})"  # "chapter eight"
-    rf"  (?:\s*,?\s*verses?\s+(?P<verse_start>{NUM})"
-    rf"    (?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?)?"
-    rf"  |"
-    rf"  \s+(?P<chapter2>{NUM})"  # bare "three sixteen"
-    rf"  (?:\s+(?P<verse_start2>{NUM})"
-    rf"    (?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end2>{NUM}))?)?"
-    rf")?",
-    re.IGNORECASE | re.VERBOSE,
+CHAPTER_ONLY_PATTERN = re.compile(
+    rf"(?P<book>{BOOK_PATTERN})\s+(?P<chapter>{NUM})"
+    rf"(?:{VERSE_MARK}(?P<verse_start>{NUM}){RANGE})?",
+    re.I,
 )
-
-# "John three sixteen" / "John 3 16" (spoken without "chapter"/"verse")
 SPOKEN_BARE_PATTERN = re.compile(
-    rf"(?P<book>{BOOK_PATTERN})"
-    rf"\s+(?P<chapter>{NUM})"
-    rf"\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?",
-    re.IGNORECASE,
+    rf"(?P<book>{BOOK_PATTERN})\s+(?P<chapter>{NUM})\s*,?\s+(?P<verse_start>{NUM}){RANGE}", re.I
 )
-
-# "verse 28" / "verses 3 to 5" (contextual — needs recent book/chapter)
-BARE_VERSE_PATTERN = re.compile(
-    rf"verses?\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|and|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?",
-    re.IGNORECASE,
-)
-
-# "chapter 8" (contextual — needs recent book)
 BARE_CHAPTER_PATTERN = re.compile(
-    rf"chapter\s+(?P<chapter>{NUM})"
-    rf"(?:\s*,?\s*verses?\s+(?P<verse_start>{NUM})"
-    rf"(?:\s*(?:to|through|[-\u2013\u2014])\s*(?P<verse_end>{NUM}))?)?",
-    re.IGNORECASE,
+    rf"\bchapter{FILL}(?P<chapter>{NUM})(?:{VERSE_MARK}(?P<verse_start>{NUM}){RANGE})?", re.I
 )
+BARE_VERSE_PATTERN = re.compile(rf"\bverses?{FILL}(?P<verse_start>{NUM}){RANGE}", re.I)
+BOOK_MENTION_PATTERN = re.compile(rf"(?P<book>{BOOK_PATTERN})(?=\s*(?:[,.;:]|$))", re.I)
+HYMN_PATTERN = re.compile(r"\b(?:hymns?|stanzas?)\b", re.I)
+AMBIGUOUS_BOOK_PATTERN = re.compile(r"\b(?:Peter|Samuel|Kings|Chronicles|Corinthians|Thessalonians|Timothy)\b", re.I)
 
 
 # ---------------------------------------------------------------------------
@@ -413,10 +386,24 @@ class VerseExtractor:
         vs = normalize_number(str(verse_start)) if verse_start else None
         ve = normalize_number(str(verse_end)) if verse_end else None
 
-        # Update context tracking
-        self.current_book = canonical_book
-        if chapter_str:
-            self.current_chapter = chapter_str
+        # Validate before committing chapter context. A changed book must never
+        # inherit a chapter from the previous book, even if this match is invalid.
+        bounds = CHAPTER_VERSE_COUNTS.get(canonical_book)
+        if canonical_book != self.current_book:
+            self.current_chapter = None
+        self.current_book = canonical_book if bounds else None
+        if chapter_str is None:
+            return
+        if not bounds or not chapter_str.isdigit() or not 1 <= int(chapter_str) <= len(bounds):
+            self.current_chapter = None
+            return
+        limit = bounds[int(chapter_str) - 1]
+        if (vs is not None and (not vs.isdigit() or not 1 <= int(vs) <= limit)) or (
+            ve is not None and (not ve.isdigit() or not vs or not int(vs) <= int(ve) <= limit)
+        ):
+            self.current_chapter = None
+            return
+        self.current_chapter = chapter_str
 
         # Build reference string
         ref = canonical_book
@@ -456,9 +443,8 @@ class VerseExtractor:
     def extract_from_text(self, text, timestamp="", speaker=None):
         """Run all extraction passes on a text segment.
 
-        Patterns are applied in priority order. Once a region of text is
-        matched by a higher-priority pattern, lower-priority patterns skip
-        that region to avoid duplicate/partial matches.
+        Pattern priority selects non-overlapping matches, then references and
+        book/context changes are applied in their original text order.
 
         Args:
             text: English transcript text.
@@ -468,144 +454,86 @@ class VerseExtractor:
         if not text:
             return
 
-        # Track matched character spans to prevent overlapping matches
+        # Priority resolves overlapping matches; context follows spoken order.
         matched_spans = []
-
-        # --- Pass 1: Explicit patterns (highest priority) ---
-
-        # "Romans 8:28" / "Romans 8:28-30"
-        for m in EXPLICIT_PATTERN.finditer(text):
-            if self._overlaps(matched_spans, m.start(), m.end()):
+        events = []
+        patterns = (
+            ("explicit", EXPLICIT_PATTERN),
+            ("chapter_verse_spoken", CHAPTER_VERSE_SPOKEN),
+            ("spoken_bare", SPOKEN_BARE_PATTERN),
+            ("chapter_only", CHAPTER_ONLY_PATTERN),
+            ("bare_chapter", BARE_CHAPTER_PATTERN),
+            ("bare_verse", BARE_VERSE_PATTERN),
+        )
+        hymn = bool(HYMN_PATTERN.search(text))
+        for name, pattern in patterns:
+            for match in pattern.finditer(text):
+                if self._overlaps(matched_spans, match.start(), match.end()):
+                    continue
+                matched_spans.append(match.span())
+                events.append((match.start(), name, match))
+        for name, pattern in (
+            ("book_mention", BOOK_MENTION_PATTERN),
+            ("ambiguous_book", AMBIGUOUS_BOOK_PATTERN),
+            ("hymn", HYMN_PATTERN),
+        ):
+            for match in pattern.finditer(text):
+                if self._overlaps(matched_spans, match.start(), match.end()):
+                    continue
+                matched_spans.append(match.span())
+                events.append((match.start(), name, match))
+        for _, name, match in sorted(events, key=lambda event: event[0]):
+            if name in ("hymn", "ambiguous_book"):
+                self.current_book = self.current_chapter = None
                 continue
-            ctx = _extract_context(text, m.start(), m.end())
+            if name == "book_mention":
+                book = resolve_book(match.group("book"))
+                if book != self.current_book:
+                    self.current_chapter = None
+                self.current_book = book
+                continue
+            if hymn and name in ("bare_chapter", "bare_verse"):
+                continue
+            groups = match.groupdict()
+            book = groups.get("book") or self.current_book
+            chapter = groups.get("chapter") or self.current_chapter
+            if not book or not chapter:
+                continue
+            # A tens word at the end of an unpunctuated audio chunk can continue
+            # ("verse thirty" / "uh thirty six"). Leave it unresolved.
+            number = groups.get("verse_end") or groups.get("verse_start") or groups.get("chapter") or ""
+            if match.end() == len(text.rstrip()) and number.lower() in {
+                "twenty",
+                "thirty",
+                "forty",
+                "fifty",
+                "sixty",
+                "seventy",
+                "eighty",
+                "ninety",
+                "hundred",
+                "one hundred",
+            }:
+                self.current_chapter = None
+                continue
+            # Do not publish the prefix of an unfinished verse/range/list.
+            tail = text[match.end() :]
+            unfinished = re.fullmatch(r"\s*(?:to|through|and|[-\u2013\u2014])(?:\s+(?:uh|um))*\s*[.,]?", tail, re.I)
+            verse_marker = not groups.get("verse_start") and re.match(r"\s*(?:and\s+)?verses?\b", tail, re.I)
+            verse_list = groups.get("verse_start") and re.match(rf"\s+and\s+{NUM}", tail, re.I)
+            if unfinished or verse_marker or verse_list:
+                self.current_chapter = None
+                continue
             self._add_reference(
-                book=m.group("book"),
-                chapter=m.group("chapter"),
-                verse_start=m.group("verse_start"),
-                verse_end=m.group("verse_end"),
-                timestamp=timestamp,
-                speaker=speaker,
-                context=ctx,
-                pattern_name="explicit",
+                book,
+                chapter,
+                groups.get("verse_start"),
+                groups.get("verse_end"),
+                timestamp,
+                speaker,
+                _extract_context(text, match.start(), match.end()),
+                name,
             )
-            matched_spans.append((m.start(), m.end()))
-
-        # "Romans chapter 8, verse 28"
-        for m in CHAPTER_VERSE_SPOKEN.finditer(text):
-            if self._overlaps(matched_spans, m.start(), m.end()):
-                continue
-            ctx = _extract_context(text, m.start(), m.end())
-            self._add_reference(
-                book=m.group("book"),
-                chapter=m.group("chapter"),
-                verse_start=m.group("verse_start"),
-                verse_end=m.group("verse_end"),
-                timestamp=timestamp,
-                speaker=speaker,
-                context=ctx,
-                pattern_name="chapter_verse_spoken",
-            )
-            matched_spans.append((m.start(), m.end()))
-
-        # --- Pass 2: Spoken-form and contextual patterns ---
-
-        # "turn to Romans chapter eight" / "passage in John three sixteen"
-        for m in SPOKEN_INTRO_PATTERN.finditer(text):
-            if self._overlaps(matched_spans, m.start(), m.end()):
-                continue
-            # Use primary groups or alternate groups (chapter2/verse_start2/verse_end2)
-            chapter = m.group("chapter") or m.group("chapter2")
-            verse_start = m.group("verse_start") or m.group("verse_start2")
-            verse_end = m.group("verse_end") or m.group("verse_end2")
-            ctx = _extract_context(text, m.start(), m.end())
-            self._add_reference(
-                book=m.group("book"),
-                chapter=chapter,
-                verse_start=verse_start,
-                verse_end=verse_end,
-                timestamp=timestamp,
-                speaker=speaker,
-                context=ctx,
-                pattern_name="spoken_intro",
-            )
-            matched_spans.append((m.start(), m.end()))
-
-        # "John three sixteen"
-        for m in SPOKEN_BARE_PATTERN.finditer(text):
-            if self._overlaps(matched_spans, m.start(), m.end()):
-                continue
-            # Avoid false positives: check that numbers make sense
-            vs = normalize_number(m.group("verse_start"))
-            ch = normalize_number(m.group("chapter"))
-            if not vs.isdigit() or not ch.isdigit():
-                continue
-            if int(ch) > 150 or int(vs) > 176:  # sanity: max Psalm 119=176 verses
-                continue
-            ctx = _extract_context(text, m.start(), m.end())
-            self._add_reference(
-                book=m.group("book"),
-                chapter=m.group("chapter"),
-                verse_start=m.group("verse_start"),
-                verse_end=m.group("verse_end"),
-                timestamp=timestamp,
-                speaker=speaker,
-                context=ctx,
-                pattern_name="spoken_bare",
-            )
-            matched_spans.append((m.start(), m.end()))
-
-        # "chapter 8" (needs current_book context)
-        for m in BARE_CHAPTER_PATTERN.finditer(text):
-            if self._overlaps(matched_spans, m.start(), m.end()):
-                continue
-            if self.current_book:
-                ctx = _extract_context(text, m.start(), m.end())
-                self._add_reference(
-                    book=self.current_book,
-                    chapter=m.group("chapter"),
-                    verse_start=m.group("verse_start"),
-                    verse_end=m.group("verse_end"),
-                    timestamp=timestamp,
-                    speaker=speaker,
-                    context=ctx,
-                    pattern_name="bare_chapter",
-                )
-                matched_spans.append((m.start(), m.end()))
-
-        # "verse 28" (needs current_book + current_chapter context)
-        for m in BARE_VERSE_PATTERN.finditer(text):
-            if self._overlaps(matched_spans, m.start(), m.end()):
-                continue
-            if self.current_book and self.current_chapter:
-                ctx = _extract_context(text, m.start(), m.end())
-                self._add_reference(
-                    book=self.current_book,
-                    chapter=self.current_chapter,
-                    verse_start=m.group("verse_start"),
-                    verse_end=m.group("verse_end"),
-                    timestamp=timestamp,
-                    speaker=speaker,
-                    context=ctx,
-                    pattern_name="bare_verse",
-                )
-                matched_spans.append((m.start(), m.end()))
-
-        # "Romans 8" (chapter only, no verse — lowest priority, updates context)
-        for m in CHAPTER_ONLY_PATTERN.finditer(text):
-            if self._overlaps(matched_spans, m.start(), m.end()):
-                continue
-            ctx = _extract_context(text, m.start(), m.end())
-            self._add_reference(
-                book=m.group("book"),
-                chapter=m.group("chapter"),
-                verse_start=None,
-                verse_end=None,
-                timestamp=timestamp,
-                speaker=speaker,
-                context=ctx,
-                pattern_name="chapter_only",
-            )
-            matched_spans.append((m.start(), m.end()))
 
 
 def _extract_context(text, start, end):

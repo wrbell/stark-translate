@@ -1,0 +1,761 @@
+{
+  "schema_version": 1,
+  "scope": "Installed macOS arm64 CPU-only synthetic functional smoke; not hardware certification or a latency/quality gate",
+  "source_commit": "0d5a875",
+  "installed_wheel_sha256": "a1578b40b6a18e9710e18d7bd1ba4fdb00d91fd2cf8595f687c98b079ed9f5e3",
+  "pipeline_sha256": "227661cdd1a865eff9150dd0b726b1377b6282568d8688c5d1eec931b3c8afae",
+  "runtime": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+  "profile": {
+    "name": "lite-cpu",
+    "backend": "cpu",
+    "stt_model": "whisper-small",
+    "stt_compute_type": "int8",
+    "stt_threads": 3,
+    "stt_workers": 1,
+    "marian_threads": 1,
+    "final_engine": "marian",
+    "translation_model": null,
+    "vad_backend": "onnx",
+    "ram_floor_gb": 8,
+    "physical_core_floor": 4,
+    "vram_floor_gb": 0
+  },
+  "dependencies": {
+    "shellingham": "1.5.4",
+    "cloudpickle": "3.1.2",
+    "filelock": "3.32.6",
+    "av": "18.1.0",
+    "click": "8.5.0",
+    "fastapi": "0.141.1",
+    "packaging": "26.3",
+    "joblib": "1.6.0",
+    "Pygments": "2.21.0",
+    "sounddevice": "0.5.6",
+    "hf-xet": "1.6.0",
+    "rich": "15.0.0",
+    "pip": "24.0",
+    "pydantic_core": "2.46.5",
+    "sentencepiece": "0.2.2",
+    "numpy": "2.4.6",
+    "stark-translate": "2026.14.0.0",
+    "tokenizers": "0.23.2",
+    "pathvalidate": "3.3.1",
+    "httpcore": "1.0.9",
+    "setuptools": "65.5.0",
+    "sacremoses": "0.2.0",
+    "starlette": "1.6.0",
+    "transformers": "5.17.0",
+    "fsspec": "2026.7.0",
+    "huggingface_hub": "1.30.0",
+    "safetensors": "0.8.0",
+    "loguru": "0.7.3",
+    "httptools": "0.8.0",
+    "h11": "0.16.0",
+    "pydantic": "2.13.5",
+    "pydantic-settings": "2.15.0",
+    "pycparser": "3.0",
+    "mdurl": "0.1.2",
+    "PyYAML": "6.0.3",
+    "onnxruntime": "1.29.0",
+    "ctranslate2": "4.8.2",
+    "idna": "3.19",
+    "cffi": "2.1.1",
+    "certifi": "2026.7.22",
+    "scipy": "1.17.1",
+    "watchfiles": "1.2.0",
+    "annotated-types": "0.8.0",
+    "markdown-it-py": "4.2.0",
+    "annotated-doc": "0.0.5",
+    "typing-inspection": "0.4.4",
+    "tqdm": "4.70.0",
+    "flatbuffers": "25.12.19",
+    "python-dotenv": "1.2.3",
+    "websockets": "17.1",
+    "httpx": "0.28.1",
+    "typing_extensions": "4.16.0",
+    "faster-whisper": "1.2.1",
+    "uvloop": "0.22.1",
+    "psutil": "7.2.2",
+    "regex": "2026.9.10",
+    "typer": "0.27.2",
+    "uvicorn": "0.52.4",
+    "protobuf": "7.36.1",
+    "anyio": "4.15.1",
+    "piper-tts": "1.8.0"
+  },
+  "preparation": {
+    "online": {
+      "exit_code": 0,
+      "installed": 4,
+      "reused": 4
+    },
+    "offline": {
+      "exit_code": 0,
+      "installed": 0,
+      "reused": 8
+    },
+    "no_conversion_needed": true,
+    "torch_mlx_distributions_present": false,
+    "working_environment_modified": false
+  },
+  "artifact_hashes": [
+    {
+      "key": "marian-ct2-en-es",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+      "repo_id": null,
+      "revision": null,
+      "manifest_sha256": null,
+      "files": {
+        "model.bin": {
+          "size_bytes": 79567635,
+          "sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865"
+        },
+        "config.json": {
+          "size_bytes": 223,
+          "sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af"
+        },
+        "vocab.json": {
+          "size_bytes": 1590040,
+          "sha256": "257f346d7a6b2ecceafcca8ba05648ce2fd68dfaf105fb0e913dca7198f3f6d5"
+        },
+        "source.spm": {
+          "size_bytes": 801636,
+          "sha256": "4dd547c24816a335e7b0b2e63376a8f1b3cbfc671eda5ab808dd44fdadaa8791"
+        },
+        "target.spm": {
+          "size_bytes": 825924,
+          "sha256": "e236ee6d866b635c0142114f8647f39831f9d92534aa2aad75c942f6a78ad0e3"
+        },
+        "tokenizer_config.json": {
+          "size_bytes": 44,
+          "sha256": "9859e3f8f73e2f50ab3e5cc2de432645347432956df4772d33209a346dd97f3b"
+        },
+        "export_manifest.json": {
+          "size_bytes": 2070,
+          "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303"
+        }
+      }
+    },
+    {
+      "key": "marian-ct2-es-en",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+      "repo_id": null,
+      "revision": null,
+      "manifest_sha256": null,
+      "files": {
+        "model.bin": {
+          "size_bytes": 79567635,
+          "sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b"
+        },
+        "config.json": {
+          "size_bytes": 223,
+          "sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af"
+        },
+        "vocab.json": {
+          "size_bytes": 1590040,
+          "sha256": "257f346d7a6b2ecceafcca8ba05648ce2fd68dfaf105fb0e913dca7198f3f6d5"
+        },
+        "source.spm": {
+          "size_bytes": 825924,
+          "sha256": "e236ee6d866b635c0142114f8647f39831f9d92534aa2aad75c942f6a78ad0e3"
+        },
+        "target.spm": {
+          "size_bytes": 801636,
+          "sha256": "4dd547c24816a335e7b0b2e63376a8f1b3cbfc671eda5ab808dd44fdadaa8791"
+        },
+        "tokenizer_config.json": {
+          "size_bytes": 44,
+          "sha256": "dd009536f1cd954180a3004be20e9963eaf3d68b485d062ea1b90d3b9ded2bc5"
+        },
+        "export_manifest.json": {
+          "size_bytes": 2061,
+          "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a"
+        }
+      }
+    },
+    {
+      "key": "marian-en-es",
+      "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-en-es/snapshots/5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+      "repo_id": "Helsinki-NLP/opus-mt-en-es",
+      "revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+      "manifest_sha256": null,
+      "files": {
+        "pytorch_model.bin": {
+          "size_bytes": 312087523,
+          "sha256": "befce0f620e8e63f83bbb7f0818eb51d541cba28057a7cc14b00466d85c4994c"
+        },
+        "config.json": {
+          "size_bytes": 1473,
+          "sha256": "666ad3c2943674b6a789e311d221e44ec23e27f1bd9727930754bf773ec8e464"
+        },
+        "vocab.json": {
+          "size_bytes": 1590040,
+          "sha256": "257f346d7a6b2ecceafcca8ba05648ce2fd68dfaf105fb0e913dca7198f3f6d5"
+        },
+        "source.spm": {
+          "size_bytes": 801636,
+          "sha256": "4dd547c24816a335e7b0b2e63376a8f1b3cbfc671eda5ab808dd44fdadaa8791"
+        },
+        "target.spm": {
+          "size_bytes": 825924,
+          "sha256": "e236ee6d866b635c0142114f8647f39831f9d92534aa2aad75c942f6a78ad0e3"
+        },
+        "tokenizer_config.json": {
+          "size_bytes": 44,
+          "sha256": "9859e3f8f73e2f50ab3e5cc2de432645347432956df4772d33209a346dd97f3b"
+        }
+      }
+    },
+    {
+      "key": "marian-es-en",
+      "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-es-en/snapshots/c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+      "repo_id": "Helsinki-NLP/opus-mt-es-en",
+      "revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+      "manifest_sha256": null,
+      "files": {
+        "pytorch_model.bin": {
+          "size_bytes": 312087523,
+          "sha256": "586a4e69e0804459ac7c176a5dc76852652100d9af1ee0db796de719899a5deb"
+        },
+        "config.json": {
+          "size_bytes": 1438,
+          "sha256": "374443eacf8986c21386503e2fcd52eae6952ac09c87fd36695f5c12259a4cd1"
+        },
+        "vocab.json": {
+          "size_bytes": 1590040,
+          "sha256": "257f346d7a6b2ecceafcca8ba05648ce2fd68dfaf105fb0e913dca7198f3f6d5"
+        },
+        "source.spm": {
+          "size_bytes": 825924,
+          "sha256": "e236ee6d866b635c0142114f8647f39831f9d92534aa2aad75c942f6a78ad0e3"
+        },
+        "target.spm": {
+          "size_bytes": 801636,
+          "sha256": "4dd547c24816a335e7b0b2e63376a8f1b3cbfc671eda5ab808dd44fdadaa8791"
+        },
+        "tokenizer_config.json": {
+          "size_bytes": 44,
+          "sha256": "dd009536f1cd954180a3004be20e9963eaf3d68b485d062ea1b90d3b9ded2bc5"
+        }
+      }
+    },
+    {
+      "key": "piper-en",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/piper-en",
+      "repo_id": "rhasspy/piper-voices",
+      "revision": "1162a9173d0ce503555aed757976b7a9912eae4c",
+      "manifest_sha256": null,
+      "files": {
+        ".installed": {
+          "size_bytes": 173,
+          "sha256": "56a7278d7c3a2e801ab1f2420693d1332e4fd8d006c7a23557f6964c179bc073"
+        },
+        "en/en_US/lessac/high/en_US-lessac-high.onnx": {
+          "size_bytes": 113895201,
+          "sha256": "4cabf7c3a638017137f34a1516522032d4fe3f38228a843cc9b764ddcbcd9e09"
+        },
+        "en/en_US/lessac/high/en_US-lessac-high.onnx.json": {
+          "size_bytes": 4883,
+          "sha256": "db42b97d9859f257bc1561b8ed980e7fb2398402050a74ddd6cbec931a92412f"
+        }
+      }
+    },
+    {
+      "key": "piper-es",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/piper-es",
+      "repo_id": "rhasspy/piper-voices",
+      "revision": "1162a9173d0ce503555aed757976b7a9912eae4c",
+      "manifest_sha256": null,
+      "files": {
+        ".installed": {
+          "size_bytes": 173,
+          "sha256": "43f5c36a690eeb3347dcf87039cb76119c24a975e63809c8ed91f23dba0469f8"
+        },
+        "es/es_MX/claude/high/es_MX-claude-high.onnx": {
+          "size_bytes": 63122309,
+          "sha256": "3ef40a71ea63852cd8ab7e6fa7d2ecdcfa67a0b47c9c48e3f10e02ee02083ea0"
+        },
+        "es/es_MX/claude/high/es_MX-claude-high.onnx.json": {
+          "size_bytes": 4963,
+          "sha256": "1afc81f703c0e4cb3b4d7c0dca096b8b54a98806807f0170cf5eb5557723c12d"
+        }
+      }
+    },
+    {
+      "key": "silero-vad-onnx",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+      "repo_id": null,
+      "revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+      "manifest_sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+      "files": {
+        "silero-vad-6.2.1.onnx": {
+          "size_bytes": 2327524,
+          "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3"
+        }
+      }
+    },
+    {
+      "key": "whisper-small",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+      "repo_id": "Systran/faster-whisper-small",
+      "revision": "536b0662742c02347bc0e980a01041f333bce120",
+      "manifest_sha256": null,
+      "files": {
+        "model.bin": {
+          "size_bytes": 483546902,
+          "sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"
+        },
+        "config.json": {
+          "size_bytes": 2370,
+          "sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828"
+        },
+        "tokenizer.json": {
+          "size_bytes": 2203239,
+          "sha256": "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab"
+        },
+        "vocabulary.txt": {
+          "size_bytes": 459861,
+          "sha256": "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913"
+        },
+        ".installed": {
+          "size_bytes": 181,
+          "sha256": "6d04416fa9ec5b0e2363fef385a56e00dcf58f108992f6809a613342908113ae"
+        }
+      }
+    }
+  ],
+  "evidence": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-preparation.json": {
+      "sha256": "8e6c0e901b4550c7307eddc9dc3fbd01b58c66d0ef1cb98ebdd576c73ed584be",
+      "size_bytes": 13189
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-imports.json": {
+      "sha256": "a403aa8e5c3322882face263bf3ee0094f8909c04bf8fde0d9321bb64216b6a8",
+      "size_bytes": 4583
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-requirements.txt": {
+      "sha256": "ac929ca5684bd5477068823ca20dc96533c103243a130c12da7d664e282aaf53",
+      "size_bytes": 1094
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-pip-check.txt": {
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "size_bytes": 30
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-setup.log": {
+      "sha256": "a7aee1fea06de69a1f2e46fa7326786feb9f1b1b430bb4a9add19e64e7fc0641",
+      "size_bytes": 13186
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-setup-offline.log": {
+      "sha256": "135bebae34c4c9adb139b9c674983189f86f207188235e3cb3cbce6a65232583",
+      "size_bytes": 1437
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-tokenizer-smoke.json": {
+      "sha256": "75d03357826094bc5aea9ec0fdbdcd236a23ce9d5333357a1900a774ef91e5ac",
+      "size_bytes": 1021
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite_cpu_smoke.py": {
+      "sha256": "ff4913a2a5e59635fa05cc19549d5e1c6ece9d9f39089f0bd993bb46526836f3",
+      "size_bytes": 4145
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/report.json": {
+      "sha256": "6a0f42b755ba10461757b0e514393971b560bfa835fc241135cfebac307c9637",
+      "size_bytes": 24021
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/pipeline.log": {
+      "sha256": "cc5c068d34cf7bac5ec56c961ea1474ccbe06caf16a36abfe8492bc77a566c1d",
+      "size_bytes": 4090
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/metrics/diagnostics_lite_installed_smoke_en_01.jsonl": {
+      "sha256": "bcd474465a88406273db7d9bddbcc8342b72382323d30854f1fe744b98db0e88",
+      "size_bytes": 3675
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/metrics/session_metadata_lite_installed_smoke_en_01.json": {
+      "sha256": "d88ac2bec526eaa43eb709089be189fb3e98e17f86a4ee4c70ad6d9abdb31aa7",
+      "size_bytes": 5502
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/metrics/ab_metrics_lite_installed_smoke_en_01.csv": {
+      "sha256": "7915ac331c58c16b5bff6450f60d992be7ae568aa1b9c9863faba8f5f8abff07",
+      "size_bytes": 1129
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/metrics/session_lifecycle_lite_installed_smoke_en_01.json": {
+      "sha256": "aa6973262b39ebc06ff3fdd306ae2a918bc57bf32dbe5f227aa979f413dc3567",
+      "size_bytes": 2429
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/metrics/session_lite_installed_smoke_en_01.log": {
+      "sha256": "48318a454f49f8387dbab89c6947f250713f2084033589ffb3cbf4671c7f8ae0",
+      "size_bytes": 312
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/metrics/partials_lite_installed_smoke_en_01.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/metrics/hardware_lite_installed_smoke_en_01.json": {
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+      "size_bytes": 262
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/stark_data/live_sessions/lite_installed_smoke_en_01/chunk_0001.wav": {
+      "sha256": "ed5918bfdd3b78b0d879c92b68dbed77b889167e1c2dbb8017abfd534cf1d70c",
+      "size_bytes": 157754
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/stark_data/live_sessions/lite_installed_smoke_en_01/tts/tts_0001.wav": {
+      "sha256": "a9a1ed9a037ed0003424b04d21e797c299f7debd6ac6af8606d7844d41fa27e4",
+      "size_bytes": 93740
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/pipeline.log": {
+      "sha256": "d2cca03dea2f562f47074d0fa557e54891b4d6198d5c69a3b916cbbad33b696a",
+      "size_bytes": 4085
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/metrics/session_lifecycle_lite_installed_smoke_es_01.json": {
+      "sha256": "28c3ea6e02fc3b45f34f0186f1db62bdfbd94d5d502ffdce42d4706c006b5bba",
+      "size_bytes": 2429
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/metrics/partials_lite_installed_smoke_es_01.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/metrics/session_metadata_lite_installed_smoke_es_01.json": {
+      "sha256": "c6d821a7ffc3d054cef98d043f346204143c6edfacdd2d2d3b76afbc5af2e7b5",
+      "size_bytes": 5502
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/metrics/session_lite_installed_smoke_es_01.log": {
+      "sha256": "fc0149fcf1b85eb2bec8c09d889fe041cea654bcbe8b120a0e7c170c25b23dd9",
+      "size_bytes": 312
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/metrics/ab_metrics_lite_installed_smoke_es_01.csv": {
+      "sha256": "1ca0becaada5b259ee92c7152bd6381a65d6548017e986b49e537aed228c58c3",
+      "size_bytes": 1126
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/metrics/diagnostics_lite_installed_smoke_es_01.jsonl": {
+      "sha256": "fe25d89522c260b01c589eb65af4f932ab943d96c164f310c836fe00e36c3b63",
+      "size_bytes": 3665
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/metrics/hardware_lite_installed_smoke_es_01.json": {
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+      "size_bytes": 262
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/stark_data/live_sessions/lite_installed_smoke_es_01/chunk_0001.wav": {
+      "sha256": "8f02d8c93da6a7f9a13228c3409e19679ef03d8b335cbb831c998cfd92f8a895",
+      "size_bytes": 161850
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/stark_data/live_sessions/lite_installed_smoke_es_01/tts/tts_0001.wav": {
+      "sha256": "39d9d3c88f1589cf7e7df066e6cf7a4e56804a0e0ca5ba84779975a2611843e3",
+      "size_bytes": 95276
+    }
+  },
+  "cases": [
+    {
+      "source_lang": "en",
+      "target_lang": "es",
+      "session_id": "lite_installed_smoke_en_01",
+      "input_seconds": 3.282675736961451,
+      "input_sha256": "ca258b91c9ea8187048829899cac1e60277ee258631cc58ce7b156a8e4cb1b43",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-I",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/lib/python3.11/site-packages/dry_run_ab.py",
+        "--profile",
+        "lite-cpu",
+        "--lang",
+        "en",
+        "--audio-file",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en.wav",
+        "--session-id",
+        "lite_installed_smoke_en_01",
+        "--gain",
+        "1",
+        "--no-ab",
+        "--tts",
+        "--tts-output",
+        "wav",
+        "--ws-port",
+        "58752",
+        "--http-port",
+        "58753"
+      ],
+      "returncode": 0,
+      "lifecycle_status": "completed",
+      "observed_git_sha": "53d8680f75fce18d5110cca482f15c9984bf74de",
+      "peak_rss_bytes": 1377107968,
+      "metadata": {
+        "backend": "cpu",
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "profile_artifacts": {
+          "marian-ct2-en-es": {
+            "repo_id": null,
+            "revision": null,
+            "sha256": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66"
+          },
+          "marian-ct2-es-en": {
+            "repo_id": null,
+            "revision": null,
+            "sha256": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055"
+          },
+          "marian-en-es": {
+            "repo_id": "Helsinki-NLP/opus-mt-en-es",
+            "revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "sha256": null,
+            "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-en-es/snapshots/5bc4493d463cf000c1f0b50f8d56886a392ed4ab"
+          },
+          "marian-es-en": {
+            "repo_id": "Helsinki-NLP/opus-mt-es-en",
+            "revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "sha256": null,
+            "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-es-en/snapshots/c96e2c5399ebfae4fc43d9669556b9afa74bb69d"
+          },
+          "silero-vad-onnx": {
+            "repo_id": null,
+            "revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx"
+          },
+          "whisper-small": {
+            "repo_id": "Systran/faster-whisper-small",
+            "revision": "536b0662742c02347bc0e980a01041f333bce120",
+            "sha256": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small"
+          }
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "stt_backend": "faster-whisper",
+        "managed_llama": null,
+        "model_a": null,
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        }
+      },
+      "finals": [
+        {
+          "source_text": "The grace of God brings salvation.",
+          "translated_text": "La gracia de Dios trae salvaci\u00f3n.",
+          "marian_backend": "ct2-int8",
+          "source_lang": "en",
+          "target_lang": "es",
+          "session_kind": "replay"
+        }
+      ],
+      "tts": [
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en/stark_data/live_sessions/lite_installed_smoke_en_01/tts/tts_0001.wav",
+          "sha256": "a9a1ed9a037ed0003424b04d21e797c299f7debd6ac6af8606d7844d41fa27e4",
+          "sample_rate": 22050,
+          "channels": 1,
+          "frames": 46848
+        }
+      ]
+    },
+    {
+      "source_lang": "es",
+      "target_lang": "en",
+      "session_id": "lite_installed_smoke_es_01",
+      "input_seconds": 3.2478458049886623,
+      "input_sha256": "0f5783acac94e7ff66714b3fb81d8e4523e41a9167cfd554cba7460a9d63cfd9",
+      "argv": [
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+        "-I",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/lib/python3.11/site-packages/dry_run_ab.py",
+        "--profile",
+        "lite-cpu",
+        "--lang",
+        "es",
+        "--audio-file",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es.wav",
+        "--session-id",
+        "lite_installed_smoke_es_01",
+        "--gain",
+        "1",
+        "--no-ab",
+        "--tts",
+        "--tts-output",
+        "wav",
+        "--ws-port",
+        "58787",
+        "--http-port",
+        "58788"
+      ],
+      "returncode": 0,
+      "lifecycle_status": "completed",
+      "observed_git_sha": "53d8680f75fce18d5110cca482f15c9984bf74de",
+      "peak_rss_bytes": 1492680704,
+      "metadata": {
+        "backend": "cpu",
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "profile_artifacts": {
+          "marian-ct2-en-es": {
+            "repo_id": null,
+            "revision": null,
+            "sha256": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66"
+          },
+          "marian-ct2-es-en": {
+            "repo_id": null,
+            "revision": null,
+            "sha256": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055"
+          },
+          "marian-en-es": {
+            "repo_id": "Helsinki-NLP/opus-mt-en-es",
+            "revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "sha256": null,
+            "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-en-es/snapshots/5bc4493d463cf000c1f0b50f8d56886a392ed4ab"
+          },
+          "marian-es-en": {
+            "repo_id": "Helsinki-NLP/opus-mt-es-en",
+            "revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "sha256": null,
+            "path": "/Users/willem/.cache/huggingface/hub/models--Helsinki-NLP--opus-mt-es-en/snapshots/c96e2c5399ebfae4fc43d9669556b9afa74bb69d"
+          },
+          "silero-vad-onnx": {
+            "repo_id": null,
+            "revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx"
+          },
+          "whisper-small": {
+            "repo_id": "Systran/faster-whisper-small",
+            "revision": "536b0662742c02347bc0e980a01041f333bce120",
+            "sha256": null,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small"
+          }
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "stt_backend": "faster-whisper",
+        "managed_llama": null,
+        "model_a": null,
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        }
+      },
+      "finals": [
+        {
+          "source_text": "La gracia de Dios trae salvaci\u00f3n.",
+          "translated_text": "God's grace brings salvation.",
+          "marian_backend": "ct2-int8",
+          "source_lang": "es",
+          "target_lang": "en",
+          "session_kind": "replay"
+        }
+      ],
+      "tts": [
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/es/stark_data/live_sessions/lite_installed_smoke_es_01/tts/tts_0001.wav",
+          "sha256": "39d9d3c88f1589cf7e7df066e6cf7a4e56804a0e0ca5ba84779975a2611843e3",
+          "sample_rate": 22050,
+          "channels": 1,
+          "frames": 47616
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Mac CPU execution does not certify native Windows/Linux x86 or RTX 2070.",
+    "Two synthetic single-final cases are functional checks only.",
+    "Lifecycle observed_git_sha points to ancestor checkout, not the installed build; wheel/pipeline hashes bind the actual code.",
+    "No human quality approvals, physical microphone/output, hotplug or diarization checks."
+  ]
+}

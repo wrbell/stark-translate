@@ -17,18 +17,18 @@ class TestRunbook:
         path = ROOT / "docs" / "operator_runbook.md"
         assert path.exists()
         text = path.read_text()
-        assert "Operator Runbook" in text
+        assert "operator runbook" in text.lower()
 
     def test_runbook_has_required_sections(self):
         text = (ROOT / "docs" / "operator_runbook.md").read_text()
-        # Sections that map to the runbook structure described in the plan
+        # Cover the current volunteer workflow rather than the legacy panel names.
         for section in (
-            "Before the event",
-            "During the event",
-            "Start the session",
+            "Before people arrive",
+            "While the speaker talks",
+            "Start captions",
             "When something goes wrong",
-            "End-of-event checklist",
-            "Pre-event dry-run",
+            "End the session",
+            "Setup owner reference",
         ):
             assert section in text, f"runbook missing section: {section}"
 
@@ -40,7 +40,7 @@ class TestRunbook:
             "/healthz",
             "audience_display.html",
             "metrics/",
-            "Romans 8:28",  # used as a test phrase in the dry-run
+            "John 3:16",  # exercised in the controlled operator rehearsal
         ):
             assert token in text, f"runbook missing reference: {token}"
 

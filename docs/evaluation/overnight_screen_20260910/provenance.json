@@ -1,0 +1,686 @@
+{
+  "all_arms_preserved": true,
+  "analysis_sha256": "0ce884b43839ce4e9a01dbb0dba7e3211906338f049439f572c2acfb24dc0442",
+  "archive": {
+    "file": "screen-evidence.tar.gz",
+    "members": 1222,
+    "raw_bytes": 129407566,
+    "sha256": "d2beaf8cf48ed2f0c773f82b303930091241fc3bb72702ede366b4ac2f1a6a82"
+  },
+  "arm_status_counts": {
+    "not_selected": 28
+  },
+  "determinism": "Sorted names; tar ownership/mode/time fixed; gzip filename empty and mtime=0; compression level6. No generated wallclock timestamps.",
+  "editorial_followup": {
+    "date": "2026-09-10",
+    "decision_source": {
+      "original_path": "/Users/willem/Code/vibes/SRTranslate-worktrees/overnight-latency/.cache/endurance-reader/screen-decision.json",
+      "sha256": "7a6cccda4de73364435f2fc05b69d564967b67a8463f022794fca95b6c0bdcc1"
+    },
+    "files": [
+      {
+        "path": "README.md",
+        "sha256": "b1f888fda06ac57ee863a84ed3aa870f94b82b15e6db01b652df435f04d387ac"
+      },
+      {
+        "path": "first_preview_e4b.md",
+        "sha256": "ebafbec48fcbac2d84519e8089766b19ed2b6ac770bc115a51a741c8a6484d2f"
+      },
+      {
+        "path": "screen-decision.json",
+        "sha256": "7a6cccda4de73364435f2fc05b69d564967b67a8463f022794fca95b6c0bdcc1"
+      }
+    ],
+    "original_generated_report": {
+      "archive_path": "COMPACT.md",
+      "sha256": "14a14fc6a99e4e91bb7852fc9ddfad93cc46aca2370bc02cb6f71523ea25dbfe"
+    },
+    "production_defaults_changed": false,
+    "quality_approval": false,
+    "raw_archive_and_shards_unchanged": true,
+    "scope": "External README outcome lead and first-preview E4B decision note added after evidence packaging"
+  },
+  "endpoint_classification_version": 1,
+  "excluded": [
+    "Source WAV and per-chunk recordings",
+    "Model weights and adapter binaries",
+    "Unrelated sessions",
+    "Historical reports and repository metadata"
+  ],
+  "frozen_git_revision": "911f4ae8d6f42d41574478eee141790cc82818f2",
+  "independent_audit": {
+    "discrepancies": [],
+    "endpoint_counts": {
+      "hard_cut": 96,
+      "silence": 96,
+      "silence_replay_tail": 96,
+      "smart_cut": 384
+    },
+    "finals": 672,
+    "passed": true,
+    "scope": "Independent completed-96 analysis checks; no production or reference-quality certification",
+    "script_sha256": "bbbf14bae0e29889ce8b1e75d154a9e26c478b29088ebf4253b655f926494bed",
+    "sha256": "2e9d09afc3454ccbb8f0a317d184ccc2785e69e8ff2355844b9968fd52219b86",
+    "total_checks": 24324
+  },
+  "inventory": {
+    "file": "inventory.jsonl.gz",
+    "self_entry": "Inventory omits its own recursive entry; external SHA256SUMS binds inventory and archive",
+    "uncompressed_sha256": "167ff0b6cf21a427ae7497e670718ea0dd95f001b44c72eb7c521e3db88daadf"
+  },
+  "limitations": [
+    "Native Mac was locked while the controlled browser DOM reported visible. This does not prove physical on-screen visibility or stable physical browser identity.",
+    "Per-session declared display-role ACKs include return-network time; preserve connection IDs and coverage, never pool unrelated clients.",
+    "Recorded silence and VAD decisions assisted by virtual EOF padding are separate analytical endpoints. Raw labels/timings are unchanged.",
+    "Natural EN and synthetic ES must remain separate workloads; this archive contains only the supplied matrix.",
+    "Per-process lifetime RSS and Metal allocation are separate recorded metrics, not combined process-tree or whole-machine peak RAM.",
+    "Stage medians are not additive median total latency; stage wall time includes internal waits.",
+    "No WER/reference-quality score, bilingual approval, hardware certification or production promotion is inferred."
+  ],
+  "missing_optional_logs": [],
+  "package_activity_utc": {
+    "basis": "Recorded package/build activity window; supporting validation report may be included in context. Enclosing interval includes quiet gaps; no measured CPU/thermal effect is inferred.",
+    "end": "2026-09-10T05:53:18.380938+00:00",
+    "exclusion_applied": false,
+    "session_overlap": [
+      {
+        "ended_at": "2026-09-10T05:36:28.088316+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_1024_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:35:33.145904+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:41:28.978448+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_1024_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:40:34.535802+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:41:38.776217+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_1024_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:40:43.582162+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:35:26.732476+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_1024_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:34:28.433778+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:42:30.351593+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_1024_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:41:33.797855+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:40:37.439272+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_1024_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:39:40.986025+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:34:23.330895+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_512_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:33:29.434086+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:43:29.648037+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_512_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:42:35.793561+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:39:35.947158+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_512_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:38:41.936469+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:33:24.012178+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_512_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:32:26.803954+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:44:31.194293+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_512_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:43:34.319750+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:38:36.604220+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_allocation_512_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:37:37.677851+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:11:38.712533+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_async_captions_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:10:44.186650+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:05:50.213122+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_async_captions_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:04:56.076419+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:17:10.282476+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_async_captions_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:16:15.181781+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:10:39.429508+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_async_captions_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:09:42.549883+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:06:54.805193+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_async_captions_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:05:56.114627+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:16:09.033105+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_async_captions_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:15:11.390773+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:38:28.751023+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_anchor_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:37:34.462628+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:09:58.921384+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_anchor_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:09:03.343884+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:43:41.523414+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_anchor_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:42:46.418180+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:37:29.444580+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_anchor_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:36:33.352671+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:11:00.779648+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_anchor_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:10:03.761824+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:42:40.145515+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_anchor_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:41:43.733772+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:07:33.106375+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:06:35.698891+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:39:28.067482+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:38:33.585644+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:13:03.532719+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:12:09.377667+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:06:30.768789+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:05:31.591686+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:40:29.591887+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:39:33.265259+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:12:04.243512+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_baseline_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:11:07.157004+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:21:51.283505+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_clause_preview_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:20:56.427684+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:55:41.044338+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_clause_preview_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:54:46.971347+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:27:20.819754+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_clause_preview_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:26:25.438131+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:20:49.776548+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_clause_preview_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:19:51.350680+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:56:42.395177+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_clause_preview_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:55:46.265766+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:26:19.487499+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_clause_preview_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:25:23.049805+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:13:39.348494+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_first_preview_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:12:45.260973+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:03:49.436516+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_first_preview_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:02:53.497320+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:19:13.507151+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_first_preview_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:18:17.969908+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:12:40.027287+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_first_preview_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:11:43.636280+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:04:50.888742+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_first_preview_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:03:54.481069+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:18:12.190155+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_first_preview_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:17:15.143095+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:09:37.700085+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_latest_partial_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:08:42.234267+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:07:56.088671+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_latest_partial_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:07:00.986521+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:15:06.549326+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_latest_partial_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:14:10.630999+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:08:36.355826+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_latest_partial_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:07:37.804068+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:08:57.525949+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_latest_partial_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:08:01.019696+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:14:05.228126+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_latest_partial_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:13:08.579904+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:15:40.681299+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_marian_memo_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:14:46.498133+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:01:46.084824+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_marian_memo_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:00:51.150345+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:21:14.834444+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_marian_memo_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:20:20.713081+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:14:41.337142+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_marian_memo_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:13:44.069746+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:02:48.104938+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_marian_memo_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T06:01:51.021837+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:20:15.533956+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_marian_memo_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:19:18.600137+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:17:45.390017+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_preview_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:16:50.155695+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:59:42.363343+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_preview_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:58:48.210276+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:23:17.472597+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_preview_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:22:21.538664+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:16:44.114135+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_preview_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:15:45.625318+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:00:44.780054+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_preview_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:59:47.282756+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:22:16.163412+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_preview_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:21:19.840244+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:19:46.176339+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_speculation_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:18:52.089969+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:57:41.708870+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_speculation_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:56:47.653891+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:25:18.119395+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_speculation_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:24:24.134761+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:18:46.846668+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_speculation_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:17:50.315285+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:58:43.050553+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_speculation_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:57:46.730924+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:24:18.835148+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_pause_speculation_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:23:22.859089+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:32:21.892381+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_prefix_cache_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:31:27.340272+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:45:30.504589+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_prefix_cache_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:44:35.991465+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:37:32.758364+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_prefix_cache_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:36:38.966389+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:31:20.625306+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_prefix_cache_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:30:22.458627+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:46:32.018123+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_prefix_cache_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:45:35.705751+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:36:31.428322+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_prefix_cache_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:35:35.014961+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:23:59.337586+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_rolling_6s_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:23:02.558386+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:53:40.412570+00:00",
+        "package_activity_overlap": true,
+        "session_id": "overnight_screen_rolling_6s_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:52:44.507469+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:29:23.535730+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_rolling_6s_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:28:28.026896+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:22:55.790861+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_rolling_6s_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:21:56.568727+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:54:41.755521+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_rolling_6s_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:53:45.239745+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:28:22.219899+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_rolling_6s_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:27:25.864645+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:26:02.004922+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_streaming_stt_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:25:06.421137+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:51:37.616768+00:00",
+        "package_activity_overlap": true,
+        "session_id": "overnight_screen_streaming_stt_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:50:43.568337+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:31:24.369124+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_streaming_stt_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:30:29.949633+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:25:00.678012+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_streaming_stt_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:24:04.278029+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:52:39.086239+00:00",
+        "package_activity_overlap": true,
+        "session_id": "overnight_screen_streaming_stt_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:51:42.717415+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:30:25.054999+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_streaming_stt_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:29:28.458345+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:30:17.189159+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_onnx_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:29:20.631384+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:47:33.844123+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_onnx_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:46:37.398699+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:35:30.039932+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_onnx_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:34:33.768654+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:29:13.842765+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_onnx_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:28:10.790904+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:48:35.617534+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_onnx_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:47:39.483850+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:34:28.699415+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_onnx_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:33:31.715348+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:28:05.722723+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_torch_e2b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:27:10.822327+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:49:36.931803+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_torch_e2b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:48:41.351978+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:33:26.986723+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_torch_e2b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:32:31.141709+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:27:04.203496+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_torch_e4b_r0_screening_45s_en",
+        "started_at": "2026-09-10T05:26:07.413966+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T05:50:38.300009+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_torch_e4b_r1_screening_45s_en",
+        "started_at": "2026-09-10T05:49:41.880270+00:00"
+      },
+      {
+        "ended_at": "2026-09-10T06:32:25.687938+00:00",
+        "package_activity_overlap": false,
+        "session_id": "overnight_screen_vad_worker_torch_e4b_r2_screening_45s_en",
+        "started_at": "2026-09-10T06:31:29.208643+00:00"
+      }
+    ],
+    "start": "2026-09-10T05:51:37+00:00"
+  },
+  "privacy": {
+    "contains": "Church transcript/translation excerpts, local paths, host/PID identity and original logs. Source-PR evidence authorization does not publish a package/release.",
+    "exact_original_bytes": true,
+    "redacted_derivatives": [],
+    "secret_scan": "Known credential patterns/environment-dump heuristic; fail closed for review, not a guarantee of absence"
+  },
+  "purpose": "Complete screening evidence; no production promotion or release publication",
+  "recorded_runs": 96,
+  "schema_version": 1,
+  "source_kinds": {
+    "screening_45s": "natural"
+  },
+  "source_snapshot": "Only runtime/harness static local import closure and audience assets; full recorded source hash manifest is in launch.json",
+  "supporting_context": [
+    {
+      "archive_path": "context/00-report.json",
+      "sha256": "39e8a3a46c890deb2aef486e8cd27200fd321dcf628f191c056b1e503a5c4c2c"
+    }
+  ],
+  "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "valid_runs": 96
+}

@@ -1,0 +1,137 @@
+"""Read-only byte comparison of two already-built wheels and their receipts."""
+import hashlib
+import json
+import zipfile
+from datetime import datetime, timezone
+from email.parser import BytesParser
+from pathlib import Path
+
+BASE = Path('/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910')
+OUT = Path(__file__).resolve().parent
+BEGIN = datetime.now(timezone.utc).isoformat()
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def collect(directory):
+    report_path = BASE / directory / 'report.json'
+    report_raw = report_path.read_bytes()
+    report = json.loads(report_raw)
+    artifacts = {row['kind']: row for row in report['artifacts']}
+    wheel_evidence = []
+    for kind in ('wheel', 'wheel_from_mac', 'wheel_from_sdist'):
+        descriptor = artifacts[kind]
+        path = Path(descriptor['path'])
+        raw = path.read_bytes()
+        assert len(raw) == descriptor['size_bytes'], (kind, 'size differs from receipt')
+        assert sha(raw) == descriptor['sha256'], (kind, 'hash differs from receipt')
+        wheel_evidence.append({'kind': kind, 'path': str(path), 'sha256': sha(raw), 'size_bytes': len(raw)})
+    canonical = Path(artifacts['wheel']['path'])
+    with zipfile.ZipFile(canonical) as archive:
+        infos = [i for i in archive.infolist() if not i.is_dir()]
+        assert len(infos) == len({i.filename for i in infos}), 'Duplicate ZIP names'
+        assert sum(i.file_size for i in infos) < 32 * 1024 * 1024, 'Unexpected expanded wheel size'
+        payloads = {i.filename: archive.read(i.filename) for i in infos}
+    actual_hashes = {name: sha(raw) for name, raw in payloads.items()}
+    declared = report['runtime_equivalence']['member_sha256']
+    for name, expected in declared.items():
+        assert actual_hashes[name] == expected, ('Actual member differs from manifest', name)
+    runtime_names = {name for name in actual_hashes if '.dist-info/' not in name}
+    assert runtime_names == set(declared), ('Manifest does not cover exact non-dist-info member inventory', runtime_names ^ set(declared))
+    assert len(declared) == report['runtime_equivalence']['member_count']
+    metadata_name = next(name for name in payloads if name.endswith('.dist-info/METADATA'))
+    parsed = BytesParser().parsebytes(payloads[metadata_name])
+    headers = {key: parsed.get_all(key) for key in parsed.keys()}
+    return payloads, {
+        'source_revision': report['source_revision'],
+        'build_report': {'path': str(report_path), 'sha256': sha(report_raw), 'size_bytes': len(report_raw),
+                         'reported_status': report['status'], 'reported_ended_at_utc': report.get('ended_at_utc')},
+        'wheels': wheel_evidence, 'runtime_members': sorted(runtime_names),
+        'runtime_manifest_matches_actual_members': True,
+        'canonical_equals_both_rebuilt_wheels': len({row['sha256'] for row in wheel_evidence}) == 1,
+        'wheel_metadata_headers': headers,
+    }
+
+
+old_payloads, old = collect('artifact-validation-752ab9a-20260910T0829Z')
+new_payloads, new = collect('artifact-validation-84832fb-final')
+assert set(old_payloads) == set(new_payloads), 'Wheel member inventory changed'
+assert old['runtime_members'] == new['runtime_members'], 'Runtime manifest inventory changed'
+rows = []
+for name in sorted(old_payloads):
+    kind = 'metadata' if '.dist-info/' in name else 'markdown' if name.endswith('.md') else 'runtime_code_or_resource'
+    a, b = old_payloads[name], new_payloads[name]
+    rows.append({'path': name, 'kind': kind, 'old_sha256': sha(a), 'new_sha256': sha(b),
+                 'old_size_bytes': len(a), 'new_size_bytes': len(b), 'byte_identical': a == b})
+code = [row for row in rows if row['kind'] == 'runtime_code_or_resource']
+markdown = [row for row in rows if row['kind'] == 'markdown']
+meta = [row for row in rows if row['kind'] == 'metadata']
+changed_code = [row['path'] for row in code if not row['byte_identical']]
+changed_md = [row['path'] for row in markdown if not row['byte_identical']]
+changed_meta = [row['path'] for row in meta if not row['byte_identical']]
+expected_operator_delta = {'operator_app/main.py', 'operator_app/audio.py', 'operator_app/metrics.py', 'operator_app/features.py', 'operator_app/pipeline_manager.py'}
+assert set(changed_code) == expected_operator_delta, ('Unexpected non-Markdown delta', set(changed_code) ^ expected_operator_delta)
+assert new['source_revision'] == '84832fb98caf4504cf65b1f5969558b0be911f5c'
+assert new['build_report']['sha256'] == 'd13fe9aabad161f45b3631ed33f20194a5ab7bfa83d64c020ab38fb032b94b3b'
+assert new['build_report']['reported_status'] == 'passed'
+assert new['wheels'][0]['sha256'] == 'ac3d5216ce79f2ef004e2ed5be4c42d5eccb3f2ce8612661a2a7d138c7c2c41e'
+assert old['build_report']['sha256'] == '986e9bc40bcd29f10453b4525245c3122b12cc6f5f756e6a2192b87c891566ac'
+inference_members = [row for row in code if row['path'] not in expected_operator_delta]
+assert all(row['byte_identical'] for row in inference_members)
+assert any(row['path'] == 'dry_run_ab.py' for row in inference_members)
+assert any(row['path'].startswith('engines/') for row in inference_members)
+report = {
+    'schema_version': 1, 'started_at_utc': BEGIN, 'ended_at_utc': datetime.now(timezone.utc).isoformat(),
+    'status': 'expected_operator_cleanup_only_runtime_delta',
+    'old': old, 'new': new,
+    'comparison': {'identical_member_inventory': True, 'runtime_total': len(code) + len(markdown),
+                   'non_markdown_runtime_count': len(code), 'byte_identical_non_markdown_runtime_count': sum(row['byte_identical'] for row in code),
+                   'changed_non_markdown_runtime_paths': changed_code,
+                   'markdown_runtime_count': len(markdown), 'changed_markdown_paths': changed_md,
+                   'identical_markdown_paths': [row['path'] for row in markdown if row['byte_identical']],
+                   'metadata_count': len(meta), 'changed_metadata_paths': changed_meta,
+                   'metadata_headers_equal': old['wheel_metadata_headers'] == new['wheel_metadata_headers'],
+                   'canonical_wheel_bytes_identical': old['wheels'][0]['sha256'] == new['wheels'][0]['sha256'],
+                   'expected_operator_cleanup_paths': sorted(expected_operator_delta),
+                   'unexpected_non_markdown_runtime_paths': [],
+                   'runtime_code_resources_outside_operator_delta': len(inference_members),
+                   'unchanged_outside_operator_delta': all(row['byte_identical'] for row in inference_members),
+                   'explicit_pipeline_engine_paths': [row['path'] for row in inference_members if row['path'] == 'dry_run_ab.py' or row['path'].startswith('engines/')],
+                   'uncompared_runtime_members': []},
+    'members': rows,
+    'method': 'Read and hash both build reports, all six wheel containers, and every canonical-wheel member; compare actual decompressed bytes, validate CRC on read, reject duplicate names or inventory changes. No extraction or package execution.',
+    'boundaries': [
+        '152 runtime members are the exact wheel inventory excluding dist-info; 143 code/resources and nine Markdown resources are counted separately.',
+        'Exactly five operator control-plane lifecycle modules intentionally changed. Their exact old/new hashes remain included; they are excluded only from the byte-identical subset, not from the comparison.',
+        'The final 84832fb build receipt passed, including six actual native device initialization/rapid-exit checks. Zero devices were visible in that context; no physical input/output certification or model inference is implied. The failed intermediate 60ad4db smoke remains a separate retained result.',
+        'Both successful installed full-hour sessions remain bound to their actual 752ab9a wheel/runtime. All 138 non-Markdown runtime members outside the five named operator modules are byte-identical, including dry_run_ab.py, every engines module, pipeline helpers, profiles and packaged resources. No new 84832fb inference hour is invented.',
+        'Metadata changes and canonical wheel hash differences remain recorded; documentation changes can alter METADATA description and RECORD.',
+        'No models, inference, tests, builds, source edits, environment changes, Git/index changes or archive publication were performed.',
+    ],
+}
+(OUT / 'report.json').write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
+lines = ['# Final built wheel continuity: 752ab9a → 84832fb', '',
+         f"**{len(inference_members)} non-Markdown runtime code/resource members are byte-identical; exactly five operator lifecycle modules changed as expected.** Both wheels have the same {len(code) + len(markdown)}-member runtime inventory: {len(code)} non-Markdown members and {len(markdown)} Markdown files. No runtime paths were added or removed. There are no unexamined runtime members.", '',
+         'All inference engine/pipeline code and other resources outside the five named operator modules match 752ab9a exactly. The successful Standard and Lite hours remain bound to their actual 752ab9a installation. This companion establishes the exact final code difference; it does not invent another hour or promote a latency, quality, physical-device or target-hardware gate.', '',
+         '| Artifact | Source | SHA-256 |', '|---|---|---|',
+         f"| Endurance canonical wheel | `{old['source_revision']}` | `{old['wheels'][0]['sha256']}` |",
+         f"| Final canonical wheel | `{new['source_revision']}` | `{new['wheels'][0]['sha256']}` |", '',
+         'Each canonical wheel independently matches its sdist-rebuilt and Mac-ZIP-rebuilt wheel. All 152 actual runtime member hashes match the respective build manifests. Container hashes differ because operator source, Markdown and wheel metadata changed.', '',
+         '## Disclosed operator cleanup delta', '',
+         'These five members are excluded only from the identical subset. All five are fully compared and hash-mapped below. They stop existing application workers on lifespan exit, preserve exception cleanup, avoid constructing absent workers and report failed bounded joins. They do not change inference engines, model selection, caption generation, audio processing or pipeline timing.', '',
+         '| Wheel member | 752 SHA-256 | 848 SHA-256 |', '|---|---|---|']
+for row in code:
+    if not row['byte_identical']:
+        lines.append(f"| `{row['path']}` | `{row['old_sha256']}` | `{row['new_sha256']}` |")
+lines += ['', '## Markdown and metadata', '',
+          'Changed Markdown: ' + ', '.join('`' + name + '`' for name in changed_md) + '.',
+          'Unchanged Markdown: ' + ', '.join('`' + row['path'] + '`' for row in markdown if row['byte_identical']) + '.',
+          'Changed dist-info members: ' + ', '.join('`' + name + '`' for name in changed_meta) + '.',
+          'Parsed package metadata headers, including requirements/version, are identical. Exact old/new hashes and sizes for every one of the 157 wheel members, both build reports and all six wheel containers are in `report.json`.', '',
+          '## Validation boundary', '',
+          'The final 84832fb artifact receipt passed. It records six actual native sounddevice initialization/rapid-process-exit checks, with no model imports and no remaining polling workers after lifespan. Zero inputs/outputs were visible in that execution context; this does not certify microphone or speaker hardware. The earlier 60ad4db shutdown failure remains retained separately; this final receipt does not rewrite it.', '',
+          'This comparison itself only read already-built files. No extraction, package import/execution, model, device, test, build, tracked source, installed environment or Git/index mutation was performed. Every inference resource is compared, but model weight files are external to the wheel and are not newly revalidated by this member comparison.']
+(OUT / 'README.md').write_text('\n'.join(lines) + '\n')
+print(json.dumps({'status': report['status'], 'comparison': report['comparison'], 'output': str(OUT)}, indent=2))

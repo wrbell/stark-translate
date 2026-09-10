@@ -92,6 +92,7 @@ class TestCreateTranslationEngine:
         # Repoint the resolver root at an empty tmp_path so the auto-resolver
         # finds nothing.
         monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+        monkeypatch.setenv("STARK_MODELS_DIR", str(tmp_path / "isolated-managed-cache"))
 
         mock_engine = MagicMock()
         with patch("engines.marian_hf_engine.MarianHFEngine", return_value=mock_engine) as mock_cls:
@@ -105,8 +106,11 @@ class TestCreateTranslationEngine:
         active_dir = tmp_path / "en-es" / "active"
         active_dir.mkdir(parents=True)
         (active_dir / "model.bin").write_bytes(b"fake CT2 weights")
+        for filename in ("config.json", "vocab.json", "source.spm", "target.spm", "tokenizer_config.json"):
+            (active_dir / filename).write_text("{}")
 
         monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+        monkeypatch.setenv("STARK_MODELS_DIR", str(tmp_path / "isolated-managed-cache"))
 
         mock_engine = MagicMock()
         with patch("engines.cuda_engine.MarianCT2Engine", return_value=mock_engine) as mock_cls:
@@ -117,6 +121,7 @@ class TestCreateTranslationEngine:
     def test_marian_strict_ct2_raises_when_missing(self, tmp_path, monkeypatch):
         """marian_backend='ct2' with no model.bin raises ValueError (no silent fallback)."""
         monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+        monkeypatch.setenv("STARK_MODELS_DIR", str(tmp_path / "isolated-managed-cache"))
         with pytest.raises(ValueError, match="marian_backend='ct2' requested"):
             create_translation_engine(engine_type="marian", marian_backend="ct2")
 
@@ -125,7 +130,10 @@ class TestCreateTranslationEngine:
         active_dir = tmp_path / "en-es" / "active"
         active_dir.mkdir(parents=True)
         (active_dir / "model.bin").write_bytes(b"fake CT2 weights")
+        for filename in ("config.json", "vocab.json", "source.spm", "target.spm", "tokenizer_config.json"):
+            (active_dir / filename).write_text("{}")
         monkeypatch.setattr("engines.factory._MARIAN_CT2_ROOT", tmp_path)
+        monkeypatch.setenv("STARK_MODELS_DIR", str(tmp_path / "isolated-managed-cache"))
 
         mock_engine = MagicMock()
         with patch("engines.marian_hf_engine.MarianHFEngine", return_value=mock_engine) as mock_cls:

@@ -115,11 +115,11 @@ class TestHelloValidation:
 
         assert not _validate_hello({"version": 1, "sample_rate": 22050, "channels": 1, "format": "pcm_s16le"})
 
-    def test_accepts_24k_and_48k(self):
+    def test_rejects_unnegotiated_24k_and_48k(self):
         from operator_app.audio_ingest import _validate_hello
 
         for sr in (24000, 48000):
-            assert _validate_hello({"version": 1, "sample_rate": sr, "channels": 1, "format": "pcm_s16le"})
+            assert not _validate_hello({"version": 1, "sample_rate": sr, "channels": 1, "format": "pcm_s16le"})
 
 
 # ---------------------------------------------------------------------------
@@ -397,7 +397,7 @@ class TestAudioBridgeClient:
         assert stream.url == "ws://test-host:9000/ws/audio/subscribe"
 
     def test_open_audio_stream_picks_sounddevice_by_default(self, monkeypatch):
-        """No env var → falls back to sd.InputStream import + call."""
+        """No env var isolates native device open in a disposable child."""
         monkeypatch.delenv("STARK_AUDIO_SOURCE", raising=False)
         from unittest.mock import MagicMock, patch
 
@@ -414,8 +414,10 @@ class TestAudioBridgeClient:
                 blocksize=512,
                 device=None,
             )
-        assert result == "<sd_stream>"
-        fake_sd.InputStream.assert_called_once()
+        from tools.isolated_audio import IsolatedInputStream
+
+        assert isinstance(result, IsolatedInputStream)
+        fake_sd.InputStream.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -427,7 +429,14 @@ class TestPipelineIntegration:
     def test_dry_run_ab_uses_open_audio_stream_factory(self):
         """dry_run_ab.py should call tools.audio_bridge_client.open_audio_stream."""
         text = (ROOT / "dry_run_ab.py").read_text()
-        assert "from tools.audio_bridge_client import open_audio_stream" in text
+        import ast
+
+        assert any(
+            isinstance(node, ast.ImportFrom)
+            and node.module == "tools.audio_bridge_client"
+            and any(alias.name == "open_audio_stream" for alias in node.names)
+            for node in ast.walk(ast.parse(text))
+        )
         assert "open_audio_stream(" in text
         # Old direct sd.InputStream call site should be replaced
         assert "stream = sd.InputStream(" not in text

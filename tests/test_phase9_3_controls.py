@@ -34,7 +34,8 @@ def stub_pipeline(tmp_path: Path) -> Path:
         '"""Test stub mimicking dry_run_ab.py CSV output."""\n'
         "from __future__ import annotations\n"
         "import argparse\n"
-        "import csv\n"
+        "import csv, json\n"
+        "from pathlib import Path\n"
         "import os\n"
         "import signal\n"
         "import sys\n"
@@ -44,6 +45,10 @@ def stub_pipeline(tmp_path: Path) -> Path:
         "def main():\n"
         "    parser = argparse.ArgumentParser()\n"
         "    parser.add_argument('--lang')\n"
+        "    parser.add_argument('--profile', default='standard')\n"
+        "    parser.add_argument('--http-port', type=int, default=8080)\n"
+        "    parser.add_argument('--ws-port', type=int, default=8765)\n"
+        "    parser.add_argument('--session-id', required=True)\n"
         "    parser.add_argument('--backend', default='auto')\n"
         "    parser.add_argument('--engine', default='auto')\n"
         "    parser.add_argument('--vad-threshold', type=float, default=0.3)\n"
@@ -54,20 +59,15 @@ def stub_pipeline(tmp_path: Path) -> Path:
         "    parser.add_argument('--device', type=int, default=None)\n"
         "    parser.add_argument('--gain', type=float, default=None)\n"
         "    args = parser.parse_args()\n"
-        "    # Runner and stub each call datetime.now() for the session id.\n"
-        "    # Write a ±1s window so a second-boundary race cannot miss the tail.\n"
-        "    now = datetime.now()\n"
-        "    paths = []\n"
-        "    for delta in (-1, 0, 1):\n"
-        "        stamp = datetime.fromtimestamp(now.timestamp() + delta).strftime('%Y%m%d_%H%M%S')\n"
-        "        paths.append(os.path.join('metrics', f'ab_metrics_{stamp}_{args.lang}.csv'))\n"
-        "    header = ['chunk_id','english','spanish','stt_ms','translate_ms','latency_ms','confidence']\n"
+        "    time.sleep(1.1)  # Startup crosses a second boundary.\n"
+        "    paths = [os.path.join('metrics', f'ab_metrics_{args.session_id}.csv')]\n"
+        "    header = ['chunk_id','english','spanish_a','stt_latency_ms','latency_a_ms','speech_end_to_final_ms','stt_confidence','timing_schema_version']\n"
         "    files = [open(p, 'w', newline='') for p in paths]\n"
         "    writers = [csv.writer(f) for f in files]\n"
         "    for w in writers:\n"
         "        w.writerow(header)\n"
         "    for i in range(3):\n"
-        "        row = [i, f'sample {i}', f'muestra {i}', 100.0, 200.0, 300.0, 0.9]\n"
+        "        row = [i, f'sample {i}', f'muestra {i}', 100.0, 200.0, 300.0, 0.9, 2]\n"
         "        for w, f in zip(writers, files):\n"
         "            w.writerow(row)\n"
         "            f.flush()\n"
@@ -80,8 +80,19 @@ def stub_pipeline(tmp_path: Path) -> Path:
         "        stopped['flag'] = True\n"
         "    signal.signal(signal.SIGTERM, _stop)\n"
         "    signal.signal(signal.SIGINT, _stop)\n"
+        "    phase = 'ready'\n"
         "    while not stopped['flag']:\n"
-        "        time.sleep(0.1)\n"
+        "        command = Path(f'metrics/control_{args.session_id}.json')\n"
+        "        if command.exists():\n"
+        "            op = json.loads(command.read_text())['operation']\n"
+        "            if op == 'stop': stopped['flag'] = True\n"
+        "            elif op == 'pause': phase = 'paused'\n"
+        "            elif op == 'resume': phase = 'ready'\n"
+        "        target = Path(f'metrics/health_{args.session_id}.json')\n"
+        "        temp = target.with_suffix('.tmp')\n"
+        "        temp.write_text(json.dumps(dict(schema_version=1, session_id=args.session_id, updated_at=time.time(), phase=phase)))\n"
+        "        temp.replace(target)\n"
+        "        time.sleep(0.05)\n"
         "    sys.exit(0)\n"
         "\n"
         "if __name__ == '__main__':\n"
@@ -90,17 +101,86 @@ def stub_pipeline(tmp_path: Path) -> Path:
     return tmp_path
 
 
+def _wait_state(runner, state):
+    for _ in range(60):
+        if runner.status().state == state:
+            return
+        time.sleep(0.05)
+    raise AssertionError(runner.status().to_dict())
+
+
 # -- subprocess lifecycle ----------------------------------------------------
 
 
 class TestPipelineRunnerSubprocess:
+    def test_stop_during_spawn_cannot_leave_live_child(self, stub_pipeline, monkeypatch):
+        import subprocess
+        import threading
+
+        from operator_app.pipeline_manager import PipelineRunner, SessionConfig
+
+        real_popen = subprocess.Popen
+        spawn_entered = threading.Event()
+        allow_spawn = threading.Event()
+        children = []
+
+        def delayed_popen(*args, **kwargs):
+            spawn_entered.set()
+            assert allow_spawn.wait(timeout=5)
+            child = real_popen(*args, **kwargs)
+            children.append(child)
+            return child
+
+        monkeypatch.setattr(subprocess, "Popen", delayed_popen)
+        runner = PipelineRunner(project_root=stub_pipeline)
+        runner.start(SessionConfig())
+        assert spawn_entered.wait(timeout=5)
+        stopped = []
+        stopper = threading.Thread(target=lambda: stopped.append(runner.stop(timeout_s=5)))
+        stopper.start()
+        allow_spawn.set()
+        stopper.join(timeout=7)
+        try:
+            assert not stopper.is_alive()
+            assert stopped[0].state == "idle"
+            assert children and children[0].poll() is not None
+        finally:
+            for child in children:
+                if child.poll() is None:
+                    child.kill()
+                    child.wait(timeout=2)
+
+    def test_start_rejects_stopping_session(self, stub_pipeline):
+        from operator_app.pipeline_manager import PipelineRunner, SessionAlreadyRunningError, SessionConfig
+
+        runner = PipelineRunner(project_root=stub_pipeline)
+        runner._status.state = "stopping"
+        with pytest.raises(SessionAlreadyRunningError):
+            runner.start(SessionConfig())
+
     def test_start_spawns_subprocess_and_status_running(self, stub_pipeline):
         from operator_app.pipeline_manager import PipelineRunner, SessionConfig
 
         runner = PipelineRunner(project_root=stub_pipeline)
         snap = runner.start(SessionConfig(lang="en"))
-        assert snap.state in ("starting", "running")
-        # Wait for state to flip to running (subprocess actually launched)
+        assert snap.state == "starting"
+        # A live subprocess has not finished model initialization yet.
+        for _ in range(100):
+            if runner.status().pid is not None:
+                break
+            time.sleep(0.01)
+        assert runner.status().pid is not None
+        assert runner.status().state == "starting"
+        assert "loading models" in runner.status().last_event
+        from operator_app.pipeline_manager import InvalidStateError
+
+        with pytest.raises(InvalidStateError):
+            runner.pause()
+        # A partially written header must not announce readiness.
+        Path(snap.csv_path).write_text("chunk_id,stt_latency_ms")
+        time.sleep(0.55)
+        assert runner.status().state == "starting"
+        # Wait for the actual pipeline header to be flushed after startup.
         for _ in range(40):
             snap = runner.status()
             if snap.state == "running":
@@ -109,6 +189,24 @@ class TestPipelineRunnerSubprocess:
         assert snap.state == "running", f"state={snap.state}, last_event={snap.last_event}"
         assert snap.pid is not None
         runner.stop(timeout_s=5)
+
+    def test_stop_during_model_loading_terminates_child(self, stub_pipeline):
+        from operator_app.pipeline_manager import PipelineRunner, SessionConfig
+
+        runner = PipelineRunner(project_root=stub_pipeline)
+        runner.start(SessionConfig())
+        try:
+            for _ in range(100):
+                if runner.status().pid is not None:
+                    break
+                time.sleep(0.01)
+            assert runner.status().state == "starting"
+            child = runner._proc
+            assert child is not None and child.poll() is None
+            assert runner.stop(timeout_s=5).state == "idle"
+            assert child.poll() is not None
+        finally:
+            runner.stop(timeout_s=5)
 
     def test_stop_terminates_subprocess(self, stub_pipeline):
         from operator_app.pipeline_manager import PipelineRunner, SessionConfig
@@ -133,10 +231,6 @@ class TestPipelineRunnerSubprocess:
         runner.stop(timeout_s=5)
 
     def test_pause_resume_flow(self, stub_pipeline):
-        import platform
-
-        if platform.system() == "Windows":
-            pytest.skip("SIGSTOP/SIGCONT not supported on Windows")
         from operator_app.pipeline_manager import PipelineRunner, SessionConfig
 
         runner = PipelineRunner(project_root=stub_pipeline)
@@ -145,10 +239,10 @@ class TestPipelineRunnerSubprocess:
             if runner.status().state == "running":
                 break
             time.sleep(0.1)
-        snap = runner.pause()
-        assert snap.state == "paused"
-        snap = runner.resume()
-        assert snap.state == "running"
+        runner.pause()
+        _wait_state(runner, "paused")
+        runner.resume()
+        _wait_state(runner, "running")
         runner.stop(timeout_s=5)
 
     def test_pause_when_idle_raises(self, stub_pipeline):
@@ -224,7 +318,9 @@ def client_and_root(stub_pipeline, monkeypatch):
 
     pipeline_manager.reset_runner_for_tests()
     pipeline_manager._runner = pipeline_manager.PipelineRunner(project_root=stub_pipeline)
-    return TestClient(app), stub_pipeline
+    monkeypatch.setattr("operator_app.main.run_all_checks", lambda **kw: {"ok": True, "checks": []})
+    with TestClient(app) as client:
+        yield client, stub_pipeline
 
 
 class TestControlEndpoints:
@@ -255,10 +351,6 @@ class TestControlEndpoints:
         assert resp.status_code == 422
 
     def test_pause_resume_full_cycle(self, client_and_root):
-        import platform
-
-        if platform.system() == "Windows":
-            pytest.skip("SIGSTOP/SIGCONT not supported on Windows")
         client, _ = client_and_root
 
         start_resp = client.post("/api/session/start", json={"lang": "en"})
@@ -268,8 +360,12 @@ class TestControlEndpoints:
             if client.get("/api/session/status").json()["state"] == "running":
                 break
             time.sleep(0.1)
-        assert client.post("/api/control/pause").json()["state"] == "paused"
-        assert client.post("/api/control/resume").json()["state"] == "running"
+        assert client.post("/api/control/pause").status_code == 200
+        from operator_app.pipeline_manager import get_runner
+
+        _wait_state(get_runner(), "paused")
+        assert client.post("/api/control/resume").status_code == 200
+        _wait_state(get_runner(), "running")
         client.post("/api/session/stop")
 
 

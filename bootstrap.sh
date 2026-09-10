@@ -5,9 +5,9 @@
 # from a checkout of the stark-translate repo. It does:
 #
 #   1. Verify prerequisites (Python 3.11+, ffmpeg, CUDA toolkit, etc.)
-#   2. Create a venv at ./venv and install stark-translate[cuda|cpu] from pyproject
-#   3. Install systemd unit + drop-in with the actual install paths
-#   4. Run a one-shot pre-flight via /api/preflight
+#   2. Select or create a venv and install the platform's pyproject extras
+#   3. Download models and run doctor (the local checks behind /api/preflight)
+#   4. Install the requested service only after setup and pre-flight succeed
 #   5. Print final URLs the operator should bookmark
 #
 # Designed to be idempotent — re-runnable if something fails midway.
@@ -30,9 +30,11 @@ ROOT="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
 SKIP_SYSTEMD=0
+INSTALL_LAUNCHD=0
 for arg in "$@"; do
     case "$arg" in
         --skip-systemd) SKIP_SYSTEMD=1 ;;
+        --install-launchd) INSTALL_LAUNCHD=1 ;;
         --help|-h)
             sed -n '2,/^set -euo/p' "$0" | sed 's/^# \?//'
             exit 0
@@ -42,6 +44,14 @@ for arg in "$@"; do
 done
 
 STARK_USER="${STARK_USER:-$USER}"
+source "$ROOT/scripts/runtime_env.sh"
+# Runtime launchers require VENV to exist; bootstrap can create an explicit
+# target using the next available interpreter without installing into that one.
+if [ -z "${STARK_PYTHON:-}" ] && [ -n "${VENV:-}" ] && [ ! -x "$VENV/bin/python" ]; then
+    PYTHON="$(unset VENV; stark_resolve_python "$ROOT")"
+else
+    PYTHON="$(stark_resolve_python "$ROOT")"
+fi
 
 # -----------------------------------------------------------------------------
 log() { printf '[bootstrap] %s\n' "$*"; }
@@ -50,43 +60,72 @@ fail() { printf '[bootstrap] ERROR: %s\n' "$*" >&2; exit "${2:-2}"; }
 # 1. Prerequisites ------------------------------------------------------------
 log "checking prerequisites…"
 
-command -v python3 >/dev/null || fail "python3 not found — apt install python3.11 python3.11-venv" 2
+EXTRA="cpu"
+if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+    EXTRA="mlx"
+    log "  Apple Silicon detected — operator will use MLX/Metal. NVIDIA CUDA is not required."
+    PYTHON_HINT="install Python 3.11+ (for example: brew install python@3.11)"
+    AUDIO_HINT="brew install ffmpeg portaudio"
+else
+    PYTHON_HINT="install Python 3.11+ (Ubuntu: apt install python3.11 python3.11-venv)"
+    AUDIO_HINT="install ffmpeg and PortAudio using your system package manager"
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        EXTRA="cuda"
+        log "  NVIDIA GPU detected — operator will use CUDA."
+    else
+        log "  NVIDIA GPU not detected — operator will use the CPU backend."
+    fi
+fi
 
-PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+command -v python3 >/dev/null || fail "python3 not found — $PYTHON_HINT" 2
+
+PY_VER=$("$PYTHON" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
 case "$PY_VER" in
-    3.11|3.12) ;;
-    *) fail "python $PY_VER unsupported — need 3.11 or 3.12 (apt install python3.11)" 2 ;;
+    3.11|3.12|3.13|3.14) ;;
+    *) fail "python $PY_VER unsupported — $PYTHON_HINT" 2 ;;
 esac
 log "  python $PY_VER OK"
 
-command -v ffmpeg >/dev/null || fail "ffmpeg not found — apt install ffmpeg" 2
+command -v ffmpeg >/dev/null || fail "ffmpeg not found — $AUDIO_HINT" 2
 log "  ffmpeg OK"
-
-if command -v nvidia-smi >/dev/null 2>&1; then
-    log "  nvidia-smi OK ($(nvidia-smi --query-gpu=name --format=csv,noheader -i 0 2>/dev/null | head -1))"
-else
-    log "  nvidia-smi NOT found — operator will run on CPU (slow). Install NVIDIA driver if this is the church PC."
-fi
 
 # 2. venv + dependencies ------------------------------------------------------
 # Prefer the pyproject.toml extras (v2026.7+); fall back to the legacy
 # requirements files for environments that pin against the frozen versions.
-VENV="$ROOT/venv"
-EXTRA="cuda"
-command -v nvidia-smi >/dev/null 2>&1 || EXTRA="cpu"
-
-if [ ! -d "$VENV" ]; then
-    log "creating venv at $VENV"
-    python3 -m venv "$VENV" || fail "venv creation failed" 3
+if [ -n "${STARK_PYTHON:-}" ]; then
+    VENV="$("$PYTHON" -c 'import sys; print(sys.prefix if sys.prefix != sys.base_prefix else "")')"
+    [ -n "$VENV" ] || VENV="$ROOT/venv"
+elif [ -n "${VENV:-}" ]; then
+    :
+elif [ -n "${VIRTUAL_ENV:-}" ]; then
+    VENV="$VIRTUAL_ENV"
+elif [ -n "${CONDA_PREFIX:-}" ]; then
+    VENV="$CONDA_PREFIX"
+elif [ -x "$ROOT/stt_env/bin/python" ]; then
+    VENV="$ROOT/stt_env"
+else
+    VENV="$ROOT/venv"
 fi
+if [ ! -x "$VENV/bin/python" ]; then
+    log "creating venv at $VENV"
+    "$PYTHON" -m venv "$VENV" || fail "venv creation failed" 3
+fi
+# Service executables must be absolute, even for an explicit relative target.
+VENV="$(cd -- "$VENV" && pwd)"
 
 log "installing stark-translate[$EXTRA] into venv (this may take 5–15 minutes)…"
-"$VENV/bin/pip" install --upgrade pip wheel >/tmp/bootstrap-pip.log 2>&1 || true
-"$VENV/bin/pip" install ".[$EXTRA]" >>/tmp/bootstrap-pip.log 2>&1 \
+"$VENV/bin/python" -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0' wheel >/tmp/bootstrap-pip.log 2>&1 \
+    || fail "installer tool upgrade failed (see /tmp/bootstrap-pip.log)" 3
+"$VENV/bin/python" -m pip install ".[$EXTRA]" >>/tmp/bootstrap-pip.log 2>&1 \
     || fail "dependency install failed (see /tmp/bootstrap-pip.log)" 3
 log "  pip install OK"
 
-# 3. systemd unit -------------------------------------------------------------
+# 3. Model setup and preflight: works even when no server is running.
+log "downloading models for $EXTRA (existing snapshots are reused)…"
+"$VENV/bin/python" -m operator_app.cli setup --backend "$EXTRA" || fail "model setup failed" 3
+"$VENV/bin/python" -m operator_app.cli doctor --backend "$EXTRA" || fail "pre-flight failed; inspect missing models/dependencies/audio" 5
+
+# 4. Services ---------------------------------------------------------------
 if [ "$SKIP_SYSTEMD" -eq 0 ] && command -v systemctl >/dev/null 2>&1; then
     UNIT_SRC="$ROOT/systemd/stark-translate.service"
     UNIT_DEST="/etc/systemd/system/stark-translate.service"
@@ -98,6 +137,13 @@ if [ "$SKIP_SYSTEMD" -eq 0 ] && command -v systemctl >/dev/null 2>&1; then
         # Drop-in with the actual install paths
         DROPIN_DIR="/etc/systemd/system/stark-translate.service.d"
         sudo mkdir -p "$DROPIN_DIR"
+        # Quote the executable as one systemd argument, including literal
+        # backslashes, quotes, specifiers and environment expansion characters.
+        UVICORN="$VENV/bin/uvicorn"
+        UVICORN="${UVICORN//\\/\\\\}"
+        UVICORN="${UVICORN//\"/\\\"}"
+        UVICORN="${UVICORN//%/%%}"
+        UVICORN="${UVICORN//\$/\$\$}"
         sudo tee "$DROPIN_DIR/override.conf" >/dev/null <<EOF
 [Service]
 User=$STARK_USER
@@ -105,7 +151,7 @@ WorkingDirectory=$ROOT
 Environment=STARK_PROJECT_ROOT=$ROOT
 Environment=STARK_OPERATOR_LOG_DIR=$ROOT/metrics
 ExecStart=
-ExecStart=$VENV/bin/uvicorn operator_app.main:app --host 0.0.0.0 --port 9000
+ExecStart="$UVICORN" operator_app.main:app --host 127.0.0.1 --port 9000
 EOF
         sudo systemctl daemon-reload
         sudo systemctl enable stark-translate.service
@@ -118,31 +164,9 @@ else
     log "skipping systemd install"
 fi
 
-# 4. Pre-flight ---------------------------------------------------------------
-log "waiting up to 30s for /healthz…"
-URL="http://127.0.0.1:9000/healthz"
-ok=0
-for _ in $(seq 1 30); do
-    if curl -sf "$URL" >/dev/null 2>&1; then
-        ok=1
-        break
-    fi
-    sleep 1
-done
-
-if [ "$ok" -eq 0 ]; then
-    log "  WARNING: /healthz did not respond within 30s. The service may still be starting."
-    log "  Check: journalctl -u stark-translate -n 50 --no-pager"
-else
-    log "  /healthz OK"
-    log "running pre-flight checks…"
-    PREFLIGHT=$(curl -s "http://127.0.0.1:9000/api/preflight" | "$VENV/bin/python" -c 'import json,sys; d=json.load(sys.stdin); print(d["status_counts"]["fail"], json.dumps(d["status_counts"]))' 2>/dev/null || echo "0 {}")
-    set -- $PREFLIGHT
-    FAIL_COUNT="$1"
-    log "  pre-flight summary: $2"
-    if [ "$FAIL_COUNT" -gt 0 ]; then
-        log "  WARNING: $FAIL_COUNT pre-flight check(s) red. Open http://localhost:9000/operator/ to investigate."
-    fi
+# Explicit launchd setup (never install a login service implicitly).
+if [ "$INSTALL_LAUNCHD" -eq 1 ]; then
+    "$VENV/bin/python" -m operator_app.cli launchd install --project-root "$ROOT" || fail "launchd install failed" 4
 fi
 
 # 5. Final summary ------------------------------------------------------------

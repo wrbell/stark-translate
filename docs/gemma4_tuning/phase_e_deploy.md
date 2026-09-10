@@ -1,5 +1,18 @@
 # Phase E — Deploy
 
+> **Status (2026-09-10): not executed; plan partly superseded.** No tuned Gemma 4 adapter is
+> registered, deployed or A/B'd; stock E4B is the default (#135). Against current source:
+> E2's `--gguf` flag and `gemma_4_e4b` / `gemma_4_e2b` registry names do **not** exist
+> (`manage_adapters.py register` takes `--adapter --model --version --eval-file`; any model
+> name is accepted, but `activate`'s base-model map knows only `gemma_4b`/`gemma_12b`, so pass
+> `--base-model`). The `cycle{N}_…` version convention is not enforced (version = directory
+> name unless `--version`). E3 is done differently: `tools/health_check.py` already draws
+> from the 18-entry `training/theological_canaries.py` (`--n-canaries` default 8,
+> `--max-latency` default 5.0 s). E4/E5 "symlink swap" is a manifest `active`/`previous`
+> swap, and a mid-session adapter toggle in the operator UI is **not** implemented — A/B is
+> `dry_run_ab.py --ab` or two separate sessions. E6's `enable_thinking: false` workaround is
+> still in `engines/llamacpp_engine.py` and must stay until an adapter is permanent.
+
 **Goal:** roll the v1 (or v2) adapters into production with a one-step rollback path.
 
 **Wall clock:** 1–2 days.
@@ -23,6 +36,8 @@ The script's model registry currently knows `gemma_4b` / `gemma_12b` / `whisper_
 Add a `gguf_path` field to the manifest schema to track the deployed GGUF artifact (currently only tracks `safetensors` adapters).
 
 ```bash
+# PROPOSED — `--gguf` is not an implemented flag (see banner); today's parser accepts
+# --adapter --model [--version] [--eval-file] only.
 python tools/manage_adapters.py register \
     --adapter fine_tuned_gemma4_e4b_v1 \
     --model gemma_4_e4b \

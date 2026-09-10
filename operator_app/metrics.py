@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import collections
 import logging
+import math
 import statistics
 import subprocess
 import threading
@@ -36,11 +37,13 @@ class _Segment:
     """One pipeline segment — STT + translate + display."""
 
     chunk_id: int
-    stt_ms: float
-    translate_ms: float
-    total_ms: float
-    confidence: float
+    stt_ms: float | None
+    translate_ms: float | None
+    total_ms: float | None
+    confidence: float | None
     text_len: int
+    timing_schema_version: str
+    latency_basis: str
 
 
 class MetricsCollector:
@@ -59,11 +62,13 @@ class MetricsCollector:
         self._vram_samples: collections.deque[_Sample] = collections.deque(maxlen=self.RESOURCE_BUFFER)
         self._cpu_samples: collections.deque[_Sample] = collections.deque(maxlen=self.RESOURCE_BUFFER)
         self._segments: collections.deque[_Segment] = collections.deque(maxlen=self.SEGMENT_BUFFER)
-        self._queue_depth = 0  # current pending inference jobs
+        self._health = {}
+        self._queue_depth = None  # unknown until the producer supplies a sample
         self._error_count = 0
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
         self._started_at: float | None = None
+        self._session_id: str | None = None
 
     # -- lifecycle ------------------------------------------------------------
 
@@ -80,30 +85,52 @@ class MetricsCollector:
         self._stop_event.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
+            if self._thread.is_alive():
+                raise RuntimeError("metrics sampler did not stop within 2 seconds")
 
     # -- ingest hooks (called by pipeline) ------------------------------------
+
+    def reset_session(self, session_id: str) -> None:
+        with self._lock:
+            self._session_id = session_id
+            self._segments.clear()
+            self._queue_depth = None
+            self._health = {}
+            self._error_count = 0
 
     def record_segment(
         self,
         *,
         chunk_id: int,
-        stt_ms: float,
-        translate_ms: float,
-        total_ms: float,
-        confidence: float,
+        stt_ms: float | None,
+        translate_ms: float | None,
+        total_ms: float | None,
+        confidence: float | None,
         text_len: int = 0,
+        timing_schema_version: str = "legacy",
+        latency_basis: str = "legacy_total_ms",
     ) -> None:
         with self._lock:
             self._segments.append(
                 _Segment(
                     chunk_id=chunk_id,
-                    stt_ms=float(stt_ms),
-                    translate_ms=float(translate_ms),
-                    total_ms=float(total_ms),
-                    confidence=float(confidence),
+                    stt_ms=float(stt_ms) if stt_ms is not None else None,
+                    translate_ms=float(translate_ms) if translate_ms is not None else None,
+                    total_ms=float(total_ms) if total_ms is not None else None,
+                    confidence=float(confidence) if confidence is not None else None,
                     text_len=int(text_len),
+                    timing_schema_version=timing_schema_version,
+                    latency_basis=latency_basis,
                 )
             )
+
+    def record_health(self, health: dict) -> None:
+        with self._lock:
+            if health.get("session_id") != self._session_id:
+                return
+            self._health = health.copy()
+            self._queue_depth = health.get("queues", {}).get("finals")
+            self._error_count = health.get("error_count", 0) + (health.get("persistence") or {}).get("failed", 0)
 
     def set_queue_depth(self, depth: int) -> None:
         with self._lock:
@@ -124,20 +151,32 @@ class MetricsCollector:
             queue_depth = self._queue_depth
             error_count = self._error_count
             started_at = self._started_at
+            session_id = self._session_id
+            health = self._health.copy()
 
         # Latency aggregates from the last N segments.
         if segs:
-            totals = [s.total_ms for s in segs]
-            stt = [s.stt_ms for s in segs]
-            translate = [s.translate_ms for s in segs]
-            confidences = [s.confidence for s in segs]
+            # Show the newest timing cohort; unlike units/definitions never mix.
+            latest = segs[-1]
+            segs = [
+                s
+                for s in segs
+                if (s.timing_schema_version, s.latency_basis) == (latest.timing_schema_version, latest.latency_basis)
+            ]
+            totals = [s.total_ms for s in segs if s.total_ms is not None]
+            stt = [s.stt_ms for s in segs if s.stt_ms is not None]
+            translate = [s.translate_ms for s in segs if s.translate_ms is not None]
+            confidences = [s.confidence for s in segs if s.confidence is not None]
             latency = {
                 "n": len(segs),
-                "total_ms_p50": round(statistics.median(totals), 1),
-                "total_ms_p95": round(_p95(totals), 1),
-                "stt_ms_p50": round(statistics.median(stt), 1),
-                "translate_ms_p50": round(statistics.median(translate), 1),
-                "confidence_mean": round(statistics.mean(confidences), 3),
+                "timing_schema_version": latest.timing_schema_version,
+                "basis": latest.latency_basis,
+                "measured_n": len(totals),
+                "total_ms_p50": round(statistics.median(totals), 1) if totals else None,
+                "total_ms_p95": round(_p95(totals), 1) if totals else None,
+                "stt_ms_p50": round(statistics.median(stt), 1) if stt else None,
+                "translate_ms_p50": round(statistics.median(translate), 1) if translate else None,
+                "confidence_mean": round(statistics.mean(confidences), 3) if confidences else None,
             }
         else:
             latency = {"n": 0}
@@ -175,9 +214,12 @@ class MetricsCollector:
 
         return {
             "ts": time.time(),
+            "session_id": session_id,
             "uptime_s": round(time.time() - started_at, 1) if started_at else 0.0,
             "queue_depth": queue_depth,
             "error_count": error_count,
+            "health": health,
+            "captions": health.get("captions", []),
             "latency": latency,
             "resources": {
                 "vram_mib_recent": _recent_values(vram, 30),
@@ -211,10 +253,11 @@ class MetricsCollector:
 
 
 def _p95(values: list[float]) -> float:
+    """Nearest-rank 95th percentile, including windows with very few segments."""
     if not values:
         return 0.0
     s = sorted(values)
-    idx = max(0, int(len(s) * 0.95) - 1)
+    idx = math.ceil(len(s) * 0.95) - 1
     return s[idx]
 
 
@@ -259,6 +302,15 @@ def get_collector() -> MetricsCollector:
             _collector = MetricsCollector()
             _collector.start()
         return _collector
+
+
+def shutdown_collector() -> None:
+    """Stop the existing sampler and permit a later app lifespan to recreate it."""
+    global _collector
+    with _collector_lock:
+        collector, _collector = _collector, None
+    if collector is not None:
+        collector.stop()
 
 
 def reset_collector_for_tests() -> None:

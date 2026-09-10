@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "scope": "Installed macOS arm64 synthetic EN-to-ES CPU-quality functional smoke; not a performance, memory-floor, human-quality, x86 or RTX2070 certification",
+  "recorded_at": "2026-09-10T04:46:40.274126+00:00",
+  "source": {
+    "build_commit_reported_by_coordinator": "a1d7cdf",
+    "wheel_sha256": "c5c12d8658c01a79c5ad93252d15af9f68a6c61a07469a0e80fa6772934e4da3",
+    "pipeline_sha256": "ba5905fe8bcf4f2e2c8e90c1dc97aaefb4ac5c2255e73ac97c13efe2a89a1ef8",
+    "package_version": "2026.14.0.0",
+    "recorded_git_sha": null,
+    "installed_runtime": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+    "git_commit_pipeline_bytes_match": "a1d7cdf"
+  },
+  "session_id": "overnight_lite_quality_smoke02_en",
+  "input": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-cpu-smoke-attempt01/en.wav",
+    "sha256": "ca258b91c9ea8187048829899cac1e60277ee258631cc58ce7b156a8e4cb1b43",
+    "synthetic": true,
+    "frames": 72383,
+    "sample_rate": 22050,
+    "duration_s": 3.282675736961451
+  },
+  "profile": {
+    "name": "lite-cpu-quality",
+    "backend": "cpu",
+    "stt_model": "whisper-small",
+    "stt_compute_type": "int8",
+    "stt_threads": 3,
+    "stt_workers": 1,
+    "marian_threads": 1,
+    "final_engine": "llamacpp",
+    "translation_model": "gemma-4-e2b-it-q4km.gguf",
+    "vad_backend": "onnx",
+    "ram_floor_gb": 16,
+    "physical_core_floor": 4,
+    "vram_floor_gb": 0
+  },
+  "source_lang": "en",
+  "target_lang": "es",
+  "observed_stt": "The grace of God brings salvation.",
+  "observed_final": "La gracia de Dios trae la salvación.",
+  "timing": {
+    "speech_end_to_final_ms": 3452.8,
+    "stt_latency_ms": 1251.3,
+    "latency_a_ms": 428.7,
+    "vad_wait_ms": 483.1,
+    "stt_queue_wait_ms": 1288.0,
+    "translation_queue_wait_ms": 0.0,
+    "finalization_overhead_ms": 0.7
+  },
+  "timing_basis": {
+    "schema": 2,
+    "endpoint": "silence",
+    "clock": "replay_realtime",
+    "speech_end": "estimated from VAD",
+    "final": "server payload readiness",
+    "browser_clients": 0,
+    "browser_render_measurement": null,
+    "gate_passed": false
+  },
+  "native_server": {
+    "pid": 30812,
+    "url": "http://127.0.0.1:61959",
+    "alias": "stark-63746d58adc44b88b9edb1b55b331c95",
+    "command": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/native/b10883/Darwin-arm64-cpu/llama-b10883/llama-server",
+      "-m",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/gemma-4-e2b-it-q4km.gguf",
+      "--alias",
+      "stark-63746d58adc44b88b9edb1b55b331c95",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "61959",
+      "-ngl",
+      "0",
+      "-c",
+      "512",
+      "-ctk",
+      "q8_0",
+      "-ctv",
+      "q8_0",
+      "-t",
+      "3",
+      "--parallel",
+      "1",
+      "--no-kv-offload",
+      "--no-op-offload"
+    ],
+    "model": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/gemma-4-e2b-it-q4km.gguf",
+    "model_sha256": "62adb571af12205e1e6ce0f2a4bd2835441f3e9a47d782af1539c0bc8831107f",
+    "native_revision": "91f6a6cf361385700bbe15981f0f39909df77498",
+    "native_executable_sha256": "d707b6db4c1397a7383176fba12d339e5b33c7513669d74c8fbc2a76f6979a72",
+    "backend": "cpu"
+  },
+  "model_identity_checks": {
+    "native_executable_hash_matches": true,
+    "gguf_startup_hash_matches_pinned_preparation": true,
+    "startup_metadata_contains_identity": true,
+    "legacy_lifecycle_translation_a": {
+      "requested_id": "llama.cpp",
+      "manifest_revision": null,
+      "resolved_revision": null,
+      "resolved_path": null,
+      "revision_source": "unknown"
+    }
+  },
+  "lifecycle": {
+    "status": "completed",
+    "exit_code": 0,
+    "persistence": {
+      "submitted": 4,
+      "completed": 4,
+      "pending": 0,
+      "failed": 0,
+      "capacity": 256,
+      "ok": true,
+      "failures": []
+    },
+    "diagnostics_hash_matches": true
+  },
+  "memory": {
+    "retained": {
+      "scope": "pipeline_process_lifetime",
+      "peak_rss_bytes": 1106247680,
+      "peak_metal_bytes": null
+    },
+    "owned_native_child_peak_rss_bytes": null,
+    "combined_process_tree_peak_rss_bytes": null,
+    "limitation": "RUSAGE_SELF covers only the Python pipeline, excluding owned llama-server; global system RAM snapshot cannot reconstruct simultaneous process-tree peak",
+    "ram_gate_passed": false
+  },
+  "logging_and_cleanup": {
+    "native_log_bytes": 7260,
+    "native_log_mode": "0o600",
+    "structured_records": 22,
+    "native_exit_cleanup_message_observed": true,
+    "recorded_process_ids_absent_on_audit": [
+      30517,
+      30796,
+      30812
+    ],
+    "process_check": "ps -p 30517,30796,30812 -o pid=,ppid=,comm= returned no rows (exit1)",
+    "rotation_exercised": false,
+    "retention_exercised": false,
+    "final_logging_counters_retained": false,
+    "counters_limitation": "This executed wheel wrote startup metadata before native shutdown; final logging counters were not persisted. Follow-up lifecycle wiring has focused tests; original smoke records are unchanged."
+  },
+  "failed_first_attempt": {
+    "session_id": "overnight_lite_quality_smoke_en",
+    "pid": 30517,
+    "cause": "Nonexistent audio filename supplied by smoke command; failure occurred before model loading",
+    "missing_input": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-roadmap/installed-runtime-final-03/inputs/en.wav",
+    "stored_lifecycle_status": "running",
+    "process_absent_on_audit": true,
+    "inference_executed": false,
+    "original_evidence_preserved": true,
+    "limitation": "Lifecycle marker stayed running after early input hash failure; dead-PID status handling blocks export. Validation fix is separate from this historical result."
+  },
+  "not_exercised": [
+    "Spanish-source E2B quality mode",
+    "physical microphone",
+    "physical speaker/TTS",
+    "phone/browser rendering",
+    "natural-speech quality review",
+    "sustained latency or thermal load",
+    "process-tree peak memory",
+    "native Windows/Linux",
+    "RTX2070"
+  ],
+  "raw_evidence": [
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/ab_metrics_overnight_lite_quality_smoke02_en.csv",
+      "bytes": 1262,
+      "sha256": "73b363165ea128fb054336798d867de349d32366a4f8fe83f39a53e84c525e25"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/diagnostics_overnight_lite_quality_smoke02_en.jsonl",
+      "bytes": 4297,
+      "sha256": "5a1f9a0993d63f0c0e53afdb657cee4957f2945b6054d70cee1ef6b30fc64f44"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/hardware_overnight_lite_quality_smoke02_en.json",
+      "bytes": 262,
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/health_overnight_lite_quality_smoke02_en.json",
+      "bytes": 1061,
+      "sha256": "a6426a1f59ce0e4539ec8bfa7a2d3e341ea4a635c6d2e450deff3aed2af457c0"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/health_overnight_lite_quality_smoke_en.json",
+      "bytes": 654,
+      "sha256": "75472b60778eb591abe832587568d7a2c12d37ab3824b9fdbfcca3509c6d0f42"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/llama_overnight_lite_quality_smoke02_en.log",
+      "bytes": 7260,
+      "sha256": "4aeba356902f62aa8884f3461a6a72333c001956e4d95ecd4aa6d7ac539994ff"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/partials_overnight_lite_quality_smoke02_en.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/partials_overnight_lite_quality_smoke_en.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/session_lifecycle_overnight_lite_quality_smoke02_en.json",
+      "bytes": 3178,
+      "sha256": "ed661687ef77c30db7a1dae6b4956e929c6f0cb99962fe359ace5f03f95ccfec"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/session_lifecycle_overnight_lite_quality_smoke_en.json",
+      "bytes": 680,
+      "sha256": "3373435734a52651ffafe210fa31144455d8c90163190b33c196e2f206c8d5b9"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/session_metadata_overnight_lite_quality_smoke02_en.json",
+      "bytes": 7603,
+      "sha256": "3c8a626f2ad3bd93edf93421c56472501cf87b3209967861786ee54df3164be2"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/session_overnight_lite_quality_smoke02_en.log",
+      "bytes": 300,
+      "sha256": "810dbc37a4e019ec762959ec1538bbdbf695963843e2bfd92ddc47cbe42f1126"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/metrics/session_overnight_lite_quality_smoke_en.log",
+      "bytes": 296,
+      "sha256": "39d31625512c5a0aad7763d73f058613d5efd86abd2b76b282f9ffefb18d4215"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/run.log",
+      "bytes": 1170,
+      "sha256": "bfdab1ae97271fe9b4a967c118854a1c7383ca3b332207ff8dd13b43a6f7adc4"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/run02.log",
+      "bytes": 4362,
+      "sha256": "4816a7c49eb9e2592a015886856375daf4ebf5f670d57ab268cbb1948ab977b7"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-quality-smoke/stark_data/live_sessions/overnight_lite_quality_smoke02_en/chunk_0001.wav",
+      "bytes": 157754,
+      "sha256": "ed5918bfdd3b78b0d879c92b68dbed77b889167e1c2dbb8017abfd534cf1d70c"
+    },
+    {
+      "path": ".cache/overnight-20260910/artifacts-smoke/stark_translate-2026.14.0.0-py3-none-any.whl",
+      "bytes": 616936,
+      "sha256": "c5c12d8658c01a79c5ad93252d15af9f68a6c61a07469a0e80fa6772934e4da3"
+    }
+  ],
+  "followup_validation": {
+    "native_completion_metadata_tests": 2,
+    "result": "passed against the reliability worktree wiring",
+    "command": "PYTHONPATH=/Users/willem/Code/vibes/SRTranslate-worktrees/overnight-reliability /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python -m pytest --import-mode=importlib /Users/willem/Code/vibes/SRTranslate-worktrees/overnight-lite/tests/test_native_completion_metadata.py -q",
+    "reran_model": false,
+    "original_smoke_metadata_rewritten": false
+  }
+}

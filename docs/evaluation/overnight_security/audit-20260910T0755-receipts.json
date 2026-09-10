@@ -1,0 +1,77 @@
+[
+  {
+    "name": "pip-audit-working-mac",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/pip-audit",
+      "--path",
+      "/Users/willem/Code/vibes/SRTranslate/stt_env/lib/python3.11/site-packages",
+      "--format",
+      "json",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/pip-audit-working-mac.json",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/audit-cache-working-mac",
+      "--timeout",
+      "5",
+      "--progress-spinner",
+      "off"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_at_utc": "2026-09-10T07:55:42.417630+00:00",
+    "ended_at_utc": "2026-09-10T07:55:50.521701+00:00",
+    "exit_code": 1,
+    "timed_out": false,
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/pip-audit-working-mac.log",
+    "log_sha256": "62671f7bfc54cf0e89a17feefaad75e002ff517a6b2cb957160fde97ca28c2db"
+  },
+  {
+    "name": "pip-audit-isolated-mac",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/pip-audit",
+      "--path",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/lib/python3.11/site-packages",
+      "--format",
+      "json",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/pip-audit-isolated-mac.json",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/audit-cache-isolated-mac",
+      "--timeout",
+      "5",
+      "--progress-spinner",
+      "off"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_at_utc": "2026-09-10T07:55:42.411615+00:00",
+    "ended_at_utc": "2026-09-10T07:55:51.424899+00:00",
+    "exit_code": 1,
+    "timed_out": false,
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/pip-audit-isolated-mac.log",
+    "log_sha256": "dc92fab56aab3af601c5a7e8449139d1876f7ab7ee1f5e6c52c8abc2098aae63"
+  },
+  {
+    "name": "pip-audit-lite",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/pip-audit",
+      "--path",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/lib/python3.11/site-packages",
+      "--format",
+      "json",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/pip-audit-lite.json",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/audit-cache-lite",
+      "--timeout",
+      "5",
+      "--progress-spinner",
+      "off"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_at_utc": "2026-09-10T07:55:42.423617+00:00",
+    "ended_at_utc": "2026-09-10T07:55:46.305649+00:00",
+    "exit_code": 0,
+    "timed_out": false,
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-network-root-788cbc9/pip-audit-lite.log",
+    "log_sha256": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955"
+  }
+]

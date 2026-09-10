@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "status": "bounded_read_only_source_and_chronology_audit",
+  "session_id": "20260910_024936_300302_en",
+  "source": {
+    "video_id": "5D2rOMvkwrk",
+    "title": "Gospel Message (12/14/25)",
+    "duration_seconds": 3640.053,
+    "channel": "Stark Road Gospel Hall",
+    "url": "https://www.youtube.com/watch?v=5D2rOMvkwrk",
+    "download_timestamp": "2026-02-09T01:56:37.195602+00:00",
+    "status": "downloaded"
+  },
+  "input_audio_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+  "input_selection": "full source; speed 1; no crop or restart configured",
+  "recommended_claim": "Full-length service recording containing the first hymn and following prayer used for real-time replay; downstream complete coverage failed.",
+  "full_source_reader_completion": {
+    "status": "consistent_with_full_duration_but_no_explicit_persisted_eof_or_cursor",
+    "exact_eof_at": null,
+    "all_source_frames_captured": null,
+    "last_point_reason": "explicit operator stop after expected source duration",
+    "downstream_audio_coverage_failed": true
+  },
+  "exact_singing_boundaries": null,
+  "lyric_accuracy": "unreviewed, not an added issue134 requirement",
+  "chronological_rows": [
+    {
+      "chunk_id": 2,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 410.464,
+      "source_end_s_as_recorded": 414.592,
+      "reported_pcm_duration_s": 4.13,
+      "span_difference_s": -0.002,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "eac735b1681448ffda1afa066ce8eca97480edb9fdd0ada1143a92b22ef77559"
+    },
+    {
+      "chunk_id": 3,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 414.592,
+      "source_end_s_as_recorded": 422.592,
+      "reported_pcm_duration_s": 8.0,
+      "span_difference_s": 0.0,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "2ec935b96b0e29c9af8ff868b4bb05fcda373f6f2cf4e42865d58062bf074083"
+    },
+    {
+      "chunk_id": 4,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 422.624,
+      "source_end_s_as_recorded": 430.112,
+      "reported_pcm_duration_s": 7.49,
+      "span_difference_s": -0.002,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "2de3521d72a430515cb8fb1d49edc0c370d946e44d44493dcc7d9bcca5871de8"
+    },
+    {
+      "chunk_id": 5,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 430.112,
+      "source_end_s_as_recorded": 431.904,
+      "reported_pcm_duration_s": 1.79,
+      "span_difference_s": 0.002,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "0a6eb88ebbb0edc28a3044441d0e96ab81e96c3c180cfd37e92539260dc2b128"
+    },
+    {
+      "chunk_id": 6,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 432.096,
+      "source_end_s_as_recorded": 434.464,
+      "reported_pcm_duration_s": 2.37,
+      "span_difference_s": -0.002,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "791ff0aee4602629355bdc9acc8a2ea82a1b8b8a02780dd4cb4fb817751a45ab"
+    },
+    {
+      "chunk_id": 7,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 434.528,
+      "source_end_s_as_recorded": 436.832,
+      "reported_pcm_duration_s": 2.3,
+      "span_difference_s": 0.004,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "a51703fe07bfb233e8183e682a447ef04f2412413d4a2d1bca369d47e6c3fb16"
+    },
+    {
+      "chunk_id": 8,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 441.6,
+      "source_end_s_as_recorded": 720.8,
+      "reported_pcm_duration_s": 2.91,
+      "span_difference_s": 276.29,
+      "span_consistent_with_two_decimal_duration": false,
+      "text_sha256": "d6af8f27380aac0512ae4b0e49cecc195b02393a0f64405c23608acbd281991b"
+    },
+    {
+      "chunk_id": 9,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 720.864,
+      "source_end_s_as_recorded": 725.152,
+      "reported_pcm_duration_s": 4.29,
+      "span_difference_s": -0.002,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "38fd50b39759bbba31f29dc55df678f32c6c1e6660b4265afbb4d61a59bff192"
+    },
+    {
+      "chunk_id": 10,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 725.152,
+      "source_end_s_as_recorded": 733.152,
+      "reported_pcm_duration_s": 8.0,
+      "span_difference_s": 0.0,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "e1757a8d4e1fe842b2d2d9163af1e7a4402c1f41258a38dffd61b48488b5ee4b"
+    },
+    {
+      "chunk_id": 11,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 733.248,
+      "source_end_s_as_recorded": 741.248,
+      "reported_pcm_duration_s": 8.0,
+      "span_difference_s": 0.0,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "d2f51062fc3a62cd2eaabc50c3ad835eed66a58af8f2301d655b32042aae26ac"
+    },
+    {
+      "chunk_id": 12,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 741.28,
+      "source_end_s_as_recorded": 749.28,
+      "reported_pcm_duration_s": 8.0,
+      "span_difference_s": 0.0,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "9659a7dac0ee83adcade12aa3e5825aac88698cda5af69d360bd3606edd34076"
+    },
+    {
+      "chunk_id": 13,
+      "completed_transcript_row": false
+    },
+    {
+      "chunk_id": 14,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 754.336,
+      "source_end_s_as_recorded": 762.336,
+      "reported_pcm_duration_s": 8.0,
+      "span_difference_s": 0.0,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "e9bb65e66bdfde2e8458501f4940283ee25aa3c49d872555e21f7194b45ea8e1"
+    },
+    {
+      "chunk_id": 15,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 762.368,
+      "source_end_s_as_recorded": 770.112,
+      "reported_pcm_duration_s": 7.74,
+      "span_difference_s": 0.004,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "181d3e2987e5fd862d513ad2c20d86f582c9b0e97bc0d98de59f2c2972af6492"
+    },
+    {
+      "chunk_id": 16,
+      "completed_transcript_row": true,
+      "source_start_s_as_recorded": 770.112,
+      "source_end_s_as_recorded": 775.104,
+      "reported_pcm_duration_s": 4.99,
+      "span_difference_s": 0.002,
+      "span_consistent_with_two_decimal_duration": true,
+      "text_sha256": "78cc0839ffe614feb62caa2e3a567a7fe64b63a7638daa477072bd19857f3373"
+    }
+  ],
+  "evidence": {
+    "catalog": {
+      "source_path": "stark_data/download_log.jsonl",
+      "size_bytes": 176003,
+      "sha256": "b729ef8d4e86f3bed91b41ad4ba7ec766d4af94c64be625014a9195559aa5c54"
+    },
+    "csv": {
+      "source_path": ".cache/overnight-20260910/installed-standard-endurance/metrics/ab_metrics_20260910_024936_300302_en.csv",
+      "size_bytes": 285669,
+      "sha256": "46a0ffba7ed68be34db6fa126ddd08749806675a8ccca874b33278a102f673bd"
+    },
+    "metadata": {
+      "source_path": ".cache/overnight-20260910/installed-standard-endurance/metrics/session_metadata_20260910_024936_300302_en.json",
+      "size_bytes": 4616,
+      "sha256": "8d6df01cd2735450072be0160c4c16b5f83d7035167f8ff8677d87326578ba43"
+    },
+    "lifecycle": {
+      "source_path": ".cache/overnight-20260910/installed-standard-endurance/metrics/session_lifecycle_20260910_024936_300302_en.json",
+      "size_bytes": 3377,
+      "sha256": "b59fee7f7be1dd84f93c6c6e9721720c52e061f996018681e6f66717e05bc003"
+    },
+    "control": {
+      "source_path": ".cache/overnight-20260910/installed-standard-endurance/metrics/control_20260910_024936_300302_en.json",
+      "size_bytes": 106,
+      "sha256": "e962d405ba7d9057578ac1b6fd8c30b9143ff4d80a712a4a7b43ce836d66060d"
+    },
+    "operational_log": {
+      "source_path": ".cache/overnight-20260910/installed-standard-endurance/metrics/session_20260910_024936_300302_en.log",
+      "size_bytes": 4118740,
+      "sha256": "0e08f59e52ff12387c3c43602b1fdc9a0d709cd67ad1d720051ebf4b1df49dbd"
+    },
+    "launch": {
+      "source_path": ".cache/overnight-20260910/installed-standard-endurance/operator-launch.json",
+      "size_bytes": 1260,
+      "sha256": "7929e4890f65a1b8cf0ba8827f3857184823e78b0e5f17dd3122a994e8819fe9"
+    },
+    "actions": {
+      "source_path": ".cache/overnight-20260910/endurance-preparation/operator-actions.jsonl",
+      "size_bytes": 379,
+      "sha256": "4be1ec365988d7a6acb4f0c1572a12bc7b163890aba726ce556b03a028cb5a21"
+    }
+  },
+  "raw_lyrics_or_private_notes_reproduced": false,
+  "installed_code_read_only_crosscheck": {
+    "basis": "Hashes match old-standard installed receipt; no module imports or execution.",
+    "source_file_sha256": {
+      "tools/audio_bridge_client.py": "908ef8cebee0dc85618b606f9d46ff36672d44e62871579d998a5c8aa6104427",
+      "dry_run_ab.py": "d7205f90ecbfd50a0b37f2b11f081306117342ce3b2574743ecf74cf36cb47ec"
+    },
+    "reader_behavior": "Offset0, all source frames, 2s virtual tail; no crop configured. Completion flag is in-memory and not persisted by this run."
+  }
+}

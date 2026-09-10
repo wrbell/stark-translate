@@ -49,7 +49,9 @@ class LlamaCppEngine(TranslationEngine):
         model_family: str = "gemma4",
         timeout_s: float = 30.0,
         max_tokens: int = 256,
+        strict_errors: bool = False,
     ):
+        self._strict_errors = strict_errors
         self._server_url = server_url.rstrip("/")
         self._model_family = model_family
         self._timeout_s = timeout_s
@@ -140,6 +142,8 @@ class LlamaCppEngine(TranslationEngine):
             with urllib.request.urlopen(req, timeout=self._timeout_s) as resp:  # nosec B310
                 result = json.loads(resp.read())
         except urllib.error.URLError as exc:
+            if self._strict_errors:
+                raise RuntimeError(f"Owned llama-server request failed: {exc}") from exc
             logger.error("llama-server request failed: %s", exc)
             return TranslationResult(text=f"(llama-server error: {exc})", latency_ms=0.0)
 
@@ -148,10 +152,14 @@ class LlamaCppEngine(TranslationEngine):
         # Extract translation from response
         choices = result.get("choices", [])
         if not choices:
+            if self._strict_errors:
+                raise RuntimeError("Owned llama-server returned no translation choice")
             return TranslationResult(text="(no response from llama-server)", latency_ms=latency_ms)
 
         raw_text = choices[0].get("message", {}).get("content", "").strip()
         clean = clean_translation(raw_text, model_family=self._model_family)
+        if self._strict_errors and not clean:
+            raise RuntimeError("Owned llama-server returned empty translation")
 
         # Calculate tokens per second
         usage = result.get("usage", {})
@@ -237,12 +245,16 @@ class LlamaCppEngine(TranslationEngine):
                     if token_callback is not None:
                         token_callback(accumulated, completion_tokens)
         except urllib.error.URLError as exc:
+            if self._strict_errors:
+                raise RuntimeError(f"Owned llama-server stream failed: {exc}") from exc
             logger.error("llama-server stream failed: %s — falling back to non-streaming", exc)
             return self.translate(text, source_lang=source_lang, target_lang=target_lang)
 
         latency_ms = (time.perf_counter() - t0) * 1000.0
 
         clean = clean_translation(accumulated.strip(), model_family=self._model_family)
+        if self._strict_errors and not clean:
+            raise RuntimeError("Owned llama-server returned empty stream")
 
         gen_tps = completion_tokens / (latency_ms / 1000) if latency_ms > 0 and completion_tokens else 0.0
         return TranslationResult(text=clean, latency_ms=latency_ms, tokens_per_second=gen_tps)

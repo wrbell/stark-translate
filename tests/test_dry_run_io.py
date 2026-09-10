@@ -54,9 +54,16 @@ class TestInitCsv:
             reader = csv.reader(f)
             header = next(reader)
         # Preserve the original 26 columns, then MLX generation telemetry, then speaker.
-        assert len(header) == 35
-        assert header[-1] == "speaker"
-        assert header[-9:-1] == list(d._GEN_STAT_FIELDS)
+        legacy_end = 35 + len(d.TIMING_COLUMNS)
+        assert header[legacy_end:] == [
+            "cached_prompt_tokens_a",
+            "prompt_cache_prepare_ms_a",
+            "generation_lock_wait_ms_a",
+            "prompt_cache_hit_a",
+            "caption_delivery_mode",
+        ]
+        assert header[34] == "speaker"
+        assert header[26:34] == list(d._GEN_STAT_FIELDS)
         assert "marian_backend" in header
 
     def test_creates_parent_dirs(self, tmp_path):
@@ -138,8 +145,8 @@ class TestWriteCsvRow:
         d.write_csv_row(self._make_data(speaker="Speaker A"))
         with open(d.CSV_PATH, newline="") as f:
             rows = list(csv.reader(f))
-        assert rows[0][-1] == "speaker"
-        assert rows[1][-1] == "Speaker A"
+        assert rows[0][34] == "speaker"
+        assert rows[1][34] == "Speaker A"
 
     def test_speaker_column_empty_when_absent(self):
         import dry_run_ab as d
@@ -148,7 +155,7 @@ class TestWriteCsvRow:
         d.write_csv_row(self._make_data())
         with open(d.CSV_PATH, newline="") as f:
             rows = list(csv.reader(f))
-        assert rows[1][-1] == ""
+        assert rows[1][34] == ""
 
 
 # ===================================================================

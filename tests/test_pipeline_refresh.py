@@ -65,7 +65,8 @@ class TestMergeCorrections:
         train.write_text('{"en": "Hello", "es": "Hola"}\n', encoding="utf-8")
         corr = tmp_path / "corr.jsonl"
         corr.write_text(
-            '{"en": "Hello", "es": "Hola"}\n{"en": "Grace", "es": "Gracia"}\n',
+            '{"en": "Hello", "es": "Hola", "session_kind": "live"}\n'
+            '{"en": "Grace", "es": "Gracia", "session_kind": "live"}\n',
             encoding="utf-8",
         )
         summary = merge_translation(corr, train)
@@ -79,7 +80,7 @@ class TestMergeCorrections:
         corr_dir.mkdir()
         (corr_dir / "clip1.wav").write_bytes(b"fake")
         (corr_dir / "metadata.jsonl").write_text(
-            '{"file_name": "clip1.wav", "transcription": "Amen"}\n',
+            '{"file_name": "clip1.wav", "transcription": "Amen", "session_kind": "live"}\n',
             encoding="utf-8",
         )
         train_dir = tmp_path / "train"

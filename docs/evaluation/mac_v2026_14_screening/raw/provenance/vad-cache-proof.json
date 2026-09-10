@@ -1,0 +1,44 @@
+{
+  "observed_at": "2026-09-10T01:50:33.712063+00:00",
+  "package_version": "6.2.1",
+  "hub_git_revision": null,
+  "scope": "Local artifact snapshot during frozen replay collection; not a claim of upstream Git revision.",
+  "roots": {
+    "torch_hub": "/Users/willem/.cache/torch/hub/snakers4_silero-vad_master/src/silero_vad",
+    "installed_package": "/Users/willem/Code/vibes/SRTranslate/stt_env/lib/python3.11/site-packages/silero_vad"
+  },
+  "artifacts": [
+    {
+      "relative_path": "model.py",
+      "sha256": {
+        "torch_hub": "9f332779f7609e70ff1e0bbeadb087ff24baa61d2ffa844266f3c9150a3ccd3d",
+        "installed_package": "9f332779f7609e70ff1e0bbeadb087ff24baa61d2ffa844266f3c9150a3ccd3d"
+      },
+      "identical": true
+    },
+    {
+      "relative_path": "utils_vad.py",
+      "sha256": {
+        "torch_hub": "dbdcfc5cef2c14abf8cc29b44afb79038509a9bc34ae8ba2e7482b48813949ee",
+        "installed_package": "dbdcfc5cef2c14abf8cc29b44afb79038509a9bc34ae8ba2e7482b48813949ee"
+      },
+      "identical": true
+    },
+    {
+      "relative_path": "data/silero_vad.jit",
+      "sha256": {
+        "torch_hub": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+        "installed_package": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720"
+      },
+      "identical": true
+    },
+    {
+      "relative_path": "data/silero_vad.onnx",
+      "sha256": {
+        "torch_hub": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+        "installed_package": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3"
+      },
+      "identical": true
+    }
+  ]
+}

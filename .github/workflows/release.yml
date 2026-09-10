@@ -16,6 +16,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Validate tag and package versions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python tools/release_artifacts.py validate --tag "$RELEASE_TAG"
+
       - name: Get tag name
         id: tag
         run: echo "TAG=${GITHUB_REF_NAME:-v0.0.0-dev}" >> "$GITHUB_OUTPUT"
@@ -35,13 +44,10 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Bundle Mac (inference)
-        run: |
-          zip -r "stark-translate-${{ steps.tag.outputs.TAG }}-mac.zip" \
-            dry_run_ab.py settings.py models.lock.json pyproject.toml \
-            operator_app/ engines/ features/ displays/ \
-            requirements-mac.txt \
-            -x "**/__pycache__/*" "**/*.pyc"
+      - name: Bundle Mac (complete installable source)
+        env:
+          RELEASE_TAG: ${{ steps.tag.outputs.TAG }}
+        run: python tools/release_artifacts.py mac --tag "$RELEASE_TAG" --output-dir .
 
       - name: Bundle Windows (training)
         run: |

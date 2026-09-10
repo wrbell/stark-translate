@@ -1,0 +1,182 @@
+{
+  "schema_version": 2,
+  "date": "2026-09-10",
+  "scope": "Frozen-source local CPU/GPU regressions, prescribed static checks and mechanical installed-artifact validation. Not latency, full-hour endurance, human quality, microphone/device or publication certification.",
+  "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+  "source_binding": {
+    "cpu_recorder": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/frozen-752ab9a-validation.json",
+      "sha256": "52c405abab8b3b6f5f5fb1a0f821bb1611727bcf830c8f968ce248ac9e263e4d",
+      "size_bytes": 752
+    },
+    "static_before_after": "Both source HEAD values are 752ab9a351815feee4b8cd155f732c588cb30a6c; working-tree status empty before and after.",
+    "gpu_binding": "Coordinator recorded the GPU regressions against the same frozen source; the pytest text log records counts/duration, not its own Git revision.",
+    "artifact_receipt": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-752ab9a-20260910T0829Z/report.json",
+      "sha256": "986e9bc40bcd29f10453b4525245c3122b12cc6f5f756e6a2192b87c891566ac",
+      "size_bytes": 38088,
+      "tracked_copy": "overnight_artifact_validation_20260910.json"
+    },
+    "pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36"
+  },
+  "cpu_suite": {
+    "passed": 2363,
+    "skipped": 4,
+    "duration_seconds": 89.97,
+    "covered_statements": 11371,
+    "total_statements": 17822,
+    "coverage_percent": 63.8
+  },
+  "gpu_regressions": {
+    "passed": 3,
+    "warnings": 2,
+    "duration_seconds": 21.16,
+    "scope": "Real local GPU regressions; not a performance benchmark or new installed EN/ES end-to-end smoke."
+  },
+  "pre_commit": {
+    "status": "passed",
+    "log": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/pre-commit-752ab9a.log",
+      "sha256": "fc4ecbca5ddb8ba88a8a7db175f1fea526c6fe4bf2f11cd694b617e3334fbbd8",
+      "size_bytes": 560
+    }
+  },
+  "static_validation": {
+    "status": "passed",
+    "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+    "tracked_report": "overnight_static_validation_752ab9a_20260910.json",
+    "receipt": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/final-runtime-static-752ab9a/report.json",
+      "sha256": "8bfe36ea134d070d88141444aa12e1fc4905f129db526530e603aebfd6e72fd7",
+      "size_bytes": 12118
+    },
+    "summary": {
+      "ruff": "passed",
+      "ruff_format": "307 files already formatted",
+      "mypy": "Success: no issues found in 22 source files",
+      "bandit": {
+        "passed": true,
+        "findings": 0,
+        "errors": [],
+        "scope": "engines/features/tools/operator_app/settings; medium+; B101/B603/B607/B615 skipped exactly as prescribed CI"
+      },
+      "html_tidy": {
+        "passed": true,
+        "version": "HTML Tidy for Apple macOS version 5.8.0",
+        "files": 6,
+        "all_exit_codes": 0
+      }
+    },
+    "dependency_audit": "Not rerun by these checks; see separate security evidence."
+  },
+  "logs": [
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/full-tests-752ab9a.log",
+      "sha256": "e5c12ed97c814edd925f235dc4d7643e8a9f3ed0807dc9419a3e0304eb2b6d96",
+      "size_bytes": 14985
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/gpu-752ab9a.log",
+      "sha256": "7248cf61c7effedb0f48196469846b827d5d72e4e1e47ec2a920d26eff13a41e",
+      "size_bytes": 636
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/pre-commit-752ab9a.log",
+      "sha256": "fc4ecbca5ddb8ba88a8a7db175f1fea526c6fe4bf2f11cd694b617e3334fbbd8",
+      "size_bytes": 560
+    }
+  ],
+  "artifact_validation": {
+    "status": "passed",
+    "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+    "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+    "runtime_member_count": 152,
+    "source_members_match": true,
+    "sdist_and_mac_zip_rebuilt_wheels_byte_identical": true,
+    "installations": [
+      "isolated Mac package environment",
+      "isolated Torch-free Lite environment"
+    ],
+    "dependency_versions_changed": false,
+    "inference_during_artifact_check": false,
+    "service_installed": false,
+    "publication": false,
+    "prior_failed_attempt": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/artifact-validation-752ab9a-20260910T0826Z/report.json",
+      "sha256": "a04ceaac8df7612769b68b1203624b73d41eef72b05eb2b292f4a04237cec868",
+      "size_bytes": 5055,
+      "failure": {
+        "type": "RuntimeError",
+        "message": "Extracted launcher is not executable: scripts/runtime_env.sh"
+      },
+      "same_source_archive_sha256": "7248c4c33a36442060dd804baad256f978a183168677b76134f5132e2b24ede4",
+      "interpretation": "The earlier validator rejected the 0644 sourced runtime_env.sh helper. The corrected validation preserved executable launchers and accepted the helper; frozen source archive unchanged. Failure evidence retained."
+    }
+  },
+  "historical_records": {
+    "earlier_local_checks": {
+      "path": "overnight_validation_early_20260910.json",
+      "sha256": "49538f7a12a5bd887c42e9ed19b6eb2562f2115441ea5559774b1f7e2b027940",
+      "source_revision": null,
+      "reason": "Exact source not recorded by the earlier pytest log; original receipt preserved byte-for-byte."
+    },
+    "b65e6e0_artifact": {
+      "path": "overnight_artifact_validation_b65e6e0_20260910.json",
+      "sha256": "39e8a3a46c890deb2aef486e8cd27200fd321dcf628f191c056b1e503a5c4c2c",
+      "source_revision": "b65e6e0f161553b0b381cab412a39e5d58007e77",
+      "reason": "Original installed hour uses this older artifact; not certified by current-source checks."
+    },
+    "english_screen": {
+      "path": "overnight_screen_20260910/README.md",
+      "source_revision": "911f4ae",
+      "runs_valid": 96,
+      "arms_selected": 0,
+      "reason": "Separate frozen workload and source; all negative results unchanged."
+    }
+  },
+  "endurance_snapshot": {
+    "as_of_utc": "2026-09-10T08:32:49.616+00:00",
+    "basis": "Retained fresh Standard UI start/running ledger; terminal results intentionally not inspected or asserted by this report preparation.",
+    "old_standard": {
+      "session_id": "20260910_024936_300302_en",
+      "source_revision": "b65e6e0f161553b0b381cab412a39e5d58007e77",
+      "lifecycle": "completed",
+      "source_timing_validation": "failed",
+      "invalid_final_spans": 23,
+      "total_final_spans": 549,
+      "invalid_preview_spans": 97,
+      "total_preview_spans": 2720,
+      "acceptance": "Not an endurance/source-coverage pass."
+    },
+    "fresh_standard": {
+      "session_id": "20260910_043120_839144_en",
+      "pid_at_start": 78008,
+      "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+      "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+      "pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36",
+      "ui_start_before_utc": "2026-09-10T08:31:20.797+00:00",
+      "ui_start_after_utc": "2026-09-10T08:31:21.067+00:00",
+      "lifecycle_started_at_utc": "2026-09-10T08:31:24.962266+00:00",
+      "status_at_snapshot": "running",
+      "terminal_outcome": null,
+      "acceptance": "pending",
+      "source_kind": "uncropped natural English full-service replay",
+      "input_audio_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+      "source_duration_s": 3640.053,
+      "replay_speed": 1.0
+    },
+    "lite_cpu": {
+      "status": "pending",
+      "terminal_outcome": null
+    },
+    "long_summary_ui": {
+      "status": "pending",
+      "outcome": null
+    },
+    "unused350s_slice_executed": false
+  },
+  "release": {
+    "source_integration": "Tracked separately by PR #192; this evidence does not assert merge or issue closure.",
+    "pypi_package_and_release_tags": "pending by user choice"
+  }
+}

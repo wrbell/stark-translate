@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "id": "mac_v2026_14_routing_synthetic",
+  "usage": "evaluation_only",
+  "created_at": "2026-09-10T02:18:40.734497+00:00",
+  "purpose": "Bounded routing path exercise, separate from sermon latency and natural-speech quality gates.",
+  "replays": [
+    {
+      "id": "routing_synthetic_en",
+      "path": "stark_data/replay/mac_routing_synthetic_en.wav",
+      "sha256": "a3fbf1c4a24ed54b37a6951820814c339723f185df768b6086579bdd445c6a0d",
+      "duration": 10.144125,
+      "lang": "en",
+      "provenance": "synthetic_piper",
+      "reference_status": "synthetic_script_not_human_reference",
+      "voice": "en_US-lessac-high",
+      "conditions": [
+        "operational_phrases",
+        "explicit_silence",
+        "synthetic"
+      ],
+      "recipe": [
+        {
+          "text": "Would you please take your seats.",
+          "start_s": 1.0,
+          "duration_s": 1.579,
+          "conservative_allowlist_member": true,
+          "route_requires_observed_confidence_at_least": 0.8
+        },
+        {
+          "text": "Please turn to the next page.",
+          "start_s": 4.079,
+          "duration_s": 1.776375,
+          "conservative_allowlist_member": true,
+          "route_requires_observed_confidence_at_least": 0.8
+        },
+        {
+          "text": "The window is open.",
+          "start_s": 7.355375,
+          "duration_s": 1.28875,
+          "conservative_allowlist_member": false,
+          "route_requires_observed_confidence_at_least": 0.8
+        }
+      ]
+    },
+    {
+      "id": "routing_synthetic_es",
+      "path": "stark_data/replay/mac_routing_synthetic_es.wav",
+      "sha256": "36cf98f6069603b1271a8e926e34a0d3a7a178278469922516f32de9c9b59441",
+      "duration": 10.039625,
+      "lang": "es",
+      "provenance": "synthetic_piper",
+      "reference_status": "synthetic_script_not_human_reference",
+      "voice": "es_MX-claude-high",
+      "conditions": [
+        "operational_phrases",
+        "explicit_silence",
+        "synthetic"
+      ],
+      "recipe": [
+        {
+          "text": "Por favor tomen asiento.",
+          "start_s": 1.0,
+          "duration_s": 1.6370625,
+          "conservative_allowlist_member": true,
+          "route_requires_observed_confidence_at_least": 0.8
+        },
+        {
+          "text": "Pueden sentarse.",
+          "start_s": 4.1370625,
+          "duration_s": 1.2539375,
+          "conservative_allowlist_member": true,
+          "route_requires_observed_confidence_at_least": 0.8
+        },
+        {
+          "text": "La ventana está abierta.",
+          "start_s": 6.891,
+          "duration_s": 1.648625,
+          "conservative_allowlist_member": false,
+          "route_requires_observed_confidence_at_least": 0.8
+        }
+      ]
+    }
+  ],
+  "utterances": [],
+  "translations": [],
+  "gates": {
+    "natural_spanish": "pending",
+    "two_speaker": "pending",
+    "bilingual_blind_review": "pending"
+  }
+}

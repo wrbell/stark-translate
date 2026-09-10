@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "usage": "evaluation_only",
+  "stage": "english_transcription",
+  "status": "completed",
+  "manifest_sha256": "e17dac6ad3d47e667c65516e000b7f2159808e56385cd828c995062513278826",
+  "environment": {
+    "code_sha": "c5fb689a80a45d0c16e337e4f3a9334cee509d75",
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_sha256": {
+      "dry_run_ab.py": "ba5905fe8bcf4f2e2c8e90c1dc97aaefb4ac5c2255e73ac97c13efe2a89a1ef8",
+      "settings.py": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568",
+      "engines/mlx_engine.py": "6d2deafa810a50992f7e9794d7be8ecd245e45c9cd3eb2c5e920b3871e9f8dd2",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/model_paths.py": "4fada0e21bbda88a9168cfe20a29da14b5b467173d761fba9728456430181e22",
+      "tools/pipeline_timing.py": "729cc42443c5373751da704920c8eca99afa747fd5447cc874bf55c5a2b13f9a",
+      "tools/mac_evaluation.py": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a",
+      "tools/offline_hindi.py": "9e06515f9fb386e2f67c59f08ad2db95e0b3c447f179ffef3b0d523b267efa5c",
+      "tools/vad_runtime.py": "3a4101e59d9e06bee3019dd8d37208c1ed8d185831384d64a7908beda764521d",
+      "engines/parakeet_mlx_engine.py": "a2e463974659ef671acc46a1935e13326d44b5f2886704fda22ecb2516e71582"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": null,
+      "silero-vad": "6.2.1",
+      "torch": "2.10.0",
+      "numpy": "2.3.5",
+      "scipy": "1.17.1"
+    },
+    "created_at": "2026-09-10T04:24:49.505775+00:00"
+  },
+  "human_review": "pending",
+  "quality_gate": "pending_references_and_bilingual_review",
+  "live_readiness": "not_assessed",
+  "stt_model_id": "mlx-community/parakeet-tdt-0.6b-v3",
+  "resolved_model": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+  "vad": {
+    "source": "installed_package",
+    "package": "silero-vad",
+    "package_version": "6.2.1",
+    "backend": "torch",
+    "opset_version": null,
+    "path": "/Users/willem/Code/vibes/SRTranslate/stt_env/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+    "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+    "size_bytes": 2272526
+  },
+  "segmentation": {
+    "sampling_rate": 16000,
+    "threshold": 0.5,
+    "min_speech_duration_ms": 250,
+    "max_speech_duration_s": 8.0,
+    "min_silence_duration_ms": 500,
+    "speech_pad_ms": 30,
+    "return_seconds": false
+  },
+  "segmentation_semantics": "offline Silero segmentation, not live endpoint timing",
+  "stt_settings": {
+    "language": "en",
+    "language_forcing_supported": false,
+    "initial_prompt": null,
+    "word_timestamps": true,
+    "corrections": "off",
+    "dtype": "bfloat16",
+    "cache_limit_mb": 256,
+    "warmup_seconds": 1.0
+  },
+  "utterances_by_source": {
+    "december_45s": 8,
+    "february_150s": 33
+  },
+  "completion": {
+    "memory": {
+      "scope": "pipeline_process_lifetime",
+      "peak_rss_bytes": 1287782400,
+      "peak_metal_bytes": 3590245966
+    },
+    "models": {
+      "stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+      }
+    }
+  },
+  "rows_sha256": "e08618b7a348b0d225db52727e990e05a17514ad7eb8744c29e5a3ca328c2fc2"
+}

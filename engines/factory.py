@@ -35,22 +35,16 @@ def _resolve_ct2_whisper_model(explicit_model_id: str | None) -> str:
     if _WHISPER_CT2_ACTIVE_PATH.exists() and (_WHISPER_CT2_ACTIVE_PATH / "model.bin").exists():
         logger.info("STT: using local CT2 fine-tune at %s", _WHISPER_CT2_ACTIVE_PATH)
         return str(_WHISPER_CT2_ACTIVE_PATH)
-    return "large-v3-turbo"
+    from engines.model_paths import resolve_model_path
+
+    return resolve_model_path("large-v3-turbo") or "large-v3-turbo"
 
 
 def _resolve_ct2_marian_model(direction: str, explicit_path: str | None) -> str | None:
-    """Return a usable CT2 Marian directory for *direction* or None if not available.
+    """Shared adapter/managed-cache lookup; explicit overrides remain first."""
+    from engines.model_paths import resolve_marian_ct2
 
-    *direction* is "en-es" or "es-en". Mirrors ``_resolve_ct2_whisper_model``:
-    explicit override wins; otherwise check the active adapter slot.
-    """
-    if explicit_path is not None and Path(explicit_path).exists():
-        return explicit_path
-    candidate = _MARIAN_CT2_ROOT / direction / "active"
-    if candidate.exists() and (candidate / "model.bin").exists():
-        logger.info("Marian: using local CT2 model at %s", candidate)
-        return str(candidate)
-    return None
+    return resolve_marian_ct2(direction, explicit_path=explicit_path, adapter_root=_MARIAN_CT2_ROOT)
 
 
 def _marian_direction_from_langs(source_lang: str, target_lang: str) -> str:
@@ -323,6 +317,7 @@ def create_translation_engine(
         backend = _detect_backend()
 
     if engine_type == "marian":
+        backend = kwargs.pop("device", None) or backend
         # Marian-specific kwargs. Pop them off kwargs so the residual dict is
         # safe to forward to either engine (HF and CT2 share most names).
         marian_backend = kwargs.pop("marian_backend", "auto")
@@ -441,14 +436,20 @@ def create_tts_engine(voices: dict[str, str] | None = None) -> TTSEngine:
 
     Args:
         voices:  Dict mapping language codes to Piper voice names.
-                 Default: ``{"es": "es_ES-carlfm-high"}``.
+                 Default: configured EN/ES voices from settings.
 
     Returns:
         An *unloaded* ``TTSEngine`` instance.  Call ``.load()`` to initialise.
     """
-    from engines.mlx_engine import PiperTTSEngine
+    from engines.tts_engine import PiperTTSEngine
 
-    return PiperTTSEngine(voices=voices or {"es": "es_ES-carlfm-high"})
+    if voices is None:
+        from settings import settings
+
+        voices = {
+            language: settings.tts.voices[language] for language in ("en", "es") if language in settings.tts.voices
+        }
+    return PiperTTSEngine(voices=voices)
 
 
 def _detect_backend() -> str:

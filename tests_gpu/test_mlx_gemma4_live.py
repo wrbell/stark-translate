@@ -1,8 +1,9 @@
 """Live Gemma 4 OptiQ regression for the EOS/stop-token fix (#172).
 
-Loads the real Mac default model once and checks that every canary translation
-stops on ``<turn|>`` well before ``max_tokens``, leaks no chat-template markers,
-and keeps the theological canary score at >= 7/8.
+Loads the real Mac default model once, verifies the Gemma stop set, and checks
+that canary translations stop before ``max_tokens`` without template markers.
+The eight-item lexical slice must retain the observed stock floor of 6/8; this is
+a regression check, not a 7/8 quality-promotion claim or the full 18-item review.
 """
 
 from __future__ import annotations

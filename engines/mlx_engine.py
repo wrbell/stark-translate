@@ -12,7 +12,10 @@ remains here.
 import copy
 import logging
 import os
+import threading
 import time
+import weakref
+from collections import OrderedDict
 from collections.abc import Callable
 
 import numpy as np
@@ -22,9 +25,9 @@ from engines.base import (
     STTResult,
     TranslationEngine,
     TranslationResult,
-    TTSEngine,
-    TTSResult,
 )
+from engines.model_paths import resolve_model_path
+from engines.stt_fallback import require_mlx_fallback_language
 from engines.translation_prompts import (
     build_chat_messages,
     chat_template_extra_kwargs,
@@ -112,7 +115,7 @@ def materialize_mlx_model(model) -> None:
         logger.warning("Could not materialize MLX model parameters: %s", exc)
 
 
-def warm_mlx_model(model, tokenizer, *, model_family: str, label: str = "model") -> None:
+def warm_mlx_model(model, tokenizer, *, model_family: str, label: str = "model", strict: bool = True) -> None:
     """Run the model's *first* forward pass on the load thread (1 token).
 
     mlx-lm's ``generation_stream`` is a thread-local stream. On mlx 0.32.x the
@@ -123,6 +126,8 @@ def warm_mlx_model(model, tokenizer, *, model_family: str, label: str = "model")
     right after ``load()`` (main/load thread) makes the model usable from any
     worker. Verified 2026-09-09 on mlx 0.32.2 / mlx-lm 0.31.3 and mlx-lm main.
     Weight materialisation alone (``materialize_mlx_model``) is not sufficient.
+    Startup failures propagate by default; optional later probes may pass
+    ``strict=False`` when failure must not invalidate an already loaded model.
     """
     if mx is None or model is None or tokenizer is None:
         return
@@ -142,6 +147,8 @@ def warm_mlx_model(model, tokenizer, *, model_family: str, label: str = "model")
         logger.info("%s warm forward on load thread (%.0f ms)", label, (time.perf_counter() - t0) * 1000)
     except Exception as exc:
         logger.warning("%s warm forward failed: %s", label, exc)
+        if strict:
+            raise RuntimeError(f"{label} warm forward failed: {exc}") from exc
 
 
 # PyTorch is always available (used as a fallback). Silero VAD on Mac uses
@@ -170,6 +177,10 @@ class MLXWhisperEngine(STTEngine):
                                  as hallucination and retried (default: 2.4).
         fallback_on_low_conf:    Enable/disable the quality-based fallback retry
                                  (default: True).
+        session_language:       Language used to guard startup fallback (default:
+                                 English). Automatic fallback is EN-only, including
+                                 custom fallback IDs. Spanish primary output is kept
+                                 on low confidence without an incompatible retry.
     """
 
     def __init__(
@@ -180,6 +191,7 @@ class MLXWhisperEngine(STTEngine):
         fallback_threshold: float = -1.2,
         hallucination_threshold: float = 2.4,
         fallback_on_low_conf: bool = True,
+        session_language: str = "en",
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
@@ -192,6 +204,8 @@ class MLXWhisperEngine(STTEngine):
         self._fallback_threshold = fallback_threshold
         self._hallucination_threshold = hallucination_threshold
         self._fallback_on_low_conf = fallback_on_low_conf
+        self._session_language = session_language
+        self._startup_used_fallback = False
         self._fallback_loaded = False
         self._loaded = False
 
@@ -212,11 +226,12 @@ class MLXWhisperEngine(STTEngine):
         try:
             mlx_whisper.transcribe(
                 silence,
-                path_or_hf_repo=self._model_id,
+                path_or_hf_repo=resolve_model_path(self._model_id),
                 condition_on_previous_text=False,
             )
             logger.info("Whisper ready (%s) (%.1fs)", self._model_id, time.time() - t0)
         except Exception as exc:
+            require_mlx_fallback_language(self._session_language, self._fallback_model_id)
             logger.warning(
                 "Primary model %s failed (%s), falling back to %s",
                 self._model_id,
@@ -227,10 +242,11 @@ class MLXWhisperEngine(STTEngine):
             t0 = time.time()
             mlx_whisper.transcribe(
                 silence,
-                path_or_hf_repo=self._model_id,
+                path_or_hf_repo=resolve_model_path(self._model_id),
                 condition_on_previous_text=False,
             )
             logger.info("Whisper ready (%s) (%.1fs)", self._model_id, time.time() - t0)
+            self._startup_used_fallback = True
 
         # Warmup already eval'd graphs on this thread; synchronize so the
         # mlx-whisper cache is safe for pool workers (MLX >= 0.31.2 TLS streams).
@@ -264,6 +280,11 @@ class MLXWhisperEngine(STTEngine):
         if not self._loaded:
             raise RuntimeError("Engine not loaded -- call load() first")
 
+        # A default-English caller may later request Spanish on the same engine.
+        # Never run that request on a fallback selected during startup.
+        if self._startup_used_fallback:
+            require_mlx_fallback_language(language, self._fallback_model_id)
+
         primary_result = self._raw_transcribe(
             audio,
             model_repo=self._model_id,
@@ -274,7 +295,7 @@ class MLXWhisperEngine(STTEngine):
         )
 
         # -- quality-based fallback retry ------------------------------------
-        if not self._fallback_on_low_conf:
+        if not self._fallback_on_low_conf or language != "en":
             return primary_result
 
         needs_fallback = self._should_fallback(primary_result)
@@ -344,7 +365,7 @@ class MLXWhisperEngine(STTEngine):
         # mlx-whisper is always greedy; beam_size param is ignored
         result = mlx_whisper.transcribe(
             audio,
-            path_or_hf_repo=model_repo,
+            path_or_hf_repo=resolve_model_path(model_repo),
             language=language,
             condition_on_previous_text=False,
             initial_prompt=initial_prompt,
@@ -421,7 +442,7 @@ class MLXWhisperEngine(STTEngine):
         silence = np.zeros(16000, dtype=np.float32)
         mlx_whisper.transcribe(
             silence,
-            path_or_hf_repo=self._fallback_model_id,
+            path_or_hf_repo=resolve_model_path(self._fallback_model_id),
             condition_on_previous_text=False,
         )
         if hasattr(mx, "synchronize"):
@@ -497,8 +518,116 @@ class MLXWhisperEngine(STTEngine):
 # MLX TranslateGemma
 # ---------------------------------------------------------------------------
 
+_prefix_stores = OrderedDict()
+_prefix_stores_lock = threading.Lock()
+
+
+def _prefix_store(model):
+    from engines.prefix_cache import FixedPrefixStore
+
+    key = id(model)
+    try:
+        reference = weakref.ref(model)
+    except TypeError:
+        # Never retain an ID-only cache for a holder whose lifetime cannot be
+        # observed: Python may reuse that ID for another model.
+        return FixedPrefixStore()
+    with _prefix_stores_lock:
+        if key not in _prefix_stores or _prefix_stores[key][0]() is not model:
+            _prefix_stores[key] = (reference, FixedPrefixStore())
+            weakref.finalize(model, _forget_prefix_store, key)
+            while len(_prefix_stores) > 4:
+                _prefix_stores.popitem(last=False)
+        _prefix_stores.move_to_end(key)
+        return _prefix_stores[key][1]
+
+
+def _forget_prefix_store(key):
+    with _prefix_stores_lock:
+        _prefix_stores.pop(key, None)
+
+
+def _prompt_tokens(tokenizer, prompt):
+    if not isinstance(prompt, str):
+        return list(prompt)
+    bos = getattr(tokenizer, "bos_token", None)
+    return list(tokenizer.encode(prompt, add_special_tokens=bos is None or not prompt.startswith(bos)))
+
+
+def _prepare_gemma_prefix(model, tokenizer, gen_kwargs, options):
+    from mlx_lm.generate import generate_step
+    from mlx_lm.models.cache import make_prompt_cache
+
+    from engines.prefix_cache import shared_token_prefix
+
+    full_prompt = _prompt_tokens(tokenizer, gen_kwargs["prompt"])
+    probes = []
+    for text in ("Alpha", "¿Por qué?", "Ω", ""):
+        messages = build_chat_messages(text, model_family="gemma4", **options)
+        probes.append(
+            _prompt_tokens(
+                tokenizer, tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False)
+            )
+        )
+    prefix = shared_token_prefix(probes)
+
+    def prefill(tokens, cache):
+        for _ in generate_step(mx.array(tokens), model, max_tokens=0, prompt_cache=cache):
+            pass
+        mx.eval([entry.state for entry in cache])
+
+    prepared = _prefix_store(model).prepare(prefix, full_prompt, lambda: make_prompt_cache(model), prefill)
+    if prepared.cache is not None:
+        gen_kwargs["prompt"] = prepared.prompt
+        gen_kwargs["prompt_cache"] = prepared.cache
+    return prepared, len(full_prompt)
+
 
 def generate_translation(
+    model,
+    tokenizer,
+    *,
+    model_family: str,
+    gen_kwargs: dict,
+    token_callback: Callable[[str, int], None] | None = None,
+    batch_size: int = 3,
+) -> TranslationResult:
+    """Serialize target/draft access; separate STT and translation models overlap."""
+    from engines.mlx_generation_lock import generation_guard
+
+    gen_kwargs = dict(gen_kwargs)
+    prefix_options = gen_kwargs.pop("_stark_prefix_options", None)
+    measure_lock = prefix_options is not None or os.environ.get("STARK_EXPERIMENT_TRACE", "").lower() in {"true", "1"}
+    requested = time.perf_counter() if measure_lock else None
+    with generation_guard(model, gen_kwargs.get("draft_model")):
+        lock_ms = (time.perf_counter() - requested) * 1000 if requested is not None else None
+        prepared, original_tokens = None, None
+        prepare_ms = 0.0
+        if prefix_options is not None:
+            prepare_started = time.perf_counter()
+            prepared, original_tokens = _prepare_gemma_prefix(model, tokenizer, gen_kwargs, prefix_options)
+            prepare_ms = (time.perf_counter() - prepare_started) * 1000
+        result = _generate_translation(
+            model,
+            tokenizer,
+            model_family=model_family,
+            gen_kwargs=gen_kwargs,
+            token_callback=token_callback,
+            batch_size=batch_size,
+        )
+        result.generation_lock_wait_ms = lock_ms
+        if prepared is not None:
+            result.cached_prompt_tokens = prepared.cached_tokens
+            result.prompt_cache_hit = prepared.hit
+            result.prompt_cache_prepare_ms = prepare_ms
+            result.prompt_tokens = original_tokens
+            result.latency_ms += prepare_ms
+            if result.ttft_ms is not None:
+                result.ttft_ms += prepare_ms
+        return result
+
+
+def _generate_translation(
     model,
     tokenizer,
     *,
@@ -552,6 +681,70 @@ def generate_translation(
     )
 
 
+def translate_loaded_model(
+    model,
+    tokenizer,
+    text,
+    *,
+    model_family="gemma4",
+    source_lang="en",
+    target_lang="es",
+    draft_model=None,
+    num_draft_tokens=1,
+    prompt_cache_template=None,
+    suffix_tokens=None,
+    token_callback=None,
+    batch_size=3,
+    terminology_prompt="none",
+):
+    """Canonical preparation/generation path for live, engine and worker calls."""
+    if model is None or tokenizer is None:
+        return TranslationResult(text="(model not loaded)", latency_ms=0.0)
+    use_cache = (
+        prompt_cache_template is not None
+        and suffix_tokens is not None
+        and draft_model is None
+        and model_family == "translategemma"
+    )
+    gen_kwargs = {"max_tokens": dynamic_max_tokens(text)}
+    if use_cache:
+        copy_started = time.perf_counter()
+        gen_kwargs["prompt_cache"] = copy.deepcopy(prompt_cache_template)
+        copy_ms = (time.perf_counter() - copy_started) * 1000
+        if copy_ms > 20:
+            logger.warning("prompt_cache deep-copy took %.1fms", copy_ms)
+        gen_kwargs["prompt"] = tokenizer.encode(text, add_special_tokens=False) + suffix_tokens
+    else:
+        messages = build_chat_messages(
+            text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            model_family=model_family,
+            terminology_prompt=terminology_prompt,
+        )
+        gen_kwargs["prompt"] = tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=model_family)
+        )
+    if draft_model is not None and num_draft_tokens > 0:
+        gen_kwargs.update(draft_model=draft_model, num_draft_tokens=num_draft_tokens)
+    if model_family == "gemma4" and os.environ.get("STARK_EXPERIMENT_GEMMA_PREFIX_CACHE", "").lower() in {"true", "1"}:
+        if draft_model is not None:
+            raise ValueError("Gemma fixed-prefix caching cannot be combined with speculative token decoding")
+        gen_kwargs["_stark_prefix_options"] = {
+            "source_lang": source_lang,
+            "target_lang": target_lang,
+            "terminology_prompt": terminology_prompt,
+        }
+    return generate_translation(
+        model,
+        tokenizer,
+        model_family=model_family,
+        gen_kwargs=gen_kwargs,
+        token_callback=token_callback,
+        batch_size=batch_size,
+    )
+
+
 class MLXGemmaEngine(TranslationEngine):
     """Translation engine wrapping Gemma 4 OptiQ / TranslateGemma via mlx-lm.
 
@@ -583,6 +776,7 @@ class MLXGemmaEngine(TranslationEngine):
         adapter_path: str | None = None,
         draft_model_id: str | None = None,
         num_draft_tokens: int = 1,
+        terminology_prompt: str = "none",
     ):
         if not MLX_AVAILABLE:
             raise RuntimeError(
@@ -598,6 +792,7 @@ class MLXGemmaEngine(TranslationEngine):
         self._adapter_path = adapter_path
         self._draft_model_id = draft_model_id
         self._num_draft_tokens = num_draft_tokens
+        self._terminology_prompt = terminology_prompt
 
         self._model = None
         self._tokenizer = None
@@ -612,7 +807,14 @@ class MLXGemmaEngine(TranslationEngine):
         """Load the model weights, apply the EOS fix, and build the prompt cache."""
         from mlx_lm import load as mlx_load
 
-        mx.set_cache_limit(self._cache_limit_mb * 1024 * 1024)
+        cache_mb = self._cache_limit_mb
+        experimental_limit = os.environ.get("STARK_EXPERIMENT_MLX_CACHE_MB")
+        if experimental_limit is not None:
+            cache_mb = int(experimental_limit)
+            if not 0 <= cache_mb <= 1024:
+                raise ValueError("Experimental MLX allocation cache must be between 0 and 1024 MiB")
+        mx.set_cache_limit(cache_mb * 1024 * 1024)
+        logger.info("MLX reusable allocation cache limit: %d MiB", cache_mb)
 
         logger.info("Loading %s (MLX 4-bit)...", self._model_id)
         t0 = time.time()
@@ -620,7 +822,7 @@ class MLXGemmaEngine(TranslationEngine):
         if self._adapter_path:
             load_kwargs["adapter_path"] = self._adapter_path
             logger.info("Loading LoRA adapter from %s", self._adapter_path)
-        self._model, self._tokenizer = mlx_load(self._model_id, **load_kwargs)
+        self._model, self._tokenizer = mlx_load(resolve_model_path(self._model_id), **load_kwargs)
 
         ensure_stop_tokens(self._tokenizer, model_family=self._model_family)
 
@@ -639,7 +841,7 @@ class MLXGemmaEngine(TranslationEngine):
                 self._num_draft_tokens,
             )
             t1 = time.time()
-            self._draft_model, _draft_tok = mlx_load(self._draft_model_id)
+            self._draft_model, _draft_tok = mlx_load(resolve_model_path(self._draft_model_id))
             logger.info("Draft model loaded (%.1fs)", time.time() - t1)
             # Speculative decode is incompatible with prompt KV cache
             if self._use_prompt_cache:
@@ -670,7 +872,7 @@ class MLXGemmaEngine(TranslationEngine):
                 logger.warning("TurboQuant initialization failed: %s", exc)
 
         # -- prompt cache (mirrors dry_run_ab._build_prompt_cache) ------------
-        if self._use_prompt_cache:
+        if self._use_prompt_cache and self._model_family == "translategemma":
             self._prompt_cache_template, self._suffix_tokens = self._build_prompt_cache()
 
         # Materialize weights on the load thread so pool workers can run
@@ -726,59 +928,21 @@ class MLXGemmaEngine(TranslationEngine):
         if self._model is None or self._tokenizer is None:
             return TranslationResult(text="(model not loaded)", latency_ms=0.0)
 
-        # Dynamic max-tokens cap via shared helper (same formula as CUDA Gemma path).
-        max_tok = dynamic_max_tokens(text)
-
-        # Prompt cache is pre-built for en→es translategemma only; skip for other configs
-        use_cache = (
-            self._prompt_cache_template is not None
-            and self._suffix_tokens is not None
-            and source_lang == "en"
-            and target_lang == "es"
-            and self._model_family == "translategemma"
-        )
-
-        if use_cache:
-            # Deep-copy the pre-computed KV cache so we don't mutate the template
-            cached = copy.deepcopy(self._prompt_cache_template)
-            text_tokens = self._tokenizer.encode(text, add_special_tokens=False)
-            dynamic_tokens = text_tokens + self._suffix_tokens
-            gen_kwargs = dict(
-                prompt=dynamic_tokens,
-                max_tokens=max_tok,
-                prompt_cache=cached,
-            )
-        else:
-            messages = build_chat_messages(
-                text,
-                source_lang=source_lang,
-                target_lang=target_lang,
-                model_family=self._model_family,
-            )
-            prompt = self._tokenizer.apply_chat_template(
-                messages,
-                add_generation_prompt=True,
-                **chat_template_extra_kwargs(model_family=self._model_family),
-            )
-            gen_kwargs = dict(
-                prompt=prompt,
-                max_tokens=max_tok,
-            )
-
-        # Optional Gemma-4 assistant-drafter / mlx-lm draft_model speculative decode
-        if self._draft_model is not None and self._num_draft_tokens > 0:
-            gen_kwargs["draft_model"] = self._draft_model
-            gen_kwargs["num_draft_tokens"] = self._num_draft_tokens
-            # Prompt cache is incompatible with speculative decoding
-            gen_kwargs.pop("prompt_cache", None)
-
-        return generate_translation(
+        use_cache = source_lang == "en" and target_lang == "es"
+        return translate_loaded_model(
             self._model,
             self._tokenizer,
+            text,
             model_family=self._model_family,
-            gen_kwargs=gen_kwargs,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            draft_model=self._draft_model,
+            num_draft_tokens=self._num_draft_tokens,
+            prompt_cache_template=self._prompt_cache_template if use_cache else None,
+            suffix_tokens=self._suffix_tokens if use_cache else None,
             token_callback=token_callback,
             batch_size=batch_size,
+            terminology_prompt=self._terminology_prompt,
         )
 
     def unload(self) -> None:
@@ -877,160 +1041,4 @@ class MLXGemmaEngine(TranslationEngine):
 # ---------------------------------------------------------------------------
 
 
-class PiperTTSEngine(TTSEngine):
-    """Text-to-speech engine wrapping Piper (ONNX Runtime).
-
-    Piper uses ONNX Runtime for inference (CPU), not MLX. Despite living in
-    mlx_engine.py, it's the Mac-side TTS engine. ONNX Runtime is thread-safe,
-    so TTS can run on its own thread pool without the MLX single-thread restriction.
-
-    Constructor args:
-        voices:  Dict mapping language codes to Piper voice names or paths.
-                 Default: ``{"es": "es_ES-carlfm-high"}``.
-    """
-
-    def __init__(self, voices: dict[str, str] | None = None):
-        self._voice_specs = voices or {"es": "es_MX-claude-high"}
-        self._voices: dict = {}  # lang -> PiperVoice instance
-        self._loaded = False
-
-    def load(self) -> None:
-        """Load Piper voice models for each configured language."""
-        from piper.voice import PiperVoice
-
-        logger.info("Loading Piper TTS voices: %s", self._voice_specs)
-        t0 = time.time()
-
-        for lang, voice_spec in self._voice_specs.items():
-            # Try custom path first, then resolve from Piper's download cache
-            custom_path = f"piper_voices/{lang}/{voice_spec}.onnx"
-            if os.path.exists(custom_path):
-                voice = PiperVoice.load(custom_path)
-                logger.info("  Loaded custom voice for %s: %s", lang, custom_path)
-            else:
-                # Stock voice: download if needed via piper_download
-                model_path = self._ensure_voice_downloaded(voice_spec)
-                voice = PiperVoice.load(model_path)
-                logger.info("  Loaded stock voice for %s: %s", lang, voice_spec)
-            self._voices[lang] = voice
-
-        self._loaded = True
-        logger.info("Piper TTS ready (%d voices, %.1fs)", len(self._voices), time.time() - t0)
-
-    def synthesize(self, text: str, *, language: str = "es") -> TTSResult:
-        """Synthesize text to float32 audio array using the voice for *language*."""
-        if not self._loaded:
-            raise RuntimeError("Engine not loaded -- call load() first")
-
-        if language not in self._voices:
-            raise ValueError(f"No voice loaded for language '{language}'. Available: {list(self._voices.keys())}")
-
-        import io
-        import wave
-
-        voice = self._voices[language]
-
-        t0 = time.perf_counter()
-
-        # Synthesize to in-memory WAV
-        wav_buffer = io.BytesIO()
-        with wave.open(wav_buffer, "wb") as wav_file:
-            voice.synthesize_wav(text, wav_file)
-
-        latency_ms = (time.perf_counter() - t0) * 1000
-
-        # Extract raw PCM from WAV and convert int16 -> float32
-        wav_buffer.seek(0)
-        with wave.open(wav_buffer, "rb") as wav_file:
-            sample_rate = wav_file.getframerate()
-            n_frames = wav_file.getnframes()
-            raw_bytes = wav_file.readframes(n_frames)
-
-        audio_int16 = np.frombuffer(raw_bytes, dtype=np.int16)
-        audio_float32 = audio_int16.astype(np.float32) / 32768.0
-
-        return TTSResult(
-            audio=audio_float32,
-            sample_rate=sample_rate,
-            latency_ms=latency_ms,
-            text=text,
-        )
-
-    def play(self, audio_float32: np.ndarray, sample_rate: int, device: int | None = None) -> None:
-        """Play synthesized audio to a sounddevice output device.
-
-        Used by ``--tts-output local`` mode (Phase 9.4.1) so the operator
-        can route the translated audio to a chosen speaker / monitor without
-        going through the WebSocket clients.
-
-        Args:
-            audio_float32:  PCM as returned by ``synthesize().audio``.
-            sample_rate:    Hz, also from the ``TTSResult``.
-            device:         sounddevice output device index, or ``None`` for
-                            system default. Get the index from
-                            ``operator_app.audio.list_devices()`` outputs.
-
-        Returns immediately after the audio is queued; the playback runs on
-        sounddevice's own thread.
-        PortAudioError propagates so the routing layer can re-resolve hotplugged devices.
-        """
-        import sounddevice as sd
-
-        try:
-            sd.play(audio_float32, samplerate=sample_rate, device=device)
-        except sd.PortAudioError:
-            raise
-        except Exception as exc:
-            logger.warning("PiperTTSEngine.play failed (device=%s): %s", device, exc)
-
-    def unload(self) -> None:
-        """Release voice models from memory."""
-        self._voices.clear()
-        self._loaded = False
-        logger.info("PiperTTSEngine unloaded")
-
-    @property
-    def model_id(self) -> str:
-        return f"piper:{','.join(f'{k}={v}' for k, v in self._voice_specs.items())}"
-
-    @property
-    def backend(self) -> str:
-        return "onnx"
-
-    @staticmethod
-    def _ensure_voice_downloaded(voice_name: str) -> str:
-        """Download a Piper voice if not already cached, return path to .onnx file.
-
-        Uses piper_download to fetch from HuggingFace rhasspy/piper-voices.
-        """
-        from pathlib import Path
-
-        # Piper voices cache in ~/.local/share/piper_tts/ by convention
-        cache_dir = Path.home() / ".local" / "share" / "piper_tts"
-        cache_dir.mkdir(parents=True, exist_ok=True)
-
-        # Check if already downloaded
-        onnx_path = cache_dir / f"{voice_name}.onnx"
-        if onnx_path.exists():
-            return str(onnx_path)
-
-        # Download via huggingface_hub
-        from huggingface_hub import hf_hub_download
-
-        # Piper voice naming: language_REGION-name-quality
-        # e.g., es_ES-carlfm-high -> es/es_ES/carlfm/high/
-        parts = voice_name.split("-")
-        lang_region = parts[0]  # es_ES
-        lang = lang_region.split("_")[0]  # es
-        name = parts[1] if len(parts) > 1 else "default"
-        quality = parts[2] if len(parts) > 2 else "medium"
-
-        repo_id = "rhasspy/piper-voices"
-        model_file = f"{lang}/{lang_region}/{name}/{quality}/{voice_name}.onnx"
-        config_file = f"{lang}/{lang_region}/{name}/{quality}/{voice_name}.onnx.json"
-
-        logger.info("Downloading Piper voice: %s", voice_name)
-        onnx_local = hf_hub_download(repo_id=repo_id, filename=model_file, cache_dir=str(cache_dir))
-        hf_hub_download(repo_id=repo_id, filename=config_file, cache_dir=str(cache_dir))
-
-        return onnx_local
+from engines.tts_engine import PiperTTSEngine  # noqa: F401 -- historical import compatibility

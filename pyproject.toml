@@ -1,6 +1,6 @@
 [project]
 name = "stark-translate"
-version = "2026.13.0.0"
+version = "2026.14.0.0"
 requires-python = ">=3.11"
 description = "Live bilingual speech-to-text for church outreach"
 readme = "README.md"
@@ -30,10 +30,12 @@ dependencies = [
     "numpy>=1.26",
     "huggingface_hub>=0.24",
     "sounddevice>=0.5",
+    "packaging>=24",
 ]
 
 [project.scripts]
 stark-translate = "operator_app.cli:main"
+stark-translate-lite = "operator_app.cli:lite_main"
 
 [project.urls]
 Homepage = "https://github.com/wrbell/stark-translate"
@@ -41,6 +43,12 @@ Documentation = "https://github.com/wrbell/stark-translate/blob/main/docs/operat
 Issues = "https://github.com/wrbell/stark-translate/issues"
 
 [project.optional-dependencies]
+# Runtime is torch-free. Model conversion is a separate setup interpreter.
+lite-cpu = ["ctranslate2>=4.7.1,<5", "faster-whisper>=1.2.1,<2", "onnxruntime>=1.20,<2", "transformers>=5.5,<6", "sentencepiece>=0.2,<0.3", "sacremoses>=0.1", "scipy>=1.13,<2"]
+lite-cuda = ["stark-translate[lite-cpu]"]
+lite-build = ["torch>=2.6,<3", "transformers>=5.5,<6", "ctranslate2>=4.7.1,<5", "sentencepiece>=0.2,<0.3", "sacremoses>=0.1"]
+tts = ["piper-tts>=1.4.1,<2"]
+
 # --------------------------------------------------------------------------
 # Hardware-backend extras — pick exactly one for your platform.
 # --------------------------------------------------------------------------
@@ -54,6 +62,10 @@ cuda = [
     "transformers>=5.5",
     "ctranslate2>=4.5",
     "faster-whisper>=1.1",
+    "silero-vad>=6.2.1",
+    "onnxruntime>=1.20",
+    "sentencepiece>=0.2",
+    "sacremoses>=0.1",
     "bitsandbytes>=0.43",
     "scipy>=1.13",
     "piper-tts",
@@ -61,10 +73,17 @@ cuda = [
 
 # MLX / Apple Silicon. arm64 only.
 mlx = [
-    "mlx>=0.31.2",                    # multi-thread independent eval (thread-local streams)
+    "torch>=2.10,<2.11",
+    "silero-vad==6.2.1",
+    "onnxruntime>=1.20",
+    "ctranslate2>=4.7.1",
+    "sentencepiece>=0.2",
+    "sacremoses>=0.1",
+    "parakeet-mlx>=0.5.2,<0.6",
+    "mlx>=0.32.2,<0.33",                    # multi-thread independent eval (thread-local streams)
     "mlx-whisper>=0.4",
-    "mlx-lm>=0.31.3",                 # thread-local generation stream (companion to mlx 0.31.2)
-    "mlx-optiq>=0.1",                 # TurboQuant KV cache (optional at runtime)
+    "mlx-lm>=0.31.3,<0.32",                 # thread-local generation stream (companion to mlx 0.31.2)
+    "mlx-optiq>=0.4.34,<0.5",                 # TurboQuant KV cache (optional at runtime)
     "transformers>=5.5",
     "scipy>=1.13",
     "piper-tts",
@@ -72,6 +91,8 @@ mlx = [
 
 # Optional multilingual STT engine; combine with the mlx extra on Apple Silicon.
 parakeet-mlx = ["parakeet-mlx>=0.5.2"]
+eval = ["sacrebleu>=2.5", "jiwer>=3"]
+diarization = ["speechbrain>=1.0", "torchaudio>=2.10,<2.11", "soundfile>=0.12", "scikit-learn>=1.4"]
 
 # CPU fallback — no GPU acceleration. Slow but works on any machine.
 cpu = [
@@ -79,6 +100,10 @@ cpu = [
     "transformers>=5.5",
     "ctranslate2>=4.5",
     "faster-whisper>=1.1",
+    "silero-vad>=6.2.1",
+    "onnxruntime>=1.20",
+    "sentencepiece>=0.2",
+    "sacremoses>=0.1",
     "scipy>=1.13",
     "piper-tts",
 ]
@@ -94,6 +119,7 @@ dev = [
     "vulture>=2.11",
     "httpx>=0.28",                        # for fastapi.testclient
     "build>=1.2",                         # python -m build
+    "pyyaml>=6.0",                       # parse production workflow contracts in tests
 ]
 
 # ---------------------------------------------------------------------------
@@ -105,18 +131,28 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["stark_translate", "operator_app", "engines", "tools", "features"]
+exclude = ["/tools/roundtrip_output/**", "/tools/roundtrip_texts/**"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "settings.py" = "settings.py"
+"workers.py" = "workers.py"
 "dry_run_ab.py" = "dry_run_ab.py"
 "models.lock.json" = "models.lock.json"
 "displays" = "displays"
 "scripts/dry_run_rehearsal.sh" = "scripts/dry_run_rehearsal.sh"
+"scripts/runtime_env.sh" = "scripts/runtime_env.sh"
 "start_server.sh" = "start_server.sh"
 "run_operator.sh" = "run_operator.sh"
+"training/__init__.py" = "training/__init__.py"
+"training/theological_canaries.py" = "training/theological_canaries.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
+    "stark_translate",
+    "launchd",
+    "docs",
+    "LICENSE",
+    "workers.py",
     "operator_app",
     "engines",
     "tools",
@@ -124,15 +160,21 @@ include = [
     "displays",
     "scripts",
     "tests",
+    "training/*.py",
+    "training/*.sh",
+    "training/*.md",
     "settings.py",
     "dry_run_ab.py",
     "models.lock.json",
     "pyproject.toml",
     "README.md",
-    "CLAUDE.md",
+    "AGENTS.md",
+    "CLAUDE*.md",
     "*.sh",
 ]
 exclude = [
+    "/tools/roundtrip_output/**",
+    "/tools/roundtrip_texts/**",
     "stt-data",
     "stark_data",
     "whisper_ablation",
@@ -251,7 +293,7 @@ markers = [
 [tool.briefcase]
 project_name = "Stark Translate"
 bundle = "com.starkroad"
-version = "2026.13.0.0"
+version = "2026.14.0.0"
 url = "https://github.com/wrbell/stark-translate"
 license.file = "LICENSE"
 

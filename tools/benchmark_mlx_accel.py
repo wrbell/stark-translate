@@ -312,10 +312,11 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
 
 
 def bench_stt_baseline(runs: int, warmup: int, model_id: str, duration_s: float = 3.0) -> dict[str, Any]:
-    """mlx-whisper latency on synthetic audio (Mac only)."""
+    """Primary mlx-whisper latency; a startup fallback makes this arm ineligible."""
     import numpy as np
 
     from engines.mlx_engine import MLXWhisperEngine
+    from tools.benchmark_identity import load_primary_model
 
     print(f"\n=== STT {model_id} ===")
     audio = np.zeros(int(16000 * duration_s), dtype=np.float32)
@@ -323,11 +324,11 @@ def bench_stt_baseline(runs: int, warmup: int, model_id: str, duration_s: float 
     t = np.arange(len(audio)) / 16000.0
     audio = (0.05 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
 
-    engine = MLXWhisperEngine(model_id=model_id)
+    engine = MLXWhisperEngine(model_id=model_id, fallback_on_low_conf=False)
     try:
-        engine.load()
+        identity = load_primary_model(engine, model_id)
     except Exception as exc:
-        return {"error": str(exc), "model_id": model_id}
+        return {"error": str(exc), "model_id": model_id, "actual_model_id": engine.model_id, "eligible": False}
 
     for _ in range(warmup):
         engine.transcribe(audio, language="en", word_timestamps=False)
@@ -342,7 +343,13 @@ def bench_stt_baseline(runs: int, warmup: int, model_id: str, duration_s: float 
     engine.unload()
     stats = _stats(lats)
     print(f"  STT (no timestamps): p50={stats['p50']:.0f}ms p95={stats['p95']:.0f}ms")
-    return {"model_id": model_id, "latency": stats, "note": "synthetic audio; use real clips for WER"}
+    return {
+        "model_id": model_id,
+        "model_identity": identity,
+        "eligible": True,
+        "latency": stats,
+        "note": "synthetic audio; use real clips for WER",
+    }
 
 
 def bench_e2e_overlap_proxy(mt_result: dict, stt_result: dict) -> dict[str, Any]:

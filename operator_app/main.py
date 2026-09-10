@@ -1,7 +1,7 @@
 """FastAPI control plane (Phase 9.1+).
 
 Run with:
-    uvicorn operator_app.main:app --host 0.0.0.0 --port 9000
+    uvicorn operator_app.main:app --host 127.0.0.1 --port 9000
 
 The HTML/JS frontend is served from ``displays/operator/`` at ``/operator/``.
 """
@@ -14,27 +14,31 @@ import json
 import logging
 import logging.handlers
 import os
+import re
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from engines.audio_devices import list_output_devices
-from operator_app.audio import get_watcher
+from operator_app.audio import get_watcher, shutdown_watcher
 from operator_app.audio_ingest import get_bus as get_audio_bus
 from operator_app.audio_ingest import handle_audio_ingest, handle_audio_subscribe
-from operator_app.features import get_summary_runner, get_verse_watcher
-from operator_app.metrics import get_collector, healthz_snapshot
+from operator_app.features import get_summary_runner, get_verse_watcher, shutdown_features
+from operator_app.metrics import get_collector, healthz_snapshot, shutdown_collector
 from operator_app.pipeline_manager import (
     InvalidStateError,
     PipelineRunner,
     SessionAlreadyRunningError,
     SessionConfig,
     get_runner,
+    shutdown_runner,
 )
 from operator_app.preflight import run_all_checks
+from operator_app.review import router as review_router
+from operator_app.work_lease import WorkBusyError
 
 logger = logging.getLogger(__name__)
 
@@ -43,32 +47,11 @@ PROJECT_ROOT = Path(os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
 
 
 def _configure_logging() -> None:
-    """Wire a rotating file handler so multi-day sessions don't grow unbounded.
+    from tools.operational_logging import configure_log, prune_completed_logs
 
-    Honors STARK_OPERATOR_LOG_DIR if set; otherwise writes under metrics/.
-    Rotates at 100 MiB, keeps 5 backups. The console handler stays at the
-    root logger's existing level (defaults to WARNING).
-    """
     log_dir = Path(os.environ.get("STARK_OPERATOR_LOG_DIR", str(PROJECT_ROOT / "metrics")))
-    try:
-        log_dir.mkdir(parents=True, exist_ok=True)
-    except OSError:
-        return
-    handler = logging.handlers.RotatingFileHandler(
-        log_dir / "operator.log",
-        maxBytes=100 * 1024 * 1024,
-        backupCount=5,
-        encoding="utf-8",
-    )
-    handler.setLevel(logging.INFO)
-    handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    )
-    root = logging.getLogger()
-    if not any(getattr(h, "baseFilename", "").endswith("operator.log") for h in root.handlers):
-        root.addHandler(handler)
-    if root.level > logging.INFO:
-        root.setLevel(logging.INFO)
+    configure_log(logging.getLogger(), log_dir / "operator.log")
+    prune_completed_logs(PROJECT_ROOT)
 
 
 _configure_logging()
@@ -83,14 +66,23 @@ async def _lifespan(app: FastAPI):
     or partially-flushed CSVs.
     """
     logger.info("operator app starting up")
-    yield
-    logger.info("operator app shutting down — stopping pipeline if running")
     try:
-        runner = get_runner()
-        if runner.status().state != "idle":
-            runner.stop(timeout_s=10.0)
-    except Exception as exc:
-        logger.warning("graceful pipeline stop failed: %s", exc)
+        yield
+    finally:
+        logger.info("operator app shutting down — stopping existing workers")
+        # Stop the pipeline first so its final health/features cannot restart a poller
+        # after cleanup. Helpers detach only existing singletons, then join outside
+        # registry locks; a later lifespan can create fresh workers normally.
+        for name, shutdown in (
+            ("pipeline", shutdown_runner),
+            ("features", shutdown_features),
+            ("metrics", shutdown_collector),
+            ("audio devices", shutdown_watcher),
+        ):
+            try:
+                shutdown()
+            except Exception:
+                logger.exception("operator %s shutdown failed", name)
 
 
 app = FastAPI(
@@ -99,6 +91,16 @@ app = FastAPI(
     description="Live pipeline control plane (Phase 9).",
     lifespan=_lifespan,
 )
+from operator_app.security import OperatorBoundaryMiddleware
+
+app.add_middleware(OperatorBoundaryMiddleware)
+app.include_router(review_router)
+from operator_app.support import router as support_router
+
+app.include_router(support_router)
+from operator_app.audio_tests import router as audio_test_router
+
+app.include_router(audio_test_router)
 
 
 # -- request models -----------------------------------------------------------
@@ -108,6 +110,15 @@ class StartRequest(BaseModel):
     """Subset of ``SessionConfig`` the frontend exposes."""
 
     lang: str = Field(default="en", pattern="^(en|es)$")
+    profile: str = Field(
+        default_factory=lambda: os.environ.get("STARK_PROFILE", "standard"),
+        pattern="^(standard|lite-cpu|lite-cuda-8gb|lite-cpu-quality)$",
+    )
+    record_audio: bool = True
+    stt_backend: str = Field(default="auto", pattern="^(auto|mlx|parakeet-mlx|faster-whisper|hf|parakeet-nemo)$")
+    model_family: str | None = Field(default=None, pattern="^(gemma4|translategemma)$")
+    gemma4_size: str | None = Field(default=None, pattern="^(e2b|e4b)$")
+    low_vram: bool = False
     backend: str = Field(default="auto", pattern="^(auto|mlx|cuda|cpu)$")
     engine: str = Field(default="auto", pattern="^(auto|llamacpp|hf)$")
     tts: bool = False
@@ -133,10 +144,130 @@ def healthz() -> dict:
     return healthz_snapshot()
 
 
+@app.get("/api/capabilities")
+def api_capabilities(request: Request) -> dict:
+    """Supported controls, not a claim that models or physical devices are ready."""
+    from settings import settings
+
+    try:
+        from stark_translate.profiles import PROFILE_NAMES
+
+        profiles = list(PROFILE_NAMES)
+    except ImportError:
+        profiles = ["standard"]
+    host = request.url.hostname or "localhost"
+    if ":" in host:
+        host = "[" + host + "]"
+    http_port, ws_port = settings.server.http_port, settings.server.ws_port
+    base = f"{request.url.scheme}://{host}:{http_port}"
+    return {
+        "profiles": profiles,
+        "default_profile": os.environ.get("STARK_PROFILE", "standard"),
+        "preflight_required": True,
+        "audio_tests": True,
+        "audio_tests_require_idle": True,
+        "audio_devices_validated": False,
+        "support": True,
+        "storage": True,
+        "display_ports": {"http": http_port, "websocket": ws_port},
+        "audience_urls": {
+            name: f"{base}/displays/{filename}?port={ws_port}"
+            for name, filename in {
+                "audience": "audience_display.html",
+                "church": "church_display.html",
+                "mobile": "mobile_display.html",
+                "obs": "obs_overlay.html",
+            }.items()
+        },
+    }
+
+
+def _resolve_session_config(cfg):
+    try:
+        from stark_translate.profiles import session_overrides
+    except ImportError:
+        if cfg.profile != "standard":
+            raise HTTPException(
+                status_code=422,
+                detail={"code": "profile_unavailable", "message": "Install the selected runtime profile"},
+            ) from None
+        return {}
+    try:
+        values = session_overrides(cfg.profile, cfg.backend)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    for name, value in values.items():
+        if hasattr(cfg, name):
+            setattr(cfg, name, value)
+    return {"profile": cfg.profile}
+
+
+def _preflight_config(cfg, root):
+    profile_args = _resolve_session_config(cfg)
+    return run_all_checks(
+        project_root=root,
+        backend=cfg.backend,
+        lang=cfg.lang,
+        tts=cfg.tts,
+        diarize=cfg.diarize,
+        input_device=cfg.mic_device,
+        stt_backend=cfg.stt_backend,
+        model_family=cfg.model_family or "gemma4",
+        gemma4_size=cfg.gemma4_size or "e4b",
+        **profile_args,
+    )
+
+
+def _require_preflight(cfg, runner):
+    checks = _preflight_config(cfg, runner._project_root)
+    if not checks["ok"]:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "preflight_failed",
+                "message": "The selected configuration is not ready. Resolve the failed checks before starting.",
+                "checks": checks["checks"],
+            },
+        )
+
+
+def _checked_restart(cfg, runner, *, requested_engine=None):
+    _require_preflight(cfg, runner)
+    if requested_engine is not None and cfg.engine != requested_engine:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "profile_conflict",
+                "message": f"The {cfg.profile} profile requires engine {cfg.engine}. Choose a matching profile before switching engines.",
+            },
+        )
+    try:
+        return runner.restart_with(cfg).to_dict()
+    except (WorkBusyError, SessionAlreadyRunningError, InvalidStateError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
 @app.get("/api/preflight")
-def api_preflight() -> dict:
-    """Run all preflight checks. Cheap enough to poll every few seconds."""
-    return run_all_checks(project_root=PROJECT_ROOT)
+def api_preflight(
+    backend: str = "auto",
+    lang: str = "en",
+    tts: bool = False,
+    diarize: bool = False,
+    input_device: int | None = None,
+    profile: str | None = None,
+    runner: PipelineRunner = Depends(get_runner),
+) -> dict:
+    cfg = SessionConfig(
+        backend=backend,
+        lang=lang,
+        tts=tts,
+        diarize=diarize,
+        mic_device=input_device,
+        profile=profile or os.environ.get("STARK_PROFILE", "standard"),
+    )
+    checks = _preflight_config(cfg, runner._project_root)
+    checks["effective_profile"] = cfg.__dict__.copy()
+    return checks
 
 
 @app.get("/api/devices")
@@ -171,8 +302,15 @@ def api_session_status(runner: PipelineRunner = Depends(get_runner)) -> dict:
 @app.post("/api/session/start")
 def api_session_start(req: StartRequest, runner: PipelineRunner = Depends(get_runner)) -> dict:
     cfg = SessionConfig(**req.model_dump())
+    if runner.status().state in {"starting", "running", "paused", "stopping"}:
+        raise HTTPException(status_code=409, detail="A session is already running")
+    _require_preflight(cfg, runner)
     try:
         snap = runner.start(cfg)
+    except WorkBusyError as exc:
+        raise HTTPException(
+            status_code=409, detail={"code": "work_busy", "message": str(exc), "work": exc.work}
+        ) from exc
     except SessionAlreadyRunningError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     return snap.to_dict()
@@ -180,7 +318,10 @@ def api_session_start(req: StartRequest, runner: PipelineRunner = Depends(get_ru
 
 @app.post("/api/session/stop")
 def api_session_stop(runner: PipelineRunner = Depends(get_runner)) -> dict:
-    snap = runner.stop()
+    try:
+        snap = runner.stop()
+    except InvalidStateError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return snap.to_dict()
 
 
@@ -223,7 +364,7 @@ def api_control_lang_flip(runner: PipelineRunner = Depends(get_runner)) -> dict:
         raise HTTPException(status_code=409, detail="no active session to flip")
     cfg = SessionConfig(**snap.config)
     cfg.lang = "es" if cfg.lang == "en" else "en"
-    return runner.restart_with(cfg).to_dict()
+    return _checked_restart(cfg, runner)
 
 
 @app.post("/api/control/vad")
@@ -234,7 +375,7 @@ def api_control_vad(req: VadRequest, runner: PipelineRunner = Depends(get_runner
         raise HTTPException(status_code=409, detail="no active session to retune")
     cfg = SessionConfig(**snap.config)
     cfg.vad_threshold = req.threshold
-    return runner.restart_with(cfg).to_dict()
+    return _checked_restart(cfg, runner)
 
 
 @app.post("/api/control/fallback")
@@ -245,7 +386,7 @@ def api_control_fallback(req: FallbackRequest, runner: PipelineRunner = Depends(
         raise HTTPException(status_code=409, detail="no active session to swap")
     cfg = SessionConfig(**snap.config)
     cfg.engine = req.engine
-    return runner.restart_with(cfg).to_dict()
+    return _checked_restart(cfg, runner, requested_engine=req.engine)
 
 
 # -- features (Phase 9.6) -----------------------------------------------------
@@ -275,6 +416,7 @@ def api_features_verses(
         watcher = get_verse_watcher()
     if watcher is None:
         return {"highlights": [], "since_chunk": since_chunk}
+    watcher.force_scan()
     highlights = watcher.snapshot(since_chunk=since_chunk)
     return {"highlights": highlights, "since_chunk": since_chunk}
 
@@ -291,13 +433,47 @@ def api_features_summary(
     with a task_id; poll ``GET /api/features/summary/{id}``.
     """
     snap = runner.status()
+    if snap.state in ("starting", "running", "paused", "stopping"):
+        raise HTTPException(status_code=409, detail="Stop the live session before generating a summary")
     csv_path = req.csv_path or snap.csv_path
     if not csv_path:
         raise HTTPException(status_code=400, detail="no csv_path available — pass one or start a session first")
     if not Path(csv_path).exists():
         raise HTTPException(status_code=404, detail=f"csv_path does not exist: {csv_path}")
-    task = get_summary_runner(project_root=PROJECT_ROOT).submit(csv_path=csv_path, output_path=req.output_path)
+    root = runner._project_root.resolve()
+    from operator_app.support import _scoped
+
+    try:
+        source = _scoped(root, Path(csv_path)).resolve()
+        if source.parent != root / "metrics" or source.suffix != ".csv" or not source.is_file():
+            raise ValueError("Summary input must be a CSV inside this installation's metrics directory")
+        expected_name = f"summary_{source.stem.removeprefix('ab_metrics_')}.json"
+        output = _scoped(root, root / "metrics" / expected_name)
+        if not re.fullmatch(r"summary_[A-Za-z0-9][A-Za-z0-9_.-]{0,159}\.json", output.name):
+            raise ValueError("Invalid session filename for a summary")
+        if req.output_path is not None and _scoped(root, Path(req.output_path)).resolve() != output:
+            raise ValueError("Summary output is generated from the session name; custom output paths are not supported")
+        if output == source:
+            raise ValueError("A summary cannot replace its input")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    try:
+        task = get_summary_runner(project_root=root).submit(
+            csv_path=str(source), output_path=str(output) if output else None
+        )
+    except WorkBusyError as exc:
+        raise HTTPException(
+            status_code=409, detail={"code": "work_busy", "message": str(exc), "work": exc.work}
+        ) from exc
     return task.to_dict()
+
+
+@app.post("/api/features/summary/{task_id}/cancel")
+def cancel_summary(task_id: str, runner: PipelineRunner = Depends(get_runner)):
+    try:
+        return get_summary_runner(project_root=runner._project_root).cancel(task_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Summary task not found") from exc
 
 
 @app.get("/api/features/summary/{task_id}")
@@ -435,6 +611,8 @@ async def ws_control(websocket: WebSocket) -> None:
 
 
 _operator_static = PROJECT_ROOT / "displays" / "operator"
+if not _operator_static.is_dir():
+    _operator_static = Path(__file__).resolve().parent.parent / "displays" / "operator"
 if _operator_static.exists():
     app.mount("/operator", StaticFiles(directory=str(_operator_static), html=True), name="operator")
 else:

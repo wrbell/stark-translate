@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       requirements_changed: ${{ steps.filter.outputs.requirements }}
+      lite_changed: ${{ steps.filter.outputs.lite }}
     steps:
       - uses: actions/checkout@v7
 
@@ -22,6 +23,13 @@ jobs:
           filters: |
             requirements:
               - 'requirements*.txt'
+            lite:
+              - 'pyproject.toml'
+              - 'requirements*.txt'
+              - 'stark_translate/profiles.py'
+              - 'bootstrap.sh'
+              - 'tools/check_dependency_audit.py'
+              - '.github/workflows/security.yml'
 
   audit:
     needs: detect-changes
@@ -73,17 +81,64 @@ jobs:
           cat /tmp/audit-reqs.txt
           pip-audit -r /tmp/audit-reqs.txt --desc --no-deps
 
+  audit-lite:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.lite_changed == 'true' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install audit tool separately from the Lite target
+        run: python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0' pip-audit
+
+      - name: Resolve the actual Lite CPU and TTS installation
+        run: |
+          python -m venv .venv-lite-audit
+          .venv-lite-audit/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
+          .venv-lite-audit/bin/python -m pip install '.[lite-cpu,tts]'
+          .venv-lite-audit/bin/python -m pip check
+
+      - name: Audit every installed Lite dependency
+        run: |
+          LITE_SITE_PACKAGES=$(.venv-lite-audit/bin/python -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+          pip-audit --path "$LITE_SITE_PACKAGES" --format json --output lite-installed-audit.json
+          python tools/check_dependency_audit.py lite-installed-audit.json
+
+      - name: Retain the installed dependency audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lite-installed-audit
+          path: lite-installed-audit.json
+          if-no-files-found: warn
+
   security:
     # Gate job: always runs, required for branch protection.
-    # Passes if audit was skipped (no requirements changes) or all audits passed.
-    needs: [detect-changes, audit]
+    # Skipped audits are allowed only when change detection did not request them.
+    needs: [detect-changes, audit, audit-lite]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check audit results
         run: |
-          if [ "${{ needs.audit.result }}" = "failure" ] || [ "${{ needs.audit.result }}" = "cancelled" ]; then
-            echo "Security audit failed or was cancelled"
+          if [ "${{ needs.detect-changes.result }}" != "success" ]; then
+            echo "Security change detection failed or was cancelled"
             exit 1
           fi
-          echo "Security gate passed (audit result: ${{ needs.audit.result }})"
+          LEGACY_REQUIRED="${{ needs.detect-changes.outputs.requirements_changed == 'true' || github.event_name == 'schedule' }}"
+          LITE_REQUIRED="${{ needs.detect-changes.outputs.lite_changed == 'true' || github.event_name == 'schedule' }}"
+          check_audit() {
+            if [ "$2" = "success" ]; then return; fi
+            if [ "$1" = "false" ] && [ "$2" = "skipped" ]; then return; fi
+            echo "Security audit failed, was cancelled, or was unexpectedly skipped: $3 ($2)"
+            exit 1
+          }
+          check_audit "$LEGACY_REQUIRED" "${{ needs.audit.result }}" legacy
+          check_audit "$LITE_REQUIRED" "${{ needs.audit-lite.result }}" installed-lite
+          echo "Security gate passed"

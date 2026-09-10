@@ -119,10 +119,19 @@ def build_chat_messages(
     source_lang: str = "en",
     target_lang: str = "es",
     model_family: str = "translategemma",
+    terminology_prompt: str = "none",
 ) -> list[dict[str, Any]]:
     """Dispatch to Gemma 4 or TranslateGemma message builders."""
+    if terminology_prompt not in {"none", "church"}:
+        raise ValueError("terminology_prompt must be none or church")
     if model_family == "gemma4":
-        return gemma4_chat_messages(text, source_lang, target_lang)
+        messages = gemma4_chat_messages(text, source_lang, target_lang)
+        if terminology_prompt == "church" and target_lang == "es":
+            messages[0]["content"] = (
+                "For biblical names use Jacobo for James the person and Santiago for the epistle. "
+                "Use partimiento del pan for breaking of bread and pacto for covenant. " + messages[0]["content"]
+            )
+        return messages
     return translategemma_chat_messages(text, source_lang, target_lang)
 
 
@@ -187,3 +196,40 @@ def dynamic_max_tokens(
     """Cap generation length from input word count (stops early on EOS anyway)."""
     input_words = len(text.split())
     return max(floor, int(input_words * ratio))
+
+
+# Small reviewed operational phrase set, rather than a confidence-only expansion.
+_OPERATIONAL_PHRASES = {
+    "en": {
+        "good morning",
+        "good afternoon",
+        "good evening",
+        "thank you",
+        "please sit down",
+        "you may be seated",
+        "would you please take your seats",
+        "please turn to the next page",
+    },
+    "es": {
+        "buenos días",
+        "buenas tardes",
+        "buenas noches",
+        "gracias",
+        "muchas gracias",
+        "pueden sentarse",
+        "por favor tomen asiento",
+        "por favor pasen a la siguiente página",
+    },
+}
+
+
+def conservative_marian_route(text: str, source_lang: str, confidence: float | None) -> bool:
+    """Opt-in bilingual routing; unknown confidence and non-allowlisted text use Gemma."""
+    import math
+    import re
+
+    if confidence is None or not math.isfinite(confidence) or confidence < 0.8:
+        return False
+    normalized = re.sub(r"[^\w\s]", "", text.casefold())
+    normalized = " ".join(normalized.split())
+    return normalized in _OPERATIONAL_PHRASES.get(source_lang, set())

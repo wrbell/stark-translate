@@ -17,7 +17,7 @@ Environment=STARK_OPERATOR_LOG_DIR=/var/log/stark-translate
 Environment=STARK_STT__BACKEND=auto
 # venv path — bootstrap.sh sets this up next to the repo
 ExecStart=/opt/stark-translate/venv/bin/uvicorn operator_app.main:app \
-    --host 0.0.0.0 --port 9000 --log-config /opt/stark-translate/systemd/uvicorn-log.json
+    --host 127.0.0.1 --port 9000 --log-config /opt/stark-translate/systemd/uvicorn-log.json
 ExecStop=/bin/kill -SIGTERM $MAINPID
 
 # Auto-restart on crash; small backoff so a busted config doesn't pin the CPU.

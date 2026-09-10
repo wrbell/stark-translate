@@ -16,13 +16,26 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
-import random
 import sys
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from tools.review_data import (
+    _LOCK,
+    _file_lock,
+    atomic_jsonl,
+    latest_corrections,
+    normalize_record,
+    read_jsonl,
+    sha256_file,
+)
 
 # ---------------------------------------------------------------------------
 # Constants — match prepare_whisper_dataset.py thresholds
@@ -63,6 +76,19 @@ def load_diagnostics(paths: list[Path]) -> list[dict]:
     """Parse JSONL files, filter out event records, attach source metadata."""
     records = []
     for p in paths:
+        session_id = p.stem.removeprefix("diagnostics_")
+        corrections = p.parent.parent / "stark_data" / "corrections"
+        edits = latest_corrections(corrections / f"{session_id}.jsonl")
+        confirmations = {
+            row.get("session"): row
+            for row in read_jsonl(corrections / "session_provenance.jsonl")
+            if row.get("session_kind") == "live"
+        }
+        assigned_splits = {
+            row.get("split")
+            for row in read_jsonl(corrections / "export_registry.jsonl")
+            if row.get("session") == session_id
+        }
         with open(p, encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
@@ -83,12 +109,116 @@ def load_diagnostics(paths: list[Path]) -> list[dict]:
                 if "chunk_id" not in rec:
                     continue
                 rec["_source_file"] = str(p)
+                rec.setdefault("session", session_id)
+                rec = normalize_record(rec, edits.get(int(rec["chunk_id"])))
+                if rec["session_kind"] == "unknown" and session_id in confirmations:
+                    rec["session_kind"] = "live"
+                    rec["live_provenance_confirmed_at"] = confirmations[session_id].get("confirmed_at")
+                if (
+                    "eval" in assigned_splits
+                    or rec.get("dataset_split", rec.get("split")) in ("eval", "test", "holdout")
+                    or rec.get("is_eval")
+                    or rec.get("session_kind") in ("replay", "synthetic")
+                ):
+                    rec["dataset_split"] = "eval"
+                elif "train" in assigned_splits:
+                    rec.setdefault("dataset_split", "train")
+                if rec["revision"]:
+                    rec["corrected_english"] = rec["corrected_source_text"] if rec["transcript_approved"] else None
+                    rec["corrected_spanish"] = (
+                        rec["corrected_translation_text"] if rec["translation_approved"] else None
+                    )
                 records.append(rec)
+    return records
+
+
+def _export_policy(records: list[dict], args: argparse.Namespace) -> list[dict]:
+    """Keep unknown/replay sessions out of training unless live provenance is confirmed."""
+    confirmations = set(getattr(args, "confirm_live_session", None) or [])
+    missing = confirmations - {r["session"] for r in records}
+    if missing:
+        raise ValueError(f"Confirmed session not in selected eligible records: {', '.join(sorted(missing))}")
+    for session in confirmations:
+        selected = [r for r in records if r["session"] == session]
+        if any(
+            r["session_kind"] not in ("unknown", "live")
+            or r.get("dataset_split", r.get("split")) in ("eval", "test", "holdout")
+            or r.get("is_eval")
+            for r in selected
+        ):
+            raise ValueError(f"Cannot confirm replay/evaluation session {session} as live training audio")
+    for session in confirmations:
+        selected = [r for r in records if r["session"] == session]
+        directory = Path(selected[0]["_source_file"]).resolve().parent.parent / "stark_data" / "corrections"
+        with _LOCK, _file_lock(directory):
+            path = directory / "session_provenance.jsonl"
+            previous = read_jsonl(path)
+            stamp = datetime.now(UTC).isoformat()
+            atomic_jsonl(
+                path,
+                [
+                    *previous,
+                    {
+                        "session": session,
+                        "session_kind": "live",
+                        "confirmed_at": stamp,
+                        "confirmation_source": "prepare_finetune_data --confirm-live-session",
+                    },
+                ],
+            )
+        for rec in selected:
+            rec["session_kind"] = "live"
+            rec["live_provenance_confirmed_at"] = stamp
+    for rec in records:
+        if getattr(args, "eval_only", False):
+            if rec.get("dataset_split", rec.get("split")) == "train":
+                raise ValueError(
+                    f"Session {rec['session']} is already assigned to training; use a separate evaluation session"
+                )
+            rec["dataset_split"] = "eval"
+        elif rec["session_kind"] != "live":
+            raise ValueError(
+                f"Session {rec['session']} has {rec['session_kind']} provenance and cannot be exported for training. "
+                "Use --eval-only, or confirm a known live legacy recording with --confirm-live-session SESSION."
+            )
+    # Assign whole sessions, then record the assignment shared with web exports.
+    # An existing eval designation wins for every chunk in that session.
+    assignments = {}
+    for session in {r["session"] for r in records}:
+        selected = [r for r in records if r["session"] == session]
+        explicit = {r.get("dataset_split", r.get("split")) for r in selected}
+        if explicit & {"eval", "test", "holdout"}:
+            split = "eval"
+        elif "train" in explicit:
+            split = "train"
+        else:
+            fraction = int(hashlib.sha256(session.encode()).hexdigest()[:8], 16) / 2**32
+            split = "eval" if fraction < getattr(args, "eval_ratio", 0) else "train"
+        assignments[session] = split
+    if assignments:
+        directory = Path(args.metrics_dir).resolve().parent / "stark_data" / "corrections"
+        with _LOCK, _file_lock(directory):
+            path = directory / "export_registry.jsonl"
+            registry = read_jsonl(path)
+            for session, split in assignments.items():
+                if any(row.get("session") == session and row.get("split") != split for row in registry):
+                    raise ValueError(f"Session {session} is already assigned to a different dataset split")
+            known = {(row.get("session"), row.get("split")) for row in registry}
+            registry.extend(
+                {"session": session, "split": split, "export_source": "prepare_finetune_data"}
+                for session, split in assignments.items()
+                if (session, split) not in known
+            )
+            atomic_jsonl(path, registry)
+        for rec in records:
+            rec["dataset_split"] = assignments[rec["session"]]
     return records
 
 
 def apply_auto_corrections_to_record(record: dict) -> tuple[str, list]:
     """Lazy-import correct_stt_output from dry_run_ab and apply to english."""
+    if normalize_record(record)["source_lang"] != "en":
+        return record.get("english", ""), []
     from dry_run_ab import correct_stt_output
 
     english = record.get("english", "")
@@ -147,7 +277,8 @@ def cmd_extract_review_queue(args: argparse.Namespace) -> None:
     flagged = [
         r
         for r in records
-        if r.get("review_priority", 0) >= args.min_priority
+        if not r.get("excluded")
+        and r.get("review_priority", 0) >= args.min_priority
         and not r.get("corrected_english")
         and not r.get("corrected_spanish")
     ]
@@ -318,7 +449,13 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
     print(f"Loaded {len(records)} chunk records")
 
     # Filter by confidence thresholds
-    eligible = [r for r in records if _passes_whisper_filter(r)]
+    eligible = [
+        r
+        for r in records
+        if not r.get("excluded")
+        and (not r.get("revision") or r.get("transcript_approved"))
+        and (_passes_whisper_filter(r) or r.get("transcript_approved"))
+    ]
     print(f"  {len(eligible)} pass confidence filter (rejected {len(records) - len(eligible)})")
 
     # Filter out empty transcriptions
@@ -328,18 +465,25 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
     if not eligible:
         print("No eligible records for Whisper export.")
         return
+    eligible = _export_policy(eligible, args)
 
-    # Stratified train/eval split
-    random.seed(42)
-    random.shuffle(eligible)
-    eval_count = int(len(eligible) * args.eval_ratio)
-    if args.eval_ratio > 0 and eval_count == 0 and len(eligible) > 1:
-        eval_count = 1  # At least 1 eval sample when ratio > 0
-    eval_set = eligible[:eval_count]
-    train_set = eligible[eval_count:]
+    # Stable assignment by session keeps all chunks from the same source together,
+    # including when a later export adds corrections/chunks to an existing session.
+    def is_eval(rec):
+        if rec.get("dataset_split", rec.get("split")) in ("eval", "test", "holdout"):
+            return True
+        if rec.get("dataset_split", rec.get("split")) == "train":
+            return False
+        fraction = int(hashlib.sha256(rec["session"].encode()).hexdigest()[:8], 16) / 2**32
+        return fraction < args.eval_ratio
+
+    eval_set = [r for r in eligible if is_eval(r)]
+    train_set = [r for r in eligible if not is_eval(r)]
 
     out_dir = Path(args.output)
     accent = args.accent
+    if not accent or Path(accent).name != accent or accent in (".", "..") or "\\" in accent:
+        raise ValueError("Accent must be a single directory name")
 
     for split_name, split_data in [("train", train_set), ("eval", eval_set)]:
         split_dir = out_dir / split_name / accent
@@ -352,27 +496,35 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
                 continue
 
             src = Path(audio_path)
-            dst = split_dir / src.name
+            if not src.is_absolute():
+                src = Path(args.metrics_dir).resolve().parent / src
+            if not src.is_file():
+                continue
+            source_lang = rec.get("source_lang") or getattr(args, "source_lang", None)
+            if source_lang not in ("en", "es"):
+                print(f"  skipping unknown-language session {rec['session']}; pass --source-lang", file=sys.stderr)
+                continue
+            sample_id = f"{rec['session']}__{rec['chunk_id']}"
+            identity = hashlib.sha256(sample_id.encode()).hexdigest()[:24]
+            name = f"sample_{identity}{src.suffix}"
+            dst = split_dir / name
 
-            # Create symlink to original audio
-            if not dst.exists():
-                try:
-                    dst.symlink_to(src.resolve())
-                except OSError:
-                    # Fallback: try relative path or skip
-                    try:
-                        dst.symlink_to(os.path.relpath(src, dst.parent))
-                    except OSError:
-                        print(
-                            f"  warning: could not symlink {src.name}",
-                            file=sys.stderr,
-                        )
-                        continue
+            # Copy so exports survive moving to WSL or removing a source recording.
+            import shutil
+
+            shutil.copy2(src, dst)
 
             transcription = (rec.get("corrected_english") or rec.get("english", "")).strip()
             metadata_rows.append(
                 {
-                    "file_name": f"{accent}/{src.name}",
+                    "file_name": f"{accent}/{name}",
+                    "sample_id": sample_id,
+                    "session": rec["session"],
+                    "session_kind": rec["session_kind"],
+                    "revision": rec["revision"],
+                    "audio_sha256": sha256_file(dst),
+                    "source_lang": source_lang,
+                    "split": split_name,
                     "transcription": transcription,
                     "accent": accent,
                 }
@@ -381,7 +533,21 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
         # Write metadata.csv
         meta_path = out_dir / split_name / "metadata.csv"
         with open(meta_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=["file_name", "transcription", "accent"])
+            writer = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "file_name",
+                    "transcription",
+                    "accent",
+                    "sample_id",
+                    "source_lang",
+                    "split",
+                    "session",
+                    "session_kind",
+                    "revision",
+                    "audio_sha256",
+                ],
+            )
             writer.writeheader()
             writer.writerows(metadata_rows)
 
@@ -406,8 +572,17 @@ def cmd_export_translation(args: argparse.Namespace) -> None:
     records = load_diagnostics(paths)
     print(f"Loaded {len(records)} chunk records")
 
-    pairs = []
+    eligible = []
     for rec in records:
+        if rec.get("excluded") or (
+            rec.get("revision") and not (rec.get("transcript_approved") and rec.get("translation_approved"))
+        ):
+            continue
+        source_lang = rec.get("source_lang") or getattr(args, "source_lang", None)
+        if source_lang not in ("en", "es"):
+            print(f"  skipping unknown-language session {rec['session']}; pass --source-lang", file=sys.stderr)
+            continue
+        # Legacy slots represent source and target text.
         # English: prefer corrected
         en = (rec.get("corrected_english") or rec.get("english", "")).strip()
         if not en:
@@ -432,7 +607,23 @@ def cmd_export_translation(args: argparse.Namespace) -> None:
             if qe < args.min_qe:
                 continue
 
-        pairs.append({"en": en, "es": es})
+        if source_lang == "es":
+            en, es = es, en
+        eligible.append({**rec, "_export_en": en, "_export_es": es, "source_lang": source_lang})
+    pairs = []
+    for rec in _export_policy(eligible, args):
+        pairs.append(
+            {
+                "en": rec["_export_en"],
+                "es": rec["_export_es"],
+                "sample_id": f"{rec['session']}__{rec['chunk_id']}",
+                "session": rec["session"],
+                "session_kind": rec["session_kind"],
+                "revision": rec["revision"],
+                "source_lang": rec["source_lang"],
+                "split": rec.get("dataset_split", rec.get("split", "train")),
+            }
+        )
 
     if not pairs:
         print("No eligible translation pairs.")
@@ -671,6 +862,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=METRICS_DIR,
         help="Directory containing diagnostics JSONL files",
     )
+    p_whisper.add_argument(
+        "--source-lang", choices=["en", "es"], help="Explicit direction for untagged legacy sessions"
+    )
     p_whisper.set_defaults(func=cmd_export_whisper)
 
     # --- export-translation ---
@@ -700,7 +894,19 @@ def build_parser() -> argparse.ArgumentParser:
         default=METRICS_DIR,
         help="Directory containing diagnostics JSONL files",
     )
+    p_trans.add_argument("--source-lang", choices=["en", "es"], help="Explicit direction for untagged legacy sessions")
     p_trans.set_defaults(func=cmd_export_translation)
+    for export_parser in (p_whisper, p_trans):
+        export_parser.add_argument(
+            "--eval-only", action="store_true", help="Export only for evaluation; permits replay/unknown provenance"
+        )
+        export_parser.add_argument(
+            "--confirm-live-session",
+            action="append",
+            default=[],
+            metavar="SESSION",
+            help="Record explicit live provenance for a named legacy session; never overrides replay/holdout flags",
+        )
 
     # --- summary ---
     p_summary = sub.add_parser(

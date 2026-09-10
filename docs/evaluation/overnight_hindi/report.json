@@ -1,0 +1,81 @@
+{
+  "usage": "evaluation_only",
+  "manifest_sha256": "e17dac6ad3d47e667c65516e000b7f2159808e56385cd828c995062513278826",
+  "transcripts_sha256": "e08618b7a348b0d225db52727e990e05a17514ad7eb8744c29e5a3ca328c2fc2",
+  "quality_gate": "pending_references_and_bilingual_review",
+  "live_readiness": "not_assessed",
+  "qlora_decision": "not_assessed",
+  "audio_sources": 2,
+  "audio_utterances": 41,
+  "text_probes": 8,
+  "models": [
+    {
+      "size": "e4b",
+      "model_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "directory": "/Users/willem/Code/vibes/SRTranslate/metrics/overnight_hindi_e4b",
+      "metadata_sha256": "0623a84ab895187252f6e135d6c63e43884f5eefbb3b172a197631e79f944eff",
+      "rows_sha256": "7a29088665d362f7b345ad2634766725d5f644c944be22eb1f8d7e5efec729e1",
+      "expected_observations": 147,
+      "generated_observations": 147,
+      "empty_stt_skips": 0,
+      "empty_translations": 0,
+      "budget_exhausted": 0,
+      "budget_status_unknown": 0,
+      "with_devanagari": 147,
+      "with_latin_fragments": 0,
+      "translation_latency_ms": {
+        "n": 147,
+        "p50": 803.4463339718059,
+        "p95": 1241.1993750138208
+      },
+      "translation_latency_by_input_kind_ms": {
+        "church_audio_utterance": {
+          "n": 123,
+          "p50": 789.1801670193672,
+          "p95": 1264.3612920073792
+        },
+        "theological_text_probe": {
+          "n": 24,
+          "p50": 844.8262289748527,
+          "p95": 926.3732500257902
+        }
+      },
+      "references_available": 0,
+      "human_review": "pending"
+    },
+    {
+      "size": "e2b",
+      "model_id": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+      "directory": "/Users/willem/Code/vibes/SRTranslate/metrics/overnight_hindi_e2b",
+      "metadata_sha256": "da7f8b8f80b48931297b9f167dac30d06d00891ce440fab8bd12fb2e831ed9af",
+      "rows_sha256": "ab71cecfaf595fe440bc756958c5f0b4f9dda9add04e9674e3ba3685a45ad031",
+      "expected_observations": 147,
+      "generated_observations": 147,
+      "empty_stt_skips": 0,
+      "empty_translations": 0,
+      "budget_exhausted": 0,
+      "budget_status_unknown": 0,
+      "with_devanagari": 147,
+      "with_latin_fragments": 0,
+      "translation_latency_ms": {
+        "n": 147,
+        "p50": 481.83066601632163,
+        "p95": 672.7062499849126
+      },
+      "translation_latency_by_input_kind_ms": {
+        "church_audio_utterance": {
+          "n": 123,
+          "p50": 476.13508300855756,
+          "p95": 688.8019999605604
+        },
+        "theological_text_probe": {
+          "n": 24,
+          "p50": 502.5470835098531,
+          "p95": 579.1290419874713
+        }
+      },
+      "references_available": 0,
+      "human_review": "pending"
+    }
+  ]
+}

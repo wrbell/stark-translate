@@ -1,0 +1,286 @@
+{
+  "gpu": {
+    "passed": 3,
+    "duration_s": 21.82,
+    "scope": "cached E4B EOS/canary and worker-first-forward regression"
+  },
+  "ruff": {
+    "status": "passed",
+    "formatted_files": 236
+  },
+  "mypy": {
+    "status": "passed",
+    "files": 19
+  },
+  "bandit_ci": {
+    "status": "passed",
+    "medium_or_high_findings": 0,
+    "skipped": [
+      "B101",
+      "B603",
+      "B607",
+      "B615"
+    ],
+    "evidence": ".cache/mac-roadmap/bandit-ci-release.json"
+  },
+  "bandit_expanded": {
+    "status": "findings",
+    "medium": 27,
+    "high": 0,
+    "rule": "B615",
+    "classification": {
+      "previous_findings_with_documented_cache_and_fallback_limits": 26,
+      "guarded_full_commit_revision_false_positive": 1
+    },
+    "report": "docs/evaluation/mac_v2026_14_security.md",
+    "evidence": ".cache/mac-roadmap/bandit-expanded-release.json"
+  },
+  "vulture": {
+    "status": "advisory",
+    "findings": 3,
+    "details": "mlx_lm import plus two context-manager tb parameters"
+  },
+  "pip_audit": {
+    "status": "passed",
+    "vulnerabilities": 0,
+    "requirements": [
+      "mac",
+      "windows",
+      "nvidia"
+    ],
+    "artifacts": ".cache/security-audit"
+  },
+  "cpu_suite": {
+    "status": "passed",
+    "passed": 1790,
+    "skipped": 4,
+    "duration_s": 41.25,
+    "coverage_percent": 59.07,
+    "log": ".cache/mac-roadmap/full-tests-delivery.log",
+    "coverage": ".cache/mac-roadmap/coverage-delivery.json",
+    "initial_failure": {
+      "log": ".cache/mac-roadmap/full-tests-final-initial-failure.log",
+      "reason": "The old packaging shape test did not accept derived-ct2 entries. It now validates their pinned source, direction and int8 quantization.",
+      "fix_revision": "753c48e"
+    },
+    "packaging_followup": "Complete suite rerun after executable launcher, Mac prerequisite and activated Conda environment checks; all earlier logs preserved."
+  },
+  "browser": {
+    "review_draft_reload": "passed",
+    "review_selection_reload": "passed",
+    "unapproved_export_guard": "passed",
+    "tts_language_device_reload": "passed"
+  },
+  "publishing": "pending_by_user_choice",
+  "html5": {
+    "status": "passed",
+    "files": 5,
+    "warnings": 0,
+    "errors": 0,
+    "version": "5.8.0",
+    "report": ".cache/html5-validation/report-final.json"
+  },
+  "schema_version": 2,
+  "observed_at": "2026-09-10T02:59:52.863823+00:00",
+  "code_revision": "2bd8b35dd7720db5a0c8770affcfc14c0d744126",
+  "replays": {
+    "historical_baseline": {
+      "completed": 18,
+      "cohorts": "retain separate original runtime cohorts"
+    },
+    "frozen_english_screen": {
+      "completed": 48,
+      "finals": 348,
+      "partials": 3184,
+      "visible_final_acknowledgments": 0,
+      "combination_recommended": false
+    },
+    "synthetic_routing": {
+      "completed": 24,
+      "finals": 72,
+      "status": "all processes completed with exit code 0; report retains actual routing and confidence"
+    }
+  },
+  "offline_setup": {
+    "packaged_vad": {
+      "jit": "passed real CPU with empty caches and blocked Hub/network",
+      "onnx": "passed real CPU with empty caches and blocked Hub/network"
+    },
+    "managed_marian": {
+      "directions": [
+        "en-es",
+        "es-en"
+      ],
+      "pinned_offline_conversion": "passed in isolated environment",
+      "cpu_translation": "passed",
+      "idempotent_reuse": "passed",
+      "existing_adapters": "preserved, converted weight hashes match"
+    },
+    "report": ".cache/mac-roadmap/ct2-setup-validation/report.json"
+  },
+  "final_artifacts": {
+    "status": "validated_local_artifacts",
+    "version": "2026.14.0.0",
+    "built_source_revision": "977583bdb970369b0979412ccb06ef0646c9d85f",
+    "post_build_evidence": true,
+    "report": "docs/evaluation/mac_v2026_14_installation.json",
+    "artifacts": [
+      {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/package-final-v14-r4/stark_translate-2026.14.0.0-py3-none-any.whl",
+        "sha256": "f6c02f64624cd911d79887d6004ceea0499aaffd624ce25f2b0c088a0e851f65",
+        "size_bytes": 521238
+      },
+      {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/package-final-v14-r4/stark_translate-2026.14.0.0.tar.gz",
+        "sha256": "f1589cb9ead18d17ab95f6ae56b64d67c3cc0906cb60c7458de3083170cabc87",
+        "size_bytes": 2399825
+      },
+      {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/package-final-v14-r4/stark-translate-v2026.14.0.0-mac.zip",
+        "sha256": "4e3bd7fed6beb06cc09a404adc9933acb985233b8e890f3f7571b72d32bddaa3",
+        "size_bytes": 3306940
+      }
+    ],
+    "source_zip_build_install": "passed; wheel byte-identical to canonical sdist-built wheel",
+    "direct_extracted_launcher": "passed healthz200; owned server stopped",
+    "installed_http": "passed both ZIP-built and canonical wheels",
+    "pip_check": "passed",
+    "native_imports": 18,
+    "installed_source_hash_matches": 106,
+    "actual_gpu_exercised_wheel_sha256": "1ca39d41c9f147c4daa69f7acd70f0ebffeb44caff0983b812322fd6c6598d58",
+    "functional_sessions": [
+      {
+        "session_id": "20260909_225354_018346_en",
+        "source_lang": "en",
+        "status": "passed",
+        "lifecycle_status": "completed",
+        "exit_code": 0
+      },
+      {
+        "session_id": "20260909_225534_182211_es",
+        "source_lang": "es",
+        "status": "passed",
+        "lifecycle_status": "completed",
+        "exit_code": 0
+      }
+    ],
+    "final_wheel_inference_equivalence": {
+      "identical_members": 113,
+      "changed_members": [
+        "scripts/runtime_env.sh",
+        "stark_translate-2026.14.0.0.dist-info/RECORD"
+      ],
+      "actual_gpu_exercised_artifact": "r3",
+      "final_artifact": "r4",
+      "note": "Actual GPU inference exercised r3. Final r4 differs only in the active-Conda shell resolver and regenerated wheel RECORD. Every Python, UI, model manifest and other non-shell runtime resource is byte-identical. r4 direct launcher/install/import checks were executed separately."
+    },
+    "publishing": "pending_by_user_choice"
+  },
+  "pending_gates": [
+    "50 human-reviewed natural utterances per language",
+    "Natural Spanish audio provenance and references",
+    "Natural two-speaker audio, transition labels and additional-final-p95 diarization gate",
+    "Bilingual blinded meaning and terminology review",
+    "Second physical output device and unplug/replug/acoustic validation",
+    "Visible frozen browser timing run; previous controlled operator rehearsal is separate",
+    "PyPI publishing explicitly pending by user choice"
+  ],
+  "evidence": [
+    {
+      "path": ".cache/mac-roadmap/full-tests-final.log",
+      "size_bytes": 18651,
+      "sha256": "12467c5c8cf1b23b622a1ac678fab54483afaac4b5611d0070c2d8508427bc47"
+    },
+    {
+      "path": ".cache/mac-roadmap/full-tests-final-initial-failure.log",
+      "size_bytes": 19257,
+      "sha256": "501a1531b30675457a4c711d1494dab2f58a722439682df7c7ece3a2130fac78"
+    },
+    {
+      "path": ".cache/mac-roadmap/coverage-final.json",
+      "size_bytes": 567247,
+      "sha256": "4096c00ef759491edb7141cab1df398acdb85e3b4828f01983e709ade7f51b4d"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-ci-final.json",
+      "size_bytes": 23557,
+      "sha256": "a0d1d8b2c6d3376959c9f7d5f642172740e51725925b0b22c4442f1b2075dae0"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-expanded-final.json",
+      "size_bytes": 47576,
+      "sha256": "32b442f4b41e795d12726061cdcef4c41772a8120bac6b2817c1d235ac95a7f6"
+    },
+    {
+      "path": ".cache/html5-validation/report-final.json",
+      "size_bytes": 595,
+      "sha256": "986f0faedd41657cec100e72e47ac60724e876d27be6a3dee8f52a4f9d90b5f5"
+    },
+    {
+      "path": ".cache/mac-roadmap/ct2-setup-validation/report.json",
+      "size_bytes": 5826,
+      "sha256": "6efef22b1fabec321eb543eef7da0999ecf242a820025fa67b0d8e55fa0b19cf"
+    },
+    {
+      "path": ".cache/mac-roadmap/full-tests-release.log",
+      "size_bytes": 18653,
+      "sha256": "93112935601c16231289b9512763ee4644f39566ecddcd7015b3efd347d62b1d"
+    },
+    {
+      "path": ".cache/mac-roadmap/coverage-release.json",
+      "size_bytes": 567636,
+      "sha256": "01817b53b720e98169ca9f27b0a636e0817f6afb564420434dccc05f39931604"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-ci-release.json",
+      "size_bytes": 23557,
+      "sha256": "60d5d8e36a6c301d644d52ba8d779a928fc3bfb4650d263999541e33f0a94014"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-expanded-release.json",
+      "size_bytes": 47576,
+      "sha256": "9321143316624b3a0145818f1a6fcd8bcd2c790d1b09ed82b5403649d9b60ccb"
+    },
+    {
+      "path": ".cache/mac-roadmap/full-tests-delivery.log",
+      "size_bytes": 18654,
+      "sha256": "ccc29fcf8cb63375e0f3e7db03a6a06349cd158058bf26c25f05dcc1c77e8df3"
+    },
+    {
+      "path": ".cache/mac-roadmap/coverage-delivery.json",
+      "size_bytes": 567636,
+      "sha256": "8efb86038ec1b2ce4532ef68fbc746245487dd743b9bee087f723a4b721fad20"
+    },
+    {
+      "path": ".cache/package-final-v14-r4/report.json",
+      "size_bytes": 48976,
+      "sha256": "dfa697af7d041918e5da69f6dc8f3a0d7d4870cc484f948d2063843f97e34bcc"
+    },
+    {
+      "path": ".cache/package-final-v14-r4/runtime-equivalence.json",
+      "size_bytes": 27116,
+      "sha256": "9760a7e5d7924c3f50dd38e69a500b218666a45bf71ac9ab394bc15b9b606ad4"
+    },
+    {
+      "path": ".cache/mac-roadmap/installed-runtime-final-verified/report.json",
+      "size_bytes": 35140,
+      "sha256": "9e3f0ef02078d3d76e0a0c88a09de67767f31bc8e60ecc888ca18372457e45f8"
+    }
+  ],
+  "visible_browser_status": {
+    "status": "pending",
+    "reason": "The Mac remained locked at the final CUA inventory; the earlier unlock question is unanswered. The three completed controlled operator rehearsals are retained separately.",
+    "recorded_at": "2026-09-10T02:42:04.921295+00:00"
+  },
+  "installed_functional_smoke": {
+    "status": "passed",
+    "languages": [
+      "en",
+      "es"
+    ],
+    "inference_artifact": "r3",
+    "report": ".cache/mac-roadmap/installed-runtime-final-verified/report.json",
+    "scope": "Actual installed EN/ES STT, Gemma E4B, managed CT2, packaged VAD, target-language Piper WAV and clean lifecycle. Corrected harness assertions verified preserved production artifacts without repeating successful inference. Final shell-only artifact rebuild will be bound by runtime content hashes."
+  },
+  "post_build_evidence_recorded_at": "2026-09-10T03:01:40.519883+00:00"
+}

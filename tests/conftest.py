@@ -128,3 +128,31 @@ def sample_translation_result():
         tokens_per_second=45.2,
         qe_score=0.88,
     )
+
+
+@pytest.fixture(autouse=True)
+def _local_operator_test_client(monkeypatch):
+    """Default ASGI clients model localhost; explicit hostile peers/hosts remain testable."""
+    import inspect
+
+    from starlette.testclient import TestClient
+
+    original = TestClient.__init__
+    signature = inspect.signature(original)
+
+    def local_client(self, *args, **kwargs):
+        bound = signature.bind_partial(self, *args, **kwargs)
+        bound.arguments.setdefault("base_url", "http://localhost")
+        bound.arguments.setdefault("client", ("127.0.0.1", 50000))
+        original(*bound.args, **bound.kwargs)
+
+    monkeypatch.setattr(TestClient, "__init__", local_client)
+    original_ws = TestClient.websocket_connect
+
+    def local_websocket(self, url, *args, **kwargs):
+        from urllib.parse import urljoin
+
+        base = str(self.base_url).replace("https:", "wss:", 1).replace("http:", "ws:", 1)
+        return original_ws(self, urljoin(base, url), *args, **kwargs)
+
+    monkeypatch.setattr(TestClient, "websocket_connect", local_websocket)

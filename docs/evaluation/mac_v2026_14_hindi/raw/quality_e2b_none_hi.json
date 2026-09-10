@@ -1,0 +1,1807 @@
+{
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+    "/Users/willem/Code/vibes/SRTranslate/tools/mac_evaluation.py",
+    "_quality-worker",
+    "--manifest",
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_v2026_14_manifest_v2.json",
+    "--size",
+    "e2b",
+    "--policy",
+    "none",
+    "--runs",
+    "3",
+    "--output",
+    "/Users/willem/Code/vibes/SRTranslate/metrics/mac_roadmap/hindi/quality_e2b_none_hi.json",
+    "--target",
+    "hi"
+  ],
+  "manifest_sha256": "3f000c1cd4d1fedf063ab98b1f7b81fa5b8be60a095531f086a4de3c96cd6716",
+  "environment": {
+    "code_sha": "76e64a5453f16cf27eb0b02e36dc05672ecece86",
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_sha256": {
+      "dry_run_ab.py": "2733b7a8cf2e0e2e25d33b957b7df445d3c9be0bcdd48021b91efccdbd168d54",
+      "settings.py": "58da818e27ce1698f7c7385272a5456bbcea92308a5aa7275be6c828290c3b75",
+      "engines/mlx_engine.py": "1f62e38eba9b6605fc4ffc8665c7e2a00e47008f3d617a09bea3c6e4c7329ceb",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/model_paths.py": "0db290cce1932173356be3203c58422d22ea105df3883ae6629b2a2da1ad1d36",
+      "tools/pipeline_timing.py": "cd47a816ecc04d7f26dc1cf6fc090d0fa91cb70c387a542a83a838f6fb1e3dbc",
+      "tools/mac_evaluation.py": "20da9dbd7d50a5799c74ba976f5eff0da30efb85b16d9ecbac08b9df00b693c7"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": "2.6.0"
+    },
+    "created_at": "2026-09-10T01:23:24.571209+00:00"
+  },
+  "completed": true,
+  "rows": [
+    {
+      "id": "canary_00",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "The atonement of Christ reconciles us to God.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "मसीह का प्रायश्चित हमें परमेश्वर से मेल कराता है।",
+          "latency_ms": 526.4237090013921,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मसीह का प्रायश्चित हमें परमेश्वर से मेल कराता है।",
+          "latency_ms": 511.39262499054894,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मसीह का प्रायश्चित हमें परमेश्वर से मेल कराता है।",
+          "latency_ms": 541.3125000195578,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_01",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "James wrote about faith and works.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "जेम्स ने विश्वास और कर्म के बारे में लिखा।",
+          "latency_ms": 413.31066604470834,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "जेम्स ने विश्वास और कर्म के बारे में लिखा।",
+          "latency_ms": 447.126166021917,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "जेम्स ने विश्वास और कर्म के बारे में लिखा।",
+          "latency_ms": 416.0657090251334,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_02",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "The propitiation for our sins was the blood of Christ.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "हमारे पापों के लिए प्रायश्चित मसीह का लहू था।",
+          "latency_ms": 512.6140829524957,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हमारे पापों के लिए प्रायश्चित मसीह का लहू था।",
+          "latency_ms": 546.8613340053707,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हमारे पापों के लिए प्रायश्चित मसीह का लहू था।",
+          "latency_ms": 517.2158749774098,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_03",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "The breaking of bread is a solemn remembrance.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "रोटी तोड़ना एक गंभीर स्मरण है।",
+          "latency_ms": 399.8898749705404,
+          "generated_tokens": 10,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "रोटी तोड़ना एक गंभीर स्मरण है।",
+          "latency_ms": 402.117041987367,
+          "generated_tokens": 10,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "रोटी तोड़ना एक गंभीर स्मरण है।",
+          "latency_ms": 387.47395802056417,
+          "generated_tokens": 10,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_04",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Paul wrote to the Corinthians about the resurrection.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "पौल ने कोरिंथियों को पुनरुत्थान के बारे में लिखा।",
+          "latency_ms": 524.9024169752374,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "पौल ने कोरिंथियों को पुनरुत्थान के बारे में लिखा।",
+          "latency_ms": 559.212958032731,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "पौल ने कोरिंथियों को पुनरुत्थान के बारे में लिखा।",
+          "latency_ms": 593.67920801742,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_05",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Justification is by faith alone, not by works of the law.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "न्याय केवल विश्वास से है, विधि के कर्मों से नहीं।",
+          "latency_ms": 524.7347499825992,
+          "generated_tokens": 15,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "न्याय केवल विश्वास से है, विधि के कर्मों से नहीं।",
+          "latency_ms": 501.07812497299165,
+          "generated_tokens": 15,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "न्याय केवल विश्वास से है, विधि के कर्मों से नहीं।",
+          "latency_ms": 479.1060839779675,
+          "generated_tokens": 15,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_06",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "The Holy Spirit convicts the world of sin and righteousness.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "पवित्र आत्मा दुनिया को पाप और धार्मिकता के लिए दोषी ठहराता है।",
+          "latency_ms": 557.6179579948075,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "पवित्र आत्मा दुनिया को पाप और धार्मिकता के लिए दोषी ठहराता है।",
+          "latency_ms": 519.8198329890147,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "पवित्र आत्मा दुनिया को पाप और धार्मिकता के लिए दोषी ठहराता है।",
+          "latency_ms": 566.0900000366382,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_07",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Grace and mercy meet at the cross of our Lord Jesus Christ.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "कृपा और दया हमारे प्रभु यीशु मसीह के क्रूस पर मिलती है।",
+          "latency_ms": 541.6930000064895,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "कृपा और दया हमारे प्रभु यीशु मसीह के क्रूस पर मिलती है।",
+          "latency_ms": 568.9637080067769,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "कृपा और दया हमारे प्रभु यीशु मसीह के क्रूस पर मिलती है।",
+          "latency_ms": 594.50912498869,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_08",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "We gather before the mercy seat in prayer.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "हम प्रार्थना के लिए मरसी सीट से पहले इकट्ठा होते हैं।",
+          "latency_ms": 473.2141669956036,
+          "generated_tokens": 14,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हम प्रार्थना के लिए मरसी सीट से पहले इकट्ठा होते हैं।",
+          "latency_ms": 462.60879101464525,
+          "generated_tokens": 14,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हम प्रार्थना के लिए मरसी सीट से पहले इकट्ठा होते हैं।",
+          "latency_ms": 458.4816669812426,
+          "generated_tokens": 14,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_09",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "The table of the Lord is spread for His people.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "प्रभु की तालिका उसके लोगों के लिए बिछाई गई है।",
+          "latency_ms": 490.2226670528762,
+          "generated_tokens": 15,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "प्रभु की तालिका उसके लोगों के लिए बिछाई गई है।",
+          "latency_ms": 489.0325829619542,
+          "generated_tokens": 15,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "प्रभु की तालिका उसके लोगों के लिए बिछाई गई है।",
+          "latency_ms": 496.4586250134744,
+          "generated_tokens": 15,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_10",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "We are gathered to Thy Name on the first day of the week.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "हम सप्ताह के पहले दिन तुम्हारे नाम पर एकत्रित हुए हैं।",
+          "latency_ms": 441.10383302904665,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हम सप्ताह के पहले दिन तुम्हारे नाम पर एकत्रित हुए हैं।",
+          "latency_ms": 470.34700005315244,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हम सप्ताह के पहले दिन तुम्हारे नाम पर एकत्रित हुए हैं।",
+          "latency_ms": 483.6564169963822,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_11",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "A little while, and we shall see the Lord.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "थोड़ी देर में, और हम प्रभु को देखेंगे।",
+          "latency_ms": 422.23966598976403,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "थोड़ी देर में, और हम प्रभु को देखेंगे।",
+          "latency_ms": 485.0874579860829,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "थोड़ी देर में, और हम प्रभु को देखेंगे।",
+          "latency_ms": 465.5242500011809,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_12",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Nothing but the blood of Jesus can wash away my sin.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "केवल यीशु का लहू ही मेरे पापों को धो सकता है।",
+          "latency_ms": 484.1759590199217,
+          "generated_tokens": 16,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "केवल यीशु का लहू ही मेरे पापों को धो सकता है।",
+          "latency_ms": 514.5500829676166,
+          "generated_tokens": 16,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "केवल यीशु का लहू ही मेरे पापों को धो सकता है।",
+          "latency_ms": 520.8262919913977,
+          "generated_tokens": 16,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_13",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Christ is the Surety of a better covenant.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "मसीह एक बेहतर वाचा का साखकर्ता है।",
+          "latency_ms": 447.0607499824837,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मसीह एक बेहतर वाचा का साखकर्ता है।",
+          "latency_ms": 473.26800000155345,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मसीह एक बेहतर वाचा का साखकर्ता है।",
+          "latency_ms": 434.02233405504376,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_14",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "This do in remembrance of Me at His table.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "यह मेरे स्मरण में उनके मेज पर किया जाता है।",
+          "latency_ms": 452.12933397851884,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "यह मेरे स्मरण में उनके मेज पर किया जाता है।",
+          "latency_ms": 456.4652079716325,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "यह मेरे स्मरण में उनके मेज पर किया जाता है।",
+          "latency_ms": 435.7547920080833,
+          "generated_tokens": 13,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_15",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "At the mercy seat we remember His propitiation for our sins.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "मर्सी सीट पर हम हमारे पापों के लिए उनकी मध्यस्थता याद करते हैं।",
+          "latency_ms": 560.9900419949554,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मर्सी सीट पर हम हमारे पापों के लिए उनकी मध्यस्थता याद करते हैं।",
+          "latency_ms": 600.4550840007141,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मर्सी सीट पर हम हमारे पापों के लिए उनकी मध्यस्थता याद करते हैं।",
+          "latency_ms": 556.4553340082057,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_16",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Yet there is room at the gospel feast for the weary soul.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "फिर भी सुसमाचार के भोज में थके हुए आत्मा के लिए जगह है।",
+          "latency_ms": 561.966624984052,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "फिर भी सुसमाचार के भोज में थके हुए आत्मा के लिए जगह है।",
+          "latency_ms": 511.25333295203745,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "फिर भी सुसमाचार के भोज में थके हुए आत्मा के लिए जगह है।",
+          "latency_ms": 532.7264170045964,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "canary_17",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "We come as pilgrims to Calvary and the cross.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "theological_canary",
+      "runs": [
+        {
+          "text": "हम कलवरी और क्रॉस के तीर्थयात्री के रूप में आते हैं।",
+          "latency_ms": 513.0717920255847,
+          "generated_tokens": 16,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हम कलवरी और क्रॉस के तीर्थयात्री के रूप में आते हैं।",
+          "latency_ms": 492.3875840031542,
+          "generated_tokens": 16,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हम कलवरी और क्रॉस के तीर्थयात्री के रूप में आते हैं।",
+          "latency_ms": 514.3300410127267,
+          "generated_tokens": 16,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_00_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "They look at themselves, then go on their way,",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 30291,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "james",
+        1,
+        24
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "वे खुद को देखते हैं, फिर चले जाते हैं।",
+          "latency_ms": 431.68320902623236,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "वे खुद को देखते हैं, फिर चले जाते हैं।",
+          "latency_ms": 426.52770900167525,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "वे खुद को देखते हैं, फिर चले जाते हैं।",
+          "latency_ms": 457.09712500683963,
+          "generated_tokens": 12,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_01_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "The trees of the Lord drink their fill the cedars he planted on Lebanon,",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 15588,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "psalms",
+        104,
+        16
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "प्रभु के वृक्ष लेबनान में लगाए गए देवदार को तृप्त करते हैं।",
+          "latency_ms": 528.0225409660488,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "प्रभु के वृक्ष लेबनान में लगाए गए देवदार को तृप्त करते हैं।",
+          "latency_ms": 565.0347909540869,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "प्रभु के वृक्ष लेबनान में लगाए गए देवदार को तृप्त करते हैं।",
+          "latency_ms": 570.8782920264639,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_02_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "From Kibroth-hattaavah the people journeyed unto Hazeroth; and they abode at Hazeroth.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 4060,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "numbers",
+        11,
+        35
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "किब्रोथ-हतावा से लोग हाज़रथ की ओर यात्रा करते थे; और वे हाज़रथ में निवास करते थे।",
+          "latency_ms": 751.4820829965174,
+          "generated_tokens": 30,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "किब्रोथ-हतावा से लोग हाज़रथ की ओर यात्रा करते थे; और वे हाज़रथ में निवास करते थे।",
+          "latency_ms": 765.0502090109512,
+          "generated_tokens": 30,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "किब्रोथ-हतावा से लोग हाज़रथ की ओर यात्रा करते थे; और वे हाज़रथ में निवास करते थे।",
+          "latency_ms": 753.8212910294533,
+          "generated_tokens": 30,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_03_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "and from the Nethinim, whom David and the heads gave for the service of the Levites, two hundred and twenty Nethinim, all of them defined by name.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 12222,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "ezra",
+        8,
+        20
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और नेथिनिमों से, जिन्हें दाऊद और प्रमुखों ने लेवीयों की सेवा के लिए दिया था, दो सौ बीस नेथिनिम, सभी का नाम से परिभाषित किया गया था।",
+          "latency_ms": 993.2850420009345,
+          "generated_tokens": 45,
+          "requested_max_tokens": 81,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और नेथिनिमों से, जिन्हें दाऊद और प्रमुखों ने लेवीयों की सेवा के लिए दिया था, दो सौ बीस नेथिनिम, सभी का नाम से परिभाषित किया गया था।",
+          "latency_ms": 1004.8437500372529,
+          "generated_tokens": 45,
+          "requested_max_tokens": 81,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और नेथिनिमों से, जिन्हें दाऊद और प्रमुखों ने लेवीयों की सेवा के लिए दिया था, दो सौ बीस नेथिनिम, सभी का नाम से परिभाषित किया गया था।",
+          "latency_ms": 1016.4717080187984,
+          "generated_tokens": 45,
+          "requested_max_tokens": 81,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_04_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And the name of the daughter of Asher <FI>is<Fi> Sarah.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 4536,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "numbers",
+        26,
+        46
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और Asher की बेटी का नाम सारा है।",
+          "latency_ms": 398.02008296828717,
+          "generated_tokens": 10,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और Asher की बेटी का नाम सारा है।",
+          "latency_ms": 399.870875000488,
+          "generated_tokens": 10,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और Asher की बेटी का नाम सारा है।",
+          "latency_ms": 396.7815420473926,
+          "generated_tokens": 10,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_05_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "If thou lend money to any of my people with thee that is poor, thou shalt not be to him as a creditor; neither shall ye lay upon him interest.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 2139,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "exodus",
+        22,
+        25
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "यदि तुम अपने किसी भी व्यक्ति को धन उधार देते हो जो गरीब है, तो तुम उसके लिए लेनदार नहीं होगे; न ही तुम उस पर ब्याज लगाओगे।",
+          "latency_ms": 842.5264580291696,
+          "generated_tokens": 36,
+          "requested_max_tokens": 90,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "यदि तुम अपने किसी भी व्यक्ति को धन उधार देते हो जो गरीब है, तो तुम उसके लिए लेनदार नहीं होगे; न ही तुम उस पर ब्याज लगाओगे।",
+          "latency_ms": 855.192499991972,
+          "generated_tokens": 36,
+          "requested_max_tokens": 90,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "यदि तुम अपने किसी भी व्यक्ति को धन उधार देते हो जो गरीब है, तो तुम उसके लिए लेनदार नहीं होगे; न ही तुम उस पर ब्याज लगाओगे।",
+          "latency_ms": 833.1537910271436,
+          "generated_tokens": 36,
+          "requested_max_tokens": 90,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_06_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "But I counted it necessary to send to you Epaphroditus, my brother and fellow-worker and fellow-soldier, and your messenger and minister to my need;",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 29417,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "philippians",
+        2,
+        25
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "परन्तु मैंने आपको एपैफ़्रोडिटस, मेरे भाई और सहकर्मी और सह-सैनिक, और मेरी आवश्यकता के लिए आपके दूत और मंत्री को भेजने को आवश्यक समझा;",
+          "latency_ms": 943.4430839610286,
+          "generated_tokens": 40,
+          "requested_max_tokens": 72,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "परन्तु मैंने आपको एपैफ़्रोडिटस, मेरे भाई और सहकर्मी और सह-सैनिक, और मेरी आवश्यकता के लिए आपके दूत और मंत्री को भेजने को आवश्यक समझा;",
+          "latency_ms": 922.1635409630835,
+          "generated_tokens": 40,
+          "requested_max_tokens": 72,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "परन्तु मैंने आपको एपैफ़्रोडिटस, मेरे भाई और सहकर्मी और सह-सैनिक, और मेरी आवश्यकता के लिए आपके दूत और मंत्री को भेजने को आवश्यक समझा;",
+          "latency_ms": 895.82066697767,
+          "generated_tokens": 40,
+          "requested_max_tokens": 72,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_07_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And this is the testimony of John, when the Jews sent out of Jerusalem priests and Levites, that they might question him, `Who art thou?'",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 26064,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "john",
+        1,
+        19
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और यह जॉन की गवाही है, जब यहूदी यरूशलेम से पुजारी और लेवीय भेजते थे, ताकि वे उससे पूछताछ कर सकें, \"तुम कौन हो?\"",
+          "latency_ms": 912.3668340034783,
+          "generated_tokens": 39,
+          "requested_max_tokens": 75,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और यह जॉन की गवाही है, जब यहूदी यरूशलेम से पुजारी और लेवीय भेजते थे, ताकि वे उससे पूछताछ कर सकें, \"तुम कौन हो?\"",
+          "latency_ms": 928.9739580126479,
+          "generated_tokens": 39,
+          "requested_max_tokens": 75,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और यह जॉन की गवाही है, जब यहूदी यरूशलेम से पुजारी और लेवीय भेजते थे, ताकि वे उससे पूछताछ कर सकें, \"तुम कौन हो?\"",
+          "latency_ms": 875.0069580273703,
+          "generated_tokens": 39,
+          "requested_max_tokens": 75,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_08_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And thou shalt make holy garments for Aaron thy brother, for glory and for beauty.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 2296,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "exodus",
+        28,
+        2
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और तुम हारून के लिए पवित्र वस्त्र बनाओ, महिमा और सुंदरता के लिए।",
+          "latency_ms": 617.5598329864442,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और तुम हारून के लिए पवित्र वस्त्र बनाओ, महिमा और सुंदरता के लिए।",
+          "latency_ms": 560.2413750020787,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और तुम हारून के लिए पवित्र वस्त्र बनाओ, महिमा और सुंदरता के लिए।",
+          "latency_ms": 565.0845419731922,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_09_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "and they said “I will come quickly.”Blessed will he be who lays to heart the words of the prophecy contained in this book.’",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 31088,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "revelation of john",
+        22,
+        7
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और उन्होंने कहा \"मैं जल्दी आऊंगा।\" वह धन्य होगा जो इस पुस्तक में निहित भविष्यवाणियों के शब्दों को हृदय में रखेगा।",
+          "latency_ms": 737.3089169850573,
+          "generated_tokens": 30,
+          "requested_max_tokens": 69,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और उन्होंने कहा \"मैं जल्दी आऊंगा।\" वह धन्य होगा जो इस पुस्तक में निहित भविष्यवाणियों के शब्दों को हृदय में रखेगा।",
+          "latency_ms": 757.1022500051185,
+          "generated_tokens": 30,
+          "requested_max_tokens": 69,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और उन्होंने कहा \"मैं जल्दी आऊंगा।\" वह धन्य होगा जो इस पुस्तक में निहित भविष्यवाणियों के शब्दों को हृदय में रखेगा।",
+          "latency_ms": 730.5310409865342,
+          "generated_tokens": 30,
+          "requested_max_tokens": 69,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_10_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "and again it saith, `Rejoice ye nations, with His people;'",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28314,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "romans",
+        15,
+        10
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और फिर वह कहता है, \"राष्ट्रों, अपने लोगों के साथ आनन्द मनाओ;\"",
+          "latency_ms": 603.5938750137575,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और फिर वह कहता है, \"राष्ट्रों, अपने लोगों के साथ आनन्द मनाओ;\"",
+          "latency_ms": 552.5670839706436,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और फिर वह कहता है, \"राष्ट्रों, अपने लोगों के साथ आनन्द मनाओ;\"",
+          "latency_ms": 583.4198329830542,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_11_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "So two or three cities wandered unto one city, to drink water; but they were not satisfied: yet have ye not returned unto me, saith the Lord.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 22419,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "amos",
+        4,
+        8
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "तो दो या तीन शहर पानी पीने के लिए एक शहर की ओर भटक गए; लेकिन वे संतुष्ट नहीं हुए: परन्तु तू मेरे पास वापस नहीं आया है, यहोवा कहता है।",
+          "latency_ms": 879.4680410064757,
+          "generated_tokens": 39,
+          "requested_max_tokens": 81,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "तो दो या तीन शहर पानी पीने के लिए एक शहर की ओर भटक गए; लेकिन वे संतुष्ट नहीं हुए: परन्तु तू मेरे पास वापस नहीं आया है, यहोवा कहता है।",
+          "latency_ms": 923.0255829752423,
+          "generated_tokens": 39,
+          "requested_max_tokens": 81,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "तो दो या तीन शहर पानी पीने के लिए एक शहर की ओर भटक गए; लेकिन वे संतुष्ट नहीं हुए: परन्तु तू मेरे पास वापस नहीं आया है, यहोवा कहता है।",
+          "latency_ms": 912.6780419610441,
+          "generated_tokens": 39,
+          "requested_max_tokens": 81,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_12_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And the God of peace shall bruise Satan under your feet shortly. The grace of our Lord Jesus Christ be with you. Amen.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28357,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "romans",
+        16,
+        20
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और शांति के परमेश्वर शीघ्र ही तुम्हारे पैरों के नीचे शैतान को कुचल देंगे। हमारे प्रभु यीशु मसीह की कृपा तुम पर बनी रहे। आमीन।",
+          "latency_ms": 840.9648329834454,
+          "generated_tokens": 36,
+          "requested_max_tokens": 69,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और शांति के परमेश्वर शीघ्र ही तुम्हारे पैरों के नीचे शैतान को कुचल देंगे। हमारे प्रभु यीशु मसीह की कृपा तुम पर बनी रहे। आमीन।",
+          "latency_ms": 851.4970410033129,
+          "generated_tokens": 36,
+          "requested_max_tokens": 69,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और शांति के परमेश्वर शीघ्र ही तुम्हारे पैरों के नीचे शैतान को कुचल देंगे। हमारे प्रभु यीशु मसीह की कृपा तुम पर बनी रहे। आमीन।",
+          "latency_ms": 837.3005419853143,
+          "generated_tokens": 36,
+          "requested_max_tokens": 69,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_13_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Take my teaching, and not silver; get knowledge in place of the best gold.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 16613,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "proverbs",
+        8,
+        10
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "मेरी शिक्षा लो, और चाँदी नहीं; सर्वोत्तम सोने के स्थान पर ज्ञान प्राप्त करो।",
+          "latency_ms": 542.2939590062015,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मेरी शिक्षा लो, और चाँदी नहीं; सर्वोत्तम सोने के स्थान पर ज्ञान प्राप्त करो।",
+          "latency_ms": 531.1042499961331,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "मेरी शिक्षा लो, और चाँदी नहीं; सर्वोत्तम सोने के स्थान पर ज्ञान प्राप्त करो।",
+          "latency_ms": 540.7154579879716,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_14_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "O death, where is your power? O death, where are your pains?",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 28774,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "i corinthians",
+        15,
+        55
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "हे मृत्यु, तुम्हारी शक्ति कहाँ है? हे मृत्यु, तुम्हारे दर्द कहाँ हैं?",
+          "latency_ms": 499.37266699271277,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हे मृत्यु, तुम्हारी शक्ति कहाँ है? हे मृत्यु, तुम्हारे दर्द कहाँ हैं?",
+          "latency_ms": 522.2268750076182,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "हे मृत्यु, तुम्हारी शक्ति कहाँ है? हे मृत्यु, तुम्हारे दर्द कहाँ हैं?",
+          "latency_ms": 570.3329999814741,
+          "generated_tokens": 17,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_15_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And by the desire of all the people, the feast went on for another seven days, and they kept the seven days with joy.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 11851,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "ii chronicles",
+        30,
+        23
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और सभी लोगों की इच्छा से, दावत सात और दिनों तक चली और उन्होंने उन सात दिनों को खुशी से मनाया।",
+          "latency_ms": 645.8832920179702,
+          "generated_tokens": 25,
+          "requested_max_tokens": 72,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और सभी लोगों की इच्छा से, दावत सात और दिनों तक चली और उन्होंने उन सात दिनों को खुशी से मनाया।",
+          "latency_ms": 653.9339579758234,
+          "generated_tokens": 25,
+          "requested_max_tokens": 72,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और सभी लोगों की इच्छा से, दावत सात और दिनों तक चली और उन्होंने उन सात दिनों को खुशी से मनाया।",
+          "latency_ms": 649.4050420005806,
+          "generated_tokens": 25,
+          "requested_max_tokens": 72,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_16_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "`Remember that which Amalek hath done to thee in the way, in your going out from Egypt,",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 5565,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "deuteronomy",
+        25,
+        17
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "याद रखना कि अमलेक ने तुम्हें मिस्र से निकलते समय रास्ते में क्या किया था",
+          "latency_ms": 585.7754579628818,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "याद रखना कि अमलेक ने तुम्हें मिस्र से निकलते समय रास्ते में क्या किया था",
+          "latency_ms": 562.7715000300668,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "याद रखना कि अमलेक ने तुम्हें मिस्र से निकलते समय रास्ते में क्या किया था",
+          "latency_ms": 562.5599999912083,
+          "generated_tokens": 20,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_17_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Building up Zion with blood, And Jerusalem with iniquity.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 22619,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "micah",
+        3,
+        10
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "ज़ियोन को खून से और यरूशलेम को पाप से बनाना।",
+          "latency_ms": 571.4573750155978,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "ज़ियोन को खून से और यरूशलेम को पाप से बनाना।",
+          "latency_ms": 523.5408329754137,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "ज़ियोन को खून से और यरूशलेम को पाप से बनाना।",
+          "latency_ms": 550.2151669934392,
+          "generated_tokens": 18,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_18_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "He took them and sent them over the stream with all he had.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 952,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "genesis",
+        32,
+        23
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "उसने उन्हें लिया और अपने पास जो कुछ था, उससे उन्हें धारा में भेज दिया।",
+          "latency_ms": 572.6462920429185,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "उसने उन्हें लिया और अपने पास जो कुछ था, उससे उन्हें धारा में भेज दिया।",
+          "latency_ms": 570.6835419987328,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "उसने उन्हें लिया और अपने पास जो कुछ था, उससे उन्हें धारा में भेज दिया।",
+          "latency_ms": 579.453874961473,
+          "generated_tokens": 19,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_19_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And the Lord your God will give to you and to your seed a circumcision of the heart, so that, loving him with all your heart and all your soul, you may have life.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 5715,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "deuteronomy",
+        30,
+        6
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और तुम्हारा परमेश्वर तुम्हारे और तुम्हारे वंश को हृदय का अनुपालन देगा, ताकि तुम उससे अपने पूरे हृदय और अपनी पूरी आत्मा से प्रेम करो, तो तुम्हें जीवन मिलेगा।",
+          "latency_ms": 834.5616250298917,
+          "generated_tokens": 35,
+          "requested_max_tokens": 102,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और तुम्हारा परमेश्वर तुम्हारे और तुम्हारे वंश को हृदय का अनुपालन देगा, ताकि तुम उससे अपने पूरे हृदय और अपनी पूरी आत्मा से प्रेम करो, तो तुम्हें जीवन मिलेगा।",
+          "latency_ms": 802.3285419913009,
+          "generated_tokens": 35,
+          "requested_max_tokens": 102,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और तुम्हारा परमेश्वर तुम्हारे और तुम्हारे वंश को हृदय का अनुपालन देगा, ताकि तुम उससे अपने पूरे हृदय और अपनी पूरी आत्मा से प्रेम करो, तो तुम्हें जीवन मिलेगा।",
+          "latency_ms": 840.8655829844065,
+          "generated_tokens": 35,
+          "requested_max_tokens": 102,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_20_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And he arose, and departed to his house.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 23387,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        9,
+        7
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और वह उठा, और अपने घर चला गया।",
+          "latency_ms": 450.71141701191664,
+          "generated_tokens": 11,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और वह उठा, और अपने घर चला गया।",
+          "latency_ms": 399.68737500021234,
+          "generated_tokens": 11,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और वह उठा, और अपने घर चला गया।",
+          "latency_ms": 395.5478330026381,
+          "generated_tokens": 11,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_21_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And he arose, and departed to his house.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 23387,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "matthew",
+        9,
+        7
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और वह उठा, और अपने घर चला गया।",
+          "latency_ms": 411.70191700803116,
+          "generated_tokens": 11,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और वह उठा, और अपने घर चला गया।",
+          "latency_ms": 412.6823330298066,
+          "generated_tokens": 11,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और वह उठा, और अपने घर चला गया।",
+          "latency_ms": 392.56604202091694,
+          "generated_tokens": 11,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_22_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And he stayeth yet other seven days, and addeth to send forth the dove from the ark;",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 194,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "genesis",
+        8,
+        10
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और वह सात और दिन रहता है, और वह जहाज से कबूतर भेजने में जोड़ता है;",
+          "latency_ms": 586.9895840296522,
+          "generated_tokens": 22,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और वह सात और दिन रहता है, और वह जहाज से कबूतर भेजने में जोड़ता है;",
+          "latency_ms": 628.9857919909991,
+          "generated_tokens": 22,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और वह सात और दिन रहता है, और वह जहाज से कबूतर भेजने में जोड़ता है;",
+          "latency_ms": 623.2497079763561,
+          "generated_tokens": 22,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_23_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "And in the evening, at sundown, they took to him all who were diseased, and those who had evil spirits.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 24248,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "mark",
+        1,
+        32
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "और शाम को, सूर्यास्त के समय, वे उन सभी को उसके पास ले गए जो बीमार थे, और जिनके साथ बुरी आत्माएं थीं।",
+          "latency_ms": 751.1627500061877,
+          "generated_tokens": 30,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और शाम को, सूर्यास्त के समय, वे उन सभी को उसके पास ले गए जो बीमार थे, और जिनके साथ बुरी आत्माएं थीं।",
+          "latency_ms": 734.0493749943562,
+          "generated_tokens": 30,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "और शाम को, सूर्यास्त के समय, वे उन सभी को उसके पास ले गए जो बीमार थे, और जिनके साथ बुरी आत्माएं थीं।",
+          "latency_ms": 748.9619579864666,
+          "generated_tokens": 30,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    },
+    {
+      "id": "verse_24_en",
+      "source_lang": "en",
+      "target_lang": "hi",
+      "source": "Thou hast turned my mourning to dancing for me, Thou hast loosed my sackcloth, And girdest me <FI>with<Fi> joy.",
+      "reference": null,
+      "required_terms": [],
+      "domain": "public_domain_verse",
+      "verse_id": 14331,
+      "reference_status": "structurally_aligned",
+      "canonical_reference": [
+        "psalms",
+        30,
+        11
+      ],
+      "reference_translation": "SpaRV",
+      "runs": [
+        {
+          "text": "तूने मेरे शोक को मेरे लिए नृत्य में बदल दिया, तूने मेरे लंगोट को खोल दिया, और मुझे आनंद से परिधान पहना दिया।",
+          "latency_ms": 790.1416249806061,
+          "generated_tokens": 32,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "तूने मेरे शोक को मेरे लिए नृत्य में बदल दिया, तूने मेरे लंगोट को खोल दिया, और मुझे आनंद से परिधान पहना दिया।",
+          "latency_ms": 759.0574159985408,
+          "generated_tokens": 32,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        },
+        {
+          "text": "तूने मेरे शोक को मेरे लिए नृत्य में बदल दिया, तूने मेरे लंगोट को खोल दिया, और मुझे आनंद से परिधान पहना दिया।",
+          "latency_ms": 783.800249977503,
+          "generated_tokens": 32,
+          "requested_max_tokens": 64,
+          "budget_exhausted": false,
+          "finish_reason": "stop"
+        }
+      ],
+      "canary_pass": null
+    }
+  ],
+  "timeout_s": 1800,
+  "size": "e2b",
+  "model_id": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+  "policy": "none",
+  "target_override": "hi",
+  "human_review": "pending",
+  "resolved_model": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-it-OptiQ-4bit/snapshots/0f3495e3e826e95fa21002c327805b840568f489",
+  "model_revision": "0f3495e3e826e95fa21002c327805b840568f489",
+  "peak_metal_bytes": 4391313300,
+  "peak_rss_bytes": 3665690624,
+  "returncode": 0
+}

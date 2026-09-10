@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "purpose": "Bounded English 45-second screening on both models; all runs at real time, three alternating pairs. These screens do not replace the two 150-second historical baseline clips or natural Spanish gates.",
+  "baseline_arguments": ["--silence-trigger", "0.5", "--partial-interval", "0.6", "--vad-backend", "torch", "--no-idle-warmup-only", "--no-final-aware-partials", "--routing-policy", "legacy", "--terminology-prompt", "none"],
+  "experiments": [
+    {"name": "screening_baseline", "arguments": []},
+    {"name": "idle_warmup", "arguments": ["--idle-warmup-only"]},
+    {"name": "final_aware_partials", "arguments": ["--final-aware-partials"]},
+    {"name": "silence_04", "arguments": ["--silence-trigger", "0.4"]},
+    {"name": "silence_035", "arguments": ["--silence-trigger", "0.35"]},
+    {"name": "conservative_marian", "arguments": ["--routing-policy", "conservative"]},
+    {"name": "terminology", "arguments": ["--terminology-prompt", "church"]},
+    {"name": "onnx_vad", "arguments": ["--vad-backend", "onnx"]}
+  ]
+}

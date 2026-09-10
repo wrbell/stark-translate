@@ -1,5 +1,9 @@
 # Phase A — Infrastructure
 
+> **As-written plan (2026-04); completed.** The scripts exist and were used for the spike, v1,
+> v1.1 and v2-cpo runs ([`v1_results.md`](./v1_results.md)); status table in
+> [`overview.md`](./overview.md). Current flags: `training/CLAUDE.md` § Gemma 4 tuning.
+
 **Goal:** stand up the tooling needed to train Gemma 4 properly. No model training yet.
 
 **Wall clock:** 5–7 days.

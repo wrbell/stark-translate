@@ -24,6 +24,16 @@ Usage:
 """
 
 import os
+import sys
+
+# Resolve only the product name before optional acceleration imports. A CPU
+# lite launch must not import Torch/MLX just because the host has them installed.
+for _index, _argument in enumerate(sys.argv[1:], 1):
+    if _argument == "--profile" and _index + 1 < len(sys.argv):
+        os.environ["STARK_PROFILE"] = sys.argv[_index + 1]
+    elif _argument.startswith("--profile="):
+        os.environ["STARK_PROFILE"] = _argument.split("=", 1)[1]
+_LITE_IMPORTS = os.environ.get("STARK_PROFILE", "standard").startswith("lite-")
 
 os.environ["NUMBA_THREADING_LAYER"] = "workqueue"  # Prevent numba from loading its own libomp (conflicts with torch's)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # Safety net for any remaining libomp duplicates
@@ -31,6 +41,8 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # Safety net for any remaining libo
 # Backend detection — MLX for Apple Silicon, CUDA for NVIDIA
 # Must come before other imports so we know which inference paths are available.
 try:
+    if _LITE_IMPORTS:
+        raise ImportError("Lite uses CPU/CUDA runtime")
     import mlx.core as _mx  # noqa: F401
     import mlx_lm as _mlx_lm  # noqa: F401
 
@@ -41,9 +53,7 @@ except ImportError:
 import argparse
 import asyncio
 import atexit
-import copy
 import csv
-import http.server
 import json
 import logging
 import multiprocessing
@@ -61,10 +71,41 @@ from datetime import datetime
 import numpy as np
 import psutil
 import sounddevice as sd
-import torch
+
+try:
+    if _LITE_IMPORTS:
+        raise ImportError("Lite does not require PyTorch")
+    import torch
+except ImportError:
+    torch = None
 import websockets
 
 from settings import settings
+from stark_translate.profiles import apply_profile, resolve_profile
+from tools.capture_handoff import CaptureHandoff
+from tools.isolated_audio import AudioCaptureError
+from tools.latency_experiments import LatencyExperiments
+from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker
+from tools.latency_trace import LatencyTrace
+from tools.persistence import PersistenceExecutor
+from tools.pipeline_health import PipelineHealth
+from tools.pipeline_timing import (
+    SAMPLE_COLUMNS,
+    TIMING_COLUMNS,
+    AudioFrame,
+    AudioTimeline,
+    CaptureSampleClock,
+    CaptureStamp,
+    ChunkTiming,
+    RenderTracker,
+    capture_stamp,
+    milliseconds,
+)
+from tools.preview_candidates import RollingPreview, TranslationCandidate, common_prefix_words
+from tools.replay_client_barrier import ReplayClientBarrier, validate_replay_client_wait
+
+RUNTIME_PROFILE = resolve_profile(settings.profile)
+_managed_llama_server = None
 
 # ---------------------------------------------------------------------------
 # Structured logging — logger used for VAD diagnostics, pipeline events,
@@ -74,10 +115,13 @@ from settings import settings
 logger = logging.getLogger("stark")
 logger.setLevel(logging.DEBUG)  # handler levels control actual output
 # Console handler (default INFO, overridden by --log-level)
-_console_handler = logging.StreamHandler(sys.stdout)
-_console_handler.setLevel(logging.INFO)
-_console_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"))
-logger.addHandler(_console_handler)
+_console_handler = next((h for h in logger.handlers if getattr(h, "_stark_console", False)), None)
+if _console_handler is None:
+    _console_handler = logging.StreamHandler(sys.stdout)
+    _console_handler._stark_console = True
+    _console_handler.setLevel(logging.INFO)
+    _console_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"))
+    logger.addHandler(_console_handler)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -96,6 +140,13 @@ CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
 AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"  # per-chunk WAVs for fine-tuning
 DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"  # structured review queue
 PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
+_session_stop_requested = False
+_clean_session_shutdown = False
+_session_model_ids = {}
+_session_main_task = None
+_health = None
+_RECORD_AUDIO = True
+_capture_handoff = None
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
@@ -104,6 +155,44 @@ DIARIZE_INTERVAL_S = 2.0
 _diarize_proc = None
 _rolling_window = None
 EXIT_AFTER_REPLAY = False
+_SESSION_CLOCK_ORIGIN = time.perf_counter()
+_utterance_timings: dict[int, ChunkTiming] = {}
+_chunk_timings: dict[int, ChunkTiming] = {}
+_render_tracker = RenderTracker()
+_broadcast_sequence = 0
+_speaker_pending: dict[int, tuple[float, float, str | None]] = {}
+_warmup_future = None
+_translation_active = threading.Event()
+_experiment_lock = threading.Lock()
+_active_stt_workers = {"partial": 0, "final": 0}
+_experiment_counters = {}
+_INPUT_AUDIO_HASH = None
+_latency = LatencyExperiments()
+_latency_trace = LatencyTrace()
+_replay_client_wait = ReplayClientBarrier()
+_stt_scheduler = None
+_caption_delivery = None
+_vad_pool = None
+_marian_memo = ExactTextMemo(0)
+_closed_utterances = set()
+# Publication is distinct from experimental closure at final admission. Keep
+# ordinary previews while a final computes, but never resurrect a published one.
+_published_final_session = None
+_published_final_utterances = set()
+_published_final_floor = 0
+# IDs increase within the capture session. A watermark rejects arbitrarily late
+# provisional work without retaining one tombstone per discarded noise blip.
+_discarded_utterance_id = 0
+_last_capture_utterance_id = 0
+_partial_sequence = 0
+_partial_emitted_sequence = {}
+_partial_source_text = {}
+_pause_epochs = {}
+_speculative_candidates = {}
+_speculation_tasks = set()
+_speculation_attempts = {}
+_rolling_previews = {}
+_incremental_stt = None
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
 BEAM_SIZE = 1  # Whisper beam search width: 1=greedy (fastest), 5=default
@@ -197,6 +286,17 @@ MODEL_FAMILY = "gemma4"
 MLX_DRAFT_MODEL_ID = None
 MLX_DRAFT_MODEL = None
 USE_MTS = False
+LIVE_MTS_UNAVAILABLE = (
+    "Live --mts is unavailable: the supported mlx-lm loader cannot load the Gemma 4 assistant drafter. "
+    "MTP remains an offline experiment (docs/mlx_mtp_notes.md); run with --no-mts. "
+    "The live pipeline will not silently continue after a drafter failure."
+)
+
+
+def validate_live_mts(requested, disabled=False, configured=False):
+    if not disabled and (requested is True or (requested is None and configured)):
+        raise ValueError(LIVE_MTS_UNAVAILABLE)
+
 
 # [P7-1E] Whisper initial_prompt — capped at ~40 words to reduce prefill time.
 # Biases decoder toward theological vocabulary that Whisper otherwise
@@ -318,6 +418,13 @@ def should_use_marian_only(english: str, stt_confidence: float | None) -> bool:
     This saves 200-400ms by skipping TranslateGemma on trivial phrases
     like "good morning" or "let's turn to page five".
     """
+    policy = settings.translation.routing_policy
+    if policy == "off":
+        return False
+    if policy == "conservative":
+        from engines.translation_prompts import conservative_marian_route
+
+        return conservative_marian_route(english, SOURCE_LANG, stt_confidence)
     words = english.lower().split()
     if len(words) >= 8:
         return False
@@ -942,19 +1049,17 @@ def get_local_ip():
 
 
 def start_http_server(port, directory):
-    """Start a simple HTTP server in a background thread."""
-    handler = lambda *args, **kwargs: http.server.SimpleHTTPRequestHandler(*args, directory=directory, **kwargs)
-    server = http.server.HTTPServer(("0.0.0.0", port), handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    return server
+    """Serve only allowlisted audience pages/assets to the LAN."""
+    from tools.display_server import start_display_server
+
+    return start_display_server(port, directory)
 
 
 # ---------------------------------------------------------------------------
 # Globals
 # ---------------------------------------------------------------------------
 
-audio_queue = asyncio.Queue()
+audio_queue = asyncio.Queue(maxsize=64)
 ws_clients = set()
 chunk_id = 0
 all_results = []
@@ -964,6 +1069,7 @@ _last_final_text = ""  # consecutive duplicate suppression
 # Models (set during init)
 vad_model = None
 vad_utils = None
+_vad_provenance = {}
 stt_pipe = None
 mlx_a_model = None
 mlx_a_tokenizer = None
@@ -992,10 +1098,15 @@ mlx_b_suffix_tokens = None
 
 
 def load_vad():
-    """Load Silero VAD (~2MB)."""
-    print("[1/6] Loading Silero VAD...")
-    model, utils = torch.hub.load("snakers4/silero-vad", "silero_vad")
-    print("  VAD ready")
+    """Load the installed Silero package's bundled weights without network access."""
+    from tools.vad_runtime import load_managed_onnx_vad, load_packaged_vad
+
+    global _vad_provenance
+    print("[1/6] Loading packaged Silero VAD...")
+    model, utils, _vad_provenance = (
+        load_managed_onnx_vad() if RUNTIME_PROFILE.lite else load_packaged_vad(settings.vad.backend)
+    )
+    print(f"  VAD ready (silero-vad {_vad_provenance['package_version']}, {settings.vad.backend})")
     return model, utils
 
 
@@ -1022,8 +1133,9 @@ def _resolve_mlx_stt_backend() -> str:
 def load_whisper(backend="mlx"):
     """Load Whisper STT model for the given backend.
 
-    MLX backend: uses mlx-whisper with whisper-large-v3-turbo (default)
-                 or distil-whisper-large-v3.5 (fallback).
+    MLX backend: uses the selected settings.stt.whisper_model (Turbo by default).
+                 The configured startup fallback is EN-only; Spanish fails
+                 visibly if its primary model cannot load.
     CUDA backend: uses faster-whisper with large-v3-turbo on GPU.
     CPU backend: uses faster-whisper with large-v3-turbo on CPU.
 
@@ -1054,112 +1166,125 @@ def load_whisper(backend="mlx"):
         # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
         mx.set_cache_limit(256 * 1024 * 1024)
 
-        model_id = WHISPER_MODEL_TURBO
+        from engines.model_paths import resolve_model_path
+        from engines.stt_fallback import require_mlx_fallback_language
+
+        model_id = resolve_model_path(settings.stt.whisper_model)
         print(f"[2/6] Loading {model_id} (MLX)...")
         t0 = time.time()
         try:
             # Warm up — first call downloads and compiles the model
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
-            print(f"  Whisper Turbo ready ({time.time() - t0:.1f}s)")
+            print(f"  Whisper ready ({time.time() - t0:.1f}s)")
         except Exception as e:
-            print(f"  Turbo load failed ({e}), falling back to distil...")
-            model_id = WHISPER_MODEL_DISTIL
+            require_mlx_fallback_language(SOURCE_LANG, settings.stt.whisper_fallback)
+            print(f"  Whisper load failed ({e}), falling back to {settings.stt.whisper_fallback}...")
+            model_id = resolve_model_path(settings.stt.whisper_fallback)
             t0 = time.time()
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
-            print(f"  Whisper Distil ready ({time.time() - t0:.1f}s)")
+            print(f"  Whisper fallback ready ({time.time() - t0:.1f}s)")
         # Materialize cached Whisper weights for pool-thread use (MLX >= 0.31.2).
         if hasattr(mx, "synchronize"):
             mx.synchronize()
         return model_id  # mlx_whisper uses model_id per call, no persistent object
 
     elif backend in ("cuda", "cpu"):
-        # CUDA/CPU: use faster-whisper (CTranslate2 backend)
-        try:
-            from faster_whisper import WhisperModel
-        except ImportError:
-            print("ERROR: faster-whisper not installed. Install with: pip install faster-whisper", file=sys.stderr)
-            sys.exit(1)
+        from engines.factory import create_stt_engine
+        from engines.model_paths import resolve_model_path
 
-        device = "cuda" if backend == "cuda" else "cpu"
-        compute_type = "int8" if backend == "cuda" else "int8"
-        fw_model_id = "large-v3-turbo"
-        print(f"[2/6] Loading faster-whisper {fw_model_id} ({device})...")
-        t0 = time.time()
-        model = WhisperModel(fw_model_id, device=device, compute_type=compute_type)
-        # Warm up
-        silence = np.zeros(16000, dtype=np.float32)
-        segments, _ = model.transcribe(silence, language=SOURCE_LANG)
-        list(segments)  # consume generator to trigger actual inference
-        print(f"  Whisper Turbo ready ({time.time() - t0:.1f}s)")
+        if settings.stt.backend == "hf":
+            # Explicit standard HF selection has a distinct artifact/config API.
+            model = create_stt_engine(
+                backend=backend,
+                stt_backend="hf",
+                compile_mode=settings.stt.compile_mode,
+                warmup_seconds=settings.stt.warmup_seconds,
+            )
+            model.load()
+            return model
+        if settings.stt.backend not in ("auto", "faster-whisper"):
+            raise ValueError(
+                f"STT {settings.stt.backend!r} is unsupported by this CPU/CUDA pipeline; choose faster-whisper or hf"
+            )
+        requested = settings.stt.whisper_cuda_model
+        from stark_translate.profiles import resolve_profile_model
+
+        auto_model = (
+            settings.profile == "standard"
+            and requested == "large-v3-turbo"
+            and "whisper_cuda_model" not in settings.stt.model_fields_set
+        )
+        # An untouched standard default delegates to the factory's existing
+        # active-adapter preference. Explicit overrides, even the stock alias,
+        # bypass that preference; Lite always resolves its exact pinned model.
+        model_path = (
+            None
+            if auto_model
+            else (
+                resolve_profile_model(requested)
+                if settings.profile != "standard"
+                else resolve_model_path(requested, local_only=settings.stt.local_files_only)
+            )
+        )
+        if model_path is None and not auto_model:
+            raise FileNotFoundError(f"Pinned STT model {requested} missing; run setup for {settings.profile}")
+        compute = settings.stt.whisper_cuda_compute_type
+        if backend == "cpu" and compute == "int8_float16":
+            compute = "int8"
+        model = create_stt_engine(
+            backend=backend,
+            model_id=model_path,
+            stt_backend=settings.stt.backend,
+            compute_type=compute,
+            cpu_threads=settings.stt.cpu_threads,
+            num_workers=settings.stt.num_workers,
+            local_files_only=settings.stt.local_files_only,
+            fallback_on_low_conf=settings.stt.fallback_on_low_conf,
+            fallback_threshold=settings.stt.fallback_threshold,
+            hallucination_threshold=settings.stt.hallucination_threshold,
+        )
+        print(f"[2/6] Loading {model.model_id} ({backend}, {compute})...")
+        model.load()
         return model
 
 
+def profile_artifact_provenance():
+    if not RUNTIME_PROFILE.lite:
+        return None
+    from engines.model_paths import load_model_manifest
+    from stark_translate.profiles import resolve_profile_model
+
+    manifest = load_model_manifest()["models"]
+    return {
+        key: {
+            "repo_id": manifest[key].get("repo_id"),
+            "revision": manifest[key].get("revision"),
+            "sha256": manifest[key].get("sha256"),
+            "path": resolve_profile_model(key),
+        }
+        for key in sorted(RUNTIME_PROFILE.model_keys())
+    }
+
+
 def load_mlx_gemma(model_id, label, adapter_path=None, model_family: str | None = None):
-    """Load a Gemma model via MLX, defaulting model_family to MODEL_FAMILY.
+    """Legacy tuple facade over the shared MLX engine lifecycle."""
+    from engines.mlx_engine import MLXGemmaEngine
 
-    Passes ``adapter_path`` to ``mlx_lm.load`` when set, and optionally wraps
-    the model KV cache with TurboQuant (``USE_TURBOQUANT`` / mlx-optiq).
-    """
-    import mlx.core as mx
-    from mlx_lm import load
-
-    # [P7-4B] Increased from 100MB to 256MB (same rationale as load_whisper)
-    mx.set_cache_limit(256 * 1024 * 1024)
-
-    print(f"  Loading {model_id}...")
-    if adapter_path:
-        print(f"  Adapter: {adapter_path}")
-    t0 = time.time()
-    load_kwargs = {}
-    if adapter_path:
-        load_kwargs["adapter_path"] = adapter_path
-    model, tokenizer = load(model_id, **load_kwargs)
-
-    from engines.translation_prompts import ensure_stop_tokens
-
-    family = MODEL_FAMILY if model_family is None else model_family
-    ensure_stop_tokens(tokenizer, model_family=family)
-
-    # TurboQuant KV cache compression — same resolver as MLXGemmaEngine
-    if USE_TURBOQUANT:
-        try:
-            from engines.mlx_engine import (
-                TURBOQUANT_UNAVAILABLE_MSG,
-                resolve_turboquant_kv_cache_cls,
-            )
-
-            turbo_cls = resolve_turboquant_kv_cache_cls()
-            if turbo_cls is None:
-                print(f"  WARNING: {TURBOQUANT_UNAVAILABLE_MSG}")
-            else:
-                model.kv_cache = turbo_cls(
-                    model,
-                    key_bits=TURBOQUANT_KEY_BITS,
-                    val_bits=TURBOQUANT_VAL_BITS,
-                    rotate=True,
-                )
-                print(f"  TurboQuant KV cache enabled (key={TURBOQUANT_KEY_BITS}-bit, val={TURBOQUANT_VAL_BITS}-bit)")
-        except Exception as exc:
-            print(f"  WARNING: TurboQuant initialization failed: {exc}")
-
-    elapsed = time.time() - t0
-    # Materialize weights on the load thread so pool workers can run
-    # independent inference (MLX >= 0.31.2 thread-local streams).
-    try:
-        from engines.mlx_engine import materialize_mlx_model, warm_mlx_model
-
-        materialize_mlx_model(model)
-        # The FIRST forward pass must run on this (load) thread: with mlx 0.32.x
-        # a first pass on a pool worker binds lazy state to that worker's
-        # thread-local stream and every later generation from another thread
-        # raises "There is no Stream(gpu, N) in current thread".
-        warm_mlx_model(model, tokenizer, model_family=family, label=label)
-    except Exception as exc:
-        print(f"  WARNING: could not materialize/warm MLX model: {exc}")
-    print(f"  {label} ready ({elapsed:.1f}s)")
-    return model, tokenizer
+    engine = MLXGemmaEngine(
+        model_id=model_id,
+        model_family=MODEL_FAMILY if model_family is None else model_family,
+        adapter_path=adapter_path,
+        use_prompt_cache=False,
+        use_turboquant=USE_TURBOQUANT,
+        turboquant_key_bits=TURBOQUANT_KEY_BITS,
+        turboquant_val_bits=TURBOQUANT_VAL_BITS,
+        terminology_prompt=settings.translation.terminology_prompt,
+    )
+    print(f"  Loading {label}...")
+    engine.load()
+    return engine._model, engine._tokenizer
 
 
 def _build_prompt_cache(model, tokenizer, label):
@@ -1244,6 +1369,9 @@ def load_translation_models(load_b=True):
     global mlx_a_suffix_tokens, mlx_b_suffix_tokens
     global MLX_DRAFT_MODEL
 
+    if USE_MTS:
+        raise RuntimeError(LIVE_MTS_UNAVAILABLE)
+
     family_label = "Gemma 4" if MODEL_FAMILY == "gemma4" else "TranslateGemma"
     print(f"[3/6] Loading {family_label} models (MLX)...")
     a_model, a_tok = load_mlx_gemma(MLX_MODEL_A, f"Approach A ({MLX_MODEL_A})", adapter_path=ADAPTER_DIR_A)
@@ -1255,15 +1383,8 @@ def load_translation_models(load_b=True):
         mlx_a_prompt_cache, mlx_a_suffix_tokens = None, None
         print("  Prompt cache skipped (gemma4 instruct path)")
 
-    # Gemma-4 assistant-drafter MTS (loads alongside target; used as draft_model)
+    # Live MTP is explicitly unavailable; offline research uses mlx_spec.
     MLX_DRAFT_MODEL = None
-    if USE_MTS and MLX_DRAFT_MODEL_ID and MODEL_FAMILY == "gemma4":
-        try:
-            MLX_DRAFT_MODEL, _ = load_mlx_gemma(MLX_DRAFT_MODEL_ID, f"MTS drafter ({MLX_DRAFT_MODEL_ID})")
-            print(f"  MTS enabled: draft={MLX_DRAFT_MODEL_ID}, num_draft_tokens={NUM_DRAFT_TOKENS}")
-        except Exception as e:
-            print(f"  WARNING: MTS drafter load failed: {e}")
-            MLX_DRAFT_MODEL = None
 
     b_model, b_tok = None, None
     if load_b and MODEL_FAMILY == "translategemma":
@@ -1306,11 +1427,21 @@ def load_marian():
     model_id = "Helsinki-NLP/opus-mt-es-en" if SOURCE_LANG == "es" else "Helsinki-NLP/opus-mt-en-es"
     print(f"[4/6] Loading {model_id} (Marian partial translator)...")
     t0 = time.time()
+    ct2_path = None
+    if RUNTIME_PROFILE.lite:
+        from engines.model_paths import resolve_marian_ct2
+
+        ct2_path = resolve_marian_ct2(f"{SOURCE_LANG}-{target_lang}", managed_only=True)
+        if ct2_path is None:
+            raise FileNotFoundError("Pinned managed Marian CT2 missing; run setup for the selected profile")
     engine = create_translation_engine(
+        ct2_path=ct2_path,
         backend=BACKEND,
         engine_type="marian",
         model_id=model_id,
         marian_backend=settings.translation.marian_backend,
+        device=None if settings.translation.marian_device == "auto" else settings.translation.marian_device,
+        intra_threads=settings.translation.marian_intra_threads,
         compute_type=settings.translation.marian_compute_type,
         max_new_tokens=settings.translation.marian_max_new_tokens,
         warmup_passes=settings.translation.marian_warmup_passes,
@@ -1506,7 +1637,14 @@ def _start_workers(run_ab=False):
     _trans_worker_proc = multiprocessing.Process(
         target=translation_worker_main,
         args=(child_conn2, MLX_MODEL_A, model_12b_id, NUM_DRAFT_TOKENS),
-        kwargs={"source_lang": SOURCE_LANG, "target_lang": TARGET_LANG},
+        kwargs={
+            "source_lang": SOURCE_LANG,
+            "target_lang": TARGET_LANG,
+            "model_family": MODEL_FAMILY,
+            "adapter_path": ADAPTER_DIR_A,
+            "adapter_b_path": ADAPTER_DIR_B,
+            "terminology_prompt": settings.translation.terminology_prompt,
+        },
         daemon=True,
     )
     _trans_worker_proc.start()
@@ -1667,79 +1805,39 @@ _GEN_STAT_FIELDS = {
     "draft_tokens_a": "draft_tokens",
     "draft_accept_a": "draft_accept_rate",
 }
+_EXPERIMENT_GEN_FIELDS = {
+    "cached_prompt_tokens_a": "cached_prompt_tokens",
+    "prompt_cache_prepare_ms_a": "prompt_cache_prepare_ms",
+    "generation_lock_wait_ms_a": "generation_lock_wait_ms",
+    "prompt_cache_hit_a": "prompt_cache_hit",
+}
 
 
 def _generation_stats(result):
-    return {column: getattr(result, attr, None) for column, attr in _GEN_STAT_FIELDS.items()}
+    return {
+        column: getattr(result, attr, None) for column, attr in {**_GEN_STAT_FIELDS, **_EXPERIMENT_GEN_FIELDS}.items()
+    }
 
 
 def translate_mlx(
     model, tokenizer, text, draft_model=None, prompt_cache_template=None, suffix_tokens=None, chunk_id=None
 ):
-    """Translate using TranslateGemma or Gemma 4 via MLX.
+    """Compatibility tuple facade; generation is shared with MLXGemmaEngine."""
+    from engines.mlx_engine import translate_loaded_model
 
-    Prompt format follows ``MODEL_FAMILY`` (``translategemma`` | ``gemma4``)
-    via ``engines.translation_prompts`` so Mac matches CUDA llama.cpp strings.
-
-    Returns (translation, latency_ms, generation_tps).
-    """
-    from engines.mlx_engine import generate_translation
-    from engines.translation_prompts import (
-        build_chat_messages,
-        chat_template_extra_kwargs,
-        dynamic_max_tokens,
+    result = translate_loaded_model(
+        model,
+        tokenizer,
+        text,
+        model_family=globals().get("MODEL_FAMILY", "gemma4"),
+        source_lang=SOURCE_LANG,
+        target_lang=TARGET_LANG,
+        draft_model=draft_model,
+        num_draft_tokens=NUM_DRAFT_TOKENS,
+        prompt_cache_template=prompt_cache_template,
+        suffix_tokens=suffix_tokens,
+        terminology_prompt=settings.translation.terminology_prompt,
     )
-
-    if model is None or tokenizer is None:
-        return "(model not loaded)", 0.0, 0.0
-
-    family = globals().get("MODEL_FAMILY", "gemma4")
-    max_tok = dynamic_max_tokens(text)
-
-    # Prompt cache is TG-only and incompatible with speculative decoding
-    use_cache = (
-        prompt_cache_template is not None
-        and suffix_tokens is not None
-        and draft_model is None
-        and family == "translategemma"
-    )
-
-    if use_cache:
-        _dc_t0 = time.perf_counter()
-        cached = copy.deepcopy(prompt_cache_template)
-        _dc_ms = (time.perf_counter() - _dc_t0) * 1000
-        if _dc_ms > 20:
-            logger.warning("prompt_cache deep-copy took %.1fms (>20ms threshold)", _dc_ms)
-        else:
-            logger.debug("prompt_cache deep-copy: %.1fms", _dc_ms)
-        text_tokens = tokenizer.encode(text, add_special_tokens=False)
-        dynamic_tokens = text_tokens + suffix_tokens
-        gen_kwargs = dict(
-            prompt=dynamic_tokens,
-            max_tokens=max_tok,
-            prompt_cache=cached,
-        )
-    else:
-        messages = build_chat_messages(
-            text,
-            source_lang=SOURCE_LANG,
-            target_lang=TARGET_LANG,
-            model_family=family,
-        )
-        prompt = tokenizer.apply_chat_template(
-            messages,
-            add_generation_prompt=True,
-            **chat_template_extra_kwargs(model_family=family),
-        )
-        gen_kwargs = dict(
-            prompt=prompt,
-            max_tokens=max_tok,
-        )
-        if draft_model is not None:
-            gen_kwargs["draft_model"] = draft_model
-            gen_kwargs["num_draft_tokens"] = NUM_DRAFT_TOKENS
-
-    result = generate_translation(model, tokenizer, model_family=family, gen_kwargs=gen_kwargs)
     if chunk_id is not None:
         _last_gen_stats[chunk_id] = _generation_stats(result)
     return result.text, result.latency_ms, result.tokens_per_second
@@ -1850,72 +1948,25 @@ def _enqueue_stream_token(item):
 
 
 def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_template=None, suffix_tokens=None):
-    """Translate with token streaming (TranslateGemma or Gemma 4).
-
-    Uses mlx_lm.stream_generate() to yield tokens as they're generated.
-    Pushes intermediate results to _stream_token_queue for the async
-    WebSocket broadcaster to pick up.
-
-    Returns (translation, latency_ms, generation_tps).
-    """
-    from engines.mlx_engine import generate_translation
-    from engines.translation_prompts import (
-        build_chat_messages,
-        chat_template_extra_kwargs,
-        dynamic_max_tokens,
-    )
-
-    if model is None or tokenizer is None:
-        return "(model not loaded)", 0.0, 0.0
-
-    family = globals().get("MODEL_FAMILY", "gemma4")
-    max_tok = dynamic_max_tokens(text)
-
-    use_cache = prompt_cache_template is not None and suffix_tokens is not None and family == "translategemma"
-
-    if use_cache:
-        _dc_t0 = time.perf_counter()
-        cached = copy.deepcopy(prompt_cache_template)
-        _dc_ms = (time.perf_counter() - _dc_t0) * 1000
-        if _dc_ms > 20:
-            logger.warning("prompt_cache deep-copy (stream) took %.1fms (>20ms threshold)", _dc_ms)
-        else:
-            logger.debug("prompt_cache deep-copy (stream): %.1fms", _dc_ms)
-        text_tokens = tokenizer.encode(text, add_special_tokens=False)
-        dynamic_tokens = text_tokens + suffix_tokens
-        gen_kwargs = dict(
-            prompt=dynamic_tokens,
-            max_tokens=max_tok,
-            prompt_cache=cached,
-        )
-    else:
-        messages = build_chat_messages(
-            text,
-            source_lang=SOURCE_LANG,
-            target_lang=TARGET_LANG,
-            model_family=family,
-        )
-        prompt = tokenizer.apply_chat_template(
-            messages,
-            add_generation_prompt=True,
-            **chat_template_extra_kwargs(model_family=family),
-        )
-        gen_kwargs = dict(
-            prompt=prompt,
-            max_tokens=max_tok,
-        )
+    """Live streaming facade over the same prepared request as engine calls."""
+    from engines.mlx_engine import translate_loaded_model
 
     def token_callback(partial, tokens):
         if partial:
             _enqueue_stream_token(("token", chunk_id, partial, tokens))
 
-    result = generate_translation(
+    result = translate_loaded_model(
         model,
         tokenizer,
-        model_family=family,
-        gen_kwargs=gen_kwargs,
+        text,
+        model_family=globals().get("MODEL_FAMILY", "gemma4"),
+        source_lang=SOURCE_LANG,
+        target_lang=TARGET_LANG,
+        prompt_cache_template=prompt_cache_template,
+        suffix_tokens=suffix_tokens,
         token_callback=token_callback,
         batch_size=STREAM_TOKEN_BATCH_SIZE,
+        terminology_prompt=settings.translation.terminology_prompt,
     )
     _last_gen_stats[chunk_id] = _generation_stats(result)
     return result.text, result.latency_ms, result.tokens_per_second
@@ -1953,6 +2004,80 @@ _last_warmup_time = 0.0  # perf_counter of last warmup — for periodic re-warmi
 _WARMUP_INTERVAL = 4.0  # seconds between periodic warmups during sustained silence
 
 
+def _inference_idle():
+    with _experiment_lock:
+        stt_running = any(_active_stt_workers.values())
+    return not (
+        stt_running
+        or _translation_active.is_set()
+        or _final_pending.is_set()
+        or (_pipeline_chunk_queue is not None and not _pipeline_chunk_queue.empty())
+        or (_active_partial_future is not None and not _active_partial_future.done())
+        or (_stt_scheduler is not None and _stt_scheduler.busy)
+    )
+
+
+def _count_experiment(name):
+    with _experiment_lock:
+        _experiment_counters[name] = _experiment_counters.get(name, 0) + 1
+
+
+def _experiment_snapshot():
+    with _experiment_lock:
+        counters = dict.fromkeys(
+            (
+                "warmup_requested",
+                "warmup_executed",
+                "warmup_failed",
+                "warmup_suppressed_busy",
+                "warmup_suppressed_coalesced",
+                "warmup_suppressed_before_run",
+                "warmup_suppressed_no_pending",
+                "warmup_suppressed_model_lock",
+                "partial_suppressed_final_decode",
+                "partial_suppressed_final_pending",
+                "partial_suppressed_backlog",
+                "partial_suppressed_in_flight",
+                "partial_suppressed_after_stt",
+                "partial_stt_started",
+                "partial_stt_finished",
+                "final_stt_started",
+                "final_stt_finished",
+                "partial_emitted",
+                "final_marian_routes",
+                "final_gemma_requests",
+            ),
+            0,
+        )
+        return {**counters, **_experiment_counters}
+
+
+def _run_tracked_stt(kind, function, *args):
+    """Track actual worker lifetime; cancelling its asyncio wrapper is not completion."""
+    with _experiment_lock:
+        _active_stt_workers[kind] += 1
+    _count_experiment(f"{kind}_stt_started")
+    try:
+        return function(*args)
+    finally:
+        with _experiment_lock:
+            _active_stt_workers[kind] -= 1
+        _count_experiment(f"{kind}_stt_finished")
+
+
+def _schedule_warmup(loop):
+    global _warmup_future
+    _count_experiment("warmup_requested")
+    if settings.translation.idle_warmup_only:
+        if not _inference_idle():
+            _count_experiment("warmup_suppressed_busy")
+            return
+        if _warmup_future is not None and not _warmup_future.done():
+            _count_experiment("warmup_suppressed_coalesced")
+            return
+    _warmup_future = loop.run_in_executor(_pipeline_pool, warmup_translation_models)
+
+
 def warmup_translation_models():
     """Dummy 1-token forward pass on translation models to keep Metal GPU warm.
 
@@ -1961,7 +2086,11 @@ def warmup_translation_models():
     CUDA does not have this issue.
     """
     global _warmup_pending, _last_warmup_time
+    if settings.translation.idle_warmup_only and not _inference_idle():
+        _count_experiment("warmup_suppressed_before_run")
+        return
     if not _warmup_pending:
+        _count_experiment("warmup_suppressed_no_pending")
         return
     _warmup_pending = False
     _last_warmup_time = time.perf_counter()
@@ -1973,16 +2102,31 @@ def warmup_translation_models():
         from engines.translation_prompts import build_chat_messages, chat_template_extra_kwargs
 
         if mlx_a_model is not None and mlx_a_tokenizer is not None:
-            family = globals().get("MODEL_FAMILY", "gemma4")
-            messages = build_chat_messages(
-                "hello", source_lang=SOURCE_LANG, target_lang=TARGET_LANG, model_family=family
-            )
-            prompt = mlx_a_tokenizer.apply_chat_template(
-                messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
-            )
-            generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
+            from engines.mlx_generation_lock import generation_guard
+
+            with generation_guard(mlx_a_model):
+                # A final can become ready after the warmup task was queued.
+                if settings.translation.idle_warmup_only and not _inference_idle():
+                    _warmup_pending = True
+                    _count_experiment("warmup_suppressed_model_lock")
+                    return
+                family = globals().get("MODEL_FAMILY", "gemma4")
+                messages = build_chat_messages(
+                    "hello", source_lang=SOURCE_LANG, target_lang=TARGET_LANG, model_family=family
+                )
+                prompt = mlx_a_tokenizer.apply_chat_template(
+                    messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
+                )
+                generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
+                _count_experiment("warmup_executed")
     except Exception:
+        _count_experiment("warmup_failed")
         pass  # warmup is best-effort, never block the pipeline
+
+
+def _latency_event(event, **fields):
+    _count_experiment(event)
+    _latency_trace.record(event, **fields)
 
 
 def translate_marian(text):
@@ -1995,7 +2139,17 @@ def translate_marian(text):
     if _marian_engine is None:
         return "(MarianMT not loaded)", 0.0
     target_lang = "en" if SOURCE_LANG == "es" else "es"
+    memo_started = time.perf_counter()
+    key = (id(_marian_engine), getattr(_marian_engine, "model_id", None), SOURCE_LANG, target_lang, text)
+    if _latency.marian_memo:
+        cached = _marian_memo.get(key)
+        if cached is not None:
+            _latency_event("marian_memo_hit")
+            return cached, (time.perf_counter() - memo_started) * 1000
+        _latency_event("marian_memo_miss")
     result = _marian_engine.translate(text, source_lang=SOURCE_LANG, target_lang=target_lang)
+    if _latency.marian_memo:
+        _marian_memo.put(key, result.text)
     return result.text, result.latency_ms
 
 
@@ -2005,54 +2159,41 @@ def translate_marian(text):
 
 
 def detect_macbook_mic():
-    """Find the MacBook Pro built-in microphone by name.
-    Returns (device_index, measured_rms) so gain can be auto-calibrated.
-    """
-    devices = sd.query_devices()
-    # Find MacBook Pro mic by name
-    for idx, d in enumerate(devices):
-        if d["max_input_channels"] > 0 and "MacBook Pro" in d["name"]:
-            # Quick RMS measurement for gain calibration
-            test = sd.rec(
-                int(1.0 * d["default_samplerate"]),
-                samplerate=d["default_samplerate"],
-                channels=1,
-                dtype="float32",
-                device=idx,
-            )
-            sd.wait()
-            rms = float(np.sqrt(np.mean(test[:, 0] ** 2)))
-            print(f"  Using: [{idx}] {d['name']} (RMS={rms:.4f})")
-            return idx, rms
+    """Select the system default; explicit idle audio probes measure gain safely.
 
-    # Fallback: use system default input if MacBook Pro mic not found
-    print("  WARNING: MacBook Pro mic not found, using system default", file=sys.stderr)
-    default_idx = sd.default.device[0]
-    d = sd.query_devices(default_idx)
-    test = sd.rec(
-        int(1.0 * d["default_samplerate"]),
-        samplerate=d["default_samplerate"],
-        channels=1,
-        dtype="float32",
-        device=default_idx,
-    )
-    sd.wait()
-    rms = float(np.sqrt(np.mean(test[:, 0] ** 2)))
-    print(f"  Using default: [{default_idx}] {d['name']} (RMS={rms:.4f})")
-    return default_idx, rms
+    Never open a native recording device here: permission prompts can block
+    indefinitely. The capture child confirms sample flow after displays start.
+    """
+    return None, 0.0
 
 
 MIC_GAIN = 1.0  # Set during mic detection based on measured signal level
 TARGET_RMS = 0.08  # Target RMS for speech audio fed to VAD/Whisper
 
 # [P7-5D] Background thread pool for non-blocking I/O (WAV saves, CSV/JSONL writes)
-_io_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="io")
+_io_pool = PersistenceExecutor(max_workers=2, max_pending=256)
 
 
 def audio_callback(indata, frames, time_info, status):
-    """sounddevice callback — resample from mic rate to 16kHz and push to queue."""
+    """Resample from the captured source rate to 16 kHz and push to queue."""
     if status:
+        if _health is not None:
+            _health.error(
+                "audio", "capture_overflow" if str(status).startswith("capture_overflow:") else "capture_status"
+            )
+        if str(status).startswith("capture_overflow:"):
+            _io_pool.record_failure("audio_capture", "samples_dropped")
         print(f"  Audio status: {status}", file=sys.stderr)
+    # File and isolated mic stamps carry their actual callback rate. The
+    # WebSocket protocol already delivers 16 kHz PCM, regardless of mic settings.
+    input_rate = (
+        time_info.sample_rate
+        if isinstance(time_info, CaptureStamp) and time_info.sample_rate
+        else SAMPLE_RATE
+        if os.environ.get("STARK_AUDIO_SOURCE") == "ws"
+        else MIC_SAMPLE_RATE
+    )
+    stamp = capture_stamp(frames, input_rate, time_info)
     raw = indata[:, 0].copy()
     # Clamp to [-1, 1] — some mics deliver out-of-range samples that break VAD
     raw = np.clip(raw, -1.0, 1.0)
@@ -2060,18 +2201,27 @@ def audio_callback(indata, frames, time_info, status):
     if MIC_GAIN != 1.0:
         raw = np.clip(raw * MIC_GAIN, -1.0, 1.0)
     # [P7-5A] Use decimate instead of resample — faster for integer factor (48k/16k = 3x)
-    if MIC_SAMPLE_RATE != SAMPLE_RATE:
+    if input_rate != SAMPLE_RATE:
         from scipy.signal import decimate
 
-        factor = MIC_SAMPLE_RATE // SAMPLE_RATE  # 48000 // 16000 = 3
-        if MIC_SAMPLE_RATE % SAMPLE_RATE == 0 and factor > 1:
+        factor = input_rate // SAMPLE_RATE
+        if input_rate % SAMPLE_RATE == 0 and factor > 1:
             raw = decimate(raw, factor, zero_phase=False).astype(np.float32)
         else:
             from scipy.signal import resample
 
-            target_len = int(len(raw) * SAMPLE_RATE / MIC_SAMPLE_RATE)
+            target_len = int(len(raw) * SAMPLE_RATE / input_rate)
             raw = resample(raw, target_len).astype(np.float32)
-    audio_queue.put_nowait(raw)
+    if _health is not None:
+        _health.input(float(np.sqrt(np.mean(raw * raw))))
+        if _health.paused:
+            return
+    try:
+        audio_queue.put_nowait(AudioFrame(raw, stamp))
+    except asyncio.QueueFull:
+        _io_pool.record_failure("audio_capture", "input_queue_full")
+        if _health is not None:
+            _health.error("capture", "input_queue_full")
 
 
 def is_speech(audio_chunk, model, utils):
@@ -2082,7 +2232,7 @@ def is_speech(audio_chunk, model, utils):
     music segments, or use inaSpeechSegmenter to detect music and skip/handle
     differently.
     """
-    tensor = torch.from_numpy(audio_chunk).float()
+    tensor = audio_chunk if getattr(model, "numpy_input", False) else torch.from_numpy(audio_chunk).float()
     with _pytorch_lock:
         speech_prob = model(tensor, SAMPLE_RATE).item()
     return speech_prob > VAD_THRESHOLD
@@ -2173,18 +2323,280 @@ def _is_garbage_text(text: str) -> bool:
     return False
 
 
-async def process_partial(audio_data, utterance_id):
+def _translation_identity(text):
+    return (
+        SESSION_ID,
+        SOURCE_LANG,
+        TARGET_LANG,
+        id(mlx_a_model),
+        id(mlx_a_tokenizer),
+        MODEL_FAMILY,
+        ADAPTER_DIR_A,
+        settings.translation.terminology_prompt,
+        text,
+    )
+
+
+async def _speculate_pause(audio_data, utterance_id, pause_epoch, sample_bounds):
+    """Start optional work early; ordinary final STT must confirm exact source.
+
+    No generated token is broadcast, spoken or saved as a final here. A resumed
+    utterance invalidates the result; running model work still drains normally.
+    """
+    if _preview_was_discarded(utterance_id):
+        return
+    if (
+        BACKEND != "mlx"
+        or MULTIPROCESS
+        or mlx_a_model is None
+        or mlx_b_model is not None
+        or MLX_DRAFT_MODEL is not None
+        or MODEL_FAMILY != "gemma4"
+        or _stt_scheduler is None
+    ):
+        _latency_event("speculation_unsupported")
+        return
+    if (
+        _translation_active.is_set()
+        or _final_pending.is_set()
+        or _stt_scheduler.busy
+        or utterance_id not in _partial_source_text
+        or _speculation_attempts.get(utterance_id, 0) >= 2
+    ):
+        _latency_event("speculation_suppressed_busy")
+        return
+    _speculation_attempts[utterance_id] = _speculation_attempts.get(utterance_id, 0) + 1
+    _latency_event("speculation_started", utterance_id=utterance_id)
+    try:
+        result = await asyncio.wrap_future(
+            _stt_scheduler.submit(
+                "partial", _run_tracked_stt, "partial", _run_stt, audio_data, _whisper_prompt(), key=utterance_id
+            )
+        )
+        source, _, confidence, segments, _ = result
+        if (
+            _pause_epochs.get(utterance_id, 0) != pause_epoch
+            or _preview_was_discarded(utterance_id)
+            or utterance_id in _closed_utterances
+            or _final_pending.is_set()
+            or _pipeline_translation_lock.locked()
+            or not source
+            or _is_garbage_text(source)
+            or _should_suppress(
+                source,
+                confidence,
+                len(audio_data) / SAMPLE_RATE,
+                no_speech_prob=_max_segment_metric(segments, "no_speech_prob"),
+                compression_ratio=_max_segment_metric(segments, "compression_ratio"),
+            )
+        ):
+            _latency_event("speculation_discarded_before_translate")
+            return
+        source, _ = correct_stt_output(source)
+        if should_use_marian_only(source, confidence):
+            _latency_event("speculation_skipped_marian_route")
+            return
+        identity = _translation_identity(source)
+        from engines.mlx_engine import translate_loaded_model
+
+        def generate():
+            _latency_trace.record("speculative_generation_started", utterance_id=utterance_id)
+            return translate_loaded_model(
+                mlx_a_model,
+                mlx_a_tokenizer,
+                source,
+                model_family=MODEL_FAMILY,
+                source_lang=SOURCE_LANG,
+                target_lang=TARGET_LANG,
+                terminology_prompt=settings.translation.terminology_prompt,
+            )
+
+        async with _pipeline_translation_lock:
+            _translation_active.set()
+            try:
+                translated = await asyncio.get_running_loop().run_in_executor(_pipeline_pool, generate)
+            finally:
+                _translation_active.clear()
+            if _preview_was_discarded(utterance_id) or _pause_epochs.get(utterance_id, 0) != pause_epoch:
+                _latency_event("speculation_discarded_resumed_speech")
+                return
+            _speculative_candidates[utterance_id] = TranslationCandidate(
+                identity, translated, pause_epoch, dict(sample_bounds)
+            )
+            _latency_event("speculation_completed", utterance_id=utterance_id, model_ms=translated.latency_ms)
+    except asyncio.CancelledError:
+        _latency_event("speculation_cancelled_pending")
+    except Exception as exc:
+        _latency_event("speculation_failed")
+        logger.warning("Optional pause speculation failed: %s", exc)
+
+
+def _confirmed_speculation(utterance_id, text, confidence):
+    candidate = _speculative_candidates.pop(utterance_id, None)
+    if candidate is None or _preview_was_discarded(utterance_id):
+        return None
+    if should_use_marian_only(text, confidence) or not candidate.confirmed(
+        _translation_identity(text), _pause_epochs.get(utterance_id, 0)
+    ):
+        _latency_event("speculation_confirmation_mismatch")
+        return None
+    _latency_event("speculation_reused", utterance_id=utterance_id)
+    return candidate.result
+
+
+def _preview_ordering_enabled():
+    """Use the same closure policy at final admission and preview publication."""
+    return bool(
+        _stt_scheduler is not None
+        or _latency.latest_partial
+        or _latency.incremental_stt != "off"
+        or _latency.first_preview_s
+        or _latency.speculate_pause_ms
+        or _latency.pause_preview_ms
+        or _latency.clause_preview_s
+    )
+
+
+def _preview_was_discarded(utterance_id):
+    return isinstance(utterance_id, int) and 0 < utterance_id <= _discarded_utterance_id
+
+
+def _valid_publication_utterance(utterance_id):
+    return type(utterance_id) is int and 0 < utterance_id <= 2**53 - 1
+
+
+def _preview_was_finalized(utterance_id, session_id=None):
+    session_id = SESSION_ID if session_id is None else session_id
+    return (
+        session_id == _published_final_session
+        and _valid_publication_utterance(utterance_id)
+        and (utterance_id <= _published_final_floor or utterance_id in _published_final_utterances)
+    )
+
+
+def _record_final_publication(data):
+    """Close exact capture identity on the loop immediately before publication.
+
+    Final chunk counters are a different identity and must never be substituted.
+    The retired floor also rejects arbitrarily late results after bounded eviction.
+    """
+    global _published_final_session, _published_final_floor
+    session_id, utterance_id = data.get("session_id"), data.get("utterance_id")
+    if (
+        data.get("type") != "translation"
+        or data.get("stage") != "complete"
+        or session_id != SESSION_ID
+        or not _valid_publication_utterance(utterance_id)
+    ):
+        return
+    if _published_final_session != session_id:
+        _published_final_session = session_id
+        _published_final_utterances.clear()
+        _published_final_floor = 0
+    if utterance_id > _published_final_floor:
+        _published_final_utterances.add(utterance_id)
+    while len(_published_final_utterances) > 128:
+        oldest = min(_published_final_utterances)
+        _published_final_utterances.remove(oldest)
+        _published_final_floor = max(_published_final_floor, oldest)
+
+
+def _next_capture_utterance_id():
+    global _last_capture_utterance_id
+    _last_capture_utterance_id += 1
+    return _last_capture_utterance_id
+
+
+def _discard_utterance(utterance_id, reason, buffer_duration, sample_bounds):
+    """Invalidate provisional results on the loop; running STT still drains.
+
+    Never close an incremental recognizer from this thread. Its owning worker
+    closes the old stream when the next utterance ID arrives (or at shutdown).
+    """
+    global _discarded_utterance_id
+    if utterance_id <= 0:
+        return
+    _discarded_utterance_id = max(_discarded_utterance_id, utterance_id)
+    for state in (
+        _utterance_start_times,
+        _utterance_timings,
+        _partial_emitted_sequence,
+        _partial_source_text,
+        _pause_epochs,
+        _speculative_candidates,
+        _speculation_attempts,
+        _rolling_previews,
+        partial_translations,
+        partial_latencies,
+    ):
+        state.pop(utterance_id, None)
+    if _stt_scheduler is not None:
+        _stt_scheduler.cancel_partial(utterance_id)
+    if _caption_delivery is not None:
+        _caption_delivery.discard_utterance(SESSION_ID, utterance_id)
+    if _health is not None:
+        _health.discard_utterance(SESSION_ID, utterance_id)
+    _latency_event("utterance_discarded", utterance_id=utterance_id, reason=reason, **sample_bounds)
+    logger.info(
+        "vad_utterance_discard utterance_id=%d reason=%s buffer_s=%.3f sample_bounds=%s",
+        utterance_id,
+        reason,
+        buffer_duration,
+        sample_bounds,
+    )
+    return {"type": "utterance_discarded", "session_id": SESSION_ID, "utterance_id": utterance_id, "reason": reason}
+
+
+def _broadcast_discard(event):
+    if event is not None:
+        task = asyncio.create_task(broadcast(event))
+        _partial_tasks.add(task)
+        task.add_done_callback(_partial_tasks.discard)
+
+
+async def process_partial(
+    audio_data,
+    utterance_id,
+    captured_end=None,
+    captured_start=None,
+    sample_bounds=None,
+    preview_kind="periodic",
+    speech_end=None,
+    timing_source="unknown",
+):
     """Fast partial: STT (~300ms) + MarianMT (~80ms). Italic in UI.
 
     [FIX] Partials are skipped when a final is pending to avoid starving
     the MLX pipeline thread. MarianMT runs on a separate PyTorch pool
     to free ~80ms of MLX pool time per partial.
     """
-    global _active_partial_future
+    global _active_partial_future, _partial_sequence
+    request_session = SESSION_ID
+    if _preview_was_finalized(utterance_id, request_session):
+        _latency_event("partial_suppressed_published_final")
+        return
+    if _preview_was_discarded(utterance_id):
+        _latency_event("partial_suppressed_discarded_utterance")
+        return
+    _partial_sequence += 1
+    request_sequence = _partial_sequence
+    original_audio_duration = len(audio_data) / SAMPLE_RATE
+    rolling_start = 0
+    processed_audio_samples = len(audio_data)
+    if _latency.incremental_stt == "rolling":
+        rolling_start = max(0, len(audio_data) - int(_latency.rolling_window_s * SAMPLE_RATE))
+        audio_data = audio_data[rolling_start:]
+        processed_audio_samples = len(audio_data)
+    sample_bounds = sample_bounds or {name: None for name in SAMPLE_COLUMNS}
+    partial_submitted = time.perf_counter()
+    if settings.translation.final_aware_partials and _translation_active.is_set():
+        _count_experiment("partial_suppressed_final_decode")
+        return
 
     # [FIX] Skip partial if a final is queued for the SAME utterance — finals take priority.
     # Partials for a NEW utterance (different utterance_id) are allowed through.
     if _final_pending.is_set() and utterance_id == _final_pending_utterance_id:
+        _count_experiment("partial_suppressed_final_pending")
         print("  [FIX] partial skipped (final pending)", end="\r")
         return
 
@@ -2196,12 +2608,14 @@ async def process_partial(audio_data, utterance_id):
     # normal — partials still run for live UX feedback.  queue>=2 means the
     # pipeline is behind — shed partials so finals can drain the backlog.
     if _pipeline_chunk_queue is not None and _pipeline_chunk_queue.qsize() > 1:
+        _count_experiment("partial_suppressed_backlog")
         return
 
     # [FIX] At most one partial in flight on the pool — a second partial
     # queued behind the first just adds latency with no UX benefit (the
     # first partial's text is already on screen).
-    if _active_partial_future is not None and not _active_partial_future.done():
+    if _stt_scheduler is None and _active_partial_future is not None and not _active_partial_future.done():
+        _count_experiment("partial_suppressed_in_flight")
         return
 
     # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
@@ -2215,13 +2629,24 @@ async def process_partial(audio_data, utterance_id):
 
         # --- Step 1: Whisper STT on the MLX pipeline pool ---
         def _partial_stt():
+            nonlocal processed_audio_samples
             t0 = time.perf_counter()
             conf = None
             no_speech = None
             cr = None
             from engines.base import STTEngine
 
-            if BACKEND == "mlx" and isinstance(stt_pipe, STTEngine):
+            if _incremental_stt is not None:
+                result, processed = _incremental_stt.transcribe(audio_data, utterance_id)
+                processed_audio_samples = processed
+                _latency_trace.record(
+                    "stream_preview_stt",
+                    utterance_id=utterance_id,
+                    processed_samples=processed,
+                    sample_rate=SAMPLE_RATE,
+                )
+                return result
+            if isinstance(stt_pipe, STTEngine):
                 res = stt_pipe.transcribe(
                     audio_data,
                     language=SOURCE_LANG,
@@ -2283,17 +2708,32 @@ async def process_partial(audio_data, utterance_id):
             return english, stt_lat, conf, no_speech, cr
 
         # Submit STT and track the future so process_final can cancel it
-        if MULTIPROCESS:
-            stt_future = loop.run_in_executor(_stt_comm_pool, _run_partial_stt_via_worker, audio_data)
+        if _stt_scheduler is not None:
+            function = (lambda: _run_partial_stt_via_worker(audio_data)) if MULTIPROCESS else _partial_stt
+            stt_future = asyncio.wrap_future(
+                _stt_scheduler.submit("partial", _run_tracked_stt, "partial", function, key=utterance_id)
+            )
+        elif MULTIPROCESS:
+            stt_future = loop.run_in_executor(
+                _stt_comm_pool, _run_tracked_stt, "partial", _run_partial_stt_via_worker, audio_data
+            )
         else:
-            stt_future = loop.run_in_executor(_pipeline_pool, _partial_stt)
+            stt_future = loop.run_in_executor(_pipeline_pool, _run_tracked_stt, "partial", _partial_stt)
         with _partial_future_lock:
             _active_partial_future = stt_future
 
         stt_result = await stt_future
+        _latency_trace.record("partial_stt_resumed", utterance_id=utterance_id)
 
         with _partial_future_lock:
             _active_partial_future = None
+
+        if request_session != SESSION_ID or _preview_was_finalized(utterance_id, request_session):
+            _latency_event("partial_suppressed_published_final")
+            return
+        if _preview_was_discarded(utterance_id):
+            _latency_event("partial_suppressed_discarded_utterance")
+            return
 
         if stt_result is None:
             buf_dur = len(audio_data) / SAMPLE_RATE
@@ -2306,6 +2746,11 @@ async def process_partial(audio_data, utterance_id):
             stt_confidence = no_speech_prob = compression_ratio = None
         else:
             english, stt_latency, stt_confidence, no_speech_prob, compression_ratio = stt_result
+
+        if _latency.incremental_stt == "rolling":
+            rolling = _rolling_previews.setdefault(utterance_id, RollingPreview())
+            english, joined = rolling.update(english, rolling_start)
+            _latency_event("rolling_preview_joined" if joined else "rolling_preview_unaligned")
 
         # [FILTER] Suppress garbage/hallucinated text
         if _is_garbage_text(english):
@@ -2327,19 +2772,72 @@ async def process_partial(audio_data, utterance_id):
 
         # [FIX] Re-check after STT — a final may have arrived while we were running
         if _final_pending.is_set() and utterance_id == _final_pending_utterance_id:
+            _count_experiment("partial_suppressed_after_stt")
             print("  [FIX] partial skipped after STT (final pending)", end="\r")
             return
 
         # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
+        if request_session != SESSION_ID or _preview_was_finalized(utterance_id, request_session):
+            _latency_event("partial_suppressed_published_final")
+            return
+        if _preview_was_discarded(utterance_id) or (
+            _preview_ordering_enabled()
+            and (
+                utterance_id in _closed_utterances
+                or request_sequence <= _partial_emitted_sequence.get(utterance_id, -1)
+            )
+        ):
+            _latency_event("partial_suppressed_stale_result")
+            return
+        _partial_emitted_sequence[utterance_id] = request_sequence
+        previous_source = _partial_source_text.get(utterance_id, "")
+        stable_prefix = common_prefix_words(previous_source, english)
+        _partial_source_text[utterance_id] = english
+        _latency_event("preview_" + preview_kind)
         total = stt_latency + marian_latency
+        _count_experiment("partial_emitted")
+
+        emitted = time.perf_counter()
+        preview_metadata = {
+            "event_id": f"{SESSION_ID}:partial:{request_sequence}",
+            "timing_schema_version": 2,
+            "timing_source": timing_source,
+            "clock": "session_monotonic",
+            **sample_bounds,
+            "utterance_id": utterance_id,
+            "preview_kind": preview_kind,
+            "preview_revision": request_sequence,
+            "stable_source_prefix": stable_prefix,
+            "caption_delivery_mode": "queued" if _latency.async_captions else "awaited",
+            "captured_start_at_ms": (
+                round((captured_start - _SESSION_CLOCK_ORIGIN) * 1000, 3) if captured_start is not None else None
+            ),
+            "captured_end_at_ms": (
+                round((captured_end - _SESSION_CLOCK_ORIGIN) * 1000, 3) if captured_end is not None else None
+            ),
+            "speech_end_at_ms": (
+                round((speech_end - _SESSION_CLOCK_ORIGIN) * 1000, 3) if speech_end is not None else None
+            ),
+        }
 
         _io_pool.submit(
             _write_partial_record,
             {
-                "utterance_id": utterance_id,
+                **_session_provenance(),
+                **preview_metadata,
+                "emitted_at_ms": round((emitted - _SESSION_CLOCK_ORIGIN) * 1000, 3),
+                "captured_end_to_partial_ms": milliseconds(emitted, captured_end),
+                "speech_start_to_partial_ms": milliseconds(emitted, captured_start),
+                "speech_end_to_partial_ms": (
+                    milliseconds(emitted, speech_end) if timing_source != "replay_nonrealtime" else None
+                ),
+                "partial_processing_ms": milliseconds(emitted, partial_submitted),
                 "ts": datetime.now().isoformat(),
-                "buffer_s": len(audio_data) / SAMPLE_RATE,
+                "buffer_s": original_audio_duration,
+                "processed_audio_s": processed_audio_samples / SAMPLE_RATE,
+                "processed_window_offset_samples": rolling_start,
+                "processed_window_sample_rate": SAMPLE_RATE,
                 "stt_ms": stt_latency,
                 "marian_ms": marian_latency,
                 "text_en": english if SOURCE_LANG == "en" else spanish,
@@ -2359,6 +2857,7 @@ async def process_partial(audio_data, utterance_id):
             {
                 "type": "translation",
                 "stage": "partial",
+                **preview_metadata,
                 "chunk_id": utterance_id,
                 "english": english,
                 "spanish_a": spanish,
@@ -2432,6 +2931,12 @@ def _run_stt(audio_data, whisper_prompt):
 
     Returns (english, stt_latency_ms, stt_confidence, segment_meta, low_conf_words).
     """
+    from engines.base import STTEngine
+
+    if _incremental_stt is not None:
+        _incremental_stt.close()  # owning worker restores attention before full final STT
+    if isinstance(stt_pipe, STTEngine):
+        return _run_stt_engine(audio_data, whisper_prompt)
     if BACKEND == "mlx":
         return _run_stt_mlx(audio_data, whisper_prompt)
     else:
@@ -2449,6 +2954,7 @@ def _run_stt_engine(audio_data, whisper_prompt):
         language=SOURCE_LANG,
         initial_prompt=whisper_prompt,
         word_timestamps=WORD_TIMESTAMPS,
+        beam_size=BEAM_SIZE,
     )
     conf = round(min(1.0, max(0.0, res.confidence)), 2) if res.confidence is not None else None
     return res.text.strip(), res.latency_ms, conf, list(res.segments or []), list(res.low_confidence_words or [])
@@ -2579,6 +3085,7 @@ async def _pipeline_translate_and_finalize(
     e2e_start,
     utterance_start=None,
     queue_wait_ms=None,
+    timing=None,
 ):
     """[P7-6C] Run translation and finalization for a chunk.
 
@@ -2597,57 +3104,143 @@ async def _pipeline_translate_and_finalize(
     spanish_a = spanish_b = None
     lat_a = lat_b = tps_a = tps_b = 0.0
     qe_a = qe_b = None
+    timing = timing or ChunkTiming(submitted=e2e_start)
+    timing.translation_requested = time.perf_counter()
     try:
         async with _pipeline_translation_lock:
-            loop = asyncio.get_event_loop()
+            timing.translation_lock_acquired = time.perf_counter()
+            _translation_active.set()
+            try:
+                loop = asyncio.get_event_loop()
 
-            # --- Multiprocess path: dispatch to translation worker process ---
-            if MULTIPROCESS:
-                # Adaptive routing still works — MarianMT is in the main process
-                if not _RUN_AB and should_use_marian_only(english, stt_confidence):
-                    spanish_a, lat_a = translate_marian(english)
+                def timed_translate(fn, *args):
+                    timing.translation_started = timing.translation_started or time.perf_counter()
+                    return fn(*args)
+
+                def submit_translate(pool, fn, *args):
+                    _count_experiment("final_marian_routes" if fn is translate_marian else "final_gemma_requests")
+                    return loop.run_in_executor(pool, timed_translate, fn, *args)
+
+                async def run_translate(pool, fn, *args):
+                    return await submit_translate(pool, fn, *args)
+
+                confirmed = _confirmed_speculation(timing.utterance_id, english, stt_confidence)
+                # Only a matching final STT result can commit earlier generation.
+                if confirmed is not None:
+                    timing.translation_started = time.perf_counter()
+                    spanish_a, lat_a, tps_a = confirmed.text, confirmed.latency_ms, confirmed.tokens_per_second
+                    _last_gen_stats[cid] = _generation_stats(confirmed)
+                    qe_a = qe_score(english, spanish_a)
+                # --- Multiprocess path: dispatch to translation worker process ---
+                elif not MULTIPROCESS and mlx_a_model is None:
+                    # A missing/disabled Gemma always means real Marian finals,
+                    # including CPU and --low-vram; never audience placeholder text.
+                    spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
+                    qe_a = qe_score(english, spanish_a)
+                elif MULTIPROCESS:
+                    # Adaptive routing still works — MarianMT is in the main process
+                    if not _RUN_AB and should_use_marian_only(english, stt_confidence):
+                        spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
+                        tps_a = 0.0
+                        qe_a = qe_score(english, spanish_a)
+                        print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
+                    else:
+                        result = await run_translate(_trans_comm_pool, _translate_via_worker, english, _RUN_AB)
+                        spanish_a, lat_a, tps_a, spanish_b, lat_b, tps_b = result
+                        qe_a = qe_score(english, spanish_a)
+                        if spanish_b:
+                            qe_b = qe_score(english, spanish_b)
+
+                # [P7-6B] Adaptive routing: skip TranslateGemma for simple
+                # utterances when NOT in A/B mode and NOT on CUDA with Gemma loaded.
+                elif (
+                    BACKEND != "cuda"
+                    and mlx_b_model is None
+                    and mlx_a_model is not None
+                    and should_use_marian_only(english, stt_confidence)
+                ):
+                    spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
                     tps_a = 0.0
                     qe_a = qe_score(english, spanish_a)
                     print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
-                else:
-                    result = await loop.run_in_executor(_trans_comm_pool, _translate_via_worker, english, _RUN_AB)
-                    spanish_a, lat_a, tps_a, spanish_b, lat_b, tps_b = result
-                    qe_a = qe_score(english, spanish_a)
-                    if spanish_b:
-                        qe_b = qe_score(english, spanish_b)
+                elif BACKEND == "cuda" or RUNTIME_PROFILE.final_engine == "llamacpp":
+                    # CUDA backend: full feature parity — streaming, A/B, adaptive routing.
+                    # CUDA is thread-safe, so task_a and task_b run truly concurrently
+                    # on the 2-worker pipeline pool (unlike MLX which serializes).
+                    if (
+                        mlx_b_model is None
+                        and mlx_a_model is not None
+                        and should_use_marian_only(english, stt_confidence)
+                    ):
+                        # Adaptive routing: simple utterance, skip Gemma
+                        spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
+                        tps_a = 0.0
+                        qe_a = qe_score(english, spanish_a)
+                        print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
+                    elif mlx_b_model is not None and mlx_a_model is not None:
+                        # A/B mode: stream 4B + speculative-decode 12B (truly concurrent)
+                        task_a = submit_translate(
+                            _pipeline_pool,
+                            lambda: timed_translate(translate_cuda_gemma_streaming, mlx_a_model, english, cid),
+                        )
+                        task_b = submit_translate(
+                            _pipeline_pool,
+                            lambda: timed_translate(_translate_cuda_b, mlx_b_model, english),
+                        )
+                        spanish_a, lat_a, tps_a = await task_a
+                        qe_a = qe_score(english, spanish_a)
+                        await broadcast(
+                            {
+                                "type": "translation",
+                                "stage": "translation_a",
+                                "chunk_id": cid,
+                                "english": english,
+                                "spanish_a": spanish_a,
+                                "spanish_b": None,
+                                "stt_latency_ms": round(stt_latency, 1),
+                                "latency_a_ms": round(lat_a, 1),
+                                "stt_confidence": stt_confidence,
+                                "tps_a": round(tps_a, 1),
+                                "qe_a": qe_a,
+                                "timestamp": datetime.now().isoformat(),
+                            }
+                        )
+                        spanish_b, lat_b, tps_b = await task_b
+                        qe_b = qe_score(english, spanish_b) if spanish_b else None
+                    elif mlx_a_model is not None:
+                        # 4B-only: streaming translation
+                        spanish_a, lat_a, tps_a = await run_translate(
+                            _pipeline_pool,
+                            lambda: timed_translate(translate_cuda_gemma_streaming, mlx_a_model, english, cid),
+                        )
+                        qe_a = qe_score(english, spanish_a)
+                    else:
+                        # Low-VRAM: MarianMT only
+                        spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
+                        tps_a = 0.0
+                        qe_a = qe_score(english, spanish_a)
 
-            # [P7-6B] Adaptive routing: skip TranslateGemma for simple
-            # utterances when NOT in A/B mode and NOT on CUDA with Gemma loaded.
-            elif (
-                BACKEND != "cuda"
-                and mlx_b_model is None
-                and mlx_a_model is not None
-                and should_use_marian_only(english, stt_confidence)
-            ):
-                spanish_a, lat_a = translate_marian(english)
-                tps_a = 0.0
-                qe_a = qe_score(english, spanish_a)
-                print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
-            elif BACKEND == "cuda":
-                # CUDA backend: full feature parity — streaming, A/B, adaptive routing.
-                # CUDA is thread-safe, so task_a and task_b run truly concurrently
-                # on the 2-worker pipeline pool (unlike MLX which serializes).
-                if mlx_b_model is None and mlx_a_model is not None and should_use_marian_only(english, stt_confidence):
-                    # Adaptive routing: simple utterance, skip Gemma
-                    spanish_a, lat_a = translate_marian(english)
-                    tps_a = 0.0
-                    qe_a = qe_score(english, spanish_a)
-                    print("  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)")
-                elif mlx_b_model is not None and mlx_a_model is not None:
-                    # A/B mode: stream 4B + speculative-decode 12B (truly concurrent)
-                    task_a = loop.run_in_executor(
+                elif mlx_b_model is not None:
+                    # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
+                    # without partial broadcasts for model B.
+                    task_a = submit_translate(
                         _pipeline_pool,
-                        lambda: translate_cuda_gemma_streaming(mlx_a_model, english, cid),
+                        lambda: translate_mlx_streaming(
+                            mlx_a_model,
+                            mlx_a_tokenizer,
+                            english,
+                            cid,
+                            prompt_cache_template=mlx_a_prompt_cache,
+                            suffix_tokens=mlx_a_suffix_tokens,
+                        ),
                     )
-                    task_b = loop.run_in_executor(
+                    # Speculative decoding: 4B model drafts tokens for 12B to verify
+                    # Note: prompt cache not used with speculative decoding (incompatible)
+                    task_b = submit_translate(
                         _pipeline_pool,
-                        lambda: _translate_cuda_b(mlx_b_model, english),
+                        lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english, draft_model=mlx_a_model),
                     )
+
                     spanish_a, lat_a, tps_a = await task_a
                     qe_a = qe_score(english, spanish_a)
                     await broadcast(
@@ -2666,90 +3259,40 @@ async def _pipeline_translate_and_finalize(
                             "timestamp": datetime.now().isoformat(),
                         }
                     )
+
                     spanish_b, lat_b, tps_b = await task_b
-                    qe_b = qe_score(english, spanish_b) if spanish_b else None
-                elif mlx_a_model is not None:
-                    # 4B-only: streaming translation
-                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                        _pipeline_pool,
-                        lambda: translate_cuda_gemma_streaming(mlx_a_model, english, cid),
-                    )
-                    qe_a = qe_score(english, spanish_a)
+                    qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
                 else:
-                    # Low-VRAM: MarianMT only
-                    spanish_a, lat_a = translate_marian(english)
-                    tps_a = 0.0
+                    # 4B/E4B-only: broadcast partials unless Gemma-4 MTS draft is active.
+                    if MLX_DRAFT_MODEL is not None:
+                        spanish_a, lat_a, tps_a = await run_translate(
+                            _pipeline_pool,
+                            lambda: translate_mlx(
+                                mlx_a_model,
+                                mlx_a_tokenizer,
+                                english,
+                                draft_model=MLX_DRAFT_MODEL,
+                                chunk_id=cid,
+                            ),
+                        )
+                    else:
+                        spanish_a, lat_a, tps_a = await run_translate(
+                            _pipeline_pool,
+                            lambda: translate_mlx_streaming(
+                                mlx_a_model,
+                                mlx_a_tokenizer,
+                                english,
+                                cid,
+                                prompt_cache_template=mlx_a_prompt_cache,
+                                suffix_tokens=mlx_a_suffix_tokens,
+                            ),
+                        )
                     qe_a = qe_score(english, spanish_a)
 
-            elif mlx_b_model is not None:
-                # [P7-P3-6A] In A/B mode, stream 4B translation while 12B runs
-                # without partial broadcasts for model B.
-                task_a = loop.run_in_executor(
-                    _pipeline_pool,
-                    lambda: translate_mlx_streaming(
-                        mlx_a_model,
-                        mlx_a_tokenizer,
-                        english,
-                        cid,
-                        prompt_cache_template=mlx_a_prompt_cache,
-                        suffix_tokens=mlx_a_suffix_tokens,
-                    ),
-                )
-                # Speculative decoding: 4B model drafts tokens for 12B to verify
-                # Note: prompt cache not used with speculative decoding (incompatible)
-                task_b = loop.run_in_executor(
-                    _pipeline_pool,
-                    lambda: translate_mlx(mlx_b_model, mlx_b_tokenizer, english, draft_model=mlx_a_model),
-                )
-
-                spanish_a, lat_a, tps_a = await task_a
-                qe_a = qe_score(english, spanish_a)
-                await broadcast(
-                    {
-                        "type": "translation",
-                        "stage": "translation_a",
-                        "chunk_id": cid,
-                        "english": english,
-                        "spanish_a": spanish_a,
-                        "spanish_b": None,
-                        "stt_latency_ms": round(stt_latency, 1),
-                        "latency_a_ms": round(lat_a, 1),
-                        "stt_confidence": stt_confidence,
-                        "tps_a": round(tps_a, 1),
-                        "qe_a": qe_a,
-                        "timestamp": datetime.now().isoformat(),
-                    }
-                )
-
-                spanish_b, lat_b, tps_b = await task_b
-                qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
-            else:
-                # 4B/E4B-only: broadcast partials unless Gemma-4 MTS draft is active.
-                if MLX_DRAFT_MODEL is not None:
-                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                        _pipeline_pool,
-                        lambda: translate_mlx(
-                            mlx_a_model,
-                            mlx_a_tokenizer,
-                            english,
-                            draft_model=MLX_DRAFT_MODEL,
-                            chunk_id=cid,
-                        ),
-                    )
-                else:
-                    spanish_a, lat_a, tps_a = await loop.run_in_executor(
-                        _pipeline_pool,
-                        lambda: translate_mlx_streaming(
-                            mlx_a_model,
-                            mlx_a_tokenizer,
-                            english,
-                            cid,
-                            prompt_cache_template=mlx_a_prompt_cache,
-                            suffix_tokens=mlx_a_suffix_tokens,
-                        ),
-                    )
-                qe_a = qe_score(english, spanish_a)
-
+            finally:
+                _translation_active.clear()
+        timing.translation_started = timing.translation_started or timing.translation_lock_acquired
+        timing.translation_finished = time.perf_counter()
         now = time.perf_counter()
         e2e_latency = (now - e2e_start) * 1000
         true_e2e_ms = round((now - utterance_start) * 1000, 1) if utterance_start is not None else None
@@ -2773,12 +3316,12 @@ async def _pipeline_translate_and_finalize(
         if low_conf_words:
             words_str = ", ".join(f"'{w['word']}'({w['probability']:.0%})" for w in low_conf_words[:5])
             print(f"  >> LOW CONF WORDS: {words_str}")
-        # Compare last MarianMT partial against Gemma final + word stability
-        last_marian = partial_translations.pop(cid, None)
-        if last_marian is None:
-            # utterance_id doesn't match chunk_id — try recent entries
-            for uid in list(partial_translations.keys()):
-                last_marian = partial_translations.pop(uid, None)
+        # Preview maps use capture utterance IDs; final chunk IDs can diverge
+        # after discarded or filtered utterances. Take this exact pair before
+        # the next await, retaining newer utterances' previews and measurements.
+        uid = timing.utterance_id
+        last_marian = partial_translations.pop(uid, None) if uid is not None else None
+        marian_lat = partial_latencies.pop(uid, None) if uid is not None else None
         word_stability_pct = None
         if last_marian and spanish_a:
             check_marian_divergence(cid, last_marian, spanish_a)
@@ -2803,9 +3346,9 @@ async def _pipeline_translate_and_finalize(
             qe_str = f" | QE: A={qe_a} B={qe_b}"
             print(f"  +{lat_b:.0f}ms B ({tps_b:.0f} t/s): {spanish_b}")
         print(f"  +{lat_a:.0f}ms A ({tps_a:.0f} t/s){gen_str}: {spanish_a}")
-        true_e2e_str = f" | true_e2e: {true_e2e_ms:.0f}ms" if true_e2e_ms is not None else ""
+        true_e2e_str = f" | utterance-start→processing: {true_e2e_ms:.0f}ms" if true_e2e_ms is not None else ""
         ws_str = f" | ws: {word_stability_pct:.0%}" if word_stability_pct is not None else ""
-        print(f"  E2E: {e2e_latency:.0f}ms{true_e2e_str}{conf_str}{qe_str}{ws_str}")
+        print(f"  Processing: {e2e_latency:.0f}ms{true_e2e_str}{conf_str}{qe_str}{ws_str}")
 
         _chunks_completed += 1
 
@@ -2833,45 +3376,50 @@ async def _pipeline_translate_and_finalize(
             "timestamp": datetime.now().isoformat(),
         }
         result_data.update(gen_stats)
+        result_data.update(_session_provenance())
         # Phase 9.6.1: speaker lookup is a JSONL read (no models). Rolling-WAV
         # export happens on _io_pool below so this stays off the GPU path.
         utt_start_ts = utt_end_ts = None
         if DIARIZE_ENABLED:
             try:
-                utt_start_ts, utt_end_ts = _utterance_wallclock(utterance_start, audio_data)
+                utt_start_ts, utt_end_ts = _utterance_wallclock(timing.captured_start or utterance_start, audio_data)
                 result_data["speaker"] = _lookup_speaker(utt_start_ts, utt_end_ts)
             except Exception as exc:
                 logger.warning("speaker lookup failed: %s", exc)
                 result_data["speaker"] = None
+        if DIARIZE_ENABLED and utt_start_ts is not None:
+            _speaker_pending[cid] = (utt_start_ts, utt_end_ts, result_data.get("speaker"))
+        timing.final_ready = time.perf_counter()
+        result_data.update(timing.metrics())
         all_results.append(result_data)
         await broadcast(result_data)
+        timing.broadcast_finished = time.perf_counter()
+        result_data.update(timing.metrics())
+        result_data["timing_stages_ms"] = timing.relative_stages(_SESSION_CLOCK_ORIGIN)
 
         # --- TTS: fire-and-forget synthesis of translated text ---
         if tts_engine and settings.tts.enabled and _tts_pool is not None:
             # Dynamic language: TTS speaks TARGET_LANG (the translated output)
             tts_text = spanish_a  # Use 4B translation (always available)
             tts_lang = TARGET_LANG
-            tts_e2e_start = e2e_start  # capture for E2E speech-to-speech timing
             loop = asyncio.get_event_loop()
-
-            def _tts_with_latency():
-                _run_tts(tts_engine, tts_text, tts_lang, cid, settings.tts.output_mode, loop)
-                # Log dual E2E: speech-to-translated-text vs speech-to-translated-speech
-                speech_to_speech_ms = (time.perf_counter() - tts_e2e_start) * 1000
-                print(f"  [tts] E2E speech→text: {e2e_latency:.0f}ms | E2E speech→speech: {speech_to_speech_ms:.0f}ms")
-
-            _tts_pool.submit(_tts_with_latency)
+            _tts_pool.submit(
+                _run_tts,
+                tts_engine,
+                tts_text,
+                tts_lang,
+                cid,
+                settings.tts.output_mode,
+                loop,
+                timing.speech_end,
+                time.perf_counter(),
+            )
 
         # [P7-5D] Move I/O to background threads — prevents disk writes from
         # blocking the main processing loop (saves 10-30ms on the critical path).
         #
-        # Extract MarianMT latency BEFORE submitting to pool — both CSV and
-        # JSONL writers need it, and .pop() from one would race with the other.
-        marian_lat = partial_latencies.pop(cid, None)
-        if marian_lat is None:
-            for uid in list(partial_latencies.keys()):
-                marian_lat = partial_latencies.pop(uid, None)
-
+        # Both writers receive the same exact-utterance preview measurement
+        # captured above; a missing utterance identity stays unavailable.
         _io_pool.submit(write_csv_row, result_data, marian_lat)
 
         # Save audio + structured diagnostics for fine-tuning pipeline
@@ -2896,6 +3444,8 @@ async def _pipeline_translate_and_finalize(
         _io_pool.submit(_save_io)
 
     except Exception as e:
+        if _health is not None:
+            _health.error("translation", type(e).__name__)
         logger.error("Translation error chunk #%d: %s", cid, e, exc_info=True)
         print(f"\n  ERROR in chunk #{cid} translation: {e}", file=sys.stderr)
 
@@ -2923,20 +3473,26 @@ async def _pipeline_coordinator():
 
     # Track the currently-running translation task so we can measure overlap
     active_translation_task = None
+    translation_tasks = []
 
     while True:
         item = await _pipeline_chunk_queue.get()
         if item is None:
-            # Poison pill — wait for any in-flight translation to finish
-            if active_translation_task is not None:
-                await active_translation_task
+            # Earlier tasks may still be broadcasting/logging after releasing
+            # the model lock. Completion evidence must include every finalizer.
+            if translation_tasks:
+                await asyncio.gather(*translation_tasks)
             break
 
-        audio_data, e2e_start, utterance_start = item
+        audio_data, e2e_start, utterance_start, timing = item
+        timing.dequeued = time.perf_counter()
         dequeue_time = time.perf_counter()
         queue_wait_ms = round((dequeue_time - e2e_start) * 1000, 1)
         chunk_id += 1
         cid = chunk_id
+        _chunk_timings[cid] = timing
+        while len(_chunk_timings) > 2048:
+            _chunk_timings.pop(next(iter(_chunk_timings)))
         _pipeline_total += 1
         _chunks_attempted += 1
 
@@ -2960,14 +3516,28 @@ async def _pipeline_coordinator():
             # --- STT: submit to pipeline pool ---
             loop = asyncio.get_event_loop()
             whisper_prompt = _whisper_prompt()
-            if MULTIPROCESS:
-                stt_future = loop.run_in_executor(_stt_comm_pool, _run_stt_via_worker, audio_data, whisper_prompt)
+            timing.stt_requested = time.perf_counter()
+
+            def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing):
+                clock.stt_started = time.perf_counter()
+                try:
+                    return _run_tracked_stt("final", _run_stt_via_worker if MULTIPROCESS else _run_stt, audio, prompt)
+                finally:
+                    clock.stt_finished = time.perf_counter()
+
+            if _stt_scheduler is not None:
+                stt_future = asyncio.wrap_future(_stt_scheduler.submit("final", timed_stt, key=timing.utterance_id))
             else:
-                stt_future = loop.run_in_executor(_pipeline_pool, _run_stt, audio_data, whisper_prompt)
+                stt_future = loop.run_in_executor(_stt_comm_pool if MULTIPROCESS else _pipeline_pool, timed_stt)
 
             # Await STT completion (translation of N-1 may still be running
             # concurrently in another thread — that's the overlap)
             english, stt_latency, stt_confidence, segment_meta, low_conf_words = await stt_future
+            _latency_trace.record(
+                "final_stt_resumed",
+                chunk_id=cid,
+                worker_finish_to_resume_ms=milliseconds(time.perf_counter(), timing.stt_finished),
+            )
 
             # [FIX] Final STT done — allow partials again for the next utterance
             _final_pending.clear()
@@ -3025,6 +3595,7 @@ async def _pipeline_coordinator():
                 {
                     "type": "translation_start",
                     "chunk_id": cid,
+                    "utterance_id": timing.utterance_id,
                     "english": english,
                     "stage": "final",
                     "stt_latency_ms": round(stt_latency, 1),
@@ -3049,12 +3620,16 @@ async def _pipeline_coordinator():
                     e2e_start,
                     utterance_start=utterance_start,
                     queue_wait_ms=queue_wait_ms,
+                    timing=timing,
                 )
             )
+            translation_tasks.append(active_translation_task)
 
         except Exception as e:
             _final_pending.clear()  # [FIX] Don't leave flag stuck on error
             _final_pending_utterance_id = None
+            if _health is not None:
+                _health.error("stt", type(e).__name__)
             print(f"\n  ERROR in pipeline chunk #{cid}: {e}", file=sys.stderr)
 
     # Print overlap statistics
@@ -3065,7 +3640,7 @@ async def _pipeline_coordinator():
         )
 
 
-async def pipeline_submit(audio_data, utterance_start=None):
+async def pipeline_submit(audio_data, utterance_start=None, timing=None):
     """[P7-6C] Submit audio to the pipeline without blocking the audio loop.
 
     Called from audio_loop when an utterance is finalized. Returns immediately;
@@ -3076,7 +3651,10 @@ async def pipeline_submit(audio_data, utterance_start=None):
         utterance_start: perf_counter timestamp of first audio frame (for true E2E).
     """
     if _pipeline_chunk_queue is not None:
-        await _pipeline_chunk_queue.put((audio_data, time.perf_counter(), utterance_start))
+        submitted = time.perf_counter()
+        timing = timing or ChunkTiming()
+        timing.submitted = submitted
+        await _pipeline_chunk_queue.put((audio_data, submitted, utterance_start, timing))
 
 
 async def process_final(audio_data, finalized_utterance_id=None):
@@ -3094,17 +3672,40 @@ async def process_final(audio_data, finalized_utterance_id=None):
     # Signal partials for this utterance to stop — finals take priority on the MLX thread
     _final_pending_utterance_id = finalized_utterance_id
     _final_pending.set()
+    if finalized_utterance_id is not None:
+        for state in (
+            _partial_emitted_sequence,
+            _partial_source_text,
+            partial_translations,
+            partial_latencies,
+            _pause_epochs,
+            _speculative_candidates,
+            _speculation_attempts,
+            _rolling_previews,
+        ):
+            for old_id in list(state):
+                if old_id < finalized_utterance_id - 128:
+                    state.pop(old_id, None)
+        _closed_utterances.difference_update(
+            uid for uid in tuple(_closed_utterances) if uid < finalized_utterance_id - 128
+        )
+
+    if finalized_utterance_id is not None and _preview_ordering_enabled():
+        _closed_utterances.add(finalized_utterance_id)
+    if _stt_scheduler is not None:
+        _stt_scheduler.cancel_partial(finalized_utterance_id)
 
     # Cancel any queued (not-yet-started) partial STT future
     with _partial_future_lock:
-        if _active_partial_future is not None:
+        if _stt_scheduler is None and _active_partial_future is not None:
             cancelled = _active_partial_future.cancel()
             if cancelled:
                 print("  [FIX] cancelled queued partial (final arriving)")
 
     # Extract utterance start time for true E2E latency measurement
     utterance_start = _utterance_start_times.pop(finalized_utterance_id, None)
-    await pipeline_submit(audio_data, utterance_start=utterance_start)
+    timing = _utterance_timings.pop(finalized_utterance_id, None)
+    await pipeline_submit(audio_data, utterance_start=utterance_start, timing=timing)
 
 
 # ---------------------------------------------------------------------------
@@ -3117,10 +3718,40 @@ _ws_total_disconnections = 0
 _ws_send_failures = 0
 
 
+def _session_provenance():
+    source = os.environ.get("STARK_AUDIO_SOURCE", "mic")
+    kind = (
+        "synthetic"
+        if os.environ.get("STARK_SESSION_KIND") == "synthetic"
+        else ("replay" if source == "file" else "live")
+    )
+    return {
+        "session_id": SESSION_ID,
+        "source_lang": SOURCE_LANG,
+        "target_lang": TARGET_LANG,
+        "session_kind": kind,
+        "input_audio_path": os.environ.get("STARK_AUDIO_FILE") if source == "file" else None,
+        "input_audio_sha256": _INPUT_AUDIO_HASH,
+        "audio_source": source,
+    }
+
+
+_display_log_lock = threading.Lock()
+
+
+def _write_display_record(record):
+    path = os.path.join(os.path.dirname(DIAG_PATH), f"display_metrics_{SESSION_ID}.jsonl")
+    with _display_log_lock:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "a") as output:
+            output.write(json.dumps({"session_id": SESSION_ID, **record}) + "\n")
+
+
 async def ws_handler(websocket, path=None):
     """Handle new WebSocket connections."""
     global _ws_total_connections
-    ws_clients.add(websocket)
+    if not _latency.async_captions:
+        ws_clients.add(websocket)
     _ws_total_connections += 1
     logger.info("ws_connect clients=%d total_connections=%d", len(ws_clients), _ws_total_connections)
     print(f"  Browser connected ({len(ws_clients)} client(s))")
@@ -3130,6 +3761,7 @@ async def ws_handler(websocket, path=None):
             json.dumps(
                 {
                     "type": "lang_config",
+                    "session_id": SESSION_ID,
                     "source_lang": SOURCE_LANG,
                     "target_lang": TARGET_LANG,
                     "source_label": "Español" if SOURCE_LANG == "es" else "English",
@@ -3140,31 +3772,128 @@ async def ws_handler(websocket, path=None):
     except websockets.ConnectionClosed:
         ws_clients.discard(websocket)
         return
+    if _latency.async_captions:
+        ws_clients.add(websocket)
     try:
-        async for _ in websocket:
-            pass  # We only send, not receive
+        async for raw in websocket:
+            if not isinstance(raw, str) or len(raw) > 2048:
+                continue
+            try:
+                message = json.loads(raw)
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(message, dict) or message.get("type") != "caption_rendered":
+                continue
+            record = _render_tracker.acknowledge(websocket, message, time.perf_counter())
+            if record is not None:
+                _io_pool.submit(_write_display_record, record)
     except websockets.ConnectionClosed:
         pass
     finally:
         global _ws_total_disconnections
         ws_clients.discard(websocket)
+        if _caption_delivery is not None:
+            await _caption_delivery.remove(websocket)
         _ws_total_disconnections += 1
+        _render_tracker.disconnect(websocket)
         logger.info("ws_disconnect clients=%d total_disconnections=%d", len(ws_clients), _ws_total_disconnections)
         print(f"  Browser disconnected ({len(ws_clients)} client(s))")
 
 
+def _caption_before_send(client, data, started, queue_ms):
+    _latency_trace.record("caption_send_started", event_id=data.get("event_id"), queue_ms=queue_ms)
+    if data.get("type") != "translation":
+        return
+    timing = _chunk_timings.get(data.get("chunk_id")) if data.get("stage") != "partial" else None
+
+    def preview_reference(name):
+        if data.get("stage") != "partial" or data.get("timing_source") == "replay_nonrealtime":
+            return None
+        value = data.get(name)
+        return _SESSION_CLOCK_ORIGIN + value / 1000 if value is not None else None
+
+    _render_tracker.sent(
+        client,
+        data["event_id"],
+        started,
+        timing.speech_end if timing and timing.timing_source != "replay_nonrealtime" else None,
+        data.get("stage", "complete"),
+        {
+            "chunk_id": data.get("chunk_id"),
+            "utterance_id": data.get("utterance_id", data.get("chunk_id")),
+            "preview_kind": data.get("preview_kind"),
+            "preview_revision": data.get("preview_revision"),
+            "timing_source": data.get("timing_source", timing.timing_source if timing else "unknown"),
+            "caption_delivery_mode": data.get("caption_delivery_mode"),
+            "caption_queue_wait_ms": round(queue_ms, 3),
+            **{name: data.get(name) for name in ("captured_start_at_ms", "captured_end_at_ms", "speech_end_at_ms")},
+            **{name: data.get(name) for name in SAMPLE_COLUMNS},
+        },
+        preview_start=preview_reference("captured_start_at_ms"),
+        preview_end=preview_reference("captured_end_at_ms"),
+        preview_speech_end=preview_reference("speech_end_at_ms"),
+    )
+
+
+def _caption_failed(client, error):
+    global _ws_send_failures
+    _ws_send_failures += 1
+    ws_clients.discard(client)
+    _render_tracker.disconnect(client)
+    logger.warning("caption_client_failed: %s", error)
+
+
 async def broadcast(data):
     """Send data to all connected WebSocket clients."""
+    if not _caption_message_allowed(data):
+        return
+    data.setdefault("session_id", SESSION_ID)
+    _record_final_publication(data)
+    data.setdefault("caption_delivery_mode", "queued" if _latency.async_captions else "awaited")
+    if _health is not None and data.get("type") == "translation":
+        _health.caption(data)
     if not ws_clients:
         print("  [ws] No clients connected, skipping broadcast")
+        return
+    global _broadcast_sequence, _caption_delivery
+    # Add the correlation id to the producer record too, so diagnostics can
+    # be joined to acknowledgments. Never add post-send durations to payload.
+    if "event_id" not in data:
+        _broadcast_sequence += 1
+        data["event_id"] = f"{SESSION_ID}:{_broadcast_sequence}"
+    cid = data.get("chunk_id")
+    timing = _chunk_timings.get(cid) if data.get("stage") != "partial" else None
+    if timing is not None:
+        data.setdefault("utterance_id", timing.utterance_id)
+        for name, value in timing.sample_metadata().items():
+            data.setdefault(name, value)
+    if _latency.async_captions:
+        from tools.caption_delivery import CaptionDelivery
+
+        if _caption_delivery is None:
+            _caption_delivery = CaptionDelivery(
+                before_send=_caption_before_send,
+                on_failure=_caption_failed,
+                on_event=_latency_event,
+                allow_message=_caption_message_allowed,
+            )
+        for client in list(ws_clients):
+            _caption_delivery.publish(client, data)
         return
     msg = json.dumps(data)
     dead = set()
     clients = list(ws_clients)
-    results = await asyncio.gather(
-        *[client.send(msg) for client in clients],
-        return_exceptions=True,
-    )
+    if data.get("type") == "translation":
+        for client in clients:
+            _caption_before_send(client, data, time.perf_counter(), 0.0)
+
+    async def send(client):
+        # An awaited broadcast can be scheduled before discard but only start
+        # sending afterwards. Already-started sends need the consumer tombstone.
+        if _caption_message_allowed(data):
+            await client.send(msg)
+
+    results = await asyncio.gather(*[send(client) for client in clients], return_exceptions=True)
     for client, result in zip(clients, results):
         if isinstance(result, Exception):
             global _ws_send_failures
@@ -3176,6 +3905,18 @@ async def broadcast(data):
     ok = len(clients) - len(dead)
     if ok > 0:
         print(f"  [ws] Sent to {ok} client(s)")
+
+
+def _caption_message_allowed(data):
+    return not (
+        data.get("type") == "translation"
+        and data.get("stage") == "partial"
+        and data.get("session_id", SESSION_ID) == SESSION_ID
+        and (
+            _preview_was_discarded(data.get("utterance_id", data.get("chunk_id")))
+            or _preview_was_finalized(data.get("utterance_id"), data.get("session_id", SESSION_ID))
+        )
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -3227,7 +3968,7 @@ from engines.audio_devices import OutputDeviceResolver
 _tts_device_resolver = OutputDeviceResolver()
 
 
-def _run_tts(engine, text, language, cid, output_mode, loop):
+def _run_tts(engine, text, language, cid, output_mode, loop, speech_end=None, submitted=None):
     """Synthesize TTS and dispatch output (runs on _tts_pool thread).
 
     This is fire-and-forget — doesn't block the next STT/translation cycle.
@@ -3238,7 +3979,10 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
         return
 
     try:
+        started = time.perf_counter()
         tts_result = engine.synthesize(text, language=language)
+        synthesized = time.perf_counter()
+        playback_started = playback_finished = None
         _tts_chunk_counter += 1
 
         # WAV file output
@@ -3262,6 +4006,7 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
 
         # Local sounddevice playback (Phase 9.4.1)
         if output_mode == "local":
+            playback_started = time.perf_counter()
             _tts_device_resolver.play(
                 engine.play,
                 tts_result.audio,
@@ -3269,6 +4014,24 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
                 language=language,
                 spec=settings.tts.output_devices.get(language, settings.tts.output_device),
             )
+            playback_finished = time.perf_counter()
+
+        _io_pool.submit(
+            _write_jsonl_record,
+            {
+                "event": "tts_timing",
+                "session_id": SESSION_ID,
+                "chunk_id": cid,
+                "timing_schema_version": 2,
+                "output_mode": output_mode,
+                "tts_queue_wait_ms": milliseconds(started, submitted),
+                "tts_synthesis_ms": milliseconds(synthesized, started),
+                "speech_end_to_synthesis_ms": milliseconds(synthesized, speech_end),
+                "speech_end_to_playback_request_ms": milliseconds(playback_started, speech_end),
+                "playback_call_ms": milliseconds(playback_finished, playback_started),
+                "playback_boundary": "host_call_not_acoustic_onset" if playback_started is not None else None,
+            },
+        )
 
         # Log TTS latency
         tts_e2e_ms = tts_result.latency_ms
@@ -3277,6 +4040,8 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
         )
 
     except Exception as e:
+        if _health is not None:
+            _health.error("tts", type(e).__name__)
         print(f"  [tts] ERROR: {e}", file=sys.stderr)
 
 
@@ -3287,6 +4052,8 @@ def _run_tts(engine, text, language, cid, output_mode, loop):
 
 def save_chunk_audio(audio_data, cid):
     """Save chunk audio as 16kHz WAV for later Whisper fine-tuning."""
+    if not _RECORD_AUDIO:
+        return None
     import scipy.io.wavfile as wav
 
     os.makedirs(AUDIO_DIR, exist_ok=True)
@@ -3325,6 +4092,28 @@ def _export_diarize_chunk(audio_data, cid, start_ts, end_ts):
     if _rolling_window is None or str(_rolling_window.session_dir) != AUDIO_DIR:
         _rolling_window = RollingSpeechWindow(AUDIO_DIR)
     _rolling_window.append(audio_data, cid, start_ts, end_ts)
+
+
+async def _speaker_update_loop():
+    """Revisit finalized chunks after rolling diarization produces labels."""
+    while True:
+        await asyncio.sleep(max(0.25, DIARIZE_INTERVAL_S))
+        for cid, (start, end, previous) in list(_speaker_pending.items()):
+            speaker = await asyncio.get_running_loop().run_in_executor(_io_pool, _lookup_speaker, start, end)
+            if speaker and speaker != previous:
+                _speaker_pending[cid] = (start, end, speaker)
+                record = {
+                    "type": "speaker_update",
+                    "chunk_id": cid,
+                    "speaker": speaker,
+                    "session_id": SESSION_ID,
+                    "timestamp": datetime.now().isoformat(),
+                }
+                await broadcast(record)
+                _io_pool.submit(_write_jsonl_record, {"event": "speaker_update", **record})
+            # The rolling daemon cannot improve an expired chunk indefinitely.
+            if time.time() - end > max(120, DIARIZE_INTERVAL_S * 5):
+                _speaker_pending.pop(cid, None)
 
 
 def start_diarize_daemon():
@@ -3493,7 +4282,22 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "speaker": data.get("speaker"),
     }
 
-    record.update({field: data.get(field) for field in _GEN_STAT_FIELDS})
+    record.update(_session_provenance())
+    record.update(
+        {
+            field: data.get(field)
+            for field in (*_GEN_STAT_FIELDS, *TIMING_COLUMNS, *_EXPERIMENT_GEN_FIELDS, "caption_delivery_mode")
+            if field in data
+        }
+    )
+    record["timing_stages_ms"] = data.get("timing_stages_ms")
+    record["event_id"] = data.get("event_id")
+    import hashlib
+    from pathlib import Path
+
+    record["audio_sha256"] = (
+        hashlib.sha256(Path(audio_path).read_bytes()).hexdigest() if audio_path and Path(audio_path).is_file() else None
+    )
 
     os.makedirs(os.path.dirname(DIAG_PATH), exist_ok=True)
     with open(DIAG_PATH, "a") as f:
@@ -3535,6 +4339,9 @@ def init_csv():
                 "word_stability_pct",
                 *_GEN_STAT_FIELDS,
                 "speaker",
+                *TIMING_COLUMNS,
+                *_EXPERIMENT_GEN_FIELDS,
+                "caption_delivery_mode",
             ]
         )
     print(f"  CSV: {CSV_PATH}")
@@ -3588,6 +4395,9 @@ def write_csv_row(data, marian_lat=None):
                 data.get("word_stability_pct", ""),
                 *(data.get(field) for field in _GEN_STAT_FIELDS),
                 data.get("speaker", "") if data.get("speaker") is not None else "",
+                *(data.get(field) for field in TIMING_COLUMNS),
+                *(data.get(field) for field in _EXPERIMENT_GEN_FIELDS),
+                data.get("caption_delivery_mode"),
             ]
         )
 
@@ -3599,6 +4409,27 @@ def write_csv_row(data, marian_lat=None):
 
 def print_summary():
     """Print summary statistics on exit."""
+    # Also write zero-output runs: suppression counters explain a failed screen.
+    _io_pool.submit(
+        _write_jsonl_record,
+        {
+            "event": "session_summary",
+            "session": SESSION_ID,
+            "timestamp": datetime.now().isoformat(),
+            "chunks_attempted": _chunks_attempted,
+            "chunks_completed": _chunks_completed,
+            "chunks_empty_stt": _chunks_empty_stt,
+            "chunks_hallucination": _chunks_hallucination,
+            "chunks_dedup": _chunks_dedup,
+            "ws_total_connections": _ws_total_connections,
+            "ws_total_disconnections": _ws_total_disconnections,
+            "ws_send_failures": _ws_send_failures,
+            "latency_experiment_counters": _experiment_snapshot(),
+            "latency_experiment_configuration": _latency.as_dict(),
+            "latency_trace": _latency_trace.snapshot(),
+            "replay_client_wait": _replay_client_wait.snapshot(),
+        },
+    )
     if not all_results:
         print("\nNo results to summarize.")
         return
@@ -3633,7 +4464,7 @@ def print_summary():
     # KPI: True E2E latency summary
     true_e2es = [r["true_e2e_ms"] for r in all_results if r.get("true_e2e_ms") is not None]
     if true_e2es:
-        print(f"  True E2E:    avg={np.mean(true_e2es):.0f}ms (median {np.median(true_e2es):.0f}ms)")
+        print(f"  Utterance-start→processing: avg={np.mean(true_e2es):.0f}ms (median {np.median(true_e2es):.0f}ms)")
 
     # KPI: Word stability summary
     stabilities = [r["word_stability_pct"] for r in all_results if r.get("word_stability_pct") is not None]
@@ -3649,22 +4480,6 @@ def print_summary():
         f"  WS stats:    connections={_ws_total_connections} disconnections={_ws_total_disconnections} send_failures={_ws_send_failures}"
     )
 
-    # Write session summary to diagnostics JSONL for KPI report tool
-    summary_record = {
-        "event": "session_summary",
-        "session": SESSION_ID,
-        "timestamp": datetime.now().isoformat(),
-        "chunks_attempted": _chunks_attempted,
-        "chunks_completed": _chunks_completed,
-        "chunks_empty_stt": _chunks_empty_stt,
-        "chunks_hallucination": _chunks_hallucination,
-        "chunks_dedup": _chunks_dedup,
-        "ws_total_connections": _ws_total_connections,
-        "ws_total_disconnections": _ws_total_disconnections,
-        "ws_send_failures": _ws_send_failures,
-    }
-    _io_pool.submit(_write_jsonl_record, summary_record)
-
 
 # ---------------------------------------------------------------------------
 # Main Loop
@@ -3673,10 +4488,12 @@ def print_summary():
 
 async def audio_loop():
     """Main audio capture and processing loop with error recovery."""
-    global _warmup_pending  # [P7-4A]
+    global _warmup_pending, _capture_handoff  # [P7-4A]
     print("\nListening... (Ctrl+C to stop)\n")
 
     PARTIAL_INTERVAL = settings.vad.partial_interval
+    pause_preview_fired = False
+    pause_speculation_fired = False
     SILENCE_TRIGGER = settings.vad.silence_trigger
     MAX_UTTERANCE = settings.vad.max_utterance
 
@@ -3687,7 +4504,15 @@ async def audio_loop():
     speech_frame_count = 0
     last_status_time = time.time()
     last_partial_len = 0  # audio length (samples) at last partial
-    utterance_id = 0  # tracks current utterance for partial updates
+    # Keep IDs distinct if capture is invoked again in-process. Resetting a
+    # discard watermark could allow old worker results to repaint the new run.
+    utterance_id = _last_capture_utterance_id
+    if utterance_id:
+        _broadcast_discard(_discard_utterance(utterance_id, "capture_restart", 0, {}))
+    timeline = AudioTimeline()
+    sample_clock = CaptureSampleClock()
+    replay_stream = None
+    replay_consumed_samples = 0
     last_silence_boundary = 0  # sample index of last silence gap start
 
     # Music/hymn auto-muting state
@@ -3698,56 +4523,170 @@ async def audio_loop():
     music_resume_frames = int(0.5 * SAMPLE_RATE / 512)  # ~0.5s speech to exit
     music_hold_start_frame = 0
 
+    def discard_buffer(reason):
+        nonlocal speech_buffer, timeline, silence_frames, speech_frame_count
+        nonlocal last_partial_len, last_silence_boundary, pause_preview_fired, pause_speculation_fired
+        _broadcast_discard(
+            _discard_utterance(utterance_id, reason, len(speech_buffer) / SAMPLE_RATE, timeline.sample_metadata())
+        )
+        speech_buffer = np.array([], dtype=np.float32)
+        timeline = AudioTimeline()
+        silence_frames = speech_frame_count = last_partial_len = last_silence_boundary = 0
+        pause_preview_fired = pause_speculation_fired = False
+
     while True:
+        if _health is not None and _health.paused:
+            await asyncio.sleep(0.05)
+            continue
         try:
             # Phase 9.4.2: when STARK_AUDIO_SOURCE=ws, read frames from the
             # operator's /ws/audio/subscribe endpoint instead of the local
             # mic. The factory matches sd.InputStream's context-manager
             # interface so the loop below is unchanged.
-            from tools.audio_bridge_client import open_audio_stream
+            from contextlib import ExitStack
 
-            stream_callback = audio_callback
-            if os.environ.get("STARK_AUDIO_SOURCE") == "file":
-                # asyncio.Queue must be fed on its owning loop. Wake it for
-                # every replay block instead of waiting for the queue timeout.
-                capture_loop = asyncio.get_running_loop()
-                stream_callback = lambda *args, _loop=capture_loop: _loop.call_soon_threadsafe(audio_callback, *args)
+            from tools.audio_bridge_client import FileAudioStream, open_audio_stream
 
-            stream = open_audio_stream(
+            capture_loop = asyncio.get_running_loop()
+            input_rate = SAMPLE_RATE if os.environ.get("STARK_AUDIO_SOURCE") == "ws" else MIC_SAMPLE_RATE
+
+            def capture_dropped():
+                _io_pool.record_failure("audio_capture", "handoff_overflow")
+                if _health is not None:
+                    _health.error("capture", "handoff_overflow")
+
+            _capture_handoff = CaptureHandoff(
+                capture_loop,
+                audio_callback,
+                lambda: not audio_queue.full(),
+                capture_dropped,
+                wait_for_space=os.environ.get("STARK_AUDIO_SOURCE") == "file",
+            )
+
+            def stream_callback(indata, frames, time_info, status, _handoff=_capture_handoff, _input_rate=input_rate):
+                # Capture before loop handoff; device callbacks must never touch
+                # asyncio.Queue from their producer thread. Copy PortAudio's buffer.
+                stamp = sample_clock.capture(frames, _input_rate, time_info)
+                if os.environ.get("STARK_AUDIO_SOURCE") == "ws":
+                    stamp = CaptureStamp(
+                        stamp.start,
+                        stamp.end,
+                        "bridge_receipt_estimate",
+                        stamp.sample_start,
+                        stamp.sample_end,
+                        stamp.sample_rate,
+                        stamp.padding_samples,
+                    )
+                _handoff.put(indata.copy(), frames, stamp, status)
+
+            stream = replay_stream or open_audio_stream(
                 callback=stream_callback,
-                samplerate=MIC_SAMPLE_RATE,
+                samplerate=input_rate,
                 channels=1,
                 dtype="float32",
-                blocksize=int(MIC_SAMPLE_RATE * 0.032),  # ~32ms frames
+                blocksize=int(input_rate * 0.032),  # ~32ms frames
                 device=MIC_DEVICE,
             )
 
-            with stream:
+            is_replay = isinstance(stream, FileAudioStream)
+            if is_replay:
+                replay_stream = stream
+                stream.resume_from(replay_consumed_samples, callback=stream_callback)
+            if hasattr(stream, "sample_offset"):
+                stream.sample_offset = sample_clock.next_sample
+            with ExitStack() as capture_context:
+                capture_context.enter_context(stream)
+                capture_context.enter_context(_capture_handoff)
+                if _health is not None:
+                    _health.phase("listening")
                 while True:
+                    if _health is not None and _health.paused:
+                        # Stop production before final admission. File prefetch is
+                        # replayed from the last consumed sample after Resume.
+                        if is_replay:
+                            _capture_handoff.close(record_discard=False)
+                        capture_context.close()
+                        if len(speech_buffer) / SAMPLE_RATE >= 0.7:
+                            _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
+                                timeline, utterance_id, "pause"
+                            )
+                            await process_final(speech_buffer.copy(), utterance_id)
+                        elif len(speech_buffer):
+                            discard_buffer("pause")
+                        if not is_replay and not audio_queue.empty():
+                            _io_pool.record_failure("audio_capture", "pause_queued_audio_discarded")
+                            _health.error("capture", "pause_queued_audio_discarded")
+                        speech_buffer = np.array([], dtype=np.float32)
+                        timeline = AudioTimeline()
+                        silence_frames = speech_frame_count = last_partial_len = 0
+                        last_silence_boundary = frame_count = 0
+                        pause_preview_fired = pause_speculation_fired = False
+                        if vad_model is not None:
+                            vad_model.reset_states()
+                        while not audio_queue.empty():
+                            audio_queue.get_nowait()
+                        break  # close the native capture child while paused
                     # Get audio frame from sounddevice callback, run VAD inline.
                     # VAD is <1ms so running it on the asyncio thread is fine.
                     try:
                         audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
                     except TimeoutError:
+                        if getattr(stream, "error", None) is not None:
+                            if isinstance(stream.error, AudioCaptureError):
+                                raise stream.error from None
+                            raise RuntimeError("Audio source failed") from stream.error
                         # EOF is checked only once all callback blocks have drained.
                         finished = getattr(stream, "finished", None)
-                        if EXIT_AFTER_REPLAY and finished is not None and finished.is_set() and audio_queue.empty():
+                        if (
+                            EXIT_AFTER_REPLAY
+                            and finished is not None
+                            and finished.is_set()
+                            and audio_queue.empty()
+                            and _capture_handoff.qsize() == 0
+                        ):
                             if getattr(stream, "error", None) is not None:
                                 raise RuntimeError("Audio replay failed") from stream.error
                             if len(speech_buffer):
                                 # Tail silence normally finalizes speech. Flush any
                                 # remainder, retaining the live minimum-length gate.
                                 if len(speech_buffer) / SAMPLE_RATE >= 0.7:
+                                    _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
+                                        timeline, utterance_id, "eof"
+                                    )
                                     await process_final(speech_buffer.copy(), utterance_id)
+                                else:
+                                    discard_buffer("eof")
+                                timeline = AudioTimeline()
                                 speech_buffer = np.array([], dtype=np.float32)
                             if (
                                 _pipeline_chunk_queue.empty()
                                 and not any(not task.done() for task in _partial_tasks)
                                 and (_active_partial_future is None or _active_partial_future.done())
+                                and (_stt_scheduler is None or not _stt_scheduler.busy)
                             ):
                                 return
                         continue
-                    has_speech = is_speech(audio_frame, vad_model, vad_utils)
+                    if isinstance(audio_frame, AudioFrame):
+                        frame_stamp, audio_frame = audio_frame.stamp, audio_frame.samples
+                    else:  # historical callers/tests with raw PCM have receipt estimates
+                        frame_stamp = sample_clock.capture(len(audio_frame), SAMPLE_RATE, None)
+                    if is_replay:
+                        replay_consumed_samples += (
+                            frame_stamp.sample_end - frame_stamp.sample_start + frame_stamp.padding_samples
+                        )
+                    _latency_trace.record(
+                        "audio_dequeued",
+                        capture_age_ms=milliseconds(time.perf_counter(), frame_stamp.end),
+                        queue_depth=audio_queue.qsize(),
+                    )
+                    vad_started = time.perf_counter()
+                    if _vad_pool is not None:
+                        has_speech = await asyncio.get_running_loop().run_in_executor(
+                            _vad_pool, is_speech, audio_frame, vad_model, vad_utils
+                        )
+                    else:
+                        has_speech = is_speech(audio_frame, vad_model, vad_utils)
+                    _latency_trace.record("vad_complete", elapsed_ms=(time.perf_counter() - vad_started) * 1000)
 
                     frame_count += 1
 
@@ -3771,12 +4710,9 @@ async def audio_loop():
                         print(
                             f"\n  [MUSIC] Music detected — muting STT (RMS={frame_rms:.4f}, threshold={MUSIC_THRESHOLD})"
                         )
-                        # Discard any accumulated speech buffer (it's likely music garbage)
-                        if len(speech_buffer) > 0:
-                            speech_buffer = np.array([], dtype=np.float32)
-                            silence_frames = 0
-                            last_partial_len = 0
-                            last_silence_boundary = 0
+                        # Clear timestamps and provisional identity even if only
+                        # asynchronous work remains from the preceding buffer.
+                        discard_buffer("music_hold")
                         # Broadcast music_hold to displays
                         task = asyncio.create_task(broadcast({"type": "music_hold", "active": True}))
                         _partial_tasks.add(task)
@@ -3799,13 +4735,18 @@ async def audio_loop():
                         continue
 
                     if has_speech:
+                        if silence_frames:
+                            _pause_epochs[utterance_id] = _pause_epochs.get(utterance_id, 0) + 1
+                        pause_preview_fired = False
+                        pause_speculation_fired = False
                         if len(speech_buffer) == 0:
-                            utterance_id += 1  # new utterance starting
+                            utterance_id = _next_capture_utterance_id()
                             _utterance_start_times[utterance_id] = time.perf_counter()
                             last_partial_len = 0
                             last_silence_boundary = 0
                             logger.debug("vad_speech_start utterance_id=%d frame=%d", utterance_id, frame_count)
                         speech_buffer = np.concatenate([speech_buffer, audio_frame])
+                        timeline.append(len(audio_frame), frame_stamp, True)
                         silence_frames = 0
                         speech_frame_count += 1
                     else:
@@ -3816,6 +4757,7 @@ async def audio_loop():
                         # Keep buffering during brief pauses so words aren't dropped
                         if len(speech_buffer) > 0 and silence_frames < max_silence_frames:
                             speech_buffer = np.concatenate([speech_buffer, audio_frame])
+                            timeline.append(len(audio_frame), frame_stamp, False)
 
                     # Periodic status line (~every 3s)
                     now = time.time()
@@ -3831,20 +4773,88 @@ async def audio_loop():
                     buffer_duration = len(speech_buffer) / SAMPLE_RATE
                     new_audio = (len(speech_buffer) - last_partial_len) / SAMPLE_RATE
 
+                    pause_ms = silence_frames * 512 / SAMPLE_RATE * 1000
+                    if not has_speech and buffer_duration >= 0.7 and silence_frames < max_silence_frames:
+                        clause = bool(_latency.clause_preview_s and buffer_duration >= _latency.clause_preview_s)
+                        preview_delay = _latency.pause_preview_ms or (128 if clause else 0)
+                        if preview_delay and pause_ms >= preview_delay and not pause_preview_fired:
+                            pause_preview_fired = True
+                            kind = "clause" if clause else "pause"
+                            _latency_trace.record(
+                                "prospective_preview_boundary",
+                                utterance_id=utterance_id,
+                                kind=kind,
+                                **timeline.sample_metadata(),
+                            )
+                            task = asyncio.create_task(
+                                process_partial(
+                                    speech_buffer.copy(),
+                                    utterance_id,
+                                    timeline.last,
+                                    timeline.first,
+                                    timeline.sample_metadata(),
+                                    preview_kind=kind,
+                                    speech_end=timeline.speech_end,
+                                    timing_source=timeline.source,
+                                )
+                            )
+                            _partial_tasks.add(task)
+                            task.add_done_callback(_partial_tasks.discard)
+                            last_partial_len = len(speech_buffer)
+                        if (
+                            _latency.speculate_pause_ms
+                            and pause_ms >= _latency.speculate_pause_ms
+                            and not pause_speculation_fired
+                        ):
+                            pause_speculation_fired = True
+                            task = asyncio.create_task(
+                                _speculate_pause(
+                                    speech_buffer.copy(),
+                                    utterance_id,
+                                    _pause_epochs.get(utterance_id, 0),
+                                    timeline.sample_metadata(),
+                                )
+                            )
+                            _speculation_tasks.add(task)
+                            task.add_done_callback(_speculation_tasks.discard)
+
+                    new_audio = (len(speech_buffer) - last_partial_len) / SAMPLE_RATE
+                    # One earlier first preview; subsequent cadence is unchanged.
+                    partial_interval = (
+                        (_latency.first_preview_s or PARTIAL_INTERVAL) if last_partial_len == 0 else PARTIAL_INTERVAL
+                    )
                     # --- Partial: fire every PARTIAL_INTERVAL of new audio ---
                     if (
-                        new_audio >= PARTIAL_INTERVAL
+                        new_audio >= partial_interval
                         and silence_frames < max_silence_frames
                         and buffer_duration < MAX_UTTERANCE
                     ):
                         # [FIX] Fire-and-forget: don't block audio loop on partials
-                        task = asyncio.create_task(process_partial(speech_buffer.copy(), utterance_id))
+                        task = asyncio.create_task(
+                            process_partial(
+                                speech_buffer.copy(),
+                                utterance_id,
+                                timeline.last,
+                                timeline.first,
+                                timeline.sample_metadata(),
+                                speech_end=timeline.speech_end,
+                                timing_source=timeline.source,
+                            )
+                        )
                         _partial_tasks.add(task)
                         task.add_done_callback(_partial_tasks.discard)
                         last_partial_len = len(speech_buffer)
 
                     # --- Final: on silence gap or max duration ---
                     # Min 0.7s buffer — sub-0.7s breath pops are almost never real speech
+                    if 0 < buffer_duration < 0.7 and silence_frames >= max_silence_frames:
+                        # This rejected utterance has ended too. Leaving its
+                        # frozen buffer alive would join unrelated future speech
+                        # across an unbuffered gap, corrupting sample provenance.
+                        discard_buffer("short_silence")
+                        if vad_model is not None:
+                            vad_model.reset_states()
+                        continue
                     silence_triggered = buffer_duration >= 0.7 and silence_frames >= max_silence_frames
                     force_cut_triggered = buffer_duration >= MAX_UTTERANCE
 
@@ -3878,15 +4888,23 @@ async def audio_loop():
 
                             if cut_type == "smart":
                                 # Send first part as final, carry over remainder
+                                taken = timeline.split(split_pos)
+                                _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
+                                    taken, utterance_id, "smart_cut"
+                                )
                                 await process_final(speech_buffer[:split_pos].copy(), utterance_id)
                                 speech_buffer = speech_buffer[split_pos:].copy()
-                                utterance_id += 1
-                                _utterance_start_times[utterance_id] = time.perf_counter()
+                                utterance_id = _next_capture_utterance_id()
+                                _utterance_start_times[utterance_id] = timeline.first or time.perf_counter()
                                 last_partial_len = 0
                                 last_silence_boundary = 0
                             else:
                                 # No silence found — send entire buffer (original behavior)
+                                _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
+                                    timeline, utterance_id, "hard_cut"
+                                )
                                 await process_final(speech_buffer.copy(), utterance_id)
+                                timeline = AudioTimeline()
                                 speech_buffer = np.array([], dtype=np.float32)
                                 silence_frames = 0
                                 speech_frame_count = 0
@@ -3897,6 +4915,10 @@ async def audio_loop():
                                 _warmup_pending = True
                         else:
                             # Normal silence-triggered finalization
+                            _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
+                                timeline, utterance_id, "silence"
+                            )
+                            timeline = AudioTimeline()
                             await process_final(speech_buffer.copy(), utterance_id)
                             speech_buffer = np.array([], dtype=np.float32)
                             silence_frames = 0
@@ -3919,11 +4941,33 @@ async def audio_loop():
                     ):
                         _warmup_pending = True
                         loop = asyncio.get_event_loop()
-                        loop.run_in_executor(_pipeline_pool, warmup_translation_models)
+                        _schedule_warmup(loop)
 
-        except sd.PortAudioError as e:
+        except asyncio.CancelledError:
+            # Admit captured speech before main_async sends the coordinator's
+            # sentinel. Pending translation then follows the normal final drain.
+            if _session_stop_requested and len(speech_buffer) / SAMPLE_RATE >= 0.7:
+                _utterance_timings[utterance_id] = ChunkTiming.from_timeline(timeline, utterance_id, "stop")
+                await process_final(speech_buffer.copy(), utterance_id)
+            elif _session_stop_requested and len(speech_buffer):
+                discard_buffer("stop")
+            if not audio_queue.empty():
+                _io_pool.record_failure("audio_capture", "stop_queued_audio_discarded")
+                if _health is not None:
+                    _health.error("capture", "stop_queued_audio_discarded")
+            raise
+        except (sd.PortAudioError, AudioCaptureError) as e:
+            if len(speech_buffer):
+                _io_pool.record_failure("audio_capture", "interrupted_utterance")
+                if _health is not None:
+                    _health.error("capture", "interrupted_utterance")
+            if _health is not None:
+                _health.phase("input_error")
+                _health.error("audio", type(e).__name__)
             print(f"\n  Mic error: {e} — retrying in 2s...", file=sys.stderr)
-            speech_buffer = np.array([], dtype=np.float32)
+            discard_buffer("capture_error")
+            if vad_model is not None:
+                vad_model.reset_states()
             # Drain stale audio from queue
             while not audio_queue.empty():
                 try:
@@ -3970,9 +5014,14 @@ async def main_async(args):
     global _marian_engine
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
-    global _RUN_AB
+    global _RUN_AB, _clean_session_shutdown, _session_model_ids, _session_main_task, _incremental_stt
+    global _replay_client_wait
+
+    _replay_client_wait = ReplayClientBarrier(getattr(args, "replay_wait_client_seconds", 0))
 
     _RUN_AB = args.run_ab
+    _clean_session_shutdown = False
+    _session_main_task = asyncio.current_task()
 
     spec_info = ""
     if args.run_ab and BACKEND == "mlx":
@@ -4004,11 +5053,38 @@ async def main_async(args):
         mlx_b_model, mlx_b_tokenizer = None, None
         _start_workers(run_ab=args.run_ab)
     else:
-        stt_pipe = load_whisper(BACKEND)
+        if _stt_scheduler is not None:
+            stt_pipe = await asyncio.wrap_future(_stt_scheduler.submit("final", load_whisper, BACKEND))
+        else:
+            stt_pipe = load_whisper(BACKEND)
+        if _latency.incremental_stt == "stream":
+            from tools.incremental_stt import StreamingPreview
+
+            _incremental_stt = StreamingPreview(stt_pipe)
         if args.low_vram:
             # Low-VRAM mode: skip Gemma entirely, MarianMT handles all translation
             mlx_a_model, mlx_a_tokenizer = None, None
             mlx_b_model, mlx_b_tokenizer = None, None
+        elif RUNTIME_PROFILE.final_engine == "llamacpp":
+            global _managed_llama_server
+            from pathlib import Path
+
+            from engines.llamacpp_engine import LlamaCppEngine
+            from tools.llama_runtime import ManagedLlamaServer
+
+            _managed_llama_server = ManagedLlamaServer(
+                RUNTIME_PROFILE, log_path=Path(f"metrics/llama_{SESSION_ID}.log")
+            )
+            url = _managed_llama_server.start()
+            mlx_a_model = LlamaCppEngine(
+                server_url=url,
+                model_family="gemma4",
+                timeout_s=120 if BACKEND == "cpu" else 30,
+                max_tokens=128,
+                strict_errors=True,
+            )
+            mlx_a_model.load()
+            mlx_a_tokenizer = mlx_b_model = mlx_b_tokenizer = None
         elif BACKEND == "mlx":
             mlx_a_model, mlx_a_tokenizer, mlx_b_model, mlx_b_tokenizer = load_translation_models(load_b=args.run_ab)
         elif BACKEND == "cuda":
@@ -4025,7 +5101,7 @@ async def main_async(args):
     # --- TTS engine (optional, ONNX Runtime — thread-safe, separate pool) ---
     global tts_engine, _tts_pool
     if args.tts:
-        from engines.mlx_engine import PiperTTSEngine
+        from engines.tts_engine import PiperTTSEngine
 
         # Dynamic language: TTS speaks in TARGET_LANG (the translated language)
         tts_voice = settings.tts.voices.get(TARGET_LANG)
@@ -4058,7 +5134,7 @@ async def main_async(args):
                 prompt_cache_template=mlx_a_prompt_cache,
                 suffix_tokens=mlx_a_suffix_tokens,
             )
-        elif BACKEND == "cuda" and mlx_a_model is not None:
+        elif (BACKEND == "cuda" or RUNTIME_PROFILE.final_engine == "llamacpp") and mlx_a_model is not None:
             # mlx_a_model is a CUDAGemmaStreamingEngine when using streaming path
             if hasattr(mlx_a_model, "translate_streaming"):
                 result = mlx_a_model.translate(args.dry_run_text, source_lang=SOURCE_LANG, target_lang=TARGET_LANG)
@@ -4111,7 +5187,41 @@ async def main_async(args):
     )
 
     print("[6/6] Starting servers...")
+    _session_model_ids = {
+        "stt": stt_pipe if isinstance(stt_pipe, str) else getattr(stt_pipe, "model_id", None),
+        "translation_a": (MLX_MODEL_A if BACKEND == "mlx" else getattr(mlx_a_model, "model_id", None))
+        if not args.low_vram
+        else None,
+        "translation_b": MLX_MODEL_B if BACKEND == "mlx" and _RUN_AB else None,
+        "marian": getattr(_marian_engine, "model_id", None),
+        "draft": MLX_DRAFT_MODEL_ID if USE_MTS else None,
+    }
+    metadata = {
+        **_session_provenance(),
+        "timing_schema_version": 2,
+        "backend": BACKEND,
+        "model_family": MODEL_FAMILY,
+        "model_a": _session_model_ids["translation_a"],
+        "profile": RUNTIME_PROFILE.to_dict(),
+        "profile_artifacts": profile_artifact_provenance(),
+        "stt_settings": settings.stt.model_dump(),
+        "managed_llama": _managed_llama_server.provenance if _managed_llama_server else None,
+        "model_b": MLX_MODEL_B if _RUN_AB else None,
+        "stt_backend": settings.stt.backend,
+        "vad": {**settings.vad.model_dump(), "artifact": _vad_provenance},
+        "translation": settings.translation.model_dump(),
+        "replay_speed": float(os.environ.get("STARK_REPLAY_SPEED", "1")),
+        "replay_client_wait": _replay_client_wait.snapshot(),
+    }
+    from pathlib import Path
+
+    from tools.session_lifecycle import source_provenance
+
+    metadata.update(source_provenance(Path(__file__)))
+    metadata["latency_experiment_configuration"] = _latency.as_dict()
+    Path(os.path.dirname(DIAG_PATH), f"session_metadata_{SESSION_ID}.json").write_text(json.dumps(metadata, indent=2))
     init_csv()
+    _io_pool.submit(_write_jsonl_record, {"event": "session_started", **_session_provenance()})
 
     # Start HTTP server for mobile access
     project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -4164,19 +5274,71 @@ async def main_async(args):
     else:
         print("  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)")
 
+    speaker_task = None
     if DIARIZE_ENABLED:
         start_diarize_daemon()
+        speaker_task = asyncio.create_task(_speaker_update_loop())
 
     # Rolling stats task — prints averages every 5 minutes
     rolling_task = asyncio.create_task(_rolling_stats_task())
 
-    # Run audio loop
+    if _health is not None:
+
+        def health_provider():
+            return {
+                "queues": {
+                    "audio": audio_queue.qsize(),
+                    "capture_handoff": _capture_handoff.qsize() if _capture_handoff is not None else 0,
+                    "finals": _pipeline_chunk_queue.qsize() if _pipeline_chunk_queue else 0,
+                    "stream_tokens": _stream_token_queue.qsize() if _stream_token_queue else 0,
+                },
+                "clients": len(ws_clients),
+                "replay_client_wait": _replay_client_wait.snapshot(),
+            }
+
+        def apply_control(operation):
+            global _session_stop_requested
+            if operation == "stop":
+                _session_stop_requested = True
+                request_graceful_stop(_session_main_task)
+            else:
+                if operation == "resume":
+                    _health.phase("listening")
+                _health.paused = operation == "pause"
+
+        from tools.session_lifecycle import request_graceful_stop
+
+        _health._provider = health_provider
+        _health._control = apply_control
+
+    # FileAudioStream anchors its clock only when audio_loop enters the stream.
+    # Keep this opt-in wait inside cleanup/control scope and before any capture.
     try:
+        if _replay_client_wait.seconds:
+            if _health is not None:
+                _health.phase("waiting_for_display")
+            _latency_trace.record("replay_client_wait_started", **_replay_client_wait.snapshot())
+            try:
+                await _replay_client_wait.wait(lambda: len(ws_clients))
+            finally:
+                wait_result = _replay_client_wait.snapshot()
+                metadata["replay_client_wait"] = wait_result
+                Path(os.path.dirname(DIAG_PATH), f"session_metadata_{SESSION_ID}.json").write_text(
+                    json.dumps(metadata, indent=2)
+                )
+                _latency_trace.record("replay_client_wait_finished", **wait_result)
+                logger.info("Replay client barrier: %s", wait_result)
+                if _health is not None:
+                    _health.phase("listening" if wait_result["status"] == "connected" else "replay_client_wait_failed")
         await audio_loop()
     except KeyboardInterrupt:
         pass
     finally:
+        shutdown_exception = sys.exc_info()[1]
         rolling_task.cancel()
+        if speaker_task is not None:
+            speaker_task.cancel()
+            await asyncio.gather(speaker_task, return_exceptions=True)
         # [P7-6C] Stop pipeline coordinator — send poison pill and wait
         if _pipeline_chunk_queue is not None:
             await _pipeline_chunk_queue.put(None)
@@ -4185,13 +5347,23 @@ async def main_async(args):
         if _stream_token_queue is not None:
             await _stream_token_queue.put(None)
         stream_task.cancel()
+        if _speculation_tasks:
+            await asyncio.gather(*list(_speculation_tasks), return_exceptions=True)
+        if _stt_scheduler is not None:
+            if _incremental_stt is not None:
+                await asyncio.wrap_future(_stt_scheduler.submit("final", _incremental_stt.close))
+            await asyncio.get_running_loop().run_in_executor(None, _stt_scheduler.shutdown)
+        if _vad_pool is not None:
+            _vad_pool.shutdown(wait=True)
+        if _caption_delivery is not None:
+            await _caption_delivery.close()
         # Release the Marian engine first, then shut down the PyTorch pool.
         if _marian_engine is not None:
             _marian_engine.unload()
         _pytorch_pool.shutdown(wait=False)
         # Shut down TTS pool if running
         if _tts_pool is not None:
-            _tts_pool.shutdown(wait=False)
+            _tts_pool.shutdown(wait=True)
         if tts_engine is not None:
             tts_engine.unload()
         # Stop multiprocess workers if running
@@ -4204,18 +5376,33 @@ async def main_async(args):
         if tts_ws_server is not None:
             tts_ws_server.close()
             await tts_ws_server.wait_closed()
+        _clean_session_shutdown = shutdown_exception is None or (
+            _session_stop_requested
+            and isinstance(shutdown_exception, (asyncio.CancelledError, KeyboardInterrupt, SystemExit))
+        )
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Live A/B bilingual speech-to-text dry run")
+    import hashlib
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(description="Live English/Spanish transcription and translation")
     parser.add_argument(
-        "--ab", action="store_true", dest="run_ab", help="Load both 4B and 12B for A/B comparison (default: 4B only)"
+        "--no-record-audio",
+        action="store_true",
+        help="Keep captions/diagnostics without retaining microphone WAV files",
+    )
+    parser.add_argument(
+        "--ab",
+        action="store_true",
+        dest="run_ab",
+        help="Load both model variants for A/B comparison (default: one model)",
     )
     parser.add_argument(
         "--backend",
-        choices=["auto", "mlx", "cuda"],
+        choices=["auto", "mlx", "cuda", "cpu"],
         default="auto",
-        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA)",
+        help="Inference backend: auto (detect), mlx (Apple Silicon), cuda (NVIDIA), cpu",
     )
     parser.add_argument(
         "--engine",
@@ -4257,10 +5444,23 @@ def main():
         "--http-port", type=int, default=8080, help="HTTP server port for serving display pages to phones"
     )
     parser.add_argument("--vad-threshold", type=float, default=0.3, help="VAD speech threshold (0-1)")
+    parser.add_argument("--vad-backend", choices=["torch", "onnx"], default=None)
+    parser.add_argument("--silence-trigger", type=float, default=None)
+    parser.add_argument("--partial-interval", type=float, default=None)
+    parser.add_argument("--idle-warmup-only", action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument("--final-aware-partials", action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument("--routing-policy", choices=["legacy", "conservative", "off"], default=None)
+    parser.add_argument("--terminology-prompt", choices=["none", "church"], default=None)
     parser.add_argument("--device", type=int, default=None, help="Audio input device index (default: auto-detect)")
     parser.add_argument("--gain", type=float, default=None, help="Mic gain multiplier (default: auto-calibrate)")
     parser.add_argument("--audio-file", help="Replay a WAV through the live audio pipeline")
     parser.add_argument("--replay-speed", type=float, default=1.0, help="Replay speed; <=0 runs unpaced")
+    parser.add_argument(
+        "--replay-wait-client-seconds",
+        type=float,
+        default=0.0,
+        help="File replay only: wait up to this many seconds for a caption client before starting audio (0 disables)",
+    )
     parser.add_argument("--session-id", help="Deterministic session ID for metrics and recordings")
     parser.add_argument(
         "--exit-after-replay",
@@ -4346,7 +5546,7 @@ def main():
     )
     parser.add_argument(
         "--tts",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=False,
         help="Enable TTS audio output of translated text (Piper ONNX)",
     )
@@ -4473,10 +5673,57 @@ def main():
         default=2.0,
         help="Diarization daemon poll interval in seconds (default: 2)",
     )
+    from stark_translate.profiles import PROFILE_NAMES
+
+    parser.add_argument("--profile", choices=PROFILE_NAMES, default=settings.profile)
     args = parser.parse_args()
+    try:
+        validate_replay_client_wait(
+            args.replay_wait_client_seconds,
+            "file" if args.audio_file else os.environ.get("STARK_AUDIO_SOURCE", "mic"),
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
+    try:
+        validate_live_mts(args.mts, args.no_mts, settings.translation.mlx_mts)
+    except ValueError as exc:
+        parser.error(str(exc))
+    global RUNTIME_PROFILE
+    try:
+        RUNTIME_PROFILE = apply_profile(settings, args.profile, args.backend)
+    except ValueError as exc:
+        parser.error(str(exc))
+    if RUNTIME_PROFILE.lite:
+        if args.run_ab or args.multiprocess or args.diarize:
+            parser.error("Lite profiles do not enable A/B, multiprocess or diarization")
+        args.backend = RUNTIME_PROFILE.backend
+        args.low_vram = settings.low_vram
+        args.stt_backend = "faster-whisper"
+        args.vad_backend = "onnx"
+        args.gemma4_size = "e2b"
+        args.model_family = "gemma4"
+        args.engine = settings.cuda.engine
+        args.no_mts = True
 
     global EXIT_AFTER_REPLAY
     EXIT_AFTER_REPLAY = bool(args.audio_file) if args.exit_after_replay is None else args.exit_after_replay
+    # Validate fallible replay input before creating a running lifecycle marker,
+    # health thread or inference pool. Invalid CLI input is not a started session.
+    global _INPUT_AUDIO_HASH
+    _INPUT_AUDIO_HASH = None
+    if args.audio_file or os.environ.get("STARK_AUDIO_SOURCE") == "file":
+        effective_audio_file = args.audio_file or os.environ.get("STARK_AUDIO_FILE")
+        if not effective_audio_file:
+            parser.error("STARK_AUDIO_FILE is required when STARK_AUDIO_SOURCE=file")
+        try:
+            _INPUT_AUDIO_HASH = hashlib.sha256(Path(effective_audio_file).read_bytes()).hexdigest()
+        except (OSError, ValueError) as exc:
+            parser.error(f"Cannot read audio input: {exc}")
+    for name in ("silence_trigger", "partial_interval"):
+        value = getattr(args, name)
+        if value is not None and not 0.032 <= value <= 5:
+            parser.error(f"--{name.replace('_', '-')} must be between 0.032 and 5 seconds")
+
     if args.audio_file:
         os.environ["STARK_AUDIO_SOURCE"] = "file"
         os.environ["STARK_AUDIO_FILE"] = args.audio_file
@@ -4495,7 +5742,7 @@ def main():
     if args.backend == "auto":
         if MLX_AVAILABLE:
             BACKEND = "mlx"
-        elif torch.cuda.is_available():
+        elif torch is not None and torch.cuda.is_available():
             BACKEND = "cuda"
         else:
             BACKEND = "cpu"
@@ -4505,10 +5752,13 @@ def main():
             sys.exit(1)
         BACKEND = "mlx"
     elif args.backend == "cuda":
-        if not torch.cuda.is_available():
-            print("ERROR: CUDA not available.", file=sys.stderr)
-            sys.exit(1)
+        import ctranslate2
+
+        if ctranslate2.get_cuda_device_count() < 1:
+            parser.error("CUDA profile selected but CTranslate2 cannot find a CUDA device")
         BACKEND = "cuda"
+    elif args.backend == "cpu":
+        BACKEND = "cpu"
 
     # --low-vram implies --no-ab
     if args.low_vram:
@@ -4529,6 +5779,15 @@ def main():
             )
             args.run_ab = False
 
+    global _latency, _latency_trace, _stt_scheduler, _marian_memo, _vad_pool
+    _latency = LatencyExperiments.from_env()
+    _latency_trace = LatencyTrace(_latency.trace)
+    _marian_memo = ExactTextMemo(_latency.marian_memo)
+    if _latency.latest_partial or _latency.incremental_stt != "off" or _latency.speculate_pause_ms:
+        _stt_scheduler = LatestSTTWorker(on_event=_latency_event)
+    if _latency.vad_worker:
+        _vad_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="vad-owner")
+
     # --- Create pipeline thread pool (backend-dependent) ---
     global _pipeline_pool
     # Both CUDA and MLX (>=0.31.2) support independent concurrent inference.
@@ -4548,6 +5807,21 @@ def main():
 
     # Re-derive session paths with language tag so EN/ES data stays separate
     SESSION_ID = args.session_id or f"{datetime.now():%Y%m%d_%H%M%S}_{SOURCE_LANG}"
+    from tools.session_lifecycle import finish_session, request_graceful_stop, source_provenance, start_session
+
+    source = source_provenance(Path(__file__))
+    lifecycle_root = Path.cwd()
+    lifecycle = start_session(
+        lifecycle_root,
+        SESSION_ID,
+        git_sha=source["git_sha"],
+        source=source,
+        pipeline_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    )
+    global _health, _RECORD_AUDIO
+    _RECORD_AUDIO = not args.no_record_audio
+    _health = PipelineHealth(lifecycle_root, SESSION_ID, persistence=_io_pool, record_audio=_RECORD_AUDIO)
+    _health.start()
     CSV_PATH = f"metrics/ab_metrics_{SESSION_ID}.csv"
     AUDIO_DIR = f"stark_data/live_sessions/{SESSION_ID}"
     DIAG_PATH = f"metrics/diagnostics_{SESSION_ID}.jsonl"
@@ -4565,12 +5839,10 @@ def main():
     _console_handler.setLevel(log_level)
     LOG_PATH = f"metrics/session_{SESSION_ID}.log"
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
-    _file_handler = logging.FileHandler(LOG_PATH)
-    _file_handler.setLevel(logging.DEBUG)  # file always captures everything
-    _file_handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    )
-    logger.addHandler(_file_handler)
+    if not os.environ.get("STARK_OPERATOR_CAPTURE"):
+        from tools.operational_logging import configure_log
+
+        configure_log(logger, LOG_PATH)
     logger.info("Session %s started — log file: %s", SESSION_ID, LOG_PATH)
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
@@ -4578,6 +5850,15 @@ def main():
     CHUNK_DURATION = args.chunk_duration
     WS_PORT = args.ws_port
     VAD_THRESHOLD = args.vad_threshold
+    for name in ("silence_trigger", "partial_interval"):
+        value = getattr(args, name)
+        if value is not None:
+            setattr(settings.vad, name, value)
+    if args.vad_backend is not None:
+        settings.vad.backend = args.vad_backend
+    for name in ("idle_warmup_only", "final_aware_partials", "routing_policy", "terminology_prompt"):
+        if getattr(args, name) is not None:
+            setattr(settings.translation, name, getattr(args, name))
     MIC_DEVICE = args.device
     if args.audio_file:
         MIC_GAIN = 1.0
@@ -4647,16 +5928,57 @@ def main():
 
     # Handle Ctrl+C gracefully
     def signal_handler(sig, frame):
+        global _session_stop_requested
+        _session_stop_requested = True
         print("\n\nStopping...")
+        if request_graceful_stop(_session_main_task):
+            return
         print_summary()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
+    completed = False
     try:
         asyncio.run(main_async(args))
+        completed = True
     except KeyboardInterrupt:
         print_summary()
+    except asyncio.CancelledError:
+        if not _session_stop_requested:
+            raise
+    finally:
+        if _managed_llama_server is not None:
+            _managed_llama_server.stop()
+        # A completed marker is export evidence: all queued diagnostics must be
+        # on disk, and the pipeline must have drained without an abnormal exit.
+        failure = sys.exc_info()[1]
+        _io_pool.shutdown(wait=True)
+        completed = completed or _clean_session_shutdown
+        persistence = _io_pool.snapshot()
+        completed = completed and persistence["ok"] and persistence["pending"] == 0
+        health_snapshot = _health.snapshot() if _health is not None else {}
+        if _health is not None and (
+            not health_snapshot["input_seen"] or health_snapshot["recording"]["required_failures"]
+        ):
+            completed = False
+        outcome = "completed" if completed else "interrupted" if _session_stop_requested else "failed"
+        if not persistence["ok"] or health_snapshot.get("recording", {}).get("required_failures"):
+            outcome = "failed"
+        if _health is not None:
+            _health.close(outcome)
+        exit_code = getattr(failure, "code", 1) if failure is not None else 1
+        finish_session(
+            lifecycle_root,
+            SESSION_ID,
+            run_id=lifecycle["run_id"],
+            status=outcome,
+            exit_code=0 if completed else exit_code if isinstance(exit_code, int) and exit_code else 1,
+            model_ids=_session_model_ids,
+            persistence=persistence,
+            native_server=getattr(globals().get("_managed_llama_server"), "provenance", None),
+        )
 
 
 if __name__ == "__main__":

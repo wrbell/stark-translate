@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_053518_894101_en",
+  "status": "completed_and_source_span_consistent",
+  "report": {
+    "path": ".cache/overnight-20260910/endurance-lite-final-audit/report.json",
+    "size_bytes": 759860,
+    "sha256": "042c1f091c3f66a3f03ab07817bad90cfbb3ed0cf8d7ce66b315aa55f8959982"
+  },
+  "assessment": {
+    "path": ".cache/overnight-20260910/endurance-lite-final-audit/assessment.json",
+    "size_bytes": 22592,
+    "sha256": "cd7c49210e0eeee767db84792a5ec121bcbca5376151dc62a6ee4c7d298d9b33"
+  },
+  "audit_manifest": {
+    "path": ".cache/overnight-20260910/endurance-lite-final-audit/audit-manifest.json",
+    "size_bytes": 1111,
+    "sha256": "8cd9b7b91c2ed9d5c3fa41ea3e7be17ede01bf15a023ef20597967fdca6bff94"
+  },
+  "operator_actions": {
+    "path": ".cache/overnight-20260910/endurance-preparation/lite-ui-actions.jsonl",
+    "size_bytes": 972,
+    "sha256": "25d18e0e1ace1fbc57eb77c2bb4f2b17f90ec1b508590de7849956dfe21294bb"
+  },
+  "operator_launch": {
+    "path": ".cache/overnight-20260910/installed-lite-endurance/operator-launch.json",
+    "size_bytes": 1274,
+    "sha256": "abd1a644fe4a7deb7764330179ab0bb41bfac7c1b9ee8ce499851a629a3c7547"
+  },
+  "operator_shutdown": {
+    "path": ".cache/overnight-20260910/lite-operator-shutdown.json",
+    "size_bytes": 506,
+    "sha256": "ae88c91bdebbccc235528dbbdf74b96495ae65ec146f4fffc13c6d7ebce79cad"
+  },
+  "stopped_ui": {
+    "path": ".cache/overnight-20260910/endurance-preparation/lite-stopped-ui.txt",
+    "size_bytes": 2576,
+    "sha256": "dc562cccdda6e51db7344ed44ada4e027c9b4fab5a402e922620366c0f2597cc"
+  },
+  "before_stop_ui": {
+    "path": ".cache/overnight-20260910/endurance-preparation/lite-before-stop-ui.txt",
+    "size_bytes": 3925,
+    "sha256": "fa9b1b678877ce0752f3221beb4095a2fba1f3b1046a885037486ec63fdc1a6f"
+  },
+  "tail_ui": {
+    "path": ".cache/overnight-20260910/endurance-preparation/lite-tail-live-ui.txt",
+    "size_bytes": 3922,
+    "sha256": "d95380f03e708a1d5f9019c0e02f807f4124031089110c82d4ad6146bd006d8c"
+  },
+  "waveform_evidence": "../waveform-evidence.json",
+  "scope": "Completed CPU functional run and retained source-span/WAV-header, required-write and cleanup evidence. Sparse previews and large latency tails do not support a fast-production recommendation. Closing-hymn UI does not classify the remaining source tail; no exact EOF/all-speech/human-quality claim."
+}
