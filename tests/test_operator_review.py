@@ -294,6 +294,10 @@ def test_legacy_cli_preserves_evaluation_provenance(review, tmp_path, provenance
         source_lang=None,
         min_qe=0.6,
     )
+    if provenance in ("replay", "synthetic"):
+        with pytest.raises(ValueError, match="cannot be exported for training"):
+            cmd_export_whisper(args)
+        args.eval_only = True
     cmd_export_whisper(args)
     with (output / "train" / "metadata.csv").open() as stream:
         assert list(csv.DictReader(stream)) == []
@@ -308,7 +312,7 @@ def test_legacy_cli_preserves_evaluation_provenance(review, tmp_path, provenance
 
 def test_generic_spanish_correction_pair_direction_and_replay_rejection(tmp_path):
     source = tmp_path / "pairs.jsonl"
-    row = {"source_text": "Dios te ama.", "target_text": "God loves you.", "source_lang": "es"}
+    row = {"source_text": "Dios te ama.", "target_text": "God loves you.", "source_lang": "es", "session_kind": "live"}
     atomic_jsonl(source, [row])
     target = tmp_path / "train.jsonl"
     merge_translation(source, target)

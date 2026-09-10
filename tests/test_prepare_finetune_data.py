@@ -40,6 +40,7 @@ def _make_diag_record(**overrides) -> dict:
         "chunk_id": 1,
         "session": "20260301_113532",
         "source_lang": "en",
+        "session_kind": "live",
         "timestamp": "2026-03-01T11:37:01.960449",
         "audio_path": "stark_data/live_sessions/20260301_113532/chunk_0001.wav",
         "mic_gain": 8.48,
@@ -564,6 +565,59 @@ class TestApplyCorrections:
 
 
 class TestExportWhisper:
+    def test_unknown_provenance_requires_eval_or_named_live_confirmation(self, tmp_path):
+        rec = _make_diag_record(session_kind="unknown")
+        rec["audio_path"] = str(tmp_path / "legacy.wav")
+        with pytest.raises(ValueError, match="--confirm-live-session"):
+            self._run(tmp_path, [rec], eval_ratio=0.0)
+        out = self._run(tmp_path, [rec], confirm_live_session=[rec["session"]], eval_ratio=0.0)
+        with (out / "train" / "metadata.csv").open() as stream:
+            assert next(csv.DictReader(stream))["session_kind"] == "live"
+        loaded = load_diagnostics([tmp_path / "metrics" / "diagnostics_20260301_113532.jsonl"])
+        assert loaded[0]["session_kind"] == "live"
+        assert loaded[0]["live_provenance_confirmed_at"]
+        assert (
+            json.loads((tmp_path / "metrics" / "diagnostics_20260301_113532.jsonl").read_text())["session_kind"]
+            == "unknown"
+        )
+
+    def test_unknown_eval_export_cannot_later_be_confirmed_for_training(self, tmp_path):
+        rec = _make_diag_record(session_kind="unknown", audio_path=str(tmp_path / "legacy.wav"))
+        out = self._run(tmp_path, [rec], eval_only=True, eval_ratio=0.0)
+        with (out / "eval" / "metadata.csv").open() as stream:
+            assert len(list(csv.DictReader(stream))) == 1
+        with pytest.raises(ValueError, match="Cannot confirm"):
+            self._run(tmp_path, [rec], confirm_live_session=[rec["session"]], eval_ratio=0.0)
+
+    def test_confirmation_cannot_relabel_replay_or_heldout_audio(self, tmp_path):
+        for kind, split in [("replay", None), ("unknown", "eval")]:
+            rec = _make_diag_record(session_kind=kind, dataset_split=split)
+            rec["audio_path"] = str(tmp_path / "legacy.wav")
+            with pytest.raises(ValueError, match="Cannot confirm"):
+                self._run(tmp_path, [rec], confirm_live_session=[rec["session"]], eval_ratio=0.0)
+
+    def test_audio_names_cannot_collide_after_session_sanitization(self, tmp_path):
+        rows = []
+        for session in ("foo.bar", "foo_bar"):
+            audio = tmp_path / f"{session}.wav"
+            audio.write_bytes(session.encode())
+            row = _make_diag_record(session=session, audio_path=str(audio))
+            _write_diag_jsonl(tmp_path / "metrics" / f"diagnostics_{session}.jsonl", [row])
+        out = tmp_path / "export"
+        cmd_export_whisper(
+            argparse.Namespace(
+                metrics_dir=str(tmp_path / "metrics"),
+                session=None,
+                output=str(out),
+                accent="live",
+                eval_ratio=0.0,
+            )
+        )
+        with (out / "train" / "metadata.csv").open() as stream:
+            rows = list(csv.DictReader(stream))
+        assert len({row["file_name"] for row in rows}) == 2
+        assert {(out / "train" / row["file_name"]).read_bytes() for row in rows} == {b"foo.bar", b"foo_bar"}
+
     def _run(self, tmp_path, records, **kwargs):
         """Helper: write records and run export-whisper."""
         metrics = tmp_path / "metrics"
@@ -609,7 +663,11 @@ class TestExportWhisper:
         with open(meta_path) as f:
             reader = list(csv.DictReader(f))
         assert len(reader) == 1
-        assert reader[0]["file_name"] == "church_live/20260301_113532__1.wav"
+        assert reader[0]["file_name"].startswith("church_live/sample_")
+        assert reader[0]["file_name"].endswith(".wav")
+        assert reader[0]["session"] == "20260301_113532"
+        assert reader[0]["session_kind"] == "live"
+        assert len(reader[0]["audio_sha256"]) == 64
         assert not (out / "train" / reader[0]["file_name"]).is_symlink()
         assert reader[0]["transcription"] == "For God so loved the world."
         assert reader[0]["accent"] == "church_live"
