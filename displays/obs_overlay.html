@@ -159,6 +159,7 @@
   <div class="text-english" id="englishText"></div>
 </div>
 
+<script src="display_connection.js"></script>
 <script src="caption_telemetry.js"></script>
 <script>
 (function() {
@@ -173,12 +174,10 @@
   // ?lines=3     → max visible lines for Spanish text (default 3)
   var params = new URLSearchParams(window.location.search);
   var useModel = (params.get('model') || 'a').toLowerCase();
-  var wsPort = parseInt(params.get('port') || '8765', 10);
   var showEnglish = params.get('english') !== '0';
   var maxLines = parseInt(params.get('lines') || '3', 10);
 
-  var wsHost = window.location.hostname || 'localhost';
-  var WS_URL = 'ws://' + wsHost + ':' + wsPort;
+  var WS_URL = StarkDisplayConnection.websocketUrl(window.location);
   var RECONNECT_MS = 2000;
   var CLEAR_AFTER_MS = 12000; // Clear text after 12s of no new messages
 
