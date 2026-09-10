@@ -296,6 +296,104 @@ def test_w17_data_checks_real_wave_and_deepgram_and_excludes_eval(w17_data, hold
     assert selected[0]["split"] == "train"
 
 
+@pytest.mark.parametrize("suffix", ["[Part1]", "Part?", "Part*"])
+def test_w17_and_real_alignment_use_same_literal_nested_source(w17_data, holdout, monkeypatch, suffix):
+    from training import align_deepgram_chunks as alignment
+
+    dataset, audio, deepgram = w17_data
+    source = f"Independent_Training_{suffix}"
+    nested = audio / "services" / "2026"
+    nested.mkdir(parents=True)
+    expected = nested / f"{source}.WaV"
+    next(audio.glob("*.wav")).rename(expected)
+    next(deepgram.iterdir()).rename(deepgram / f"{source}.deepgram.json")
+    # These are valid wildcard matches for the old resolver, but wrong source IDs.
+    (nested / "Independent_Training_P.wav").write_bytes(expected.read_bytes())
+    (nested / "Independent_Training_Part2.wav").write_bytes(expected.read_bytes())
+    chunks_path = dataset / "chunks.json"
+    chunks_path.write_text(json.dumps([{"source": source, "start": 0, "end": 1, "split": "train"}]))
+
+    report, _ = preflight.validate_w17_data(chunks_path, deepgram, audio, preflight.holdout_index([holdout]))
+    assert report["source_inputs"][source]["audio"] == str(expected)
+    assert alignment.find_audio_file(audio, source) == expected
+    assert alignment.find_audio_file(audio, source, audio_files=alignment.build_audio_file_index(audio)) == expected
+
+    extracted = []
+
+    def extract(source_wav, output_wav, start, end):
+        extracted.append((source_wav, start, end))
+        output_wav.parent.mkdir(parents=True, exist_ok=True)
+        output_wav.write_bytes(source_wav.read_bytes())
+        return True
+
+    output = dataset / "aligned"
+    monkeypatch.setattr(alignment, "extract_audio_chunk", extract)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "align_deepgram_chunks.py",
+            "--whisper-chunks",
+            str(chunks_path),
+            "--deepgram-dir",
+            str(deepgram),
+            "--audio-dir",
+            str(audio),
+            "--output",
+            str(output),
+        ],
+    )
+    alignment.main()
+    assert extracted == [(expected, 0, 1)]
+    assert (output / "train" / "metadata.csv").is_file()
+
+
+def test_w17_and_runtime_fail_closed_for_duplicate_source_paths(w17_data, holdout):
+    from training.align_deepgram_chunks import find_audio_file
+
+    dataset, audio, deepgram = w17_data
+    original = next(audio.iterdir())
+    nested = audio / "other_service"
+    nested.mkdir()
+    duplicate = nested / original.name
+    duplicate.write_bytes(original.read_bytes())
+    # A flat match must not silently take precedence over a second nested source.
+    with pytest.raises(preflight.PreflightError, match="Ambiguous source WAV") as runtime_error:
+        find_audio_file(audio, original.stem)
+    with pytest.raises(preflight.PreflightError, match="Ambiguous source WAV") as preflight_error:
+        preflight.validate_w17_data(dataset / "chunks.json", deepgram, audio, preflight.holdout_index([holdout]))
+    assert str(runtime_error.value) == str(preflight_error.value)
+    assert str(runtime_error.value).endswith(", ".join(str(p) for p in sorted([original, duplicate])))
+
+
+def test_runtime_literal_source_does_not_match_glob_sibling_or_cache_other_root(tmp_path):
+    from training.align_deepgram_chunks import find_audio_file
+
+    first, second = tmp_path / "first", tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    source = "Independent_Training_[Part1]"
+    (first / "Independent_Training_P.wav").write_bytes(b"wrong sibling")
+    assert find_audio_file(first, source) is None
+    (first / f"{source}.wav").write_bytes(b"first source")
+    (second / f"{source}.WAV").write_bytes(b"second source")
+    assert find_audio_file(first, source) == first / f"{source}.wav"
+    assert find_audio_file(second, source) == second / f"{source}.WAV"
+
+
+def test_shared_audio_resolver_imports_without_site_or_gpu(tmp_path):
+    code = """
+import sys
+from pathlib import Path
+from training.align_deepgram_chunks import build_audio_file_index, find_audio_file
+root = Path(sys.argv[1])
+assert find_audio_file(root, 'missing', audio_files=build_audio_file_index(root)) is None
+assert not {'torch', 'transformers', 'peft', 'soundfile', 'mlx'} & sys.modules.keys()
+"""
+    result = subprocess.run([sys.executable, "-S", "-c", code, str(tmp_path)], cwd=ROOT, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+
+
 @pytest.mark.parametrize("corruption", ["missing_audio", "empty_deepgram", "timing", "post_cutoff", "fresh_eval"])
 def test_w17_rejects_unsafe_or_missing_corpus(w17_data, holdout, corruption):
     dataset, audio, deepgram = w17_data
@@ -323,6 +421,7 @@ def test_w17_rejects_unsafe_or_missing_corpus(w17_data, holdout, corruption):
         {"en": "Unique", "es": "Other", "direction": "en2fr"},
         {"en": "Unique", "es": "Other", "split": "eval"},
         {"en": "Unique", "es": "Other", "approved_for_training": False},
+        {"en": "Unique", "es": "Other", "training_eligible": False},
         {"en": "Unique", "es": "Other", "chunk_source": "Gospel_(3_15_26)_late"},
         {"en": "Unique", "es": "Other", "en_source": "niv"},
         {"en": "Unique", "es": ""},

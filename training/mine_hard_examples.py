@@ -98,6 +98,7 @@ def mine(args):
 
     from training.align_deepgram_chunks import (
         ALIGNMENT_TOLERANCE,
+        build_audio_file_index,
         find_audio_file,
         find_deepgram_words_for_chunk,
         group_chunks_by_source,
@@ -154,6 +155,7 @@ def mine(args):
     skipped = 0
     start_time = time.time()
 
+    audio_files = build_audio_file_index(Path(args.audio_dir))
     with open(output_path, "a") as out_f:
         for source, source_chunks in sorted(grouped.items()):
             # Load Deepgram transcript
@@ -165,7 +167,7 @@ def mine(args):
                 continue
 
             # Find audio file
-            audio_path = find_audio_file(Path(args.audio_dir), source)
+            audio_path = find_audio_file(Path(args.audio_dir), source, audio_files=audio_files)
             if audio_path is None:
                 continue
 

@@ -35,6 +35,7 @@ OTHER_HOLDOUTS = (
     "bible_data/synthetic/deepl_sermon_benchmark_500.jsonl",
     "tools/stt_bench_manifest.json",
     "docs/evaluation/mac_v2026_14_manifest_v2.json",
+    "docs/evaluation/mac_followup_20260910/public_data/manifest.json",
     "training/theological_canaries.py",
 )
 TEXT_FIELDS = {
@@ -48,8 +49,10 @@ TEXT_FIELDS = {
     "reference_text",
     "reference_translation",
     "draft_transcript",
+    "reference",
+    "translation_reference",
 }
-ID_FIELDS = {"verse_id", "video_id", "chunk_source", "source_id"}
+ID_FIELDS = {"verse_id", "video_id", "chunk_source", "source_id", "sentence_id"}
 
 
 class PreflightError(ValueError):
@@ -168,7 +171,11 @@ def holdout_index(paths: list[Path] | None = None, *, allow_missing=False) -> di
 
 
 def check_training_row(row: dict, index: dict, label: str) -> None:
-    if row.get("split", "train") != "train" or row.get("usage") == "evaluation_only":
+    if (
+        row.get("split", "train") != "train"
+        or row.get("usage") == "evaluation_only"
+        or row.get("training_eligible") is False
+    ):
         raise PreflightError(f"Evaluation row in training input: {label}")
     if row.get("approved_for_training") is False or row.get("review_status") == "unapproved":
         raise PreflightError(f"Unapproved candidate in training input: {label}")
@@ -465,6 +472,33 @@ def validate_gemma(args: argparse.Namespace, index: dict) -> dict:
     }
 
 
+def index_source_wavs(audio_dir: Path) -> dict[str, list[Path]]:
+    """Index literal stems once per run, including nested and mixed-case WAV extensions."""
+    audio_files: dict[str, list[Path]] = {}
+    for path in sorted(audio_dir.rglob("*")):
+        if path.is_file() and path.suffix.lower() == ".wav":
+            audio_files.setdefault(path.stem, []).append(path)
+    return audio_files
+
+
+def resolve_source_wav(
+    audio_dir: Path, source: str, *, audio_files: dict[str, list[Path]] | None = None
+) -> Path | None:
+    """Resolve the same literal source for preflight, alignment and hard mining.
+
+    Source names are data, never glob expressions. Reject multiple matches even
+    when one is flat: guessing a sibling would bind the transcript to wrong audio.
+    Callers processing many sources may pass an explicit index for that run.
+    There is deliberately no process-global root/source cache.
+    """
+    if not isinstance(source, str) or not source or Path(source).name != source:
+        raise PreflightError(f"Invalid source WAV stem: {source!r}")
+    matches = (index_source_wavs(audio_dir) if audio_files is None else audio_files).get(source, [])
+    if len(matches) > 1:
+        raise PreflightError(f"Ambiguous source WAV for {source}: " + ", ".join(str(p) for p in sorted(matches)))
+    return matches[0] if matches else None
+
+
 def validate_w17_data(chunks_path: Path, deepgram_dir: Path, audio_dir: Path, index: dict) -> tuple[dict, list[dict]]:
     if not chunks_path.is_file():
         raise PreflightError(f"Missing Whisper chunks: {chunks_path}")
@@ -474,10 +508,7 @@ def validate_w17_data(chunks_path: Path, deepgram_dir: Path, audio_dir: Path, in
     eval_sources = {
         r.get("source") for r in chunks if isinstance(r, dict) and r.get("split") in {"eval", "test", "validation"}
     }
-    audio_files = {}
-    for path in audio_dir.rglob("*"):
-        if path.is_file() and path.suffix.lower() == ".wav":
-            audio_files.setdefault(path.stem, []).append(path)
+    audio_files = index_source_wavs(audio_dir)
     selected, excluded, checked_sources = [], 0, {}
     for number, row in enumerate(chunks, 1):
         if not isinstance(row, dict):
@@ -503,8 +534,8 @@ def validate_w17_data(chunks_path: Path, deepgram_dir: Path, audio_dir: Path, in
             transcripts = [
                 p for p in (deepgram_dir / f"{source}.deepgram.json", deepgram_dir / f"{source}.json") if p.is_file()
             ]
-            audio = audio_files.get(source, [])
-            if len(transcripts) != 1 or len(audio) != 1:
+            audio = resolve_source_wav(audio_dir, source, audio_files=audio_files)
+            if len(transcripts) != 1 or audio is None:
                 raise PreflightError(f"Require one exact Deepgram transcript and source WAV for {source}")
             words = json.loads(transcripts[0].read_text()).get("words")
             if not isinstance(words, list) or not words:
@@ -519,12 +550,12 @@ def validate_w17_data(chunks_path: Path, deepgram_dir: Path, audio_dir: Path, in
                     or not math.isfinite(word["end"])
                 ):
                     raise PreflightError(f"Malformed Deepgram word: {transcripts[0]}")
-            with wave.open(str(audio[0]), "rb") as wav:
+            with wave.open(str(audio), "rb") as wav:
                 if wav.getframerate() != 16000 or wav.getnchannels() != 1:
-                    raise PreflightError(f"Expected 16 kHz mono source WAV: {audio[0]}")
+                    raise PreflightError(f"Expected 16 kHz mono source WAV: {audio}")
                 duration = wav.getnframes() / wav.getframerate()
             checked_sources[source] = {
-                "audio": str(audio[0]),
+                "audio": str(audio),
                 "duration": duration,
                 "deepgram_sha256": sha256(transcripts[0]),
                 "words": words,

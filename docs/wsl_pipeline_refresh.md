@@ -140,6 +140,8 @@ Set `STARK_WHISPER_MODEL_CONFIG` when the config is not in the local Hugging Fac
 Explicit `--allow-target-expansion` retains every W16 source tensor and permits fresh
 added modules/DoRA magnitudes; `--require-replay` aborts if replay cannot load. The hard
 subset JSON is aligned into a separate `STARK_W17_DATASET` audiofolder before training.
+Preflight, mining and alignment share the same literal source-stem WAV lookup, including
+nested/mixed-case extensions; multiple matching paths fail without guessing.
 Existing outputs are refused. Neither `--dry-run` nor passing fixture tests fulfills the
 CUDA gate; mining, alignment, replay availability and hardware execution remain pending.
 

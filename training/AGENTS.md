@@ -28,6 +28,8 @@
   enables `--allow-target-expansion` for fresh added modules/DoRA magnitudes while retaining
   every W16 LoRA tensor. `--require-replay` forbids falling back to hard-only training.
   Hard-subset JSON is aligned into a separate audiofolder before training.
+  Preflight, mining and alignment resolve literal source stems through the same WAV
+  index; nested/mixed-case WAV extensions work, and ambiguous duplicate paths fail.
 - **Jacobo candidates:** [`candidates/README.md`](candidates/README.md) records original
   synthetic, **unapproved** preference triples, provenance and overlap checks. The CPO
   loader rejects these before GPU imports. The missing v2 holdout and bilingual review

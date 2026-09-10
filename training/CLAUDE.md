@@ -135,6 +135,9 @@ Strict init-from remains the trainer default; explicit expansion permits only ne
 selected target modules and newly introduced DoRA magnitudes to initialize fresh. Every
 source tensor must load. Existing recipe output paths are refused to preserve earlier work.
 Missing replay now fails W17 instead of silently producing hard-only training.
+Preflight, mining and alignment share a literal-stem WAV index: nested `.wav`, `.WAV`
+and mixed-case extensions work, filename glob characters are ordinary characters,
+and duplicate matching paths fail instead of choosing a flat file or wildcard sibling.
 Direct `train_whisper.py` invocations also require the local config before GPU imports;
 cache resolution honors `HF_HUB_CACHE`, `HF_HOME` and `XDG_CACHE_HOME`. When introducing
 DoRA on a source LoRA adapter, the trainer recomputes new magnitudes **after** loading W16

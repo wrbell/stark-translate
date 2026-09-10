@@ -12,7 +12,8 @@ deliberate rejected-name substitution. `approved_for_training: false` and
 markers before importing Unsloth. Do not remove the markers to bypass review.
 
 The [manifest](jacobo_candidates_20260910.manifest.json) records file hashes and zero
-exact normalized text overlaps against the seven available local holdout/canary files.
+exact normalized text overlaps against the eight available local holdout/canary files,
+including the new evaluation-only public EN/ES manifest.
 The required `bible_data/aligned/verse_pairs_test_v2.jsonl` was absent on this Mac.
 **The full holdout gate is therefore pending**, as are semantic overlap review and
 bilingual approval. Exact string checks cannot establish absence of paraphrase or topic
