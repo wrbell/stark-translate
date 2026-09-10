@@ -12,6 +12,7 @@ import csv
 import hashlib
 import importlib.metadata
 import json
+import math
 import os
 import re
 import subprocess
@@ -193,6 +194,8 @@ def configuration(spec, config, clip, size):
         "parakeet-mlx" if clip["lang"] == "en" else "mlx",
         "--replay-speed",
         "1",
+        "--replay-wait-client-seconds",
+        "15",
     ]
     return arguments, env, LatencyExperiments.from_env(env).as_dict()
 
@@ -218,6 +221,18 @@ def completion_errors(result, observed, metrics, expected, clip, source):
     if metadata.get("latency_experiment_configuration") != expected:
         errors.append("Resolved startup experiment configuration differs from requested values")
     summary = observed["session_summary"]
+    barrier = metadata.get("replay_client_wait", {})
+    if (
+        barrier.get("requested_seconds") != 15
+        or barrier.get("status") != "connected"
+        or not isinstance(barrier.get("actual_wait_seconds"), (int, float))
+        or not math.isfinite(barrier["actual_wait_seconds"])
+        or barrier["actual_wait_seconds"] < 0
+        or barrier.get("connected_clients", 0) < 1
+        or barrier.get("visibility_confirmed") is not False
+        or summary.get("replay_client_wait") != barrier
+    ):
+        errors.append("Replay client barrier did not confirm a connected client before capture")
     if summary.get("latency_experiment_configuration") != expected:
         errors.append("Resolved summary experiment configuration differs from requested values")
     if not observed["final_count"] or summary.get("chunks_completed") != observed["final_count"]:
@@ -548,6 +563,7 @@ def run(args):
             completion_validation={"valid": not errors and not result.get("error"), "errors": errors},
             tts_requested=False,
             profile_requested="standard",
+            replay_wait_client_seconds_requested=15,
             experiment_env={
                 key: value
                 for key, value in env.items()

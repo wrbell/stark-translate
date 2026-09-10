@@ -103,6 +103,7 @@ from tools.pipeline_timing import (
     milliseconds,
 )
 from tools.preview_candidates import RollingPreview, TranslationCandidate, common_prefix_words
+from tools.replay_client_barrier import ReplayClientBarrier, validate_replay_client_wait
 
 RUNTIME_PROFILE = resolve_profile(settings.profile)
 _managed_llama_server = None
@@ -169,6 +170,7 @@ _experiment_counters = {}
 _INPUT_AUDIO_HASH = None
 _latency = LatencyExperiments()
 _latency_trace = LatencyTrace()
+_replay_client_wait = ReplayClientBarrier()
 _stt_scheduler = None
 _caption_delivery = None
 _vad_pool = None
@@ -4275,6 +4277,7 @@ def print_summary():
             "latency_experiment_counters": _experiment_snapshot(),
             "latency_experiment_configuration": _latency.as_dict(),
             "latency_trace": _latency_trace.snapshot(),
+            "replay_client_wait": _replay_client_wait.snapshot(),
         },
     )
     if not all_results:
@@ -4839,6 +4842,9 @@ async def main_async(args):
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
     global _RUN_AB, _clean_session_shutdown, _session_model_ids, _session_main_task, _incremental_stt
+    global _replay_client_wait
+
+    _replay_client_wait = ReplayClientBarrier(getattr(args, "replay_wait_client_seconds", 0))
 
     _RUN_AB = args.run_ab
     _clean_session_shutdown = False
@@ -5032,6 +5038,7 @@ async def main_async(args):
         "vad": {**settings.vad.model_dump(), "artifact": _vad_provenance},
         "translation": settings.translation.model_dump(),
         "replay_speed": float(os.environ.get("STARK_REPLAY_SPEED", "1")),
+        "replay_client_wait": _replay_client_wait.snapshot(),
     }
     from pathlib import Path
 
@@ -5113,6 +5120,7 @@ async def main_async(args):
                     "stream_tokens": _stream_token_queue.qsize() if _stream_token_queue else 0,
                 },
                 "clients": len(ws_clients),
+                "replay_client_wait": _replay_client_wait.snapshot(),
             }
 
         def apply_control(operation):
@@ -5130,8 +5138,25 @@ async def main_async(args):
         _health._provider = health_provider
         _health._control = apply_control
 
-    # Run audio loop
+    # FileAudioStream anchors its clock only when audio_loop enters the stream.
+    # Keep this opt-in wait inside cleanup/control scope and before any capture.
     try:
+        if _replay_client_wait.seconds:
+            if _health is not None:
+                _health.phase("waiting_for_display")
+            _latency_trace.record("replay_client_wait_started", **_replay_client_wait.snapshot())
+            try:
+                await _replay_client_wait.wait(lambda: len(ws_clients))
+            finally:
+                wait_result = _replay_client_wait.snapshot()
+                metadata["replay_client_wait"] = wait_result
+                Path(os.path.dirname(DIAG_PATH), f"session_metadata_{SESSION_ID}.json").write_text(
+                    json.dumps(metadata, indent=2)
+                )
+                _latency_trace.record("replay_client_wait_finished", **wait_result)
+                logger.info("Replay client barrier: %s", wait_result)
+                if _health is not None:
+                    _health.phase("listening" if wait_result["status"] == "connected" else "replay_client_wait_failed")
         await audio_loop()
     except KeyboardInterrupt:
         pass
@@ -5254,6 +5279,12 @@ def main():
     parser.add_argument("--gain", type=float, default=None, help="Mic gain multiplier (default: auto-calibrate)")
     parser.add_argument("--audio-file", help="Replay a WAV through the live audio pipeline")
     parser.add_argument("--replay-speed", type=float, default=1.0, help="Replay speed; <=0 runs unpaced")
+    parser.add_argument(
+        "--replay-wait-client-seconds",
+        type=float,
+        default=0.0,
+        help="File replay only: wait up to this many seconds for a caption client before starting audio (0 disables)",
+    )
     parser.add_argument("--session-id", help="Deterministic session ID for metrics and recordings")
     parser.add_argument(
         "--exit-after-replay",
@@ -5470,6 +5501,13 @@ def main():
 
     parser.add_argument("--profile", choices=PROFILE_NAMES, default=settings.profile)
     args = parser.parse_args()
+    try:
+        validate_replay_client_wait(
+            args.replay_wait_client_seconds,
+            "file" if args.audio_file else os.environ.get("STARK_AUDIO_SOURCE", "mic"),
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
     try:
         validate_live_mts(args.mts, args.no_mts, settings.translation.mlx_mts)
     except ValueError as exc:

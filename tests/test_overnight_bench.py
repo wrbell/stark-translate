@@ -178,6 +178,7 @@ def test_configuration_is_standard_tts_off_and_independent_of_ambient_operator_s
         {}, {"env": {"STARK_EXPERIMENT_FIRST_PREVIEW_S": "0.35"}}, {"lang": "en", "provenance": "church_replay"}, "e4b"
     )
     assert bench.argument_value(args, "--profile") == "standard" and "--no-tts" in args
+    assert bench.argument_value(args, "--replay-wait-client-seconds") == "15"
     assert "STARK_PROFILE" not in env and "STARK_TTS_ENABLED" not in env
     assert "STARK_TRANSLATE_MARIAN_BACKEND" not in env
     assert env["STARK_SESSION_KIND"] == "replay" and env["HF_HUB_OFFLINE"] == "1"
@@ -210,8 +211,22 @@ def completed_fixture(tmp_path, session, expected, clip):
         writer.writeheader()
         writer.writerow(row)
     diagnostics = metrics / f"diagnostics_{session}.jsonl"
+    barrier = {
+        "requested_seconds": 15,
+        "actual_wait_seconds": 0.25,
+        "status": "connected",
+        "connected_clients": 1,
+        "visibility_confirmed": False,
+    }
     diagnostics.write_text(
-        json.dumps({"event": "session_summary", "chunks_completed": 1, "latency_experiment_configuration": expected})
+        json.dumps(
+            {
+                "event": "session_summary",
+                "chunks_completed": 1,
+                "latency_experiment_configuration": expected,
+                "replay_client_wait": barrier,
+            }
+        )
         + "\n"
     )
     return {
@@ -231,6 +246,7 @@ def completed_fixture(tmp_path, session, expected, clip):
             "input_audio_sha256": clip["sha256"],
             "source_lang": clip["lang"],
             "replay_speed": 1,
+            "replay_client_wait": barrier,
             "profile": {"name": "standard"},
             "backend": "mlx",
             "latency_experiment_configuration": expected,
@@ -323,3 +339,28 @@ def test_report_excludes_failed_fast_samples_instead_of_rewarding_them(tmp_path)
     group = result["groups"][0]
     assert group["endpoints"]["silence|replay_realtime"] == {"n": 1, "p50": 1000, "p95": 1000}
     assert group["first_preview_ms"]["p50"] == 1000 and group["failures"] == 1
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        None,
+        {"status": "timed_out"},
+        {"requested_seconds": 0},
+        {"connected_clients": 0},
+        {"actual_wait_seconds": float("nan")},
+        {"visibility_confirmed": True},
+    ],
+)
+def test_benchmark_requires_resolved_client_barrier_evidence(tmp_path, change):
+    clip = {"lang": "en", "sha256": "input"}
+    result = completed_fixture(tmp_path, "s", {}, clip)
+    observed = inspect_run(result, tmp_path / "metrics")
+    if change is None:
+        result["session_metadata"].pop("replay_client_wait")
+    else:
+        result["session_metadata"]["replay_client_wait"].update(change)
+    errors = bench.completion_errors(
+        result, observed, tmp_path / "metrics", {}, clip, {"all_code_sha256": {"dry_run_ab.py": "code"}}
+    )
+    assert any("client barrier" in message for message in errors)
