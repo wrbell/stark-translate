@@ -738,6 +738,7 @@ def correct_stt_output(text):
 
     Returns (corrected_text, corrections_list) where each correction is
     (original, replacement, correction_type).
+    Existing whitespace is retained; this does not infer missing STT boundaries.
     """
     corrections = []
     result = text
@@ -750,7 +751,7 @@ def correct_stt_output(text):
             corrections.append((phrase, replacement, "phrase"))
 
     # 2. Always apply near-miss corrections (unambiguous misspellings)
-    words = result.split()
+    words = re.split(r"(\s+)", result)
     for i, w in enumerate(words):
         clean = w.lower().strip(".,!?;:'\"()")
         if clean in NEAR_MISS_CORRECTIONS:
@@ -763,7 +764,7 @@ def correct_stt_output(text):
             trailing = w[len(stripped) :]
             words[i] = replacement + trailing
             corrections.append((clean, NEAR_MISS_CORRECTIONS[clean], "near_miss"))
-    result = " ".join(words)
+    result = "".join(words)
 
     # 3. Context-gated homophone corrections
     # Only apply if ANY theological term is present in the text
@@ -771,7 +772,7 @@ def correct_stt_output(text):
     has_theological_context = bool(words_lower & THEOLOGICAL_TERMS)
 
     if has_theological_context:
-        words = result.split()
+        words = re.split(r"(\s+)", result)
         for i, w in enumerate(words):
             clean = w.lower().strip(".,!?;:'\"()")
             if clean in HOMOPHONE_FLAGS:
@@ -782,7 +783,7 @@ def correct_stt_output(text):
                 trailing = w[len(stripped) :]
                 words[i] = replacement + trailing
                 corrections.append((clean, HOMOPHONE_FLAGS[clean], "homophone"))
-        result = " ".join(words)
+        result = "".join(words)
 
     return result, corrections
 

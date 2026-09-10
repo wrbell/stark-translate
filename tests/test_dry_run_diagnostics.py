@@ -632,6 +632,29 @@ class TestCorrectSttOutput:
         assert text == ""
         assert corrections == []
 
+    @pytest.mark.parametrize("text", ["Eternity\nTime will soon end.", "  God\t is love.\r\nAmen!  ", "\n\t  "])
+    def test_preserves_existing_whitespace_when_no_correction_applies(self, text):
+        from dry_run_ab import correct_stt_output
+
+        corrected, corrections = correct_stt_output(text)
+        assert corrected == text
+        assert corrections == []
+
+    def test_token_corrections_preserve_adjacent_newline_case_and_punctuation(self):
+        from dry_run_ab import correct_stt_output
+
+        text = "The Exhitation.\nChrist's rain\tand mercy.\r\nThe rain of Christ."
+        corrected, corrections = correct_stt_output(text)
+        assert corrected == "The Exaltation.\nChrist's reign\tand mercy.\r\nThe reign of Christ."
+        assert [kind for _, _, kind in corrections] == ["near_miss", "homophone", "homophone"]
+
+    def test_phrase_correction_preserves_surrounding_title_separator(self):
+        from dry_run_ab import correct_stt_output
+
+        corrected, corrections = correct_stt_output("Eternity\nHe began to waver in the beach.\nTime will soon end.")
+        assert corrected == "Eternity\nHe began to wavering in speech.\nTime will soon end."
+        assert corrections == [("waver in the beach", "wavering in speech", "phrase")]
+
 
 # ===================================================================
 # Music hold diagnostics accumulator
