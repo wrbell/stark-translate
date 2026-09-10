@@ -2,6 +2,14 @@
 
 This describes the overnight reliability implementation. The integrated UI uses these APIs; this document does not claim physical microphone, speaker, reconnect, or Windows device acceptance. Those checks remain a separate rehearsal.
 
+## Operator access boundary
+
+The operator defaults to `127.0.0.1:9000` in the CLI, source launcher, systemd template/bootstrap and generated launchd configuration. The public audience display and caption ports remain separate LAN services. A remote audience screen does not require opening the operator port.
+
+Operator HTTP and WebSocket requests validate the connection peer and Host header. Browser origins must match the operator scheme, host and port; foreign or opaque origins are rejected before controls or private-data routes run. Originless local CLI clients remain supported. These guards prevent accidental LAN exposure and cross-origin browser control; they are not authentication against other programs/users on the same computer.
+
+Remote operator use is explicit: `stark-translate operator --host 0.0.0.0`, or `HOST=0.0.0.0 ./run_operator.sh`. The launcher prints an unauthenticated-access warning. Reachable clients on that network can control sessions and read private recordings; use a restricted trusted network or an authenticated tunnel/proxy. Exact custom DNS/proxy names require `STARK_OPERATOR_ALLOWED_HOSTS=operator.example` (comma-separated hostnames/IPs, no wildcards). Interface IP addresses are discovered when the remote policy initializes; restart after changing interfaces. Direct uvicorn deployments must also set `STARK_OPERATOR_BIND_HOST` to their intended binding policy. Reverse proxies must preserve the request Host and correct HTTP/TLS scheme; authentication at the proxy is separate from these request guards.
+
 ## Before a service
 
 Select a runtime profile and language, then run preflight. Profiles listed by `GET /api/capabilities` are selectable software configurations; the list does not establish that their models or dependencies are installed. Preflight reports the effective configuration, and Start runs fresh server-side preflight again. A failed preflight returns HTTP 422 with `detail.code = preflight_failed` and the current checks. A stale green browser result cannot bypass it. Language, VAD and engine restarts run the same check before stopping the working session. An engine choice incompatible with the selected profile is rejected without restarting.

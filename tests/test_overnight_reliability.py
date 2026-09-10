@@ -421,7 +421,7 @@ def test_capabilities_separate_supported_controls_from_readiness(monkeypatch):
     assert "standard" in caps["profiles"] and caps["preflight_required"]
     assert caps["audio_tests"] and caps["audio_tests_require_idle"]
     assert not caps["audio_devices_validated"]
-    assert caps["audience_urls"]["audience"] == "http://testserver:18080/displays/audience_display.html?port=18765"
+    assert caps["audience_urls"]["audience"] == "http://localhost:18080/displays/audience_display.html?port=18765"
 
 
 def test_capture_handoff_recovers_after_consumer_error():

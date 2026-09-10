@@ -131,7 +131,7 @@ WorkingDirectory=$ROOT
 Environment=STARK_PROJECT_ROOT=$ROOT
 Environment=STARK_OPERATOR_LOG_DIR=$ROOT/metrics
 ExecStart=
-ExecStart=$VENV/bin/uvicorn operator_app.main:app --host 0.0.0.0 --port 9000
+ExecStart=$VENV/bin/uvicorn operator_app.main:app --host 127.0.0.1 --port 9000
 EOF
         sudo systemctl daemon-reload
         sudo systemctl enable stark-translate.service

@@ -2,7 +2,7 @@
 
 Subcommands:
 
-    stark-translate operator [--port 9000] [--host 0.0.0.0] [--no-browser]
+    stark-translate operator [--port 9000] [--host 127.0.0.1] [--no-browser]
         Launch the FastAPI control plane and (by default) open the operator
         UI in the user's default browser.
 
@@ -56,7 +56,13 @@ def cmd_operator(args: argparse.Namespace) -> int:
     """Launch FastAPI on the configured port and open the browser."""
     import uvicorn
 
-    url = f"http://{args.host if args.host != '0.0.0.0' else 'localhost'}:{args.port}/operator/"
+    from operator_app.security import configure_operator_host
+
+    configure_operator_host(args.host)
+    browser_host = "localhost" if args.host in {"0.0.0.0", "::"} else args.host
+    if ":" in browser_host:
+        browser_host = f"[{browser_host}]"
+    url = f"http://{browser_host}:{args.port}/operator/"
     if not args.no_browser:
         # Open AFTER uvicorn binds — but uvicorn.run blocks. Use a small thread.
         import threading
@@ -165,7 +171,9 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(metavar="COMMAND")
 
     p_op = sub.add_parser("operator", help="Launch the FastAPI control plane + browser UI")
-    p_op.add_argument("--host", default="0.0.0.0", help="Bind host (default: 0.0.0.0)")
+    p_op.add_argument(
+        "--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1; remote access has no authentication)"
+    )
     p_op.add_argument("--port", type=int, default=9000, help="Bind port (default: 9000)")
     p_op.add_argument("--no-browser", action="store_true", help="Don't open the browser")
     p_op.add_argument(

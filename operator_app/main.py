@@ -1,7 +1,7 @@
 """FastAPI control plane (Phase 9.1+).
 
 Run with:
-    uvicorn operator_app.main:app --host 0.0.0.0 --port 9000
+    uvicorn operator_app.main:app --host 127.0.0.1 --port 9000
 
 The HTML/JS frontend is served from ``displays/operator/`` at ``/operator/``.
 """
@@ -82,6 +82,9 @@ app = FastAPI(
     description="Live pipeline control plane (Phase 9).",
     lifespan=_lifespan,
 )
+from operator_app.security import OperatorBoundaryMiddleware
+
+app.add_middleware(OperatorBoundaryMiddleware)
 app.include_router(review_router)
 from operator_app.support import router as support_router
 

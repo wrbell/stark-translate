@@ -7,7 +7,7 @@
 # production; running it directly is the same behavior.
 #
 # Usage:
-#     ./run_operator.sh                                # default 0.0.0.0:9000
+#     ./run_operator.sh                                # default 127.0.0.1:9000
 #     PORT=9001 ./run_operator.sh                      # custom port
 #     STARK_OPERATOR_LOG_DIR=... ./run_operator.sh     # custom log dir
 
@@ -16,7 +16,7 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-HOST="${HOST:-0.0.0.0}"
+HOST="${HOST:-127.0.0.1}"
 PORT="${PORT:-9000}"
 source "$ROOT/scripts/runtime_env.sh"
 PYTHON="$(stark_resolve_python "$ROOT")"
@@ -32,4 +32,4 @@ if ! "$PYTHON" -c 'import uvicorn' >/dev/null 2>&1; then
 fi
 
 echo "starting operator at http://$HOST:$PORT (logs: $STARK_OPERATOR_LOG_DIR)"
-exec "$PYTHON" -m uvicorn operator_app.main:app --host "$HOST" --port "$PORT"
+exec "$PYTHON" -m operator_app.cli operator --no-browser --host "$HOST" --port "$PORT"
