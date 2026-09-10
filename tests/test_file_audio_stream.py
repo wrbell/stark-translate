@@ -11,6 +11,7 @@ import numpy as np
 import pytest
 
 from tools.audio_bridge_client import FileAudioStream, open_audio_stream
+from tools.capture_handoff import CaptureTransportSummary
 
 
 @pytest.fixture(autouse=True)
@@ -20,6 +21,8 @@ def fresh_session_discard_state(monkeypatch):
     import dry_run_ab as pipeline
 
     monkeypatch.setattr(pipeline, "_discarded_utterance_id", 0)
+    # Keep real transport accounting isolated for each simulated session.
+    monkeypatch.setattr(pipeline, "_capture_transport", CaptureTransportSummary())
 
 
 @pytest.fixture
@@ -185,7 +188,7 @@ def test_audio_loop_drains_eof_and_waits_for_partial(monkeypatch, speech_frames)
         queue = asyncio.Queue()
         for _ in range(speech_frames):
             queue.put_nowait(np.ones(512, np.float32) * 0.1)
-        stream = MagicMock()
+        stream = MagicMock(spec=["__enter__", "__exit__"])
         stream.finished = threading.Event()
         stream.finished.set()
         stream.error = None
@@ -256,7 +259,7 @@ def test_no_exit_after_replay_keeps_loop_open(monkeypatch):
     monkeypatch.setattr(d.sd, "PortAudioError", type("PortAudioError", (Exception,), {}))
 
     async def exercise():
-        stream = MagicMock()
+        stream = MagicMock(spec=["__enter__", "__exit__"])
         stream.finished = threading.Event()
         stream.finished.set()
         stream.error = None
@@ -335,7 +338,7 @@ def test_control_or_disconnect_preserves_truthful_buffer_outcome(monkeypatch, tm
         queue = asyncio.Queue()
         for _ in range(25):
             queue.put_nowait(np.ones(512, np.float32) * 0.1)
-        stream = MagicMock()
+        stream = MagicMock(spec=["__enter__", "__exit__"])
         stream.error = None
         stream.finished = threading.Event()
         health = PipelineHealth(tmp_path, "control_en")

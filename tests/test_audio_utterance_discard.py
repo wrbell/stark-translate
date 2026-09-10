@@ -10,6 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import numpy as np
 import pytest
 
+from tools.capture_handoff import CaptureTransportSummary
 from tools.latency_experiments import LatencyExperiments
 from tools.latency_scheduler import PartialRuntimePredictor
 from tools.latency_trace import LatencyTrace
@@ -40,6 +41,7 @@ def pipeline(monkeypatch):
     monkeypatch.setattr(d, "_last_capture_utterance_id", 0)
     monkeypatch.setattr(d, "_latency", LatencyExperiments())
     monkeypatch.setattr(d, "_source_coverage", SourceCoverage())
+    monkeypatch.setattr(d, "_capture_transport", CaptureTransportSummary())
     monkeypatch.setattr(d, "_stt_scheduler", None)
     monkeypatch.setattr(d, "_vad_pool", None)
     monkeypatch.setattr(d, "_health", None)
@@ -81,7 +83,8 @@ async def capture(pipeline, monkeypatch, frames, queue_type=asyncio.Queue, resum
     decisions = iter(speech for _, speech in all_frames)
     for audio, _ in frames:
         queue.put_nowait(audio)
-    stream = MagicMock()
+    # Scripted context only: never invent capture_snapshot() or loss counters.
+    stream = MagicMock(spec=["__enter__", "__exit__"])
     stream.finished = threading.Event()
     stream.finished.set()
     stream.error = None
@@ -492,7 +495,7 @@ def test_capture_error_discards_identity_and_short_buffer_before_retry(pipeline,
         monkeypatch.setattr(d.asyncio, "sleep", sleep)
 
         def open_stream(**kwargs):
-            stream = MagicMock()
+            stream = MagicMock(spec=["__enter__", "__exit__"])
             stream.finished = threading.Event()
             stream.finished.set()
             stream.error = AudioCaptureError("device lost") if not calls else None
@@ -530,7 +533,7 @@ def test_subminimum_capture_end_invalidates_inflight_preview_without_final(pipel
     monkeypatch.setattr(d, "is_speech", lambda *args: True)
     health = PipelineHealth(tmp_path, d.SESSION_ID)
     monkeypatch.setattr(d, "_health", health)
-    stream = MagicMock()
+    stream = MagicMock(spec=["__enter__", "__exit__"])
     stream.finished = threading.Event()
     stream.error = None
     monkeypatch.setattr(audio_bridge_client, "open_audio_stream", lambda **kwargs: stream)

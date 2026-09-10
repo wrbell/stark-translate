@@ -144,3 +144,17 @@ if VAD state is reset afterward. These are proposed bounded experiments, not
 implemented or selected optimizations. File replay cannot certify PortAudio
 capture. A later authorized native rehearsal must separately verify callback
 flow, observed and terminal accounting, consumer delivery, and clean shutdown.
+
+## Existing fixture compatibility follow-up
+
+The first full CI run on `d7ed43d` exposed six failures in older capture/file
+fixtures. Their unrestricted `MagicMock` streams invented `capture_snapshot()`
+and truthy loss counters; production shutdown correctly reported those fabricated
+losses. The fixtures now expose only their scripted context-manager interface
+and use the real per-session transport accumulator. They do not pretend to be
+`FileAudioStream` instances or weaken production loss checks.
+
+The combined capture-accounting, utterance-discard and file-stream checks then
+passed **73 tests and 20 subtests** in 11.34 seconds, with devices/models mocked.
+The original CI failure remains retained; full CI on the fixture repair is a
+separate validation step.
