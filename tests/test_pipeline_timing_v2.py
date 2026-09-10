@@ -79,7 +79,10 @@ def test_render_ack_upper_bound_is_server_clock_only():
     assert not tracker.pending
 
 
-def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(monkeypatch):
+@pytest.mark.parametrize("confirmed_speculation", [False, True])
+def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(
+    monkeypatch, tmp_path, confirmed_speculation
+):
     import dry_run_ab as pipeline
 
     clock = [20.0]
@@ -102,12 +105,22 @@ def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(mon
 
     def translation(*args, **kwargs):
         clock[0] += 0.4
+        pipeline._last_gen_stats[7] = {"generation_lock_wait_ms_a": 12.5}
         return "La gracia de Dios", 400, 10
+
+    def confirm(*args):
+        if not confirmed_speculation:
+            return None
+        clock[0] += 0.4
+        return SimpleNamespace(
+            text="La gracia de Dios", latency_ms=400, tokens_per_second=10, generation_lock_wait_ms=12.5
+        )
 
     def diagnostics(*args):
         clock[0] += 0.2
 
     monkeypatch.setattr(pipeline, "translate_mlx_streaming", translation)
+    monkeypatch.setattr(pipeline, "_confirmed_speculation", confirm)
     monkeypatch.setattr(pipeline, "check_homophones", diagnostics)
     monkeypatch.setattr(pipeline, "check_bad_split", lambda *args: None)
     monkeypatch.setattr(pipeline, "check_near_miss", lambda *args: None)
@@ -137,6 +150,14 @@ def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(mon
     assert final["utterance_id"] == 4
     assert final["broadcast_ms"] is None  # cannot know before sending
     assert pipeline.all_results[0]["broadcast_ms"] == 50
+    assert final["final_translation_route"] == "gemma"
+    assert final["generation_lock_wait_ms_a"] == 12.5
+    diagnostic_path = tmp_path / "diagnostics.jsonl"
+    monkeypatch.setattr(pipeline, "DIAG_PATH", str(diagnostic_path))
+    pipeline.write_diag_jsonl(pipeline.all_results[0], None)
+    persisted = json.loads(diagnostic_path.read_text())
+    assert persisted["final_translation_route"] == "gemma"
+    assert persisted["generation_lock_wait_ms_a"] == 12.5
 
 
 def test_delayed_speaker_update_uses_final_chunk_id(monkeypatch):

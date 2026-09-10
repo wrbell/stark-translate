@@ -52,10 +52,24 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
     if duplicate_samples:
         raise ValueError("Overlapping final source spans")
     results = []
+    masked = any("required_intervals" in anchor for anchor in anchors)
+    if masked and not all("required_intervals" in anchor for anchor in anchors):
+        raise ValueError("Cannot mix buffered-span and VAD-mask anchors")
     for anchor in anchors:
         start, end, speech_end = (_number(anchor.get(k)) for k in ("sample_start", "sample_end", "speech_end_sample"))
         if not 0 <= start < speech_end <= end:
             raise ValueError("Invalid frozen source anchor")
+        required = anchor.get("required_intervals", [[start, end]])
+        if not isinstance(required, list) or not required:
+            raise ValueError("Frozen source anchor requires nonempty intervals")
+        for interval in required:
+            if not isinstance(interval, (list, tuple)) or len(interval) != 2:
+                raise ValueError("Invalid required source interval")
+            left, right = map(_number, interval)
+            if not start <= left < right <= (speech_end if masked else end):
+                raise ValueError("Required source interval outside anchor")
+        required = merged(required)
+        required_samples = sum(b - a for a, b in required)
         eligible = anchor.get("endpoint_reason") not in {"eof", "pause", "stop"} and not anchor.get(
             "padding_samples", 0
         )
@@ -63,11 +77,11 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
         for row in sorted(records, key=lambda r: r["ready"]):
             if row["padding"]:
                 continue  # synthetic tail cannot supply a gain target
-            left, right = max(start, row["start"]), min(end, row["end"])
-            if right <= left:
-                continue
-            pieces.append((left, right))
-            if sum(b - a for a, b in merged(pieces)) == end - start:
+            for required_start, required_end in required:
+                left, right = max(required_start, row["start"]), min(required_end, row["end"])
+                if right > left:
+                    pieces.append((left, right))
+            if sum(b - a for a, b in merged(pieces)) == required_samples:
                 completed_at = row["ready"] - origin
                 break
         results.append(
@@ -76,6 +90,7 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
                 "sample_start": start,
                 "sample_end": end,
                 "speech_end_sample": speech_end,
+                "required_intervals": required,
                 "eligible": eligible,
                 "covered": completed_at is not None,
                 "speech_end_to_span_final_ms": (
@@ -84,17 +99,10 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
             }
         )
     values = sorted(r["speech_end_to_span_final_ms"] for r in results if r["speech_end_to_span_final_ms"] is not None)
-    # Match NumPy's ordinary linear percentile without importing an inference stack.
-    position = (len(values) - 1) * 0.95
-    lower = int(position) if values else 0
-    p95 = (
-        values[lower] + (values[min(lower + 1, len(values) - 1)] - values[lower]) * (position - lower)
-        if values
-        else None
-    )
+    p95 = values[math.ceil(len(values) * 0.95) - 1] if values else None
     return {
         "schema_version": 1,
-        "metric": "fixed_source_span_server_delivery",
+        "metric": "fixed_vad_positive_source_server_delivery" if masked else "fixed_source_span_server_delivery",
         "status": (
             "no_eligible_anchors"
             if not any(r["eligible"] for r in results)
@@ -107,5 +115,7 @@ def fixed_span_delivery(anchors: list[dict], finals: list[dict], *, sample_rate:
         "n": len(values),
         "p50_ms": statistics.median(values) if values else None,
         "p95_ms": p95,
-        "quality_scope": "Audio-span completion only; source/translation references scored separately",
+        "percentile_method": "median p50; nearest-rank ceil(0.95*n) p95",
+        "quality_scope": "Frozen machine-VAD mask completion" if masked else "Audio-span completion only",
+        "reference_quality": "Source/translation references scored separately; VAD mask is not acoustic truth",
     }

@@ -58,3 +58,11 @@ def test_observed_source_cannot_extend_beyond_declared_eof():
     ledger.eof(512, 16000)
     assert ledger.snapshot()["observed_samples_beyond_eof"] == 512
     assert not ledger.snapshot()["complete"]
+
+
+def test_frozen_vad_mask_retains_transitions_inside_buffered_audio():
+    ledger = SourceCoverage()
+    ledger.observe(span(0, 512), "buffered", speech=True)
+    ledger.observe(span(512, 1024), "buffered", speech=False)
+    ledger.observe(span(1024, 1536), "buffered", speech=True)
+    assert [r["vad_positive"] for r in ledger.snapshot()["observed"]] == [True, False, True]

@@ -65,3 +65,31 @@ def test_no_eligible_anchors_is_not_a_completed_comparison():
 def test_final_cannot_be_ready_before_its_source_arrives():
     with pytest.raises(ValueError, match="complete source capture"):
         fixed_span_delivery([ANCHOR], [final(0, 8000, 7000)], sample_rate=1000)
+
+
+def test_frozen_vad_mask_allows_omitted_silence_but_not_omitted_speech():
+    anchor = {**ANCHOR, "required_intervals": [[0, 3000], [4000, 7900]]}
+    records = [final(0, 3000, 3500), final(4000, 7900, 8500)]
+    result = fixed_span_delivery([anchor], records, sample_rate=1000)
+    assert result["status"] == "complete"
+    assert result["metric"] == "fixed_vad_positive_source_server_delivery"
+    assert fixed_span_delivery([ANCHOR], records, sample_rate=1000)["status"] == "missing_source"
+    records[1]["sample_start"] = 4100
+    records[1]["timing_stages_ms"]["captured_start"] = 14100
+    assert fixed_span_delivery([anchor], records, sample_rate=1000)["status"] == "missing_source"
+
+
+def test_p95_is_explicit_nearest_rank_for_tail_guard():
+    anchors = [
+        {
+            "id": str(i),
+            "sample_start": i * 2000,
+            "sample_end": i * 2000 + 1000,
+            "speech_end_sample": i * 2000 + 1000,
+            "endpoint_reason": "silence",
+        }
+        for i in range(2)
+    ]
+    result = fixed_span_delivery(anchors, [final(0, 1000, 1500), final(2000, 3000, 4130)], sample_rate=1000)
+    assert result["p95_ms"] == 1130
+    assert "nearest-rank" in result["percentile_method"]

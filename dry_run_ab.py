@@ -83,6 +83,7 @@ import websockets
 from settings import settings
 from stark_translate.profiles import apply_profile, resolve_profile
 from tools.capture_handoff import CaptureHandoff
+from tools.final_queue_pressure import FinalQueuePressure
 from tools.isolated_audio import AudioCaptureError
 from tools.latency_experiments import LatencyExperiments
 from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker, PartialRuntimePredictor
@@ -170,6 +171,7 @@ _experiment_counters = {}
 _INPUT_AUDIO_HASH = None
 _latency = LatencyExperiments()
 _latency_trace = LatencyTrace(origin=_SESSION_CLOCK_ORIGIN)
+_final_queue_pressure = FinalQueuePressure(origin=_SESSION_CLOCK_ORIGIN, on_event=_latency_trace.record)
 _source_coverage = SourceCoverage()
 _partial_runtime = PartialRuntimePredictor()
 _PARTIAL_DEFERRED = object()
@@ -2755,6 +2757,16 @@ async def process_partial(
                     **sample_bounds,
                 },
             )
+            _latency_trace.record(
+                "partial_physical_result",
+                utterance_id=utterance_id,
+                request_sequence=request_sequence,
+                processed_audio_samples=processed_audio_samples,
+                audio_sample_rate=SAMPLE_RATE,
+                rolling_offset_samples=rolling_start,
+                incremental_mode=_latency.incremental_stt,
+                **sample_bounds,
+            )
             elapsed = (time.perf_counter() - started) * 1000
             if margin:
                 _partial_runtime.observe(original_audio_duration, elapsed)
@@ -3163,6 +3175,7 @@ async def _pipeline_translate_and_finalize(
     spanish_a = spanish_b = None
     lat_a = lat_b = tps_a = tps_b = 0.0
     qe_a = qe_b = None
+    final_translation_route = None
     timing = timing or ChunkTiming(submitted=e2e_start)
     timing.translation_requested = time.perf_counter()
     try:
@@ -3177,6 +3190,8 @@ async def _pipeline_translate_and_finalize(
                     return fn(*args)
 
                 def submit_translate(pool, fn, *args):
+                    nonlocal final_translation_route
+                    final_translation_route = "marian" if fn is translate_marian else "gemma"
                     _count_experiment("final_marian_routes" if fn is translate_marian else "final_gemma_requests")
                     return loop.run_in_executor(pool, timed_translate, fn, *args)
 
@@ -3186,6 +3201,7 @@ async def _pipeline_translate_and_finalize(
                 confirmed = _confirmed_speculation(timing.utterance_id, english, stt_confidence)
                 # Only a matching final STT result can commit earlier generation.
                 if confirmed is not None:
+                    final_translation_route = "gemma"
                     timing.translation_started = time.perf_counter()
                     spanish_a, lat_a, tps_a = confirmed.text, confirmed.latency_ms, confirmed.tokens_per_second
                     _last_gen_stats[cid] = _generation_stats(confirmed)
@@ -3432,9 +3448,13 @@ async def _pipeline_translate_and_finalize(
             "qe_a": qe_a,
             "qe_b": qe_b,
             "word_stability_pct": word_stability_pct,
+            "final_translation_route": final_translation_route,
             "timestamp": datetime.now().isoformat(),
         }
         result_data.update(gen_stats)
+        if final_translation_route == "marian":
+            # No Gemma lock was acquired: null is not a measured zero wait.
+            result_data["generation_lock_wait_ms_a"] = None
         result_data.update(_session_provenance())
         # Phase 9.6.1: speaker lookup is a JSONL read (no models). Rolling-WAV
         # export happens on _io_pool below so this stays off the GPU path.
@@ -3547,6 +3567,7 @@ async def _pipeline_coordinator():
 
         audio_data, e2e_start, utterance_start, timing = item
         timing.dequeued = time.perf_counter()
+        _final_queue_pressure.dequeued(item, now=timing.dequeued)
         dequeue_time = time.perf_counter()
         queue_wait_ms = round((dequeue_time - e2e_start) * 1000, 1)
         chunk_id += 1
@@ -3580,10 +3601,16 @@ async def _pipeline_coordinator():
             whisper_prompt = _whisper_prompt()
             timing.stt_requested = time.perf_counter()
 
-            def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing):
+            def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing, chunk=cid):
                 clock.stt_started = time.perf_counter()
                 try:
-                    return _run_tracked_stt("final", _run_stt_via_worker if MULTIPROCESS else _run_stt, audio, prompt)
+                    return _run_tracked_stt(
+                        "final",
+                        _run_stt_via_worker if MULTIPROCESS else _run_stt,
+                        audio,
+                        prompt,
+                        trace_fields={"chunk_id": chunk, "utterance_id": clock.utterance_id, **clock.sample_metadata()},
+                    )
                 finally:
                     clock.stt_finished = time.perf_counter()
 
@@ -3724,7 +3751,11 @@ async def pipeline_submit(audio_data, utterance_start=None, timing=None):
         timing = timing or ChunkTiming()
         timing.submitted = submitted
         _source_coverage.outcome(timing.sample_metadata(), "submitted", timing.utterance_id)
-        await _pipeline_chunk_queue.put((audio_data, submitted, utterance_start, timing))
+        await _final_queue_pressure.put(
+            _pipeline_chunk_queue,
+            (audio_data, submitted, utterance_start, timing),
+            utterance_id=timing.utterance_id,
+        )
 
 
 async def process_final(audio_data, finalized_utterance_id=None):
@@ -4321,6 +4352,7 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "mic_gain": MIC_GAIN,
         "english": data["english"],
         "spanish_gemma": data.get("spanish_a"),
+        "final_translation_route": data.get("final_translation_route"),
         "spanish_marian": marian_text,
         "stt_confidence": conf,
         "qe_a": data.get("qe_a"),
@@ -4497,6 +4529,7 @@ def print_summary():
             "latency_experiment_counters": _experiment_snapshot(),
             "latency_experiment_configuration": _latency.as_dict(),
             "latency_trace": _latency_trace.snapshot(),
+            "final_queue_pressure": _final_queue_pressure.snapshot(),
             "source_coverage": _source_coverage.snapshot(),
             "replay_client_wait": _replay_client_wait.snapshot(),
         },
@@ -4808,11 +4841,13 @@ async def audio_loop():
 
                     # Skip all speech buffering when in music hold
                     if music_hold_active:
-                        _source_coverage.observe(vars(frame_stamp), "music_hold")
+                        _source_coverage.observe(vars(frame_stamp), "music_hold", speech=has_speech)
                         continue
 
                     buffered_frame = has_speech or (len(speech_buffer) > 0 and silence_frames + 1 < max_silence_frames)
-                    _source_coverage.observe(vars(frame_stamp), "buffered" if buffered_frame else "vad_non_speech")
+                    _source_coverage.observe(
+                        vars(frame_stamp), "buffered" if buffered_frame else "vad_non_speech", speech=has_speech
+                    )
 
                     if has_speech:
                         if silence_frames:
@@ -5885,8 +5920,10 @@ def main():
             args.run_ab = False
 
     global _latency, _latency_trace, _stt_scheduler, _marian_memo, _vad_pool, _source_coverage, _partial_runtime
+    global _final_queue_pressure
     _latency = LatencyExperiments.from_env()
     _latency_trace = LatencyTrace(_latency.trace, origin=_SESSION_CLOCK_ORIGIN)
+    _final_queue_pressure = FinalQueuePressure(origin=_SESSION_CLOCK_ORIGIN, on_event=_latency_trace.record)
     _source_coverage = SourceCoverage()
     _partial_runtime = PartialRuntimePredictor()
     _marian_memo = ExactTextMemo(_latency.marian_memo)

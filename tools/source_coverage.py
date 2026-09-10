@@ -50,7 +50,7 @@ class SourceCoverage:
         self._rate = rate
         return start, end
 
-    def observe(self, metadata, state):
+    def observe(self, metadata, state, *, speech=None):
         with self._lock:
             bounds = self._bounds(metadata)
             if bounds is None or bounds[0] == bounds[1]:
@@ -59,10 +59,15 @@ class SourceCoverage:
             if start < self._last_end:
                 self._overlap += min(end, self._last_end) - start
             self._last_end = max(end, self._last_end)
-            if self._observed and self._observed[-1]["state"] == state and self._observed[-1]["end"] == start:
+            if (
+                self._observed
+                and self._observed[-1]["state"] == state
+                and self._observed[-1]["end"] == start
+                and self._observed[-1].get("vad_positive") == speech
+            ):
                 self._observed[-1]["end"] = end
             elif len(self._observed) < self.capacity:
-                self._observed.append({"start": start, "end": end, "state": state})
+                self._observed.append({"start": start, "end": end, "state": state, "vad_positive": speech})
             else:
                 self._dropped += 1
 
