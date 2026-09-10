@@ -52,18 +52,18 @@
   },
   "cpu_suite": {
     "status": "passed",
-    "passed": 1787,
+    "passed": 1790,
     "skipped": 4,
-    "duration_s": 41.07,
+    "duration_s": 41.25,
     "coverage_percent": 59.07,
-    "log": ".cache/mac-roadmap/full-tests-release.log",
-    "coverage": ".cache/mac-roadmap/coverage-release.json",
+    "log": ".cache/mac-roadmap/full-tests-delivery.log",
+    "coverage": ".cache/mac-roadmap/coverage-delivery.json",
     "initial_failure": {
       "log": ".cache/mac-roadmap/full-tests-final-initial-failure.log",
       "reason": "The old packaging shape test did not accept derived-ct2 entries. It now validates their pinned source, direction and int8 quantization.",
       "fix_revision": "753c48e"
     },
-    "packaging_followup": "Complete suite rerun after source-ZIP generated-data exclusion and verification-order regressions; earlier passed and failed logs preserved."
+    "packaging_followup": "Complete suite rerun after executable launcher, Mac prerequisite and activated Conda environment checks; all earlier logs preserved."
   },
   "browser": {
     "review_draft_reload": "passed",
@@ -81,8 +81,8 @@
     "report": ".cache/html5-validation/report-final.json"
   },
   "schema_version": 2,
-  "observed_at": "2026-09-10T02:49:43.771041+00:00",
-  "code_revision": "a123c266b6105073e00465b68b978c21cfbdb601",
+  "observed_at": "2026-09-10T02:59:52.863823+00:00",
+  "code_revision": "2bd8b35dd7720db5a0c8770affcfc14c0d744126",
   "replays": {
     "historical_baseline": {
       "completed": 18,
@@ -185,11 +185,31 @@
       "path": ".cache/mac-roadmap/bandit-expanded-release.json",
       "size_bytes": 47576,
       "sha256": "9321143316624b3a0145818f1a6fcd8bcd2c790d1b09ed82b5403649d9b60ccb"
+    },
+    {
+      "path": ".cache/mac-roadmap/full-tests-delivery.log",
+      "size_bytes": 18654,
+      "sha256": "ccc29fcf8cb63375e0f3e7db03a6a06349cd158058bf26c25f05dcc1c77e8df3"
+    },
+    {
+      "path": ".cache/mac-roadmap/coverage-delivery.json",
+      "size_bytes": 567636,
+      "sha256": "8efb86038ec1b2ce4532ef68fbc746245487dd743b9bee087f723a4b721fad20"
     }
   ],
   "visible_browser_status": {
     "status": "pending",
     "reason": "The Mac remained locked at the final CUA inventory; the earlier unlock question is unanswered. The three completed controlled operator rehearsals are retained separately.",
     "recorded_at": "2026-09-10T02:42:04.921295+00:00"
+  },
+  "installed_functional_smoke": {
+    "status": "passed",
+    "languages": [
+      "en",
+      "es"
+    ],
+    "inference_artifact": "r3",
+    "report": ".cache/mac-roadmap/installed-runtime-final-verified/report.json",
+    "scope": "Actual installed EN/ES STT, Gemma E4B, managed CT2, packaged VAD, target-language Piper WAV and clean lifecycle. Corrected harness assertions verified preserved production artifacts without repeating successful inference. Final shell-only artifact rebuild will be bound by runtime content hashes."
   }
 }
