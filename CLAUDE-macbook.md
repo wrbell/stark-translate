@@ -1,19 +1,11 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
-> **Current Mac work:** [v2026.14 implementation status](docs/mac_implementation_status.md),
-> [evaluation definitions and reports](docs/evaluation/README.md), and
-> [reproducible packaging/setup](docs/packaging/macos.md). Use the selected
-> environment and cached MLX model resolver; do not recreate working `stt_env`.
-> The [48-run screen](docs/evaluation/mac_v2026_14_screening/README.md) is complete:
-> retain E4B, 0.5 s silence and 0.6 s cadence; no combined experiment is justified.
-> Current setup uses bundled Silero 6.2.1 and automatically reuses or converts
-> both pinned Marian CT2 directions. The packaging guide supersedes the older
-> environment snapshot below. All 24 synthetic routing probes passed, followed
-> by 1,790 CPU tests (4 skipped, 59.07% coverage). Local artifacts and installed
-> EN/ES runtime checks passed ([exact evidence](docs/evaluation/mac_v2026_14_installation.md));
-> natural Spanish, human review and physical-device gates remain open.
-> New latency uses captured speech end to payload readiness and visible-browser
-> acknowledgments. Legacy processing timings cannot establish the sub-second goal.
+> **v2026.14 candidate:** [implementation status](docs/mac_implementation_status.md) ·
+> [architecture](docs/current_architecture.md) · [backlog](docs/backlog.json) ·
+> [evaluation README](docs/evaluation/README.md). Use cached MLX resolver; **do not
+> recreate `stt_env`**. Defaults: Parakeet EN, Whisper ES, Marian CT2 CPU, E4B finals,
+> 0.5 s silence / 0.6 s partial cadence. Validation counts live only in
+> `mac_implementation_status.md`. Human and hardware gates remain in backlog.
 
 > **Machine:** M3 Pro MacBook (Mac15,6), 18GB unified memory, 12-core CPU (6P+6E), 18-core GPU, Metal 4, MLX acceleration
 > **Role:** Inference, live demos, quality monitoring, browser displays, A/B testing
@@ -71,7 +63,7 @@ With 18 GB unified memory, default Gemma 4 OptiQ E4B fits easily; TG A/B mode (~
 - Python 3.11.11
 - MLX 0.32.2, mlx-lm 0.31.3, mlx-whisper 0.4.3, mlx-optiq 0.4.34 (verified 2026-09-09)
 - PyTorch 2.10.0 (used for Silero VAD and MarianMT PyTorch backend only)
-- CTranslate2 4.7.1 (MarianMT int8 backend; the arm64 wheel no longer links libomp — the live Mac path still uses HF/PyTorch Marian until `adapters/marian_ct2/` is populated)
+- CTranslate2 4.7.1 (Marian CT2 int8 on CPU; managed setup converts or reuses `adapters/marian_ct2/`)
 
 ### Installation
 

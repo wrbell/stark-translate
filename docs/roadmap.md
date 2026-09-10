@@ -3,7 +3,10 @@
 > Living document tracking the full project trajectory from Mac prototype
 > through Windows training to production deployment.
 >
-> **Last updated:** 2026-09-09
+> **Last updated:** 2026-09-09 (overnight docs worktree)
+>
+> **Remaining tasks (canonical):** [`backlog.json`](./backlog.json) · rendered
+> [`backlog.md`](./backlog.md) · contracts [`current_architecture.md`](./current_architecture.md)
 
 ---
 
@@ -51,7 +54,7 @@ for first-time church PC setup.
 - **Bidirectional language support** — `--lang en` (EN→ES) and `--lang es` (ES→EN)
 - **Pipeline overlap** — Translation on utterance N while STT runs on N+1
 - **5 display modes** — Audience, A/B, Mobile, Church, OBS overlay
-- **CI/CD** — 7 GitHub Actions (lint, test, security, release, label, commitlint, stale), 806 tests, Codecov, pre-commit, CalVer
+- **CI/CD** — 7 GitHub Actions (lint, test, security, release, label, commitlint, stale), coverage gate in `test.yml`, Codecov, pre-commit, CalVer
 
 ### Phase 2: Data Collection (Done)
 
@@ -263,6 +266,9 @@ Key decisions: Hindi → English partial + Hindi final (SOV word order garbles p
 
 | Doc | Contents |
 |-----|----------|
+| [`backlog.json`](./backlog.json) | Machine-readable remaining tasks with status and acceptance |
+| [`current_architecture.md`](./current_architecture.md) | v2026.14 candidate inference/operator contracts |
+| [`mac_implementation_status.md`](./mac_implementation_status.md) | Local validation evidence (single source for test counts) |
 | [`training_plan.md`](archive/training/training_plan.md) | Full training schedule, channel inventory, go/no-go gates |
 | [`accent_tuning_plan.md`](archive/research/accent_tuning_plan.md) | 4-week accent-diverse STT tuning plan (code complete) |
 | [`hard_mining.md`](archive/research/hard_mining.md) | W15 hard example mining design |

@@ -1,4 +1,4 @@
-# CLAUDE.md — Live Bilingual Speech-to-Text
+# AGENTS.md — Live Bilingual Speech-to-Text
 
 > **v2026.14 candidate (local):** [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
 > [`docs/current_architecture.md`](docs/current_architecture.md) ·
@@ -38,10 +38,10 @@ Adapters: WSL → copy to Mac `adapters/`.
 
 ## Six quality layers
 
-1. Audio preprocessing (WSL) — [`training/CLAUDE.md`](training/CLAUDE.md)
+1. Audio preprocessing (WSL) — [`training/AGENTS.md`](training/AGENTS.md)
 2. Data quality assessment (WSL) — same
-3. Confidence flagging (Mac) — [`engines/CLAUDE.md`](engines/CLAUDE.md)
-4. YouTube caption comparison — [`tools/CLAUDE.md`](tools/CLAUDE.md)
+3. Confidence flagging (Mac) — [`engines/AGENTS.md`](engines/AGENTS.md)
+4. YouTube caption comparison — [`tools/AGENTS.md`](tools/AGENTS.md)
 5. Translation QE — same
 6. Active learning loop — infer → review → retrain (both)
 
@@ -62,21 +62,21 @@ Open engineering debt: [`docs/backlog.md`](docs/backlog.md) (from [`backlog.json
 
 ## Subdirectory guides
 
-| Directory | CLAUDE.md | AGENTS.md |
+| Directory | AGENTS.md | CLAUDE.md |
 |-----------|-----------|-----------|
-| [`engines/`](engines/CLAUDE.md) | Engine ABCs, MLX thread safety, models | [`engines/AGENTS.md`](engines/AGENTS.md) |
-| [`training/`](training/CLAUDE.md) | Preprocess, LoRA/QLoRA, corpora | [`training/AGENTS.md`](training/AGENTS.md) |
-| [`tools/`](tools/CLAUDE.md) | QE, YouTube compare, adapters | [`tools/AGENTS.md`](tools/AGENTS.md) |
-| [`displays/`](displays/CLAUDE.md) | WebSocket protocol, displays | [`displays/AGENTS.md`](displays/AGENTS.md) |
-| [`features/`](features/CLAUDE.md) | Diarization, summary, verses | [`features/AGENTS.md`](features/AGENTS.md) |
+| [`engines/`](engines/AGENTS.md) | Engine ABCs, MLX thread safety, models | [`engines/CLAUDE.md`](engines/CLAUDE.md) |
+| [`training/`](training/AGENTS.md) | Preprocess, LoRA/QLoRA, corpora | [`training/CLAUDE.md`](training/CLAUDE.md) |
+| [`tools/`](tools/AGENTS.md) | QE, YouTube compare, adapters | [`tools/CLAUDE.md`](tools/CLAUDE.md) |
+| [`displays/`](displays/AGENTS.md) | WebSocket protocol, displays | [`displays/CLAUDE.md`](displays/CLAUDE.md) |
+| [`features/`](features/AGENTS.md) | Diarization, summary, verses | [`features/CLAUDE.md`](features/CLAUDE.md) |
 
 ## Extension patterns
 
-- New engine → `engines/CLAUDE.md` § Adding a New Engine
-- New language → `engines/CLAUDE.md` + `training/CLAUDE.md`
-- New display → `displays/CLAUDE.md`
-- Adapter deploy → `tools/CLAUDE.md`
-- Active learning → `tools/CLAUDE.md`
+- New engine → `engines/AGENTS.md` § Adding a New Engine
+- New language → `engines/AGENTS.md` + `training/AGENTS.md`
+- New display → `displays/AGENTS.md`
+- Adapter deploy → `tools/AGENTS.md`
+- Active learning → `tools/AGENTS.md`
 
 ## CI/CD
 

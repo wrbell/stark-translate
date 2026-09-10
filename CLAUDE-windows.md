@@ -2,7 +2,10 @@
 
 > **Machine:** Windows Desktop, WSL2/Ubuntu, NVIDIA A2000 Ada (16GB VRAM), 64GB RAM
 > **Role:** Audio preprocessing, data quality assessment, fine-tuning (Whisper + Gemma LoRA), feedback loop retraining
-> **Parent doc:** [`CLAUDE.md`](./CLAUDE.md)
+> **Parent doc:** [`CLAUDE.md`](./CLAUDE.md) · **Backlog:** [`docs/backlog.json`](docs/backlog.json)
+>
+> Lite CPU and native Windows/RTX 2070 inference are equal-priority deployment targets;
+> packaging docs are owned by the lite overnight agent.
 
 ---
 
