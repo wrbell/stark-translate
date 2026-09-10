@@ -544,6 +544,13 @@
   const acceptSession = StarkDisplayConnection.sessionGuard(function() {
     chunkData = [];
     renderLatestChunks();
+  }, function(uid) {
+    var kept = chunkData.filter(function(c) {
+      return !(c.stage === 'partial' && StarkDisplayConnection.partialUtteranceId(c) === uid);
+    });
+    if (kept.length === chunkData.length) return;
+    chunkData = kept;
+    renderLatestChunks();
   });
 
   function addChunk(data) {

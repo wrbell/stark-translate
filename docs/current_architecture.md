@@ -48,6 +48,12 @@ is bounded (`tools/capture_handoff.py`, overflow counted as a capture failure). 
 (`STARK_AUDIO_SOURCE=file`) and the Docker bridge (`STARK_AUDIO_SOURCE=ws`) use the same
 loop. Pause closes the capture child; buffered speech ≥ 0.7 s is finalized before pausing.
 
+Sub-minimum utterances expire at their silence endpoint. Discarding them resets
+audio and sample timing together, so later speech cannot inherit an old noise
+frame across an unbuffered gap. Scoped `utterance_discarded` events remove only
+the abandoned preview; pending STT/translation and queued delivery cannot repaint
+it. Music hold and capture-error recovery share the same invalidation contract.
+
 **Health/control channel:** `tools/pipeline_health.py` writes a low-rate snapshot (`phase`
 ∈ `loading, listening, ready, paused, input_error, …`, input/caption ages, error counts,
 last captions) and accepts pause/resume/stop control; readers mark it `stale` after 3 s.
@@ -66,7 +72,7 @@ E4B via llama.cpp. See [`CLAUDE-windows.md`](../CLAUDE-windows.md) and
 |-------|---------|-----|
 | `speech_end_to_final_ms` | Estimated speech end → final payload ready | Primary pipeline latency |
 | `speech_end_to_ack_upper_bound_ms` | Estimated speech end → visible browser's acknowledgement (render + return network included); visible tabs only | Upper bound on delivery |
-| `send_to_ack_ms` / `receive_to_render_ms` | Server send → ACK; browser receive → paint (client-reported) | Diagnostics, not the delivery gate |
+| `send_to_ack_ms` / `receive_to_render_ms` | Server send → ACK; browser receive → render opportunity (client-reported) | Diagnostics, not the delivery gate |
 | `e2e_latency_ms` (legacy) | Processing after submission | **Archived only** — not speech-end-to-display |
 
 Historical v2026.13 tables in [`docs/archive/v2026.13/MAC_LATENCY.md`](./archive/v2026.13/MAC_LATENCY.md)

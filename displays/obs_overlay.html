@@ -203,6 +203,11 @@
     spanishText.classList.remove('visible', 'partial', 'streaming');
     englishText.classList.remove('visible', 'partial');
     container.classList.add('empty');
+  }, function(uid) {
+    var kept = recentChunks.filter(function(c) { return !(c.partial && c.utterance_id === uid); });
+    if (kept.length === recentChunks.length) return;
+    recentChunks = kept;
+    renderRecent();
   });
 
   // ── Profanity filter ──
@@ -290,13 +295,13 @@
       var found = false;
       for (var i = 0; i < recentChunks.length; i++) {
         if (recentChunks[i].partial) {
-          recentChunks[i] = { spanish: spanish, english: english, partial: true, streaming: false };
+          recentChunks[i] = { utterance_id: StarkDisplayConnection.partialUtteranceId(data), spanish: spanish, english: english, partial: true, streaming: false };
           found = true;
           break;
         }
       }
       if (!found) {
-        recentChunks.push({ spanish: spanish, english: english, partial: true, streaming: false });
+        recentChunks.push({ utterance_id: StarkDisplayConnection.partialUtteranceId(data), spanish: spanish, english: english, partial: true, streaming: false });
       }
     } else {
       // Remove any partial and streaming, add final

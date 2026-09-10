@@ -175,6 +175,10 @@ _caption_delivery = None
 _vad_pool = None
 _marian_memo = ExactTextMemo(0)
 _closed_utterances = set()
+# IDs increase within the capture session. A watermark rejects arbitrarily late
+# provisional work without retaining one tombstone per discarded noise blip.
+_discarded_utterance_id = 0
+_last_capture_utterance_id = 0
 _partial_sequence = 0
 _partial_emitted_sequence = {}
 _partial_source_text = {}
@@ -2334,6 +2338,8 @@ async def _speculate_pause(audio_data, utterance_id, pause_epoch, sample_bounds)
     No generated token is broadcast, spoken or saved as a final here. A resumed
     utterance invalidates the result; running model work still drains normally.
     """
+    if _preview_was_discarded(utterance_id):
+        return
     if (
         BACKEND != "mlx"
         or MULTIPROCESS
@@ -2365,6 +2371,7 @@ async def _speculate_pause(audio_data, utterance_id, pause_epoch, sample_bounds)
         source, _, confidence, segments, _ = result
         if (
             _pause_epochs.get(utterance_id, 0) != pause_epoch
+            or _preview_was_discarded(utterance_id)
             or utterance_id in _closed_utterances
             or _final_pending.is_set()
             or _pipeline_translation_lock.locked()
@@ -2405,7 +2412,7 @@ async def _speculate_pause(audio_data, utterance_id, pause_epoch, sample_bounds)
                 translated = await asyncio.get_running_loop().run_in_executor(_pipeline_pool, generate)
             finally:
                 _translation_active.clear()
-            if _pause_epochs.get(utterance_id, 0) != pause_epoch:
+            if _preview_was_discarded(utterance_id) or _pause_epochs.get(utterance_id, 0) != pause_epoch:
                 _latency_event("speculation_discarded_resumed_speech")
                 return
             _speculative_candidates[utterance_id] = TranslationCandidate(
@@ -2421,7 +2428,7 @@ async def _speculate_pause(audio_data, utterance_id, pause_epoch, sample_bounds)
 
 def _confirmed_speculation(utterance_id, text, confidence):
     candidate = _speculative_candidates.pop(utterance_id, None)
-    if candidate is None:
+    if candidate is None or _preview_was_discarded(utterance_id):
         return None
     if should_use_marian_only(text, confidence) or not candidate.confirmed(
         _translation_identity(text), _pause_epochs.get(utterance_id, 0)
@@ -2445,6 +2452,63 @@ def _preview_ordering_enabled():
     )
 
 
+def _preview_was_discarded(utterance_id):
+    return isinstance(utterance_id, int) and 0 < utterance_id <= _discarded_utterance_id
+
+
+def _next_capture_utterance_id():
+    global _last_capture_utterance_id
+    _last_capture_utterance_id += 1
+    return _last_capture_utterance_id
+
+
+def _discard_utterance(utterance_id, reason, buffer_duration, sample_bounds):
+    """Invalidate provisional results on the loop; running STT still drains.
+
+    Never close an incremental recognizer from this thread. Its owning worker
+    closes the old stream when the next utterance ID arrives (or at shutdown).
+    """
+    global _discarded_utterance_id
+    if utterance_id <= 0:
+        return
+    _discarded_utterance_id = max(_discarded_utterance_id, utterance_id)
+    for state in (
+        _utterance_start_times,
+        _utterance_timings,
+        _partial_emitted_sequence,
+        _partial_source_text,
+        _pause_epochs,
+        _speculative_candidates,
+        _speculation_attempts,
+        _rolling_previews,
+        partial_translations,
+        partial_latencies,
+    ):
+        state.pop(utterance_id, None)
+    if _stt_scheduler is not None:
+        _stt_scheduler.cancel_partial(utterance_id)
+    if _caption_delivery is not None:
+        _caption_delivery.discard_utterance(SESSION_ID, utterance_id)
+    if _health is not None:
+        _health.discard_utterance(SESSION_ID, utterance_id)
+    _latency_event("utterance_discarded", utterance_id=utterance_id, reason=reason, **sample_bounds)
+    logger.info(
+        "vad_utterance_discard utterance_id=%d reason=%s buffer_s=%.3f sample_bounds=%s",
+        utterance_id,
+        reason,
+        buffer_duration,
+        sample_bounds,
+    )
+    return {"type": "utterance_discarded", "session_id": SESSION_ID, "utterance_id": utterance_id, "reason": reason}
+
+
+def _broadcast_discard(event):
+    if event is not None:
+        task = asyncio.create_task(broadcast(event))
+        _partial_tasks.add(task)
+        task.add_done_callback(_partial_tasks.discard)
+
+
 async def process_partial(
     audio_data,
     utterance_id,
@@ -2462,6 +2526,9 @@ async def process_partial(
     to free ~80ms of MLX pool time per partial.
     """
     global _active_partial_future, _partial_sequence
+    if _preview_was_discarded(utterance_id):
+        _latency_event("partial_suppressed_discarded_utterance")
+        return
     _partial_sequence += 1
     request_sequence = _partial_sequence
     original_audio_duration = len(audio_data) / SAMPLE_RATE
@@ -2612,6 +2679,10 @@ async def process_partial(
         with _partial_future_lock:
             _active_partial_future = None
 
+        if _preview_was_discarded(utterance_id):
+            _latency_event("partial_suppressed_discarded_utterance")
+            return
+
         if stt_result is None:
             buf_dur = len(audio_data) / SAMPLE_RATE
             _log_stt_drop("partial", utterance_id, buf_dur)
@@ -2655,8 +2726,12 @@ async def process_partial(
 
         # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
-        if _preview_ordering_enabled() and (
-            utterance_id in _closed_utterances or request_sequence <= _partial_emitted_sequence.get(utterance_id, -1)
+        if _preview_was_discarded(utterance_id) or (
+            _preview_ordering_enabled()
+            and (
+                utterance_id in _closed_utterances
+                or request_sequence <= _partial_emitted_sequence.get(utterance_id, -1)
+            )
         ):
             _latency_event("partial_suppressed_stale_result")
             return
@@ -3717,6 +3792,9 @@ def _caption_failed(client, error):
 
 async def broadcast(data):
     """Send data to all connected WebSocket clients."""
+    if not _caption_message_allowed(data):
+        return
+    data.setdefault("session_id", SESSION_ID)
     data.setdefault("caption_delivery_mode", "queued" if _latency.async_captions else "awaited")
     if _health is not None and data.get("type") == "translation":
         _health.caption(data)
@@ -3726,7 +3804,6 @@ async def broadcast(data):
     global _broadcast_sequence, _caption_delivery
     # Add the correlation id to the producer record too, so diagnostics can
     # be joined to acknowledgments. Never add post-send durations to payload.
-    data.setdefault("session_id", SESSION_ID)
     if "event_id" not in data:
         _broadcast_sequence += 1
         data["event_id"] = f"{SESSION_ID}:{_broadcast_sequence}"
@@ -3741,7 +3818,10 @@ async def broadcast(data):
 
         if _caption_delivery is None:
             _caption_delivery = CaptionDelivery(
-                before_send=_caption_before_send, on_failure=_caption_failed, on_event=_latency_event
+                before_send=_caption_before_send,
+                on_failure=_caption_failed,
+                on_event=_latency_event,
+                allow_message=_caption_message_allowed,
             )
         for client in list(ws_clients):
             _caption_delivery.publish(client, data)
@@ -3752,10 +3832,14 @@ async def broadcast(data):
     if data.get("type") == "translation":
         for client in clients:
             _caption_before_send(client, data, time.perf_counter(), 0.0)
-    results = await asyncio.gather(
-        *[client.send(msg) for client in clients],
-        return_exceptions=True,
-    )
+
+    async def send(client):
+        # An awaited broadcast can be scheduled before discard but only start
+        # sending afterwards. Already-started sends need the consumer tombstone.
+        if _caption_message_allowed(data):
+            await client.send(msg)
+
+    results = await asyncio.gather(*[send(client) for client in clients], return_exceptions=True)
     for client, result in zip(clients, results):
         if isinstance(result, Exception):
             global _ws_send_failures
@@ -3767,6 +3851,15 @@ async def broadcast(data):
     ok = len(clients) - len(dead)
     if ok > 0:
         print(f"  [ws] Sent to {ok} client(s)")
+
+
+def _caption_message_allowed(data):
+    return not (
+        data.get("type") == "translation"
+        and data.get("stage") == "partial"
+        and data.get("session_id", SESSION_ID) == SESSION_ID
+        and _preview_was_discarded(data.get("utterance_id", data.get("chunk_id")))
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -4354,7 +4447,11 @@ async def audio_loop():
     speech_frame_count = 0
     last_status_time = time.time()
     last_partial_len = 0  # audio length (samples) at last partial
-    utterance_id = 0  # tracks current utterance for partial updates
+    # Keep IDs distinct if capture is invoked again in-process. Resetting a
+    # discard watermark could allow old worker results to repaint the new run.
+    utterance_id = _last_capture_utterance_id
+    if utterance_id:
+        _broadcast_discard(_discard_utterance(utterance_id, "capture_restart", 0, {}))
     timeline = AudioTimeline()
     sample_clock = CaptureSampleClock()
     replay_stream = None
@@ -4368,6 +4465,17 @@ async def audio_loop():
     music_holdoff_frames = int(MUSIC_HOLDOFF * SAMPLE_RATE / 512)  # ~2s
     music_resume_frames = int(0.5 * SAMPLE_RATE / 512)  # ~0.5s speech to exit
     music_hold_start_frame = 0
+
+    def discard_buffer(reason):
+        nonlocal speech_buffer, timeline, silence_frames, speech_frame_count
+        nonlocal last_partial_len, last_silence_boundary, pause_preview_fired, pause_speculation_fired
+        _broadcast_discard(
+            _discard_utterance(utterance_id, reason, len(speech_buffer) / SAMPLE_RATE, timeline.sample_metadata())
+        )
+        speech_buffer = np.array([], dtype=np.float32)
+        timeline = AudioTimeline()
+        silence_frames = speech_frame_count = last_partial_len = last_silence_boundary = 0
+        pause_preview_fired = pause_speculation_fired = False
 
     while True:
         if _health is not None and _health.paused:
@@ -4446,6 +4554,8 @@ async def audio_loop():
                                 timeline, utterance_id, "pause"
                             )
                             await process_final(speech_buffer.copy(), utterance_id)
+                        elif len(speech_buffer):
+                            discard_buffer("pause")
                         if not is_replay and not audio_queue.empty():
                             _io_pool.record_failure("audio_capture", "pause_queued_audio_discarded")
                             _health.error("capture", "pause_queued_audio_discarded")
@@ -4487,6 +4597,8 @@ async def audio_loop():
                                         timeline, utterance_id, "eof"
                                     )
                                     await process_final(speech_buffer.copy(), utterance_id)
+                                else:
+                                    discard_buffer("eof")
                                 timeline = AudioTimeline()
                                 speech_buffer = np.array([], dtype=np.float32)
                             if (
@@ -4541,15 +4653,9 @@ async def audio_loop():
                         print(
                             f"\n  [MUSIC] Music detected — muting STT (RMS={frame_rms:.4f}, threshold={MUSIC_THRESHOLD})"
                         )
-                        # Discard any accumulated speech buffer (it's likely music garbage)
-                        if len(speech_buffer) > 0:
-                            timeline = AudioTimeline()
-                            _utterance_start_times.pop(utterance_id, None)
-                            _utterance_timings.pop(utterance_id, None)
-                            speech_buffer = np.array([], dtype=np.float32)
-                            silence_frames = 0
-                            last_partial_len = 0
-                            last_silence_boundary = 0
+                        # Clear timestamps and provisional identity even if only
+                        # asynchronous work remains from the preceding buffer.
+                        discard_buffer("music_hold")
                         # Broadcast music_hold to displays
                         task = asyncio.create_task(broadcast({"type": "music_hold", "active": True}))
                         _partial_tasks.add(task)
@@ -4577,7 +4683,7 @@ async def audio_loop():
                         pause_preview_fired = False
                         pause_speculation_fired = False
                         if len(speech_buffer) == 0:
-                            utterance_id += 1  # new utterance starting
+                            utterance_id = _next_capture_utterance_id()
                             _utterance_start_times[utterance_id] = time.perf_counter()
                             last_partial_len = 0
                             last_silence_boundary = 0
@@ -4684,6 +4790,14 @@ async def audio_loop():
 
                     # --- Final: on silence gap or max duration ---
                     # Min 0.7s buffer — sub-0.7s breath pops are almost never real speech
+                    if 0 < buffer_duration < 0.7 and silence_frames >= max_silence_frames:
+                        # This rejected utterance has ended too. Leaving its
+                        # frozen buffer alive would join unrelated future speech
+                        # across an unbuffered gap, corrupting sample provenance.
+                        discard_buffer("short_silence")
+                        if vad_model is not None:
+                            vad_model.reset_states()
+                        continue
                     silence_triggered = buffer_duration >= 0.7 and silence_frames >= max_silence_frames
                     force_cut_triggered = buffer_duration >= MAX_UTTERANCE
 
@@ -4723,7 +4837,7 @@ async def audio_loop():
                                 )
                                 await process_final(speech_buffer[:split_pos].copy(), utterance_id)
                                 speech_buffer = speech_buffer[split_pos:].copy()
-                                utterance_id += 1
+                                utterance_id = _next_capture_utterance_id()
                                 _utterance_start_times[utterance_id] = timeline.first or time.perf_counter()
                                 last_partial_len = 0
                                 last_silence_boundary = 0
@@ -4778,6 +4892,8 @@ async def audio_loop():
             if _session_stop_requested and len(speech_buffer) / SAMPLE_RATE >= 0.7:
                 _utterance_timings[utterance_id] = ChunkTiming.from_timeline(timeline, utterance_id, "stop")
                 await process_final(speech_buffer.copy(), utterance_id)
+            elif _session_stop_requested and len(speech_buffer):
+                discard_buffer("stop")
             if not audio_queue.empty():
                 _io_pool.record_failure("audio_capture", "stop_queued_audio_discarded")
                 if _health is not None:
@@ -4792,9 +4908,9 @@ async def audio_loop():
                 _health.phase("input_error")
                 _health.error("audio", type(e).__name__)
             print(f"\n  Mic error: {e} — retrying in 2s...", file=sys.stderr)
-            speech_buffer = np.array([], dtype=np.float32)
-            timeline = AudioTimeline()
-            _utterance_start_times.pop(utterance_id, None)
+            discard_buffer("capture_error")
+            if vad_model is not None:
+                vad_model.reset_states()
             # Drain stale audio from queue
             while not audio_queue.empty():
                 try:

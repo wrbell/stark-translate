@@ -14,16 +14,23 @@
 
   const SCOPED = ["translation", "translation_start", "translation_stream", "speaker_update", "music_hold"];
 
+  function partialUtteranceId(message) {
+    const value = message.utterance_id == null ? message.chunk_id : message.utterance_id;
+    return Number.isSafeInteger(value) && value > 0 ? value : null;
+  }
+
   function createModel(options) {
     const limit = (options && options.limit) || 200;
     let sentences = [];
     let session = null;
     let labels = {source: "", target: ""};
     let musicHold = false;
+    const discarded = new Set();
 
     function reset() {
       sentences = [];
       musicHold = false;
+      discarded.clear();
     }
 
     // Same guard as the audience display: a new session ID resets history so
@@ -37,12 +44,25 @@
       return !session || SCOPED.indexOf(message.type) < 0 || incoming === session;
     }
 
+    function acceptsCaption(message) {
+      if (session && message.session_id !== session) return false;
+      return !(message.stage === "partial" && discarded.has(partialUtteranceId(message)));
+    }
+
     function apply(message) {
       if (!message || typeof message !== "object") return false;
       if (!accept(message)) return false;
       const type = message.type;
       if (type === "lang_config") {
         labels = {source: message.source_label || "", target: message.target_label || ""};
+        return true;
+      }
+      if (type === "utterance_discarded") {
+        const uid = message.utterance_id;
+        if (!session || message.session_id !== session || !Number.isSafeInteger(uid) || uid <= 0 || discarded.has(uid)) return false;
+        discarded.add(uid);
+        sentences = sentences.filter(s => !(s.partial && s.utterance_id === uid));
+        // Notify even when only the operator's status-feed fallback has this preview.
         return true;
       }
       if (type === "music_hold") {
@@ -78,13 +98,16 @@
       const source = message.english || "";
       const target = message.spanish_a || "";
       if ((message.stage || "complete") === "partial") {
+        const uid = partialUtteranceId(message);
+        if (discarded.has(uid)) return false;
         const existing = sentences.find(s => s.id === "p-" + message.chunk_id);
         if (existing) {
+          existing.utterance_id = uid;
           existing.source = source;
           existing.target = target;
         } else {
           sentences = sentences.filter(s => !s.partial);
-          sentences.push({id: "p-" + message.chunk_id, source, target, speaker: "", partial: true, streaming: false});
+          sentences.push({id: "p-" + message.chunk_id, utterance_id: uid, source, target, speaker: "", partial: true, streaming: false});
         }
         return true;
       }
@@ -106,6 +129,7 @@
     return {
       apply,
       reset,
+      acceptsCaption,
       sentences: () => sentences.map(s => ({...s})),
       labels: () => ({...labels}),
       musicHold: () => musicHold,

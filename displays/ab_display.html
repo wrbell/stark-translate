@@ -396,6 +396,13 @@
     hasAB = false;
     document.querySelectorAll('.stat-val, .latency').forEach(el => { el.textContent = '—'; });
     $('chunkCount').textContent = '0';
+  }, function(uid) {
+    Object.values(panels).forEach(panel => {
+      panel.querySelectorAll('.chunk.partial').forEach(el => {
+        if (el.dataset.utteranceId === String(uid)) el.remove();
+      });
+    });
+    delete lastMarianPartial[uid];
   });
 
   function connect() {
@@ -485,20 +492,20 @@
         const es = filterText(data.spanish_a || '');
 
         // Column C (audience): show italic partial
-        if (en) upsertChunk(panels['c-en'], 'p-' + data.chunk_id, en, confDot, true);
-        if (es) upsertChunk(panels['c-es'], 'p-' + data.chunk_id, es, '', true);
+        if (en) upsertChunk(panels['c-en'], 'p-' + data.chunk_id, en, confDot, true, false, StarkDisplayConnection.partialUtteranceId(data));
+        if (es) upsertChunk(panels['c-es'], 'p-' + data.chunk_id, es, '', true, false, StarkDisplayConnection.partialUtteranceId(data));
 
         // Column B (MarianMT in non-AB mode): show italic partial
         if (!hasAB) {
-          if (en) upsertChunk(panels['b-en'], 'p-' + data.chunk_id, en, confDot, true);
+          if (en) upsertChunk(panels['b-en'], 'p-' + data.chunk_id, en, confDot, true, false, StarkDisplayConnection.partialUtteranceId(data));
           if (es) {
-            upsertChunk(panels['b-es'], 'p-' + data.chunk_id, es, '', true);
-            lastMarianPartial[data.chunk_id] = es;
+            upsertChunk(panels['b-es'], 'p-' + data.chunk_id, es, '', true, false, StarkDisplayConnection.partialUtteranceId(data));
+            lastMarianPartial[StarkDisplayConnection.partialUtteranceId(data)] = es;
           }
         }
 
         // Column A: show English partial only (no Gemma translation yet)
-        if (en) upsertChunk(panels['a-en'], 'p-' + data.chunk_id, en, confDot, true);
+        if (en) upsertChunk(panels['a-en'], 'p-' + data.chunk_id, en, confDot, true, false, StarkDisplayConnection.partialUtteranceId(data));
 
         // Latency for partial
         if (data.latency_a_ms) {
@@ -552,9 +559,9 @@
       } else {
         // Non-AB mode: Column B = MarianMT (keep the last partial as the final)
         if (en) upsertChunk(panels['b-en'], data.chunk_id, en, confDot, false);
-        const marianFinal = lastMarianPartial[data.chunk_id] || '';
+        const marianFinal = lastMarianPartial[StarkDisplayConnection.partialUtteranceId(data)] || '';
         if (marianFinal) upsertChunk(panels['b-es'], data.chunk_id, marianFinal, '', false);
-        delete lastMarianPartial[data.chunk_id];
+        delete lastMarianPartial[StarkDisplayConnection.partialUtteranceId(data)];
       }
 
       // Column C (audience output): show final Gemma (replaces italic partial)
@@ -624,7 +631,7 @@
     });
   }
 
-  function upsertChunk(panel, id, text, prefix, isPartial, isStreaming) {
+  function upsertChunk(panel, id, text, prefix, isPartial, isStreaming, utteranceId) {
     const domId = panel.id + '-chunk-' + id;
     let div = document.getElementById(domId);
     if (!div) {
@@ -634,6 +641,7 @@
       panel.appendChild(div);
     }
     div.className = isStreaming ? 'chunk streaming' : isPartial ? 'chunk partial' : 'chunk';
+    if (isPartial) div.dataset.utteranceId = utteranceId == null ? '' : String(utteranceId);
     const isTemporary = typeof id === 'string' && (id.startsWith('p-') || id.startsWith('stream-'));
     if (!isTemporary) div.dataset.finalChunk = id;
     const label = isTemporary ? '' : '<span class="chunk-num">#' + id + '</span>';

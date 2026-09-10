@@ -58,8 +58,37 @@ class PipelineHealth:
             self._captions.append(
                 {
                     k: record.get(k)
-                    for k in ("chunk_id", "stage", "english", "spanish_a", "source_lang", "target_lang", "speaker")
+                    for k in (
+                        "session_id",
+                        "utterance_id",
+                        "chunk_id",
+                        "stage",
+                        "english",
+                        "spanish_a",
+                        "source_lang",
+                        "target_lang",
+                        "speaker",
+                    )
                 }
+            )
+
+    def discard_utterance(self, session_id, utterance_id):
+        """Remove discarded interim snapshots, preserving finals with equal IDs."""
+        if session_id != self.session:
+            return
+        with self._lock:
+            self._captions = deque(
+                (
+                    row
+                    for row in self._captions
+                    if not (
+                        row.get("stage") == "partial"
+                        and row.get("session_id") in (None, session_id)
+                        and (row.get("utterance_id") if row.get("utterance_id") is not None else row.get("chunk_id"))
+                        == utterance_id
+                    )
+                ),
+                maxlen=8,
             )
 
     def error(self, stage, code):

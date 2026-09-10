@@ -288,6 +288,13 @@
   const acceptSession = StarkDisplayConnection.sessionGuard(function() {
     chunkData = [];
     rerenderChunks();
+  }, function(uid) {
+    var kept = chunkData.filter(function(c) {
+      return !(c.stage === 'partial' && StarkDisplayConnection.partialUtteranceId(c) === uid);
+    });
+    if (kept.length === chunkData.length) return;
+    chunkData = kept;
+    rerenderChunks();
   });
 
   // ── Profanity filter (same regex as ab_display.html) ──

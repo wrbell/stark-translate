@@ -1417,17 +1417,20 @@
     function socketRows() {
       return socketCaptionsLive() && captionModel ? captionModel.sentences() : [];
     }
+    function healthCaptionRows() {
+      return healthCaptions.filter(c => !captionModel || captionModel.acceptsCaption(c));
+    }
     function captionRows() {
       const live = socketRows();
       if (live.length) return live.slice(-6);
-      return healthCaptions.slice(-6).map(c => ({
+      return healthCaptionRows().slice(-6).map(c => ({
         source: c.english || "", target: c.spanish_a || "", speaker: c.speaker || "",
         partial: c.stage === "partial", streaming: false,
       }));
     }
     function updateHealthCaptions(snap) {
       const list = snap && snap.health && Array.isArray(snap.health.captions) && ACTIVE_STATES.includes(currentState)
-        ? snap.health.captions : [];
+        ? snap.health.captions.map(c => ({...c, session_id: c.session_id || snap.session_id})) : [];
       const json = JSON.stringify(list);
       if (json === healthCaptionsJson) return;
       healthCaptionsJson = json;
@@ -1444,10 +1447,10 @@
         const pair = labels.source && labels.target ? ` (${labels.source} → ${labels.target})` : "";
         setText(el.captionStatus, captionModel && captionModel.musicHold()
           ? `Connected${pair} — music or silence detected, waiting for speech.`
-          : !socketRows().length && healthCaptions.length
+          : !socketRows().length && healthCaptionRows().length
             ? `Connected${pair}. Showing the latest captions from the status feed until new ones arrive.`
             : `Connected${pair}. Partial lines are in italics until the final caption replaces them.`);
-      } else if (healthCaptions.length) {
+      } else if (healthCaptionRows().length) {
         setText(el.captionStatus, "Showing the latest captions from the status feed (updates every few seconds).");
       } else {
         setText(el.captionStatus, currentState === "starting"

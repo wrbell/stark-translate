@@ -291,6 +291,11 @@
     autoScrollEn = autoScrollEs = true;
     document.getElementById('musicHold').classList.remove('visible');
     render();
+  }, function(uid) {
+    const kept = sentences.filter(s => !(s.partial && s.utterance_id === uid));
+    if (kept.length === sentences.length) return;
+    sentences = kept;
+    render();
   });
 
   // Pause auto-scroll when user scrolls up, resume at bottom
@@ -437,11 +442,12 @@
       if (stage === 'partial') {
         const existing = sentences.find(s => s.id === 'p-' + data.chunk_id);
         if (existing) {
+          existing.utterance_id = StarkDisplayConnection.partialUtteranceId(data);
           existing.english = en;
           existing.spanish = es;
         } else {
           sentences = sentences.filter(s => !s.partial);
-          sentences.push({ id: 'p-' + data.chunk_id, english: en, spanish: es, speaker: '', partial: true, streaming: false });
+          sentences.push({ id: 'p-' + data.chunk_id, utterance_id: StarkDisplayConnection.partialUtteranceId(data), english: en, spanish: es, speaker: '', partial: true, streaming: false });
         }
       } else {
         // Final translation — remove ALL partials and streaming entries.

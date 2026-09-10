@@ -2,7 +2,8 @@
 
 > Paired with [`AGENTS.md`](./AGENTS.md). Protocol statements come from
 > `dry_run_ab.py` (`broadcast()`, `_session_provenance()`), `tools/pipeline_timing.py`
-> and the display JS on the local branch (base `5154fb9`). Main is v2026.13.
+> and the display JS. Integration and release state are recorded in
+> [`Mac implementation status`](../docs/mac_implementation_status.md).
 
 Static HTML/JS served by the pipeline's HTTP server (`--http-port 8080`) with captions
 pushed over WebSocket (`--ws-port 8765`). The operator control plane is a separate
@@ -35,6 +36,7 @@ ids from a previous session cannot collide with the new one.
 |--------|------|------------|
 | `lang_config` | On connect and on language flip | `session_id`, `source_lang`, `target_lang`, `source_label`, `target_label` |
 | `translation` (`stage: "partial"`) | Every ~0.6 s of new speech | `chunk_id` (utterance id), `english`, `spanish_a` (Marian), `spanish_b: null`, `stt_latency_ms`, `latency_a_ms`, `marian_pt_ms`, `timing_schema_version: 2`, sample bounds |
+| `utterance_discarded` | A provisional utterance is abandoned | `session_id`, `utterance_id`, `reason`; remove only its partial and suppress late matching partials, never a final or final stream |
 | `translation_start` | Final STT done, translation starting | `chunk_id`, `english`, `stage: "final"`, `stt_latency_ms`, `stt_confidence` |
 | `translation_stream` | Token batches while a final translation streams (CUDA streaming engine; batch size `settings.cuda.streaming_batch_size`) | `chunk_id`, `partial_spanish_a`, `tokens_so_far` |
 | `translation` (`stage: "complete"`) | Final ready | `chunk_id`, `english`, `spanish_a`, `spanish_b`, `stt_latency_ms`, `latency_a_ms`, `latency_b_ms`, legacy `e2e_latency_ms` / `true_e2e_ms` / `silence_delay_ms`, `queue_wait_ms`, `stt_confidence`, `tps_a`, `qe_a`, `word_stability_pct`, `speaker` (with `--diarize`), session provenance, schema 2 sample metadata |
@@ -43,8 +45,9 @@ ids from a previous session cannot collide with the new one.
 | `rolling_stats` | Periodic session stats for the A/B display | `chunks`, `stt_avg_ms`, `a_avg_ms`, `true_e2e_avg_ms` |
 | `text` | `--dry-run-text` and test markers | `text`, lang codes |
 
-Every broadcast carries `session_id` and a monotonically increasing
-`event_id = "<session_id>:<sequence>"`. Provenance fields (`session_kind` = `live`,
+Every broadcast carries `session_id` and a producer-assigned `event_id` scoped to
+that session. Preview IDs include a `:partial:` component; consumers treat event
+IDs as opaque identities rather than parsing them as chunk numbers. Provenance fields (`session_kind` = `live`,
 `replay` or `synthetic`; `audio_source`; `input_audio_path`; `input_audio_sha256`) are
 attached to finals so downstream review and evaluation can separate live audio from
 file replay.
@@ -110,7 +113,7 @@ Ports 8080/8765/9000 must be reachable on the LAN; displays reconnect on drops.
 ## Adding a display
 
 1. Include `display_connection.js` and `caption_telemetry.js`; wrap your socket handler with the telemetry helper so ACKs keep working.
-2. Handle `lang_config` first (labels + history reset), then `translation` partial/complete, `translation_start`, `translation_stream`, `speaker_update`, `music_hold`.
+2. Handle `lang_config` first (labels + history reset), then `translation` partial/complete, `utterance_discarded`, `translation_start`, `translation_stream`, `speaker_update`, `music_hold`.
 3. Treat `english` / `spanish_a` as source/target per `lang_config`, not by language.
 4. Keep the page static (no build step); add it to `dry_run_ab.py`'s printed "Local displays" list if operators should see it.
 5. Run the HTML5 Tidy check recorded in [`docs/mac_implementation_status.md`](../docs/mac_implementation_status.md) (zero warnings expected) before committing.

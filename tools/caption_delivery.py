@@ -35,6 +35,7 @@ class CaptionDelivery:
         before_send: Callable | None = None,
         on_failure: Callable | None = None,
         on_event: Callable | None = None,
+        allow_message: Callable | None = None,
     ):
         if capacity < 1 or send_timeout <= 0:
             raise ValueError("Caption capacity and timeout must be positive")
@@ -42,6 +43,7 @@ class CaptionDelivery:
         self.before_send = before_send or (lambda *args: None)
         self.on_failure = on_failure or (lambda *args: None)
         self.on_event = on_event or (lambda *args: None)
+        self.allow_message = allow_message or (lambda message: True)
         self._clients: dict[Any, _Client] = {}
 
     def add(self, client):
@@ -52,6 +54,9 @@ class CaptionDelivery:
         state.task = asyncio.create_task(self._write(client, state))
 
     def publish(self, client, message: dict):
+        if not self.allow_message(message):
+            self.on_event("caption_discarded_partial_suppressed")
+            return
         self.add(client)
         state = self._clients[client]
         if state.closing:
@@ -86,12 +91,36 @@ class CaptionDelivery:
         state.pending.append((dict(message), time.perf_counter(), key))
         state.ready.set()
 
+    def discard_utterance(self, session_id, utterance_id):
+        """Remove only queued partials for this exact session/utterance.
+
+        A send already in progress cannot be recalled; consumers receive the
+        subsequent discard event and suppress any late matching partial too.
+        """
+        for state in self._clients.values():
+            before = len(state.pending)
+            state.pending = deque(
+                item
+                for item in state.pending
+                if not (
+                    item[0].get("type") == "translation"
+                    and item[0].get("stage") == "partial"
+                    and item[0].get("session_id") == session_id
+                    and item[0].get("utterance_id", item[0].get("chunk_id")) == utterance_id
+                )
+            )
+            for _ in range(before - len(state.pending)):
+                self.on_event("caption_discarded_partial_removed")
+
     async def _write(self, client, state):
         try:
             while True:
                 await state.ready.wait()
                 while state.pending:
                     message, queued, _ = state.pending.popleft()
+                    if not self.allow_message(message):
+                        self.on_event("caption_discarded_partial_suppressed")
+                        continue
                     started = time.perf_counter()
                     self.before_send(client, message, started, (started - queued) * 1000)
                     await asyncio.wait_for(client.send(json.dumps(message)), self.send_timeout)
