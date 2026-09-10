@@ -37,8 +37,12 @@ def digest(path: Path) -> str:
 
 
 def write_json(path: Path, data: object, *, exclusive: bool = False) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     encoded = json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+    _write_text(path, encoded, exclusive=exclusive)
+
+
+def _write_text(path: Path, encoded: str, *, exclusive: bool = False) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     if exclusive:
         with path.open("x", encoding="utf-8") as f:
             f.write(encoded)
@@ -854,6 +858,46 @@ def _stt_inputs_match(run: dict, manifest: dict) -> bool:
     return True
 
 
+def _preserve_blind_reviews(path: Path, proposed: list[dict]) -> list[dict]:
+    """Keep annotations only when the same labeled comparison is unchanged.
+
+    Even unfinished ratings and reviewer notes count as work. Refuse to replace
+    their source/reference/outputs or remove their pair; use a fresh report
+    directory for a different cohort. Validation precedes every artifact write.
+    """
+    if not path.exists():
+        return proposed
+    pairs = {row["id"]: dict(row) for row in proposed}
+    immutable = {"id", "source", "reference", "A", "B"}
+    seen = set()
+    for line_number, line in enumerate(path.read_text().splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            prior = json.loads(line)
+        except ValueError as exc:
+            raise ValueError(f"Invalid existing blind review at {path}:{line_number}; no report files changed") from exc
+        if not isinstance(prior, dict) or not isinstance(prior.get("id"), str) or prior["id"] in seen:
+            raise ValueError(
+                f"Invalid or duplicate existing blind-review ID at {path}:{line_number}; no report files changed"
+            )
+        seen.add(prior["id"])
+        annotations = {key: value for key, value in prior.items() if key not in immutable}
+        has_work = bool(prior.get("reviewed")) or any(
+            value is not None and value != "" for key, value in annotations.items() if key != "reviewed"
+        )
+        incoming = pairs.get(prior["id"])
+        same_pair = incoming is not None and all(prior.get(key) == incoming.get(key) for key in immutable)
+        if not same_pair:
+            if has_work:
+                raise ValueError(
+                    f"Reviewed pair {prior['id']} changed or disappeared; use a fresh report directory to preserve human ratings"
+                )
+            continue
+        incoming.update(annotations)
+    return [pairs[row["id"]] for row in proposed]
+
+
 def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
     manifest = json.loads(manifest_path.read_text())
     report = {
@@ -1139,7 +1183,6 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         for key, metrics in event_groups.items()
     ]
     output.mkdir(parents=True, exist_ok=True)
-    write_json(output / "comparison.json", report)
     lines = [
         "# Mac E4B / E2B comparison",
         "",
@@ -1278,8 +1321,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             key_rows.append({"id": pair_id, "A": "e2b" if swap else "e4b", "B": "e4b" if swap else "e2b"})
             if first != second:
                 lines += [f"**{pair_id}** — {a['source']}", "", f"- E4B: {first}", f"- E2B: {second}", ""]
-    for name, records in (("blind_review.jsonl", blind), ("review_key.jsonl", key_rows)):
-        (output / name).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records))
+    blind = _preserve_blind_reviews(output / "blind_review.jsonl", blind)
     lines += [
         "## Pending gates",
         "",
@@ -1290,7 +1332,15 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         "",
         f"Recorded failed runs: {len(failures)}. Excluded incompatible/duplicate runs: {len(exclusions)}. Details are retained in comparison.json.",
     ]
-    (output / "comparison.md").write_text("\n".join(lines) + "\n")
+    # Human-review validation above must succeed before changing any artifact.
+    encoded_rows = {
+        name: "".join(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n" for row in records)
+        for name, records in (("blind_review.jsonl", blind), ("review_key.jsonl", key_rows))
+    }
+    write_json(output / "comparison.json", report)
+    for name, encoded in encoded_rows.items():
+        _write_text(output / name, encoded)
+    _write_text(output / "comparison.md", "\n".join(lines) + "\n")
     return report
 
 

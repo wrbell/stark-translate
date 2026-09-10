@@ -515,3 +515,88 @@ def test_startup_pipeline_hash_overrides_later_source_snapshot(replay_case, tmp_
     assert result["source_cohorts"][original_hash]["pipeline_hash_basis"] == "startup_source_file"
     assert result["source_cohorts"][original_hash]["startup_pipeline_sha256"] == "a" * 64
     assert "session_lifecycle" not in json.loads((inputs / "replay.json").read_text())
+
+
+@pytest.fixture
+def paired_review_report(tmp_path, monkeypatch):
+    monkeypatch.setattr(evaluation, "ROOT", tmp_path)
+    item = {
+        "id": "q",
+        "source": "Grace",
+        "source_lang": "en",
+        "target_lang": "es",
+        "reference": None,
+        "required_terms": [],
+    }
+    manifest = tmp_path / "manifest.json"
+    evaluation.write_json(manifest, {"usage": "evaluation_only", "translations": [item], "utterances": []})
+    inputs, output = tmp_path / "inputs", tmp_path / "report"
+    for size, text in [("e4b", "Gracia"), ("e2b", "La gracia")]:
+        evaluation.write_json(
+            inputs / f"quality_{size}.json",
+            {
+                "manifest_sha256": evaluation.digest(manifest),
+                "size": size,
+                "policy": "none",
+                "completed": True,
+                "environment": {"source_sha256": {"engines/mlx_engine.py": "same-code"}},
+                "rows": [{**item, "runs": [{"text": text, "latency_ms": 100}], "canary_pass": None}],
+            },
+        )
+    evaluation.report_results(inputs, output, manifest)
+    return inputs, output, manifest
+
+
+def test_report_regeneration_preserves_human_ratings_and_notes(paired_review_report):
+    inputs, output, manifest = paired_review_report
+    path = output / "blind_review.jsonl"
+    pair = json.loads(path.read_text())
+    pair.update(
+        meaning_error_A=False,
+        meaning_error_B=0,
+        terminology_preference="B",
+        reviewed=True,
+        reviewer_notes="Checked the theological term in context.",
+    )
+    path.write_text(json.dumps(pair) + "\n")
+    evaluation.report_results(inputs, output, manifest)
+    assert json.loads(path.read_text()) == pair
+
+
+@pytest.mark.parametrize("change", ["output", "remove", "source", "reference"])
+def test_changed_reviewed_pairs_leave_every_report_artifact_untouched(paired_review_report, change):
+    inputs, output, manifest_path = paired_review_report
+    path = output / "blind_review.jsonl"
+    pair = json.loads(path.read_text())
+    # A false rating is still saved work even before the row is marked reviewed.
+    pair.update(meaning_error_A=False, reviewed=False)
+    path.write_text(json.dumps(pair) + "\n")
+    before = {p.name: p.read_bytes() for p in output.iterdir()}
+    selected = inputs / "quality_e4b.json"
+    if change == "remove":
+        selected.unlink()
+    elif change == "output":
+        run = json.loads(selected.read_text())
+        run["rows"][0]["runs"][0]["text"] = "Changed model answer"
+        evaluation.write_json(selected, run)
+    else:
+        manifest = json.loads(manifest_path.read_text())
+        manifest["translations"][0][change] = "Changed comparison context"
+        evaluation.write_json(manifest_path, manifest)
+        for source in inputs.glob("quality_*.json"):
+            run = json.loads(source.read_text())
+            run["manifest_sha256"] = evaluation.digest(manifest_path)
+            run["rows"][0][change] = "Changed comparison context"
+            evaluation.write_json(source, run)
+    with pytest.raises(ValueError, match=r"Reviewed pair.*fresh report directory"):
+        evaluation.report_results(inputs, output, manifest_path)
+    assert {p.name: p.read_bytes() for p in output.iterdir()} == before
+
+
+def test_malformed_existing_review_is_not_silently_discarded(paired_review_report):
+    inputs, output, manifest = paired_review_report
+    (output / "blind_review.jsonl").write_text("{unfinished human edit\n")
+    before = {p.name: p.read_bytes() for p in output.iterdir()}
+    with pytest.raises(ValueError, match="Invalid existing blind review"):
+        evaluation.report_results(inputs, output, manifest)
+    assert {p.name: p.read_bytes() for p in output.iterdir()} == before
