@@ -6,12 +6,12 @@
 
 ## Integration status
 
-- **Main release:** `v2026.13` — PR #192 merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z, from reviewed source ab66ad2929e61171e4ab9c7c77685ba1ac988577. v2026.13 remains the last published release; no release/tag upload followed this source merge.
-- **Local candidate:** `2026.14.0.0` on `main` (base `PR #192 merged at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c from reviewed ab66ad2. The 752ab9a endurance cohort, five-module 84832fb operator cleanup and ab66ad2 bootstrap delivery retain separate exact-source evidence.`)
-- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z; exact-head Python 3.11/3.12 CI passed 2,398 tests with four skips each. Merge and closure receipts: docs/evaluation/overnight_closeout_20260910/README.md.
-- **Publication:** PR #192 source merge and justified issue closures are complete. Local package artifacts are mechanically validated; PyPI/GHCR/release uploads and release tags remain pending by user choice.
+- **Main release:** `v2026.13` — Verified main is 958bb5c9425473256038bae04ce95ee1c32c7ae8. PR #192 remains merged; the new PR #196 follow-up is still a draft. v2026.13 remains the last published release.
+- **Local candidate:** `2026.14.0.0` on `codex/mac-en-es-closeout` (base `958bb5c9425473256038bae04ce95ee1c32c7ae8`)
+- **Draft PR:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) — draft Mac EN↔ES follow-up on codex/mac-en-es-closeout. Experiments, final artifact checks and review remain in progress; no merge claimed.
+- **Publication:** User authorized source merge after validation. PyPI, GHCR, release uploads and new tags remain pending by user choice.
 
-Implemented/validated source from PR #192 is merged into main. Source integration, local artifact validation, public distribution and service certification remain separate. Certification records each item’s actual acceptance; source merge alone does not close human/device gates.
+PR #192 integration and its immutable test/artifact/service evidence remain complete. PR #196 is a separate active follow-up with its own source identities. Final-source validation and merge are pending; neither source integration nor file replay certifies human or physical-device gates.
 
 ## Status vocabulary
 
@@ -62,11 +62,11 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
-- **Sources:** [#193](https://github.com/wrbell/stark-translate/issues/193), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`
+- **Sources:** [#193](https://github.com/wrbell/stark-translate/issues/193), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`, `docs/evaluation/mac_followup_20260910/hymn-annotation-protocol.md`
 - **Acceptance:** On a bounded, human-labeled natural hymn→speech transition, measure unwanted captions, suppressed legitimate speech and recovery alongside unchanged controls and partial/final latency. Include quiet prayer and short valid EN/ES replies; no global short-word blacklist or inferred reference labels from generated captions.
 - **Evidence:** Repaired Standard emitted hymn-context fragments including “It dies a” and “Changing uh” while process health remained normal. No music-hold event was recorded. Current energy/VAD logic is a heuristic, not a validated music classifier; absence of its event does not establish exactly why the streak threshold was not met.
 - **Notes:** Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately. Commit 26f854c retains accepted speech onset without changing the existing 15-frame recovery decision; pending/recovered source dispositions and pause-spanning hold logs are explicit. Regression CI on ffa34c5 passed Python 3.11/3.12 and lint.
-- **Next action:** Prepare a source-linked uncertain transition annotation packet and an opt-in experiment protocol. Human natural-audio labels remain required for classifier quality; no live microphone/playback test is allowed for the rest of this session.
+- **Next action:** Run the prepared single silent E4B 350-second diagnostic in a reserved model window using actual VAD/RMS/source/EOF trace fields. Keep acoustic labels uncertain until independently reviewed. Further microphone or speaker testing is prohibited this session; detector changes require unchanged controls and legitimate-speech/quality guards.
 
 ### `hymn-translation-boundary` — Preserve title/sentence meaning in natural hymn captions (#194)
 
@@ -85,7 +85,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Sources:** `docs/evaluation/mac_v2026_14_installation.md`, `docs/evaluation/overnight_artifact_validation_20260910.json`, `docs/evaluation/overnight_endurance_20260910/README.md`
 - **Acceptance:** Outside-checkout install, launcher checks and installed EN/ES inference recorded with artifact hashes.
 - **Notes:** Frozen 752 wheel/sdist/Mac ZIP mechanical validation passed: 152 runtime members match source; ZIP/sdist rebuilt wheels match canonical, and both isolated installs passed outside-checkout HTTP/profile/version/launchd checks without inference. Wheel 7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5 then ran separate completed Standard and CPU Lite natural-service hours. This does not establish human quality or fast CPU production. The validator-only false failure and old b65 receipt remain preserved. Docker main pushes build without uploading; public distributions remain pending.
-- **Next action:** Retain exact artifact/runtime receipts and completed functional evidence, verify final workflow/source checks, and publish only after the separately required release authorization.
+- **Next action:** After runtime changes and the serial experiment queue finish, freeze clean final source, rebuild wheel/sdist/Mac ZIP, install outside checkout, and execute explicit-file/no-TTS Standard and Lite EN/ES smoke plus fresh full-service runs. Record exact hashes and preserve old artifacts. Publication remains separately deferred.
 
 ### `visible-browser-timing-run` — Frozen timing run with a visible browser (non-zero ACK coverage)
 
@@ -109,10 +109,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P2 · **Machine:** both · **Certification:** pending
 - **Depends on:** none
-- **Sources:** `docs/evaluation/mac_v2026_14_security.md`, `docs/evaluation/security_feasibility_20260910/README.md`
+- **Sources:** `docs/evaluation/mac_v2026_14_security.md`, `docs/evaluation/security_feasibility_20260910/README.md`, `docs/evaluation/mac_followup_20260910/live-hf-pinning.md`, `docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json`
 - **Acceptance:** Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).
-- **Notes:** Live Marian HF and missing Piper voice resolution now use registered pinned revisions, with local explicit paths supported and unknown remote fallback rejected. Static B615 still reports calls using validated keyword arguments; no suppression was added. Broader optional/training call-site inventory remains outside the validated live-path subset.
-- **Next action:** Retain live-path pinning evidence; reconcile remaining optional and training download sites individually before claiming all B615 scope complete.
+- **Notes:** Mac MLX primary/fallback Whisper, Parakeet, Gemma/draft, workers, operator summary and optional live SpeechBrain/Pyannote paths now resolve local overrides or registered immutable snapshots. Selected HF setup entries require full commits before any cache mutation. Optional Pyannote segmentation access remains HTTP 403. The complete source inventory distinguishes 105 offline residual calls, 13 optional alternative live calls and one unverified legacy Piper API; no global B615 clearance or native diarization certification is claimed. Source review and CI are still resolving final follow-up changes.
+- **Next action:** Complete final source review, refresh loader inventory hashes after any repair, and bind CI/installed tests to the resulting code. Preserve documented alternative-backend/offline residuals as separate scope; do not describe every runtime as fully pinned.
 
 ## Pending Input Or Hardware
 
@@ -301,8 +301,8 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** Live built-in-microphone EN→ES and ES→EN utterances render a partial and a final on the audience display with clean session logs; controlled file replay alone does not satisfy the issue.
 - **Evidence:** Controlled file-replay EN and ES sessions rendered captions and exited 0; review draft recovery passed (2026-09-09, base 5154fb9).
 - **Evidence:** Live microphone attempt stalled the same night (see mac-live-mic-stall); the capture/readiness fix is integrated but untested against a real microphone.
-- **Notes:** The original issue explicitly asks to confirm W16 CT2 preference. The factory retains adapter preference for the configured faster-whisper path; Mac English auto now selects Parakeet by deliberate policy. Document this distinction during the live EN/ES retest instead of claiming W16 is the Mac auto default.
-- **Next action:** Run one live EN and one live ES built-in-mic utterance through the operator UI with the audience display connected and keep the session logs as evidence; the issue requires live mic — file replay does not close it.
+- **Notes:** The original issue explicitly asks to confirm W16 CT2 preference. The factory retains adapter preference for the configured faster-whisper path; Mac English auto now selects Parakeet by deliberate policy. Document this distinction during the live EN/ES retest instead of claiming W16 is the Mac auto default. September 10 quiet-room readiness and synthetic acoustic attempts are recorded separately; a Spanish retest retained 160 ms of upstream loss. This supersedes the earlier statement that the integrated capture fix had no real-device test at all, without erasing the failed evidence.
+- **Next action:** Further live microphone testing is prohibited for the rest of this session. At a later permitted attended session, retain clean EN/ES audience partial/final and adapter-selection evidence. Current file replays and the successful bounded device-identity probe do not close the remaining live pipeline acceptance.
 
 ### `issue-132-tts-routing` — Multi-channel TTS routing code and tests (9.4.1 / #132)
 
