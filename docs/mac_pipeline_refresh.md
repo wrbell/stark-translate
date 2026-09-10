@@ -94,9 +94,17 @@ See [`mlx_cuda_parity.md`](./mlx_cuda_parity.md). Naïve uniform Gemma 4 MLX 4-b
 
 ### Mac latency (v2026.13, 2026-09-09 — replay of real sermon audio, `tools/replay_bench.py`)
 
-Speech-end → final on display (`e2e_latency_ms`), two 150 s sermon clips, M3 Pro:
+Legacy processing (submission → completion, `e2e_latency_ms`), two 150 s sermon clips, M3 Pro:
 
-| Config | 12_14_25 e2e p50 / p95 | 2_8_26 e2e p50 / p95 | partial p50 | Notes |
+> **Measurement correction (2026-09-09):** these historical values are preserved,
+> but they do not measure speech-end → display. `true_e2e_ms` starts at the first
+> speech observation in the VAD loop and ends at processing completion;
+> `silence_delay_ms` spans that observation → submission and includes the
+> utterance duration. Browser rendering was not measured. Use the new timing
+> boundaries and verified results in [Mac implementation status](./mac_implementation_status.md)
+> for current latency gates.
+
+| Config | 12_14_25 legacy processing p50 / p95 | 2_8_26 legacy processing p50 / p95 | partial p50 | Notes |
 |---|---|---|---|---|
 | 2026-08-30 code (whisper, HF Marian, EOS bug) | 4803 / 8939 | 3742 / 6641 | ~1000 | every final ran to max_tokens |
 | + #181 / #184 fixes (whisper, HF Marian) | 4016 / 7944 | 2858 / 4365 | ~1000 | |
