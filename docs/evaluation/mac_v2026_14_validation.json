@@ -1,0 +1,172 @@
+{
+  "gpu": {
+    "passed": 3,
+    "duration_s": 21.82,
+    "scope": "cached E4B EOS/canary and worker-first-forward regression"
+  },
+  "ruff": {
+    "status": "passed",
+    "formatted_files": 236
+  },
+  "mypy": {
+    "status": "passed",
+    "files": 19
+  },
+  "bandit_ci": {
+    "status": "passed",
+    "medium_or_high_findings": 0,
+    "skipped": [
+      "B101",
+      "B603",
+      "B607",
+      "B615"
+    ]
+  },
+  "bandit_expanded": {
+    "status": "findings",
+    "medium": 27,
+    "high": 0,
+    "rule": "B615",
+    "classification": {
+      "previous_findings_with_documented_cache_and_fallback_limits": 26,
+      "guarded_full_commit_revision_false_positive": 1
+    },
+    "report": "docs/evaluation/mac_v2026_14_security.md"
+  },
+  "vulture": {
+    "status": "advisory",
+    "findings": 3,
+    "details": "mlx_lm import plus two context-manager tb parameters"
+  },
+  "pip_audit": {
+    "status": "passed",
+    "vulnerabilities": 0,
+    "requirements": [
+      "mac",
+      "windows",
+      "nvidia"
+    ],
+    "artifacts": ".cache/security-audit"
+  },
+  "cpu_suite": {
+    "status": "passed",
+    "passed": 1785,
+    "skipped": 4,
+    "duration_s": 42.96,
+    "coverage_percent": 59.05,
+    "log": ".cache/mac-roadmap/full-tests-final.log",
+    "coverage": ".cache/mac-roadmap/coverage-final.json",
+    "initial_failure": {
+      "log": ".cache/mac-roadmap/full-tests-final-initial-failure.log",
+      "reason": "The old packaging shape test did not accept derived-ct2 entries. It now validates their pinned source, direction and int8 quantization.",
+      "fix_revision": "753c48e"
+    }
+  },
+  "browser": {
+    "review_draft_reload": "passed",
+    "review_selection_reload": "passed",
+    "unapproved_export_guard": "passed",
+    "tts_language_device_reload": "passed"
+  },
+  "publishing": "pending_by_user_choice",
+  "html5": {
+    "status": "passed",
+    "files": 5,
+    "warnings": 0,
+    "errors": 0,
+    "version": "5.8.0",
+    "report": ".cache/html5-validation/report-final.json"
+  },
+  "schema_version": 2,
+  "observed_at": "2026-09-10T02:39:57.197295+00:00",
+  "code_revision": "8e98997dc71eca02ba211298555b5dd4d58c4e30",
+  "replays": {
+    "historical_baseline": {
+      "completed": 18,
+      "cohorts": "retain separate original runtime cohorts"
+    },
+    "frozen_english_screen": {
+      "completed": 48,
+      "finals": 348,
+      "partials": 3184,
+      "visible_final_acknowledgments": 0,
+      "combination_recommended": false
+    },
+    "synthetic_routing": {
+      "completed": 24,
+      "finals": 72,
+      "status": "all processes completed with exit code 0; report retains actual routing and confidence"
+    }
+  },
+  "offline_setup": {
+    "packaged_vad": {
+      "jit": "passed real CPU with empty caches and blocked Hub/network",
+      "onnx": "passed real CPU with empty caches and blocked Hub/network"
+    },
+    "managed_marian": {
+      "directions": [
+        "en-es",
+        "es-en"
+      ],
+      "pinned_offline_conversion": "passed in isolated environment",
+      "cpu_translation": "passed",
+      "idempotent_reuse": "passed",
+      "existing_adapters": "preserved, converted weight hashes match"
+    },
+    "report": ".cache/mac-roadmap/ct2-setup-validation/report.json"
+  },
+  "final_artifacts": {
+    "status": "pending_final_build_and_installed_inference"
+  },
+  "pending_gates": [
+    "50 human-reviewed natural utterances per language",
+    "Natural Spanish audio provenance and references",
+    "Natural two-speaker audio, transition labels and additional-final-p95 diarization gate",
+    "Bilingual blinded meaning and terminology review",
+    "Second physical output device and unplug/replug/acoustic validation",
+    "Visible frozen browser timing run; previous controlled operator rehearsal is separate",
+    "PyPI publishing explicitly pending by user choice"
+  ],
+  "evidence": [
+    {
+      "path": ".cache/mac-roadmap/full-tests-final.log",
+      "size_bytes": 18651,
+      "sha256": "12467c5c8cf1b23b622a1ac678fab54483afaac4b5611d0070c2d8508427bc47"
+    },
+    {
+      "path": ".cache/mac-roadmap/full-tests-final-initial-failure.log",
+      "size_bytes": 19257,
+      "sha256": "501a1531b30675457a4c711d1494dab2f58a722439682df7c7ece3a2130fac78"
+    },
+    {
+      "path": ".cache/mac-roadmap/coverage-final.json",
+      "size_bytes": 567247,
+      "sha256": "4096c00ef759491edb7141cab1df398acdb85e3b4828f01983e709ade7f51b4d"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-ci-final.json",
+      "size_bytes": 23557,
+      "sha256": "a0d1d8b2c6d3376959c9f7d5f642172740e51725925b0b22c4442f1b2075dae0"
+    },
+    {
+      "path": ".cache/mac-roadmap/bandit-expanded-final.json",
+      "size_bytes": 47576,
+      "sha256": "32b442f4b41e795d12726061cdcef4c41772a8120bac6b2817c1d235ac95a7f6"
+    },
+    {
+      "path": ".cache/html5-validation/report-final.json",
+      "size_bytes": 595,
+      "sha256": "986f0faedd41657cec100e72e47ac60724e876d27be6a3dee8f52a4f9d90b5f5"
+    },
+    {
+      "path": ".cache/mac-roadmap/ct2-setup-validation/report.json",
+      "size_bytes": 5826,
+      "sha256": "6efef22b1fabec321eb543eef7da0999ecf242a820025fa67b0d8e55fa0b19cf"
+    }
+  ],
+  "visible_browser_status": {
+    "status": "pending",
+    "reason": "The Mac remained locked at the final CUA inventory; the earlier unlock question is unanswered. The three completed controlled operator rehearsals are retained separately.",
+    "recorded_at": "2026-09-10T02:42:04.921295+00:00"
+  }
+}

@@ -88,6 +88,14 @@ failed optimization hypotheses, execution counters and matched-caption analysis
 where lower silence thresholds changed segmentation. It supports retaining all
 experimental options as opt-in; no combined optimization was justified.
 
+[The bilingual routing probes](mac_v2026_14_routing/README.md) record 24 completed
+synthetic runs. The conservative policy used Marian for the two allowlisted
+phrases and Gemma for the control phrase in both languages and on both models.
+Observed confidence values and route counters are retained; these checks do not
+calibrate either STT engine's confidence or establish natural-speech quality.
+
 The [runtime snapshot](mac_v2026_14_runtime.json) supplements per-run package,
 code and model identities. The [security scope](mac_v2026_14_security.md) records
 what the checks covered and the remaining unpinned model-download findings.
+The [validation record](mac_v2026_14_validation.json) records the final unit,
+type, lint, HTML, security, replay and setup checks with local evidence hashes.
