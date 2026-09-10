@@ -20,12 +20,16 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools.review_data import atomic_jsonl, sha256_file
+from tools.training_preflight import DEFAULT_HOLDOUT, OTHER_HOLDOUTS
+from tools.training_preflight import ROOT as TRAINING_PROJECT_ROOT
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-def _load_jsonl(path: Path) -> list[dict]:
+def _load_jsonl(path: Path, *, required: bool = False) -> list[dict]:
     if not path.exists():
+        if required:
+            raise FileNotFoundError(f"Correction input not found: {path}")
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
@@ -34,14 +38,40 @@ def _write_jsonl(path: Path, rows: list[dict]) -> None:
     atomic_jsonl(path, rows)
 
 
+def _review_approvals(rows: list[dict], fields: tuple[str, ...]) -> None:
+    """Reject explicit denials without inventing approval for legacy projections.
+
+    Schema-2 bundles keep approval flags in corrections.jsonl; their training
+    projections historically omit them. Preserve that format, but never accept
+    an explicit unapproved/excluded row through a direct JSONL/CSV import.
+    CSV boolean text is accepted only as literal true/false, not Python truthiness.
+    """
+    for row in rows:
+        for field in ("approved_for_training", "training_eligible", *fields):
+            if field in row:
+                value = row[field]
+                if value is not True and not (isinstance(value, str) and value.strip().lower() == "true"):
+                    raise ValueError(f"Unapproved correction: {field} must explicitly be true when present")
+        if "excluded" in row:
+            value = row["excluded"]
+            if value is not False and not (isinstance(value, str) and value.strip().lower() == "false"):
+                raise ValueError("Excluded/unknown-status correction must not enter training")
+        if str(row.get("review_status", "")).strip().lower() == "unapproved":
+            raise ValueError("Unapproved correction must not enter training")
+
+
 def _training_only(path: Path, rows: list[dict], *, require_live: bool = False) -> None:
-    if {"eval", "test", "holdout"} & (set(path.parts) | set(path.resolve().parts)):
+    protected = [DEFAULT_HOLDOUT.relative_to(TRAINING_PROJECT_ROOT), *(Path(p) for p in OTHER_HOLDOUTS)]
+    if path.resolve() in {(PROJECT_ROOT / p).resolve() for p in protected} or {"eval", "test", "holdout"} & (
+        set(path.parts) | set(path.resolve().parts)
+    ):
         raise ValueError("Evaluation data must not be imported into a training corpus")
     if any(row.get("split", "train") != "train" or row.get("dataset_split", "train") != "train" for row in rows):
         raise ValueError("Export contains evaluation/unknown split records; import training records only")
     if any(
         str(row.get("is_eval", "")).lower() in ("true", "1", "yes")
         or row.get("session_kind") in ("replay", "synthetic")
+        or str(row.get("usage", "")).strip().lower() == "evaluation_only"
         for row in rows
     ):
         raise ValueError("Evaluation/replay records must not be imported into a training corpus")
@@ -97,10 +127,15 @@ def merge_translation(
     output: Path | None = None,
     dedupe: bool = True,
 ) -> dict:
-    corrections = _load_jsonl(corrections_path)
+    corrections = _load_jsonl(corrections_path, required=True)
+    if not corrections:
+        raise ValueError("Correction input contains no records")
+    approval_fields = ("transcript_approved", "translation_approved")
+    _review_approvals(corrections, approval_fields)
     _training_only(corrections_path, corrections, require_live=True)
     _training_only(output or train_jsonl, [])
     existing = _load_jsonl(train_jsonl)
+    _review_approvals(existing, approval_fields)
     _training_only(train_jsonl, existing)
     before = len(existing)
     ids = {row.get("sample_id"): index for index, row in enumerate(existing) if row.get("sample_id")}
@@ -184,6 +219,9 @@ def merge_whisper(
         raise ValueError("Evaluation bundles cannot be merged into training")
     meta_path = _metadata(corrections_dir, language)
     corr_rows = _read_metadata(meta_path)
+    if not corr_rows:
+        raise ValueError("Correction input contains no records")
+    _review_approvals(corr_rows, ("transcript_approved",))
     _training_only(meta_path, corr_rows, require_live=True)
     out_dir = output_dir or train_dir
     _training_only(out_dir, [])
@@ -195,6 +233,7 @@ def merge_whisper(
         source_meta = _metadata(train_dir, language, required=False)
         train_meta = out_dir / source_meta.name
     existing = _read_metadata(source_meta) if source_meta.exists() else []
+    _review_approvals(existing, ("transcript_approved",))
     _training_only(source_meta, existing)
     if any((row.get("source_lang") or "en") != language for row in [*corr_rows, *existing]):
         raise ValueError("Audio language does not match --language; use a separate corpus per language")

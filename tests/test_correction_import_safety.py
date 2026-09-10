@@ -174,3 +174,114 @@ def test_malformed_first_revision_cannot_enter_either_corpus(tmp_path, revision)
         merge_whisper(whisper_export(tmp_path / "audio", revision=revision), tmp_path / "train")
     assert not (tmp_path / "train.jsonl").exists()
     assert not (tmp_path / "train").exists()
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [
+        {"transcript_approved": False},
+        {"transcript_approved": "false"},
+        {"transcript_approved": 1},
+        {"approved_for_training": False},
+        {"approved_for_training": "False"},
+        {"training_eligible": False},
+        {"training_eligible": "false"},
+        {"training_eligible": "unknown"},
+        {"review_status": "unapproved"},
+        {"excluded": True},
+        {"excluded": "true"},
+    ],
+)
+def test_explicit_unapproved_or_excluded_rows_never_enter_either_corpus(tmp_path, flags):
+    correction = tmp_path / "corrections.jsonl"
+    atomic_jsonl(correction, [pair(**flags)])
+    with pytest.raises(ValueError, match=r"Unapproved|Excluded"):
+        merge_translation(correction, tmp_path / "train.jsonl")
+    with pytest.raises(ValueError, match=r"Unapproved|Excluded"):
+        merge_whisper(whisper_export(tmp_path / "audio", **flags), tmp_path / "train")
+    assert not (tmp_path / "train.jsonl").exists()
+    assert not (tmp_path / "train").exists()
+
+
+def test_whisper_accepts_approved_transcript_without_bilingual_approval(tmp_path):
+    flags = {"transcript_approved": True, "translation_approved": False}
+    correction = tmp_path / "corrections.jsonl"
+    atomic_jsonl(correction, [pair(**flags)])
+    with pytest.raises(ValueError, match="translation_approved"):
+        merge_translation(correction, tmp_path / "train.jsonl")
+    audio = whisper_export(tmp_path / "audio", **flags)
+    assert merge_whisper(audio, tmp_path / "train")["added"] == 1
+    assert merge_whisper(audio, tmp_path / "train")["added"] == 0
+
+
+def test_evaluation_usage_cannot_be_overridden_by_live_provenance(tmp_path):
+    correction = tmp_path / "corrections.jsonl"
+    atomic_jsonl(correction, [pair(usage="evaluation_only")])
+    with pytest.raises(ValueError, match="Evaluation"):
+        merge_translation(correction, tmp_path / "train.jsonl")
+    with pytest.raises(ValueError, match="Evaluation"):
+        merge_whisper(whisper_export(tmp_path / "audio", usage="evaluation_only"), tmp_path / "train")
+    assert not (tmp_path / "train.jsonl").exists()
+    assert not (tmp_path / "train").exists()
+
+
+def test_csv_literal_boolean_approvals_preserve_historical_import(tmp_path):
+    audio = whisper_export(tmp_path / "audio")
+    (audio / "metadata.jsonl").unlink()
+    (audio / "metadata.csv").write_text(
+        "file_name,transcription,session_kind,source_lang,transcript_approved,excluded\n"
+        "clip.wav,Grace,live,en,True,False\n"
+    )
+    assert merge_whisper(audio, tmp_path / "train")["added"] == 1
+
+
+def test_existing_unapproved_records_cannot_be_carried_to_new_output(tmp_path):
+    correction, original, output = (tmp_path / name for name in ["corrections.jsonl", "old.jsonl", "new.jsonl"])
+    atomic_jsonl(correction, [pair()])
+    atomic_jsonl(original, [pair(sample_id="old", translation_approved=False)])
+    before = original.read_bytes()
+    with pytest.raises(ValueError, match="translation_approved"):
+        merge_translation(correction, original, output=output)
+    assert original.read_bytes() == before and not output.exists()
+
+
+@pytest.mark.parametrize("missing", [True, False])
+def test_missing_or_empty_correction_input_cannot_report_success(tmp_path, missing):
+    correction, target = tmp_path / "corrections.jsonl", tmp_path / "train.jsonl"
+    if not missing:
+        correction.write_text("\n")
+    with pytest.raises((FileNotFoundError, ValueError)):
+        merge_translation(correction, target)
+    assert not target.exists()
+    audio = tmp_path / "audio"
+    audio.mkdir()
+    if not missing:
+        (audio / "metadata.jsonl").write_text("\n")
+    with pytest.raises((FileNotFoundError, ValueError)):
+        merge_whisper(audio, tmp_path / "train")
+    assert not (tmp_path / "train").exists()
+
+
+@pytest.mark.parametrize("alias", [False, True])
+@pytest.mark.parametrize("as_output", [False, True])
+def test_registered_v2_holdout_cannot_be_read_as_base_or_written_via_alias(tmp_path, monkeypatch, alias, as_output):
+    from tools import merge_corrections as merger
+
+    monkeypatch.setattr(merger, "PROJECT_ROOT", tmp_path)
+    holdout = tmp_path / "bible_data/aligned/verse_pairs_test_v2.jsonl"
+    atomic_jsonl(holdout, [{"en": "Held out text", "es": "Texto reservado"}])
+    target = holdout
+    if alias:
+        target = tmp_path / "ordinary_name.jsonl"
+        target.symlink_to(holdout)
+    correction = tmp_path / "correction.jsonl"
+    atomic_jsonl(correction, [pair()])
+    before = holdout.read_bytes()
+    with pytest.raises(ValueError, match="Evaluation"):
+        merger.merge_translation(
+            correction,
+            tmp_path / "train.jsonl" if as_output else target,
+            output=target if as_output else tmp_path / "scratch_train.jsonl",
+        )
+    assert holdout.read_bytes() == before
+    assert not (tmp_path / "scratch_train.jsonl").exists()
