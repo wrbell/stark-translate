@@ -98,6 +98,7 @@ from tools.pipeline_timing import (
     capture_stamp,
     milliseconds,
 )
+from tools.preview_candidates import RollingPreview, TranslationCandidate, common_prefix_words
 
 RUNTIME_PROFILE = resolve_profile(settings.profile)
 _managed_llama_server = None
@@ -165,6 +166,13 @@ _marian_memo = ExactTextMemo(0)
 _closed_utterances = set()
 _partial_sequence = 0
 _partial_emitted_sequence = {}
+_partial_source_text = {}
+_pause_epochs = {}
+_speculative_candidates = {}
+_speculation_tasks = set()
+_speculation_attempts = {}
+_rolling_previews = {}
+_incremental_stt = None
 NUM_DRAFT_TOKENS = 3  # speculative decoding: 4B drafts tokens for 12B to verify
 WORD_TIMESTAMPS = False  # per-word timestamps/confidence (adds ~200-400ms DTW pass)
 BEAM_SIZE = 1  # Whisper beam search width: 1=greedy (fastest), 5=default
@@ -2272,7 +2280,127 @@ def _is_garbage_text(text: str) -> bool:
     return False
 
 
-async def process_partial(audio_data, utterance_id, captured_end=None, captured_start=None, sample_bounds=None):
+def _translation_identity(text):
+    return (
+        SESSION_ID,
+        SOURCE_LANG,
+        TARGET_LANG,
+        id(mlx_a_model),
+        id(mlx_a_tokenizer),
+        MODEL_FAMILY,
+        ADAPTER_DIR_A,
+        settings.translation.terminology_prompt,
+        text,
+    )
+
+
+async def _speculate_pause(audio_data, utterance_id, pause_epoch, sample_bounds):
+    """Start optional work early; ordinary final STT must confirm exact source.
+
+    No generated token is broadcast, spoken or saved as a final here. A resumed
+    utterance invalidates the result; running model work still drains normally.
+    """
+    if (
+        BACKEND != "mlx"
+        or MULTIPROCESS
+        or mlx_a_model is None
+        or mlx_b_model is not None
+        or MLX_DRAFT_MODEL is not None
+        or MODEL_FAMILY != "gemma4"
+        or _stt_scheduler is None
+    ):
+        _latency_event("speculation_unsupported")
+        return
+    if (
+        _translation_active.is_set()
+        or _final_pending.is_set()
+        or _stt_scheduler.busy
+        or utterance_id not in _partial_source_text
+        or _speculation_attempts.get(utterance_id, 0) >= 2
+    ):
+        _latency_event("speculation_suppressed_busy")
+        return
+    _speculation_attempts[utterance_id] = _speculation_attempts.get(utterance_id, 0) + 1
+    _latency_event("speculation_started", utterance_id=utterance_id)
+    try:
+        result = await asyncio.wrap_future(
+            _stt_scheduler.submit(
+                "partial", _run_tracked_stt, "partial", _run_stt, audio_data, _whisper_prompt(), key=utterance_id
+            )
+        )
+        source, _, confidence, segments, _ = result
+        if (
+            _pause_epochs.get(utterance_id, 0) != pause_epoch
+            or utterance_id in _closed_utterances
+            or _final_pending.is_set()
+            or _pipeline_translation_lock.locked()
+            or not source
+            or _is_garbage_text(source)
+            or _should_suppress(
+                source,
+                confidence,
+                len(audio_data) / SAMPLE_RATE,
+                no_speech_prob=_max_segment_metric(segments, "no_speech_prob"),
+                compression_ratio=_max_segment_metric(segments, "compression_ratio"),
+            )
+        ):
+            _latency_event("speculation_discarded_before_translate")
+            return
+        source, _ = correct_stt_output(source)
+        if should_use_marian_only(source, confidence):
+            _latency_event("speculation_skipped_marian_route")
+            return
+        identity = _translation_identity(source)
+        from engines.mlx_engine import translate_loaded_model
+
+        def generate():
+            _latency_trace.record("speculative_generation_started", utterance_id=utterance_id)
+            return translate_loaded_model(
+                mlx_a_model,
+                mlx_a_tokenizer,
+                source,
+                model_family=MODEL_FAMILY,
+                source_lang=SOURCE_LANG,
+                target_lang=TARGET_LANG,
+                terminology_prompt=settings.translation.terminology_prompt,
+            )
+
+        async with _pipeline_translation_lock:
+            _translation_active.set()
+            try:
+                translated = await asyncio.get_running_loop().run_in_executor(_pipeline_pool, generate)
+            finally:
+                _translation_active.clear()
+            if _pause_epochs.get(utterance_id, 0) != pause_epoch:
+                _latency_event("speculation_discarded_resumed_speech")
+                return
+            _speculative_candidates[utterance_id] = TranslationCandidate(
+                identity, translated, pause_epoch, dict(sample_bounds)
+            )
+            _latency_event("speculation_completed", utterance_id=utterance_id, model_ms=translated.latency_ms)
+    except asyncio.CancelledError:
+        _latency_event("speculation_cancelled_pending")
+    except Exception as exc:
+        _latency_event("speculation_failed")
+        logger.warning("Optional pause speculation failed: %s", exc)
+
+
+def _confirmed_speculation(utterance_id, text, confidence):
+    candidate = _speculative_candidates.pop(utterance_id, None)
+    if candidate is None:
+        return None
+    if should_use_marian_only(text, confidence) or not candidate.confirmed(
+        _translation_identity(text), _pause_epochs.get(utterance_id, 0)
+    ):
+        _latency_event("speculation_confirmation_mismatch")
+        return None
+    _latency_event("speculation_reused", utterance_id=utterance_id)
+    return candidate.result
+
+
+async def process_partial(
+    audio_data, utterance_id, captured_end=None, captured_start=None, sample_bounds=None, preview_kind="periodic"
+):
     """Fast partial: STT (~300ms) + MarianMT (~80ms). Italic in UI.
 
     [FIX] Partials are skipped when a final is pending to avoid starving
@@ -2282,6 +2410,13 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
     global _active_partial_future, _partial_sequence
     _partial_sequence += 1
     request_sequence = _partial_sequence
+    original_audio_duration = len(audio_data) / SAMPLE_RATE
+    rolling_start = 0
+    processed_audio_samples = len(audio_data)
+    if _latency.incremental_stt == "rolling":
+        rolling_start = max(0, len(audio_data) - int(_latency.rolling_window_s * SAMPLE_RATE))
+        audio_data = audio_data[rolling_start:]
+        processed_audio_samples = len(audio_data)
     sample_bounds = sample_bounds or {name: None for name in SAMPLE_COLUMNS}
     partial_submitted = time.perf_counter()
     if settings.translation.final_aware_partials and _translation_active.is_set():
@@ -2324,12 +2459,23 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
 
         # --- Step 1: Whisper STT on the MLX pipeline pool ---
         def _partial_stt():
+            nonlocal processed_audio_samples
             t0 = time.perf_counter()
             conf = None
             no_speech = None
             cr = None
             from engines.base import STTEngine
 
+            if _incremental_stt is not None:
+                result, processed = _incremental_stt.transcribe(audio_data, utterance_id)
+                processed_audio_samples = processed
+                _latency_trace.record(
+                    "stream_preview_stt",
+                    utterance_id=utterance_id,
+                    processed_samples=processed,
+                    sample_rate=SAMPLE_RATE,
+                )
+                return result
             if isinstance(stt_pipe, STTEngine):
                 res = stt_pipe.transcribe(
                     audio_data,
@@ -2424,6 +2570,11 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
         else:
             english, stt_latency, stt_confidence, no_speech_prob, compression_ratio = stt_result
 
+        if _latency.incremental_stt == "rolling":
+            rolling = _rolling_previews.setdefault(utterance_id, RollingPreview())
+            english, joined = rolling.update(english, rolling_start)
+            _latency_event("rolling_preview_joined" if joined else "rolling_preview_unaligned")
+
         # [FILTER] Suppress garbage/hallucinated text
         if _is_garbage_text(english):
             print(f"  [FILTER] garbage partial suppressed: {english!r}")
@@ -2450,12 +2601,21 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
 
         # --- Step 2: MarianMT on the separate PyTorch pool (frees MLX thread) ---
         spanish, marian_latency = await loop.run_in_executor(_pytorch_pool, translate_marian, english)
-        if _latency.latest_partial and (
+        if (
+            _stt_scheduler is not None
+            or _latency.speculate_pause_ms
+            or _latency.pause_preview_ms
+            or _latency.clause_preview_s
+        ) and (
             utterance_id in _closed_utterances or request_sequence <= _partial_emitted_sequence.get(utterance_id, -1)
         ):
             _latency_event("partial_suppressed_stale_result")
             return
         _partial_emitted_sequence[utterance_id] = request_sequence
+        previous_source = _partial_source_text.get(utterance_id, "")
+        stable_prefix = common_prefix_words(previous_source, english)
+        _partial_source_text[utterance_id] = english
+        _latency_event("preview_" + preview_kind)
         total = stt_latency + marian_latency
         _count_experiment("partial_emitted")
 
@@ -2471,7 +2631,13 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
                 "speech_start_to_partial_ms": milliseconds(time.perf_counter(), captured_start),
                 "partial_processing_ms": milliseconds(time.perf_counter(), partial_submitted),
                 "ts": datetime.now().isoformat(),
-                "buffer_s": len(audio_data) / SAMPLE_RATE,
+                "buffer_s": original_audio_duration,
+                "processed_audio_s": processed_audio_samples / SAMPLE_RATE,
+                "preview_kind": preview_kind,
+                "preview_revision": request_sequence,
+                "stable_source_prefix": stable_prefix,
+                "processed_window_offset_samples": rolling_start,
+                "processed_window_sample_rate": SAMPLE_RATE,
                 "stt_ms": stt_latency,
                 "marian_ms": marian_latency,
                 "text_en": english if SOURCE_LANG == "en" else spanish,
@@ -2491,6 +2657,9 @@ async def process_partial(audio_data, utterance_id, captured_end=None, captured_
             {
                 "type": "translation",
                 "stage": "partial",
+                "preview_kind": preview_kind,
+                "preview_revision": request_sequence,
+                "stable_source_prefix": stable_prefix,
                 "timing_schema_version": 2,
                 **sample_bounds,
                 "chunk_id": utterance_id,
@@ -2568,6 +2737,8 @@ def _run_stt(audio_data, whisper_prompt):
     """
     from engines.base import STTEngine
 
+    if _incremental_stt is not None:
+        _incremental_stt.close()  # owning worker restores attention before full final STT
     if isinstance(stt_pipe, STTEngine):
         return _run_stt_engine(audio_data, whisper_prompt)
     if BACKEND == "mlx":
@@ -2757,8 +2928,15 @@ async def _pipeline_translate_and_finalize(
                 async def run_translate(pool, fn, *args):
                     return await submit_translate(pool, fn, *args)
 
+                confirmed = _confirmed_speculation(timing.utterance_id, english, stt_confidence)
+                # Only a matching final STT result can commit earlier generation.
+                if confirmed is not None:
+                    timing.translation_started = time.perf_counter()
+                    spanish_a, lat_a, tps_a = confirmed.text, confirmed.latency_ms, confirmed.tokens_per_second
+                    _last_gen_stats[cid] = _generation_stats(confirmed)
+                    qe_a = qe_score(english, spanish_a)
                 # --- Multiprocess path: dispatch to translation worker process ---
-                if not MULTIPROCESS and mlx_a_model is None:
+                elif not MULTIPROCESS and mlx_a_model is None:
                     # A missing/disabled Gemma always means real Marian finals,
                     # including CPU and --low-vram; never audience placeholder text.
                     spanish_a, lat_a = await run_translate(_pytorch_pool, translate_marian, english)
@@ -3294,8 +3472,23 @@ async def process_final(audio_data, finalized_utterance_id=None):
     # Signal partials for this utterance to stop — finals take priority on the MLX thread
     _final_pending_utterance_id = finalized_utterance_id
     _final_pending.set()
+    if finalized_utterance_id is not None:
+        for state in (
+            _partial_emitted_sequence,
+            _partial_source_text,
+            _pause_epochs,
+            _speculative_candidates,
+            _speculation_attempts,
+            _rolling_previews,
+        ):
+            for old_id in list(state):
+                if old_id < finalized_utterance_id - 128:
+                    state.pop(old_id, None)
+        _closed_utterances.difference_update(
+            uid for uid in tuple(_closed_utterances) if uid < finalized_utterance_id - 128
+        )
 
-    if _latency.latest_partial:
+    if _latency.latest_partial or _latency.speculate_pause_ms or _latency.pause_preview_ms or _latency.clause_preview_s:
         _closed_utterances.add(finalized_utterance_id)
     if _stt_scheduler is not None:
         _stt_scheduler.cancel_partial(finalized_utterance_id)
@@ -4051,6 +4244,8 @@ async def audio_loop():
     print("\nListening... (Ctrl+C to stop)\n")
 
     PARTIAL_INTERVAL = settings.vad.partial_interval
+    pause_preview_fired = False
+    pause_speculation_fired = False
     SILENCE_TRIGGER = settings.vad.silence_trigger
     MAX_UTTERANCE = settings.vad.max_utterance
 
@@ -4210,6 +4405,10 @@ async def audio_loop():
                         continue
 
                     if has_speech:
+                        if silence_frames:
+                            _pause_epochs[utterance_id] = _pause_epochs.get(utterance_id, 0) + 1
+                        pause_preview_fired = False
+                        pause_speculation_fired = False
                         if len(speech_buffer) == 0:
                             utterance_id += 1  # new utterance starting
                             _utterance_start_times[utterance_id] = time.perf_counter()
@@ -4244,9 +4443,57 @@ async def audio_loop():
                     buffer_duration = len(speech_buffer) / SAMPLE_RATE
                     new_audio = (len(speech_buffer) - last_partial_len) / SAMPLE_RATE
 
+                    pause_ms = silence_frames * 512 / SAMPLE_RATE * 1000
+                    if not has_speech and buffer_duration >= 0.7 and silence_frames < max_silence_frames:
+                        clause = bool(_latency.clause_preview_s and buffer_duration >= _latency.clause_preview_s)
+                        preview_delay = _latency.pause_preview_ms or (128 if clause else 0)
+                        if preview_delay and pause_ms >= preview_delay and not pause_preview_fired:
+                            pause_preview_fired = True
+                            kind = "clause" if clause else "pause"
+                            _latency_trace.record(
+                                "prospective_preview_boundary",
+                                utterance_id=utterance_id,
+                                kind=kind,
+                                **timeline.sample_metadata(),
+                            )
+                            task = asyncio.create_task(
+                                process_partial(
+                                    speech_buffer.copy(),
+                                    utterance_id,
+                                    timeline.last,
+                                    timeline.first,
+                                    timeline.sample_metadata(),
+                                    preview_kind=kind,
+                                )
+                            )
+                            _partial_tasks.add(task)
+                            task.add_done_callback(_partial_tasks.discard)
+                            last_partial_len = len(speech_buffer)
+                        if (
+                            _latency.speculate_pause_ms
+                            and pause_ms >= _latency.speculate_pause_ms
+                            and not pause_speculation_fired
+                        ):
+                            pause_speculation_fired = True
+                            task = asyncio.create_task(
+                                _speculate_pause(
+                                    speech_buffer.copy(),
+                                    utterance_id,
+                                    _pause_epochs.get(utterance_id, 0),
+                                    timeline.sample_metadata(),
+                                )
+                            )
+                            _speculation_tasks.add(task)
+                            task.add_done_callback(_speculation_tasks.discard)
+
+                    new_audio = (len(speech_buffer) - last_partial_len) / SAMPLE_RATE
+                    # One earlier first preview; subsequent cadence is unchanged.
+                    partial_interval = (
+                        (_latency.first_preview_s or PARTIAL_INTERVAL) if last_partial_len == 0 else PARTIAL_INTERVAL
+                    )
                     # --- Partial: fire every PARTIAL_INTERVAL of new audio ---
                     if (
-                        new_audio >= PARTIAL_INTERVAL
+                        new_audio >= partial_interval
                         and silence_frames < max_silence_frames
                         and buffer_duration < MAX_UTTERANCE
                     ):
@@ -4405,7 +4652,7 @@ async def main_async(args):
     global _marian_engine
     global _stream_token_queue, _stream_loop
     global _pipeline_chunk_queue, _pipeline_translation_lock
-    global _RUN_AB, _clean_session_shutdown, _session_model_ids, _session_main_task
+    global _RUN_AB, _clean_session_shutdown, _session_model_ids, _session_main_task, _incremental_stt
 
     _RUN_AB = args.run_ab
     _clean_session_shutdown = False
@@ -4445,6 +4692,10 @@ async def main_async(args):
             stt_pipe = await asyncio.wrap_future(_stt_scheduler.submit("final", load_whisper, BACKEND))
         else:
             stt_pipe = load_whisper(BACKEND)
+        if _latency.incremental_stt == "stream":
+            from tools.incremental_stt import StreamingPreview
+
+            _incremental_stt = StreamingPreview(stt_pipe)
         if args.low_vram:
             # Low-VRAM mode: skip Gemma entirely, MarianMT handles all translation
             mlx_a_model, mlx_a_tokenizer = None, None
@@ -4685,7 +4936,11 @@ async def main_async(args):
         if _stream_token_queue is not None:
             await _stream_token_queue.put(None)
         stream_task.cancel()
+        if _speculation_tasks:
+            await asyncio.gather(*list(_speculation_tasks), return_exceptions=True)
         if _stt_scheduler is not None:
+            if _incremental_stt is not None:
+                await asyncio.wrap_future(_stt_scheduler.submit("final", _incremental_stt.close))
             await asyncio.get_running_loop().run_in_executor(None, _stt_scheduler.shutdown)
         if _vad_pool is not None:
             _vad_pool.shutdown(wait=True)
@@ -5072,7 +5327,7 @@ def main():
     _latency = LatencyExperiments.from_env()
     _latency_trace = LatencyTrace(_latency.trace)
     _marian_memo = ExactTextMemo(_latency.marian_memo)
-    if _latency.latest_partial or _latency.incremental_stt != "off":
+    if _latency.latest_partial or _latency.incremental_stt != "off" or _latency.speculate_pause_ms:
         _stt_scheduler = LatestSTTWorker(on_event=_latency_event)
     if _latency.vad_worker:
         _vad_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="vad-owner")
