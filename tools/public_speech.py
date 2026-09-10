@@ -14,15 +14,14 @@ import io
 import json
 import os
 import re
+import shutil
 import tarfile
-import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
 REVISION = "70bb2e84b976b7e960aa89f1c648e09c59f894dd"
 LANGUAGES = {"en": "en_us", "es": "es_419"}
 PARTITIONS = {"development": "dev", "confirmation": "test"}
-BASE = "https://huggingface.co/datasets/google/fleurs/resolve"
 
 
 def sha256(path: Path) -> str:
@@ -88,6 +87,8 @@ def select(rows: list[dict], count: int) -> list[dict]:
 def download(revision: str, relative: str, cache: Path) -> Path:
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError("Dataset revision must be an immutable 40-hex commit")
+    if not re.fullmatch(r"data/(?:en_us|es_419)/(?:dev\.tsv|test\.tsv|audio/(?:dev|test)\.tar\.gz)", relative):
+        raise ValueError("Only frozen EN/ES FLEURS source paths are supported")
     path = cache / revision / relative
     receipt = path.with_name(path.name + ".sha256")
     if path.exists():
@@ -96,12 +97,19 @@ def download(revision: str, relative: str, cache: Path) -> Path:
         return path
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".part")
-    url = f"{BASE}/{revision}/{relative}"
     print(f"Downloading {relative}", flush=True)
     try:
-        with urllib.request.urlopen(url, timeout=120) as response, temporary.open("wb") as target:
-            while block := response.read(1024 * 1024):
-                target.write(block)
+        from huggingface_hub import hf_hub_download
+
+        source = hf_hub_download(
+            repo_id="google/fleurs",
+            repo_type="dataset",
+            filename=relative,
+            revision=revision,
+            cache_dir=cache / ".hf-cache",
+        )
+        with Path(source).open("rb") as response, temporary.open("wb") as target:
+            shutil.copyfileobj(response, target, length=1024 * 1024)
         digest = sha256(temporary)
         os.replace(temporary, path)
         receipt.write_text(digest + "\n")

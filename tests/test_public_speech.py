@@ -41,14 +41,14 @@ def test_selection_stable_balanced_unique_sentences():
 
 def test_existing_download_checks_integrity_without_network(tmp_path):
     revision = "a" * 40
-    target = tmp_path / revision / "source"
-    target.parent.mkdir()
+    target = tmp_path / revision / "data/en_us/dev.tsv"
+    target.parent.mkdir(parents=True)
     target.write_bytes(b"original")
-    target.with_suffix(".sha256").write_text(hashlib.sha256(b"original").hexdigest())
-    assert download(revision, "source", tmp_path) == target
+    target.with_name(target.name + ".sha256").write_text(hashlib.sha256(b"original").hexdigest())
+    assert download(revision, "data/en_us/dev.tsv", tmp_path) == target
     target.write_bytes(b"corrupted")
     with pytest.raises(ValueError, match="integrity"):
-        download(revision, "source", tmp_path)
+        download(revision, "data/en_us/dev.tsv", tmp_path)
 
 
 def test_archive_copies_original_bytes_and_validates_samples(tmp_path, monkeypatch):
@@ -68,3 +68,39 @@ def test_archive_copies_original_bytes_and_validates_samples(tmp_path, monkeypat
     assert (tmp_path / "out/1.wav").read_bytes() == audio.getvalue()
     with pytest.raises(ValueError, match="shape/rate"):
         copy_selected_audio(archive, [row(1, samples=123)], tmp_path / "bad")
+
+
+def test_download_uses_pinned_dataset_client_and_rejects_paths(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    source = tmp_path / "downloaded"
+    source.write_bytes(b"exact dataset bytes")
+    calls = []
+
+    def download_file(**kwargs):
+        calls.append(kwargs)
+        return str(source)
+
+    monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(hf_hub_download=download_file))
+    cache = tmp_path / "cache"
+    revision = "b" * 40
+    result = download(revision, "data/es_419/audio/test.tar.gz", cache)
+    assert result.read_bytes() == source.read_bytes()
+    assert calls == [
+        {
+            "repo_id": "google/fleurs",
+            "repo_type": "dataset",
+            "revision": revision,
+            "filename": "data/es_419/audio/test.tar.gz",
+            "cache_dir": cache / ".hf-cache",
+        }
+    ]
+    assert (
+        result.with_name(result.name + ".sha256").read_text().strip() == hashlib.sha256(source.read_bytes()).hexdigest()
+    )
+    for relative in ("../../outside", "/tmp/file", "https://example.com", "data/en_us/train.tsv"):
+        with pytest.raises(ValueError, match="source paths"):
+            download(revision, relative, cache)
+    with pytest.raises(ValueError, match="immutable"):
+        download("main", "data/en_us/dev.tsv", cache)
+    assert len(calls) == 1
