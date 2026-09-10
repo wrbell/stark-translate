@@ -1,9 +1,10 @@
 # AGENTS.md — Live Bilingual Speech-to-Text
 
 > **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
-> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) covers the new source-accounted replay program,
-> installed dependency candidate and operator/device findings. Final experiments,
-> artifact rehearsals and merge validation remain in progress; defaults are unchanged.
+> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
+> Standard, Spanish Parakeet and CPU Lite cadence screens, with no qualified arms.
+> CPU Whisper small/base quality recovery, independent Lite deadlines, final
+> artifact rehearsals and merge validation remain pending; defaults are unchanged.
 
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
 > (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
@@ -41,12 +42,17 @@ Schema 2 `speech_end_to_final_ms` = estimated speech end → final payload ready
 acknowledgement (includes return-network time); legacy `e2e_latency_ms` is archived
 processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/README.md).
 
-The [completed September 10 screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
+The September 10 normalized follow-up completed [Standard screening](docs/evaluation/mac_followup_20260910/standard-screen-result.md)
+(96 technical passes, 0/24 qualified arms), [Spanish Parakeet screening](docs/evaluation/mac_followup_20260910/spanish-parakeet-result.md)
+(18 passes, 0/2) and [CPU Lite cadence screening](docs/evaluation/mac_followup_20260910/lite-cadence-result.md)
+(24 passes, 0/4). Each run has six eligible anchors, so these screens support no
+p95 claim. Faster medians did not satisfy the other guards. E4B finals, Spanish
+Whisper and the 0.6-second cadence remain unchanged. Lite finals in this screen
+use Marian CPU; E2B is only a harness label. CPU Whisper small/base quality
+recovery and independent Lite deadline follow-ups remain pending; rejected arms cannot enter confirmation
+or combinations.
 
-The [current EN↔ES follow-up](docs/evaluation/mac_followup_20260910/README.md)
-adds audited public bilingual references, source-accounted experiments, conditional
-Parakeet profiling, CPU training preflight repairs and isolated dependency migration.
-Model/default promotion still requires its recorded gates.
+The [earlier September 10 overnight screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
 
 EN↔ES remains the active speed priority. The installed Standard and CPU Lite
 full-service runs on `752ab9a` completed with consistent retained source spans,
@@ -90,6 +96,12 @@ and model unloading, preserving queued TTS. These repairs do not certify sustain
 microphone capture or human-heard output. See [quiet-room receipts](docs/evaluation/attended_mic_20260910/README.md),
 [synthetic checks and identity probe](docs/evaluation/tts_routing_20260910/README.md),
 and `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
+
+The later [capture-loss accounting repair](docs/evaluation/mac_followup_20260910/capture-loss-accounting.md)
+(`d7ed43d`) separates counted worker FIFO drops from native-overflow flags with an
+unknown lost-sample count, validates bounded POSIX terminal receipts and records
+shutdown-only losses. It does not certify native capture reliability or resolve
+the retained Spanish failure; no native audio test was performed for this repair.
 
 The [hymn source repairs](docs/evaluation/mac_followup_20260910/hymn-source-repairs.md)
 preserve existing whitespace through correction and retain the first 14 speech

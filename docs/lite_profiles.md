@@ -28,6 +28,23 @@ tails were large. Lite is functionally exercised, but cannot be recommended as a
 fast production profile today; the observational Standard/Lite results are not a
 causal paired comparison or a human-quality certificate.
 
+**2026-09-10 cadence update:** the
+[normalized CPU Lite screen](evaluation/mac_followup_20260910/lite-cadence-result.md)
+completed 24 file replays with 0/4 language/cadence arms qualified. Slower partial
+intervals lost preview coverage and responsiveness, including cases with faster
+final medians. The 0.6-second cadence remains unchanged. These runs used
+Whisper-small and Marian finals; the harness's `e2b` label does not indicate
+Gemma inference or a test of `lite-cpu-quality`.
+
+CPU Whisper small/base quality recovery and independent CPU Lite deadline screens
+remain pending. Deadline screens retain the default cadence; rejected cadence
+arms cannot enter a combination. The separate
+[Standard endpoint/deadline](evaluation/mac_followup_20260910/standard-screen-result.md)
+and [Spanish Parakeet](evaluation/mac_followup_20260910/spanish-parakeet-result.md)
+results leave the Mac Gemma E4B and Spanish Whisper defaults unchanged. None of
+these file cohorts certifies microphone reliability, physical output or bilingual
+service quality.
+
 The profiles disable A/B, speculative drafting, extra STT fallback models,
 multiprocess and live diarization. TTS is an optional CPU extra. E2B failures fail
 the selected session rather than silently loading HF NF4 or publishing a model
