@@ -1,0 +1,98 @@
+{
+  "recorded_at_utc": "2026-09-10T11:41:43.171366+00:00",
+  "base_source_head": "2e76109efca4b247e307c1855863f8d4018343e8",
+  "scope": [
+    "bootstrap.sh",
+    "tests/test_bootstrap_flow.py"
+  ],
+  "changes": [
+    "Create an explicit VENV target with an available creator when target/bin/python is absent, including an existing empty target directory.",
+    "Preserve STARK_PYTHON > VENV > VIRTUAL_ENV > CONDA_PREFIX > repo stt_env > repo venv precedence.",
+    "Normalize the resulting VENV path absolute and quote/escape its systemd executable.",
+    "Finish setup and doctor successfully before either systemd or launchd mutation."
+  ],
+  "validation": [
+    {
+      "command": "stt_env/bin/python -m pytest tests/test_bootstrap_flow.py -q --tb=short -p no:cacheprovider",
+      "phase": "before",
+      "exit_code": 1,
+      "result": "8 failed, 6 passed; both reported bugs reproduced",
+      "log": {
+        "path": ".cache/overnight-20260910/bootstrap-bugbot-fix/before-tests.log",
+        "bytes": 5635,
+        "sha256": "052ec880c9831400f43ce8703b4a02d897509fd79f2289311354803d873ab65e"
+      }
+    },
+    {
+      "command": "stt_env/bin/python -m pytest tests/test_bootstrap_flow.py -q --tb=short -p no:cacheprovider",
+      "phase": "after",
+      "exit_code": 0,
+      "result": "14 passed in 7.81s",
+      "log": {
+        "path": ".cache/overnight-20260910/bootstrap-bugbot-fix/after-tests.log",
+        "bytes": 99,
+        "sha256": "ed434db24b370ef24924f3bc666af9beb05ee79e443c89de8f84651c8ed19b44"
+      }
+    },
+    {
+      "command": "stt_env/bin/python -m pytest tests/test_mac_setup_runtime.py tests/test_phase9_7_runbook.py -k 'launch_environment or invalid_active_conda or bootstrap' -q --tb=short -p no:cacheprovider",
+      "exit_code": 0,
+      "result": "11 passed, 23 deselected in 0.59s",
+      "log": {
+        "path": ".cache/overnight-20260910/bootstrap-bugbot-fix/compatibility-tests.log",
+        "bytes": 114,
+        "sha256": "486e0cfeed73f6f52d673b76155f733117256f48c48ae2e5c933da9e50b8cb29"
+      }
+    },
+    {
+      "command": "stt_env/bin/python -m ruff check tests/test_bootstrap_flow.py",
+      "exit_code": 0,
+      "log": {
+        "path": ".cache/overnight-20260910/bootstrap-bugbot-fix/ruff.log",
+        "bytes": 19,
+        "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      }
+    },
+    {
+      "command": "stt_env/bin/python -m ruff format --check tests/test_bootstrap_flow.py",
+      "exit_code": 0,
+      "log": {
+        "path": ".cache/overnight-20260910/bootstrap-bugbot-fix/ruff-format.log",
+        "bytes": 25,
+        "sha256": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50"
+      }
+    },
+    {
+      "command": "/bin/bash -n bootstrap.sh",
+      "exit_code": 0
+    }
+  ],
+  "file_records": [
+    {
+      "path": "bootstrap.sh",
+      "bytes": 7647,
+      "sha256": "33e74f60338a881a67990c016b32befa5e0bcc185713a71aab9b9cfb3641678e"
+    },
+    {
+      "path": "tests/test_bootstrap_flow.py",
+      "bytes": 7750,
+      "sha256": "3b506acef4d51fa7f383c2dbcbb52cadb889dbbe6e956059690205a6e75efbf8"
+    },
+    {
+      "path": ".cache/overnight-20260910/bootstrap-bugbot-fix/bootstrap-before.sh",
+      "bytes": 6856,
+      "sha256": "11b8fcc4383929757d1a216c054c01506a947f54e1e3ae3987a916dc09f7ec2c"
+    }
+  ],
+  "previous_wheel_inventory": {
+    "artifact": {
+      "path": ".cache/overnight-20260910/artifact-validation-84832fb-final/canonical/stark_translate-2026.14.0.0-py3-none-any.whl",
+      "bytes": 682363,
+      "sha256": "ac3d5216ce79f2ef004e2ed5be4c42d5eccb3f2ce8612661a2a7d138c7c2c41e"
+    },
+    "bootstrap_members": [],
+    "scope": "The modified installer is absent from this canonical wheel. Parent owns final immutable source/Mac ZIP and full member comparison."
+  },
+  "effects": "Only copied scripts with inert Python/pip/sudo/systemctl shims ran inside pytest temporary directories. No actual package installation, model downloads, native imports, system service changes, or working stt_env changes.",
+  "git_changes": "No commit or index mutation. Parent owns commit and delivery verification."
+}

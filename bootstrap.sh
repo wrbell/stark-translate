@@ -5,9 +5,9 @@
 # from a checkout of the stark-translate repo. It does:
 #
 #   1. Verify prerequisites (Python 3.11+, ffmpeg, CUDA toolkit, etc.)
-#   2. Create a venv at ./venv and install stark-translate[cuda|cpu] from pyproject
-#   3. Install systemd unit + drop-in with the actual install paths
-#   4. Run a one-shot pre-flight via /api/preflight
+#   2. Select or create a venv and install the platform's pyproject extras
+#   3. Download models and run doctor (the local checks behind /api/preflight)
+#   4. Install the requested service only after setup and pre-flight succeed
 #   5. Print final URLs the operator should bookmark
 #
 # Designed to be idempotent — re-runnable if something fails midway.
@@ -45,7 +45,13 @@ done
 
 STARK_USER="${STARK_USER:-$USER}"
 source "$ROOT/scripts/runtime_env.sh"
-PYTHON="$(stark_resolve_python "$ROOT")"
+# Runtime launchers require VENV to exist; bootstrap can create an explicit
+# target using the next available interpreter without installing into that one.
+if [ -z "${STARK_PYTHON:-}" ] && [ -n "${VENV:-}" ] && [ ! -x "$VENV/bin/python" ]; then
+    PYTHON="$(unset VENV; stark_resolve_python "$ROOT")"
+else
+    PYTHON="$(stark_resolve_python "$ROOT")"
+fi
 
 # -----------------------------------------------------------------------------
 log() { printf '[bootstrap] %s\n' "$*"; }
@@ -100,10 +106,12 @@ elif [ -x "$ROOT/stt_env/bin/python" ]; then
 else
     VENV="$ROOT/venv"
 fi
-if [ ! -d "$VENV" ]; then
+if [ ! -x "$VENV/bin/python" ]; then
     log "creating venv at $VENV"
     "$PYTHON" -m venv "$VENV" || fail "venv creation failed" 3
 fi
+# Service executables must be absolute, even for an explicit relative target.
+VENV="$(cd -- "$VENV" && pwd)"
 
 log "installing stark-translate[$EXTRA] into venv (this may take 5–15 minutes)…"
 "$VENV/bin/python" -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0' wheel >/tmp/bootstrap-pip.log 2>&1 \
@@ -112,7 +120,12 @@ log "installing stark-translate[$EXTRA] into venv (this may take 5–15 minutes)
     || fail "dependency install failed (see /tmp/bootstrap-pip.log)" 3
 log "  pip install OK"
 
-# 3. systemd unit -------------------------------------------------------------
+# 3. Model setup and preflight: works even when no server is running.
+log "downloading models for $EXTRA (existing snapshots are reused)…"
+"$VENV/bin/python" -m operator_app.cli setup --backend "$EXTRA" || fail "model setup failed" 3
+"$VENV/bin/python" -m operator_app.cli doctor --backend "$EXTRA" || fail "pre-flight failed; inspect missing models/dependencies/audio" 5
+
+# 4. Services ---------------------------------------------------------------
 if [ "$SKIP_SYSTEMD" -eq 0 ] && command -v systemctl >/dev/null 2>&1; then
     UNIT_SRC="$ROOT/systemd/stark-translate.service"
     UNIT_DEST="/etc/systemd/system/stark-translate.service"
@@ -124,6 +137,13 @@ if [ "$SKIP_SYSTEMD" -eq 0 ] && command -v systemctl >/dev/null 2>&1; then
         # Drop-in with the actual install paths
         DROPIN_DIR="/etc/systemd/system/stark-translate.service.d"
         sudo mkdir -p "$DROPIN_DIR"
+        # Quote the executable as one systemd argument, including literal
+        # backslashes, quotes, specifiers and environment expansion characters.
+        UVICORN="$VENV/bin/uvicorn"
+        UVICORN="${UVICORN//\\/\\\\}"
+        UVICORN="${UVICORN//\"/\\\"}"
+        UVICORN="${UVICORN//%/%%}"
+        UVICORN="${UVICORN//\$/\$\$}"
         sudo tee "$DROPIN_DIR/override.conf" >/dev/null <<EOF
 [Service]
 User=$STARK_USER
@@ -131,7 +151,7 @@ WorkingDirectory=$ROOT
 Environment=STARK_PROJECT_ROOT=$ROOT
 Environment=STARK_OPERATOR_LOG_DIR=$ROOT/metrics
 ExecStart=
-ExecStart=$VENV/bin/uvicorn operator_app.main:app --host 127.0.0.1 --port 9000
+ExecStart="$UVICORN" operator_app.main:app --host 127.0.0.1 --port 9000
 EOF
         sudo systemctl daemon-reload
         sudo systemctl enable stark-translate.service
@@ -148,11 +168,6 @@ fi
 if [ "$INSTALL_LAUNCHD" -eq 1 ]; then
     "$VENV/bin/python" -m operator_app.cli launchd install --project-root "$ROOT" || fail "launchd install failed" 4
 fi
-
-# 4. Model setup and preflight: works even when no server is running.
-log "downloading models for $EXTRA (existing snapshots are reused)…"
-"$VENV/bin/python" -m operator_app.cli setup --backend "$EXTRA" || fail "model setup failed" 3
-"$VENV/bin/python" -m operator_app.cli doctor --backend "$EXTRA" || fail "pre-flight failed; inspect missing models/dependencies/audio" 5
 
 # 5. Final summary ------------------------------------------------------------
 log ""

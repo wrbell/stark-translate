@@ -34,6 +34,10 @@ members; pipeline/engine bytes remain unchanged, while the completed hours still
 belong to the actual 752 wheel. Full receipts and modest logs are retained in the
 [final evidence directory](overnight_final_validation_20260910/README.md).
 
+The later [bootstrap review corrections](bootstrap_review_20260910/README.md)
+record explicit-environment creation and setup-before-service regression checks.
+They change the source installer; the frozen runtime results retain their own identity.
+
 ## Frozen inputs
 
 - `mac_v2026_14_manifest.json`: original frozen audio/transcript inputs. Retains
