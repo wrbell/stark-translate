@@ -116,10 +116,18 @@ class TestBacklogJson:
             if item["status"] in {"in_progress", "pending_input_or_hardware"}:
                 assert item["certification"] != "met", item["id"]
 
-    def test_draft_pr_is_not_described_as_merged(self):
+    def test_pr_status_has_consistent_merge_evidence(self):
         integration = _load_backlog()["integration"]
         assert "pull/192" in integration["draft_pr"]
-        assert "not merged" in integration["draft_pr"].lower()
+        state = integration["pr_state"]
+        assert state in {"open", "merged", "closed"}
+        if state == "merged":
+            assert re.fullmatch(r"[0-9a-f]{40}", integration["merge_commit"])
+            assert "not merged" not in integration["draft_pr"].lower()
+            assert "merged" in integration["draft_pr"].lower()
+        else:
+            assert "not merged" in integration["draft_pr"].lower()
+            assert not integration.get("merge_commit")
 
     def test_known_issue_items_carry_issue_acceptance(self):
         items = {item["id"]: item for item in _load_backlog()["items"]}

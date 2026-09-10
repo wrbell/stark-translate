@@ -7,9 +7,10 @@
     "local_branch": "codex/mac-reliability-roadmap",
     "local_base": "5154fb9; subsequent integrated runtime, UI, Lite, security and documentation commits are tracked by PR #192.",
     "local_version": "2026.14.0.0",
-    "draft_pr": "[PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft; validation and source merge in progress. Source is pushed as changes pass focused checks.",
+    "draft_pr": "[PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft, not merged; final validation and source merge are in progress.",
     "publication": "Source and issue publishing and the final merge to main are authorized by the user. PyPI publication, package artifacts and release tags remain pending by user choice.",
-    "distinction": "Items marked implemented or validated exist on the local reliability branch (all overnight worktrees are integrated as of 2026-09-10) unless noted as main-only. Nothing below is released on main or PyPI until the parent supplies merge/tag evidence. Certification records whether the item's own acceptance was met; implementation alone does not close an issue."
+    "distinction": "Items marked implemented or validated exist on the local reliability branch (all overnight worktrees are integrated as of 2026-09-10) unless noted as main-only. Nothing below is released on main or PyPI until the parent supplies merge/tag evidence. Certification records whether the item's own acceptance was met; implementation alone does not close an issue.",
+    "pr_state": "open"
   },
   "status_definitions": {
     "in_progress": "Active engineering right now; code may still be changing on the branch and its acceptance is not yet met.",

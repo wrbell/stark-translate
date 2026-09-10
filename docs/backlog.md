@@ -8,7 +8,7 @@
 
 - **Main release:** `v2026.13` — main at 09e4679; v2026.13 PRs #180–191 merged. main stays v2026.13 until the authorized final merge.
 - **Local candidate:** `2026.14.0.0` on `codex/mac-reliability-roadmap` (base `5154fb9; subsequent integrated runtime, UI, Lite, security and documentation commits are tracked by PR #192.`)
-- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft; validation and source merge in progress. Source is pushed as changes pass focused checks.
+- **Draft PR:** [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open draft, not merged; final validation and source merge are in progress.
 - **Publication:** Source and issue publishing and the final merge to main are authorized by the user. PyPI publication, package artifacts and release tags remain pending by user choice.
 
 Items marked implemented or validated exist on the local reliability branch (all overnight worktrees are integrated as of 2026-09-10) unless noted as main-only. Nothing below is released on main or PyPI until the parent supplies merge/tag evidence. Certification records whether the item's own acceptance was met; implementation alone does not close an issue.
