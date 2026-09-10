@@ -119,5 +119,7 @@ optional SpeechBrain source; then update the alternate backend, legacy conversio
 corpus and offline-QE tools. Broaden audit roots and cover
 the resolved extras environment before describing the project as comprehensively
 audited. These are follow-up items. The Silero/managed-CT2 setup fixes were applied
-after the frozen screening run and require their separate routing validation.
+after the frozen screening run. The separate [24-run synthetic routing exercise](mac_v2026_14_routing/README.md)
+completed successfully and records the packaged VAD artifact in every run;
+that runtime evidence does not broaden the security scan's scope.
 PyPI account setup and publication remain pending by user choice.

@@ -60,12 +60,16 @@ Keep E4B, 0.5-second silence and 0.6-second partial cadence as defaults; experim
 remain opt-in. No browser clients were observed (visible final ACK coverage
 0/348), so this screen cannot establish the caption-delivery goal.
 
-The conservative routing branch was unexercised on that sermon clip. A separate
-**24-run synthetic EN/ES routing probe is currently running** after the packaged
-VAD and automatic CT2 setup changes: legacy/conservative routing, both models,
-both languages and three alternating pairs. This checks runtime paths; it cannot
-replace natural Spanish references or human translation review. The frozen
-48-run report retains its original source and VAD-loader cohort.
+The conservative routing branch was unexercised on that sermon clip. The separate
+[synthetic EN/ES routing report](evaluation/mac_v2026_14_routing/README.md) now
+records **24/24 runs exited zero**, with 72 finals and 90 partials after the
+packaged VAD and automatic CT2 setup changes. Across both models, languages and
+three repeats, conservative routing used Marian for the two allowlisted phrases
+and Gemma for the non-allowlisted sentence; legacy routing used Marian for all
+three. All runs recorded the installed Silero 6.2.1 JIT artifact and its weight
+hash. Visible final ACK coverage was 0/72. Keep conservative routing opt-in:
+these synthetic path checks do not replace natural Spanish references or human
+translation review. The 48-run screen retains its original source/loader cohort.
 
 The [translation comparison](evaluation/mac_v2026_14_quality/comparison.md) uses
 identical text inputs and three repeats. E2B's translation-only median is 37–43%
@@ -84,13 +88,14 @@ have no reference score. Predictions and measured timings were preserved.
 
 ## Completed validation
 
-The full-suite figures below precede the latest VAD/CT2 setup changes. Their
-focused checks have passed; the final full-suite and artifact checks remain pending.
-
-- Full CPU suite: **1,722 passed, 2 skipped**, 57.83% coverage against the 50% gate.
-- Cached MLX GPU regression suite: **3 passed**, covering E4B EOS/canary behavior
-  and the worker's first forward pass.
-- Ruff lint/format and mypy pass. Official HTML5 Tidy 5.8.0 reports zero warnings
+- Final CPU suite after the VAD/CT2 setup changes: **1,785 passed, 4 skipped**,
+  59.05% coverage against the 50% gate. An earlier rerun exposed a stale packaging
+  test that rejected the new derived-CT2 manifest type; its schema assertion was
+  corrected and the complete suite rerun. The failure log was retained.
+- Earlier cached MLX GPU regression suite: **3 passed**, covering E4B EOS/canary
+  behavior and the worker's first forward pass. The later 24 routing runs cover
+  actual post-setup pipeline execution separately.
+- Ruff lint/format (236 files) and mypy (19 files) pass. Official HTML5 Tidy 5.8.0 reports zero warnings
   or errors across all five displays; it was built only in the repository cache.
 - CI-configured Bandit passes with zero medium/high findings. The final expanded
   run retaining B615 reports **27 medium findings**: the original 26 call sites
@@ -116,15 +121,16 @@ focused checks have passed; the final full-suite and artifact checks remain pend
   `[mlx,eval,diarization]` extras were **installed**, all 18 runtime import checks
   passed and `pip check` was clean. Existing `stt_env` was unchanged. Mac setup
   reused five cached default artifacts with no model downloads. The final
-  v2026.14 wheel/sdist/Mac ZIP rebuild and reinstall await the measured reports
-  and source freeze; the preliminary artifact is not the final release.
+  v2026.14 wheel/sdist/Mac ZIP rebuild and reinstall remain pending; the
+  preliminary artifact is not the final release.
 - Independent STT inference completed on 50 English and 11 Spanish saved clips,
   with no approved human references, so **no WER or natural-audio acceptance claim**
   is made. Offline Hindi generation completed on both models for 43 English
   inputs each; Hindi references and human quality review remain absent.
 
 Local evidence is recorded in `.cache/mac-roadmap/validation.json`,
-`.cache/mac-roadmap/full-tests.log`, `.cache/html5-validation/report.json`,
+`.cache/mac-roadmap/full-tests.log`, `.cache/mac-roadmap/full-tests-final.log`,
+`.cache/mac-roadmap/coverage-final.json`, `.cache/html5-validation/report.json`,
 `.cache/security-audit/`, `.cache/package-artifacts-validation/`,
 `.cache/mac-roadmap/vad-cache-proof.json` and
 `.cache/mac-roadmap/ct2-setup-validation/report.json`. See the
@@ -175,10 +181,10 @@ in `.cache/mac-roadmap/rehearsal_report.json`; the retained summary failure is
 - A service rehearsal with natural bilingual speech, real speaker transitions and
   church audio hardware. The controlled hymn/pause/restart/Review/Stop rehearsal
   above does not close those human and device gates.
-- Completion and review of the 24 synthetic routing probes, the final full-suite
-  rerun, then v2026.14 wheel/sdist/Mac ZIP rebuild and outside-checkout installed
-  runtime checks. The 48-run screening report is complete; no combined experiment
-  is justified by its results.
+- Final v2026.14 wheel/sdist/Mac ZIP rebuild, build/install from the unpacked
+  source ZIP, and outside-checkout installed runtime checks. Both the 48-run
+  screen and 24-run synthetic routing report are complete, as is the final CPU
+  suite; no combined experiment or default change is justified by those reports.
 - PyPI trusted publisher account setup: the browser is signed out and the user
   explicitly chose to leave publishing pending. Required mapping is owner
   `wrbell`, repository `stark-translate`, workflow `pypi.yml`, environment `pypi`.
