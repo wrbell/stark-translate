@@ -19,6 +19,10 @@ reports distributions from individual observations. E4B remains the default.
   it does not replace the full historical baseline.
 - `mac_v2026_14_experiments.json`: fixed cadence 0.6 s, three alternating E4B/E2B
   pairs for each opt-in experiment. Only one behavior changes per screen.
+- `mac_v2026_14_routing_synthetic.json` and `mac_v2026_14_routing_experiments.json`:
+  separate Piper EN/ES operational phrases for exercising routing decisions with
+  unchanged confidence thresholds. These are functional probes, not natural
+  speech references or substitutes for the sermon benchmark.
 
 Predicted transcripts never count as references. Use `annotate` to create a new
 manifest with human-reviewed text/provenance; it rejects changes to immutable
@@ -77,3 +81,13 @@ The [operator rehearsal](mac_v2026_14_rehearsal.md) records actual browser,
 session, summary and TTS behavior separately from benchmark acceptance.
 Physical output-device, natural
 Spanish, two-speaker and bilingual review gates are explicitly separate.
+
+[The frozen latency screen](mac_v2026_14_screening/README.md) compares all eight
+configurations on both models across 48 completed real-time runs. It includes
+failed optimization hypotheses, execution counters and matched-caption analysis
+where lower silence thresholds changed segmentation. It supports retaining all
+experimental options as opt-in; no combined optimization was justified.
+
+The [runtime snapshot](mac_v2026_14_runtime.json) supplements per-run package,
+code and model identities. The [security scope](mac_v2026_14_security.md) records
+what the checks covered and the remaining unpinned model-download findings.

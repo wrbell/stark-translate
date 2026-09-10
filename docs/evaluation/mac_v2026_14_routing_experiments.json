@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "purpose": "Targeted synthetic EN/ES path exercise after the frozen sermon screens; unchanged confidence threshold, three alternating E4B/E2B pairs per language/configuration. Existing legacy routing is the baseline.",
+  "baseline_arguments": ["--silence-trigger", "0.5", "--partial-interval", "0.6", "--vad-backend", "torch", "--no-idle-warmup-only", "--no-final-aware-partials", "--routing-policy", "legacy", "--terminology-prompt", "none"],
+  "experiments": [
+    {"name": "routing_legacy", "arguments": []},
+    {"name": "routing_conservative", "arguments": ["--routing-policy", "conservative"]}
+  ]
+}

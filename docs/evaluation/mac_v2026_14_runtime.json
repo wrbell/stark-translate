@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-09-10T01:59:36.404950+00:00",
+  "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "evaluation_dependency_overlay": ".cache/mac-eval-deps",
+  "versions": {
+    "torch": "2.10.0",
+    "torchaudio": "2.10.0",
+    "transformers": "5.12.1",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "onnxruntime": "1.24.2",
+    "silero-vad": "6.2.1",
+    "mlx": "0.32.2",
+    "mlx-lm": "0.31.3",
+    "mlx-optiq": "0.4.34",
+    "mlx-whisper": "0.4.3",
+    "parakeet-mlx": "0.5.2",
+    "ctranslate2": "4.7.1",
+    "piper-tts": "1.4.1",
+    "sentencepiece": "0.2.1",
+    "tokenizers": "0.22.2",
+    "safetensors": "0.7.0",
+    "huggingface-hub": "1.29.0",
+    "sacrebleu": "2.6.0",
+    "jiwer": "4.0.0"
+  },
+  "scope": "Environment snapshot during the frozen screen. This supplements each run\u2019s recorded package/source/model evidence; it does not retrospectively prove imported bytecode. The working stt_env was not replaced or upgraded during this work."
+}
