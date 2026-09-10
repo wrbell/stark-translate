@@ -249,7 +249,9 @@ class FileAudioStream:
         self.close()
 
     def _reader_loop(self) -> None:
-        started = time.monotonic()
+        from tools.pipeline_timing import CaptureStamp
+
+        started = time.perf_counter()
         try:
             for offset in range(0, len(self._samples), self.blocksize):
                 if self._stop.is_set():
@@ -257,11 +259,19 @@ class FileAudioStream:
                 block = np.zeros((self.blocksize, self.channels), dtype=np.float32)
                 samples = self._samples[offset : offset + self.blocksize]
                 block[: len(samples)] = samples[:, None]
-                self._callback(block, self.blocksize, None, None)
                 if self.speed > 0:
                     deadline = started + (offset + self.blocksize) / self.samplerate / self.speed
-                    if self._stop.wait(max(0, deadline - time.monotonic())):
+                    if self._stop.wait(max(0, deadline - time.perf_counter())):
                         return
+                # Real-time replay uses the same block-availability boundary as
+                # capture. Accelerated replay is a functional, not latency, run.
+                scale = self.speed if self.speed > 0 else 1
+                stamp = CaptureStamp(
+                    started + offset / self.samplerate / scale,
+                    started + (offset + self.blocksize) / self.samplerate / scale,
+                    "replay_realtime" if self.speed == 1 else "replay_nonrealtime",
+                )
+                self._callback(block, self.blocksize, stamp, None)
         except Exception as exc:
             self.error = exc
             logger.exception("file-audio: replay failed")

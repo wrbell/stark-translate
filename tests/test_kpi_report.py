@@ -101,7 +101,7 @@ class TestComputeLatencyKpis:
 
         rows = self._make_rows([1000, 1200, 15000, 20000])
         result = compute_latency_kpis(rows)
-        assert result["e2e_count"] == 2  # only non-stall values
+        assert result["e2e_count"] == 4  # stalls stay in latency percentiles
         assert result["stall_count"] == 2
 
     def test_prefers_true_e2e_ms(self):
@@ -111,7 +111,7 @@ class TestComputeLatencyKpis:
             {"e2e_latency_ms": "1000", "true_e2e_ms": "5000", "chunk_id": "1"},
         ]
         result = compute_latency_kpis(rows)
-        assert result["e2e_p50"] == 5000  # true_e2e_ms takes priority
+        assert result["e2e_p50"] == 1000  # do not include time the speaker was talking
 
     def test_falls_back_to_e2e_latency(self):
         from tools.kpi_report import compute_latency_kpis
@@ -127,7 +127,7 @@ class TestComputeLatencyKpis:
 
         result = compute_latency_kpis([])
         assert result["e2e_count"] == 0
-        assert result["e2e_p50"] == 0.0
+        assert result["e2e_p50"] is None
 
     def test_translation_b_latency(self):
         from tools.kpi_report import compute_latency_kpis

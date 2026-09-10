@@ -320,6 +320,7 @@
 
 <button class="fs-btn" id="fsBtn" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
 
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
   const wsHost = location.hostname || 'localhost';
@@ -402,9 +403,17 @@
 
     ws.onerror = () => ws.close();
 
-    ws.onmessage = (evt) => {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, (evt) => {
       const data = JSON.parse(evt.data);
 
+      if (data.type === 'speaker_update') {
+        document.querySelectorAll('[data-final-chunk="' + data.chunk_id + '"]').forEach(function(el) {
+          var label = el.querySelector('.speaker-label');
+          if (!label) { label = document.createElement('span'); label.className = 'speaker-label'; el.prepend(label); }
+          label.textContent = data.speaker ? data.speaker + ': ' : '';
+        });
+        return;
+      }
       // Handle language config — swap row labels for source/target
       if (data.type === 'lang_config') {
         const srcLabel = data.source_label;
@@ -550,28 +559,30 @@
         $('latB').textContent = fmtMs(data.latency_b_ms);
         $('latBes').textContent = fmtMs(data.latency_b_ms);
       }
-      if (data.e2e_latency_ms) {
-        $('latC').textContent = fmtMs(data.e2e_latency_ms);
-        $('latCes').textContent = fmtMs(data.e2e_latency_ms);
+      const finalReadyMs = data.speech_end_to_final_ms;
+      if (Number.isFinite(finalReadyMs)) {
+        $('latC').textContent = fmtMs(finalReadyMs);
+        $('latCes').textContent = fmtMs(finalReadyMs);
+        $('latC').title = 'Speech-end estimate to final ready (before browser delivery)';
       }
 
       // Stats on complete only
       if (stage === 'complete') {
         const latA = data.latency_a_ms || 0;
         const latB = data.latency_b_ms || 0;
-        const e2e = data.e2e_latency_ms || (latSTT + Math.max(latA, latB));
+        const e2e = Number.isFinite(data.speech_end_to_final_ms) ? data.speech_end_to_final_ms : null;
 
         chunks++;
         sumA += latA;
         sumB += latB;
         sumSTT += latSTT;
-        sumE2E += e2e;
+        if (e2e !== null) sumE2E += e2e;
         if (data.spanish_a === data.spanish_b && data.spanish_b) sameCount++;
 
         latenciesSTT.push(latSTT);
         latenciesA.push(latA);
         if (latB > 0) latenciesB.push(latB);
-        latenciesE2E.push(e2e);
+        if (e2e !== null) latenciesE2E.push(e2e);
 
         const tpsA = data.tps_a || 0;
         const tpsB = data.tps_b || 0;
@@ -582,7 +593,7 @@
         $('avgA').textContent = fmtMs(sumA / chunks);
         $('avgB').textContent = latenciesB.length > 0 ? fmtMs(sumB / latenciesB.length) : '—';
         $('avgSTT').textContent = fmtMs(sumSTT / chunks);
-        $('avgE2E').textContent = fmtMs(sumE2E / chunks);
+        $('avgE2E').textContent = latenciesE2E.length ? fmtMs(sumE2E / latenciesE2E.length) : '—';
         $('sameRate').textContent = hasAB
           ? ((sameCount / chunks) * 100).toFixed(0) + '%' : '—';
 
@@ -598,7 +609,7 @@
         $('tpsA').textContent = tpsCountA > 0 ? (sumTpsA / tpsCountA).toFixed(0) : '—';
         $('tpsB').textContent = tpsCountB > 0 ? (sumTpsB / tpsCountB).toFixed(0) : '—';
       }
-    };
+    });
   }
 
   function upsertChunk(panel, id, text, prefix, isPartial, isStreaming) {
@@ -612,6 +623,7 @@
     }
     div.className = isStreaming ? 'chunk streaming' : isPartial ? 'chunk partial' : 'chunk';
     const isTemporary = typeof id === 'string' && (id.startsWith('p-') || id.startsWith('stream-'));
+    if (!isTemporary) div.dataset.finalChunk = id;
     const label = isTemporary ? '' : '<span class="chunk-num">#' + id + '</span>';
     // [P7-P3-6A] Add streaming cursor for actively streaming text
     const cursor = isStreaming ? '<span class="streaming-cursor"></span>' : '';

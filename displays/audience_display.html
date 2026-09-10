@@ -265,6 +265,7 @@
   </div>
 </div>
 
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
   const wsHost = location.hostname || 'localhost';
@@ -353,9 +354,14 @@
 
     ws.onerror = () => ws.close();
 
-    ws.onmessage = (evt) => {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, (evt) => {
       const data = JSON.parse(evt.data);
 
+      if (data.type === 'speaker_update') {
+        const sentence = sentences.find(s => s.id === data.chunk_id);
+        if (sentence) { sentence.speaker = data.speaker || ''; render(); }
+        return;
+      }
       // Handle language config — swap column labels
       if (data.type === 'lang_config') {
         document.getElementById('srcLabel').textContent = data.source_label;
@@ -451,7 +457,7 @@
       }
 
       render();
-    };
+    });
   }
 
   function toggleFullscreen() {

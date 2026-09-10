@@ -262,6 +262,7 @@
   <div class="chunks-wrapper" id="englishChunks"></div>
 </div>
 
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
   const wsHost = location.hostname || 'localhost';
@@ -365,14 +366,14 @@
       }
 
       var text = getText(data);
-      div.textContent = filterText(text);
+      div.textContent = (data.speaker ? data.speaker + ': ' : '') + filterText(text || '');
       container.appendChild(div);
     });
   }
 
   function rerenderChunks() {
     renderChunks(spanishChunks, function(d) {
-      return useModelB ? d.spanish_b : d.spanish_a;
+      return useModelB ? (d.spanish_b || d.spanish_a) : d.spanish_a;
     }, true);
     renderChunks(englishChunks, function(d) {
       return d.english;
@@ -380,6 +381,13 @@
   }
 
   function addChunk(data) {
+    if (data.stage === 'partial') {
+      chunkData = chunkData.filter(function(c) { return c.stage !== 'partial'; });
+    } else {
+      chunkData = chunkData.filter(function(c) {
+        return c.stage !== 'partial' && c.chunk_id !== data.chunk_id;
+      });
+    }
     chunkData.push(data);
 
     // Trim to prevent unbounded memory growth
@@ -414,7 +422,7 @@
       ws.close();
     };
 
-    ws.onmessage = function(evt) {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, function(evt) {
       var data;
       try {
         data = JSON.parse(evt.data);
@@ -423,15 +431,26 @@
       }
       // lang_config: acknowledged but no visible labels to swap in this display
       if (data.type === 'lang_config') return;
+      if (data.type === 'speaker_update') {
+        var existing = chunkData.find(function(c) { return c.chunk_id === data.chunk_id && c.stage !== 'partial'; });
+        if (existing) {
+          existing.speaker = data.speaker || '';
+          rerenderChunks();
+        }
+        return;
+      }
       if (data.type !== 'translation') return;
 
       addChunk({
         chunk_id: data.chunk_id,
+        utterance_id: data.utterance_id,
+        stage: data.stage || 'complete',
+        speaker: data.speaker || '',
         english: data.english || '',
         spanish_a: data.spanish_a || '',
         spanish_b: data.spanish_b || '',
       });
-    };
+    });
   }
 
   connect();

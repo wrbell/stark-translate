@@ -13,6 +13,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import re
 import shlex
 import statistics
@@ -23,6 +24,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 METRIC_COLUMNS = (
+    "speech_end_to_final_ms",
+    "vad_wait_ms",
+    "stt_queue_wait_ms",
+    "translation_queue_wait_ms",
+    "finalization_overhead_ms",
+    "broadcast_ms",
     "true_e2e_ms",
     "e2e_latency_ms",
     "stt_latency_ms",
@@ -114,6 +121,28 @@ def analyze_run(csv_path: Path | str, partials_path: Path | str, log_path: Path 
         "chunk_count": len(rows),
         "partial_count": len(partials),
         "metrics": metrics,
+        "timing_schema_versions": sorted({row.get("timing_schema_version") or "legacy" for row in rows}),
+        "metric_definitions": {
+            "speech_end_to_final_ms": "last VAD-positive capture frame end to final payload ready; not browser rendering",
+            "e2e_latency_ms": "legacy queue submission to translation/QE completion",
+            "true_e2e_ms": "legacy first speech observation to translation/QE completion",
+            "silence_delay_ms": "legacy first speech observation to queue submission (includes speaking)",
+            "partial_total_ms": "STT plus Marian compute only; excludes cadence, queue and delivery",
+        },
+        "speech_end_by_endpoint": {
+            reason: summarize(
+                [
+                    n
+                    for row in rows
+                    if row.get("endpoint_reason") == reason
+                    and (n := _number(row.get("speech_end_to_final_ms"))) is not None
+                ]
+            )
+            for reason in sorted({row.get("endpoint_reason") for row in rows if row.get("endpoint_reason")})
+        },
+        "partial_capture_to_ready_ms": summarize(
+            [n for row in partials if (n := _number(row.get("captured_end_to_partial_ms"))) is not None]
+        ),
         "marian_only_share": sum(n == 0 for n in tps) / len(tps) if tps else None,
         "marian_only_observations": len(tps),
         "marian_only_source": "tps_a == 0 proxy" if tps else None,
@@ -263,7 +292,17 @@ def run_replay(clip: dict, wav: Path, tag: str, extra: list[str], index: int, me
     metrics_dir.mkdir(parents=True, exist_ok=True)
     with log_path.open("x") as log:
         result = subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=False)
-    report = {"session_id": tag, "clip": clip, "command": command, "returncode": result.returncode}
+    report = {
+        "session_id": tag,
+        "clip": clip,
+        "command": command,
+        "returncode": result.returncode,
+        "replay_speed": float(os.environ.get("STARK_REPLAY_SPEED", "1")),
+        "realtime_latency_eligible": float(os.environ.get("STARK_REPLAY_SPEED", "1")) == 1,
+    }
+    metadata = metrics_dir / f"session_metadata_{tag}.json"
+    if metadata.exists():
+        report["session_metadata"] = json.loads(metadata.read_text())
     if csv_path.exists():
         report.update(analyze_run(csv_path, partials_path, log_path))
     else:

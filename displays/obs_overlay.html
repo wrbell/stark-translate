@@ -159,6 +159,7 @@
   <div class="text-english" id="englishText"></div>
 </div>
 
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
   'use strict';
@@ -293,7 +294,7 @@
     } else {
       // Remove any partial and streaming, add final
       recentChunks = recentChunks.filter(function(c) { return !c.partial && !c.streaming; });
-      recentChunks.push({ spanish: spanish, english: english, partial: false, streaming: false });
+      recentChunks.push({ chunk_id: data.chunk_id, speaker: data.speaker || '', spanish: spanish, english: english, partial: false, streaming: false });
     }
 
     // Keep only last N chunks
@@ -301,9 +302,13 @@
       recentChunks.shift();
     }
 
+    renderRecent();
+  }
+
+  function renderRecent() {
     // Render: join recent chunks, most recent at bottom
-    var spanishLines = recentChunks.map(function(c) { return c.spanish; }).filter(Boolean);
-    var englishLines = recentChunks.map(function(c) { return c.english; }).filter(Boolean);
+    var spanishLines = recentChunks.map(function(c) { return (c.speaker ? c.speaker + ': ' : '') + c.spanish; }).filter(Boolean);
+    var englishLines = recentChunks.map(function(c) { return (c.speaker ? c.speaker + ': ' : '') + c.english; }).filter(Boolean);
     var lastIsPartial = recentChunks.length > 0 && recentChunks[recentChunks.length - 1].partial;
     var lastIsStreaming = recentChunks.length > 0 && recentChunks[recentChunks.length - 1].streaming;
 
@@ -337,7 +342,7 @@
       ws.close();
     };
 
-    ws.onmessage = function(evt) {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, function(evt) {
       var data;
       try {
         data = JSON.parse(evt.data);
@@ -345,6 +350,11 @@
         return;
       }
 
+      if (data.type === 'speaker_update') {
+        var existing = recentChunks.find(function(c) { return c.chunk_id === data.chunk_id; });
+        if (existing) { existing.speaker = data.speaker || ''; renderRecent(); }
+        return;
+      }
       // [P7-P3-6A] Handle streaming translation messages
       if (data.type === 'translation_start') {
         // STT completed — show English immediately, create streaming placeholder
@@ -372,7 +382,7 @@
       var isPartial = (stage === 'partial');
 
       addChunk(data, isPartial, false);
-    };
+    });
   }
 
   // Start with empty state

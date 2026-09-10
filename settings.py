@@ -85,6 +85,8 @@ class VADSettings(BaseSettings):
         description="Seconds between partial STT updates while speaking",
     )
 
+    backend: Literal["torch", "onnx"] = Field(default="torch", description="Opt-in Silero ONNX CPU experiment")
+
     model_config = {"env_prefix": "STARK_VAD_"}
 
 
@@ -217,6 +219,13 @@ class STTSettings(BaseSettings):
 
 class TranslationSettings(BaseSettings):
     """Translation model configuration (TranslateGemma + MarianMT + Gemma 4)."""
+
+    idle_warmup_only: bool = Field(default=False, description="Experimental idle-only/coalesced MLX keep-warm")
+    final_aware_partials: bool = Field(default=False, description="Experimental partial admission during final decode")
+    routing_policy: Literal["legacy", "conservative", "off"] = Field(default="legacy")
+    terminology_prompt: Literal["none", "church"] = Field(
+        default="none", description="Opt-in Gemma theological wording prompt"
+    )
 
     # MLX models (Apple Silicon) — Gemma 4 OptiQ is the Mac finals default
     # (parity with CUDA Gemma 4). TranslateGemma IDs remain for --model-family

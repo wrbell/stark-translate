@@ -46,7 +46,9 @@ def test_replay_blocks_tail_and_completion(wav_path, rate, channels):
 
     def callback(data, frames, time_info, status):
         assert frames == 512
-        assert time_info is None and status is None
+        from tools.pipeline_timing import CaptureStamp
+        assert isinstance(time_info, CaptureStamp) and status is None
+        assert time_info.end > time_info.start
         blocks.append(data)
 
     stream = FileAudioStream(
@@ -102,7 +104,8 @@ def test_stop_interrupts_pacing_and_can_restart(wav_path):
     called = threading.Event()
     stream = FileAudioStream(wav_path, callback=lambda *args: called.set(), speed=0.001)
     stream.start()
-    assert called.wait(1)
+    # First block becomes available after pacing; stop interrupts that wait.
+    assert not called.wait(0.05)
     stream.stop()
     assert not stream._thread.is_alive()
     assert not stream.finished.is_set()

@@ -460,6 +460,7 @@
   </div>
 </div>
 
+<script src="caption_telemetry.js"></script>
 <script>
 (function() {
   'use strict';
@@ -542,6 +543,13 @@
   var chunkData = [];
 
   function addChunk(data) {
+    if (data.stage === 'partial') {
+      chunkData = chunkData.filter(function(c) { return c.stage !== 'partial'; });
+    } else {
+      chunkData = chunkData.filter(function(c) {
+        return c.stage !== 'partial' && c.chunk_id !== data.chunk_id;
+      });
+    }
     chunkData.push(data);
     if (chunkData.length > MAX_CHUNKS) {
       chunkData.shift();
@@ -552,7 +560,7 @@
   function renderLatestChunks() {
     // Render English
     renderPanel(englishChunks, chunkData.map(function(d) {
-      return filterText(d.english);
+      return (d.speaker ? d.speaker + ': ' : '') + filterText(d.english);
     }), false);
 
     // Render Spanish
@@ -569,7 +577,7 @@
 
   function renderSpanishPanel() {
     var texts = chunkData.map(function(d) {
-      return filterText(useModelB ? d.spanish_b : d.spanish_a);
+      return (d.speaker ? d.speaker + ': ' : '') + filterText(useModelB ? (d.spanish_b || d.spanish_a) : d.spanish_a);
     });
     renderPanel(spanishChunks, texts, true);
   }
@@ -678,7 +686,7 @@
       ws.close();
     };
 
-    ws.onmessage = function(evt) {
+    ws.onmessage = StarkCaptionTelemetry.wrap(ws, function(evt) {
       var data;
       try {
         data = JSON.parse(evt.data);
@@ -692,15 +700,26 @@
         $('enLabel').textContent = data.source_label;
         return;
       }
+      if (data.type === 'speaker_update') {
+        var existing = chunkData.find(function(c) { return c.chunk_id === data.chunk_id && c.stage !== 'partial'; });
+        if (existing) {
+          existing.speaker = data.speaker || '';
+          renderLatestChunks();
+        }
+        return;
+      }
       if (data.type !== 'translation') return;
 
       addChunk({
         chunk_id: data.chunk_id,
+        utterance_id: data.utterance_id,
+        stage: data.stage || 'complete',
+        speaker: data.speaker || '',
         english: data.english || '',
         spanish_a: data.spanish_a || '',
         spanish_b: data.spanish_b || ''
       });
-    };
+    });
   }
 
   connect();

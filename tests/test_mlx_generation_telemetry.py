@@ -150,8 +150,8 @@ def test_pipeline_telemetry_and_exports(monkeypatch, tmp_path, streaming):
     d.write_diag_jsonl(data, "audio.wav")
     with open(d.CSV_PATH) as f:
         row = next(csv.DictReader(f))
-    assert list(row)[-9:-1] == list(d._GEN_STAT_FIELDS)
-    assert list(row)[-1] == "speaker"
+    assert list(row)[26:34] == list(d._GEN_STAT_FIELDS)
+    assert list(row)[34] == "speaker"
     assert row["gen_tokens_a"] == "4"
     record = json.loads((tmp_path / "diag.jsonl").read_text())
     assert {key: record[key] for key in stats} == stats

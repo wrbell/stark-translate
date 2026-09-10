@@ -18,6 +18,7 @@ import argparse
 import csv
 import glob
 import json
+import math
 import os
 import statistics
 import sys
@@ -66,7 +67,8 @@ def _safe_float(value: str | float | None) -> float | None:
     if value is None or value == "":
         return None
     try:
-        return float(value)
+        number = float(value)
+        return number if math.isfinite(number) else None
     except (ValueError, TypeError):
         return None
 
@@ -90,23 +92,24 @@ STALL_THRESHOLD_MS = 10000  # >10s indicates queue stall, not normal latency
 def compute_latency_kpis(rows: list[dict]) -> dict:
     """KPI 1: Latency percentiles from CSV data.
 
-    Uses true_e2e_ms when available, falls back to e2e_latency_ms.
-    Outliers >10s are counted separately as stalls.
+    Version-2 speech-end measurements never mix with legacy processing values.
+    Slow observations stay in percentiles. Stall counts use processing time,
+    never first-speech latency (which includes time the speaker was talking).
     """
     e2e_values = []
     stt_values = []
     trans_a_values = []
     trans_b_values = []
     stall_count = 0
-
+    version2 = any(row.get("timing_schema_version") in (2, "2") for row in rows)
+    metric = "speech_end_to_final_ms" if version2 else "e2e_latency_ms"
     for row in rows:
-        # Prefer true_e2e_ms, fall back to e2e_latency_ms
-        e2e = _safe_float(row.get("true_e2e_ms")) or _safe_float(row.get("e2e_latency_ms"))
+        e2e = _safe_float(row.get(metric))
         if e2e is not None:
-            if e2e > STALL_THRESHOLD_MS:
-                stall_count += 1
-            else:
-                e2e_values.append(e2e)
+            e2e_values.append(e2e)
+        processing = _safe_float(row.get("e2e_latency_ms"))
+        if processing is not None and processing > STALL_THRESHOLD_MS:
+            stall_count += 1
 
         stt = _safe_float(row.get("stt_latency_ms"))
         if stt is not None:
@@ -121,9 +124,11 @@ def compute_latency_kpis(rows: list[dict]) -> dict:
             trans_b_values.append(lat_b)
 
     return {
-        "e2e_p50": _percentile(e2e_values, 50),
-        "e2e_p95": _percentile(e2e_values, 95),
-        "e2e_p99": _percentile(e2e_values, 99),
+        "metric": metric,
+        "metric_label": "Speech-end to final ready" if version2 else "Legacy pipeline processing",
+        "e2e_p50": _percentile(e2e_values, 50) if e2e_values else None,
+        "e2e_p95": _percentile(e2e_values, 95) if e2e_values else None,
+        "e2e_p99": _percentile(e2e_values, 99) if e2e_values else None,
         "e2e_count": len(e2e_values),
         "stt_p50": _percentile(stt_values, 50),
         "stt_p95": _percentile(stt_values, 95),
@@ -355,7 +360,9 @@ def generate_scorecard(
     # 1. Latency
     e2e_p95 = latency["e2e_p95"]
     e2e_grade = grade(e2e_p95, 2000, 3000, higher_is_better=False)
-    lines.append(f"| 1 | E2E Latency P95 | {e2e_p95:.0f}ms | <3000ms | {e2e_grade} |")
+    label = latency.get("metric_label", "Latency")
+    value = f"{e2e_p95:.0f}ms" if e2e_p95 is not None else "N/A"
+    lines.append(f"| 1 | {label} P95 | {value} | <3000ms | {e2e_grade} |")
 
     # 2. WER proxy (confidence)
     conf_mean = wer["conf_mean"]
@@ -412,14 +419,19 @@ def generate_report(
     lines.append("## 1. Latency Detail")
     lines.append("")
     lines.append(
-        f"- E2E: P50={latency['e2e_p50']:.0f}ms, P95={latency['e2e_p95']:.0f}ms, P99={latency['e2e_p99']:.0f}ms ({latency['e2e_count']} chunks)"
+        f"- {latency.get('metric_label', 'Latency')}: "
+        + ", ".join(
+            f"P{q}={latency[f'e2e_p{q}']:.0f}ms" if latency[f"e2e_p{q}"] is not None else f"P{q}=N/A"
+            for q in (50, 95, 99)
+        )
+        + f" ({latency['e2e_count']} chunks)"
     )
     lines.append(f"- STT: P50={latency['stt_p50']:.0f}ms, P95={latency['stt_p95']:.0f}ms")
     lines.append(f"- Translation A: P50={latency['trans_a_p50']:.0f}ms, P95={latency['trans_a_p95']:.0f}ms")
     if latency["trans_b_p50"] is not None:
         lines.append(f"- Translation B: P50={latency['trans_b_p50']:.0f}ms, P95={latency['trans_b_p95']:.0f}ms")
     if latency["stall_count"] > 0:
-        lines.append(f"- Queue stalls (>10s): {latency['stall_count']}")
+        lines.append(f"- Slow processing (>10s; retained in latency percentiles): {latency['stall_count']}")
     lines.append("")
 
     # Detail: WER
