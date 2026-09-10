@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-10T14:24:38.875467+00:00",
+  "completed": true,
+  "rows": [
+    {
+      "language": "es",
+      "text": "Hola amigos. Esta es una prueba del micrófono en español. Estamos comprobando los subtítulos en esta computadora.",
+      "synthesis_ms": 231.3804590376094,
+      "synthesis_this_process": false,
+      "audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/tts-routing-20260910/routes-r1/synthetic_es.wav",
+      "audio_sha256": "ed48f0dd1889e931ce165c314d3388f108c801be2074292340999fc4bed02c93",
+      "duration_s": 7.627755102040816,
+      "frames": 168192,
+      "sample_rate": 22050,
+      "status": "passed",
+      "playback": {
+        "spec": "MacBook Pro Speakers",
+        "resolved_device": 2,
+        "attempts": [
+          {
+            "requested_device": 2,
+            "started_at": "2026-09-10T14:24:39.054465+00:00",
+            "actual_device": 2,
+            "samplerate": 22050.0,
+            "channels": 1,
+            "reported_latency_s": 0.03850340136054422,
+            "active_after_open": true,
+            "host_open_call_ms": 55.436333001125604,
+            "wait_completed": true,
+            "host_completion_ms": 7807.986041007098,
+            "active_after_wait": false,
+            "stopped_after_wait": true,
+            "closed_after_wait": true,
+            "callback_status": "None",
+            "callback_error": false
+          }
+        ],
+        "passed": true
+      }
+    }
+  ],
+  "synthetic": true,
+  "human_reviewed": false,
+  "training_eligible": false,
+  "scope": "production Piper/route host calls and native completion; no human-heard/physical second-output claim",
+  "python": "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python",
+  "probe_source_sha256": "fa98fca177ad6c6b859bdae5d50cd352212dd0d2300881cffffc35766d942313",
+  "versions": {
+    "piper-tts": "1.8.0",
+    "onnxruntime": "1.29.0",
+    "numpy": "2.4.6",
+    "sounddevice": "0.5.6"
+  },
+  "source_sha256": {
+    "engines/tts_engine.py": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+    "engines/audio_devices.py": "994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5",
+    "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+    "models.lock.json": "ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273"
+  },
+  "devices": [
+    {
+      "index": 2,
+      "name": "MacBook Pro Speakers",
+      "channels": 2,
+      "default": true
+    },
+    {
+      "index": 3,
+      "name": "Microsoft Teams Audio",
+      "channels": 1,
+      "default": false
+    }
+  ],
+  "synthetic_source_receipt_sha256": "39c318493e98b86dc83545dd4b279ec97546b485fa81836800e7c628c41213c0",
+  "ended_at": "2026-09-10T14:24:46.863032+00:00"
+}

@@ -75,7 +75,7 @@
     {
       "id": "mac-live-mic-stall",
       "title": "Built-in microphone capture stalled; operator showed RUNNING without audio",
-      "status": "implemented",
+      "status": "in_progress",
       "certification": "pending",
       "priority": "P0",
       "machine": "mac",
@@ -85,17 +85,19 @@
         "tools/capture_worker.py",
         "tools/pipeline_health.py",
         "operator_app/pipeline_manager.py",
-        "docs/current_architecture.md"
+        "docs/current_architecture.md",
+        "docs/evaluation/attended_mic_20260910/README.md",
+        "docs/evaluation/tts_routing_20260910/README.md"
       ],
       "acceptance": "A live built-in-microphone session produces partial and final captions on the audience display; operator status reflects actual audio frames rather than the CSV header; a stalled input stream is detected and surfaced within seconds.",
       "evidence": [
         "2026-09-09 23:32 session 20260909_233204_799019_en (audio_source=mic): models loaded, 'Listening...' printed, audience page fetched, then no frames; session_lifecycle stayed status=running; partials file empty.",
         "Operator UI derived RUNNING from the CSV header while the audience display stayed disconnected; a separate sounddevice sd.rec probe also stalled.",
         "File-replay sessions 20260909_233546_027169_en and 20260909_233823_034893_es (audio_source=file) completed with exit 0 on the same build; they do not exercise the microphone path.",
-        "Fix integrated 2026-09-10: tools/isolated_audio.py runs PortAudio in a disposable child (tools/capture_worker.py) and raises AudioCaptureError after 5 s without first samples or 3 s idle; tools/pipeline_health.py phases loading → listening → ready feed operator readiness (stale after 3 s); unit tests cover the modules. No live microphone session has been run against the fix."
+        "Capture/readiness fix integrated September 10: isolated PortAudio child, bounded startup/idle/backpressure failures and actual frame readiness. Subsequent real-device sessions and failures are retained in attended_mic_20260910 and tts_routing_20260910."
       ],
-      "notes": "The capture/readiness fix is implemented and integrated; the real built-in-microphone retest and physical-device checks are deferred to the next attended session at the user’s request.",
-      "next_action": "At the next attended session, run built-in-mic captions through the operator and audience pages; confirm readiness follows real frames and a blocked/disconnected input surfaces as input_error within seconds. Record the session identity."
+      "notes": "Built-in quiet-room EN/ES sessions reached ready and stopped cleanly on September 10. Synthetic acoustic EN produced partials/final and completed. Original Spanish acoustic capture failed; traced a8511ee retest eliminated parent-handoff drops but retained 7,680 upstream dropped samples (160 ms), so lossless capture is not certified. Retest included incidental speech; shared evidence is structural only. A per-process device-index mismatch also exposed a selection defect now being repaired.",
+      "next_action": "Finish identity-based input selection and resolve the measured upstream capture loss; preserve all failed lifecycles. Controlled file runs and client-reported visible ACKs do not certify live microphone or physical display quality."
     },
     {
       "id": "issue-131-smoke",
@@ -153,7 +155,8 @@
         "https://github.com/wrbell/stark-translate/issues/132",
         "tests/test_tts_multichannel.py",
         "tests/test_phase9_4_1_tts_device.py",
-        "settings.py"
+        "settings.py",
+        "docs/evaluation/tts_routing_20260910/README.md"
       ],
       "issue_acceptance": "Operator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.",
       "acceptance": "Hardware-independent part: per-language output map (`--tts-device-en/es`, `STARK_TTS_OUTPUT_DEVICES`), operator persistence and hotplug retry covered by tests. Physical part: an operator routes EN and ES to two real outputs and hears each — tracked as `physical-second-output`.",
@@ -161,7 +164,8 @@
         "tests/test_tts_multichannel.py and tests/test_phase9_4_1_tts_device.py pass in the recorded CPU suite (device enumeration mocked).",
         "Built-in MacBook speaker playback calls completed in the controlled rehearsal; no second physical device was used."
       ],
-      "next_action": "Keep #132 open until physical-second-output passes; then root closes both together."
+      "next_action": "Review final integrated caption-to-selected-output wiring and tests, then close #132 if its original routing acceptance is met. Keep physical-second-output pending independently; do not add that stronger requirement to the issue.",
+      "notes": "Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing."
     },
     {
       "id": "physical-second-output",
@@ -223,11 +227,12 @@
       "dependencies": [],
       "sources": [
         "docs/mac_implementation_status.md",
-        "docs/evaluation/README.md"
+        "docs/evaluation/README.md",
+        "docs/evaluation/mac_followup_20260910/public_data/README.md"
       ],
       "acceptance": "At least 50 approved natural utterances per language; no WER or natural-audio acceptance claim before approval.",
-      "notes": "50 English and 11 Spanish candidates exist, all unapproved. The user has no natural Spanish recording location yet; the synthetic Piper Spanish clip stays separate.",
-      "next_action": "User supplies a natural Spanish source; then annotate via tools/mac_evaluation.py annotate."
+      "notes": "Pinned public FLEURS contains 100 natural read-speech recordings per language, with 50 development and 50 untouched confirmation, exact upstream references and hashes. These permit explicitly labeled engineering WER; they are not local human approval or church-domain references. Existing church candidates remain unapproved.",
+      "next_action": "Obtain bilingual approval for at least 50 natural church-relevant utterances per language; keep public engineering references and synthetic Piper evidence separate."
     },
     {
       "id": "bilingual-blinded-review",
@@ -239,10 +244,13 @@
       "dependencies": [],
       "sources": [
         "docs/evaluation/mac_v2026_14_quality/comparison.md",
-        "docs/evaluation/README.md"
+        "docs/evaluation/README.md",
+        "docs/evaluation/mac_followup_20260910/bilingual-review-preparation.json",
+        "docs/evaluation/mac_followup_20260910/translation-comparison.md"
       ],
       "acceptance": "A bilingual reviewer completes blind_review.jsonl for the E4B/E2B comparison; the E2B speed tradeoff is accepted or rejected on meaning and terminology, not canary counts alone.",
-      "next_action": "Hand the blind review form to a reviewer; keep review_key.jsonl separate. Do not change the default before this."
+      "next_action": "Give only the prepared reviewer ZIP to bilingual reviewers; withhold the private key and model-labeled report until annotations are locked. No model-default change is authorized by automated scores alone.",
+      "notes": "A model-blinded development packet contains 354 cases (118 source/canary items × three repeats); all approval fields remain false. The private key is separate and excluded from the reviewer ZIP. Isolated E4B/E2B latency, reference chrF, changed outputs and all 18 canaries are retained separately without claiming a single quality percentage."
     },
     {
       "id": "visible-browser-timing-run",
@@ -416,12 +424,13 @@
       "sources": [
         "https://github.com/wrbell/stark-translate/issues/136",
         "docs/gemma4_tuning/v3_directions.md",
-        "tools/build_preference_triples.py"
+        "tools/build_preference_triples.py",
+        "training/candidates/README.md"
       ],
       "issue_acceptance": "Jacobo canary passes (or we document why it cannot) and COMET-22 does not regress vs v2-cpo.",
       "acceptance": "50–100 hand-crafted preference triples, one CPO continue from v2 (`training/train_gemma4_cpo.py --init-adapter`), re-scored 8-canary set and 500-verse holdout, Jacobo passing or a documented reason.",
-      "notes": "v3_directions Tier 1 also proposes few-shot disambiguation in the production prompt as a cheaper first step; the opt-in `--terminology-prompt church` examples are the Mac analogue and remain opt-in after the screen.",
-      "next_action": "Author triples on WSL; run one CPO continue; re-score."
+      "notes": "Sixty original Jacobo/Santiago preference candidates are prepared, explicitly unapproved and excluded from training. Available exclusion files were checked; the missing versioned WSL holdout is still required. No CPO continue, COMET-22 or trained-canary success is claimed.",
+      "next_action": "Review candidates against the complete WSL holdouts, obtain explicit preference approval, run one CPO continue from v2 and re-score the canaries and 500-verse holdout."
     },
     {
       "id": "issue-137-active-learning",
@@ -437,12 +446,13 @@
         "tools/review_data.py",
         "tools/merge_corrections.py",
         "tests/test_operator_review.py",
-        "tests/test_correction_import_safety.py"
+        "tests/test_correction_import_safety.py",
+        "docs/evaluation/mac_followup_20260910/correction-handoff.md"
       ],
       "issue_acceptance": "An operator can correct a caption and that pair lands in a dated corrections corpus. Retrain script documented even if the first retrain is a dry run.",
       "acceptance": "An operator approves a correction from a recorded Sunday session, the pair reaches a dated corpus with provenance, and the documented correction → merge → smoke-retrain workflow is exercised. The first retrain may be a dry run; a merger dry run alone is not the retrain step.",
-      "notes": "Live/post-session Review, independent transcript/translation approvals, revisioned drafts, portable schema-2 bundles and training/evaluation separation are implemented and tested. Repaired Standard saved correction revision 1 with both approvals false; retained prefixes of original CSV/diagnostics/partials/ACK files remained unchanged. No human approval or dated real correction→merge→smoke-retrain loop has been recorded. Drafts and fixtures are not approved training data.",
-      "next_action": "After human approval of a recorded Sunday correction, export and merge against a scratch training corpus, then execute/document the smoke-retrain dry run. Live microphone capture is not an extra prerequisite for reviewing a recorded session."
+      "notes": "Review drafts survived save/reload on a real replay while original diagnostics remained unchanged. The actual unapproved correction was rejected by scratch training/evaluation export; merger now rejects explicit unapproved, excluded, evaluation-only and protected holdout targets. Conditional correction→merge→CPU trainer-preflight commands are documented. No human-approved Sunday correction or smoke-retrain execution is fabricated.",
+      "next_action": "After human approval of a recorded Sunday correction, run the documented scratch export/merge and actual trainer CPU preflight with real WSL inputs, retaining dated provenance. Live mic is not an extra prerequisite for reviewing a recorded session."
     },
     {
       "id": "issue-138-hindi-zero-shot",
@@ -707,17 +717,18 @@
     {
       "id": "security-b615-pinning",
       "title": "Remaining unpinned Hugging Face download paths (B615)",
-      "status": "deferred",
+      "status": "in_progress",
       "certification": "pending",
       "priority": "P2",
       "machine": "both",
       "dependencies": [],
       "sources": [
-        "docs/evaluation/mac_v2026_14_security.md"
+        "docs/evaluation/mac_v2026_14_security.md",
+        "docs/evaluation/security_feasibility_20260910/README.md"
       ],
       "acceptance": "Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).",
-      "notes": "The configured CI Bandit pass skips B615; the expanded scan's findings and scope limits are documented in the security note.",
-      "next_action": "Pin the live-path fallbacks first."
+      "notes": "Live Marian HF and missing Piper voice resolution now use registered pinned revisions, with local explicit paths supported and unknown remote fallback rejected. Static B615 still reports calls using validated keyword arguments; no suppression was added. Broader optional/training call-site inventory remains outside the validated live-path subset.",
+      "next_action": "Retain live-path pinning evidence; reconcile remaining optional and training download sites individually before claiming all B615 scope complete."
     },
     {
       "id": "multilingual-expansion",
@@ -772,18 +783,19 @@
     {
       "id": "mac-torch-security-migration",
       "title": "Resolve pinned Mac Torch dependency advisories",
-      "status": "pending_input_or_hardware",
-      "certification": "pending",
+      "status": "validated",
+      "certification": "met",
       "priority": "P1",
       "machine": "mac",
       "dependencies": [],
       "sources": [
         "docs/evaluation/overnight_security/README.md",
-        "pyproject.toml"
+        "pyproject.toml",
+        "docs/evaluation/mac_followup_20260910/torch-full-application-candidate.md"
       ],
       "acceptance": "A compatible patched Mac Torch/audio dependency set passes installed imports, VAD and real EN/ES inference, with an explicit full installed audit result. No incompatible forced install or changed frozen benchmark environment.",
-      "notes": "Fresh isolated Mac audit retains two Torch 2.10 findings. A Torch 2.13 upgrade attempt failed before mutation because a matching Mac torchaudio 2.13 wheel was unavailable. Working stt_env is preserved.",
-      "next_action": "Validate a supported patched Torch/audio pairing or isolate optional diarization when available; keep the current audit limitation explicit."
+      "notes": "A fresh Mac arm64 Python 3.11 full-application candidate with Torch 2.13/TorchAudio 2.11 passed installed native imports, bundled VAD, pip check, selected-extra metadata checks and actual normalized EN/ES replay: all 19 validation checks per language. Full installed audit: zero known findings across 123 third-party distributions, unpublished first-party explicitly skipped. Working stt_env and production bounds are unchanged. This meets compatible-candidate feasibility acceptance, not final-source production migration or performance certification.",
+      "next_action": "If promoting the candidate later, rebuild final source into a fresh environment with the complete audited constraints, revalidate installed artifacts and matched-source performance, then switch the launcher with rollback. Do not upgrade working stt_env in place."
     },
     {
       "id": "windows-msi-bootstrap",
@@ -807,7 +819,7 @@
     {
       "id": "wsl-training-recipe-checks",
       "title": "Repair unexecuted W17 projection and domain-corpus recipe assumptions",
-      "status": "deferred",
+      "status": "implemented",
       "certification": "pending",
       "priority": "P2",
       "machine": "wsl",
@@ -817,11 +829,12 @@
       "sources": [
         "training/run_w17_curriculum.sh",
         "training/run_gemma4_e4b_domain_sft.sh",
-        "training/CLAUDE.md"
+        "training/CLAUDE.md",
+        "tools/training_preflight.py"
       ],
       "acceptance": "W17 uses real Whisper projection module names and compatible initialization shape/rank; domain SFT resolves the intended versioned corpus explicitly and rejects missing configured inputs before training. A dry-run command/data inspection is recorded on WSL.",
-      "notes": "Current W17 shell names o_proj whereas Whisper uses out_proj. Domain SFT recipe can select legacy default verse corpus; guides currently require explicit reviewed paths. No WSL execution occurred on Mac.",
-      "next_action": "Correct and inspect the recipes alongside the real W16 adapter and prepared WSL corpus before the next training run."
+      "notes": "W17 now uses out_proj, explicitly validates rank/shape and source LoRA tensors, initializes newly expanded DoRA magnitudes and materializes its JSON selection into aligned audio data. Domain SFT requires explicit versioned corpora. Real CPU preflight inspects trainer/config/data/safetensors and fails on missing inputs. Mac tests and conditional WSL commands are retained; actual WSL adapter/corpus execution remains pending.",
+      "next_action": "Run the repaired CPU preflight on WSL with the real W16/v2 adapters, prepared corpora and complete holdouts before any GPU training."
     },
     {
       "id": "hymn-translation-boundary",

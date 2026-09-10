@@ -1,0 +1,81 @@
+{
+  "devices": {
+    "inputs": [
+      {
+        "index": 0,
+        "name": "WR17.1 Microphone",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 1,
+        "name": "MacBook Pro Microphone",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      }
+    ],
+    "outputs": [
+      {
+        "index": 2,
+        "name": "MacBook Pro Speakers",
+        "direction": "output",
+        "channels": 2,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "direction": "output",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      }
+    ],
+    "error": null,
+    "change_seq": 0
+  },
+  "request": {
+    "lang": "es",
+    "profile": "standard",
+    "backend": "mlx",
+    "stt_backend": "mlx",
+    "model_family": "gemma4",
+    "gemma4_size": "e4b",
+    "mic_device": 1,
+    "tts": false,
+    "record_audio": false,
+    "run_ab": false
+  },
+  "session_id": "20260910_105554_710324_es",
+  "state": "starting",
+  "config": {
+    "lang": "es",
+    "profile": "standard",
+    "record_audio": false,
+    "stt_backend": "mlx",
+    "model_family": "gemma4",
+    "gemma4_size": "e4b",
+    "low_vram": false,
+    "backend": "mlx",
+    "engine": "auto",
+    "tts": false,
+    "run_ab": false,
+    "vad_threshold": 0.3,
+    "mic_device": 1,
+    "mic_gain": null,
+    "log_level": "INFO",
+    "tts_output_mode": "ws",
+    "tts_device": null,
+    "diarize": false,
+    "tts_device_en": null,
+    "tts_device_es": null
+  }
+}

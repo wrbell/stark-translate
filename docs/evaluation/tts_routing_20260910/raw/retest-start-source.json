@@ -1,0 +1,11 @@
+{
+  "head": "a8511eed53fde804a688b4dd56a52c077e773eca",
+  "dirty_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sha256": {
+    "dry_run_ab.py": "576d5272491e0e559df09d5f0018d4bf68575a1e752d960c5b4ec02143fa2cd3",
+    "tools/capture_handoff.py": "8c82c6c01f1fd5227d345edf3c07bc970037b58817f63bbc60c695ad227626a8",
+    "tools/isolated_audio.py": "621d9bce523ef2dd559403d58fee1439c7686bf8a2a593b4a852c72f1c6b317b",
+    "engines/model_paths.py": "e7ed8fc7b3cf086635e95f47ac0c44b3cc51983c697157cb350a26bc989246e1",
+    "docs/evaluation/tts_routing_20260910/probe.py": "9906f0ae66d85d75b366e43e6c683e535ec1acaf882a2098662a341639aa49ac"
+  }
+}

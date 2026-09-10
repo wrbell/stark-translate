@@ -1,0 +1,30 @@
+{
+  "pid": 32143,
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python",
+    "-m",
+    "operator_app.cli",
+    "operator",
+    "--no-browser",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "9002"
+  ],
+  "env_overrides": {
+    "STARK_PROJECT_ROOT": "/Users/willem/Code/vibes/SRTranslate",
+    "STARK_PYTHON": "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python",
+    "STARK_MODELS_DIR": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-roadmap/ct2-setup-validation/managed",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "STARK_AUDIO_SOURCE": "mic",
+    "STARK_SESSION_KIND": "synthetic",
+    "STARK_SERVER_HTTP_PORT": "9080",
+    "STARK_SERVER_WS_PORT": "9765",
+    "STARK_EXPERIMENT_TRACE": "true",
+    "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"
+  },
+  "head": "a8511eed53fde804a688b4dd56a52c077e773eca",
+  "pipeline_sha256": "576d5272491e0e559df09d5f0018d4bf68575a1e752d960c5b4ec02143fa2cd3",
+  "prior_pid": 31979
+}

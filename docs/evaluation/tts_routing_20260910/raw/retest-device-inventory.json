@@ -1,0 +1,50 @@
+[
+  {
+    "name": "WR17.1 Microphone",
+    "index": 0,
+    "hostapi": 0,
+    "max_input_channels": 1,
+    "max_output_channels": 0,
+    "default_low_input_latency": 0.12841666666666668,
+    "default_low_output_latency": 0.01,
+    "default_high_input_latency": 0.13775,
+    "default_high_output_latency": 0.1,
+    "default_samplerate": 48000.0
+  },
+  {
+    "name": "MacBook Pro Microphone",
+    "index": 1,
+    "hostapi": 0,
+    "max_input_channels": 1,
+    "max_output_channels": 0,
+    "default_low_input_latency": 0.03235416666666667,
+    "default_low_output_latency": 0.01,
+    "default_high_input_latency": 0.0416875,
+    "default_high_output_latency": 0.1,
+    "default_samplerate": 48000.0
+  },
+  {
+    "name": "MacBook Pro Speakers",
+    "index": 2,
+    "hostapi": 0,
+    "max_input_channels": 0,
+    "max_output_channels": 2,
+    "default_low_input_latency": 0.01,
+    "default_low_output_latency": 0.018708333333333334,
+    "default_high_input_latency": 0.1,
+    "default_high_output_latency": 0.028041666666666666,
+    "default_samplerate": 48000.0
+  },
+  {
+    "name": "Microsoft Teams Audio",
+    "index": 3,
+    "hostapi": 0,
+    "max_input_channels": 1,
+    "max_output_channels": 1,
+    "default_low_input_latency": 0.01,
+    "default_low_output_latency": 0.0013333333333333333,
+    "default_high_input_latency": 0.1,
+    "default_high_output_latency": 0.010666666666666666,
+    "default_samplerate": 48000.0
+  }
+]

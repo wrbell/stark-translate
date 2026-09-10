@@ -1,0 +1,1 @@
+24409 24024 /Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python -u /Users/willem/Code/vibes/SRTranslate/dry_run_ab.py --lang es --backend mlx --vad-threshold 0.3 --log-level INFO --http-port 9080 --ws-port 9765 --session-id 20260910_102356_408494_es --stt-backend mlx --model-family gemma4 --gemma4-size e4b --profile standard --no-record-audio --no-ab --device 1

@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-10T14:21:01.878445+00:00",
+  "completed": false,
+  "rows": [],
+  "synthetic": true,
+  "human_reviewed": false,
+  "training_eligible": false,
+  "scope": "production Piper/route host calls and native completion; no human-heard/physical second-output claim",
+  "python": "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python",
+  "probe_source_sha256": "63aeb6f3af4b452195b4fcb821f92eff7376e75d4e95f566d8ce403dc2c9b08c",
+  "versions": {
+    "piper-tts": "1.8.0",
+    "onnxruntime": "1.29.0",
+    "numpy": "2.4.6",
+    "sounddevice": "0.5.6"
+  },
+  "source_sha256": {
+    "engines/tts_engine.py": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+    "engines/audio_devices.py": "994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5",
+    "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+    "models.lock.json": "ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273"
+  },
+  "devices": [
+    {
+      "index": 2,
+      "name": "MacBook Pro Speakers",
+      "channels": 2,
+      "default": true
+    },
+    {
+      "index": 3,
+      "name": "Microsoft Teams Audio",
+      "channels": 1,
+      "default": false
+    }
+  ],
+  "voices": {
+    "en": {
+      "name": "en_US-lessac-high",
+      "path": "/Users/willem/.local/share/piper_tts/models--rhasspy--piper-voices/snapshots/1162a9173d0ce503555aed757976b7a9912eae4c/en/en_US/lessac/high/en_US-lessac-high.onnx",
+      "sha256": "4cabf7c3a638017137f34a1516522032d4fe3f38228a843cc9b764ddcbcd9e09",
+      "config_sha256": "db42b97d9859f257bc1561b8ed980e7fb2398402050a74ddd6cbec931a92412f"
+    },
+    "es": {
+      "name": "es_MX-claude-high",
+      "path": "/Users/willem/.local/share/piper_tts/models--rhasspy--piper-voices/snapshots/1162a9173d0ce503555aed757976b7a9912eae4c/es/es_MX/claude/high/es_MX-claude-high.onnx",
+      "sha256": "3ef40a71ea63852cd8ab7e6fa7d2ecdcfa67a0b47c9c48e3f10e02ee02083ea0",
+      "config_sha256": "1afc81f703c0e4cb3b4d7c0dca096b8b54a98806807f0170cf5eb5557723c12d"
+    }
+  },
+  "error": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/willem/.local/share/piper_tts/models--rhasspy--piper-voices/blobs/4cabf7c3a638017137f34a1516522032d4fe3f38228a843cc9b764ddcbcd9e09.json'",
+  "ended_at": "2026-09-10T14:21:02.204489+00:00"
+}

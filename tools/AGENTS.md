@@ -30,9 +30,19 @@ A status claim needs `metrics/` artifacts (`session_*.log`, `session_lifecycle_*
 `session_metadata_*.json` with `audio_source`). 2026-09-09: mic session
 `20260909_233204_799019_en` stalled (lifecycle stuck `running`); file replays
 `..._233546_027169_en` / `..._233823_034893_es` completed. The isolated-capture /
-health fix (`isolated_audio.py`, `pipeline_health.py`) is integrated; a real mic session
-proving it is still pending. Cite the session id, never "tests passed", when describing
-live behavior. `speech_end_to_ack_upper_bound_ms` = estimated speech end → visible-browser
+health fix (`isolated_audio.py`, `pipeline_health.py`) is integrated. Built-in-mic
+sessions `20260910_092405_457769_en` / `20260910_092544_206252_es` reached ready,
+captured nonzero input and stopped cleanly in a quiet room; they contained no
+speech/caption evidence. Synthetic acoustic EN `20260910_102239_515548_en`
+produced partials/final and completed. ES `20260910_102356_408494_es` failed
+capture; traced retest `20260910_105554_710324_es` had zero parent-handoff drops
+but still failed upstream capture and included incidental room speech. Its
+shared evidence is structural only, not a controlled or human-quality reference.
+The OS was locked for these acoustic checks: browser `visible:true` ACKs are
+client reports, not native visibility certification. See
+[`tts_routing_20260910`](../docs/evaluation/tts_routing_20260910/README.md).
+Cite the session id, never "tests passed", when describing live behavior.
+`speech_end_to_ack_upper_bound_ms` = estimated speech end → visible-browser
 ACK (includes return network); `send_to_ack_ms` is the server-send → ACK span.
 Lite: `docs/evaluation/lite_cpu_smoke_20260910.json` is a synthetic CPU smoke, not a gate.
 

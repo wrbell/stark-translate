@@ -1,0 +1,287 @@
+{
+  "last_status": {
+    "state": "idle",
+    "session_id": "20260910_102356_408494_es",
+    "started_at": "2026-09-10T10:23:56",
+    "stopped_at": "2026-09-10T10:25:12",
+    "config": {
+      "lang": "es",
+      "profile": "standard",
+      "record_audio": false,
+      "stt_backend": "mlx",
+      "model_family": "gemma4",
+      "gemma4_size": "e4b",
+      "low_vram": false,
+      "backend": "mlx",
+      "engine": "auto",
+      "tts": false,
+      "run_ab": false,
+      "vad_threshold": 0.3,
+      "mic_device": 1,
+      "mic_gain": null,
+      "log_level": "INFO",
+      "tts_output_mode": "ws",
+      "tts_device": null,
+      "diarize": false,
+      "tts_device_en": null,
+      "tts_device_es": null
+    },
+    "last_event": "Session stopped with errors; review is available, export is blocked",
+    "csv_path": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_20260910_102356_408494_es.csv",
+    "log_path": "/Users/willem/Code/vibes/SRTranslate/metrics/session_20260910_102356_408494_es.log",
+    "outcome": "failed",
+    "readiness": {
+      "phase": "failed",
+      "ready": false,
+      "reason": "Pipeline health is unavailable",
+      "updated_at": 1789050308.009098,
+      "age_s": 19.066314935684204,
+      "stale": true
+    },
+    "health": {
+      "schema_version": 1,
+      "session_id": "20260910_102356_408494_es",
+      "updated_at": 1789050308.009098,
+      "phase": "failed",
+      "input_seen": true,
+      "input_age_s": 0.13270112499594688,
+      "caption_age_s": 15.67982420802582,
+      "input_level": 0.0020945179276168346,
+      "errors": [
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.5928
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592816
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592837
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592851
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592868
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592881
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592893
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.59291
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592923
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592938
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.59295
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592962
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592979
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.592992
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.632731
+        },
+        {
+          "stage": "capture",
+          "code": "handoff_overflow",
+          "at": 1789050290.6335738
+        },
+        {
+          "stage": "audio",
+          "code": "capture_overflow",
+          "at": 1789050290.667941
+        }
+      ],
+      "error_count": 17,
+      "captions": [
+        {
+          "session_id": "20260910_102356_408494_es",
+          "utterance_id": 1,
+          "chunk_id": 1,
+          "stage": "complete",
+          "english": "Hola amigos, esta es una prueba del micr\u00f3fono en espa\u00f1ol. Estamos comprobando los subt\u00edtulos en esta computadora.",
+          "spanish_a": "Hello friends, this is a microphone test in Spanish. We are checking the subtitles on this computer.",
+          "source_lang": "es",
+          "target_lang": "en",
+          "speaker": null
+        }
+      ],
+      "recording": {
+        "audio_enabled": false,
+        "required_failures": 16,
+        "ok": false
+      },
+      "control_sequence": 1789050307501749000,
+      "publish_failures": 0,
+      "persistence": {
+        "submitted": 17,
+        "completed": 17,
+        "pending": 0,
+        "failed": 17,
+        "capacity": 256,
+        "ok": false,
+        "failures": [
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "handoff_overflow"
+          },
+          {
+            "operation": "audio_capture",
+            "code": "samples_dropped"
+          }
+        ]
+      },
+      "storage": {
+        "free_bytes": 241178116096,
+        "low_space": false
+      },
+      "queues": {
+        "audio": 0,
+        "capture_handoff": 0,
+        "finals": 0,
+        "stream_tokens": 1
+      },
+      "clients": 0,
+      "replay_client_wait": {
+        "requested_seconds": 0.0,
+        "actual_wait_seconds": 0.0,
+        "status": "disabled",
+        "connected_clients": 0,
+        "visibility_confirmed": false
+      },
+      "age_s": 19.066314935684204,
+      "stale": true,
+      "operational_logging": {
+        "queued": 0,
+        "dropped": 0,
+        "write_failures": 0
+      }
+    },
+    "effective_profile": {
+      "name": "standard"
+    }
+  },
+  "temporary_ports_listening": {
+    "9002": false,
+    "9080": false,
+    "9765": false
+  },
+  "owned_processes": "24024     1 /Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python -m operator_app.cli operator --no-browser --host 127.0.0.1 --port 9002\n",
+  "model_capture_probe_process_matches": "",
+  "primary_status": {
+    "state": "idle",
+    "readiness": {
+      "phase": "idle",
+      "ready": false,
+      "reason": "idle",
+      "updated_at": null,
+      "age_s": null,
+      "stale": false
+    },
+    "health": {}
+  },
+  "later_owned_processes": "",
+  "later_model_capture_probe_process_matches": "25233 /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python /Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/dry_run_ab.py --backend mlx --no-ab --lang en --audio-file /Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v1/fleurs_development_en.wav --session-id integrity_v2_baseline_e4b_r0_fleurs_development_en_en --ws-port 8865 --http-port 8866 --profile standard --no-tts --model-family gemma4 --gemma4-size e4b --no-mts --stt-backend parakeet-mlx --replay-speed 1 --silence-trigger 0.5 --partial-interval 0.6 --gain 1 --routing-policy legacy --terminology-prompt none --no-idle-warmup-only --no-final-aware-partials\n"
+}

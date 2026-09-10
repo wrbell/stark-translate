@@ -1,0 +1,36 @@
+{
+  "inputs": [
+    {
+      "index": 0,
+      "name": "MacBook Pro Microphone",
+      "direction": "input",
+      "channels": 1,
+      "default_sample_rate": 48000.0
+    },
+    {
+      "index": 2,
+      "name": "Microsoft Teams Audio",
+      "direction": "input",
+      "channels": 1,
+      "default_sample_rate": 48000.0
+    }
+  ],
+  "outputs": [
+    {
+      "index": 1,
+      "name": "MacBook Pro Speakers",
+      "direction": "output",
+      "channels": 2,
+      "default_sample_rate": 48000.0
+    },
+    {
+      "index": 2,
+      "name": "Microsoft Teams Audio",
+      "direction": "output",
+      "channels": 1,
+      "default_sample_rate": 48000.0
+    }
+  ],
+  "error": null,
+  "change_seq": 0
+}

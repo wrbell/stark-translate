@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_102356_408494_es",
+  "updated_at": 1789050308.009098,
+  "phase": "failed",
+  "input_seen": true,
+  "input_age_s": 0.13270112499594688,
+  "caption_age_s": 15.67982420802582,
+  "input_level": 0.0020945179276168346,
+  "errors": [
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.5928
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592816
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592837
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592851
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592868
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592881
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592893
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.59291
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592923
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592938
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.59295
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592962
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592979
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.592992
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.632731
+    },
+    {
+      "stage": "capture",
+      "code": "handoff_overflow",
+      "at": 1789050290.6335738
+    },
+    {
+      "stage": "audio",
+      "code": "capture_overflow",
+      "at": 1789050290.667941
+    }
+  ],
+  "error_count": 17,
+  "captions": [
+    {
+      "session_id": "20260910_102356_408494_es",
+      "utterance_id": 1,
+      "chunk_id": 1,
+      "stage": "complete",
+      "english": "Hola amigos, esta es una prueba del micr\u00f3fono en espa\u00f1ol. Estamos comprobando los subt\u00edtulos en esta computadora.",
+      "spanish_a": "Hello friends, this is a microphone test in Spanish. We are checking the subtitles on this computer.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "speaker": null
+    }
+  ],
+  "recording": {
+    "audio_enabled": false,
+    "required_failures": 16,
+    "ok": false
+  },
+  "control_sequence": 1789050307501749000,
+  "publish_failures": 0,
+  "persistence": {
+    "submitted": 17,
+    "completed": 17,
+    "pending": 0,
+    "failed": 17,
+    "capacity": 256,
+    "ok": false,
+    "failures": [
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "samples_dropped"
+      }
+    ]
+  },
+  "storage": {
+    "free_bytes": 241178116096,
+    "low_space": false
+  },
+  "queues": {
+    "audio": 0,
+    "capture_handoff": 0,
+    "finals": 0,
+    "stream_tokens": 1
+  },
+  "clients": 0,
+  "replay_client_wait": {
+    "requested_seconds": 0.0,
+    "actual_wait_seconds": 0.0,
+    "status": "disabled",
+    "connected_clients": 0,
+    "visibility_confirmed": false
+  }
+}

@@ -1,0 +1,423 @@
+[
+  {
+    "language": "en",
+    "session_id": "20260910_102239_515548_en",
+    "status": "completed",
+    "exit_code": 0,
+    "audio_source": "mic",
+    "session_kind": "synthetic",
+    "record_audio": false,
+    "tts": false,
+    "synthetic": true,
+    "human_reviewed": false,
+    "training_eligible": false,
+    "git_sha": "e644fe049d4ae65dbb2e4881c6934a65f68849c8",
+    "pipeline_sha256": "af6ff9a69a3adf747ef106265e6eab4c93d8ada904d7232d5f43d2be25c32359",
+    "partials": 7,
+    "finals": 1,
+    "speech_end_to_final_ms": 3412.6,
+    "final_ack": [
+      {
+        "session_id": "20260910_102239_515548_en",
+        "chunk_id": 1,
+        "utterance_id": 1,
+        "preview_kind": null,
+        "preview_revision": null,
+        "timing_source": "portaudio_adc",
+        "caption_delivery_mode": "awaited",
+        "caption_queue_wait_ms": 0.0,
+        "captured_start_at_ms": null,
+        "captured_end_at_ms": null,
+        "speech_end_at_ms": null,
+        "sample_start": 1132032,
+        "sample_end": 1431552,
+        "sample_rate": 48000,
+        "speech_end_sample": 1410048,
+        "padding_samples": 0,
+        "event": "caption_rendered",
+        "event_id": "20260910_102239_515548_en:11",
+        "stage": "complete",
+        "client_id": "6039366160",
+        "visible": true,
+        "receive_to_render_ms": 14.2,
+        "send_to_ack_ms": 15.2,
+        "speech_end_to_ack_upper_bound_ms": 3427.8,
+        "speech_start_to_preview_ack_upper_bound_ms": null,
+        "captured_end_to_preview_ack_upper_bound_ms": null,
+        "speech_end_to_preview_ack_upper_bound_ms": null,
+        "timing_schema_version": 2
+      }
+    ],
+    "source_coverage": {
+      "schema_version": 1,
+      "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+      "sample_rate": 48000,
+      "expected_source_samples": 2124288,
+      "eof": null,
+      "dropped_records": 0,
+      "unknown_bounds": 0,
+      "duplicate_observed_samples": 0,
+      "observed_samples_beyond_eof": 0,
+      "capture_gaps": [],
+      "unclassified_intervals": [],
+      "complete": false,
+      "observed": [
+        {
+          "start": 0,
+          "end": 1132032,
+          "state": "vad_non_speech",
+          "vad_positive": false
+        },
+        {
+          "start": 1132032,
+          "end": 1171968,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1171968,
+          "end": 1179648,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1179648,
+          "end": 1218048,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1218048,
+          "end": 1219584,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1219584,
+          "end": 1290240,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1290240,
+          "end": 1299456,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1299456,
+          "end": 1410048,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1410048,
+          "end": 1431552,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1431552,
+          "end": 1814016,
+          "state": "vad_non_speech",
+          "vad_positive": false
+        },
+        {
+          "start": 1814016,
+          "end": 1817088,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1817088,
+          "end": 1838592,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1838592,
+          "end": 2124288,
+          "state": "vad_non_speech",
+          "vad_positive": false
+        }
+      ],
+      "outcomes": [
+        {
+          "start": 1132032,
+          "end": 1431552,
+          "utterance_id": 1,
+          "state": "final_ready"
+        },
+        {
+          "start": 1814016,
+          "end": 1838592,
+          "utterance_id": 2,
+          "state": "discarded_short_silence"
+        }
+      ]
+    },
+    "persistence": {
+      "submitted": 19,
+      "completed": 19,
+      "pending": 0,
+      "failed": 0,
+      "capacity": 256,
+      "ok": true,
+      "failures": []
+    }
+  },
+  {
+    "language": "es",
+    "session_id": "20260910_102356_408494_es",
+    "status": "failed",
+    "exit_code": 1,
+    "audio_source": "mic",
+    "session_kind": "synthetic",
+    "record_audio": false,
+    "tts": false,
+    "synthetic": true,
+    "human_reviewed": false,
+    "training_eligible": false,
+    "git_sha": "e644fe049d4ae65dbb2e4881c6934a65f68849c8",
+    "pipeline_sha256": "af6ff9a69a3adf747ef106265e6eab4c93d8ada904d7232d5f43d2be25c32359",
+    "partials": 6,
+    "finals": 1,
+    "speech_end_to_final_ms": 5510.9,
+    "final_ack": [
+      {
+        "session_id": "20260910_102356_408494_es",
+        "chunk_id": 1,
+        "utterance_id": 1,
+        "preview_kind": null,
+        "preview_revision": null,
+        "timing_source": "portaudio_adc",
+        "caption_delivery_mode": "awaited",
+        "caption_queue_wait_ms": 0.0,
+        "captured_start_at_ms": null,
+        "captured_end_at_ms": null,
+        "speech_end_at_ms": null,
+        "sample_start": 1107456,
+        "sample_end": 1489920,
+        "sample_rate": 48000,
+        "speech_end_sample": 1468416,
+        "padding_samples": 0,
+        "event": "caption_rendered",
+        "event_id": "20260910_102356_408494_es:9",
+        "stage": "complete",
+        "client_id": "22593504912",
+        "visible": true,
+        "receive_to_render_ms": 26.9,
+        "send_to_ack_ms": 31.1,
+        "speech_end_to_ack_upper_bound_ms": 5542.5,
+        "speech_start_to_preview_ack_upper_bound_ms": null,
+        "captured_end_to_preview_ack_upper_bound_ms": null,
+        "speech_end_to_preview_ack_upper_bound_ms": null,
+        "timing_schema_version": 2
+      }
+    ],
+    "source_coverage": {
+      "schema_version": 1,
+      "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+      "sample_rate": 48000,
+      "expected_source_samples": 2479104,
+      "eof": null,
+      "dropped_records": 0,
+      "unknown_bounds": 0,
+      "duplicate_observed_samples": 0,
+      "observed_samples_beyond_eof": 0,
+      "capture_gaps": [
+        [
+          1571328,
+          1595904
+        ],
+        [
+          1641984,
+          1648128
+        ]
+      ],
+      "unclassified_intervals": [
+        [
+          1571328,
+          1595904
+        ],
+        [
+          1641984,
+          1648128
+        ]
+      ],
+      "complete": false,
+      "observed": [
+        {
+          "start": 0,
+          "end": 1107456,
+          "state": "vad_non_speech",
+          "vad_positive": false
+        },
+        {
+          "start": 1107456,
+          "end": 1152000,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1152000,
+          "end": 1156608,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1156608,
+          "end": 1181184,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1181184,
+          "end": 1182720,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1182720,
+          "end": 1302528,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1302528,
+          "end": 1305600,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1305600,
+          "end": 1388544,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1388544,
+          "end": 1390080,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1390080,
+          "end": 1468416,
+          "state": "buffered",
+          "vad_positive": true
+        },
+        {
+          "start": 1468416,
+          "end": 1489920,
+          "state": "buffered",
+          "vad_positive": false
+        },
+        {
+          "start": 1489920,
+          "end": 1571328,
+          "state": "vad_non_speech",
+          "vad_positive": false
+        },
+        {
+          "start": 1595904,
+          "end": 1641984,
+          "state": "vad_non_speech",
+          "vad_positive": false
+        },
+        {
+          "start": 1648128,
+          "end": 2479104,
+          "state": "vad_non_speech",
+          "vad_positive": false
+        }
+      ],
+      "outcomes": [
+        {
+          "start": 1107456,
+          "end": 1489920,
+          "utterance_id": 1,
+          "state": "final_ready"
+        }
+      ]
+    },
+    "persistence": {
+      "submitted": 17,
+      "completed": 17,
+      "pending": 0,
+      "failed": 17,
+      "capacity": 256,
+      "ok": false,
+      "failures": [
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "handoff_overflow"
+        },
+        {
+          "operation": "audio_capture",
+          "code": "samples_dropped"
+        }
+      ]
+    }
+  }
+]
