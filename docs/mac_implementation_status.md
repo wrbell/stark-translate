@@ -12,6 +12,8 @@ Whisper Turbo Spanish, Marian CT2 CPU previews and Gemma 4 E4B OptiQ finals,
 are opt-in. MTP is rejected before live model loading. Hindi is a separate completed
 offline R&D baseline, with no further work in the current speed program.
 
+The [completed 96-run screen](evaluation/overnight_screen_20260910/README.md) selected **0/28 experiment/model arms**. The sub-second final-delivery goal was not met on this 45-second English cohort. No ordinary historical confirmation or combination of these arms is justified; E4B remains the default. New engineering hypotheses are tracked separately.
+
 ## Implemented
 
 - Operator-owned session identity, production CSV parsing and unavailable values.
@@ -61,21 +63,33 @@ installations passed five real HTTP routes, version/profile/launchd-render check
 and `pip check`, without loading inference libraries. Final documentation archives
 and actual installed inference remain separate checks.
 
-The last full local suite before the latest barrier/security changes recorded
-1,992 passes, four skips and four stale runbook assertions. Their focused repair
-passed. CI then found an extracted cleanup-test namespace missing the replay
-barrier and a timeout-message casing assumption; all 34 lifecycle/rehearsal checks
-pass after repair. Final suite, CI, HTML, lint/type/security and artifact results
-remain to be recorded against the final integrated source.
+The [final local validation record](evaluation/overnight_validation_20260910.json)
+contains 2,213 passing CPU-suite tests, four skips and 63.52% coverage; the three
+real GPU regressions also passed. These checks validate the integrated source
+before this documentation refresh; they do not establish a latency or quality gate.
+Final CI, source review and the authorized merge remain separate.
 
-The [overnight plan](evaluation/overnight_experiment_plan.md) defines the frozen
-96-run English screen, alternating E4B/E2B pairs and baseline anchors. Collection
-is underway on source `911f4ae`, with one inference process and a visible audience
-browser. Its first run acknowledged all seven finals and 66 previews. At 05:46 UTC
-the native-app surface reported a locked Mac while the browser still reported
-`visible` and acknowledged updates; physical display verification is therefore
-unavailable for that interval. Lock onset was not observed. One run
-cannot establish a speed gain or justify a default change.
+The [96-run English screen](evaluation/overnight_screen_20260910/README.md) is
+complete on frozen source `911f4ae`: 96/96 valid runs, 672 finals, and 0/28 selected
+experiment/model arms. It retains 384 smart cuts, 96 hard cuts, 96 recorded-silence
+endings and 96 endings assisted by virtual EOF padding. Every candidate final text
+matched its control in 588 comparisons against opening controls and 588 against
+closing controls; these repeated comparisons are not independent utterances or
+reference-quality scores. The independent audit passed 24,324 consistency checks.
+
+The native Mac reported a locked screen while the audience DOM reported `visible`
+and sent ACKs; lock onset and physical display visibility were not observed.
+Package activity from 05:51:37 to 05:53:18.380938 UTC overlapped three sessions,
+which remain included and annotated. The narrow workload, tiny endpoint cohorts,
+unreviewed references and control drift prevent a promotion claim. The
+[first-preview E4B note](evaluation/overnight_screen_20260910/first_preview_e4b.md)
+explains why a large pooled improvement against closing controls does not justify
+an ordinary confirmation run.
+
+At the recorded 06:49:36 UTC handoff on September 10, the standard full-service
+endurance replay had started; completion, persistence and memory results were
+pending. CPU Lite endurance follows and had not started. No full-hour gate is
+marked passed from a successful launch.
 
 Previous [48-run screening](evaluation/mac_v2026_14_screening/README.md),
 [24 bilingual routing probes](evaluation/mac_v2026_14_routing/README.md) and
@@ -86,9 +100,10 @@ delivery measurements. The sub-second median goal remains unachieved.
 
 ## Remaining gates
 
-- Finish screen analysis, justified historical confirmations and separate Spanish
-  probes, then standard and CPU Lite endurance rehearsals. Require visible,
-  real-time schema 2 evidence; no default promotion without quality review.
+- Complete and review the standard and CPU Lite endurance rehearsals. The 96-run
+  screen justifies no ordinary confirmations or combined configuration; future
+  profiling needs a distinct hypothesis. Keep any Spanish probes in a separate
+  cohort, and require quality review before a default change.
 - Retest live microphone and physical outputs tomorrow, as requested. Natural
   Spanish, two-speaker audio, bilingual review and approved corrections remain
   external dependencies. Predicted text does not count as a human reference.

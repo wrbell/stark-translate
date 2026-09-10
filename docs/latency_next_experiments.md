@@ -1,10 +1,11 @@
 # EN↔ES latency: experiments after the overnight screen
 
-The current [experiment program](evaluation/overnight_experiment_plan.md) tests
-15 configurations on E4B and E2B. The proposals below are subsequent research,
-not implemented optimizations or a recommendation to change defaults. Finish the
-paired screen and independent confirmations first. Natural Spanish and bilingual
-review remain required for quality certification.
+The [completed screen](evaluation/overnight_screen_20260910/README.md) tested
+15 configurations on E4B and E2B and selected no experimental arms. Ordinary
+confirmations or combinations of those arms are therefore not justified. The
+proposals below are subsequent research, not implemented optimizations or a
+recommendation to change defaults. Natural Spanish and bilingual review remain
+required for quality certification.
 
 ## What the stage records show
 

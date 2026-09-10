@@ -3,7 +3,7 @@
 > Living document tracking the project from Mac prototype through Windows training to
 > production deployment.
 >
-> **Last updated:** 2026-09-10 (overnight docs pass 3, on the integrated candidate branch at `c5fb689`).
+> **Last updated:** 2026-09-10 (completed 96-run screen; standard endurance running at the 06:49:36 UTC handoff).
 >
 > **Remaining tasks (canonical):** [`backlog.json`](./backlog.json) · rendered
 > [`backlog.md`](./backlog.md) · contracts [`current_architecture.md`](./current_architecture.md)
@@ -33,7 +33,7 @@ Lite (implemented; hardware performance pending)
   Runtime:    Torch-free lite-cpu extra, stark-translate-lite, ONNX Silero, Whisper small CT2,
               Marian CT2 finals or Gemma 4 E2B via session-owned llama-server (b10883)
   Evidence:   isolated Mac CPU synthetic EN+ES caption/TTS smoke; E2B GGUF + native runtime
-              download/verify only — no x86 CPU, native Windows or RTX 2070 run yet
+              CPU quality smoke passed — no x86 CPU, native Windows or RTX 2070 run yet
 
 Windows / WSL (A2000 Ada 16 GB, CUDA)
   Inference:  W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B Q4_K_M via llama.cpp b10883
@@ -69,16 +69,16 @@ Status, priority, dependencies and acceptance for every item below are in
 
 ### Mac — integrate, then certify
 
-1. **PR #192 validation and merge** (`pr-192-integration`): the overnight worktrees are integrated on the candidate branch; the parent re-runs the CPU suite, collects operator/benchmark/installation evidence and marks the draft ready. Main advances from v2026.13 only at that merge.
+1. **PR #192 validation and merge** (`pr-192-integration`): integrated local checks passed (2,213 CPU-suite tests, four skips, 63.52% coverage; three GPU regressions). Standard endurance is running, Lite follows; complete their evidence, remote CI and source review before the authorized merge. Main advances from v2026.13 only at that merge.
 2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): the stall fix is implemented — `tools/isolated_audio.py` / `capture_worker.py` (disposable PortAudio child, 5 s no-input and 3 s idle timeouts), `tools/pipeline_health.py` readiness consumed by the operator. What remains is the **real built-in-mic retest** with live EN and ES utterances and the audience display connected (deferred to tomorrow). #131 closes only on that evidence.
-3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): active engineering on the frozen 45-second English screen — opt-in latency experiments (`tools/latency_experiments.py`: provisional previews, exact fixed-prefix cache, bounded allocator, pause speculation), bounded scheduling and caption-delivery instrumentation are integrated; `tools/overnight_bench.py` pairs runs with a visible audience browser. Measurement needs a visible browser (`visible-browser-timing-run`); natural-speech quality certification is a separate gate and does not block the engineering experiments.
+3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): the [96-run screen](evaluation/overnight_screen_20260910/README.md) completed with 672 finals and 0/28 selected arms. The sub-second goal was not met on this 45-second English cohort; E4B defaults remain unchanged. No ordinary confirmation or combination of these arms is justified. Pursue [new measured hypotheses](latency_next_experiments.md), keeping tiny endpoint counts, control drift, unreviewed references and locked-native-screen/DOM telemetry separate from certification.
 4. **Human and device gates:** natural Spanish references, blinded bilingual review, natural two-speaker audio (#133 gate), second physical output (#132 acceptance), dry run with a laptop stand-in permitted (#134: full hymn + spoken segment + setup-to-first-caption timing + written note — no new live-mic or human-walkthrough requirement beyond the issue text).
 5. **Active learning evidence (#137):** Review/export is implemented and fixture-tested. A real human correction from a recorded Sunday must reach a dated corpus and be merged; the documented first retrain may be a dry run. Draft notes and generated text are not approved pairs.
 6. **Separate R&D (#138):** the [offline Hindi church-audio baseline](./evaluation/overnight_hindi/README.md) is complete and archived. Human Hindi review, live integration and the QLoRA decision remain pending; no further Hindi work is scheduled in this EN↔ES latency program.
 
 ### Equal-priority deployment targets
 
-- **Lite CPU inference** (`lite-cpu-inference`): **implemented and integrated** — `stark_translate/profiles.py` (`lite-cpu`, `lite-cpu-quality`), `operator_app/lite_preflight.py`, Torch-free `lite-cpu` extra, `stark-translate-lite`, pinned Whisper small / Marian / E2B / Silero ONNX artifacts, `tools/llama_runtime.py`. Evidence: isolated Mac CPU synthetic EN+ES caption/TTS smoke and E2B/native-runtime preparation ([`lite_profiles.md`](./lite_profiles.md)). Performance and natural-speech quality on an x86 CPU host: pending hardware.
+- **Lite CPU inference** (`lite-cpu-inference`): **implemented and integrated** — `stark_translate/profiles.py` (`lite-cpu`, `lite-cpu-quality`), `operator_app/lite_preflight.py`, Torch-free `lite-cpu` extra, `stark-translate-lite`, pinned Whisper small / Marian / E2B / Silero ONNX artifacts, `tools/llama_runtime.py`. Evidence: isolated Mac CPU synthetic EN+ES caption/TTS smoke and actual installed CPU E2B quality inference ([`lite_profiles.md`](./lite_profiles.md)). CPU Lite full-service endurance is pending after the running standard replay. Performance and natural-speech quality on an x86 CPU host: pending hardware.
 - **Native Windows / RTX 2070** (`rtx2070-native-validation`): `lite-cuda-8gb` implemented (pinned Windows CUDA 12.4 llama.cpp archives, sm_75 Linux build option); nothing has run on a 2070 or native Windows; the v2026.13 MSI digest was verified without Windows execution and the MSI remains a scaffold plan.
 
 ### WSL — pipeline refresh (pending hardware)
@@ -94,6 +94,13 @@ reuse, #175) are folded into it. Gemma 4 tuning results and next directions:
 [`gemma4_tuning/v3_directions.md`](./gemma4_tuning/v3_directions.md).
 
 ### Experiments kept opt-in
+
+The [September 10 screen](evaluation/overnight_screen_20260910/README.md) completed
+96/96 valid runs and selected 0/28 experiment/model arms. All 588 candidate final
+comparisons against each control set retained identical text, without establishing
+reference accuracy. [First-preview E4B](evaluation/overnight_screen_20260910/first_preview_e4b.md)
+illustrates why control drift and repeat-level guards matter. These results do not
+justify ordinary confirmations or combined settings; new hypotheses remain distinct.
 
 After the [48-run frozen screen](./evaluation/mac_v2026_14_screening/README.md) no
 combined configuration beat E4B + 0.5 s silence + 0.6 s cadence on both models, and the
@@ -214,7 +221,7 @@ Scripts ready: `prepare_piper_dataset.py`, `train_piper.py`, `export_piper_onnx.
 - Done — post-sermon summary trigger and live verse highlights in the operator UI (workflow evidence in the rehearsal; bilingual accuracy review pending)
 - **Implemented, acceptance pending** — 9.4.1 multi-channel TTS routing (#132): per-language device map, `--tts-device-en/es`, hotplug retry, persisted operator selectors, hardware-independent tests. Physical two-output verification is the open half.
 - **Implemented, gate not run** — 9.6.1 live diarization (#133): `--diarize`, rolling buffer, separate daemon, `speaker` on finals. Needs a two-speaker clip and the +50 ms p95 check ([`live_diarization.md`](./live_diarization.md)).
-- **Pending** — Sunday dry run (#134): a laptop stand-in is allowed; retain a full hymn, spoken segment, setup-to-first-caption timing and a written UX note. Live microphone certification belongs to #131. Continuous improvement follows Phases 6/8.
+- **In progress** — standard full-service replay started September 10 at 06:49:36 UTC; CPU Lite follows. Sunday dry run (#134): a laptop stand-in is allowed; retain a full hymn, spoken segment, setup-to-first-caption timing and a written UX note. Live microphone certification belongs to #131. Continuous improvement follows Phases 6/8.
 
 ---
 
@@ -263,7 +270,7 @@ and [`evaluation/README.md`](./evaluation/README.md).
 | CUDA Gemma loading | llama.cpp GGUF; HF NF4 kept as legacy fallback (PLE embeddings make it 14–15 GB) |
 | Mac EN STT | Parakeet TDT v3 MLX (v2026.13); Whisper large-v3-turbo stays for ES and CUDA (W16 CT2) |
 | Partials | Marian CT2 int8 — CUDA (v2026.8) and Mac CPU (v2026.13); HF fallback |
-| Mac defaults | E4B, 0.5 s silence, 0.6 s cadence frozen after the 48-run screen; all experiments opt-in |
+| Mac defaults | E4B, 0.5 s silence, 0.6 s cadence retained after separate 48-run and 96-run screens; all experiments opt-in |
 | E2B | Separately evaluated profile behind `--gemma4-size e2b`; not default until bilingual review |
 | Measurement | Schema 2 `speech_end_to_final_ms`; legacy `e2e_latency_ms` labeled processing time |
 | MTP / assistant drafter | Off on both platforms (#177 experimental; CUDA `--mtp` opt-in, unbenchmarked) |

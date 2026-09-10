@@ -36,6 +36,8 @@ Schema 2 `speech_end_to_final_ms` = estimated speech end → final payload ready
 acknowledgement (includes return-network time); legacy `e2e_latency_ms` is archived
 processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/README.md).
 
+The [completed September 10 screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
+
 **Lite profiles** (`stark_translate/profiles.py`, `stark-translate-lite`): Whisper small
 CT2 int8 + Marian CT2 finals on CPU (`lite-cpu`), Gemma 4 E2B Q4_K_M via a session-owned
 `llama-server` (`lite-cpu-quality`, `lite-cuda-8gb`); ONNX Silero; no A/B, drafting,

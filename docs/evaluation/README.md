@@ -7,8 +7,11 @@ The September 10 continuation is tracked by the
 [overnight EN↔ES experiment plan](overnight_experiment_plan.md),
 [integrated operator rehearsal](overnight_operator_rehearsal.md) and
 [current implementation status](../mac_implementation_status.md).
-Its visible-browser screen uses a new frozen source cohort; do not pool it with
-the earlier runs below. Lite installation and CPU evidence are in
+Its [complete 96-run English screen](overnight_screen_20260910/README.md) selected
+0/28 arms and did not meet the sub-second final goal. It uses a separate frozen
+source cohort; do not pool it with earlier runs. Browser-DOM ACK telemetry was
+collected while the native Mac was locked, so physical screen visibility remains
+unverified. Negative results, small endpoint counts and original hashes are retained. Lite installation and CPU evidence are in
 [Lite profiles](../lite_profiles.md).
 
 ## Frozen inputs

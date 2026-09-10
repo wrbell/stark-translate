@@ -15,6 +15,8 @@ Fully on-device, live bilingual speech-to-text for church outreach at Stark Road
 > [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) · remaining work:
 > [`docs/backlog.json`](docs/backlog.json) (rendered as [`docs/backlog.md`](docs/backlog.md)).
 
+The [completed September 10 screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
+
 ## Architecture
 
 ```

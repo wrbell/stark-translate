@@ -2,8 +2,10 @@
 
 The candidate branch `codex/mac-reliability-roadmap` is proposed in
 [PR #192](https://github.com/wrbell/stark-translate/pull/192). Its operator, reliability,
-Lite, latency and documentation work is integrated. Final validation, measured
-experiment conclusions and the authorized merge remain in progress. PyPI, package
+Lite, latency and documentation work is integrated. The English matrix is complete:
+96/96 valid runs, 672 finals and 0/28 selected arms. The sub-second final-delivery
+goal was not met on this cohort; E4B remains unchanged. Endurance and the
+authorized merge remain in progress. PyPI, package
 publication and release tags remain pending by user choice.
 
 ## Where to look
@@ -14,7 +16,9 @@ publication and release tags remain pending by user choice.
 | Every remaining task with acceptance and ownership | [Machine-readable backlog](backlog.json), [rendered backlog](backlog.md) |
 | Volunteer operation and recovery | [Operator runbook](operator_runbook.md) |
 | Current runtime interfaces and defaults | [Architecture](current_architecture.md) |
+| Completed English matrix and retained negative results | [Compact screen report](evaluation/overnight_screen_20260910/README.md) |
 | EN↔ES speed experiments and decision rules | [Experiment plan](evaluation/overnight_experiment_plan.md) |
+| Final local CPU/GPU check counts | [Validation record](evaluation/overnight_validation_20260910.json) |
 | Actual browser/session evidence | [Operator rehearsal](evaluation/overnight_operator_rehearsal.md) |
 | CPU and original RTX2070 installation/performance gates | [Lite profiles](lite_profiles.md) |
 | Installed wheel, sdist and Mac ZIP evidence | [Runtime artifact validation](evaluation/overnight_artifact_validation_20260910.json) |
@@ -35,14 +39,22 @@ replace obsolete installation claims. MSI file/hash inspection remains distinct
 from an actual Windows first-launch test. The PyApp reference TOML is not consumed
 by the workflow and cannot establish automatic profile/extras installation.
 
+At the September 10 06:49:36 UTC handoff, standard full-service endurance was
+running and CPU Lite endurance was pending. The local CPU suite passed 2,213 tests
+with four skips and 63.52% coverage; all three GPU regressions passed. Endurance
+completion and remote CI must be recorded separately.
+
 ## Decisions and evidence boundaries
 
 - EN↔ES is the active latency priority. E4B remains standard; E2B and scheduler
-  experiments remain opt-in until matched speed/coverage/quality evidence warrants
-  a change. Hindi is separate offline R&D and has no further overnight experiments.
+  experiments remain opt-in. No arm warrants ordinary confirmation or a combined
+  configuration after the 96-run screen. New endpoint/scheduling hypotheses are
+  separate work. Hindi is offline R&D with no further overnight experiments.
 - Real-time visible browser measurements use schema 2. Speech end → ACK is an upper
   bound including return-network time. Missing ACKs remain missing. File replays,
-  synthetic audio and unreviewed transcripts are always labeled.
+  synthetic audio and unreviewed transcripts are always labeled. In the completed
+  screen the native Mac was locked while the DOM reported visible; physical display
+  visibility is unverified. The package-activity overlap remains annotated.
 - The user deferred live microphone and physical-output tests until tomorrow.
   Natural Spanish, two-speaker audio, bilingual approval, x86/RTX2070 execution,
   WSL training and adapter transfer remain explicit external dependencies.

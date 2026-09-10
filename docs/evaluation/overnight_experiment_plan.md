@@ -5,6 +5,23 @@ not repeat the earlier silence/cadence/routing sweeps without a new hypothesis.
 Standard E4B remains the production default. Experimental scheduling and routing
 stay opt-in until their measured behavior and quality are reviewed.
 
+## Completed screen and next decision
+
+The [complete matrix](overnight_screen_20260910/README.md) recorded 96/96 valid
+runs and 672 finals; **0/28 experiment/model arms were selected**. The sub-second
+final-delivery goal was not met on this 45-second English cohort. E4B remains the
+default, with no ordinary historical confirmation or combined configuration
+justified by this screen. The original hypotheses and rules below remain the
+recorded plan; they are not an instruction to rerun rejected arms.
+
+Candidate final text stayed unchanged in 588 comparisons against opening controls
+and 588 against closing controls. This is repeat agreement, not reference quality.
+The [first-preview E4B appendix](overnight_screen_20260910/first_preview_e4b.md)
+shows the repeat-level control drift behind its misleading pooled closing-control
+improvement. [New experiments](../latency_next_experiments.md) need distinct,
+measurable hypotheses. Standard endurance started at 06:49:36 UTC on September 10;
+its result is pending, followed by CPU Lite endurance.
+
 ## Outcome measures
 
 The primary target is estimated speech end to final payload readiness, schema 2,
@@ -69,8 +86,9 @@ its previous bounded negative result does not justify another overnight sweep.
 3. Run three paired real-time replays per configuration, alternating E4B/E2B order
    and reversing candidate order on the middle repetition. Include baseline anchors
    at each repetition's beginning and end. Preserve failed attempts.
-4. Confirm worthwhile candidates on both historical recordings. Combine only changes
-   with evidence that their individual behavior warrants it; report rejected ideas.
+4. Conditional confirmation was reserved for worthwhile candidates on both
+   historical recordings. The completed matrix selected none, so no ordinary
+   confirmation or combined configuration is scheduled from these arms.
 5. Run a full-hour standard replay and a separate full-hour CPU Lite replay, with
    memory/queue/persistence/completion checks and a written rehearsal note. Include a
    complete recorded hymn and spoken material when assessing the laptop-stand-in
@@ -103,7 +121,9 @@ Browser collection limitation observed at 05:46 UTC: the Mac native-app surface
 reported a locked screen while the audience document still reported `visible` and
 continued rendering acknowledgements. Lock onset was not observed. Reports must
 distinguish this browser protocol telemetry from an attended physical display
-check; server latency and source coverage remain independently measurable.
+check; server latency and source coverage remain independently measurable. The
+complete report also retains three sessions overlapping package activity from
+05:51:37 to 05:53:18.380938 UTC; its performance effect was not measured.
 
 The [subsequent EN↔ES experiment proposals](../latency_next_experiments.md) target
 earlier endpoint commitment, deadline-aware partial admission and measured TDT
