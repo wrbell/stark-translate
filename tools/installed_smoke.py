@@ -27,6 +27,7 @@ def check_operator_routes(app) -> dict[str, int]:
 
 def main() -> None:
     import operator_app
+    from features.extract_verses import VerseExtractor
     from operator_app.main import app
     from operator_app.setup import load_lockfile
     from tools.release_artifacts import RUNTIME_REQUIRED
@@ -46,6 +47,11 @@ def main() -> None:
     manifest = load_lockfile()
     assert "mlx-parakeet-v3" in manifest["models"]
     assert canary_sentences(1)[0]["en"]
+    verses = VerseExtractor()
+    verses.extract_from_text("Luke twenty three and verse uh thirty two.")
+    verses.extract_from_text("Philemon 50:11.")
+    if [row["reference"] for row in verses.references] != ["Luke 23:32"]:
+        raise RuntimeError("Installed verse parser or structural bounds failed")
     print(
         json.dumps(
             {
@@ -54,6 +60,7 @@ def main() -> None:
                 "model_entries": len(manifest["models"]),
                 "package": str(package),
                 "runtime_files": len(runtime_files),
+                "verse_parser": "passed",
             }
         )
     )

@@ -77,6 +77,8 @@ RUNTIME_REQUIRED = {
     "tools/llama_runtime.py",
     "training/theological_canaries.py",
     "features/live_diarize.py",
+    "features/extract_verses.py",
+    "features/bible_reference_bounds.py",
     "displays/audience_display.html",
     "dry_run_ab.py",
     "settings.py",
