@@ -16,6 +16,15 @@ from tools.latency_scheduler import LatestSTTWorker
 from tools.preview_candidates import RollingPreview, TranslationCandidate, common_prefix_words
 
 
+@pytest.fixture(autouse=True)
+def fresh_session_discard_state(monkeypatch):
+    # These tests start fresh utterance IDs, independent of prior audio-loop
+    # tests in the same interpreter. The production guard remains active.
+    import dry_run_ab as pipeline
+
+    monkeypatch.setattr(pipeline, "_discarded_utterance_id", 0)
+
+
 def test_candidate_confirmation_does_not_normalize_negation_case_or_request_identity():
     identity = ("en", "es", "model", "He is not guilty.")
     candidate = TranslationCandidate(identity, object(), 2, {})

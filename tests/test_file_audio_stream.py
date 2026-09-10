@@ -13,6 +13,15 @@ import pytest
 from tools.audio_bridge_client import FileAudioStream, open_audio_stream
 
 
+@pytest.fixture(autouse=True)
+def fresh_session_discard_state(monkeypatch):
+    # Each replay test represents a new pipeline process. A short EOF/noise
+    # discard must not leave its session watermark in the cached module.
+    import dry_run_ab as pipeline
+
+    monkeypatch.setattr(pipeline, "_discarded_utterance_id", 0)
+
+
 @pytest.fixture
 def real_scipy(monkeypatch):
     # conftest mocks scipy as well as ML libraries. Restore only scipy for
