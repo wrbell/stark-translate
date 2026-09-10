@@ -36,8 +36,10 @@ Windows venv interpreters live in `Scripts/python.exe` and executables in
 
 ```sh
 python3 -m venv .venv-lite
+.venv-lite/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
 .venv-lite/bin/python -m pip install '.[lite-cpu,tts]'
 python3 -m venv .venv-lite-build
+.venv-lite-build/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
 .venv-lite-build/bin/python -m pip install '.[lite-build]'
 .venv-lite/bin/stark-translate-lite setup --models-dir /absolute/lite-models \
   --converter-python /absolute/.venv-lite-build/bin/python --include tts
@@ -300,3 +302,39 @@ The [machine-readable smoke evidence](evaluation/lite_cpu_quality_smoke_20260910
 indexes hashes for both attempts and the executed wheel. Spanish-source E2B,
 natural speech, sustained latency, total memory, native Windows/Linux and real
 RTX 2070 acceptance remain separate validation work.
+
+
+## Installer security check on 2026-09-10
+
+The installed Lite dependency audit found vulnerabilities in the environment's
+seeded installer tools, pip 24.0 and setuptools 65.5.0. Only those two packages
+were upgraded in `.cache/overnight-20260910/lite-runtime`: pip is now 26.2.1 and
+setuptools 84.0.0. No other existing package version changed, and the working
+`stt_env` was not modified. A repeat installed-path audit reports zero known
+vulnerabilities across 60 audited dependencies. The locally built, unpublished
+`stark-translate` package is the sole expected PyPI audit skip; project source
+security remains covered by source scans and review.
+
+`pip check` passes. Fourteen actual installed runtime/operator imports from
+outside the checkout still have no Torch, MLX, Silero wrapper or bitsandbytes
+distributions or loaded modules. No model inference ran during this remediation;
+the earlier smoke artifacts are unchanged. The
+[evidence report](evaluation/lite_installer_security_20260910.json) includes the
+exact commands, version changes and hashes for both audit reports and import checks.
+
+New installation instructions upgrade pip to at least 26.2 and setuptools to at
+least 83.0.0 before installing Lite or converter dependencies. Bootstrap applies
+the same minimums and stops if this tool upgrade fails. For an offline package
+installation, prepare those installer wheels in the wheelhouse too and use
+`--no-index --find-links /absolute/wheelhouse` for the upgrade and installation;
+model-cache `setup --offline` is separate from Python package installation.
+
+The security workflow now audits an actual isolated Linux `lite-cpu,tts`
+installation on packaging changes (including `pyproject.toml`) and weekly. It
+runs `pip check`, scans the complete installed dependency inventory, rejects
+unexpected unaudited or non-Lite packages, and retains the JSON report. The final
+security gate fails on audit failure, cancellation, failed change detection or an
+unexpectedly skipped required audit. Sixteen local tests exercise these report
+and shell-gate cases; the new GitHub job itself was not executed locally. This
+job downloads Python packages only, never model weights, and does not certify
+Windows, macOS or RTX 2070 runtime behavior.

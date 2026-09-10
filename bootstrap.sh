@@ -106,7 +106,8 @@ if [ ! -d "$VENV" ]; then
 fi
 
 log "installing stark-translate[$EXTRA] into venv (this may take 5–15 minutes)…"
-"$VENV/bin/python" -m pip install --upgrade pip wheel >/tmp/bootstrap-pip.log 2>&1 || true
+"$VENV/bin/python" -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0' wheel >/tmp/bootstrap-pip.log 2>&1 \
+    || fail "installer tool upgrade failed (see /tmp/bootstrap-pip.log)" 3
 "$VENV/bin/python" -m pip install ".[$EXTRA]" >>/tmp/bootstrap-pip.log 2>&1 \
     || fail "dependency install failed (see /tmp/bootstrap-pip.log)" 3
 log "  pip install OK"

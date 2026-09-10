@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-10T05:06:43.424506+00:00",
+  "scope": "Remediate installer tools only in isolated lite-runtime; dependency audit and imports, no inference or benchmark",
+  "isolated_runtime": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+  "working_stt_env_modified": false,
+  "changed_distributions": {
+    "pip": {
+      "before": "24.0",
+      "after": "26.2.1"
+    },
+    "setuptools": {
+      "before": "65.5.0",
+      "after": "84.0.0"
+    }
+  },
+  "other_preexisting_distributions_changed": false,
+  "upgrade_command": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/bin/python",
+    "-m",
+    "pip",
+    "install",
+    "--upgrade",
+    "pip>=26.2",
+    "setuptools>=83.0.0"
+  ],
+  "audit_command": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/pip-audit",
+    "--path",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-runtime/lib/python3.11/site-packages",
+    "--format",
+    "json",
+    "--output",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/pip-audit-lite-installed-after-tools.json"
+  ],
+  "audit": {
+    "returncode": 0,
+    "audited_dependencies": 60,
+    "known_vulnerabilities": 0,
+    "skipped": [
+      {
+        "name": "stark-translate",
+        "skip_reason": "Dependency not found on PyPI and could not be audited: stark-translate (2026.14.0.0)"
+      }
+    ]
+  },
+  "pip_check": {
+    "returncode": 0,
+    "output": "No broken requirements found."
+  },
+  "runtime_import_verification": {
+    "count": 14,
+    "imports": [
+      "numpy",
+      "ctranslate2",
+      "faster_whisper",
+      "onnxruntime",
+      "transformers",
+      "sentencepiece",
+      "scipy",
+      "piper",
+      "sounddevice",
+      "engines.cuda_engine",
+      "engines.tts_engine",
+      "tools.vad_runtime",
+      "dry_run_ab",
+      "operator_app.main"
+    ],
+    "outside_checkout": true,
+    "isolated_mode": true,
+    "model_inference": false,
+    "forbidden_distributions": [],
+    "forbidden_modules": [],
+    "pipeline_sha256": "ba5905fe8bcf4f2e2c8e90c1dc97aaefb4ac5c2255e73ac97c13efe2a89a1ef8"
+  },
+  "ci_validation": {
+    "tests_passed": 16,
+    "tests": "tests/test_dependency_audit_gate.py",
+    "coverage": "actual shell gate pass/fail/cancel/unexpected-skip cases plus incomplete, vulnerable, unknown and non-Lite installed reports",
+    "github_job_executed": false,
+    "scope": "Linux installed Lite CPU+TTS dependency audit; no model downloads or device/hardware certification"
+  },
+  "raw_evidence": [
+    {
+      "path": ".cache/overnight-20260910/pip-audit-lite-installed.json",
+      "bytes": 16413,
+      "sha256": "735791456d82db201efd2d4952eb38177b87b82bea449a74a523187402356f96"
+    },
+    {
+      "path": ".cache/overnight-20260910/pip-audit-lite-installed-after-tools.json",
+      "bytes": 3542,
+      "sha256": "f5a014c612af6353b5a4fdd35525e11e9b5c7a04e10b09362a30983756d50007"
+    },
+    {
+      "path": ".cache/overnight-20260910/pip-audit-lite-installed-after-tools.log",
+      "bytes": 31,
+      "sha256": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-installer-upgrade.log",
+      "bytes": 694,
+      "sha256": "c32a9f3da695bdfd989711d75a47658d088762ec97221ba3b4eb88c25fe26c4c"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-installer-upgrade-verification.json",
+      "bytes": 4620,
+      "sha256": "863bc9654242fd93b9b030c1473a965faff92180e2db0f3514720d24dda5e0d5"
+    },
+    {
+      "path": ".cache/overnight-20260910/lite-pip-check-after-tools.txt",
+      "bytes": 30,
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+    }
+  ]
+}
