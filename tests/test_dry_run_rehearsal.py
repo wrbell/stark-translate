@@ -1,179 +1,257 @@
-"""Tests for scripts/dry_run_rehearsal.sh.
-
-Exercises the script end-to-end against a tiny in-process HTTP server
-that stands in for the operator FastAPI app. Two scenarios:
-
-- All endpoints return healthy → script exits 0.
-- /api/preflight reports a red check → script exits 1.
-
-Skipped on platforms without bash (Windows CI).
-"""
+"""Run the shell rehearsal over HTTP through real FastAPI routes; no real pipeline."""
 
 from __future__ import annotations
 
-import json
+import os
 import shutil
-import socket
 import subprocess
+import sys
 import threading
+from dataclasses import replace
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 import pytest
 
+from operator_app.pipeline_manager import SessionStatus
+
 ROOT = Path(__file__).parent.parent
 SCRIPT = ROOT / "scripts" / "dry_run_rehearsal.sh"
 
 
-# -- bash existence ----------------------------------------------------------
-
-
 @pytest.fixture(scope="module", autouse=True)
-def _require_bash():
+def require_bash():
     if shutil.which("bash") is None:
         pytest.skip("bash not available on this platform")
-    if shutil.which("curl") is None:
-        pytest.skip("curl not available on this platform")
 
 
-# -- fake operator HTTP server -----------------------------------------------
+class ControlledRunner:
+    """Only process/model work is replaced; routes serialize real status objects."""
 
+    def __init__(self, root):
+        self._project_root = root
+        self.current = SessionStatus(state="idle")
+        self.scenario = "healthy"
+        self.starts = []
+        self.stops = []
+        self.flips = []
+        self.polls = 0
+        self.polling_started = threading.Event()
 
-def _make_handler(state):
-    """Build a handler class closing over a mutable state dict.
+    def status(self):
+        if self.current.state in {"starting", "running"}:
+            self.polls += 1
+            self.polling_started.set()
+            if self.scenario == "replacement":
+                self.current = replace(self.current, session_id="someone_else_en")
+            elif self.scenario == "input_error":
+                self.current.readiness.update(phase="input_error", reason="No capture samples")
+            elif self.scenario == "stale":
+                self.current.state = "running"
+                self.current.readiness.update(ready=True, stale=True)
+                self.current.health.update(stale=True, input_seen=True)
+            elif self.polls >= 3:
+                self.current.state = "running"
+                self.current.readiness.update(phase="ready", ready=True, stale=False, reason="ready")
+                self.current.health.update(phase="ready", stale=False, input_seen=True)
+        return self.current
 
-    state['preflight_fail'] toggles whether /api/preflight reports red.
-    state['session_state'] tracks the simulated session state.
-    """
+    def start(self, config):
+        sid = f"rehearsal_{len(self.starts) + 1}_{config.lang}"
+        self.starts.append((sid, config.lang))
+        self.polls = 0
+        self.current = SessionStatus(
+            state="starting",
+            session_id=sid,
+            config=config.__dict__.copy(),
+            readiness={"phase": "warming", "ready": False, "stale": False, "reason": "models warming"},
+            health={"phase": "warming", "stale": False, "input_seen": False, "recording": {"ok": True}},
+        )
+        return self.current
 
-    class Handler(BaseHTTPRequestHandler):
-        def log_message(self, *_args, **_kwargs):
-            return  # silence stderr noise during tests
+    def restart_with(self, config):
+        # A second flip before readiness is an actual invalid use of this API.
+        assert self.current.state == "running" and self.current.readiness["ready"]
+        previous = self.current.session_id
+        self.flips.append((previous, config.lang))
+        snapshot = self.start(config)
+        if self.scenario == "wrong_language":
+            snapshot.config["lang"] = "en"
+        elif self.scenario == "reused_identity":
+            snapshot.session_id = previous
+        return snapshot
 
-        def _json(self, status, body):
-            payload = json.dumps(body).encode()
-            self.send_response(status)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(payload)))
-            self.end_headers()
-            self.wfile.write(payload)
-
-        def do_GET(self):
-            if self.path == "/healthz":
-                return self._json(200, {"status": "ok", "uptime_s": 1})
-            if self.path == "/api/preflight":
-                fail = 1 if state.get("preflight_fail") else 0
-                return self._json(
-                    200,
-                    {
-                        "checks": [],
-                        "ok": fail == 0,
-                        "status_counts": {"pass": 4, "warn": 0, "fail": fail},
-                    },
-                )
-            if self.path == "/api/session/status":
-                return self._json(200, {"state": state.get("session_state", "idle")})
-            if self.path.startswith("/api/features/verses"):
-                return self._json(200, {"highlights": [], "since_chunk": None})
-            return self._json(404, {"detail": "not found"})
-
-        def do_POST(self):
-            length = int(self.headers.get("Content-Length", 0))
-            if length:
-                _ = self.rfile.read(length)
-            if self.path == "/api/session/start":
-                state["session_state"] = "running"
-                return self._json(200, {"state": "running", "session_id": "test_sid"})
-            if self.path == "/api/control/lang_flip":
-                return self._json(200, {"state": "running"})
-            if self.path == "/api/session/stop":
-                state["session_state"] = "idle"
-                return self._json(200, {"state": "idle"})
-            return self._json(404, {"detail": "not found"})
-
-    return Handler
+    def stop(self):
+        self.stops.append(self.current.session_id)
+        self.current.state = "idle"
+        self.current.outcome = "failed" if self.scenario == "failed_stop" else "completed"
+        self.current.readiness.update(phase=self.current.outcome, ready=False)
+        return self.current
 
 
 @pytest.fixture
-def fake_operator():
-    """Spin up a fake operator server on an ephemeral port. Yields (url, state)."""
-    state = {"preflight_fail": False, "session_state": "idle"}
-    Handler = _make_handler(state)
+def operator_http(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
 
-    # Bind to ephemeral port
-    s = socket.socket()
-    s.bind(("127.0.0.1", 0))
-    port = s.getsockname()[1]
-    s.close()
+    from operator_app import main
+    from operator_app.pipeline_manager import get_runner
 
-    server = HTTPServer(("127.0.0.1", port), Handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    runner = ControlledRunner(tmp_path)
+    preflight_calls = []
+    monkeypatch.delenv("STARK_PROFILE", raising=False)
+    monkeypatch.setitem(main.app.dependency_overrides, get_runner, lambda: runner)
+    monkeypatch.setattr(main, "healthz_snapshot", lambda: {"status": "ok", "uptime_s": 1})
+    monkeypatch.setattr(main, "get_verse_watcher", lambda **kwargs: None)
+
+    def preflight(config, root):
+        preflight_calls.append(config.lang)
+        fail = runner.scenario == "preflight_fail" or (runner.scenario == "start_rejected" and len(preflight_calls) > 1)
+        return {"ok": not fail, "checks": [], "status_counts": {"pass": 4, "warn": 0, "fail": int(fail)}}
+
+    monkeypatch.setattr(main, "_preflight_config", preflight)
+    client = TestClient(main.app)  # No lifespan: no global device watchers or child processes.
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *_args):
+            pass
+
+        def dispatch(self):
+            body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            response = client.request(
+                self.command, self.path, content=body, headers={"Content-Type": "application/json"}
+            )
+            self.send_response(response.status_code)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(response.content)))
+            self.end_headers()
+            self.wfile.write(response.content)
+
+        do_GET = do_POST = dispatch
+
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.02}, daemon=True)
     thread.start()
     try:
-        yield f"http://127.0.0.1:{port}", state
+        yield f"http://127.0.0.1:{server.server_port}", runner, preflight_calls
     finally:
         server.shutdown()
         server.server_close()
+        thread.join(timeout=2)
+        client.close()
+        assert not thread.is_alive()
 
 
-def _run_rehearsal(url: str) -> subprocess.CompletedProcess:
+def environment(url, **overrides):
+    return {
+        "PATH": os.environ["PATH"],
+        "STARK_PYTHON": sys.executable,
+        "OPERATOR_URL": url,
+        "REHEARSAL_TIMEOUT_S": "0.5",
+        "REHEARSAL_POLL_S": "0.02",
+        **overrides,
+    }
+
+
+def run_rehearsal(url, **overrides):
     return subprocess.run(
-        ["bash", str(SCRIPT)],
+        [str(SCRIPT)] if os.name != "nt" else ["bash", str(SCRIPT)],
         capture_output=True,
         text=True,
-        env={"PATH": "/usr/bin:/bin", "OPERATOR_URL": url},
-        timeout=30,
+        env=environment(url, **overrides),
+        timeout=10,
     )
 
 
-# -- happy path --------------------------------------------------------------
+def test_waits_for_each_real_status_and_completed_stop(operator_http):
+    url, runner, preflight = operator_http
+    result = run_rehearsal(url)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "rehearsal passed" in result.stdout
+    assert len(runner.starts) == 3
+    assert [lang for _, lang in runner.starts] == ["en", "es", "en"]
+    assert len(set(sid for sid, _ in runner.starts)) == 3
+    assert len(runner.flips) == 2
+    assert runner.stops == [runner.starts[-1][0]]
+    assert runner.current.outcome == "completed"
+    assert preflight == ["en", "en", "es", "en"]
+    assert result.stdout.count("✓ ready:") == 3
+    assert all(f"[{step}]" in result.stdout for step in range(1, 7))
 
 
-class TestHappyPath:
-    def test_exits_zero_when_all_green(self, fake_operator):
-        url, _state = fake_operator
-        result = _run_rehearsal(url)
-        assert result.returncode == 0, f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
-        assert "rehearsal passed" in result.stdout
-        # Every numbered step should appear
-        for step in ("[1]", "[2]", "[3]", "[4]", "[5]", "[6]"):
-            assert step in result.stdout
-
-    def test_walks_session_lifecycle(self, fake_operator):
-        url, state = fake_operator
-        result = _run_rehearsal(url)
-        assert result.returncode == 0
-        # Session must have been started, then stopped — we observe the final
-        # state via the fake server's mutable record.
-        assert state["session_state"] == "idle"
-
-
-# -- failure path ------------------------------------------------------------
-
-
-class TestFailurePath:
-    def test_exits_nonzero_when_preflight_red(self, fake_operator):
-        url, state = fake_operator
-        state["preflight_fail"] = True
-        result = _run_rehearsal(url)
-        assert result.returncode == 1
-        assert "rehearsal failed" in result.stdout
+@pytest.mark.parametrize(
+    "scenario,message",
+    [
+        ("preflight_fail", "Pre-flight"),
+        ("start_rejected", "HTTP 422"),
+        ("stale", "Timed out"),
+        ("input_error", "input_error"),
+        ("wrong_language", "expected language es"),
+        ("reused_identity", "reused the previous session identity"),
+        ("failed_stop", "stop outcome=failed"),
+        ("replacement", "ownership changed"),
+    ],
+)
+def test_failures_do_not_report_green_or_stop_another_session(operator_http, scenario, message):
+    url, runner, _ = operator_http
+    runner.scenario = scenario
+    result = run_rehearsal(url, REHEARSAL_TIMEOUT_S="0.15")
+    assert result.returncode == 1
+    assert "rehearsal failed" in result.stderr
+    assert message in result.stderr
+    assert "rehearsal passed" not in result.stdout
+    if scenario in {"preflight_fail", "start_rejected", "replacement"}:
+        assert not runner.stops
+    else:
+        assert runner.stops == [runner.current.session_id]
+        assert runner.current.state == "idle"
 
 
-# -- script shape ------------------------------------------------------------
+def test_refuses_operator_already_in_use(operator_http):
+    url, runner, _ = operator_http
+    runner.current = SessionStatus(state="paused", session_id="someone_else_en")
+    result = run_rehearsal(url)
+    assert result.returncode == 1
+    assert "not idle" in result.stderr
+    assert not runner.starts and not runner.stops
 
 
-class TestScriptShape:
-    def test_has_shebang(self):
-        assert SCRIPT.read_text().startswith("#!/usr/bin/env bash")
+def test_interruption_cleans_only_session_started_by_script(operator_http):
+    url, runner, _ = operator_http
+    runner.scenario = "stale"
+    process = subprocess.Popen(
+        ["bash", str(SCRIPT)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=environment(url, REHEARSAL_TIMEOUT_S="5"),
+    )
+    try:
+        assert runner.polling_started.wait(4)
+        process.terminate()
+        stdout, stderr = process.communicate(timeout=5)
+        assert process.returncode == 1
+        assert "Interrupted by signal" in stderr
+        assert "rehearsal passed" not in stdout
+        assert runner.stops == [runner.starts[0][0]]
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.communicate(timeout=3)
 
-    def test_set_euo_pipefail(self):
-        assert "set -euo pipefail" in SCRIPT.read_text()
 
-    def test_bash_syntax_valid(self):
-        result = subprocess.run(["bash", "-n", str(SCRIPT)], capture_output=True, text=True)
-        assert result.returncode == 0, result.stderr
+def test_invalid_deadline_has_no_mutations(operator_http):
+    url, runner, _ = operator_http
+    result = run_rehearsal(url, REHEARSAL_TIMEOUT_S="nan")
+    assert result.returncode == 1
+    assert "positive finite" in result.stderr
+    assert not runner.starts and not runner.stops
 
-    def test_runbook_links_to_script(self):
-        runbook = (ROOT / "docs" / "operator_runbook.md").read_text()
-        assert "scripts/dry_run_rehearsal.sh" in runbook
+
+def test_script_is_executable_shell_and_runbook_link_is_current():
+    if os.name != "nt":
+        assert os.access(SCRIPT, os.X_OK)
+    assert SCRIPT.read_text().startswith("#!/usr/bin/env bash")
+    assert "set -euo pipefail" in SCRIPT.read_text()
+    result = subprocess.run(["bash", "-n", str(SCRIPT)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "scripts/dry_run_rehearsal.sh" in (ROOT / "docs/operator_runbook.md").read_text()
