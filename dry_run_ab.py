@@ -2198,13 +2198,20 @@ _io_pool = PersistenceExecutor(max_workers=2, max_pending=256)
 
 def audio_callback(indata, frames, time_info, status):
     """Resample from the captured source rate to 16 kHz and push to queue."""
+    from tools.capture_protocol import capture_status
+
     if status:
+        capture_errors = capture_status(status)
         if _health is not None:
             _health.error(
                 "audio", "capture_overflow" if str(status).startswith("capture_overflow:") else "capture_status"
             )
-        if str(status).startswith("capture_overflow:"):
+        if capture_errors.fifo_dropped_samples:
             _io_pool.record_failure("audio_capture", "samples_dropped")
+        if capture_errors.input_overflow_callbacks:
+            _io_pool.record_failure("audio_capture", "portaudio_input_overflow")
+            if _health is not None:
+                _health.error("capture", "portaudio_input_overflow")
         print(f"  Audio status: {status}", file=sys.stderr)
     # File and isolated mic stamps carry their actual callback rate. The
     # WebSocket protocol already delivers 16 kHz PCM, regardless of mic settings.
@@ -2244,6 +2251,24 @@ def audio_callback(indata, frames, time_info, status):
         _io_pool.record_failure("audio_capture", "input_queue_full")
         if _health is not None:
             _health.error("capture", "input_queue_full")
+
+
+def _record_capture_transport(stream, handoff):
+    """Snapshot closed transport and persist unreported/unknown capture failures."""
+    record = _capture_transport.record(stream, handoff)
+    pipe = record.get("pipe", {})
+    failures = list(pipe.get("capture_completeness_failures", []))
+    # Parsed status may still be waiting in a deliberately discarded Stop tail.
+    # Reconcile every known loss, even if its live notification already ran.
+    # Failure notifications are not counts of lost frames or native samples.
+    if pipe.get("upstream_dropped_samples", 0):
+        failures.append("worker_fifo_samples_dropped_observed_at_close")
+    if pipe.get("portaudio_input_overflow_callbacks_observed", 0):
+        failures.append("portaudio_input_overflow_observed_at_close")
+    for code in failures:
+        _io_pool.record_failure("audio_capture", code)
+        if _health is not None:
+            _health.error("capture", code)
 
 
 def is_speech(audio_chunk, model, utils):
@@ -4738,7 +4763,7 @@ async def audio_loop():
             with ExitStack() as capture_context:
                 # Register first: snapshot only after the handoff closes and
                 # the native child/reader have stopped, including pause/error.
-                capture_context.callback(_capture_transport.record, stream, _capture_handoff)
+                capture_context.callback(_record_capture_transport, stream, _capture_handoff)
                 capture_context.enter_context(stream)
                 capture_context.enter_context(_capture_handoff)
                 if _health is not None:

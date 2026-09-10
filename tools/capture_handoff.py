@@ -163,15 +163,40 @@ class CaptureTransportSummary:
     def __init__(self):
         self.segments = deque(maxlen=16)
         self.count = self.handoff_drops = self.upstream_dropped_samples = 0
+        self.terminal_verified = self.terminal_unverified = self.terminal_unavailable = 0
+        self.terminal_not_applicable = 0
+        self.terminal_fifo_dropped = self.observed_input_overflows = self.terminal_input_overflows = 0
+        self.overflow_observed_segments = 0
 
     def record(self, stream, handoff):
         record = {"stream_type": type(stream).__name__, "handoff": handoff.snapshot()}
         if hasattr(stream, "capture_snapshot"):
             record["pipe"] = stream.capture_snapshot()
             self.upstream_dropped_samples += record["pipe"]["upstream_dropped_samples"]
+            overflows = record["pipe"].get("portaudio_input_overflow_callbacks_observed")
+            if overflows is not None:
+                self.observed_input_overflows += overflows
+                self.overflow_observed_segments += 1
+            terminal = record["pipe"].get("terminal_accounting", {})
+            record["terminal_accounting_status"] = terminal.get("status", "unavailable_legacy_stream")
+            if terminal.get("status") == "verified":
+                self.terminal_verified += 1
+                self.terminal_fifo_dropped += terminal["receipt"]["worker_fifo_dropped_samples"]
+                self.terminal_input_overflows += terminal["receipt"]["portaudio_input_overflow_callbacks"]
+            elif terminal.get("status") == "unverified":
+                self.terminal_unverified += 1
+            else:
+                self.terminal_unavailable += 1
+        elif type(stream).__name__ == "FileAudioStream":
+            record["terminal_accounting_status"] = "not_applicable_file_replay"
+            self.terminal_not_applicable += 1
+        else:
+            record["terminal_accounting_status"] = "unavailable_direct_or_legacy_stream"
+            self.terminal_unavailable += 1
         self.handoff_drops += record["handoff"]["dropped_frames"]
         self.count += 1
         self.segments.append(record)
+        return record
 
     def snapshot(self):
         return {
@@ -180,6 +205,24 @@ class CaptureTransportSummary:
             "segments_completed": self.count,
             "handoff_dropped_frames": self.handoff_drops,
             "upstream_dropped_samples": self.upstream_dropped_samples,
+            "worker_fifo_dropped_samples_observed": self.upstream_dropped_samples,
+            "worker_fifo_dropped_samples_terminal": self.terminal_fifo_dropped
+            if self.count and self.terminal_verified == self.count
+            else None,
+            "portaudio_input_overflow_callbacks_observed": self.observed_input_overflows
+            if self.count and self.overflow_observed_segments == self.count
+            else None,
+            "portaudio_input_overflow_observed_segments": self.overflow_observed_segments,
+            "portaudio_input_overflow_callbacks_terminal": self.terminal_input_overflows
+            if self.count and self.terminal_verified == self.count
+            else None,
+            "portaudio_input_overflow_lost_samples": None,
+            "worker_fifo_loss_detected": bool(self.upstream_dropped_samples or self.terminal_fifo_dropped),
+            "portaudio_input_overflow_detected": bool(self.observed_input_overflows or self.terminal_input_overflows),
+            "terminal_accounting_verified_segments": self.terminal_verified,
+            "terminal_accounting_unverified_segments": self.terminal_unverified,
+            "terminal_accounting_unavailable_segments": self.terminal_unavailable,
+            "terminal_accounting_not_applicable_segments": self.terminal_not_applicable,
             "segments": list(self.segments),
             "segments_truncated": self.count > len(self.segments),
         }

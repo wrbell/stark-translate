@@ -6,15 +6,19 @@ import json
 import struct
 import subprocess
 import sys
+import tempfile
 import threading
 import time
+import uuid
 from collections import deque
 from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 
 from operator_app.processes import cleanup_children
+from tools.capture_protocol import count, read_terminal_receipt, status_from_metadata
 from tools.pipeline_timing import capture_stamp
 
 
@@ -85,17 +89,30 @@ class IsolatedInputStream:
     ):
         self.callback = callback
         self.rate, self.channels = samplerate, channels
-        self.argv = argv or worker_argv(
-            {
-                "samplerate": samplerate,
-                "channels": channels,
-                "dtype": dtype,
-                "blocksize": blocksize,
-                "device": device,
-                "device_name": device_name,
-                "device_host_api": device_host_api,
-            }
+        self._worker_options = {
+            "samplerate": samplerate,
+            "channels": channels,
+            "dtype": dtype,
+            "blocksize": blocksize,
+            "device": device,
+            "device_name": device_name,
+            "device_host_api": device_host_api,
+        }
+        self.argv = argv or worker_argv(self._worker_options)
+        self._terminal_expected = argv is None and sys.platform != "win32"
+        self._terminal_status = (
+            "pending"
+            if self._terminal_expected
+            else "unavailable_legacy_worker"
+            if argv is not None
+            else "unsupported_platform"
         )
+        self._terminal_directory = None
+        self._terminal_path = None
+        self._capture_token = None
+        self._terminal_receipt = None
+        self._accounting_failures = []
+        self._input_overflows = self._observed_end = 0
         self.startup_timeout, self.idle_timeout = startup_timeout, idle_timeout
         self.finished = threading.Event()
         self.error = None
@@ -117,9 +134,25 @@ class IsolatedInputStream:
     def __enter__(self):
         # No native calls or wait for permission on the inference event loop.
         self._started = time.monotonic()
-        self._proc = subprocess.Popen(
-            self.argv, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, start_new_session=False
-        )
+        if self._terminal_expected:
+            self._terminal_directory = tempfile.TemporaryDirectory(prefix="stark-capture-")
+            self._terminal_path = Path(self._terminal_directory.name) / "terminal.json"
+            self._capture_token = uuid.uuid4().hex
+            self.argv = worker_argv(
+                {
+                    **self._worker_options,
+                    "terminal_path": str(self._terminal_path),
+                    "capture_token": self._capture_token,
+                }
+            )
+        try:
+            self._proc = subprocess.Popen(
+                self.argv, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, start_new_session=False
+            )
+        except BaseException:
+            if self._terminal_directory is not None:
+                self._terminal_directory.cleanup()
+            raise
         self._reader = threading.Thread(target=self._read, name="capture-reader", daemon=True)
         self._watcher = threading.Thread(target=self._watch, name="capture-watchdog", daemon=True)
         self._reader.start()
@@ -151,18 +184,20 @@ class IsolatedInputStream:
                 samples = np.frombuffer(self._bytes(frames * channels * 4), dtype="float32").reshape(frames, channels)
                 self._last_frame = time.monotonic()
                 parsed_at = time.perf_counter()
-                newly_dropped = metadata["dropped"] - self.dropped_samples
-                self.dropped_samples = metadata["dropped"]
+                fifo, overflows, status = status_from_metadata(metadata, self.dropped_samples, self._input_overflows)
+                newly_dropped = fifo - self.dropped_samples
+                self.dropped_samples, self._input_overflows = fifo, overflows
+                source_start = count(metadata["sample_start"], "sample_start")
+                self._observed_end = max(self._observed_end, source_start + frames)
                 # perf_counter is a common host monotonic clock. Anchor the ADC
                 # offset at child callback receipt, never at delayed pipe receipt.
                 stamp = capture_stamp(frames, self.rate, SimpleNamespace(**metadata), received=metadata["received"])
                 stamp = replace(
                     stamp,
-                    sample_start=self.sample_offset + metadata["sample_start"],
-                    sample_end=self.sample_offset + metadata["sample_start"] + frames,
+                    sample_start=self.sample_offset + source_start,
+                    sample_end=self.sample_offset + source_start + frames,
                     sample_rate=self.rate,
                 )
-                status = f"capture_overflow:{newly_dropped}" if newly_dropped else metadata["status"] or None
                 pipe_age_ms = max(0.0, (parsed_at - metadata["received"]) * 1000)
                 capture_age_ms = max(0.0, (parsed_at - stamp.end) * 1000)
                 with self._telemetry_lock:
@@ -190,10 +225,13 @@ class IsolatedInputStream:
                         callback_to_pipe_ms=pipe_age_ms,
                         capture_age_ms=capture_age_ms,
                         upstream_dropped_samples=newly_dropped,
+                        worker_fifo_dropped_samples=newly_dropped,
+                        portaudio_input_overflow_callbacks=status.input_overflow_callbacks,
+                        portaudio_input_overflow_lost_samples=None,
                     )
                 self._callback_started = time.monotonic()
                 try:
-                    self.callback(samples, frames, stamp, status)
+                    self.callback(samples, frames, stamp, status or None)
                 finally:
                     # The input idle clock excludes time spent in the consumer.
                     self._last_frame = time.monotonic()
@@ -208,6 +246,15 @@ class IsolatedInputStream:
             return {
                 "frames_received": self._frames_received,
                 "upstream_dropped_samples": self.dropped_samples,
+                "worker_fifo_dropped_samples_observed": self.dropped_samples,
+                "portaudio_input_overflow_callbacks_observed": self._input_overflows,
+                "portaudio_input_overflow_lost_samples": None,
+                "terminal_accounting": {
+                    "status": self._terminal_status,
+                    "receipt": self._terminal_receipt,
+                    "scope": "Worker callback/FIFO counters; PortAudio overflow does not supply a lost-sample count",
+                },
+                "capture_completeness_failures": list(self._accounting_failures),
                 "max_callback_to_pipe_ms": self._max_pipe_age_ms,
                 "max_capture_age_ms": self._max_capture_age_ms,
                 "source_gaps": list(self._source_gaps),
@@ -238,17 +285,54 @@ class IsolatedInputStream:
 
     def __exit__(self, *args):
         self._stop.set()
-        if self._proc is not None:
-            if self._proc.poll() is None:
-                self._proc.terminate()
-                try:
-                    self._proc.wait(timeout=0.5)
-                except subprocess.TimeoutExpired:
-                    self._proc.kill()
-            self._proc.wait(timeout=2)
-            cleanup_children(self._proc.pid, group=False)
-        for thread in (self._reader, self._watcher):
-            if thread:
-                thread.join(timeout=2)
-        if self._proc and self._proc.stdout:
-            self._proc.stdout.close()
+        try:
+            try:
+                if self._proc is not None:
+                    if self._proc.poll() is None:
+                        self._proc.terminate()
+                        try:
+                            self._proc.wait(timeout=0.5)
+                        except subprocess.TimeoutExpired:
+                            self._proc.kill()
+                    self._proc.wait(timeout=2)
+                    cleanup_children(self._proc.pid, group=False)
+            finally:
+                for thread in (self._reader, self._watcher):
+                    if thread:
+                        thread.join(timeout=2)
+                # Closing a buffered pipe while its reader holds the lock can
+                # otherwise turn a failed bounded shutdown into an unbounded wait.
+                if self._proc and self._proc.stdout and (self._reader is None or not self._reader.is_alive()):
+                    self._proc.stdout.close()
+        finally:
+            self._finish_terminal_accounting()
+
+    def _finish_terminal_accounting(self):
+        if not self._terminal_expected or self._terminal_status != "pending":
+            return
+        try:
+            if (self._proc is not None and self._proc.poll() is None) or (
+                self._reader is not None and self._reader.is_alive()
+            ):
+                raise ValueError("Capture transport still active")
+            receipt = read_terminal_receipt(
+                self._terminal_path,
+                self._capture_token,
+                observed_fifo=self.dropped_samples,
+                observed_overflows=self._input_overflows,
+                observed_end=self._observed_end,
+            )
+            self._terminal_receipt = receipt
+            self._terminal_status = "verified"
+            if receipt["worker_fifo_dropped_samples"] > self.dropped_samples:
+                self._accounting_failures.append("worker_fifo_samples_dropped_at_close")
+            if receipt["portaudio_input_overflow_callbacks"] > self._input_overflows:
+                self._accounting_failures.append("portaudio_input_overflow_at_close")
+            if receipt["stop_reason"] != "requested_stop":
+                self._accounting_failures.append("capture_worker_error")
+        except (OSError, ValueError, TypeError):
+            self._terminal_status = "unverified"
+            self._accounting_failures.append("capture_terminal_accounting_unverified")
+        finally:
+            if self._terminal_directory is not None:
+                self._terminal_directory.cleanup()
