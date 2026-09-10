@@ -1,0 +1,38 @@
+{
+  "stt/manifest.json": {
+    "source": "metrics/overnight_hindi_stt/manifest.json",
+    "sha256": "e17dac6ad3d47e667c65516e000b7f2159808e56385cd828c995062513278826"
+  },
+  "stt/metadata.json": {
+    "source": "metrics/overnight_hindi_stt/metadata.json",
+    "sha256": "1ced80e4a63e3ac3b8087ddc787f9b964ac0faf5573dfbfe0c3ff4e91abb45f6"
+  },
+  "stt/rows.jsonl": {
+    "source": "metrics/overnight_hindi_stt/rows.jsonl",
+    "sha256": "e08618b7a348b0d225db52727e990e05a17514ad7eb8744c29e5a3ca328c2fc2"
+  },
+  "e4b/manifest.json": {
+    "source": "metrics/overnight_hindi_e4b/manifest.json",
+    "sha256": "e17dac6ad3d47e667c65516e000b7f2159808e56385cd828c995062513278826"
+  },
+  "e4b/metadata.json": {
+    "source": "metrics/overnight_hindi_e4b/metadata.json",
+    "sha256": "0623a84ab895187252f6e135d6c63e43884f5eefbb3b172a197631e79f944eff"
+  },
+  "e4b/rows.jsonl": {
+    "source": "metrics/overnight_hindi_e4b/rows.jsonl",
+    "sha256": "7a29088665d362f7b345ad2634766725d5f644c944be22eb1f8d7e5efec729e1"
+  },
+  "e2b/manifest.json": {
+    "source": "metrics/overnight_hindi_e2b/manifest.json",
+    "sha256": "e17dac6ad3d47e667c65516e000b7f2159808e56385cd828c995062513278826"
+  },
+  "e2b/metadata.json": {
+    "source": "metrics/overnight_hindi_e2b/metadata.json",
+    "sha256": "da7f8b8f80b48931297b9f167dac30d06d00891ce440fab8bd12fb2e831ed9af"
+  },
+  "e2b/rows.jsonl": {
+    "source": "metrics/overnight_hindi_e2b/rows.jsonl",
+    "sha256": "ab71cecfaf595fe440bc756958c5f0b4f9dda9add04e9674e3ba3685a45ad031"
+  }
+}
