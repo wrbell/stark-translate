@@ -162,7 +162,7 @@ def replay_case(tmp_path, monkeypatch):
     }
     evaluation.write_json(inputs / "replay.json", run)
     (metrics / "ab_metrics_session.csv").write_text(
-        "timing_schema_version,endpoint_reason,speech_end_to_final_ms\n2,silence,600\n"
+        "chunk_id,timing_schema_version,endpoint_reason,speech_end_to_final_ms\n1,2,silence,600\n"
     )
     return manifest, inputs, metrics, run
 
@@ -191,6 +191,7 @@ def test_report_sorts_partials_and_deduplicates_only_valid_v2_visible_acks(repla
     ack = {
         "event": "caption_rendered",
         "event_id": "a",
+        "chunk_id": 1,
         "client_id": "c",
         "stage": "complete",
         "visible": True,
@@ -213,7 +214,132 @@ def test_report_sorts_partials_and_deduplicates_only_valid_v2_visible_acks(repla
     events = result["caption_events"][0]["metrics"]
     assert events["first_partial_ms"] == {"n": 2, "p50": 125, "p95": 150}
     assert events["partial_update_gap_ms"] == {"n": 2, "p50": 100, "p95": 100}
-    assert events["receive_to_render_ms"]["n"] == 1
+    assert "receive_to_render_ms" not in events
+    browser = result["caption_events"][0]["browser_render_cohorts"][0]
+    assert browser["metrics"]["receive_to_render_ms"]["n"] == 1
+    assert browser["endpoint"] == "silence" and browser["client_id"] == "c"
+
+
+def test_browser_reports_join_chunks_and_never_pool_clients_endpoints_or_clock_sources(replay_case, tmp_path):
+    manifest, inputs, metrics, _ = replay_case
+    (metrics / "ab_metrics_session.csv").write_text(
+        "chunk_id,timing_schema_version,endpoint_reason,timing_source,speech_end_to_final_ms\n"
+        "1,2,silence,replay_paced,500\n"
+        "2,2,hard_cut,replay_paced,40\n"
+        "3,2,silence,callback_receipt_estimate,700\n"
+        "4,2,eof,replay_paced,500\n"
+    )
+
+    def ack(client, chunk, delay, **extra):
+        return {
+            "event": "caption_rendered",
+            "session_id": "session",
+            "event_id": f"{client}-{chunk}",
+            "chunk_id": chunk,
+            "client_id": client,
+            "stage": "complete",
+            "visible": True,
+            "timing_schema_version": 2,
+            "receive_to_render_ms": 20,
+            "speech_end_to_ack_upper_bound_ms": delay,
+            **extra,
+        }
+
+    acknowledgments = [
+        ack("A", 1, 1, session_id="older_session"),
+        ack("A", 1, 600),
+        ack("A", 1, 600),
+        ack("A", 1, 9999, event_id="retry"),
+        ack("A", 2, 50),
+        ack("B", 1, 4000),
+        ack("B", 3, 850),
+        ack("B", 999, 1),  # No matching finalized chunk.
+        ack("A", 4, 1, session_id="older_session"),
+        ack("B", 4, 1, visible=False),
+        ack("B", 2, 1, timing_schema_version=1),
+        ack("C", 4, 30, stage="partial"),
+    ]
+    (metrics / "display_metrics_session.jsonl").write_text("".join(json.dumps(row) + "\n" for row in acknowledgments))
+    result = evaluation.report_results(inputs, tmp_path / "report", manifest)
+    captions = result["caption_events"][0]
+    cohorts = {
+        (row["client_id"], row["endpoint"], row["timing_source"]): row for row in captions["browser_render_cohorts"]
+    }
+    assert len(cohorts) == 12  # Include every endpoint for the partial-only client too.
+    for key, expected in (
+        (("A", "silence", "replay_paced"), 600),
+        (("A", "hard_cut", "replay_paced"), 50),
+        (("B", "silence", "replay_paced"), 4000),
+        (("B", "silence", "callback_receipt_estimate"), 850),
+    ):
+        assert cohorts[key]["metrics"]["speech_end_to_ack_upper_bound_ms"] == {"n": 1, "p50": expected, "p95": expected}
+    missing = cohorts["B", "hard_cut", "replay_paced"]
+    assert missing["metrics"]["speech_end_to_ack_upper_bound_ms"] == {"n": 0, "p50": None, "p95": None}
+    assert missing["final_ack_coverage"] == {
+        "received_final_chunks": 0,
+        "finalized_chunks": 1,
+        "missing_final_chunks": ["2"],
+    }
+    assert all(
+        row["final_ack_coverage"]["received_final_chunks"] == 0
+        for row in captions["browser_render_cohorts"]
+        if row["client_id"] == "C"
+    )
+    assert captions["browser_client_sessions"] == 3
+    assert captions["final_ack_coverage"]["received_final_chunks"] == 3
+    assert captions["final_ack_coverage"]["finalized_chunks"] == 4
+    assert captions["unmatched_final_acks"] == 3
+    assert "speech_end_to_ack_upper_bound_ms" not in captions["metrics"]
+    assert result["latency_gate"] == "pending_browser_ack"
+
+
+def test_browser_ack_cannot_join_ambiguous_or_legacy_final_chunks():
+    rows = [
+        {"chunk_id": "1", "timing_schema_version": "2", "endpoint_reason": "silence"},
+        {"chunk_id": "1", "timing_schema_version": "2", "endpoint_reason": "hard_cut"},
+        {"chunk_id": "2", "timing_schema_version": "legacy"},
+    ]
+    acknowledgments = [
+        {
+            "event": "caption_rendered",
+            "event_id": str(cid),
+            "client_id": "browser",
+            "chunk_id": cid,
+            "timing_schema_version": 2,
+            "stage": "complete",
+            "visible": True,
+            "speech_end_to_ack_upper_bound_ms": 1,
+        }
+        for cid in (1, 2)
+    ]
+    report = evaluation._report_browser_acknowledgments(rows, acknowledgments, "session")
+    assert report["cohorts"] == []
+    assert report["unmatched_final_acks"] == 2
+    assert report["coverage"]["received_final_chunks"] == 0
+
+
+def test_partial_only_browser_is_counted_even_when_no_final_was_produced(replay_case, tmp_path):
+    manifest, inputs, metrics, _ = replay_case
+    (metrics / "ab_metrics_session.csv").write_text("chunk_id,timing_schema_version,endpoint_reason\n")
+    (metrics / "display_metrics_session.jsonl").write_text(
+        json.dumps(
+            {
+                "event": "caption_rendered",
+                "event_id": "partial-1",
+                "client_id": "browser",
+                "stage": "partial",
+                "visible": True,
+                "timing_schema_version": 2,
+            }
+        )
+        + "\n"
+    )
+    result = evaluation.report_results(inputs, tmp_path / "report", manifest)
+    captions = result["caption_events"][0]
+    assert captions["browser_client_sessions"] == 1
+    assert captions["browser_render_cohorts"] == []
+    assert captions["final_ack_coverage"]["finalized_chunks"] == 0
+    assert result["latency_gate"] == "pending_browser_ack"
 
 
 def test_report_never_pools_different_pipeline_sources_or_duplicate_sessions(replay_case, tmp_path):

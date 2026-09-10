@@ -17,7 +17,7 @@ def test_report():
     assert report["chunk_count"] == 4
     assert report["partial_count"] == 3
     assert report["metrics"]["true_e2e_ms"] == {"n": 3, "p50": 2000, "p95": 3000, "mean": 2000}
-    assert report["metrics"]["partial_total_ms"] == {"n": 2, "p50": 140, "p95": 260, "mean": 200}
+    assert report["metrics"]["partial_total_ms"] == {"n": 2, "p50": 200, "p95": 260, "mean": 200}
     assert report["metrics"]["gen_tokens_a"]["mean"] == pytest.approx(40 / 3)
     assert report["metrics"]["stt_latency_ms"]["n"] == 3
     assert report["metrics"]["latency_a_ms"]["n"] == 3
@@ -40,15 +40,86 @@ def test_missing_optional_metrics_and_empty_values(tmp_path):
     assert report["special_token_outputs"] == 0
 
 
+def _comparable_report(**values):
+    return {
+        "returncode": 0,
+        "replay_speed": 1,
+        "percentile_method": "median_p50_nearest_rank_p95",
+        "clip": {"sha256": "a" * 64, "lang": "en"},
+        "timing_schema_versions": ["2"],
+        "timing_sources": ["replay_paced"],
+        "session_lifecycle": {"pipeline_sha256": "c" * 64},
+        **values,
+    }
+
+
 def test_percentiles_and_delta():
     assert bench._pct([], 95) == 0
     assert bench._pct([4, 1, 2, 3, 5], 50) == 3
     assert bench._pct([4, 1, 2, 3, 5], 95) == 5
-    baseline = {"metrics": {"stt_latency_ms": bench.summarize([100])}, "chunk_count": 0}
-    current = {"metrics": {"stt_latency_ms": bench.summarize([80])}, "chunk_count": 1}
+    baseline = _comparable_report(metrics={"stt_latency_ms": bench.summarize([100])}, chunk_count=0)
+    current = _comparable_report(metrics={"stt_latency_ms": bench.summarize([80])}, chunk_count=1)
     table = bench.delta_table(current, baseline)
     assert "| stt_latency_ms.p50 | 100.00 | 80.00 | -20.00 | -20.00 |" in table
     assert "| chunk_count | 0.00 | 1.00 | 1.00 | — |" in table
+
+
+@pytest.mark.parametrize(
+    "values,p50,p95",
+    [
+        ([2044], 2044, 2044),
+        ([2204, 2044], 2124, 2204),
+        ([2204, 1800, 2044], 2044, 2204),
+        (list(range(20, 0, -1)), 10.5, 19),
+    ],
+)
+def test_summary_percentiles_match_operator_and_comparison_reports(values, p50, p95):
+    result = bench.summarize(values)
+    assert result["p50"] == p50 and result["p95"] == p95
+
+
+@pytest.mark.parametrize(
+    "changes,reason",
+    [
+        ({"clip": {"sha256": "b" * 64, "lang": "en"}}, "audio sha256"),
+        ({"clip": {"sha256": "a" * 64, "lang": "es"}}, "audio lang"),
+        ({"clip": {"lang": "en"}}, "audio hash"),
+        ({"timing_schema_versions": ["legacy"]}, "incompatible timing_schema"),
+        ({"timing_sources": ["callback_receipt_estimate"]}, "incompatible timing_sources"),
+        ({"replay_speed": 2}, "real-time"),
+        ({"returncode": 1}, "failed"),
+        ({"percentile_method": None}, "rebuild percentile"),
+        ({"session_metadata": {"input_audio_sha256": "b" * 64}}, "contradicts"),
+        ({"metric_definitions": {"e2e_latency_ms": "different meaning"}}, "metric_definitions"),
+        ({"session_lifecycle": {}}, "unknown pipeline source"),
+    ],
+)
+def test_delta_rejects_incompatible_or_unknown_baselines(changes, reason):
+    with pytest.raises(ValueError, match=reason):
+        bench.delta_table(_comparable_report(), _comparable_report(**changes))
+
+
+def test_delta_separates_endpoints_and_identifies_intentional_configuration_changes():
+    baseline = _comparable_report(
+        metrics={"speech_end_to_final_ms": bench.summarize([50, 600])},
+        speech_end_by_endpoint={"silence": bench.summarize([600]), "hard_cut": bench.summarize([50])},
+        session_metadata={"model_a": "e4b"},
+        session_lifecycle={"pipeline_sha256": "c" * 64},
+    )
+    current = _comparable_report(
+        metrics={"speech_end_to_final_ms": bench.summarize([800])},
+        speech_end_by_endpoint={"silence": bench.summarize([800])},
+        session_metadata={"model_a": "e2b"},
+        session_lifecycle={"pipeline_sha256": "c" * 64},
+    )
+    table = bench.delta_table(current, baseline)
+    assert "Configuration fields changed: model_a." in table
+    assert "speech_end_to_final_ms.p50" not in table
+    assert "speech_end_to_final_ms[silence].p50 | 600.00 | 800.00 | 200.00 | 33.33" in table
+    assert "speech_end_to_final_ms[hard_cut].p50 | 50.00 | — | — | —" in table
+    current["session_lifecycle"]["pipeline_sha256"] = "d" * 64
+    with pytest.raises(ValueError, match="different pipeline source"):
+        bench.delta_table(current, baseline)
 
 
 def test_configs_inline_and_json(tmp_path):

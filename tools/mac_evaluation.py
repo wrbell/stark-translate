@@ -898,6 +898,103 @@ def _preserve_blind_reviews(path: Path, proposed: list[dict]) -> list[dict]:
     return [pairs[row["id"]] for row in proposed]
 
 
+def _report_browser_acknowledgments(rows: list[dict], acknowledgments: list[dict], session_id: str) -> dict:
+    """Join visible final ACKs to unique CSV chunks; never pool clients or endpoints."""
+    chunks: dict[str, list[dict]] = defaultdict(list)
+    for row in rows:
+        if row.get("chunk_id") not in (None, ""):
+            chunks[str(row["chunk_id"])].append(row)
+
+    def endpoint_key(row):
+        return (
+            str(row.get("timing_schema_version") or "legacy"),
+            row.get("endpoint_reason") or row.get("finalization_reason") or "unknown",
+            row.get("timing_source") or "unknown",
+        )
+
+    endpoints: dict[tuple, set] = defaultdict(set)
+    for cid, matching in chunks.items():
+        if len(matching) == 1 and endpoint_key(matching[0])[0] == "2":
+            endpoints[endpoint_key(matching[0])].add(cid)
+    samples: dict[tuple, dict[str, list]] = defaultdict(lambda: defaultdict(list))
+    received: dict[tuple, set] = defaultdict(set)
+    clients = set()
+    seen_events, seen_chunks = set(), set()
+    unmatched = 0
+    for ack in acknowledgments:
+        identity = ack.get("client_id"), ack.get("event_id")
+        if (
+            ack.get("event") != "caption_rendered"
+            or ack.get("visible") is not True
+            or ack.get("timing_schema_version") != 2
+            or any(not isinstance(value, str) or not value for value in identity)
+            or identity in seen_events
+        ):
+            continue
+        if ack.get("session_id", session_id) != session_id:
+            if ack.get("stage") == "complete":
+                unmatched += 1
+            continue
+        seen_events.add(identity)
+        client = identity[0]
+        # Partial-only browsers are real observed clients with zero final
+        # coverage, not evidence that no browser was present.
+        if ack.get("stage") in {"partial", "final", "translation_a"}:
+            clients.add(client)
+            continue
+        if ack.get("stage") != "complete":
+            continue
+        cid = str(ack["chunk_id"]) if ack.get("chunk_id") is not None else ""
+        matching = chunks.get(cid, [])
+        if len(matching) != 1 or endpoint_key(matching[0])[0] != "2":
+            unmatched += 1
+            continue
+        if (client, cid) in seen_chunks:
+            continue
+        seen_chunks.add((client, cid))
+        clients.add(client)
+        key = (client, *endpoint_key(matching[0]))
+        received[key].add(cid)
+        for field in ("receive_to_render_ms", "speech_end_to_ack_upper_bound_ms"):
+            if (delay := _numeric(ack.get(field))) is not None:
+                samples[key][field].append(delay)
+
+    cohorts = []
+    for client in sorted(clients):
+        for endpoint, finalized in sorted(endpoints.items()):
+            key = (client, *endpoint)
+            acknowledged = received[key]
+            cohorts.append(
+                {
+                    "session_id": session_id,
+                    "client_id": client,
+                    **dict(zip(("schema", "endpoint", "timing_source"), endpoint, strict=True)),
+                    "metrics": {
+                        field: stats(samples[key][field])
+                        for field in ("receive_to_render_ms", "speech_end_to_ack_upper_bound_ms")
+                    },
+                    "final_ack_coverage": {
+                        "received_final_chunks": len(acknowledged),
+                        "finalized_chunks": len(finalized),
+                        "missing_final_chunks": sorted(finalized - acknowledged),
+                    },
+                }
+            )
+    acknowledged = {cid for _, cid in seen_chunks}
+    return {
+        "cohorts": cohorts,
+        "client_count": len(clients),
+        "unmatched_final_acks": unmatched,
+        "coverage": {
+            "session_id": session_id,
+            "received_final_chunks": len(acknowledged),
+            "finalized_chunks": len(chunks),
+            "missing_final_chunks": sorted(set(chunks) - acknowledged),
+            "available": bool(chunks),
+        },
+    }
+
+
 def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
     manifest = json.loads(manifest_path.read_text())
     report = {
@@ -1011,7 +1108,9 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
     groups: dict[tuple, list] = defaultdict(list)
     event_groups: dict[tuple, dict[str, list]] = defaultdict(lambda: defaultdict(list))
     source_cohorts = {}
-    ack_clients: dict[tuple, set] = defaultdict(set)
+    browser_groups: dict[tuple, list] = defaultdict(list)
+    browser_client_counts: dict[tuple, int] = defaultdict(int)
+    unmatched_acks: dict[tuple, int] = defaultdict(int)
     ack_coverage: dict[tuple, list] = defaultdict(list)
     counter_sessions: dict[tuple, dict] = defaultdict(dict)
     seen_sessions = set()
@@ -1090,34 +1189,12 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
                     events["partial_update_gap_ms"].append(emitted - prior_emission)
                 prior_emission = emitted
         events["first_partial_ms"].extend(first_utterances.values())
-        seen_acks = set()
-        acknowledged_chunks = set()
-        finalized_chunks = set()
-        for ack in _jsonl(ROOT / "metrics" / f"display_metrics_{run['session_id']}.jsonl"):
-            identity = ack.get("client_id"), ack.get("event_id")
-            if (
-                ack.get("event") != "caption_rendered"
-                or ack.get("visible") is not True
-                or ack.get("stage") != "complete"
-                or ack.get("timing_schema_version") != 2
-                or None in identity
-                or identity in seen_acks
-            ):
-                continue
-            seen_acks.add(identity)
-            if ack.get("chunk_id") is not None:
-                acknowledged_chunks.add(str(ack["chunk_id"]))
-            ack_clients[group_key].add((run["session_id"], ack["client_id"]))
-            for field in ("receive_to_render_ms", "speech_end_to_ack_upper_bound_ms"):
-                if (delay := _numeric(ack.get(field))) is not None:
-                    events[field].append(delay)
+        rows = []
         csv_path = ROOT / "metrics" / f"ab_metrics_{run['session_id']}.csv"
         if csv_path.exists():
             with csv_path.open() as f:
                 rows = list(csv.DictReader(f))
             for row in rows:
-                if row.get("chunk_id") not in (None, ""):
-                    finalized_chunks.add(str(row["chunk_id"]))
                 # Separate source, endpoint reason and timing definition, never average percentiles.
                 schema = row.get("timing_schema_version") or "legacy"
                 key = (
@@ -1126,15 +1203,15 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
                     row.get("endpoint_reason") or row.get("finalization_reason") or "unknown",
                 )
                 groups[key].append(row)
-        ack_coverage[group_key].append(
-            {
-                "session_id": run["session_id"],
-                "received_final_chunks": len(finalized_chunks & acknowledged_chunks),
-                "finalized_chunks": len(finalized_chunks),
-                "missing_final_chunks": sorted(finalized_chunks - acknowledged_chunks),
-                "available": bool(finalized_chunks),
-            }
+        browser = _report_browser_acknowledgments(
+            rows,
+            _jsonl(ROOT / "metrics" / f"display_metrics_{run['session_id']}.jsonl"),
+            run["session_id"],
         )
+        browser_groups[group_key].extend(browser["cohorts"])
+        browser_client_counts[group_key] += browser["client_count"]
+        unmatched_acks[group_key] += browser["unmatched_final_acks"]
+        ack_coverage[group_key].append(browser["coverage"])
     for key, rows in groups.items():
         fields = {}
         for field in (
@@ -1168,7 +1245,9 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         dict(zip(("experiment", "size", "language", "provenance", "clip_id", "runtime_cohort"), key, strict=True))
         | {
             "metrics": {name: stats(values) for name, values in metrics.items()},
-            "browser_client_sessions": len(ack_clients[key]),
+            "browser_client_sessions": browser_client_counts[key],
+            "browser_render_cohorts": browser_groups[key],
+            "unmatched_final_acks": unmatched_acks[key],
             "latency_experiment_counters": {
                 name: sum(row.get(name, 0) for row in counter_sessions[key].values())
                 for name in sorted({name for row in counter_sessions[key].values() for name in row})
@@ -1264,7 +1343,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         "",
         "## Partial delivery and visible browser timing",
         "",
-        "First-partial delay starts at the first captured speech frame; one earliest delay is counted per known utterance. Update gaps use chronological emissions, including speaking pauses. Browser receipt-to-render is measured per visible client acknowledgment; speech-end-to-ack includes return-network time. Duplicate or non-v2 acknowledgments are excluded.",
+        "First-partial delay starts at the first captured speech frame; one earliest delay is counted per known utterance. Update gaps use chronological emissions, including speaking pauses. These partial timings end at server readiness, before browser rendering.",
         "",
         "| Experiment | Model | Clip / cohort | Source | Metric | n | p50 ms | p95 ms |",
         "|---|---|---|---|---|---:|---:|---:|",
@@ -1274,6 +1353,22 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
             lines.append(
                 f"| {row['experiment']} | {row['size']} | {row['clip_id']} / {row['runtime_cohort']} | {row['language']}/{row['provenance']} | {name} | {values['n']} | {fmt(values['p50'])} | {fmt(values['p95'])} |"
             )
+    lines += [
+        "",
+        "### Visible final latency by browser session and endpoint",
+        "",
+        "Only visible schema-2 final ACKs matched to a unique CSV chunk contribute. Each browser session, capture timing source and endpoint has its own distribution; clients and silence/forced-cut/EOF endpoints are never pooled. Duplicate chunk acknowledgments and unmatched/stale events are excluded. Speech-end-to-ack includes return-network time. Coverage alone does not make a run acceptance eligible; the latency gate remains pending.",
+        "",
+        "| Experiment | Model | Clip / cohort | Session / client | Endpoint / timing source | Metric | n | p50 ms | p95 ms | ACKs / finals |",
+        "|---|---|---|---|---|---|---:|---:|---:|---|",
+    ]
+    for row in report["caption_events"]:
+        for browser in row["browser_render_cohorts"]:
+            coverage = browser["final_ack_coverage"]
+            for name, values in browser["metrics"].items():
+                lines.append(
+                    f"| {row['experiment']} | {row['size']} | {row['clip_id']} / {row['runtime_cohort']} | {browser['session_id']} / {browser['client_id']} | {browser['endpoint']} / {browser['timing_source']} | {name} | {values['n']} | {fmt(values['p50'])} | {fmt(values['p95'])} | {coverage['received_final_chunks']} / {coverage['finalized_chunks']} |"
+                )
     lines += [
         "",
         "### Visible final acknowledgment coverage",

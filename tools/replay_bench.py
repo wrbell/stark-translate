@@ -117,11 +117,11 @@ def read_lifecycle(metrics_dir: Path, session_id: str) -> dict:
 
 
 def _pct(xs: list[float], p: float) -> float:
-    # Same nearest-rank helper as tools/benchmark_mlx_accel.py.
+    """Nearest-rank percentile; the reported p50 separately uses the median."""
     if not xs:
         return 0.0
     s = sorted(xs)
-    idx = min(len(s) - 1, max(0, round((p / 100.0) * (len(s) - 1))))
+    idx = min(len(s) - 1, max(0, math.ceil((p / 100.0) * len(s)) - 1))
     return s[idx]
 
 
@@ -137,7 +137,7 @@ def summarize(values: list[float]) -> dict:
     """Missing measurements remain null, rather than implying zero latency."""
     return {
         "n": len(values),
-        "p50": _pct(values, 50) if values else None,
+        "p50": statistics.median(values) if values else None,
         "p95": _pct(values, 95) if values else None,
         "mean": statistics.mean(values) if values else None,
     }
@@ -191,8 +191,10 @@ def analyze_run(csv_path: Path | str, partials_path: Path | str, log_path: Path 
     return {
         "chunk_count": len(rows),
         "partial_count": len(partials),
+        "percentile_method": "median_p50_nearest_rank_p95",
         "metrics": metrics,
         "timing_schema_versions": sorted({row.get("timing_schema_version") or "legacy" for row in rows}),
+        "timing_sources": sorted({row.get("timing_source") or "unknown" for row in rows}),
         "metric_definitions": {
             "speech_end_to_final_ms": "last VAD-positive capture frame end to final payload ready; not browser rendering",
             "e2e_latency_ms": "legacy queue submission to translation/QE completion",
@@ -224,19 +226,72 @@ def analyze_run(csv_path: Path | str, partials_path: Path | str, log_path: Path 
 
 
 def delta_table(current: dict, baseline: dict) -> str:
-    """Markdown comparison; percentages are undefined for a zero baseline."""
+    """Compare compatible replay observations, keeping speech endpoints separate."""
+    for label, report in (("baseline", baseline), ("current", current)):
+        if report.get("returncode") != 0 or report.get("error"):
+            raise ValueError(f"Cannot compare {label}: replay is failed or lacks successful completion metadata")
+        if _number(report.get("replay_speed")) != 1 or report.get("realtime_latency_eligible") is False:
+            raise ValueError(f"Cannot compare {label}: latency comparison requires real-time (1x) replay")
+        if report.get("percentile_method") != "median_p50_nearest_rank_p95":
+            raise ValueError(f"Cannot compare {label}: rebuild percentile summaries from saved CSVs with this analyzer")
+        clip = report.get("clip", {})
+        audio_hash = clip.get("sha256")
+        if (
+            not isinstance(audio_hash, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", audio_hash)
+            or clip.get("lang") not in {"en", "es"}
+        ):
+            raise ValueError(f"Cannot compare {label}: frozen audio hash and language are required")
+        metadata = report.get("session_metadata", {})
+        if (
+            metadata.get("source_lang", clip["lang"]) != clip["lang"]
+            or metadata.get("input_audio_sha256", clip["sha256"]) != clip["sha256"]
+        ):
+            raise ValueError(f"Cannot compare {label}: actual input metadata contradicts the frozen clip")
+        if not report.get("timing_schema_versions") or not report.get("timing_sources"):
+            raise ValueError(f"Cannot compare {label}: timing schema and capture-source metadata are required")
+    for key in ("sha256", "lang"):
+        if current["clip"][key] != baseline["clip"][key]:
+            raise ValueError(f"Cannot compare different replay audio {key}")
+    for key in ("timing_schema_versions", "timing_sources", "metric_definitions"):
+        if current.get(key) != baseline.get(key):
+            raise ValueError(f"Cannot compare incompatible {key}")
+
+    # Model/experiment settings may intentionally differ. Keep them explicit,
+    # while rejecting changed or unknown pipeline implementation identities.
+    hashes = [r.get("session_lifecycle", {}).get("pipeline_sha256") for r in (baseline, current)]
+    if any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value) for value in hashes):
+        raise ValueError("Cannot compare unknown pipeline source hashes; use recorded runtime cohorts")
+    if hashes[0] != hashes[1]:
+        raise ValueError("Cannot compare different pipeline source hashes; use separate runtime cohorts")
+    config_changes = []
+    for key in ("backend", "model_family", "model_a", "stt_backend", "vad", "translation"):
+        before = baseline.get("session_metadata", {}).get(key)
+        after = current.get("session_metadata", {}).get(key)
+        if before != after:
+            config_changes.append(key)
 
     def flatten(report):
         result = {}
         for metric, stats in report.get("metrics", {}).items():
+            if metric == "speech_end_to_final_ms":
+                continue  # Silence and forced cuts have different meanings.
             for stat in ("p50", "p95", "mean"):
                 result[f"{metric}.{stat}"] = stats.get(stat)
+        for endpoint, stats in report.get("speech_end_by_endpoint", {}).items():
+            for stat in ("p50", "p95", "mean"):
+                result[f"speech_end_to_final_ms[{endpoint}].{stat}"] = stats.get(stat)
         for metric in ("chunk_count", "partial_count", "marian_only_share", "special_token_outputs", "overlap_pct"):
             result[metric] = report.get(metric)
         return result
 
     old, new = flatten(baseline), flatten(current)
-    lines = ["| Metric | Baseline | Replay | Delta | Delta % |", "|---|---:|---:|---:|---:|"]
+    lines = [
+        "Configuration fields changed: " + (", ".join(config_changes) if config_changes else "none recorded") + ".",
+        "",
+        "| Metric | Baseline | Replay | Delta | Delta % |",
+        "|---|---:|---:|---:|---:|",
+    ]
     for key in sorted(old.keys() | new.keys()):
         a, b = _number(old.get(key)), _number(new.get(key))
         delta = b - a if a is not None and b is not None else None
