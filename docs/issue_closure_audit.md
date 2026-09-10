@@ -19,9 +19,11 @@ status lives in [Mac implementation status](mac_implementation_status.md) and th
 | [#176 — worker prompts](https://github.com/wrbell/stark-translate/issues/176) | Share model-family chat/stop rules and skip the incompatible Gemma 4 prompt cache, or deprecate multiprocess. | [Workers](../workers.py) use `MLXGemmaEngine` with the parent's model family and shared [prompt/stop helpers](../engines/translation_prompts.py). [Pipe tests](../tests/test_worker_translation_contract.py) cover both model families, EN/ES and the A/B contract. | **Ready after merge:** shared-engine option implemented and tested. Multiprocess remains optional; closure is not a performance endorsement. |
 | [#177 — MLX MTP](https://github.com/wrbell/stark-translate/issues/177) | Greedy-equivalent output, canary ≥7/8, medium p50 ≤0.85× post-EOS E4B, acceptance ≥30%; otherwise MTP stays off. | [Recorded experiment](archive/v2026.13/MAC_LATENCY.md): 33/33 identical outputs, 31.3% acceptance, medium 1339/1393 ms (≈0.96×), missing the speed gate. [Live validation](../dry_run_ab.py) rejects requested/configured MTP before loading; [tests](../tests/test_worker_translation_contract.py) verify rejection. | **Ready after merge as a negative experiment:** keep MTP off and state the speed gate failed. The ≥7/8 canary promotion gate is not established. Fixed-prefix caching is a separate experiment, not MTP evidence. |
 
-The [endurance monitor](../tools/endurance_monitor.py) supports the upcoming
+The [endurance monitor](../tools/endurance_monitor.py) supports fresh full-length
 standard and CPU Lite replays with sampled process-tree memory, queue, source
-interval and recording-completion evidence. Tool availability is not completed
+interval and recording-completion evidence. The earlier standard attempt failed
+source-bound validation; the prepared 350-second slice was unused. Fresh results
+remain pending. Tool availability is not completed
 endurance or #134 acceptance. Source gaps do not identify silence or hymns without
 inspection. Human, device, training and target-hardware gates remain pending until
 their own evidence is recorded.

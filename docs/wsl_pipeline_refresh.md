@@ -62,7 +62,7 @@ Follow full setup in [`CLAUDE-windows.md`](../CLAUDE-windows.md) (`~/stt_train_e
 ```bash
 source ~/stt_train_env/bin/activate
 cd ~/path/to/stark-translate   # or your clone
-git checkout main              # or codex/mac-reliability-roadmap (v2026.14 candidate, PR #192 draft)
+git checkout main              # use the tested v2026.14 source revision recorded by PR #192
 nvidia-smi                     # A2000 Ada, ~16 GB visible
 
 # Data presence

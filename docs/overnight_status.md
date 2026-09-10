@@ -1,11 +1,11 @@
 # September 10 delivery status
 
-The candidate branch `codex/mac-reliability-roadmap` is proposed in
-[PR #192](https://github.com/wrbell/stark-translate/pull/192). Its operator, reliability,
-Lite, latency and documentation work is integrated. The English matrix is complete:
+The v2026.14 source (`2026.14.0.0`) is tracked by
+[PR #192](https://github.com/wrbell/stark-translate/pull/192); v2026.13 is the last published release recorded here.
+The operator, reliability, Lite, latency and documentation work is integrated. The English matrix is complete:
 96/96 valid runs, 672 finals and 0/28 selected arms. The sub-second final-delivery
 goal was not met on this cohort; E4B remains unchanged. Endurance and the
-authorized merge remain in progress. PyPI, package
+source-integration evidence remain separate from that screen. PyPI, package
 publication and release tags remain pending by user choice.
 
 ## Where to look
@@ -39,8 +39,13 @@ replace obsolete installation claims. MSI file/hash inspection remains distinct
 from an actual Windows first-launch test. The PyApp reference TOML is not consumed
 by the workflow and cannot establish automatic profile/extras installation.
 
-At the September 10 06:49:36 UTC handoff, standard full-service endurance was
-running and CPU Lite endurance was pending. The local CPU suite passed 2,213 tests
+The earlier standard full-service attempt is retained as failed source-bound
+validation evidence and does not satisfy endurance acceptance. The next validation
+uses the complete source recording: a fresh full-length standard replay, followed
+by a separate full-length CPU Lite replay. Results for both remain pending. The
+prepared 350-second slice was unused and is not a validation cohort.
+
+The recorded local CPU suite passed 2,213 tests
 with four skips and 63.52% coverage; all three GPU regressions passed. Endurance
 completion and remote CI must be recorded separately.
 
@@ -55,7 +60,7 @@ completion and remote CI must be recorded separately.
   synthetic audio and unreviewed transcripts are always labeled. In the completed
   screen the native Mac was locked while the DOM reported visible; physical display
   visibility is unverified. The package-activity overlap remains annotated.
-- The user deferred live microphone and physical-output tests until tomorrow.
+- Live microphone and physical-output tests are deferred to the next attended session.
   Natural Spanish, two-speaker audio, bilingual approval, x86/RTX2070 execution,
   WSL training and adapter transfer remain explicit external dependencies.
 - Issue #134 permits a laptop stand-in with a full recorded hymn, spoken segment,

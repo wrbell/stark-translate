@@ -1,8 +1,8 @@
 # features/ — Diarization, Verse Extraction, Sermon Summary
 
-> Paired with [`AGENTS.md`](./AGENTS.md). Describes the local branch (base `5154fb9`,
-> v2026.14 candidate); main is v2026.13. Integration status is stated per feature —
-> do not read "implemented" as "certified for a service".
+> Paired with [`AGENTS.md`](./AGENTS.md). Describes v2026.14 source tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192);
+> the last published release recorded here is v2026.13. Acceptance is stated per
+> feature; "implemented" does not mean "certified for a service".
 
 Three post-processing capabilities plus a live diarization path. Two are exposed to the
 operator UI through [`operator_app/features.py`](../operator_app/features.py); live

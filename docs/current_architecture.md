@@ -1,13 +1,10 @@
-# Current architecture — v2026.14 candidate (local branch)
+# Current architecture — v2026.14 source
 
-> **Scope:** Inference and operator contracts on `codex/mac-reliability-roadmap`
-> (version `2026.14.0.0`), proposed in draft
-> [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open, **not merged**.
-> **Main** remains at v2026.13 until the authorized final merge. Do not describe
-> candidate-branch behavior as shipped on main/PyPI without integration evidence.
-> The overnight worktrees (latency experiments, Lite profiles, operator UI, reliability,
-> issue evidence, docs) are integrated on this branch; final runtime and endurance validation continues;
-> the contracts below include them ([`overnight_status.md`](./overnight_status.md)).
+> **Scope:** Inference and operator contracts for v2026.14 source (`2026.14.0.0`).
+> [PR #192](https://github.com/wrbell/stark-translate/pull/192) records its integration history and current PR state.
+> The last published release recorded here is v2026.13. These contracts do not imply
+> package publication or service certification. Recorded evidence and remaining
+> validation are in [`overnight_status.md`](./overnight_status.md).
 >
 > **Live microphone (2026-09-09 → 10):** built-in microphone session
 > `20260909_233204_799019_en` stalled after model load — no audio frames, lifecycle
@@ -16,7 +13,7 @@
 > sessions on the same build passed. The fix is **implemented** (isolated capture with
 > no-input timeouts, health-derived readiness — § Audio capture and § Operator control
 > plane); the real built-in-mic retest and physical-device checks are deferred to
-> tomorrow (`mac-live-mic-stall`, `issue-131-smoke` in [`backlog.json`](./backlog.json)).
+> the next attended session (`mac-live-mic-stall`, `issue-131-smoke` in [`backlog.json`](./backlog.json)).
 
 ## Two-pass live pipeline
 

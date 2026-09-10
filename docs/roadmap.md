@@ -3,7 +3,7 @@
 > Living document tracking the project from Mac prototype through Windows training to
 > production deployment.
 >
-> **Last updated:** 2026-09-10 (completed 96-run screen; standard endurance running at the 06:49:36 UTC handoff).
+> **Last updated:** 2026-09-10 (completed 96-run screen; fresh full-length standard and Lite endurance results pending).
 >
 > **Remaining tasks (canonical):** [`backlog.json`](./backlog.json) · rendered
 > [`backlog.md`](./backlog.md) · contracts [`current_architecture.md`](./current_architecture.md)
@@ -40,11 +40,10 @@ Windows / WSL (A2000 Ada 16 GB, CUDA)
   Training:   Phase 4 preprocess, E4B domain SFT, W17 — scripted, not run since 2026-04-30
   Latency:    CUDA proposal scripts header-marked unexecuted
 
-Release lines
-  main:       v2026.13 (PRs #180–191)
-  candidate:  2026.14.0.0 on codex/mac-reliability-roadmap → draft PR #192 (open, not merged)
-  overnight:  docs / lite / latency / operator-ui / reliability / issue-evidence worktrees
-              integrated on the candidate branch; parent validating
+Source and releases
+  published:  v2026.13 is the last published release recorded here (PRs #180–191)
+  source:     v2026.14 / 2026.14.0.0; integration history and current state in PR #192
+  evidence:   per-feature acceptance and source/artifact identity are recorded separately
   publishing: source + issues + final merge authorized; PyPI / tags pending by user choice
 ```
 
@@ -54,10 +53,9 @@ audio frames arrived and the audience display stayed disconnected; a separate
 `sounddevice` record probe stalled too. File-replay EN/ES sessions on the same build
 completed. The fix (isolated capture with no-input timeouts, health-derived readiness,
 owned-process cleanup) is **implemented and integrated**; the real built-in-mic retest and
-physical-device checks are deferred to tomorrow (`mac-live-mic-stall`, `issue-131-smoke`).
+physical-device checks are deferred to the next attended session (`mac-live-mic-stall`, `issue-131-smoke`).
 
-Day-of-event workflow: [`operator_runbook.md`](./operator_runbook.md) (UI evidence
-refreshed by root after integration). First-time install:
+Day-of-event workflow: [`operator_runbook.md`](./operator_runbook.md) (with recorded UI evidence). First-time install:
 [`packaging/macos.md`](./packaging/macos.md), `bootstrap.sh`.
 
 ---
@@ -69,8 +67,8 @@ Status, priority, dependencies and acceptance for every item below are in
 
 ### Mac — integrate, then certify
 
-1. **PR #192 validation and merge** (`pr-192-integration`): integrated local checks passed (2,213 CPU-suite tests, four skips, 63.52% coverage; three GPU regressions). Standard endurance is running, Lite follows; complete their evidence, remote CI and source review before the authorized merge. Main advances from v2026.13 only at that merge.
-2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): the stall fix is implemented — `tools/isolated_audio.py` / `capture_worker.py` (disposable PortAudio child, 5 s no-input and 3 s idle timeouts), `tools/pipeline_health.py` readiness consumed by the operator. What remains is the **real built-in-mic retest** with live EN and ES utterances and the audience display connected (deferred to tomorrow). #131 closes only on that evidence.
+1. **PR #192 validation and integration evidence** (`pr-192-integration`): recorded local checks passed (2,213 CPU-suite tests, four skips, 63.52% coverage; three GPU regressions). The earlier standard endurance attempt failed source-bound validation and cannot satisfy acceptance. Fresh full-length standard and CPU Lite replay results remain pending; the unused 350-second slice is not a cohort. Record their evidence, remote CI and source review separately from the completed screen. See PR #192 for actual merge state; published v2026.13 and v2026.14 source are distinct.
+2. **Live microphone** (`mac-live-mic-stall`, `issue-131-smoke`): the stall fix is implemented — `tools/isolated_audio.py` / `capture_worker.py` (disposable PortAudio child, 5 s no-input and 3 s idle timeouts), `tools/pipeline_health.py` readiness consumed by the operator. What remains is the **real built-in-mic retest** with live EN and ES utterances and the audience display connected (deferred to the next attended session). #131 closes only on that evidence.
 3. **Sub-second caption delivery** (`caption-delivery-goal`, `overnight-latency-scheduling`): the [96-run screen](evaluation/overnight_screen_20260910/README.md) completed with 672 finals and 0/28 selected arms. The sub-second goal was not met on this 45-second English cohort; E4B defaults remain unchanged. No ordinary confirmation or combination of these arms is justified. Pursue [new measured hypotheses](latency_next_experiments.md), keeping tiny endpoint counts, control drift, unreviewed references and locked-native-screen/DOM telemetry separate from certification.
 4. **Human and device gates:** natural Spanish references, blinded bilingual review, natural two-speaker audio (#133 gate), second physical output (#132 acceptance), dry run with a laptop stand-in permitted (#134: full hymn + spoken segment + setup-to-first-caption timing + written note — no new live-mic or human-walkthrough requirement beyond the issue text).
 5. **Active learning evidence (#137):** Review/export is implemented and fixture-tested. A real human correction from a recorded Sunday must reach a dated corpus and be merged; the documented first retrain may be a dry run. Draft notes and generated text are not approved pairs.
@@ -78,7 +76,7 @@ Status, priority, dependencies and acceptance for every item below are in
 
 ### Equal-priority deployment targets
 
-- **Lite CPU inference** (`lite-cpu-inference`): **implemented and integrated** — `stark_translate/profiles.py` (`lite-cpu`, `lite-cpu-quality`), `operator_app/lite_preflight.py`, Torch-free `lite-cpu` extra, `stark-translate-lite`, pinned Whisper small / Marian / E2B / Silero ONNX artifacts, `tools/llama_runtime.py`. Evidence: isolated Mac CPU synthetic EN+ES caption/TTS smoke and actual installed CPU E2B quality inference ([`lite_profiles.md`](./lite_profiles.md)). CPU Lite full-service endurance is pending after the running standard replay. Performance and natural-speech quality on an x86 CPU host: pending hardware.
+- **Lite CPU inference** (`lite-cpu-inference`): **implemented and integrated** — `stark_translate/profiles.py` (`lite-cpu`, `lite-cpu-quality`), `operator_app/lite_preflight.py`, Torch-free `lite-cpu` extra, `stark-translate-lite`, pinned Whisper small / Marian / E2B / Silero ONNX artifacts, `tools/llama_runtime.py`. Evidence: isolated Mac CPU synthetic EN+ES caption/TTS smoke and actual installed CPU E2B quality inference ([`lite_profiles.md`](./lite_profiles.md)). CPU Lite full-service endurance results are pending after a fresh full-length standard replay. Performance and natural-speech quality on an x86 CPU host: pending hardware.
 - **Native Windows / RTX 2070** (`rtx2070-native-validation`): `lite-cuda-8gb` implemented (pinned Windows CUDA 12.4 llama.cpp archives, sm_75 Linux build option); nothing has run on a 2070 or native Windows; the v2026.13 MSI digest was verified without Windows execution and the MSI remains a scaffold plan.
 
 ### WSL — pipeline refresh (pending hardware)

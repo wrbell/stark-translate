@@ -7,10 +7,11 @@
 
 Fully on-device, live bilingual speech-to-text for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). English/Spanish, real-time mic input, browser display. No cloud APIs, no internet required at runtime.
 
-> **Release lines (2026-09-10):** **main** is v2026.13. The v2026.14 candidate lives on
-> `codex/mac-reliability-roadmap` (all overnight worktrees integrated, under validation)
-> and is proposed in draft [PR #192](https://github.com/wrbell/stark-translate/pull/192) —
-> open, not merged.
+> **Source and releases (2026-09-10):** this guide describes v2026.14 source
+> (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> The last published release recorded here is **v2026.13**. Source integration,
+> release publication and service certification are separate; PyPI/package artifacts
+> and release tags remain pending by user choice.
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) · evidence:
 > [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) · remaining work:
 > [`docs/backlog.json`](docs/backlog.json) (rendered as [`docs/backlog.md`](docs/backlog.md)).
@@ -249,17 +250,17 @@ docs/                          Architecture, evaluation, backlog, dated archives
 
 ## Status
 
-**Shipped on main (v2026.13):** bidirectional EN/ES inference, operator control plane,
+**Last published release recorded here (v2026.13):** bidirectional EN/ES inference, operator control plane,
 Mac latency fixes (#180–191), Parakeet EN STT, Marian CT2 Mac path, replay harness,
 TTS routing, live diarization code behind `--diarize`. See [`docs/archive/`](docs/archive/)
 for version-specific benchmarks — legacy `e2e_latency_ms` is processing time, not
 speech-end-to-display.
 
-**v2026.14 candidate (draft [PR #192](https://github.com/wrbell/stark-translate/pull/192), open, not merged):**
+**v2026.14 source ([PR #192](https://github.com/wrbell/stark-translate/pull/192)):**
 operator reliability (isolated capture, health channel, work lease, owned-process cleanup),
 schema 2 timing, reproducible setup, Review/export, frozen screening, Lite profiles, opt-in
 latency experiments, the lay-volunteer operator page and the offline Hindi baseline tool —
-all overnight worktrees are integrated on the branch and under validation; evidence in
+implemented in the integrated source; recorded evidence and remaining gates are in
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) and
 [`docs/lite_profiles.md`](docs/lite_profiles.md). Source publishing and the final merge are
 authorized; PyPI/package/release tags remain pending.
@@ -268,7 +269,7 @@ authorized; PyPI/package/release tags remain pending.
 (no audio frames, operator showed RUNNING from the CSV header) while file replay passed. The
 fix — PortAudio in a disposable child with a no-input timeout, and operator readiness from
 the pipeline health channel — is implemented; the real built-in-mic retest is deferred to
-tomorrow (`mac-live-mic-stall`, #131).
+the next attended session (`mac-live-mic-stall`, #131).
 
 **Open gates:** live microphone EN/ES retest, natural Spanish references, bilingual review,
 visible-browser timing run, two-speaker diarization gate, physical second output, dry run

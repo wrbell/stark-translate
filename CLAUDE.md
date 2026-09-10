@@ -1,12 +1,10 @@
 # CLAUDE.md — Live Bilingual Speech-to-Text
 
-> **Release lines (2026-09-10):** **main** is v2026.13. The v2026.14 candidate
-> (`2026.14.0.0`) lives on `codex/mac-reliability-roadmap` and is proposed in draft
-> [PR #192](https://github.com/wrbell/stark-translate/pull/192) — open, **not merged**.
-> The overnight worktrees (docs, lite, latency, operator-ui, reliability, issue-evidence)
-> are **integrated** on that branch and are being validated by the parent session; main
-> advances only at the authorized final merge. Source and issue publishing are authorized;
-> PyPI/package artifacts/release tags remain pending by user choice. Do not recreate `stt_env`.
+> **Source and releases (2026-09-10):** this guide describes v2026.14 source
+> (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> The last published release recorded here is **v2026.13**. Source integration,
+> release publication and service certification are separate; PyPI/package artifacts
+> and release tags remain pending by user choice. Do not recreate `stt_env`.
 >
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) ·
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
@@ -57,7 +55,7 @@ from the CSV header. The fix is **implemented**: PortAudio runs in a disposable 
 and 3 s idle timeout that fail the session (`AudioCaptureError`), and operator readiness
 comes from `tools/pipeline_health.py` phases (`loading → listening → ready`,
 `input_error`) rather than file presence. The **real built-in-mic retest is deferred to
-tomorrow**; file replay passes. See `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
+the next attended session**; file replay passes. See `mac-live-mic-stall` / `issue-131-smoke` in the backlog.
 
 ## Environment split
 
@@ -91,8 +89,8 @@ benchmark numbers in guides.
 | v2026.7–8 | W16 Whisper CT2; Marian CT2 partials on CUDA | [`v2026.7/STT_BENCHMARK.md`](docs/archive/v2026.7/STT_BENCHMARK.md), [`v2026.8/MARIAN_BENCHMARK.md`](docs/archive/v2026.8/MARIAN_BENCHMARK.md) |
 | v2026.9–11 | llama.cpp tuning, IQ4_XS rejected, imatrix calibration | [`v2026.9/GEMMA_OPTIM_PHASE2.md`](docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md), [`v2026.10/IQ4_XS_BENCHMARK.md`](docs/archive/v2026.10/IQ4_XS_BENCHMARK.md), [`v2026.11/IMATRIX_CALIBRATION.md`](docs/archive/v2026.11/IMATRIX_CALIBRATION.md) |
 | v2026.12 | Gemma 4 OptiQ E4B Mac default; EOS bug #172 fixed | [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
-| v2026.13 (main) | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
-| v2026.14 candidate | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **PR #192 draft, integrated, under validation** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md) |
+| v2026.13 (last published release) | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
+| v2026.14 source | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **source tracked by PR #192; acceptance remains evidence-specific** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md) |
 
 ## Subdirectory guides
 

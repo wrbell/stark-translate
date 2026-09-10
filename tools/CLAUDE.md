@@ -1,8 +1,8 @@
 # tools/ — Evaluation, Monitoring, Review, Adapter Deployment
 
-> Paired with [`AGENTS.md`](./AGENTS.md). Inventory and contracts reflect the local
-> branch (base `5154fb9`, v2026.14 candidate); main is v2026.13. Numbers belong in the
-> linked evidence documents, not here.
+> Paired with [`AGENTS.md`](./AGENTS.md). Inventory and contracts describe v2026.14
+> source tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192); the last published release recorded here is v2026.13.
+> Numbers belong in the linked evidence documents, not here.
 
 Quality layers 4–6 from the root guide live here (YouTube caption comparison,
 translation QE, active learning), together with the reproducible Mac evaluation

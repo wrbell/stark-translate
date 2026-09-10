@@ -1,9 +1,9 @@
-# Mac implementation status — September 10 candidate
+# Mac implementation status — September 10 source and evidence
 
-The integrated candidate is on `codex/mac-reliability-roadmap`, proposed in
-[PR #192](https://github.com/wrbell/stark-translate/pull/192). Final validation and
-the authorized source merge remain in progress. Package publication and release
-tags are pending by user choice. The [September 9 snapshot](mac_implementation_status_20260909.md)
+This document describes v2026.14 source (`2026.14.0.0`), tracked by
+[PR #192](https://github.com/wrbell/stark-translate/pull/192). The last published release recorded here is v2026.13.
+The PR records source integration separately from the acceptance evidence below.
+Package publication and release tags are pending by user choice. The [September 9 snapshot](mac_implementation_status_20260909.md)
 preserves earlier counts and artifact identities; those do not certify later changes.
 
 EN↔ES is the production and latency priority. Mac defaults remain Parakeet English,
@@ -86,10 +86,11 @@ unreviewed references and control drift prevent a promotion claim. The
 explains why a large pooled improvement against closing controls does not justify
 an ordinary confirmation run.
 
-At the recorded 06:49:36 UTC handoff on September 10, the standard full-service
-endurance replay had started; completion, persistence and memory results were
-pending. CPU Lite endurance follows and had not started. No full-hour gate is
-marked passed from a successful launch.
+The earlier standard full-service attempt is retained as failed source-bound
+validation evidence and does not satisfy endurance acceptance. The next validation
+uses the complete source recording: a fresh full-length standard replay, followed
+by a separate full-length CPU Lite replay. Results for both remain pending. The
+prepared 350-second slice was unused and is not a validation cohort.
 
 Previous [48-run screening](evaluation/mac_v2026_14_screening/README.md),
 [24 bilingual routing probes](evaluation/mac_v2026_14_routing/README.md) and
@@ -104,13 +105,13 @@ delivery measurements. The sub-second median goal remains unachieved.
   screen justifies no ordinary confirmations or combined configuration; future
   profiling needs a distinct hypothesis. Keep any Spanish probes in a separate
   cohort, and require quality review before a default change.
-- Retest live microphone and physical outputs tomorrow, as requested. Natural
+- Retest live microphone and physical outputs at the next attended session. Natural
   Spanish, two-speaker audio, bilingual review and approved corrections remain
   external dependencies. Predicted text does not count as a human reference.
 - Execute native Windows/RTX2070, representative x86 CPU and WSL training/CUDA
   gates on their target hardware; portable reviewed data remains the handoff.
-- Finish the integrated checks, installed inference, evidence/docs refresh and PR
-  merge. Source privacy fixes and isolated artifact checks have passed their focused
+- Record the final integrated checks, installed inference, evidence/docs refresh and
+  PR merge evidence. Source privacy fixes and isolated artifact checks have passed their focused
   regressions; the [Mac dependency assessment](evaluation/overnight_security/README.md)
   retains two unresolved Torch advisories. Preserve working
   `stt_env`, original holdouts and the frozen benchmark dependencies.

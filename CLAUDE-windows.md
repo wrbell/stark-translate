@@ -182,8 +182,8 @@ Remote endpoints in `tools/deploy_adapters.py` still need SSH keys
 # Part B — Native Windows / RTX 2070 Lite inference
 
 Lite is the same pipeline, operator UI, displays and Review format with bounded product
-profiles; the source of truth is [`docs/lite_profiles.md`](docs/lite_profiles.md) (parent-owned
-evidence, read it before changing anything here). Packaging plans:
+profiles; the source of truth is [`docs/lite_profiles.md`](docs/lite_profiles.md) (implementation and
+acceptance evidence). Packaging plans:
 [`docs/packaging/windows.md`](docs/packaging/windows.md) (MSI, planned/unsigned),
 [`packaging/windows/README.md`](packaging/windows/README.md), [`docs/packaging/models.md`](docs/packaging/models.md).
 

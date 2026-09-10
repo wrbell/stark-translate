@@ -19,8 +19,10 @@ and 588 against closing controls. This is repeat agreement, not reference qualit
 The [first-preview E4B appendix](overnight_screen_20260910/first_preview_e4b.md)
 shows the repeat-level control drift behind its misleading pooled closing-control
 improvement. [New experiments](../latency_next_experiments.md) need distinct,
-measurable hypotheses. Standard endurance started at 06:49:36 UTC on September 10;
-its result is pending, followed by CPU Lite endurance.
+measurable hypotheses. The earlier standard endurance attempt failed source-bound
+validation; it remains retained failure evidence. Fresh full-length standard and
+then CPU Lite replay results are pending. The prepared 350-second slice was unused
+and contributes no validation evidence.
 
 ## Outcome measures
 
@@ -79,7 +81,7 @@ its previous bounded negative result does not justify another overnight sweep.
 
 1. Rehearse the integrated operator with controlled English/Spanish recordings;
    verify readiness, Pause/Resume, language restart, Stop, review, support and summary.
-   Microphone and physical output devices are explicitly deferred to tomorrow.
+   Microphone and physical output devices are deferred to the next attended session.
 2. Freeze the source checkout, audio hashes, resolved settings and model revisions.
    Run one inference process at a time. Use the same visible audience browser and
    stable ports; it reconnects across runs.

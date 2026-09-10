@@ -31,7 +31,7 @@ Follow the [operator runbook](operator_runbook.md): Prepare → Start → Live,
 Pause/Resume, Switch language, Stop, then Sessions/Review. Model loading and input
 readiness are distinct. A stalled microphone must surface as an error; it must not
 be mistaken for a quiet successful session. Real microphone and physical-output
-checks are deferred to tomorrow for this overnight program.
+checks are deferred to the next attended session.
 
 The readiness script is an additional control check:
 

@@ -5,9 +5,9 @@
 > **Role:** inference, operator UI, browser displays, Mac evaluation. Training happens on
 > WSL ([`CLAUDE-windows.md`](./CLAUDE-windows.md)). Parent: [`CLAUDE.md`](./CLAUDE.md).
 >
-> **State (2026-09-10):** main is v2026.13; the v2026.14 candidate is on
-> `codex/mac-reliability-roadmap` (draft [PR #192](https://github.com/wrbell/stark-translate/pull/192),
-> not merged) with all overnight worktrees integrated and under parent validation.
+> **Source (2026-09-10):** v2026.14 (`2026.14.0.0`), tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> The last published release recorded here is v2026.13. Source integration and
+> published artifacts are separate from the acceptance evidence below.
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md);
 > contracts: [`docs/current_architecture.md`](docs/current_architecture.md); remaining work:
 > [`docs/backlog.json`](docs/backlog.json). **Do not recreate `stt_env`.** Validation counts
@@ -134,7 +134,7 @@ What changed (integrated on the candidate branch, `c5fb689`):
 - **Ownership:** `operator_app/processes.py` cleans only owned subprocesses;
   `operator_app/work_lease.py` allows one model/audio job per operator.
 
-**Not yet proven:** a real built-in-microphone session on this Mac (deferred to tomorrow),
+**Not yet proven:** a real built-in-microphone session on this Mac (deferred to the next attended session),
 physical second output, hotplug. Until then #131 stays `in_progress`.
 
 ---

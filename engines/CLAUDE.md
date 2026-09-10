@@ -1,8 +1,8 @@
 # engines/ — STT + Translation + TTS Engine Layer
 
 > Paired with [`AGENTS.md`](./AGENTS.md) (agent constraints and navigation).
-> Statements below describe the local branch at base `5154fb9` (v2026.14 candidate);
-> **main is v2026.13**. Historical benchmark numbers live under dated links in
+> Statements below describe v2026.14 source tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> The last published release recorded here is v2026.13. Historical benchmark numbers live under dated links in
 > [`docs/archive/`](../docs/archive/) and are not repeated here.
 
 Backend-agnostic ABCs with MLX (Apple Silicon), CUDA (NVIDIA) and CPU implementations.
