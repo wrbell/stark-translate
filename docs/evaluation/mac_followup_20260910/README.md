@@ -86,6 +86,16 @@ opened the built-in microphone at current index 1 despite a supplied stale index
 2, and rejected a missing name. It discarded its samples and ran no STT;
 post-fix live-pipeline capture reliability remains unvalidated.
 
+The [hymn source repairs](hymn-source-repairs.md) preserve existing text
+delimiters and accepted speech onset after music hold; Python 3.11/3.12 CI and
+lint passed on `ffa34c5`. Paired text-boundary experiments and source-linked
+transition annotations are being prepared separately from human quality approval.
+
+The user now prohibits microphone capture and output playback for the rest of
+this session. Further physical checks, including the prepared integrated TTS
+rehearsal, are deferred. Remaining inference uses file input with TTS disabled
+or isolated text calls; earlier device receipts retain their original scope.
+
 ## Development STT result
 
 | Language | Engine | Corpus WER, all three repeats | Per-repeat whole-recording STT p50 |

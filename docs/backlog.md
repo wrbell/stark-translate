@@ -55,8 +55,28 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Evidence:** Operator UI derived RUNNING from the CSV header while the audience display stayed disconnected; a separate sounddevice sd.rec probe also stalled.
 - **Evidence:** File-replay sessions 20260909_233546_027169_en and 20260909_233823_034893_es (audio_source=file) completed with exit 0 on the same build; they do not exercise the microphone path.
 - **Evidence:** Capture/readiness fix integrated September 10: isolated PortAudio child, bounded startup/idle/backpressure failures and actual frame readiness. Subsequent real-device sessions and failures are retained in attended_mic_20260910 and tts_routing_20260910.
-- **Notes:** Built-in quiet-room EN/ES sessions reached ready and stopped cleanly on September 10. Synthetic acoustic EN produced partials/final and completed. Original Spanish acoustic capture failed; traced a8511ee retest eliminated parent-handoff drops but retained 7,680 upstream dropped samples (160 ms), so lossless capture is not certified. Retest included incidental speech; shared evidence is structural only. A per-process device-index mismatch also exposed a selection defect now being repaired.
-- **Next action:** Finish identity-based input selection and resolve the measured upstream capture loss; preserve all failed lifecycles. Controlled file runs and client-reported visible ACKs do not certify live microphone or physical display quality.
+- **Notes:** Built-in quiet-room EN/ES sessions reached ready and stopped cleanly on September 10. Synthetic acoustic EN produced partials/final and completed. Original Spanish acoustic capture failed; traced a8511ee retest eliminated parent-handoff drops but retained 7,680 upstream dropped samples (160 ms), so lossless capture is not certified. Retest included incidental speech; shared evidence is structural only. Exact name/host-API binding now repairs the per-process index mismatch; a two-second native probe opened the selected built-in microphone despite a stale index and rejected a missing name. This narrow probe saved no audio and ran no STT. User instruction now prohibits further microphone or output playback tests for the rest of this session.
+- **Next action:** Resolve the measured upstream capture loss without erasing failed evidence. Further live microphone testing is deferred by the current user instruction; continue silent source analysis and file replays. Identity resolution passed its separate bounded probe.
+
+### `hymn-capture-suppression` — Reduce unwanted hymn captions without losing short spoken replies (#193)
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** pending
+- **Depends on:** none
+- **Sources:** [#193](https://github.com/wrbell/stark-translate/issues/193), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`
+- **Acceptance:** On a bounded, human-labeled natural hymn→speech transition, measure unwanted captions, suppressed legitimate speech and recovery alongside unchanged controls and partial/final latency. Include quiet prayer and short valid EN/ES replies; no global short-word blacklist or inferred reference labels from generated captions.
+- **Evidence:** Repaired Standard emitted hymn-context fragments including “It dies a” and “Changing uh” while process health remained normal. No music-hold event was recorded. Current energy/VAD logic is a heuristic, not a validated music classifier; absence of its event does not establish exactly why the streak threshold was not met.
+- **Notes:** Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately. Commit 26f854c retains accepted speech onset without changing the existing 15-frame recovery decision; pending/recovered source dispositions and pause-spanning hold logs are explicit. Regression CI on ffa34c5 passed Python 3.11/3.12 and lint.
+- **Next action:** Prepare a source-linked uncertain transition annotation packet and an opt-in experiment protocol. Human natural-audio labels remain required for classifier quality; no live microphone/playback test is allowed for the rest of this session.
+
+### `hymn-translation-boundary` — Preserve title/sentence meaning in natural hymn captions (#194)
+
+- **Priority:** P1 · **Machine:** mac · **Certification:** pending
+- **Depends on:** `bilingual-blinded-review`
+- **Sources:** [#194](https://github.com/wrbell/stark-translate/issues/194), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md), `docs/evaluation/mac_followup_20260910/hymn-source-repairs.md`
+- **Acceptance:** With independently reviewed source boundaries and bilingual references, preserve the intended subject/title boundary on the retained natural hymn example without hard-coded word substitutions. Compare unchanged controls, report subject/negation/name/theological meaning errors and preview/final latency before any prompt or context promotion.
+- **Evidence:** Repaired Standard session 20260910_043120_839144_en, chunk 3, source 414.592–422.592 s, installed 752ab9a: the recognized string includes “Eternity Time will soon end”, but the Spanish final says “La eternidad pronto terminará.” QE 1.0 did not flag the changed meaning. Audio punctuation and the bilingual reference remain unreviewed.
+- **Notes:** Open quality follow-up #194 from the completed #134 rehearsal. Retained evidence is not an approved correction, model-default promotion or attribution of the whole error to one pipeline stage. Earlier operator UX blockers were fixed separately. Commit 7c06b27 preserves existing text delimiters through correction; it cannot reconstruct absent STT boundaries. A silent paired raw/delimited E4B/E2B experiment is prepared; source-fix CI on ffa34c5 passed Python 3.11/3.12 and lint.
+- **Next action:** Run the bounded raw/delimited and contrastive-input comparison through the actual correction stage, retaining outputs and timing. Obtain independent audio-boundary/bilingual review before any prompt or context promotion.
 
 ### `packaging-artifacts-local` — v2026.14 wheel, sdist and Mac ZIP local validation
 
@@ -113,26 +133,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** llama.cpp b10883 built, MTP opt-in bench, `-fa on` retest, W16 HF fp16 and Parakeet probes recorded with the proposal's tables filled in.
 - **Notes:** start_server.sh now defaults to --no-draft with --mtp opt-in and both pins read b10883; the scripts remain header-marked unexecuted.
 - **Next action:** Run scripts/cuda/*.sh on WSL.
-
-### `hymn-capture-suppression` — Reduce unwanted hymn captions without losing short spoken replies (#193)
-
-- **Priority:** P1 · **Machine:** mac · **Certification:** pending
-- **Depends on:** none
-- **Sources:** [#193](https://github.com/wrbell/stark-translate/issues/193), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md)
-- **Acceptance:** On a bounded, human-labeled natural hymn→speech transition, measure unwanted captions, suppressed legitimate speech and recovery alongside unchanged controls and partial/final latency. Include quiet prayer and short valid EN/ES replies; no global short-word blacklist or inferred reference labels from generated captions.
-- **Evidence:** Repaired Standard emitted hymn-context fragments including “It dies a” and “Changing uh” while process health remained normal. No music-hold event was recorded. Current energy/VAD logic is a heuristic, not a validated music classifier; absence of its event does not establish exactly why the streak threshold was not met.
-- **Notes:** Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately.
-- **Next action:** Label uncertain music/speech transitions before evaluating a detector or scheduling change; retain legitimate short spoken replies and report recovery and latency.
-
-### `hymn-translation-boundary` — Preserve title/sentence meaning in natural hymn captions (#194)
-
-- **Priority:** P1 · **Machine:** mac · **Certification:** pending
-- **Depends on:** `bilingual-blinded-review`
-- **Sources:** [#194](https://github.com/wrbell/stark-translate/issues/194), `docs/evaluation/overnight_endurance_20260910/README.md`, [README.md](https://github.com/wrbell/stark-translate/blob/0483f81a57a3ee689b51cda70ed0b8dc85e7926d/docs/evaluation/overnight_endurance_20260910/README.md)
-- **Acceptance:** With independently reviewed source boundaries and bilingual references, preserve the intended subject/title boundary on the retained natural hymn example without hard-coded word substitutions. Compare unchanged controls, report subject/negation/name/theological meaning errors and preview/final latency before any prompt or context promotion.
-- **Evidence:** Repaired Standard session 20260910_043120_839144_en, chunk 3, source 414.592–422.592 s, installed 752ab9a: the recognized string includes “Eternity Time will soon end”, but the Spanish final says “La eternidad pronto terminará.” QE 1.0 did not flag the changed meaning. Audio punctuation and the bilingual reference remain unreviewed.
-- **Notes:** Open quality follow-up #194 from the completed #134 rehearsal. Retained evidence is not an approved correction, model-default promotion or attribution of the whole error to one pipeline stage. Earlier operator UX blockers were fixed separately.
-- **Next action:** Obtain independent boundary/reference review, then compare a bounded delimiter/context hypothesis with unchanged controls and meaning/latency guards.
 
 ### `issue-135-mac-ab` — Deploy W16 + v2-cpo to Mac and live A/B vs stock (#135)
 
@@ -314,7 +314,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Evidence:** tests/test_tts_multichannel.py and tests/test_phase9_4_1_tts_device.py pass in the recorded CPU suite (device enumeration mocked).
 - **Evidence:** Built-in MacBook speaker playback calls completed in the controlled rehearsal; no second physical device was used.
 - **Notes:** Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing.
-- **Next action:** Review final integrated caption-to-selected-output wiring and tests, then close #132 if its original routing acceptance is met. Keep physical-second-output pending independently; do not add that stronger requirement to the issue.
+- **Next action:** The integrated operator-caption-to-selected-output harness is prepared but execution is deferred: the user prohibits microphone and output playback testing for the rest of this session. Keep #132 open until its remaining integrated acceptance is demonstrated; physical-second-output remains an independent stronger gate.
 
 ### `issue-133-diarize-gate` — Live diarization on a rolling buffer (9.6.1 / #133)
 
@@ -344,7 +344,7 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Sources:** `operator_app/processes.py`, `operator_app/work_lease.py`, `operator_app/support.py`, `tools/capture_worker.py`, `tools/isolated_audio.py`, `tools/pipeline_health.py`
 - **Acceptance:** Operator status derives from live pipeline health (frames, heartbeats) rather than file presence; stalled capture surfaces as a failure; tests cover the new modules.
 - **Notes:** Integrated health/readiness, owned-process cleanup, work leases, bounded capture handoff, required-write ledger and support/logging contracts are tested. Repaired installed Standard completed all 7,594 required writes with zero pending/failed and verified pipeline/descendant cleanup. Original source-bound failure remains recorded; the 752 buffer-discard and authoritative-final guards address its discovered reliability defects with regression coverage. Real-microphone behavior still needs the next attended retest; file evidence does not certify it.
-- **Next action:** Retain the repaired Standard evidence and finish the separate Lite outcome; exercise real built-in capture during the next attended session before claiming the microphone gate.
+- **Next action:** Bind final-source CPU/static tests and fresh installed Standard/Lite rehearsals to this follow-up. Preserve prior completed 752ab9a Standard and Lite receipts; further live microphone/output testing is deferred by user instruction.
 
 ### `issue-137-active-learning` — Active learning — low-confidence to operator correction (#137)
 
@@ -457,8 +457,8 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 | Status | Count |
 |--------|------:|
-| In Progress | 6 |
-| Pending Input Or Hardware | 15 |
+| In Progress | 8 |
+| Pending Input Or Hardware | 13 |
 | Experimental | 1 |
 | Deferred | 5 |
 | Implemented | 8 |
