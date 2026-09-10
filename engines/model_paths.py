@@ -182,7 +182,9 @@ def resolve_piper_voice(voice_name: str, *, models_dir: Path | None = None) -> s
     """Find setup voices, explicit local overrides, or a pinned Piper HF snapshot."""
     explicit = Path(voice_name).expanduser()
     if explicit.is_file() and explicit.with_suffix(".onnx.json").is_file():
-        return str(explicit.resolve())
+        # Piper appends ".json" to the supplied ONNX path. Resolving an HF
+        # snapshot symlink into blobs/<hash> would lose its adjacent config.
+        return str(explicit.absolute())
     manifest = load_model_manifest()
     for key, entry in manifest["models"].items():
         if entry.get("voice") == voice_name:

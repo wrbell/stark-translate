@@ -394,6 +394,52 @@ assert not {'torch', 'transformers', 'peft', 'soundfile', 'mlx'} & sys.modules.k
     assert result.returncode == 0, result.stderr
 
 
+def test_alignment_script_outside_checkout_bootstraps_shared_resolver(w17_data, tmp_path):
+    dataset, audio, deepgram = w17_data
+    source = "Independent_Training_[Part1]"
+    nested = audio / "services"
+    nested.mkdir()
+    source_wav = nested / f"{source}.WaV"
+    next(audio.glob("*.wav")).rename(source_wav)
+    next(deepgram.iterdir()).rename(deepgram / f"{source}.deepgram.json")
+    chunks = dataset / "chunks.json"
+    chunks.write_text(json.dumps([{"source": source, "start": 0, "end": 1, "split": "train"}]))
+    output = tmp_path / "aligned"
+    training = output / "train"
+    training.mkdir(parents=True)
+    expected_wav = training / f"{source}_00000.wav"
+    expected_wav.write_bytes(source_wav.read_bytes())
+    before = expected_wav.read_bytes()
+    outside = tmp_path / "outside_checkout"
+    outside.mkdir()
+    env = {key: value for key, value in os.environ.items() if key not in {"PYTHONPATH", "PYTHONHOME"}}
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-S",
+            str(ROOT / "training/align_deepgram_chunks.py"),
+            "--whisper-chunks",
+            str(chunks),
+            "--deepgram-dir",
+            str(deepgram),
+            "--audio-dir",
+            str(audio),
+            "--output",
+            str(output),
+        ],
+        cwd=outside,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "Skipped (existing):  1" in result.stderr
+    assert expected_wav.read_bytes() == before
+    assert f"{source}_00000.wav" in (training / "metadata.csv").read_text()
+
+
 @pytest.mark.parametrize("corruption", ["missing_audio", "empty_deepgram", "timing", "post_cutoff", "fresh_eval"])
 def test_w17_rejects_unsafe_or_missing_corpus(w17_data, holdout, corruption):
     dataset, audio, deepgram = w17_data
