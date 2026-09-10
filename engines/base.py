@@ -44,6 +44,10 @@ class TranslationResult:
     finish_reason: str | None = None
     draft_tokens: int | None = None
     draft_accept_rate: float | None = None
+    cached_prompt_tokens: int | None = None
+    prompt_cache_prepare_ms: float | None = None
+    generation_lock_wait_ms: float | None = None
+    prompt_cache_hit: bool | None = None
 
 
 class STTEngine(ABC):

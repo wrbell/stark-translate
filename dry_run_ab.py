@@ -1765,10 +1765,18 @@ _GEN_STAT_FIELDS = {
     "draft_tokens_a": "draft_tokens",
     "draft_accept_a": "draft_accept_rate",
 }
+_EXPERIMENT_GEN_FIELDS = {
+    "cached_prompt_tokens_a": "cached_prompt_tokens",
+    "prompt_cache_prepare_ms_a": "prompt_cache_prepare_ms",
+    "generation_lock_wait_ms_a": "generation_lock_wait_ms",
+    "prompt_cache_hit_a": "prompt_cache_hit",
+}
 
 
 def _generation_stats(result):
-    return {column: getattr(result, attr, None) for column, attr in _GEN_STAT_FIELDS.items()}
+    return {
+        column: getattr(result, attr, None) for column, attr in {**_GEN_STAT_FIELDS, **_EXPERIMENT_GEN_FIELDS}.items()
+    }
 
 
 def translate_mlx(
@@ -3488,7 +3496,7 @@ async def process_final(audio_data, finalized_utterance_id=None):
             uid for uid in tuple(_closed_utterances) if uid < finalized_utterance_id - 128
         )
 
-    if _latency.latest_partial or _latency.speculate_pause_ms or _latency.pause_preview_ms or _latency.clause_preview_s:
+    if _stt_scheduler is not None or _latency.pause_preview_ms or _latency.clause_preview_s:
         _closed_utterances.add(finalized_utterance_id)
     if _stt_scheduler is not None:
         _stt_scheduler.cancel_partial(finalized_utterance_id)
@@ -4046,7 +4054,13 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
     }
 
     record.update(_session_provenance())
-    record.update({field: data.get(field) for field in (*_GEN_STAT_FIELDS, *TIMING_COLUMNS) if field in data})
+    record.update(
+        {
+            field: data.get(field)
+            for field in (*_GEN_STAT_FIELDS, *TIMING_COLUMNS, *_EXPERIMENT_GEN_FIELDS)
+            if field in data
+        }
+    )
     record["timing_stages_ms"] = data.get("timing_stages_ms")
     record["event_id"] = data.get("event_id")
     import hashlib
@@ -4097,6 +4111,7 @@ def init_csv():
                 *_GEN_STAT_FIELDS,
                 "speaker",
                 *TIMING_COLUMNS,
+                *_EXPERIMENT_GEN_FIELDS,
             ]
         )
     print(f"  CSV: {CSV_PATH}")
@@ -4151,6 +4166,7 @@ def write_csv_row(data, marian_lat=None):
                 *(data.get(field) for field in _GEN_STAT_FIELDS),
                 data.get("speaker", "") if data.get("speaker") is not None else "",
                 *(data.get(field) for field in TIMING_COLUMNS),
+                *(data.get(field) for field in _EXPERIMENT_GEN_FIELDS),
             ]
         )
 

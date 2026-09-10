@@ -11,7 +11,11 @@ remains here.
 
 import copy
 import logging
+import os
+import threading
 import time
+import weakref
+from collections import OrderedDict
 from collections.abc import Callable
 
 import numpy as np
@@ -499,6 +503,70 @@ class MLXWhisperEngine(STTEngine):
 # MLX TranslateGemma
 # ---------------------------------------------------------------------------
 
+_prefix_stores = OrderedDict()
+_prefix_stores_lock = threading.Lock()
+
+
+def _prefix_store(model):
+    from engines.prefix_cache import FixedPrefixStore
+
+    key = id(model)
+    try:
+        reference = weakref.ref(model)
+    except TypeError:
+        # Never retain an ID-only cache for a holder whose lifetime cannot be
+        # observed: Python may reuse that ID for another model.
+        return FixedPrefixStore()
+    with _prefix_stores_lock:
+        if key not in _prefix_stores or _prefix_stores[key][0]() is not model:
+            _prefix_stores[key] = (reference, FixedPrefixStore())
+            weakref.finalize(model, _forget_prefix_store, key)
+            while len(_prefix_stores) > 4:
+                _prefix_stores.popitem(last=False)
+        _prefix_stores.move_to_end(key)
+        return _prefix_stores[key][1]
+
+
+def _forget_prefix_store(key):
+    with _prefix_stores_lock:
+        _prefix_stores.pop(key, None)
+
+
+def _prompt_tokens(tokenizer, prompt):
+    if not isinstance(prompt, str):
+        return list(prompt)
+    bos = getattr(tokenizer, "bos_token", None)
+    return list(tokenizer.encode(prompt, add_special_tokens=bos is None or not prompt.startswith(bos)))
+
+
+def _prepare_gemma_prefix(model, tokenizer, gen_kwargs, options):
+    from mlx_lm.generate import generate_step
+    from mlx_lm.models.cache import make_prompt_cache
+
+    from engines.prefix_cache import shared_token_prefix
+
+    full_prompt = _prompt_tokens(tokenizer, gen_kwargs["prompt"])
+    probes = []
+    for text in ("Alpha", "¿Por qué?", "Ω", ""):
+        messages = build_chat_messages(text, model_family="gemma4", **options)
+        probes.append(
+            _prompt_tokens(
+                tokenizer, tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False)
+            )
+        )
+    prefix = shared_token_prefix(probes)
+
+    def prefill(tokens, cache):
+        for _ in generate_step(mx.array(tokens), model, max_tokens=0, prompt_cache=cache):
+            pass
+        mx.eval([entry.state for entry in cache])
+
+    prepared = _prefix_store(model).prepare(prefix, full_prompt, lambda: make_prompt_cache(model), prefill)
+    if prepared.cache is not None:
+        gen_kwargs["prompt"] = prepared.prompt
+        gen_kwargs["prompt_cache"] = prepared.cache
+    return prepared, len(full_prompt)
+
 
 def generate_translation(
     model,
@@ -512,8 +580,19 @@ def generate_translation(
     """Serialize target/draft access; separate STT and translation models overlap."""
     from engines.mlx_generation_lock import generation_guard
 
+    gen_kwargs = dict(gen_kwargs)
+    prefix_options = gen_kwargs.pop("_stark_prefix_options", None)
+    measure_lock = prefix_options is not None or os.environ.get("STARK_EXPERIMENT_TRACE", "").lower() in {"true", "1"}
+    requested = time.perf_counter() if measure_lock else None
     with generation_guard(model, gen_kwargs.get("draft_model")):
-        return _generate_translation(
+        lock_ms = (time.perf_counter() - requested) * 1000 if requested is not None else None
+        prepared, original_tokens = None, None
+        prepare_ms = 0.0
+        if prefix_options is not None:
+            prepare_started = time.perf_counter()
+            prepared, original_tokens = _prepare_gemma_prefix(model, tokenizer, gen_kwargs, prefix_options)
+            prepare_ms = (time.perf_counter() - prepare_started) * 1000
+        result = _generate_translation(
             model,
             tokenizer,
             model_family=model_family,
@@ -521,6 +600,16 @@ def generate_translation(
             token_callback=token_callback,
             batch_size=batch_size,
         )
+        result.generation_lock_wait_ms = lock_ms
+        if prepared is not None:
+            result.cached_prompt_tokens = prepared.cached_tokens
+            result.prompt_cache_hit = prepared.hit
+            result.prompt_cache_prepare_ms = prepare_ms
+            result.prompt_tokens = original_tokens
+            result.latency_ms += prepare_ms
+            if result.ttft_ms is not None:
+                result.ttft_ms += prepare_ms
+        return result
 
 
 def _generate_translation(
@@ -623,6 +712,14 @@ def translate_loaded_model(
         )
     if draft_model is not None and num_draft_tokens > 0:
         gen_kwargs.update(draft_model=draft_model, num_draft_tokens=num_draft_tokens)
+    if model_family == "gemma4" and os.environ.get("STARK_EXPERIMENT_GEMMA_PREFIX_CACHE", "").lower() in {"true", "1"}:
+        if draft_model is not None:
+            raise ValueError("Gemma fixed-prefix caching cannot be combined with speculative token decoding")
+        gen_kwargs["_stark_prefix_options"] = {
+            "source_lang": source_lang,
+            "target_lang": target_lang,
+            "terminology_prompt": terminology_prompt,
+        }
     return generate_translation(
         model,
         tokenizer,
@@ -695,7 +792,14 @@ class MLXGemmaEngine(TranslationEngine):
         """Load the model weights, apply the EOS fix, and build the prompt cache."""
         from mlx_lm import load as mlx_load
 
-        mx.set_cache_limit(self._cache_limit_mb * 1024 * 1024)
+        cache_mb = self._cache_limit_mb
+        experimental_limit = os.environ.get("STARK_EXPERIMENT_MLX_CACHE_MB")
+        if experimental_limit is not None:
+            cache_mb = int(experimental_limit)
+            if not 0 <= cache_mb <= 1024:
+                raise ValueError("Experimental MLX allocation cache must be between 0 and 1024 MiB")
+        mx.set_cache_limit(cache_mb * 1024 * 1024)
+        logger.info("MLX reusable allocation cache limit: %d MiB", cache_mb)
 
         logger.info("Loading %s (MLX 4-bit)...", self._model_id)
         t0 = time.time()
