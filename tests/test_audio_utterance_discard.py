@@ -89,7 +89,7 @@ async def capture(pipeline, monkeypatch, frames, queue_type=asyncio.Queue, resum
     if resumed_frames:
         entries = 0
 
-        def reopen():
+        def reopen(*_args):
             nonlocal entries
             if entries:
                 for audio, _ in resumed_frames:
