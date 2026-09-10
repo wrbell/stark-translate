@@ -1176,17 +1176,19 @@ def load_whisper(backend="mlx"):
         # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
         mx.set_cache_limit(256 * 1024 * 1024)
 
-        from engines.model_paths import resolve_model_for_loading
+        from engines.model_paths import UnpinnedModelError, resolve_model_for_loading
         from engines.stt_fallback import require_mlx_fallback_language
 
-        model_id = resolve_model_for_loading(settings.stt.whisper_model)
-        print(f"[2/6] Loading {model_id} (MLX)...")
+        print(f"[2/6] Loading {settings.stt.whisper_model} (MLX)...")
         t0 = time.time()
         try:
+            model_id = resolve_model_for_loading(settings.stt.whisper_model)
             # Warm up — first call downloads and compiles the model
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
             print(f"  Whisper ready ({time.time() - t0:.1f}s)")
+        except UnpinnedModelError:
+            raise  # A model policy error must not silently select another model.
         except Exception as e:
             require_mlx_fallback_language(SOURCE_LANG, settings.stt.whisper_fallback)
             print(f"  Whisper load failed ({e}), falling back to {settings.stt.whisper_fallback}...")

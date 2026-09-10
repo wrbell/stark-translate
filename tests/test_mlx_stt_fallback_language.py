@@ -59,6 +59,38 @@ def test_live_spanish_load_failure_never_resolves_or_loads_fallback(runtime, mon
     resolve.assert_called_once_with("chosen-primary")
 
 
+def test_live_english_primary_download_failure_uses_cached_fallback(runtime, monkeypatch, capsys):
+    transcribe, resolve = runtime
+    monkeypatch.setattr(dry_run_ab, "SOURCE_LANG", "en")
+    resolve.side_effect = [OSError("primary unavailable offline"), "/installed/chosen-fallback"]
+    assert dry_run_ab.load_whisper("mlx") == "/installed/chosen-fallback"
+    assert [call.args[0] for call in resolve.call_args_list] == ["chosen-primary", "chosen-fallback"]
+    transcribe.assert_called_once()
+    assert transcribe.call_args.kwargs["path_or_hf_repo"] == "/installed/chosen-fallback"
+    assert "primary unavailable offline" in capsys.readouterr().out
+
+
+def test_live_spanish_primary_download_failure_does_not_attempt_english_fallback(runtime, monkeypatch):
+    transcribe, resolve = runtime
+    monkeypatch.setattr(dry_run_ab, "SOURCE_LANG", "es")
+    resolve.side_effect = OSError("primary unavailable offline")
+    with pytest.raises(RuntimeError, match="refusing fallback for language='es'"):
+        dry_run_ab.load_whisper("mlx")
+    resolve.assert_called_once_with("chosen-primary")
+    transcribe.assert_not_called()
+
+
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_live_unpinned_primary_never_attempts_fallback(runtime, monkeypatch, language):
+    transcribe, resolve = runtime
+    monkeypatch.setattr(dry_run_ab, "SOURCE_LANG", language)
+    resolve.side_effect = model_paths.UnpinnedModelError("unregistered primary")
+    with pytest.raises(model_paths.UnpinnedModelError, match="unregistered primary"):
+        dry_run_ab.load_whisper("mlx")
+    resolve.assert_called_once_with("chosen-primary")
+    transcribe.assert_not_called()
+
+
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_engine_startup_language_contract(runtime, language):
     transcribe, resolve = runtime
