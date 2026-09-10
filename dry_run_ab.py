@@ -3503,7 +3503,9 @@ async def process_final(audio_data, finalized_utterance_id=None):
             uid for uid in tuple(_closed_utterances) if uid < finalized_utterance_id - 128
         )
 
-    if _stt_scheduler is not None or _latency.pause_preview_ms or _latency.clause_preview_s:
+    if finalized_utterance_id is not None and (
+        _stt_scheduler is not None or _latency.pause_preview_ms or _latency.clause_preview_s
+    ):
         _closed_utterances.add(finalized_utterance_id)
     if _stt_scheduler is not None:
         _stt_scheduler.cancel_partial(finalized_utterance_id)
@@ -4878,6 +4880,7 @@ async def main_async(args):
         ).strip()
     except (OSError, subprocess.CalledProcessError):
         metadata["git_sha"] = None
+    metadata["latency_experiment_configuration"] = _latency.as_dict()
     Path(os.path.dirname(DIAG_PATH), f"session_metadata_{SESSION_ID}.json").write_text(json.dumps(metadata, indent=2))
     init_csv()
 

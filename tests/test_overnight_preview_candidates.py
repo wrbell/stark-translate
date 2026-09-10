@@ -4,6 +4,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from types import SimpleNamespace
+from unittest.mock import AsyncMock, Mock
 
 import numpy as np
 import pytest
@@ -83,6 +84,25 @@ def test_final_batch_restores_model_mode_before_calling_recognizer(monkeypatch):
 
     monkeypatch.setattr(pipeline, "_run_stt_mlx", batch)
     assert pipeline._run_stt(np.ones(10), "prompt") == "final"
+
+
+def test_unidentified_final_does_not_poison_later_bounded_history_cleanup(monkeypatch):
+    import dry_run_ab as pipeline
+
+    monkeypatch.setattr(pipeline, "_stt_scheduler", Mock())
+    monkeypatch.setattr(pipeline, "_closed_utterances", set())
+    monkeypatch.setattr(pipeline, "pipeline_submit", AsyncMock())
+
+    async def run():
+        await pipeline.process_final(np.ones(10))
+        assert None not in pipeline._closed_utterances
+        await pipeline.process_final(np.ones(10), 200)
+        assert pipeline._closed_utterances == {200}
+
+    try:
+        asyncio.run(run())
+    finally:
+        pipeline._final_pending.clear()
 
 
 @pytest.mark.parametrize("resume", [False, True])
