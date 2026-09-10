@@ -155,3 +155,4 @@ stark_data/corrections/
 
 # Local overnight execution records; selected immutable reports live in docs/evaluation.
 /metrics/overnight_*/
+/metrics/support/
