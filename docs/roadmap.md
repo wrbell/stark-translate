@@ -207,7 +207,8 @@ under Active Work.
 ### Phase 5: Adapter Evaluation & Transfer (pending WSL artifacts; #135)
 
 - Transfer W16 CT2 and v2-cpo to the Mac — runbook §5
-- Live A/B vs stock (E4B finals; Parakeet vs W16 on the CPU faster-whisper path) with `tools/health_check.py --backend mlx --n-canaries 8`
+- Run the translation-only text-canary prerequisite with `tools/health_check.py --backend mlx --n-canaries 8`; it does not test STT or a live A/B
+- Separately compare stock E4B versus v2-cpo finals and stock STT versus W16 on the Mac CPU faster-whisper path; keep the deliberate Parakeet English default as its own comparison
 - Written ship/no-ship note; stock E4B stays default on no-ship
 
 ### Phase 6: Active Learning Feedback Loop (implemented path, evidence pending; #137)

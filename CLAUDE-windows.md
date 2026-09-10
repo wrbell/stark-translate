@@ -241,9 +241,10 @@ $env:STARK_MODELS_DIR = "D:\lite-models"
 | Isolated `lite-cpu,tts` install from an outside checkout; import, `pip check`, offline setup reuse | Passed on a Mac (2026-09-10), recorded in `docs/lite_profiles.md` with hashes |
 | CPU replay EN and ES (synthetic ~3 s inputs, Whisper small int8 + Marian, TTS WAV) | Passed on the Mac; **synthetic** — not a quality or latency gate |
 | `lite-cpu-quality` E2B GGUF + native llama.cpp archive download, integrity, `llama-server --version` | Passed on the Mac; no inference started |
+| Later installed CPU E2B synthetic EN→ES inference (`a1d7cdf`) | Completed one silent smoke with owned-server cleanup; [separate receipt](docs/lite_profiles.md#installed-cpu-quality-smoke-observed-on-2026-09-10), no quality, p95 or total-memory certification |
 | RTX 2070 sustained speech, VRAM/OOM, thermal, Windows process cleanup | **Not run** — needs the hardware |
 | Native Windows install path, MSI | **Not run**; MSI is a scaffold plan |
-| Physical microphone, second audio output, human bilingual approval | Separate acceptance gates (#131, #132, #134) |
+| Physical microphone, second audio output, human bilingual approval | Separate open gates (#131, #132 and `bilingual-blinded-review`); laptop runbook rehearsal #134 is already closed |
 
 Do not reuse A2000 (Ada) latency figures for the 2070 (Turing, no BF16). Backlog:
 `lite-cpu-inference`, `rtx2070-native-validation`.

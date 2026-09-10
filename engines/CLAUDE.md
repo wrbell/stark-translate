@@ -148,7 +148,7 @@ accepts `STARK_<GROUP>__<FIELD>` with the double-underscore delimiter. Common ke
 
 ## Adding a New Language
 
-- STT: mlx-whisper is multilingual; Parakeet TDT v3 covers EN/ES/others but is only wired for EN dispatch. Add the `--lang` choice in `dry_run_ab.py` and a Marian direction in `factory._marian_direction_from_langs()` (only `en-es` / `es-en` have CT2 adapters today).
+- STT: mlx-whisper is multilingual; Parakeet TDT v3 is the English automatic default, with explicit Spanish selection available for experiments. Spanish automatic selection remains Whisper. Additional languages need a `--lang` choice in `dry_run_ab.py` and a Marian direction in `factory._marian_direction_from_langs()` (only `en-es` / `es-en` have CT2 adapters today).
 - Translation: Gemma 4 prompts take language names; TranslateGemma takes codes. Hindi/Chinese integration requires a later user decision. The [offline Hindi baseline](../docs/evaluation/overnight_hindi/README.md) is completed R&D with no live integration or approved references; EN↔ES remains the latency priority.
 - TTS: add a Piper voice to `settings.tts.voices` and the setup `tts` profile.
 

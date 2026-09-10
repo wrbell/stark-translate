@@ -169,7 +169,7 @@ Guide: [`training/CLAUDE.md`](./training/CLAUDE.md).
 
 | Target | Config | Status |
 |--------|--------|--------|
-| MacBook Pro M3 Pro 18 GB | Parakeet/Whisper + Marian CT2 + Gemma 4 E4B OptiQ | Verified daily; peak memory per session in `metrics/session_lifecycle_<id>.json` |
+| MacBook Pro M3 Pro 18 GB | Parakeet/Whisper + Marian CT2 + Gemma 4 E4B OptiQ | Dated functional/replay evidence in [Mac evaluation](docs/evaluation/mac_followup_20260910/README.md); microphone reliability and human/device gates remain pending |
 | Smaller-memory Apple Silicon | `--gemma4-size e2b` | Intended path, not validated |
 | NVIDIA A2000 Ada 16 GB (WSL) | W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B Q4_K_M | Benchmarked v2026.5–8 (archives above) |
 | NVIDIA 6–8 GB | Gemma 4 E2B / E4B Q4_K_M via llama.cpp | Per [`docs/archive/v2026.5/BENCHMARK.md`](./docs/archive/v2026.5/BENCHMARK.md) VRAM figures; not separately certified |
@@ -192,7 +192,7 @@ pytest tests/test_documentation.py -v
 
 10 GitHub Actions workflow files in `.github/workflows/`: Lint, Test (3.11 + 3.12, coverage
 gate in `test.yml`), Security (pip-audit), Release, Windows MSI Release, PyPI Publish
-(manual/pending), Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in
+(tag/manual-triggered; publication and trusted publisher pending), Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in
 `pyproject.toml`. Validated CPU suite counts live only in
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md).
 
