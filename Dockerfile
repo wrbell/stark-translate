@@ -62,6 +62,8 @@ COPY tools /tmp/build/tools
 COPY features /tmp/build/features
 COPY displays /tmp/build/displays
 COPY scripts /tmp/build/scripts
+COPY stark_translate /tmp/build/stark_translate
+COPY training/__init__.py training/theological_canaries.py /tmp/build/training/
 COPY settings.py dry_run_ab.py workers.py models.lock.json start_server.sh run_operator.sh /tmp/build/
 
 WORKDIR /tmp/build
