@@ -46,6 +46,11 @@ def check_gpu() -> Check:
     return _check("GPU", "warn", "No GPU detected — will run on CPU (slow but functional)")
 
 
+# The unmodified pre-promotion Mac runtime (stt_env, Torch 2.10 / TorchAudio 2.10) stays a supported
+# rollback target after the 2026-09-11 promotion to Torch 2.13 / TorchAudio 2.11: readiness passes with a note.
+MAC_ROLLBACK_RUNTIME = {"torch": ">=2.10,<2.11", "torchaudio": ">=2.10,<2.11"}
+
+
 def check_dependencies(
     backend: str, *, lang: str = "en", stt_backend: str = "auto", tts: bool = False, diarize: bool = False
 ) -> Check:
@@ -81,12 +86,18 @@ def check_dependencies(
     from packaging.specifiers import SpecifierSet
 
     missing = []
+    rollback = []
     for package, minimum in requirements.items():
         specifier = minimum if minimum.startswith((">", "<", "=", "!", "~")) else f">={minimum}"
         try:
             installed = importlib.metadata.version(package)
-            if installed not in SpecifierSet(specifier):
-                missing.append(f"{package}{specifier} (installed {installed})")
+            if installed in SpecifierSet(specifier):
+                continue
+            fallback = MAC_ROLLBACK_RUNTIME.get(package) if backend == "mlx" else None
+            if fallback and installed in SpecifierSet(fallback):
+                rollback.append(f"{package}{fallback} (installed {installed}; promoted {specifier})")
+                continue
+            missing.append(f"{package}{specifier} (installed {installed})")
         except importlib.metadata.PackageNotFoundError:
             missing.append(f"{package}{specifier}")
     if not missing:
@@ -103,6 +114,12 @@ def check_dependencies(
             "Runtime dependencies",
             "fail",
             f"Missing/incompatible: {', '.join(missing)}. Install stark-translate[{extra}] in this interpreter.",
+        )
+    if rollback:
+        return _check(
+            "Runtime dependencies",
+            "pass",
+            f"{backend} dependencies available on the retained rollback runtime: {', '.join(rollback)}",
         )
     return _check("Runtime dependencies", "pass", f"{backend} dependencies available")
 
