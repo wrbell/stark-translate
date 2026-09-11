@@ -73,8 +73,9 @@ def test_load_whisper_returns_parakeet_engine_when_selected(monkeypatch):
     created = {}
 
     class _Eng:
-        def __init__(self, model_id):
+        def __init__(self, model_id, cache_limit_mb=256):
             created["model_id"] = model_id
+            created["cache_limit_mb"] = cache_limit_mb
             self.model_id = model_id
 
         def load(self):
@@ -90,7 +91,7 @@ def test_load_whisper_returns_parakeet_engine_when_selected(monkeypatch):
     )
     engine = dry_run_ab.load_whisper("mlx")
     assert isinstance(engine, _Eng)
-    assert created == {"model_id": "mlx-community/parakeet-tdt-0.6b-v3", "loaded": True}
+    assert created == {"model_id": "mlx-community/parakeet-tdt-0.6b-v3", "loaded": True, "cache_limit_mb": 256}
 
 
 def test_auto_backend_prefers_parakeet_for_english_when_installed(monkeypatch):

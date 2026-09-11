@@ -4,6 +4,10 @@ Kept separate from deployment profiles: no experimental default is promoted by
 selecting an inference backend. Values are validated before session startup.
 ``STARK_EXPERIMENT_SERIAL_FINALS`` waits for the preceding translation before
 requesting final STT; disabled by default to preserve pipeline overlap.
+``STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION`` suppresses queued partial STT
+when translation is active at worker admission; false by default (true/false/1/0).
+``STARK_EXPERIMENT_MLX_CACHE_MB`` applies consistently to STT and translation,
+including spawned workers; its default remains 256 MiB.
 """
 
 from __future__ import annotations
@@ -35,6 +39,7 @@ class LatencyExperiments:
     partial_deadline_margin_ms: float = 0.0
     draft_model_id: str = ""
     draft_tokens: int = 0
+    partial_recheck_translation: bool = False  # Recheck translation activity on the partial worker.
     serial_finals: bool = False  # Serialize final STT after the preceding translation.
 
     @classmethod
