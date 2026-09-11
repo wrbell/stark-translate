@@ -59,7 +59,11 @@ def test_opt_in_partial_suppression_is_counted_without_starting_inference(monkey
 
 def test_marian_final_runs_on_cpu_pool_and_keeps_routing_count(monkeypatch):
     import dry_run_ab as pipeline
+    from tools.latency_trace import LatencyTrace
 
+    trace = LatencyTrace(True)
+    monkeypatch.setattr(pipeline, "_latency_trace", trace)
+    monkeypatch.setattr(pipeline, "_first_stream_chunks", {1})
     loop_thread = threading.get_ident()
     monkeypatch.setattr(pipeline, "_experiment_counters", {})
     monkeypatch.setattr(pipeline, "BACKEND", "mlx")
@@ -95,6 +99,11 @@ def test_marian_final_runs_on_cpu_pool_and_keeps_routing_count(monkeypatch):
         monkeypatch.setattr(pipeline, "_pytorch_pool", pool)
         asyncio.run(exercise())
     assert pipeline.all_results[0]["spanish_a"] == "Buenos días"
+    physical = [e for e in trace.snapshot()["events"] if e["event"] == "physical_translation_finished"]
+    assert len(physical) == 1
+    assert physical[0]["cpu_ms"] >= 0 and physical[0]["elapsed_ms"] >= 0
+    assert physical[0]["route"] == "marian" and physical[0]["chunk_id"] == 1
+    assert not pipeline._first_stream_chunks
     assert pipeline._experiment_snapshot()["final_marian_routes"] == 1
     assert pipeline._experiment_snapshot()["final_gemma_requests"] == 0
 
@@ -368,3 +377,103 @@ def test_serial_finals_off_submits_stt_while_translation_pending(monkeypatch):
 
 def test_serial_finals_translation_exception_still_surfaces_at_shutdown(monkeypatch):
     _exercise_serial_finals(monkeypatch, True, translation_error=True)
+
+
+@pytest.mark.parametrize("enabled,active,suppressed", [(False, True, False), (True, True, True), (True, False, False)])
+@pytest.mark.parametrize("scheduler", [False, True])
+def test_partial_rechecks_translation_on_worker(monkeypatch, enabled, active, suppressed, scheduler):
+    import dry_run_ab as pipeline
+    from tools.latency_experiments import LatencyExperiments
+    from tools.latency_scheduler import LatestSTTWorker
+    from tools.latency_trace import LatencyTrace
+
+    trace = LatencyTrace(True)
+    monkeypatch.setattr(pipeline, "_latency", LatencyExperiments(partial_recheck_translation=enabled))
+    monkeypatch.setattr(pipeline, "_latency_trace", trace)
+    monkeypatch.setattr(pipeline, "_experiment_counters", {})
+    monkeypatch.setattr(pipeline, "_active_stt_workers", {"partial": 0, "final": 0})
+    translation = threading.Event()
+    monkeypatch.setattr(pipeline, "_translation_active", translation)
+    monkeypatch.setattr(pipeline, "_final_pending", threading.Event())
+    monkeypatch.setattr(pipeline, "_pipeline_chunk_queue", None)
+    monkeypatch.setattr(pipeline, "_active_partial_future", None)
+    monkeypatch.setattr(pipeline, "_preview_was_finalized", lambda *args: False)
+    monkeypatch.setattr(pipeline, "_preview_was_discarded", lambda *args: False)
+    monkeypatch.setattr(pipeline, "MULTIPROCESS", True)
+    monkeypatch.setattr(pipeline.settings.translation, "final_aware_partials", True)
+    # Empty text stops downstream processing; test admission without model or QE work.
+    stt = Mock(return_value=None)
+    monkeypatch.setattr(pipeline, "_run_partial_stt_via_worker", stt)
+    broadcast = AsyncMock()
+    monkeypatch.setattr(pipeline, "broadcast", broadcast)
+    started, release = threading.Event(), threading.Event()
+
+    def blocker():
+        started.set()
+        assert release.wait(3)
+
+    async def exercise():
+        partial = asyncio.create_task(pipeline.process_partial(np.ones(16000), 123))
+        for _ in range(100):
+            if pipeline._active_partial_future is not None:
+                break
+            await asyncio.sleep(0.001)
+        assert pipeline._active_partial_future is not None
+        # The dispatch-time check saw idle; translation begins while STT is queued.
+        if active:
+            translation.set()
+        release.set()
+        await asyncio.wait_for(partial, 2)
+
+    owner = LatestSTTWorker() if scheduler else None
+    try:
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            monkeypatch.setattr(pipeline, "_stt_comm_pool", pool)
+            monkeypatch.setattr(pipeline, "_stt_scheduler", owner)
+            if owner:
+                owner.submit("final", blocker)
+            else:
+                pool.submit(blocker)
+            assert started.wait(1)
+            asyncio.run(exercise())
+    finally:
+        release.set()
+        if owner:
+            owner.shutdown()
+    assert stt.call_count == (0 if suppressed else 1)
+    broadcast.assert_not_awaited()
+    counts = pipeline._experiment_snapshot()
+    assert counts["partial_suppressed_translation_running"] == int(suppressed)
+    assert counts["partial_stt_started"] == counts["partial_stt_finished"] == int(not suppressed)
+    assert pipeline._active_partial_future is None
+    assert pipeline._active_stt_workers == {"partial": 0, "final": 0}
+    events = trace.snapshot()["events"]
+    if suppressed:
+        assert events == [dict(events[0], event="partial_suppressed_translation_running", utterance_id=123)]
+    else:
+        assert next(e for e in events if e["event"] == "physical_stt_finished")["cpu_ms"] >= 0
+
+
+def test_first_stream_token_per_chunk_with_fake_broadcaster(monkeypatch):
+    import dry_run_ab as pipeline
+    from tools.latency_trace import LatencyTrace
+
+    trace = LatencyTrace(True)
+    monkeypatch.setattr(pipeline, "_latency_trace", trace)
+    monkeypatch.setattr(pipeline, "_first_stream_chunks", set())
+    broadcaster = AsyncMock()
+    monkeypatch.setattr(pipeline, "broadcast", broadcaster)
+
+    async def exercise():
+        monkeypatch.setattr(pipeline, "_stream_loop", asyncio.get_running_loop())
+        queue = asyncio.Queue()
+        monkeypatch.setattr(pipeline, "_stream_token_queue", queue)
+        for item in [("token", 1, "Hola", 3), ("token", 1, "Hola mundo", 6), ("token", 2, "Dos", 3)]:
+            pipeline._enqueue_stream_token(item)
+        await asyncio.sleep(0)
+        await queue.put(None)
+        await pipeline.stream_token_broadcaster()
+
+    asyncio.run(exercise())
+    assert broadcaster.await_count == 3
+    assert [(e["chunk_id"], e["tokens"]) for e in trace.snapshot()["events"]] == [(1, 3), (2, 3)]

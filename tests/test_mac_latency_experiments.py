@@ -103,3 +103,41 @@ def test_generation_guard_serializes_only_shared_models(same_model):
         one.result(timeout=1)
         two.result(timeout=1)
     assert second_entered.is_set()
+
+
+@pytest.mark.parametrize("cache_env,expected", [("512", 512), (None, 256), ("unset_latency", 256)])
+def test_stt_and_worker_cache_limits_share_experiment(monkeypatch, cache_env, expected):
+    import dry_run_ab as pipeline
+    import engines.parakeet_mlx_engine as parakeet
+    from tools.latency_experiments import LatencyExperiments
+
+    monkeypatch.delenv("STARK_EXPERIMENT_MLX_CACHE_MB", raising=False)
+    if cache_env == "512":
+        monkeypatch.setenv("STARK_EXPERIMENT_MLX_CACHE_MB", cache_env)
+    latency = None if cache_env == "unset_latency" else LatencyExperiments.from_env()
+    monkeypatch.setattr(pipeline, "_latency", latency)
+    constructor = Mock()
+    monkeypatch.setattr(parakeet, "ParakeetMLXEngine", constructor)
+    monkeypatch.setattr(pipeline, "_resolve_mlx_stt_backend", lambda: "parakeet-mlx")
+    assert pipeline.load_whisper("mlx") is constructor.return_value
+    assert constructor.call_args.kwargs["cache_limit_mb"] == expected
+    constructor.return_value.load.assert_called_once()
+
+    process = Mock()
+    parent, child = Mock(), Mock()
+    parent.recv.return_value = "ready"
+    monkeypatch.setattr(pipeline.multiprocessing, "Pipe", lambda: (parent, child))
+    monkeypatch.setattr(pipeline.multiprocessing, "Process", process)
+    monkeypatch.setattr(pipeline, "ThreadPoolExecutor", Mock())
+    for name in (
+        "_stt_worker_proc",
+        "_trans_worker_proc",
+        "_stt_worker_conn",
+        "_trans_worker_conn",
+        "_stt_comm_pool",
+        "_trans_comm_pool",
+    ):
+        monkeypatch.setattr(pipeline, name, None)
+    pipeline._start_workers()
+    assert len(process.call_args_list) == 2
+    assert [call.kwargs["kwargs"]["cache_limit_mb"] for call in process.call_args_list] == [expected, expected]

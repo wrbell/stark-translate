@@ -149,3 +149,25 @@ careful finals and fast, revisable previews.
 ## 2026-09-11 tail screen (rejected; do not re-run)
 
 The declared `tail_screen_20260911` ([evidence](evaluation/followup_20260911/X-tail-screen/README.md); two 360 s church clips, promoted Torch 2.13 runtime, 3 repeats) rejected both hypotheses: **E2B OptiQ as a live mlx-lm draft for E4B finals (γ=3)** — the draft shortens Gemma decode in isolation but the resident E4B+E2B+Parakeet set (12.4–12.8 GiB Metal) starves the STT side (`stt_call` p95 0.5 → 2.5–3.0 s, final STT dispatch wait p95 3 s), cuts previews by a third and doubles or triples every Gemma-routed p95; and **`serial_finals`** (no overlap of a final's STT with the previous final's translation) — the overlap is rare and removing it only adds wait. Neither enters a confirmation or a combination. Control tails on the promoted environment are translation-dominated (long Gemma outputs at 31–35 tok/s); the `physical_stt` trace now records `translation_active`, `concurrent_partial` and `concurrent_final` on every run for the next hypothesis. The overnight L1 attribution's Gemma cohort was a route mixture; see its correction.
+
+## Harness controls and attribution
+
+`STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION` defaults to `false` and accepts
+`true`, `false`, `1`, or `0`. When enabled, partial workers recheck translation
+activity before physical STT and count `partial_suppressed_translation_running`
+with the utterance identity. Queued work suppressed here emits no preview.
+`STARK_EXPERIMENT_MLX_CACHE_MB` now reaches the STT loaders and both spawned
+workers consistently; its default is still 256 MiB. No default is promoted.
+
+With `STARK_EXPERIMENT_TRACE=true`, physical STT and final translation records
+include calling-thread `cpu_ms` alongside wall time. This excludes GPU work and
+CPU used by other native threads; multiprocess wrappers measure parent IPC work.
+`first_stream_token` marks the first callback batch per chunk, not a browser ACK
+or necessarily token 1. `tools/stt_overlap_attribution.py --diagnostics DIAG.jsonl
+--output report.json --markdown report.md` reports union overlap durations,
+slow/normal buckets, and endpoint cohorts. Repeat `--diagnostics` for comparable
+runs; truncated traces undercount overlap, and overlap alone is not causation.
+
+Clip preparation accepts `--prepare --source NAME.wav --clip-key KEY` to write a
+single-entry `manifest_KEY.json`. Keys allow letters, digits, `_`, and `-`.
+The Spanish fixture retains its zero-offset special case.

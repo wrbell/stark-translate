@@ -14,7 +14,7 @@ import pytest
 
 from engines.model_paths import resolve_model_path
 from operator_app import preflight, setup
-from operator_app.launchd import launchd_plist, manage_launchd
+from operator_app.launchd import launchd_plist, manage_launchd, pointer_python
 from tools.release_artifacts import build_mac_bundle, validate_version, verify_artifact
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -171,6 +171,51 @@ def test_launchd_render_uses_actual_paths_and_preserves_venv(tmp_path):
     target = tmp_path / "agent.plist"
     assert manage_launchd("render", project_root=tmp_path, python=python, output=target) == 0
     assert plistlib.loads(target.read_bytes())["ProgramArguments"][0] == str(python)
+
+
+@pytest.mark.parametrize("style", ["absolute", "relative", "tilde", "crlf", "no-newline"])
+def test_launchd_render_honours_pointer(tmp_path, monkeypatch, capsys, style):
+    binary = tmp_path / "my env/bin/python"
+    binary.parent.mkdir(parents=True)
+    binary.symlink_to(sys.executable)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    value = {"relative": "my env/bin/python", "tilde": "~/my env/bin/python"}.get(style, str(binary))
+    ending = "\r\n" if style == "crlf" else "\n"
+    content = ending + "  # choose runtime" + ending + "\t " + ending + " \t" + value + " \t"
+    if style != "no-newline":
+        content += ending + "/ignored/second/path" + ending
+    (tmp_path / ".stark-python").write_bytes(content.encode())
+    assert pointer_python(tmp_path) == binary
+    assert manage_launchd("render", project_root=tmp_path) == 0
+    assert plistlib.loads(capsys.readouterr().out.encode())["ProgramArguments"][0] == str(binary)
+
+
+@pytest.mark.parametrize("invalid", ["empty", "comments", "missing", "directory", "not-executable"])
+def test_launchd_invalid_pointer_fails(tmp_path, invalid):
+    candidate = tmp_path / "candidate"
+    if invalid == "directory":
+        candidate.mkdir()
+    elif invalid == "not-executable":
+        candidate.write_text("inert")
+        candidate.chmod(0o644)
+    value = {"empty": "", "comments": " \n # comment\r\n"}.get(invalid, str(candidate))
+    (tmp_path / ".stark-python").write_text(value)
+    with pytest.raises(ValueError, match=r"\.stark-python"):
+        manage_launchd("render", project_root=tmp_path)
+
+
+def test_launchd_explicit_cli_python_beats_invalid_pointer(tmp_path, capsys):
+    from operator_app.cli import main
+
+    (tmp_path / ".stark-python").write_text("/missing/python")
+    assert main(["launchd", "render", "--project-root", str(tmp_path), "--python", sys.executable]) == 0
+    assert plistlib.loads(capsys.readouterr().out.encode())["ProgramArguments"][0] == sys.executable
+
+
+def test_launchd_absent_pointer_uses_current_interpreter(tmp_path, capsys):
+    assert pointer_python(tmp_path) is None
+    assert manage_launchd("render", project_root=tmp_path) == 0
+    assert plistlib.loads(capsys.readouterr().out.encode())["ProgramArguments"][0] == sys.executable
 
 
 def test_launchd_install_and_uninstall_are_explicit(tmp_path, monkeypatch):

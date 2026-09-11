@@ -1,4 +1,4 @@
-"""Fail closed on an incomplete installed-Lite pip-audit JSON report.
+"""Fail closed on an incomplete installed-runtime pip-audit JSON report.
 
 The locally built project can be absent from PyPI; every dependency must be
 represented and auditable. This supplements pip-audit's vulnerability exit code.
@@ -12,12 +12,35 @@ from pathlib import Path
 
 REQUIRED = {"stark-translate", "pip", "setuptools", "faster-whisper", "ctranslate2", "onnxruntime", "piper-tts"}
 FORBIDDEN = {"torch", "torchaudio", "torchvision", "mlx", "mlx-lm", "silero-vad", "bitsandbytes"}
+MAC_REQUIRED = {
+    "stark-translate",
+    "pip",
+    "setuptools",
+    "torch",
+    "torchaudio",
+    "mlx",
+    "mlx-lm",
+    "mlx-whisper",
+    "parakeet-mlx",
+    "ctranslate2",
+    "silero-vad",
+}
 
 
 def validate_lite_audit(report: dict) -> dict:
+    """Retain the existing Lite validation API and result shape."""
+    return validate_audit(report, runtime="lite")
+
+
+def validate_audit(report: dict, *, runtime: str = "lite") -> dict:
+    if runtime not in {"lite", "mac"}:
+        raise ValueError(f"Unknown runtime: {runtime}")
+    label = "Lite" if runtime == "lite" else "Mac"
+    required = REQUIRED if runtime == "lite" else MAC_REQUIRED
+    forbidden = FORBIDDEN if runtime == "lite" else set()
     dependencies = report.get("dependencies") if isinstance(report, dict) else None
     if not isinstance(dependencies, list) or not dependencies:
-        raise ValueError("Audit must include the installed Lite dependency inventory")
+        raise ValueError(f"Audit must include the installed {label} dependency inventory")
     names, skipped = set(), []
     for item in dependencies:
         if not isinstance(item, dict) or not isinstance(item.get("name"), str):
@@ -34,22 +57,24 @@ def validate_lite_audit(report: dict) -> dict:
             skipped.append(name)
         elif not isinstance(item.get("vulns"), list) or not item.get("version"):
             raise ValueError(f"Incomplete audit result for {name}")
-    if REQUIRED - names:
-        raise ValueError(f"Installed Lite packages missing from audit: {sorted(REQUIRED - names)}")
-    if FORBIDDEN & names:
-        raise ValueError(f"Non-Lite dependencies installed: {sorted(FORBIDDEN & names)}")
+    if required - names:
+        raise ValueError(f"Installed {label} packages missing from audit: {sorted(required - names)}")
+    if forbidden & names:
+        raise ValueError(f"Non-{label} dependencies installed: {sorted(forbidden & names)}")
     return {"audited": len(names) - len(skipped), "skipped_local_project": skipped, "known_vulnerabilities": 0}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--runtime", choices=["lite", "mac"], default="lite")
     parser.add_argument("report", type=Path)
     args = parser.parse_args()
     try:
-        result = validate_lite_audit(json.loads(args.report.read_text()))
+        result = validate_audit(json.loads(args.report.read_text()), runtime=args.runtime)
     except (OSError, ValueError) as exc:
-        parser.exit(1, f"Installed Lite audit failed: {exc}\n")
-    print(json.dumps(result))
+        label = "Lite" if args.runtime == "lite" else "Mac"
+        parser.exit(1, f"Installed {label} audit failed: {exc}\n")
+    print(json.dumps({**result, "runtime": args.runtime}))
 
 
 if __name__ == "__main__":

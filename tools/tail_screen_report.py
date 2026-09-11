@@ -16,7 +16,7 @@ import json
 import math
 import statistics
 import sys
-from itertools import zip_longest
+from difflib import SequenceMatcher
 from pathlib import Path
 
 if __package__ in (None, ""):
@@ -134,25 +134,41 @@ def _counters(metadata: dict, replay: dict, diagnostics: list[dict]) -> tuple[di
 
 def _identity(candidate: dict, control: dict) -> dict:
     left, right = candidate["csv_rows"], control["csv_rows"]
-    aligned = min(len(left), len(right))
+    matcher = SequenceMatcher(None, [r["english"] for r in left], [r["english"] for r in right], autojunk=False)
+    pairs = [(i + k, j + k) for i, j, size in matcher.get_matching_blocks() for k in range(size)]
+    aligned = len(pairs)
     shares = {
-        field: sum(a[field].encode("utf-8") == b[field].encode("utf-8") for a, b in zip(left, right)) / aligned
+        "spanish_a": sum(
+            left[i]["spanish_a"].encode("utf-8") == right[j]["spanish_a"].encode("utf-8") for i, j in pairs
+        )
+        / aligned
         if aligned
-        else None
-        for field in ("spanish_a", "english")
+        else None,
+        "english": aligned / max(len(left), len(right)) if left or right else None,
     }
     differences = []
-    for index, (a, b) in enumerate(zip_longest(left, right)):
+
+    def difference(index, a, b):
         fields = [f for f in ("spanish_a", "english") if a is None or b is None or a[f] != b[f]]
         if fields:
             differences.append(
                 {
                     "row_index": index,
                     "fields": fields,
-                    "candidate": {k: a[k] for k in ("chunk_id", "spanish_a", "english")} if a else None,
-                    "control": {k: b[k] for k in ("chunk_id", "spanish_a", "english")} if b else None,
+                    "candidate": {k: a[k] for k in ("chunk_id", "spanish_a", "english")} if a is not None else None,
+                    "control": {k: b[k] for k in ("chunk_id", "spanish_a", "english")} if b is not None else None,
                 }
             )
+
+    for i, j in pairs:
+        difference(i, left[i], right[j])
+    matched_left, matched_right = {i for i, _ in pairs}, {j for _, j in pairs}
+    for i, row in enumerate(left):
+        if i not in matched_left:
+            difference(i, row, None)
+    for j, row in enumerate(right):
+        if j not in matched_right:
+            difference(j, None, row)
     return {
         "candidate_tag": candidate["tag"],
         "control_tag": control["tag"],

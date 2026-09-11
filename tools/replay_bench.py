@@ -325,7 +325,15 @@ def load_configs(specs: list[str], json_path: Path | None = None) -> dict[str, l
     return configs
 
 
-def prepare_clips(raw_dir: Path, replay_dir: Path, seconds: float = 300, offset: float = 0.0) -> Path:
+def prepare_clips(
+    raw_dir: Path,
+    replay_dir: Path,
+    seconds: float = 300,
+    offset: float = 0.0,
+    *,
+    source: str | None = None,
+    clip_key: str | None = None,
+) -> Path:
     """Cut local WAVs (from ``offset`` s) without changing sample rate, channels or PCM dtype."""
     from scipy.io import wavfile
 
@@ -333,10 +341,21 @@ def prepare_clips(raw_dir: Path, replay_dir: Path, seconds: float = 300, offset:
         raise ValueError("seconds must be finite and positive")
     if not math.isfinite(offset) or offset < 0:
         raise ValueError("offset must be finite and nonnegative")
-    sources = sorted(raw_dir.glob("Gospel_Message_*.wav"))
+    if clip_key is not None and not re.fullmatch(r"[A-Za-z0-9_-]+", clip_key):
+        raise ValueError("clip_key must contain only letters, digits, underscores or hyphens")
     spanish = raw_dir / "spanish_test_2cor1.wav"
-    if spanish.exists():
-        sources.append(spanish)
+    if source is not None:
+        if Path(source).name != source or Path(source).suffix.lower() != ".wav":
+            raise ValueError("source must be a WAV file name in raw_dir")
+        sources = [raw_dir / source]
+        if not sources[0].is_file():
+            raise FileNotFoundError(f"Replay source WAV missing: {sources[0]}")
+    else:
+        sources = sorted(raw_dir.glob("Gospel_Message_*.wav"))
+        if spanish.exists():
+            sources.append(spanish)
+    if clip_key is not None and len(sources) != 1:
+        raise ValueError("clip_key requires a single source WAV; select one with source")
     if not sources:
         raise FileNotFoundError(f"No replay source WAVs in {raw_dir}")
     replay_dir.mkdir(parents=True, exist_ok=True)
@@ -357,7 +376,7 @@ def prepare_clips(raw_dir: Path, replay_dir: Path, seconds: float = 300, offset:
                 "offset_s": offset if source != spanish else 0.0,
             }
         )
-    manifest = replay_dir / "manifest.json"
+    manifest = replay_dir / (f"manifest_{clip_key}.json" if clip_key is not None else "manifest.json")
     manifest.write_text(json.dumps({"clips": clips}, indent=2) + "\n")
     return manifest
 
@@ -486,6 +505,8 @@ def run_replay(
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prepare", action="store_true", help="Prepare clips and exit; does not load models")
+    parser.add_argument("--source", help="Prepare only this raw WAV file name")
+    parser.add_argument("--clip-key", help="Write a named single-clip manifest")
     parser.add_argument("--seconds", type=float, default=300)
     parser.add_argument("--offset", type=float, default=0.0, help="Start offset in seconds for sermon clips")
     parser.add_argument("--configs", nargs="+", default=[], metavar="NAME=ARGV", help="Named configs or a JSON file")
@@ -495,7 +516,16 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--tag", default=datetime.now().strftime("%Y%m%d_%H%M%S"), help="Session prefix")
     args = parser.parse_args(argv)
     if args.prepare:
-        print(prepare_clips(ROOT / "stark_data/raw", args.manifest.parent, args.seconds, args.offset))
+        print(
+            prepare_clips(
+                ROOT / "stark_data/raw",
+                args.manifest.parent,
+                args.seconds,
+                args.offset,
+                source=args.source,
+                clip_key=args.clip_key,
+            )
+        )
         return
     if not re.fullmatch(r"[A-Za-z0-9_-]+", args.tag):
         parser.error("--tag must contain only letters, digits, underscores or hyphens")
