@@ -240,3 +240,40 @@ def test_live_marian_facade_exact_hit_preserves_zero_and_request_identity(monkey
     monkeypatch.setattr(pipeline, "SOURCE_LANG", "es")
     pipeline.translate_marian("Hello")
     assert len(calls) == 2
+
+
+@pytest.mark.parametrize("tokens", [1, 2, 3, 4])
+def test_full_model_draft_environment_is_opt_in(tokens):
+    model = "mlx-community/gemma-4-e2b-it-OptiQ-4bit"
+    env = {"STARK_EXPERIMENT_DRAFT_MODEL_ID": model, "STARK_EXPERIMENT_DRAFT_TOKENS": str(tokens)}
+    result = LatencyExperiments.from_env(env)
+    assert result.draft_model_id == model
+    assert result.draft_tokens == tokens
+    assert result.as_dict()["draft_model_id"] == model
+    assert result.as_dict()["draft_tokens"] == tokens
+    assert LatencyExperiments.from_env({}).draft_model_id == ""
+    assert LatencyExperiments.from_env({}).draft_tokens == 0
+    assert (
+        LatencyExperiments.from_env(
+            {
+                "STARK_EXPERIMENT_DRAFT_MODEL_ID": "",
+                "STARK_EXPERIMENT_DRAFT_TOKENS": "0",
+            }
+        )
+        == LatencyExperiments()
+    )
+
+
+@pytest.mark.parametrize(
+    "env",
+    [
+        {"DRAFT_MODEL_ID": "model"},
+        {"DRAFT_TOKENS": "2"},
+        {"DRAFT_MODEL_ID": "model", "DRAFT_TOKENS": "0"},
+        {"DRAFT_MODEL_ID": "", "DRAFT_TOKENS": "2"},
+        *[{"DRAFT_MODEL_ID": "model", "DRAFT_TOKENS": v} for v in ("-1", "5", "nan", "1.5")],
+    ],
+)
+def test_full_model_draft_rejects_incomplete_or_unbounded_configuration(env):
+    with pytest.raises(ValueError, match="STARK_EXPERIMENT_DRAFT"):
+        LatencyExperiments.from_env({"STARK_EXPERIMENT_" + k: v for k, v in env.items()})
