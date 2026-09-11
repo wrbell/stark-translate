@@ -41,7 +41,7 @@ jobs:
           --cov-report=term-missing
           --cov-report=json:coverage.json
           --cov-report=xml:coverage.xml
-          --cov-fail-under=50
+          --cov-fail-under=65
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'
