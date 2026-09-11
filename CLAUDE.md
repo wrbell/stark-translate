@@ -13,7 +13,7 @@
 > The last published release is **v2026.14.0.0**, tagged 2026-09-11 on `50f81c6` (GitHub Release with
 > Mac/NVIDIA/Windows ZIPs and the MSI; overnight lanes #199–#203 included). Source integration,
 > release publication and service certification are separate. PyPI publication still fails until the
-> trusted publisher is mapped; the GHCR image needed the Dockerfile fix in PR #203. Do not recreate `stt_env`.
+> trusted publisher is mapped; the GHCR image `ghcr.io/wrbell/stark-translate:v2026.14.0.0` was built after the Dockerfile fixes in PRs #203/#204. Do not recreate `stt_env`.
 >
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) ·
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
