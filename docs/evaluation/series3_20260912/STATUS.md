@@ -14,10 +14,10 @@
 | P3-S installed smoke + Mac runtime audit | DONE | 2026-09-11T19:10Z | 2026-09-11T19:12Z | [P3-runtime-smoke/README.md](P3-runtime-smoke/README.md) | #211 (this PR) | smoke passed (5 routes 200, 45 runtime files, verse parser ok); pip-audit 0 findings / 124; `--runtime mac` check passed |
 | P1-H hymn #193 second control + slices | DONE | 2026-09-11T18:35Z | 2026-09-11T18:41Z | [P1H-hymn-control/README.md](P1H-hymn-control/README.md) | #211 (this PR) | completed_technical_diagnostic, 0 errors; 18 finals, same endpoint mix and routing as the c13f51f control; hold never entered; two search slices cut and hashed |
 | P1-E promoted-runtime service endurance (3,640 s replay) | DONE | 2026-09-11T18:42Z | 2026-09-11T19:48Z | [P1E-endurance/README.md](P1E-endurance/README.md) | #211 (this PR) | lifecycle completed exit 0; peak Metal 8.7 GiB; health ready throughout; observational |
-| L-A attribution | RUNNING | 2026-09-11T19:50Z | | | | main `a46649e`; text bench + 3 traced control replays with cpu_ms + attribution over 9 traces |
-| L-B arm 2 `marian_threads_2` | PENDING | | | | | only if L-A admits |
-| L-B arm 3 `max_utterance_6` | PENDING | | | | | only if L-A admits |
-| L-B arm 4 `partial_recheck_translation` | PENDING | | | | | only if L-A admits |
+| L-A attribution | DONE | 2026-09-11T19:48Z | 2026-09-11T20:09Z | [LA-attribution/README.md](LA-attribution/README.md) | #211 (this PR) | 34.6 % of Gemma decode overlapped by partial STT; live tok/s −13 % vs isolated with process CPU > 1 core at p95; smart cuts 40 % of finals at +1.5 s; all three arms admitted |
+| L-B arm 2 `marian_threads_2` | RUNNING | 2026-09-11T20:22Z | | [LB-tail-screen/protocol.json](LB-tail-screen/protocol.json) | | admitted by L-A; 24-run screen on clips A/B |
+| L-B arm 3 `max_utterance_6` | RUNNING | 2026-09-11T20:22Z | | [LB-tail-screen/protocol.json](LB-tail-screen/protocol.json) | | admitted by L-A; 24-run screen on clips A/B |
+| L-B arm 4 `partial_recheck_translation` | RUNNING | 2026-09-11T20:22Z | | [LB-tail-screen/protocol.json](LB-tail-screen/protocol.json) | | admitted by L-A; 24-run screen on clips A/B |
 | L-C first-token report | PENDING | | | | | |
 | P2-R closed-arm registry PR | PENDING | | | | | after L-B |
 | C1 closeout docs | PENDING | | | | | last |
@@ -32,3 +32,4 @@
 - 19:05Z #213 merged (main `c914e14`), hunks verified. #214's first commit header exceeded commitlint's 100 chars; while shortening it a `git reset --soft origin/main` after main had moved produced a squash that would have reverted #213 — caught before CI finished, branch rebuilt by cherry-pick onto `c914e14` (6e00f5e), #213 hunks verified on the branch, force-pushed; CI restarted.
 - 19:12Z #214 merged (main `a46649e`, parent `c914e14`; #213 hunks verified). P3-S DONE (`--runtime mac` check passed on the venv audit). Endurance replay continues; L-A starts when it ends.
 - 19:50Z P1-E DONE (3,640 s replay through the operator on the promoted runtime completed cleanly). Main pulled to `a46649e`; L-A started on the GPU.
+- 20:22Z L-A DONE; all three arms admitted with measured mechanisms. L-B protocol declared (protocol.json copied before run 1) and the 24-run screen started on the GPU (≈ 2.6 h).

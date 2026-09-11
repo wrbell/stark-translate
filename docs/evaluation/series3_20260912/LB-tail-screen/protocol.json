@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "id": "tail_screen_series3_20260912",
+  "declared_at": "2026-09-11T20:20Z (before any run)",
+  "purpose": "Screen of the arms admitted by the series-3 L-A attribution on the promoted Torch 2.13 runtime; same clips, gates and order rule as tail_screen_20260911; production defaults unchanged; no visible-ACK, human-quality or default-promotion claim.",
+  "source": "main a46649e",
+  "interpreter": "venv/bin/python",
+  "profile": "standard",
+  "fixed_argv": "--profile standard --no-tts --stt-backend parakeet-mlx --model-family gemma4 --gemma4-size e4b --vad-backend torch --no-mts --gain 1 --replay-speed 1 (all other settings at production defaults, final-aware partials on)",
+  "baseline_env": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "STARK_EXPERIMENT_TRACE": "true",
+    "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"
+  },
+  "clips": {
+    "A": {
+      "source": "stark_data/raw/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "path": "clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17",
+      "offset_s": 1290,
+      "duration_s": 360.0,
+      "rms": 0.1316,
+      "silero_speech_coverage": 0.895,
+      "lang": "en"
+    },
+    "B": {
+      "source": "stark_data/raw/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "path": "clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c",
+      "offset_s": 1170,
+      "duration_s": 360.0,
+      "rms": 0.1605,
+      "silero_speech_coverage": 0.756,
+      "lang": "en"
+    }
+  },
+  "clip_selection": "Same speech-dense offsets as the frozen 150 s clips (1290 s / 1170 s), extended to 360 s. Declared coverage floor 0.75: the best 360 s window anywhere in the 2_8_26 sermon reaches only 0.777, measured before any run; neither window has a 5 s no-speech interval with RMS > 0.15.",
+  "admission": {
+    "arm2_marian_threads_2": "live Gemma tok/s p50 29.2 vs isolated 33-35 (-13 %); pipeline process CPU p95 115-143 % of one core during traced control replays while Marian previews run -> mechanism present (CPU-side contention)",
+    "arm3_max_utterance_6": "smart cuts 240/606 pooled finals (40 %), p50 3085 ms vs silence p50 1566 ms (+1.5 s) -> mechanism present (policy-driven long finals)",
+    "arm4_partial_recheck_translation": "34.6 % of Gemma decode time overlapped by partial STT; slow-decode median overlap 33 %; 613/4815 partial STT calls started while a translation was active -> mechanism present"
+  },
+  "arms": {
+    "ctl": {
+      "kind": "control",
+      "env": {}
+    },
+    "marian_threads_2": {
+      "kind": "candidate",
+      "hypothesis": "Marian CT2 previews with 4 intra-threads contend with the MLX host thread; 2 threads reduce CPU-side contention during Gemma decode",
+      "env": {
+        "STARK_TRANSLATE_MARIAN_INTRA_THREADS": "2"
+      },
+      "memory_rule": "relative",
+      "proof": "session_metadata.translation.marian_intra_threads == 2"
+    },
+    "max_utterance_6": {
+      "kind": "candidate",
+      "hypothesis": "Capping utterances at 6 s shortens smart/hard-cut finals (35-43 tokens) and their decode tail; a policy arm",
+      "env": {
+        "STARK_VAD_MAX_UTTERANCE": "6.0"
+      },
+      "memory_rule": "relative",
+      "proof": "session_metadata.vad.max_utterance == 6.0",
+      "quality_guard": "G4 identity fails by construction (segmentation changes); substitute guard: no empty or duplicated finals and WER of the concatenated Spanish finals vs the control concatenation <= +1 pt (jiwer); preview guard G5 applies; a PASS only qualifies the arm for Willem's review"
+    },
+    "partial_recheck_translation": {
+      "kind": "candidate",
+      "hypothesis": "Skipping a queued partial STT at worker admission while a Gemma translation is active removes ~35 % overlap of decode time",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION": "true"
+      },
+      "memory_rule": "relative",
+      "proof": "latency_experiment_configuration.partial_recheck_translation == true and partial_suppressed_translation_running > 0"
+    }
+  },
+  "order": "per clip: ctl,marian_threads_2,max_utterance_6,partial_recheck_translation | partial_recheck_translation,max_utterance_6,marian_threads_2,ctl | ctl,partial_recheck_translation,marian_threads_2,max_utterance_6 (3 repeats per configuration, controls at both ends, candidate order reversed in the middle repetition); clip A then clip B; 24 runs",
+  "gates": {
+    "G1_primary": "gemma-routed silence-final speech_end_to_final_ms nearest-rank p95 (pooled over 3 repeats per clip): arm <= 0.85*ctl or arm <= ctl-300 ms, on both clips",
+    "G2": "all-route silence-final p95 and pooled smart_cut+hard_cut p95 not worse than ctl + max(5 %,100 ms)",
+    "G3": "all-route silence-final p50 not worse than ctl + max(5 %,50 ms)",
+    "G4_identity": ">= 95 % byte-identical translated finals vs the same-repeat control run (aligned by row order); every difference listed",
+    "G5_previews": "preview count per run >= 98 % of the clip's mean control count",
+    "G6_memory": "draft_g3: peak Metal <= 15.5 GiB and no pageouts (absolute budget declared because the draft cannot pass the frozen relative guard); serial_finals: peak RSS/Metal <= max(control) + max(10 %,256 MiB)",
+    "G7_health": "rc 0, no timeout, lifecycle status recorded, chunk_count within +-10 % of the clip's mean control",
+    "n": "gemma-routed silence finals per arm >= 50 per clip and >= 100 across clips for p95_claim_eligible; otherwise a screen without p95 claim"
+  },
+  "outcome_rule": "PASS only if every gate holds on both clips -> eligible for a later confirmation with visible ACKs (tools/overnight_bench.py); otherwise REJECTED naming the gate. No default changes and no combination arm follow from this screen.",
+  "excluded": "every closed arm in docs/latency_next_experiments.md (incl. the live E2B draft and serial_finals); no combination this series",
+  "report_tool": "tools/tail_screen_report.py (sequence-aligned G4, PR #214)"
+}
