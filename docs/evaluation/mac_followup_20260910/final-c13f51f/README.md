@@ -39,6 +39,9 @@ diarization, Windows/CUDA and publication retain their separate backlog gates.
 The Standard pipeline completed, but its original monitor hit the artifact reader
 limit. A separate corrected report recovered the data; the unchanged validator
 then failed on one blank translated preview. [Installed delivery](installed-delivery.md)
-retains both failures and the producer repair. Fresh repaired-source rehearsals,
-raw archive verification and source merge remain pending; this index does not
-relabel those steps as complete.
+retains both failures and the producer repair. The separate
+[760e948 packet](../final-760e948/README.md) records the passed fresh rehearsals
+and verified raw archive; c13 remains a failed service cohort. Its source/CI,
+hymn and delivery evidence lives under the archive member prefixes `validation/`,
+`hymn/` and `historical-v5/`. Integration status is recorded in the current
+[implementation status](../../../mac_implementation_status.md).

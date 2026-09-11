@@ -1,22 +1,27 @@
 # September 10 delivery status
 
-> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196); see [implementation status](mac_implementation_status.md) for its integration state.
 > [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) records completed
 > source-accounted screens and silent hymn diagnostics, with no screened arm qualified.
 > Defaults are unchanged. Current artifact, service and merge results are recorded in
 > [implementation status](mac_implementation_status.md).
 
 
-> The [c13 source and hymn evidence](evaluation/mac_followup_20260910/final-c13f51f/README.md)
-> is separate from the earlier measurements below, which retain their original sources.
-> The natural hymn control never entered music hold; the text experiment used supplied
-> boundaries, without human approval. Earlier quiet-room microphone readiness passed,
-> while later Spanish acoustic checks retained capture loss; sustained live acceptance
-> remains a separate gate.
+> The current [760e948 packet](evaluation/mac_followup_20260910/final-760e948/README.md)
+> records completed source checks, CI, installed smokes and both full-service
+> technical gates, with their raw evidence and explicit latency limitations. The historical
+> [c13 source and hymn evidence](evaluation/mac_followup_20260910/final-c13f51f/README.md)
+> and the earlier measurements below retain their original sources. The natural hymn
+> control never entered music hold; the text experiment used supplied boundaries,
+> without human approval. Earlier quiet-room microphone readiness passed, while later
+> Spanish acoustic checks retained capture loss; sustained live acceptance remains
+> a separate gate.
 
-The v2026.14 source (`2026.14.0.0`) is tracked by
+Earlier v2026.14 integration (`2026.14.0.0`) is recorded in
 [PR #192](https://github.com/wrbell/stark-translate/pull/192), merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z. See [closeout evidence](evaluation/overnight_closeout_20260910/README.md). v2026.13 remains the last published release.
-The operator, reliability, Lite, latency and documentation work is integrated. The English matrix is complete:
+That earlier operator, reliability, Lite, latency and documentation work is integrated.
+The subsequent [PR #196](https://github.com/wrbell/stark-translate/pull/196) follow-up
+has its own [integration status](mac_implementation_status.md). The earlier English matrix completed:
 96/96 valid runs, 672 finals and 0/28 selected arms. The sub-second final-delivery
 goal was not met on this cohort; E4B remains unchanged. Endurance and the
 source-integration evidence remain separate from that screen. PyPI, package
@@ -33,7 +38,8 @@ publication and release tags remain pending by user choice.
 | Current runtime interfaces and defaults | [Architecture](current_architecture.md) |
 | Completed English matrix and retained negative results | [Compact screen report](evaluation/overnight_screen_20260910/README.md) |
 | EN↔ES speed experiments and decision rules | [Experiment plan](evaluation/overnight_experiment_plan.md) |
-| Final integration CPU/static/artifact checks and wheel continuity | [84832fb validation](evaluation/overnight_final_validation_20260910.md) |
+| Current source checks and installed-delivery gates | [760e948 source validation](evaluation/mac_followup_20260910/final-760e948/source-validation.md), [installed delivery](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md) |
+| Earlier integration CPU/static/artifact checks and wheel continuity | [84832fb validation](evaluation/overnight_final_validation_20260910.md) |
 | 752 CPU/GPU checks bound to the endurance runtime | [752 validation record](evaluation/overnight_validation_20260910.json) |
 | Actual browser/session evidence | [Operator rehearsal](evaluation/overnight_operator_rehearsal.md) |
 | CPU and original RTX2070 installation/performance gates | [Lite profiles](lite_profiles.md) |
@@ -134,4 +140,4 @@ pytest tests/test_documentation.py -v
 Maintain evidence and integration state as future changes occur; retain historical
 measurements and failure logs with their original source boundaries.
 
-Final reviewed source `ab66ad2` passed **2,398 tests with four skips** on each Python 3.11/3.12 CI job. Its Mac ZIP contains the patched executable bootstrap and all 152 runtime members match `84832fb`; this is bootstrap delivery evidence, not new inference. #134/#176 closed COMPLETED; #177 closed NOT_PLANNED with MTP promotion still pending. Hindi remains parked separate R&D.
+Earlier reviewed source `ab66ad2` passed **2,398 tests with four skips** on each Python 3.11/3.12 CI job. Its Mac ZIP contains the patched executable bootstrap and all 152 runtime members match `84832fb`; this is bootstrap delivery evidence, not new inference. #134/#176 closed COMPLETED; #177 closed NOT_PLANNED with MTP promotion still pending. Hindi remains parked separate R&D.

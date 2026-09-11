@@ -1,6 +1,6 @@
 # AGENTS.md — Live Bilingual Speech-to-Text
 
-> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
 > [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
 > screens with no qualified arms, CPU Whisper-base rejection and silent hymn diagnostics.
 > Defaults are unchanged. Current artifact, service and merge results are recorded in
@@ -8,7 +8,7 @@
 
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
 > (`2026.14.0.0`), with historical integration in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
-> and the active follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
+> and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > Current integration and delivery state is recorded in [implementation status](docs/mac_implementation_status.md).
 > The last published release recorded here is **v2026.13**. Source integration,
 > release publication and service certification are separate; PyPI/package artifacts
@@ -114,7 +114,9 @@ recovery accepts an onset. The completed [350-second natural file control](docs/
 never entered music hold; the [102-call text packet](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
 used supplied boundary hypotheses. Neither approves automatic singing detection or
 bilingual meaning. Thresholds and defaults are unchanged; #193/#194 remain open.
-Current source checks are in the [c13 validation record](docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md).
+Current source checks are in the [760e948 validation record](docs/evaluation/mac_followup_20260910/final-760e948/source-validation.md).
+The [delivery packet](docs/evaluation/mac_followup_20260910/final-760e948/README.md) records
+artifact and service acceptance separately; the hymn evidence retains its c13 source identity.
 
 ## Environment split
 
@@ -149,7 +151,7 @@ benchmark numbers in guides.
 | v2026.9–11 | llama.cpp tuning, IQ4_XS rejected, imatrix calibration | [`v2026.9/GEMMA_OPTIM_PHASE2.md`](docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md), [`v2026.10/IQ4_XS_BENCHMARK.md`](docs/archive/v2026.10/IQ4_XS_BENCHMARK.md), [`v2026.11/IMATRIX_CALIBRATION.md`](docs/archive/v2026.11/IMATRIX_CALIBRATION.md) |
 | v2026.12 | Gemma 4 OptiQ E4B Mac default; EOS bug #172 fixed | [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
 | v2026.13 (last published release) | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
-| v2026.14 source | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **source tracked by PR #192; acceptance remains evidence-specific** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md) |
+| v2026.14 source | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **integration history in PR #192 and EN↔ES follow-up in PR #196; acceptance remains evidence-specific** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md) |
 
 ## Subdirectory guides
 

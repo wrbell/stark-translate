@@ -1,0 +1,735 @@
+{
+  "schema_version": 1,
+  "source_revision": "760e948ec9efb9266a5419cf68ce5f1cb5cfabab",
+  "generated_at": "2026-09-11T00:23:02.280016+00:00",
+  "status": "all_six_terminal_sessions_passed",
+  "sessions": [
+    {
+      "case": "standard-smoke_en",
+      "status": "passed",
+      "session_id": "final_final-delivery-v6_standard_smoke_en",
+      "started_at": "2026-09-10T22:15:15.938552+00:00",
+      "ended_at": "2026-09-10T22:16:46.604272+00:00",
+      "source_duration_seconds": 46.94,
+      "finals": 6,
+      "previews": 49,
+      "checks_passed": 47,
+      "persistence": {
+        "submitted": 63,
+        "completed": 63,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "source_ledger_complete": true,
+      "eof": {
+        "source_samples": 2253120,
+        "reader_eof": true,
+        "capture_queues_drained": true
+      },
+      "expected_source_samples": 2253120,
+      "physical_trace_available": true,
+      "physical_trace_status": "passed",
+      "completed_physical_calls_in_available_trace": 56,
+      "whole_session_counters": {
+        "warmup_requested": 7,
+        "warmup_executed": 7,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 0,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 4,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "partial_stt_started": 50,
+        "partial_stt_finished": 50,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 49,
+        "final_marian_routes": 1,
+        "final_gemma_requests": 5,
+        "preview_periodic": 49,
+        "utterance_discarded": 1
+      },
+      "monitor_observed_seconds": 65.25642262492329,
+      "monitor_sample_count": 14,
+      "health_stale_samples": 1,
+      "monitor_errors": [],
+      "incomplete_tree_samples": 0,
+      "sampled_process_tree_rss_bytes": {
+        "n": 14,
+        "p50": 424419328.0,
+        "p95": 1224851456,
+        "max": 1224851456
+      },
+      "pipeline_lifetime_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 2292498432,
+        "peak_metal_bytes": 8733003944
+      },
+      "cohorts": [
+        {
+          "identity": {
+            "timing_schema_version": "2",
+            "timing_source": "replay_realtime",
+            "sample_rate": "48000",
+            "source_lang": "en",
+            "target_lang": "es",
+            "input_audio_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4"
+          },
+          "finals_by_endpoint": {
+            "silence": {
+              "n": 5,
+              "p50_ms": 2425.6,
+              "p95_ms": null,
+              "max_ms": 3008.5,
+              "p95_scope": "withheld: fewer than 100 observations"
+            },
+            "smart_cut": {
+              "n": 1,
+              "p50_ms": 2692.5,
+              "p95_ms": null,
+              "max_ms": 2692.5,
+              "p95_scope": "withheld: fewer than 100 observations"
+            }
+          },
+          "first_partial_speech_start": {
+            "n": 6,
+            "p50_ms": 877.3499999999999,
+            "p95_ms": null,
+            "max_ms": 1779.8,
+            "p95_scope": "withheld: fewer than 100 observations"
+          },
+          "server_update_gap": {
+            "n": 54,
+            "p50_ms": 637.5855000000001,
+            "p95_ms": null,
+            "max_ms": 2804.740999999998,
+            "p95_scope": "withheld: fewer than 100 observations"
+          }
+        }
+      ]
+    },
+    {
+      "case": "standard-smoke_es",
+      "status": "passed",
+      "session_id": "final_final-delivery-v6_standard_smoke_es",
+      "started_at": "2026-09-10T22:16:47.299640+00:00",
+      "ended_at": "2026-09-10T22:17:51.682665+00:00",
+      "source_duration_seconds": 47.6,
+      "finals": 6,
+      "previews": 23,
+      "checks_passed": 47,
+      "persistence": {
+        "submitted": 38,
+        "completed": 38,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "source_ledger_complete": true,
+      "eof": {
+        "source_samples": 2284800,
+        "reader_eof": true,
+        "capture_queues_drained": true
+      },
+      "expected_source_samples": 2284800,
+      "physical_trace_available": true,
+      "physical_trace_status": "passed",
+      "completed_physical_calls_in_available_trace": 41,
+      "whole_session_counters": {
+        "warmup_requested": 178,
+        "warmup_executed": 7,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 171,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 14,
+        "partial_suppressed_after_stt": 5,
+        "partial_suppressed_empty_translation": 0,
+        "partial_stt_started": 35,
+        "partial_stt_finished": 35,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 23,
+        "final_marian_routes": 1,
+        "final_gemma_requests": 5,
+        "preview_periodic": 23
+      },
+      "monitor_observed_seconds": 60.29259095899761,
+      "monitor_sample_count": 13,
+      "health_stale_samples": 0,
+      "monitor_errors": [],
+      "incomplete_tree_samples": 0,
+      "sampled_process_tree_rss_bytes": {
+        "n": 13,
+        "p50": 416743424,
+        "p95": 1332674560,
+        "max": 1332674560
+      },
+      "pipeline_lifetime_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 4703469568,
+        "peak_metal_bytes": 9308374373
+      },
+      "cohorts": [
+        {
+          "identity": {
+            "timing_schema_version": "2",
+            "timing_source": "replay_realtime",
+            "sample_rate": "48000",
+            "source_lang": "es",
+            "target_lang": "en",
+            "input_audio_sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae"
+          },
+          "finals_by_endpoint": {
+            "silence": {
+              "n": 5,
+              "p50_ms": 3359.0,
+              "p95_ms": null,
+              "max_ms": 3787.1,
+              "p95_scope": "withheld: fewer than 100 observations"
+            },
+            "smart_cut": {
+              "n": 1,
+              "p50_ms": 6650.3,
+              "p95_ms": null,
+              "max_ms": 6650.3,
+              "p95_scope": "withheld: fewer than 100 observations"
+            }
+          },
+          "first_partial_speech_start": {
+            "n": 5,
+            "p50_ms": 3041.0,
+            "p95_ms": null,
+            "max_ms": 6161.5,
+            "p95_scope": "withheld: fewer than 100 observations"
+          },
+          "server_update_gap": {
+            "n": 28,
+            "p50_ms": 712.6769999999997,
+            "p95_ms": null,
+            "max_ms": 4660.947000000004,
+            "p95_scope": "withheld: fewer than 100 observations"
+          }
+        }
+      ]
+    },
+    {
+      "case": "standard-full_service_en",
+      "status": "passed",
+      "session_id": "final_final-delivery-v6_standard_full_service_en",
+      "started_at": "2026-09-10T22:20:19.390664+00:00",
+      "ended_at": "2026-09-10T23:21:27.551596+00:00",
+      "source_duration_seconds": 3640.053,
+      "finals": 563,
+      "previews": 2800,
+      "checks_passed": 47,
+      "persistence": {
+        "submitted": 4200,
+        "completed": 4200,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "source_ledger_complete": true,
+      "eof": {
+        "source_samples": 174722544,
+        "reader_eof": true,
+        "capture_queues_drained": true
+      },
+      "expected_source_samples": 174722544,
+      "physical_trace_available": false,
+      "physical_trace_status": "unassessable",
+      "completed_physical_calls_in_available_trace": null,
+      "whole_session_counters": {
+        "warmup_requested": 1271,
+        "warmup_executed": 733,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 538,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 6,
+        "partial_suppressed_backlog": 2,
+        "partial_suppressed_in_flight": 241,
+        "partial_suppressed_after_stt": 2,
+        "partial_suppressed_empty_translation": 1,
+        "partial_stt_started": 3318,
+        "partial_stt_finished": 3318,
+        "final_stt_started": 599,
+        "final_stt_finished": 599,
+        "partial_emitted": 2800,
+        "final_marian_routes": 203,
+        "final_gemma_requests": 360,
+        "preview_periodic": 2800,
+        "utterance_discarded": 32,
+        "partial_suppressed_discarded_utterance": 8
+      },
+      "monitor_observed_seconds": 3660.009471834055,
+      "monitor_sample_count": 729,
+      "health_stale_samples": 2,
+      "monitor_errors": [],
+      "incomplete_tree_samples": 0,
+      "sampled_process_tree_rss_bytes": {
+        "n": 729,
+        "p50": 425033728,
+        "p95": 541736960,
+        "max": 1739849728
+      },
+      "pipeline_lifetime_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 2869444608,
+        "peak_metal_bytes": 9426769736
+      },
+      "cohorts": [
+        {
+          "identity": {
+            "timing_schema_version": "2",
+            "timing_source": "replay_realtime",
+            "sample_rate": "48000",
+            "source_lang": "en",
+            "target_lang": "es",
+            "input_audio_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53"
+          },
+          "finals_by_endpoint": {
+            "hard_cut": {
+              "n": 38,
+              "p50_ms": 2247.1,
+              "p95_ms": null,
+              "max_ms": 2961.3,
+              "p95_scope": "withheld: fewer than 100 observations"
+            },
+            "silence": {
+              "n": 401,
+              "p50_ms": 1458.7,
+              "p95_ms": 3283.2,
+              "max_ms": 12612.4,
+              "p95_scope": "reported"
+            },
+            "smart_cut": {
+              "n": 124,
+              "p50_ms": 3372.8,
+              "p95_ms": 7220.7,
+              "max_ms": 13133.6,
+              "p95_scope": "reported"
+            }
+          },
+          "first_partial_speech_start": {
+            "n": 565,
+            "p50_ms": 899.1,
+            "p95_ms": 4042.9,
+            "max_ms": 7667.0,
+            "p95_scope": "reported"
+          },
+          "server_update_gap": {
+            "n": 3362,
+            "p50_ms": 622.3794999999227,
+            "p95_ms": 1855.13300000038,
+            "max_ms": 295456.29200000013,
+            "p95_scope": "reported"
+          }
+        }
+      ]
+    },
+    {
+      "case": "lite-smoke_en",
+      "status": "passed",
+      "session_id": "final_final-delivery-v6_lite_smoke_en",
+      "started_at": "2026-09-10T22:17:55.884981+00:00",
+      "ended_at": "2026-09-10T22:19:22.086494+00:00",
+      "source_duration_seconds": 46.94,
+      "finals": 6,
+      "previews": 7,
+      "checks_passed": 46,
+      "persistence": {
+        "submitted": 22,
+        "completed": 22,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "source_ledger_complete": true,
+      "eof": {
+        "source_samples": 2253120,
+        "reader_eof": true,
+        "capture_queues_drained": true
+      },
+      "expected_source_samples": 2253120,
+      "physical_trace_available": true,
+      "physical_trace_status": "passed",
+      "completed_physical_calls_in_available_trace": 23,
+      "whole_session_counters": {
+        "warmup_requested": 320,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 313,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 37,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 7,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 7,
+        "utterance_discarded": 1
+      },
+      "monitor_observed_seconds": 85.32796687493101,
+      "monitor_sample_count": 18,
+      "health_stale_samples": 1,
+      "monitor_errors": [],
+      "incomplete_tree_samples": 0,
+      "sampled_process_tree_rss_bytes": {
+        "n": 18,
+        "p50": 1355776000.0,
+        "p95": 1993588736,
+        "max": 1993588736
+      },
+      "pipeline_lifetime_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 2000551936,
+        "peak_metal_bytes": null
+      },
+      "cohorts": [
+        {
+          "identity": {
+            "timing_schema_version": "2",
+            "timing_source": "replay_realtime",
+            "sample_rate": "48000",
+            "source_lang": "en",
+            "target_lang": "es",
+            "input_audio_sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4"
+          },
+          "finals_by_endpoint": {
+            "silence": {
+              "n": 5,
+              "p50_ms": 2170.4,
+              "p95_ms": null,
+              "max_ms": 9866.8,
+              "p95_scope": "withheld: fewer than 100 observations"
+            },
+            "smart_cut": {
+              "n": 1,
+              "p50_ms": 3413.1,
+              "p95_ms": null,
+              "max_ms": 3413.1,
+              "p95_scope": "withheld: fewer than 100 observations"
+            }
+          },
+          "first_partial_speech_start": {
+            "n": 4,
+            "p50_ms": 3989.05,
+            "p95_ms": null,
+            "max_ms": 7081.9,
+            "p95_scope": "withheld: fewer than 100 observations"
+          },
+          "server_update_gap": {
+            "n": 12,
+            "p50_ms": 3445.0315000000046,
+            "p95_ms": null,
+            "max_ms": 12752.474999999991,
+            "p95_scope": "withheld: fewer than 100 observations"
+          }
+        }
+      ]
+    },
+    {
+      "case": "lite-smoke_es",
+      "status": "passed",
+      "session_id": "final_final-delivery-v6_lite_smoke_es",
+      "started_at": "2026-09-10T22:19:22.524748+00:00",
+      "ended_at": "2026-09-10T22:20:18.425743+00:00",
+      "source_duration_seconds": 47.6,
+      "finals": 6,
+      "previews": 8,
+      "checks_passed": 46,
+      "persistence": {
+        "submitted": 22,
+        "completed": 22,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "source_ledger_complete": true,
+      "eof": {
+        "source_samples": 2284800,
+        "reader_eof": true,
+        "capture_queues_drained": true
+      },
+      "expected_source_samples": 2284800,
+      "physical_trace_available": true,
+      "physical_trace_status": "passed",
+      "completed_physical_calls_in_available_trace": 23,
+      "whole_session_counters": {
+        "warmup_requested": 284,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 278,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 32,
+        "partial_suppressed_after_stt": 1,
+        "partial_suppressed_empty_translation": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 8,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 8
+      },
+      "monitor_observed_seconds": 55.24694883299526,
+      "monitor_sample_count": 12,
+      "health_stale_samples": 0,
+      "monitor_errors": [],
+      "incomplete_tree_samples": 0,
+      "sampled_process_tree_rss_bytes": {
+        "n": 12,
+        "p50": 1648771072.0,
+        "p95": 1692663808,
+        "max": 1692663808
+      },
+      "pipeline_lifetime_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1681195008,
+        "peak_metal_bytes": null
+      },
+      "cohorts": [
+        {
+          "identity": {
+            "timing_schema_version": "2",
+            "timing_source": "replay_realtime",
+            "sample_rate": "48000",
+            "source_lang": "es",
+            "target_lang": "en",
+            "input_audio_sha256": "cebc5836d796bc5fbc52cce7b15de1ea364d19057e57d99039bc8d39be6556ae"
+          },
+          "finals_by_endpoint": {
+            "silence": {
+              "n": 5,
+              "p50_ms": 2323.3,
+              "p95_ms": null,
+              "max_ms": 4673.0,
+              "p95_scope": "withheld: fewer than 100 observations"
+            },
+            "smart_cut": {
+              "n": 1,
+              "p50_ms": 5560.6,
+              "p95_ms": null,
+              "max_ms": 5560.6,
+              "p95_scope": "withheld: fewer than 100 observations"
+            }
+          },
+          "first_partial_speech_start": {
+            "n": 5,
+            "p50_ms": 4061.2,
+            "p95_ms": null,
+            "max_ms": 6996.8,
+            "p95_scope": "withheld: fewer than 100 observations"
+          },
+          "server_update_gap": {
+            "n": 13,
+            "p50_ms": 3272.201000000001,
+            "p95_ms": null,
+            "max_ms": 6858.618999999999,
+            "p95_scope": "withheld: fewer than 100 observations"
+          }
+        }
+      ]
+    },
+    {
+      "case": "lite-full_service_en",
+      "status": "passed",
+      "session_id": "final_final-delivery-v6_lite_full_service_en",
+      "started_at": "2026-09-10T23:21:28.260874+00:00",
+      "ended_at": "2026-09-11T00:22:25.663096+00:00",
+      "source_duration_seconds": 3640.053,
+      "finals": 467,
+      "previews": 214,
+      "checks_passed": 46,
+      "persistence": {
+        "submitted": 1188,
+        "completed": 1188,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "source_ledger_complete": true,
+      "eof": {
+        "source_samples": 174722544,
+        "reader_eof": true,
+        "capture_queues_drained": true
+      },
+      "expected_source_samples": 174722544,
+      "physical_trace_available": false,
+      "physical_trace_status": "unassessable",
+      "completed_physical_calls_in_available_trace": null,
+      "whole_session_counters": {
+        "warmup_requested": 6545,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 5943,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 5,
+        "partial_suppressed_backlog": 188,
+        "partial_suppressed_in_flight": 2334,
+        "partial_suppressed_after_stt": 91,
+        "partial_suppressed_empty_translation": 0,
+        "partial_stt_started": 782,
+        "partial_stt_finished": 782,
+        "final_stt_started": 599,
+        "final_stt_finished": 599,
+        "partial_emitted": 214,
+        "final_marian_routes": 467,
+        "final_gemma_requests": 0,
+        "preview_periodic": 214,
+        "utterance_discarded": 32,
+        "partial_suppressed_discarded_utterance": 12
+      },
+      "monitor_observed_seconds": 3654.453364084009,
+      "monitor_sample_count": 729,
+      "health_stale_samples": 1,
+      "monitor_errors": [],
+      "incomplete_tree_samples": 0,
+      "sampled_process_tree_rss_bytes": {
+        "n": 729,
+        "p50": 1106870272,
+        "p95": 1681260544,
+        "max": 2235990016
+      },
+      "pipeline_lifetime_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 3606560768,
+        "peak_metal_bytes": null
+      },
+      "cohorts": [
+        {
+          "identity": {
+            "timing_schema_version": "2",
+            "timing_source": "replay_realtime",
+            "sample_rate": "48000",
+            "source_lang": "en",
+            "target_lang": "es",
+            "input_audio_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53"
+          },
+          "finals_by_endpoint": {
+            "hard_cut": {
+              "n": 36,
+              "p50_ms": 3534.3,
+              "p95_ms": null,
+              "max_ms": 14042.2,
+              "p95_scope": "withheld: fewer than 100 observations"
+            },
+            "silence": {
+              "n": 310,
+              "p50_ms": 3297.7,
+              "p95_ms": 10322.0,
+              "max_ms": 25604.1,
+              "p95_scope": "reported"
+            },
+            "smart_cut": {
+              "n": 121,
+              "p50_ms": 5002.1,
+              "p95_ms": 14268.4,
+              "max_ms": 27330.8,
+              "p95_scope": "reported"
+            }
+          },
+          "first_partial_speech_start": {
+            "n": 149,
+            "p50_ms": 6096.0,
+            "p95_ms": 8059.7,
+            "max_ms": 11302.9,
+            "p95_scope": "reported"
+          },
+          "server_update_gap": {
+            "n": 680,
+            "p50_ms": 3108.8174999998882,
+            "p95_ms": 8883.879999999888,
+            "max_ms": 322880.6179999999,
+            "p95_scope": "reported"
+          }
+        }
+      ]
+    }
+  ],
+  "source_receipt_sha256": {
+    ".cache/mac-en-es-closeout/final-delivery-resume-v6/state.json": "071252dece1c28bf64afa6a9d2732c0294aea81388a9408812da2e2e5c43004d",
+    ".cache/mac-en-es-closeout/final-delivery-resume-v6/delivery-summary.log": "5bc462ce8181ec9de56ae96c7ad78261a0513ec49ef8d70023fc1326cd895053",
+    ".cache/mac-en-es-closeout/final-delivery-resume-v6/delivery-summary-receipt.json": "a2e085624486fbf5351929310f3a0d4d30535998ef3f93277f5df19ddf52c89c",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-smoke_en/receipt.json": "d589a117f5f5b69ab5ffe23add26428264fb843da147ccf14aed104fd6993adc",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-smoke_en/validation.json": "57df926e4df881e01eec6038ed364fbf00802b57a55d81d1542848d156199e64",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-smoke_en/monitor/report.json": "cb3b4bf5bbacdce0c7d9e732ef32162a355bf12f76197178fbd309a46e1d0af1",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-smoke_es/receipt.json": "2f79cdebf422f5241a4cc4e99afd56420202712ce410bc104394964116744e8c",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-smoke_es/validation.json": "9c1ea4fc8e1010476f07efec23146c1a1e20805f656fa08738fddc92d20aaf84",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-smoke_es/monitor/report.json": "d07b0ec1b0f96b1bd0fa2a48e62dc5a10c4a200c260327fd9dbda4ee77ee1b6f",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-full_service_en/receipt.json": "65b34d92eda5f3ece618ceaf6496556d4899fceecf61533eb1e9ff7edd6061d0",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-full_service_en/validation.json": "761e5315dcbbf457765281eb69574d3088f0397d1e29dcbe71cb411828efbd32",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/standard-full_service_en/monitor/report.json": "031ee18e05d562d1ebba2ee1101f1ec83204a34ace1f2f4a7efa94645abf7997",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-smoke_en/receipt.json": "842363872a83b87081f1696aa1404f2519d1fd9f16a4e5e3ecf39222e6a9e4ee",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-smoke_en/validation.json": "efa72aef41561e7453092dcd6fa7f213eabf2f445938a27b13d86f1c45f32ad9",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-smoke_en/monitor/report.json": "66f0c4aef9a4322f3e9346f776fe7eff9e951a12eb136aff53615946b8bc892d",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-smoke_es/receipt.json": "4716403f4e291ffc13f53c82de7b6d02940fbb500ce80ef31310a54990342d6a",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-smoke_es/validation.json": "ff257999501812fe0aa5d362dce224dcd263813038c09b0465b0c5d2eae67b39",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-smoke_es/monitor/report.json": "8a94af5c8e25e7becd59c6f4c78ee4d44c0a03cde6978651955aa0c1c46702ce",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-full_service_en/receipt.json": "20ac03d5fe7d74b94730273b0550c65c4e6caa5aae68c1500ed872d178a35243",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-full_service_en/validation.json": "2a50d78e41bbca8e938179b11973a52367e26d00acb0a4ebc7616d8438706858",
+    ".cache/mac-en-es-closeout/final-delivery-v6/sessions/lite-full_service_en/monitor/report.json": "ff0dad2bdbf9e1a6186a81b9ee310bfab5db989269e2896cf61e9b5b6cb9fe20"
+  },
+  "scope": [
+    "File-only input and no TTS; no microphone or speaker use.",
+    "Observational installed-delivery sessions, not paired causal performance experiments.",
+    "Final timing is estimated last VAD-positive frame to server payload readiness.",
+    "First-partial timing begins at estimated speech start.",
+    "Intervening music and silence can contribute to gaps between updates; leading/trailing source spans are excluded.",
+    "Each latency endpoint and session retains its own count; latency p95 withheld below 100.",
+    "No visible-browser ACKs or human-quality approval.",
+    "Process-tree RSS and Metal/pipeline peaks are separate and must not be added.",
+    "Truncated physical traces are unavailable; whole-session counters do not reconstruct them.",
+    "Historical c13 failures remain separate and failed."
+  ]
+}

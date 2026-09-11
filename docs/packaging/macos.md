@@ -5,12 +5,16 @@ Whisper Turbo for Spanish, Gemma 4 E4B OptiQ for finals and Marian for partials.
 A signed `.app` remains deferred. The PyPI release needs its trusted publisher
 configured; use a checkout, complete Mac ZIP, or verified wheel until publication succeeds.
 
-The c13 [installed-delivery record](../evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
-records fresh isolated Standard/Lite installs, four operator checks and four EN/ES
-file smokes. It preserves failed earlier attempts and the installed audit findings.
-Current full-service acceptance and merge state are tracked in
-[implementation status](../mac_implementation_status.md); a completed pipeline
-alone does not establish successful monitoring or a certified service.
+The current [validation packet](../evaluation/mac_followup_20260910/final-760e948/README.md)
+binds source `760e948`, its completed software checks and fresh installed artifacts.
+The [installed-delivery record](../evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+records isolated Standard/Lite installs, operator checks, EN/ES file smokes and
+actual dependency findings. Both full-service technical gates passed;
+public raw evidence is indexed in that packet; consult [implementation status](../mac_implementation_status.md)
+for current service and merge decisions. The earlier
+[c13 delivery record](../evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+preserves its failed monitor and blank-preview checks. A completed pipeline alone
+does not establish successful monitoring or a certified service.
 
 ## Install from a checkout or Mac ZIP
 

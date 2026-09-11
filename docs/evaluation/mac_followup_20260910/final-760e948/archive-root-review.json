@@ -1,0 +1,8 @@
+{
+  "source_revision": "760e948ec9efb9266a5419cf68ce5f1cb5cfabab",
+  "reviewed_at": "2026-09-11T00:41:59.195896+00:00",
+  "helper_sha256": "35f0abbcbd2c7f829873ee34db6c70368835e48ae9f6387e7b6373accdab98bc",
+  "selection_sha256": "807b28ce37493ee424512559cc9a289fc2e990a5fd22de562b5b6b199ee02d0c",
+  "root_review": "Read both complete helper deltas and both exact redactors, selection/gate differences, derivative checks, independent reviews and zero-finding fixed scan. Only four masked CI fields and three package-description fields omitted in explicit bound derivatives; originals remain unchanged. All terminal/source/failure gates and archive bounds retained.",
+  "audio_devices_used": false
+}

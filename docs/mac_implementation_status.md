@@ -1,10 +1,11 @@
 # Mac implementation status — September 10 source and evidence
 
-> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) remains a draft.
-> The [EN↔ES experiment screens](evaluation/mac_followup_20260910/README.md),
-> c13 source validation and silent hymn diagnostics are complete. No arm qualified
-> for a default change. Installed delivery reconciliation and merge review remain
-> in progress; the exact source and acceptance limits are recorded below.
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
+> The [experiment screens](evaluation/mac_followup_20260910/README.md) selected no
+> default changes. Current [source checks](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+> bind `760e948`; the silent hymn diagnostics retain their earlier c13 identity.
+> [Installed delivery](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+> records artifact and service acceptance separately. Integration status is recorded separately.
 
 
 > **Follow-up, September 10:** [Current EN/ES work](evaluation/mac_followup_20260910/README.md)
@@ -13,9 +14,10 @@
 > The quiet-room check produced no spoken captions; that gate remains pending.
 > Older experiment and endurance measurements below retain their original source identities.
 
-This document describes v2026.14 source (`2026.14.0.0`), tracked by
-[PR #192](https://github.com/wrbell/stark-translate/pull/192). The last published release recorded here is v2026.13.
-The PR merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z; [closeout evidence](evaluation/overnight_closeout_20260910/README.md) retains actual merge/closure records, final ab66ad2 CI and bootstrap ZIP evidence. Source integration remains separate from the acceptance evidence below.
+This document describes v2026.14 source (`2026.14.0.0`), with prior integration in
+[PR #192](https://github.com/wrbell/stark-translate/pull/192) and the EN↔ES follow-up in
+[PR #196](https://github.com/wrbell/stark-translate/pull/196). The last published release recorded here is v2026.13.
+PR #192 merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z; [closeout evidence](evaluation/overnight_closeout_20260910/README.md) retains actual merge/closure records, final ab66ad2 CI and bootstrap ZIP evidence. Source integration remains separate from the acceptance evidence below.
 Package publication and release tags are pending by user choice. The [September 9 snapshot](mac_implementation_status_20260909.md)
 preserves earlier counts and artifact identities; those do not certify later changes.
 
@@ -56,7 +58,13 @@ The [completed 96-run screen](evaluation/overnight_screen_20260910/README.md) se
 
 ## Evidence and active validation
 
-The [c13f51f source validation](evaluation/mac_followup_20260910/final-c13f51f/source-validation.md)
+The current [760e948 source-validation record](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+retains the completed local CPU, static, text-only GPU and pre-commit checks,
+plus exact-source CI. It preserves the original wrapper bookkeeping failure
+separately from the successful checks. [Current installed delivery](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+has its own artifact and full-service gates.
+
+The historical [c13f51f source validation](evaluation/mac_followup_20260910/final-c13f51f/source-validation.md)
 records 2,837 local passing tests, four skips, 20 subtests and 66.62% coverage;
 three actual text-only MLX checks, 11 prescribed static commands and seven isolated
 pre-commit hooks also passed. Exact-head GitHub Python 3.11/3.12 jobs each passed
@@ -74,8 +82,12 @@ original failure. The unchanged terminal validator then passed 46/47 checks and
 failed on one blank translated preview out of 2,562. The [producer repair](evaluation/mac_followup_20260910/final-c13f51f/empty-preview-repair.md)
 preserves the prior caption and logs that rejection explicitly; 21 focused
 production-coroutine checks passed. Fresh repaired-source
-Standard/Lite rehearsals remain pending; c13 is not relabeled as fully passed.
-See [installed delivery](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md).
+Standard/Lite rehearsals on `760e948` passed their separate terminal gates,
+with 5,533/5,533 required writes across all six file sessions. Standard silence-final
+median was 1,458.7 ms; CPU Lite was 3,297.7 ms with sparse previews. The sub-second
+goal remains unmet; c13 is not relabeled as fully passed.
+See the [current installed delivery](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+and the separate [c13 failure record](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md).
 
 The [350-second hymn control](evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
 completed without entering music hold. The [102-call boundary comparison](evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
@@ -211,4 +223,4 @@ keep implementation and certification separate. #134 permits a laptop stand-in
 with a complete recorded hymn, spoken segment and written timing/UX note; live
 microphone and physical-device requirements belong to their own gates.
 
-The final reviewed `ab66ad2` head passed 2,398 tests with four skips on both Python 3.11 and 3.12 CI. Its Mac ZIP contains the patched executable bootstrap; all 152 packaged runtime members match `84832fb`. No additional inference or hardware validation is implied. #134/#176 acceptance is met after their actual completed closures; #177 is closed NOT_PLANNED with implementation deferred and promotion certification pending.
+The earlier reviewed `ab66ad2` head passed 2,398 tests with four skips on both Python 3.11 and 3.12 CI. Its Mac ZIP contains the patched executable bootstrap; all 152 packaged runtime members match `84832fb`. No additional inference or hardware validation is implied. #134/#176 acceptance is met after their actual completed closures; #177 is closed NOT_PLANNED with implementation deferred and promotion certification pending.

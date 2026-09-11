@@ -1,6 +1,6 @@
 # stark-translate
 
-> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
 > [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
 > screens with no qualified arms, CPU Whisper-base rejection and silent hymn diagnostics.
 > Defaults are unchanged. Current artifact, service and merge results are recorded in
@@ -16,7 +16,7 @@ Fully on-device, live bilingual speech-to-text for church outreach at Stark Road
 
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
 > (`2026.14.0.0`), with prior integration in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
-> and the active follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
+> and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > The last published release recorded here is **v2026.13**. Source integration,
 > release publication and service certification are separate; PyPI/package artifacts
 > and release tags remain pending by user choice.
@@ -39,7 +39,11 @@ Rejected arms cannot enter confirmation or combinations.
 
 The [earlier September 10 overnight screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
 
-The completed c13 [source checks](docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md),
+Current [source validation](docs/evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+records the repaired `760e948` source. Its [delivery packet](docs/evaluation/mac_followup_20260910/final-760e948/README.md)
+keeps installed-artifact and full-service acceptance separate.
+
+The earlier c13 [source checks](docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md),
 [350-second hymn control](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
 and [102-call text comparison](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
 are separate evidence. The natural control never entered music hold; supplied text

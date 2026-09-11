@@ -1,0 +1,22 @@
+# V6 concise report source/schema review
+
+Reviewed `summarize.py` at SHA256 `ae8e5ee4f528d302aa3a31c4da119a8f26023b93b1dba5fe15048941c339a1b4` without executing it. Source and terminal metadata only; no tests, models, native/device operations, raw trace/media reads or tracked edits. The V6 service stage was still running, so no all-six completion claim is made.
+
+## Actionable findings
+
+1. **Complete the receipt hash chain before summarizing.** The script verifies the validator's monitor hash, but does not compare the current six session receipts with `delivery-summary.log`'s `sessions[].receipt_sha256`, or the current validation/monitor bytes with each receipt's `evidence_sha256`. It also omits receipt/validator/monitor session identity equality. Therefore a copied or modified passed same-head metadata trio can be labeled as a different case while the successful delivery summary still binds the original bytes. Require the exact six case names and passed/evidence-valid rows; match each receipt hash, its validation/monitor hashes and all session IDs. Bind the summary log to the actual passed `delivery-summary-receipt.json` log hash. These are small existing metadata fields; no raw artifact rehash is necessary here.
+2. **Qualify update-gap coverage.** “Update gaps include all original music and silence” overstates the monitor implementation. It uses adjacent sorted final-ready/partial-emitted timestamps, so intervening pauses/music can contribute but leading/trailing source spans are excluded. Suggested wording: “Unfiltered intervals between successive recorded final-ready or partial-emitted events; intervening silence/music may contribute. Leading and trailing source spans are excluded.”
+
+## Schema and interpretation checks
+
+- Actual V6 Standard EN smoke: six finals, 49 previews, 47 true checks; `trace_available=true`, status `passed`, 56 completed physical calls. Source duration, coverage, persistence, monitor measurement and summary-counter keys referenced by the script are present.
+- Historical V5 posthoc Standard metadata: validation is 1,487,041 bytes and monitor report 361,465 bytes, both below the script's 2 MiB per-file guard. It remains failed because `nonempty_previews=false`. Its physical trace status is `unassessable`, `trace_available=false`, while the legacy count field is zero. The proposed conditional null for that unavailable count is correct; counters cannot reconstruct the discarded trace.
+- Latency p95 is independently withheld for endpoint/first-partial/update-gap cohorts below 100 observations; no timing schemas or sessions are pooled. The RSS stats copied separately include their original p95 even below 100 samples; clarify the global scope sentence as **latency p95** if that distinction is intended.
+- Sampled process-tree RSS and pipeline-lifetime RSS/Metal fields are separate, correctly labeled and not added. Retained research trace dictionaries/terminal serialization contribute to measured pipeline RSS; the underlying receipt documents that observer overhead. There is no uninstrumented-memory claim.
+- Source-only inspection of the existing delivery summary confirms it already records exact session receipt hashes after validating raw artifacts and preserves the historical failures. Connecting this report to those receipts is sufficient; duplicating heavy validation is unnecessary.
+
+Reviewed primary schemas: `final-delivery-v6/sessions/standard-smoke_en/{receipt.json,validation.json,monitor/report.json}`, the Lite ES monitor shape, `final-delivery-continuation-v1/recover-standard/{validation.json,monitor-report.json}`, and current V6 coordinator/delivery/verifier source. Historical files were not modified or relabeled.
+
+## Resolution rereview
+
+The parent repaired both actionable findings. At helper SHA256 `c0868157787894baa30a7576b57aa641d9a661d58f3e1da180c86071f56ad043`, the source now checks the final stage receipt's successful exit and exact log hash; indexes exactly six unique passed/evidence-valid summary cases; matches every current session receipt hash, receipt-bound validator/monitor hashes, and all three session IDs. The update-gap sentence now explicitly excludes leading/trailing source spans. These fields match the actual source and small terminal schemas inspected above. No remaining source/schema blocker found; the helper was not executed. The minor optional “latency p95” scope clarification remains as noted above.

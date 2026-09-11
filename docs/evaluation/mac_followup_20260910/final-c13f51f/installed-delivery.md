@@ -5,7 +5,8 @@ Build, installation, read-only operator checks and four EN↔ES file smokes pass
 The Standard full-service pipeline completed; its original monitor hit a reader
 limit. A separate corrected report recovered its artifacts, then the unchanged
 terminal validator failed on one blank translated preview. The failed acceptance
-is retained; final rehearsals against a repaired producer remain pending.
+is retained; [repaired-source V6 rehearsals](../final-760e948/installed-delivery.md)
+passed separately.
 
 ## Artifacts and installation
 
@@ -14,8 +15,6 @@ is retained; final rehearsals against a repaired producer remain pending.
 | `stark_translate-2026.14.0.0-py3-none-any.whl` | `7369382dca07e0d9f129850f3a3f1a639c24955035c8d7c31c5e8148be414c44` | 783,944 |
 | `stark_translate-2026.14.0.0.tar.gz` | `73c65578e79e4af0600c2806cad11e469296c246d808bf5adb11ea93136ef213` | 113,465,626 |
 | `stark-translate-v2026.14.0.0-mac.zip` | `ce43f77d05b693d87703d1f97fa5712a391ca3b360e0edc27d53d1530a1ddb43` | 115,027,649 |
-| `stark_translate-2026.14.0.0-py3-none-any.whl` | `7369382dca07e0d9f129850f3a3f1a639c24955035c8d7c31c5e8148be414c44` | 783,944 |
-| `stark_translate-2026.14.0.0-py3-none-any.whl` | `7369382dca07e0d9f129850f3a3f1a639c24955035c8d7c31c5e8148be414c44` | 783,944 |
 
 Canonical, sdist-rebuilt and Mac-ZIP-rebuilt wheels are byte-identical. All 169
 runtime members match frozen source; all 174 wheel members were checked. Mac ZIP
@@ -75,7 +74,7 @@ remain retained. The run is not reclassified as accepted by weakening the gate.
 A narrow producer repair keeps the previous caption when Marian returns an empty
 or whitespace-only target and records the rejected update explicitly. It changes
 no model, language detector, confidence threshold or fallback policy. Fresh final
-Standard/Lite rehearsals will use the repaired source and bounded monitor;
+Standard/Lite rehearsals on 760e948 passed with the repaired source and bounded monitor;
 the old c13 service remains a negative result.
 
 The full-service research trace retained 262,144 of Standard's 474,952 events;
@@ -101,5 +100,11 @@ Standard monitor limit failure is likewise retained separately from any later
 reconciliation. None is relabeled as a successful original delivery run.
 
 Human acoustic/bilingual approval, sustained native capture, physical outputs,
-two-speaker diarization, x86/RTX2070, public package publication and source merge
-remain separate gates. Source checks are in [source validation](source-validation.md).
+two-speaker diarization, x86/RTX2070, public package publication and source integration
+have separately recorded states. Source checks are in [source validation](source-validation.md).
+
+The [verified raw archive](../final-760e948/raw/artifact-manifest.json) retains
+this cohort under `historical-v5/`, with c13 source/CI under `validation/` and
+hymn evidence under `hymn/`. These are archive member paths, not standalone URLs.
+The artifact table lists three unique contents; the original build receipt
+records the same wheel in three build roles.

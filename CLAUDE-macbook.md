@@ -1,6 +1,6 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
-> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
 > [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
 > source-accounted screens and silent hymn diagnostics. No screened arm qualified;
 > defaults remain unchanged. Final artifact, service and merge status is recorded in
@@ -12,13 +12,17 @@
 > **Role:** inference, operator UI, browser displays, Mac evaluation. Training happens on
 > WSL ([`CLAUDE-windows.md`](./CLAUDE-windows.md)). Parent: [`CLAUDE.md`](./CLAUDE.md).
 >
-> **Source (2026-09-10):** v2026.14 (`2026.14.0.0`), tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> **Source (2026-09-10):** v2026.14 (`2026.14.0.0`), with integration history in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
+> and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > The last published release recorded here is v2026.13. Source integration and
 > published artifacts are separate from the acceptance evidence below.
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md);
 > contracts: [`docs/current_architecture.md`](docs/current_architecture.md); remaining work:
 > [`docs/backlog.json`](docs/backlog.json). **Do not recreate `stt_env`.** Validation counts
-> and latency numbers live only in the linked evidence documents.
+> and latency numbers live only in the linked evidence documents. Current checks bind
+> [repaired source 760e948](docs/evaluation/mac_followup_20260910/final-760e948/source-validation.md);
+> [installed delivery](docs/evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+> records artifact and service acceptance separately.
 
 ---
 

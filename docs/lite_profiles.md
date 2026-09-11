@@ -28,14 +28,16 @@ tails were large. Lite is functionally exercised, but cannot be recommended as a
 fast production profile today; the observational Standard/Lite results are not a
 causal paired comparison or a human-quality certificate.
 
-The later c13 [installed-delivery record](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
-keeps fresh Standard/Lite artifacts, EN/ES file smokes and installed dependency
-audits separate from full-service acceptance. A separate monitor reconstruction
-recovered the terminal read, but the Standard service still failed one blank
-translated-preview check; the original failures remain preserved. The preview
-repair and new-source Standard/Lite full rehearsals are tracked in
-[implementation status](mac_implementation_status.md). These Mac checks do not
-certify x86/RTX 2070 hardware, a RAM floor or service quality.
+The current [source validation](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+and [installed-delivery record](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+bind the repaired source `760e948`, fresh Standard/Lite artifacts, EN/ES file
+smokes and installed dependency assessments. Both full-service technical gates
+passed, with CPU Lite latency and sparse previews still limiting its usefulness; current decisions are tracked in
+[implementation status](mac_implementation_status.md). The earlier
+[c13 cohort](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+remains separate: a monitor reconstruction recovered its terminal read, but its
+Standard service still failed one blank translated-preview check. These Mac
+checks do not certify x86/RTX 2070 hardware, a RAM floor or service quality.
 
 **2026-09-10 cadence update:** the
 [normalized CPU Lite screen](evaluation/mac_followup_20260910/lite-cadence-result.md)

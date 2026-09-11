@@ -1,6 +1,6 @@
 # Roadmap — Stark Road Bilingual Speech-to-Text
 
-> **Current follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) is a draft.
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
 > [EN↔ES evidence](evaluation/mac_followup_20260910/README.md) records completed
 > source-accounted screens and silent hymn diagnostics. No screened arm qualified;
 > defaults remain unchanged. Final artifact, service and merge status is recorded in
@@ -10,7 +10,7 @@
 > Living document tracking the project from Mac prototype through Windows training to
 > production deployment.
 >
-> **Last updated:** 2026-09-10 (follow-up EN/ES public evaluation and operator checks underway; defaults unchanged).
+> **Last updated:** 2026-09-10 (EN/ES screens complete; repaired-source checks recorded; defaults unchanged).
 >
 > **Remaining tasks (canonical):** [`backlog.json`](./backlog.json) · rendered
 > [`backlog.md`](./backlog.md) · contracts [`current_architecture.md`](./current_architecture.md)
@@ -49,7 +49,7 @@ Windows / WSL (A2000 Ada 16 GB, CUDA)
 
 Source and releases
   published:  v2026.13 is the last published release recorded here (PRs #180–191)
-  source:     v2026.14 / 2026.14.0.0; integration history and current state in PR #192
+  source:     v2026.14 / 2026.14.0.0; integration history in PR #192, EN/ES follow-up in PR #196
   evidence:   per-feature acceptance and source/artifact identity are recorded separately
   publishing: source + issues + final merge authorized; PyPI / tags pending by user choice
 ```
@@ -100,6 +100,10 @@ Spanish Parakeet, CPU Lite cadence and independent Lite deadline screens are now
 complete, with no qualified arms. CPU Whisper-base failed its separate WER guard
 in both languages. E4B, Spanish Whisper and the 0.6-second partial cadence remain
 the defaults; no follow-up result establishes the sub-second caption goal.
+Current [source checks](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+bind repaired source `760e948`. The [delivery packet](evaluation/mac_followup_20260910/final-760e948/README.md)
+keeps artifact and full-service acceptance separate from those checks and the
+earlier c13 hymn diagnostics.
 
 [Hymn source repairs](evaluation/mac_followup_20260910/hymn-source-repairs.md)
 preserve existing text delimiters and accepted speech onset after music hold.
@@ -307,7 +311,7 @@ and [`evaluation/README.md`](./evaluation/README.md).
 | Mac EN STT | Parakeet TDT v3 MLX (v2026.13); Whisper large-v3-turbo stays for ES and CUDA (W16 CT2) |
 | Partials | Marian CT2 int8 — CUDA (v2026.8) and Mac CPU (v2026.13); HF fallback |
 | Mac defaults | E4B, 0.5 s silence, 0.6 s cadence retained after separate 48-run and 96-run screens; all experiments opt-in |
-| E2B | Separately evaluated profile behind `--gemma4-size e2b`; not default until bilingual review |
+| E2B | Separately evaluated, opt-in `--gemma4-size e2b`; default promotion requires the complete performance/quality gates and bilingual review |
 | Measurement | Schema 2 `speech_end_to_final_ms`; legacy `e2e_latency_ms` labeled processing time |
 | MTP / assistant drafter | Off on both platforms (#177 experimental; CUDA `--mtp` opt-in, unbenchmarked) |
 | Environments | pyproject extras `.[mlx]` / `.[cuda]` / `.[cpu]`; `requirements-*.txt` deprecated except the WSL training env |
@@ -322,13 +326,13 @@ and [`evaluation/README.md`](./evaluation/README.md).
 |----------|------|-----------------|
 | Hindi/Chinese timing | Later user decision | Separate R&D; offline Hindi church-audio baseline archived (#138), live path not started; no overnight action |
 | Church Spanish recording source | Local source and independent review pending | Public FLEURS Spanish already supports separately labeled engineering WER; church terminology and locally approved quality remain unvalidated |
-| E2B as default | After blinded bilingual review | Speed vs meaning/terminology tradeoff |
+| E2B as default | After a qualifying performance/quality comparison and blinded bilingual review | Current screens qualified no arm; retain the measured speed, meaning and terminology tradeoffs |
 | Production hardware | Before future production-device certification | Dedicated church PC vs portable Mac; the laptop #134 rehearsal is already complete |
-| PyPI publication and release tag | After PR #192 merge | User choice; trusted publisher mapping pending |
+| PyPI publication and release tag | After separate publication authorization and release validation | PR #192 is already merged; trusted publisher mapping remains pending |
 | W17 curriculum iterations | After Phase 4 on WSL | 2–4 cycles typical |
 | Scottish accent data sources | Before accent tuning | User provides playlist URLs |
 | TTS voice fine-tuning | Phase 9 | Fine-tune from Piper base vs train from scratch |
-| Lite vs RTX 2070 certification order | After lite profile lands | Whichever hardware is available first |
+| Lite vs RTX 2070 certification order | When the required x86 or RTX 2070 hardware is available | Profiles are implemented; run the documented device-specific gates on whichever host is available first |
 
 ---
 

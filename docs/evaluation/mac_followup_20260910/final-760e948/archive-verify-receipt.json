@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/Users/willem/anaconda3/bin/python3.11",
+    "-S",
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/final-760e948/raw/verify_endurance.py",
+    "--root",
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/final-760e948/raw",
+    "--output",
+    "/private/tmp/stark-final-760e948-verify-v7-20260911",
+    "--manifest-sha256",
+    "23692ba4a9958a1b3c7fca1b2f042fc4ab3f3f90616951b737cacaf7b3701f8f"
+  ],
+  "started_at": "2026-09-11T00:42:38.077449+00:00",
+  "ended_at": "2026-09-11T00:42:38.804366+00:00",
+  "exit_code": 0,
+  "manifest_sha256": "23692ba4a9958a1b3c7fca1b2f042fc4ab3f3f90616951b737cacaf7b3701f8f",
+  "verifier_sha256": "bb52959705509a219421a3858a7c71aef7bad3420932dcfedca4eeba795ece30",
+  "log_sha256": "ba98b4823bd7e5b622dda038fafac6707d12ba318a7fba58076607098f96cce4"
+}

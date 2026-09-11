@@ -1,13 +1,17 @@
 # Mac EN↔ES follow-up implementation and experiments
 
-Work is in progress on `codex/mac-en-es-closeout`, tracked by
-[draft PR #196](https://github.com/wrbell/stark-translate/pull/196). Defaults remain unchanged;
+This EN↔ES follow-up is recorded in
+[PR #196](https://github.com/wrbell/stark-translate/pull/196). Defaults remain unchanged;
 no release or package publication is authorized for this follow-up. The
 [43-item audit](backlog-audit.md) preserves each original acceptance condition.
 
 ## Completed evidence
 
-- [Final c13 source validation](final-c13f51f/source-validation.md): completed CPU,
+- [Current 760e948 source validation](final-760e948/source-validation.md): completed
+  CPU, static, text-only GPU, pre-commit and exact-source CI evidence; the original
+  wrapper bookkeeping failure remains retained. [Installed delivery](final-760e948/installed-delivery.md)
+  records the separate artifact and full-service gates.
+- [Earlier c13 source validation](final-c13f51f/source-validation.md): completed CPU,
   static, text-only GPU and pre-commit evidence, with exact-source CI kept separate.
 - [Natural hymn control](final-c13f51f/hymn-capture.md): the 350-second silent file
   replay completed without entering music hold; it does not validate hold recovery.
@@ -218,7 +222,9 @@ Nothing here changes a production model default.
 The bounded Standard, Spanish Parakeet, CPU Lite cadence/deadline and smaller
 CPU STT comparisons have completed without a qualifying candidate. Untouched
 confirmation is therefore unused; all negative results are retained. Silent hymn
-diagnostics and c13 source checks are also complete.
+diagnostics retain their c13 identity. The repaired
+[760e948 source checks](final-760e948/source-validation.md) are complete; full-service
+acceptance and archive verification are separate gates.
 
 The [installed-delivery report](final-c13f51f/installed-delivery.md) separates completed
 artifact, operator and EN/ES smoke checks from full-service acceptance. The c13
@@ -226,9 +232,10 @@ Standard pipeline completed its required writes. A separate 128 MiB monitor
 reconstruction recovered the terminal read, but the original terminal validator
 then failed its nonempty-preview check on one blank translated preview. Preserve
 both the original monitor failure and this application failure. The preview
-repair and new-source Standard/Lite full rehearsals are tracked in
-[implementation status](../../mac_implementation_status.md), alongside actual
-terminal acceptance, archive verification and reviewed merge. External human/device/CUDA
+repair and new-source Standard/Lite full rehearsals are recorded in the
+[760e948 delivery packet](final-760e948/README.md).
+[Implementation status](../../mac_implementation_status.md) retains actual
+terminal acceptance, archive verification and integration receipts. External human/device/CUDA
 gates remain separate; the sub-second caption-delivery goal is not established.
 
 [Completed evidence index](completed-evidence-index.json) binds the retained raw

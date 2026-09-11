@@ -1,0 +1,6 @@
+{
+  "source_sha256": "bf13b185f02cb5ea1be03d7cc1d8acc2020735fc15f42d98c26eade652422a44",
+  "review": "source-schema-review.md",
+  "post_review_delta": "Scope sentence now explicitly says latency p95; sampled memory distributions retain their original statistics. No logic changed after rereview.",
+  "executed": false
+}
