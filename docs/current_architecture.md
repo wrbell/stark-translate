@@ -123,7 +123,7 @@ retain their original definitions. The sub-second median caption-delivery goal i
 - MLX Whisper resolves the selected primary/fallback settings through the shared resolver.
   Automatic Distil fallback is English-only; Spanish load failures surface visibly, and
   low-confidence Spanish output is never retried on an English-only model.
-- Do **not** recreate the operator's working `stt_env`
+- `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`.
 
 Details: [`mac_implementation_status.md`](./mac_implementation_status.md),
 [`packaging/macos.md`](./packaging/macos.md) (installation paths and artifact checks).

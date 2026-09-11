@@ -218,8 +218,8 @@ delivery measurements. The sub-second median goal remains unachieved.
 - Preserve the recorded integration checks, installed inference, evidence and actual
   PR merge/closure receipts. Source privacy fixes and isolated artifact checks have
   passed; the [Mac dependency assessment](evaluation/overnight_security/README.md)
-  retains two unresolved Torch advisories. Preserve working
-  `stt_env`, original holdouts and the frozen benchmark dependencies.
+  retains two unresolved Torch advisories. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`.
+  Preserve original holdouts and the frozen benchmark dependencies.
 - Leave PyPI and release publication pending. Published tags have not moved.
   Previous v2026.13 MSI verification and obsolete-asset cleanup remain in the
   September 9 snapshot; native Windows installation remains untested.
