@@ -155,6 +155,7 @@ _capture_transport = CaptureTransportSummary()
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
+DIARIZE_PYTHON = None
 DIARIZE_JSONL = ""
 DIARIZE_INTERVAL_S = 2.0
 _diarize_proc = None
@@ -4289,7 +4290,7 @@ def start_diarize_daemon():
         logger.warning("HF_TOKEN not set — pyannote diarization daemon not started")
         return
     cmd = build_daemon_command(
-        python=sys.executable,
+        python=DIARIZE_PYTHON or sys.executable,
         script=script,
         rolling_wav=os.path.join(AUDIO_DIR, "rolling.wav"),
         output=DIARIZE_JSONL,
@@ -4298,11 +4299,15 @@ def start_diarize_daemon():
         session_dir=AUDIO_DIR,
         chunks_jsonl=os.path.join(AUDIO_DIR, "chunks.jsonl"),
     )
+    env = os.environ.copy()
+    if DIARIZE_MODE == "embed":
+        env["HF_HUB_OFFLINE"] = "1"
     try:
         _diarize_proc = subprocess.Popen(
             cmd,
             cwd=os.path.dirname(os.path.abspath(__file__)),
             start_new_session=True,
+            env=env,
         )
         logger.info("live diarization daemon pid=%s mode=%s jsonl=%s", _diarize_proc.pid, DIARIZE_MODE, DIARIZE_JSONL)
         print(f"  Diarization daemon started ({DIARIZE_MODE}) → {DIARIZE_JSONL}")
@@ -4574,6 +4579,7 @@ def print_summary():
         _write_jsonl_record,
         {
             "event": "session_summary",
+            **_diarize_configuration(),
             "session": SESSION_ID,
             "timestamp": datetime.now().isoformat(),
             "chunks_attempted": _chunks_attempted,
@@ -5528,6 +5534,7 @@ async def main_async(args):
     }
     metadata = {
         **_session_provenance(),
+        **_diarize_configuration(),
         "timing_schema_version": 2,
         "backend": BACKEND,
         "model_family": MODEL_FAMILY,
@@ -5705,6 +5712,23 @@ async def main_async(args):
             _session_stop_requested
             and isinstance(shutdown_exception, (asyncio.CancelledError, KeyboardInterrupt, SystemExit))
         )
+
+
+def _diarize_configuration():
+    return {
+        "diarize": DIARIZE_ENABLED,
+        "diarize_mode": DIARIZE_MODE,
+        "diarize_python": DIARIZE_PYTHON or sys.executable,
+        "diarize_interval_s": DIARIZE_INTERVAL_S,
+    }
+
+
+def _diarize_python_path(value):
+    # Keep the venv symlink: resolving it would launch the base interpreter.
+    path = os.path.abspath(os.path.expanduser(value))
+    if not os.path.isfile(path) or not os.access(path, os.X_OK):
+        raise argparse.ArgumentTypeError(f"diarization interpreter must be an executable file: {value}")
+    return path
 
 
 def main():
@@ -5989,6 +6013,13 @@ def main():
         help="Enable live speaker diarization (off by default; separate CPU daemon, no GPU)",
     )
     parser.add_argument(
+        "--diarize-python",
+        type=_diarize_python_path,
+        default=None,
+        metavar="PATH",
+        help="Python executable for the diarization daemon (default: pipeline interpreter)",
+    )
+    parser.add_argument(
         "--diarize-mode",
         choices=["embed", "pyannote"],
         default="embed",
@@ -6132,7 +6163,7 @@ def main():
     # --- Resolve language direction ---
     global SOURCE_LANG, TARGET_LANG, WHISPER_PROMPT
     global SESSION_ID, CSV_PATH, AUDIO_DIR, DIAG_PATH, PARTIALS_PATH
-    global DIARIZE_ENABLED, DIARIZE_MODE, DIARIZE_JSONL, DIARIZE_INTERVAL_S
+    global DIARIZE_ENABLED, DIARIZE_MODE, DIARIZE_PYTHON, DIARIZE_JSONL, DIARIZE_INTERVAL_S
     SOURCE_LANG = args.lang
     TARGET_LANG = "es" if args.lang == "en" else "en"
     WHISPER_PROMPT = WHISPER_PROMPT_ES if SOURCE_LANG == "es" else WHISPER_PROMPT_EN
@@ -6160,6 +6191,7 @@ def main():
     PARTIALS_PATH = f"metrics/partials_{SESSION_ID}.jsonl"
     DIARIZE_ENABLED = bool(args.diarize)
     DIARIZE_MODE = args.diarize_mode
+    DIARIZE_PYTHON = args.diarize_python
     DIARIZE_INTERVAL_S = float(args.diarize_interval_s)
     DIARIZE_JSONL = f"metrics/diarization_{SESSION_ID}.jsonl"
     os.makedirs(os.path.dirname(PARTIALS_PATH), exist_ok=True)

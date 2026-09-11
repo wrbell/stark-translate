@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -365,6 +366,72 @@ class TestDaemon:
 
 
 class TestPipelineHook:
+    @pytest.mark.parametrize("interpreter", [None, "/audited venv/bin/python"])
+    @pytest.mark.parametrize("mode", ["embed", "pyannote"])
+    def test_daemon_interpreter_and_environment(self, tmp_path, monkeypatch, interpreter, mode):
+        import dry_run_ab as d
+
+        monkeypatch.setattr(d, "DIARIZE_ENABLED", True)
+        monkeypatch.setattr(d, "DIARIZE_MODE", mode)
+        monkeypatch.setattr(d, "DIARIZE_PYTHON", interpreter)
+        monkeypatch.setattr(d, "AUDIO_DIR", str(tmp_path / "audio"))
+        monkeypatch.setattr(d, "DIARIZE_JSONL", str(tmp_path / "labels.jsonl"))
+        monkeypatch.setattr(d, "_diarize_proc", None)
+        monkeypatch.setenv("HF_TOKEN", "test-token")
+        monkeypatch.setenv("HF_HUB_OFFLINE", "0")
+        popen = MagicMock()
+        monkeypatch.setattr(d.subprocess, "Popen", popen)
+        d.start_diarize_daemon()
+        popen.assert_called_once()
+        command = popen.call_args.args[0]
+        assert command[0] == (interpreter or sys.executable)
+        assert command[command.index("--mode") + 1] == mode
+        assert popen.call_args.kwargs["start_new_session"] is True
+        env = popen.call_args.kwargs["env"]
+        assert env["HF_HUB_OFFLINE"] == ("1" if mode == "embed" else "0")
+        assert env["HF_TOKEN"] == "test-token"
+        assert d.os.environ["HF_HUB_OFFLINE"] == "0"
+        assert d._diarize_configuration()["diarize_python"] == command[0]
+
+    @pytest.mark.parametrize("kind", ["missing", "nonexecutable", "directory"])
+    def test_invalid_interpreter_rejected_at_parse_time(self, tmp_path, monkeypatch, capsys, kind):
+        import dry_run_ab as d
+
+        path = tmp_path / "python"
+        if kind == "nonexecutable":
+            path.write_text("not executable")
+            path.chmod(0o600)
+        elif kind == "directory":
+            path.mkdir()
+        monkeypatch.setattr(sys, "argv", ["dry_run_ab.py", "--diarize-python", str(path)])
+        popen = MagicMock(side_effect=AssertionError("must fail before launching anything"))
+        monkeypatch.setattr(d.subprocess, "Popen", popen)
+        with pytest.raises(SystemExit) as exc:
+            d.main()
+        assert exc.value.code == 2
+        assert "--diarize-python" in capsys.readouterr().err
+        popen.assert_not_called()
+
+    def test_interpreter_validation_preserves_venv_symlink(self, tmp_path, monkeypatch):
+        import dry_run_ab as d
+
+        venv_python = tmp_path / "python"
+        venv_python.symlink_to(sys.executable)
+        monkeypatch.chdir(tmp_path)
+        assert d._diarize_python_path("python") == str(venv_python)
+
+    def test_summary_records_diarization_configuration(self, monkeypatch):
+        import dry_run_ab as d
+
+        monkeypatch.setattr(d, "DIARIZE_PYTHON", "/audited/bin/python")
+        monkeypatch.setattr(d, "all_results", [])
+        pool = MagicMock()
+        monkeypatch.setattr(d, "_io_pool", pool)
+        d.print_summary()
+        summary = pool.submit.call_args.args[1]
+        assert summary["diarize_python"] == "/audited/bin/python"
+        assert summary["diarize_mode"] == d.DIARIZE_MODE
+
     def test_diarize_off_by_default(self):
         import dry_run_ab as d
 
