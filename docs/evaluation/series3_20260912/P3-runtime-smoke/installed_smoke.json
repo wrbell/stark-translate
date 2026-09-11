@@ -1,0 +1,1 @@
+{"version": "2026.14.0.0", "http": {"/healthz": 200, "/operator/": 200, "/operator/review.js": 200, "/operator/widgets/qr.js": 200, "/api/capabilities": 200}, "model_entries": 22, "package": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/operator_app/__init__.py", "runtime_files": 45, "verse_parser": "passed"}

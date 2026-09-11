@@ -1,0 +1,24 @@
+{
+  "tool": "pip-audit --path venv/lib/python3.11/site-packages --format json (auditor .cache/package-smoke/bin/pip-audit)",
+  "audited_distributions": 124,
+  "findings": [],
+  "skipped": [
+    {
+      "name": "stark-translate",
+      "skip_reason": "Dependency not found on PyPI and could not be audited: stark-translate (2026.14.0.0)"
+    }
+  ],
+  "versions": {
+    "ctranslate2": "4.7.1",
+    "mlx": "0.32.2",
+    "mlx-lm": "0.31.3",
+    "mlx-whisper": "0.4.3",
+    "parakeet-mlx": "0.5.2",
+    "pip": "26.2.1",
+    "setuptools": "84.0.0",
+    "silero-vad": "6.2.1",
+    "torch": "2.13.0",
+    "torchaudio": "2.11.0",
+    "transformers": "5.12.1"
+  }
+}
