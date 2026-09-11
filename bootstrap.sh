@@ -45,6 +45,7 @@ done
 
 STARK_USER="${STARK_USER:-$USER}"
 source "$ROOT/scripts/runtime_env.sh"
+stark_apply_python_pointer "$ROOT"
 # Runtime launchers require VENV to exist; bootstrap can create an explicit
 # target using the next available interpreter without installing into that one.
 if [ -z "${STARK_PYTHON:-}" ] && [ -n "${VENV:-}" ] && [ ! -x "$VENV/bin/python" ]; then

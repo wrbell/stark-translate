@@ -159,6 +159,7 @@ def test_source_launcher_passes_loopback_and_explicit_remote_host_to_guarded_cli
             ["bash", "run_operator.sh"], cwd=tmp_path, env=env, text=True, capture_output=True, timeout=3
         )
         assert result.returncode == 0, result.stderr
+        assert f"python: {python} " in result.stdout.splitlines()[0]
         args = result.stdout.splitlines()[1:]
         assert args[:3] == ["-m", "operator_app.cli", "operator"]
         assert args[args.index("--host") + 1] == expected

@@ -19,23 +19,27 @@ does not establish successful monitoring or a certified service.
 ## Install from a checkout or Mac ZIP
 
 Use Python 3.11 or newer and install ffmpeg/PortAudio with your system package manager.
-Create an isolated environment; existing `stt_env` installations can continue unchanged.
+Create an isolated environment; an existing `stt_env` is kept unmodified as the rollback environment.
 
 ```bash
 python3.11 -m venv venv
 venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
-venv/bin/python -m pip install '.[mlx]'
+venv/bin/python -m pip install -c constraints/macos-arm64-py311-runtime.txt '.[mlx]'
 venv/bin/python -m operator_app.cli setup --backend mlx
 venv/bin/python -m operator_app.cli doctor --backend mlx --lang en
 venv/bin/python -m operator_app.cli doctor --backend mlx --lang es
-VENV="$PWD/venv" ./run_operator.sh
+printf '%s\n' "$PWD/venv/bin/python" > .stark-python   # launcher pointer; rollback: point it at stt_env/bin/python
+./run_operator.sh
 ```
 
 `.[mlx]` includes the live runtime: PyTorch/Silero, ONNX Runtime, CT2, Marian
 SentencePiece support, Parakeet, Whisper, MLX/OptiQ, and Piper. Optional extras:
 `.[mlx,diarization]` adds SpeechBrain/ECAPA dependencies; `.[mlx,eval]` adds WER
-and translation scoring. Mac installs constrain MLX/OptiQ/Parakeet and PyTorch
-to the verified minor versions; upgrading those lines requires another replay gate. Diarization is still opt-in and its model/latency gate
+and translation scoring. The Mac runtime pins Torch 2.13.0 / TorchAudio 2.11.0,
+[audited 2026-09-11](../evaluation/overnight_20260911/L6-torch213-candidate/README.md).
+The [constraints file](../../constraints/macos-arm64-py311-runtime.txt) carries the
+six transitive audit fixes. Mac installs also constrain MLX/OptiQ/Parakeet;
+upgrading the pinned lines requires another replay gate. Diarization is still opt-in and its model/latency gate
 must pass before use at a service.
 
 The [earlier installed-dependency audit](../evaluation/overnight_security/README.md)
@@ -44,7 +48,8 @@ audio-wheel upgrade attempt. The Lite runtime has a separate clean audit; neithe
 that result nor filtered CI certifies the full Mac dependency set. A separate
 [full-application dependency candidate](../evaluation/mac_followup_20260910/torch-full-application-candidate.md)
 passed installed EN/ES inference and a zero-known-finding audit of 123 third-party
-distributions. It has not replaced production bounds or the working `stt_env`.
+distributions. On 2026-09-11 its constraints became the production Mac bounds; the working
+`stt_env` is retained unmodified as the rollback environment.
 
 `bootstrap.sh --skip-systemd` performs the dependency install, backend-specific
 model setup and CLI preflight without requiring an already-running web server.
@@ -94,9 +99,20 @@ and `--output` flags. Setup never runs it against your working adapter directory
 
 ## Interpreter selection and launchd
 
-`run_operator.sh` and bootstrap select `STARK_PYTHON` or explicit `VENV` first,
-then activated `VIRTUAL_ENV` or `CONDA_PREFIX`, then repo `stt_env`, then repo
-`venv`. A nested virtualenv takes precedence over its parent Conda environment.
+`run_operator.sh` and bootstrap select, in order: `STARK_PYTHON`, explicit `VENV`,
+the repo `.stark-python` pointer, activated `VIRTUAL_ENV`, `CONDA_PREFIX`, repo
+`stt_env`, repo `venv`, then `python3`. The pointer ranks above auto-activated Conda
+base. Explicit overrides ignore a present pointer with a notice on stderr.
+
+The pointer uses the first nonblank, noncomment line, trims whitespace and CRLF,
+expands a leading `~/`, and resolves relative paths against the project root.
+An absent pointer preserves fallback selection; an empty pointer or one naming a
+missing, non-file or non-executable interpreter fails loudly. Roll back in one line:
+
+```bash
+printf '%s\n' "$PWD/stt_env/bin/python" > .stark-python
+```
+
 An invalid selected interpreter fails instead of silently using another environment.
 The launcher delegates to the installed operator CLI, which starts uvicorn; the
 pipeline child uses that same selected environment.

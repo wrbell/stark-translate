@@ -78,13 +78,23 @@ def test_pipeline_keeps_model_utils_interface_and_records_provenance(monkeypatch
 
 def _versions(package):
     return {
-        "torch": "2.10.0",
+        "torch": "2.13.0",
         "mlx": "0.32.2",
         "mlx-lm": "0.31.3",
         "mlx-optiq": "0.4.34",
         "silero-vad": "6.2.1",
         "parakeet-mlx": "0.5.2",
     }.get(package, "99.0")
+
+
+def test_mac_preflight_rejects_rollback_torch_version(monkeypatch):
+    monkeypatch.setattr(
+        preflight.importlib.metadata, "version", lambda name: "2.10.0" if name == "torch" else _versions(name)
+    )
+    result = preflight.check_dependencies("mlx")
+    assert result["status"] == "fail"
+    assert "torch>=2.13,<2.14 (installed 2.10.0)" in result["detail"]
+    assert "Install stark-translate[mlx]" in result["detail"]
 
 
 def test_mac_preflight_requires_exact_silero_version(monkeypatch):

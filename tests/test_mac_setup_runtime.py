@@ -196,40 +196,114 @@ def test_missing_dependency_blocks_preflight_without_importing_models():
     assert "stark-translate[mlx]" in result["detail"]
 
 
-@pytest.mark.parametrize(
-    "explicit,active,conda,expected",
-    [
-        (True, True, True, "explicit"),
-        (False, True, True, "active"),
-        (False, False, True, "conda"),
-        (False, False, False, "stt_env"),
-    ],
-)
-def test_launch_environment_precedence(tmp_path, explicit, active, conda, expected):
-    env = {k: v for k, v in os.environ.items() if k not in {"STARK_PYTHON", "VENV", "VIRTUAL_ENV", "CONDA_PREFIX"}}
-    for name in ["explicit", "active", "conda", "stt_env", "venv"]:
-        binary = tmp_path / name / "bin" / "python"
-        binary.parent.mkdir(parents=True)
-        binary.symlink_to(sys.executable)
-    if explicit:
-        env["STARK_PYTHON"] = str(tmp_path / "explicit" / "bin" / "python")
-    if active:
-        env["VIRTUAL_ENV"] = str(tmp_path / "active")
-    if conda:
-        env["CONDA_PREFIX"] = str(tmp_path / "conda")
-    result = subprocess.check_output(
+def _pointer_result(root, env):
+    return subprocess.run(
         [
             "bash",
-            "-c",
-            'source "$1"; stark_resolve_python "$2"',
+            "-ec",
+            'source "$1"; stark_apply_python_pointer "$2"; stark_resolve_python "$2"',
             "test",
             str(ROOT / "scripts/runtime_env.sh"),
-            str(tmp_path),
+            str(root),
         ],
         env=env,
         text=True,
+        capture_output=True,
     )
-    assert result.strip() == str(tmp_path / expected / "bin" / "python")
+
+
+def _clean_runtime_env():
+    return {k: v for k, v in os.environ.items() if k not in {"STARK_PYTHON", "VENV", "VIRTUAL_ENV", "CONDA_PREFIX"}}
+
+
+@pytest.mark.parametrize("expected", ["explicit", "target", "pointer", "active", "conda", "stt_env", "venv"])
+def test_launch_environment_precedence(tmp_path, expected):
+    env = _clean_runtime_env()
+    layers = ["explicit", "target", "pointer", "active", "conda", "stt_env", "venv"]
+    available = layers[layers.index(expected) :]
+    for name in available:
+        binary = tmp_path / name / "bin" / "python"
+        binary.parent.mkdir(parents=True)
+        binary.symlink_to(sys.executable)
+    for name, variable in [
+        ("explicit", "STARK_PYTHON"),
+        ("target", "VENV"),
+        ("active", "VIRTUAL_ENV"),
+        ("conda", "CONDA_PREFIX"),
+    ]:
+        if name in available:
+            env[variable] = str(tmp_path / name / "bin/python" if name == "explicit" else tmp_path / name)
+    if "pointer" in available:
+        (tmp_path / ".stark-python").write_text(str(tmp_path / "pointer/bin/python") + "\n")
+    result = _pointer_result(tmp_path, env)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == str(tmp_path / expected / "bin/python")
+    if expected not in ("explicit", "target"):
+        assert result.stderr == ""
+
+
+@pytest.mark.parametrize("style", ["relative", "tilde", "crlf", "no-newline"])
+def test_pointer_resolves_relative_tilde_and_crlf(tmp_path, style):
+    root = tmp_path / "project"
+    root.mkdir()
+    binary = root / "pointer env/bin/python"
+    binary.parent.mkdir(parents=True)
+    binary.symlink_to(sys.executable)
+    path = {
+        "relative": "pointer env/bin/python",
+        "tilde": "~/project/pointer env/bin/python",
+        "crlf": str(binary),
+        "no-newline": str(binary),
+    }[style]
+    ending = "\r\n" if style == "crlf" else "\n"
+    content = ending + "  # interpreter selection  " + ending + " \t " + ending + " \t" + path + "  "
+    if style != "no-newline":
+        content += ending + "/ignored/second/path" + ending
+    (root / ".stark-python").write_bytes(content.encode())
+    env = {**_clean_runtime_env(), "HOME": str(tmp_path)}
+    result = _pointer_result(root, env)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == str(binary)
+    assert result.stderr == ""
+
+
+@pytest.mark.parametrize("content", ["missing/bin/python\n", "", " \n  # comment only\n"])
+def test_missing_pointer_interpreter_fails_naming_pointer_file(tmp_path, content):
+    (tmp_path / ".stark-python").write_text(content)
+    result = _pointer_result(tmp_path, _clean_runtime_env())
+    assert result.returncode == 2
+    assert f"{tmp_path}/.stark-python" in result.stderr
+    expected = "not executable" if content.startswith("missing") else "contains no interpreter path"
+    assert expected in result.stderr
+    assert result.stdout == ""
+
+
+@pytest.mark.parametrize("kind", ["directory", "non-executable"])
+def test_pointer_requires_regular_executable_file(tmp_path, kind):
+    target = tmp_path / "interpreter"
+    if kind == "directory":
+        target.mkdir()
+    else:
+        target.write_text("#!/bin/sh\n")
+        target.chmod(0o644)
+    (tmp_path / ".stark-python").write_text(str(target))
+    result = _pointer_result(tmp_path, _clean_runtime_env())
+    assert result.returncode == 2
+    assert f"interpreter from {tmp_path}/.stark-python is not executable: {target}" in result.stderr
+    assert result.stdout == ""
+
+
+@pytest.mark.parametrize("override", ["STARK_PYTHON", "VENV"])
+def test_pointer_is_ignored_when_explicit_override_is_set(tmp_path, override):
+    binary = tmp_path / "explicit/bin/python"
+    binary.parent.mkdir(parents=True)
+    binary.symlink_to(sys.executable)
+    (tmp_path / ".stark-python").write_text("/missing/interpreter\n")
+    env = {**_clean_runtime_env(), override: str(binary if override == "STARK_PYTHON" else binary.parent.parent)}
+    result = _pointer_result(tmp_path, env)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == str(binary)
+    assert result.stderr == "notice: .stark-python ignored because STARK_PYTHON/VENV is set\n"
 
 
 def test_invalid_active_conda_interpreter_fails_without_fallback(tmp_path):

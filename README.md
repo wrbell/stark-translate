@@ -111,10 +111,11 @@ optional evaluation/diarization dependencies.
 brew install ffmpeg portaudio
 python3.11 -m venv venv
 venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
-venv/bin/python -m pip install '.[mlx]'
+venv/bin/python -m pip install -c constraints/macos-arm64-py311-runtime.txt '.[mlx]'
 venv/bin/stark-translate setup --backend mlx    # Mac defaults, both languages; --include e2b tts translategemma
 venv/bin/stark-translate doctor --backend mlx --lang en
-VENV="$PWD/venv" ./run_operator.sh              # Open /operator/ on port 9000
+printf '%s\n' "$PWD/venv/bin/python" > .stark-python   # launcher pointer; rollback: point it at stt_env/bin/python
+./run_operator.sh              # Open /operator/ on port 9000
 
 # NVIDIA (Linux)
 python3.11 -m venv venv

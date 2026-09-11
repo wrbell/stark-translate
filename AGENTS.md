@@ -12,7 +12,7 @@
 > Current integration and delivery state is recorded in [implementation status](docs/mac_implementation_status.md).
 > The last published release recorded here is **v2026.13**. Source integration,
 > release publication and service certification are separate; PyPI/package artifacts
-> and release tags remain pending by user choice. Do not recreate `stt_env`.
+> and release tags remain pending by user choice. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`.
 >
 > Paired human guide: [`CLAUDE.md`](CLAUDE.md) (same content, human-facing links).
 >

@@ -13,7 +13,7 @@
 > The last published release is **v2026.14.0.0**, tagged 2026-09-11 on `50f81c6` (GitHub Release with
 > Mac/NVIDIA/Windows ZIPs and the MSI; overnight lanes #199–#203 included). Source integration,
 > release publication and service certification are separate. PyPI publication still fails until the
-> trusted publisher is mapped; the GHCR image `ghcr.io/wrbell/stark-translate:v2026.14.0.0` was built after the Dockerfile fixes in PRs #203/#204. Do not recreate `stt_env`.
+> trusted publisher is mapped; the GHCR image `ghcr.io/wrbell/stark-translate:v2026.14.0.0` was built after the Dockerfile fixes in PRs #203/#204. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`.
 >
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) ·
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·

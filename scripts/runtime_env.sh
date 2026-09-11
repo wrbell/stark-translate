@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sourced by launch/bootstrap scripts. Explicit override > activated env > repo env.
+# STARK_PYTHON > VENV > .stark-python > VIRTUAL_ENV > CONDA_PREFIX > stt_env > venv > python3.
 stark_resolve_python() {
     local root="$1" candidate
     if [ -n "${STARK_PYTHON:-}" ]; then
@@ -22,4 +22,38 @@ stark_resolve_python() {
         return 2
     fi
     printf '%s\n' "$candidate"
+}
+
+# Apply in the caller's shell before resolving Python in a command substitution.
+stark_apply_python_pointer() {
+    local root="$1" line candidate=""
+    if [ -n "${STARK_PYTHON:-}" ] || [ -n "${VENV:-}" ]; then
+        if [ -e "$root/.stark-python" ]; then
+            printf '%s\n' 'notice: .stark-python ignored because STARK_PYTHON/VENV is set' >&2
+        fi
+        return 0
+    fi
+    [ -e "$root/.stark-python" ] || return 0
+    while IFS= read -r line || [ -n "$line" ]; do
+        line="${line%$'\r'}"
+        line="${line#"${line%%[![:space:]]*}"}"
+        line="${line%"${line##*[![:space:]]}"}"
+        case "$line" in
+            ""|\#*) continue ;;
+            \~/*) candidate="$HOME/${line#\~/}" ;;
+            /*) candidate="$line" ;;
+            *) candidate="$root/$line" ;;
+        esac
+        break
+    done < "$root/.stark-python"
+    if [ -z "$candidate" ]; then
+        printf 'ERROR: %s/.stark-python contains no interpreter path\n' "$root" >&2
+        return 2
+    fi
+    if [ ! -f "$candidate" ] || [ ! -x "$candidate" ]; then
+        printf 'ERROR: interpreter from %s/.stark-python is not executable: %s\n' "$root" "$candidate" >&2
+        return 2
+    fi
+    export STARK_PYTHON="$candidate"
+    return 0
 }

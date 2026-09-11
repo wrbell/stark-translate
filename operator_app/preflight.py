@@ -72,12 +72,12 @@ def check_dependencies(
         requirements.update({"speechbrain": "1.0", "torchaudio": "2.6", "soundfile": "0.12", "scikit-learn": "1.4"})
     if backend == "mlx":
         requirements.update(
-            {"torch": ">=2.10,<2.11", "mlx": ">=0.32.2,<0.33", "mlx-lm": ">=0.31.3,<0.32", "mlx-optiq": ">=0.4.34,<0.5"}
+            {"torch": ">=2.13,<2.14", "mlx": ">=0.32.2,<0.33", "mlx-lm": ">=0.31.3,<0.32", "mlx-optiq": ">=0.4.34,<0.5"}
         )
     if backend == "mlx":
         requirements["silero-vad"] = "==6.2.1"
     if diarize:
-        requirements["torchaudio"] = ">=2.10,<2.11"
+        requirements["torchaudio"] = ">=2.11,<2.12"
     from packaging.specifiers import SpecifierSet
 
     missing = []

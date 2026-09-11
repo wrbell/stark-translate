@@ -19,6 +19,7 @@ cd "$ROOT"
 HOST="${HOST:-127.0.0.1}"
 PORT="${PORT:-9000}"
 source "$ROOT/scripts/runtime_env.sh"
+stark_apply_python_pointer "$ROOT"
 PYTHON="$(stark_resolve_python "$ROOT")"
 
 export STARK_PROJECT_ROOT="$ROOT"
@@ -31,5 +32,5 @@ if ! "$PYTHON" -c 'import uvicorn' >/dev/null 2>&1; then
     exit 2
 fi
 
-echo "starting operator at http://$HOST:$PORT (logs: $STARK_OPERATOR_LOG_DIR)"
+echo "starting operator at http://$HOST:$PORT (logs: $STARK_OPERATOR_LOG_DIR; python: $PYTHON $("$PYTHON" --version 2>&1 || true))"
 exec "$PYTHON" -m operator_app.cli operator --no-browser --host "$HOST" --port "$PORT"
