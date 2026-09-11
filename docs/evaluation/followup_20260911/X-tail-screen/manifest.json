@@ -1,0 +1,24 @@
+{
+  "clips": [
+    {
+      "path": "clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17",
+      "duration": 360.0,
+      "lang": "en",
+      "offset_s": 1290,
+      "rms": 0.1316,
+      "speech_coverage": 0.895,
+      "clip_key": "A"
+    },
+    {
+      "path": "clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c",
+      "duration": 360.0,
+      "lang": "en",
+      "offset_s": 1170,
+      "rms": 0.1605,
+      "speech_coverage": 0.756,
+      "clip_key": "B"
+    }
+  ]
+}

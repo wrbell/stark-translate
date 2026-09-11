@@ -46,3 +46,15 @@ Full tables including smart-cut, hard-cut and EOF endpoints: `stages_752ab9a.md`
 Arithmetic consequence: with the 0.5 s trigger fixed, STT + translation must fall below ~0.5 s combined at the median to reach a sub-second median. Neither a 15 % translation gain nor a 15 % STT gain alone gets there; both together (≈ −120 ms) still leave the median near 1.3 s. This is why the sub-second goal remained unmet across all screens, and why the next credible levers are the p95 tails (Metal contention between preview and final work), not the medians.
 
 This is engineering attribution on machine-timed replays. It does not certify human quality, physical display timing or live-microphone behaviour.
+
+## Correction (2026-09-11, afternoon)
+
+The "Gemma" cohort above is a mixture. These cohorts predate the `final_translation_route` field, and the diagnostics writer
+fills `spanish_gemma` = `spanish_marian` on Marian-routed finals, so the route proxy in `tools/silence_final_stages.py`
+labelled every silence final "gemma" and the statement that all 401 were Gemma E4B finals is wrong. Re-splitting the
+752ab9a cohort by the `tps_a == 0` + identical-text proxy gives 137 Marian-routed finals (total p50/p95 921 / 1 773 ms,
+translation 27 / 54 ms) and 264 Gemma-routed finals (1 751 / 3 289 ms, translation 759 / 1 420 ms); a stricter
+no-`gen_tokens_a` proxy gives 196 / 205 with 927 / 1 873 vs 1 880 / 3 324 ms. The Gemma final translation median is
+therefore ~0.76–0.82 s, not 0.38 s, and the sub-second goal is a Gemma-route problem. The tool now prefers
+`final_translation_route` when present (PR #209) and reports which source it used. The original tables are retained
+unchanged as the record of what was computed.

@@ -1,0 +1,122 @@
+[
+  {
+    "tag": "ts0911_A_draft_g3_r0",
+    "cand_finals": 59,
+    "ctl_finals": 61,
+    "english_matched": 59,
+    "english_matched_share": 0.967,
+    "spanish_identical": 53,
+    "matched_pairs": 59,
+    "spanish_identical_share": 0.898
+  },
+  {
+    "tag": "ts0911_A_serial_finals_r0",
+    "cand_finals": 61,
+    "ctl_finals": 61,
+    "english_matched": 61,
+    "english_matched_share": 1.0,
+    "spanish_identical": 61,
+    "matched_pairs": 61,
+    "spanish_identical_share": 1.0
+  },
+  {
+    "tag": "ts0911_A_serial_finals_r1",
+    "cand_finals": 61,
+    "ctl_finals": 61,
+    "english_matched": 61,
+    "english_matched_share": 1.0,
+    "spanish_identical": 61,
+    "matched_pairs": 61,
+    "spanish_identical_share": 1.0
+  },
+  {
+    "tag": "ts0911_A_draft_g3_r1",
+    "cand_finals": 60,
+    "ctl_finals": 61,
+    "english_matched": 60,
+    "english_matched_share": 0.984,
+    "spanish_identical": 54,
+    "matched_pairs": 60,
+    "spanish_identical_share": 0.9
+  },
+  {
+    "tag": "ts0911_A_serial_finals_r2",
+    "cand_finals": 60,
+    "ctl_finals": 61,
+    "english_matched": 60,
+    "english_matched_share": 0.984,
+    "spanish_identical": 60,
+    "matched_pairs": 60,
+    "spanish_identical_share": 1.0
+  },
+  {
+    "tag": "ts0911_A_draft_g3_r2",
+    "cand_finals": 61,
+    "ctl_finals": 61,
+    "english_matched": 61,
+    "english_matched_share": 1.0,
+    "spanish_identical": 55,
+    "matched_pairs": 61,
+    "spanish_identical_share": 0.902
+  },
+  {
+    "tag": "ts0911_B_draft_g3_r0",
+    "cand_finals": 80,
+    "ctl_finals": 80,
+    "english_matched": 80,
+    "english_matched_share": 1.0,
+    "spanish_identical": 78,
+    "matched_pairs": 80,
+    "spanish_identical_share": 0.975
+  },
+  {
+    "tag": "ts0911_B_serial_finals_r0",
+    "cand_finals": 80,
+    "ctl_finals": 80,
+    "english_matched": 80,
+    "english_matched_share": 1.0,
+    "spanish_identical": 80,
+    "matched_pairs": 80,
+    "spanish_identical_share": 1.0
+  },
+  {
+    "tag": "ts0911_B_serial_finals_r1",
+    "cand_finals": 80,
+    "ctl_finals": 80,
+    "english_matched": 80,
+    "english_matched_share": 1.0,
+    "spanish_identical": 80,
+    "matched_pairs": 80,
+    "spanish_identical_share": 1.0
+  },
+  {
+    "tag": "ts0911_B_draft_g3_r1",
+    "cand_finals": 75,
+    "ctl_finals": 80,
+    "english_matched": 75,
+    "english_matched_share": 0.938,
+    "spanish_identical": 73,
+    "matched_pairs": 75,
+    "spanish_identical_share": 0.973
+  },
+  {
+    "tag": "ts0911_B_serial_finals_r2",
+    "cand_finals": 80,
+    "ctl_finals": 80,
+    "english_matched": 80,
+    "english_matched_share": 1.0,
+    "spanish_identical": 80,
+    "matched_pairs": 80,
+    "spanish_identical_share": 1.0
+  },
+  {
+    "tag": "ts0911_B_draft_g3_r2",
+    "cand_finals": 80,
+    "ctl_finals": 80,
+    "english_matched": 80,
+    "english_matched_share": 1.0,
+    "spanish_identical": 78,
+    "matched_pairs": 80,
+    "spanish_identical_share": 0.975
+  }
+]
