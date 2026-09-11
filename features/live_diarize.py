@@ -228,6 +228,26 @@ class FakeEmbedder:
         return [1.0 - mean_abs, mean_abs]
 
 
+def _load_wav_array(wav_path: str):
+    """Read a WAV as a ``(channels, samples)`` float32 array.
+
+    torchaudio >= 2.9 delegates ``torchaudio.load`` to TorchCodec, which the
+    ``diarization`` extra does not install; ``soundfile`` (which it does) is used
+    first and torchaudio only as a fallback.
+    """
+    import numpy as np
+
+    try:
+        import soundfile as sf
+    except ImportError:
+        import torchaudio
+
+        signal, _fs = torchaudio.load(wav_path)
+        return np.ascontiguousarray(signal.detach().cpu().numpy(), dtype=np.float32)
+    data, _sr = sf.read(wav_path, dtype="float32", always_2d=True)
+    return np.ascontiguousarray(data.T, dtype=np.float32)
+
+
 def _load_speechbrain_embedder():
     """Public ECAPA (Apache-2.0, not gated). Returns None if import/load fails."""
     try:
@@ -271,9 +291,9 @@ def _load_speechbrain_embedder():
     class _SB:
         def embed(self, wav_path: str) -> list[float]:
             import numpy as np
-            import torchaudio
+            import torch
 
-            signal, _fs = torchaudio.load(wav_path)
+            signal = torch.from_numpy(_load_wav_array(wav_path))
             emb = classifier.encode_batch(signal)
             arr = emb.squeeze().detach().cpu().numpy()
             return [float(x) for x in np.asarray(arr).reshape(-1)]

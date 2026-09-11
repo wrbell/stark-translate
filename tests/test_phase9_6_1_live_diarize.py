@@ -465,3 +465,43 @@ class TestPipelineHook:
         assert "speaker" not in result
         result.update(speaker_field_for_result(True, "Speaker A"))
         assert result["speaker"] == "Speaker A"
+
+
+def test_load_wav_array_uses_soundfile_not_torchaudio(tmp_path, monkeypatch):
+    """The diarization extra ships soundfile, not TorchCodec; WAV reads must not need torchaudio.load."""
+    import sys
+    import wave
+
+    import numpy as np
+
+    from features import live_diarize
+
+    wav = tmp_path / "two_channel.wav"
+    rate = 16000
+    frames = (np.sin(np.linspace(0, 200, rate // 4)) * 0.5 * 32767).astype("<i2")
+    with wave.open(str(wav), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(rate)
+        handle.writeframes(frames.tobytes())
+
+    class _NoTorchaudio:
+        def __getattr__(self, name):  # pragma: no cover - any attribute access is a failure
+            raise AssertionError("torchaudio.load must not be used when soundfile is available")
+
+    class _WaveSoundfile:
+        """Minimal soundfile stand-in (conftest stubs the real module): reads PCM16 WAV via ``wave``."""
+
+        @staticmethod
+        def read(path, dtype="float32", always_2d=True):
+            with wave.open(str(path), "rb") as handle:
+                pcm = np.frombuffer(handle.readframes(handle.getnframes()), dtype="<i2")
+                data = (pcm.astype(dtype) / 32768.0).reshape(-1, handle.getnchannels())
+                return data, handle.getframerate()
+
+    monkeypatch.setitem(sys.modules, "torchaudio", _NoTorchaudio())
+    monkeypatch.setitem(sys.modules, "soundfile", _WaveSoundfile())
+    array = live_diarize._load_wav_array(str(wav))
+    assert array.shape == (1, rate // 4)
+    assert array.dtype == np.float32
+    assert abs(float(np.abs(array).max()) - 0.5) < 0.01
