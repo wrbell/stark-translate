@@ -287,3 +287,17 @@ def test_serial_finals_is_strictly_opt_in():
         assert LatencyExperiments.from_env({"STARK_EXPERIMENT_SERIAL_FINALS": value}).serial_finals is False
     with pytest.raises(ValueError, match="STARK_EXPERIMENT_SERIAL_FINALS"):
         LatencyExperiments.from_env({"STARK_EXPERIMENT_SERIAL_FINALS": "yes"})
+
+
+def test_partial_recheck_translation_is_strictly_opt_in():
+    assert LatencyExperiments.from_env({}).partial_recheck_translation is False
+    for raw, expected in [("true", True), ("1", True), ("false", False), ("0", False)]:
+        assert (
+            LatencyExperiments.from_env(
+                {"STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION": raw}
+            ).partial_recheck_translation
+            is expected
+        )
+    for raw in ("yes", "2", "", " true "):
+        with pytest.raises(ValueError, match="PARTIAL_RECHECK_TRANSLATION"):
+            LatencyExperiments.from_env({"STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION": raw})

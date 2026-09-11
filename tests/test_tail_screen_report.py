@@ -129,22 +129,33 @@ def test_rejected_screen_percentiles_gates_identity_and_secondary(tmp_path):
     assert candidate["cohorts"]["silence"]["gemma"]["p95"] == 2100
     assert candidate["n_by_route"] == {"gemma": 6, "marian": 4, "unknown": 2}
     gates = candidate["gates"]
-    assert {key: g["pass"] for key, g in gates.items()} == dict.fromkeys([f"G{i}" for i in range(1, 8)], False)
+    assert {key: g["pass"] for key, g in gates.items()} == {
+        **dict.fromkeys([f"G{i}" for i in range(1, 8)], False),
+        "G4": True,
+    }
     assert gates["G1"]["limit"] == 1700
     assert gates["G2"]["silence"]["limit"] == 2100
     assert gates["G2"]["cuts"]["limit"] == 700
     assert gates["G3"]["limit"] == 1050
     assert gates["G5"]["minimum"] == pytest.approx(107.8)
     identity = gates["G4"]["comparisons"][0]
-    assert identity["identical_share"] == identity["english_identical_share"] == 5 / 6
+    assert identity["identical_share"] == 1
+    assert identity["english_identical_share"] == 5 / 6
+    assert identity["aligned_length"] == 5
     assert identity["chunk_count_difference"] == 0
     assert identity["differences"] == [
         {
             "row_index": 1,
             "fields": ["spanish_a", "english"],
             "candidate": {"chunk_id": "1", "spanish_a": "Distinto", "english": "Different"},
+            "control": None,
+        },
+        {
+            "row_index": 1,
+            "fields": ["spanish_a", "english"],
+            "candidate": None,
             "control": {"chunk_id": "1", "spanish_a": "Español 1", "english": "English 1"},
-        }
+        },
     ]
     assert gates["G4"]["comparisons"][1]["pass"]
     assert not gates["G6"]["runs"][0]["pageouts_pass"]
@@ -164,7 +175,7 @@ def test_rejected_screen_percentiles_gates_identity_and_secondary(tmp_path):
     assert secondary["stages_by_route"]["gemma"]["gen_tokens_a"]["p95"] == 24
     outcome = report["outcomes"]["candidate"]
     assert outcome["outcome"] == "REJECTED"
-    assert outcome["failing_gates"] == [f"A:G{i}" for i in range(1, 8)]
+    assert outcome["failing_gates"] == [f"A:G{i}" for i in range(1, 8) if i != 4]
     assert outcome["p95_claim_eligible"] is False
     assert outcome["p95_claim_reason"] == "screen without p95 claim"
     markdown = render_markdown(report)
@@ -240,6 +251,7 @@ def test_filters_counters_fallback_and_unaligned_csv_rows(tmp_path):
     assert observed["experiment_counters_source"] == "diagnostics_jsonl.session_summary"
     assert observed["experiment_counters"] == {"partial_suppressed_backlog": 7}
     identity = report["clips"]["A"]["arms"]["candidate"]["gates"]["G4"]["comparisons"][0]
+    assert identity["english_identical_share"] == 6 / 7
     assert identity["chunk_count_difference"] == 1
     assert identity["aligned_length"] == 6
     assert identity["identical_share"] == 1
@@ -307,3 +319,22 @@ def test_g1_absolute_reduction_alternative_and_unknown_route_exclusion(tmp_path)
     assert gates["G1"] == {"pass": True, "candidate": 3600, "control": 4000, "limit": 3700}
     assert not gates["G2"]["pass"]
     assert gates["G2"]["silence"]["candidate"] == 9000
+
+
+def test_identity_survives_one_extra_early_chunk():
+    from tools.tail_screen_report import _identity
+
+    rows = [{"chunk_id": str(i), "english": f"English {i}", "spanish_a": f"Español {i}"} for i in range(6)]
+    candidate = [rows[0], {"chunk_id": "extra", "english": "Extra", "spanish_a": "Adicional"}, *rows[1:]]
+    result = _identity({"tag": "candidate", "csv_rows": candidate}, {"tag": "control", "csv_rows": rows})
+    assert result["identical_share"] == 1.0
+    assert result["english_identical_share"] == 6 / 7
+    assert result["aligned_length"] == 6 and result["pass"]
+    assert len(result["differences"]) == 1
+    assert result["differences"][0]["row_index"] == 1
+    assert result["differences"][0]["control"] is None
+    candidate[3] = {**candidate[3], "spanish_a": "Changed translation"}
+    result = _identity({"tag": "candidate", "csv_rows": candidate}, {"tag": "control", "csv_rows": rows})
+    assert result["identical_share"] == 5 / 6
+    assert len(result["differences"]) == 2
+    assert result["differences"][0]["fields"] == ["spanish_a"]

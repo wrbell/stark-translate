@@ -1160,7 +1160,9 @@ def load_whisper(backend="mlx"):
         # process_partial dispatch on isinstance(stt_pipe, STTEngine).
         from engines.parakeet_mlx_engine import ParakeetMLXEngine
 
-        engine = ParakeetMLXEngine(model_id=settings.stt.parakeet_mlx_model)
+        engine = ParakeetMLXEngine(
+            model_id=settings.stt.parakeet_mlx_model, cache_limit_mb=getattr(_latency, "mlx_cache_mb", 256)
+        )
         print(f"[2/6] Loading {engine.model_id} (Parakeet MLX)...")
         t0 = time.time()
         engine.load()  # warm forward on the load thread (thread-local streams)
@@ -1175,7 +1177,7 @@ def load_whisper(backend="mlx"):
         # [P7-4B] Increased from 100MB to 256MB — allows MLX to keep more intermediate
         # computation results cached in Metal memory, reducing recomputation.
         # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
-        mx.set_cache_limit(256 * 1024 * 1024)
+        mx.set_cache_limit(getattr(_latency, "mlx_cache_mb", 256) * 1024 * 1024)
 
         from engines.model_paths import UnpinnedModelError, resolve_model_for_loading
         from engines.stt_fallback import require_mlx_fallback_language
@@ -1646,7 +1648,7 @@ def _start_workers(run_ab=False):
     _stt_worker_proc = multiprocessing.Process(
         target=stt_worker_main,
         args=(child_conn, WHISPER_MODEL_TURBO),
-        kwargs={"source_lang": SOURCE_LANG},
+        kwargs={"source_lang": SOURCE_LANG, "cache_limit_mb": getattr(_latency, "mlx_cache_mb", 256)},
         daemon=True,
     )
     _stt_worker_proc.start()
@@ -1668,6 +1670,7 @@ def _start_workers(run_ab=False):
             "model_family": MODEL_FAMILY,
             "adapter_path": ADAPTER_DIR_A,
             "adapter_b_path": ADAPTER_DIR_B,
+            "cache_limit_mb": getattr(_latency, "mlx_cache_mb", 256),
             "terminology_prompt": settings.translation.terminology_prompt,
         },
         daemon=True,
@@ -1955,6 +1958,8 @@ def translate_cuda_gemma_streaming(engine, text, chunk_id):
 #   ("done", chunk_id, final_text, gen_tps, latency_ms) — generation complete
 _stream_token_queue = None  # set to asyncio.Queue in async context
 _stream_loop = None  # event loop reference for thread-safe queue access
+_first_stream_chunks = set()
+_first_stream_lock = threading.Lock()
 
 STREAM_TOKEN_BATCH_SIZE = 3  # Send every N tokens to reduce WebSocket overhead
 
@@ -1964,6 +1969,11 @@ def _enqueue_stream_token(item):
     asyncio.Queue is not thread-safe, so we use call_soon_threadsafe
     from the executor thread to schedule the put on the main loop.
     """
+    if _latency_trace.enabled and item[0] == "token":
+        with _first_stream_lock:
+            if item[1] not in _first_stream_chunks:
+                _first_stream_chunks.add(item[1])
+                _latency_trace.record("first_stream_token", chunk_id=item[1], tokens=item[3])
     if _stream_token_queue is None or _stream_loop is None:
         return
     try:
@@ -2060,6 +2070,7 @@ def _experiment_snapshot():
                 "warmup_suppressed_no_pending",
                 "warmup_suppressed_model_lock",
                 "partial_suppressed_final_decode",
+                "partial_suppressed_translation_running",
                 "partial_suppressed_final_pending",
                 "partial_suppressed_backlog",
                 "partial_suppressed_in_flight",
@@ -2100,7 +2111,7 @@ def _run_tracked_stt(kind, function, *args, trace_fields=None):
             **(trace_fields or {}),
             **activity_fields,
         }
-        with _latency_trace.span("physical_stt", **fields):
+        with _latency_trace.span("physical_stt", measure_cpu=True, **fields):
             return function(*args)
     finally:
         with _experiment_lock:
@@ -2779,6 +2790,9 @@ async def process_partial(
         # Admission is checked on the physical worker, not when a Future is queued.
         # This works with both ordinary pools and the optional latest-only owner.
         def _execute_partial():
+            if _latency.partial_recheck_translation and _translation_active.is_set():
+                _latency_event("partial_suppressed_translation_running", utterance_id=utterance_id)
+                return _PARTIAL_DEFERRED
             started = time.perf_counter()
             margin = _latency.partial_deadline_margin_ms
             predicted = None
@@ -3266,7 +3280,19 @@ async def _pipeline_translate_and_finalize(
 
                 def timed_translate(fn, *args):
                     timing.translation_started = timing.translation_started or time.perf_counter()
-                    return fn(*args)
+                    started = time.perf_counter()
+                    cpu_started = time.thread_time()
+                    try:
+                        return fn(*args)
+                    finally:
+                        _latency_trace.record(
+                            "physical_translation_finished",
+                            chunk_id=cid,
+                            utterance_id=timing.utterance_id,
+                            elapsed_ms=(time.perf_counter() - started) * 1000,
+                            cpu_ms=(time.thread_time() - cpu_started) * 1000,
+                            route="marian" if fn is translate_marian else "gemma",
+                        )
 
                 def submit_translate(pool, fn, *args):
                     nonlocal final_translation_route
@@ -3335,11 +3361,11 @@ async def _pipeline_translate_and_finalize(
                         # A/B mode: stream 4B + speculative-decode 12B (truly concurrent)
                         task_a = submit_translate(
                             _pipeline_pool,
-                            lambda: timed_translate(translate_cuda_gemma_streaming, mlx_a_model, english, cid),
+                            lambda: translate_cuda_gemma_streaming(mlx_a_model, english, cid),
                         )
                         task_b = submit_translate(
                             _pipeline_pool,
-                            lambda: timed_translate(_translate_cuda_b, mlx_b_model, english),
+                            lambda: _translate_cuda_b(mlx_b_model, english),
                         )
                         spanish_a, lat_a, tps_a = await task_a
                         qe_a = qe_score(english, spanish_a)
@@ -3365,7 +3391,7 @@ async def _pipeline_translate_and_finalize(
                         # 4B-only: streaming translation
                         spanish_a, lat_a, tps_a = await run_translate(
                             _pipeline_pool,
-                            lambda: timed_translate(translate_cuda_gemma_streaming, mlx_a_model, english, cid),
+                            lambda: translate_cuda_gemma_streaming(mlx_a_model, english, cid),
                         )
                         qe_a = qe_score(english, spanish_a)
                     else:
@@ -3445,6 +3471,8 @@ async def _pipeline_translate_and_finalize(
 
             finally:
                 _translation_active.clear()
+                with _first_stream_lock:
+                    _first_stream_chunks.discard(cid)
         timing.translation_started = timing.translation_started or timing.translation_lock_acquired
         timing.translation_finished = time.perf_counter()
         now = time.perf_counter()

@@ -33,13 +33,14 @@ class LatencyTrace:
             self._records.append(record)
 
     @contextmanager
-    def span(self, event: str, **fields):
+    def span(self, event: str, *, measure_cpu: bool = False, **fields):
         """Record physical lifetime including failures; no extra device synchronization."""
         if not self.enabled:
             yield
             return
         started = time.perf_counter()
         self.record(event + "_started", **fields)
+        cpu_started = time.thread_time() if measure_cpu else None
         failed = False
         try:
             yield
@@ -47,6 +48,8 @@ class LatencyTrace:
             failed = True
             raise
         finally:
+            if cpu_started is not None:
+                fields["cpu_ms"] = (time.thread_time() - cpu_started) * 1000
             self.record(event + "_finished", elapsed_ms=(time.perf_counter() - started) * 1000, failed=failed, **fields)
 
     def snapshot(self) -> dict:

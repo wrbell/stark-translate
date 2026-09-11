@@ -194,3 +194,98 @@ def test_bounded_worker_terminates_hanging_child(tmp_path):
     with (tmp_path / "worker.log").open("w") as log, pytest.raises(subprocess.TimeoutExpired):
         bench.run_child([sys.executable, "-c", "import time; time.sleep(60)"], cwd=tmp_path, stdout=log, timeout=0.05)
     assert time.monotonic() - started < 3
+
+
+@pytest.fixture
+def real_wavfile(monkeypatch):
+    # conftest mocks scipy as well as ML dependencies. Temporarily import the
+    # actual installed reader/writer; never substitute a fake PCM implementation.
+    saved = {name: module for name, module in sys.modules.items() if name == "scipy" or name.startswith("scipy.")}
+    for name in saved:
+        del sys.modules[name]
+    try:
+        yield pytest.importorskip("scipy.io.wavfile", reason="clip preparation requires installed scipy.io.wavfile")
+    finally:
+        for name in list(sys.modules):
+            if name == "scipy" or name.startswith("scipy."):
+                del sys.modules[name]
+        sys.modules.update(saved)
+
+
+def _raw_wavs(tmp_path):
+    import struct
+    import wave
+
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    for name in ("Gospel_Message_one.wav", "Gospel_Message_two.wav", "spanish_test_2cor1.wav"):
+        with wave.open(str(raw / name), "wb") as wav:
+            wav.setnchannels(2)
+            wav.setsampwidth(2)
+            wav.setframerate(100)
+            wav.writeframes(struct.pack("<400h", *range(400)))
+    return raw
+
+
+@pytest.mark.parametrize(
+    "source,lang,offset", [("Gospel_Message_two.wav", "en", 0.5), ("spanish_test_2cor1.wav", "es", 0.0)]
+)
+def test_prepare_single_source_preserves_pcm_and_spanish_offset(tmp_path, source, lang, offset, real_wavfile):
+    import wave
+
+    raw = _raw_wavs(tmp_path)
+    replay = tmp_path / "replay"
+    manifest = bench.prepare_clips(raw, replay, 1, 0.5, source=source, clip_key="clip-1_A")
+    assert manifest.name == "manifest_clip-1_A.json"
+    entries = json.loads(manifest.read_text())["clips"]
+    assert len(entries) == 1
+    assert entries[0]["lang"] == lang and entries[0]["offset_s"] == offset
+    assert entries[0]["duration"] == 1
+    assert sorted(p.name for p in replay.iterdir()) == sorted([source, manifest.name])
+    with wave.open(str(raw / source), "rb") as original, wave.open(str(replay / source), "rb") as cut:
+        assert (cut.getnchannels(), cut.getsampwidth(), cut.getframerate()) == (2, 2, 100)
+        original.setpos(int(offset * 100))
+        assert cut.readframes(100) == original.readframes(100)
+
+
+def test_prepare_default_manifest_and_selection_validation(tmp_path, real_wavfile):
+    raw = _raw_wavs(tmp_path)
+    replay = tmp_path / "replay"
+    manifest = bench.prepare_clips(raw, replay, 1, 0.5)
+    expected = []
+    for name in ("Gospel_Message_one.wav", "Gospel_Message_two.wav", "spanish_test_2cor1.wav"):
+        import hashlib
+
+        expected.append(
+            {
+                "path": name,
+                "sha256": hashlib.sha256((replay / name).read_bytes()).hexdigest(),
+                "duration": 1.0,
+                "lang": "es" if name.startswith("spanish") else "en",
+                "offset_s": 0.0 if name.startswith("spanish") else 0.5,
+            }
+        )
+    assert manifest.name == "manifest.json"
+    assert manifest.read_bytes() == (json.dumps({"clips": expected}, indent=2) + "\n").encode()
+    with pytest.raises(FileNotFoundError, match="missing"):
+        bench.prepare_clips(raw, replay, source="missing.wav")
+    for key in ("", "../bad", "has space"):
+        with pytest.raises(ValueError, match="clip_key"):
+            bench.prepare_clips(raw, replay, source="Gospel_Message_one.wav", clip_key=key)
+    with pytest.raises(ValueError, match="single source"):
+        bench.prepare_clips(raw, replay, clip_key="single")
+    with pytest.raises(ValueError, match="file name"):
+        bench.prepare_clips(raw, replay, source="../outside.wav")
+
+
+def test_prepare_cli_passes_source_and_clip_key(tmp_path, monkeypatch, capsys):
+    from unittest.mock import Mock
+
+    prepare = Mock(return_value=tmp_path / "manifest_slice.json")
+    monkeypatch.setattr(bench, "prepare_clips", prepare)
+    bench.main(
+        ["--prepare", "--source", "spanish_test_2cor1.wav", "--clip-key", "slice", "--seconds", "1", "--offset", "2"]
+    )
+    assert prepare.call_args.args[2:] == (1, 2)
+    assert prepare.call_args.kwargs == {"source": "spanish_test_2cor1.wav", "clip_key": "slice"}
+    assert "manifest_slice.json" in capsys.readouterr().out
