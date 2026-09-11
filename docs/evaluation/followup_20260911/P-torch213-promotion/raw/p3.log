@@ -1,0 +1,47 @@
+=== P3a normalized replays 2026-09-11T15:39:13Z
+--- replay en 15:39:13Z
+  "scope": "Installed older frozen candidate file-replay functionality and dependency-security feasibility only; no causal latency claims; semantic review, browser ACKs, attended devices and matched-control regression pending."
+}
+{"receipt": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/replay-work/torch213_promote_normalized_r1_en/receipt.json", "status": "passed_basic_functionality", "issues": []}
+rc=0
+--- replay es 15:40:16Z
+  "scope": "Installed older frozen candidate file-replay functionality and dependency-security feasibility only; no causal latency claims; semantic review, browser ACKs, attended devices and matched-control regression pending."
+}
+{"receipt": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/replay-work/torch213_promote_normalized_r1_es/receipt.json", "status": "passed_basic_functionality", "issues": []}
+rc=0
+--- validate 15:41:18Z
+{
+  "passed": true,
+  "sessions": [
+    {
+      "id": "torch213_promote_normalized_r1_en",
+      "status": "passed_functionality",
+      "failed_checks": []
+    },
+    {
+      "id": "torch213_promote_normalized_r1_es",
+      "status": "passed_functionality",
+      "failed_checks": []
+    }
+  ]
+}
+=== P3b paired replays 2026-09-11T15:41:18Z
+--- r0 ctl 15:41:18Z py=/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python
+Replay fu0911_t213p_r0_ctl_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 26 chunks
+rc=0
+--- r0 cand 15:44:04Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay fu0911_t213p_r0_cand_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 26 chunks
+rc=0
+--- r1 cand 15:46:49Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay fu0911_t213p_r1_cand_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 26 chunks
+rc=0
+--- r1 ctl 15:49:31Z py=/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python
+Replay fu0911_t213p_r1_ctl_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 26 chunks
+rc=0
+--- r2 ctl 15:52:16Z py=/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python
+Replay fu0911_t213p_r2_ctl_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 26 chunks
+rc=0
+--- r2 cand 15:54:59Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay fu0911_t213p_r2_cand_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 26 chunks
+rc=0
+=== P3 done 2026-09-11T15:57:43Z

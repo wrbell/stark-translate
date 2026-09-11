@@ -141,3 +141,7 @@ Maintain evidence and integration state as future changes occur; retain historic
 measurements and failure logs with their original source boundaries.
 
 Earlier reviewed source `ab66ad2` passed **2,398 tests with four skips** on each Python 3.11/3.12 CI job. Its Mac ZIP contains the patched executable bootstrap and all 152 runtime members match `84832fb`; this is bootstrap delivery evidence, not new inference. #134/#176 closed COMPLETED; #177 closed NOT_PLANNED with MTP promotion still pending. Hindi remains parked separate R&D.
+
+## 2026-09-11 daytime series (followup_20260911)
+
+Recorded in [`docs/evaluation/followup_20260911/STATUS.md`](evaluation/followup_20260911/STATUS.md): the audited Torch 2.13.0 / TorchAudio 2.11.0 runtime was promoted to the launcher default through the `.stark-python` pointer with `stt_env` retained as the one-line rollback (PRs #208, #210; [evidence](evaluation/followup_20260911/P-torch213-promotion/README.md)); PyPI publication was deferred by decision (#207); the declared p95-tail screen rejected both arms — the live E2B draft starves STT on this memory budget and serializing finals only adds wait ([evidence](evaluation/followup_20260911/X-tail-screen/README.md)). The overnight L1 route mixture is corrected in place. Defaults are unchanged; the Sunday attended microphone session on the promoted environment is the remaining gate.

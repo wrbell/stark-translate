@@ -1,0 +1,12 @@
+{
+  "clips": [
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/stark_data/replay/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "sha256": "db11fb4c96131390e178e59e29f5d47f550a0e68047e3401f898094d40babd3f",
+      "duration": 150.0,
+      "lang": "en",
+      "offset_s": 1290,
+      "rms": 0.1376
+    }
+  ]
+}

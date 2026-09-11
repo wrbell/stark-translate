@@ -1,0 +1,5 @@
+{
+  "audited_distributions": 124,
+  "findings": [],
+  "tool": "pip-audit --path site-packages (first-party skipped)"
+}

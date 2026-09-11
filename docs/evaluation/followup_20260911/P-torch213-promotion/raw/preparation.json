@@ -1,0 +1,21 @@
+{
+  "created_at": "2026-09-11T15:35:35.595660+00:00",
+  "source_head": "337790a143b6ea6d5eee7178a11ef9ebfe90e613",
+  "source_root": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/source",
+  "copied_files": [
+    {
+      "path": "dry_run_ab.py",
+      "source_sha256": "36799a551fdfc74f729af7789f1edad7f13f8b85b92faa0705b34093dd296744"
+    },
+    {
+      "path": "models.lock.json",
+      "source_sha256": "3736cfc8c71bb8492d3812e6da6eceabf7f027af7ea14086923277cb5639037f"
+    }
+  ],
+  "production_pyproject_sha256": "39d9cc3b7bcea6df116a66903abdcc3e8c7706d1337903b695fcee208b929119",
+  "candidate_pyproject_sha256": "39d9cc3b7bcea6df116a66903abdcc3e8c7706d1337903b695fcee208b929119",
+  "model_manifest_sha256": "3736cfc8c71bb8492d3812e6da6eceabf7f027af7ea14086923277cb5639037f",
+  "constraints_sha256": "8159db5f25bc0bb902e181ebeec71dbf3a07c3ac9a4b59236551297fb78c4352",
+  "constraints_source": "constraints/macos-arm64-py311-runtime.txt",
+  "note": "Promoted environment built from final main after the promotion source PR; production pyproject carries the audited pins; working stt_env untouched."
+}

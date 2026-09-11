@@ -1,0 +1,65 @@
+=== ts0911_A_ctl_r0 already recorded; skip
+=== ts0911_A_draft_g3_r0 order=1 start 2026-09-11T16:10:43Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_draft_g3_r0_draft_g3_Gospel_Message__12_14_25__5D2rOMvkwrk: 59 chunks
+rc=0 pageouts 229758 -> 232408
+draft peak_metal_bytes=13678304426
+draft pageout delta=2650 (control median delta=1877, limit=20000)
+=== ts0911_A_serial_finals_r0 order=2 start 2026-09-11T16:17:12Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_serial_finals_r0_serial_finals_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 232408 -> 234609
+=== ts0911_A_serial_finals_r1 order=3 start 2026-09-11T16:23:25Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_serial_finals_r1_serial_finals_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 234609 -> 240670
+=== ts0911_A_draft_g3_r1 order=4 start 2026-09-11T16:29:38Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_draft_g3_r1_draft_g3_Gospel_Message__12_14_25__5D2rOMvkwrk: 60 chunks
+rc=0 pageouts 240670 -> 244240
+draft peak_metal_bytes=13425852124
+draft pageout delta=3570 (control median delta=1877, limit=20000)
+=== ts0911_A_ctl_r1 order=5 start 2026-09-11T16:36:07Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 244240 -> 245765
+=== ts0911_A_ctl_r2 order=6 start 2026-09-11T16:42:20Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 245765 -> 247006
+=== ts0911_A_serial_finals_r2 order=7 start 2026-09-11T16:48:33Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_serial_finals_r2_serial_finals_Gospel_Message__12_14_25__5D2rOMvkwrk: 60 chunks
+rc=0 pageouts 247006 -> 247388
+=== ts0911_A_draft_g3_r2 order=8 start 2026-09-11T16:54:46Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_A_draft_g3_r2_draft_g3_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 247388 -> 254978
+draft peak_metal_bytes=13359932770
+draft pageout delta=7590 (control median delta=1525, limit=20000)
+=== ts0911_B_ctl_r0 order=9 start 2026-09-11T17:01:19Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 254978 -> 256708
+=== ts0911_B_draft_g3_r0 order=10 start 2026-09-11T17:07:32Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_draft_g3_r0_draft_g3_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 256708 -> 258758
+draft peak_metal_bytes=13568254774
+draft pageout delta=2050 (control median delta=1730, limit=20000)
+=== ts0911_B_serial_finals_r0 order=11 start 2026-09-11T17:13:56Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_serial_finals_r0_serial_finals_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 258758 -> 259694
+=== ts0911_B_serial_finals_r1 order=12 start 2026-09-11T17:20:08Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_serial_finals_r1_serial_finals_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 259694 -> 261614
+=== ts0911_B_draft_g3_r1 order=13 start 2026-09-11T17:26:21Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_draft_g3_r1_draft_g3_Gospel_Message__2_8_26__BpIELcuh8O0: 75 chunks
+rc=0 pageouts 261614 -> 265866
+draft peak_metal_bytes=13755431200
+draft pageout delta=4252 (control median delta=1730, limit=20000)
+=== ts0911_B_ctl_r1 order=14 start 2026-09-11T17:32:49Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 265866 -> 266940
+=== ts0911_B_ctl_r2 order=15 start 2026-09-11T17:39:01Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 266940 -> 267927
+=== ts0911_B_serial_finals_r2 order=16 start 2026-09-11T17:45:14Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_serial_finals_r2_serial_finals_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 267927 -> 270625
+=== ts0911_B_draft_g3_r2 order=17 start 2026-09-11T17:51:28Z py=/Users/willem/Code/vibes/SRTranslate/venv/bin/python
+Replay ts0911_B_draft_g3_r2_draft_g3_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 270625 -> 274562
+draft peak_metal_bytes=13389399342
+draft pageout delta=3937 (control median delta=1074, limit=20000)
+=== screen done 2026-09-11T17:57:55Z ===
