@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "packet_id": "issue193-natural-transition-preparation-v1",
+  "issue_url": "https://github.com/wrbell/stark-translate/issues/193",
+  "status": "prepared_unexecuted_unreviewed",
+  "prepared_source_revision": "e7af289e04997570f7d957f855fcb763c6defb87",
+  "accepted_onset_fix": "26f854c6c7af6c6144cc95079b95c25df6adf45a",
+  "historical_session": {
+    "session_id": "20260910_043120_839144_en",
+    "source_revision": "752ab9a351815feee4b8cd155f732c588cb30a6c",
+    "pipeline_sha256": "48de525519f8ac900f523ba874084392863b203406ad768f3eaeb73f1b076c36",
+    "wheel_sha256": "7477574d25c91739b6a88ca142a35bf36258599a66671b8dbb32237d1fa852b5",
+    "source_lang": "en",
+    "target_lang": "es",
+    "annotation_status": "none approved; generated captions locate regions only",
+    "per_frame_vad_probability_recorded": false,
+    "per_frame_rms_recorded": false,
+    "trace_enabled": false
+  },
+  "source": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/stark_data/raw/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+    "sha256_as_previously_recorded": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+    "hash_reverified_now": false,
+    "hash_basis": ".cache/overnight-20260910/endurance-preparation/hymn-transition-400-750.json",
+    "current_header_only": {
+      "sample_rate": 16000,
+      "sample_count": 58240848,
+      "channels": 1,
+      "sample_width_bytes": 2,
+      "compression": "NONE",
+      "file_size_bytes": 116481774
+    },
+    "provenance": "Existing natural English Gospel Message recording; original basename carries YouTube ID 5D2rOMvkwrk. No new platform/provenance verification was performed.",
+    "privacy": "Evaluation input retained locally; this packet copies no audio or transcript text.",
+    "training_allowed": false
+  },
+  "existing_crop": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/endurance-preparation/hymn-transition-400-750.wav",
+    "sha256_as_previously_recorded": "7937eb4f0fc2b2c072add522d1b8ebcb65520cf197ff62c47c712a46f29f577e",
+    "hash_reverified_now": false,
+    "source_native_sample_offset": 6400000,
+    "native_sample_rate": 16000,
+    "source_start_s": 400,
+    "source_end_s": 750,
+    "source_sample_start": 6400000,
+    "source_sample_end": 12000000,
+    "source_sample_rate": 16000,
+    "historical_transport_sample_start": 19200000,
+    "historical_transport_sample_end": 36000000,
+    "historical_transport_sample_rate": 48000,
+    "boundary_semantics": "half-open; proposed locator bounds, not approved acoustic labels",
+    "current_header_only": {
+      "sample_rate": 16000,
+      "sample_count": 5600000,
+      "channels": 1,
+      "sample_width_bytes": 2,
+      "compression": "NONE",
+      "file_size_bytes": 11200044
+    },
+    "scope": "Includes first prayer prefix; excludes closing-reply locator and next announcement beyond 750 s."
+  },
+  "current_policy": {
+    "source_constants": {
+      "SAMPLE_RATE": 16000,
+      "VAD_THRESHOLD": 0.3,
+      "MUSIC_THRESHOLD": 0.15,
+      "MUSIC_HOLDOFF": 5.0
+    },
+    "processed_frame_samples": 512,
+    "processed_frame_ms": 32,
+    "enter_hold_consecutive_vad_negative_and_rms_strictly_greater_frames": 156,
+    "enter_hold_quantized_duration_ms": 4992,
+    "nominal_entry_holdoff_s": 5,
+    "exit_hold_consecutive_vad_positive_frames": 15,
+    "exit_hold_quantized_duration_ms": 480,
+    "nominal_recovery_s": 0.5,
+    "speech_probability_comparison": "strictly greater than 0.3",
+    "low_rms_or_vad_positive_resets_entry_streak": true,
+    "vad_negative_resets_recovery_streak": true,
+    "accepted_recovery_preserves_all_15_original_frames": true,
+    "prior_accepted_onset_loss_frames": 14,
+    "prior_accepted_onset_loss_ms": 448,
+    "unaccepted_short_bursts": "suppressed; policy unchanged",
+    "terminal_minimum_final_s": 0.7,
+    "partial_interval_s": 0.6,
+    "silence_trigger_s": 0.5,
+    "max_utterance_s": 8,
+    "source_ledger_scope": "machine dispositions; recovery is intermediate, not a final caption or acoustic recall"
+  },
+  "excluded_private_capture": {
+    "structural_receipt": "docs/evaluation/tts_routing_20260910/raw/acoustic-es-retest-structural-summary.json",
+    "session_id": "20260910_105554_710324_es",
+    "lifecycle_status": "failed",
+    "record_audio": false,
+    "controlled_input": false,
+    "exclusion_reason": "Mixed incidental room/synthetic input, no saved audio and upstream capture gaps; cannot supply natural hymn, Spanish speech, or short-reply references.",
+    "private_content_copied": false
+  },
+  "needed_external_inputs": [
+    "Independent listener labels for natural singing/spoken transition and quiet prayer; uncertain spans retained.",
+    "Natural Spanish transition/quiet prayer/short valid replies and their provenance are not supplied by this English recording.",
+    "Separate EN/ES reviewer-approved short replies where natural local examples cannot be located."
+  ],
+  "artifact_hashes": {
+    "docs/evaluation/overnight_endurance_20260910/fresh-standard-early/snapshot.json": "388d426e55818de1ec7813aa510488fb1dae083b6567af530177a50f08d53c29",
+    ".cache/overnight-20260910/endurance-preparation/hymn-transition-400-750.json": "f99f3699d4624d8f4d1510a08cb097fec73c220b5f984aa320b3e0aba3e8d224",
+    ".cache/overnight-20260910/installed-standard-fixed-endurance/metrics/session_metadata_20260910_043120_839144_en.json": "8a168c7f60000c75e713a06eb5c5109b7eae50fd3fd75aa7795159616fac95af",
+    "docs/evaluation/tts_routing_20260910/raw/acoustic-es-retest-structural-summary.json": "5ea1ef0c7977c426d1d390b7924d93b3db3d414e95dc4f9e4a12208ec2e5e655",
+    "dry_run_ab.py": "090f35d75ac7015255efdfe2ef285592745076858c91843428c46f8427b16585",
+    "tools/music_recovery.py": "ac4dbf98d7b72f38eafec45d9b62a9a1ccfaeeeecc0906da98f01d26634fd11c",
+    "tools/source_coverage.py": "83181bc4c27e0f58fd85c50408e41387be793b617f16d731ab7af8d934c99227",
+    ".cache/mac-en-es-closeout/hymn-capture-preparation/prepare.py": "36abfb3edd2e9f0f63564cc0f029005ec3412765eecc104f6c76f82a512c47a9"
+  },
+  "executed_models": false,
+  "executed_devices": false,
+  "pcm_read_or_copied": false,
+  "human_approved": false,
+  "training_allowed": false
+}

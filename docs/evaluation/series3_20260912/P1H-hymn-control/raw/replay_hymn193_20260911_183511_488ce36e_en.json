@@ -1,0 +1,452 @@
+{
+  "session_id": "hymn193_20260911_183511_488ce36e_en",
+  "clip": {
+    "id": "hymn_transition_400_750",
+    "lang": "en",
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/endurance-preparation/hymn-transition-400-750.wav",
+    "duration": 350,
+    "sha256": "7937eb4f0fc2b2c072add522d1b8ebcb65520cf197ff62c47c712a46f29f577e",
+    "provenance": "retained natural English sermon; annotation unreviewed"
+  },
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/venv/bin/python",
+    "/Users/willem/Code/vibes/SRTranslate/dry_run_ab.py",
+    "--backend",
+    "mlx",
+    "--no-ab",
+    "--lang",
+    "en",
+    "--audio-file",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/endurance-preparation/hymn-transition-400-750.wav",
+    "--session-id",
+    "hymn193_20260911_183511_488ce36e_en",
+    "--ws-port",
+    "57319",
+    "--http-port",
+    "57320",
+    "--profile",
+    "standard",
+    "--no-tts",
+    "--no-record-audio",
+    "--model-family",
+    "gemma4",
+    "--gemma4-size",
+    "e4b",
+    "--no-mts",
+    "--stt-backend",
+    "parakeet-mlx",
+    "--replay-speed",
+    "1",
+    "--exit-after-replay",
+    "--replay-wait-client-seconds",
+    "0",
+    "--vad-backend",
+    "torch",
+    "--vad-threshold",
+    "0.3",
+    "--music-threshold",
+    "0.15",
+    "--music-holdoff",
+    "5",
+    "--silence-trigger",
+    "0.5",
+    "--partial-interval",
+    "0.6",
+    "--gain",
+    "1",
+    "--routing-policy",
+    "legacy",
+    "--terminology-prompt",
+    "none",
+    "--no-idle-warmup-only",
+    "--no-final-aware-partials"
+  ],
+  "returncode": 0,
+  "replay_speed": 1.0,
+  "realtime_latency_eligible": true,
+  "timeout_s": 600,
+  "timed_out": false,
+  "session_lifecycle": {
+    "schema_version": 1,
+    "session_id": "hymn193_20260911_183511_488ce36e_en",
+    "run_id": "da85a549d88d4279a819db8e5c840429",
+    "status": "completed",
+    "pid": 12387,
+    "hostname": "Invicta91.local",
+    "started_at": "2026-09-11T18:35:16.359648+00:00",
+    "git_sha": "dc983c60ea4751ffb30977bc957c65873b805136",
+    "source": {
+      "git_sha": "dc983c60ea4751ffb30977bc957c65873b805136",
+      "pipeline_sha256": "9a5199684929f65af5ea6ac531f15d1b35e9f7926ced762853aebd36e9a33c1c",
+      "package_version": "2026.14.0.0",
+      "package_artifact_hashes": {
+        "sha256": "b7499b7be6eafde57fc6f328fb9ba286d3cb7e470772632a2e631b35ef8f9579"
+      },
+      "package_vcs_commit": null
+    },
+    "pipeline_sha256": "9a5199684929f65af5ea6ac531f15d1b35e9f7926ced762853aebd36e9a33c1c",
+    "persistence": {
+      "submitted": 147,
+      "completed": 147,
+      "pending": 0,
+      "failed": 0,
+      "capacity": 256,
+      "ok": true,
+      "failures": []
+    },
+    "exit_code": 0,
+    "ended_at": "2026-09-11T18:41:17.176565+00:00",
+    "memory": {
+      "scope": "pipeline_process_lifetime",
+      "peak_rss_bytes": 2103476224,
+      "peak_metal_bytes": 9042699162
+    },
+    "models": {
+      "stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+      },
+      "translation_a": {
+        "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+      },
+      "marian": {
+        "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+        "manifest_revision": null,
+        "resolved_revision": null,
+        "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+        "revision_source": "unknown",
+        "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+        "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+        "model_bin_size_bytes": 79567635,
+        "export_manifest": {
+          "sha256": "a2252e22ba84cde86261163aacb51708f62c3defae3a52a928fd428c4a4ae789",
+          "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+          "source_revision": null,
+          "ct2_quantization": "int8",
+          "direction": "en-es",
+          "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_hash_matches": true
+        }
+      }
+    },
+    "diagnostics": {
+      "size_bytes": 15256033,
+      "sha256": "43d189abb5437517ce56c63ed009d7ba310ceb1402134b536a98ba7f446cf79f"
+    }
+  },
+  "session_metadata": {
+    "session_id": "hymn193_20260911_183511_488ce36e_en",
+    "source_lang": "en",
+    "target_lang": "es",
+    "session_kind": "replay",
+    "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/endurance-preparation/hymn-transition-400-750.wav",
+    "input_audio_sha256": "7937eb4f0fc2b2c072add522d1b8ebcb65520cf197ff62c47c712a46f29f577e",
+    "audio_source": "file",
+    "diarize": false,
+    "diarize_mode": "embed",
+    "diarize_python": "/Users/willem/Code/vibes/SRTranslate/venv/bin/python",
+    "diarize_interval_s": 2.0,
+    "timing_schema_version": 2,
+    "backend": "mlx",
+    "model_family": "gemma4",
+    "model_a": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+    "draft": null,
+    "draft_tokens": 0,
+    "profile": {
+      "name": "standard",
+      "backend": "mlx",
+      "stt_model": null,
+      "stt_compute_type": null,
+      "stt_threads": 3,
+      "stt_workers": 1,
+      "marian_threads": 1,
+      "final_engine": null,
+      "translation_model": null,
+      "vad_backend": null,
+      "ram_floor_gb": 8,
+      "physical_core_floor": 4,
+      "vram_floor_gb": 0
+    },
+    "profile_artifacts": null,
+    "stt_settings": {
+      "whisper_model": "mlx-community/whisper-large-v3-turbo",
+      "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+      "cpu_threads": 4,
+      "num_workers": 1,
+      "local_files_only": false,
+      "whisper_cuda_model": "large-v3-turbo",
+      "whisper_cuda_compute_type": "int8_float16",
+      "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+      "use_chunked_algo": false,
+      "chunk_length_s": 30,
+      "fallback_on_low_conf": true,
+      "fallback_threshold": -1.2,
+      "hallucination_threshold": 2.4,
+      "word_timestamps": false,
+      "beam_size": 1,
+      "spec_decode": false,
+      "draft_model": null,
+      "backend": "parakeet-mlx",
+      "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+      "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+      "compile_mode": null,
+      "warmup_seconds": 1
+    },
+    "managed_llama": null,
+    "model_b": null,
+    "stt_backend": "parakeet-mlx",
+    "vad": {
+      "threshold": 0.3,
+      "silence_trigger": 0.5,
+      "max_utterance": 8.0,
+      "partial_interval": 0.6,
+      "backend": "torch",
+      "artifact": {
+        "source": "installed_package",
+        "package": "silero-vad",
+        "package_version": "6.2.1",
+        "backend": "torch",
+        "opset_version": null,
+        "path": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+        "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+        "size_bytes": 2272526
+      }
+    },
+    "translation": {
+      "idle_warmup_only": false,
+      "final_aware_partials": false,
+      "routing_policy": "legacy",
+      "terminology_prompt": "none",
+      "mlx_model_4b": "mlx-community/translategemma-4b-it-4bit",
+      "mlx_model_12b": "mlx-community/translategemma-12b-it-4bit",
+      "mlx_model_gemma4_e4b": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "mlx_model_gemma4_e2b": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+      "mlx_drafter_gemma4": "mlx-community/gemma-4-e4b-it-assistant-bf16",
+      "mlx_mts": false,
+      "cuda_model_4b": "google/translategemma-4b-it",
+      "cuda_model_12b": "google/translategemma-12b-it",
+      "marian_model": "Helsinki-NLP/opus-mt-en-es",
+      "marian_device": "auto",
+      "marian_intra_threads": 4,
+      "marian_backend": "auto",
+      "marian_compute_type": "int8_float16",
+      "marian_max_new_tokens": 128,
+      "marian_warmup_passes": 2,
+      "marian_eager_both": false,
+      "model_family": "gemma4",
+      "num_draft_tokens": 3,
+      "default_source_lang": "en",
+      "default_target_lang": "es",
+      "turboquant": false,
+      "turboquant_key_bits": 3,
+      "turboquant_val_bits": 4
+    },
+    "replay_speed": 1.0,
+    "replay_client_wait": {
+      "requested_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "status": "disabled",
+      "connected_clients": 0,
+      "visibility_confirmed": false
+    },
+    "git_sha": "dc983c60ea4751ffb30977bc957c65873b805136",
+    "pipeline_sha256": "9a5199684929f65af5ea6ac531f15d1b35e9f7926ced762853aebd36e9a33c1c",
+    "package_version": "2026.14.0.0",
+    "package_artifact_hashes": {
+      "sha256": "b7499b7be6eafde57fc6f328fb9ba286d3cb7e470772632a2e631b35ef8f9579"
+    },
+    "package_vcs_commit": null,
+    "latency_experiment_configuration": {
+      "latest_partial": false,
+      "async_captions": false,
+      "marian_memo": 0,
+      "first_preview_s": 0.0,
+      "pause_preview_ms": 0.0,
+      "speculate_pause_ms": 0.0,
+      "clause_preview_s": 0.0,
+      "vad_worker": false,
+      "incremental_stt": "off",
+      "rolling_window_s": 4.0,
+      "mlx_cache_mb": 256,
+      "gemma_prefix_cache": false,
+      "trace": true,
+      "trace_capacity": 131072,
+      "early_clause_s": 0.0,
+      "early_clause_pause_ms": 0.0,
+      "partial_deadline_margin_ms": 0.0,
+      "draft_model_id": "",
+      "draft_tokens": 0,
+      "serial_finals": false
+    }
+  },
+  "chunk_count": 18,
+  "partial_count": 89,
+  "percentile_method": "median_p50_nearest_rank_p95",
+  "metrics": {
+    "speech_end_to_final_ms": {
+      "n": 18,
+      "p50": 1385.75,
+      "p95": 5892.6,
+      "mean": 2036.3055555555557
+    },
+    "vad_wait_ms": {
+      "n": 18,
+      "p50": 486.3,
+      "p95": 3875.6,
+      "mean": 866.6555555555556
+    },
+    "stt_queue_wait_ms": {
+      "n": 18,
+      "p50": 1.1,
+      "p95": 14.5,
+      "mean": 2.261111111111111
+    },
+    "translation_queue_wait_ms": {
+      "n": 18,
+      "p50": 0.0,
+      "p95": 547.4,
+      "mean": 35.86111111111111
+    },
+    "finalization_overhead_ms": {
+      "n": 18,
+      "p50": 0.45,
+      "p95": 2.7,
+      "mean": 0.9055555555555556
+    },
+    "broadcast_ms": {
+      "n": 18,
+      "p50": 0.0,
+      "p95": 0.1,
+      "mean": 0.022222222222222223
+    },
+    "true_e2e_ms": {
+      "n": 18,
+      "p50": 2802.45,
+      "p95": 10259.6,
+      "mean": 5438.6
+    },
+    "e2e_latency_ms": {
+      "n": 18,
+      "p50": 843.8,
+      "p95": 2482.1,
+      "mean": 1168.6722222222222
+    },
+    "stt_latency_ms": {
+      "n": 18,
+      "p50": 316.15,
+      "p95": 1118.2,
+      "mean": 355.22777777777776
+    },
+    "latency_a_ms": {
+      "n": 18,
+      "p50": 335.5,
+      "p95": 1789.1,
+      "mean": 738.8111111111111
+    },
+    "silence_delay_ms": {
+      "n": 18,
+      "p50": 2198.85,
+      "p95": 8010.4,
+      "mean": 4269.938888888889
+    },
+    "queue_wait_ms": {
+      "n": 18,
+      "p50": 1.0,
+      "p95": 14.3,
+      "mean": 2.1222222222222222
+    },
+    "marian_pt_ms": {
+      "n": 17,
+      "p50": 31.9,
+      "p95": 136.1,
+      "mean": 61.199999999999996
+    },
+    "gen_tokens_a": {
+      "n": 13,
+      "p50": 16.0,
+      "p95": 42.0,
+      "mean": 17.53846153846154
+    },
+    "prefill_ms_a": {
+      "n": 13,
+      "p50": 114.48462500266032,
+      "p95": 185.7129160052864,
+      "mean": 127.45992938569263
+    },
+    "ttft_ms_a": {
+      "n": 13,
+      "p50": 301.3429580023512,
+      "p95": 1066.732957995555,
+      "mean": 381.37673069174457
+    },
+    "decode_ms_a": {
+      "n": 13,
+      "p50": 722.3877090000315,
+      "p95": 1397.5927499996033,
+      "mean": 628.1631925398519
+    },
+    "partial_total_ms": {
+      "n": 89,
+      "p50": 219.25787500367733,
+      "p95": 499.0297499971348,
+      "mean": 253.71061569709903
+    }
+  },
+  "timing_schema_versions": [
+    "2"
+  ],
+  "timing_sources": [
+    "replay_realtime"
+  ],
+  "metric_definitions": {
+    "speech_end_to_final_ms": "last VAD-positive capture frame end to final payload ready; not browser rendering",
+    "e2e_latency_ms": "legacy queue submission to translation/QE completion",
+    "true_e2e_ms": "legacy first speech observation to translation/QE completion",
+    "silence_delay_ms": "legacy first speech observation to queue submission (includes speaking)",
+    "partial_total_ms": "STT plus Marian compute only; excludes cadence, queue and delivery"
+  },
+  "speech_end_by_endpoint": {
+    "hard_cut": {
+      "n": 4,
+      "p50": 2133.45,
+      "p95": 2485.9,
+      "mean": 2165.075
+    },
+    "silence": {
+      "n": 10,
+      "p50": 1158.9499999999998,
+      "p95": 1412.6,
+      "mean": 1133.34
+    },
+    "smart_cut": {
+      "n": 4,
+      "p50": 4117.3,
+      "p95": 5892.6,
+      "mean": 4164.95
+    }
+  },
+  "partial_capture_to_ready_ms": {
+    "n": 89,
+    "p50": 235.3,
+    "p95": 616.9,
+    "mean": 267.6865168539326
+  },
+  "marian_only_share": 0.2777777777777778,
+  "marian_only_observations": 18,
+  "marian_only_source": "tps_a == 0 proxy",
+  "special_token_outputs": 0,
+  "special_token_counts": {
+    "<turn|>": 0,
+    "<|channel>": 0
+  },
+  "overlap_pct": 9.0
+}

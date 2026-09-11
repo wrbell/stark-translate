@@ -12,8 +12,8 @@
 | P2-L launcher PR (Codex): launchd honours `.stark-python`, bootstrap protects `stt_env`, `check_dependency_audit --runtime mac`, `scripts/audit_mac_runtime.sh` | RUNNING | 2026-09-11T19:14Z | | | | |
 | P3-C coverage gate 50 → 65 | DONE | 2026-09-11T19:10Z | 2026-09-11T18:36Z | [P3-runtime-smoke/README.md](P3-runtime-smoke/README.md) | #212 (merged `e92f831`) | measured 68.17 % on main; gate now 65 |
 | P3-S installed smoke + Mac runtime audit | RUNNING | 2026-09-11T19:10Z | | | | smoke passed (5 routes 200, 45 runtime files, verse parser ok); pip-audit 0 findings / 124; `--runtime mac` check pending P2-L |
-| P1-H hymn #193 second control + slices | RUNNING | 2026-09-11T19:16Z | | | | wrapper running under its 600 s bound on venv; slices cut |
-| P1-E promoted-runtime service endurance (3,640 s replay) | PENDING | | | | | |
+| P1-H hymn #193 second control + slices | DONE | 2026-09-11T18:35Z | 2026-09-11T18:41Z | [P1H-hymn-control/README.md](P1H-hymn-control/README.md) | #211 (this PR) | completed_technical_diagnostic, 0 errors; 18 finals, same endpoint mix and routing as the c13f51f control; hold never entered; two search slices cut and hashed |
+| P1-E promoted-runtime service endurance (3,640 s replay) | RUNNING | 2026-09-11T18:42Z | | | | operator on venv, file replay session 20260911_144155_276040_en, monitor attached |
 | L-A attribution | PENDING | | | | | after P2-H merges |
 | L-B arm 2 `marian_threads_2` | PENDING | | | | | only if L-A admits |
 | L-B arm 3 `max_utterance_6` | PENDING | | | | | only if L-A admits |
@@ -27,3 +27,4 @@
 - 19:05Z S0 started on `main` @ `dc983c6` (clean). `caffeinate -dims` running. Worktrees created for the harness and launcher Codex lanes, the coverage-gate PR and this status branch.
 - 19:16Z S0 DONE. Codex C1 (harness) and C2 (launcher) launched 19:14Z. Coverage PR #212 opened with auto-merge. Installed smoke passed from outside the checkout; venv pip-audit clean (124 distributions). Hymn second control started on the GPU (promoted interpreter); the two search slices were cut and hashed.
 - 19:25Z #212 merged (main `e92f831`, coverage gate 65). L-C first-token report written from the six traced control runs (Gemma first token p50 1.13–1.21 s; all-route first-visible p50 1.09–1.19 s vs payload-ready 1.6–2.0 s).
+- 18:45Z P1-H DONE (second control on the promoted runtime: identical segmentation to the first control, hold never entered; slices 400–470 s and 700–780 s cut and hashed). P1-E endurance started through the operator on venv (3,640 s replay, recording off, monitor attached).
