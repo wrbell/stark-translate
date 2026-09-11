@@ -1,0 +1,10 @@
+{"chunk_id": 1, "speaker": "Speaker A", "confidence": 1.0, "ts": 1789094996.232165, "start_ts": 1789094986.7995834, "end_ts": 1789094990.6075835}
+{"chunk_id": 2, "speaker": "Speaker B", "confidence": 1.0, "ts": 1789095000.307714, "start_ts": 1789094991.5355587, "end_ts": 1789094996.9755588}
+{"chunk_id": 3, "speaker": "Speaker A", "confidence": 0.797, "ts": 1789095006.4121962, "start_ts": 1789094997.903541, "end_ts": 1789095002.5435412}
+{"chunk_id": 5, "speaker": "Speaker A", "confidence": 0.82, "ts": 1789095016.495402, "start_ts": 1789095009.807502, "end_ts": 1789095014.159502}
+{"chunk_id": 6, "speaker": "Speaker B", "confidence": 0.786, "ts": 1789095022.5747, "start_ts": 1789095015.0554845, "end_ts": 1789095019.5994844}
+{"chunk_id": 7, "speaker": "Speaker A", "confidence": 0.839, "ts": 1789095026.644129, "start_ts": 1789095020.3994687, "end_ts": 1789095024.3354688}
+{"chunk_id": 8, "speaker": "Speaker B", "confidence": 0.796, "ts": 1789095030.7125912, "start_ts": 1789095025.1674514, "end_ts": 1789095029.2634513}
+{"chunk_id": 9, "speaker": "Speaker A", "confidence": 0.867, "ts": 1789095034.7821262, "start_ts": 1789095030.0314379, "end_ts": 1789095033.0714378}
+{"chunk_id": 10, "speaker": "Speaker B", "confidence": 0.779, "ts": 1789095040.844901, "start_ts": 1789095033.9994226, "end_ts": 1789095037.7434225}
+{"chunk_id": 11, "speaker": "Speaker A", "confidence": 0.852, "ts": 1789095044.899629, "start_ts": 1789095038.543404, "end_ts": 1789095042.0954041}

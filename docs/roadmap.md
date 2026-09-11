@@ -48,10 +48,10 @@ Windows / WSL (A2000 Ada 16 GB, CUDA)
   Latency:    CUDA proposal scripts header-marked unexecuted
 
 Source and releases
-  published:  v2026.13 is the last published release recorded here (PRs #180–191)
+  published:  v2026.14.0.0 (2026-09-11; GitHub Release + MSI; PRs #192–#203) — v2026.13 was the previous release
   source:     v2026.14 / 2026.14.0.0; integration history in PR #192, EN/ES follow-up in PR #196
   evidence:   per-feature acceptance and source/artifact identity are recorded separately
-  publishing: source + issues + final merge authorized; PyPI / tags pending by user choice
+  publishing: tag, GitHub Release and MSI done 2026-09-11; PyPI pending trusted-publisher mapping; GHCR image pending the PR #203 rebuild
 ```
 
 **Live microphone:** the 2026-09-09 built-in-microphone session (`20260909_233204_799019_en`)

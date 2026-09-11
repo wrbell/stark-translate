@@ -1,0 +1,58 @@
+=== source 50f81c6 2026-09-11T03:06:09Z ===
+=== open+draft 2026-09-11T03:06:09Z ===
+  canary_09: p50=661ms p95=667ms tps=48.8
+  canary_10: p50=569ms p95=579ms tps=56.3
+  canary_11: p50=616ms p95=674ms tps=49.4
+  canary_12: p50=657ms p95=670ms tps=31.5
+  canary_13: p50=581ms p95=594ms tps=54.8
+  canary_14: p50=653ms p95=675ms tps=41.6
+  canary_15: p50=667ms p95=669ms tps=45.5
+  canary_16: p50=816ms p95=818ms tps=41.8
+  canary_17: p50=813ms p95=911ms tps=44.1
+  canary_18: p50=657ms p95=680ms tps=52.3
+  canary: 13/18
+=== Gemma 4 E4B OptiQ + E2B OptiQ draft (gamma=3) ===
+  short: p50=397ms p95=418ms tps=88.7
+  medium: p50=1120ms p95=1143ms tps=50.1
+  long: p50=1398ms p95=1423ms tps=43.4
+  canary_01: p50=666ms p95=671ms tps=48.7
+  canary_02: p50=400ms p95=451ms tps=90.5
+  canary_03: p50=652ms p95=661ms tps=52.8
+  canary_04: p50=666ms p95=674ms tps=44.5
+  canary_05: p50=665ms p95=674ms tps=52.1
+  canary_06: p50=744ms p95=754ms tps=50.7
+  canary_07: p50=660ms p95=661ms tps=52.3
+  canary_08: p50=761ms p95=769ms tps=50.0
+  canary_09: p50=656ms p95=667ms tps=52.6
+  canary_10: p50=644ms p95=661ms tps=45.1
+  canary_11: p50=654ms p95=681ms tps=52.8
+  canary_12: p50=650ms p95=678ms tps=33.0
+  canary_13: p50=568ms p95=605ms tps=66.8
+  canary_14: p50=568ms p95=583ms tps=64.3
+  canary_15: p50=747ms p95=819ms tps=36.7
+  canary_16: p50=738ms p95=750ms tps=51.5
+  canary_17: p50=847ms p95=869ms tps=42.5
+  canary_18: p50=638ms p95=691ms tps=54.9
+  canary: 13/18
+Wrote /Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260911/L2/textbench_open_draft.json
+=== Summary ===
+  e4b: medium_p50=1451ms canary=13/18 rssΔ=-467724MB gates=canary_ok,no_garbage
+  e4b_e2b_draft_g1: medium_p50=1287ms canary=13/18 rssΔ=347MB gates=canary_ok,no_garbage
+  e4b_e2b_draft_g2: medium_p50=1182ms canary=13/18 rssΔ=497MB gates=canary_ok,no_garbage
+  e4b_e2b_draft_g3: medium_p50=1120ms canary=13/18 rssΔ=119MB gates=canary_ok,no_garbage
+rc=0
+=== closing e4b 2026-09-11T03:12:52Z ===
+  canary_11: p50=754ms p95=791ms tps=34.5
+  canary_12: p50=617ms p95=628ms tps=34.6
+  canary_13: p50=701ms p95=711ms tps=34.3
+  canary_14: p50=687ms p95=693ms tps=35.8
+  canary_15: p50=712ms p95=731ms tps=35.2
+  canary_16: p50=902ms p95=918ms tps=33.4
+  canary_17: p50=938ms p95=945ms tps=33.2
+  canary_18: p50=792ms p95=816ms tps=33.5
+  canary: 13/18
+Wrote /Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260911/L2/textbench_close_e4b.json
+=== Summary ===
+  e4b: medium_p50=1464ms canary=13/18 rssΔ=-467212MB gates=canary_ok,no_garbage
+rc=0
+=== textbench done 2026-09-11T03:14:42Z ===
