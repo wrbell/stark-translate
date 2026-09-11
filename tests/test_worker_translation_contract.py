@@ -90,3 +90,81 @@ def test_live_mts_rejects_before_any_target_model_load(monkeypatch):
     with pytest.raises(RuntimeError, match="offline experiment"):
         pipeline.load_translation_models()
     loader.assert_not_called()
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("load_b", [False, True])
+def test_live_full_model_draft_load_order_and_ab_models(monkeypatch, enabled, load_b):
+    import dry_run_ab as pipeline
+    from tools.latency_experiments import LatencyExperiments
+
+    draft_id = "mlx-community/gemma-4-e2b-it-OptiQ-4bit"
+    monkeypatch.setattr(
+        pipeline,
+        "_latency",
+        LatencyExperiments.from_env(
+            {
+                "STARK_EXPERIMENT_DRAFT_MODEL_ID": draft_id,
+                "STARK_EXPERIMENT_DRAFT_TOKENS": "2",
+            }
+            if enabled
+            else {}
+        ),
+    )
+    for name, value in {
+        "USE_MTS": False,
+        "MODEL_FAMILY": "gemma4",
+        "MLX_MODEL_A": "target-e4b",
+        "ADAPTER_DIR_A": None,
+        "MLX_DRAFT_MODEL": None,
+        "MLX_DRAFT_MODEL_ID": None,
+        "NUM_DRAFT_TOKENS": 3,
+        "mlx_a_prompt_cache": None,
+        "mlx_a_suffix_tokens": None,
+        "mlx_b_prompt_cache": None,
+        "mlx_b_suffix_tokens": None,
+    }.items():
+        monkeypatch.setattr(pipeline, name, value)
+    target, draft, secondary = object(), object(), object()
+    models = [(target, "target-tokenizer")]
+    if enabled:
+        models.append((draft, "draft-tokenizer"))
+    if load_b:
+        models.append((secondary, "secondary-tokenizer"))
+    loader = Mock(side_effect=models)
+    monkeypatch.setattr(pipeline, "load_mlx_gemma", loader)
+    monkeypatch.setattr("engines.factory.resolve_mlx_translation_model_id", lambda **kw: "ab-e2b")
+    result = pipeline.load_translation_models(load_b=load_b)
+    assert [call.args[0] for call in loader.call_args_list] == [
+        "target-e4b",
+        *([draft_id] if enabled else []),
+        *(["ab-e2b"] if load_b else []),
+    ]
+    assert result == (
+        target,
+        "target-tokenizer",
+        secondary if load_b else None,
+        "secondary-tokenizer" if load_b else None,
+    )
+    assert pipeline.MLX_DRAFT_MODEL is (draft if enabled else None)
+    assert (2 if enabled else 3) == pipeline.NUM_DRAFT_TOKENS
+    assert pipeline._draft_metadata() == {"draft": draft_id if enabled else None, "draft_tokens": 2 if enabled else 0}
+    # Reject the old --mts request even when the independent experiment is set.
+    monkeypatch.setattr(pipeline, "USE_MTS", True)
+    loader.reset_mock()
+    with pytest.raises(RuntimeError, match="offline experiment"):
+        pipeline.load_translation_models(load_b=load_b)
+    loader.assert_not_called()
+
+
+def test_live_draft_reaches_shared_translation(monkeypatch):
+    import dry_run_ab as pipeline
+    from engines.base import TranslationResult
+
+    draft = object()
+    monkeypatch.setattr(pipeline, "NUM_DRAFT_TOKENS", 2)
+    shared = Mock(return_value=TranslationResult("translated", 10, 20))
+    monkeypatch.setattr("engines.mlx_engine.translate_loaded_model", shared)
+    assert pipeline.translate_mlx(object(), object(), "source", draft_model=draft) == ("translated", 10, 20)
+    assert shared.call_args.kwargs["draft_model"] is draft
+    assert shared.call_args.kwargs["num_draft_tokens"] == 2
