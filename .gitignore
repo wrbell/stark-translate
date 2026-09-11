@@ -1,5 +1,8 @@
 # Python
 stt_env/
+venv/
+.venv/
+.stark-python
 stt_train_env/
 __pycache__/
 *.pyc

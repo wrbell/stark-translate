@@ -25,7 +25,7 @@ has its own [integration status](mac_implementation_status.md). The earlier Engl
 96/96 valid runs, 672 finals and 0/28 selected arms. The sub-second final-delivery
 goal was not met on this cohort; E4B remains unchanged. Endurance and the
 source-integration evidence remain separate from that screen. PyPI, package
-publication remains pending until the PyPI trusted publisher is mapped; tag `v2026.14.0.0`, its GitHub Release and the MSI were published on 2026-09-11 (see the [overnight 2026-09-11 status](evaluation/overnight_20260911/STATUS.md)).
+PyPI publication is deferred by decision (2026-09-11), with the publish job gated on `PYPI_PUBLISH_ENABLED`; tag `v2026.14.0.0`, its GitHub Release and the MSI were published on 2026-09-11 (see the [overnight 2026-09-11 status](evaluation/overnight_20260911/STATUS.md)).
 
 ## Where to look
 

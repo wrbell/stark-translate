@@ -14,11 +14,12 @@
 >
 > **Source (2026-09-10):** v2026.14 (`2026.14.0.0`), with integration history in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
 > and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
-> The last published release recorded here is v2026.13. Source integration and
+> The last published release is v2026.14.0.0 (tagged 2026-09-11). Source integration and
 > published artifacts are separate from the acceptance evidence below.
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md);
 > contracts: [`docs/current_architecture.md`](docs/current_architecture.md); remaining work:
-> [`docs/backlog.json`](docs/backlog.json). **Do not recreate `stt_env`.** Validation counts
+> [`docs/backlog.json`](docs/backlog.json). `stt_env` (Torch 2.10) is the rollback environment; never modify it. The launcher
+> default is `venv` (Torch 2.13.0 / TorchAudio 2.11.0) via `.stark-python`. Validation counts
 > and latency numbers live only in the linked evidence documents. Current checks bind
 > [repaired source 760e948](docs/evaluation/mac_followup_20260910/final-760e948/source-validation.md);
 > [installed delivery](docs/evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
@@ -47,10 +48,10 @@ is the goal, **not achieved**, and is active engineering (`caption-delivery-goal
 
 ## Environment
 
-### Verified packages (2026-09-09, `stt_env`)
+### Verified packages (2026-09-11, promoted `venv`)
 
 Python 3.11.11 · MLX 0.32.2 · mlx-lm 0.31.3 · mlx-whisper 0.4.3 · mlx-optiq 0.4.34 ·
-parakeet-mlx 0.5.x · PyTorch 2.10.0 (Silero VAD, Marian HF fallback only) ·
+parakeet-mlx 0.5.x · PyTorch 2.13.0 (Silero VAD, Marian HF fallback only) · TorchAudio 2.11.0 ·
 CTranslate2 4.7.1 (Marian int8 on CPU) · silero-vad 6.2.1. Pins live in
 `pyproject.toml` `[mlx]`; upgrading the MLX/OptiQ/Parakeet or PyTorch lines requires
 another replay gate.
@@ -61,13 +62,15 @@ Authoritative steps: [`docs/packaging/macos.md`](docs/packaging/macos.md).
 
 ```bash
 brew install ffmpeg portaudio
-python3.11 -m venv venv                      # or keep using the existing stt_env
-venv/bin/python -m pip install '.[mlx]'      # add ,eval or ,diarization as needed
+python3.11 -m venv venv                      # keep stt_env unmodified for rollback
+venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
+venv/bin/python -m pip install -c constraints/macos-arm64-py311-runtime.txt '.[mlx]'      # add ,eval or ,diarization as needed
 venv/bin/stark-translate setup --backend mlx                # Mac defaults, both directions
 venv/bin/stark-translate setup --backend mlx --include e2b tts translategemma   # optional profiles
 venv/bin/stark-translate doctor --backend mlx --lang en     # preflight without loading Metal models
 venv/bin/stark-translate doctor --backend mlx --lang es
-VENV="$PWD/venv" ./run_operator.sh           # operator UI on http://localhost:9000/operator/
+printf '%s\n' "$PWD/venv/bin/python" > .stark-python   # launcher pointer; rollback: point it at stt_env/bin/python
+./run_operator.sh           # operator UI on http://localhost:9000/operator/
 ```
 
 `bootstrap.sh --skip-systemd` performs install + setup + preflight in one step;
@@ -108,7 +111,7 @@ verse highlights, summary, Review/export. Session artifacts land in `metrics/`.
 **Direct CLI (debugging / replay):**
 
 ```bash
-source stt_env/bin/activate            # or venv
+source venv/bin/activate  # stt_env = rollback env
 python dry_run_ab.py                                   # EN→ES, mic, Mac defaults
 python dry_run_ab.py --lang es                         # ES→EN
 python dry_run_ab.py --audio-file clip.wav --session-id demo_en   # file replay, exits after drain

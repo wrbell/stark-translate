@@ -185,7 +185,9 @@ Manual daemon (only if the pipeline is not spawning it)::
 
 1. Accept terms for `pyannote/speaker-diarization-3.1` (and `pyannote/embedding`
    if not using SpeechBrain) and export `HF_TOKEN` on the church Mac — **or**
-   `pip install speechbrain` in `stt_env` for the embed path (no gated token).
+   install the diarization extra in the promoted `venv` for the embed path (no gated token):
+   `venv/bin/python -m pip install -c constraints/macos-arm64-py311-runtime.txt '.[mlx,diarization]'`.
+   `stt_env` is not modified.
 2. A two-speaker clip (pastor + second voice, or a short Q&A) long enough for
    at least two turns per speaker.
 3. Baseline: `python tools/replay_bench.py --audio-file <clip>` (no `--diarize`).

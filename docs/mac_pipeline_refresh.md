@@ -7,17 +7,18 @@ for actual validation and [the backlog](backlog.md) for remaining work.
 
 ## Install and prepare
 
-Use an isolated environment for a new installation. Keep a working `stt_env`
-unchanged while comparing revisions or dependencies.
+Create an isolated environment; an existing `stt_env` is kept unmodified as the
+rollback environment. The promoted runtime is selected by `.stark-python`.
 
 ```bash
 python3.11 -m venv venv
 venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
-venv/bin/python -m pip install '.[mlx]'
+venv/bin/python -m pip install -c constraints/macos-arm64-py311-runtime.txt '.[mlx]'
 venv/bin/stark-translate setup --backend mlx
 venv/bin/stark-translate doctor --backend mlx --lang en
 venv/bin/stark-translate doctor --backend mlx --lang es
-VENV="$PWD/venv" ./run_operator.sh
+printf '%s\n' "$PWD/venv/bin/python" > .stark-python   # launcher pointer; rollback: point it at stt_env/bin/python
+./run_operator.sh
 ```
 
 Setup reuses complete local/cache artifacts and supplies pinned Parakeet English,
@@ -33,7 +34,8 @@ readiness are distinct. A stalled microphone must surface as an error; it must n
 be mistaken for a quiet successful session. Real microphone and physical-output
 checks are deferred to the next attended session.
 
-The readiness script is an additional control check:
+The readiness script is an additional control check. Its explicit `STARK_PYTHON`
+selection remains supported; the operator launcher also accepts `.stark-python`:
 
 ```bash
 STARK_PYTHON="$PWD/venv/bin/python" ./scripts/dry_run_rehearsal.sh

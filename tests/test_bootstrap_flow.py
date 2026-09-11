@@ -148,17 +148,22 @@ def test_bootstrap_creates_explicit_relative_target_even_if_directory_exists(boo
     assert f'ExecStart="{target}/bin/uvicorn" operator_app.main:app' in dropin
 
 
-@pytest.mark.parametrize("selected", ["explicit", "target", "active", "conda", "stt_env", "venv"])
+@pytest.mark.parametrize("selected", ["explicit", "target", "pointer", "active", "conda", "stt_env", "venv"])
 def test_bootstrap_preserves_authorized_environment_precedence(bootstrap, selected):
-    paths = {name: bootstrap.environment(name) for name in ["explicit", "target", "active", "conda", "stt_env", "venv"]}
+    paths = {
+        name: bootstrap.environment(name)
+        for name in ["explicit", "target", "pointer", "active", "conda", "stt_env", "venv"]
+    }
     overrides = {}
     if selected == "explicit":
         overrides["STARK_PYTHON"] = str(paths["explicit"] / "bin/python")
     if selected in ("explicit", "target"):
         overrides["VENV"] = str(paths["target"])
-    if selected in ("explicit", "target", "active"):
+    if selected in ("explicit", "target", "pointer"):
+        (bootstrap.project / ".stark-python").write_text(str(paths["pointer"] / "bin/python") + "\n")
+    if selected in ("explicit", "target", "pointer", "active"):
         overrides["VIRTUAL_ENV"] = str(paths["active"])
-    if selected in ("explicit", "target", "active", "conda"):
+    if selected in ("explicit", "target", "pointer", "active", "conda"):
         overrides["CONDA_PREFIX"] = str(paths["conda"])
     if selected == "venv":
         (paths["stt_env"] / "bin/python").unlink()
@@ -166,6 +171,8 @@ def test_bootstrap_preserves_authorized_environment_precedence(bootstrap, select
     assert result.returncode == 0, result.stderr
     assert {row["exe"] for row in installer_records(records)} == {str(paths[selected] / "bin/python")}
     assert not any(row["args"][:2] == ["-m", "venv"] for row in records)
+    if selected == "pointer":
+        assert all(row["exe"] != str(paths["stt_env"] / "bin/python") for row in records)
 
 
 @pytest.mark.parametrize("service", ["systemd", "launchd"])
