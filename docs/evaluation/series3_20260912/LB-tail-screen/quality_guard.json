@@ -1,0 +1,290 @@
+[
+  {
+    "tag": "lb0912_A_marian_threads_2_r0",
+    "arm": "marian_threads_2",
+    "control": "lb0912_A_ctl_r0",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 2,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_A_max_utterance_6_r0",
+    "arm": "max_utterance_6",
+    "control": "lb0912_A_ctl_r0",
+    "finals": 77,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 2,
+    "spanish_wer_vs_control_pct": 20.26,
+    "english_wer_vs_control_pct": 11.01,
+    "proof": {
+      "max_utterance": 6.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_A_partial_recheck_translation_r0",
+    "arm": "partial_recheck_translation",
+    "control": "lb0912_A_ctl_r0",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": true
+    }
+  },
+  {
+    "tag": "lb0912_A_partial_recheck_translation_r1",
+    "arm": "partial_recheck_translation",
+    "control": "lb0912_A_ctl_r1",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": true
+    }
+  },
+  {
+    "tag": "lb0912_A_max_utterance_6_r1",
+    "arm": "max_utterance_6",
+    "control": "lb0912_A_ctl_r1",
+    "finals": 77,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 2,
+    "spanish_wer_vs_control_pct": 20.26,
+    "english_wer_vs_control_pct": 11.01,
+    "proof": {
+      "max_utterance": 6.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_A_marian_threads_2_r1",
+    "arm": "marian_threads_2",
+    "control": "lb0912_A_ctl_r1",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 2,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_A_partial_recheck_translation_r2",
+    "arm": "partial_recheck_translation",
+    "control": "lb0912_A_ctl_r2",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": true
+    }
+  },
+  {
+    "tag": "lb0912_A_marian_threads_2_r2",
+    "arm": "marian_threads_2",
+    "control": "lb0912_A_ctl_r2",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 2,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_A_max_utterance_6_r2",
+    "arm": "max_utterance_6",
+    "control": "lb0912_A_ctl_r2",
+    "finals": 77,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 2,
+    "spanish_wer_vs_control_pct": 20.26,
+    "english_wer_vs_control_pct": 11.01,
+    "proof": {
+      "max_utterance": 6.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_B_marian_threads_2_r0",
+    "arm": "marian_threads_2",
+    "control": "lb0912_B_ctl_r0",
+    "finals": 80,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 2,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_B_max_utterance_6_r0",
+    "arm": "max_utterance_6",
+    "control": "lb0912_B_ctl_r0",
+    "finals": 89,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 3.87,
+    "english_wer_vs_control_pct": 2.58,
+    "proof": {
+      "max_utterance": 6.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_B_partial_recheck_translation_r0",
+    "arm": "partial_recheck_translation",
+    "control": "lb0912_B_ctl_r0",
+    "finals": 80,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": true
+    }
+  },
+  {
+    "tag": "lb0912_B_partial_recheck_translation_r1",
+    "arm": "partial_recheck_translation",
+    "control": "lb0912_B_ctl_r1",
+    "finals": 80,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": true
+    }
+  },
+  {
+    "tag": "lb0912_B_max_utterance_6_r1",
+    "arm": "max_utterance_6",
+    "control": "lb0912_B_ctl_r1",
+    "finals": 89,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 3.87,
+    "english_wer_vs_control_pct": 2.58,
+    "proof": {
+      "max_utterance": 6.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_B_marian_threads_2_r1",
+    "arm": "marian_threads_2",
+    "control": "lb0912_B_ctl_r1",
+    "finals": 80,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 2,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_B_partial_recheck_translation_r2",
+    "arm": "partial_recheck_translation",
+    "control": "lb0912_B_ctl_r2",
+    "finals": 80,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": true
+    }
+  },
+  {
+    "tag": "lb0912_B_marian_threads_2_r2",
+    "arm": "marian_threads_2",
+    "control": "lb0912_B_ctl_r2",
+    "finals": 80,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "english_wer_vs_control_pct": 0.0,
+    "proof": {
+      "max_utterance": 8.0,
+      "marian_intra_threads": 2,
+      "partial_recheck_translation": false
+    }
+  },
+  {
+    "tag": "lb0912_B_max_utterance_6_r2",
+    "arm": "max_utterance_6",
+    "control": "lb0912_B_ctl_r2",
+    "finals": 89,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "spanish_wer_vs_control_pct": 3.87,
+    "english_wer_vs_control_pct": 2.58,
+    "proof": {
+      "max_utterance": 6.0,
+      "marian_intra_threads": 4,
+      "partial_recheck_translation": false
+    }
+  }
+]

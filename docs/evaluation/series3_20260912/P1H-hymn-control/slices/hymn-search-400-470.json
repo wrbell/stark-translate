@@ -1,0 +1,19 @@
+{
+  "slice": "hymn-search-400-470",
+  "parent_path": "/Users/willem/Code/vibes/SRTranslate/stark_data/raw/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+  "parent_sha256": "8bec0f104dd883fd001f2a4b12ff9b454217c344f233458868feda07a0e83f53",
+  "parent_frames": 58240848,
+  "source_native_sample_offset": 6400000,
+  "source_native_sample_end": 7520000,
+  "frames": 1120000,
+  "duration_s": 70.0,
+  "sample_rate": 16000,
+  "channels": 1,
+  "sample_width_bytes": 2,
+  "path": "/Users/willem/Code/vibes/SRTranslate/.cache/series3-20260912/P1H/slices/hymn-search-400-470.wav",
+  "sha256": "ed850359bda133cecfb712dd780e88dcbb0ce6fc8bde528b67073f3a2b30ebf1",
+  "size_bytes": 2240044,
+  "method": "Lossless PCM frame slice with wave.setpos/readframes; no resampling, normalization, synthetic padding or removed intervals.",
+  "created_at": "2026-09-11T18:35:35.733868+00:00",
+  "labels": "none; acoustic annotation pending (issue #193)"
+}

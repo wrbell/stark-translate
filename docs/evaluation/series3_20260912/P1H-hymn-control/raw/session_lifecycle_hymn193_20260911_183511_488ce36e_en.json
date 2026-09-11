@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "session_id": "hymn193_20260911_183511_488ce36e_en",
+  "run_id": "da85a549d88d4279a819db8e5c840429",
+  "status": "completed",
+  "pid": 12387,
+  "hostname": "Invicta91.local",
+  "started_at": "2026-09-11T18:35:16.359648+00:00",
+  "git_sha": "dc983c60ea4751ffb30977bc957c65873b805136",
+  "source": {
+    "git_sha": "dc983c60ea4751ffb30977bc957c65873b805136",
+    "pipeline_sha256": "9a5199684929f65af5ea6ac531f15d1b35e9f7926ced762853aebd36e9a33c1c",
+    "package_version": "2026.14.0.0",
+    "package_artifact_hashes": {
+      "sha256": "b7499b7be6eafde57fc6f328fb9ba286d3cb7e470772632a2e631b35ef8f9579"
+    },
+    "package_vcs_commit": null
+  },
+  "pipeline_sha256": "9a5199684929f65af5ea6ac531f15d1b35e9f7926ced762853aebd36e9a33c1c",
+  "persistence": {
+    "submitted": 147,
+    "completed": 147,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "exit_code": 0,
+  "ended_at": "2026-09-11T18:41:17.176565+00:00",
+  "memory": {
+    "scope": "pipeline_process_lifetime",
+    "peak_rss_bytes": 2103476224,
+    "peak_metal_bytes": 9042699162
+  },
+  "models": {
+    "stt": {
+      "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+      "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+      "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+    },
+    "translation_a": {
+      "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+    },
+    "marian": {
+      "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+      "manifest_revision": null,
+      "resolved_revision": null,
+      "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+      "revision_source": "unknown",
+      "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+      "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+      "model_bin_size_bytes": 79567635,
+      "export_manifest": {
+        "sha256": "a2252e22ba84cde86261163aacb51708f62c3defae3a52a928fd428c4a4ae789",
+        "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+        "source_revision": null,
+        "ct2_quantization": "int8",
+        "direction": "en-es",
+        "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+        "model_bin_hash_matches": true
+      }
+    }
+  },
+  "diagnostics": {
+    "size_bytes": 15256033,
+    "sha256": "43d189abb5437517ce56c63ed009d7ba310ceb1402134b536a98ba7f446cf79f"
+  }
+}

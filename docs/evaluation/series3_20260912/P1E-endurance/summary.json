@@ -1,0 +1,58 @@
+{
+  "finals": 563,
+  "partials": 3049,
+  "endpoints": {
+    "smart_cut": 124,
+    "hard_cut": 38,
+    "silence": 401
+  },
+  "routes": {
+    "gemma": 360,
+    "marian": 203
+  },
+  "silence_all_p50_p95": [
+    1213.8,
+    2236.2
+  ],
+  "gemma_silence_p50_p95": [
+    1631.3,
+    2563.3
+  ],
+  "marian_silence_p50_p95": [
+    843.7,
+    1049.3
+  ],
+  "cuts_p50_p95": [
+    2572.0,
+    5935.0
+  ],
+  "silence_first_third_p50": 1241.4,
+  "silence_last_third_p50": 914.2,
+  "monitor": {
+    "status": "partial",
+    "stop_reason": "deadline",
+    "samples": 769,
+    "observed_s": 3850,
+    "rss_tree_p50_mib": 510,
+    "rss_tree_max_mib": 663,
+    "rss_first_10_mean_mib": 362,
+    "rss_last_10_mean_mib": 177,
+    "cpu_pct_p50": 42.2,
+    "cpu_pct_p95": 81.4,
+    "cpu_pct_max": 117.8,
+    "health_phases": {
+      "ready": 769
+    },
+    "health_stale_samples": 0,
+    "errors": [],
+    "rss_drift_note": "samples with tree RSS > 100 MiB only (the monitor window outlived the pipeline)"
+  },
+  "lifecycle": {
+    "status": "completed",
+    "exit_code": 0,
+    "peak_rss_gib": 3.38,
+    "peak_metal_gib": 8.66,
+    "started": "2026-09-11T18:41:58.959433+00:00",
+    "ended": "2026-09-11T19:47:23.302155+00:00"
+  }
+}

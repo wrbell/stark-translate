@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "session_id": "hymn193_20260911_183511_488ce36e_en",
+  "updated_at": 1789152077.175076,
+  "phase": "completed",
+  "input_seen": true,
+  "input_age_s": 0.2659155000001192,
+  "caption_age_s": 1.0842658749970724,
+  "input_level": 0.0,
+  "errors": [],
+  "error_count": 0,
+  "captions": [
+    {
+      "session_id": "hymn193_20260911_183511_488ce36e_en",
+      "utterance_id": 24,
+      "chunk_id": 24,
+      "stage": "partial",
+      "english": "hope in",
+      "spanish_a": "esperanza en",
+      "source_lang": null,
+      "target_lang": null,
+      "speaker": null
+    },
+    {
+      "session_id": "hymn193_20260911_183511_488ce36e_en",
+      "utterance_id": 23,
+      "chunk_id": 21,
+      "stage": "complete",
+      "english": "The meeting or online who does not know know you as their personal savior will open their open their heart and open their eyes and realize that there is",
+      "spanish_a": "La reuni\u00f3n o en l\u00ednea quien no te conoce como su salvador personal abrir\u00e1 su coraz\u00f3n y abrir\u00e1 sus ojos y se dar\u00e1 cuenta de que hay",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    }
+  ],
+  "recording": {
+    "audio_enabled": false,
+    "required_failures": 0,
+    "ok": true
+  },
+  "control_sequence": 0,
+  "publish_failures": 0,
+  "persistence": {
+    "submitted": 147,
+    "completed": 147,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "storage": {
+    "free_bytes": 178545717248,
+    "low_space": false
+  },
+  "queues": {
+    "audio": 0,
+    "capture_handoff": 0,
+    "finals": 0,
+    "stream_tokens": 1
+  },
+  "clients": 0,
+  "replay_client_wait": {
+    "requested_seconds": 0.0,
+    "actual_wait_seconds": 0.0,
+    "status": "disabled",
+    "connected_clients": 0,
+    "visibility_confirmed": false
+  }
+}
