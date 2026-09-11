@@ -277,3 +277,13 @@ def test_full_model_draft_environment_is_opt_in(tokens):
 def test_full_model_draft_rejects_incomplete_or_unbounded_configuration(env):
     with pytest.raises(ValueError, match="STARK_EXPERIMENT_DRAFT"):
         LatencyExperiments.from_env({"STARK_EXPERIMENT_" + k: v for k, v in env.items()})
+
+
+def test_serial_finals_is_strictly_opt_in():
+    assert LatencyExperiments.from_env({}).serial_finals is False
+    for value in ("true", "1"):
+        assert LatencyExperiments.from_env({"STARK_EXPERIMENT_SERIAL_FINALS": value}).serial_finals is True
+    for value in ("false", "0"):
+        assert LatencyExperiments.from_env({"STARK_EXPERIMENT_SERIAL_FINALS": value}).serial_finals is False
+    with pytest.raises(ValueError, match="STARK_EXPERIMENT_SERIAL_FINALS"):
+        LatencyExperiments.from_env({"STARK_EXPERIMENT_SERIAL_FINALS": "yes"})

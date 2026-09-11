@@ -12,7 +12,7 @@
 > Current integration and delivery state is recorded in [implementation status](docs/mac_implementation_status.md).
 > The last published release recorded here is **v2026.13**. Source integration,
 > release publication and service certification are separate; PyPI/package artifacts
-> and release tags remain pending by user choice. Do not recreate `stt_env`.
+> and release tags remain pending by user choice. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`.
 >
 > Paired human guide: [`CLAUDE.md`](CLAUDE.md) (same content, human-facing links).
 >
@@ -177,7 +177,7 @@ benchmark numbers in guides.
 10 GitHub Actions workflow files in `.github/workflows/`: Lint, Test (3.11 + 3.12,
 coverage gate in `test.yml`), Security (pip-audit + Bandit; B615 skipped in CI —
 see [`docs/evaluation/mac_v2026_14_security.md`](docs/evaluation/mac_v2026_14_security.md)),
-Release, Windows MSI Release, PyPI Publish (tag-triggered; trusted publisher pending),
+Release, Windows MSI Release, PyPI Publish (tag-triggered build; publishing deferred by decision, gated on `PYPI_PUBLISH_ENABLED`),
 Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in `pyproject.toml`.
 
 ```bash

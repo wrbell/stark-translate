@@ -84,6 +84,9 @@ def _delta(row: dict, start: str, end: str) -> float | None:
 
 
 def _route(row: dict) -> str:
+    if "final_translation_route" in row:
+        route = row["final_translation_route"]
+        return route if route in ("gemma", "marian") else "unknown"
     if row.get("tps_a") in (0, None) and not row.get("spanish_gemma") and row.get("spanish_marian"):
         return "marian"
     return "gemma"
@@ -103,6 +106,13 @@ def _cohort(rows: list[dict]) -> dict:
     own = _stats([_number(row.get("speech_end_to_final_ms")) for row in rows])
     return {
         "jsonl_rows": len(rows),
+        "route_source": (
+            "mixed"
+            if 0 < sum("final_translation_route" in row for row in rows) < len(rows)
+            else "final_translation_route"
+            if any("final_translation_route" in row for row in rows)
+            else "tps_a_proxy"
+        ),
         "stages": stages,
         "checksum": {
             "total_speech_end_to_final_p50": total_p50,
@@ -121,6 +131,8 @@ def _cohort(rows: list[dict]) -> dict:
 
 def _endpoint_report(rows: list[dict]) -> dict:
     cohorts = {route: _cohort([row for row in rows if _route(row) == route]) for route in ("gemma", "marian")}
+    if any(_route(row) == "unknown" for row in rows):
+        cohorts["unknown"] = _cohort([row for row in rows if _route(row) == "unknown"])
     ranked = [{"stage": name, **cohorts["gemma"]["stages"][name]} for name in STAGES]
     ranked.sort(key=lambda row: (row["p50"] is None, -row["p50"] if row["p50"] is not None else 0))
     return {
@@ -221,6 +233,8 @@ def render_markdown(report: dict) -> str:
             lines.extend(
                 [
                     f"### {route.capitalize()}",
+                    "",
+                    f"Route source: {cohort['route_source']}",
                     "",
                     "| stage | n | missing | mean | p50 | p95 | share (approx.) |",
                     "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",

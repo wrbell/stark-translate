@@ -2,6 +2,8 @@
 
 Kept separate from deployment profiles: no experimental default is promoted by
 selecting an inference backend. Values are validated before session startup.
+``STARK_EXPERIMENT_SERIAL_FINALS`` waits for the preceding translation before
+requesting final STT; disabled by default to preserve pipeline overlap.
 """
 
 from __future__ import annotations
@@ -33,6 +35,7 @@ class LatencyExperiments:
     partial_deadline_margin_ms: float = 0.0
     draft_model_id: str = ""
     draft_tokens: int = 0
+    serial_finals: bool = False  # Serialize final STT after the preceding translation.
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> LatencyExperiments:

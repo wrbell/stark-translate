@@ -13,7 +13,7 @@
 - **PyTorch:** `MarianHFEngine` and Silero VAD share `_pytorch_lock`; VAD runs on the asyncio thread by default. The experimental worker path remains opt-in and uses the same lock.
 - **Quantization:** only OptiQ mixed-precision Gemma 4 repos; uniform 4-bit quants break PLE.
 - **Downloads:** keep `resolve_model_path` purely offline for setup/preflight. Live MLX wrappers use `resolve_model_for_loading`: existing local copy or registered full-commit snapshot, never an uncached bare ID. Model identity and explicit local overrides remain in provenance. Do not add unpinned live-path downloads; [pinning scope and residual inventory](../docs/evaluation/mac_followup_20260910/live-hf-pinning.md) retain the B615 limitations.
-- Do not recreate `stt_env`; do not run model loads in unit tests.
+- `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`; do not run model loads in unit tests.
 
 ## Current Mac defaults (verify in `settings.py` / `factory.py` before citing)
 
