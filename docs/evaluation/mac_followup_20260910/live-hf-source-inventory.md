@@ -96,3 +96,48 @@ Python 3.11 recorded 2,812 passed, one failed, six skipped and 66.24% coverage.
 The coordinator reported the same sole failure on Python 3.12. The documentation
 assertion is repaired in `476e349`; full CI for that head remains pending here.
 Neither the failed full suite nor source checks establish native/artifact validation.
+
+## 2026-09-11 follow-up
+
+The 13 `optional_live` entries with `residual_remote_risk: true` now use pinned
+source resolution or a strict local-only loader. The JSON field is `roles`
+(a list); filtering membership yields exactly the 13 sites below. Its earlier
+text, hashes and JSON remain historical and are not refreshed by this append.
+The legacy Piper site is separately classified under
+`training_export_evaluation` with a null risk value.
+
+| Original inventory sites | Follow-up policy |
+| --- | --- |
+| `engines/cuda_engine.py:131,327` | Primary and lazy fallback faster-whisper require an installed pinned snapshot or explicit local path; both pass `local_files_only=True`. |
+| `engines/cuda_engine.py:444,445,668,669,696` | Basic/streaming Transformers tokenizer, target and assistant use `resolve_hf_model_source`: local-only path or exact manifest revision. The assistant is validated before any primary loader call. |
+| `engines/hf_whisper_engine.py:102,103,114` | Processor, target and draft share the same source policy; all configured sources are validated before loading. |
+| `engines/parakeet_engine.py:70` | NeMo requires exactly one local `.nemo` checkpoint and uses `restore_from`; it never calls the revision-less `from_pretrained`. |
+| `tools/live_caption_monitor.py:885,920` | Live warmup and chunk transcription reuse the complete local snapshot from `resolve_model_for_loading`, after validating remote identity with `resolve_hf_model_source`. |
+| `training/evaluate_piper.py:219` (legacy, additional) | `resolve_piper_voice` selects a local ONNX/config pair; names require a manifest pin and an installed copy. Piper receives only a local path. |
+
+`resolve_hf_model_source` now checks a remote identity's immutable manifest entry
+before looking in caches, so a cached moving-ref repo cannot bypass the missing
+pin error. Explicit local overrides remain allowed. Faster-whisper, NeMo and
+legacy Piper never acquire models at runtime; an unavailable local artifact
+raises `UnpinnedModelError` naming the model and `models.lock.json`.
+
+Existing entries cover faster-whisper Turbo/small, the monitor's
+`wbell7/distil-whisper-large-v3.5-mlx`, and the EN/ES Piper voices. No new lock
+entries were added: the permitted local evidence did not supply immutable
+revisions for faster-whisper `large-v3`, `openai/whisper-large-v3[-turbo]`,
+`google/translategemma-{4b,12b}-it`, or `nvidia/parakeet-tdt-0.6b-v3`.
+These remote selections and arbitrary unregistered custom/draft IDs now fail
+closed until registered, or explicitly configured as local artifacts.
+Defaults, dependencies and existing lock entries are unchanged.
+
+The [operator-only offline model path policy](../../security_offline_model_paths.md)
+enumerates the separate 105 residual `training_export_evaluation` calls, explains
+the CI B615 skip and scan-root limits, and gives the pinning procedure for
+promotion into live code. The offline role has 130 entries total: 105 true,
+24 false and the one legacy Piper null entry addressed above.
+
+Regression tests use tiny file fixtures and mocked Transformers, faster-whisper,
+NeMo, MLX, Piper and download APIs. They cover local/pinned selection, missing
+and malformed pins, partial caches, target/draft/fallback rejection, and reuse
+of the monitor's selected snapshot. No model download, native model execution,
+server startup or hardware certification was performed for this follow-up.
