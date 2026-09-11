@@ -10,7 +10,7 @@
 | S0 pre-flight (caffeinate, worktrees, status branch) | DONE | 2026-09-11T19:05Z | 2026-09-11T19:12Z | [STATUS.md](STATUS.md) | #211 | caffeinate pid 11163; stt_env freeze a09be842…; pointer venv |
 | P2-H harness PR (Codex): cache-limit consistency, `partial_recheck_translation`, cpu_ms + first_stream_token trace, attribution tool, aligned G4, clip prep | RUNNING | 2026-09-11T19:14Z | | | | |
 | P2-L launcher PR (Codex): launchd honours `.stark-python`, bootstrap protects `stt_env`, `check_dependency_audit --runtime mac`, `scripts/audit_mac_runtime.sh` | RUNNING | 2026-09-11T19:14Z | | | | |
-| P3-C coverage gate 50 → 65 | RUNNING | 2026-09-11T19:10Z | | | #212 (auto-merge) | measured 68.17 % on main |
+| P3-C coverage gate 50 → 65 | DONE | 2026-09-11T19:10Z | 2026-09-11T18:36Z | [P3-runtime-smoke/README.md](P3-runtime-smoke/README.md) | #212 (merged `e92f831`) | measured 68.17 % on main; gate now 65 |
 | P3-S installed smoke + Mac runtime audit | RUNNING | 2026-09-11T19:10Z | | | | smoke passed (5 routes 200, 45 runtime files, verse parser ok); pip-audit 0 findings / 124; `--runtime mac` check pending P2-L |
 | P1-H hymn #193 second control + slices | RUNNING | 2026-09-11T19:16Z | | | | wrapper running under its 600 s bound on venv; slices cut |
 | P1-E promoted-runtime service endurance (3,640 s replay) | PENDING | | | | | |
@@ -26,3 +26,4 @@
 
 - 19:05Z S0 started on `main` @ `dc983c6` (clean). `caffeinate -dims` running. Worktrees created for the harness and launcher Codex lanes, the coverage-gate PR and this status branch.
 - 19:16Z S0 DONE. Codex C1 (harness) and C2 (launcher) launched 19:14Z. Coverage PR #212 opened with auto-merge. Installed smoke passed from outside the checkout; venv pip-audit clean (124 distributions). Hymn second control started on the GPU (promoted interpreter); the two search slices were cut and hashed.
+- 19:25Z #212 merged (main `e92f831`, coverage gate 65). L-C first-token report written from the six traced control runs (Gemma first token p50 1.13–1.21 s; all-route first-visible p50 1.09–1.19 s vs payload-ready 1.6–2.0 s).
