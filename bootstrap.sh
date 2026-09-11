@@ -107,6 +107,11 @@ elif [ -x "$ROOT/stt_env/bin/python" ]; then
 else
     VENV="$ROOT/venv"
 fi
+if [ -n "${STARK_PYTHON:-}" ] && [[ "$STARK_PYTHON" != "$ROOT/stt_env/"* ]] \
+    && [ -d "$VENV" ] && [ -d "$ROOT/stt_env" ] \
+    && [ "$(cd -- "$VENV" && pwd -P)" = "$(cd -- "$ROOT/stt_env" && pwd -P)" ]; then
+    fail "refusing to install into the rollback environment stt_env; .stark-python/STARK_PYTHON names $STARK_PYTHON" 3
+fi
 if [ ! -x "$VENV/bin/python" ]; then
     log "creating venv at $VENV"
     "$PYTHON" -m venv "$VENV" || fail "venv creation failed" 3
