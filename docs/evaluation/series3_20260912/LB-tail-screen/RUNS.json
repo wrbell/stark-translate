@@ -1,0 +1,416 @@
+{
+  "screen": "tail_screen_series3_20260912",
+  "clips": {
+    "A": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/followup-20260911/X/clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17"
+    },
+    "B": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/followup-20260911/X/clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c"
+    }
+  },
+  "arms": {
+    "ctl": {
+      "kind": "control"
+    },
+    "marian_threads_2": {
+      "kind": "candidate",
+      "memory_rule": "relative"
+    },
+    "max_utterance_6": {
+      "kind": "candidate",
+      "memory_rule": "relative"
+    },
+    "partial_recheck_translation": {
+      "kind": "candidate",
+      "memory_rule": "relative"
+    }
+  },
+  "runs": [
+    {
+      "tag": "lb0912_A_ctl_r0",
+      "clip": "A",
+      "arm": "ctl",
+      "repeat": 0,
+      "order": 0,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 301326,
+        "after": 303809
+      }
+    },
+    {
+      "tag": "lb0912_A_marian_threads_2_r0",
+      "clip": "A",
+      "arm": "marian_threads_2",
+      "repeat": 0,
+      "order": 1,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_marian_threads_2_r0_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_marian_threads_2_r0_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_marian_threads_2_r0_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_marian_threads_2_r0_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_marian_threads_2_r0_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 303809,
+        "after": 305854
+      }
+    },
+    {
+      "tag": "lb0912_A_max_utterance_6_r0",
+      "clip": "A",
+      "arm": "max_utterance_6",
+      "repeat": 0,
+      "order": 2,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_max_utterance_6_r0_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_max_utterance_6_r0_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_max_utterance_6_r0_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_max_utterance_6_r0_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_max_utterance_6_r0_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 305854,
+        "after": 307042
+      }
+    },
+    {
+      "tag": "lb0912_A_partial_recheck_translation_r0",
+      "clip": "A",
+      "arm": "partial_recheck_translation",
+      "repeat": 0,
+      "order": 3,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 307042,
+        "after": 308515
+      }
+    },
+    {
+      "tag": "lb0912_A_partial_recheck_translation_r1",
+      "clip": "A",
+      "arm": "partial_recheck_translation",
+      "repeat": 1,
+      "order": 4,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 308515,
+        "after": 309053
+      }
+    },
+    {
+      "tag": "lb0912_A_max_utterance_6_r1",
+      "clip": "A",
+      "arm": "max_utterance_6",
+      "repeat": 1,
+      "order": 5,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_max_utterance_6_r1_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_max_utterance_6_r1_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_max_utterance_6_r1_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_max_utterance_6_r1_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_max_utterance_6_r1_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 309053,
+        "after": 310782
+      }
+    },
+    {
+      "tag": "lb0912_A_marian_threads_2_r1",
+      "clip": "A",
+      "arm": "marian_threads_2",
+      "repeat": 1,
+      "order": 6,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_marian_threads_2_r1_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_marian_threads_2_r1_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_marian_threads_2_r1_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_marian_threads_2_r1_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_marian_threads_2_r1_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 310782,
+        "after": 313004
+      }
+    },
+    {
+      "tag": "lb0912_A_ctl_r1",
+      "clip": "A",
+      "arm": "ctl",
+      "repeat": 1,
+      "order": 7,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 313004,
+        "after": 315447
+      }
+    },
+    {
+      "tag": "lb0912_A_ctl_r2",
+      "clip": "A",
+      "arm": "ctl",
+      "repeat": 2,
+      "order": 8,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 315447,
+        "after": 318175
+      }
+    },
+    {
+      "tag": "lb0912_A_partial_recheck_translation_r2",
+      "clip": "A",
+      "arm": "partial_recheck_translation",
+      "repeat": 2,
+      "order": 9,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 318175,
+        "after": 319726
+      }
+    },
+    {
+      "tag": "lb0912_A_marian_threads_2_r2",
+      "clip": "A",
+      "arm": "marian_threads_2",
+      "repeat": 2,
+      "order": 10,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_marian_threads_2_r2_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_marian_threads_2_r2_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_marian_threads_2_r2_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_marian_threads_2_r2_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_marian_threads_2_r2_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 319726,
+        "after": 325950
+      }
+    },
+    {
+      "tag": "lb0912_A_max_utterance_6_r2",
+      "clip": "A",
+      "arm": "max_utterance_6",
+      "repeat": 2,
+      "order": 11,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_A_max_utterance_6_r2_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_A_max_utterance_6_r2_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_A_max_utterance_6_r2_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_A_max_utterance_6_r2_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_A_max_utterance_6_r2_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 325950,
+        "after": 330445
+      }
+    },
+    {
+      "tag": "lb0912_B_ctl_r0",
+      "clip": "B",
+      "arm": "ctl",
+      "repeat": 0,
+      "order": 12,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 330445,
+        "after": 332184
+      }
+    },
+    {
+      "tag": "lb0912_B_marian_threads_2_r0",
+      "clip": "B",
+      "arm": "marian_threads_2",
+      "repeat": 0,
+      "order": 13,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_marian_threads_2_r0_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_marian_threads_2_r0_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_marian_threads_2_r0_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_marian_threads_2_r0_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_marian_threads_2_r0_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 332184,
+        "after": 333165
+      }
+    },
+    {
+      "tag": "lb0912_B_max_utterance_6_r0",
+      "clip": "B",
+      "arm": "max_utterance_6",
+      "repeat": 0,
+      "order": 14,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_max_utterance_6_r0_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_max_utterance_6_r0_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_max_utterance_6_r0_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_max_utterance_6_r0_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_max_utterance_6_r0_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 333165,
+        "after": 334416
+      }
+    },
+    {
+      "tag": "lb0912_B_partial_recheck_translation_r0",
+      "clip": "B",
+      "arm": "partial_recheck_translation",
+      "repeat": 0,
+      "order": 15,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 334416,
+        "after": 335939
+      }
+    },
+    {
+      "tag": "lb0912_B_partial_recheck_translation_r1",
+      "clip": "B",
+      "arm": "partial_recheck_translation",
+      "repeat": 1,
+      "order": 16,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 335939,
+        "after": 336931
+      }
+    },
+    {
+      "tag": "lb0912_B_max_utterance_6_r1",
+      "clip": "B",
+      "arm": "max_utterance_6",
+      "repeat": 1,
+      "order": 17,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_max_utterance_6_r1_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_max_utterance_6_r1_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_max_utterance_6_r1_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_max_utterance_6_r1_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_max_utterance_6_r1_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 336931,
+        "after": 338126
+      }
+    },
+    {
+      "tag": "lb0912_B_marian_threads_2_r1",
+      "clip": "B",
+      "arm": "marian_threads_2",
+      "repeat": 1,
+      "order": 18,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_marian_threads_2_r1_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_marian_threads_2_r1_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_marian_threads_2_r1_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_marian_threads_2_r1_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_marian_threads_2_r1_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 338126,
+        "after": 341910
+      }
+    },
+    {
+      "tag": "lb0912_B_ctl_r1",
+      "clip": "B",
+      "arm": "ctl",
+      "repeat": 1,
+      "order": 19,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 341910,
+        "after": 344135
+      }
+    },
+    {
+      "tag": "lb0912_B_ctl_r2",
+      "clip": "B",
+      "arm": "ctl",
+      "repeat": 2,
+      "order": 20,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 344135,
+        "after": 346230
+      }
+    },
+    {
+      "tag": "lb0912_B_partial_recheck_translation_r2",
+      "clip": "B",
+      "arm": "partial_recheck_translation",
+      "repeat": 2,
+      "order": 21,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 346230,
+        "after": 348113
+      }
+    },
+    {
+      "tag": "lb0912_B_marian_threads_2_r2",
+      "clip": "B",
+      "arm": "marian_threads_2",
+      "repeat": 2,
+      "order": 22,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_marian_threads_2_r2_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_marian_threads_2_r2_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_marian_threads_2_r2_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_marian_threads_2_r2_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_marian_threads_2_r2_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 348113,
+        "after": 349953
+      }
+    },
+    {
+      "tag": "lb0912_B_max_utterance_6_r2",
+      "clip": "B",
+      "arm": "max_utterance_6",
+      "repeat": 2,
+      "order": 23,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate/metrics/replay_lb0912_B_max_utterance_6_r2_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate/metrics/diagnostics_lb0912_B_max_utterance_6_r2_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_lb0912_B_max_utterance_6_r2_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_lifecycle_lb0912_B_max_utterance_6_r2_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate/metrics/session_metadata_lb0912_B_max_utterance_6_r2_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0.json",
+      "pageouts": {
+        "before": 349953,
+        "after": 351435
+      }
+    }
+  ]
+}

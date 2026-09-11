@@ -1,0 +1,73 @@
+=== lb0912_A_ctl_r0 order=0 start 2026-09-11T20:11:03Z
+Replay lb0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 301326 -> 303809
+=== lb0912_A_marian_threads_2_r0 order=1 start 2026-09-11T20:17:16Z
+Replay lb0912_A_marian_threads_2_r0_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 303809 -> 305854
+=== lb0912_A_max_utterance_6_r0 order=2 start 2026-09-11T20:23:30Z
+Replay lb0912_A_max_utterance_6_r0_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk: 77 chunks
+rc=0 pageouts 305854 -> 307042
+=== lb0912_A_partial_recheck_translation_r0 order=3 start 2026-09-11T20:29:43Z
+Replay lb0912_A_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 307042 -> 308515
+=== lb0912_A_partial_recheck_translation_r1 order=4 start 2026-09-11T20:35:56Z
+Replay lb0912_A_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 308515 -> 309053
+=== lb0912_A_max_utterance_6_r1 order=5 start 2026-09-11T20:42:09Z
+Replay lb0912_A_max_utterance_6_r1_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk: 77 chunks
+rc=0 pageouts 309053 -> 310782
+=== lb0912_A_marian_threads_2_r1 order=6 start 2026-09-11T20:48:21Z
+Replay lb0912_A_marian_threads_2_r1_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 310782 -> 313004
+=== lb0912_A_ctl_r1 order=7 start 2026-09-11T20:54:35Z
+Replay lb0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 313004 -> 315447
+=== lb0912_A_ctl_r2 order=8 start 2026-09-11T21:00:48Z
+Replay lb0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 315447 -> 318175
+=== lb0912_A_partial_recheck_translation_r2 order=9 start 2026-09-11T21:07:03Z
+Replay lb0912_A_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 318175 -> 319726
+=== lb0912_A_marian_threads_2_r2 order=10 start 2026-09-11T21:13:16Z
+Replay lb0912_A_marian_threads_2_r2_marian_threads_2_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 319726 -> 325950
+=== lb0912_A_max_utterance_6_r2 order=11 start 2026-09-11T21:19:30Z
+Replay lb0912_A_max_utterance_6_r2_max_utterance_6_Gospel_Message__12_14_25__5D2rOMvkwrk: 77 chunks
+rc=0 pageouts 325950 -> 330445
+=== lb0912_B_ctl_r0 order=12 start 2026-09-11T21:25:44Z
+Replay lb0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 330445 -> 332184
+=== lb0912_B_marian_threads_2_r0 order=13 start 2026-09-11T21:31:58Z
+Replay lb0912_B_marian_threads_2_r0_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 332184 -> 333165
+=== lb0912_B_max_utterance_6_r0 order=14 start 2026-09-11T21:38:11Z
+Replay lb0912_B_max_utterance_6_r0_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0: 89 chunks
+rc=0 pageouts 333165 -> 334416
+=== lb0912_B_partial_recheck_translation_r0 order=15 start 2026-09-11T21:44:24Z
+Replay lb0912_B_partial_recheck_translation_r0_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 334416 -> 335939
+=== lb0912_B_partial_recheck_translation_r1 order=16 start 2026-09-11T21:50:37Z
+Replay lb0912_B_partial_recheck_translation_r1_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 335939 -> 336931
+=== lb0912_B_max_utterance_6_r1 order=17 start 2026-09-11T21:56:50Z
+Replay lb0912_B_max_utterance_6_r1_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0: 89 chunks
+rc=0 pageouts 336931 -> 338126
+=== lb0912_B_marian_threads_2_r1 order=18 start 2026-09-11T22:03:03Z
+Replay lb0912_B_marian_threads_2_r1_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 338126 -> 341910
+=== lb0912_B_ctl_r1 order=19 start 2026-09-11T22:09:17Z
+Replay lb0912_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 341910 -> 344135
+=== lb0912_B_ctl_r2 order=20 start 2026-09-11T22:15:31Z
+Replay lb0912_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 344135 -> 346230
+=== lb0912_B_partial_recheck_translation_r2 order=21 start 2026-09-11T22:21:43Z
+Replay lb0912_B_partial_recheck_translation_r2_partial_recheck_translation_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 346230 -> 348113
+=== lb0912_B_marian_threads_2_r2 order=22 start 2026-09-11T22:27:56Z
+Replay lb0912_B_marian_threads_2_r2_marian_threads_2_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 348113 -> 349953
+=== lb0912_B_max_utterance_6_r2 order=23 start 2026-09-11T22:34:09Z
+Replay lb0912_B_max_utterance_6_r2_max_utterance_6_Gospel_Message__2_8_26__BpIELcuh8O0: 89 chunks
+rc=0 pageouts 349953 -> 351435
+=== L-B done 2026-09-11T22:40:23Z ===

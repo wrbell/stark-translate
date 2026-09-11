@@ -19,7 +19,7 @@ source-bound; pick them from measured overlap (see "Open attribution questions")
 | 0.4 s partial cadence; 12 CT2 threads | `--partial-interval 0.4`; CT2 `intra_threads` 12 | both worse (GPU/CPU contention) | [v2026.13 MAC_LATENCY §5](archive/v2026.13/MAC_LATENCY.md) |
 | E2B OptiQ as speculative draft for E4B, γ = 1 / 2 / 3 (isolated text bench) | `STARK_EXPERIMENT_DRAFT_MODEL_ID`, `_DRAFT_TOKENS` | byte-identical but canary-length gain below the 15 %/150 ms gate | [overnight L2](evaluation/overnight_20260911/L2-e2b-draft/README.md) |
 | `draft_g3` live (E2B draft γ=3) and `serial_finals` (no STT/translation overlap), 360 s clips | same draft knobs; `STARK_EXPERIMENT_SERIAL_FINALS` | draft: STT starved on the 18 GB budget, previews −30 %, p95 ×2–3; serial: overlap rare, waiting only hurts | [tail screen 2026-09-11](evaluation/followup_20260911/X-tail-screen/README.md) |
-| Series 3 arms (2026-09-12): `marian_threads_2`, `max_utterance_6`, `partial_recheck_translation` | `STARK_TRANSLATE_MARIAN_INTRA_THREADS=2`; `STARK_VAD_MAX_UTTERANCE=6.0`; `STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION=true` | _pending — filled from the L-B evidence_ | [series 3 L-B](evaluation/series3_20260912/STATUS.md) |
+| Series 3 arms (2026-09-12): `marian_threads_2`, `max_utterance_6`, `partial_recheck_translation` | `STARK_TRANSLATE_MARIAN_INTRA_THREADS=2`; `STARK_VAD_MAX_UTTERANCE=6.0`; `STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION=true` | all REJECTED on G1 on both clips: threads-2 raised the Gemma p95 (+16 % A, +6 % B); the 6 s cap lowered medians but raised the clip A tail and failed its quality guard (20 % concatenated WER, duplicates); the partial re-check cut the clip A Gemma p95 by 8.8 % (below the 15 %/300 ms gate), nothing on B, previews −7…−13 % | [series 3 L-B](evaluation/series3_20260912/LB-tail-screen/README.md) |
 
 Note on the allocator arms: `STARK_EXPERIMENT_MLX_CACHE_MB` was applied process-wide by the Gemma loader when
 those arms ran (Gemma loads last), so they were real screens; PR #214 only made the STT loaders and workers
@@ -36,12 +36,12 @@ consistent with it.
 - Control tails are translation-dominated (worst decile: Gemma call > 800 ms in 95–100 %, STT in 14 %); ~86 partial
   STT calls per 360 s run start while a Gemma translation is active.
 
-## Open attribution questions
+## Attribution answers (series 3 L-A)
 
 Answered by [series 3 L-A](evaluation/series3_20260912/STATUS.md) with `tools/stt_overlap_attribution.py` on traced
 control runs: how much of slow Gemma decode overlaps partial STT; how much of slow final STT overlaps another
 chunk's decode; isolated vs live Gemma tokens/s; process CPU during decode with Marian previews; the share and
-cost of smart/hard-cut finals. Arms run only where the mechanism is measured.
+cost of smart/hard-cut finals. Arms ran only where the mechanism was measured; all three admitted arms were rejected (row above). Every hypothesis that keeps the model, the token count and the goal's metric is now closed; the remaining levers are a smaller/faster final model with quality review, fewer output tokens, or restating the goal on the first-token measure.
 
 ## Harness controls and attribution
 
