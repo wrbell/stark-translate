@@ -224,3 +224,29 @@ def test_input_collision_and_bad_json_do_not_write(diagnostics, tmp_path):
     with pytest.raises(SystemExit, match="2"):
         main(["--diagnostics", str(bad), "--label", "bad", "--output", str(output)])
     assert not output.exists()
+
+
+def test_explicit_route_precedes_proxy_and_records_source(tmp_path):
+    path = write_rows(
+        tmp_path / "routes.jsonl",
+        [
+            caption(final_translation_route="marian"),  # Gemma proxy disagrees.
+            caption(tps_a=0, spanish_gemma=""),
+            caption(final_translation_route="gemma", tps_a=0, spanish_gemma=""),
+        ],
+    )
+    report = analyze(path, "routes")
+    assert report["cohorts"]["marian"]["jsonl_rows"] == 2
+    assert report["cohorts"]["marian"]["route_source"] == "mixed"
+    assert report["cohorts"]["gemma"]["route_source"] == "final_translation_route"
+    assert "Route source: mixed" in render_markdown(report)
+    assert (
+        analyze(write_rows(tmp_path / "proxy.jsonl", [caption()]), "proxy")["cohorts"]["gemma"]["route_source"]
+        == "tps_a_proxy"
+    )
+
+
+def test_explicit_invalid_route_does_not_fall_back(tmp_path):
+    report = analyze(write_rows(tmp_path / "unknown.jsonl", [caption(final_translation_route=None)]), "unknown")
+    assert report["cohorts"]["unknown"]["jsonl_rows"] == 1
+    assert report["cohorts"]["gemma"]["jsonl_rows"] == 0

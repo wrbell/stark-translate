@@ -2069,6 +2069,7 @@ def _experiment_snapshot():
                 "partial_stt_finished",
                 "final_stt_started",
                 "final_stt_finished",
+                "final_stt_waited_for_translation",
                 "partial_emitted",
                 "final_marian_routes",
                 "final_gemma_requests",
@@ -2082,6 +2083,12 @@ def _run_tracked_stt(kind, function, *args, trace_fields=None):
     """Track actual worker lifetime; cancelling its asyncio wrapper is not completion."""
     with _experiment_lock:
         _active_stt_workers[kind] += 1
+        # Counts include this call itself, including a final in concurrent_final.
+        activity_fields = {
+            "translation_active": _translation_active.is_set(),
+            "concurrent_partial": _active_stt_workers["partial"],
+            "concurrent_final": _active_stt_workers["final"],
+        }
     _count_experiment(f"{kind}_stt_started")
     try:
         audio_samples = len(args[0]) if args and hasattr(args[0], "__len__") else None
@@ -2091,6 +2098,7 @@ def _run_tracked_stt(kind, function, *args, trace_fields=None):
             "audio_sample_rate": SAMPLE_RATE,
             "function": getattr(function, "__name__", type(function).__name__),
             **(trace_fields or {}),
+            **activity_fields,
         }
         with _latency_trace.span("physical_stt", **fields):
             return function(*args)
@@ -3666,6 +3674,20 @@ async def _pipeline_coordinator():
             if overlap_detected:
                 _pipeline_overlaps += 1
                 print(f"  [P7-6C] OVERLAP: STT #{cid} starting while Translation #{cid - 1} still running")
+
+            if _latency.serial_finals and overlap_detected:
+                wait_started = time.perf_counter()
+                try:
+                    await asyncio.shield(active_translation_task)
+                except Exception:
+                    # The shutdown gather retains and surfaces translation failures.
+                    pass
+                _latency_event(
+                    "final_stt_waited_for_translation",
+                    utterance_id=timing.utterance_id,
+                    chunk_id=cid,
+                    wait_ms=(time.perf_counter() - wait_started) * 1000,
+                )
 
             # --- STT: submit to pipeline pool ---
             loop = asyncio.get_event_loop()
