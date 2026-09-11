@@ -87,14 +87,36 @@ def _versions(package):
     }.get(package, "99.0")
 
 
-def test_mac_preflight_rejects_rollback_torch_version(monkeypatch):
+def test_mac_preflight_accepts_retained_rollback_torch_with_note(monkeypatch):
     monkeypatch.setattr(
         preflight.importlib.metadata, "version", lambda name: "2.10.0" if name == "torch" else _versions(name)
     )
+    monkeypatch.setattr(vad_runtime, "packaged_vad_path", lambda backend: Path("packaged.jit"))
+    result = preflight.check_dependencies("mlx")
+    assert result["status"] == "pass"
+    assert "rollback runtime" in result["detail"]
+    assert "torch>=2.10,<2.11 (installed 2.10.0; promoted >=2.13,<2.14)" in result["detail"]
+
+
+def test_mac_preflight_rejects_torch_outside_promoted_and_rollback_ranges(monkeypatch):
+    monkeypatch.setattr(
+        preflight.importlib.metadata, "version", lambda name: "2.12.0" if name == "torch" else _versions(name)
+    )
     result = preflight.check_dependencies("mlx")
     assert result["status"] == "fail"
-    assert "torch>=2.13,<2.14 (installed 2.10.0)" in result["detail"]
+    assert "torch>=2.13,<2.14 (installed 2.12.0)" in result["detail"]
     assert "Install stark-translate[mlx]" in result["detail"]
+
+
+def test_mac_preflight_rollback_torchaudio_only_applies_to_mlx(monkeypatch):
+    monkeypatch.setattr(
+        preflight.importlib.metadata, "version", lambda name: "2.10.0" if name == "torchaudio" else _versions(name)
+    )
+    monkeypatch.setattr(vad_runtime, "packaged_vad_path", lambda backend: Path("packaged.jit"))
+    mlx = preflight.check_dependencies("mlx", diarize=True)
+    assert (
+        mlx["status"] == "pass" and "torchaudio>=2.10,<2.11 (installed 2.10.0; promoted >=2.11,<2.12)" in mlx["detail"]
+    )
 
 
 def test_mac_preflight_requires_exact_silero_version(monkeypatch):
