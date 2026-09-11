@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "session_id": "20260911_144155_276040_en",
+  "updated_at": 1789156043.299542,
+  "phase": "completed",
+  "input_seen": true,
+  "input_age_s": 272.78296687499824,
+  "caption_age_s": 435.1030613750045,
+  "input_level": 0.0,
+  "errors": [],
+  "error_count": 0,
+  "captions": [
+    {
+      "session_id": "20260911_144155_276040_en",
+      "utterance_id": 629,
+      "chunk_id": 629,
+      "stage": "partial",
+      "english": "She goes.",
+      "spanish_a": "Ella se va.",
+      "source_lang": null,
+      "target_lang": null,
+      "speaker": null
+    },
+    {
+      "session_id": "20260911_144155_276040_en",
+      "utterance_id": 629,
+      "chunk_id": 629,
+      "stage": "partial",
+      "english": "S",
+      "spanish_a": "S",
+      "source_lang": null,
+      "target_lang": null,
+      "speaker": null
+    },
+    {
+      "session_id": "20260911_144155_276040_en",
+      "utterance_id": 628,
+      "chunk_id": 597,
+      "stage": "complete",
+      "english": "For sinners sin was made. We'll sing verse one and five of Hymn eleven, and thank you again for coming tonight.",
+      "spanish_a": "Para los pecadores se hizo el pecado. Cantaremos el verso uno y cinco del Himno once, y gracias de nuevo por venir esta noche.",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    },
+    {
+      "session_id": "20260911_144155_276040_en",
+      "utterance_id": 629,
+      "chunk_id": 629,
+      "stage": "partial",
+      "english": "She no dawn",
+      "spanish_a": "Ella no amanece",
+      "source_lang": null,
+      "target_lang": null,
+      "speaker": null
+    },
+    {
+      "session_id": "20260911_144155_276040_en",
+      "utterance_id": 631,
+      "chunk_id": 599,
+      "stage": "complete",
+      "english": "Yeah, yeah.",
+      "spanish_a": "S\u00ed, s\u00ed.",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    }
+  ],
+  "recording": {
+    "audio_enabled": false,
+    "required_failures": 0,
+    "ok": true
+  },
+  "control_sequence": 1789156042884397000,
+  "publish_failures": 0,
+  "persistence": {
+    "submitted": 4470,
+    "completed": 4470,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "storage": {
+    "free_bytes": 174262075392,
+    "low_space": false
+  },
+  "queues": {
+    "audio": 0,
+    "capture_handoff": 0,
+    "finals": 0,
+    "stream_tokens": 1
+  },
+  "clients": 0,
+  "replay_client_wait": {
+    "requested_seconds": 0.0,
+    "actual_wait_seconds": 0.0,
+    "status": "disabled",
+    "connected_clients": 0,
+    "visibility_confirmed": false
+  }
+}
