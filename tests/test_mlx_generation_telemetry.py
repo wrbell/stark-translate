@@ -68,7 +68,7 @@ def test_generation_telemetry(engine, streaming, finish_reason):
 def test_streaming_custom_batch_cleans_partial(engine):
     callback = MagicMock()
     with patch("mlx_lm.stream_generate", return_value=iter(responses())):
-        engine.translate_streaming("hello", token_callback=callback, batch_size=2)
+        engine.translate_streaming("hello", token_callback=callback, batch_size=2, first_batch_size=2)
     assert [call.args for call in callback.call_args_list] == [("Hola mundo", 2), ("Hola mundo.", 4)]
 
 
@@ -123,7 +123,10 @@ def test_pipeline_telemetry_and_exports(monkeypatch, tmp_path, streaming):
     ):
         if streaming:
             text, latency, tps = d.translate_mlx_streaming(object(), tok, "hello", 42)
-            enqueue.assert_called_once_with(("token", 42, "Hola mundo.", 3))
+            assert [call.args[0] for call in enqueue.call_args_list] == [
+                ("token", 42, "Hola", 1),
+                ("token", 42, "Hola mundo.", 4),
+            ]
         else:
             text, latency, tps = d.translate_mlx(object(), tok, "hello", chunk_id=42)
     assert gen.call_args.kwargs["max_tokens"] == 64
@@ -164,3 +167,34 @@ def test_missing_response_metadata_is_safe():
     assert result.prompt_tokens is None
     assert result.finish_reason is None
     assert result.tokens_per_second == 0
+
+
+def test_first_token_callback_preserves_final_and_generation_arguments(engine):
+    callback = MagicMock()
+    with patch("mlx_lm.stream_generate", side_effect=lambda *a, **kw: iter(responses())) as gen:
+        expected = engine.translate("hello")
+        expected_kwargs = gen.call_args.kwargs
+        result = engine.translate_streaming("hello", token_callback=callback, first_batch_size=1, batch_size=2)
+    assert [call.args for call in callback.call_args_list] == [("Hola", 1), ("Hola mundo.", 3)]
+    assert result.text == expected.text == "Hola mundo."
+    assert result.generated_tokens == expected.generated_tokens == 4
+    assert result.draft_tokens == expected.draft_tokens == 2
+    assert gen.call_args.kwargs == expected_kwargs
+
+
+def test_invalid_first_batch(engine):
+    with pytest.raises(ValueError, match="first_batch_size must be positive"):
+        engine.translate_streaming("hello", first_batch_size=0)
+
+
+def test_pipeline_first_batch_kill_switch(monkeypatch):
+    import dry_run_ab as d
+
+    monkeypatch.setattr(d, "STREAM_FIRST_TOKEN_BATCH_SIZE", 3)
+    monkeypatch.setattr(d, "_last_gen_stats", {})
+    with (
+        patch("mlx_lm.stream_generate", return_value=iter(responses())),
+        patch.object(d, "_enqueue_stream_token") as enqueue,
+    ):
+        d.translate_mlx_streaming(object(), MagicMock(), "hello", 42)
+    enqueue.assert_called_once_with(("token", 42, "Hola mundo.", 3))
