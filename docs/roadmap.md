@@ -328,7 +328,7 @@ and [`evaluation/README.md`](./evaluation/README.md).
 | Church Spanish recording source | Local source and independent review pending | Public FLEURS Spanish already supports separately labeled engineering WER; church terminology and locally approved quality remain unvalidated |
 | E2B as default | After a qualifying performance/quality comparison and blinded bilingual review | Current screens qualified no arm; retain the measured speed, meaning and terminology tradeoffs |
 | Production hardware | Before future production-device certification | Dedicated church PC vs portable Mac; the laptop #134 rehearsal is already complete |
-| PyPI publication and release tag | After separate publication authorization and release validation | PR #192 is already merged; trusted publisher mapping remains pending |
+| PyPI publication and release tag | Deferred by decision (2026-09-11) | Tag `v2026.14.0.0`, GitHub Release, MSI and GHCR image are published; the PyPI publish job is gated on `PYPI_PUBLISH_ENABLED` and stays off |
 | W17 curriculum iterations | After Phase 4 on WSL | 2–4 cycles typical |
 | Scottish accent data sources | Before accent tuning | User provides playlist URLs |
 | TTS voice fine-tuning | Phase 9 | Fine-tune from Piper base vs train from scratch |
