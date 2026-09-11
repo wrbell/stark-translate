@@ -1,0 +1,15 @@
+{
+  "smart-turn-v3.2-cpu.onnx": {
+    "sha256": "2bb026316b14a660486a75b1733cd3fbab8c2fd0314dc9af7be49f8cca967e4f",
+    "bytes": 8679182,
+    "matches_lfs": true
+  },
+  "README.md": {
+    "sha256": "8b87ad1bb42432c1c8221944a7de5a0d1a52c2162af6f447ee9522530b38f199",
+    "bytes": 1247,
+    "matches_lfs": true
+  },
+  "revision": "f766f81d3cfdf7737ac64aad813d91bbfd56bf93",
+  "repo": "pipecat-ai/smart-turn-v3",
+  "license": "bsd-2-clause"
+}
