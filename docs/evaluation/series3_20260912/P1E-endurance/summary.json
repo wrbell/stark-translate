@@ -36,7 +36,7 @@
     "rss_tree_p50_mib": 510,
     "rss_tree_max_mib": 663,
     "rss_first_10_mean_mib": 362,
-    "rss_last_10_mean_mib": 25,
+    "rss_last_10_mean_mib": 177,
     "cpu_pct_p50": 42.2,
     "cpu_pct_p95": 81.4,
     "cpu_pct_max": 117.8,
@@ -44,7 +44,8 @@
       "ready": 769
     },
     "health_stale_samples": 0,
-    "errors": []
+    "errors": [],
+    "rss_drift_note": "samples with tree RSS > 100 MiB only (the monitor window outlived the pipeline)"
   },
   "lifecycle": {
     "status": "completed",

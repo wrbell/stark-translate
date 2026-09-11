@@ -17,7 +17,7 @@ monitor errors [].
 | Marian-routed silence p50 / p95 | 843.7 / 1049.3 ms |
 | smart+hard cuts p50 / p95 | 2572.0 / 5935.0 ms |
 | silence p50, first third → last third of the service | 1241.4 → 914.2 ms |
-| process-tree RSS (monitor, 5 s samples) p50 / max | 510 / 663 MiB; first 10 samples mean 362 → last 10 mean 25 MiB |
+| process-tree RSS (monitor, 5 s samples) p50 / max | 510 / 663 MiB; first 10 → last 10 samples with the pipeline alive: mean 362 → 177 MiB (no growth) |
 | process-tree CPU (100 % = one core) p50 / p95 / max | 42.2 / 81.4 / 117.8 % |
 
 Monitor: `tools/endurance_monitor.py` (`--duration-seconds 3850`, `partial`, stop reason `deadline` — the
