@@ -8,8 +8,8 @@
 | Lane | State | Started (UTC) | Ended (UTC) | Evidence | PR | Note |
 |---|---|---|---|---|---|---|
 | S0 pre-flight (caffeinate, worktrees, status branch) | DONE | 2026-09-11T19:05Z | 2026-09-11T19:12Z | [STATUS.md](STATUS.md) | #211 | caffeinate pid 11163; stt_env freeze a09be842…; pointer venv |
-| P2-H harness PR (Codex): cache-limit consistency, `partial_recheck_translation`, cpu_ms + first_stream_token trace, attribution tool, aligned G4, clip prep | RUNNING | 2026-09-11T19:14Z | | | | |
-| P2-L launcher PR (Codex): launchd honours `.stark-python`, bootstrap protects `stt_env`, `check_dependency_audit --runtime mac`, `scripts/audit_mac_runtime.sh` | RUNNING | 2026-09-11T19:14Z | | | | |
+| P2-H harness PR (Codex): cache-limit consistency, `partial_recheck_translation`, cpu_ms + first_stream_token trace, attribution tool, aligned G4, clip prep | RUNNING | 2026-09-11T19:14Z | | | #214 (auto-merge) | Codex done 18:44Z; full suite 3020 passed after one dispatch-test update |
+| P2-L launcher PR (Codex): launchd honours `.stark-python`, bootstrap protects `stt_env`, `check_dependency_audit --runtime mac`, `scripts/audit_mac_runtime.sh` | RUNNING | 2026-09-11T19:14Z | | | #213 (auto-merge) | Codex done 18:44Z; full suite 3040 passed |
 | P3-C coverage gate 50 → 65 | DONE | 2026-09-11T19:10Z | 2026-09-11T18:36Z | [P3-runtime-smoke/README.md](P3-runtime-smoke/README.md) | #212 (merged `e92f831`) | measured 68.17 % on main; gate now 65 |
 | P3-S installed smoke + Mac runtime audit | RUNNING | 2026-09-11T19:10Z | | | | smoke passed (5 routes 200, 45 runtime files, verse parser ok); pip-audit 0 findings / 124; `--runtime mac` check pending P2-L |
 | P1-H hymn #193 second control + slices | DONE | 2026-09-11T18:35Z | 2026-09-11T18:41Z | [P1H-hymn-control/README.md](P1H-hymn-control/README.md) | #211 (this PR) | completed_technical_diagnostic, 0 errors; 18 finals, same endpoint mix and routing as the c13f51f control; hold never entered; two search slices cut and hashed |
@@ -28,3 +28,4 @@
 - 19:16Z S0 DONE. Codex C1 (harness) and C2 (launcher) launched 19:14Z. Coverage PR #212 opened with auto-merge. Installed smoke passed from outside the checkout; venv pip-audit clean (124 distributions). Hymn second control started on the GPU (promoted interpreter); the two search slices were cut and hashed.
 - 19:25Z #212 merged (main `e92f831`, coverage gate 65). L-C first-token report written from the six traced control runs (Gemma first token p50 1.13–1.21 s; all-route first-visible p50 1.09–1.19 s vs payload-ready 1.6–2.0 s).
 - 18:45Z P1-H DONE (second control on the promoted runtime: identical segmentation to the first control, hold never entered; slices 400–470 s and 700–780 s cut and hashed). P1-E endurance started through the operator on venv (3,640 s replay, recording off, monitor attached).
+- 18:55Z Codex lanes finished 18:44Z; reviewed; launcher PR #213 and harness PR #214 opened with auto-merge (harness: one existing dispatch test updated for the new constructor argument). Endurance replay still running.
