@@ -1,7 +1,6 @@
 # P1-E — promoted-runtime service endurance replay (2026-09-11)
 
-**Result: completed.** The operator (`venv/bin/python -m operator_app.cli operator`, `main` @ `a46649e`... launched at
-`dc983c6`+#212/#213 state; see note) replayed the full 3,640 s natural English service
+**Result: completed.** The operator (`venv/bin/python -m operator_app.cli operator`, checkout at `c914e14` when launched — see caveats) replayed the full 3,640 s natural English service
 (`stark_data/raw/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav`, SHA256 `8bec0f10…`) as session `20260911_144155_276040_en`
 through the production Start path (`POST /api/session/start`, profile standard, Parakeet EN, E4B, recording off, TTS off).
 Lifecycle `completed` (exit 0), 2026-09-11T18:41:58Z → 2026-09-11T19:47:23Z; peak RSS 3.38 GiB,
@@ -18,7 +17,7 @@ monitor errors [].
 | Marian-routed silence p50 / p95 | 843.7 / 1049.3 ms |
 | smart+hard cuts p50 / p95 | 2572.0 / 5935.0 ms |
 | silence p50, first third → last third of the service | 1241.4 → 914.2 ms |
-| process-tree RSS (monitor, 5 s samples) p50 / max | 510 / 663 MiB; first 10 samples mean None → last 10 mean None MiB |
+| process-tree RSS (monitor, 5 s samples) p50 / max | 510 / 663 MiB; first 10 samples mean 362 → last 10 mean 25 MiB |
 | process-tree CPU (100 % = one core) p50 / p95 / max | 42.2 / 81.4 / 117.8 % |
 
 Monitor: `tools/endurance_monitor.py` (`--duration-seconds 3850`, `partial`, stop reason `deadline` — the

@@ -13,7 +13,7 @@
 | P3-C coverage gate 50 → 65 | DONE | 2026-09-11T19:10Z | 2026-09-11T18:36Z | [P3-runtime-smoke/README.md](P3-runtime-smoke/README.md) | #212 (merged `e92f831`) | measured 68.17 % on main; gate now 65 |
 | P3-S installed smoke + Mac runtime audit | DONE | 2026-09-11T19:10Z | 2026-09-11T19:12Z | [P3-runtime-smoke/README.md](P3-runtime-smoke/README.md) | #211 (this PR) | smoke passed (5 routes 200, 45 runtime files, verse parser ok); pip-audit 0 findings / 124; `--runtime mac` check passed |
 | P1-H hymn #193 second control + slices | DONE | 2026-09-11T18:35Z | 2026-09-11T18:41Z | [P1H-hymn-control/README.md](P1H-hymn-control/README.md) | #211 (this PR) | completed_technical_diagnostic, 0 errors; 18 finals, same endpoint mix and routing as the c13f51f control; hold never entered; two search slices cut and hashed |
-| P1-E promoted-runtime service endurance (3,640 s replay) | DONE | 2026-09-11T18:42Z | 2026-09-11T19:48Z | [P1E-endurance/README.md](P1E-endurance/README.md) | #211 (this PR) | lifecycle completed exit 0; peak Metal 9.3 GiB; health ready throughout; observational |
+| P1-E promoted-runtime service endurance (3,640 s replay) | DONE | 2026-09-11T18:42Z | 2026-09-11T19:48Z | [P1E-endurance/README.md](P1E-endurance/README.md) | #211 (this PR) | lifecycle completed exit 0; peak Metal 8.7 GiB; health ready throughout; observational |
 | L-A attribution | RUNNING | 2026-09-11T19:50Z | | | | main `a46649e`; text bench + 3 traced control replays with cpu_ms + attribution over 9 traces |
 | L-B arm 2 `marian_threads_2` | PENDING | | | | | only if L-A admits |
 | L-B arm 3 `max_utterance_6` | PENDING | | | | | only if L-A admits |
