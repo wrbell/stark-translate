@@ -1,154 +1,47 @@
-# EN↔ES latency: experiments after the overnight screen
+# EN↔ES latency: closed-arm registry and open attribution questions
 
-**2026-09-10 update:** the normalized [Standard screen](evaluation/mac_followup_20260910/standard-screen-result.md)
-completed 96 runs with 0/24 model/language arms qualified; the
-[Spanish Parakeet screen](evaluation/mac_followup_20260910/spanish-parakeet-result.md)
-completed 18 runs with 0/2 arms qualified; the
-[CPU Lite cadence screen](evaluation/mac_followup_20260910/lite-cadence-result.md)
-completed 24 runs with 0/4 language/cadence arms qualified. The independent
-[CPU Lite deadline screen](evaluation/mac_followup_20260910/lite-deadline-result.md)
-completed another 24 runs with 0/4 arms qualified. Their retained results
-do not authorize confirmation or combinations of the rejected arms. Gemma E4B,
-Spanish Whisper and the 0.6-second partial cadence remain unchanged.
+This file is the single registry of every latency arm that has been screened and closed on the Mac. A closed arm
+is **never re-run as a confirmation and never enters a combination** (`docs/evaluation/overnight_experiment_plan.md`,
+`CLAUDE.md`). Each row links to the immutable evidence that closed it. New hypotheses must be distinct and
+source-bound; pick them from measured overlap (see "Open attribution questions"), not from this list.
 
-The earlier [overnight screen](evaluation/overnight_screen_20260910/README.md)
-tested 15 configurations on E4B and E2B: 96/96 valid runs and 0/28 selected
-experiment/model arms. That historical cohort and its stage observations below
-remain separate from the normalized [EN↔ES follow-up](evaluation/mac_followup_20260910/README.md).
-Public Spanish read-speech references are available for engineering comparisons;
-church references and bilingual review remain required for quality certification. The [completed Standard and Lite endurance audits](evaluation/overnight_endurance_20260910/README.md)
-confirm consistent retained spans and durable completion on `752ab9a`. Lite's
-sparse translated previews and large observed tails do not support a fast-production
-recommendation. These functional runs do not promote a screen arm, establish a
-causal speed improvement or satisfy quality/hardware certification.
+## Closed arms — never re-run or combined
 
-## Historical stage observations
+| Arm(s) | Knob / env | Verdict | Evidence |
+|---|---|---|---|
+| 14 experiments × {E2B, E4B} (`allocation_512/1024`, `async_captions`, `clause_preview`, `first_preview`, `latest_partial`, `marian_memo`, `pause_preview`, `pause_speculation`, `prefix_cache`, `rolling_6s`, `streaming_stt`, `vad_worker_torch/onnx`) | `STARK_EXPERIMENT_*` (`MLX_CACHE_MB`, `ASYNC_CAPTIONS`, `CLAUSE_PREVIEW_S`, `FIRST_PREVIEW_S`, `LATEST_PARTIAL`, `MARIAN_MEMO`, `PAUSE_PREVIEW_MS`, `SPECULATE_PAUSE_MS`, `GEMMA_PREFIX_CACHE`, `INCREMENTAL_STT=rolling/stream`, `VAD_WORKER`) | 0/28 selected; every row failed a tail guard and the median gate | [overnight screen 2026-09-10](evaluation/overnight_screen_20260910/README.md) |
+| Early clause cuts (2 s / 4 s × 160 / 240 ms) and partial-STT deadline margins (100 / 250 ms) × {E4B, E2B} × {EN, ES} | `STARK_EXPERIMENT_EARLY_CLAUSE_S` + `_EARLY_CLAUSE_PAUSE_MS`, `STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS` | 0/24 qualified (36/72 median-only) | [Standard screen](evaluation/mac_followup_20260910/standard-screen-result.md) |
+| Spanish Parakeet STT (vs mlx-whisper large-v3-turbo) × {E4B, E2B} | `--stt-backend parakeet-mlx` for ES | 0/2 (queue-wait and update-gap tails) | [Spanish Parakeet screen](evaluation/mac_followup_20260910/spanish-parakeet-result.md) |
+| CPU Lite partial cadence 0.9 s / 1.2 s × {EN, ES} | `--partial-interval` | 0/4 (preview coverage loss, tails) | [Lite cadence screen](evaluation/mac_followup_20260910/lite-cadence-result.md) |
+| CPU Lite deadline margins 100 / 250 ms × {EN, ES} | `STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS` | 0/4 (STT stage-queue and delivery tails) | [Lite deadline screen](evaluation/mac_followup_20260910/lite-deadline-result.md) |
+| CPU Whisper base (vs small) | Lite STT model size | rejected on WER in both languages | [CPU STT comparison](evaluation/mac_followup_20260910/cpu-stt-comparison.md) |
+| Gemma 4 MTP / assistant drafter (`--mts`), incl. the RoPE-offset patch | `--mts`, `engines/mlx_spec.py` | 31 % acceptance, medium p50 ≈ 0.96×; off; #177 closed not-planned | [MTP notes](mlx_mtp_notes.md), [v2026.13 MAC_LATENCY §3](archive/v2026.13/MAC_LATENCY.md) |
+| 0.4 s partial cadence; 12 CT2 threads | `--partial-interval 0.4`; CT2 `intra_threads` 12 | both worse (GPU/CPU contention) | [v2026.13 MAC_LATENCY §5](archive/v2026.13/MAC_LATENCY.md) |
+| E2B OptiQ as speculative draft for E4B, γ = 1 / 2 / 3 (isolated text bench) | `STARK_EXPERIMENT_DRAFT_MODEL_ID`, `_DRAFT_TOKENS` | byte-identical but canary-length gain below the 15 %/150 ms gate | [overnight L2](evaluation/overnight_20260911/L2-e2b-draft/README.md) |
+| `draft_g3` live (E2B draft γ=3) and `serial_finals` (no STT/translation overlap), 360 s clips | same draft knobs; `STARK_EXPERIMENT_SERIAL_FINALS` | draft: STT starved on the 18 GB budget, previews −30 %, p95 ×2–3; serial: overlap rare, waiting only hurts | [tail screen 2026-09-11](evaluation/followup_20260911/X-tail-screen/README.md) |
+| Series 3 arms (2026-09-12): `marian_threads_2`, `max_utterance_6`, `partial_recheck_translation` | `STARK_TRANSLATE_MARIAN_INTRA_THREADS=2`; `STARK_VAD_MAX_UTTERANCE=6.0`; `STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION=true` | _pending — filled from the L-B evidence_ | [series 3 L-B](evaluation/series3_20260912/STATUS.md) |
 
-On frozen source `911f4ae`, the first two opening-baseline smart-cut finals wait
-about 3,085 and 2,829 ms between the selected earlier speech boundary and the VAD
-submission decision. Both model sizes show this delay. A faster translation model
-cannot remove time spent before transcription starts.
+Note on the allocator arms: `STARK_EXPERIMENT_MLX_CACHE_MB` was applied process-wide by the Gemma loader when
+those arms ran (Gemma loads last), so they were real screens; PR #214 only made the STT loaders and workers
+consistent with it.
 
-STT also has a variable tail. E4B opening-baseline chunk 6 takes 1,947 ms inside
-STT, versus 552 ms for identical audio bounds in the closing control. In the
-latest-partial arm, chunk 2 queues for 1,370 ms before a 128-ms STT call, but chunk
-7 still takes 2,310 ms inside STT with negligible queueing. These are individual
-observations from repetition 0, not a selection result or an estimate of average
-improvement. Full comparisons must retain every repetition and both controls.
+## What is known about where the time goes
 
-There is no Python inference mutex in [Parakeet](../engines/parakeet_mlx_engine.py)
-to remove. [Gemma's lock](../engines/mlx_generation_lock.py) protects its translation
-model. The inspected final STT calls start after the previous final translation
-ends, so these records do not establish that overlap as the cause. Untraced warmup
-and concurrently executing partial work remain possible contributors. STT-reported
-latency matches wrapper call wall time closely; returning from the worker to the
-event loop contributes at most 2.8 ms in the inspected records.
+- Silence-final medians on the promoted runtime: fixed 0.5 s silence trigger + Parakeet ≈ 0.4 s + Gemma E4B
+  ≈ 0.75–1.0 s for Gemma-routed finals (14–19 tokens at 31–35 tok/s); Marian-routed finals are already
+  sub-second at the median ([L1 + correction](evaluation/overnight_20260911/L1-silence-stages/README.md),
+  [tail screen](evaluation/followup_20260911/X-tail-screen/README.md)).
+- The first translated tokens reach the wire about 1.1–1.2 s after speech end (p95 ≈ 1.3 s), versus 1.6–2.0 s
+  for the payload-ready number the goal measures ([L-C](evaluation/series3_20260912/LC-first-token/README.md)).
+- Control tails are translation-dominated (worst decile: Gemma call > 800 ms in 95–100 %, STT in 14 %); ~86 partial
+  STT calls per 360 s run start while a Gemma translation is active.
 
-## CPU Lite follow-up
+## Open attribution questions
 
-The completed CPU hour already used beam size 1, three STT threads with one
-worker, one Marian thread and a 0.6-second partial interval. Its recorded STT
-admission waits and roughly 1.3–1.5-second STT-call medians dominate; Marian's
-silence-final translation median was 58.8 ms. A bounded partial-admission/cadence
-trial should preserve translated-preview coverage, final-tail latency and meaning
-while measuring any gain. Greedy decoding is already enabled, and adding E2B
-does not address the CPU STT queue. The completed
-[cadence comparison](evaluation/mac_followup_20260910/lite-cadence-result.md)
-rejected both slower intervals because preview coverage and responsiveness did
-not meet the guards, even where final medians improved. Preview coverage loss
-does not imply capture or final-source loss.
-
-Independent CPU Lite deadline screens completed 24 runs at unchanged
-0.6-second cadence and rejected all four arms. Neither rejected deadline nor
-cadence candidates enter confirmation or combinations. The separate
-[CPU Whisper small/base comparison](evaluation/mac_followup_20260910/cpu-stt-comparison.md)
-completed all 600 calls on 50 public development recordings per language over
-three repeats. Base was faster but failed the WER gate in both languages; no
-conditional base pipeline trial follows. These isolated scores do not establish
-production WER or caption-delivery latency.
-
-## First improve attribution
-
-The follow-up now records a common monotonic clock for capture, VAD, worker
-admission, physical STT calls and final delivery. Source coverage and actual
-EOF accounting accompany the trace; native inference drains before terminal
-summaries. The separate sampled Parakeet profile records exact model inputs,
-encoder/decoder work and scalar readback waits with an alternating unprofiled
-control. Its observed overhead is retained in the linked report.
-
-The later [capture loss accounting repair](evaluation/mac_followup_20260910/capture-loss-accounting.md)
-on `d7ed43d` separates measured worker FIFO loss from PortAudio overflow with an
-unknown sample count and reconciles losses at shutdown. It is implemented;
-no native retest or sustained capture certification is established by that repair.
-
-Historical [LatencyTrace](../tools/latency_trace.py) and session timing used
-separate relative clock origins. Do not retrospectively join them without a
-recorded offset; their existing within-clock durations remain usable. New
-schema-2 traces expose their explicit common origin.
-STT call wall time includes internal runtime waits; it is not a kernel-only timer.
-MLX [synchronize](https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.synchronize.html)
-uses the current default stream when no stream is specified, so a call alone does
-not prove every model's GPU work has finished. Measure profiling overhead itself
-and keep it out of production timing gates.
-
-## Ranked hypotheses and completed screening
-
-Standard v2 completed the six independent clause/deadline settings plus opening
-and closing controls for both models and languages. Its
-[selection and rejected tradeoffs](evaluation/mac_followup_20260910/standard-screen-result.md)
-apply to the first two hypotheses below. The failed v1 technical cohort and
-three-run shutdown-repair pilot remain separate. Any later revision needs a new
-declared experiment; all quality-changing behavior stays opt-in.
-
-
-1. **Commit an eligible clause boundary sooner.** Opt-in early final commitment
-   was exercised in Standard v2; none of its tested arms qualified. Ordinary
-   smart cuts still wait until the eight-second limit to choose an earlier pause.
-   A revised early-cut experiment must retain candidate-boundary timing and
-   resumed speech, and preserve preview coverage as well as finals. Require
-   full-recording source coverage,
-   aligned transcript/translation review, and better visible latency. Producing
-   more short captions is not itself a quality or speed win. This applies to both
-   language directions and must preserve theological phrases across boundaries.
-
-2. **Admit partial STT against an approaching final deadline.** Latest-only
-   queuing cannot interrupt an expensive partial already executing. Measure
-   physical partial starts/finishes, request age, audio length, and prediction
-   error before deferring a full-prefix partial likely to outlast an imminent
-   forced cut. Keep the ordinary 0.6-second cadence outside this bounded guard.
-   Reject gains that sacrifice first-preview coverage or update-gap tails.
-   The tested Standard and independent CPU Lite deadline arms did not qualify.
-   Their paired controls and failed responsiveness/queue/memory guards remain
-   recorded; no deadline setting is promoted.
-
-3. **Reduce scalar synchronization in Parakeet TDT decoding.** The exercised
-   Parakeet package reads token, confidence and duration scalars separately in
-   its decoder loop. If profiling proves those readbacks dominate, compare joint
-   evaluation of those outputs or a compiled pure decoder/joint step in an
-   isolated dependency environment. Require identical tokens/durations and stable
-   confidence near routing thresholds before paired replay testing. This is an
-   EN→ES STT optimization; it does not accelerate Spanish Whisper. No confidence
-   threshold changes are implied, and the working installation must stay intact.
-
-   **Completed result:** joint scalar evaluation saved 15.13 ms (9.18%) at the
-   paired median across 18 exact-output pairs, below the promotion gate. The
-   compiled decoder did not improve that paired median and introduced confidence
-   differences plus worse first-call tails. Both remain unintegrated; see
-   [retained profiling evidence](evaluation/mac_followup_20260910/README.md).
-
-Blind waveform padding is not justified by the current evidence. Parakeet
-normalizes across time and uses full-context attention, so padding can alter its
-outputs. Its full inference path is not explicitly compiled; Spanish Whisper
-already pads decoding windows. Shape compilation and allocator contention remain
-hypotheses until measured.
-
-No MTP or Hindi work is included in these follow-ups. The next decision should
-use stage-level evidence and independently confirmed output changes, preserving
-careful finals and fast, revisable previews.
-
-## 2026-09-11 tail screen (rejected; do not re-run)
-
-The declared `tail_screen_20260911` ([evidence](evaluation/followup_20260911/X-tail-screen/README.md); two 360 s church clips, promoted Torch 2.13 runtime, 3 repeats) rejected both hypotheses: **E2B OptiQ as a live mlx-lm draft for E4B finals (γ=3)** — the draft shortens Gemma decode in isolation but the resident E4B+E2B+Parakeet set (12.4–12.8 GiB Metal) starves the STT side (`stt_call` p95 0.5 → 2.5–3.0 s, final STT dispatch wait p95 3 s), cuts previews by a third and doubles or triples every Gemma-routed p95; and **`serial_finals`** (no overlap of a final's STT with the previous final's translation) — the overlap is rare and removing it only adds wait. Neither enters a confirmation or a combination. Control tails on the promoted environment are translation-dominated (long Gemma outputs at 31–35 tok/s); the `physical_stt` trace now records `translation_active`, `concurrent_partial` and `concurrent_final` on every run for the next hypothesis. The overnight L1 attribution's Gemma cohort was a route mixture; see its correction.
+Answered by [series 3 L-A](evaluation/series3_20260912/STATUS.md) with `tools/stt_overlap_attribution.py` on traced
+control runs: how much of slow Gemma decode overlaps partial STT; how much of slow final STT overlaps another
+chunk's decode; isolated vs live Gemma tokens/s; process CPU during decode with Marian previews; the share and
+cost of smart/hard-cut finals. Arms run only where the mechanism is measured.
 
 ## Harness controls and attribution
 
