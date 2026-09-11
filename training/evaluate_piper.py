@@ -30,6 +30,11 @@ from pathlib import Path
 
 import numpy as np
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from engines.model_paths import UnpinnedModelError, pinned_hf_entry, resolve_piper_voice
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -194,32 +199,23 @@ THEOLOGICAL_TERMS = {
 def load_piper_voice(voice_path_or_name, lang="en"):
     """Load a Piper voice from an ONNX path or a named model.
 
-    If *voice_path_or_name* points to an existing file, load it directly.
-    Otherwise, treat it as a Piper model name (e.g. ``en_US-lessac-high``)
-    and let PiperVoice resolve it from the default model directory.
+    Resolve a local ONNX/config pair first. Named voices require an immutable
+    models.lock.json entry and an installed copy; Piper never receives a name.
     """
+    resolved = resolve_piper_voice(str(voice_path_or_name))
+    if not Path(voice_path_or_name).expanduser().is_file():
+        pinned_hf_entry(str(voice_path_or_name))
+    if resolved is None:
+        raise UnpinnedModelError(
+            f"No local ONNX/config pair for {voice_path_or_name}; prepare its "
+            "models.lock.json entry with setup or configure an explicit local voice path"
+        )
     if not PIPER_AVAILABLE:
         logger.error("piper-tts not installed. Install with: pip install piper-tts")
         return None
 
-    voice_path = Path(voice_path_or_name)
-
-    if voice_path.exists() and voice_path.suffix == ".onnx":
-        config_path = voice_path.with_suffix(".onnx.json")
-        if not config_path.exists():
-            logger.error(f"Voice config not found: {config_path}")
-            return None
-        logger.info(f"Loading Piper voice from ONNX: {voice_path}")
-        return PiperVoice.load(str(voice_path), config_path=str(config_path))
-    else:
-        # Treat as a named model -- PiperVoice.load may support this
-        # depending on the installed version and local model cache.
-        logger.info(f"Loading Piper voice by name: {voice_path_or_name}")
-        try:
-            return PiperVoice.load(str(voice_path_or_name))
-        except Exception as e:
-            logger.error(f"Could not load Piper voice '{voice_path_or_name}': {e}")
-            return None
+    logger.info("Loading Piper voice from ONNX: %s", resolved)
+    return PiperVoice.load(resolved, config_path=f"{resolved}.json")
 
 
 def synthesize_to_wav_bytes(voice, text):

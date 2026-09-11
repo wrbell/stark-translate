@@ -27,6 +27,7 @@ from typing import Any
 import numpy as np
 
 from engines.base import STTEngine, STTResult
+from engines.model_paths import resolve_hf_model_source
 
 logger = logging.getLogger(__name__)
 
@@ -99,20 +100,24 @@ class HFWhisperEngine(STTEngine):
         t0 = time.time()
         logger.info("Loading %s (HF Whisper, %s)...", self._model_id, self._device)
 
-        self._processor = AutoProcessor.from_pretrained(self._model_id)
+        source, source_kwargs = resolve_hf_model_source(self._model_id)
+        draft_source = resolve_hf_model_source(self._draft_model_id) if self._draft_model_id else None
+        self._processor = AutoProcessor.from_pretrained(source, **source_kwargs)
         self._model = AutoModelForSpeechSeq2Seq.from_pretrained(
-            self._model_id,
+            source,
+            **source_kwargs,
             torch_dtype=self._torch_dtype,
             device_map=self._device,
         )
         self._model.eval()
         logger.info("Target model loaded (%.1fs)", time.time() - t0)
 
-        if self._draft_model_id:
+        if draft_source is not None:
             t1 = time.time()
             logger.info("Loading draft model %s...", self._draft_model_id)
             self._draft_model = AutoModelForSpeechSeq2Seq.from_pretrained(
-                self._draft_model_id,
+                draft_source[0],
+                **draft_source[1],
                 torch_dtype=self._torch_dtype,
                 device_map=self._device,
             )

@@ -25,6 +25,7 @@ from engines.base import (
     TranslationEngine,
     TranslationResult,
 )
+from engines.model_paths import resolve_hf_model_source, resolve_local_model_for_loading
 from engines.translation_prompts import (
     build_chat_messages,
     clean_translation,
@@ -129,12 +130,12 @@ class FasterWhisperEngine(STTEngine):
         )
         t0 = time.time()
         self._model = WhisperModel(
-            self._model_id_str,
+            resolve_local_model_for_loading(self._model_id_str),
             device=self._device,
             compute_type=self._compute_type,
             cpu_threads=self._cpu_threads,
             num_workers=self._num_workers,
-            local_files_only=self._local_files_only,
+            local_files_only=True,
         )
 
         # Warm up -- consume the generator to trigger actual inference
@@ -325,9 +326,10 @@ class FasterWhisperEngine(STTEngine):
         )
         t0 = time.time()
         self._fallback_model = WhisperModel(
-            self._fallback_model_id,
+            resolve_local_model_for_loading(self._fallback_model_id),
             device=self._device,
             compute_type=self._compute_type,
+            local_files_only=True,
         )
         # Warm up
         silence = np.zeros(16000, dtype=np.float32)
@@ -441,9 +443,11 @@ class CUDAGemmaEngine(TranslationEngine):
         logger.info("Loading %s (CUDA 4-bit)...", self._model_id_str)
         t0 = time.time()
 
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_id_str)
+        source, source_kwargs = resolve_hf_model_source(self._model_id_str)
+        self._tokenizer = AutoTokenizer.from_pretrained(source, **source_kwargs)
         self._model = AutoModelForCausalLM.from_pretrained(
-            self._model_id_str,
+            source,
+            **source_kwargs,
             load_in_4bit=True,
             torch_dtype=torch.bfloat16,
             device_map="cuda",
@@ -665,9 +669,12 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
         logger.info("Loading %s (CUDA 4-bit, streaming)...", self._model_id_str)
         t0 = time.time()
 
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_id_str)
+        source, source_kwargs = resolve_hf_model_source(self._model_id_str)
+        assistant_source = resolve_hf_model_source(self._assistant_model_id) if self._assistant_model_id else None
+        self._tokenizer = AutoTokenizer.from_pretrained(source, **source_kwargs)
         self._model = AutoModelForCausalLM.from_pretrained(
-            self._model_id_str,
+            source,
+            **source_kwargs,
             load_in_4bit=True,
             torch_dtype=torch.bfloat16,
             device_map="cuda",
@@ -688,13 +695,14 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
             self._prompt_cache_pkv, self._suffix_tokens = self._build_prompt_cache()
 
         # -- Optional assistant model for speculative decoding --
-        if self._assistant_model_id:
+        if assistant_source is not None:
             logger.info(
                 "Loading assistant model %s for speculative decoding...",
                 self._assistant_model_id,
             )
             self._assistant_model = AutoModelForCausalLM.from_pretrained(
-                self._assistant_model_id,
+                assistant_source[0],
+                **assistant_source[1],
                 load_in_4bit=True,
                 torch_dtype=torch.bfloat16,
                 device_map="cuda",

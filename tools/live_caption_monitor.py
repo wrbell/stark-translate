@@ -47,8 +47,14 @@ import sys
 import tempfile
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 
 import numpy as np
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from engines.model_paths import resolve_hf_model_source, resolve_model_for_loading
 
 # ---------------------------------------------------------------------------
 # Required dependency: jiwer
@@ -830,6 +836,8 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
 
     Returns a list of TimedSegment objects.
     """
+    source, _ = resolve_hf_model_source(WHISPER_MODEL)
+    model_path = resolve_model_for_loading(source)
     mlx_whisper = _import_mlx_whisper()
 
     # Check that streamlink is available
@@ -884,7 +892,7 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
     silence = np.zeros(SAMPLE_RATE, dtype=np.float32)
     mlx_whisper.transcribe(
         silence,
-        path_or_hf_repo=WHISPER_MODEL,
+        path_or_hf_repo=model_path,
         language="en",
         condition_on_previous_text=False,
     )
@@ -919,7 +927,7 @@ def capture_and_transcribe_live(video_id, duration_seconds, whisper_prompt=WHISP
             t0 = time.perf_counter()
             result = mlx_whisper.transcribe(
                 audio,
-                path_or_hf_repo=WHISPER_MODEL,
+                path_or_hf_repo=model_path,
                 language="en",
                 condition_on_previous_text=False,
                 initial_prompt=whisper_prompt,

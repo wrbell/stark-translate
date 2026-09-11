@@ -206,11 +206,26 @@ def resolve_hf_model_source(
     Local overrides retain their identity; a revision is never invented for them.
     Unknown remote IDs must be prepared explicitly instead of following HF main.
     """
+    # A cached moving-ref repo is not an explicit operator override. Validate
+    # remote identity before looking in caches, even if a cache happens to exist.
+    if not Path(model_id).expanduser().exists():
+        pinned_hf_entry(model_id, project_root=project_root)
     local = resolve_model_path(model_id, models_dir=models_dir, project_root=project_root, local_only=True)
     if local:
         return local, {"local_files_only": True}
     entry = pinned_hf_entry(model_id, project_root=project_root)
     return entry["repo_id"], {"revision": entry["revision"]}
+
+
+def resolve_local_model_for_loading(model_id: str) -> str:
+    """Require a prepared local source for loaders without revision support."""
+    source, kwargs = resolve_hf_model_source(model_id)
+    if kwargs.get("local_files_only"):
+        return source
+    raise UnpinnedModelError(
+        f"No local snapshot for {model_id}; prepare its pinned models.lock.json "
+        "entry with setup, or configure an explicit local model path"
+    )
 
 
 def resolve_piper_voice(voice_name: str, *, models_dir: Path | None = None) -> str | None:

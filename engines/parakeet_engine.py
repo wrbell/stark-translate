@@ -13,11 +13,13 @@ from __future__ import annotations
 
 import logging
 import time
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from engines.base import STTEngine, STTResult
+from engines.model_paths import UnpinnedModelError, resolve_local_model_for_loading
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,13 @@ class ParakeetEngine(STTEngine):
     def load(self) -> None:
         if self._loaded:
             return
+        source = Path(resolve_local_model_for_loading(self._model_id))
+        candidates = list(source.glob("*.nemo")) if source.is_dir() else [source]
+        if len(candidates) != 1 or candidates[0].suffix != ".nemo" or not candidates[0].is_file():
+            raise UnpinnedModelError(
+                f"No unambiguous local .nemo checkpoint for {self._model_id}; "
+                "prepare its models.lock.json entry or configure an explicit local .nemo path"
+            )
         try:
             import nemo.collections.asr as nemo_asr  # type: ignore
         except ImportError as exc:
@@ -67,7 +76,7 @@ class ParakeetEngine(STTEngine):
             ) from exc
 
         logger.info("Loading Parakeet model %s on %s", self._model_id, self._device)
-        model = nemo_asr.models.ASRModel.from_pretrained(model_name=self._model_id)
+        model = nemo_asr.models.ASRModel.restore_from(restore_path=str(candidates[0]))
         if self._device == "cuda":
             model = model.cuda()
         model.eval()
