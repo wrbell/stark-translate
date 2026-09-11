@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "name": "GPU",
+      "status": "pass",
+      "detail": "Apple Silicon detected (MLX path)"
+    },
+    {
+      "name": "Runtime dependencies",
+      "status": "pass",
+      "detail": "mlx dependencies available"
+    },
+    {
+      "name": "Models",
+      "status": "pass",
+      "detail": "mlx-parakeet-v3, mlx-gemma4-e4b; Marian CT2 (/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active)"
+    },
+    {
+      "name": "Microphone",
+      "status": "pass",
+      "detail": "3 input device(s): WR17.1 Microphone, MacBook Pro Microphone, Microsoft Teams Audio"
+    },
+    {
+      "name": "Adapter manifest",
+      "status": "warn",
+      "detail": "No adapters/manifest.json \u2014 running with base models"
+    }
+  ],
+  "ok": true,
+  "status_counts": {
+    "pass": 4,
+    "warn": 1,
+    "fail": 0
+  },
+  "backend": "mlx"
+}

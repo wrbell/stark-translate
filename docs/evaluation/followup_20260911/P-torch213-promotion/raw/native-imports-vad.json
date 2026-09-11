@@ -1,0 +1,50 @@
+{
+  "status": "passed",
+  "scope": "Installed full application native imports and three CPU bundled-VAD silence frames; no STT/Gemma/speaker model loaded.",
+  "modules": {
+    "torch": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/torch/__init__.py",
+    "torchaudio": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/torchaudio/__init__.py",
+    "speechbrain.inference.speaker": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/speechbrain/inference/speaker.py",
+    "transformers": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/transformers/__init__.py",
+    "mlx_whisper": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/mlx_whisper/__init__.py",
+    "parakeet_mlx": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/parakeet_mlx/__init__.py",
+    "operator_app.cli": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/operator_app/cli.py",
+    "engines.factory": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/engines/factory.py",
+    "engines.mlx_engine": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/engines/mlx_engine.py",
+    "engines.parakeet_mlx_engine": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/engines/parakeet_mlx_engine.py",
+    "tools.vad_runtime": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/tools/vad_runtime.py"
+  },
+  "model_classes_imported": [
+    "MarianMTModel",
+    "MarianTokenizer",
+    "WhisperForConditionalGeneration"
+  ],
+  "vad_provenance": {
+    "source": "installed_package",
+    "package": "silero-vad",
+    "package_version": "6.2.1",
+    "backend": "torch",
+    "opset_version": null,
+    "path": "/Users/willem/Code/vibes/SRTranslate/venv/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+    "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+    "size_bytes": 2272526
+  },
+  "silence_probabilities": [
+    0.0016698009567335248,
+    0.006883855909109116,
+    0.008910718373954296
+  ],
+  "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+  "versions": {
+    "torch": "2.13.0",
+    "torchaudio": "2.11.0",
+    "mlx": "0.32.2",
+    "mlx-metal": "0.32.2",
+    "mlx-lm": "0.31.3",
+    "mlx-whisper": "0.4.3",
+    "mlx-optiq": "0.4.34",
+    "parakeet-mlx": "0.5.2",
+    "transformers": "5.12.1",
+    "speechbrain": "1.1.1"
+  }
+}

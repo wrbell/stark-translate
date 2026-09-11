@@ -1,0 +1,45 @@
+=== prepare 15:35:34Z main=337790a
+{
+  "source_head": "337790a143b6ea6d5eee7178a11ef9ebfe90e613",
+  "constraints_sha256": "8159db5f25bc0bb902e181ebeec71dbf3a07c3ac9a4b59236551297fb78c4352",
+  "production_pyproject_sha256": "39d9cc3b7bcea6df116a66903abdcc3e8c7706d1337903b695fcee208b929119"
+}
+=== build wheel 15:35:35Z
+stark_translate-2026.14.0.0-py3-none-any.whl
+=== metadata 15:35:35Z
+
+    "sentencepiece>=0.2; extra == 'mlx'",
+    "silero-vad==6.2.1; extra == 'mlx'",
+    "torch==2.13.0; extra == 'mlx'",
+    "transformers>=5.5; extra == 'mlx'",
+    "parakeet-mlx>=0.5.2; extra == 'parakeet-mlx'",
+    "piper-tts<2,>=1.4.1; extra == 'tts'"
+  ],
+  "torch_audio_extras_correct": true
+}
+
+=== resolve 15:35:35Z
+00", "exit_code": 0, "ended_at": "2026-09-11T15:36:02.259974+00:00", "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/full-application-resolution.log", "log_sha256": "0f0445ff69d2d5fe06f3be18a2c35cbc6a9458c371f944599d0b95f14334a227"}
+{"resolved_packages": 123, "requirements_sha256": "fd377d733d1a7afa19e6cde38fa4396347a07e1a2e10ee076c5df5356a3e66ae"}
+
+--- resolved third-party set vs the audited candidate:
+IDENTICAL third-party set
+=== install 15:36:02Z
+RTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/work", "started_at": "2026-09-11T15:37:22.468450+00:00", "exit_code": 0, "ended_at": "2026-09-11T15:37:22.738431+00:00", "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/installed-metadata-consistency.log", "log_sha256": "c34a265e786ddda51a01c5629574093ac21db8e9d0f0bc2c461e142b39e53971"}
+
+=== smoke 15:37:22Z
+Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/work", "started_at": "2026-09-11T15:37:22.777777+00:00", "exit_code": 0, "ended_at": "2026-09-11T15:38:02.302368+00:00", "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/native-imports-vad.log", "log_sha256": "481e02d907855311db2af8e50564dc533186906941f6bc61ce29fad9b461066e"}
+
+=== audit 15:38:02Z
+de/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/work", "started_at": "2026-09-11T15:38:02.345672+00:00", "exit_code": 0, "ended_at": "2026-09-11T15:38:12.287607+00:00", "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-promote-20260911/full-installed-audit.log", "log_sha256": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955"}
+
+=== audit summary
+audited 124 with findings 0 []
+=== doctor 15:38:12Z
+doctor --lang en rc=0
+doctor --lang es rc=0
+doctor --lang en --diarize rc=0
+=== freeze
+d8b3d68187e2f6d11f23f0a0ee9ecb78214b0812135e803f5e0396e31dc7392c  -
+torch 2.13.0 torchaudio 2.11.0 mlx 0.32.2
+=== chain done 15:38:14Z

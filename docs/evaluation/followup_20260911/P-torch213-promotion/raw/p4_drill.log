@@ -1,0 +1,16 @@
+=== P4 drill 2026-09-11T15:58:44Z CONDA_PREFIX=/Users/willem/anaconda3
+pointer -> /Users/willem/Code/vibes/SRTranslate/venv/bin/python
+[promoted] startup line: starting operator at http://127.0.0.1:9017 (logs: /Users/willem/Code/vibes/SRTranslate/metrics; python: /Users/willem/Code/vibes/SRTranslate/venv/bin/python Python 3.11.11)
+[promoted] healthz after 2s ok=1: {"status":"ok","service":"stark-translate-operator","uptime_s":0.0,"queue_depth":null,"error_count":0,"vram_mib":0.0,"cpu_percent":0.0,"ts":"2026-09-11T11:58:46"}
+[promoted] preflight backend=mlx&lang=en rc=0 checks 5 | non-pass: [('Adapter manifest', 'warn')]
+[promoted] preflight backend=mlx&lang=es rc=0 checks 5 | non-pass: [('Adapter manifest', 'warn')]
+[promoted] operator stopped; python line in log: python: /Users/willem/Code/vibes/SRTranslate/venv/bin/python Python 3.11.11
+pointer -> /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python  (rollback drill)
+[rollback] startup line: starting operator at http://127.0.0.1:9017 (logs: /Users/willem/Code/vibes/SRTranslate/metrics; python: /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python Python 3.11.11)
+[rollback] healthz after 1s ok=1: {"status":"ok","service":"stark-translate-operator","uptime_s":0.0,"queue_depth":null,"error_count":0,"vram_mib":0.0,"cpu_percent":0.0,"ts":"2026-09-11T11:58:49"}
+[rollback] preflight backend=mlx&lang=en rc=0 checks 5 | non-pass: [('Runtime dependencies', 'fail'), ('Adapter manifest', 'warn')]
+[rollback] preflight backend=mlx&lang=es rc=0 checks 5 | non-pass: [('Runtime dependencies', 'fail'), ('Adapter manifest', 'warn')]
+[rollback] operator stopped; python line in log: python: /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python Python 3.11.11
+pointer restored -> /Users/willem/Code/vibes/SRTranslate/venv/bin/python
+stt_env freeze: a09be8422c195824
+=== P4 done 2026-09-11T15:58:52Z
