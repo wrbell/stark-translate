@@ -13,7 +13,7 @@
 | P3 GPU revalidation (normalized EN/ES + 3 paired replays vs `stt_env`) | RUNNING | 2026-09-11T15:45Z | | | | serial GPU; ~40 min |
 | P4 launcher switch + rollback drill | PENDING | | | | | |
 | D1 PyPI deferral (workflow gate + backlog) | DONE | 2026-09-11T15:20Z | 2026-09-11T15:34Z | [backlog.md](../../backlog.md) | #207 (merged `71de7b1`) | publish job gated on PYPI_PUBLISH_ENABLED; item deferred |
-| X1 tail harness + `serial_finals` flag PR (Codex) | RUNNING | 2026-09-11T15:16Z | | | #209 (auto-merge) | Codex done 15:33Z; full suite 2980 passed |
+| X1 tail harness + `serial_finals` flag PR (Codex) | DONE | 2026-09-11T15:16Z | 2026-09-11T15:42Z | [X-tail-screen/README.md](X-tail-screen/README.md) | #209 (merged `6f160bb`) | serial_finals flag, STT overlap tracing, route fix, tail_screen_report; full suite 2980 passed |
 | X2 tail screen runs (2 clips × 360 s, ctl/A1/A2 × 3) | PENDING | | | | | after P4 and X1 |
 | X3 tail evidence PR | PENDING | | | | | |
 | C1 closeout docs (backlog, status guides) | PENDING | | | | | last |
@@ -26,3 +26,4 @@
 - 15:33Z #208 merged (main `337790a`); #207 and #199–#205 hunks verified present. Promoted `venv` build chain started from `337790a` (wheel → hash-pinned resolve/install → native smoke → pip-audit → doctor).
 - 15:40Z Tail harness PR #209 opened with auto-merge (serial_finals flag, STT overlap tracing, route fix, tail_screen_report). Promoted venv: wheel built from `337790a`, metadata OK, hash-pinned resolution identical to the audited candidate's third-party set (123 packages); install running.
 - 15:45Z P2 DONE: promoted `venv` built from `337790a` (torch 2.13.0, torchaudio 2.11.0, mlx 0.32.2; audit 0/124; doctor passes). P3 started on the GPU: normalized FLEURS EN/ES replays from the installed wheel, then 3 alternating paired 150 s replays `stt_env` vs `venv`.
+- 15:50Z #209 merged (main `6f160bb`); #208/#207 hunks verified on origin/main. P3: normalized FLEURS EN and ES replays from the installed wheel both `passed_functionality` (validator passed: true); paired replays running (r0 ctl done). The main checkout stays at `337790a` until the paired runs finish so both arms run identical pipeline code.
