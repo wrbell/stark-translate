@@ -9,8 +9,8 @@
 |---|---|---|---|---|---|---|
 | S0 pre-flight (caffeinate, worktrees, status branch) | DONE | 2026-09-11T15:11Z | 2026-09-11T15:16Z | [STATUS.md](STATUS.md) | #206 | caffeinate pid 73151; stt_env freeze a09be842…; 4 worktrees |
 | P1 promotion source PR (Codex) | DONE | 2026-09-11T15:16Z | 2026-09-11T15:30Z | [P-torch213-promotion/README.md](P-torch213-promotion/README.md) | #208 (merged `337790a`) | Codex done 15:22Z; full suite 2975 passed; pyproject pins, preflight bounds, `.stark-python` pointer, constraints file, docs |
-| P2 promoted `venv` build (Torch 2.13.0 / TorchAudio 2.11.0) | RUNNING | 2026-09-11T15:33Z | | | | build from main `337790a`; audited constraints |
-| P3 GPU revalidation (normalized EN/ES + 3 paired replays vs `stt_env`) | PENDING | | | | | |
+| P2 promoted `venv` build (Torch 2.13.0 / TorchAudio 2.11.0) | DONE | 2026-09-11T15:33Z | 2026-09-11T15:38Z | [P-torch213-promotion/README.md](P-torch213-promotion/README.md) | — | wheel from `337790a`; hash-pinned set identical to the audited candidate (123); pip check, native smoke, pip-audit 0/124, doctor en/es/en+diarize pass |
+| P3 GPU revalidation (normalized EN/ES + 3 paired replays vs `stt_env`) | RUNNING | 2026-09-11T15:45Z | | | | serial GPU; ~40 min |
 | P4 launcher switch + rollback drill | PENDING | | | | | |
 | D1 PyPI deferral (workflow gate + backlog) | DONE | 2026-09-11T15:20Z | 2026-09-11T15:34Z | [backlog.md](../../backlog.md) | #207 (merged `71de7b1`) | publish job gated on PYPI_PUBLISH_ENABLED; item deferred |
 | X1 tail harness + `serial_finals` flag PR (Codex) | RUNNING | 2026-09-11T15:16Z | | | #209 (auto-merge) | Codex done 15:33Z; full suite 2980 passed |
@@ -25,3 +25,4 @@
 - 15:50Z D1 merged (#207, main `71de7b1`). Promotion source PR #208 opened with auto-merge after review and a full local suite (2975 passed); branch updated onto main. Tail Codex lane still running. Tail-screen protocol.json declared (sha256 fd19d940…) and 360 s clips frozen before any run.
 - 15:33Z #208 merged (main `337790a`); #207 and #199–#205 hunks verified present. Promoted `venv` build chain started from `337790a` (wheel → hash-pinned resolve/install → native smoke → pip-audit → doctor).
 - 15:40Z Tail harness PR #209 opened with auto-merge (serial_finals flag, STT overlap tracing, route fix, tail_screen_report). Promoted venv: wheel built from `337790a`, metadata OK, hash-pinned resolution identical to the audited candidate's third-party set (123 packages); install running.
+- 15:45Z P2 DONE: promoted `venv` built from `337790a` (torch 2.13.0, torchaudio 2.11.0, mlx 0.32.2; audit 0/124; doctor passes). P3 started on the GPU: normalized FLEURS EN/ES replays from the installed wheel, then 3 alternating paired 150 s replays `stt_env` vs `venv`.
