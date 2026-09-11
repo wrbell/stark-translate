@@ -17,6 +17,12 @@ entries 22; runtime files 45; verse parser passed. No model loads, no network.
 ctranslate2 4.7.1, mlx 0.32.2, mlx-lm 0.31.3, mlx-whisper 0.4.3, parakeet-mlx 0.5.2, pip 26.2.1, setuptools 84.0.0, silero-vad 6.2.1, torch 2.13.0, torchaudio 2.11.0, transformers 5.12.1. CI's weekly audit strips `torch*`/`mlx*` and cannot
 cover this environment; the P2-L launcher PR adds `scripts/audit_mac_runtime.sh` and a `--runtime mac` mode of
 `tools/check_dependency_audit.py` so this audit is a one-line monthly command (no scheduler is installed on the
-Mac; that remains Willem's choice). The check-mode result is appended below once that PR is merged.
+Mac; that remains Willem's choice). The check-mode result (PR #213 merged as `c914e14`) is appended below.
 
 This certifies package provenance and known-vulnerability status only; it is not a functional, quality or device gate.
+
+### `--runtime mac` check (tool from `main` @ `c914e14`)
+
+```
+{"audited": 123, "skipped_local_project": ["stark-translate"], "known_vulnerabilities": 0, "runtime": "mac"}
+```
