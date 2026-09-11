@@ -1370,16 +1370,23 @@ def _build_prompt_cache(model, tokenizer, label):
     return prompt_cache, len(prefix_tokens), suffix_tokens
 
 
+def _draft_metadata():
+    return {
+        "draft": MLX_DRAFT_MODEL_ID if MLX_DRAFT_MODEL is not None else None,
+        "draft_tokens": NUM_DRAFT_TOKENS if MLX_DRAFT_MODEL is not None else 0,
+    }
+
+
 def load_translation_models(load_b=True):
     """Load TranslateGemma or Gemma 4 model(s) via MLX.
 
     When ``MODEL_FAMILY == "gemma4"``, loads OptiQ E4B (or CLI override) and
-    optionally the assistant drafter for MTS. TranslateGemma prompt cache is
-    skipped for Gemma 4 (different chat template).
+    optionally a separate full-model speculative draft experiment. TranslateGemma
+    prompt cache is skipped for Gemma 4 (different chat template).
     """
     global mlx_a_prompt_cache, mlx_b_prompt_cache
     global mlx_a_suffix_tokens, mlx_b_suffix_tokens
-    global MLX_DRAFT_MODEL
+    global MLX_DRAFT_MODEL, MLX_DRAFT_MODEL_ID, NUM_DRAFT_TOKENS
 
     if USE_MTS:
         raise RuntimeError(LIVE_MTS_UNAVAILABLE)
@@ -1395,8 +1402,13 @@ def load_translation_models(load_b=True):
         mlx_a_prompt_cache, mlx_a_suffix_tokens = None, None
         print("  Prompt cache skipped (gemma4 instruct path)")
 
-    # Live MTP is explicitly unavailable; offline research uses mlx_spec.
+    # Live MTP remains unavailable. This opt-in draft is a full mlx-lm model.
     MLX_DRAFT_MODEL = None
+    if MODEL_FAMILY == "gemma4" and _latency.draft_model_id:
+        draft_model, _ = load_mlx_gemma(_latency.draft_model_id, f"Draft ({_latency.draft_model_id})")
+        MLX_DRAFT_MODEL = draft_model
+        MLX_DRAFT_MODEL_ID = _latency.draft_model_id
+        NUM_DRAFT_TOKENS = _latency.draft_tokens
 
     b_model, b_tok = None, None
     if load_b and MODEL_FAMILY == "translategemma":
@@ -3396,7 +3408,7 @@ async def _pipeline_translate_and_finalize(
                     spanish_b, lat_b, tps_b = await task_b
                     qe_b = qe_score(english, spanish_b) if spanish_b and spanish_b != "(model not loaded)" else None
                 else:
-                    # 4B/E4B-only: broadcast partials unless Gemma-4 MTS draft is active.
+                    # 4B/E4B-only: broadcast token previews unless a speculative draft is active.
                     if MLX_DRAFT_MODEL is not None:
                         spanish_a, lat_a, tps_a = await run_translate(
                             _pipeline_pool,
@@ -5524,7 +5536,7 @@ async def main_async(args):
         else None,
         "translation_b": MLX_MODEL_B if BACKEND == "mlx" and _RUN_AB else None,
         "marian": getattr(_marian_engine, "model_id", None),
-        "draft": MLX_DRAFT_MODEL_ID if USE_MTS else None,
+        "draft": _draft_metadata()["draft"],
     }
     metadata = {
         **_session_provenance(),
@@ -5532,6 +5544,7 @@ async def main_async(args):
         "backend": BACKEND,
         "model_family": MODEL_FAMILY,
         "model_a": _session_model_ids["translation_a"],
+        **_draft_metadata(),
         "profile": RUNTIME_PROFILE.to_dict(),
         "profile_artifacts": profile_artifact_provenance(),
         "stt_settings": settings.stt.model_dump(),

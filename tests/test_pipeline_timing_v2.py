@@ -79,9 +79,9 @@ def test_render_ack_upper_bound_is_server_clock_only():
     assert not tracker.pending
 
 
-@pytest.mark.parametrize("confirmed_speculation", [False, True])
+@pytest.mark.parametrize("confirmed_speculation,use_draft", [(False, False), (True, False), (False, True)])
 def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(
-    monkeypatch, tmp_path, confirmed_speculation
+    monkeypatch, tmp_path, confirmed_speculation, use_draft
 ):
     import dry_run_ab as pipeline
 
@@ -92,7 +92,8 @@ def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(
     monkeypatch.setattr(pipeline, "mlx_a_model", object())
     monkeypatch.setattr(pipeline, "mlx_a_tokenizer", object())
     monkeypatch.setattr(pipeline, "mlx_b_model", None)
-    monkeypatch.setattr(pipeline, "MLX_DRAFT_MODEL", None)
+    draft = object() if use_draft else None
+    monkeypatch.setattr(pipeline, "MLX_DRAFT_MODEL", draft)
     monkeypatch.setattr(pipeline, "DIARIZE_ENABLED", False)
     monkeypatch.setattr(pipeline, "tts_engine", None)
     monkeypatch.setattr(pipeline, "_io_pool", Mock())
@@ -119,7 +120,10 @@ def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(
     def diagnostics(*args):
         clock[0] += 0.2
 
-    monkeypatch.setattr(pipeline, "translate_mlx_streaming", translation)
+    streaming = Mock(side_effect=translation)
+    nonstreaming = Mock(side_effect=translation)
+    monkeypatch.setattr(pipeline, "translate_mlx_streaming", streaming)
+    monkeypatch.setattr(pipeline, "translate_mlx", nonstreaming)
     monkeypatch.setattr(pipeline, "_confirmed_speculation", confirm)
     monkeypatch.setattr(pipeline, "check_homophones", diagnostics)
     monkeypatch.setattr(pipeline, "check_bad_split", lambda *args: None)
@@ -142,6 +146,12 @@ def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(
     with ThreadPoolExecutor(max_workers=1) as pool:
         monkeypatch.setattr(pipeline, "_pipeline_pool", pool)
         asyncio.run(exercise())
+    if use_draft:
+        streaming.assert_not_called()
+        nonstreaming.assert_called_once()
+        assert nonstreaming.call_args.kwargs["draft_model"] is draft
+    else:
+        nonstreaming.assert_not_called()
     assert len(messages) == 1
     final = messages[0]
     assert final["speech_end_to_final_ms"] == 1600

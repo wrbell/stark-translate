@@ -609,3 +609,36 @@ def test_report_rejects_shared_wrong_audio_against_frozen_provenance(tmp_path):
     assert all("Run identity mismatch" in error for error in result["inventory_errors"])
     assert result["pairs"][0]["status"] == "invalid_inventory"
     assert not any(pair["status"] == "latency_candidate" for pair in result["pairs"])
+
+
+def test_e2b_draft_protocol_parses_and_schedules_without_inference():
+    from pathlib import Path
+
+    from tools.mac_followup_latency import schedule
+
+    root = Path(__file__).resolve().parents[1]
+    # Same JSON loader as run(); configuration() is its pre-inference validator.
+    spec = json.loads((root / "docs/evaluation/overnight_20260911/L2-e2b-draft/protocol.json").read_text())
+    original = json.loads((root / "docs/evaluation/mac_followup_20260910/protocol/standard-screen.json").read_text())
+    assert spec["clips"] == original["clips"]
+    assert spec["baseline_env"] == original["baseline_env"]
+    assert spec["sizes"] == ["e4b"]
+    assert [item["name"] for item in spec["experiments"]] == ["baseline", "e2b_draft_g2"]
+    assert "selection.json is expected to reject on memory" in spec["note"]
+    planned = list(schedule(spec, 3))
+    assert len(planned) == 18  # 3 repeats x 2 languages x opening/candidate/closing
+    assert {clip["lang"] for _, _, clip, _ in planned} == {"en", "es"}
+    for repeat in range(3):
+        assert [config["name"] for r, config, clip, _ in planned if r == repeat and clip["lang"] == "en"] == [
+            "baseline",
+            "e2b_draft_g2",
+            "baseline_anchor",
+        ]
+    for _, config, clip, size in planned:
+        arguments, env, experiment = configuration(spec, config, clip, size)
+        assert "--no-mts" in arguments
+        assert size == "e4b"
+        candidate = config["name"] == "e2b_draft_g2"
+        assert experiment["draft_model_id"] == ("mlx-community/gemma-4-e2b-it-OptiQ-4bit" if candidate else "")
+        assert experiment["draft_tokens"] == (2 if candidate else 0)
+        assert env["HF_HUB_OFFLINE"] == "1"
