@@ -119,6 +119,69 @@ def screen(tmp_path, passing=False, memory_rule="absolute"):
     return path, spec
 
 
+def test_optional_first_visible_metrics_report_nearest_rank_without_changing_gates(tmp_path):
+    path, spec = screen(tmp_path)
+    original = analyze(path)
+    assert all("first_visible" not in run for run in original["runs"])
+    assert "First visible" not in render_markdown(original)
+    for repeat, latencies in enumerate(([1100, 1200], [1300, 1400])):
+        entry = spec["runs"][repeat]
+        ack = {
+            "event": "caption_rendered",
+            "session_id": entry["tag"],
+            "client_id": "audience",
+            "event_id": f"{entry['tag']}:stream:1",
+            "chunk_id": 1,
+            "stage": "first_stream",
+            "visible": True,
+            "speech_end_to_ack_upper_bound_ms": latencies[0],
+        }
+        metrics = tmp_path / f"{entry['tag']}_display.jsonl"
+        metrics.write_text(
+            "\n".join(
+                json.dumps(row)
+                for row in [
+                    ack,
+                    ack,
+                    {
+                        **ack,
+                        "chunk_id": 2,
+                        "event_id": f"{entry['tag']}:stream:2",
+                        "speech_end_to_ack_upper_bound_ms": latencies[1],
+                    },
+                    {**ack, "chunk_id": 3, "stage": "complete", "speech_end_to_ack_upper_bound_ms": 9000},
+                    {**ack, "chunk_id": 4, "visible": False},
+                    {**ack, "chunk_id": 5, "speech_end_to_ack_upper_bound_ms": None},
+                ]
+            )
+            + "\n\n"
+        )
+        entry["display_metrics_jsonl"] = metrics.name  # relative paths share the diagnostics reader base
+    _json(path, spec)
+    report = analyze(path)
+    assert report["runs"][0]["first_visible"] == {"n": 2, "missing": 1, "mean": 1150, "p50": 1100, "p95": 1200}
+    arms = report["clips"]["A"]["arms"]
+    assert arms["ctl"]["first_visible"] == {"n": 4, "missing": 2, "mean": 1250, "p50": 1200, "p95": 1400}
+    assert "first_visible" not in arms["candidate"]
+    assert report["outcomes"] == original["outcomes"]
+    assert arms["candidate"]["gates"] == original["clips"]["A"]["arms"]["candidate"]["gates"]
+    assert len(report["inputs"]) == len(original["inputs"]) + 2
+    markdown = render_markdown(report)
+    assert "reported, not gated" in markdown
+    assert "| ctl | 4 | 1200.0 | 1400.0 |" in markdown
+    assert "| ctl_0 | 2 | 1100.0 | 1200.0 |" in markdown
+
+
+def test_optional_display_metrics_rejects_non_object_rows(tmp_path):
+    path, spec = screen(tmp_path)
+    metrics = tmp_path / "display.jsonl"
+    metrics.write_text("[]\n")
+    spec["runs"][0]["display_metrics_jsonl"] = str(metrics)
+    _json(path, spec)
+    with pytest.raises(ValueError, match="Display metrics rows must be objects"):
+        analyze(path)
+
+
 def test_rejected_screen_percentiles_gates_identity_and_secondary(tmp_path):
     path, spec = screen(tmp_path)
     report = analyze(path)

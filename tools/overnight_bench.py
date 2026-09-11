@@ -267,6 +267,8 @@ def preview_browsers(partials, acknowledgments, session):
     emitted = {key: values[0] for key, values in grouped.items() if len(values) == 1}
     clients: set[str] = set()
     events: dict[tuple, dict] = defaultdict(dict)
+    first_streams: dict[tuple, dict] = defaultdict(dict)
+    seen_stream_chunks = set()
     cohort_keys = {
         (row.get("timing_source", "unknown"), row.get("caption_delivery_mode", "unknown")) for row in emitted.values()
     }
@@ -280,9 +282,21 @@ def preview_browsers(partials, acknowledgments, session):
             or not ack["client_id"]
         ):
             continue
-        if ack.get("stage") in {"partial", "complete"}:
+        if ack.get("stage") in {"partial", "complete", "first_stream"}:
             clients.add(ack["client_id"])
         if not isinstance(ack.get("event_id"), str):
+            continue
+        if ack.get("stage") == "first_stream":
+            # emitted contains translated previews only, not final stream batches.
+            # The server's before-send tracker supplies the chunk identity.
+            cid = ack.get("chunk_id")
+            identity = (ack["client_id"], str(cid))
+            if cid is None or identity in seen_stream_chunks:
+                continue
+            seen_stream_chunks.add(identity)
+            cohort = (ack.get("timing_source", "unknown"), ack.get("caption_delivery_mode", "unknown"))
+            cohort_keys.add(cohort)
+            first_streams[(ack["client_id"], *cohort)][str(cid)] = ack
             continue
         row = emitted.get(ack.get("event_id"))
         if ack.get("stage") != "partial" or row is None:
@@ -321,6 +335,13 @@ def preview_browsers(partials, acknowledgments, session):
                     "emitted_translated_preview_events": len(matching),
                     "missing_preview_event_ids": sorted(matching.keys() - received.keys()),
                     "first_preview_ack_upper_bound_ms": stats(list(first.values())),
+                    "first_visible_ms": stats(
+                        [
+                            delay
+                            for ack in first_streams[(client_id, timing_source, delivery)].values()
+                            if (delay := number(ack.get("speech_end_to_ack_upper_bound_ms"))) is not None
+                        ]
+                    ),
                     "receive_to_render_ms": stats(render),
                 }
             )
@@ -704,6 +725,24 @@ def report(args):
         markdown.append(
             f"| {name} ({clip_id}) | {size} | {len(observations)} / {failures} | {pair(silence)} | {pair(entry['first_preview_ms'])} | {missing:.3f} | {changes} |"
         )
+    markdown.extend(
+        [
+            "",
+            "## First streamed tokens visible (reported, not gated)",
+            "",
+            "Speech end to visible ACK includes return network time. Clients and sessions remain separate.",
+            "",
+            "| Session | Client | Timing source | Delivery | First visible p50 / p95 ms | n |",
+            "|---|---|---|---|---|---:|",
+        ]
+    )
+    for group in result["groups"]:
+        for session in group["browser_sessions"]:
+            for cohort in session["preview"].get("cohorts", []):
+                visible = cohort.get("first_visible_ms", stats([]))
+                markdown.append(
+                    f"| {session['session_id']} | {cohort['client_id']} | {cohort['timing_source']} | {cohort['caption_delivery_mode']} | {pair(visible)} | {visible['n']} |"
+                )
     args.output.mkdir(parents=True, exist_ok=True)
     write_json(args.output / "comparison.json", result)
     (args.output / "README.md").write_text("\n".join(markdown) + "\n")
