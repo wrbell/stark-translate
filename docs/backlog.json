@@ -3,14 +3,14 @@
   "last_updated": "2026-09-10",
   "integration": {
     "main_release_tag": "v2026.13",
-    "main_head_note": "Verified main is 958bb5c9425473256038bae04ce95ee1c32c7ae8. PR #192 remains merged; the new PR #196 follow-up is still a draft. v2026.13 remains the last published release.",
-    "local_branch": "codex/mac-en-es-closeout",
+    "main_head_note": "PR #196 merged into main at ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6 on 2026-09-11T01:00:13Z, from reviewed 1b723bd87f4a2f4adecd081a281ded26cafbb0bf. v2026.13 remains the last published release recorded here.",
+    "local_branch": "main",
     "local_base": "958bb5c9425473256038bae04ce95ee1c32c7ae8",
     "local_version": "2026.14.0.0",
-    "draft_pr": "[PR #196](https://github.com/wrbell/stark-translate/pull/196) — open draft Mac EN↔ES follow-up on codex/mac-en-es-closeout; not merged. Bounded screens, exact 760e948 source checks and all seven fresh V6 delivery stages are complete, including six terminal session validators and separate Standard/CPU Lite full services. The raw archive is verified; documentation checks passed; final CI and authorized merge review remain pending.",
+    "draft_pr": "[PR #196](https://github.com/wrbell/stark-translate/pull/196) — merged into main at ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6 on 2026-09-11T01:00:13Z; required CI and all three Cursor reviews passed on 1b723bd87f4a2f4adecd081a281ded26cafbb0bf. Actual receipts: docs/evaluation/mac_followup_20260910/integration-closeout/README.md.",
     "publication": "User authorized source merge after validation. PyPI, GHCR, release uploads and new tags remain pending by user choice.",
-    "distinction": "PR #192 integration and immutable evidence remain complete. PR #196 is a separate follow-up with completed source-bound experiments, 760e948 source validation and V6 installed delivery. The raw archive is verified; documentation checks passed; final CI and authorized source merge remain pending; file replay does not certify human or physical-device gates. Historical c13/V5 failures remain failed, and publication is still separately deferred.",
-    "pr_state": "open",
+    "distinction": "PR #192 and PR #196 source integration are complete with separate immutable evidence. Local artifacts, installed file replays and documentation checks passed; source merge does not certify human, physical-device or CUDA gates. Historical failures remain failed; public package/release publication remains separately deferred.",
+    "pr_state": "merged",
     "previous_integration": {
       "main_release_tag": "v2026.13",
       "main_head_note": "PR #192 merged into main at 3e935fe39b96e7b0aa62a74711307f2b3e31a18c on 2026-09-10T11:57:22Z, from reviewed source ab66ad2929e61171e4ab9c7c77685ba1ac988577. v2026.13 remains the last published release; no release/tag upload followed this source merge.",
@@ -25,7 +25,10 @@
       "merged_at": "2026-09-10T11:57:22Z",
       "merged_head": "ab66ad2929e61171e4ab9c7c77685ba1ac988577"
     },
-    "is_draft": true
+    "is_draft": false,
+    "merge_commit": "ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6",
+    "merged_at": "2026-09-11T01:00:13Z",
+    "merged_head": "1b723bd87f4a2f4adecd081a281ded26cafbb0bf"
   },
   "status_definitions": {
     "in_progress": "Active engineering right now; code may still be changing on the branch and its acceptance is not yet met.",
@@ -170,7 +173,8 @@
         "tests/test_phase9_4_1_tts_device.py",
         "settings.py",
         "docs/evaluation/tts_routing_20260910/README.md",
-        "docs/evaluation/mac_followup_20260910/tts-routing-acceptance.md"
+        "docs/evaluation/mac_followup_20260910/tts-routing-acceptance.md",
+        "docs/evaluation/mac_followup_20260910/integration-closeout/README.md"
       ],
       "issue_acceptance": "Operator can send TTS to a chosen output device; EN and ES can be routed independently. Tests cover the new engine path.",
       "acceptance": "Hardware-independent part: per-language output map (`--tts-device-en/es`, `STARK_TTS_OUTPUT_DEVICES`), operator persistence and hotplug retry covered by tests. Physical part: an operator routes EN and ES to two real outputs and hears each — tracked as `physical-second-output`.",
@@ -179,8 +183,8 @@
         "Production Piper and output resolution completed EN on MacBook speakers and ES on Microsoft Teams virtual output, twice, including a clean a8511ee retest after the explicit pinned-voice path fix. Both native streams completed. Existing issue comments explicitly allow a virtual second route.",
         "Routing, operator configuration/argv and target-language forwarding tests pass in the full Python 3.11/3.12 CI on 476e349 (2813 passed, 6 skipped per interpreter). The dated acceptance audit binds these separate UI, native and software observations without claiming integrated caption-triggered playback."
       ],
-      "next_action": "Close #132 after the final reviewed merge using the retained acceptance audit. Keep integrated caption-triggered playback, human audibility, far-end reception and physical unplug/replug as separate follow-ups. No microphone capture or output playback is permitted for the rest of this session.",
-      "notes": "Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing."
+      "next_action": "Keep integrated caption-triggered playback, human audibility, virtual far-end reception and physical unplug/replug as separate follow-ups. The issue is closed within its original virtual-or-physical selected-routing scope. No microphone capture or speaker playback is permitted for the rest of this session.",
+      "notes": "Actual operator controls persisted independent EN/ES routes across reload and restart. Production Piper and output resolver completed EN on MacBook speakers and ES on Microsoft Teams virtual output, including explicit pinned voice paths after a symlink resolver fix. Native stream completion is established; human audibility, far-end reception and physical unplug/replug remain separate pending gates. Original issue allows virtual routing. Issue #132 closed COMPLETED at 2026-09-11T01:00:33Z after PR #196 merged; actual acceptance comment and API receipts are retained."
     },
     {
       "id": "physical-second-output",
@@ -627,7 +631,7 @@
       ],
       "acceptance": "Recorded pass/skip/coverage in mac_implementation_status.md above the test.yml coverage gate.",
       "notes": "Frozen 752ab9a351815feee4b8cd155f732c588cb30a6c passed 2,363 CPU-suite tests with four skips and 63.80% coverage. Three separate real GPU regressions passed in 21.16 s. Ruff/format, mypy engines/settings, widened CI-scope Bandit and all six HTML5 Tidy checks passed. The earlier 2,213-test receipt is historical and must remain unchanged when the current validation companion is refreshed. Subsequent capture repair/fake-interface correction passed full f7b959d CI: 2,834 tests, six skips, 20 subtests and 66.49% coverage on both Python 3.11/3.12. Six earlier d7ed43d fixture failures remain preserved. Installed Lite audit covered 60 dependencies with zero known vulnerabilities; [eval] and unchanged broader environments were not cleared. Earlier source c13f51f passed 2,837 local CPU tests, four skips and 20 subtests at 66.62% coverage; three actual MLX tests and all 11 static commands passed. Separate isolated pre-commit passed seven hooks. Exact-head GitHub Python 3.11/3.12 each passed 2,835 tests, six skips and 20 subtests at 66.49%; its successful coverage-comment step had a separately repaired JSON-input reporting annotation. Current 760e948 passed 2,861 local CPU tests, four skips and 20 subtests with 66.76% coverage in 137.85 seconds; three actual text-only MLX tests passed in 21.50 seconds, all 11 prescribed static commands and seven isolated pre-commit hooks passed. Exact-head GitHub Python 3.11/3.12 each passed 2,859 tests, six skips and 20 subtests at 66.63% coverage; durations were 138.03/137.74 seconds. The corrected JSON coverage-comment input succeeded on Python 3.11; Python 3.12 comment step was intentionally skipped. Original pytest-wrapper state-write failure is retained; its passing pytest was reused and only remaining checks ran in the continuation. V6 installed assessments separately retain two Standard Torch findings and zero Lite findings, including evaluation dependencies; this is not blanket security clearance.",
-      "next_action": "Keep exact-source test and failure receipts intact. Run final documentation/render/link checks after integrating the notes and guides; do not present historical or source-test results as human/device, publication or dependency-security certification."
+      "next_action": "Keep exact-source test and failure receipts intact. Final documentation/render/link checks passed; validate future changes separately without inferring human/device or global security certification."
     },
     {
       "id": "packaging-artifacts-local",
@@ -645,7 +649,7 @@
       ],
       "acceptance": "Outside-checkout install, launcher checks and installed EN/ES inference recorded with artifact hashes.",
       "notes": "Fresh clean 760e948 V6 local delivery passed all seven stages: freeze, build, install, installed audit completion, smokes, two full services and final summary. Three unique artifacts were verified (canonical wheel plus identical sdist/Mac-ZIP wheel rebuilds, 174 wheel members and 169 source-bound runtime members). Wheel SHA256 70c52b836a7855787a17d67d18dc7fc56e21e289332d883337d8a9a24f949c9b. Standard and Lite installed outside the checkout; both direct CLI and copied launcher served all six HTTP checks (24 responses total). Four EN/ES smokes and separate 3,640.053-second Standard/Lite services passed all six terminal validators, totaling 1,054 finals, 3,101 previews and 5,533 writes with EOF/source accounting and no forced cleanup. Standard full service exercised one suppressed empty target; both full physical traces remain unassessable. Working stt_env and baseline inventories were unchanged. Standard retains two known Torch findings; Lite audit found zero, including evaluation extras. Original V1–V5 failures, c13 source cohorts and earlier 752 artifacts remain separate. Archive assembly and standalone verification passed; final documentation checks passed; local packaging acceptance itself is met without claiming publication, causal speed, human quality or device certification.",
-      "next_action": "Retain the passed local V6 artifacts and receipt bindings; complete final CI and authorized PR review/merge. No additional local replay is required on unchanged runtime source. PyPI/GHCR/release uploads and new tags remain deferred."
+      "next_action": "Retain the passed V6 artifacts and receipt bindings after PR #196 merge. Future runtime or packaging changes need appropriate fresh validation. PyPI/GHCR/release uploads and new tags remain deferred."
     },
     {
       "id": "pypi-publication",
@@ -819,7 +823,7 @@
         "docs/evaluation/mac_followup_20260910/final-760e948/installed-delivery.md"
       ],
       "acceptance": "Every README/CLAUDE/AGENTS guide describes current behavior from source, historical numbers live only under dated archive links, and tests/test_documentation.py plus render/link checks pass.",
-      "notes": "Current README, CLAUDE and AGENTS guides, Mac setup/operator runbook, roadmap, status and canonical43-item backlog now distinguish actual760 source checks and completed V6 installed delivery from older failed c13/V5 and historical cohorts. Archive assembly and standalone reconstruction verified993 evidence members plus inventory. The four masked CI fields and three embedded package-description fields have explicit hash-bound derivatives; dependency results and failures remain retained. All38 documentation contract tests passed, backlog schema/render checks passed, and local links passed for20 canonical guides plus12 final-packet documents. No defaults, acceptance strings or human/device/CUDA/publication gates were relaxed.",
+      "notes": "Current README, CLAUDE and AGENTS guides, Mac setup/operator runbook, roadmap, status and canonical 43-item backlog now distinguish actual 760 source checks and completed V6 installed delivery from older failed c13/V5 and historical cohorts. Archive assembly and standalone reconstruction verified 993 evidence members plus inventory. The four masked CI fields and three embedded package-description fields have explicit hash-bound derivatives; dependency results and failures remain retained. All 38 documentation contract tests passed, backlog schema/render checks passed, and local links passed for 20 canonical guides plus 12 final-packet documents. No defaults, acceptance strings or human/device/CUDA/publication gates were relaxed. Actual PR #196 merge (2026-09-11T01:00:13Z) and #132 closure (2026-09-11T01:00:33Z) are recorded separately in the integration closeout.",
       "next_action": "Keep guides synchronized with actual integration/issue events and preserve historical source identities; later human/device/CUDA or release work must update its own evidence."
     },
     {

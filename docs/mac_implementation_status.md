@@ -56,6 +56,12 @@ The [completed 96-run screen](evaluation/overnight_screen_20260910/README.md) se
   explicit generated launchd install/uninstall, complete runtime artifact checks
   and release version/tag identity checks.
 
+PR #196 merged into main at `ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6` on 2026-09-11T01:00:13Z, from reviewed
+`1b723bd87f4a2f4adecd081a281ded26cafbb0bf`. Required CI and all three automatic Cursor reviews passed.
+Issue #132 subsequently closed COMPLETED at 2026-09-11T01:00:33Z; the other eight issues
+remain open with their original gates. [Actual integration receipts](evaluation/mac_followup_20260910/integration-closeout/README.md)
+keep this source merge separate from publication and human/device certification.
+
 ## Evidence and active validation
 
 The current [760e948 source-validation record](evaluation/mac_followup_20260910/final-760e948/source-validation.md)

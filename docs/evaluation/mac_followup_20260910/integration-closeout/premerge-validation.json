@@ -1,0 +1,30 @@
+{
+  "observed_at": "2026-09-11T01:00:10.414917+00:00",
+  "argv": [
+    "gh",
+    "pr",
+    "view",
+    "196",
+    "--repo",
+    "wrbell/stark-translate",
+    "--json",
+    "url,title,state,isDraft,headRefOid,baseRefOid,mergeable,mergeStateStatus,reviewDecision,reviews,statusCheckRollup"
+  ],
+  "premerge_pr_sha256": "08e1d7ac85344620eebaa0a333a7959757b2582ae1ffc807a07b798f01deea93",
+  "expected_head": "1b723bd87f4a2f4adecd081a281ded26cafbb0bf",
+  "status": "passed",
+  "checks": {
+    "commitlint": "SUCCESS",
+    "label": "SUCCESS",
+    "lint": "SUCCESS",
+    "detect-changes": "SUCCESS",
+    "test (3.11)": "SUCCESS",
+    "test (3.12)": "SUCCESS",
+    "audit": "SKIPPED",
+    "audit-lite": "SUCCESS",
+    "security": "SUCCESS",
+    "Cursor Approval Agent: Pull Request Router and Approver": "SUCCESS",
+    "Cursor Bugbot": "SUCCESS",
+    "Cursor Security Agent: Security Reviewer": "SUCCESS"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-11T01:01:33.377088+00:00",
+  "scope": "Read-only exact-final-head GitHub checks/review snapshot; no merge or issue mutations performed by this agent. Snapshot was observed after parent merge.",
+  "source": {
+    "path": ".cache/mac-en-es-closeout/final-ci-1b723bd/pr-state-20260911T010110Z.json",
+    "sha256": "56cd3f5e03f0ecb343b49d07798e411a55553eb42ba7fe2358bca769b05f41d1"
+  },
+  "head": "1b723bd87f4a2f4adecd081a281ded26cafbb0bf",
+  "base": "958bb5c9425473256038bae04ce95ee1c32c7ae8",
+  "observed_pr_state": "MERGED",
+  "rollup": "SUCCESS",
+  "required_checks": [
+    {
+      "__typename": "CheckRun",
+      "databaseId": 103105956352,
+      "name": "lint",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34548419252/job/103105956352",
+      "startedAt": "2026-09-11T00:53:49Z",
+      "completedAt": "2026-09-11T00:54:48Z"
+    },
+    {
+      "__typename": "CheckRun",
+      "databaseId": 103105956583,
+      "name": "test (3.11)",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34548419279/job/103105956583",
+      "startedAt": "2026-09-11T00:53:50Z",
+      "completedAt": "2026-09-11T00:57:22Z"
+    },
+    {
+      "__typename": "CheckRun",
+      "databaseId": 103105956323,
+      "name": "test (3.12)",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34548419279/job/103105956323",
+      "startedAt": "2026-09-11T00:53:49Z",
+      "completedAt": "2026-09-11T00:57:14Z"
+    },
+    {
+      "__typename": "CheckRun",
+      "databaseId": 103106219582,
+      "name": "security",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/wrbell/stark-translate/actions/runs/34548419280/job/103106219582",
+      "startedAt": "2026-09-11T00:55:06Z",
+      "completedAt": "2026-09-11T00:55:10Z"
+    }
+  ],
+  "cursor_checks": [
+    {
+      "__typename": "CheckRun",
+      "databaseId": 103106076692,
+      "name": "Cursor Approval Agent: Pull Request Router and Approver",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://cursor.com/agents/bc-6b3d431d-8146-49b0-8872-2ac262a8fb2a",
+      "startedAt": "2026-09-11T00:54:21Z",
+      "completedAt": "2026-09-11T00:58:32Z"
+    },
+    {
+      "__typename": "CheckRun",
+      "databaseId": 103106122795,
+      "name": "Cursor Bugbot",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://cursor.com/docs/bugbot",
+      "startedAt": "2026-09-11T00:54:34Z",
+      "completedAt": "2026-09-11T00:58:16Z"
+    },
+    {
+      "__typename": "CheckRun",
+      "databaseId": 103106066607,
+      "name": "Cursor Security Agent: Security Reviewer",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://cursor.com/agents/bc-1b41218e-175a-4e61-b20a-9d9cbf29115a",
+      "startedAt": "2026-09-11T00:54:18Z",
+      "completedAt": "2026-09-11T00:59:03Z"
+    }
+  ],
+  "review_decision": "APPROVED",
+  "reviews": [
+    {
+      "id": "PRR_kwDORLmyKc8AAAABNGOIjQ",
+      "author": {
+        "login": "cursor"
+      },
+      "state": "APPROVED",
+      "submittedAt": "2026-09-11T00:58:29Z",
+      "body": "<!-- CURSOR_AUTOMATION_ID: 5e29d72a-a15c-11f1-b532-320a589b8025 | RUN_ID: bc-6b3d431d-8146-49b0-8872-2ac262a8fb2a -->\nApproved: Cursor Bugbot completed with no findings that need human review, and no approval policy required extra review. No reviewers were assigned.\n\n<div><a href=\"https://cursor.com/agents/bc-6b3d431d-8146-49b0-8872-2ac262a8fb2a?cursor_ref=pr_footer&cursor_cta=open_in_web\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/open-in-web-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/open-in-web-light.png\"><img alt=\"Open in Web\" width=\"114\" height=\"28\" src=\"https://cursor.com/assets/images/open-in-web-dark.png\"></picture></a>&nbsp;<a href=\"https://cursor.com/automations/5e29d72a-a15c-11f1-b532-320a589b8025\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://cursor.com/assets/images/view-automation-dark.png\"><source media=\"(prefers-color-scheme: light)\" srcset=\"https://cursor.com/assets/images/view-automation-light.png\"><img alt=\"View Automation\" width=\"141\" height=\"28\" src=\"https://cursor.com/assets/images/view-automation-dark.png\"></picture></a>&nbsp;</div>\n\n<sub>Sent by Cursor Approval Agent: Pull Request Router and Approver</sub>\n",
+      "url": "https://github.com/wrbell/stark-translate/pull/196#pullrequestreview-5173905549",
+      "commit": {
+        "oid": "1b723bd87f4a2f4adecd081a281ded26cafbb0bf"
+      }
+    }
+  ],
+  "review_thread_count": 0,
+  "ci_audit_scope": {
+    "audit": "SKIPPED",
+    "audit-lite": "SUCCESS",
+    "note": "No blanket dependency-security clearance; exact installed Standard findings remain separately retained."
+  },
+  "limits": [
+    "No CI logs or artifacts downloaded; no fresh test counts inferred.",
+    "Existing coverage comment length warning is presentation-only and not a required-check failure."
+  ]
+}

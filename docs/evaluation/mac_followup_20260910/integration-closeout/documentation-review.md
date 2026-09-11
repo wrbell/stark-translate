@@ -1,0 +1,12 @@
+# Published documentation review after V7 archive verification
+
+No actionable contradiction or broken relative path found in this bounded read-only review against source `760e948ec9efb9266a5419cf68ce5f1cb5cfabab`. No tracked files were edited; no tests, model/device operations, raw archive verification or media/trace reads were performed.
+
+- All 11 published current guides matched their reviewed ignored drafts byte-for-byte. The three final760 leaves and the two revised historical c13 leaves retain source, installed-service, release and human/device boundaries. The c13 artifact table now lists three unique contents without changing any artifact identity; its original monitor and blank-preview failures remain failed.
+- Checked 481 relative file targets across 17 Markdown files: none missing. The two nonempty cross-file anchors (`input-device-identity-follow-up` and `derived-marian-ct2-models-on-mac`) match actual headings. This is a targeted path/heading inspection, not a replacement for the root's documentation/render/link test suite.
+- Published `final-760e948/sessions-summary.json` is byte-identical to retained `final-delivery-report-preparation/result.json`: 26,757 bytes, SHA256 `a45538291e6c353ec11ce44645994ed87c61ca2d722be66251226b0256d5ce3e`.
+- Small archive metadata agrees across the public manifest, build result and successful standalone verification receipt: manifest SHA256 `23692ba4a9958a1b3c7fca1b2f042fc4ab3f3f90616951b737cacaf7b3701f8f`, 993 evidence members plus inventory, 82 shards, 40,259,903 compressed bytes, reconstructed archive SHA256 `a9efcd8ff14a3c8c3bb49a25628c7caa5cae0b9ba300a27197383780839e8fed`. Verification exited 0 at 00:42:38 UTC. No archive payload was re-read by this review.
+- The final leaves correctly distinguish Standard's selected E4B engine and existing Marian final routing from CPU Lite's Whisper-small/Marian/ONNX configuration. They do not claim a V6 E2B full service. Latency remains above goal; per-endpoint counts, absent browser ACKs, unchanged defaults and truncated/unassessable physical traces remain explicit.
+- #132 has supported routing acceptance but is not described as already closed. Current PR #196 integration remains distinct from earlier PR #192. The packaging acceptance status is validated/met; the documentation-refresh status was still pending at the initial read, awaiting the root's separate final checks.
+
+The root owns any subsequent status update after documentation checks, final commit/CI and authorized merge. This review does not itself establish those later actions.
