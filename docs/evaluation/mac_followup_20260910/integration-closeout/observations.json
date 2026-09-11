@@ -1,0 +1,66 @@
+{
+  "original_observations_sha256": "835d8ca97abf4569b3bd87cab0adeb6553b56874a054c01984df41434601354c",
+  "scope": "API observations with explicit publication mapping; full main commit patch is kept locally and represented by a labelled compact derivative.",
+  "observations": [
+    {
+      "file": "closed-issue132.json",
+      "argv": [
+        "gh",
+        "api",
+        "repos/wrbell/stark-translate/issues/132"
+      ],
+      "observed_at": "2026-09-11T01:00:51.313348+00:00",
+      "sha256": "75e36755f2aa3342f82f8f8413b5840c004143836b0b3210c7ed1fd2106f656a",
+      "published_file": "closed-issue132.json",
+      "published_sha256": "75e36755f2aa3342f82f8f8413b5840c004143836b0b3210c7ed1fd2106f656a",
+      "published_is_original_response": true
+    },
+    {
+      "file": "closure-comment.json",
+      "argv": [
+        "gh",
+        "api",
+        "repos/wrbell/stark-translate/issues/comments/5627758631"
+      ],
+      "observed_at": "2026-09-11T01:00:52.102724+00:00",
+      "sha256": "fa762a694a9df14d4e1ce372f331223b74c22cbc2054ea153f486470a871d04d",
+      "published_file": "closure-comment.json",
+      "published_sha256": "fa762a694a9df14d4e1ce372f331223b74c22cbc2054ea153f486470a871d04d",
+      "published_is_original_response": true
+    },
+    {
+      "file": "open-issues.json",
+      "argv": [
+        "gh",
+        "issue",
+        "list",
+        "--repo",
+        "wrbell/stark-translate",
+        "--state",
+        "open",
+        "--limit",
+        "100",
+        "--json",
+        "number,title,url,state"
+      ],
+      "observed_at": "2026-09-11T01:00:52.557472+00:00",
+      "sha256": "2379a36c0508eddd8cd98edd4be82737c7fca0119def411e9aebbfb187e2773c",
+      "published_file": "open-issues.json",
+      "published_sha256": "2379a36c0508eddd8cd98edd4be82737c7fca0119def411e9aebbfb187e2773c",
+      "published_is_original_response": true
+    },
+    {
+      "file": "main-after-196.json",
+      "argv": [
+        "gh",
+        "api",
+        "repos/wrbell/stark-translate/commits/main"
+      ],
+      "observed_at": "2026-09-11T01:00:54.710780+00:00",
+      "sha256": "9893ae8f07b8f62d38dc2f429f0334237d9b8b524a34f8db6119353524014e0c",
+      "published_file": "main-after-196.compact.json",
+      "published_sha256": "28af10e527e6d77a38723dd9ecb31053009e77aa064d1dc5e8e3e97b6ac9534e",
+      "published_is_original_response": false
+    }
+  ]
+}

@@ -54,3 +54,6 @@ were checked; it is a retained local report generator, not an installed CLI.
 All 169 installed runtime source members remain byte-identical after this
 [documentation refresh](runtime-documentation-continuity.json). The tested
 artifacts retain their exact 760e948 identities; this is no new inference run.
+
+[Actual integration closeout](../integration-closeout/README.md) records PR #196
+merged and #132 closed, separately from these runtime measurements.

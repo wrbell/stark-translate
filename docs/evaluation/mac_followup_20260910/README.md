@@ -5,6 +5,9 @@ This EN↔ES follow-up is recorded in
 no release or package publication is authorized for this follow-up. The
 [43-item audit](backlog-audit.md) preserves each original acceptance condition.
 
+[PR #196 is merged; #132 is closed](integration-closeout/README.md). The linked
+receipt records the actual reviewed head, CI, merge time and eight remaining issues.
+
 ## Completed evidence
 
 - [Current 760e948 source validation](final-760e948/source-validation.md): completed
