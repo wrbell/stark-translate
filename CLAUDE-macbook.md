@@ -70,6 +70,7 @@ venv/bin/stark-translate setup --backend mlx --include e2b tts translategemma   
 venv/bin/stark-translate doctor --backend mlx --lang en     # preflight without loading Metal models
 venv/bin/stark-translate doctor --backend mlx --lang es
 printf '%s\n' "$PWD/venv/bin/python" > .stark-python   # launcher pointer; rollback: point it at stt_env/bin/python
+scripts/audit_mac_runtime.sh --output "metrics/runtime-audit-$(date +%Y%m%d-%H%M%S)"  # monthly; requires pip-audit
 ./run_operator.sh           # operator UI on http://localhost:9000/operator/
 ```
 

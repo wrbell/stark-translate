@@ -31,7 +31,7 @@ if args[:1] == ['-c']:
     if 'version_info' in args[1]:
         print('3.11')
     elif 'sys.prefix' in args[1]:
-        print('' if exe.name == 'python3' else exe.parent.parent)
+        print(os.environ.get('BOOTSTRAP_TEST_PREFIX', '' if exe.name == 'python3' else str(exe.parent.parent)))
     else:
         raise SystemExit('Unexpected -c command')
 elif args[:2] == ['-m', 'venv']:
@@ -120,6 +120,32 @@ def bootstrap(tmp_path):
 
 def installer_records(records):
     return [row for row in records if row["args"][:2] == ["-m", "pip"]]
+
+
+@pytest.mark.parametrize("empty_prefix", [True, False])
+def test_bootstrap_refuses_stt_env_when_pointer_names_other_env(bootstrap, empty_prefix):
+    rollback = bootstrap.environment("stt_env")
+    other = bootstrap.environment("other")
+    (bootstrap.project / ".stark-python").write_text(str(other / "bin/python") + "\n")
+    # Empty prefixes fall back to venv; a symlink can make that the rollback env.
+    (bootstrap.project / "venv").symlink_to(rollback, target_is_directory=True)
+    result, records = bootstrap.run({"BOOTSTRAP_TEST_PREFIX": "" if empty_prefix else str(rollback)})
+    assert result.returncode == 3, result.stderr
+    assert "refusing to install into the rollback environment stt_env" in result.stderr
+    assert str(other / "bin/python") in result.stderr
+    assert installer_records(records) == []
+    assert not any(row["args"][:2] == ["-m", "venv"] for row in records)
+
+
+def test_bootstrap_with_pointer_installs_into_the_pointed_env(bootstrap):
+    rollback = bootstrap.environment("stt_env")
+    other = bootstrap.environment("other")
+    (bootstrap.project / ".stark-python").write_text(str(other / "bin/python") + "\n")
+    result, records = bootstrap.run()
+    assert result.returncode == 0, result.stderr
+    assert {row["exe"] for row in installer_records(records)} == {str(other / "bin/python")}
+    assert not any(row["args"][:2] == ["-m", "venv"] for row in records)
+    assert all(row["exe"] != str(rollback / "bin/python") for row in records)
 
 
 def service_records(records):

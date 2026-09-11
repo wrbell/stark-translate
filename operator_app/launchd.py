@@ -12,6 +12,30 @@ from pathlib import Path
 LABEL = "com.starkroad.translate"
 
 
+def pointer_python(project_root: Path) -> Path | None:
+    """Read the launcher's pointer without resolving interpreter symlinks."""
+    pointer = project_root / ".stark-python"
+    if not pointer.exists():
+        return None
+    try:
+        with pointer.open(newline="") as stream:
+            for line in stream.read().split("\n"):
+                line = line.removesuffix("\n").removesuffix("\r").strip()
+                if not line or line.startswith("#"):
+                    continue
+                if line.startswith("~/"):
+                    line = os.path.join(os.environ["HOME"], line[2:])
+                candidate = Path(line)
+                if not candidate.is_absolute():
+                    candidate = project_root / candidate
+                if not candidate.is_file() or not os.access(candidate, os.X_OK):
+                    raise ValueError(f"Interpreter from {pointer} is not executable: {candidate}")
+                return candidate.absolute()
+    except (OSError, UnicodeError, KeyError) as exc:
+        raise ValueError(f"Cannot read interpreter from {pointer}: {exc}") from exc
+    raise ValueError(f"{pointer} contains no interpreter path")
+
+
 def launchd_plist(
     project_root: Path, python: Path, *, host: str = "127.0.0.1", port: int = 9000, profile: str | None = None
 ) -> dict:
@@ -67,7 +91,9 @@ def manage_launchd(
             subprocess.run(["launchctl", "bootout", f"gui/{os.getuid()}", str(path)], check=False)
             path.unlink()
         return 0
-    config = launchd_plist(project_root, python or Path(sys.executable), profile=profile)
+    config = launchd_plist(
+        project_root, python or pointer_python(project_root) or Path(sys.executable), profile=profile
+    )
     if action == "render" and output is None:
         print(plistlib.dumps(config).decode())
         return 0

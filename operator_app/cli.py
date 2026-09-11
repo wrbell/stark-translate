@@ -237,7 +237,9 @@ def main(argv: list[str] | None = None) -> int:
     p_service = sub.add_parser("launchd", help="Explicit macOS login service install/uninstall or preview")
     p_service.add_argument("action", choices=["render", "install", "uninstall"])
     p_service.add_argument("--project-root", default=os.environ.get("STARK_PROJECT_ROOT", os.getcwd()))
-    p_service.add_argument("--python", help="Absolute venv interpreter path (default: current interpreter)")
+    p_service.add_argument(
+        "--python", help="Absolute venv interpreter path (default: .stark-python, then current interpreter)"
+    )
     p_service.add_argument("--output", help="Plist destination; render prints to stdout when omitted")
     p_service.set_defaults(func=cmd_launchd)
 

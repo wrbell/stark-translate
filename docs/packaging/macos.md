@@ -116,6 +116,9 @@ printf '%s\n' "$PWD/stt_env/bin/python" > .stark-python
 An invalid selected interpreter fails instead of silently using another environment.
 The launcher delegates to the installed operator CLI, which starts uvicorn; the
 pipeline child uses that same selected environment.
+`bootstrap.sh` refuses to install into the rollback environment `stt_env` when
+`.stark-python` or `STARK_PYTHON` names another interpreter but the derived install
+directory resolves to `stt_env`.
 
 Generate and inspect the actual login-agent configuration first:
 
@@ -125,13 +128,26 @@ venv/bin/python -m operator_app.cli launchd install --project-root "$PWD"
 venv/bin/python -m operator_app.cli launchd uninstall
 ```
 
-The plist records the current venv interpreter, working directory, model cache
+`stark-translate launchd render/install` uses `.stark-python` when `--python` is
+omitted, falling back to the current interpreter when the pointer is absent.
+An explicit `--python` takes precedence, and interpreter symlinks are preserved.
+The plist records the selected interpreter, working directory, model cache
 override, log paths, and the resolved profile. Pass `--profile lite-cpu` when
 rendering/installing a Lite service (the `stark-translate-lite` alias retains its
 Lite default). The generated command preserves that choice at the next login.
 It binds localhost by default. These commands explicitly
 install/remove a user login service; a plain setup or operator launch never does so.
 The checked-in plist is a reference, not an installable hard-coded user configuration.
+
+## Runtime audit
+
+Run `scripts/audit_mac_runtime.sh --output <dir>` monthly, using a new output
+directory each time. It audits the selected interpreter's installed site-packages
+and saves `installed-audit.json` plus a `receipt.json` with paths, a UTC timestamp
+and exit codes. Findings or incomplete coverage produce a nonzero exit status.
+The script uses `pip-audit` on `PATH`, then `.cache/package-smoke/bin/pip-audit`,
+or an explicit `--auditor PATH`; it does not install packages or load models.
+CI's weekly audit strips Torch/MLX and cannot cover the installed Mac runtime.
 
 ## Package checks
 
