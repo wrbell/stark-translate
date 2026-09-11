@@ -1,0 +1,2234 @@
+{
+  "timestamp": "2026-09-10T23:12:52.322938",
+  "env": {
+    "python": "3.11.11",
+    "mlx": "0.32.2",
+    "mlx_lm": "0.31.3",
+    "optiq": "0.4.34"
+  },
+  "runs": 5,
+  "warmup": 2,
+  "sentences": {
+    "short": "The grace of God is sufficient.",
+    "medium": "For God so loved the world that he gave his only begotten son, that whosoever believeth in him should not perish.",
+    "long": "Brothers and sisters, let us turn to the book of Romans chapter eight, where the apostle Paul reminds us that there is therefore now no condemnation to them which are in Christ Jesus.",
+    "canary_01": "The atonement of Christ reconciles us to God.",
+    "canary_02": "James wrote about faith and works.",
+    "canary_03": "The propitiation for our sins was the blood of Christ.",
+    "canary_04": "The breaking of bread is a solemn remembrance.",
+    "canary_05": "Paul wrote to the Corinthians about the resurrection.",
+    "canary_06": "Justification is by faith alone, not by works of the law.",
+    "canary_07": "The Holy Spirit convicts the world of sin and righteousness.",
+    "canary_08": "Grace and mercy meet at the cross of our Lord Jesus Christ.",
+    "canary_09": "We gather before the mercy seat in prayer.",
+    "canary_10": "The table of the Lord is spread for His people.",
+    "canary_11": "We are gathered to Thy Name on the first day of the week.",
+    "canary_12": "A little while, and we shall see the Lord.",
+    "canary_13": "Nothing but the blood of Jesus can wash away my sin.",
+    "canary_14": "Christ is the Surety of a better covenant.",
+    "canary_15": "This do in remembrance of Me at His table.",
+    "canary_16": "At the mercy seat we remember His propitiation for our sins.",
+    "canary_17": "Yet there is room at the gospel feast for the weary soul.",
+    "canary_18": "We come as pilgrims to Calvary and the cross."
+  },
+  "configs": {
+    "e4b": {
+      "config": "e4b",
+      "label": "Gemma 4 E4B OptiQ-4bit",
+      "model_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "model_family": "gemma4",
+      "draft_model_id": null,
+      "num_draft_tokens": 0,
+      "turboquant": false,
+      "per_length": {
+        "short": {
+          "latency": {
+            "n": 5,
+            "mean": 522.6508583997202,
+            "p50": 541.3732919996619,
+            "p95": 551.0662079996109
+          },
+          "tps_mean": 36.59061865218534,
+          "sample": "La gracia de Dios es suficiente.",
+          "source": "The grace of God is sufficient.",
+          "texts": [
+            "La gracia de Dios es suficiente.",
+            "La gracia de Dios es suficiente.",
+            "La gracia de Dios es suficiente.",
+            "La gracia de Dios es suficiente.",
+            "La gracia de Dios es suficiente."
+          ],
+          "text_sha256s": [
+            "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4",
+            "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4",
+            "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4",
+            "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4",
+            "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 95.15454100073839,
+              "ttft_ms": 298.99324999951205,
+              "decode_ms": 243.2368330000827,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 94.7355829994194,
+              "ttft_ms": 305.3833330004636,
+              "decode_ms": 235.98995899919828,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 94.93329199995061,
+              "ttft_ms": 251.48824999996577,
+              "decode_ms": 241.50091699993936,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 98.02545799993823,
+              "ttft_ms": 310.2054999999382,
+              "decode_ms": 240.86070799967274,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 96.15245800068806,
+              "ttft_ms": 239.39845899985812,
+              "decode_ms": 246.19708299997,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+            }
+          ],
+          "gen_tokens_mean": 8,
+          "prefill_p50": 95.15454100073839,
+          "ttft_p50": 298.99324999951205,
+          "decode_p50": 241.50091699993936,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "medium": {
+          "latency": {
+            "n": 5,
+            "mean": 1459.870200000114,
+            "p50": 1464.0561250007522,
+            "p95": 1467.9235000003246
+          },
+          "tps_mean": 32.570335185510345,
+          "sample": "Porque de tal manera am\u00f3 Dios al mundo, que ha dado a su Hijo unig\u00e9nito, para que todo aquel que en \u00e9l cree, no se pierd",
+          "source": "For God so loved the world that he gave his only begotten son, that whosoever believeth in him should not perish.",
+          "texts": [
+            "Porque de tal manera am\u00f3 Dios al mundo, que ha dado a su Hijo unig\u00e9nito, para que todo aquel que en \u00e9l cree, no se pierda.",
+            "Porque de tal manera am\u00f3 Dios al mundo, que ha dado a su Hijo unig\u00e9nito, para que todo aquel que en \u00e9l cree, no se pierda.",
+            "Porque de tal manera am\u00f3 Dios al mundo, que ha dado a su Hijo unig\u00e9nito, para que todo aquel que en \u00e9l cree, no se pierda.",
+            "Porque de tal manera am\u00f3 Dios al mundo, que ha dado a su Hijo unig\u00e9nito, para que todo aquel que en \u00e9l cree, no se pierda.",
+            "Porque de tal manera am\u00f3 Dios al mundo, que ha dado a su Hijo unig\u00e9nito, para que todo aquel que en \u00e9l cree, no se pierda."
+          ],
+          "text_sha256s": [
+            "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c",
+            "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c",
+            "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c",
+            "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c",
+            "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 36,
+              "prefill_ms": 125.29145900043659,
+              "ttft_ms": 328.94062499963184,
+              "decode_ms": 1138.9828750006927,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+            },
+            {
+              "generated_tokens": 36,
+              "prefill_ms": 125.29283299954841,
+              "ttft_ms": 334.87487499951385,
+              "decode_ms": 1114.6107499998834,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+            },
+            {
+              "generated_tokens": 36,
+              "prefill_ms": 124.17562500013446,
+              "ttft_ms": 326.235125000494,
+              "decode_ms": 1125.0465829998575,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+            },
+            {
+              "generated_tokens": 36,
+              "prefill_ms": 127.20866700055922,
+              "ttft_ms": 326.6997079999783,
+              "decode_ms": 1137.356417000774,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+            },
+            {
+              "generated_tokens": 36,
+              "prefill_ms": 126.01970800005802,
+              "ttft_ms": 336.8659589996241,
+              "decode_ms": 1129.7380830001202,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+            }
+          ],
+          "gen_tokens_mean": 36,
+          "prefill_p50": 125.29283299954841,
+          "ttft_p50": 328.94062499963184,
+          "decode_p50": 1129.7380830001202,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "long": {
+          "latency": {
+            "n": 5,
+            "mean": 1691.9209249999767,
+            "p50": 1704.9538749997737,
+            "p95": 1711.4036250004574
+          },
+          "tps_mean": 31.84091796917007,
+          "sample": "Hermanos y hermanas, volvamos al libro de Romanos cap\u00edtulo ocho, donde el ap\u00f3stol Pablo nos recuerda que por lo tanto ya",
+          "source": "Brothers and sisters, let us turn to the book of Romans chapter eight, where the apostle Paul reminds us that there is therefore now no condemnation to them which are in Christ Jesus.",
+          "texts": [
+            "Hermanos y hermanas, volvamos al libro de Romanos cap\u00edtulo ocho, donde el ap\u00f3stol Pablo nos recuerda que por lo tanto ya no hay condenaci\u00f3n para los que est\u00e1n en Cristo Jes\u00fas.",
+            "Hermanos y hermanas, volvamos al libro de Romanos cap\u00edtulo ocho, donde el ap\u00f3stol Pablo nos recuerda que por lo tanto ya no hay condenaci\u00f3n para los que est\u00e1n en Cristo Jes\u00fas.",
+            "Hermanos y hermanas, volvamos al libro de Romanos cap\u00edtulo ocho, donde el ap\u00f3stol Pablo nos recuerda que por lo tanto ya no hay condenaci\u00f3n para los que est\u00e1n en Cristo Jes\u00fas.",
+            "Hermanos y hermanas, volvamos al libro de Romanos cap\u00edtulo ocho, donde el ap\u00f3stol Pablo nos recuerda que por lo tanto ya no hay condenaci\u00f3n para los que est\u00e1n en Cristo Jes\u00fas.",
+            "Hermanos y hermanas, volvamos al libro de Romanos cap\u00edtulo ocho, donde el ap\u00f3stol Pablo nos recuerda que por lo tanto ya no hay condenaci\u00f3n para los que est\u00e1n en Cristo Jes\u00fas."
+          ],
+          "text_sha256s": [
+            "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233",
+            "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233",
+            "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233",
+            "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233",
+            "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 43,
+              "prefill_ms": 123.9106670000183,
+              "ttft_ms": 328.05958399967494,
+              "decode_ms": 1378.072250000514,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+            },
+            {
+              "generated_tokens": 43,
+              "prefill_ms": 126.49679199967068,
+              "ttft_ms": 336.4294170005451,
+              "decode_ms": 1368.5244579992286,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+            },
+            {
+              "generated_tokens": 43,
+              "prefill_ms": 118.93816600058925,
+              "ttft_ms": 315.32275000063237,
+              "decode_ms": 1381.5708329993868,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+            },
+            {
+              "generated_tokens": 43,
+              "prefill_ms": 116.83683299997939,
+              "ttft_ms": 274.12366699991253,
+              "decode_ms": 1366.0980409995318,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+            },
+            {
+              "generated_tokens": 43,
+              "prefill_ms": 127.12025000018912,
+              "ttft_ms": 336.3199160003205,
+              "decode_ms": 1375.0837090001369,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+            }
+          ],
+          "gen_tokens_mean": 43,
+          "prefill_p50": 123.9106670000183,
+          "ttft_p50": 328.05958399967494,
+          "decode_p50": 1375.0837090001369,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_01": {
+          "latency": {
+            "n": 5,
+            "mean": 732.5580418000754,
+            "p50": 732.7440420003768,
+            "p95": 744.3034170000828
+          },
+          "tps_mean": 34.39289773331047,
+          "sample": "La expiaci\u00f3n de Cristo nos reconcilia con Dios.",
+          "source": "The atonement of Christ reconciles us to God.",
+          "texts": [
+            "La expiaci\u00f3n de Cristo nos reconcilia con Dios.",
+            "La expiaci\u00f3n de Cristo nos reconcilia con Dios.",
+            "La expiaci\u00f3n de Cristo nos reconcilia con Dios.",
+            "La expiaci\u00f3n de Cristo nos reconcilia con Dios.",
+            "La expiaci\u00f3n de Cristo nos reconcilia con Dios."
+          ],
+          "text_sha256s": [
+            "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+            "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+            "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+            "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+            "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 121.99320800027634,
+              "ttft_ms": 326.7334160000246,
+              "decode_ms": 395.1258750003035,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 119.33824999960052,
+              "ttft_ms": 322.411624999404,
+              "decode_ms": 407.04083400032687,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 123.73454199951084,
+              "ttft_ms": 328.2818750003571,
+              "decode_ms": 404.4621670000197,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 123.25766599951749,
+              "ttft_ms": 332.9727919999641,
+              "decode_ms": 401.4582079998945,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 122.4326250003287,
+              "ttft_ms": 338.80349999981263,
+              "decode_ms": 405.4999170002702,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+            }
+          ],
+          "gen_tokens_mean": 13,
+          "prefill_p50": 122.4326250003287,
+          "ttft_p50": 328.2818750003571,
+          "decode_p50": 404.4621670000197,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_02": {
+          "latency": {
+            "n": 5,
+            "mean": 539.8832666001908,
+            "p50": 545.3258329998789,
+            "p95": 556.5179169998373
+          },
+          "tps_mean": 36.02397468098297,
+          "sample": "James escribi\u00f3 sobre fe y obras.",
+          "source": "James wrote about faith and works.",
+          "texts": [
+            "James escribi\u00f3 sobre fe y obras.",
+            "James escribi\u00f3 sobre fe y obras.",
+            "James escribi\u00f3 sobre fe y obras.",
+            "James escribi\u00f3 sobre fe y obras.",
+            "James escribi\u00f3 sobre fe y obras."
+          ],
+          "text_sha256s": [
+            "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+            "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+            "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+            "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+            "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 100.63737500058778,
+              "ttft_ms": 309.17283299913834,
+              "decode_ms": 247.345084000699,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 100.50324999974691,
+              "ttft_ms": 309.9806250002075,
+              "decode_ms": 245.3780830001051,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 104.25000000032014,
+              "ttft_ms": 248.28770800013444,
+              "decode_ms": 248.6138750000464,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 93.8247499998397,
+              "ttft_ms": 298.7438750005822,
+              "decode_ms": 246.5684170001623,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+            },
+            {
+              "generated_tokens": 8,
+              "prefill_ms": 96.57779200006189,
+              "ttft_ms": 303.58637500012264,
+              "decode_ms": 241.73945799975627,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+            }
+          ],
+          "gen_tokens_mean": 8,
+          "prefill_p50": 100.50324999974691,
+          "ttft_p50": 303.58637500012264,
+          "decode_p50": 246.5684170001623,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_03": {
+          "latency": {
+            "n": 5,
+            "mean": 770.4322834002596,
+            "p50": 764.1751669998484,
+            "p95": 808.0973750002158
+          },
+          "tps_mean": 33.57966663253319,
+          "sample": "La propiciaci\u00f3n por nuestros pecados fue la sangre de Cristo.",
+          "source": "The propitiation for our sins was the blood of Christ.",
+          "texts": [
+            "La propiciaci\u00f3n por nuestros pecados fue la sangre de Cristo.",
+            "La propiciaci\u00f3n por nuestros pecados fue la sangre de Cristo.",
+            "La propiciaci\u00f3n por nuestros pecados fue la sangre de Cristo.",
+            "La propiciaci\u00f3n por nuestros pecados fue la sangre de Cristo.",
+            "La propiciaci\u00f3n por nuestros pecados fue la sangre de Cristo."
+          ],
+          "text_sha256s": [
+            "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+            "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+            "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+            "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+            "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 121.81929200050946,
+              "ttft_ms": 316.6922500004148,
+              "decode_ms": 425.22120800003904,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 120.49954200028878,
+              "ttft_ms": 324.9574580004264,
+              "decode_ms": 436.12087499968766,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 121.52058300034696,
+              "ttft_ms": 330.7893339997463,
+              "decode_ms": 433.38583300010214,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 119.61787499967615,
+              "ttft_ms": 326.20337500065943,
+              "decode_ms": 450.6937090000065,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 132.47229199987487,
+              "ttft_ms": 348.87583300042024,
+              "decode_ms": 459.2215419997956,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+            }
+          ],
+          "gen_tokens_mean": 14,
+          "prefill_p50": 121.52058300034696,
+          "ttft_p50": 326.20337500065943,
+          "decode_p50": 436.12087499968766,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_04": {
+          "latency": {
+            "n": 5,
+            "mean": 701.5436417999808,
+            "p50": 710.4496669999207,
+            "p95": 731.5686660003848
+          },
+          "tps_mean": 33.699744648629945,
+          "sample": "El partir del pan es un solemne recuerdo.",
+          "source": "The breaking of bread is a solemn remembrance.",
+          "texts": [
+            "El partir del pan es un solemne recuerdo.",
+            "El partir del pan es un solemne recuerdo.",
+            "El partir del pan es un solemne recuerdo.",
+            "El partir del pan es un solemne recuerdo.",
+            "El partir del pan es un solemne recuerdo."
+          ],
+          "text_sha256s": [
+            "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+            "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+            "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+            "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+            "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 116.08308300037605,
+              "ttft_ms": 261.7532909998772,
+              "decode_ms": 372.834709000017,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 122.24487499952373,
+              "ttft_ms": 338.1810419996327,
+              "decode_ms": 390.9160000002885,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 121.92841599971871,
+              "ttft_ms": 331.7439590000504,
+              "decode_ms": 378.70570799987036,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 116.12704200069855,
+              "ttft_ms": 341.03575000062847,
+              "decode_ms": 390.53291599975637,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 123.70012500014128,
+              "ttft_ms": 329.64300000003277,
+              "decode_ms": 372.3718339997504,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+            }
+          ],
+          "gen_tokens_mean": 12,
+          "prefill_p50": 121.92841599971871,
+          "ttft_p50": 331.7439590000504,
+          "decode_p50": 378.70570799987036,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_05": {
+          "latency": {
+            "n": 5,
+            "mean": 757.2219252002469,
+            "p50": 760.660208000445,
+            "p95": 791.6362500000105
+          },
+          "tps_mean": 33.74915494576924,
+          "sample": "Pablo escribi\u00f3 a los corintios sobre la resurrecci\u00f3n.",
+          "source": "Paul wrote to the Corinthians about the resurrection.",
+          "texts": [
+            "Pablo escribi\u00f3 a los corintios sobre la resurrecci\u00f3n.",
+            "Pablo escribi\u00f3 a los corintios sobre la resurrecci\u00f3n.",
+            "Pablo escribi\u00f3 a los corintios sobre la resurrecci\u00f3n.",
+            "Pablo escribi\u00f3 a los corintios sobre la resurrecci\u00f3n.",
+            "Pablo escribi\u00f3 a los corintios sobre la resurrecci\u00f3n."
+          ],
+          "text_sha256s": [
+            "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+            "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+            "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+            "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+            "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 125.65541700041649,
+              "ttft_ms": 328.91762500003097,
+              "decode_ms": 439.72895900060394,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 120.46537500009435,
+              "ttft_ms": 309.6051250004166,
+              "decode_ms": 446.19512499957636,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 128.33295800010092,
+              "ttft_ms": 344.7596670002895,
+              "decode_ms": 446.876582999721,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 123.51362499975947,
+              "ttft_ms": 326.1453329996584,
+              "decode_ms": 434.51487500078656,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 119.06220799937728,
+              "ttft_ms": 274.11974999995437,
+              "decode_ms": 435.2465840001969,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+            }
+          ],
+          "gen_tokens_mean": 14,
+          "prefill_p50": 123.51362499975947,
+          "ttft_p50": 326.1453329996584,
+          "decode_p50": 439.72895900060394,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_06": {
+          "latency": {
+            "n": 5,
+            "mean": 904.5085832000041,
+            "p50": 904.4393330004823,
+            "p95": 907.640999999785
+          },
+          "tps_mean": 33.05537695399447,
+          "sample": "La justificaci\u00f3n es por la fe solamente, no por las obras de la ley.",
+          "source": "Justification is by faith alone, not by works of the law.",
+          "texts": [
+            "La justificaci\u00f3n es por la fe solamente, no por las obras de la ley.",
+            "La justificaci\u00f3n es por la fe solamente, no por las obras de la ley.",
+            "La justificaci\u00f3n es por la fe solamente, no por las obras de la ley.",
+            "La justificaci\u00f3n es por la fe solamente, no por las obras de la ley.",
+            "La justificaci\u00f3n es por la fe solamente, no por las obras de la ley."
+          ],
+          "text_sha256s": [
+            "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+            "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+            "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+            "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+            "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 121.61966699932238,
+              "ttft_ms": 330.8261249994757,
+              "decode_ms": 572.1465830001762,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 125.50525000006019,
+              "ttft_ms": 341.66916699996364,
+              "decode_ms": 565.9718329998213,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 119.58316700020077,
+              "ttft_ms": 329.4552500001373,
+              "decode_ms": 572.2773329998745,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 121.24133399993299,
+              "ttft_ms": 335.4570829997101,
+              "decode_ms": 570.3002090003793,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 123.83362499986106,
+              "ttft_ms": 336.07375000065076,
+              "decode_ms": 568.3655829998315,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+            }
+          ],
+          "gen_tokens_mean": 18,
+          "prefill_p50": 121.61966699932238,
+          "ttft_p50": 335.4570829997101,
+          "decode_p50": 570.3002090003793,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_07": {
+          "latency": {
+            "n": 5,
+            "mean": 777.5462249999691,
+            "p50": 778.5004589995879,
+            "p95": 781.7012909999903
+          },
+          "tps_mean": 33.67570357789996,
+          "sample": "El Esp\u00edritu Santo convence al mundo de pecado y de justicia.",
+          "source": "The Holy Spirit convicts the world of sin and righteousness.",
+          "texts": [
+            "El Esp\u00edritu Santo convence al mundo de pecado y de justicia.",
+            "El Esp\u00edritu Santo convence al mundo de pecado y de justicia.",
+            "El Esp\u00edritu Santo convence al mundo de pecado y de justicia.",
+            "El Esp\u00edritu Santo convence al mundo de pecado y de justicia.",
+            "El Esp\u00edritu Santo convence al mundo de pecado y de justicia."
+          ],
+          "text_sha256s": [
+            "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+            "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+            "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+            "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+            "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 122.14387499989242,
+              "ttft_ms": 337.160459000188,
+              "decode_ms": 439.25820799995563,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 123.2817910004087,
+              "ttft_ms": 337.4326659995859,
+              "decode_ms": 444.2686250004044,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 121.81599999985337,
+              "ttft_ms": 337.2842500002662,
+              "decode_ms": 444.13941699986026,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 115.4013749992373,
+              "ttft_ms": 327.7877079999598,
+              "decode_ms": 441.8993330000376,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 124.50787500074513,
+              "ttft_ms": 341.98045899938734,
+              "decode_ms": 436.5200000002005,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+            }
+          ],
+          "gen_tokens_mean": 14,
+          "prefill_p50": 122.14387499989242,
+          "ttft_p50": 337.2842500002662,
+          "decode_p50": 441.8993330000376,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_08": {
+          "latency": {
+            "n": 5,
+            "mean": 902.2499335998873,
+            "p50": 901.3084999996863,
+            "p95": 922.1609590003936
+          },
+          "tps_mean": 33.28142695364276,
+          "sample": "La gracia y la misericordia se encuentran en la cruz de nuestro Se\u00f1or Jesucristo.",
+          "source": "Grace and mercy meet at the cross of our Lord Jesus Christ.",
+          "texts": [
+            "La gracia y la misericordia se encuentran en la cruz de nuestro Se\u00f1or Jesucristo.",
+            "La gracia y la misericordia se encuentran en la cruz de nuestro Se\u00f1or Jesucristo.",
+            "La gracia y la misericordia se encuentran en la cruz de nuestro Se\u00f1or Jesucristo.",
+            "La gracia y la misericordia se encuentran en la cruz de nuestro Se\u00f1or Jesucristo.",
+            "La gracia y la misericordia se encuentran en la cruz de nuestro Se\u00f1or Jesucristo."
+          ],
+          "text_sha256s": [
+            "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+            "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+            "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+            "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+            "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 121.77324999993289,
+              "ttft_ms": 331.0569579998628,
+              "decode_ms": 560.2872919998845,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 120.19987499934359,
+              "ttft_ms": 339.36041699962516,
+              "decode_ms": 564.4567500003177,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 122.891833999347,
+              "ttft_ms": 334.3925829994987,
+              "decode_ms": 566.9159170001876,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 117.58049999934885,
+              "ttft_ms": 326.49033300003794,
+              "decode_ms": 566.1284589996285,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 126.09437499941123,
+              "ttft_ms": 354.7890420004478,
+              "decode_ms": 567.3719169999458,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+            }
+          ],
+          "gen_tokens_mean": 18,
+          "prefill_p50": 121.77324999993289,
+          "ttft_p50": 334.3925829994987,
+          "decode_p50": 566.1284589996285,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_09": {
+          "latency": {
+            "n": 5,
+            "mean": 766.6320664000523,
+            "p50": 769.296000000395,
+            "p95": 787.7550829998654
+          },
+          "tps_mean": 34.0009368334694,
+          "sample": "Nos reunimos ante el trono de la misericordia en oraci\u00f3n.",
+          "source": "We gather before the mercy seat in prayer.",
+          "texts": [
+            "Nos reunimos ante el trono de la misericordia en oraci\u00f3n.",
+            "Nos reunimos ante el trono de la misericordia en oraci\u00f3n.",
+            "Nos reunimos ante el trono de la misericordia en oraci\u00f3n.",
+            "Nos reunimos ante el trono de la misericordia en oraci\u00f3n.",
+            "Nos reunimos ante el trono de la misericordia en oraci\u00f3n."
+          ],
+          "text_sha256s": [
+            "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+            "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+            "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+            "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+            "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 132.70199999988108,
+              "ttft_ms": 348.38337500059424,
+              "decode_ms": 439.37170799927117,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 119.8016660000576,
+              "ttft_ms": 334.55729100023746,
+              "decode_ms": 434.73870900015754,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 125.20504199983407,
+              "ttft_ms": 329.1589579994252,
+              "decode_ms": 433.3221670003695,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 119.66349999966042,
+              "ttft_ms": 309.77037499997095,
+              "decode_ms": 432.8352909997193,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 114.04770799981635,
+              "ttft_ms": 329.5183330001237,
+              "decode_ms": 441.5041250003924,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+            }
+          ],
+          "gen_tokens_mean": 14,
+          "prefill_p50": 119.8016660000576,
+          "ttft_p50": 329.5183330001237,
+          "decode_p50": 434.73870900015754,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_10": {
+          "latency": {
+            "n": 5,
+            "mean": 703.265774999818,
+            "p50": 703.1787919995622,
+            "p95": 711.7891249999957
+          },
+          "tps_mean": 34.592954701099934,
+          "sample": "La mesa del Se\u00f1or est\u00e1 extendida para Su pueblo.",
+          "source": "The table of the Lord is spread for His people.",
+          "texts": [
+            "La mesa del Se\u00f1or est\u00e1 extendida para Su pueblo.",
+            "La mesa del Se\u00f1or est\u00e1 extendida para Su pueblo.",
+            "La mesa del Se\u00f1or est\u00e1 extendida para Su pueblo.",
+            "La mesa del Se\u00f1or est\u00e1 extendida para Su pueblo.",
+            "La mesa del Se\u00f1or est\u00e1 extendida para Su pueblo."
+          ],
+          "text_sha256s": [
+            "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+            "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+            "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+            "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+            "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 119.18479099949762,
+              "ttft_ms": 329.39012499991804,
+              "decode_ms": 374.7058749995631,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 124.08524999955262,
+              "ttft_ms": 334.2682920001607,
+              "decode_ms": 377.52083299983497,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 115.0942499998564,
+              "ttft_ms": 330.1057500002571,
+              "decode_ms": 370.92220799968345,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 123.12924999969253,
+              "ttft_ms": 337.8698339993207,
+              "decode_ms": 365.30895800024155,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 120.81129199941644,
+              "ttft_ms": 329.7737499997311,
+              "decode_ms": 366.46325000037905,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+            }
+          ],
+          "gen_tokens_mean": 12,
+          "prefill_p50": 120.81129199941644,
+          "ttft_p50": 330.1057500002571,
+          "decode_p50": 370.92220799968345,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_11": {
+          "latency": {
+            "n": 5,
+            "mean": 764.2312336001851,
+            "p50": 754.2372090001663,
+            "p95": 790.5408750002607
+          },
+          "tps_mean": 34.50133828761918,
+          "sample": "Nos reunimos en Tu Nombre el primer d\u00eda de la semana.",
+          "source": "We are gathered to Thy Name on the first day of the week.",
+          "texts": [
+            "Nos reunimos en Tu Nombre el primer d\u00eda de la semana.",
+            "Nos reunimos en Tu Nombre el primer d\u00eda de la semana.",
+            "Nos reunimos en Tu Nombre el primer d\u00eda de la semana.",
+            "Nos reunimos en Tu Nombre el primer d\u00eda de la semana.",
+            "Nos reunimos en Tu Nombre el primer d\u00eda de la semana."
+          ],
+          "text_sha256s": [
+            "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+            "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+            "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+            "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+            "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 134.63362500078802,
+              "ttft_ms": 338.3115420001559,
+              "decode_ms": 431.92679200001294,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 118.82158299977164,
+              "ttft_ms": 330.49449999998615,
+              "decode_ms": 422.3425000000134,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 123.3310839998012,
+              "ttft_ms": 327.2068340002079,
+              "decode_ms": 427.03037499995844,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 121.10329099959927,
+              "ttft_ms": 324.3384170000354,
+              "decode_ms": 428.9643330002946,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+            },
+            {
+              "generated_tokens": 14,
+              "prefill_ms": 127.39787499958766,
+              "ttft_ms": 350.4575000006298,
+              "decode_ms": 440.0833749996309,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+            }
+          ],
+          "gen_tokens_mean": 14,
+          "prefill_p50": 123.3310839998012,
+          "ttft_p50": 330.49449999998615,
+          "decode_p50": 428.9643330002946,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_12": {
+          "latency": {
+            "n": 5,
+            "mean": 619.3313415999,
+            "p50": 616.7089999999007,
+            "p95": 627.9533750002884
+          },
+          "tps_mean": 34.64848961260961,
+          "sample": "En poco tiempo, veremos al Se\u00f1or.",
+          "source": "A little while, and we shall see the Lord.",
+          "texts": [
+            "En poco tiempo, veremos al Se\u00f1or.",
+            "En poco tiempo, veremos al Se\u00f1or.",
+            "En poco tiempo, veremos al Se\u00f1or.",
+            "En poco tiempo, veremos al Se\u00f1or.",
+            "En poco tiempo, veremos al Se\u00f1or."
+          ],
+          "text_sha256s": [
+            "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+            "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+            "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+            "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+            "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 9,
+              "prefill_ms": 123.18450000020675,
+              "ttft_ms": 336.4217919997827,
+              "decode_ms": 280.28720800011797,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+            },
+            {
+              "generated_tokens": 9,
+              "prefill_ms": 125.23283400059881,
+              "ttft_ms": 337.70958300010534,
+              "decode_ms": 285.6245419998231,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+            },
+            {
+              "generated_tokens": 9,
+              "prefill_ms": 122.15333300082419,
+              "ttft_ms": 339.17933400061884,
+              "decode_ms": 288.7740409996695,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+            },
+            {
+              "generated_tokens": 9,
+              "prefill_ms": 119.32337500002177,
+              "ttft_ms": 333.4410420002314,
+              "decode_ms": 282.2797079998054,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+            },
+            {
+              "generated_tokens": 9,
+              "prefill_ms": 120.68020900005648,
+              "ttft_ms": 322.9879169994092,
+              "decode_ms": 289.9515409999367,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+            }
+          ],
+          "gen_tokens_mean": 9,
+          "prefill_p50": 122.15333300082419,
+          "ttft_p50": 336.4217919997827,
+          "decode_p50": 285.6245419998231,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_13": {
+          "latency": {
+            "n": 5,
+            "mean": 699.3816584001252,
+            "p50": 700.5026249998991,
+            "p95": 710.8650420004778
+          },
+          "tps_mean": 34.30602719155996,
+          "sample": "Nada sino la sangre de Jes\u00fas puede lavar mi pecado.",
+          "source": "Nothing but the blood of Jesus can wash away my sin.",
+          "texts": [
+            "Nada sino la sangre de Jes\u00fas puede lavar mi pecado.",
+            "Nada sino la sangre de Jes\u00fas puede lavar mi pecado.",
+            "Nada sino la sangre de Jes\u00fas puede lavar mi pecado.",
+            "Nada sino la sangre de Jes\u00fas puede lavar mi pecado.",
+            "Nada sino la sangre de Jes\u00fas puede lavar mi pecado."
+          ],
+          "text_sha256s": [
+            "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+            "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+            "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+            "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+            "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 116.20079099975555,
+              "ttft_ms": 310.01487499997893,
+              "decode_ms": 386.528707999787,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 121.16545899971241,
+              "ttft_ms": 330.32354199986,
+              "decode_ms": 380.5415000006178,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 115.79841699949611,
+              "ttft_ms": 325.34591700004967,
+              "decode_ms": 375.15670799984946,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 120.26233300002787,
+              "ttft_ms": 327.9877499999202,
+              "decode_ms": 372.8847090005729,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 115.53133400047955,
+              "ttft_ms": 326.6911250002522,
+              "decode_ms": 361.4334579997376,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+            }
+          ],
+          "gen_tokens_mean": 12,
+          "prefill_p50": 116.20079099975555,
+          "ttft_p50": 326.6911250002522,
+          "decode_p50": 375.15670799984946,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_14": {
+          "latency": {
+            "n": 5,
+            "mean": 685.4727918000208,
+            "p50": 686.5024170001561,
+            "p95": 692.9717909997635
+          },
+          "tps_mean": 35.758810398067126,
+          "sample": "Cristo es la garant\u00eda de un pacto mejor.",
+          "source": "Christ is the Surety of a better covenant.",
+          "texts": [
+            "Cristo es la garant\u00eda de un pacto mejor.",
+            "Cristo es la garant\u00eda de un pacto mejor.",
+            "Cristo es la garant\u00eda de un pacto mejor.",
+            "Cristo es la garant\u00eda de un pacto mejor.",
+            "Cristo es la garant\u00eda de un pacto mejor."
+          ],
+          "text_sha256s": [
+            "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+            "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+            "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+            "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+            "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 117.88191699997697,
+              "ttft_ms": 313.3406670003751,
+              "decode_ms": 360.91216699969664,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 122.8254580000794,
+              "ttft_ms": 328.02879200062307,
+              "decode_ms": 358.40608299986343,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 122.39350000072591,
+              "ttft_ms": 333.22116599993024,
+              "decode_ms": 359.75062499983324,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 119.56025000017691,
+              "ttft_ms": 330.786624999746,
+              "decode_ms": 356.4154169998801,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+            },
+            {
+              "generated_tokens": 12,
+              "prefill_ms": 121.53662499986238,
+              "ttft_ms": 326.30470899948705,
+              "decode_ms": 360.1977080006691,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+            }
+          ],
+          "gen_tokens_mean": 12,
+          "prefill_p50": 121.53662499986238,
+          "ttft_p50": 328.02879200062307,
+          "decode_p50": 359.75062499983324,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_15": {
+          "latency": {
+            "n": 5,
+            "mean": 712.4179084001298,
+            "p50": 712.0553750000909,
+            "p95": 730.6537920003393
+          },
+          "tps_mean": 35.17398735519678,
+          "sample": "Esto se hace en memoria de M\u00ed en su mesa.",
+          "source": "This do in remembrance of Me at His table.",
+          "texts": [
+            "Esto se hace en memoria de M\u00ed en su mesa.",
+            "Esto se hace en memoria de M\u00ed en su mesa.",
+            "Esto se hace en memoria de M\u00ed en su mesa.",
+            "Esto se hace en memoria de M\u00ed en su mesa.",
+            "Esto se hace en memoria de M\u00ed en su mesa."
+          ],
+          "text_sha256s": [
+            "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+            "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+            "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+            "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+            "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 118.94612499963841,
+              "ttft_ms": 322.46704199951637,
+              "decode_ms": 386.64308300030825,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 119.65725000027305,
+              "ttft_ms": 322.97804199970415,
+              "decode_ms": 389.0773330003867,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 119.98858399965685,
+              "ttft_ms": 300.41137500029436,
+              "decode_ms": 396.40766699994856,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 117.6135420000719,
+              "ttft_ms": 319.08862500040414,
+              "decode_ms": 394.36258299974725,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+            },
+            {
+              "generated_tokens": 13,
+              "prefill_ms": 125.17283299985138,
+              "ttft_ms": 330.5737089995091,
+              "decode_ms": 400.0800830008302,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+            }
+          ],
+          "gen_tokens_mean": 13,
+          "prefill_p50": 119.65725000027305,
+          "ttft_p50": 322.46704199951637,
+          "decode_p50": 394.36258299974725,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_16": {
+          "latency": {
+            "n": 5,
+            "mean": 904.0487165999366,
+            "p50": 902.1661659999154,
+            "p95": 918.3711670002594
+          },
+          "tps_mean": 33.44950320124617,
+          "sample": "En el asiento de la misericordia recordamos Su propiciaci\u00f3n por nuestros pecados.",
+          "source": "At the mercy seat we remember His propitiation for our sins.",
+          "texts": [
+            "En el asiento de la misericordia recordamos Su propiciaci\u00f3n por nuestros pecados.",
+            "En el asiento de la misericordia recordamos Su propiciaci\u00f3n por nuestros pecados.",
+            "En el asiento de la misericordia recordamos Su propiciaci\u00f3n por nuestros pecados.",
+            "En el asiento de la misericordia recordamos Su propiciaci\u00f3n por nuestros pecados.",
+            "En el asiento de la misericordia recordamos Su propiciaci\u00f3n por nuestros pecados."
+          ],
+          "text_sha256s": [
+            "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+            "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+            "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+            "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+            "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 123.90720900020823,
+              "ttft_ms": 334.4752500006507,
+              "decode_ms": 564.6836669993718,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 122.14516699987144,
+              "ttft_ms": 339.6631659998093,
+              "decode_ms": 562.5030000001061,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 114.79758299992682,
+              "ttft_ms": 345.0778749993333,
+              "decode_ms": 564.7815830006948,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 120.80862499988143,
+              "ttft_ms": 340.85445900018385,
+              "decode_ms": 549.8334159992737,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+            },
+            {
+              "generated_tokens": 18,
+              "prefill_ms": 128.2716249997975,
+              "ttft_ms": 346.7625000002954,
+              "decode_ms": 571.608666999964,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+            }
+          ],
+          "gen_tokens_mean": 18,
+          "prefill_p50": 122.14516699987144,
+          "ttft_p50": 340.85445900018385,
+          "decode_p50": 564.6836669993718,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_17": {
+          "latency": {
+            "n": 5,
+            "mean": 930.0589332004165,
+            "p50": 938.4927920000337,
+            "p95": 944.9042080004801
+          },
+          "tps_mean": 33.16612135691231,
+          "sample": "Sin embargo, hay lugar en el banquete del evangelio para el alma cansada.",
+          "source": "Yet there is room at the gospel feast for the weary soul.",
+          "texts": [
+            "Sin embargo, hay lugar en el banquete del evangelio para el alma cansada.",
+            "Sin embargo, hay lugar en el banquete del evangelio para el alma cansada.",
+            "Sin embargo, hay lugar en el banquete del evangelio para el alma cansada.",
+            "Sin embargo, hay lugar en el banquete del evangelio para el alma cansada.",
+            "Sin embargo, hay lugar en el banquete del evangelio para el alma cansada."
+          ],
+          "text_sha256s": [
+            "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+            "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+            "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+            "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+            "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 19,
+              "prefill_ms": 123.04300000050716,
+              "ttft_ms": 318.9743750008347,
+              "decode_ms": 598.2506659993305,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+            },
+            {
+              "generated_tokens": 19,
+              "prefill_ms": 121.49487500028044,
+              "ttft_ms": 333.6775830002807,
+              "decode_ms": 605.6992920002813,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+            },
+            {
+              "generated_tokens": 19,
+              "prefill_ms": 125.32137500056706,
+              "ttft_ms": 347.0649169994431,
+              "decode_ms": 591.4278750005906,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+            },
+            {
+              "generated_tokens": 19,
+              "prefill_ms": 119.886375000533,
+              "ttft_ms": 320.0108330001967,
+              "decode_ms": 590.2849170006448,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+            },
+            {
+              "generated_tokens": 19,
+              "prefill_ms": 129.60183399991365,
+              "ttft_ms": 344.0535830004592,
+              "decode_ms": 600.850625000021,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+            }
+          ],
+          "gen_tokens_mean": 19,
+          "prefill_p50": 123.04300000050716,
+          "ttft_p50": 333.6775830002807,
+          "decode_p50": 598.2506659993305,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        },
+        "canary_18": {
+          "latency": {
+            "n": 5,
+            "mean": 784.8542081999767,
+            "p50": 792.3435000002428,
+            "p95": 815.6674169995313
+          },
+          "tps_mean": 33.532513649811094,
+          "sample": "Venimos como peregrinos a Calvario y a la cruz.",
+          "source": "We come as pilgrims to Calvary and the cross.",
+          "texts": [
+            "Venimos como peregrinos a Calvario y a la cruz.",
+            "Venimos como peregrinos a Calvario y a la cruz.",
+            "Venimos como peregrinos a Calvario y a la cruz.",
+            "Venimos como peregrinos a Calvario y a la cruz.",
+            "Venimos como peregrinos a Calvario y a la cruz."
+          ],
+          "text_sha256s": [
+            "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074",
+            "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074",
+            "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074",
+            "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074",
+            "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+          ],
+          "all_identical": true,
+          "generation": [
+            {
+              "generated_tokens": 15,
+              "prefill_ms": 120.12179099929197,
+              "ttft_ms": 333.1569590000072,
+              "decode_ms": 482.5104579995241,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+            },
+            {
+              "generated_tokens": 15,
+              "prefill_ms": 119.9632500001826,
+              "ttft_ms": 345.4003329998159,
+              "decode_ms": 466.03058300024713,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+            },
+            {
+              "generated_tokens": 15,
+              "prefill_ms": 124.21200000062525,
+              "ttft_ms": 271.02300000024115,
+              "decode_ms": 468.18645799976366,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+            },
+            {
+              "generated_tokens": 15,
+              "prefill_ms": 120.31191599999147,
+              "ttft_ms": 292.3035419998996,
+              "decode_ms": 473.31620800014207,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+            },
+            {
+              "generated_tokens": 15,
+              "prefill_ms": 122.27483300011953,
+              "ttft_ms": 330.7355830002052,
+              "decode_ms": 461.60791700003756,
+              "finish_reason": "stop",
+              "draft_tokens": 0,
+              "draft_accept_rate": 0.0,
+              "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+            }
+          ],
+          "gen_tokens_mean": 15,
+          "prefill_p50": 120.31191599999147,
+          "ttft_p50": 330.7355830002052,
+          "decode_p50": 468.18645799976366,
+          "draft_tokens_mean": 0,
+          "draft_accept_rate_mean": 0.0,
+          "draft_accept_rate_min": 0.0,
+          "finish_reason_counts": {
+            "stop": 5
+          },
+          "pct_hit_max_tokens": 0.0
+        }
+      },
+      "canary": {
+        "passed": 13,
+        "total": 18
+      },
+      "canary_details": [
+        {
+          "id": "canary_01",
+          "en": "The atonement of Christ reconciles us to God.",
+          "expect": "expiaci\u00f3n",
+          "out": "La expiaci\u00f3n de Cristo nos reconcilia con Dios.",
+          "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+          "latency_ms": 729.1324589996293,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 13,
+          "prefill_ms": 120.17637500048296,
+          "ttft_ms": 323.65616700008104,
+          "decode_ms": 405.47629199954827,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_02",
+          "en": "James wrote about faith and works.",
+          "expect": "santiago",
+          "out": "James escribi\u00f3 sobre fe y obras.",
+          "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+          "latency_ms": 534.5870000001014,
+          "pass": false,
+          "garbage": false,
+          "generated_tokens": 8,
+          "prefill_ms": 90.87508299944602,
+          "ttft_ms": 291.3993339998342,
+          "decode_ms": 243.1876660002672,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_03",
+          "en": "The propitiation for our sins was the blood of Christ.",
+          "expect": "propiciaci\u00f3n",
+          "out": "La propiciaci\u00f3n por nuestros pecados fue la sangre de Cristo.",
+          "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+          "latency_ms": 753.1325420004578,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 14,
+          "prefill_ms": 118.26362499959941,
+          "ttft_ms": 325.2786250004647,
+          "decode_ms": 427.8539169999931,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_04",
+          "en": "The breaking of bread is a solemn remembrance.",
+          "expect": "partimiento",
+          "out": "El partir del pan es un solemne recuerdo.",
+          "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+          "latency_ms": 694.5503340002688,
+          "pass": false,
+          "garbage": false,
+          "generated_tokens": 12,
+          "prefill_ms": 121.66583399994124,
+          "ttft_ms": 326.34062500073924,
+          "decode_ms": 368.20970899952954,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_05",
+          "en": "Paul wrote to the Corinthians about the resurrection.",
+          "expect": "pablo",
+          "out": "Pablo escribi\u00f3 a los corintios sobre la resurrecci\u00f3n.",
+          "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+          "latency_ms": 751.700042000266,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 14,
+          "prefill_ms": 118.1538749997344,
+          "ttft_ms": 326.0163340000872,
+          "decode_ms": 425.68370800017874,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_06",
+          "en": "Justification is by faith alone, not by works of the law.",
+          "expect": "justificaci\u00f3n",
+          "out": "La justificaci\u00f3n es por la fe solamente, no por las obras de la ley.",
+          "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+          "latency_ms": 872.8085829998236,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 18,
+          "prefill_ms": 120.06345899953885,
+          "ttft_ms": 321.5183749998687,
+          "decode_ms": 551.2902079999549,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_07",
+          "en": "The Holy Spirit convicts the world of sin and righteousness.",
+          "expect": "esp\u00edritu",
+          "out": "El Esp\u00edritu Santo convence al mundo de pecado y de justicia.",
+          "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+          "latency_ms": 757.4912919999406,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 14,
+          "prefill_ms": 120.0626249992638,
+          "ttft_ms": 324.86154199978046,
+          "decode_ms": 432.62975000016013,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_08",
+          "en": "Grace and mercy meet at the cross of our Lord Jesus Christ.",
+          "expect": "gracia",
+          "out": "La gracia y la misericordia se encuentran en la cruz de nuestro Se\u00f1or Jesucristo.",
+          "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+          "latency_ms": 900.3577080002287,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 18,
+          "prefill_ms": 122.60466699990502,
+          "ttft_ms": 334.00895799968566,
+          "decode_ms": 566.3487500005431,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_09",
+          "en": "We gather before the mercy seat in prayer.",
+          "expect": "propiciatorio",
+          "out": "Nos reunimos ante el trono de la misericordia en oraci\u00f3n.",
+          "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+          "latency_ms": 768.0269170004976,
+          "pass": false,
+          "garbage": false,
+          "generated_tokens": 14,
+          "prefill_ms": 124.44808300006117,
+          "ttft_ms": 333.26025000042137,
+          "decode_ms": 434.76666700007627,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_10",
+          "en": "The table of the Lord is spread for His people.",
+          "expect": "mesa",
+          "out": "La mesa del Se\u00f1or est\u00e1 extendida para Su pueblo.",
+          "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+          "latency_ms": 716.4728750003633,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 12,
+          "prefill_ms": 126.52420899939898,
+          "ttft_ms": 341.3863340001626,
+          "decode_ms": 375.08654100020067,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_11",
+          "en": "We are gathered to Thy Name on the first day of the week.",
+          "expect": "nombre",
+          "out": "Nos reunimos en Tu Nombre el primer d\u00eda de la semana.",
+          "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+          "latency_ms": 752.7647919996525,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 14,
+          "prefill_ms": 121.94979199921364,
+          "ttft_ms": 329.16449999993347,
+          "decode_ms": 423.60029199971905,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_12",
+          "en": "A little while, and we shall see the Lord.",
+          "expect": "poco",
+          "out": "En poco tiempo, veremos al Se\u00f1or.",
+          "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+          "latency_ms": 548.7292500001786,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 9,
+          "prefill_ms": 119.44820899952902,
+          "ttft_ms": 268.3157500005109,
+          "decode_ms": 280.4134999996677,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_13",
+          "en": "Nothing but the blood of Jesus can wash away my sin.",
+          "expect": "sangre",
+          "out": "Nada sino la sangre de Jes\u00fas puede lavar mi pecado.",
+          "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+          "latency_ms": 703.3940839992283,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 12,
+          "prefill_ms": 119.85308299972529,
+          "ttft_ms": 322.4346249999144,
+          "decode_ms": 380.95945899931394,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_14",
+          "en": "Christ is the Surety of a better covenant.",
+          "expect": "fiador",
+          "out": "Cristo es la garant\u00eda de un pacto mejor.",
+          "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+          "latency_ms": 707.315832999484,
+          "pass": false,
+          "garbage": false,
+          "generated_tokens": 12,
+          "prefill_ms": 124.20225000005303,
+          "ttft_ms": 328.04120799937664,
+          "decode_ms": 379.27462500010733,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_15",
+          "en": "This do in remembrance of Me at His table.",
+          "expect": "memoria",
+          "out": "Esto se hace en memoria de M\u00ed en su mesa.",
+          "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+          "latency_ms": 752.080083000692,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 13,
+          "prefill_ms": 124.82050000016896,
+          "ttft_ms": 341.2857080002141,
+          "decode_ms": 410.7943750004779,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_16",
+          "en": "At the mercy seat we remember His propitiation for our sins.",
+          "expect": "propiciatorio",
+          "out": "En el asiento de la misericordia recordamos Su propiciaci\u00f3n por nuestros pecados.",
+          "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+          "latency_ms": 893.6622499995792,
+          "pass": false,
+          "garbage": false,
+          "generated_tokens": 18,
+          "prefill_ms": 123.4106249994511,
+          "ttft_ms": 330.29625000017404,
+          "decode_ms": 563.3659999994052,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_17",
+          "en": "Yet there is room at the gospel feast for the weary soul.",
+          "expect": "lugar",
+          "out": "Sin embargo, hay lugar en el banquete del evangelio para el alma cansada.",
+          "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+          "latency_ms": 929.5517909995397,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 19,
+          "prefill_ms": 120.06062499949621,
+          "ttft_ms": 329.6688330001416,
+          "decode_ms": 599.8829579993981,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        },
+        {
+          "id": "canary_18",
+          "en": "We come as pilgrims to Calvary and the cross.",
+          "expect": "peregrin",
+          "out": "Venimos como peregrinos a Calvario y a la cruz.",
+          "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074",
+          "latency_ms": 800.9253750005882,
+          "pass": true,
+          "garbage": false,
+          "generated_tokens": 15,
+          "prefill_ms": 122.29516700062959,
+          "ttft_ms": 330.92554200084123,
+          "decode_ms": 469.999832999747,
+          "finish_reason": "stop",
+          "draft_tokens": 0,
+          "draft_accept_rate": 0.0
+        }
+      ],
+      "rss_delta_mb": -467212.21875,
+      "metal_peak_mib": 6383.065746307373,
+      "gate_stops_before_max": true,
+      "gate_canary_ok": true,
+      "gate_no_garbage": true
+    }
+  },
+  "gate_stops_before_max": true
+}

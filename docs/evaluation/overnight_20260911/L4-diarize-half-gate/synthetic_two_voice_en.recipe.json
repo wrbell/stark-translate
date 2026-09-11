@@ -1,0 +1,99 @@
+{
+  "output": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260911/L4/synthetic_two_voice_en.wav",
+  "sha256": "9992754346efa79cc04d6f69c1f7302470e086a5d0868a27bde5e082c3560257",
+  "duration_s": 61.4405625,
+  "sample_rate": 16000,
+  "voices": {
+    "a": "en_US-lessac-high",
+    "b": "es_MX-claude-high"
+  },
+  "seed": 0,
+  "seed_caveat": "Python/NumPy seeded; Piper/ONNX synthesis may not be bitwise reproducible",
+  "accent_caveat": "voice b is es_MX-claude-high reading English; natural two-speaker labels remain pending",
+  "segments": [
+    {
+      "index": 1,
+      "voice": "a",
+      "text": "Good morning, and welcome to our gospel meeting this Lord's day.",
+      "start_s": 0.5,
+      "end_s": 3.994625
+    },
+    {
+      "index": 2,
+      "voice": "b",
+      "text": "Thank you, brother. Let us open our Bibles to the gospel of John, chapter three.",
+      "start_s": 5.194625,
+      "end_s": 10.245
+    },
+    {
+      "index": 3,
+      "voice": "a",
+      "text": "Jesus said to Nicodemus that a man must be born again to see the kingdom of God.",
+      "start_s": 11.445,
+      "end_s": 15.914875
+    },
+    {
+      "index": 4,
+      "voice": "b",
+      "text": "That is a hard saying, and Nicodemus asked how such a thing could be.",
+      "start_s": 17.114875,
+      "end_s": 22.2929375
+    },
+    {
+      "index": 5,
+      "voice": "a",
+      "text": "The answer is not religion or good works, but the grace of God through faith.",
+      "start_s": 23.4929375,
+      "end_s": 27.521625
+    },
+    {
+      "index": 6,
+      "voice": "b",
+      "text": "For God so loved the world that he gave his only begotten Son.",
+      "start_s": 28.721625,
+      "end_s": 32.8664375
+    },
+    {
+      "index": 7,
+      "voice": "a",
+      "text": "Whoever believes in him shall not perish but have everlasting life.",
+      "start_s": 34.0664375,
+      "end_s": 37.619125
+    },
+    {
+      "index": 8,
+      "voice": "b",
+      "text": "That promise is for every person in this room this morning.",
+      "start_s": 38.819125,
+      "end_s": 42.534375
+    },
+    {
+      "index": 9,
+      "voice": "a",
+      "text": "We will sing hymn forty-two before the closing prayer.",
+      "start_s": 43.734375,
+      "end_s": 46.4395
+    },
+    {
+      "index": 10,
+      "voice": "b",
+      "text": "Please remain seated while the young people come forward.",
+      "start_s": 47.6395,
+      "end_s": 51.029625
+    },
+    {
+      "index": 11,
+      "voice": "a",
+      "text": "Let us give thanks for the message and for the fellowship we share.",
+      "start_s": 52.229625,
+      "end_s": 55.5385
+    },
+    {
+      "index": 12,
+      "voice": "b",
+      "text": "Go in peace, and may the Lord bless you and keep you this week.",
+      "start_s": 56.7385,
+      "end_s": 61.4405625
+    }
+  ]
+}

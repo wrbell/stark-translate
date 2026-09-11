@@ -10,9 +10,10 @@
 > (`2026.14.0.0`), with historical integration in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
 > and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > Current integration and delivery state is recorded in [implementation status](docs/mac_implementation_status.md).
-> The last published release recorded here is **v2026.13**. Source integration,
-> release publication and service certification are separate; PyPI/package artifacts
-> and release tags remain pending by user choice. Do not recreate `stt_env`.
+> The last published release is **v2026.14.0.0**, tagged 2026-09-11 on `50f81c6` (GitHub Release with
+> Mac/NVIDIA/Windows ZIPs and the MSI; overnight lanes #199–#203 included). Source integration,
+> release publication and service certification are separate. PyPI publication still fails until the
+> trusted publisher is mapped; the GHCR image needed the Dockerfile fix in PR #203. Do not recreate `stt_env`.
 >
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) ·
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
@@ -148,8 +149,8 @@ benchmark numbers in guides.
 | v2026.7–8 | W16 Whisper CT2; Marian CT2 partials on CUDA | [`v2026.7/STT_BENCHMARK.md`](docs/archive/v2026.7/STT_BENCHMARK.md), [`v2026.8/MARIAN_BENCHMARK.md`](docs/archive/v2026.8/MARIAN_BENCHMARK.md) |
 | v2026.9–11 | llama.cpp tuning, IQ4_XS rejected, imatrix calibration | [`v2026.9/GEMMA_OPTIM_PHASE2.md`](docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md), [`v2026.10/IQ4_XS_BENCHMARK.md`](docs/archive/v2026.10/IQ4_XS_BENCHMARK.md), [`v2026.11/IMATRIX_CALIBRATION.md`](docs/archive/v2026.11/IMATRIX_CALIBRATION.md) |
 | v2026.12 | Gemma 4 OptiQ E4B Mac default; EOS bug #172 fixed | [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
-| v2026.13 (last published release) | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
-| v2026.14 source | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **integration history in PR #192 and EN↔ES follow-up in PR #196; acceptance remains evidence-specific** | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md) |
+| v2026.13 | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
+| v2026.14.0.0 (published 2026-09-11) | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **integration history in PR #192 and EN↔ES follow-up in PR #196; acceptance remains evidence-specific**; overnight 2026-09-11 lanes: stage attribution, opt-in E2B draft, diarization interpreter, B615 pinning | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md), [`docs/evaluation/overnight_20260911/STATUS.md`](docs/evaluation/overnight_20260911/STATUS.md) |
 
 ## Subdirectory guides
 

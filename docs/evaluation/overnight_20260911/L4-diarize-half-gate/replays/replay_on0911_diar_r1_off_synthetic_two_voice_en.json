@@ -1,0 +1,410 @@
+{
+  "session_id": "on0911_diar_r1_off_synthetic_two_voice_en",
+  "clip": {
+    "path": "synthetic_two_voice_en.wav",
+    "sha256": "9992754346efa79cc04d6f69c1f7302470e086a5d0868a27bde5e082c3560257",
+    "duration": 61.4405625,
+    "lang": "en",
+    "offset_s": 0,
+    "rms": 0.14677488265783867
+  },
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate-wt-diarize/stt_env/bin/python",
+    "/Users/willem/Code/vibes/SRTranslate-wt-diarize/dry_run_ab.py",
+    "--backend",
+    "mlx",
+    "--no-ab",
+    "--lang",
+    "en",
+    "--audio-file",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260911/L4/synthetic_two_voice_en.wav",
+    "--session-id",
+    "on0911_diar_r1_off_synthetic_two_voice_en",
+    "--ws-port",
+    "8877",
+    "--http-port",
+    "8878",
+    "--profile",
+    "standard",
+    "--stt-backend",
+    "parakeet-mlx",
+    "--model-family",
+    "gemma4",
+    "--gemma4-size",
+    "e4b",
+    "--vad-backend",
+    "torch",
+    "--no-mts",
+    "--gain",
+    "1",
+    "--replay-speed",
+    "1"
+  ],
+  "returncode": 0,
+  "replay_speed": 1.0,
+  "realtime_latency_eligible": true,
+  "timeout_s": 364.3216875,
+  "timed_out": false,
+  "session_lifecycle": {
+    "schema_version": 1,
+    "session_id": "on0911_diar_r1_off_synthetic_two_voice_en",
+    "run_id": "ce35d6427c9b4999b5dfd64357abe81c",
+    "status": "completed",
+    "pid": 23722,
+    "hostname": "Invicta91.local",
+    "started_at": "2026-09-11T02:53:44.314284+00:00",
+    "git_sha": "afb71dae2cba33edbf01eb2e67586e3d36f07899",
+    "source": {
+      "git_sha": "afb71dae2cba33edbf01eb2e67586e3d36f07899",
+      "pipeline_sha256": "8ba220b9786305501440f9a97c96a3589699ecef71268ac81ba1a18e404ff60a",
+      "package_version": "2026.7.0.0",
+      "package_artifact_hashes": {},
+      "package_vcs_commit": null
+    },
+    "pipeline_sha256": "8ba220b9786305501440f9a97c96a3589699ecef71268ac81ba1a18e404ff60a",
+    "persistence": {
+      "submitted": 100,
+      "completed": 100,
+      "pending": 0,
+      "failed": 0,
+      "capacity": 256,
+      "ok": true,
+      "failures": []
+    },
+    "exit_code": 0,
+    "ended_at": "2026-09-11T02:54:55.477615+00:00",
+    "memory": {
+      "scope": "pipeline_process_lifetime",
+      "peak_rss_bytes": 4317446144,
+      "peak_metal_bytes": 8878570312
+    },
+    "models": {
+      "stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+      },
+      "translation_a": {
+        "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+        "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+      },
+      "marian": {
+        "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+        "manifest_revision": null,
+        "resolved_revision": null,
+        "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/en-es/active",
+        "revision_source": "unknown",
+        "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+        "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+        "model_bin_size_bytes": 79567635,
+        "export_manifest": {
+          "sha256": "a2252e22ba84cde86261163aacb51708f62c3defae3a52a928fd428c4a4ae789",
+          "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+          "source_revision": null,
+          "ct2_quantization": "int8",
+          "direction": "en-es",
+          "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_hash_matches": true
+        }
+      }
+    },
+    "diagnostics": {
+      "size_bytes": 46629,
+      "sha256": "3cd50852b3ed579b4b2b3f13cc813ca06f318b5ae0c6f9bb75afddaaa934fec7"
+    }
+  },
+  "session_metadata": {
+    "session_id": "on0911_diar_r1_off_synthetic_two_voice_en",
+    "source_lang": "en",
+    "target_lang": "es",
+    "session_kind": "replay",
+    "input_audio_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260911/L4/synthetic_two_voice_en.wav",
+    "input_audio_sha256": "9992754346efa79cc04d6f69c1f7302470e086a5d0868a27bde5e082c3560257",
+    "audio_source": "file",
+    "diarize": false,
+    "diarize_mode": "embed",
+    "diarize_python": "/Users/willem/Code/vibes/SRTranslate-wt-diarize/stt_env/bin/python",
+    "diarize_interval_s": 2.0,
+    "timing_schema_version": 2,
+    "backend": "mlx",
+    "model_family": "gemma4",
+    "model_a": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+    "profile": {
+      "name": "standard",
+      "backend": "mlx",
+      "stt_model": null,
+      "stt_compute_type": null,
+      "stt_threads": 3,
+      "stt_workers": 1,
+      "marian_threads": 1,
+      "final_engine": null,
+      "translation_model": null,
+      "vad_backend": null,
+      "ram_floor_gb": 8,
+      "physical_core_floor": 4,
+      "vram_floor_gb": 0
+    },
+    "profile_artifacts": null,
+    "stt_settings": {
+      "whisper_model": "mlx-community/whisper-large-v3-turbo",
+      "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+      "cpu_threads": 4,
+      "num_workers": 1,
+      "local_files_only": false,
+      "whisper_cuda_model": "large-v3-turbo",
+      "whisper_cuda_compute_type": "int8_float16",
+      "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+      "use_chunked_algo": false,
+      "chunk_length_s": 30,
+      "fallback_on_low_conf": true,
+      "fallback_threshold": -1.2,
+      "hallucination_threshold": 2.4,
+      "word_timestamps": false,
+      "beam_size": 1,
+      "spec_decode": false,
+      "draft_model": null,
+      "backend": "parakeet-mlx",
+      "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+      "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+      "compile_mode": null,
+      "warmup_seconds": 1
+    },
+    "managed_llama": null,
+    "model_b": null,
+    "stt_backend": "parakeet-mlx",
+    "vad": {
+      "threshold": 0.3,
+      "silence_trigger": 0.5,
+      "max_utterance": 8.0,
+      "partial_interval": 0.6,
+      "backend": "torch",
+      "artifact": {
+        "source": "installed_package",
+        "package": "silero-vad",
+        "package_version": "6.2.1",
+        "backend": "torch",
+        "opset_version": null,
+        "path": "/Users/willem/Code/vibes/SRTranslate/stt_env/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+        "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+        "size_bytes": 2272526
+      }
+    },
+    "translation": {
+      "idle_warmup_only": false,
+      "final_aware_partials": false,
+      "routing_policy": "legacy",
+      "terminology_prompt": "none",
+      "mlx_model_4b": "mlx-community/translategemma-4b-it-4bit",
+      "mlx_model_12b": "mlx-community/translategemma-12b-it-4bit",
+      "mlx_model_gemma4_e4b": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "mlx_model_gemma4_e2b": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+      "mlx_drafter_gemma4": "mlx-community/gemma-4-e4b-it-assistant-bf16",
+      "mlx_mts": false,
+      "cuda_model_4b": "google/translategemma-4b-it",
+      "cuda_model_12b": "google/translategemma-12b-it",
+      "marian_model": "Helsinki-NLP/opus-mt-en-es",
+      "marian_device": "auto",
+      "marian_intra_threads": 4,
+      "marian_backend": "auto",
+      "marian_compute_type": "int8_float16",
+      "marian_max_new_tokens": 128,
+      "marian_warmup_passes": 2,
+      "marian_eager_both": false,
+      "model_family": "gemma4",
+      "num_draft_tokens": 3,
+      "default_source_lang": "en",
+      "default_target_lang": "es",
+      "turboquant": false,
+      "turboquant_key_bits": 3,
+      "turboquant_val_bits": 4
+    },
+    "replay_speed": 1.0,
+    "replay_client_wait": {
+      "requested_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "status": "disabled",
+      "connected_clients": 0,
+      "visibility_confirmed": false
+    },
+    "git_sha": "afb71dae2cba33edbf01eb2e67586e3d36f07899",
+    "pipeline_sha256": "8ba220b9786305501440f9a97c96a3589699ecef71268ac81ba1a18e404ff60a",
+    "package_version": "2026.7.0.0",
+    "package_artifact_hashes": {},
+    "package_vcs_commit": null,
+    "latency_experiment_configuration": {
+      "latest_partial": false,
+      "async_captions": false,
+      "marian_memo": 0,
+      "first_preview_s": 0.0,
+      "pause_preview_ms": 0.0,
+      "speculate_pause_ms": 0.0,
+      "clause_preview_s": 0.0,
+      "vad_worker": false,
+      "incremental_stt": "off",
+      "rolling_window_s": 4.0,
+      "mlx_cache_mb": 256,
+      "gemma_prefix_cache": false,
+      "trace": false,
+      "trace_capacity": 8192,
+      "early_clause_s": 0.0,
+      "early_clause_pause_ms": 0.0,
+      "partial_deadline_margin_ms": 0.0
+    }
+  },
+  "chunk_count": 10,
+  "partial_count": 56,
+  "percentile_method": "median_p50_nearest_rank_p95",
+  "metrics": {
+    "speech_end_to_final_ms": {
+      "n": 10,
+      "p50": 1797.35,
+      "p95": 2265.3,
+      "mean": 1831.95
+    },
+    "vad_wait_ms": {
+      "n": 10,
+      "p50": 491.29999999999995,
+      "p95": 527.2,
+      "mean": 494.18
+    },
+    "stt_queue_wait_ms": {
+      "n": 10,
+      "p50": 2.0,
+      "p95": 676.6,
+      "mean": 69.62
+    },
+    "translation_queue_wait_ms": {
+      "n": 10,
+      "p50": 0.0,
+      "p95": 0.3,
+      "mean": 0.05
+    },
+    "finalization_overhead_ms": {
+      "n": 10,
+      "p50": 1.2,
+      "p95": 1.6,
+      "mean": 1.2
+    },
+    "broadcast_ms": {
+      "n": 10,
+      "p50": 0.0,
+      "p95": 0.1,
+      "mean": 0.01
+    },
+    "true_e2e_ms": {
+      "n": 10,
+      "p50": 5228.45,
+      "p95": 6927.9,
+      "mean": 5457.09
+    },
+    "e2e_latency_ms": {
+      "n": 10,
+      "p50": 1306.0,
+      "p95": 1736.8,
+      "mean": 1336.46
+    },
+    "stt_latency_ms": {
+      "n": 10,
+      "p50": 459.79999999999995,
+      "p95": 548.5,
+      "mean": 427.22
+    },
+    "latency_a_ms": {
+      "n": 10,
+      "p50": 803.2,
+      "p95": 982.5,
+      "mean": 815.98
+    },
+    "silence_delay_ms": {
+      "n": 10,
+      "p50": 4020.1,
+      "p95": 5441.0,
+      "mean": 4120.62
+    },
+    "queue_wait_ms": {
+      "n": 10,
+      "p50": 1.85,
+      "p95": 4.4,
+      "mean": 2.24
+    },
+    "marian_pt_ms": {
+      "n": 9,
+      "p50": 64.6,
+      "p95": 148.7,
+      "mean": 74.64444444444445
+    },
+    "gen_tokens_a": {
+      "n": 10,
+      "p50": 18.0,
+      "p95": 24.0,
+      "mean": 18.1
+    },
+    "prefill_ms_a": {
+      "n": 10,
+      "p50": 118.78425000008974,
+      "p95": 123.93091700005245,
+      "mean": 118.90100830005395
+    },
+    "ttft_ms_a": {
+      "n": 10,
+      "p50": 265.50160450005933,
+      "p95": 279.5733749999272,
+      "mean": 266.88691250001284
+    },
+    "decode_ms_a": {
+      "n": 10,
+      "p50": 536.8503954998687,
+      "p95": 719.3428330001552,
+      "mean": 549.0857749000043
+    },
+    "partial_total_ms": {
+      "n": 56,
+      "p50": 163.33747899989248,
+      "p95": 269.34495799969227,
+      "mean": 169.68922625007312
+    }
+  },
+  "timing_schema_versions": [
+    "2"
+  ],
+  "timing_sources": [
+    "replay_realtime"
+  ],
+  "metric_definitions": {
+    "speech_end_to_final_ms": "last VAD-positive capture frame end to final payload ready; not browser rendering",
+    "e2e_latency_ms": "legacy queue submission to translation/QE completion",
+    "true_e2e_ms": "legacy first speech observation to translation/QE completion",
+    "silence_delay_ms": "legacy first speech observation to queue submission (includes speaking)",
+    "partial_total_ms": "STT plus Marian compute only; excludes cadence, queue and delivery"
+  },
+  "speech_end_by_endpoint": {
+    "silence": {
+      "n": 10,
+      "p50": 1797.35,
+      "p95": 2265.3,
+      "mean": 1831.95
+    }
+  },
+  "partial_capture_to_ready_ms": {
+    "n": 56,
+    "p50": 170.65,
+    "p95": 279.2,
+    "mean": 179.425
+  },
+  "marian_only_share": 0.0,
+  "marian_only_observations": 10,
+  "marian_only_source": "tps_a == 0 proxy",
+  "special_token_outputs": 0,
+  "special_token_counts": {
+    "<turn|>": 0,
+    "<|channel>": 0
+  },
+  "overlap_pct": 0.0
+}

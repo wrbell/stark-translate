@@ -2,14 +2,14 @@
 
 > **Canonical machine-readable source:** [`backlog.json`](./backlog.json).
 > Regenerate this file with `python tools/render_backlog.py render`.
-> **Last updated:** 2026-09-10
+> **Last updated:** 2026-09-11
 
 ## Integration status
 
-- **Main release:** `v2026.13` — PR #196 merged into main at ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6 on 2026-09-11T01:00:13Z, from reviewed 1b723bd87f4a2f4adecd081a281ded26cafbb0bf. v2026.13 remains the last published release recorded here.
+- **Main release:** `v2026.14.0.0` — PR #196 merged into main at ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6 on 2026-09-11T01:00:13Z, from reviewed 1b723bd87f4a2f4adecd081a281ded26cafbb0bf. Overnight 2026-09-11 PRs #199-#203 merged afterwards; annotated tag v2026.14.0.0 was pushed on 50f81c6 at 2026-09-11T02:53Z with a GitHub Release (Mac/NVIDIA/Windows ZIPs) and the MSI.
 - **Local candidate:** `2026.14.0.0` on `main` (base `958bb5c9425473256038bae04ce95ee1c32c7ae8`)
 - **Draft PR:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) — merged into main at ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6 on 2026-09-11T01:00:13Z; required CI and all three Cursor reviews passed on 1b723bd87f4a2f4adecd081a281ded26cafbb0bf. Actual receipts: docs/evaluation/mac_followup_20260910/integration-closeout/README.md.
-- **Publication:** User authorized source merge after validation. PyPI, GHCR, release uploads and new tags remain pending by user choice.
+- **Publication:** User authorized the v2026.14.0.0 tag on 2026-09-11: release.yml and release-win.yml succeeded; pypi.yml failed with invalid-publisher (trusted publisher not mapped); docker.yml failed on the pre-existing Dockerfile defect fixed in PR #203 and is re-dispatched after that merge. Published tags do not move.
 
 PR #192 and PR #196 source integration are complete with separate immutable evidence. Local artifacts, installed file replays and documentation checks passed; source merge does not certify human, physical-device or CUDA gates. Historical failures remain failed; public package/release publication remains separately deferred.
 
@@ -40,10 +40,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P0 · **Machine:** mac · **Certification:** pending
 - **Depends on:** `visible-browser-timing-run`
-- **Sources:** `docs/mac_implementation_status.md`, `docs/evaluation/README.md`, `docs/archive/v2026.13/MAC_LATENCY.md`, `docs/evaluation/overnight_screen_20260910/README.md`, `docs/latency_next_experiments.md`, `docs/evaluation/mac_followup_20260910/standard-screen-result.md`, `docs/evaluation/mac_followup_20260910/spanish-parakeet-result.md`, `docs/evaluation/mac_followup_20260910/lite-deadline-result.md`, `docs/evaluation/mac_followup_20260910/final-760e948/installed-delivery.md`
+- **Sources:** `docs/mac_implementation_status.md`, `docs/evaluation/README.md`, `docs/archive/v2026.13/MAC_LATENCY.md`, `docs/evaluation/overnight_screen_20260910/README.md`, `docs/latency_next_experiments.md`, `docs/evaluation/mac_followup_20260910/standard-screen-result.md`, `docs/evaluation/mac_followup_20260910/spanish-parakeet-result.md`, `docs/evaluation/mac_followup_20260910/lite-deadline-result.md`, `docs/evaluation/mac_followup_20260910/final-760e948/installed-delivery.md`, `docs/evaluation/overnight_20260911/L1-silence-stages/README.md`, `docs/evaluation/overnight_20260911/L2-e2b-draft/README.md`, `tools/silence_final_stages.py`
 - **Acceptance:** Median schema 2 speech_end_to_final_ms under 1000 ms on the frozen real-time baseline with visible ACKs, without regressing final quality; natural-speech quality certification (references, bilingual review) is a separate gate and must not be pooled with historical cohorts.
-- **Notes:** The completed 96-run, 672-final English screen selected 0/28 experiment/model arms and did not achieve the sub-second final goal on this workload. E4B defaults remain unchanged. All 588 candidate final comparisons against each control set retained text; quality remains unreviewed. Endpoint counts are small and control drift is material. The later frozen eddb0ad EN/ES normalized development screen completed 96 technically valid runs and rejected 24 model/language arms; 36/72 individual comparisons passed median-only gain but none met every guard. Separate 18-run Spanish Parakeet screen rejected both arms despite 5/6 median-only gains. Each run has 6 eligible anchors, insufficient for a p95 claim. These are new cohorts, not relabeled historical results. Independent CPU Lite deadline screen completed 24 technically valid runs at 0.6-second cadence, selecting 0/4 EN/ES arms. No independently qualified components exist for confirmation or combination; defaults remain unchanged. Fresh 760e948 V6 Standard and CPU Lite full services passed their technical validators, but neither met the sub-second goal. Standard silence finals n=401 had server p50/p95 1458.7/3283.2 ms; Lite silence finals n=310 had 3297.7/10322.0 ms. These are separate observational cohorts without browser ACKs, not paired causal speed comparisons.
-- **Next action:** Retain completed negative screens and final V6 service evidence with the speed goal unmet. No rejected Standard/Spanish/Lite/base candidate enters confirmation or combination. Any further speed work needs a distinct source-bound hypothesis; human meaning, visible display, x86/RAM-floor and device gates remain separate.
+- **Notes:** The completed 96-run, 672-final English screen selected 0/28 experiment/model arms and did not achieve the sub-second final goal on this workload. E4B defaults remain unchanged. All 588 candidate final comparisons against each control set retained text; quality remains unreviewed. Endpoint counts are small and control drift is material. The later frozen eddb0ad EN/ES normalized development screen completed 96 technically valid runs and rejected 24 model/language arms; 36/72 individual comparisons passed median-only gain but none met every guard. Separate 18-run Spanish Parakeet screen rejected both arms despite 5/6 median-only gains. Each run has 6 eligible anchors, insufficient for a p95 claim. These are new cohorts, not relabeled historical results. Independent CPU Lite deadline screen completed 24 technically valid runs at 0.6-second cadence, selecting 0/4 EN/ES arms. No independently qualified components exist for confirmation or combination; defaults remain unchanged. Fresh 760e948 V6 Standard and CPU Lite full services passed their technical validators, but neither met the sub-second goal. Standard silence finals n=401 had server p50/p95 1458.7/3283.2 ms; Lite silence finals n=310 had 3297.7/10322.0 ms. These are separate observational cohorts without browser ACKs, not paired causal speed comparisons. 2026-09-11 stage attribution (tools/silence_final_stages.py, PR #199) on the 752ab9a and 760e948 full-service cohorts (401 silence finals each, checksums OK): at the median a silence final spends about 0.49 s in the fixed 0.5 s silence trigger, 0.40 s in the Parakeet STT call and 0.38-0.39 s in the Gemma E4B call; every other stage is under 5 ms; p95 tails come from STT (1.2-1.3 s) and translation (1.26-1.29 s) with lock/queue waits of 0.2-0.5 s. A separately loaded E2B OptiQ draft for E4B (mlx-lm speculative decoding, PR #200, opt-in) produced byte-identical greedy output on 21/21 sentences and cut medium/long sentence p50 by 18-23% at gamma 2-3, but only 7-14% on canary-length sentences, so it failed the pre-declared 15%/150 ms gate on the aggregate and no paired replay was run; Metal peak rises from 6.4 to 10.5 GiB text-only.
+- **Next action:** The fixed trigger plus STT plus translation medians sum to about 1.3 s, so no single 15% component gain reaches a sub-second median; a future declared experiment should target the STT/translation p95 tails (Metal contention between preview and final work, long smart/hard-cut finals where the E2B draft does pay off) with the frozen guards, memory budget and quality review. Human meaning, visible display, x86/RAM-floor and device gates remain separate.
 
 ### `mac-live-mic-stall` — Built-in microphone capture stalled; operator showed RUNNING without audio
 
@@ -86,15 +86,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** Replay on the unlocked Mac with the audience display connected records schema 2 speech_end_to_final_ms and non-zero visible final ACK coverage for the acceptance configuration.
 - **Notes:** The separate 96-run screen has per-session browser-DOM ACK evidence. Repaired Standard also has one matched document-visible audience connection acknowledging 563/563 finals and 2,813 nonempty translated previews. The native Mac was observed locked; physical screen visibility was not certified. These observations do not satisfy this item’s existing unlocked-Mac criterion. Earlier no-browser screens remain separate cohorts. Lite also has 468/468 final and271 translated-preview ACKs, but first-preview coverage is174/468. Physical visibility remains uncertified; this is not a human-quality result.
 - **Next action:** Retain the completed matrix, and verify the separate unlocked/attended physical display gate when the Mac is available. Do not rerun rejected arms as ordinary confirmations.
-
-### `security-b615-pinning` — Remaining unpinned Hugging Face download paths (B615)
-
-- **Priority:** P2 · **Machine:** both · **Certification:** pending
-- **Depends on:** none
-- **Sources:** `docs/evaluation/mac_v2026_14_security.md`, `docs/evaluation/security_feasibility_20260910/README.md`, `docs/evaluation/mac_followup_20260910/live-hf-pinning.md`, `docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json`, `docs/evaluation/mac_followup_20260910/final-c13f51f/model-source-continuity.md`
-- **Acceptance:** Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).
-- **Notes:** Mac MLX primary/fallback Whisper, Parakeet, Gemma/draft, workers, operator summary and optional live SpeechBrain/Pyannote paths now resolve local overrides or registered immutable snapshots. Selected HF setup entries require full commits before any cache mutation. Optional Pyannote segmentation access remains HTTP 403. The complete source inventory distinguishes 105 offline residual calls, 13 optional alternative live calls and one unverified legacy Piper API; no global B615 clearance or native diarization certification is claimed. The additive c13f51f continuity review matches all 173 original call sites; 207/211 inventoried source files are byte-identical and the four changed files preserve loader behavior. The original inventory remains unchanged. Selected source and actual Gemma checks passed without clearing the broader residuals.
-- **Next action:** Resolve or explicitly scope the remaining 13 optional alternative-live residuals separately from 105 offline calls and the legacy Piper loader. Preserve the gated segmentation HTTP 403 dependency and installed-audit limitations; do not describe all runtimes as fully pinned.
 
 ## Pending Input Or Hardware
 
@@ -139,8 +130,9 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
-- **Sources:** `docs/mac_implementation_status.md`
+- **Sources:** `docs/mac_implementation_status.md`, `docs/evaluation/overnight_20260911/L4-diarize-half-gate/README.md`
 - **Acceptance:** A natural church clip with two speakers and human-labeled speaker transitions available for the diarization gate and the service rehearsal.
+- **Notes:**  2026-09-11: a synthetic Piper two-voice clip exercised the daemon and latency half of the diarization gate; it does not substitute for this natural recording.
 - **Next action:** Record or obtain a two-speaker segment; synthetic routing probes do not substitute.
 
 ### `physical-second-output` — Second physical audio output: selection, unplug/replug, audible playback
@@ -209,10 +201,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P2 · **Machine:** any · **Certification:** pending
 - **Depends on:** `pr-192-integration`
-- **Sources:** `docs/mac_implementation_status.md`, `.github/workflows/pypi.yml`
+- **Sources:** `docs/mac_implementation_status.md`, `.github/workflows/pypi.yml`, `docs/evaluation/overnight_20260911/STATUS.md`
 - **Acceptance:** Trusted publisher mapped (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi), a new version tag pushed, and the PyPI workflow green.
-- **Notes:** Publication is explicitly pending by user choice; source/issue publishing and final main merge are authorized. Local wheel/sdist/Mac ZIP artifacts are already mechanically validated, which does not authorize PyPI/GHCR/release uploads.
-- **Next action:** User decision after the merge.
+- **Notes:** Publication is explicitly pending by user choice; source/issue publishing and final main merge are authorized. Local wheel/sdist/Mac ZIP artifacts are already mechanically validated, which does not authorize PyPI/GHCR/release uploads. 2026-09-11: annotated tag v2026.14.0.0 pushed on main 50f81c6 with user authorization. release.yml succeeded (GitHub Release with wheel/sdist/Mac ZIP), release-win.yml succeeded (MSI uploaded), pypi.yml built but the publish job failed with invalid-publisher (no trusted publisher mapped), docker.yml failed on a pre-existing Dockerfile defect (workers.py not copied into the build context) that had failed every main push since 2026-09-10.
+- **Next action:** Map the PyPI trusted publisher (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi) and re-run the PyPI workflow for the existing tag; GHCR publication needs the Dockerfile fix and a workflow_dispatch with push=true. Published tags do not move.
 
 ## Experimental
 
@@ -290,11 +282,11 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
 - **Depends on:** `natural-two-speaker`
-- **Sources:** [#133](https://github.com/wrbell/stark-translate/issues/133), `docs/live_diarization.md`, `features/live_diarize.py`, `features/speaker_labels.py`
+- **Sources:** [#133](https://github.com/wrbell/stark-translate/issues/133), `docs/live_diarization.md`, `features/live_diarize.py`, `features/speaker_labels.py`, `docs/evaluation/overnight_20260911/L4-diarize-half-gate/README.md`, [PR #201](https://github.com/wrbell/stark-translate/pull/201), `tools/synthetic_two_voice_clip.py`
 - **Issue acceptance (verbatim intent):** Two-speaker dry-run shows distinct speaker labels on finals without blowing p95 caption latency. Offline path still works.
 - **Acceptance:** With `--diarize`, a natural two-speaker clip yields distinct speaker labels on finals, final p95 stays within +50 ms of `--diarize` off (tools/replay_bench.py), and the offline pyannote path still runs.
-- **Notes:** Code is in: rolling buffer, separate daemon (`embed` or `pyannote` mode), speaker on finals/CSV/JSONL/WebSocket. The gate has not been run; it needs HF_TOKEN or SpeechBrain ECAPA plus labeled two-speaker audio.
-- **Next action:** Run the replay_bench gate on a two-speaker clip once one exists; keep default off.
+- **Notes:** Code is in: rolling buffer, separate daemon (`embed` or `pyannote` mode), speaker on finals/CSV/JSONL/WebSocket. The gate has not been run; it needs HF_TOKEN or SpeechBrain ECAPA plus labeled two-speaker audio. 2026-09-11 screening (PR #201, main 50f81c6): --diarize-python lets the embed daemon run from the audited Torch 2.13 venv (SpeechBrain ECAPA at the pinned revision, offline); the daemon now reads WAVs with soundfile because TorchAudio 2.11 delegates load() to TorchCodec. Twelve serial replays (three off/on pairs on the natural 150 s church clip and on a 61 s synthetic two-voice Piper clip): all exit 0, final captions byte-identical between arms; silence-final p95 with --diarize within +50 ms of off in 3/3 church pairs and 2/3 synthetic pairs (n=8-10 per run, no p95 claim); labels deterministic across repeats, 8/9 labeled synthetic finals consistent with a stable speaker mapping, speaker filled on 9/10 finals; two accented-voice turns produced no final in either arm. Natural two-speaker labels remain pending; default stays off.
+- **Next action:** Run the same paired replay_bench gate on the natural two-speaker recording with human transition labels once natural-two-speaker is available; keep --diarize off by default.
 
 ### `lite-cpu-inference` — Lite CPU inference profiles (no GPU) — implementation
 
@@ -393,10 +385,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** met
 - **Depends on:** none
-- **Sources:** `docs/evaluation/overnight_security/README.md`, `pyproject.toml`, `docs/evaluation/mac_followup_20260910/torch-full-application-candidate.md`
+- **Sources:** `docs/evaluation/overnight_security/README.md`, `pyproject.toml`, `docs/evaluation/mac_followup_20260910/torch-full-application-candidate.md`, `docs/evaluation/overnight_20260911/L6-torch213-candidate/README.md`
 - **Acceptance:** A compatible patched Mac Torch/audio dependency set passes installed imports, VAD and real EN/ES inference, with an explicit full installed audit result. No incompatible forced install or changed frozen benchmark environment.
-- **Notes:** A fresh Mac arm64 Python 3.11 full-application candidate with Torch 2.13/TorchAudio 2.11 passed installed native imports, bundled VAD, pip check, selected-extra metadata checks and actual normalized EN/ES replay: all 19 validation checks per language. Full installed audit: zero known findings across 123 third-party distributions, unpublished first-party explicitly skipped. Working stt_env and production bounds are unchanged. This meets compatible-candidate feasibility acceptance, not final-source production migration or performance certification.
-- **Next action:** If promoting the candidate later, rebuild final source into a fresh environment with the complete audited constraints, revalidate installed artifacts and matched-source performance, then switch the launcher with rollback. Do not upgrade working stt_env in place.
+- **Notes:** A fresh Mac arm64 Python 3.11 full-application candidate with Torch 2.13/TorchAudio 2.11 passed installed native imports, bundled VAD, pip check, selected-extra metadata checks and actual normalized EN/ES replay: all 19 validation checks per language. Full installed audit: zero known findings across 123 third-party distributions, unpublished first-party explicitly skipped. Working stt_env and production bounds are unchanged. This meets compatible-candidate feasibility acceptance, not final-source production migration or performance certification. 2026-09-11: a second candidate built from current main (9983f68 source, scratch pyproject only) passed metadata, hash-pinned install, pip check, native imports/VAD smoke and a 124-distribution audit with zero findings; EN/ES normalized replays passed every validator check; three alternating paired 150 s church-clip replays against stt_env produced byte-identical finals with silence-final p50 within max(5%,100 ms) in 3/3 pairs and flat Metal peaks (n=8 per run, equivalence screen only). Launcher and stt_env untouched.
+- **Next action:** Go recommended for an attended promotion: rebuild the final release source into a fresh environment with the audited constraints, revalidate installed artifacts and matched-source performance, then switch the launcher with rollback. Do not upgrade working stt_env in place.
 
 ### `overnight-latency-scheduling` — Opt-in bounded scheduling and caption delivery instrumentation
 
@@ -443,6 +435,15 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Actual integrated browser sessions exercised EN↔ES switching, Pause/Resume/Stop, unapproved draft recovery and metadata-only support download. Repaired Standard added a full natural-service Live/hymn/prayer view, preserved draft revision 1 with both approvals false, and an actual long-summary UI result disclosing omitted middle content. No successful reload or human summary-fidelity approval is inferred. QR oracle/decoder checks and all six HTML5 Tidy checks passed; final production caption guards are covered by the frozen 752 suite. The earlier c13f51f source validation remains separate historical evidence. Current 760e948 CPU/MLX/static/CI checks cover the integrated repairs, including the blank-preview guard and bounded monitor reader; all six HTML5 Tidy checks passed. The current runbook links root-recorded operator evidence. Native capture, physical outputs and human approval remain separate pending gates. V6 completed four installed CLI/launcher operator checks (24 HTTP 200 responses) and six file-session terminal validators, with 5,533 required writes and clean process cleanup. These read-only operator checks did not exercise live audio or browser interaction.
 - **Next action:** Retain implementation evidence and pursue only the separately listed native capture, physical output and human-quality gates when their required inputs are available.
 
+### `security-b615-pinning` — Remaining unpinned Hugging Face download paths (B615)
+
+- **Priority:** P2 · **Machine:** both · **Certification:** met
+- **Depends on:** none
+- **Sources:** `docs/evaluation/mac_v2026_14_security.md`, `docs/evaluation/security_feasibility_20260910/README.md`, `docs/evaluation/mac_followup_20260910/live-hf-pinning.md`, `docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json`, `docs/evaluation/mac_followup_20260910/final-c13f51f/model-source-continuity.md`, `docs/evaluation/overnight_20260911/L5-b615-pinning/README.md`, `docs/security_offline_model_paths.md`, [PR #202](https://github.com/wrbell/stark-translate/pull/202)
+- **Acceptance:** Optional/fallback HF paths pin revisions or are documented as operator-only, starting with live-path fallbacks (Marian HF, Piper missing-voice).
+- **Notes:** Mac MLX primary/fallback Whisper, Parakeet, Gemma/draft, workers, operator summary and optional live SpeechBrain/Pyannote paths now resolve local overrides or registered immutable snapshots. Selected HF setup entries require full commits before any cache mutation. Optional Pyannote segmentation access remains HTTP 403. The complete source inventory distinguishes 105 offline residual calls, 13 optional alternative live calls and one unverified legacy Piper API; no global B615 clearance or native diarization certification is claimed. The additive c13f51f continuity review matches all 173 original call sites; 207/211 inventoried source files are byte-identical and the four changed files preserve loader behavior. The original inventory remains unchanged. Selected source and actual Gemma checks passed without clearing the broader residuals. 2026-09-11 (PR #202, main 2cf0f7a): the 13 inventoried optional-live call sites and the legacy Piper named loader now resolve through engines/model_paths.py and raise UnpinnedModelError instead of fetching an unpinned remote; NeMo requires a local .nemo; the 105 training/export/evaluation sites are documented as operator-only in docs/security_offline_model_paths.md; 38 mocked regression tests. No new lock entries, no global B615 clearance, gated Pyannote segmentation unchanged.
+- **Next action:** Keep the pinned helpers as the only live acquisition path; when an offline training/export path is promoted to live, follow the pinning procedure in docs/security_offline_model_paths.md. CI still skips Bandit B615; the regression tests are the guard.
+
 ### `issue-176-multiprocess` — --multiprocess workers use shared Gemma 4 prompts and stop rules (#176)
 
 - **Priority:** P3 · **Machine:** mac · **Certification:** met
@@ -459,9 +460,9 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 | Status | Count |
 |--------|------:|
-| In Progress | 6 |
+| In Progress | 5 |
 | Pending Input Or Hardware | 13 |
 | Experimental | 1 |
 | Deferred | 5 |
 | Implemented | 5 |
-| Validated | 13 |
+| Validated | 14 |

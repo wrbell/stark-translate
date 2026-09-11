@@ -1,0 +1,2316 @@
+{
+  "label": "Standard full service, installed 752ab9a, session 20260910_043120_839144_en",
+  "source_file": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/installed-standard-fixed-endurance/metrics/diagnostics_20260910_043120_839144_en.jsonl",
+  "sha256": "f9927c40ec742ad483b06b7d0ed9238ef0c665aa4b084604ebd8679138a957b8",
+  "filters": {
+    "timing_schema_version": 2,
+    "caption": "no event key",
+    "endpoint_reason": "silence",
+    "all_endpoints": true
+  },
+  "jsonl_rows": 401,
+  "cohorts": {
+    "gemma": {
+      "jsonl_rows": 401,
+      "stages": {
+        "silence_wait_and_vad_decision": {
+          "n": 401,
+          "missing": 0,
+          "mean": 507.72874064825254,
+          "p50": 491.1319999997504,
+          "p95": 574.9699999997392,
+          "unit": "ms",
+          "share_of_total_p50": 0.3435263045243792
+        },
+        "submit": {
+          "n": 401,
+          "missing": 0,
+          "mean": 0.42812219451697187,
+          "p50": 0.09000000031664968,
+          "p95": 0.5169999999925494,
+          "unit": "ms",
+          "share_of_total_p50": 6.295123819255788e-05
+        },
+        "queue": {
+          "n": 401,
+          "missing": 0,
+          "mean": 10.450987531167039,
+          "p50": 1.8870000001043081,
+          "p95": 11.754999999888241,
+          "unit": "ms",
+          "share_of_total_p50": 0.0013198776228664914
+        },
+        "stt_dispatch": {
+          "n": 401,
+          "missing": 0,
+          "mean": 6.730274314224979,
+          "p50": 0.12699999986216426,
+          "p95": 22.618000000249594,
+          "unit": "ms",
+          "share_of_total_p50": 8.88311912627728e-05
+        },
+        "stt_call": {
+          "n": 401,
+          "missing": 0,
+          "mean": 505.17703241894986,
+          "p50": 414.2630000002682,
+          "p95": 1218.5759999998845,
+          "unit": "ms",
+          "share_of_total_p50": 0.2897596521736465
+        },
+        "to_translation": {
+          "n": 401,
+          "missing": 0,
+          "mean": 22.95277805486186,
+          "p50": 0.4459999999962747,
+          "p95": 4.20699999993667,
+          "unit": "ms",
+          "share_of_total_p50": 0.0003119583570540532
+        },
+        "translation_lock_wait": {
+          "n": 401,
+          "missing": 0,
+          "mean": 45.19451122194633,
+          "p50": 0.004000000189989805,
+          "p95": 462.79799999995157,
+          "unit": "ms",
+          "share_of_total_p50": 2.7978329316043566e-06
+        },
+        "translation_prepare": {
+          "n": 401,
+          "missing": 0,
+          "mean": 7.1824239401531145,
+          "p50": 0.047999999951571226,
+          "p95": 37.27700000023469,
+          "unit": "ms",
+          "share_of_total_p50": 3.357399355069925e-05
+        },
+        "translation_call": {
+          "n": 401,
+          "missing": 0,
+          "mean": 466.62988528678517,
+          "p50": 381.2609999999986,
+          "p95": 1289.089999999851,
+          "unit": "ms",
+          "share_of_total_p50": 0.26667613266766454
+        },
+        "finalize": {
+          "n": 401,
+          "missing": 0,
+          "mean": 2.29171321695343,
+          "p50": 0.4989999998360872,
+          "p95": 1.8190000001341105,
+          "unit": "ms",
+          "share_of_total_p50": 0.00034902964152497496
+        },
+        "broadcast": {
+          "n": 401,
+          "missing": 0,
+          "mean": 3.328249376552282,
+          "p50": 0.7520000003278255,
+          "p95": 4.308000000193715,
+          "unit": "ms",
+          "share_of_total_p50": 0.000525992566387613
+        },
+        "total_speech_end_to_final": {
+          "n": 401,
+          "missing": 0,
+          "mean": 1574.7664688278112,
+          "p50": 1429.6779999998398,
+          "p95": 3018.9539999999106,
+          "unit": "ms",
+          "share_of_total_p50": 1.0
+        },
+        "stt_latency_ms": {
+          "n": 401,
+          "missing": 0,
+          "mean": 501.8962593516209,
+          "p50": 414.2,
+          "p95": 1196.9,
+          "unit": "ms",
+          "share_of_total_p50": 0.28971558630687916
+        },
+        "prefill_ms_a": {
+          "n": 205,
+          "missing": 196,
+          "mean": 124.19930527770391,
+          "p50": 115.05870800465345,
+          "p95": 169.25254202215,
+          "unit": "ms",
+          "share_of_total_p50": 0.08047875675828148
+        },
+        "ttft_ms_a": {
+          "n": 205,
+          "missing": 196,
+          "mean": 319.8848615670236,
+          "p50": 299.16599998250604,
+          "p95": 408.5520419757813,
+          "unit": "ms",
+          "share_of_total_p50": 0.20925411175281397
+        },
+        "decode_ms_a": {
+          "n": 205,
+          "missing": 196,
+          "mean": 504.1402074979709,
+          "p50": 456.35483402293175,
+          "p95": 1039.7869999869727,
+          "unit": "ms",
+          "share_of_total_p50": 0.3192011306203095
+        },
+        "gen_tokens_a": {
+          "n": 205,
+          "missing": 196,
+          "mean": 15.034146341463414,
+          "p50": 14.0,
+          "p95": 31.0,
+          "unit": "tokens",
+          "share_of_total_p50": null
+        },
+        "tps_a": {
+          "n": 401,
+          "missing": 0,
+          "mean": 17.10498753117207,
+          "p50": 26.3,
+          "p95": 38.6,
+          "unit": "tokens/s",
+          "share_of_total_p50": null
+        },
+        "generation_lock_wait_ms_a": {
+          "n": 0,
+          "missing": 401,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "finalization_overhead_ms": {
+          "n": 401,
+          "missing": 0,
+          "mean": 2.297256857855362,
+          "p50": 0.5,
+          "p95": 1.8,
+          "unit": "ms",
+          "share_of_total_p50": 0.00034972909983930367
+        },
+        "broadcast_ms": {
+          "n": 401,
+          "missing": 0,
+          "mean": 3.3281795511221945,
+          "p50": 0.8,
+          "p95": 4.3,
+          "unit": "ms",
+          "share_of_total_p50": 0.0005595665597428859
+        },
+        "utterance_dur": {
+          "n": 401,
+          "missing": 0,
+          "mean": 2.790199501246883,
+          "p50": 2.21,
+          "p95": 6.75,
+          "unit": "s",
+          "share_of_total_p50": null
+        }
+      },
+      "checksum": {
+        "total_speech_end_to_final_p50": 1429.6779999998398,
+        "speech_end_to_final_ms_p50": 1429.7,
+        "stamp_n": 401,
+        "stamp_missing": 0,
+        "scalar_n": 401,
+        "scalar_missing": 0,
+        "tolerance_ms": 0.5,
+        "checksum_ok": true
+      }
+    },
+    "marian": {
+      "jsonl_rows": 0,
+      "stages": {
+        "silence_wait_and_vad_decision": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "submit": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "queue": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "stt_dispatch": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "stt_call": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "to_translation": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "translation_lock_wait": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "translation_prepare": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "translation_call": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "finalize": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "broadcast": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "total_speech_end_to_final": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "stt_latency_ms": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "prefill_ms_a": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "ttft_ms_a": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "decode_ms_a": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "gen_tokens_a": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "tokens",
+          "share_of_total_p50": null
+        },
+        "tps_a": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "tokens/s",
+          "share_of_total_p50": null
+        },
+        "generation_lock_wait_ms_a": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "finalization_overhead_ms": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "broadcast_ms": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "ms",
+          "share_of_total_p50": null
+        },
+        "utterance_dur": {
+          "n": 0,
+          "missing": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "unit": "s",
+          "share_of_total_p50": null
+        }
+      },
+      "checksum": {
+        "total_speech_end_to_final_p50": null,
+        "speech_end_to_final_ms_p50": null,
+        "stamp_n": 0,
+        "stamp_missing": 0,
+        "scalar_n": 0,
+        "scalar_missing": 0,
+        "tolerance_ms": 0.5,
+        "checksum_ok": null
+      }
+    }
+  },
+  "ranked": [
+    {
+      "stage": "total_speech_end_to_final",
+      "n": 401,
+      "missing": 0,
+      "mean": 1574.7664688278112,
+      "p50": 1429.6779999998398,
+      "p95": 3018.9539999999106,
+      "unit": "ms",
+      "share_of_total_p50": 1.0
+    },
+    {
+      "stage": "silence_wait_and_vad_decision",
+      "n": 401,
+      "missing": 0,
+      "mean": 507.72874064825254,
+      "p50": 491.1319999997504,
+      "p95": 574.9699999997392,
+      "unit": "ms",
+      "share_of_total_p50": 0.3435263045243792
+    },
+    {
+      "stage": "stt_call",
+      "n": 401,
+      "missing": 0,
+      "mean": 505.17703241894986,
+      "p50": 414.2630000002682,
+      "p95": 1218.5759999998845,
+      "unit": "ms",
+      "share_of_total_p50": 0.2897596521736465
+    },
+    {
+      "stage": "translation_call",
+      "n": 401,
+      "missing": 0,
+      "mean": 466.62988528678517,
+      "p50": 381.2609999999986,
+      "p95": 1289.089999999851,
+      "unit": "ms",
+      "share_of_total_p50": 0.26667613266766454
+    },
+    {
+      "stage": "queue",
+      "n": 401,
+      "missing": 0,
+      "mean": 10.450987531167039,
+      "p50": 1.8870000001043081,
+      "p95": 11.754999999888241,
+      "unit": "ms",
+      "share_of_total_p50": 0.0013198776228664914
+    },
+    {
+      "stage": "broadcast",
+      "n": 401,
+      "missing": 0,
+      "mean": 3.328249376552282,
+      "p50": 0.7520000003278255,
+      "p95": 4.308000000193715,
+      "unit": "ms",
+      "share_of_total_p50": 0.000525992566387613
+    },
+    {
+      "stage": "finalize",
+      "n": 401,
+      "missing": 0,
+      "mean": 2.29171321695343,
+      "p50": 0.4989999998360872,
+      "p95": 1.8190000001341105,
+      "unit": "ms",
+      "share_of_total_p50": 0.00034902964152497496
+    },
+    {
+      "stage": "to_translation",
+      "n": 401,
+      "missing": 0,
+      "mean": 22.95277805486186,
+      "p50": 0.4459999999962747,
+      "p95": 4.20699999993667,
+      "unit": "ms",
+      "share_of_total_p50": 0.0003119583570540532
+    },
+    {
+      "stage": "stt_dispatch",
+      "n": 401,
+      "missing": 0,
+      "mean": 6.730274314224979,
+      "p50": 0.12699999986216426,
+      "p95": 22.618000000249594,
+      "unit": "ms",
+      "share_of_total_p50": 8.88311912627728e-05
+    },
+    {
+      "stage": "submit",
+      "n": 401,
+      "missing": 0,
+      "mean": 0.42812219451697187,
+      "p50": 0.09000000031664968,
+      "p95": 0.5169999999925494,
+      "unit": "ms",
+      "share_of_total_p50": 6.295123819255788e-05
+    },
+    {
+      "stage": "translation_prepare",
+      "n": 401,
+      "missing": 0,
+      "mean": 7.1824239401531145,
+      "p50": 0.047999999951571226,
+      "p95": 37.27700000023469,
+      "unit": "ms",
+      "share_of_total_p50": 3.357399355069925e-05
+    },
+    {
+      "stage": "translation_lock_wait",
+      "n": 401,
+      "missing": 0,
+      "mean": 45.19451122194633,
+      "p50": 0.004000000189989805,
+      "p95": 462.79799999995157,
+      "unit": "ms",
+      "share_of_total_p50": 2.7978329316043566e-06
+    }
+  ],
+  "checksum": {
+    "gemma": {
+      "total_speech_end_to_final_p50": 1429.6779999998398,
+      "speech_end_to_final_ms_p50": 1429.7,
+      "stamp_n": 401,
+      "stamp_missing": 0,
+      "scalar_n": 401,
+      "scalar_missing": 0,
+      "tolerance_ms": 0.5,
+      "checksum_ok": true
+    },
+    "marian": {
+      "total_speech_end_to_final_p50": null,
+      "speech_end_to_final_ms_p50": null,
+      "stamp_n": 0,
+      "stamp_missing": 0,
+      "scalar_n": 0,
+      "scalar_missing": 0,
+      "tolerance_ms": 0.5,
+      "checksum_ok": null
+    }
+  },
+  "share_note": "share_of_total_p50 is an approximation: stage p50 / total p50; medians do not sum. Non-millisecond scalar rows have no share. Broadcast follows final readiness and is outside the total.",
+  "generated_at_utc": "2026-09-11T02:13:44.757882+00:00",
+  "endpoint_cohorts": {
+    "hard_cut": {
+      "jsonl_rows": 38,
+      "cohorts": {
+        "gemma": {
+          "jsonl_rows": 38,
+          "stages": {
+            "silence_wait_and_vad_decision": {
+              "n": 38,
+              "missing": 0,
+              "mean": 8.404578947422316,
+              "p50": 8.506999999983236,
+              "p95": 12.533000000054017,
+              "unit": "ms",
+              "share_of_total_p50": 0.0036577825590734135
+            },
+            "submit": {
+              "n": 38,
+              "missing": 0,
+              "mean": 0.11415789474880225,
+              "p50": 0.08999999985098839,
+              "p95": 0.22500000009313226,
+              "unit": "ms",
+              "share_of_total_p50": 3.869759371954906e-05
+            },
+            "queue": {
+              "n": 38,
+              "missing": 0,
+              "mean": 36.98594736841838,
+              "p50": 6.157000000006519,
+              "p95": 130.60700000007637,
+              "unit": "ms",
+              "share_of_total_p50": 0.0026473453880666784
+            },
+            "stt_dispatch": {
+              "n": 38,
+              "missing": 0,
+              "mean": 0.2142894736684148,
+              "p50": 0.16899999999441206,
+              "p95": 0.503000000026077,
+              "unit": "ms",
+              "share_of_total_p50": 7.266548165795058e-05
+            },
+            "stt_call": {
+              "n": 38,
+              "missing": 0,
+              "mean": 727.7304473684206,
+              "p50": 616.9139999998733,
+              "p95": 1406.377000000095,
+              "unit": "ms",
+              "share_of_total_p50": 0.26525652634914765
+            },
+            "to_translation": {
+              "n": 38,
+              "missing": 0,
+              "mean": 3.169868421063783,
+              "p50": 0.7399999999906868,
+              "p95": 13.091000000014901,
+              "unit": "ms",
+              "share_of_total_p50": 0.000318180215550205
+            },
+            "translation_lock_wait": {
+              "n": 38,
+              "missing": 0,
+              "mean": 0.007973684215501538,
+              "p50": 0.005000000121071935,
+              "p95": 0.01699999999254942,
+              "unit": "ms",
+              "share_of_total_p50": 2.149866373369921e-06
+            },
+            "translation_prepare": {
+              "n": 38,
+              "missing": 0,
+              "mean": 32.478947368425956,
+              "p50": 0.07499999995343387,
+              "p95": 129.89400000008754,
+              "unit": "ms",
+              "share_of_total_p50": 3.22479947996612e-05
+            },
+            "translation_call": {
+              "n": 38,
+              "missing": 0,
+              "mean": 1578.6868421052718,
+              "p50": 1649.3670000000857,
+              "p95": 2074.652000000002,
+              "unit": "ms",
+              "share_of_total_p50": 0.7091837129567933
+            },
+            "finalize": {
+              "n": 38,
+              "missing": 0,
+              "mean": 1.8978947368312602,
+              "p50": 1.709000000031665,
+              "p95": 3.752000000094995,
+              "unit": "ms",
+              "share_of_total_p50": 0.000734824308638134
+            },
+            "broadcast": {
+              "n": 38,
+              "missing": 0,
+              "mean": 1.153210526326132,
+              "p50": 1.0220000001136214,
+              "p95": 2.0270000000018626,
+              "unit": "ms",
+              "share_of_total_p50": 0.00043943267612507316
+            },
+            "total_speech_end_to_final": {
+              "n": 38,
+              "missing": 0,
+              "mean": 2389.690947368487,
+              "p50": 2325.725999999908,
+              "p95": 3220.1720000000205,
+              "unit": "ms",
+              "share_of_total_p50": 1.0
+            },
+            "stt_latency_ms": {
+              "n": 38,
+              "missing": 0,
+              "mean": 727.6052631578947,
+              "p50": 616.9,
+              "p95": 1406.3,
+              "unit": "ms",
+              "share_of_total_p50": 0.2652505067235024
+            },
+            "prefill_ms_a": {
+              "n": 37,
+              "missing": 1,
+              "mean": 150.66344254631298,
+              "p50": 154.23983399523422,
+              "p95": 196.45154196769,
+              "unit": "ms",
+              "share_of_total_p50": 0.06631900490222853
+            },
+            "ttft_ms_a": {
+              "n": 37,
+              "missing": 1,
+              "mean": 398.42027029639263,
+              "p50": 328.84158298838884,
+              "p95": 974.6094580041245,
+              "unit": "ms",
+              "share_of_total_p50": 0.14139308886274732
+            },
+            "decode_ms_a": {
+              "n": 37,
+              "missing": 1,
+              "mean": 1209.012082118755,
+              "p50": 1264.4284580019303,
+              "p95": 1442.9108329932205,
+              "unit": "ms",
+              "share_of_total_p50": 0.5436704315134201
+            },
+            "gen_tokens_a": {
+              "n": 37,
+              "missing": 1,
+              "mean": 35.67567567567568,
+              "p50": 35.0,
+              "p95": 43.0,
+              "unit": "tokens",
+              "share_of_total_p50": null
+            },
+            "tps_a": {
+              "n": 38,
+              "missing": 0,
+              "mean": 29.357894736842105,
+              "p50": 30.2,
+              "p95": 32.1,
+              "unit": "tokens/s",
+              "share_of_total_p50": null
+            },
+            "generation_lock_wait_ms_a": {
+              "n": 0,
+              "missing": 38,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalization_overhead_ms": {
+              "n": 38,
+              "missing": 0,
+              "mean": 1.9026315789473685,
+              "p50": 1.7,
+              "p95": 3.8,
+              "unit": "ms",
+              "share_of_total_p50": 0.0007309545492461568
+            },
+            "broadcast_ms": {
+              "n": 38,
+              "missing": 0,
+              "mean": 1.1552631578947368,
+              "p50": 1.0,
+              "p95": 2.0,
+              "unit": "ms",
+              "share_of_total_p50": 0.0004299732642624452
+            },
+            "utterance_dur": {
+              "n": 38,
+              "missing": 0,
+              "mean": 8.0,
+              "p50": 8.0,
+              "p95": 8.0,
+              "unit": "s",
+              "share_of_total_p50": null
+            }
+          },
+          "checksum": {
+            "total_speech_end_to_final_p50": 2325.725999999908,
+            "speech_end_to_final_ms_p50": 2325.7,
+            "stamp_n": 38,
+            "stamp_missing": 0,
+            "scalar_n": 38,
+            "scalar_missing": 0,
+            "tolerance_ms": 0.5,
+            "checksum_ok": true
+          }
+        },
+        "marian": {
+          "jsonl_rows": 0,
+          "stages": {
+            "silence_wait_and_vad_decision": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "submit": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "queue": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_dispatch": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_call": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "to_translation": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_lock_wait": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_prepare": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_call": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalize": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "broadcast": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "total_speech_end_to_final": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_latency_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "prefill_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "ttft_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "decode_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "gen_tokens_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "tokens",
+              "share_of_total_p50": null
+            },
+            "tps_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "tokens/s",
+              "share_of_total_p50": null
+            },
+            "generation_lock_wait_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalization_overhead_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "broadcast_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "utterance_dur": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "s",
+              "share_of_total_p50": null
+            }
+          },
+          "checksum": {
+            "total_speech_end_to_final_p50": null,
+            "speech_end_to_final_ms_p50": null,
+            "stamp_n": 0,
+            "stamp_missing": 0,
+            "scalar_n": 0,
+            "scalar_missing": 0,
+            "tolerance_ms": 0.5,
+            "checksum_ok": null
+          }
+        }
+      },
+      "ranked": [
+        {
+          "stage": "total_speech_end_to_final",
+          "n": 38,
+          "missing": 0,
+          "mean": 2389.690947368487,
+          "p50": 2325.725999999908,
+          "p95": 3220.1720000000205,
+          "unit": "ms",
+          "share_of_total_p50": 1.0
+        },
+        {
+          "stage": "translation_call",
+          "n": 38,
+          "missing": 0,
+          "mean": 1578.6868421052718,
+          "p50": 1649.3670000000857,
+          "p95": 2074.652000000002,
+          "unit": "ms",
+          "share_of_total_p50": 0.7091837129567933
+        },
+        {
+          "stage": "stt_call",
+          "n": 38,
+          "missing": 0,
+          "mean": 727.7304473684206,
+          "p50": 616.9139999998733,
+          "p95": 1406.377000000095,
+          "unit": "ms",
+          "share_of_total_p50": 0.26525652634914765
+        },
+        {
+          "stage": "silence_wait_and_vad_decision",
+          "n": 38,
+          "missing": 0,
+          "mean": 8.404578947422316,
+          "p50": 8.506999999983236,
+          "p95": 12.533000000054017,
+          "unit": "ms",
+          "share_of_total_p50": 0.0036577825590734135
+        },
+        {
+          "stage": "queue",
+          "n": 38,
+          "missing": 0,
+          "mean": 36.98594736841838,
+          "p50": 6.157000000006519,
+          "p95": 130.60700000007637,
+          "unit": "ms",
+          "share_of_total_p50": 0.0026473453880666784
+        },
+        {
+          "stage": "finalize",
+          "n": 38,
+          "missing": 0,
+          "mean": 1.8978947368312602,
+          "p50": 1.709000000031665,
+          "p95": 3.752000000094995,
+          "unit": "ms",
+          "share_of_total_p50": 0.000734824308638134
+        },
+        {
+          "stage": "broadcast",
+          "n": 38,
+          "missing": 0,
+          "mean": 1.153210526326132,
+          "p50": 1.0220000001136214,
+          "p95": 2.0270000000018626,
+          "unit": "ms",
+          "share_of_total_p50": 0.00043943267612507316
+        },
+        {
+          "stage": "to_translation",
+          "n": 38,
+          "missing": 0,
+          "mean": 3.169868421063783,
+          "p50": 0.7399999999906868,
+          "p95": 13.091000000014901,
+          "unit": "ms",
+          "share_of_total_p50": 0.000318180215550205
+        },
+        {
+          "stage": "stt_dispatch",
+          "n": 38,
+          "missing": 0,
+          "mean": 0.2142894736684148,
+          "p50": 0.16899999999441206,
+          "p95": 0.503000000026077,
+          "unit": "ms",
+          "share_of_total_p50": 7.266548165795058e-05
+        },
+        {
+          "stage": "submit",
+          "n": 38,
+          "missing": 0,
+          "mean": 0.11415789474880225,
+          "p50": 0.08999999985098839,
+          "p95": 0.22500000009313226,
+          "unit": "ms",
+          "share_of_total_p50": 3.869759371954906e-05
+        },
+        {
+          "stage": "translation_prepare",
+          "n": 38,
+          "missing": 0,
+          "mean": 32.478947368425956,
+          "p50": 0.07499999995343387,
+          "p95": 129.89400000008754,
+          "unit": "ms",
+          "share_of_total_p50": 3.22479947996612e-05
+        },
+        {
+          "stage": "translation_lock_wait",
+          "n": 38,
+          "missing": 0,
+          "mean": 0.007973684215501538,
+          "p50": 0.005000000121071935,
+          "p95": 0.01699999999254942,
+          "unit": "ms",
+          "share_of_total_p50": 2.149866373369921e-06
+        }
+      ],
+      "checksum": {
+        "gemma": {
+          "total_speech_end_to_final_p50": 2325.725999999908,
+          "speech_end_to_final_ms_p50": 2325.7,
+          "stamp_n": 38,
+          "stamp_missing": 0,
+          "scalar_n": 38,
+          "scalar_missing": 0,
+          "tolerance_ms": 0.5,
+          "checksum_ok": true
+        },
+        "marian": {
+          "total_speech_end_to_final_p50": null,
+          "speech_end_to_final_ms_p50": null,
+          "stamp_n": 0,
+          "stamp_missing": 0,
+          "scalar_n": 0,
+          "scalar_missing": 0,
+          "tolerance_ms": 0.5,
+          "checksum_ok": null
+        }
+      }
+    },
+    "silence": {
+      "jsonl_rows": 401,
+      "cohorts": {
+        "gemma": {
+          "jsonl_rows": 401,
+          "stages": {
+            "silence_wait_and_vad_decision": {
+              "n": 401,
+              "missing": 0,
+              "mean": 507.72874064825254,
+              "p50": 491.1319999997504,
+              "p95": 574.9699999997392,
+              "unit": "ms",
+              "share_of_total_p50": 0.3435263045243792
+            },
+            "submit": {
+              "n": 401,
+              "missing": 0,
+              "mean": 0.42812219451697187,
+              "p50": 0.09000000031664968,
+              "p95": 0.5169999999925494,
+              "unit": "ms",
+              "share_of_total_p50": 6.295123819255788e-05
+            },
+            "queue": {
+              "n": 401,
+              "missing": 0,
+              "mean": 10.450987531167039,
+              "p50": 1.8870000001043081,
+              "p95": 11.754999999888241,
+              "unit": "ms",
+              "share_of_total_p50": 0.0013198776228664914
+            },
+            "stt_dispatch": {
+              "n": 401,
+              "missing": 0,
+              "mean": 6.730274314224979,
+              "p50": 0.12699999986216426,
+              "p95": 22.618000000249594,
+              "unit": "ms",
+              "share_of_total_p50": 8.88311912627728e-05
+            },
+            "stt_call": {
+              "n": 401,
+              "missing": 0,
+              "mean": 505.17703241894986,
+              "p50": 414.2630000002682,
+              "p95": 1218.5759999998845,
+              "unit": "ms",
+              "share_of_total_p50": 0.2897596521736465
+            },
+            "to_translation": {
+              "n": 401,
+              "missing": 0,
+              "mean": 22.95277805486186,
+              "p50": 0.4459999999962747,
+              "p95": 4.20699999993667,
+              "unit": "ms",
+              "share_of_total_p50": 0.0003119583570540532
+            },
+            "translation_lock_wait": {
+              "n": 401,
+              "missing": 0,
+              "mean": 45.19451122194633,
+              "p50": 0.004000000189989805,
+              "p95": 462.79799999995157,
+              "unit": "ms",
+              "share_of_total_p50": 2.7978329316043566e-06
+            },
+            "translation_prepare": {
+              "n": 401,
+              "missing": 0,
+              "mean": 7.1824239401531145,
+              "p50": 0.047999999951571226,
+              "p95": 37.27700000023469,
+              "unit": "ms",
+              "share_of_total_p50": 3.357399355069925e-05
+            },
+            "translation_call": {
+              "n": 401,
+              "missing": 0,
+              "mean": 466.62988528678517,
+              "p50": 381.2609999999986,
+              "p95": 1289.089999999851,
+              "unit": "ms",
+              "share_of_total_p50": 0.26667613266766454
+            },
+            "finalize": {
+              "n": 401,
+              "missing": 0,
+              "mean": 2.29171321695343,
+              "p50": 0.4989999998360872,
+              "p95": 1.8190000001341105,
+              "unit": "ms",
+              "share_of_total_p50": 0.00034902964152497496
+            },
+            "broadcast": {
+              "n": 401,
+              "missing": 0,
+              "mean": 3.328249376552282,
+              "p50": 0.7520000003278255,
+              "p95": 4.308000000193715,
+              "unit": "ms",
+              "share_of_total_p50": 0.000525992566387613
+            },
+            "total_speech_end_to_final": {
+              "n": 401,
+              "missing": 0,
+              "mean": 1574.7664688278112,
+              "p50": 1429.6779999998398,
+              "p95": 3018.9539999999106,
+              "unit": "ms",
+              "share_of_total_p50": 1.0
+            },
+            "stt_latency_ms": {
+              "n": 401,
+              "missing": 0,
+              "mean": 501.8962593516209,
+              "p50": 414.2,
+              "p95": 1196.9,
+              "unit": "ms",
+              "share_of_total_p50": 0.28971558630687916
+            },
+            "prefill_ms_a": {
+              "n": 205,
+              "missing": 196,
+              "mean": 124.19930527770391,
+              "p50": 115.05870800465345,
+              "p95": 169.25254202215,
+              "unit": "ms",
+              "share_of_total_p50": 0.08047875675828148
+            },
+            "ttft_ms_a": {
+              "n": 205,
+              "missing": 196,
+              "mean": 319.8848615670236,
+              "p50": 299.16599998250604,
+              "p95": 408.5520419757813,
+              "unit": "ms",
+              "share_of_total_p50": 0.20925411175281397
+            },
+            "decode_ms_a": {
+              "n": 205,
+              "missing": 196,
+              "mean": 504.1402074979709,
+              "p50": 456.35483402293175,
+              "p95": 1039.7869999869727,
+              "unit": "ms",
+              "share_of_total_p50": 0.3192011306203095
+            },
+            "gen_tokens_a": {
+              "n": 205,
+              "missing": 196,
+              "mean": 15.034146341463414,
+              "p50": 14.0,
+              "p95": 31.0,
+              "unit": "tokens",
+              "share_of_total_p50": null
+            },
+            "tps_a": {
+              "n": 401,
+              "missing": 0,
+              "mean": 17.10498753117207,
+              "p50": 26.3,
+              "p95": 38.6,
+              "unit": "tokens/s",
+              "share_of_total_p50": null
+            },
+            "generation_lock_wait_ms_a": {
+              "n": 0,
+              "missing": 401,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalization_overhead_ms": {
+              "n": 401,
+              "missing": 0,
+              "mean": 2.297256857855362,
+              "p50": 0.5,
+              "p95": 1.8,
+              "unit": "ms",
+              "share_of_total_p50": 0.00034972909983930367
+            },
+            "broadcast_ms": {
+              "n": 401,
+              "missing": 0,
+              "mean": 3.3281795511221945,
+              "p50": 0.8,
+              "p95": 4.3,
+              "unit": "ms",
+              "share_of_total_p50": 0.0005595665597428859
+            },
+            "utterance_dur": {
+              "n": 401,
+              "missing": 0,
+              "mean": 2.790199501246883,
+              "p50": 2.21,
+              "p95": 6.75,
+              "unit": "s",
+              "share_of_total_p50": null
+            }
+          },
+          "checksum": {
+            "total_speech_end_to_final_p50": 1429.6779999998398,
+            "speech_end_to_final_ms_p50": 1429.7,
+            "stamp_n": 401,
+            "stamp_missing": 0,
+            "scalar_n": 401,
+            "scalar_missing": 0,
+            "tolerance_ms": 0.5,
+            "checksum_ok": true
+          }
+        },
+        "marian": {
+          "jsonl_rows": 0,
+          "stages": {
+            "silence_wait_and_vad_decision": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "submit": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "queue": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_dispatch": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_call": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "to_translation": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_lock_wait": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_prepare": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_call": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalize": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "broadcast": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "total_speech_end_to_final": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_latency_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "prefill_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "ttft_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "decode_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "gen_tokens_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "tokens",
+              "share_of_total_p50": null
+            },
+            "tps_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "tokens/s",
+              "share_of_total_p50": null
+            },
+            "generation_lock_wait_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalization_overhead_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "broadcast_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "utterance_dur": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "s",
+              "share_of_total_p50": null
+            }
+          },
+          "checksum": {
+            "total_speech_end_to_final_p50": null,
+            "speech_end_to_final_ms_p50": null,
+            "stamp_n": 0,
+            "stamp_missing": 0,
+            "scalar_n": 0,
+            "scalar_missing": 0,
+            "tolerance_ms": 0.5,
+            "checksum_ok": null
+          }
+        }
+      },
+      "ranked": [
+        {
+          "stage": "total_speech_end_to_final",
+          "n": 401,
+          "missing": 0,
+          "mean": 1574.7664688278112,
+          "p50": 1429.6779999998398,
+          "p95": 3018.9539999999106,
+          "unit": "ms",
+          "share_of_total_p50": 1.0
+        },
+        {
+          "stage": "silence_wait_and_vad_decision",
+          "n": 401,
+          "missing": 0,
+          "mean": 507.72874064825254,
+          "p50": 491.1319999997504,
+          "p95": 574.9699999997392,
+          "unit": "ms",
+          "share_of_total_p50": 0.3435263045243792
+        },
+        {
+          "stage": "stt_call",
+          "n": 401,
+          "missing": 0,
+          "mean": 505.17703241894986,
+          "p50": 414.2630000002682,
+          "p95": 1218.5759999998845,
+          "unit": "ms",
+          "share_of_total_p50": 0.2897596521736465
+        },
+        {
+          "stage": "translation_call",
+          "n": 401,
+          "missing": 0,
+          "mean": 466.62988528678517,
+          "p50": 381.2609999999986,
+          "p95": 1289.089999999851,
+          "unit": "ms",
+          "share_of_total_p50": 0.26667613266766454
+        },
+        {
+          "stage": "queue",
+          "n": 401,
+          "missing": 0,
+          "mean": 10.450987531167039,
+          "p50": 1.8870000001043081,
+          "p95": 11.754999999888241,
+          "unit": "ms",
+          "share_of_total_p50": 0.0013198776228664914
+        },
+        {
+          "stage": "broadcast",
+          "n": 401,
+          "missing": 0,
+          "mean": 3.328249376552282,
+          "p50": 0.7520000003278255,
+          "p95": 4.308000000193715,
+          "unit": "ms",
+          "share_of_total_p50": 0.000525992566387613
+        },
+        {
+          "stage": "finalize",
+          "n": 401,
+          "missing": 0,
+          "mean": 2.29171321695343,
+          "p50": 0.4989999998360872,
+          "p95": 1.8190000001341105,
+          "unit": "ms",
+          "share_of_total_p50": 0.00034902964152497496
+        },
+        {
+          "stage": "to_translation",
+          "n": 401,
+          "missing": 0,
+          "mean": 22.95277805486186,
+          "p50": 0.4459999999962747,
+          "p95": 4.20699999993667,
+          "unit": "ms",
+          "share_of_total_p50": 0.0003119583570540532
+        },
+        {
+          "stage": "stt_dispatch",
+          "n": 401,
+          "missing": 0,
+          "mean": 6.730274314224979,
+          "p50": 0.12699999986216426,
+          "p95": 22.618000000249594,
+          "unit": "ms",
+          "share_of_total_p50": 8.88311912627728e-05
+        },
+        {
+          "stage": "submit",
+          "n": 401,
+          "missing": 0,
+          "mean": 0.42812219451697187,
+          "p50": 0.09000000031664968,
+          "p95": 0.5169999999925494,
+          "unit": "ms",
+          "share_of_total_p50": 6.295123819255788e-05
+        },
+        {
+          "stage": "translation_prepare",
+          "n": 401,
+          "missing": 0,
+          "mean": 7.1824239401531145,
+          "p50": 0.047999999951571226,
+          "p95": 37.27700000023469,
+          "unit": "ms",
+          "share_of_total_p50": 3.357399355069925e-05
+        },
+        {
+          "stage": "translation_lock_wait",
+          "n": 401,
+          "missing": 0,
+          "mean": 45.19451122194633,
+          "p50": 0.004000000189989805,
+          "p95": 462.79799999995157,
+          "unit": "ms",
+          "share_of_total_p50": 2.7978329316043566e-06
+        }
+      ],
+      "checksum": {
+        "gemma": {
+          "total_speech_end_to_final_p50": 1429.6779999998398,
+          "speech_end_to_final_ms_p50": 1429.7,
+          "stamp_n": 401,
+          "stamp_missing": 0,
+          "scalar_n": 401,
+          "scalar_missing": 0,
+          "tolerance_ms": 0.5,
+          "checksum_ok": true
+        },
+        "marian": {
+          "total_speech_end_to_final_p50": null,
+          "speech_end_to_final_ms_p50": null,
+          "stamp_n": 0,
+          "stamp_missing": 0,
+          "scalar_n": 0,
+          "scalar_missing": 0,
+          "tolerance_ms": 0.5,
+          "checksum_ok": null
+        }
+      }
+    },
+    "smart_cut": {
+      "jsonl_rows": 124,
+      "cohorts": {
+        "gemma": {
+          "jsonl_rows": 124,
+          "stages": {
+            "silence_wait_and_vad_decision": {
+              "n": 124,
+              "missing": 0,
+              "mean": 1900.7520000000306,
+              "p50": 1229.0129999998026,
+              "p95": 5031.235000000102,
+              "unit": "ms",
+              "share_of_total_p50": 0.356307636644208
+            },
+            "submit": {
+              "n": 124,
+              "missing": 0,
+              "mean": 1.429596774179616,
+              "p50": 0.10100000002421439,
+              "p95": 1.3140000000130385,
+              "unit": "ms",
+              "share_of_total_p50": 2.9281277992745858e-05
+            },
+            "queue": {
+              "n": 124,
+              "missing": 0,
+              "mean": 0.5346935483887079,
+              "p50": 0.08799999998882413,
+              "p95": 0.7519999998621643,
+              "unit": "ms",
+              "share_of_total_p50": 2.551240061798638e-05
+            },
+            "stt_dispatch": {
+              "n": 124,
+              "missing": 0,
+              "mean": 0.22544354837643163,
+              "p50": 0.14799999981187284,
+              "p95": 0.4409999998752028,
+              "unit": "ms",
+              "share_of_total_p50": 4.290721917206744e-05
+            },
+            "stt_call": {
+              "n": 124,
+              "missing": 0,
+              "mean": 252.85654032258543,
+              "p50": 217.3519999999553,
+              "p95": 453.0419999998994,
+              "unit": "ms",
+              "share_of_total_p50": 0.0630133102252689
+            },
+            "to_translation": {
+              "n": 124,
+              "missing": 0,
+              "mean": 1.2714838709535767,
+              "p50": 0.5599999998230487,
+              "p95": 3.535999999847263,
+              "unit": "ms",
+              "share_of_total_p50": 0.0001623516402655948
+            },
+            "translation_lock_wait": {
+              "n": 124,
+              "missing": 0,
+              "mean": 0.017870967757546402,
+              "p50": 0.007999999914318323,
+              "p95": 0.06600000010803342,
+              "unit": "ms",
+              "share_of_total_p50": 2.3193091225439326e-06
+            },
+            "translation_prepare": {
+              "n": 124,
+              "missing": 0,
+              "mean": 11.42406451612694,
+              "p50": 0.06499999994412065,
+              "p95": 94.93100000009872,
+              "unit": "ms",
+              "share_of_total_p50": 1.88443868062966e-05
+            },
+            "translation_call": {
+              "n": 124,
+              "missing": 0,
+              "mean": 1600.5906209677341,
+              "p50": 1577.0540000000037,
+              "p95": 2739.6040000000503,
+              "unit": "ms",
+              "share_of_total_p50": 0.45720947101486026
+            },
+            "finalize": {
+              "n": 124,
+              "missing": 0,
+              "mean": 3.65063709679347,
+              "p50": 1.4320000000298023,
+              "p95": 7.288000000175089,
+              "unit": "ms",
+              "share_of_total_p50": 0.00041515633739041543
+            },
+            "broadcast": {
+              "n": 124,
+              "missing": 0,
+              "mean": 6.9868467741729425,
+              "p50": 1.3160000001080334,
+              "p95": 35.075000000186265,
+              "unit": "ms",
+              "share_of_total_p50": 0.0003815263547760245
+            },
+            "total_speech_end_to_final": {
+              "n": 124,
+              "missing": 0,
+              "mean": 3772.7529516129266,
+              "p50": 3449.3030000000726,
+              "p95": 6451.300999999978,
+              "unit": "ms",
+              "share_of_total_p50": 1.0
+            },
+            "stt_latency_ms": {
+              "n": 124,
+              "missing": 0,
+              "mean": 252.75806451612902,
+              "p50": 217.2,
+              "p95": 452.9,
+              "unit": "ms",
+              "share_of_total_p50": 0.06296924335148156
+            },
+            "prefill_ms_a": {
+              "n": 118,
+              "missing": 6,
+              "mean": 164.40939124509833,
+              "p50": 143.8062500092201,
+              "p95": 243.14424995100126,
+              "unit": "ms",
+              "share_of_total_p50": 0.04169139388717578
+            },
+            "ttft_ms_a": {
+              "n": 118,
+              "missing": 6,
+              "mean": 770.9818047814671,
+              "p50": 551.2677920050919,
+              "p95": 1395.650708989706,
+              "unit": "ms",
+              "share_of_total_p50": 0.1598200540819639
+            },
+            "decode_ms_a": {
+              "n": 118,
+              "missing": 6,
+              "mean": 867.7368159627865,
+              "p50": 856.9228330161422,
+              "p95": 1401.7313329968601,
+              "unit": "ms",
+              "share_of_total_p50": 0.24843362065209237
+            },
+            "gen_tokens_a": {
+              "n": 118,
+              "missing": 6,
+              "mean": 25.050847457627118,
+              "p50": 25.0,
+              "p95": 41.0,
+              "unit": "tokens",
+              "share_of_total_p50": null
+            },
+            "tps_a": {
+              "n": 124,
+              "missing": 0,
+              "mean": 28.52983870967742,
+              "p50": 29.7,
+              "p95": 34.4,
+              "unit": "tokens/s",
+              "share_of_total_p50": null
+            },
+            "generation_lock_wait_ms_a": {
+              "n": 0,
+              "missing": 124,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalization_overhead_ms": {
+              "n": 124,
+              "missing": 0,
+              "mean": 3.6524193548387096,
+              "p50": 1.4,
+              "p95": 7.3,
+              "unit": "ms",
+              "share_of_total_p50": 0.00040587910079223843
+            },
+            "broadcast_ms": {
+              "n": 124,
+              "missing": 0,
+              "mean": 6.985483870967742,
+              "p50": 1.3,
+              "p95": 35.1,
+              "unit": "ms",
+              "share_of_total_p50": 0.0003768877364499357
+            },
+            "utterance_dur": {
+              "n": 124,
+              "missing": 0,
+              "mean": 6.118387096774193,
+              "p50": 6.72,
+              "p95": 7.84,
+              "unit": "s",
+              "share_of_total_p50": null
+            }
+          },
+          "checksum": {
+            "total_speech_end_to_final_p50": 3449.3030000000726,
+            "speech_end_to_final_ms_p50": 3449.3,
+            "stamp_n": 124,
+            "stamp_missing": 0,
+            "scalar_n": 124,
+            "scalar_missing": 0,
+            "tolerance_ms": 0.5,
+            "checksum_ok": true
+          }
+        },
+        "marian": {
+          "jsonl_rows": 0,
+          "stages": {
+            "silence_wait_and_vad_decision": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "submit": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "queue": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_dispatch": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_call": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "to_translation": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_lock_wait": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_prepare": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "translation_call": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalize": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "broadcast": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "total_speech_end_to_final": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "stt_latency_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "prefill_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "ttft_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "decode_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "gen_tokens_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "tokens",
+              "share_of_total_p50": null
+            },
+            "tps_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "tokens/s",
+              "share_of_total_p50": null
+            },
+            "generation_lock_wait_ms_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "finalization_overhead_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "broadcast_ms": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "ms",
+              "share_of_total_p50": null
+            },
+            "utterance_dur": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null,
+              "unit": "s",
+              "share_of_total_p50": null
+            }
+          },
+          "checksum": {
+            "total_speech_end_to_final_p50": null,
+            "speech_end_to_final_ms_p50": null,
+            "stamp_n": 0,
+            "stamp_missing": 0,
+            "scalar_n": 0,
+            "scalar_missing": 0,
+            "tolerance_ms": 0.5,
+            "checksum_ok": null
+          }
+        }
+      },
+      "ranked": [
+        {
+          "stage": "total_speech_end_to_final",
+          "n": 124,
+          "missing": 0,
+          "mean": 3772.7529516129266,
+          "p50": 3449.3030000000726,
+          "p95": 6451.300999999978,
+          "unit": "ms",
+          "share_of_total_p50": 1.0
+        },
+        {
+          "stage": "translation_call",
+          "n": 124,
+          "missing": 0,
+          "mean": 1600.5906209677341,
+          "p50": 1577.0540000000037,
+          "p95": 2739.6040000000503,
+          "unit": "ms",
+          "share_of_total_p50": 0.45720947101486026
+        },
+        {
+          "stage": "silence_wait_and_vad_decision",
+          "n": 124,
+          "missing": 0,
+          "mean": 1900.7520000000306,
+          "p50": 1229.0129999998026,
+          "p95": 5031.235000000102,
+          "unit": "ms",
+          "share_of_total_p50": 0.356307636644208
+        },
+        {
+          "stage": "stt_call",
+          "n": 124,
+          "missing": 0,
+          "mean": 252.85654032258543,
+          "p50": 217.3519999999553,
+          "p95": 453.0419999998994,
+          "unit": "ms",
+          "share_of_total_p50": 0.0630133102252689
+        },
+        {
+          "stage": "finalize",
+          "n": 124,
+          "missing": 0,
+          "mean": 3.65063709679347,
+          "p50": 1.4320000000298023,
+          "p95": 7.288000000175089,
+          "unit": "ms",
+          "share_of_total_p50": 0.00041515633739041543
+        },
+        {
+          "stage": "broadcast",
+          "n": 124,
+          "missing": 0,
+          "mean": 6.9868467741729425,
+          "p50": 1.3160000001080334,
+          "p95": 35.075000000186265,
+          "unit": "ms",
+          "share_of_total_p50": 0.0003815263547760245
+        },
+        {
+          "stage": "to_translation",
+          "n": 124,
+          "missing": 0,
+          "mean": 1.2714838709535767,
+          "p50": 0.5599999998230487,
+          "p95": 3.535999999847263,
+          "unit": "ms",
+          "share_of_total_p50": 0.0001623516402655948
+        },
+        {
+          "stage": "stt_dispatch",
+          "n": 124,
+          "missing": 0,
+          "mean": 0.22544354837643163,
+          "p50": 0.14799999981187284,
+          "p95": 0.4409999998752028,
+          "unit": "ms",
+          "share_of_total_p50": 4.290721917206744e-05
+        },
+        {
+          "stage": "submit",
+          "n": 124,
+          "missing": 0,
+          "mean": 1.429596774179616,
+          "p50": 0.10100000002421439,
+          "p95": 1.3140000000130385,
+          "unit": "ms",
+          "share_of_total_p50": 2.9281277992745858e-05
+        },
+        {
+          "stage": "queue",
+          "n": 124,
+          "missing": 0,
+          "mean": 0.5346935483887079,
+          "p50": 0.08799999998882413,
+          "p95": 0.7519999998621643,
+          "unit": "ms",
+          "share_of_total_p50": 2.551240061798638e-05
+        },
+        {
+          "stage": "translation_prepare",
+          "n": 124,
+          "missing": 0,
+          "mean": 11.42406451612694,
+          "p50": 0.06499999994412065,
+          "p95": 94.93100000009872,
+          "unit": "ms",
+          "share_of_total_p50": 1.88443868062966e-05
+        },
+        {
+          "stage": "translation_lock_wait",
+          "n": 124,
+          "missing": 0,
+          "mean": 0.017870967757546402,
+          "p50": 0.007999999914318323,
+          "p95": 0.06600000010803342,
+          "unit": "ms",
+          "share_of_total_p50": 2.3193091225439326e-06
+        }
+      ],
+      "checksum": {
+        "gemma": {
+          "total_speech_end_to_final_p50": 3449.3030000000726,
+          "speech_end_to_final_ms_p50": 3449.3,
+          "stamp_n": 124,
+          "stamp_missing": 0,
+          "scalar_n": 124,
+          "scalar_missing": 0,
+          "tolerance_ms": 0.5,
+          "checksum_ok": true
+        },
+        "marian": {
+          "total_speech_end_to_final_p50": null,
+          "speech_end_to_final_ms_p50": null,
+          "stamp_n": 0,
+          "stamp_missing": 0,
+          "scalar_n": 0,
+          "scalar_missing": 0,
+          "tolerance_ms": 0.5,
+          "checksum_ok": null
+        }
+      }
+    }
+  },
+  "csv_rows": 401,
+  "csv_endpoint_reason": "silence",
+  "jsonl_silence_rows": 401
+}

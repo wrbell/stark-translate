@@ -1,0 +1,20 @@
+{
+  "created_at": "2026-09-11T02:07:10.091223+00:00",
+  "source_head": "9983f68db7a0dab51576fb5a97c395e95c3d261f",
+  "source_root": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/torch213-main-20260911/source",
+  "copied_files": [
+    {
+      "path": "dry_run_ab.py",
+      "source_sha256": "95e9b66bbd06ddbf913a5f3d9fccdf9617a0ff6b9c923e05ef1e2e3945ab50c1"
+    },
+    {
+      "path": "models.lock.json",
+      "source_sha256": "3736cfc8c71bb8492d3812e6da6eceabf7f027af7ea14086923277cb5639037f"
+    }
+  ],
+  "production_pyproject_sha256": "1c25e0c170b46df6115257e3672fc9530ffc2457e7577840b57f4df1c855404d",
+  "candidate_pyproject_sha256": "bcd403f1516da21e1bf364ee3c98f3d743662cde9db7ae86e1369baa53805dcc",
+  "model_manifest_sha256": "3736cfc8c71bb8492d3812e6da6eceabf7f027af7ea14086923277cb5639037f",
+  "constraints_sha256": "25c6b79eee79814ad741962489b09a90d681f162481d79cacfa45ba3dfc2117a",
+  "note": "Scratch candidate built from current main for the 2026-09-11 overnight run; production pyproject untouched; working stt_env untouched."
+}

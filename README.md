@@ -17,9 +17,9 @@ Fully on-device, live bilingual speech-to-text for church outreach at Stark Road
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
 > (`2026.14.0.0`), with prior integration in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
 > and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
-> The last published release recorded here is **v2026.13**. Source integration,
-> release publication and service certification are separate; PyPI/package artifacts
-> and release tags remain pending by user choice.
+> The last published release is **v2026.14.0.0** (tagged 2026-09-11; GitHub Release with Mac/NVIDIA/Windows
+> ZIPs and the MSI). Source integration, release publication and service certification are separate;
+> PyPI publication remains pending until the trusted publisher is mapped.
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) · evidence:
 > [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) · remaining work:
 > [`docs/backlog.json`](docs/backlog.json) (rendered as [`docs/backlog.md`](docs/backlog.md)).
@@ -305,7 +305,7 @@ implemented in the integrated source; recorded evidence and remaining gates are 
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) and
 [`docs/lite_profiles.md`](docs/lite_profiles.md). PR #192 merged into main;
 [closeout evidence](docs/evaluation/overnight_closeout_20260910/README.md) records the
-merge and justified issue closures. PyPI/package/release tags remain pending.
+merge and justified issue closures. Tag `v2026.14.0.0` and its GitHub Release/MSI were published on 2026-09-11; PyPI remains pending (trusted publisher unmapped).
 
 **Live microphone (2026-09-09 → 10):** the built-in-mic session stalled after model load
 (no audio frames, operator showed RUNNING from the CSV header) while file replay passed. The
