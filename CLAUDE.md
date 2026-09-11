@@ -12,8 +12,8 @@
 > Current integration and delivery state is recorded in [implementation status](docs/mac_implementation_status.md).
 > The last published release is **v2026.14.0.0**, tagged 2026-09-11 on `50f81c6` (GitHub Release with
 > Mac/NVIDIA/Windows ZIPs and the MSI; overnight lanes #199–#203 included). Source integration,
-> release publication and service certification are separate. PyPI publication still fails until the
-> trusted publisher is mapped; the GHCR image `ghcr.io/wrbell/stark-translate:v2026.14.0.0` was built after the Dockerfile fixes in PRs #203/#204. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`.
+> release publication and service certification are separate. PyPI publication is deferred by decision (2026-09-11;
+> publish job gated on `PYPI_PUBLISH_ENABLED`); the GHCR image `ghcr.io/wrbell/stark-translate:v2026.14.0.0` was built after the Dockerfile fixes in PRs #203/#204. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`.
 >
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) ·
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) ·
@@ -150,7 +150,7 @@ benchmark numbers in guides.
 | v2026.9–11 | llama.cpp tuning, IQ4_XS rejected, imatrix calibration | [`v2026.9/GEMMA_OPTIM_PHASE2.md`](docs/archive/v2026.9/GEMMA_OPTIM_PHASE2.md), [`v2026.10/IQ4_XS_BENCHMARK.md`](docs/archive/v2026.10/IQ4_XS_BENCHMARK.md), [`v2026.11/IMATRIX_CALIBRATION.md`](docs/archive/v2026.11/IMATRIX_CALIBRATION.md) |
 | v2026.12 | Gemma 4 OptiQ E4B Mac default; EOS bug #172 fixed | [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
 | v2026.13 | Mac latency fixes #180–191; Parakeet EN; Marian CT2 Mac; replay harness | [`v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md) |
-| v2026.14.0.0 (published 2026-09-11) | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **integration history in PR #192 and EN↔ES follow-up in PR #196; acceptance remains evidence-specific**; overnight 2026-09-11 lanes: stage attribution, opt-in E2B draft, diarization interpreter, B615 pinning | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md), [`docs/evaluation/overnight_20260911/STATUS.md`](docs/evaluation/overnight_20260911/STATUS.md) |
+| v2026.14.0.0 (published 2026-09-11) | Reliability (isolated capture, health, work lease), schema 2, setup, Review/export, screening, Lite profiles, latency experiments, lay operator page, offline Hindi baseline — **integration history in PR #192 and EN↔ES follow-up in PR #196; acceptance remains evidence-specific**; overnight 2026-09-11 lanes: stage attribution, opt-in E2B draft, diarization interpreter, B615 pinning; 2026-09-11 daytime: Torch 2.13 runtime promoted with `.stark-python` rollback, PyPI deferred, tail screen (both arms rejected) | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md), [`docs/evaluation/README.md`](docs/evaluation/README.md), [`docs/lite_profiles.md`](docs/lite_profiles.md), [`docs/evaluation/overnight_20260911/STATUS.md`](docs/evaluation/overnight_20260911/STATUS.md), [`docs/evaluation/followup_20260911/STATUS.md`](docs/evaluation/followup_20260911/STATUS.md) |
 
 ## Subdirectory guides
 

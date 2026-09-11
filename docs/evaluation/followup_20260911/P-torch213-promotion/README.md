@@ -107,6 +107,25 @@ pointer restored -> /Users/willem/Code/vibes/SRTranslate/venv/bin/python
 Rollback runtime dependencies now pass on `stt_env`. The pointer was restored to `venv/bin/python`; `stt_env`'s
 freeze SHA256 is unchanged.
 
+**Final drill on `main` @ `77de207` (17:58Z, after #210 merged, main checkout, port 9017):**
+
+```
+pointer -> /Users/willem/Code/vibes/SRTranslate/venv/bin/python
+[promoted] startup line: starting operator at http://127.0.0.1:9017 (logs: /Users/willem/Code/vibes/SRTranslate/metrics; python: /Users/willem/Code/vibes/SRTranslate/venv/bin/python Python 3.11.11)
+[promoted] preflight backend=mlx&lang=en rc=0 checks 5 | non-pass: [('Adapter manifest', 'warn')]
+[promoted] preflight backend=mlx&lang=es rc=0 checks 5 | non-pass: [('Adapter manifest', 'warn')]
+[promoted] operator stopped; python line in log: python: /Users/willem/Code/vibes/SRTranslate/venv/bin/python Python 3.11.11
+pointer -> /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python  (rollback drill)
+[rollback] startup line: starting operator at http://127.0.0.1:9017 (logs: /Users/willem/Code/vibes/SRTranslate/metrics; python: /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python Python 3.11.11)
+[rollback] preflight backend=mlx&lang=en rc=0 checks 5 | non-pass: [('Adapter manifest', 'warn')]
+[rollback] preflight backend=mlx&lang=es rc=0 checks 5 | non-pass: [('Adapter manifest', 'warn')]
+[rollback] operator stopped; python line in log: python: /Users/willem/Code/vibes/SRTranslate/stt_env/bin/python Python 3.11.11
+pointer restored -> /Users/willem/Code/vibes/SRTranslate/venv/bin/python
+stt_env freeze: a09be8422c195824
+```
+
+Both pointers pass readiness (the adapter-manifest warning is the pre-existing base-model notice). `.stark-python` is left at `venv/bin/python`.
+
 **Rollback (one line, documented in `docs/packaging/macos.md` and `CLAUDE-macbook.md`):**
 
 ```bash

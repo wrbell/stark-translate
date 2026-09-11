@@ -145,3 +145,7 @@ hypotheses until measured.
 No MTP or Hindi work is included in these follow-ups. The next decision should
 use stage-level evidence and independently confirmed output changes, preserving
 careful finals and fast, revisable previews.
+
+## 2026-09-11 tail screen (rejected; do not re-run)
+
+The declared `tail_screen_20260911` ([evidence](evaluation/followup_20260911/X-tail-screen/README.md); two 360 s church clips, promoted Torch 2.13 runtime, 3 repeats) rejected both hypotheses: **E2B OptiQ as a live mlx-lm draft for E4B finals (γ=3)** — the draft shortens Gemma decode in isolation but the resident E4B+E2B+Parakeet set (12.4–12.8 GiB Metal) starves the STT side (`stt_call` p95 0.5 → 2.5–3.0 s, final STT dispatch wait p95 3 s), cuts previews by a third and doubles or triples every Gemma-routed p95; and **`serial_finals`** (no overlap of a final's STT with the previous final's translation) — the overlap is rare and removing it only adds wait. Neither enters a confirmation or a combination. Control tails on the promoted environment are translation-dominated (long Gemma outputs at 31–35 tok/s); the `physical_stt` trace now records `translation_active`, `concurrent_partial` and `concurrent_final` on every run for the next hypothesis. The overnight L1 attribution's Gemma cohort was a route mixture; see its correction.
