@@ -30,6 +30,7 @@ Gates (Mac soak):
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import resource
@@ -122,6 +123,62 @@ CONFIGS: dict[str, dict[str, Any]] = {
 }
 
 
+# Separate full-model mlx-lm drafts; these are not the rejected assistant MTS head.
+for _gamma in (1, 2, 3):
+    CONFIGS[f"e4b_e2b_draft_g{_gamma}"] = {
+        "label": f"Gemma 4 E4B OptiQ + E2B OptiQ draft (gamma={_gamma})",
+        "model_id": CONFIGS["e4b"]["model_id"],
+        "model_family": "gemma4",
+        "draft_model_id": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+        "num_draft_tokens": _gamma,
+        "turboquant": False,
+    }
+
+
+def select_sentences(selection: str = "default") -> dict[str, str]:
+    """Stable sentence IDs shared across configs; preserve legacy length keys."""
+    if selection not in {"default", "canaries", "all"}:
+        raise ValueError(f"Unknown sentence selection: {selection}")
+    sentences = dict(TEST_SENTENCES) if selection in {"default", "all"} else {}
+    if selection in {"canaries", "all"}:
+        from training.theological_canaries import canary_sentences
+
+        sentences.update({f"canary_{i:02d}": c["en"] for i, c in enumerate(canary_sentences(), 1)})
+    return sentences
+
+
+def _text_sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _reset_metal_peak() -> None:
+    try:
+        import mlx.core as mx
+
+        mx.reset_peak_memory()
+    except (ImportError, AttributeError, RuntimeError, OSError):
+        pass
+
+
+def _metal_peak_mib() -> float | None:
+    try:
+        import mlx.core as mx
+
+        peak = mx.get_peak_memory()
+        return peak / (1024 * 1024) if isinstance(peak, (int, float)) else None
+    except (ImportError, AttributeError, RuntimeError, OSError):
+        return None
+
+
+def _identity(configs: dict[str, dict], sentence_ids: list[str]) -> dict[str, bool]:
+    """Require every config and every repeat; a missing/failed arm cannot pass."""
+    identity = {}
+    for sentence_id in sentence_ids:
+        hashes = [row.get("per_length", {}).get(sentence_id, {}).get("text_sha256s", []) for row in configs.values()]
+        identity[sentence_id] = all(hashes) and len({h for group in hashes for h in group}) == 1
+    return identity
+
+
 def _rss_mb() -> float:
     usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     # macOS reports bytes; Linux reports KiB
@@ -161,7 +218,15 @@ def _looks_like_garbage(text: str) -> bool:
     return False
 
 
-_GENERATION_FIELDS = ("generated_tokens", "prefill_ms", "ttft_ms", "decode_ms", "finish_reason")
+_GENERATION_FIELDS = (
+    "generated_tokens",
+    "prefill_ms",
+    "ttft_ms",
+    "decode_ms",
+    "finish_reason",
+    "draft_tokens",
+    "draft_accept_rate",
+)
 
 
 def _generation_metrics(result) -> dict[str, Any]:
@@ -181,6 +246,11 @@ def _generation_summary(rows: list[dict]) -> dict[str, Any]:
         summary[name] = (
             (statistics.mean(values) if field == "generated_tokens" else _pct(values, 50)) if values else None
         )
+    for field in ("draft_tokens", "draft_accept_rate"):
+        values = [row[field] for row in rows if row.get(field) is not None]
+        summary[f"{field}_mean"] = statistics.mean(values) if values else None
+        if field == "draft_accept_rate":
+            summary["draft_accept_rate_min"] = min(values) if values else None
     reasons = Counter(row["finish_reason"] for row in rows if row.get("finish_reason") is not None)
     summary["finish_reason_counts"] = dict(reasons)
     summary["pct_hit_max_tokens"] = reasons["length"] / sum(reasons.values()) if reasons else None
@@ -207,7 +277,7 @@ def run_canaries(engine) -> dict[str, Any]:
     """Run theological canaries; return pass count + details."""
     results = []
     passed = 0
-    for en, expect_sub in CANARIES:
+    for i, (en, expect_sub) in enumerate(CANARIES, 1):
         out = engine.translate(en, source_lang="en", target_lang="es")
         text = out.text
         ok = expect_sub.lower() in text.lower() and not _looks_like_garbage(text)
@@ -215,9 +285,11 @@ def run_canaries(engine) -> dict[str, Any]:
             passed += 1
         results.append(
             {
+                "id": f"canary_{i:02d}",
                 "en": en,
                 "expect": expect_sub,
-                "out": text[:200],
+                "out": text,
+                "text_sha256": _text_sha256(text),
                 "latency_ms": out.latency_ms,
                 "pass": ok,
                 "garbage": _looks_like_garbage(text),
@@ -227,11 +299,13 @@ def run_canaries(engine) -> dict[str, Any]:
     return {"passed": passed, "total": len(CANARIES), "details": results}
 
 
-def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
+def bench_config(cfg_key: str, runs: int, warmup: int, sentences: str = "default") -> dict[str, Any]:
     """Load one config, warm up, measure latency + canaries + RSS."""
     from engines.mlx_engine import MLXGemmaEngine
 
+    selected_sentences = select_sentences(sentences)
     cfg = CONFIGS[cfg_key]
+    _reset_metal_peak()
     print(f"\n=== {cfg['label']} ===")
     rss_before = _rss_mb()
 
@@ -252,18 +326,21 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
             "label": cfg["label"],
             "error": str(exc),
             "rss_mb": _rss_mb() - rss_before,
+            "metal_peak_mib": _metal_peak_mib(),
         }
 
     # Warmup
     for _ in range(warmup):
-        engine.translate(TEST_SENTENCES["short"], source_lang="en", target_lang="es")
+        engine.translate(next(iter(selected_sentences.values())), source_lang="en", target_lang="es")
 
     per_length: dict[str, Any] = {}
     all_generation = []
-    for length, text in TEST_SENTENCES.items():
+    for length, text in selected_sentences.items():
         lats: list[float] = []
         tps_list: list[float] = []
         generation = []
+        texts = []
+        text_sha256s = []
         sample = ""
         for _ in range(runs):
             result = engine.translate(text, source_lang="en", target_lang="es")
@@ -272,12 +349,20 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
             lats.append(result.latency_ms)
             if result.tokens_per_second is not None:
                 tps_list.append(result.tokens_per_second)
-            generation.append(_generation_metrics(result))
+            text_sha256 = _text_sha256(result.text)
+            generation.append({**_generation_metrics(result), "text_sha256": text_sha256})
+            texts.append(result.text)
+            text_sha256s.append(text_sha256)
             sample = result.text[:120]
         per_length[length] = {
             "latency": _stats(lats),
             "tps_mean": statistics.mean(tps_list) if tps_list else 0.0,
             "sample": sample,
+            "source": text,
+            "texts": texts,
+            "text_sha256s": text_sha256s,
+            "all_identical": bool(text_sha256s) and len(set(text_sha256s)) == 1,
+            "generation": generation,
             **_generation_summary(generation),
         }
         all_generation.extend(generation)
@@ -292,6 +377,7 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
 
     all_generation.extend(canary["details"])
     rss_delta = _rss_mb() - rss_before
+    metal_peak_mib = _metal_peak_mib()
     engine.unload()
 
     return {
@@ -300,11 +386,13 @@ def bench_config(cfg_key: str, runs: int, warmup: int) -> dict[str, Any]:
         "model_id": cfg["model_id"],
         "model_family": cfg["model_family"],
         "draft_model_id": cfg["draft_model_id"],
+        "num_draft_tokens": cfg["num_draft_tokens"],
         "turboquant": cfg["turboquant"],
         "per_length": per_length,
         "canary": {"passed": canary["passed"], "total": canary["total"]},
         "canary_details": canary["details"],
         "rss_delta_mb": rss_delta,
+        "metal_peak_mib": metal_peak_mib,
         "gate_stops_before_max": _stops_before_max(all_generation),
         "gate_canary_ok": canary["passed"] >= 7,
         "gate_no_garbage": not any(d.get("garbage") for d in canary["details"]),
@@ -356,6 +444,8 @@ def bench_e2e_overlap_proxy(mt_result: dict, stt_result: dict) -> dict[str, Any]
     """Estimate cycle time with STT(N)∥MT(N−1) overlap = max(stt, mt) + other."""
     if "error" in mt_result or "error" in stt_result:
         return {"error": "missing STT or MT result"}
+    if "medium" not in mt_result.get("per_length", {}):
+        return {"error": "overlap proxy requires the default medium sentence"}
     stt_p50 = stt_result.get("latency", {}).get("p50", 0)
     mt_p50 = mt_result.get("per_length", {}).get("medium", {}).get("latency", {}).get("p50", 0)
     serial = stt_p50 + mt_p50
@@ -376,14 +466,17 @@ def bench_mlx_gemma4_accel(
     warmup: int = 2,
     include_stt: bool = True,
     stt_model: str = "mlx-community/whisper-large-v3-turbo",
+    sentences: str = "default",
 ) -> dict[str, Any]:
     """Entry point used by ``tools/benchmark_latency.py --only mlx-accel``."""
+    selected_sentences = select_sentences(sentences)
     selected = configs or ["tg4b", "e4b", "e2b", "e4b_mts"]
     out: dict[str, Any] = {
         "timestamp": datetime.now().isoformat(),
         "env": _environment_versions(),
         "runs": runs,
         "warmup": warmup,
+        "sentences": selected_sentences,
         "configs": {},
     }
 
@@ -391,7 +484,10 @@ def bench_mlx_gemma4_accel(
         if key not in CONFIGS:
             out["configs"][key] = {"error": f"unknown config {key}"}
             continue
-        out["configs"][key] = bench_config(key, runs, warmup)
+        out["configs"][key] = bench_config(key, runs, warmup, sentences=sentences)
+
+    if len(out["configs"]) > 1:
+        out["identity"] = _identity(out["configs"], list(selected_sentences))
 
     out["gate_stops_before_max"] = bool(out["configs"]) and all(
         row.get("gate_stops_before_max", False) for row in out["configs"].values()
@@ -416,6 +512,7 @@ def main() -> None:
         default="tg4b,e4b,e2b,e4b_mts",
         help=f"Comma-separated configs. Available: {','.join(CONFIGS)}",
     )
+    parser.add_argument("--sentences", choices=("default", "canaries", "all"), default="default")
     parser.add_argument("--runs", type=int, default=5)
     parser.add_argument("--warmup", type=int, default=2)
     parser.add_argument("--quick", action="store_true", help="3 runs, 1 warmup")
@@ -439,6 +536,7 @@ def main() -> None:
         warmup=warmup,
         include_stt=not args.no_stt,
         stt_model=args.stt_model,
+        sentences=args.sentences,
     )
 
     out_path = args.output or f"metrics/mlx_accel_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
@@ -455,7 +553,9 @@ def main() -> None:
         if "error" in row:
             print(f"  {key}: ERROR {row['error']}")
             continue
-        p50 = row.get("per_length", {}).get("medium", {}).get("latency", {}).get("p50", 0)
+        lengths = row.get("per_length", {})
+        sentence_id = "medium" if "medium" in lengths else next(iter(lengths), "medium")
+        p50 = lengths.get(sentence_id, {}).get("latency", {}).get("p50", 0)
         can = row.get("canary", {})
         gates = []
         if row.get("gate_canary_ok"):
@@ -463,7 +563,7 @@ def main() -> None:
         if row.get("gate_no_garbage"):
             gates.append("no_garbage")
         print(
-            f"  {key}: medium_p50={p50:.0f}ms canary={can.get('passed')}/{can.get('total')} "
+            f"  {key}: {sentence_id}_p50={p50:.0f}ms canary={can.get('passed')}/{can.get('total')} "
             f"rssΔ={row.get('rss_delta_mb', 0):.0f}MB gates={','.join(gates) or 'FAIL'}"
         )
 

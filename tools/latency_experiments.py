@@ -31,6 +31,8 @@ class LatencyExperiments:
     early_clause_s: float = 0.0
     early_clause_pause_ms: float = 0.0
     partial_deadline_margin_ms: float = 0.0
+    draft_model_id: str = ""
+    draft_tokens: int = 0
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> LatencyExperiments:
@@ -54,6 +56,7 @@ class LatencyExperiments:
                 raise ValueError(f"Invalid {key}: {raw!r}") from exc
         result = cls(**values)
         bounds = {
+            "draft_tokens": (0, 4),
             "marian_memo": (0, 4096),
             "first_preview_s": (0, 2),
             "pause_preview_ms": (0, 2000),
@@ -69,6 +72,8 @@ class LatencyExperiments:
         for name, (low, high) in bounds.items():
             if not low <= getattr(result, name) <= high:
                 raise ValueError(f"STARK_EXPERIMENT_{name.upper()} must be between {low} and {high}")
+        if bool(result.draft_model_id) != bool(result.draft_tokens):
+            raise ValueError("STARK_EXPERIMENT_DRAFT_MODEL_ID and DRAFT_TOKENS must both be set or both be empty/zero")
         if result.incremental_stt not in {"off", "rolling", "stream"}:
             raise ValueError("STARK_EXPERIMENT_INCREMENTAL_STT must be off, rolling, or stream")
         if bool(result.early_clause_s) != bool(result.early_clause_pause_ms):

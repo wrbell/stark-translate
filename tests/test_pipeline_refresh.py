@@ -101,7 +101,7 @@ class TestParakeetFactory:
         assert eng.backend == "parakeet"
         assert not eng._loaded
 
-    def test_load_without_nemo_raises(self, monkeypatch):
+    def test_load_without_nemo_raises(self, monkeypatch, tmp_path):
         import builtins
 
         from engines.parakeet_engine import ParakeetEngine
@@ -114,7 +114,9 @@ class TestParakeetFactory:
             return real_import(name, *args, **kwargs)
 
         monkeypatch.setattr(builtins, "__import__", _blocked)
-        eng = ParakeetEngine()
+        checkpoint = tmp_path / "fixture.nemo"
+        checkpoint.write_bytes(b"mock checkpoint, never loaded")
+        eng = ParakeetEngine(model_id=str(checkpoint))
         with pytest.raises(ImportError, match="nemo_toolkit"):
             eng.load()
 
