@@ -1,0 +1,39 @@
+{
+  "method": "first_token_ms = timing_stages_ms.translation_started + ttft_ms_a - timing_stages_ms.speech_end (token 1 produced; slight underestimate of the wire: prompt build + lock wait before ttft, plus 2 more tokens before the first translation_stream batch); Marian-routed finals count at final-ready since they are not streamed",
+  "inputs": [
+    "metrics/diagnostics_ts0911_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+    "metrics/diagnostics_ts0911_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+    "metrics/diagnostics_ts0911_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+    "metrics/diagnostics_ts0911_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+    "metrics/diagnostics_ts0911_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+    "metrics/diagnostics_ts0911_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl"
+  ],
+  "clips": {
+    "A": {
+      "gemma_n": 45,
+      "gemma_first_token_p50": 1206.2,
+      "gemma_first_token_p95": 1346.1,
+      "gemma_final_ready_p50": 1970.5,
+      "gemma_final_ready_p95": 2424.6,
+      "gen_lock_wait_p95": 78.4,
+      "marian_n": 18,
+      "marian_final_ready_p50": 804.0,
+      "marian_final_ready_p95": 1666.9,
+      "all_first_visible_p50": 1193.8,
+      "all_first_visible_p95": 1532.9
+    },
+    "B": {
+      "gemma_n": 129,
+      "gemma_first_token_p50": 1127.0,
+      "gemma_first_token_p95": 1264.9,
+      "gemma_final_ready_p50": 1618.7,
+      "gemma_final_ready_p95": 1914.5,
+      "gen_lock_wait_p95": 79.6,
+      "marian_n": 75,
+      "marian_final_ready_p50": 868.8,
+      "marian_final_ready_p95": 984.0,
+      "all_first_visible_p50": 1089.9,
+      "all_first_visible_p95": 1228.9
+    }
+  }
+}
