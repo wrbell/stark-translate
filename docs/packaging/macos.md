@@ -2,8 +2,8 @@
 
 The supported Mac path is Python on Apple Silicon, with Parakeet for English STT,
 Whisper Turbo for Spanish, Gemma 4 E4B OptiQ for finals and Marian for partials.
-A signed `.app` remains deferred. The PyPI release needs its trusted publisher
-configured; use a checkout, complete Mac ZIP, or verified wheel until publication succeeds.
+A signed `.app` remains deferred. PyPI publication is deferred by decision (2026-09-11);
+install from a checkout, the complete Mac ZIP, or the verified wheel attached to the GitHub Release.
 
 The current [validation packet](../evaluation/mac_followup_20260910/final-760e948/README.md)
 binds source `760e948`, its completed software checks and fresh installed artifacts.

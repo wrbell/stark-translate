@@ -167,7 +167,7 @@ Per user decision (2026-09-09 overnight plan):
 ## CI/CD
 
 10 GitHub Actions workflow files in `.github/workflows/`: Lint, Test (coverage gate),
-Security, Release, Windows MSI Release, PyPI Publish (pending by user choice), Docker
+Security, Release, Windows MSI Release, PyPI Publish (deferred by decision; publish job gated), Docker
 Image (GHCR), Label PRs, Commitlint, Stale. `tests/test_documentation.py` checks this
 count against the filesystem, so update the guides when workflows change.
 

@@ -18,7 +18,7 @@ This document describes v2026.14 source (`2026.14.0.0`), with prior integration 
 [PR #192](https://github.com/wrbell/stark-translate/pull/192) and the EN↔ES follow-up in
 [PR #196](https://github.com/wrbell/stark-translate/pull/196). The last published release is v2026.14.0.0 (tagged 2026-09-11 on `50f81c6`; see the [overnight 2026-09-11 status](evaluation/overnight_20260911/STATUS.md)).
 PR #192 merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z; [closeout evidence](evaluation/overnight_closeout_20260910/README.md) retains actual merge/closure records, final ab66ad2 CI and bootstrap ZIP evidence. Source integration remains separate from the acceptance evidence below.
-PyPI publication remains pending (trusted publisher unmapped); the GitHub Release, MSI and tag are published. The [September 9 snapshot](mac_implementation_status_20260909.md)
+PyPI publication is deferred by decision (2026-09-11; the publish job is gated on `PYPI_PUBLISH_ENABLED`); the GitHub Release, MSI and tag are published. The [September 9 snapshot](mac_implementation_status_20260909.md)
 preserves earlier counts and artifact identities; those do not certify later changes.
 
 EN↔ES is the production and latency priority. Mac defaults remain Parakeet English,

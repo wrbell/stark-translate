@@ -19,7 +19,7 @@ Fully on-device, live bilingual speech-to-text for church outreach at Stark Road
 > and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > The last published release is **v2026.14.0.0** (tagged 2026-09-11; GitHub Release with Mac/NVIDIA/Windows
 > ZIPs and the MSI). Source integration, release publication and service certification are separate;
-> PyPI publication remains pending until the trusted publisher is mapped.
+> PyPI publication is deferred by decision (2026-09-11); the publish job stays disabled until the repository variable `PYPI_PUBLISH_ENABLED` is set.
 > Contracts: [`docs/current_architecture.md`](docs/current_architecture.md) · evidence:
 > [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) · remaining work:
 > [`docs/backlog.json`](docs/backlog.json) (rendered as [`docs/backlog.md`](docs/backlog.md)).
@@ -219,7 +219,7 @@ pytest tests/test_documentation.py -v
 
 10 GitHub Actions workflow files in `.github/workflows/`: Lint, Test (3.11 + 3.12, coverage
 gate in `test.yml`), Security (pip-audit), Release, Windows MSI Release, PyPI Publish
-(tag/manual-triggered; publication and trusted publisher pending), Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in
+(tag/manual-triggered build; publishing deferred by decision), Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in
 `pyproject.toml`. Validated CPU suite counts live only in
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md).
 
@@ -306,7 +306,7 @@ implemented in the integrated source; recorded evidence and remaining gates are 
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) and
 [`docs/lite_profiles.md`](docs/lite_profiles.md). PR #192 merged into main;
 [closeout evidence](docs/evaluation/overnight_closeout_20260910/README.md) records the
-merge and justified issue closures. Tag `v2026.14.0.0` and its GitHub Release/MSI were published on 2026-09-11; PyPI remains pending (trusted publisher unmapped).
+merge and justified issue closures. Tag `v2026.14.0.0` and its GitHub Release/MSI were published on 2026-09-11; PyPI publication is deferred by decision (2026-09-11).
 
 **Live microphone (2026-09-09 → 10):** the built-in-mic session stalled after model load
 (no audio frames, operator showed RUNNING from the CSV header) while file replay passed. The
