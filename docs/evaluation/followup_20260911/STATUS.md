@@ -13,7 +13,7 @@
 | P3 GPU revalidation (normalized EN/ES + 3 paired replays vs `stt_env`) | PENDING | | | | | |
 | P4 launcher switch + rollback drill | PENDING | | | | | |
 | D1 PyPI deferral (workflow gate + backlog) | DONE | 2026-09-11T15:20Z | 2026-09-11T15:34Z | [backlog.md](../../backlog.md) | #207 (merged `71de7b1`) | publish job gated on PYPI_PUBLISH_ENABLED; item deferred |
-| X1 tail harness + `serial_finals` flag PR (Codex) | RUNNING | 2026-09-11T15:16Z | | | | |
+| X1 tail harness + `serial_finals` flag PR (Codex) | RUNNING | 2026-09-11T15:16Z | | | #aborted: you must first push the current branch to a remote, or use the --head flag (auto-merge) | Codex done 15:33Z; full suite 2980 passed |
 | X2 tail screen runs (2 clips × 360 s, ctl/A1/A2 × 3) | PENDING | | | | | after P4 and X1 |
 | X3 tail evidence PR | PENDING | | | | | |
 | C1 closeout docs (backlog, status guides) | PENDING | | | | | last |
@@ -24,3 +24,4 @@
 - 15:34Z Codex lanes C1 (promotion) and C2 (tail harness) running since 15:16Z. PyPI deferral PR #207 opened with auto-merge. 360 s clips cut: A = 12_14_25 @ 1290 s (speech coverage 0.895), B = 2_8_26 @ 1170 s (0.760; the best 360 s window anywhere in that sermon is 0.777, so the declared coverage floor is 0.75, recorded before any run); no music-like gaps in either.
 - 15:50Z D1 merged (#207, main `71de7b1`). Promotion source PR #208 opened with auto-merge after review and a full local suite (2975 passed); branch updated onto main. Tail Codex lane still running. Tail-screen protocol.json declared (sha256 fd19d940…) and 360 s clips frozen before any run.
 - 15:33Z #208 merged (main `337790a`); #207 and #199–#205 hunks verified present. Promoted `venv` build chain started from `337790a` (wheel → hash-pinned resolve/install → native smoke → pip-audit → doctor).
+- 15:40Z Tail harness PR #aborted: you must first push the current branch to a remote, or use the --head flag opened with auto-merge (serial_finals flag, STT overlap tracing, route fix, tail_screen_report). Promoted venv: wheel built from `337790a`, metadata OK, hash-pinned resolution identical to the audited candidate's third-party set (123 packages); install running.
