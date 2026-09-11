@@ -176,7 +176,7 @@ benchmark numbers in guides.
 10 GitHub Actions workflow files in `.github/workflows/`: Lint, Test (3.11 + 3.12,
 coverage gate in `test.yml`), Security (pip-audit + Bandit; B615 skipped in CI —
 see [`docs/evaluation/mac_v2026_14_security.md`](docs/evaluation/mac_v2026_14_security.md)),
-Release, Windows MSI Release, PyPI Publish (tag-triggered; trusted publisher pending),
+Release, Windows MSI Release, PyPI Publish (tag-triggered build; publishing deferred by decision, gated on `PYPI_PUBLISH_ENABLED`),
 Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in `pyproject.toml`.
 
 ```bash

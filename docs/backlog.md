@@ -9,7 +9,7 @@
 - **Main release:** `v2026.14.0.0` — PR #196 merged into main at ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6 on 2026-09-11T01:00:13Z, from reviewed 1b723bd87f4a2f4adecd081a281ded26cafbb0bf. Overnight 2026-09-11 PRs #199-#203 merged afterwards; annotated tag v2026.14.0.0 was pushed on 50f81c6 at 2026-09-11T02:53Z with a GitHub Release (Mac/NVIDIA/Windows ZIPs) and the MSI.
 - **Local candidate:** `2026.14.0.0` on `main` (base `958bb5c9425473256038bae04ce95ee1c32c7ae8`)
 - **Draft PR:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) — merged into main at ea4af9a7efc87cd6fc8c86787d15c5610ab1ddd6 on 2026-09-11T01:00:13Z; required CI and all three Cursor reviews passed on 1b723bd87f4a2f4adecd081a281ded26cafbb0bf. Actual receipts: docs/evaluation/mac_followup_20260910/integration-closeout/README.md.
-- **Publication:** User authorized the v2026.14.0.0 tag on 2026-09-11: release.yml and release-win.yml succeeded; pypi.yml failed with invalid-publisher (trusted publisher not mapped); docker.yml failed on the pre-existing Dockerfile defect fixed in PR #203 and is re-dispatched after that merge. Published tags do not move.
+- **Publication:** User authorized the v2026.14.0.0 tag on 2026-09-11: release.yml and release-win.yml succeeded; pypi.yml failed with invalid-publisher (trusted publisher not mapped); docker.yml failed on the pre-existing Dockerfile defect fixed in PR #203 and is re-dispatched after that merge. Published tags do not move. 2026-09-11: PyPI publication deferred by decision; pypi.yml publish job gated on PYPI_PUBLISH_ENABLED (unset). GHCR image ghcr.io/wrbell/stark-translate:v2026.14.0.0 was pushed from 7aac2fd after the Dockerfile fixes (#203/#204).
 
 PR #192 and PR #196 source integration are complete with separate immutable evidence. Local artifacts, installed file replays and documentation checks passed; source merge does not certify human, physical-device or CUDA gates. Historical failures remain failed; public package/release publication remains separately deferred.
 
@@ -197,15 +197,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Notes:** Sixty original Jacobo/Santiago preference candidates are prepared, explicitly unapproved and excluded from training. Available exclusion files were checked; the missing versioned WSL holdout is still required. No CPO continue, COMET-22 or trained-canary success is claimed.
 - **Next action:** Review candidates against the complete WSL holdouts, obtain explicit preference approval, run one CPO continue from v2 and re-score the canaries and 500-verse holdout.
 
-### `pypi-publication` — PyPI trusted publisher, public artifact uploads and release tag
-
-- **Priority:** P2 · **Machine:** any · **Certification:** pending
-- **Depends on:** `pr-192-integration`
-- **Sources:** `docs/mac_implementation_status.md`, `.github/workflows/pypi.yml`, `docs/evaluation/overnight_20260911/STATUS.md`
-- **Acceptance:** Trusted publisher mapped (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi), a new version tag pushed, and the PyPI workflow green.
-- **Notes:** Publication is explicitly pending by user choice; source/issue publishing and final main merge are authorized. Local wheel/sdist/Mac ZIP artifacts are already mechanically validated, which does not authorize PyPI/GHCR/release uploads. 2026-09-11: annotated tag v2026.14.0.0 pushed on main 50f81c6 with user authorization. release.yml succeeded (GitHub Release with wheel/sdist/Mac ZIP), release-win.yml succeeded (MSI uploaded), pypi.yml built but the publish job failed with invalid-publisher (no trusted publisher mapped), docker.yml failed on a pre-existing Dockerfile defect (workers.py not copied into the build context) that had failed every main push since 2026-09-10.
-- **Next action:** Map the PyPI trusted publisher (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi) and re-run the PyPI workflow for the existing tag; GHCR publication needs the Dockerfile fix and a workflow_dispatch with push=true. Published tags do not move.
-
 ## Experimental
 
 ### `conservative-marian-routing` — Conservative Marian partial routing
@@ -218,6 +209,15 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Next action:** Keep opt-in.
 
 ## Deferred
+
+### `pypi-publication` — PyPI trusted publisher, public artifact uploads and release tag
+
+- **Priority:** P2 · **Machine:** any · **Certification:** pending
+- **Depends on:** `pr-192-integration`
+- **Sources:** `docs/mac_implementation_status.md`, `.github/workflows/pypi.yml`, `docs/evaluation/overnight_20260911/STATUS.md`
+- **Acceptance:** Deferred by decision on 2026-09-11: no PyPI publication is planned. If publication is later wanted: map the trusted publisher (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi), set the repository variable PYPI_PUBLISH_ENABLED=true, push a new version tag, and see the PyPI workflow green.
+- **Notes:** Publication is explicitly pending by user choice; source/issue publishing and final main merge are authorized. Local wheel/sdist/Mac ZIP artifacts are already mechanically validated, which does not authorize PyPI/GHCR/release uploads. 2026-09-11: annotated tag v2026.14.0.0 pushed on main 50f81c6 with user authorization. release.yml succeeded (GitHub Release with wheel/sdist/Mac ZIP), release-win.yml succeeded (MSI uploaded), pypi.yml built but the publish job failed with invalid-publisher (no trusted publisher mapped), docker.yml failed on a pre-existing Dockerfile defect (workers.py not copied into the build context) that had failed every main push since 2026-09-10. 2026-09-11: Willem decided not to publish to PyPI. The publish job in pypi.yml is now gated on the repository variable PYPI_PUBLISH_ENABLED (unset, so it is skipped and no longer fails on tags); the build job still validates the release identity, wheel and out-of-checkout smoke on every tag. Published tags do not move.
+- **Next action:** None while deferred. To publish later: map the trusted publisher, set PYPI_PUBLISH_ENABLED=true and push a new tag; the v2026.14.0.0 tag itself is never re-pushed.
 
 ### `issue-138-hindi-zero-shot` — Hindi zero-shot baseline on church audio (#138)
 
@@ -461,8 +461,8 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 | Status | Count |
 |--------|------:|
 | In Progress | 5 |
-| Pending Input Or Hardware | 13 |
+| Pending Input Or Hardware | 12 |
 | Experimental | 1 |
-| Deferred | 5 |
+| Deferred | 6 |
 | Implemented | 5 |
 | Validated | 14 |

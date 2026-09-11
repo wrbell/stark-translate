@@ -76,7 +76,9 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/stark-translate
-    if: github.event_name == 'push' && github.ref_type == 'tag' && !inputs.dry_run
+    # Publishing is deferred by decision (2026-09-11); set the repository variable
+    # PYPI_PUBLISH_ENABLED=true (after mapping the PyPI trusted publisher) to re-enable it.
+    if: vars.PYPI_PUBLISH_ENABLED == 'true' && github.event_name == 'push' && github.ref_type == 'tag' && !inputs.dry_run
     steps:
       - uses: actions/download-artifact@v8
         with:
