@@ -6,14 +6,19 @@ import json
 import struct
 import subprocess
 import sys
+import tempfile
 import threading
 import time
+import uuid
+from collections import deque
 from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 
 from operator_app.processes import cleanup_children
+from tools.capture_protocol import count, read_terminal_receipt, status_from_metadata
 from tools.pipeline_timing import capture_stamp
 
 
@@ -25,14 +30,23 @@ def worker_argv(options):
     return [sys.executable, "-m", "tools.capture_worker", json.dumps(options)]
 
 
-def probe_audio(mode, device=None, duration_s=2, *, argv=None):
+def probe_audio(mode, device=None, duration_s=2, *, device_name=None, device_host_api=None, argv=None):
     """A hung native device open is terminated after a bounded timeout."""
     if not 0 < duration_s <= 5:
         raise ValueError("Audio tests must last at most five seconds")
     if mode not in {"probe", "output"}:
         raise ValueError("Invalid audio test")
     proc = subprocess.Popen(
-        argv or worker_argv({"mode": mode, "device": device, "duration_s": duration_s}),
+        argv
+        or worker_argv(
+            {
+                "mode": mode,
+                "device": device,
+                "duration_s": duration_s,
+                "device_name": device_name,
+                "device_host_api": device_host_api,
+            }
+        ),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -67,15 +81,38 @@ class IsolatedInputStream:
         dtype,
         blocksize,
         device,
+        device_name=None,
+        device_host_api=None,
         startup_timeout=5.0,
         idle_timeout=3.0,
         argv=None,
     ):
         self.callback = callback
         self.rate, self.channels = samplerate, channels
-        self.argv = argv or worker_argv(
-            {"samplerate": samplerate, "channels": channels, "dtype": dtype, "blocksize": blocksize, "device": device}
+        self._worker_options = {
+            "samplerate": samplerate,
+            "channels": channels,
+            "dtype": dtype,
+            "blocksize": blocksize,
+            "device": device,
+            "device_name": device_name,
+            "device_host_api": device_host_api,
+        }
+        self.argv = argv or worker_argv(self._worker_options)
+        self._terminal_expected = argv is None and sys.platform != "win32"
+        self._terminal_status = (
+            "pending"
+            if self._terminal_expected
+            else "unavailable_legacy_worker"
+            if argv is not None
+            else "unsupported_platform"
         )
+        self._terminal_directory = None
+        self._terminal_path = None
+        self._capture_token = None
+        self._terminal_receipt = None
+        self._accounting_failures = []
+        self._input_overflows = self._observed_end = 0
         self.startup_timeout, self.idle_timeout = startup_timeout, idle_timeout
         self.finished = threading.Event()
         self.error = None
@@ -83,15 +120,39 @@ class IsolatedInputStream:
         self.sample_offset = 0
         self._stop = threading.Event()
         self._last_frame = None
+        self._callback_started = None
+        self._timeout_stage = None
         self._started = None
         self._proc = self._reader = self._watcher = None
+        self.trace = None  # Optional bounded session trace; no PCM is recorded.
+        self._telemetry_lock = threading.Lock()
+        self._frames_received = self._gap_count = 0
+        self._max_pipe_age_ms = self._max_capture_age_ms = 0.0
+        self._source_gaps = deque(maxlen=32)
+        self._opened_device = None
 
     def __enter__(self):
         # No native calls or wait for permission on the inference event loop.
         self._started = time.monotonic()
-        self._proc = subprocess.Popen(
-            self.argv, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, start_new_session=False
-        )
+        if self._terminal_expected:
+            self._terminal_directory = tempfile.TemporaryDirectory(prefix="stark-capture-")
+            self._terminal_path = Path(self._terminal_directory.name) / "terminal.json"
+            self._capture_token = uuid.uuid4().hex
+            self.argv = worker_argv(
+                {
+                    **self._worker_options,
+                    "terminal_path": str(self._terminal_path),
+                    "capture_token": self._capture_token,
+                }
+            )
+        try:
+            self._proc = subprocess.Popen(
+                self.argv, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, start_new_session=False
+            )
+        except BaseException:
+            if self._terminal_directory is not None:
+                self._terminal_directory.cleanup()
+            raise
         self._reader = threading.Thread(target=self._read, name="capture-reader", daemon=True)
         self._watcher = threading.Thread(target=self._watch, name="capture-watchdog", daemon=True)
         self._reader.start()
@@ -108,60 +169,170 @@ class IsolatedInputStream:
         return bytes(result)
 
     def _read(self):
+        expected_sample = self.sample_offset
         try:
             while not self._stop.is_set():
                 size = struct.unpack("!I", self._bytes(4))[0]
                 if not 1 <= size <= 8192:
                     raise AudioCaptureError("Invalid capture frame")
                 metadata = json.loads(self._bytes(size))
+                if metadata.get("input_device") is not None:
+                    self._opened_device = metadata["input_device"]
                 frames, channels = metadata["frames"], metadata["channels"]
                 if not isinstance(frames, int) or not 1 <= frames <= self.rate or channels != self.channels:
                     raise AudioCaptureError("Invalid capture sample bounds")
                 samples = np.frombuffer(self._bytes(frames * channels * 4), dtype="float32").reshape(frames, channels)
                 self._last_frame = time.monotonic()
-                newly_dropped = metadata["dropped"] - self.dropped_samples
-                self.dropped_samples = metadata["dropped"]
+                parsed_at = time.perf_counter()
+                fifo, overflows, status = status_from_metadata(metadata, self.dropped_samples, self._input_overflows)
+                newly_dropped = fifo - self.dropped_samples
+                self.dropped_samples, self._input_overflows = fifo, overflows
+                source_start = count(metadata["sample_start"], "sample_start")
+                self._observed_end = max(self._observed_end, source_start + frames)
                 # perf_counter is a common host monotonic clock. Anchor the ADC
                 # offset at child callback receipt, never at delayed pipe receipt.
                 stamp = capture_stamp(frames, self.rate, SimpleNamespace(**metadata), received=metadata["received"])
                 stamp = replace(
                     stamp,
-                    sample_start=self.sample_offset + metadata["sample_start"],
-                    sample_end=self.sample_offset + metadata["sample_start"] + frames,
+                    sample_start=self.sample_offset + source_start,
+                    sample_end=self.sample_offset + source_start + frames,
                     sample_rate=self.rate,
                 )
-                status = f"capture_overflow:{newly_dropped}" if newly_dropped else metadata["status"] or None
-                self.callback(samples, frames, stamp, status)
+                pipe_age_ms = max(0.0, (parsed_at - metadata["received"]) * 1000)
+                capture_age_ms = max(0.0, (parsed_at - stamp.end) * 1000)
+                with self._telemetry_lock:
+                    self._frames_received += 1
+                    self._max_pipe_age_ms = max(self._max_pipe_age_ms, pipe_age_ms)
+                    self._max_capture_age_ms = max(self._max_capture_age_ms, capture_age_ms)
+                    if stamp.sample_start > expected_sample:
+                        gap = {
+                            "sample_start": expected_sample,
+                            "sample_end": stamp.sample_start,
+                            "sample_rate": self.rate,
+                        }
+                        self._source_gaps.append(gap)
+                        self._gap_count += 1
+                        if self.trace is not None:
+                            self.trace.record("capture_pipe_gap", **gap)
+                    expected_sample = stamp.sample_end
+                if self.trace is not None:
+                    self.trace.record(
+                        "capture_pipe_received",
+                        sample_start=stamp.sample_start,
+                        sample_end=stamp.sample_end,
+                        sample_rate=self.rate,
+                        callback_received_at_ms=(metadata["received"] - self.trace.origin) * 1000,
+                        callback_to_pipe_ms=pipe_age_ms,
+                        capture_age_ms=capture_age_ms,
+                        upstream_dropped_samples=newly_dropped,
+                        worker_fifo_dropped_samples=newly_dropped,
+                        portaudio_input_overflow_callbacks=status.input_overflow_callbacks,
+                        portaudio_input_overflow_lost_samples=None,
+                    )
+                self._callback_started = time.monotonic()
+                try:
+                    self.callback(samples, frames, stamp, status or None)
+                finally:
+                    # The input idle clock excludes time spent in the consumer.
+                    self._last_frame = time.monotonic()
+                    self._callback_started = None
         except Exception as exc:
             if not self._stop.is_set() and self.error is None:
                 self.error = exc if isinstance(exc, AudioCaptureError) else AudioCaptureError(type(exc).__name__)
                 self.finished.set()
 
+    def capture_snapshot(self):
+        with self._telemetry_lock:
+            return {
+                "frames_received": self._frames_received,
+                "upstream_dropped_samples": self.dropped_samples,
+                "worker_fifo_dropped_samples_observed": self.dropped_samples,
+                "portaudio_input_overflow_callbacks_observed": self._input_overflows,
+                "portaudio_input_overflow_lost_samples": None,
+                "terminal_accounting": {
+                    "status": self._terminal_status,
+                    "receipt": self._terminal_receipt,
+                    "scope": "Worker callback/FIFO counters; PortAudio overflow does not supply a lost-sample count",
+                },
+                "capture_completeness_failures": list(self._accounting_failures),
+                "max_callback_to_pipe_ms": self._max_pipe_age_ms,
+                "max_capture_age_ms": self._max_capture_age_ms,
+                "source_gaps": list(self._source_gaps),
+                "source_gaps_truncated": self._gap_count > len(self._source_gaps),
+                "timeout_stage": self._timeout_stage,
+                "opened_device": self._opened_device,
+            }
+
     def _watch(self):
         while not self._stop.wait(0.1) and not self.finished.is_set():
-            elapsed = time.monotonic() - (self._last_frame or self._started)
+            callback_started = self._callback_started
+            elapsed = time.monotonic() - (callback_started or self._last_frame or self._started)
             limit = self.idle_timeout if self._last_frame else self.startup_timeout
             if elapsed > limit:
-                self.error = AudioCaptureError(
-                    "Microphone delivered no samples. Check permission and reconnect the device."
-                )
+                if callback_started is not None:
+                    # Preserve the bounded failure policy without diagnosing a
+                    # healthy device as silent while its reader is backpressured.
+                    self._timeout_stage = "consumer_backpressure"
+                    self.error = AudioCaptureError("Audio processing backpressure exceeded the capture timeout.")
+                else:
+                    self._timeout_stage = "input_idle" if self._last_frame else "input_startup"
+                    self.error = AudioCaptureError(
+                        "Microphone delivered no samples. Check permission and reconnect the device."
+                    )
                 self.finished.set()
                 self._proc.kill()
                 return
 
     def __exit__(self, *args):
         self._stop.set()
-        if self._proc is not None:
-            if self._proc.poll() is None:
-                self._proc.terminate()
-                try:
-                    self._proc.wait(timeout=0.5)
-                except subprocess.TimeoutExpired:
-                    self._proc.kill()
-            self._proc.wait(timeout=2)
-            cleanup_children(self._proc.pid, group=False)
-        for thread in (self._reader, self._watcher):
-            if thread:
-                thread.join(timeout=2)
-        if self._proc and self._proc.stdout:
-            self._proc.stdout.close()
+        try:
+            try:
+                if self._proc is not None:
+                    if self._proc.poll() is None:
+                        self._proc.terminate()
+                        try:
+                            self._proc.wait(timeout=0.5)
+                        except subprocess.TimeoutExpired:
+                            self._proc.kill()
+                    self._proc.wait(timeout=2)
+                    cleanup_children(self._proc.pid, group=False)
+            finally:
+                for thread in (self._reader, self._watcher):
+                    if thread:
+                        thread.join(timeout=2)
+                # Closing a buffered pipe while its reader holds the lock can
+                # otherwise turn a failed bounded shutdown into an unbounded wait.
+                if self._proc and self._proc.stdout and (self._reader is None or not self._reader.is_alive()):
+                    self._proc.stdout.close()
+        finally:
+            self._finish_terminal_accounting()
+
+    def _finish_terminal_accounting(self):
+        if not self._terminal_expected or self._terminal_status != "pending":
+            return
+        try:
+            if (self._proc is not None and self._proc.poll() is None) or (
+                self._reader is not None and self._reader.is_alive()
+            ):
+                raise ValueError("Capture transport still active")
+            receipt = read_terminal_receipt(
+                self._terminal_path,
+                self._capture_token,
+                observed_fifo=self.dropped_samples,
+                observed_overflows=self._input_overflows,
+                observed_end=self._observed_end,
+            )
+            self._terminal_receipt = receipt
+            self._terminal_status = "verified"
+            if receipt["worker_fifo_dropped_samples"] > self.dropped_samples:
+                self._accounting_failures.append("worker_fifo_samples_dropped_at_close")
+            if receipt["portaudio_input_overflow_callbacks"] > self._input_overflows:
+                self._accounting_failures.append("portaudio_input_overflow_at_close")
+            if receipt["stop_reason"] != "requested_stop":
+                self._accounting_failures.append("capture_worker_error")
+        except (OSError, ValueError, TypeError):
+            self._terminal_status = "unverified"
+            self._accounting_failures.append("capture_terminal_accounting_unverified")
+        finally:
+            if self._terminal_directory is not None:
+                self._terminal_directory.cleanup()

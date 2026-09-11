@@ -5,6 +5,17 @@ Whisper Turbo for Spanish, Gemma 4 E4B OptiQ for finals and Marian for partials.
 A signed `.app` remains deferred. The PyPI release needs its trusted publisher
 configured; use a checkout, complete Mac ZIP, or verified wheel until publication succeeds.
 
+The current [validation packet](../evaluation/mac_followup_20260910/final-760e948/README.md)
+binds source `760e948`, its completed software checks and fresh installed artifacts.
+The [installed-delivery record](../evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+records isolated Standard/Lite installs, operator checks, EN/ES file smokes and
+actual dependency findings. Both full-service technical gates passed;
+public raw evidence is indexed in that packet; consult [implementation status](../mac_implementation_status.md)
+for current service and merge decisions. The earlier
+[c13 delivery record](../evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+preserves its failed monitor and blank-preview checks. A completed pipeline alone
+does not establish successful monitoring or a certified service.
+
 ## Install from a checkout or Mac ZIP
 
 Use Python 3.11 or newer and install ffmpeg/PortAudio with your system package manager.
@@ -27,10 +38,13 @@ and translation scoring. Mac installs constrain MLX/OptiQ/Parakeet and PyTorch
 to the verified minor versions; upgrading those lines requires another replay gate. Diarization is still opt-in and its model/latency gate
 must pass before use at a service.
 
-The [current installed-dependency audit](../evaluation/overnight_security/README.md)
+The [earlier installed-dependency audit](../evaluation/overnight_security/README.md)
 records two unresolved findings in the pinned Mac Torch line and the incompatible
 audio-wheel upgrade attempt. The Lite runtime has a separate clean audit; neither
-that result nor filtered CI certifies the full Mac dependency set.
+that result nor filtered CI certifies the full Mac dependency set. A separate
+[full-application dependency candidate](../evaluation/mac_followup_20260910/torch-full-application-candidate.md)
+passed installed EN/ES inference and a zero-known-finding audit of 123 third-party
+distributions. It has not replaced production bounds or the working `stt_env`.
 
 `bootstrap.sh --skip-systemd` performs the dependency install, backend-specific
 model setup and CLI preflight without requiring an already-running web server.
@@ -40,13 +54,23 @@ No macOS login service is installed unless `--install-launchd` is supplied.
 
 `setup --backend mlx` fetches only Mac defaults, including both language directions.
 Use `--include e2b`, `--include tts`, or `--include translategemma` for optional
-profiles. E2B is a faster, separately evaluated profile; it does not replace E4B.
-Piper setup downloads only the EN/ES voice and configuration files.
+model groups. E2B is an opt-in final model; the [fixed-reference comparison](../evaluation/mac_followup_20260910/translation-comparison.md)
+found faster isolated translation with a quality tradeoff. That result does not
+establish faster caption delivery or replace the E4B default.
+Piper setup downloads only the EN/ES voice and configuration files. Standard setup
+also accepts optional `--include whisper-fallback`, `--include diarization`
+(SpeechBrain model), and `--include diarization-pyannote`. Optional runtime packages
+and any gated model access are still required; [current access/validation limits](../evaluation/mac_followup_20260910/live-hf-pinning.md)
+remain pending. These groups are not included in ordinary setup, and Lite retains
+its `--include tts`-only policy.
 
 Both setup and inference use `engines.model_paths`: explicit existing model paths,
 then `--models-dir` / `STARK_MODELS_DIR`, project `models/`, then the Hugging Face
 cache. Setup-installed models are therefore usable by the inference engines.
-Existing pinned HF snapshots are reused. `STARK_MODELS_DIR` must also be set when
+Existing pinned HF snapshots are reused. Setup rejects selected HF entries without
+a full 40-character revision before changing model caches. MLX inference and
+summary loaders use a separate pinned acquisition resolver; doctor/preflight
+lookup remains offline. `STARK_MODELS_DIR` must also be set when
 launching if setup used a custom directory. Snapshot markers include revision and
 manifest version, so changing the manifest cannot silently reuse an old revision.
 

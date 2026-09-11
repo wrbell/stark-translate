@@ -1,0 +1,4571 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-09-10T18:52:34.402866+00:00",
+  "scope": "English-only retained-data review of all 12 runs, six matched candidate pairs and two selector arms.",
+  "artifacts": {
+    "report": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json",
+      "sha256": "c3394548708908ed6f93a3369af16f836534aae8b764e490c2d7f27aaf2bc3af",
+      "bytes": 294597
+    },
+    "selection": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_selection.json",
+      "sha256": "f7d94e14c21cf1322bfa31aa00027696574f8c059c16eedc171ccf9a0dae8ce6",
+      "bytes": 1782
+    },
+    "spec": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen.json",
+      "sha256": "2edb40e3c9badfbbc5a723c04fae1f4aaec59ac4c3de13d8bda12334be8bc7ef",
+      "bytes": 6405
+    },
+    "provenance": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/provenance.json",
+      "sha256": "a4b8b3f1dcf1838342170e1890c8da8c7f201c41356857c807d004875efd70a1",
+      "bytes": 59779
+    }
+  },
+  "source_only_functions": {
+    "tools/source_coverage.py": {
+      "sha256": "62e7c1b4465d771ccd7f64acd92e8491d6e7c75decf89af9618cdc134d4f2720",
+      "functions": [
+        "merged"
+      ]
+    },
+    "tools/fixed_span_delivery.py": {
+      "sha256": "4320ff14f6f9a638a61d96399152feda4ae49943bce10ec182b0a628663af7f1",
+      "functions": [
+        "_number",
+        "fixed_span_delivery"
+      ]
+    },
+    "tools/mac_evaluation.py": {
+      "sha256": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a",
+      "functions": [
+        "_numeric",
+        "stats"
+      ]
+    },
+    "tools/overnight_bench.py": {
+      "sha256": "49549ce0daae0d9ec7d7c0b37870b30682e5dd536dde90f3359bf7ec7e93a700",
+      "functions": [
+        "number",
+        "ranges",
+        "merge_ranges",
+        "coverage_missing",
+        "translated_preview",
+        "stable_hash"
+      ]
+    },
+    "tools/mac_followup_quality.py": {
+      "sha256": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "functions": [
+        "normalize",
+        "word_errors",
+        "contains_term",
+        "chrf_counts",
+        "chrf_score"
+      ]
+    },
+    "tools/mac_followup_latency.py": {
+      "sha256": "ac12808b61279f6bc452a3943fa54f4775ba26ffec5b983d5b45bdd74f35908d",
+      "functions": [
+        "caption_quality",
+        "runtime_errors",
+        "preview_evidence",
+        "preview_comparisons",
+        "speech_intervals",
+        "score_pair"
+      ]
+    },
+    "tools/mac_followup_selection.py": {
+      "sha256": "a6553a89914f665c0f7e18fa862ad66eae29ec306830a08d12b63286f6f23045",
+      "functions": [
+        "select"
+      ]
+    }
+  },
+  "validation": {
+    "actual_inventory": 12,
+    "expected_inventory": 12,
+    "raw_runtime_reference_and_completion_checks_passed": true,
+    "all_six_score_pair_results_exactly_reproduced": true,
+    "selector_exactly_reproduced": true,
+    "quality_recomputed_all_runs": true,
+    "raw_model_hashes_not_recomputed": true
+  },
+  "selection": {
+    "schema_version": 1,
+    "inventory_complete": true,
+    "arms": [
+      {
+        "experiment": "deadline_100ms",
+        "size": "e2b",
+        "clip_id": "fleurs_development_en",
+        "qualified_for_confirmation": false,
+        "complete_three_repeats": true,
+        "all_repeats_nonlatency_guards_passed": false,
+        "passed_repeats": [],
+        "mean_conservative_gain_ms": null,
+        "p95_claim_eligible": false,
+        "rejection_reasons": [
+          "first_preview_tail_regression",
+          "median_gain_below_gate",
+          "memory_regression",
+          "preview_source_coverage_loss",
+          "stage_queue_tail_regression",
+          "tail_regression"
+        ]
+      },
+      {
+        "experiment": "deadline_250ms",
+        "size": "e2b",
+        "clip_id": "fleurs_development_en",
+        "qualified_for_confirmation": false,
+        "complete_three_repeats": true,
+        "all_repeats_nonlatency_guards_passed": false,
+        "passed_repeats": [],
+        "mean_conservative_gain_ms": null,
+        "p95_claim_eligible": false,
+        "rejection_reasons": [
+          "median_gain_below_gate",
+          "memory_regression",
+          "preview_source_coverage_loss",
+          "stage_queue_tail_regression",
+          "tail_regression"
+        ]
+      }
+    ],
+    "qualified_count": 0,
+    "defaults_changed": false,
+    "limitations": "Engineering selection only. Historical references remain unavailable; independent public confirmation and bilingual review are required. Never pool repeat counts for p95 eligibility.",
+    "source_report": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json",
+      "sha256": "c3394548708908ed6f93a3369af16f836534aae8b764e490c2d7f27aaf2bc3af",
+      "size_bytes": 294597
+    }
+  },
+  "worker_summaries": [
+    {
+      "repeat": 0,
+      "experiment": "baseline_anchor",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_en_en.json",
+      "sha256": "e5719e7852e06dfe523b5f23db7f1fe18eb1a10d6891cc629ce014d12a3d0bc6",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 3969.2,
+        "p95": 4078.1
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 2132.134,
+        "p95": 2156.9000000000015
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.6304578855633736,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": -0.18290224640319747,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 1066.15,
+        "p95": 5108.5
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.15000000000000002,
+        "p95": 0.2
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1648082944,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 0,
+        "admitted": 0,
+        "deferred": 0,
+        "cold_prediction": 0,
+        "finite_prediction": 0,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 37,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 0
+      }
+    },
+    {
+      "repeat": 1,
+      "experiment": "baseline_anchor",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_en_en.json",
+      "sha256": "2e2fe9590ce0f551d6487f63b726be58b90ca074a21ba473262439eadd00a78d",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4115.3,
+        "p95": 4140.2
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 1934.7040000000052,
+        "p95": 2031.5810000000001
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 1.1658750008791685,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": -0.32190299437691766,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 307.25,
+        "p95": 5755.6
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.2
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1754234880,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 0,
+        "admitted": 0,
+        "deferred": 0,
+        "cold_prediction": 0,
+        "finite_prediction": 0,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 0
+      }
+    },
+    {
+      "repeat": 2,
+      "experiment": "baseline_anchor",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_en_en.json",
+      "sha256": "b29c9b9d3a291f0e4b2c0f2861c8d3785d149f63c2b10ea8d379fc17a0767e9d",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 5,
+      "preview_unique_source_seconds": 11.551999999999992,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          5.568
+        ],
+        [
+          25.632,
+          30.496
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4246.2,
+        "p95": 4513.4
+      },
+      "update_gap": {
+        "n": 2,
+        "p50": 2252.9500000000007,
+        "p95": 2312.684000000001
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.5050000036135316,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": 0.03088933105270067,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 862.25,
+        "p95": 6713.5
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.15000000000000002,
+        "p95": 0.3
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1621114880,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 0,
+        "admitted": 0,
+        "deferred": 0,
+        "cold_prediction": 0,
+        "finite_prediction": 0,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 5,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 0
+      }
+    },
+    {
+      "repeat": 0,
+      "experiment": "baseline",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r0_fleurs_development_en_en.json",
+      "sha256": "c3926314ecd98fbdfc14401f64f8813916b67839d8918fc239576eb6a2e757b2",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 3927.1,
+        "p95": 3976.6
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 1971.4889999999996,
+        "p95": 2026.9300000000003
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.2511669881641865,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": -0.04215266865988572,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 722.9,
+        "p95": 5237.6
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.2
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1771683840,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 0,
+        "admitted": 0,
+        "deferred": 0,
+        "cold_prediction": 0,
+        "finite_prediction": 0,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 37,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 0
+      }
+    },
+    {
+      "repeat": 1,
+      "experiment": "baseline",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r1_fleurs_development_en_en.json",
+      "sha256": "39b83037c5d5ea9c1607699e38c2c3ed651aacc64f42d833a942a0f48100101a",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 5,
+      "preview_unique_source_seconds": 10.943999999999996,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          5.568
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4035.3,
+        "p95": 4098.2
+      },
+      "update_gap": {
+        "n": 2,
+        "p50": 2109.7525000000023,
+        "p95": 2218.9490000000005
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.15420804265886545,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": -0.01427802878121534,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 658.9,
+        "p95": 4772.8
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.5
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1633910784,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 0,
+        "admitted": 0,
+        "deferred": 0,
+        "cold_prediction": 0,
+        "finite_prediction": 0,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 5,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 0
+      }
+    },
+    {
+      "repeat": 2,
+      "experiment": "baseline",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r2_fleurs_development_en_en.json",
+      "sha256": "f85516933487eeb2ba95d854ed5c211ae85417c15fb6e40538633ecc5d0f9bca",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4073.0,
+        "p95": 4353.9
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 2039.4150000000009,
+        "p95": 2057.9590000000026
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.2101670252159238,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": 0.07808332641919453,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 1015.95,
+        "p95": 8503.3
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.4
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1595441152,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 0,
+        "admitted": 0,
+        "deferred": 0,
+        "cold_prediction": 0,
+        "finite_prediction": 0,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 36,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 0
+      }
+    },
+    {
+      "repeat": 0,
+      "experiment": "deadline_100ms",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_en_en.json",
+      "sha256": "2104996bc2636da5b72bcf948078494f8d59d207b7fbea062446f62a1e62aa50",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 7,
+      "preview_unique_source_seconds": 18.239999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          16.512,
+          21.984
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 4,
+        "p50": 3979.65,
+        "p95": 7085.8
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 2023.3880000000008,
+        "p95": 2044.247000000003
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.5794999888166785,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": -0.089791021309793,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 823.0,
+        "p95": 5455.9
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.3
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 2129461248,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 17,
+        "admitted": 17,
+        "deferred": 0,
+        "cold_prediction": 12,
+        "finite_prediction": 5,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 37,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 7,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 100
+      }
+    },
+    {
+      "repeat": 1,
+      "experiment": "deadline_100ms",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_en_en.json",
+      "sha256": "a4367b25d28d83c6d6d1ddbadb7b0ebe69bfd9a32fc2b03db6399d27bf5c1fcb",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4058.3,
+        "p95": 4081.2
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 2028.3979999999992,
+        "p95": 2082.0769999999993
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.19262509886175394,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": -0.02379168290644884,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 1118.25,
+        "p95": 7199.6
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.1
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1565605888,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 16,
+        "admitted": 16,
+        "deferred": 0,
+        "cold_prediction": 12,
+        "finite_prediction": 4,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "partial_suppressed_discarded_utterance": 1
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 100
+      }
+    },
+    {
+      "repeat": 2,
+      "experiment": "deadline_100ms",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_en_en.json",
+      "sha256": "3f1493ed766700ea2c30bc4cbd8b1f779de1e49b081bd3b614caf1d58b09a9d8",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4179.4,
+        "p95": 4213.8
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 1981.4760000000006,
+        "p95": 2146.566999999999
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.17012492753565311,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": 0.026319331179062516,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 436.4,
+        "p95": 10199.7
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.4
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1657503744,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 16,
+        "admitted": 16,
+        "deferred": 0,
+        "cold_prediction": 12,
+        "finite_prediction": 4,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 100
+      }
+    },
+    {
+      "repeat": 0,
+      "experiment": "deadline_250ms",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_en_en.json",
+      "sha256": "8443e06060cebf67bb6fc188bfef1f8a1913b07e4d17ae6b1efdde0f13ed0f73",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 3980.5,
+        "p95": 4039.4
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 2056.8950000000004,
+        "p95": 2110.785
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.5714580183848739,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": -0.18747201344619197,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 355.5,
+        "p95": 7563.7
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.1
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1796325376,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 15,
+        "admitted": 15,
+        "deferred": 0,
+        "cold_prediction": 11,
+        "finite_prediction": 4,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 39,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 250
+      }
+    },
+    {
+      "repeat": 1,
+      "experiment": "deadline_250ms",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_en_en.json",
+      "sha256": "0174a28d5a9d3437bfa2712fee2a765a91289a5b1a36e1a1245b7cc0ba247d47",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 4058.3,
+        "p95": 4225.2
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 1954.7889999999989,
+        "p95": 2089.4270000000015
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.2936249366030097,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": 0.08448570345838866,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 1081.75,
+        "p95": 8979.9
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.2
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1751941120,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 19,
+        "admitted": 16,
+        "deferred": 3,
+        "cold_prediction": 12,
+        "finite_prediction": 7,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 35,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "partial_deferred_deadline": 3
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 250
+      }
+    },
+    {
+      "repeat": 2,
+      "experiment": "deadline_250ms",
+      "file": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_en_en.json",
+      "sha256": "a0a71bcfdc7a69a4b8d7f9a3dc84ae77fce50930e2b5f09cd777136ff53d655d",
+      "completed": true,
+      "final_count": 6,
+      "eligible_anchor_count": 6,
+      "translated_previews": 6,
+      "preview_unique_source_seconds": 12.767999999999995,
+      "preview_intervals_seconds": [
+        [
+          1.312,
+          7.392
+        ],
+        [
+          25.632,
+          29.888
+        ],
+        [
+          35.136,
+          37.568
+        ]
+      ],
+      "first_preview": {
+        "n": 3,
+        "p50": 3976.8,
+        "p95": 3982.7
+      },
+      "update_gap": {
+        "n": 3,
+        "p50": 1929.399000000005,
+        "p95": 2084.7700000000004
+      },
+      "final_source_seconds": 34.71999999999999,
+      "source_accounting_complete": true,
+      "expected_source_samples": 2253120,
+      "coverage_sample_rate": 48000,
+      "capture_handoff_dropped_frames": 0,
+      "upstream_dropped_samples": 0,
+      "input_queue_max_wait_ms": 0.24512503296136856,
+      "input_queue_high_water": 1,
+      "input_queue_disjoint_growth_ms": 0.04980565669635932,
+      "stt_queue_wait": {
+        "n": 6,
+        "p50": 756.0999999999999,
+        "p95": 8929.6
+      },
+      "translation_queue_wait": {
+        "n": 6,
+        "p50": 0.1,
+        "p95": 0.2
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1971159040,
+        "peak_metal_bytes": null
+      },
+      "caption_quality": {
+        "wer": 0.10784313725490197,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "chrf": 54.6750798145335,
+        "term_opportunities": 0,
+        "term_recall": null,
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d"
+      },
+      "deadline_admission": {
+        "events": 19,
+        "admitted": 16,
+        "deferred": 3,
+        "cold_prediction": 12,
+        "finite_prediction": 7,
+        "trace_events_discarded": 0
+      },
+      "partial_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 35,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "partial_suppressed_discarded_utterance": 1,
+        "partial_deferred_deadline": 3
+      },
+      "model_bindings": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "runtime_settings": {
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_settings": {
+          "whisper_model": "mlx-community/whisper-large-v3-turbo",
+          "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+          "cpu_threads": 3,
+          "num_workers": 1,
+          "local_files_only": true,
+          "whisper_cuda_model": "whisper-small",
+          "whisper_cuda_compute_type": "int8",
+          "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+          "use_chunked_algo": false,
+          "chunk_length_s": 30,
+          "fallback_on_low_conf": false,
+          "fallback_threshold": -1.2,
+          "hallucination_threshold": 2.4,
+          "word_timestamps": false,
+          "beam_size": 1,
+          "spec_decode": false,
+          "draft_model": null,
+          "backend": "faster-whisper",
+          "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+          "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+          "compile_mode": null,
+          "warmup_seconds": 1
+        },
+        "vad": {
+          "threshold": 0.3,
+          "silence_trigger": 0.5,
+          "max_utterance": 8.0,
+          "partial_interval": 0.6,
+          "backend": "onnx",
+          "artifact": {
+            "source": "managed_cache",
+            "package": "silero-vad",
+            "package_version": "6.2.1",
+            "backend": "onnx",
+            "opset_version": 16,
+            "path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/silero-vad-6.2.1.onnx",
+            "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+            "source_revision": "7e30209a3e901f9842f81b225f3e93d8199902b1",
+            "size_bytes": 2327524
+          }
+        },
+        "deadline_margin_ms": 250
+      }
+    }
+  ],
+  "pairs": [
+    {
+      "repeat": 0,
+      "experiment": "deadline_100ms",
+      "status": "rejected",
+      "reasons": [
+        "first_preview_tail_regression",
+        "median_gain_below_gate",
+        "memory_regression",
+        "stage_queue_tail_regression"
+      ],
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "memory_comparisons": [
+        {
+          "field": "peak_rss_bytes",
+          "control": 1771683840,
+          "candidate": 2129461248,
+          "allowed_increase": 268435456
+        },
+        {
+          "field": "peak_rss_bytes",
+          "control": 1648082944,
+          "candidate": 2129461248,
+          "allowed_increase": 268435456
+        }
+      ],
+      "queue_comparisons": [
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.04215266865988572,
+          "candidate": -0.089791021309793
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 5237.6,
+          "candidate_p95_ms": 5455.9
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.2,
+          "candidate_p95_ms": 0.3
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        },
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.18290224640319747,
+          "candidate": -0.089791021309793
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 5108.5,
+          "candidate_p95_ms": 5455.9
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.2,
+          "candidate_p95_ms": 0.3
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        }
+      ],
+      "preview_responsiveness": [
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 3927.1,
+              "p95": 3976.6
+            },
+            "candidate": {
+              "n": 4,
+              "p50": 3979.65,
+              "p95": 7085.8
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 3881.8,
+                "candidate_ms": 3852.5
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 3976.6,
+                "candidate_ms": 3967.8
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 3927.1,
+                "candidate_ms": 3991.5
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 3927.1,
+              "p95": 3976.6
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 3967.8,
+              "p95": 3991.5
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 1971.4889999999996,
+              "p95": 2026.9300000000003
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 2023.3880000000008,
+              "p95": 2044.247000000003
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1971.4889999999996,
+                "candidate_ms": 1943.5740000000005
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2026.9300000000003,
+                "candidate_ms": 2023.3880000000008
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 1939.4029999999984,
+                "candidate_ms": 2044.247000000003
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 1971.4889999999996,
+              "p95": 2026.9300000000003
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 2023.3880000000008,
+              "p95": 2044.247000000003
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ],
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 3969.2,
+              "p95": 4078.1
+            },
+            "candidate": {
+              "n": 4,
+              "p50": 3979.65,
+              "p95": 7085.8
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 3937.8,
+                "candidate_ms": 3852.5
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4078.1,
+                "candidate_ms": 3967.8
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 3969.2,
+                "candidate_ms": 3991.5
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 3969.2,
+              "p95": 4078.1
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 3967.8,
+              "p95": 3991.5
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 2132.134,
+              "p95": 2156.9000000000015
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 2023.3880000000008,
+              "p95": 2044.247000000003
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1945.3919999999998,
+                "candidate_ms": 1943.5740000000005
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2132.134,
+                "candidate_ms": 2023.3880000000008
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 2156.9000000000015,
+                "candidate_ms": 2044.247000000003
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 2132.134,
+              "p95": 2156.9000000000015
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 2023.3880000000008,
+              "p95": 2044.247000000003
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ]
+      ],
+      "fixed_source_delivery": {
+        "opening": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2625.8975000000028,
+          "p95_ms": 7077.563000000002
+        },
+        "candidate": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2946.097499999998,
+          "p95_ms": 7360.044999999998
+        },
+        "closing": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 3127.0449999999983,
+          "p95_ms": 7107.576000000001
+        }
+      },
+      "all_six_anchors_reproduced": true,
+      "caption_quality_identical": true
+    },
+    {
+      "repeat": 0,
+      "experiment": "deadline_250ms",
+      "status": "rejected",
+      "reasons": [
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "memory_comparisons": [
+        {
+          "field": "peak_rss_bytes",
+          "control": 1771683840,
+          "candidate": 1796325376,
+          "allowed_increase": 268435456
+        },
+        {
+          "field": "peak_rss_bytes",
+          "control": 1648082944,
+          "candidate": 1796325376,
+          "allowed_increase": 268435456
+        }
+      ],
+      "queue_comparisons": [
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.04215266865988572,
+          "candidate": -0.18747201344619197
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 5237.6,
+          "candidate_p95_ms": 7563.7
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.2,
+          "candidate_p95_ms": 0.1
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        },
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.18290224640319747,
+          "candidate": -0.18747201344619197
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 5108.5,
+          "candidate_p95_ms": 7563.7
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.2,
+          "candidate_p95_ms": 0.1
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        }
+      ],
+      "preview_responsiveness": [
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 3927.1,
+              "p95": 3976.6
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 3980.5,
+              "p95": 4039.4
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 3881.8,
+                "candidate_ms": 3934.1
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 3976.6,
+                "candidate_ms": 4039.4
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 3927.1,
+                "candidate_ms": 3980.5
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 3927.1,
+              "p95": 3976.6
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 3980.5,
+              "p95": 4039.4
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 1971.4889999999996,
+              "p95": 2026.9300000000003
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 2056.8950000000004,
+              "p95": 2110.785
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1971.4889999999996,
+                "candidate_ms": 2056.8950000000004
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2026.9300000000003,
+                "candidate_ms": 2110.785
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 1939.4029999999984,
+                "candidate_ms": 1940.7260000000024
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 1971.4889999999996,
+              "p95": 2026.9300000000003
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 2056.8950000000004,
+              "p95": 2110.785
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ],
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 3969.2,
+              "p95": 4078.1
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 3980.5,
+              "p95": 4039.4
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 3937.8,
+                "candidate_ms": 3934.1
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4078.1,
+                "candidate_ms": 4039.4
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 3969.2,
+                "candidate_ms": 3980.5
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 3969.2,
+              "p95": 4078.1
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 3980.5,
+              "p95": 4039.4
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 2132.134,
+              "p95": 2156.9000000000015
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 2056.8950000000004,
+              "p95": 2110.785
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1945.3919999999998,
+                "candidate_ms": 2056.8950000000004
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2132.134,
+                "candidate_ms": 2110.785
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 2156.9000000000015,
+                "candidate_ms": 1940.7260000000024
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 2132.134,
+              "p95": 2156.9000000000015
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 2056.8950000000004,
+              "p95": 2110.785
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ]
+      ],
+      "fixed_source_delivery": {
+        "opening": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2625.8975000000028,
+          "p95_ms": 7077.563000000002
+        },
+        "candidate": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2350.4225000000006,
+          "p95_ms": 9516.443
+        },
+        "closing": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 3127.0449999999983,
+          "p95_ms": 7107.576000000001
+        }
+      },
+      "all_six_anchors_reproduced": true,
+      "caption_quality_identical": true
+    },
+    {
+      "repeat": 1,
+      "experiment": "deadline_250ms",
+      "status": "rejected",
+      "reasons": [
+        "median_gain_below_gate",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "memory_comparisons": [
+        {
+          "field": "peak_rss_bytes",
+          "control": 1633910784,
+          "candidate": 1751941120,
+          "allowed_increase": 268435456
+        },
+        {
+          "field": "peak_rss_bytes",
+          "control": 1754234880,
+          "candidate": 1751941120,
+          "allowed_increase": 268435456
+        }
+      ],
+      "queue_comparisons": [
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.01427802878121534,
+          "candidate": 0.08448570345838866
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 4772.8,
+          "candidate_p95_ms": 8979.9
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.5,
+          "candidate_p95_ms": 0.2
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        },
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.32190299437691766,
+          "candidate": 0.08448570345838866
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 5755.6,
+          "candidate_p95_ms": 8979.9
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.2,
+          "candidate_p95_ms": 0.2
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        }
+      ],
+      "preview_responsiveness": [
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4035.3,
+              "p95": 4098.2
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4225.2
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 4020.3,
+                "candidate_ms": 3987.9
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4098.2,
+                "candidate_ms": 4225.2
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4035.3,
+                "candidate_ms": 4058.3
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4035.3,
+              "p95": 4098.2
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4225.2
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 2,
+              "p50": 2109.7525000000023,
+              "p95": 2218.9490000000005
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 1954.7889999999989,
+              "p95": 2089.4270000000015
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 2218.9490000000005,
+                "candidate_ms": 1954.7889999999989
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 2000.5560000000041,
+                "candidate_ms": 1868.2200000000012
+              }
+            ],
+            "matched_control": {
+              "n": 2,
+              "p50": 2109.7525000000023,
+              "p95": 2218.9490000000005
+            },
+            "matched_candidate": {
+              "n": 2,
+              "p50": 1911.5045,
+              "p95": 1954.7889999999989
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ],
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4115.3,
+              "p95": 4140.2
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4225.2
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 4140.2,
+                "candidate_ms": 3987.9
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4115.3,
+                "candidate_ms": 4225.2
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4032.3,
+                "candidate_ms": 4058.3
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4115.3,
+              "p95": 4140.2
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4225.2
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 1934.7040000000052,
+              "p95": 2031.5810000000001
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 1954.7889999999989,
+              "p95": 2089.4270000000015
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1893.9410000000007,
+                "candidate_ms": 1954.7889999999989
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2031.5810000000001,
+                "candidate_ms": 2089.4270000000015
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 1934.7040000000052,
+                "candidate_ms": 1868.2200000000012
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 1934.7040000000052,
+              "p95": 2031.5810000000001
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 1954.7889999999989,
+              "p95": 2089.4270000000015
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ]
+      ],
+      "fixed_source_delivery": {
+        "opening": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2702.063500000002,
+          "p95_ms": 6761.544999999998
+        },
+        "candidate": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 3065.4429999999993,
+          "p95_ms": 10964.035000000003
+        },
+        "closing": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2441.754999999999,
+          "p95_ms": 7615.2850000000035
+        }
+      },
+      "all_six_anchors_reproduced": true,
+      "caption_quality_identical": true
+    },
+    {
+      "repeat": 1,
+      "experiment": "deadline_100ms",
+      "status": "rejected",
+      "reasons": [
+        "median_gain_below_gate",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "memory_comparisons": [
+        {
+          "field": "peak_rss_bytes",
+          "control": 1633910784,
+          "candidate": 1565605888,
+          "allowed_increase": 268435456
+        },
+        {
+          "field": "peak_rss_bytes",
+          "control": 1754234880,
+          "candidate": 1565605888,
+          "allowed_increase": 268435456
+        }
+      ],
+      "queue_comparisons": [
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.01427802878121534,
+          "candidate": -0.02379168290644884
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 4772.8,
+          "candidate_p95_ms": 7199.6
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.5,
+          "candidate_p95_ms": 0.1
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        },
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": -0.32190299437691766,
+          "candidate": -0.02379168290644884
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 5755.6,
+          "candidate_p95_ms": 7199.6
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.2,
+          "candidate_p95_ms": 0.1
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        }
+      ],
+      "preview_responsiveness": [
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4035.3,
+              "p95": 4098.2
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4081.2
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 4020.3,
+                "candidate_ms": 4058.3
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4098.2,
+                "candidate_ms": 4081.2
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4035.3,
+                "candidate_ms": 4024.8
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4035.3,
+              "p95": 4098.2
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4081.2
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 2,
+              "p50": 2109.7525000000023,
+              "p95": 2218.9490000000005
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 2028.3979999999992,
+              "p95": 2082.0769999999993
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 2218.9490000000005,
+                "candidate_ms": 2082.0769999999993
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 2000.5560000000041,
+                "candidate_ms": 1947.2929999999978
+              }
+            ],
+            "matched_control": {
+              "n": 2,
+              "p50": 2109.7525000000023,
+              "p95": 2218.9490000000005
+            },
+            "matched_candidate": {
+              "n": 2,
+              "p50": 2014.6849999999986,
+              "p95": 2082.0769999999993
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ],
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4115.3,
+              "p95": 4140.2
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4081.2
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 4140.2,
+                "candidate_ms": 4058.3
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4115.3,
+                "candidate_ms": 4081.2
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4032.3,
+                "candidate_ms": 4024.8
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4115.3,
+              "p95": 4140.2
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 4058.3,
+              "p95": 4081.2
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 1934.7040000000052,
+              "p95": 2031.5810000000001
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 2028.3979999999992,
+              "p95": 2082.0769999999993
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1893.9410000000007,
+                "candidate_ms": 2082.0769999999993
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2031.5810000000001,
+                "candidate_ms": 2028.3979999999992
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 1934.7040000000052,
+                "candidate_ms": 1947.2929999999978
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 1934.7040000000052,
+              "p95": 2031.5810000000001
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 2028.3979999999992,
+              "p95": 2082.0769999999993
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ]
+      ],
+      "fixed_source_delivery": {
+        "opening": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2702.063500000002,
+          "p95_ms": 6761.544999999998
+        },
+        "candidate": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 3075.8485,
+          "p95_ms": 9150.505000000005
+        },
+        "closing": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2441.754999999999,
+          "p95_ms": 7615.2850000000035
+        }
+      },
+      "all_six_anchors_reproduced": true,
+      "caption_quality_identical": true
+    },
+    {
+      "repeat": 2,
+      "experiment": "deadline_100ms",
+      "status": "rejected",
+      "reasons": [
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "preview_missing_fractions": [
+        0.0,
+        0.052631578947368196
+      ],
+      "p95_claim_eligible": false,
+      "memory_comparisons": [
+        {
+          "field": "peak_rss_bytes",
+          "control": 1595441152,
+          "candidate": 1657503744,
+          "allowed_increase": 268435456
+        },
+        {
+          "field": "peak_rss_bytes",
+          "control": 1621114880,
+          "candidate": 1657503744,
+          "allowed_increase": 268435456
+        }
+      ],
+      "queue_comparisons": [
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": 0.07808332641919453,
+          "candidate": 0.026319331179062516
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 8503.3,
+          "candidate_p95_ms": 10199.7
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.4,
+          "candidate_p95_ms": 0.4
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        },
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": 0.03088933105270067,
+          "candidate": 0.026319331179062516
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 6713.5,
+          "candidate_p95_ms": 10199.7
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.3,
+          "candidate_p95_ms": 0.4
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        }
+      ],
+      "preview_responsiveness": [
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4073.0,
+              "p95": 4353.9
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 4179.4,
+              "p95": 4213.8
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 3865.5,
+                "candidate_ms": 3996.1
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4073.0,
+                "candidate_ms": 4179.4
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4353.9,
+                "candidate_ms": 4213.8
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4073.0,
+              "p95": 4353.9
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 4179.4,
+              "p95": 4213.8
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 2039.4150000000009,
+              "p95": 2057.9590000000026
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 1981.4760000000006,
+              "p95": 2146.566999999999
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1942.7960000000003,
+                "candidate_ms": 1981.4760000000006
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2039.4150000000009,
+                "candidate_ms": 2146.566999999999
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 2057.9590000000026,
+                "candidate_ms": 1886.9620000000068
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 2039.4150000000009,
+              "p95": 2057.9590000000026
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 1981.4760000000006,
+              "p95": 2146.566999999999
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ],
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4246.2,
+              "p95": 4513.4
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 4179.4,
+              "p95": 4213.8
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 4246.2,
+                "candidate_ms": 3996.1
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4513.4,
+                "candidate_ms": 4179.4
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4034.0,
+                "candidate_ms": 4213.8
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4246.2,
+              "p95": 4513.4
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 4179.4,
+              "p95": 4213.8
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 2,
+              "p50": 2252.9500000000007,
+              "p95": 2312.684000000001
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 1981.4760000000006,
+              "p95": 2146.566999999999
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 2193.2160000000003,
+                "candidate_ms": 1981.4760000000006
+              }
+            ],
+            "matched_control": {
+              "n": 1,
+              "p50": 2193.2160000000003,
+              "p95": 2193.2160000000003
+            },
+            "matched_candidate": {
+              "n": 1,
+              "p50": 1981.4760000000006,
+              "p95": 1981.4760000000006
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ]
+      ],
+      "fixed_source_delivery": {
+        "opening": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 3030.6085000000003,
+          "p95_ms": 10465.266000000003
+        },
+        "candidate": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2574.175500000005,
+          "p95_ms": 12156.974000000002
+        },
+        "closing": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2976.4484999999986,
+          "p95_ms": 8851.684999999998
+        }
+      },
+      "all_six_anchors_reproduced": true,
+      "caption_quality_identical": true
+    },
+    {
+      "repeat": 2,
+      "experiment": "deadline_250ms",
+      "status": "rejected",
+      "reasons": [
+        "memory_regression",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "preview_missing_fractions": [
+        0.0,
+        0.052631578947368196
+      ],
+      "p95_claim_eligible": false,
+      "memory_comparisons": [
+        {
+          "field": "peak_rss_bytes",
+          "control": 1595441152,
+          "candidate": 1971159040,
+          "allowed_increase": 268435456
+        },
+        {
+          "field": "peak_rss_bytes",
+          "control": 1621114880,
+          "candidate": 1971159040,
+          "allowed_increase": 268435456
+        }
+      ],
+      "queue_comparisons": [
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": 0.07808332641919453,
+          "candidate": 0.04980565669635932
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 8503.3,
+          "candidate_p95_ms": 8929.6
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.4,
+          "candidate_p95_ms": 0.2
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        },
+        {
+          "field": "disjoint_queue_wait_growth_ms",
+          "control": 0.03088933105270067,
+          "candidate": 0.04980565669635932
+        },
+        {
+          "field": "stt_queue_wait_ms",
+          "control_p95_ms": 6713.5,
+          "candidate_p95_ms": 8929.6
+        },
+        {
+          "field": "translation_queue_wait_ms",
+          "control_p95_ms": 0.3,
+          "candidate_p95_ms": 0.2
+        },
+        {
+          "field": "generation_lock_wait_ms_a",
+          "control_p95_ms": null,
+          "candidate_p95_ms": null,
+          "control_sample_count": 0,
+          "candidate_sample_count": 0,
+          "control_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "candidate_route_counts": {
+            "gemma": 0,
+            "marian": 6,
+            "unknown": 0
+          },
+          "status": "not_applicable_no_gemma_in_one_or_both_runs"
+        }
+      ],
+      "preview_responsiveness": [
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4073.0,
+              "p95": 4353.9
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 3976.8,
+              "p95": 3982.7
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 3865.5,
+                "candidate_ms": 3982.7
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4073.0,
+                "candidate_ms": 3976.8
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4353.9,
+                "candidate_ms": 3912.2
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4073.0,
+              "p95": 4353.9
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 3976.8,
+              "p95": 3982.7
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 2039.4150000000009,
+              "p95": 2057.9590000000026
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 1929.399000000005,
+              "p95": 2084.7700000000004
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 1942.7960000000003,
+                "candidate_ms": 1928.2110000000011
+              },
+              {
+                "source_bounds": [
+                  62976,
+                  267264,
+                  62976,
+                  354816,
+                  48000
+                ],
+                "control_ms": 2039.4150000000009,
+                "candidate_ms": 2084.7700000000004
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  1230336,
+                  1434624,
+                  48000
+                ],
+                "control_ms": 2057.9590000000026,
+                "candidate_ms": 1929.399000000005
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 2039.4150000000009,
+              "p95": 2057.9590000000026
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 1929.399000000005,
+              "p95": 2084.7700000000004
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ],
+        [
+          {
+            "field": "first_preview",
+            "status": "compared",
+            "control": {
+              "n": 3,
+              "p50": 4246.2,
+              "p95": 4513.4
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 3976.8,
+              "p95": 3982.7
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  48000
+                ],
+                "control_ms": 4246.2,
+                "candidate_ms": 3982.7
+              },
+              {
+                "source_bounds": [
+                  1230336,
+                  1347072,
+                  48000
+                ],
+                "control_ms": 4513.4,
+                "candidate_ms": 3976.8
+              },
+              {
+                "source_bounds": [
+                  1686528,
+                  1803264,
+                  48000
+                ],
+                "control_ms": 4034.0,
+                "candidate_ms": 3912.2
+              }
+            ],
+            "matched_control": {
+              "n": 3,
+              "p50": 4246.2,
+              "p95": 4513.4
+            },
+            "matched_candidate": {
+              "n": 3,
+              "p50": 3976.8,
+              "p95": 3982.7
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          },
+          {
+            "field": "update_gap",
+            "status": "compared",
+            "control": {
+              "n": 2,
+              "p50": 2252.9500000000007,
+              "p95": 2312.684000000001
+            },
+            "candidate": {
+              "n": 3,
+              "p50": 1929.399000000005,
+              "p95": 2084.7700000000004
+            },
+            "matched_source": [
+              {
+                "source_bounds": [
+                  62976,
+                  179712,
+                  62976,
+                  267264,
+                  48000
+                ],
+                "control_ms": 2193.2160000000003,
+                "candidate_ms": 1928.2110000000011
+              }
+            ],
+            "matched_control": {
+              "n": 1,
+              "p50": 2193.2160000000003,
+              "p95": 2193.2160000000003
+            },
+            "matched_candidate": {
+              "n": 1,
+              "p50": 1928.2110000000011,
+              "p95": 1928.2110000000011
+            },
+            "p95_claim_eligible": false,
+            "scope": "Server emission; pooled utterance cohorts may change with segmentation; exact source bounds matched when available",
+            "tolerance": "candidate p95 <= control p95 + max(100 ms, 5%)"
+          }
+        ]
+      ],
+      "fixed_source_delivery": {
+        "opening": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 3030.6085000000003,
+          "p95_ms": 10465.266000000003
+        },
+        "candidate": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2674.4624999999996,
+          "p95_ms": 10763.112999999998
+        },
+        "closing": {
+          "n": 6,
+          "status": "complete",
+          "p50_ms": 2976.4484999999986,
+          "p95_ms": 8851.684999999998
+        }
+      },
+      "all_six_anchors_reproduced": true,
+      "caption_quality_identical": true
+    }
+  ],
+  "baseline_control_drift": [
+    {
+      "repeat": 0,
+      "closing_minus_opening_fixed_p50_ms": 501.1474999999955,
+      "closing_minus_opening_fixed_tail_ms": 30.01299999999901,
+      "opening_preview_count": 6,
+      "closing_preview_count": 6,
+      "opening_preview_source_s": 12.767999999999995,
+      "closing_preview_source_s": 12.767999999999995,
+      "closing_missing_opening_preview_fraction": 0.0,
+      "preview_responsiveness_reasons": [
+        "update_gap_tail_regression",
+        "matched_update_gap_tail_regression"
+      ],
+      "runtime_model_settings_identical": true,
+      "caption_outputs_identical": true
+    },
+    {
+      "repeat": 1,
+      "closing_minus_opening_fixed_p50_ms": -260.3085000000028,
+      "closing_minus_opening_fixed_tail_ms": 853.7400000000052,
+      "opening_preview_count": 5,
+      "closing_preview_count": 6,
+      "opening_preview_source_s": 10.943999999999996,
+      "closing_preview_source_s": 12.767999999999995,
+      "closing_missing_opening_preview_fraction": 0.0,
+      "preview_responsiveness_reasons": [],
+      "runtime_model_settings_identical": true,
+      "caption_outputs_identical": true
+    },
+    {
+      "repeat": 2,
+      "closing_minus_opening_fixed_p50_ms": -54.16000000000167,
+      "closing_minus_opening_fixed_tail_ms": -1613.5810000000056,
+      "opening_preview_count": 6,
+      "closing_preview_count": 5,
+      "opening_preview_source_s": 12.767999999999995,
+      "closing_preview_source_s": 11.551999999999992,
+      "closing_missing_opening_preview_fraction": 0.14285714285714296,
+      "preview_responsiveness_reasons": [
+        "update_gap_tail_regression",
+        "matched_update_gap_tail_regression"
+      ],
+      "runtime_model_settings_identical": true,
+      "caption_outputs_identical": true
+    }
+  ],
+  "decision": "No English deadline arm qualifies; no English confirmation or default change.",
+  "limitations": [
+    "E2B is a harness label; actual CPU Whisper-small and Marian CT2 finals, no Gemma.",
+    "All runs have six eligible fixed source anchors; nearest-rank tail is the maximum here, not an eligible p95 claim. Never pool runs, languages or arms to reach n>=100.",
+    "Complete machine VAD/source ledger and zero file capture loss do not certify microphone reliability or acoustic truth.",
+    "Public development read speech with unchanged unreviewed references; human/bilingual meaning and visible-browser/device certification remain pending.",
+    "Only retained JSON, source and stdlib computations were used; no native imports, models, tests, audio/device calls, Git or weight reads."
+  ]
+}

@@ -196,8 +196,16 @@ def _download_direct(url: str, target: Path, expected_size: int | None) -> None:
 # -- HF snapshot wrapper ------------------------------------------------------
 
 
+def _require_hf_revision(repo_id: str, revision: Any) -> str:
+    """Setup installs only immutable sources, including already-cached entries."""
+    if not isinstance(revision, str) or not re.fullmatch(r"[0-9a-f]{40}", revision):
+        raise ValueError(f"HF snapshot {repo_id} requires a full 40-character commit in models.lock.json")
+    return revision
+
+
 def _download_hf_snapshot(repo_id: str, revision: str, target_dir: Path, allow_patterns: list[str] | None) -> None:
     """Wrap huggingface_hub.snapshot_download with our cache layout."""
+    revision = _require_hf_revision(repo_id, revision)
     from huggingface_hub import snapshot_download
 
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -359,6 +367,17 @@ def bootstrap_models(
         logger.error("models.lock.json is empty")
         return 2
 
+    # Validate every selected HF entry before creating the cache directory or
+    # processing earlier entries. An invalid later entry must not leave a
+    # partially mutated install or bless a pre-existing moving-ref marker.
+    try:
+        for entry in models.values():
+            if entry.get("type") == "hf-snapshot":
+                _require_hf_revision(entry["repo_id"], entry.get("revision"))
+    except ValueError as exc:
+        logger.error("Invalid model manifest: %s", exc)
+        return 2
+
     logger.info("stark-translate setup")
     logger.info("  models_dir:       %s", models_dir)
     logger.info("  lockfile version: %s", lockfile_version)
@@ -400,7 +419,7 @@ def bootstrap_models(
                         installed = json.loads(marker.read_text())
                         marker_matches = (
                             installed.get("repo_id") == entry["repo_id"]
-                            and installed.get("revision") == entry.get("revision", "main")
+                            and installed.get("revision") == entry["revision"]
                             and installed.get("lockfile_version") == lockfile_version
                         )
                     except (OSError, ValueError):
@@ -411,10 +430,10 @@ def bootstrap_models(
                     continue
                 if offline:
                     raise FileNotFoundError(f"Offline pinned snapshot missing: {key}")
-                logger.info("[get ] %s ← hf:%s@%s", key, entry["repo_id"], entry.get("revision", "main"))
+                logger.info("[get ] %s ← hf:%s@%s", key, entry["repo_id"], entry["revision"])
                 _download_hf_snapshot(
                     repo_id=entry["repo_id"],
-                    revision=entry.get("revision", "main"),
+                    revision=entry["revision"],
                     target_dir=target_dir,
                     allow_patterns=allow_patterns or entry.get("allow_patterns"),
                 )
@@ -423,7 +442,7 @@ def bootstrap_models(
                         {
                             "lockfile_version": lockfile_version,
                             "repo_id": entry["repo_id"],
-                            "revision": entry.get("revision", "main"),
+                            "revision": entry["revision"],
                             "installed_at": _now_iso(),
                         },
                         indent=2,

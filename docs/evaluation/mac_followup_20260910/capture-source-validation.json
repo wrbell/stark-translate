@@ -1,0 +1,730 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-09-10T18:33:00.905008+00:00",
+  "source_revision": "f7b959d7b7f8de953fef2265c0a29f0ab264fd2f",
+  "checkout_scope": "GitHub pull_request merge refs; workflow head SHA and actual checkout merge SHA recorded separately.",
+  "scope": "Read-only primary GitHub workflow/job metadata, full job logs, and the 943-byte installed-Lite audit artifact; no local tests/models/devices/build/install.",
+  "previous_receipt_preserved": [
+    {
+      "path": "docs/evaluation/mac_followup_20260910/current-source-validation.md",
+      "bytes": 2341,
+      "sha256": "dfe04c9f036d8a8075804419d3e76e1cb01c8294d7373ebdd2c944999d6172d3"
+    },
+    {
+      "path": "docs/evaluation/mac_followup_20260910/current-source-validation.json",
+      "bytes": 9350,
+      "sha256": "456ed7f5e4ef533ddfee6a70c0b9495ef90d35fc5a2db7a96765755ea899db03"
+    }
+  ],
+  "test_workflow": {
+    "run_id": 34514178514,
+    "head_sha": "f7b959d7b7f8de953fef2265c0a29f0ab264fd2f",
+    "status": "completed",
+    "conclusion": "success",
+    "event": "pull_request",
+    "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178514",
+    "created_at": "2026-09-10T18:24:56Z",
+    "updated_at": "2026-09-10T18:28:22Z",
+    "metadata": {
+      "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-test-metadata.json",
+      "bytes": 4397,
+      "sha256": "8c3028706ac0580d665a4882317ea8ed101e4639205c37733bccd6bb257bc520"
+    },
+    "jobs": [
+      {
+        "python_matrix": "3.11",
+        "python_runtime": "3.11.16",
+        "job_id": 102995386031,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178514/job/102995386031",
+        "status": "completed",
+        "conclusion": "success",
+        "run_tests_step_conclusion": "success",
+        "checkout_merge_sha": "d137251171ea5f51053471f9d36a7244f70c2729",
+        "passed": 2834,
+        "failed": 0,
+        "skipped": 6,
+        "warnings": 2,
+        "subtests_passed": 20,
+        "duration_seconds": 133.3,
+        "coverage_percent": 66.49,
+        "log": {
+          "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-python311.log",
+          "bytes": 476189,
+          "sha256": "a0442aee9670730555305f31d1e6c4f6dc7e5e4c207a842b0839dac2ae671892"
+        },
+        "retained_summary_line": "2026-09-10T18:27:49.2094131Z = 2834 passed, 6 skipped, 2 warnings, 20 subtests passed in 133.30s (0:02:13) ==",
+        "retained_coverage_line": "2026-09-10T18:27:49.2093147Z Required test coverage of 50% reached. Total coverage: 66.49%",
+        "failure_lines": [],
+        "capture_accounting_case_results": [
+          "2026-09-10T18:25:50.9335525Z tests/test_capture_accounting.py::CaptureProtocolTests::test_already_observed_samples_cannot_still_be_in_worker_fifo PASSED [ 11%]",
+          "2026-09-10T18:25:50.9356539Z tests/test_capture_accounting.py::CaptureProtocolTests::test_fifo_and_native_loss_remain_independent PASSED [ 11%]",
+          "2026-09-10T18:25:50.9410103Z tests/test_capture_accounting.py::CaptureProtocolTests::test_invalid_wire_counters_fail_closed PASSED [ 11%]",
+          "2026-09-10T18:25:50.9430633Z tests/test_capture_accounting.py::CaptureProtocolTests::test_legacy_and_direct_flags PASSED [ 11%]",
+          "2026-09-10T18:25:50.9450997Z tests/test_capture_accounting.py::CaptureProtocolTests::test_native_flag_on_dropped_callback_reaches_next_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:25:50.9603682Z tests/test_capture_accounting.py::CaptureProtocolTests::test_terminal_identity_counts_and_conservation PASSED [ 11%]",
+          "2026-09-10T18:25:50.9648329Z tests/test_capture_accounting.py::CaptureWorkerTests::test_normal_stop_retains_pending_and_completed_pipe_counts PASSED [ 11%]",
+          "2026-09-10T18:25:50.9689099Z tests/test_capture_accounting.py::CaptureWorkerTests::test_terminal_catches_fifo_and_native_loss_without_a_later_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:25:50.9762621Z tests/test_capture_accounting.py::CaptureTerminalTests::test_active_reader_prevents_false_verified_receipt PASSED [ 11%]",
+          "2026-09-10T18:25:50.9835980Z tests/test_capture_accounting.py::CaptureTerminalTests::test_cleanup_records_unverified_even_if_process_wait_fails PASSED [ 11%]",
+          "2026-09-10T18:25:50.9895748Z tests/test_capture_accounting.py::CaptureTerminalTests::test_expected_missing_receipt_is_unverified_not_a_hardware_diagnosis PASSED [ 11%]",
+          "2026-09-10T18:25:50.9955970Z tests/test_capture_accounting.py::CaptureTerminalTests::test_real_framed_reader_keeps_both_flags_and_original_source_coordinates PASSED [ 11%]",
+          "2026-09-10T18:25:51.0024352Z tests/test_capture_accounting.py::CaptureTerminalTests::test_tail_loss_preserves_legacy_observed_counter_and_marks_required_failures PASSED [ 11%]",
+          "2026-09-10T18:25:51.0091475Z tests/test_capture_accounting.py::CaptureTerminalTests::test_verified_pending_stop_is_not_a_loss_and_finish_is_idempotent PASSED [ 11%]",
+          "2026-09-10T18:25:51.0150110Z tests/test_capture_accounting.py::CaptureTerminalTests::test_windows_and_fake_workers_are_explicitly_unavailable PASSED [ 11%]",
+          "2026-09-10T18:25:51.0170726Z tests/test_capture_accounting.py::CapturePersistenceTests::test_file_and_legacy_streams_do_not_claim_terminal_zero PASSED [ 11%]",
+          "2026-09-10T18:25:51.0676779Z tests/test_capture_accounting.py::CapturePersistenceTests::test_observed_native_overflow_and_fifo_each_fail_real_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:25:51.1781391Z tests/test_capture_accounting.py::CapturePersistenceTests::test_parsed_loss_status_never_consumed_still_fails_at_close PASSED [ 11%]",
+          "2026-09-10T18:25:51.1803050Z tests/test_capture_accounting.py::CapturePersistenceTests::test_pause_resume_totals_and_loss_flags_survive_bounded_details PASSED [ 11%]",
+          "2026-09-10T18:25:51.2934069Z tests/test_capture_accounting.py::CapturePersistenceTests::test_terminal_hook_marks_missing_accounting_in_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:25:51.3452584Z tests/test_capture_accounting.py::CapturePersistenceTests::test_verified_zero_loss_pending_tail_does_not_fail_required_ledger PASSED [ 11%]"
+        ],
+        "previously_failing_case_results": [
+          "2026-09-10T18:25:46.6626848Z tests/test_audio_utterance_discard.py::test_music_recovery_pause_clears_tentative_spans PASSED [  2%]",
+          "2026-09-10T18:25:46.7850567Z tests/test_audio_utterance_discard.py::test_music_hold_pause_logging_separates_consumed_frames_from_wall_time PASSED [  2%]",
+          "2026-09-10T18:25:47.4871768Z tests/test_audio_utterance_discard.py::test_capture_error_discards_identity_and_short_buffer_before_retry PASSED [  3%]",
+          "2026-09-10T18:26:12.3091169Z tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[stop] PASSED [ 30%]",
+          "2026-09-10T18:26:12.4284394Z tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[pause] PASSED [ 30%]",
+          "2026-09-10T18:26:12.5479486Z tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[disconnect] PASSED [ 30%]"
+        ]
+      },
+      {
+        "python_matrix": "3.12",
+        "python_runtime": "3.12.14",
+        "job_id": 102995386364,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178514/job/102995386364",
+        "status": "completed",
+        "conclusion": "success",
+        "run_tests_step_conclusion": "success",
+        "checkout_merge_sha": "d137251171ea5f51053471f9d36a7244f70c2729",
+        "passed": 2834,
+        "failed": 0,
+        "skipped": 6,
+        "warnings": 2,
+        "subtests_passed": 20,
+        "duration_seconds": 149.79,
+        "coverage_percent": 66.49,
+        "log": {
+          "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-python312.log",
+          "bytes": 448362,
+          "sha256": "01baa5767e6d37b42e23b1c23edd062b3f08f5625033e5121a18c03803884268"
+        },
+        "retained_summary_line": "2026-09-10T18:28:16.4527725Z = 2834 passed, 6 skipped, 2 warnings, 20 subtests passed in 149.79s (0:02:29) ==",
+        "retained_coverage_line": "2026-09-10T18:28:16.4526536Z Required test coverage of 50% reached. Total coverage: 66.49%",
+        "failure_lines": [],
+        "capture_accounting_case_results": [
+          "2026-09-10T18:26:13.1016275Z tests/test_capture_accounting.py::CaptureProtocolTests::test_already_observed_samples_cannot_still_be_in_worker_fifo PASSED [ 11%]",
+          "2026-09-10T18:26:13.1036659Z tests/test_capture_accounting.py::CaptureProtocolTests::test_fifo_and_native_loss_remain_independent PASSED [ 11%]",
+          "2026-09-10T18:26:13.1087829Z tests/test_capture_accounting.py::CaptureProtocolTests::test_invalid_wire_counters_fail_closed PASSED [ 11%]",
+          "2026-09-10T18:26:13.1107126Z tests/test_capture_accounting.py::CaptureProtocolTests::test_legacy_and_direct_flags PASSED [ 11%]",
+          "2026-09-10T18:26:13.1125577Z tests/test_capture_accounting.py::CaptureProtocolTests::test_native_flag_on_dropped_callback_reaches_next_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:26:13.1285894Z tests/test_capture_accounting.py::CaptureProtocolTests::test_terminal_identity_counts_and_conservation PASSED [ 11%]",
+          "2026-09-10T18:26:13.1331120Z tests/test_capture_accounting.py::CaptureWorkerTests::test_normal_stop_retains_pending_and_completed_pipe_counts PASSED [ 11%]",
+          "2026-09-10T18:26:13.1372676Z tests/test_capture_accounting.py::CaptureWorkerTests::test_terminal_catches_fifo_and_native_loss_without_a_later_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:26:13.1453305Z tests/test_capture_accounting.py::CaptureTerminalTests::test_active_reader_prevents_false_verified_receipt PASSED [ 11%]",
+          "2026-09-10T18:26:13.1528639Z tests/test_capture_accounting.py::CaptureTerminalTests::test_cleanup_records_unverified_even_if_process_wait_fails PASSED [ 11%]",
+          "2026-09-10T18:26:13.1594702Z tests/test_capture_accounting.py::CaptureTerminalTests::test_expected_missing_receipt_is_unverified_not_a_hardware_diagnosis PASSED [ 11%]",
+          "2026-09-10T18:26:13.1662994Z tests/test_capture_accounting.py::CaptureTerminalTests::test_real_framed_reader_keeps_both_flags_and_original_source_coordinates PASSED [ 11%]",
+          "2026-09-10T18:26:13.1738615Z tests/test_capture_accounting.py::CaptureTerminalTests::test_tail_loss_preserves_legacy_observed_counter_and_marks_required_failures PASSED [ 11%]",
+          "2026-09-10T18:26:13.1819933Z tests/test_capture_accounting.py::CaptureTerminalTests::test_verified_pending_stop_is_not_a_loss_and_finish_is_idempotent PASSED [ 11%]",
+          "2026-09-10T18:26:13.1884255Z tests/test_capture_accounting.py::CaptureTerminalTests::test_windows_and_fake_workers_are_explicitly_unavailable PASSED [ 11%]",
+          "2026-09-10T18:26:13.1904820Z tests/test_capture_accounting.py::CapturePersistenceTests::test_file_and_legacy_streams_do_not_claim_terminal_zero PASSED [ 11%]",
+          "2026-09-10T18:26:13.2494149Z tests/test_capture_accounting.py::CapturePersistenceTests::test_observed_native_overflow_and_fifo_each_fail_real_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:26:13.3056633Z tests/test_capture_accounting.py::CapturePersistenceTests::test_parsed_loss_status_never_consumed_still_fails_at_close PASSED [ 11%]",
+          "2026-09-10T18:26:13.3077773Z tests/test_capture_accounting.py::CapturePersistenceTests::test_pause_resume_totals_and_loss_flags_survive_bounded_details PASSED [ 11%]",
+          "2026-09-10T18:26:13.3629640Z tests/test_capture_accounting.py::CapturePersistenceTests::test_terminal_hook_marks_missing_accounting_in_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:26:13.4187000Z tests/test_capture_accounting.py::CapturePersistenceTests::test_verified_zero_loss_pending_tail_does_not_fail_required_ledger PASSED [ 11%]"
+        ],
+        "previously_failing_case_results": [
+          "2026-09-10T18:26:08.5037524Z tests/test_audio_utterance_discard.py::test_music_recovery_pause_clears_tentative_spans PASSED [  2%]",
+          "2026-09-10T18:26:08.6388417Z tests/test_audio_utterance_discard.py::test_music_hold_pause_logging_separates_consumed_frames_from_wall_time PASSED [  2%]",
+          "2026-09-10T18:26:09.3794990Z tests/test_audio_utterance_discard.py::test_capture_error_discards_identity_and_short_buffer_before_retry PASSED [  3%]",
+          "2026-09-10T18:26:34.9290221Z tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[stop] PASSED [ 30%]",
+          "2026-09-10T18:26:35.0507038Z tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[pause] PASSED [ 30%]",
+          "2026-09-10T18:26:35.1730205Z tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[disconnect] PASSED [ 30%]"
+        ]
+      }
+    ]
+  },
+  "failed_predecessor_test_workflow": {
+    "run_id": 34513515987,
+    "head_sha": "d7ed43d881c054a4a621dfbc354ceaebee52dc0e",
+    "status": "completed",
+    "conclusion": "failure",
+    "event": "pull_request",
+    "url": "https://github.com/wrbell/stark-translate/actions/runs/34513515987",
+    "created_at": "2026-09-10T18:18:30Z",
+    "updated_at": "2026-09-10T18:21:37Z",
+    "metadata": {
+      "path": ".cache/mac-en-es-closeout/capture-ci-validation/d7ed43d-test-metadata.json",
+      "bytes": 4399,
+      "sha256": "f5046244c9b824c16b490b819d88720ac639d23e7c8a45524da49102ee34ef41"
+    },
+    "jobs": [
+      {
+        "python_matrix": "3.11",
+        "python_runtime": "3.11.16",
+        "job_id": 102993182051,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34513515987/job/102993182051",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_tests_step_conclusion": "failure",
+        "checkout_merge_sha": "711761e2af0f64d2ae4755cfeffad305e9219383",
+        "passed": 2828,
+        "failed": 6,
+        "skipped": 6,
+        "warnings": 2,
+        "subtests_passed": 20,
+        "duration_seconds": 127.96,
+        "coverage_percent": 66.49,
+        "log": {
+          "path": ".cache/mac-en-es-closeout/capture-ci-validation/d7ed43d-python311.log",
+          "bytes": 466896,
+          "sha256": "d040b6b7f2d49e8a58175c9f853178fbab40f6a7302152b46a805778dcf90b12"
+        },
+        "retained_summary_line": "2026-09-10T18:21:23.5700459Z = 6 failed, 2828 passed, 6 skipped, 2 warnings, 20 subtests passed in 127.96s (0:02:07) =",
+        "retained_coverage_line": "2026-09-10T18:21:23.5690551Z Required test coverage of 50% reached. Total coverage: 66.49%",
+        "failure_lines": [
+          "2026-09-10T18:21:23.5692083Z FAILED tests/test_audio_utterance_discard.py::test_music_recovery_pause_clears_tentative_spans - AttributeError: 'PauseOnce' object has no attribute 'error'",
+          "2026-09-10T18:21:23.5693185Z FAILED tests/test_audio_utterance_discard.py::test_music_hold_pause_logging_separates_consumed_frames_from_wall_time - AttributeError: 'PauseOnce' object has no attribute 'error'",
+          "2026-09-10T18:21:23.5694913Z FAILED tests/test_audio_utterance_discard.py::test_capture_error_discards_identity_and_short_buffer_before_retry - AssertionError: Expected 'record_failure' to be called once. Called 5 times.",
+          "2026-09-10T18:21:23.5698196Z FAILED tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[stop] - assert False",
+          "2026-09-10T18:21:23.5698973Z FAILED tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[pause] - assert False",
+          "2026-09-10T18:21:23.5699779Z FAILED tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[disconnect] - assert 3 == 1"
+        ],
+        "capture_accounting_case_results": [
+          "2026-09-10T18:19:31.9918757Z tests/test_capture_accounting.py::CaptureProtocolTests::test_already_observed_samples_cannot_still_be_in_worker_fifo PASSED [ 11%]",
+          "2026-09-10T18:19:31.9938677Z tests/test_capture_accounting.py::CaptureProtocolTests::test_fifo_and_native_loss_remain_independent PASSED [ 11%]",
+          "2026-09-10T18:19:31.9984571Z tests/test_capture_accounting.py::CaptureProtocolTests::test_invalid_wire_counters_fail_closed PASSED [ 11%]",
+          "2026-09-10T18:19:32.0003581Z tests/test_capture_accounting.py::CaptureProtocolTests::test_legacy_and_direct_flags PASSED [ 11%]",
+          "2026-09-10T18:19:32.0020588Z tests/test_capture_accounting.py::CaptureProtocolTests::test_native_flag_on_dropped_callback_reaches_next_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:19:32.0156245Z tests/test_capture_accounting.py::CaptureProtocolTests::test_terminal_identity_counts_and_conservation PASSED [ 11%]",
+          "2026-09-10T18:19:32.0201411Z tests/test_capture_accounting.py::CaptureWorkerTests::test_normal_stop_retains_pending_and_completed_pipe_counts PASSED [ 11%]",
+          "2026-09-10T18:19:32.0239189Z tests/test_capture_accounting.py::CaptureWorkerTests::test_terminal_catches_fifo_and_native_loss_without_a_later_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:19:32.0315075Z tests/test_capture_accounting.py::CaptureTerminalTests::test_active_reader_prevents_false_verified_receipt PASSED [ 11%]",
+          "2026-09-10T18:19:32.0388680Z tests/test_capture_accounting.py::CaptureTerminalTests::test_cleanup_records_unverified_even_if_process_wait_fails PASSED [ 11%]",
+          "2026-09-10T18:19:32.0450568Z tests/test_capture_accounting.py::CaptureTerminalTests::test_expected_missing_receipt_is_unverified_not_a_hardware_diagnosis PASSED [ 11%]",
+          "2026-09-10T18:19:32.0513655Z tests/test_capture_accounting.py::CaptureTerminalTests::test_real_framed_reader_keeps_both_flags_and_original_source_coordinates PASSED [ 11%]",
+          "2026-09-10T18:19:32.0586812Z tests/test_capture_accounting.py::CaptureTerminalTests::test_tail_loss_preserves_legacy_observed_counter_and_marks_required_failures PASSED [ 11%]",
+          "2026-09-10T18:19:32.0656844Z tests/test_capture_accounting.py::CaptureTerminalTests::test_verified_pending_stop_is_not_a_loss_and_finish_is_idempotent PASSED [ 11%]",
+          "2026-09-10T18:19:32.0717203Z tests/test_capture_accounting.py::CaptureTerminalTests::test_windows_and_fake_workers_are_explicitly_unavailable PASSED [ 11%]",
+          "2026-09-10T18:19:32.0736067Z tests/test_capture_accounting.py::CapturePersistenceTests::test_file_and_legacy_streams_do_not_claim_terminal_zero PASSED [ 11%]",
+          "2026-09-10T18:19:32.1273378Z tests/test_capture_accounting.py::CapturePersistenceTests::test_observed_native_overflow_and_fifo_each_fail_real_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:19:32.2918232Z tests/test_capture_accounting.py::CapturePersistenceTests::test_parsed_loss_status_never_consumed_still_fails_at_close PASSED [ 11%]",
+          "2026-09-10T18:19:32.2939740Z tests/test_capture_accounting.py::CapturePersistenceTests::test_pause_resume_totals_and_loss_flags_survive_bounded_details PASSED [ 11%]",
+          "2026-09-10T18:19:32.3505465Z tests/test_capture_accounting.py::CapturePersistenceTests::test_terminal_hook_marks_missing_accounting_in_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:19:32.5067612Z tests/test_capture_accounting.py::CapturePersistenceTests::test_verified_zero_loss_pending_tail_does_not_fail_required_ledger PASSED [ 11%]"
+        ],
+        "previously_failing_case_results": []
+      },
+      {
+        "python_matrix": "3.12",
+        "python_runtime": "3.12.14",
+        "job_id": 102993181638,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34513515987/job/102993181638",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "run_tests_step_conclusion": "failure",
+        "checkout_merge_sha": "711761e2af0f64d2ae4755cfeffad305e9219383",
+        "passed": 2828,
+        "failed": 6,
+        "skipped": 6,
+        "warnings": 2,
+        "subtests_passed": 20,
+        "duration_seconds": 143.22,
+        "coverage_percent": 66.49,
+        "log": {
+          "path": ".cache/mac-en-es-closeout/capture-ci-validation/d7ed43d-python312.log",
+          "bytes": 466038,
+          "sha256": "4cd0c51d63045265a840e62d674e4f3031105292dc11b6ddba0aca59bec05b36"
+        },
+        "retained_summary_line": "2026-09-10T18:21:33.6981554Z = 6 failed, 2828 passed, 6 skipped, 2 warnings, 20 subtests passed in 143.22s (0:02:23) =",
+        "retained_coverage_line": "2026-09-10T18:21:33.6967166Z Required test coverage of 50% reached. Total coverage: 66.49%",
+        "failure_lines": [
+          "2026-09-10T18:21:33.6970214Z FAILED tests/test_audio_utterance_discard.py::test_music_recovery_pause_clears_tentative_spans - AttributeError: 'PauseOnce' object has no attribute 'error'",
+          "2026-09-10T18:21:33.6972043Z FAILED tests/test_audio_utterance_discard.py::test_music_hold_pause_logging_separates_consumed_frames_from_wall_time - AttributeError: 'PauseOnce' object has no attribute 'error'",
+          "2026-09-10T18:21:33.6973717Z FAILED tests/test_audio_utterance_discard.py::test_capture_error_discards_identity_and_short_buffer_before_retry - AssertionError: Expected 'record_failure' to be called once. Called 5 times.",
+          "2026-09-10T18:21:33.6978387Z FAILED tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[stop] - assert False",
+          "2026-09-10T18:21:33.6979516Z FAILED tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[pause] - assert False",
+          "2026-09-10T18:21:33.6980638Z FAILED tests/test_file_audio_stream.py::test_control_or_disconnect_preserves_truthful_buffer_outcome[disconnect] - assert 3 == 1"
+        ],
+        "capture_accounting_case_results": [
+          "2026-09-10T18:19:39.3143185Z tests/test_capture_accounting.py::CaptureProtocolTests::test_already_observed_samples_cannot_still_be_in_worker_fifo PASSED [ 11%]",
+          "2026-09-10T18:19:39.3170731Z tests/test_capture_accounting.py::CaptureProtocolTests::test_fifo_and_native_loss_remain_independent PASSED [ 11%]",
+          "2026-09-10T18:19:39.3236487Z tests/test_capture_accounting.py::CaptureProtocolTests::test_invalid_wire_counters_fail_closed PASSED [ 11%]",
+          "2026-09-10T18:19:39.3261091Z tests/test_capture_accounting.py::CaptureProtocolTests::test_legacy_and_direct_flags PASSED [ 11%]",
+          "2026-09-10T18:19:39.3283949Z tests/test_capture_accounting.py::CaptureProtocolTests::test_native_flag_on_dropped_callback_reaches_next_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:19:39.3561875Z tests/test_capture_accounting.py::CaptureProtocolTests::test_terminal_identity_counts_and_conservation PASSED [ 11%]",
+          "2026-09-10T18:19:39.3621794Z tests/test_capture_accounting.py::CaptureWorkerTests::test_normal_stop_retains_pending_and_completed_pipe_counts PASSED [ 11%]",
+          "2026-09-10T18:19:39.3674541Z tests/test_capture_accounting.py::CaptureWorkerTests::test_terminal_catches_fifo_and_native_loss_without_a_later_admitted_frame PASSED [ 11%]",
+          "2026-09-10T18:19:39.3961311Z tests/test_capture_accounting.py::CaptureTerminalTests::test_active_reader_prevents_false_verified_receipt PASSED [ 11%]",
+          "2026-09-10T18:19:39.4447236Z tests/test_capture_accounting.py::CaptureTerminalTests::test_cleanup_records_unverified_even_if_process_wait_fails PASSED [ 11%]",
+          "2026-09-10T18:19:39.4522078Z tests/test_capture_accounting.py::CaptureTerminalTests::test_expected_missing_receipt_is_unverified_not_a_hardware_diagnosis PASSED [ 11%]",
+          "2026-09-10T18:19:39.4589986Z tests/test_capture_accounting.py::CaptureTerminalTests::test_real_framed_reader_keeps_both_flags_and_original_source_coordinates PASSED [ 11%]",
+          "2026-09-10T18:19:39.4923949Z tests/test_capture_accounting.py::CaptureTerminalTests::test_tail_loss_preserves_legacy_observed_counter_and_marks_required_failures PASSED [ 11%]",
+          "2026-09-10T18:19:39.5376974Z tests/test_capture_accounting.py::CaptureTerminalTests::test_verified_pending_stop_is_not_a_loss_and_finish_is_idempotent PASSED [ 11%]",
+          "2026-09-10T18:19:39.5448526Z tests/test_capture_accounting.py::CaptureTerminalTests::test_windows_and_fake_workers_are_explicitly_unavailable PASSED [ 11%]",
+          "2026-09-10T18:19:39.5469552Z tests/test_capture_accounting.py::CapturePersistenceTests::test_file_and_legacy_streams_do_not_claim_terminal_zero PASSED [ 11%]",
+          "2026-09-10T18:19:39.6068680Z tests/test_capture_accounting.py::CapturePersistenceTests::test_observed_native_overflow_and_fifo_each_fail_real_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:19:39.6653540Z tests/test_capture_accounting.py::CapturePersistenceTests::test_parsed_loss_status_never_consumed_still_fails_at_close PASSED [ 11%]",
+          "2026-09-10T18:19:39.6675231Z tests/test_capture_accounting.py::CapturePersistenceTests::test_pause_resume_totals_and_loss_flags_survive_bounded_details PASSED [ 11%]",
+          "2026-09-10T18:19:39.7236181Z tests/test_capture_accounting.py::CapturePersistenceTests::test_terminal_hook_marks_missing_accounting_in_required_ledger PASSED [ 11%]",
+          "2026-09-10T18:19:39.8418041Z tests/test_capture_accounting.py::CapturePersistenceTests::test_verified_zero_loss_pending_tail_does_not_fail_required_ledger PASSED [ 11%]"
+        ],
+        "previously_failing_case_results": []
+      }
+    ]
+  },
+  "fixture_fix": {
+    "revision": "aca2604ac14425650dc2a0d3320d8a07cf393f38",
+    "url": "https://github.com/wrbell/stark-translate/commit/aca2604ac14425650dc2a0d3320d8a07cf393f38",
+    "files": [
+      "tests/test_audio_utterance_discard.py",
+      "tests/test_file_audio_stream.py",
+      "docs/evaluation/mac_followup_20260910/capture-loss-accounting.md"
+    ],
+    "runtime_source_changed": false,
+    "change": "Restrict scripted MagicMock streams to __enter__/__exit__ and reset a real CaptureTransportSummary per test; invented capture_snapshot/loss counters no longer leak into required failure handling."
+  },
+  "validation_head_change": {
+    "revision": "f7b959d7b7f8de953fef2265c0a29f0ab264fd2f",
+    "runtime_source_changed": false,
+    "scope": "Archive/documentation changes after fixture fix."
+  },
+  "lint_workflow": {
+    "run_id": 34514178583,
+    "head_sha": "f7b959d7b7f8de953fef2265c0a29f0ab264fd2f",
+    "status": "completed",
+    "conclusion": "success",
+    "event": "pull_request",
+    "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178583",
+    "created_at": "2026-09-10T18:24:56Z",
+    "updated_at": "2026-09-10T18:25:38Z",
+    "metadata": {
+      "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-lint-metadata.json",
+      "bytes": 2661,
+      "sha256": "db3142b8686037909e24e0679e6dd6bc6d4366ed47fde2bba65efdafbc218431"
+    },
+    "jobs": [
+      {
+        "completedAt": "2026-09-10T18:25:37Z",
+        "conclusion": "success",
+        "databaseId": 102995386658,
+        "name": "lint",
+        "startedAt": "2026-09-10T18:24:59Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-10T18:25:01Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-10T18:25:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:05Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v7",
+            "number": 2,
+            "startedAt": "2026-09-10T18:25:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:08Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@v7",
+            "number": 3,
+            "startedAt": "2026-09-10T18:25:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:16Z",
+            "conclusion": "success",
+            "name": "Install lint dependencies",
+            "number": 4,
+            "startedAt": "2026-09-10T18:25:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:16Z",
+            "conclusion": "success",
+            "name": "Ruff check",
+            "number": 5,
+            "startedAt": "2026-09-10T18:25:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:16Z",
+            "conclusion": "success",
+            "name": "Ruff format check",
+            "number": 6,
+            "startedAt": "2026-09-10T18:25:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:22Z",
+            "conclusion": "success",
+            "name": "Mypy (engines + settings)",
+            "number": 7,
+            "startedAt": "2026-09-10T18:25:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:27Z",
+            "conclusion": "success",
+            "name": "Bandit security scan",
+            "number": 8,
+            "startedAt": "2026-09-10T18:25:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:28Z",
+            "conclusion": "success",
+            "name": "Vulture dead code detection (advisory)",
+            "number": 9,
+            "startedAt": "2026-09-10T18:25:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:35Z",
+            "conclusion": "success",
+            "name": "Validate HTML displays",
+            "number": 10,
+            "startedAt": "2026-09-10T18:25:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:35Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-python@v7",
+            "number": 19,
+            "startedAt": "2026-09-10T18:25:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:35Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v7",
+            "number": 20,
+            "startedAt": "2026-09-10T18:25:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:35Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 21,
+            "startedAt": "2026-09-10T18:25:35Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178583/job/102995386658"
+      }
+    ],
+    "log": {
+      "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-lint.log",
+      "bytes": 38530,
+      "sha256": "7a4798f12e82d5a2ce5b0c11870139765fecac68409f6fd38625e407625043e1"
+    },
+    "retained_evidence": [
+      "2026-09-10T18:25:16.6970651Z All checks passed!",
+      "2026-09-10T18:25:16.8058311Z 350 files already formatted",
+      "2026-09-10T18:25:22.4814663Z Success: no issues found in 22 source files",
+      "2026-09-10T18:25:22.5023446Z ##[group]Run bandit -r engines/ features/ tools/ operator_app/ settings.py -s B101,B603,B607,B615 --severity-level medium",
+      "2026-09-10T18:25:22.5024404Z bandit -r engines/ features/ tools/ operator_app/ settings.py -s B101,B603,B607,B615 --severity-level medium",
+      "2026-09-10T18:25:27.2739581Z \tNo issues identified.",
+      "2026-09-10T18:25:27.3809138Z ##[group]Run vulture engines/ features/ tools/ settings.py --min-confidence 80 || true",
+      "2026-09-10T18:25:27.3809781Z vulture engines/ features/ tools/ settings.py --min-confidence 80 || true"
+    ],
+    "bandit_excluded_rules": [
+      "B101",
+      "B603",
+      "B607",
+      "B615"
+    ],
+    "vulture_advisory": true
+  },
+  "security_workflow": {
+    "run_id": 34514178486,
+    "head_sha": "f7b959d7b7f8de953fef2265c0a29f0ab264fd2f",
+    "status": "completed",
+    "conclusion": "success",
+    "event": "pull_request",
+    "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178486",
+    "created_at": "2026-09-10T18:24:56Z",
+    "updated_at": "2026-09-10T18:26:20Z",
+    "metadata": {
+      "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-security-metadata.json",
+      "bytes": 4311,
+      "sha256": "25da6841c3be02d5aae5967f4af82c365a6155f1130fb7164bdf16fc0d9a584b"
+    },
+    "jobs": [
+      {
+        "completedAt": "2026-09-10T18:25:12Z",
+        "conclusion": "success",
+        "databaseId": 102995386331,
+        "name": "detect-changes",
+        "startedAt": "2026-09-10T18:25:00Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-10T18:25:01Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-10T18:25:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:06Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v7",
+            "number": 2,
+            "startedAt": "2026-09-10T18:25:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:10Z",
+            "conclusion": "success",
+            "name": "Run dorny/paths-filter@v4",
+            "number": 3,
+            "startedAt": "2026-09-10T18:25:06Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:10Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v7",
+            "number": 6,
+            "startedAt": "2026-09-10T18:25:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:10Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 7,
+            "startedAt": "2026-09-10T18:25:10Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178486/job/102995386331"
+      },
+      {
+        "completedAt": "2026-09-10T18:26:13Z",
+        "conclusion": "success",
+        "databaseId": 102995472128,
+        "name": "audit-lite",
+        "startedAt": "2026-09-10T18:25:16Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-10T18:25:18Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-10T18:25:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:23Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v7",
+            "number": 2,
+            "startedAt": "2026-09-10T18:25:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:29Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@v7",
+            "number": 3,
+            "startedAt": "2026-09-10T18:25:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:25:34Z",
+            "conclusion": "success",
+            "name": "Install audit tool separately from the Lite target",
+            "number": 4,
+            "startedAt": "2026-09-10T18:25:29Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:04Z",
+            "conclusion": "success",
+            "name": "Resolve the actual Lite CPU and TTS installation",
+            "number": 5,
+            "startedAt": "2026-09-10T18:25:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:08Z",
+            "conclusion": "success",
+            "name": "Audit every installed Lite dependency",
+            "number": 6,
+            "startedAt": "2026-09-10T18:26:04Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:10Z",
+            "conclusion": "success",
+            "name": "Retain the installed dependency audit",
+            "number": 7,
+            "startedAt": "2026-09-10T18:26:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:10Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-python@v7",
+            "number": 13,
+            "startedAt": "2026-09-10T18:26:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:10Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v7",
+            "number": 14,
+            "startedAt": "2026-09-10T18:26:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:10Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-09-10T18:26:10Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178486/job/102995472128"
+      },
+      {
+        "completedAt": "2026-09-10T18:25:12Z",
+        "conclusion": "skipped",
+        "databaseId": 102995473862,
+        "name": "audit",
+        "startedAt": "2026-09-10T18:25:12Z",
+        "status": "completed",
+        "steps": [],
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178486/job/102995473862"
+      },
+      {
+        "completedAt": "2026-09-10T18:26:19Z",
+        "conclusion": "success",
+        "databaseId": 102995824347,
+        "name": "security",
+        "startedAt": "2026-09-10T18:26:16Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-10T18:26:17Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-10T18:26:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:17Z",
+            "conclusion": "success",
+            "name": "Check audit results",
+            "number": 2,
+            "startedAt": "2026-09-10T18:26:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-10T18:26:17Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 3,
+            "startedAt": "2026-09-10T18:26:17Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34514178486/job/102995824347"
+      }
+    ],
+    "scope": "Installed Linux Python3.11 .[lite-cpu,tts] dependency audit; excludes [eval] and Mac GPU runtime. Legacy requirements audit skipped.",
+    "installed_lite_audit_log": {
+      "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-audit-lite.log",
+      "bytes": 55247,
+      "sha256": "b0ae895c7a2f4b275842aaa323e7b3bbd11194891a7a33477280ce3882d37009"
+    },
+    "detect_changes_log": {
+      "path": ".cache/mac-en-es-closeout/capture-ci-validation/f7b959d-detect-changes.log",
+      "bytes": 82224,
+      "sha256": "aa7eed1571f73eab43861dfd5cc19eabfe1d6c2c246ba0ad51ecac02014120d8"
+    },
+    "change_detection": {
+      "requirements": false,
+      "lite": true,
+      "matched_lite_file": "pyproject.toml"
+    },
+    "retained_evidence": [
+      "2026-09-10T18:25:34.0769463Z .venv-lite-audit/bin/python -m pip install '.[lite-cpu,tts]'",
+      "2026-09-10T18:26:04.8552397Z No broken requirements found.",
+      "2026-09-10T18:26:04.8895625Z pip-audit --path \"$LITE_SITE_PACKAGES\" --format json --output lite-installed-audit.json",
+      "2026-09-10T18:26:04.8896216Z python tools/check_dependency_audit.py lite-installed-audit.json",
+      "2026-09-10T18:26:08.6352367Z No known vulnerabilities found",
+      "2026-09-10T18:26:08.7042673Z {\"audited\": 60, \"skipped_local_project\": [\"stark-translate\"], \"known_vulnerabilities\": 0}"
+    ],
+    "audit_result": {
+      "installed_entries": 61,
+      "audited_dependencies": 60,
+      "known_vulnerabilities": 0,
+      "skipped_local_project": [
+        {
+          "name": "stark-translate",
+          "skip_reason": "Dependency not found on PyPI and could not be audited: stark-translate (2026.14.0.0)"
+        }
+      ],
+      "installed_audit_json": {
+        "path": ".cache/mac-en-es-closeout/capture-ci-validation/lite-installed-audit.json",
+        "bytes": 3542,
+        "sha256": "40fbe9cd934c649adc802d9d9333bdafc6a25c6f895094ac41ec3726e882d72f"
+      },
+      "artifact": {
+        "id": 10167031069,
+        "node_id": "MDg6QXJ0aWZhY3QxMDE2NzAzMTA2OQ==",
+        "name": "lite-installed-audit",
+        "size_in_bytes": 943,
+        "url": "https://api.github.com/repos/wrbell/stark-translate/actions/artifacts/10167031069",
+        "archive_download_url": "https://api.github.com/repos/wrbell/stark-translate/actions/artifacts/10167031069/zip",
+        "expired": false,
+        "digest": "sha256:38b52d362d90d92f8cdd327d8c3301bbaf0d90a5daec67ed7d143333f52c592e",
+        "created_at": "2026-09-10T18:26:09Z",
+        "updated_at": "2026-09-10T18:26:09Z",
+        "expires_at": "2026-12-09T18:24:56Z",
+        "workflow_run": {
+          "id": 34514178486,
+          "repository_id": 1153020457,
+          "head_repository_id": 1153020457,
+          "head_branch": "codex/mac-en-es-closeout",
+          "head_sha": "f7b959d7b7f8de953fef2265c0a29f0ab264fd2f"
+        }
+      },
+      "downloaded_zip": {
+        "path": ".cache/mac-en-es-closeout/capture-ci-validation/lite-installed-audit.zip",
+        "bytes": 943,
+        "sha256": "38b52d362d90d92f8cdd327d8c3301bbaf0d90a5daec67ed7d143333f52c592e"
+      }
+    }
+  },
+  "limits": [
+    "Configured Linux CI is not native Mac capture/PortAudio-SIGTERM certification.",
+    "No microphone, output playback, local test, model, build or installation performed for this receipt.",
+    "Security audit covers .[lite-cpu,tts], not [eval] or the installed Mac GPU environment; legacy requirements audit skipped.",
+    "Bandit excludes B615 and other listed rules; no all-security-clear claim.",
+    "Current model experiments, installed-artifact checks, human review and device acceptance remain separate.",
+    "Microphone capture and output playback remain prohibited for this session; defaults/publication unchanged."
+  ],
+  "existing_failed_log_preserved": {
+    "path": ".cache/mac-en-es-closeout/ci-d7ed43d-python311.log",
+    "sha256": "d040b6b7f2d49e8a58175c9f853178fbab40f6a7302152b46a805778dcf90b12",
+    "bytes": 466896,
+    "summary_line": "2026-09-10T18:21:23.5700459Z = 6 failed, 2828 passed, 6 skipped, 2 warnings, 20 subtests passed in 127.96s (0:02:07) ="
+  }
+}

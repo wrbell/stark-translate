@@ -24,8 +24,21 @@ import hashlib
 import json
 import logging
 import os
+import sys
 from collections import Counter
 from datetime import UTC, datetime
+from pathlib import Path
+
+# Reject incompatible CLI configuration before importing torch/PEFT/transformers.
+# The preflight reader evaluates only main()'s argparse declarations below.
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from tools.training_preflight import PreflightError, parse_trainer_args, validate_whisper_config
+
+    try:
+        validate_whisper_config(parse_trainer_args("train_whisper.py", sys.argv[1:]))
+    except (PreflightError, OSError, ValueError) as exc:
+        raise SystemExit(f"Whisper preflight failed: {exc}") from exc
 
 os.environ["USE_TF"] = "0"  # Prevent transformers from importing TF/Keras (not needed for PyTorch training)
 
@@ -49,13 +62,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
+def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3, require_replay=False):
     """Mix general-domain replay samples with church data to prevent forgetting.
 
     Anti-forgetting safeguard: mix 70% general-domain + 30% church-domain samples.
     LoRA inherently preserves base weights, but replay buffer provides extra safety.
     """
     if replay_ratio <= 0:
+        if require_replay:
+            raise ValueError("W17 requires general-domain replay; hard-only training is prohibited")
         return church_dataset
 
     from datasets import interleave_datasets
@@ -70,6 +85,8 @@ def prepare_mixed_dataset(church_dataset, processor, replay_ratio=0.3):
         )
         general = general.cast_column("audio", Audio(sampling_rate=16000))
     except Exception as e:
+        if require_replay:
+            raise RuntimeError("Required replay could not be loaded; refusing hard-only training") from e
         logger.warning(f"Could not load replay data: {e}")
         logger.warning("Proceeding without replay buffer.")
         return church_dataset
@@ -280,6 +297,9 @@ def fine_tune_whisper(
     accent_balance=True,
     init_from_adapter=None,
     use_dora=False,
+    allow_target_expansion=False,
+    model_config=None,
+    require_replay=False,
 ):
     """LoRA/DoRA fine-tuning for Whisper on church audio.
 
@@ -292,6 +312,23 @@ def fine_tune_whisper(
     """
     if target_modules is None:
         target_modules = ["q_proj", "v_proj"]
+
+    from tools.training_preflight import check_adapter_load, initialize_new_dora_magnitudes, validate_whisper_config
+
+    compatibility = validate_whisper_config(
+        argparse.Namespace(
+            model=model_name,
+            target_modules=target_modules,
+            lora_r=lora_r,
+            lora_alpha=lora_alpha,
+            replay_ratio=replay_ratio,
+            require_replay=require_replay,
+            init_from=init_from_adapter,
+            use_dora=use_dora,
+            allow_target_expansion=allow_target_expansion,
+            model_config=model_config,
+        )
+    )
 
     logger.info(f"Loading {model_name}...")
     processor = WhisperProcessor.from_pretrained(model_name)
@@ -367,23 +404,18 @@ def fine_tune_whisper(
             adapter_weights = remapped
 
         incompatible = model.load_state_dict(adapter_weights, strict=False)
-        if incompatible.missing_keys:
-            # Filter to only LoRA keys — base model keys are expected to be "missing"
-            # since we only load the adapter weights, not the full model.
-            lora_missing = [k for k in incompatible.missing_keys if "lora_" in k]
-            if lora_missing:
-                raise ValueError(
-                    f"LoRA keys missing when loading adapter from {init_from_adapter}: {lora_missing}. "
-                    f"Check that lora_r and target_modules match the source adapter."
-                )
-        if incompatible.unexpected_keys:
-            logger.warning("Unexpected keys in init-from adapter: %s", incompatible.unexpected_keys)
-        # Verify at least some LoRA weights were loaded
         lora_loaded = [k for k in adapter_weights if "lora_" in k]
-        if not lora_loaded:
-            raise ValueError(
-                f"No LoRA weights found in {weights_path}. File contains keys: {list(adapter_weights.keys())[:5]}"
-            )
+        check_adapter_load(
+            incompatible.missing_keys,
+            incompatible.unexpected_keys,
+            lora_loaded,
+            fresh_targets=set(compatibility.get("fresh_targets", [])),
+            fresh_dora=compatibility.get("fresh_dora_magnitudes", False),
+        )
+        if compatibility.get("fresh_dora_magnitudes", False):
+            with torch.no_grad():
+                count = initialize_new_dora_magnitudes(model, lora_loaded)
+            logger.info("Reinitialized %d new DoRA magnitudes from the loaded W16 directions", count)
         logger.info(
             "Initialized adapter from %s (%d LoRA tensors loaded: %s)",
             init_from_adapter,
@@ -476,7 +508,7 @@ def fine_tune_whisper(
     if replay_ratio > 0:
         logger.info(f"Mixing with {replay_ratio:.0%} general-domain replay data...")
         pre_mix_size = len(train_dataset)
-        train_dataset = prepare_mixed_dataset(train_dataset, processor, replay_ratio)
+        train_dataset = prepare_mixed_dataset(train_dataset, processor, replay_ratio, require_replay=require_replay)
         # Extend accent labels for replay samples (tagged as "general")
         if train_accent_labels:
             extra = len(train_dataset) - pre_mix_size
@@ -676,6 +708,17 @@ def main():
         action="store_true",
         help="Enable DoRA (magnitude/direction split). ~15-20%% VRAM overhead; used by W17 recipe.",
     )
+    parser.add_argument("--model-config", type=Path, help="Local base config.json for offline shape validation")
+    parser.add_argument(
+        "--allow-target-expansion",
+        action="store_true",
+        help="Keep every source LoRA tensor; initialize explicitly new target modules/DoRA magnitudes",
+    )
+    parser.add_argument(
+        "--require-replay",
+        action="store_true",
+        help="Fail if general-domain replay is unavailable; required for the W17 hard mix",
+    )
     args = parser.parse_args()
 
     # Resolve resume_from_checkpoint: True means auto-detect last checkpoint
@@ -697,6 +740,9 @@ def main():
         accent_balance=args.accent_balance,
         init_from_adapter=args.init_from,
         use_dora=args.use_dora,
+        model_config=args.model_config,
+        allow_target_expansion=args.allow_target_expansion,
+        require_replay=args.require_replay,
     )
 
 

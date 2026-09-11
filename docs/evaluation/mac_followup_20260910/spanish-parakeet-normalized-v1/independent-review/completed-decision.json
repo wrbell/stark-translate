@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-10T17:48:35.763199+00:00",
+  "status": "completed_review_no_qualified_spanish_arms",
+  "source_revision": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "report_selection_and_anchor_audit": "passed",
+  "representative_raw_triplets": [
+    "E4B repeat 1",
+    "E2B repeat 0"
+  ],
+  "public_local_links_passed": 2,
+  "ast_parse": "passed",
+  "ruff_check": "passed",
+  "files": [
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-review/audit_report.py",
+      "sha256": "8216212536d9fc83cd211b2b81e649d8b9bdcc61a4a5fbe6a78f3c0f25184eb4",
+      "size_bytes": 9697
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-review/report-review.json",
+      "sha256": "5114af7d20d5b48468410ac59cfb2d8cdbdc35bd6979c976df8bdd64b2fe7d0e",
+      "size_bytes": 12020
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-review/raw-representative-e2b-r0.json",
+      "sha256": "ed6ee91ddaaf476b82b8601079e8c8fc0fcba60507945598172757207752eb1f",
+      "size_bytes": 14403
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/spanish-parakeet-result.md",
+      "sha256": "3527a055dc48e198e9ee2b5a1cae5d65722fcbe906a8a9a9aecf3598cba63abb",
+      "size_bytes": 7020
+    }
+  ],
+  "prior_pending_state_preserved": {
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/confirmation-preparation/status.json",
+    "sha256": "5b03e2bb5dd666f2f42f631d359fcfc393055a1ba54b3b8d8e475b59d9eca55f",
+    "size_bytes": 2736
+  },
+  "qualified_arms": 0,
+  "confirmation_authorized": false,
+  "model_or_device_execution": false,
+  "archive_payloads_read": false,
+  "receipt_validation_note": "Initial receipt-writing attempt used system Python 3.9, which lacks datetime.UTC; existing Python 3.11 wrote this receipt. No model execution or source/evidence mutation resulted."
+}

@@ -1,0 +1,143 @@
+{
+  "recorded_at": "2026-09-10T14:09:00.717428+00:00",
+  "session": "20260910_092824_526799_en",
+  "source_root": "/Users/willem/Code/vibes/SRTranslate",
+  "scratch_root": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/correction-handoff-20260910/session_snapshot",
+  "original_hashes": {
+    "metrics/diagnostics_20260910_092824_526799_en.jsonl": "27fb1e13aff75bc4df4fd32453c53e49582980b0b526ddc0e352e7fedb524372",
+    "metrics/session_lifecycle_20260910_092824_526799_en.json": "9f6be53341095bdc4726b14ecbcef63c2a275da74e750df601da23032eb34e25",
+    "metrics/session_metadata_20260910_092824_526799_en.json": "3c8c6eed10c83cf82e03b3e4880140432064978aa008939e9453f46167ad2f5f",
+    "stark_data/corrections/20260910_092824_526799_en.jsonl": "eec2884acb5ac41cf35466a6168c29b3778b16a81aece021518c03eeffe16335",
+    "stark_data/live_sessions/20260910_092824_526799_en/chunk_0001.wav": "ed5918bfdd3b78b0d879c92b68dbed77b889167e1c2dbb8017abfd534cf1d70c"
+  },
+  "record": {
+    "chunk_id": 1,
+    "revision": 2,
+    "source_lang": "en",
+    "session_kind": "replay",
+    "transcript_approved": false,
+    "translation_approved": false,
+    "excluded": false,
+    "review_note": "Operator rehearsal 2026-09-10: saved draft and local reload recovery verified; no human transcript or bilingual approval."
+  },
+  "export_checks": [
+    {
+      "split": "train",
+      "status": "rejected_as_expected",
+      "reason": "Approve at least one transcript or translation before exporting"
+    },
+    {
+      "split": "eval",
+      "status": "rejected_as_expected",
+      "reason": "Approve at least one transcript or translation before exporting"
+    },
+    {
+      "mode": "export-translation",
+      "argv": [
+        "/Users/willem/anaconda3/bin/python3.11",
+        "-S",
+        "/Users/willem/Code/vibes/SRTranslate/tools/prepare_finetune_data.py",
+        "export-translation",
+        "--session",
+        "20260910_092824_526799_en",
+        "--metrics-dir",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/correction-handoff-20260910/session_snapshot/metrics",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/correction-handoff-20260910/export-translation-unapproved-output"
+      ],
+      "started_at": "2026-09-10T14:09:00.720118+00:00",
+      "ended_at": "2026-09-10T14:09:00.814104+00:00",
+      "exit_code": 0,
+      "stdout": "Loaded 1 chunk records\nNo eligible translation pairs.\n",
+      "stderr": "",
+      "output_exists": false,
+      "interpretation": "CLI zero exit with no eligible rows is not an exported corpus or retrain receipt."
+    },
+    {
+      "mode": "export-whisper",
+      "argv": [
+        "/Users/willem/anaconda3/bin/python3.11",
+        "-S",
+        "/Users/willem/Code/vibes/SRTranslate/tools/prepare_finetune_data.py",
+        "export-whisper",
+        "--session",
+        "20260910_092824_526799_en",
+        "--metrics-dir",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/correction-handoff-20260910/session_snapshot/metrics",
+        "--output",
+        "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/correction-handoff-20260910/export-whisper-unapproved-output"
+      ],
+      "started_at": "2026-09-10T14:09:00.814414+00:00",
+      "ended_at": "2026-09-10T14:09:00.890497+00:00",
+      "exit_code": 0,
+      "stdout": "Loaded 1 chunk records\n  0 pass confidence filter (rejected 1)\n  0 have non-empty transcriptions\nNo eligible records for Whisper export.\n",
+      "stderr": "",
+      "output_exists": false,
+      "interpretation": "CLI zero exit with no eligible rows is not an exported corpus or retrain receipt."
+    }
+  ],
+  "originals_unchanged": true,
+  "no_bundle_or_registry_created": true,
+  "approval_flags_modified": false,
+  "training_data_created": false,
+  "models_loaded": false,
+  "ml_imports_absent": true,
+  "handoff_updated_at": "2026-09-10T14:16:01.444503+00:00",
+  "source_head_at_handoff": "cfc1629c94ef570c1946e60b9b58205501604cbf",
+  "source_worktree_snapshot": true,
+  "inspected_source_sha256": {
+    "tools/review_data.py": "227038073de8d335eb893ced8ab320055dfb311f6a6e0249e7858b518fd4b102",
+    "tools/prepare_finetune_data.py": "e825c87367d15bf26682a8c7f27b8d0efd928f9f9e5e9875e6c7759a78e96891",
+    "tools/merge_corrections.py": "49e1aa9633e1362f31e7d9a7ab2798f1ed41f31f1b684441fec0800f5dbb0777",
+    "tools/training_preflight.py": "24a399d4cd8fd871cd0e466a640162582c220ce9259e04cc9df5faec8a223c82",
+    "tools/session_lifecycle.py": "20776a6a4fdeddd5329cd50a45ee794b7f82e3d90a472d3fac46676c77d3a385",
+    "operator_app/review.py": "be79d4b432428dde8c06f2ba8ee40107016adfa7b1047670ebeb1ff75b3bf2ec",
+    "training/train_gemma4.py": "3442df47a960f6211dce08a09ca83e078ee859b0f794a3ea15cb22f9b1afba8b",
+    "tests/test_correction_import_safety.py": "33b8cdb4e676ab016a77108bf13bd2309e2bdc36249f48a0b9f776247af0f79c"
+  },
+  "guard_validation": {
+    "argv": [
+      "stt_env/bin/python",
+      "-m",
+      "pytest",
+      "tests/test_correction_import_safety.py",
+      "-q"
+    ],
+    "result": "39 passed in 0.17s",
+    "ruff_check": "passed",
+    "ruff_format_check": "passed"
+  },
+  "registered_v2_files": [
+    {
+      "path": "bible_data/aligned/verse_pairs_train_v2.jsonl",
+      "exists": false
+    },
+    {
+      "path": "bible_data/aligned/verse_pairs_test_v2.jsonl",
+      "exists": false
+    }
+  ],
+  "remaining_gates": [
+    {
+      "gate": "eligible_original_sunday_correction",
+      "status": "human_input_pending",
+      "next_receipt": "Original source provenance/date plus actual saved human text correction and independent transcript/bilingual approvals."
+    },
+    {
+      "gate": "dated_portable_export_and_scratch_merge",
+      "status": "ready_after_approved_input",
+      "next_receipt": "Bundle schema-2 manifest/ZIP/hash, sample ID/revision in dated scratch corpus, nonzero first import and idempotent reimport, original corpus/holdout hashes unchanged."
+    },
+    {
+      "gate": "cpu_smoke_trainer_data_preflight",
+      "status": "ready_after_approved_input_and_real_corpora",
+      "next_receipt": "tools/training_preflight.py gemma report against actual merged corpus with one-step trainer argv and required v2 holdout; no GPU import."
+    },
+    {
+      "gate": "real_cuda_training",
+      "status": "external_hardware_pending",
+      "next_receipt": "WSL loader/tokenizer/optimizer logs and actual artifact; no Mac execution."
+    }
+  ],
+  "future_workflow_status": "Commands in correction-handoff.md are prepared and conditional; no approval/export/merge/retraining success is claimed for the actual attended review."
+}

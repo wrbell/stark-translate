@@ -1,14 +1,22 @@
 # stark-translate
 
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
+> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
+> screens with no qualified arms, CPU Whisper-base rejection and silent hymn diagnostics.
+> Defaults are unchanged. Current artifact, service and merge results are recorded in
+> [implementation status](docs/mac_implementation_status.md).
+
+
 [![Lint](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml)
 [![Test](https://github.com/wrbell/stark-translate/actions/workflows/test.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/test.yml)
 [![Security](https://github.com/wrbell/stark-translate/actions/workflows/security.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/wrbell/stark-translate/graph/badge.svg)](https://codecov.io/gh/wrbell/stark-translate)
 
-Fully on-device, live bilingual speech-to-text for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). English/Spanish, real-time mic input, browser display. No cloud APIs, no internet required at runtime.
+Fully on-device, live bilingual speech-to-text for church outreach at Stark Road Gospel Hall (Farmington Hills, MI). English/Spanish, real-time mic input, browser display. Inference uses no cloud APIs and works offline after the selected models are prepared locally.
 
 > **Source and releases (2026-09-10):** this guide describes v2026.14 source
-> (`2026.14.0.0`), with integration history and current PR state in [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> (`2026.14.0.0`), with prior integration in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
+> and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > The last published release recorded here is **v2026.13**. Source integration,
 > release publication and service certification are separate; PyPI/package artifacts
 > and release tags remain pending by user choice.
@@ -16,7 +24,32 @@ Fully on-device, live bilingual speech-to-text for church outreach at Stark Road
 > [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) · remaining work:
 > [`docs/backlog.json`](docs/backlog.json) (rendered as [`docs/backlog.md`](docs/backlog.md)).
 
-The [completed September 10 screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
+The September 10 normalized follow-up completed [Standard screening](docs/evaluation/mac_followup_20260910/standard-screen-result.md)
+(96 technical passes, 0/24 qualified arms), [Spanish Parakeet screening](docs/evaluation/mac_followup_20260910/spanish-parakeet-result.md)
+(18 passes, 0/2) and [CPU Lite cadence screening](docs/evaluation/mac_followup_20260910/lite-cadence-result.md)
+(24 passes, 0/4). Each run has six eligible anchors, so these screens support no
+p95 claim. Faster medians did not satisfy the other guards. E4B finals, Spanish
+Whisper and the 0.6-second cadence remain unchanged. Lite finals in this screen
+use Marian CPU; E2B is only a harness label. The separate
+[CPU STT comparison](docs/evaluation/mac_followup_20260910/cpu-stt-comparison.md)
+completed 600 calls and rejected Whisper-base for higher WER in both languages.
+The [independent Lite deadline screen](docs/evaluation/mac_followup_20260910/lite-deadline-result.md)
+also completed 24 runs with 0/4 qualified arms at unchanged 0.6-second cadence.
+Rejected arms cannot enter confirmation or combinations.
+
+The [earlier September 10 overnight screen](docs/evaluation/overnight_screen_20260910/README.md) recorded 96/96 valid runs and selected 0/28 experiment/model arms. The sub-second final-delivery goal was not met on this 45-second English cohort; E4B defaults remain unchanged. Small endpoint samples, unreviewed references and the locked-native-screen/browser-DOM distinction limit this evidence.
+
+Current [source validation](docs/evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+records the repaired `760e948` source. Its [delivery packet](docs/evaluation/mac_followup_20260910/final-760e948/README.md)
+keeps installed-artifact and full-service acceptance separate.
+
+The earlier c13 [source checks](docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md),
+[350-second hymn control](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
+and [102-call text comparison](docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
+are separate evidence. The natural control never entered music hold; supplied text
+boundaries remain hypotheses. #193/#194 still require natural labels and bilingual
+review. [Installed delivery](docs/evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+keeps artifact, pipeline, monitor and full-service acceptance separate.
 
 EN↔ES remains the active speed priority. The installed Standard and CPU Lite
 full-service runs on `752ab9a` completed with consistent retained source spans,
@@ -129,7 +162,7 @@ Pinned in `models.lock.json`; resolution order (explicit path → `STARK_MODELS_
 |------|-------------------|--------------|-------|
 | VAD | Silero 6.2.1 (torch; ONNX opt-in) | same | 0.5 s silence trigger, 8 s max utterance |
 | STT EN | Parakeet TDT 0.6B v3 (`parakeet-mlx`) | Whisper large-v3-turbo + W16 LoRA → CT2 int8_float16 | Mac `--stt-backend mlx` forces Whisper |
-| STT ES | mlx-whisper large-v3-turbo; low-confidence fallback `wbell7/distil-whisper-large-v3.5-mlx` | same CT2 model | Confidence thresholds in `settings.py` |
+| STT ES | mlx-whisper large-v3-turbo | same CT2 model | English-only Distil fallback is rejected for Spanish; confidence thresholds in `settings.py` |
 | Partial translation | Marian opus-mt en-es / es-en → CT2 int8 on CPU (HF fallback) | Marian CT2 int8_float16 on GPU | [Marian benchmark](docs/archive/v2026.8/MARIAN_BENCHMARK.md) |
 | Final translation | Gemma 4 E4B OptiQ 4-bit (`--gemma4-size e2b` opt-in) | Gemma 4 E4B Q4_K_M via llama.cpp (`start_server.sh`), E2B for low VRAM | [CUDA benchmark](docs/archive/v2026.5/BENCHMARK.md); HF NF4 is legacy |
 | Opt-out translation | TranslateGemma 4B / 12B 4-bit (`--model-family translategemma`, `--ab`) | — | Historical default; see [`docs/mlx_cuda_parity.md`](./docs/mlx_cuda_parity.md) |
@@ -162,7 +195,7 @@ Guide: [`training/CLAUDE.md`](./training/CLAUDE.md).
 
 | Target | Config | Status |
 |--------|--------|--------|
-| MacBook Pro M3 Pro 18 GB | Parakeet/Whisper + Marian CT2 + Gemma 4 E4B OptiQ | Verified daily; peak memory per session in `metrics/session_lifecycle_<id>.json` |
+| MacBook Pro M3 Pro 18 GB | Parakeet/Whisper + Marian CT2 + Gemma 4 E4B OptiQ | Dated functional/replay evidence in [Mac evaluation](docs/evaluation/mac_followup_20260910/README.md); microphone reliability and human/device gates remain pending |
 | Smaller-memory Apple Silicon | `--gemma4-size e2b` | Intended path, not validated |
 | NVIDIA A2000 Ada 16 GB (WSL) | W16 Whisper CT2 + Marian CT2 + Gemma 4 E4B Q4_K_M | Benchmarked v2026.5–8 (archives above) |
 | NVIDIA 6–8 GB | Gemma 4 E2B / E4B Q4_K_M via llama.cpp | Per [`docs/archive/v2026.5/BENCHMARK.md`](./docs/archive/v2026.5/BENCHMARK.md) VRAM figures; not separately certified |
@@ -185,7 +218,7 @@ pytest tests/test_documentation.py -v
 
 10 GitHub Actions workflow files in `.github/workflows/`: Lint, Test (3.11 + 3.12, coverage
 gate in `test.yml`), Security (pip-audit), Release, Windows MSI Release, PyPI Publish
-(manual/pending), Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in
+(tag/manual-triggered; publication and trusted publisher pending), Docker Image (GHCR), Label PRs, Commitlint, Stale. CalVer in
 `pyproject.toml`. Validated CPU suite counts live only in
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md).
 
@@ -277,14 +310,25 @@ merge and justified issue closures. PyPI/package/release tags remain pending.
 **Live microphone (2026-09-09 → 10):** the built-in-mic session stalled after model load
 (no audio frames, operator showed RUNNING from the CSV header) while file replay passed. The
 fix — PortAudio in a disposable child with a no-input timeout, and operator readiness from
-the pipeline health channel — is implemented; the real built-in-mic retest is deferred to
-the next attended session (`mac-live-mic-stall`, #131).
+the pipeline health channel — is implemented. Attended EN and ES microphone sessions now
+receive real frames, reach ready and stop cleanly. These quiet-room runs did not establish
+spoken caption quality. [Session evidence](docs/evaluation/attended_mic_20260910/README.md)
+distinguishes them from visible-caption file replay. Later [synthetic EN/ES caption checks](docs/evaluation/tts_routing_20260910/README.md)
+retain a failed Spanish capture-loss result.
 
-**Open gates:** live microphone EN/ES retest, natural Spanish references, bilingual review,
+The later [capture-loss accounting repair](docs/evaluation/mac_followup_20260910/capture-loss-accounting.md)
+(`d7ed43d`) separates counted worker FIFO drops from native-overflow flags with an
+unknown lost-sample count, validates bounded POSIX terminal receipts and records
+shutdown-only losses. It does not certify native capture reliability or resolve
+the retained Spanish failure; no native audio test was performed for this repair.
+
+**Open gates:** spoken microphone EN/ES captions, church-specific Spanish references, bilingual review,
 visible-browser timing certification, two-speaker diarization gate, physical second
 output, WSL training cycle, Lite x86 CPU / RTX 2070 hardware performance — tracked
 in [`docs/backlog.json`](docs/backlog.json). The laptop runbook rehearsal is complete
-and #134 is closed; hymn/quality follow-ups #193/#194 remain open.
+and #134 is closed. The original [per-language routing acceptance for #132](docs/evaluation/mac_followup_20260910/tts-routing-acceptance.md)
+is met; closure follows reviewed merge, with physical output and audibility checked
+separately. Hymn/quality follow-ups #193/#194 remain open.
 
 ## License
 

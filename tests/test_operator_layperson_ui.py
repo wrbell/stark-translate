@@ -561,7 +561,7 @@ h.el('mic-device').value = '1';
 const probe = deferred();
 h.route('POST', '/api/audio/test-input', () => probe.promise);
 const clicking = h.el('mic-test-btn').click(); await settle();
-assert.deepStrictEqual(JSON.parse(h.lastFetch('/api/audio/test-input').init.body), {device: 1, duration_s: 2});
+assert.deepStrictEqual(JSON.parse(h.lastFetch('/api/audio/test-input').init.body), {device: 1, device_name: 'USB Mic', duration_s: 2});
 assert(h.text('mic-test-status').includes('Listening for 2 seconds on USB Mic (1ch)'), h.text('mic-test-status'));
 assert.strictEqual(h.el('start-btn').disabled, true); // Start waits for the pending device test
 assert(h.text('start-hint').includes('Wait for the audio test'));

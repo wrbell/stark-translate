@@ -1,0 +1,16 @@
+{
+  "copied_at": "2026-09-10T18:24:40.050997+00:00",
+  "files": [
+    {
+      "path": "raw-representative-en-r2.json",
+      "size_bytes": 21248,
+      "sha256": "5770f4236b08e9333c6f1e4ff69164455e99e4788d166bdc2eb756b71786dabc"
+    },
+    {
+      "path": "report-review.json",
+      "size_bytes": 10964,
+      "sha256": "1030c097855d97117764743e4250890ad7d7f986a25af363968ab025eaddd0cd"
+    }
+  ],
+  "new_inference": false
+}

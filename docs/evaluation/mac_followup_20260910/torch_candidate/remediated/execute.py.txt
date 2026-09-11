@@ -1,0 +1,121 @@
+"""Reserved-window stages for the isolated full-app candidate; no automatic inference."""
+import argparse
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import sysconfig
+import zipfile
+from datetime import datetime, timezone
+from email.parser import BytesParser
+from pathlib import Path
+
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parents[2]
+VENV=BASE/'venv'
+PY=VENV/'bin/python'
+WHEEL=next((BASE/'dist').glob('*.whl'))
+BOOT=Path('/Users/willem/anaconda3/bin/python3.11')
+AUDITOR=ROOT/'.cache/package-smoke/bin/pip-audit'
+RECEIPTS=BASE/'command-receipts.json'
+CACHE=BASE.with_name('full-application-torch-candidate')/'pip-cache'
+
+def utc(): return datetime.now(timezone.utc).isoformat()
+def digest(path):
+    with Path(path).open('rb') as f: return hashlib.file_digest(f,'sha256').hexdigest()
+def environment():
+    env=dict(os.environ)
+    for key in tuple(env):
+        if key.startswith(('STARK_', 'PIP_')) or key in {'PYTHONPATH','PYTHONHOME','VIRTUAL_ENV'}: del env[key]
+    env.update({'PYTHONNOUSERSITE':'1','HF_HUB_OFFLINE':'1','TRANSFORMERS_OFFLINE':'1',
+                'STARK_PROJECT_ROOT':str(ROOT),'STARK_MODELS_DIR':str(Path.home()/'.cache/stark-translate/models'),
+                'OMP_NUM_THREADS':'1','OPENBLAS_NUM_THREADS':'1','MKL_NUM_THREADS':'1'})
+    return env
+
+def run(label,argv,*,timeout=1800,allow_failure=False):
+    logfile=BASE/(label+'.log')
+    if logfile.exists(): raise RuntimeError('Refusing to overwrite receipt: '+str(logfile))
+    work=BASE/'work'
+    work.mkdir(exist_ok=True)
+    receipt={'stage':label,'argv':[str(x) for x in argv],'cwd':str(work),'started_at':utc()}
+    with logfile.open('w') as stream:
+        try:
+            result=subprocess.run(receipt['argv'],cwd=work,env=environment(),stdout=stream,stderr=subprocess.STDOUT,timeout=timeout,check=False)
+            receipt['exit_code']=result.returncode
+        except subprocess.TimeoutExpired:
+            receipt['exit_code']=124
+    receipt.update({'ended_at':utc(),'log':str(logfile),'log_sha256':digest(logfile)})
+    receipts=json.loads(RECEIPTS.read_text()) if RECEIPTS.exists() else []
+    receipts.append(receipt)
+    RECEIPTS.write_text(json.dumps(receipts,indent=2)+'\n')
+    print(json.dumps(receipt),flush=True)
+    if receipt['exit_code'] and not allow_failure: raise SystemExit(receipt['exit_code'])
+    return receipt
+
+def metadata_check():
+    with zipfile.ZipFile(WHEEL) as archive:
+        name=next(n for n in archive.namelist() if n.endswith('.dist-info/METADATA'))
+        metadata=BytesParser().parsebytes(archive.read(name))
+        requirements=metadata.get_all('Requires-Dist')
+        assert any('torch==2.13.0' in r and 'mlx' in r for r in requirements)
+        assert any('torchaudio==2.11.0' in r and 'diarization' in r for r in requirements)
+        assert not any('torch<2.11' in r or 'torchaudio<2.11' in r for r in requirements)
+        result={'wheel':str(WHEEL),'wheel_sha256':digest(WHEEL),'name':metadata['Name'],'version':metadata['Version'],
+                'requires_dist':requirements,'torch_audio_extras_correct':True}
+        (BASE/'wheel-metadata.json').write_text(json.dumps(result,indent=2)+'\n')
+    return result
+
+def resolve():
+    if VENV.exists(): raise RuntimeError('Candidate venv already exists; choose a new attempt directory')
+    metadata_check()
+    run('venv-create',[BOOT,'-m','venv',VENV])
+    run('installer-bootstrap',[PY,'-m','pip','--isolated','install','--only-binary=:all:',
+        '--index-url','https://pypi.org/simple','--cache-dir',CACHE,'pip==26.2.1','setuptools==84.0.0'])
+    run('full-application-resolution',[PY,'-m','pip','--isolated','install','--dry-run','--ignore-installed',
+        '--only-binary=:all:','--index-url','https://pypi.org/simple','--cache-dir',CACHE,
+        '--constraint',BASE/'constraints.txt','--report',BASE/'pip-resolution.json',str(WHEEL)+'[mlx,diarization]','jiwer==4.0.0'])
+    lock()
+
+def lock():
+    report=json.loads((BASE/'pip-resolution.json').read_text())
+    canonical=lambda name: re.sub(r'[-_.]+','-',name).lower()
+    expected={canonical(line.split('==')[0]):line.strip().split('==')[1] for line in (BASE/'constraints.txt').read_text().splitlines()}
+    lines=[]
+    for entry in report['install']:
+        name=canonical(entry['metadata']['name'])
+        version=entry['metadata']['version']
+        assert name=='stark-translate' or expected.get(name)==version,(name,version,expected.get(name))
+        source=entry['download_info']
+        sha=source['archive_info']['hashes']['sha256']
+        extras='[mlx,diarization]' if name=='stark-translate' else ''
+        lines.append(f"{name}{extras} @ {source['url']} --hash=sha256:{sha}")
+    (BASE/'resolved-requirements.txt').write_text('\n'.join(sorted(lines))+'\n')
+    print(json.dumps({'resolved_packages':len(lines),'requirements_sha256':digest(BASE/'resolved-requirements.txt')}),flush=True)
+
+def install():
+    run('full-application-install',[PY,'-m','pip','--isolated','install','--only-binary=:all:',
+        '--index-url','https://pypi.org/simple','--cache-dir',CACHE,'--require-hashes','-r',BASE/'resolved-requirements.txt'])
+    run('pip-check',[PY,'-m','pip','check'])
+    run('installed-inventory',[PY,'-m','pip','list','--format=json'])
+    run('installed-metadata-consistency',[PY,BASE/'verify_install.py'])
+
+def smoke():
+    run('native-imports-vad',[PY,BASE/'native_smoke.py'])
+
+def audit():
+    run('full-installed-audit',[AUDITOR,'--path',VENV/'lib/python3.11/site-packages','--format','json',
+        '--output',BASE/'installed-audit.json','--cache-dir',BASE/'audit-cache','--timeout','5','--progress-spinner','off'],allow_failure=True)
+
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('stage',choices=['metadata','resolve','lock','install','smoke','audit'])
+p.add_argument('--reserved-window',action='store_true',help='Required for any installation/import/VAD/audit stage')
+a=p.parse_args()
+if a.stage not in {'metadata','lock'} and not a.reserved_window: p.error('Root must reserve this stage before execution')
+if a.stage=='metadata': print(json.dumps(metadata_check(),indent=2))
+elif a.stage=='resolve': resolve()
+elif a.stage=='lock': lock()
+elif a.stage=='install': install()
+elif a.stage=='smoke': smoke()
+else: audit()

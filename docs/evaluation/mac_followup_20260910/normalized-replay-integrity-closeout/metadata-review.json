@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-09-10T17:26:30.776491+00:00",
+  "status": "metadata_checks_passed_payload_reverification_deferred",
+  "archive_index_sha256": "55ebcaec868bdb7fe5c2ffcfc1a7e5d20840da2cd7fe9c46a655fb673b744b88",
+  "indexed_files": 28,
+  "small_files_rehashed": [
+    "abort-receipt.json",
+    "archive_cohort.py.txt",
+    "archive_v1_v4.py.txt",
+    "input-inventory.json",
+    "interpretation.json",
+    "interrupted-v1-run/ab_metrics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.csv",
+    "interrupted-v1-run/hardware_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+    "interrupted-v1-run/health_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+    "interrupted-v1-run/partials_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.jsonl",
+    "interrupted-v1-run/replay_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.log",
+    "interrupted-v1-run/session_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.log",
+    "interrupted-v1-run/session_lifecycle_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+    "interrupted-v1-run/session_metadata_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+    "measurement-pilot-v4/evidence-index.json",
+    "measurement-pilot-v4/protocol.json",
+    "measurement-pilot-v4/provenance.json",
+    "measurement-pilot-v4/run-summary.json",
+    "measurement-pilot-v4/runner.log",
+    "standard-screen-normalized-v1/evidence-index.json",
+    "standard-screen-normalized-v1/protocol.json",
+    "standard-screen-normalized-v1/provenance.json",
+    "standard-screen-normalized-v1/run-summary.json",
+    "standard-screen-normalized-v1/runner.log"
+  ],
+  "stat_only_deferred_payloads": [
+    {
+      "path": "interrupted-v1-run/diagnostics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.jsonl",
+      "size_bytes": 550263,
+      "recorded_sha256": "8afde09fe84d2f18066afdcede5e6af9f4afb10564211810160413d525449efb",
+      "reason": "Compressed archive or larger raw payload: stat only; no read/hash/decompression during active model queue"
+    },
+    {
+      "path": "measurement-pilot-v4/raw-evidence.tar.gz",
+      "size_bytes": 738867,
+      "recorded_sha256": "9db412da6ba9c3c16bdf005e8a65e9b521d4f4bf4ae7b8c6441ebabb146052e2",
+      "reason": "Compressed archive or larger raw payload: stat only; no read/hash/decompression during active model queue"
+    },
+    {
+      "path": "measurement-pilot-v4/source-code.tar.gz",
+      "size_bytes": 1157694,
+      "recorded_sha256": "e316836753049a4cabf0abec65e864b9cc8cbce465fbc0ef8e44a49f8d4f3e4f",
+      "reason": "Compressed archive or larger raw payload: stat only; no read/hash/decompression during active model queue"
+    },
+    {
+      "path": "standard-screen-normalized-v1/raw-evidence.tar.gz",
+      "size_bytes": 3183176,
+      "recorded_sha256": "36a83af73dcc630ad74c556046bc43d9c162f82211ad7f372b2b0ce1f07ec6c8",
+      "reason": "Compressed archive or larger raw payload: stat only; no read/hash/decompression during active model queue"
+    },
+    {
+      "path": "standard-screen-normalized-v1/source-code.tar.gz",
+      "size_bytes": 1143764,
+      "recorded_sha256": "b9873c328f43feffcc417ec555c2d4a66d7ed3751001ace906b4477422a902af",
+      "reason": "Compressed archive or larger raw payload: stat only; no read/hash/decompression during active model queue"
+    }
+  ],
+  "cohorts": [
+    {
+      "cohort": "standard-screen-normalized-v1",
+      "recorded_source_revision": "a8511eed53fde804a688b4dd56a52c077e773eca",
+      "persisted_results": 13,
+      "planned_runs": 96,
+      "recorded_integrity_passes": 12,
+      "failed_runs": [
+        {
+          "session_id": "followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_es_es",
+          "returncode": 0,
+          "completion_errors": [
+            "Replay PCM/identity integrity failed: physical_trace: Missing keyed partial physical result; physical_trace: unmatched started/finished identities"
+          ],
+          "integrity_status": "failed"
+        }
+      ],
+      "recorded_raw_member_count": 40,
+      "raw_member_payloads_rechecked": false,
+      "summary_final_count_range": [
+        6,
+        8
+      ],
+      "promotion_eligible": false
+    },
+    {
+      "cohort": "measurement-pilot-v4",
+      "recorded_source_revision": "eddb0adb4741307680079802c47f33cb21d56aec",
+      "persisted_results": 3,
+      "planned_runs": 3,
+      "recorded_integrity_passes": 3,
+      "failed_runs": [],
+      "recorded_raw_member_count": 10,
+      "raw_member_payloads_rechecked": false,
+      "summary_final_count_range": [
+        6,
+        8
+      ],
+      "promotion_eligible": false
+    }
+  ],
+  "interrupted_artifact_count": 9,
+  "limits": [
+    "No archive content was read, hashed, decompressed or recompressed during this review.",
+    "Recorded archive/member/source-code hashes and producer readback checks are retained; their payload bytes were not independently reverified here.",
+    "Run summaries were cross-checked against small metadata and recorded member inventory, not recomputed from large raw result JSON.",
+    "No model, audio, device, Git, build or install operation was performed."
+  ]
+}

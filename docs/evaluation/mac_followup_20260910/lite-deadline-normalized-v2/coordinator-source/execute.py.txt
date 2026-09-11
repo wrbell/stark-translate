@@ -1,0 +1,315 @@
+"""Execute the reviewed Lite follow-ups after the preceding owned queue exits.
+
+Scratch coordinator only. Every model command uses the frozen file/no-TTS harness.
+Never calls the preceding queue's main or modifies its receipts.
+"""
+
+import argparse
+import datetime
+import hashlib
+import importlib.util
+import json
+import os
+import signal
+import subprocess
+import time
+from pathlib import Path
+
+ROOT = Path("/Users/willem/Code/vibes/SRTranslate")
+CACHE = ROOT / ".cache/mac-en-es-closeout"
+PREP = CACHE / "lite-followup-preparation"
+RUNTIME = CACHE / "runtime"
+FROZEN = "eddb0adb4741307680079802c47f33cb21d56aec"
+PYTHON = ROOT / "stt_env/bin/python"
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_new(path, value):
+    with path.open("x") as stream:
+        stream.write(json.dumps(value, indent=2) + "\n")
+
+
+def load_runner():
+    spec = importlib.util.spec_from_file_location("previous_owned_queue", CACHE / "serial-model-followups.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def verify_bindings(bound):
+    if any(digest(Path(path)) != expected for path, expected in bound.items()):
+        raise RuntimeError("Prepared execution plan, spec or input bundle changed")
+
+
+def validate_plan(plan, destination, bundle):
+    """Match the reviewed builder's complete argv, ordering and bounds."""
+    if (
+        plan.get("schema_version") != 1
+        or plan.get("frozen_inputs") != str(bundle)
+        or plan.get("frozen_inputs_sha256") != digest(bundle)
+        or plan.get("defaults_changed") is not False
+        or plan.get("confirmation_completed") is not False
+    ):
+        raise RuntimeError("Unexpected prepared plan identity or claims")
+    expected = []
+    seen = set()
+    common = {
+        "cwd": str(RUNTIME),
+        "environment": {
+            "STARK_MODELS_DIR": str(ROOT / ".cache/overnight-20260910/lite-models"),
+            "HF_HUB_OFFLINE": "1",
+            "TRANSFORMERS_OFFLINE": "1",
+        },
+        "execute_now": False,
+    }
+    python = str(ROOT / ".cache/overnight-20260910/lite-runtime/bin/python")
+    for item in plan["plans"]:
+        language, stage = item.get("language"), item.get("stage")
+        if language not in {"en", "es"} or language in seen:
+            raise RuntimeError("Unexpected or duplicate plan language")
+        seen.add(language)
+        if stage == "no_combination":
+            if item.get("spec") is not None or item.get("spec_path"):
+                raise RuntimeError("No-combination result contains an executable spec")
+            continue
+        if stage not in {"independent_deadline_screen", "qualified_combination_development_screen"}:
+            raise RuntimeError("Unexpected experiment stage")
+        label = language + "_" + stage
+        spec_path = destination / (label + ".json")
+        if item.get("spec_path") != str(spec_path) or item.get("spec_sha256") != digest(spec_path):
+            raise RuntimeError("Unexpected generated spec path or hash")
+        runs = destination / (label + "_runs")
+        report = destination / (label + "_report.json")
+        selection = destination / (label + "_selection.json")
+        expected.extend(
+            [
+                {
+                    **common,
+                    "label": label,
+                    "argv": [
+                        python,
+                        "-m",
+                        "tools.mac_followup_latency",
+                        "run",
+                        "--spec",
+                        str(spec_path),
+                        "--output",
+                        str(runs),
+                        "--tag",
+                        destination.name.replace("-", "_") + "_" + label,
+                        "--repeats",
+                        "3",
+                        "--ws-port",
+                        "8865",
+                        "--http-port",
+                        "8866",
+                        "--timeout",
+                        "300",
+                    ],
+                    "expected_runs": 12 if stage == "independent_deadline_screen" else 9,
+                    "timeout_s": 4500,
+                },
+                {
+                    **common,
+                    "label": label + "_report",
+                    "argv": [
+                        python,
+                        "-m",
+                        "tools.mac_followup_latency",
+                        "report",
+                        "--input",
+                        str(runs),
+                        "--output",
+                        str(report),
+                    ],
+                    "timeout_s": 300,
+                },
+                {
+                    **common,
+                    "label": label + "_selection",
+                    "argv": [
+                        python,
+                        "-m",
+                        "tools.mac_followup_selection",
+                        "--report",
+                        str(report),
+                        "--output",
+                        str(selection),
+                    ],
+                    "timeout_s": 60,
+                },
+            ]
+        )
+    if seen != {"en", "es"} or plan.get("commands") != expected:
+        raise RuntimeError("Generated command inventory, argv, environment or timeout differs from reviewed plan")
+
+
+def wait_owned(process, timeout, previous, *, process_api=None):
+    """Track detached descendants and clean the owned group on every exit path."""
+    if process_api is None:
+        import psutil as process_api
+
+    known = {}
+    deadline = time.monotonic() + timeout
+    try:
+        while True:
+            known.update(previous.descendants(process.pid))
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise subprocess.TimeoutExpired(process.args, timeout)
+            try:
+                return process.wait(timeout=min(0.5, remaining))
+            except subprocess.TimeoutExpired:
+                continue
+    finally:
+        previous.cleanup_children(process.pid, known)
+        process.wait(timeout=5)
+        alive = []
+        for pid, born in known.items():
+            try:
+                child = process_api.Process(pid)
+                if child.create_time() == born and child.status() != process_api.STATUS_ZOMBIE:
+                    alive.append(pid)
+            except process_api.NoSuchProcess:
+                continue
+        if alive:
+            raise RuntimeError(f"Owned children survived cleanup: {alive}")
+
+
+def request_stop(signum, _frame):
+    # Raising unwinds wait_owned's cleanup when the coordinator receives TERM.
+    raise SystemExit(128 + signum)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--after-pid", required=True, type=int)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--execute-reserved-serial-window", action="store_true", required=True)
+    args = parser.parse_args()
+    signal.signal(signal.SIGTERM, request_stop)
+    if args.after_pid <= 1:
+        parser.error("--after-pid must identify the preceding owned queue")
+    output = args.output.resolve()
+    output.mkdir(exist_ok=False)
+    previous = load_runner()
+    source_paths = [
+        Path(__file__).resolve(),
+        PREP / "prepare.py",
+        PREP / "inputs.example.json",
+        CACHE / "serial-model-followups.py",
+        ROOT / "operator_app/processes.py",
+    ]
+    source_hashes = {str(path): digest(path) for path in source_paths}
+    write_new(
+        output / "runner-source.json", {"sha256": source_hashes, "frozen_runtime": FROZEN, "after_pid": args.after_pid}
+    )
+
+    def save(stage, **detail):
+        record = {"updated_at": datetime.datetime.now(datetime.UTC).isoformat(), "stage": stage, **detail}
+        temporary = output / "state.tmp"
+        temporary.write_text(json.dumps(record, indent=2) + "\n")
+        temporary.replace(output / "state.json")
+        print(json.dumps(record), flush=True)
+
+    def verify():
+        previous.verify_source()
+        if any(digest(Path(path)) != expected for path, expected in source_hashes.items()):
+            raise RuntimeError("Reviewed coordinator/preparation source changed")
+
+    def run(label, argv, timeout, env_extra=None):
+        verify()
+        env = {key: value for key, value in os.environ.items() if not key.startswith("STARK_")}
+        env.update(HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1")
+        if env_extra:
+            env.update(env_extra)
+        save(label, argv=argv, timeout_s=timeout)
+        with (output / (label + ".log")).open("x") as log:
+            process = subprocess.Popen(
+                argv, cwd=RUNTIME, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True
+            )
+            code = wait_owned(process, timeout, previous)
+        if code:
+            raise RuntimeError(f"{label}: exit {code}; inspect retained failure before any new run")
+        verify()
+
+    def build_and_execute(stage, inputs_path):
+        bundle = output / (stage + "-inputs.json")
+        destination = output / stage
+        run(
+            stage + "-freeze",
+            [str(PYTHON), str(PREP / "prepare.py"), "freeze", "--inputs", str(inputs_path), "--output", str(bundle)],
+            120,
+        )
+        run(
+            stage + "-build",
+            [str(PYTHON), str(PREP / "prepare.py"), "build", "--bundle", str(bundle), "--output", str(destination)],
+            120,
+        )
+        plan_path = destination / "plan.json"
+        plan_bytes = plan_path.read_bytes()
+        plan = json.loads(plan_bytes)
+        validate_plan(plan, destination, bundle)
+        bound = {str(plan_path): hashlib.sha256(plan_bytes).hexdigest(), str(bundle): digest(bundle)}
+        for entry in plan["plans"]:
+            if entry.get("spec_path"):
+                bound[entry["spec_path"]] = entry["spec_sha256"]
+        for command in plan["commands"]:
+            verify_bindings(bound)
+            argv = command["argv"]
+            run(stage + "-" + command["label"], argv, command["timeout_s"], command["environment"])
+            verify_bindings(bound)
+            if "expected_runs" in command:
+                previous.check_replays(Path(argv[argv.index("--output") + 1]), command["expected_runs"])
+        verify_bindings(bound)
+        return plan, destination
+
+    try:
+        save("waiting_for_previous_queue", pid=args.after_pid)
+        while True:
+            result = subprocess.run(["ps", "-p", str(args.after_pid), "-o", "command="], text=True, capture_output=True)
+            if result.returncode:
+                # A failed inventory command is not evidence that the queue exited.
+                try:
+                    os.kill(args.after_pid, 0)
+                except ProcessLookupError:
+                    break
+                raise RuntimeError("Cannot verify that the preceding queue exited")
+            if "serial-model-followups.py" not in result.stdout:
+                raise RuntimeError("Awaited PID no longer identifies the preceding owned queue")
+            time.sleep(30)
+        preceding = json.loads((CACHE / "serial-model-followups-state.json").read_text())
+        if preceding.get("stage") != "completed":
+            raise RuntimeError("Preceding queue did not complete; no model job started")
+        verify()
+        plan, deadline_dir = build_and_execute("deadline-stage-v1", PREP / "inputs.example.json")
+        inputs = json.loads((PREP / "inputs.example.json").read_text())
+        inputs["deadlines"] = [
+            {
+                "spec": str(deadline_dir / f"{lang}_independent_deadline_screen.json"),
+                "provenance": str(deadline_dir / f"{lang}_independent_deadline_screen_runs/provenance.json"),
+                "report": str(deadline_dir / f"{lang}_independent_deadline_screen_report.json"),
+                "selection": str(deadline_dir / f"{lang}_independent_deadline_screen_selection.json"),
+            }
+            for lang in ("en", "es")
+        ]
+        interaction_inputs = output / "interaction-input-paths.json"
+        write_new(interaction_inputs, inputs)
+        interaction, _ = build_and_execute("interaction-stage-v1", interaction_inputs)
+        save(
+            "completed",
+            base_quality_by_language=plan["base_quality_by_language"],
+            interaction_plans=interaction["plans"],
+            defaults_changed=False,
+            confirmation_completed=False,
+        )
+    except BaseException as exc:
+        save("failed", error=type(exc).__name__ + ": " + str(exc))
+        raise
+
+
+if __name__ == "__main__":
+    main()

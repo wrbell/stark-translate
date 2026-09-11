@@ -1,6 +1,7 @@
 """Final diagnostics must join previews by capture identity, never chunk order."""
 
 import asyncio
+import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import AsyncMock, Mock
@@ -45,7 +46,7 @@ def test_final_admission_prunes_only_preview_history_older_than_existing_retenti
 
 
 @pytest.mark.parametrize("utterance_id", [8, None, 10])
-def test_actual_finalizer_consumes_only_its_exact_utterance_preview(monkeypatch, utterance_id):
+def test_actual_finalizer_consumes_only_its_exact_utterance_preview(monkeypatch, utterance_id, tmp_path):
     import dry_run_ab as d
 
     translations = {None: "unknown identity", 3: "other capture", 8: "correct preview", 9: "newer preview"}
@@ -54,7 +55,11 @@ def test_actual_finalizer_consumes_only_its_exact_utterance_preview(monkeypatch,
     monkeypatch.setattr(d, "partial_translations", translations)
     monkeypatch.setattr(d, "partial_latencies", latencies)
     monkeypatch.setattr(d, "MULTIPROCESS", False)
-    monkeypatch.setattr(d, "mlx_a_model", None)
+    # Exercise the original adaptive Marian branch as well as CPU/no-Gemma.
+    monkeypatch.setattr(d, "mlx_a_model", object() if utterance_id == 8 else None)
+    monkeypatch.setattr(d, "mlx_b_model", None)
+    monkeypatch.setattr(d, "BACKEND", "mlx")
+    monkeypatch.setattr(d, "should_use_marian_only", lambda *args: True)
     monkeypatch.setattr(d, "DIARIZE_ENABLED", False)
     monkeypatch.setattr(d, "tts_engine", None)
     monkeypatch.setattr(d, "_health", None)
@@ -70,7 +75,9 @@ def test_actual_finalizer_consumes_only_its_exact_utterance_preview(monkeypatch,
     stability = Mock(return_value=0.75)
     monkeypatch.setattr(d, "compute_word_stability", stability)
     monkeypatch.setattr(d, "write_csv_row", Mock())
-    monkeypatch.setattr(d, "write_diag_jsonl", Mock())
+    diagnostic_path = tmp_path / "diagnostics.jsonl"
+    monkeypatch.setattr(d, "DIAG_PATH", str(diagnostic_path))
+    monkeypatch.setattr(d, "write_diag_jsonl", Mock(wraps=d.write_diag_jsonl))
     monkeypatch.setattr(d, "save_chunk_audio", Mock(return_value="unused-mocked-audio.wav"))
     monkeypatch.setattr(d, "_io_pool", Mock(submit=Mock(side_effect=lambda fn, *args: fn(*args))))
     messages = []
@@ -95,6 +102,11 @@ def test_actual_finalizer_consumes_only_its_exact_utterance_preview(monkeypatch,
         asyncio.run(run())
     assert len(messages) == 1 and messages[0]["chunk_id"] == 3
     assert messages[0]["utterance_id"] == utterance_id
+    assert messages[0]["final_translation_route"] == "marian"
+    assert messages[0]["generation_lock_wait_ms_a"] is None
+    persisted = json.loads(diagnostic_path.read_text())
+    assert persisted["final_translation_route"] == "marian"
+    assert persisted["generation_lock_wait_ms_a"] is None
     expected_latency = initial_latencies[8] if utterance_id == 8 else None
     if utterance_id == 8:
         stability.assert_called_once_with("correct preview", "La traducción final.")

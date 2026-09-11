@@ -100,14 +100,18 @@ are never rewritten. `/api/support/preview|export` builds scoped support bundles
 `/api/storage/cleanup` removes only regenerable completed-session logs
 (`operator_app/support.py`).
 
-**Readiness (fixed 2026-09-10, live retest pending):** on 2026-09-09 the SPA showed RUNNING
+**Readiness (source repaired 2026-09-10, full live acceptance pending):** on 2026-09-09 the SPA showed RUNNING
 once the pipeline printed the CSV header while the built-in microphone never delivered
 frames. `PipelineRunner` now reads `tools/pipeline_health.py` (`loading → listening →
 ready` on the first input frame, `paused`, `input_error`; `stale` after 3 s without a
 heartbeat) and reports `ready` only from that channel; the pipeline itself fails a capture
 that delivers no samples within 5 s (`tools/isolated_audio.py`). Polls that return an
-unchanged status do not churn the live region. A real built-in-mic session has not yet been
-re-run — `mac-live-mic-stall` / `issue-131-smoke` in [`docs/backlog.json`](../docs/backlog.json).
+unchanged status do not churn the live region. Real quiet-room EN/ES readiness and
+synthetic acoustic checks subsequently ran. A Spanish retest retained 160 ms of
+upstream sample loss; the later device-identity probe did not run STT. See
+[actual device evidence](../docs/evaluation/tts_routing_20260910/README.md) and
+`mac-live-mic-stall` / `issue-131-smoke` in [`docs/backlog.json`](../docs/backlog.json).
+The current user instruction prohibits further microphone/output tests this session.
 
 ## Access
 
@@ -117,7 +121,9 @@ open http://localhost:9000/operator/                         # control plane
 # Phones: scan the QR on the audience display, or http://<LAN-IP>:8080/displays/mobile_display.html
 ```
 
-Ports 8080/8765/9000 must be reachable on the LAN; displays reconnect on drops.
+Audience phones need LAN access to ports 8080/8765; displays reconnect on drops.
+The operator control plane on port 9000 binds to loopback by default and does not
+need LAN exposure for audience captions.
 
 ## Adding a display
 

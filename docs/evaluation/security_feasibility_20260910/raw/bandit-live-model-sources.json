@@ -1,0 +1,140 @@
+{
+  "errors": [],
+  "generated_at": "2026-09-10T13:11:39Z",
+  "metrics": {
+    "./engines/marian_hf_engine.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 2,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 108,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "./engines/model_paths.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 242,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "./engines/tts_engine.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 2,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 124,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "_totals": {
+      "CONFIDENCE.HIGH": 4,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 4,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 474,
+      "nosec": 0,
+      "skipped_tests": 0
+    }
+  },
+  "results": [
+    {
+      "code": "73         model_path, source_kwargs = resolve_hf_model_source(self._model_id_str)\n74         self._tokenizer = MarianTokenizer.from_pretrained(model_path, **source_kwargs)\n75         self._model = MarianMTModel.from_pretrained(model_path, **source_kwargs)\n",
+      "col_offset": 26,
+      "end_col_offset": 86,
+      "filename": "./engines/marian_hf_engine.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 494,
+        "link": "https://cwe.mitre.org/data/definitions/494.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Unsafe Hugging Face Hub download without revision pinning in from_pretrained()",
+      "line_number": 74,
+      "line_range": [
+        74
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.3/plugins/b615_huggingface_unsafe_download.html",
+      "test_id": "B615",
+      "test_name": "huggingface_unsafe_download"
+    },
+    {
+      "code": "74         self._tokenizer = MarianTokenizer.from_pretrained(model_path, **source_kwargs)\n75         self._model = MarianMTModel.from_pretrained(model_path, **source_kwargs)\n76         if self._device == \"cuda\":\n",
+      "col_offset": 22,
+      "end_col_offset": 80,
+      "filename": "./engines/marian_hf_engine.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 494,
+        "link": "https://cwe.mitre.org/data/definitions/494.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Unsafe Hugging Face Hub download without revision pinning in from_pretrained()",
+      "line_number": 75,
+      "line_range": [
+        75
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.3/plugins/b615_huggingface_unsafe_download.html",
+      "test_id": "B615",
+      "test_name": "huggingface_unsafe_download"
+    },
+    {
+      "code": "166         }\n167         onnx_local = hf_hub_download(filename=model_file, **source_kwargs)\n168         hf_hub_download(filename=f\"{model_file}.json\", **source_kwargs)\n",
+      "col_offset": 21,
+      "end_col_offset": 74,
+      "filename": "./engines/tts_engine.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 494,
+        "link": "https://cwe.mitre.org/data/definitions/494.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Unsafe Hugging Face Hub download without revision pinning in hf_hub_download()",
+      "line_number": 167,
+      "line_range": [
+        167
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.3/plugins/b615_huggingface_unsafe_download.html",
+      "test_id": "B615",
+      "test_name": "huggingface_unsafe_download"
+    },
+    {
+      "code": "167         onnx_local = hf_hub_download(filename=model_file, **source_kwargs)\n168         hf_hub_download(filename=f\"{model_file}.json\", **source_kwargs)\n169 \n",
+      "col_offset": 8,
+      "end_col_offset": 71,
+      "filename": "./engines/tts_engine.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 494,
+        "link": "https://cwe.mitre.org/data/definitions/494.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Unsafe Hugging Face Hub download without revision pinning in hf_hub_download()",
+      "line_number": 168,
+      "line_range": [
+        168
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.3/plugins/b615_huggingface_unsafe_download.html",
+      "test_id": "B615",
+      "test_name": "huggingface_unsafe_download"
+    }
+  ]
+}

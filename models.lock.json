@@ -1,7 +1,7 @@
 {
   "$schema_comment": "Runtime model manifest. HF snapshots and direct files pin exact revisions. Mac setup installs Parakeet EN, Whisper ES, Gemma E4B and Marian; optional groups are selected with setup --include.",
   "version": "2026.14.0",
-  "updated": "2026-09-09",
+  "updated": "2026-09-10",
   "models": {
     "gemma-4-e2b-it-q4km.gguf": {
       "type": "direct",
@@ -244,6 +244,112 @@
       "required_for": [],
       "license": "MIT",
       "comment": "Torch-free NumPy ONNX runtime; upstream Silero v6.2.1."
+    },
+    "mlx-whisper-distil-fallback": {
+      "type": "hf-snapshot",
+      "repo_id": "wbell7/distil-whisper-large-v3.5-mlx",
+      "revision": "31357b406d55cf380abe4101b6a10207b156c4a3",
+      "subdir": "mlx-whisper-distil-fallback",
+      "required_for": [],
+      "optional_group": "whisper-fallback",
+      "required_files": [
+        "config.json",
+        "weights.safetensors"
+      ],
+      "allow_patterns": [
+        "config.json",
+        "weights.safetensors"
+      ],
+      "comment": "Existing English-only Whisper fallback; exact working local cache revision verified by HF metadata on 2026-09-10. No language/default changes."
+    },
+    "speechbrain-ecapa": {
+      "type": "hf-snapshot",
+      "repo_id": "speechbrain/spkrec-ecapa-voxceleb",
+      "revision": "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286",
+      "subdir": "speechbrain-ecapa",
+      "required_for": [],
+      "optional_group": "diarization",
+      "required_files": [
+        "hyperparams.yaml",
+        "embedding_model.ckpt",
+        "mean_var_norm_emb.ckpt",
+        "classifier.ckpt",
+        "label_encoder.txt"
+      ],
+      "allow_patterns": [
+        "hyperparams.yaml",
+        "embedding_model.ckpt",
+        "mean_var_norm_emb.ckpt",
+        "classifier.ckpt",
+        "label_encoder.txt"
+      ],
+      "weights_required": false,
+      "comment": "Optional CPU ECAPA. The live loader overrides YAML pretrained_path to this local snapshot so nested weights cannot follow main."
+    },
+    "pyannote-embedding": {
+      "type": "hf-snapshot",
+      "repo_id": "pyannote/embedding",
+      "revision": "4db4899737a38b2d618bbd74350915aa10293cb2",
+      "subdir": "pyannote-embedding",
+      "required_for": [],
+      "optional_group": "diarization-pyannote",
+      "required_files": [
+        "pytorch_model.bin"
+      ],
+      "allow_patterns": [
+        "pytorch_model.bin"
+      ],
+      "comment": "Optional pyannote checkpoint, metadata-pinned on 2026-09-10. Gated access where required uses the existing HF credential; no automatic terms acceptance."
+    },
+    "pyannote-segmentation-3.0": {
+      "type": "hf-snapshot",
+      "repo_id": "pyannote/segmentation-3.0",
+      "revision": "e66f3d3b9eb0873085418a7b813d3b369bf160bb",
+      "subdir": "pyannote-segmentation-3.0",
+      "required_for": [],
+      "optional_group": "diarization-pyannote",
+      "required_files": [
+        "pytorch_model.bin"
+      ],
+      "allow_patterns": [
+        "pytorch_model.bin"
+      ],
+      "comment": "Optional pyannote checkpoint, metadata-pinned on 2026-09-10. Gated access where required uses the existing HF credential; no automatic terms acceptance."
+    },
+    "pyannote-wespeaker": {
+      "type": "hf-snapshot",
+      "repo_id": "pyannote/wespeaker-voxceleb-resnet34-LM",
+      "revision": "837717ddb9ff5507820346191109dc79c958d614",
+      "subdir": "pyannote-wespeaker",
+      "required_for": [],
+      "optional_group": "diarization-pyannote",
+      "required_files": [
+        "pytorch_model.bin"
+      ],
+      "allow_patterns": [
+        "pytorch_model.bin"
+      ],
+      "comment": "Optional pyannote checkpoint, metadata-pinned on 2026-09-10. Gated access where required uses the existing HF credential; no automatic terms acceptance."
+    },
+    "pyannote-diarization-3.1": {
+      "type": "hf-snapshot",
+      "repo_id": "pyannote/speaker-diarization-3.1",
+      "revision": "84fd25912480287da0247647c3d2b4853cb3ee5d",
+      "subdir": "pyannote-diarization-3.1",
+      "required_for": [],
+      "optional_group": "diarization-pyannote",
+      "required_files": [
+        "config.yaml"
+      ],
+      "allow_patterns": [
+        "config.yaml"
+      ],
+      "weights_required": false,
+      "dependencies": {
+        "segmentation": "pyannote/segmentation-3.0",
+        "embedding": "pyannote/wespeaker-voxceleb-resnet34-LM"
+      },
+      "comment": "Optional live full pipeline. Config retrieved at this revision; the live loader verifies and replaces both nested sources with separately pinned local Model objects."
     }
   }
 }

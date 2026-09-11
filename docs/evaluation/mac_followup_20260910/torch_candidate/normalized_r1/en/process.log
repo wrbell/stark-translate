@@ -1,0 +1,239 @@
+10:40:56 [INFO] Session torch213_full_normalized_r1_en started — log file: metrics/session_torch213_full_normalized_r1_en.log
+/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/venv/lib/python3.11/site-packages/tools/audio_bridge_client.py:199: WavFileWarning: Chunk (non-data) not understood, skipping it.
+  source_rate, samples = wavfile.read(path)
+Parakeet has no prompt biasing; theological terms rely on correct_stt_output
+============================================================
+  Bilingual A/B Dry Run
+  Backend: MLX
+  Language: English→Spanish
+  Mode: 4B only
+  WebSocket: ws://localhost:18965
+============================================================
+
+[1/6] Loading packaged Silero VAD...
+  VAD ready (silero-vad 6.2.1, torch)
+[2/6] Loading mlx-community/parakeet-tdt-0.6b-v3 (Parakeet MLX)...
+  Parakeet ready (2.4s)
+[3/6] Loading Gemma 4 models (MLX)...
+  Loading Approach A (mlx-community/gemma-4-e4b-it-OptiQ-4bit)...
+  Prompt cache skipped (gemma4 instruct path)
+[4/6] Loading Helsinki-NLP/opus-mt-en-es (Marian partial translator)...
+  Marian ready (ct2-int8, 2.9s)
+  Hardware profile: metrics/hardware_torch213_full_normalized_r1_en.json
+    arm | 12P+0E cores | 18.0GB RAM | Apple M3 Pro
+[6/6] Starting servers...
+  CSV: metrics/ab_metrics_torch213_full_normalized_r1_en.csv
+  WebSocket ready on port 18965
+  HTTP server ready on port 18966
+
+  Local displays:
+    A/B display:       file:///Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/venv/lib/python3.11/site-packages/displays/ab_display.html
+    Audience display:  file:///Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate-remediated/venv/lib/python3.11/site-packages/displays/audience_display.html
+
+  Mobile / LAN access:
+    http://192.168.1.51:18966/displays/mobile_display.html
+    http://192.168.1.51:18966/displays/audience_display.html
+  [P7-P3-6A] Streaming translation broadcaster started
+  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)
+
+Listening... (Ctrl+C to stop)
+
+  [status] frames=75 speech=32 buf=1.1s silence=0 rms=0.2592  partial (718ms, Marian:27ms): Over time. | Con el tiempo.            [ws] No clients connected, skipping broadcast
+  partial (252ms, Marian:31ms): Over time, as the new population | Con el tiempo, como la nueva población            [ws] No clients connected, skipping broadcast
+  partial (262ms, Marian:46ms): Over time, as the new population begins to | Con el tiempo, a medida que la nueva población comienza a            [ws] No clients connected, skipping broadcast
+  [status] frames=168 speech=125 buf=4.1s silence=0 rms=0.0269  partial (1241ms, Marian:68ms): Over time, as the new population begins to adapt to itself. | Con el tiempo, la nueva población comienza a adaptarse a sí misma.            [ws] No clients connected, skipping broadcast
+  partial (264ms, Marian:69ms): Over time, as the new population begins to adapt to their new environment, | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno,            [ws] No clients connected, skipping broadcast
+  partial (275ms, Marian:77ms): Over time, as the new population begins to adapt to their new environment, they start to find | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a encontrar            [ws] No clients connected, skipping broadcast
+  partial (429ms, Marian:92ms): Over time, as the new population begins to adapt to their new environment, they start to look less. | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse menos.            [ws] No clients connected, skipping broadcast
+  partial (328ms, Marian:97ms): Over time, as the new population begins to adapt to their new environment, they start to look less and less to | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a mirar cada vez menos a            [ws] No clients connected, skipping broadcast
+  partial (345ms, Marian:110ms): Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other populations. | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como las otras poblaciones.            [ws] No clients connected, skipping broadcast
+  [status] frames=263 speech=218 buf=7.1s silence=0 rms=0.0463  partial (335ms, Marian:108ms): Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población.            [ws] No clients connected, skipping broadcast
+
+  [SMART-CUT] #1: 7.7s of 8.0s buffer
+  [FIX] cancelled queued partial (final arriving)
+  [FIX] partial cancelled (final arrived)10:41:29 [INFO] vad_utterance_discard utterance_id=2 reason=short_silence buffer_s=0.448 sample_bounds={'sample_start': 433152, 'sample_end': 454656, 'sample_rate': 48000, 'speech_end_sample': None, 'padding_samples': 0}
+  [ws] No clients connected, skipping broadcast
+
+============================================================
+Chunk #1 | STT: 592ms | EN: Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population.
+  [ws] No clients connected, skipping broadcast
+  [status] frames=357 speech=0 buf=0.0s silence=60 rms=0.0000  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +1639ms A (24 t/s) tok=30 pre=141ms ttft=349ms fin=stop: Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, empieza a parecer menos y menos como la otra población.
+  Processing: 3407ms | utterance-start→processing: 11395ms | conf: 1.00 | QE: A=1.0 | ws: 85%
+  [ws] No clients connected, skipping broadcast
+  partial (193ms, Marian:25ms): Air accident. | Accidente aéreo.            [ws] No clients connected, skipping broadcast
+  [status] frames=451 speech=31 buf=1.0s silence=0 rms=0.0788  partial (162ms, Marian:28ms): Air accidents are common. | Los accidentes aéreos son comunes.            [ws] No clients connected, skipping broadcast
+
+  [FIX] cancelled queued partial (final arriving)
+  [FIX] partial cancelled (final arrived)
+============================================================
+Chunk #2 | STT: 1119ms | EN: Air accidents are common in Iran.
+  [ws] No clients connected, skipping broadcast
+  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)
+  >> NEAR-MISS (fuzzy 80%): 'common' -> 'communion'?
+  +51ms A (0 t/s): Los accidentes aéreos son comunes en Irán.
+  Processing: 1178ms | utterance-start→processing: 3961ms | conf: 0.99 | QE: A=1.0 | ws: 80%
+  [ws] No clients connected, skipping broadcast
+  [status] frames=37 speech=23 buf=0.9s silence=6 rms=0.0166  partial (208ms, Marian:10ms): Which | Que            [ws] No clients connected, skipping broadcast
+  partial (121ms, Marian:14ms): Which have | Que tienen            [ws] No clients connected, skipping broadcast
+  partial (158ms, Marian:24ms): Which has an eight. | Que tiene un ocho.            [ws] No clients connected, skipping broadcast
+  [status] frames=131 speech=111 buf=3.9s silence=0 rms=0.0204  partial (1594ms, Marian:68ms): Which has an aging fleet. | Que tiene una flota envejecida.            [ws] No clients connected, skipping broadcast
+  partial (330ms, Marian:59ms): Which has an aging fleet that is poorly maintained for both | Que tiene una flota envejecida que está mal mantenida para ambos            [ws] No clients connected, skipping broadcast
+  partial (227ms, Marian:53ms): which has an aging fleet that is poorly maintained for both civil | que tiene una flota envejecida que está mal mantenida para ambos civiles            [ws] No clients connected, skipping broadcast
+  partial (277ms, Marian:80ms): which has an aging fleet that is poorly maintained for both civil and military. | que tiene una flota envejecida que está mal mantenida tanto para civiles como para militares.            [ws] No clients connected, skipping broadcast
+  partial (288ms, Marian:72ms): Which has an aging fleet that is poorly maintained for both civil and military operations. | Que tiene una flota envejecida que está mal mantenida tanto para operaciones civiles como militares.            [ws] No clients connected, skipping broadcast
+  partial (271ms, Marian:67ms): which has an aging fleet that is poorly maintained for both civil and military operations. | que tiene una flota envejecida que se mantiene mal para las operaciones civiles y militares.            [ws] No clients connected, skipping broadcast
+  [status] frames=226 speech=196 buf=7.0s silence=6 rms=0.0146
+
+============================================================
+Chunk #3 | STT: 1232ms | EN: which has an aging fleet that is poorly maintained for both civil and military operations.
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +1164ms A (24 t/s) tok=19 pre=152ms ttft=348ms fin=stop: que tiene una flota envejecida y mal mantenida tanto para operaciones civiles como militares.
+  Processing: 2424ms | utterance-start→processing: 8858ms | conf: 0.99 | QE: A=1.0 | ws: 67%
+  [ws] No clients connected, skipping broadcast
+  partial (121ms, Marian:14ms): In many cases | En muchos casos            [ws] No clients connected, skipping broadcast
+  [status] frames=85 speech=27 buf=0.9s silence=0 rms=0.0858  partial (182ms, Marian:37ms): In many cases enrolling a few | En muchos casos, se inscriben unos pocos            [ws] No clients connected, skipping broadcast
+  partial (190ms, Marian:43ms): In many cases I'm rolling on a capture. | En muchos casos estoy rodando en una captura.            [ws] No clients connected, skipping broadcast
+  partial (215ms, Marian:48ms): In many cases enrolling on a capri course of | En muchos casos, se inscribe en un curso de capri de            [ws] No clients connected, skipping broadcast
+  partial (247ms, Marian:65ms): In many cases, enrolling on a capture course abroad can actually be | En muchos casos, matricularse en un curso de captura en el extranjero puede ser            [ws] No clients connected, skipping broadcast
+  [status] frames=179 speech=121 buf=3.9s silence=0 rms=0.0554  partial (261ms, Marian:63ms): In many cases, enrolling on a cap your course abroad can actually improve your change. | En muchos casos, matricularse con un tope en el extranjero puede mejorar su cambio.            [ws] No clients connected, skipping broadcast
+  partial (284ms, Marian:69ms): In many cases, enrolling on a cap your course abroad can actually improve your chances of | En muchos casos, matricularse en un capuchón en el extranjero puede mejorar sus posibilidades de            [ws] No clients connected, skipping broadcast
+  partial (300ms, Marian:82ms): In many cases, enrolling on a captive course abroad can actually improve your chances of moving. | En muchos casos, matricularse en un curso cautivo en el extranjero puede mejorar sus posibilidades de mudarse.            [ws] No clients connected, skipping broadcast
+  partial (349ms, Marian:95ms): In many cases, enrolling on a cap your course abroad can actually improve your chances of moving into higher | En muchos casos, matricularse en un capuchón en el extranjero puede mejorar sus posibilidades de mudarse a un nivel superior.            [ws] No clients connected, skipping broadcast
+  partial (373ms, Marian:111ms): In many cases, enrolling on a cap year course abroad can actually improve your chances of moving into higher education by | En muchos casos, matricularse en un curso de un año de duración en el extranjero puede mejorar sus posibilidades de pasar a la educación superior mediante:            [ws] No clients connected, skipping broadcast
+  [status] frames=273 speech=212 buf=6.9s silence=0 rms=0.0708  partial (384ms, Marian:116ms): In many cases, enrolling on a cap year course abroad can actually improve your chances of moving into higher education back in your home world. | En muchos casos, matricularse en un curso de año de copa en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su mundo natal.            [ws] No clients connected, skipping broadcast
+  partial (380ms, Marian:113ms): In many cases, enrolling on a CAPER course abroad can actually improve your chances of moving into higher education back in your home country. | En muchos casos, matricularse en un curso de CAPER en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen.            [ws] No clients connected, skipping broadcast
+
+
+============================================================
+Chunk #4 | STT: 651ms | EN: In many cases, enrolling on a cap year course abroad can actually improve your chances of moving into higher education back in your home country.
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [status] frames=68 speech=12 buf=0.4s silence=0 rms=0.1779  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +1942ms A (22 t/s) tok=35 pre=159ms ttft=357ms fin=stop: En muchos casos, inscribirse en un curso de año de prácticas en el extranjero puede mejorar en realidad tus posibilidades de ingresar a la educación superior en tu país de origen.
+  Processing: 2620ms | utterance-start→processing: 10300ms | conf: 1.00 | QE: A=1.0 | ws: 82%
+  [ws] No clients connected, skipping broadcast
+  partial (281ms, Marian:26ms): The Arabs are. | Los árabes lo son.            [ws] No clients connected, skipping broadcast
+  partial (249ms, Marian:26ms): The Arabs also brought in | Los árabes también trajeron            [ws] No clients connected, skipping broadcast
+  partial (349ms, Marian:109ms): The Arabs also brought Ibzlon to the | Los árabes también trajeron Ibzlon a la            [ws] No clients connected, skipping broadcast
+  partial (671ms, Marian:58ms): The Arabs also brought Ibson to the lands. | Los árabes también trajeron a Ibson a las tierras.            [ws] No clients connected, skipping broadcast
+  [status] frames=162 speech=100 buf=3.4s silence=0 rms=0.0741  partial (1043ms, Marian:88ms): The Arabs also brought Ibzl onto the lands, and it took in a big deal. | Los árabes también trajeron Ibzl a las tierras, y se tomó en un gran problema.            [ws] No clients connected, skipping broadcast
+  partial (324ms, Marian:101ms): The Arabs also brought Ibzlon to the lands, and it took in a big way Incomros and Myodus. | Los árabes también trajeron Ibzlon a las tierras, y tomó de una manera grande Incomros y Myodus.            [ws] No clients connected, skipping broadcast
+
+  [status] frames=2 speech=0 buf=0.0s silence=2 rms=0.0220  partial (589ms, Marian:351ms): The Arabs also brought Ibszal onto the lands, and it took in a big way in Comros and Mayat. | Los árabes también trajeron a Ibszal a las tierras, y tomó de una manera grande en Comros y Mayat.            [ws] No clients connected, skipping broadcast
+
+============================================================
+Chunk #5 | STT: 1458ms | EN: The Arabs also brought Ibson to the lands, and it took in a big way in Comros and Mayat.
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  partial (374ms, Marian:69ms): It's worth half | Vale la mitad.            [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  partial (363ms, Marian:26ms): It's worth half an hour just | Vale media hora.            [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +1817ms A (19 t/s) tok=27 pre=163ms ttft=388ms fin=stop: Los árabes también trajeron Ibson a las tierras, y se arraigó mucho en Comros y Mayat.
+  Processing: 3296ms | utterance-start→processing: 9033ms | conf: 0.95 | QE: A=1.0 | ws: 63%
+  [ws] No clients connected, skipping broadcast
+  partial (174ms, Marian:26ms): It's worth half an hour to stroll about. | Vale media hora para pasear.            [ws] No clients connected, skipping broadcast
+  partial (254ms, Marian:43ms): It's worth half an hour to stroll about the intriguing. | Vale media hora para pasear por lo intrigante.            [ws] No clients connected, skipping broadcast
+  [status] frames=132 speech=87 buf=2.8s silence=0 rms=0.1079  partial (263ms, Marian:36ms): It's worth half an hour to stroll about the intriguing village. | Vale media hora para pasear por el pueblo.            [ws] No clients connected, skipping broadcast
+
+
+============================================================
+Chunk #6 | STT: 712ms | EN: It's worth half an hour to stroll about the intriguing village.
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +1016ms A (25 t/s) tok=15 pre=150ms ttft=383ms fin=stop: Vale la pena media hora para pasear por el intrigante pueblo.
+  Processing: 1738ms | utterance-start→processing: 5326ms | conf: 0.99 | QE: A=1.0 | ws: 100%
+  [ws] No clients connected, skipping broadcast
+  [status] frames=68 speech=0 buf=0.0s silence=68 rms=0.0000
+  [P7-6C] Pipeline stats: 0/6 chunks overlapped (0%)
+
+============================================================
+SESSION SUMMARY — 6 chunks
+============================================================
+  STT avg:     961ms (median 916ms)
+  A (4B) avg:  1272ms (median 1402ms)
+  B (12B):     not loaded
+  Processing:  6/6 (100.0%) — empty_stt=0, hallucination=0, dedup=0
+  Utterance-start→processing: avg=8146ms (median 8946ms)
+  Stability:   avg=79% (6 chunks with partials)
+  CSV saved:   metrics/ab_metrics_torch213_full_normalized_r1_en.csv
+============================================================
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DIAGNOSTICS SUMMARY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Homophone flags: 0 (clean)
+
+  Near-miss flags: 1
+    #2: 'common' -> 'communion' (fuzzy) in: Air accidents are common in Iran.
+
+  Bad sentence splits: 0 (clean)
+
+  Marian/Gemma avg similarity: 62% (0 high-divergence)
+    #2 (50%): MT='Los accidentes aéreos son comunes.' | TG='Los accidentes aéreos son comunes en Irá'
+    #5 (52%): MT='Los árabes también trajeron a Ibszal a l' | TG='Los árabes también trajeron Ibson a las '
+    #4 (59%): MT='En muchos casos, matricularse en un curs' | TG='En muchos casos, inscribirse en un curso'
+    #3 (65%): MT='que tiene una flota envejecida que se ma' | TG='que tiene una flota envejecida y mal man'
+    #1 (72%): MT='Con el tiempo, a medida que la nueva pob' | TG='Con el tiempo, a medida que la nueva pob'
+
+  Utterance durations: avg=5.8s, <1s=0, >6s=3, min=2.8s, max=7.7s
+
+  Low confidence chunks: 0 (clean)
+
+  Empty STT drops: 0 (clean)
+
+  Force-cuts: 1 (1 smart, 0 hard)
+    #1: smart at 7.7s of 8.0s buffer
+
+  Music holds: 0
+
+  STT corrections: 0
+
+  Resource usage (current):
+    Process RAM: 0.2GB
+    System RAM:  12.0GB / 18GB (80%)
+    CPU:         28%
+
+  [P7-6C] Pipeline overlap: 0/6 chunks (0%) had STT(N) overlapping Translation(N-1)
+
+  Fine-tuning data: stark_data/live_sessions/torch213_full_normalized_r1_en/
+  Review queue:     metrics/diagnostics_torch213_full_normalized_r1_en.jsonl
+  Mic gain used:    1.0x
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  WS stats:    connections=0 disconnections=0 send_failures=0

@@ -1,0 +1,66 @@
+"""Inspect the actual unapproved attended review via a scratch copy; never approve or edit originals."""
+import hashlib
+import json
+import shutil
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path.cwd()
+BASE = ROOT / '.cache/mac-en-es-closeout/correction-handoff-20260910'
+SNAPSHOT = BASE / 'session_snapshot'
+SESSION = '20260910_092824_526799_en'
+paths = [ROOT / f'metrics/diagnostics_{SESSION}.jsonl', ROOT / f'metrics/session_lifecycle_{SESSION}.json',
+         ROOT / f'metrics/session_metadata_{SESSION}.json', ROOT / f'stark_data/corrections/{SESSION}.jsonl',
+         ROOT / f'stark_data/live_sessions/{SESSION}/chunk_0001.wav']
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+before = {str(path.relative_to(ROOT)): sha(path) for path in paths}
+SNAPSHOT.mkdir(exist_ok=False)
+for path in paths:
+    target = SNAPSHOT / path.relative_to(ROOT)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(path, target)
+
+sys.path.insert(0, str(ROOT))
+from tools.review_data import ReviewStore
+store = ReviewStore(SNAPSHOT)
+records = store.records(SESSION)
+assert len(records) == 1
+record = records[0]
+assert record['revision'] == 2 and record['transcript_approved'] is False and record['translation_approved'] is False
+assert record['session_kind'] == 'replay'
+result = {'recorded_at': datetime.now(timezone.utc).isoformat(), 'session': SESSION,
+          'source_root': str(ROOT), 'scratch_root': str(SNAPSHOT), 'original_hashes': before,
+          'record': {k: record[k] for k in ['chunk_id', 'revision', 'source_lang', 'session_kind', 'transcript_approved',
+                                           'translation_approved', 'excluded', 'review_note']}, 'export_checks': []}
+for split in ['train', 'eval']:
+    try:
+        store.export(SESSION, split=split)
+        raise AssertionError('An unapproved record was exported')
+    except ValueError as exc:
+        result['export_checks'].append({'split': split, 'status': 'rejected_as_expected', 'reason': str(exc)})
+for mode in ['export-translation', 'export-whisper']:
+    output = BASE / (mode + '-unapproved-output')
+    argv = [sys.executable, '-S', str(ROOT / 'tools/prepare_finetune_data.py'), mode,
+            '--session', SESSION, '--metrics-dir', str(SNAPSHOT / 'metrics'), '--output', str(output)]
+    started = datetime.now(timezone.utc).isoformat()
+    completed = subprocess.run(argv, cwd=SNAPSHOT, capture_output=True, text=True, check=False)
+    result['export_checks'].append({'mode': mode, 'argv': argv, 'started_at': started,
+        'ended_at': datetime.now(timezone.utc).isoformat(), 'exit_code': completed.returncode,
+        'stdout': completed.stdout, 'stderr': completed.stderr, 'output_exists': output.exists(),
+        'interpretation': 'CLI zero exit with no eligible rows is not an exported corpus or retrain receipt.'})
+    assert not output.exists()
+assert not (SNAPSHOT / 'stark_data/corrections/exports').exists()
+assert not (SNAPSHOT / 'stark_data/corrections/export_registry.jsonl').exists()
+result['originals_unchanged'] = before == {str(path.relative_to(ROOT)): sha(path) for path in paths}
+assert result['originals_unchanged']
+result.update({'no_bundle_or_registry_created': True, 'approval_flags_modified': False,
+               'training_data_created': False, 'models_loaded': False, 'ml_imports_absent':
+               not {'torch', 'transformers', 'mlx', 'soundfile', 'numpy'} & sys.modules.keys()})
+assert result['ml_imports_absent']
+(BASE / 'attended-review-rejection.json').write_text(json.dumps(result, indent=2) + '\n')
+print(json.dumps(result, indent=2))

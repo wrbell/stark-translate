@@ -1,0 +1,577 @@
+"""Pure adaptive Lite preparation. Never starts a subprocess or loads a model."""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import copy
+import hashlib
+import importlib.util
+import json
+import math
+import os
+import re
+from pathlib import Path
+
+MAX_JSON = 64 * 1024 * 1024
+DEADLINES = {
+    "deadline_100ms": {"STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS": "100"},
+    "deadline_250ms": {"STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS": "250"},
+}
+SOURCE_FILES = (
+    "dry_run_ab.py",
+    "settings.py",
+    "models.lock.json",
+    "stark_translate/profiles.py",
+    "tools/mac_followup_latency.py",
+    "tools/mac_followup_selection.py",
+    "tools/mac_followup_quality.py",
+    "tools/latency_experiments.py",
+)
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def raw(path):
+    path = Path(path).resolve()
+    require(path.is_file() and path.stat().st_size <= MAX_JSON, f"Missing or oversized source/report: {path}")
+    return path.read_bytes()
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def read(path):
+    return json.loads(raw(path))
+
+
+def write(path, data):
+    with Path(path).open("x") as stream:
+        json.dump(data, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+
+
+def module(path, name):
+    # These two reviewed helpers import only stdlib; never call their inference APIs.
+    spec = importlib.util.spec_from_file_location(name, path)
+    loaded = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(loaded)
+    return loaded
+
+
+def configuration_validator(runtime):
+    experiments_path = runtime / "tools/latency_experiments.py"
+    # Dataclass loading requires its module to be registered temporarily.
+    import sys
+
+    name = "lite_preparation_latency_experiments"
+    spec = importlib.util.spec_from_file_location(name, experiments_path)
+    experiments = importlib.util.module_from_spec(spec)
+    sys.modules[name] = experiments
+    spec.loader.exec_module(experiments)
+    tree = ast.parse(raw(runtime / "tools/mac_followup_latency.py"))
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "configuration"]
+    require(len(functions) == 1, "Missing actual configuration function")
+    namespace = {"os": os, "LatencyExperiments": experiments.LatencyExperiments}
+    exec(compile(ast.Module(body=functions, type_ignores=[]), "actual-configuration", "exec"), namespace)
+    return namespace["configuration"]
+
+
+def load_inputs(inputs, remembered=None):
+    bindings = {}
+
+    def fetch(path):
+        path = str(Path(path).resolve())
+        data = raw(path)
+        identity = {"sha256": digest(data), "bytes": len(data)}
+        if remembered is not None:
+            require(remembered.get(path) == identity, f"Frozen input changed: {path}")
+        bindings[path] = identity
+        return json.loads(data)
+
+    runtime = Path(inputs["runtime"]).resolve()
+    source_files = (
+        *SOURCE_FILES,
+        *[str(path.relative_to(runtime)) for path in sorted((runtime / "engines").glob("*.py"))],
+    )
+    for relative in source_files:
+        path = str(runtime / relative)
+        data = raw(path)
+        identity = {"sha256": digest(data), "bytes": len(data)}
+        if remembered is not None:
+            require(remembered.get(path) == identity, f"Frozen runtime source changed: {path}")
+        bindings[path] = identity
+    selection_api = module(runtime / "tools/mac_followup_selection.py", "lite_preparation_selection")
+    quality_api = module(runtime / "tools/mac_followup_quality.py", "lite_preparation_quality")
+    queue = fetch(inputs["queue_receipt"])
+    require(
+        queue.get("stage") == "completed", "Owned preceding queue has not completed; do not schedule model followups"
+    )
+    require(queue.get("defaults_changed") is False, "Unexpected queue defaults state")
+
+    cadence = validate_latency_bundle(inputs["cadence"], fetch, selection_api, "cadence")
+    deadlines = [
+        validate_latency_bundle(item, fetch, selection_api, "deadline") for item in inputs.get("deadlines", [])
+    ]
+    cadence_ids = {clip["id"] for clip in cadence["spec"]["clips"]}
+    require(
+        all(clip["id"] in cadence_ids for item in deadlines for clip in item["spec"]["clips"]),
+        "Deadline clip is outside the completed cadence scope",
+    )
+    for bundle in (cadence, *deadlines):
+        observed = bundle["provenance"].get("source", {}).get("all_code_sha256", {})
+        require(
+            all(
+                observed.get(name) == bindings[str(runtime / name)]["sha256"]
+                for name in source_files
+                if name.endswith(".py")
+            ),
+            "Runtime source differs from completed latency cohort",
+        )
+    quality_sources = (
+        "tools/mac_followup_quality.py",
+        "settings.py",
+        "models.lock.json",
+        *[name for name in source_files if name.startswith("engines/")],
+    )
+    expected_sources = {name: bindings[str(runtime / name)]["sha256"] for name in quality_sources}
+    quality = validate_quality(inputs["quality"], fetch, quality_api, expected_sources)
+    require(
+        len({c["id"] for item in deadlines for c in item["spec"]["clips"]})
+        == sum(len(item["spec"]["clips"]) for item in deadlines),
+        "Duplicate deadline language/clip bundle",
+    )
+    if remembered is not None:
+        require(set(remembered) == set(bindings), "Frozen input inventory changed")
+    return {"cadence": cadence, "deadlines": deadlines, "quality": quality}, bindings, selection_api
+
+
+def validate_latency_bundle(paths, fetch, api, stage):
+    spec, provenance, report, selection = [fetch(paths[name]) for name in ("spec", "provenance", "report", "selection")]
+    require(
+        spec == provenance.get("spec") and provenance.get("spec_sha256") == digest(raw(paths["spec"])),
+        "Spec differs from completed provenance",
+    )
+    require(
+        spec.get("profile") == "lite-cpu" and spec.get("sizes") == ["e2b"],
+        "Only exact CPU Lite scope is allowed; e2b is a runner label",
+    )
+    require(
+        spec.get("partial_interval") == 0.6 and provenance.get("repeats") == 3,
+        "Expected unchanged 0.6 cadence and three repeats",
+    )
+    require(
+        spec.get("baseline_env") == {"STARK_EXPERIMENT_TRACE": "true", "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"},
+        "Trace protocol differs from frozen short screens",
+    )
+    clips = spec["clips"]
+    require(clips and len({c["id"] for c in clips}) == len(clips), "Missing/duplicate clip scope")
+    require(
+        all(c.get("lang") in ("en", "es") and c.get("level_normalization") == "rms-0.08" for c in clips),
+        "Use frozen normalized EN/ES clips only",
+    )
+    require(
+        all(
+            c["id"] == "fleurs_development_" + c["lang"]
+            and str(c.get("provenance", "")).startswith("fleurs_development")
+            and re.fullmatch("[0-9a-f]{64}", c.get("sha256", ""))
+            for c in clips
+        ),
+        "Development-only frozen source identity required; confirmation cannot enter tuning",
+    )
+    if stage == "cadence":
+        require(
+            len(clips) == 2 and {clip["lang"] for clip in clips} == {"en", "es"},
+            "Expected completed EN and ES cadence scopes",
+        )
+    configs = {c["name"]: c for c in spec["experiments"]}
+    require(len(configs) == len(spec["experiments"]), "Duplicate experiment name")
+    expected_names = {"baseline", "cadence_09", "cadence_12"} if stage == "cadence" else {"baseline", *DEADLINES}
+    require(
+        set(configs) == expected_names and configs["baseline"] == {"name": "baseline", "env": {}},
+        "Unexpected or mixed stage configurations",
+    )
+    for name, config in configs.items():
+        expected = {"name": name, "env": {}}
+        if name.startswith("cadence_"):
+            expected["partial_interval"] = {"cadence_09": 0.9, "cadence_12": 1.2}[name]
+        elif name in DEADLINES:
+            expected["env"] = DEADLINES[name]
+        require(config == expected, f"Unfrozen experiment settings: {name}")
+    expected_runs = len(clips) * (len(configs) + 1) * 3
+    require(
+        report.get("inventory_complete") is True and report.get("inventory_errors") == [],
+        "Latency inventory incomplete",
+    )
+    require(
+        report.get("run_count") == report.get("expected_runs") == expected_runs, "Wrong completed latency run count"
+    )
+    expected_keys = {
+        (name, c["id"], repeat, "e2b") for name in configs if name != "baseline" for c in clips for repeat in range(3)
+    }
+    keys = [(p.get("experiment"), p.get("clip_id"), p.get("repeat"), p.get("size")) for p in report["pairs"]]
+    require(len(keys) == len(set(keys)) and set(keys) == expected_keys, "Wrong or duplicate paired scopes")
+    projected = api.select(report)
+    require(
+        {k: v for k, v in selection.items() if k != "source_report"} == projected,
+        "Selection does not reproduce from report",
+    )
+    source = selection.get("source_report", {})
+    require(
+        source.get("sha256") == digest(raw(paths["report"])) and source.get("size_bytes") == len(raw(paths["report"])),
+        "Selection source report hash mismatch",
+    )
+    for clip in clips:
+        contract = provenance.get("runtime_contracts", {}).get(f"baseline|e2b|{clip['id']}", {})
+        require(
+            contract.get("profile", {}).get("name") == "lite-cpu" and contract.get("stt_backend") == "faster-whisper",
+            "Wrong resolved Lite runtime",
+        )
+        require(
+            contract.get("stt", {}).get("requested_id") == "whisper-small",
+            "Different model must receive its own explicit scope",
+        )
+        require(
+            contract.get("source_lang") == clip["lang"] and contract.get("pipeline_gain") == 1.0,
+            "Language/gain intent differs",
+        )
+        require(contract.get("vad", {}).get("partial_interval") == 0.6, "Deadline controls must retain 0.6 cadence")
+    for pair in report["pairs"]:
+        if pair.get("p95_claim_eligible") is True:
+            require(
+                all(
+                    type(pair.get(k, {}).get("n")) is int and pair[k]["n"] >= 100
+                    for k in ("opening", "candidate", "closing")
+                ),
+                "p95 claim lacks >=100 observations in each individual run",
+            )
+    return {"paths": paths, "spec": spec, "provenance": provenance, "report": report, "selection": selection}
+
+
+def finite(value):
+    return type(value) in (int, float) and math.isfinite(value)
+
+
+def validate_quality(paths, fetch, api, expected_sources):
+    manifest, index, report = [fetch(paths[name]) for name in ("manifest", "index", "report")]
+    api.validate_portable(manifest)
+    manifest_sha = digest(raw(paths["manifest"]))
+    require(index.get("completed") is True and report.get("completed") is True, "CPU quality cohort not complete")
+    require(
+        index.get("serial") is True and index.get("planned_runs") == 12,
+        "Expected serial small/base x EN/ES x three repeats",
+    )
+    require(
+        index.get("manifest_sha256") == report.get("manifest_sha256") == manifest_sha, "Quality manifest hash mismatch"
+    )
+    require(len(index["runs"]) == len(report["runs"]) == 12, "Incomplete quality inventory")
+    directory = Path(paths["index"]).resolve().parent
+    summarized = {}
+    for entry in index["runs"]:
+        path = (directory / entry["file"]).resolve()
+        require(path.is_relative_to(directory), "Quality worker path escapes cohort")
+        run = fetch(path)
+        require(digest(raw(path)) == entry["sha256"], "Quality worker differs from immutable index")
+        summary = api.summarize_run(run, manifest)
+        expected = {"file": entry["file"], "sha256": entry["sha256"], **summary}
+        require(
+            expected in report["runs"] and summary.get("eligible_for_comparison") is True,
+            "Quality report cannot be reproduced",
+        )
+        key = (summary.get("engine"), summary.get("source_lang"), summary.get("repeat"))
+        require(
+            key not in summarized and summary.get("partition") == "development" and summary.get("task") == "stt",
+            "Mixed/duplicate quality scope",
+        )
+        require(
+            summary.get("rows") == summary.get("expected_rows") == 50 and summary.get("failed_rows") == 0,
+            "Expected 50 complete development recordings per run",
+        )
+        require(
+            all(summary.get("source_sha256", {}).get(name) == value for name, value in expected_sources.items()),
+            "CPU quality source/registry differs from frozen runtime",
+        )
+        expected_model = str(Path(paths["expected_models"][key[0]]).resolve())
+        require(
+            run.get("config", {}).get("requested_model_id") == expected_model
+            and run.get("model", {}).get("resolved_path") == expected_model,
+            "Unexpected selected CPU quality model",
+        )
+        summarized[key] = summary
+    require(
+        set(summarized)
+        == {
+            (engine, lang, repeat)
+            for engine in ("ct2-small", "ct2-base")
+            for lang in ("en", "es")
+            for repeat in range(3)
+        },
+        "Wrong CPU quality engine/language/repeat inventory",
+    )
+    decisions = {}
+    for engine in ("ct2-small", "ct2-base"):
+        identities = {row.get("model_files_sha256") for key, row in summarized.items() if key[0] == engine}
+        require(
+            len(identities) == 1 and all(isinstance(value, str) and len(value) == 64 for value in identities),
+            "Quality model file identity changed between runs",
+        )
+    for lang in ("en", "es"):
+        pairs = []
+        for repeat in range(3):
+            small, base = [summarized[(engine, lang, repeat)] for engine in ("ct2-small", "ct2-base")]
+            require(all(finite(row.get("wer")) for row in (small, base)), "Missing quality WER")
+            require(
+                small["term_opportunities"] == base["term_opportunities"], "Mismatched reference term opportunities"
+            )
+            wer_ok = base["wer"] <= small["wer"] + max(0.01, small["wer"] * 0.05)
+            terms_ok = not small["term_opportunities"] or (
+                finite(small.get("term_recall"))
+                and finite(base.get("term_recall"))
+                and base["term_recall"] >= small["term_recall"]
+            )
+            pairs.append(
+                {
+                    "repeat": repeat,
+                    "wer_pass": wer_ok,
+                    "term_pass": terms_ok,
+                    "small_wer": small["wer"],
+                    "base_wer": base["wer"],
+                    "small_call_p50_ms": small["call_wall_ms"].get("p50"),
+                    "base_call_p50_ms": base["call_wall_ms"].get("p50"),
+                }
+            )
+        decisions[lang] = {
+            "quality_eligible_for_conditional_implementation": all(p["wer_pass"] and p["term_pass"] for p in pairs),
+            "pairs": pairs,
+            "live_latency_eligible": False,
+            "p95_claim_eligible": False,
+            "next_action": "If quality eligible, implement and test explicit replay model override + frozen runtime contract before a separately controlled base replay; no production default change.",
+        }
+    return decisions
+
+
+def best(bundle, clip_id):
+    arms = [
+        a
+        for a in bundle["selection"]["arms"]
+        if a["clip_id"] == clip_id and a["size"] == "e2b" and a["qualified_for_confirmation"]
+    ]
+    require(all(finite(a.get("mean_conservative_gain_ms")) for a in arms), "Qualified arm lacks ranking evidence")
+    return sorted(arms, key=lambda a: (-a["mean_conservative_gain_ms"], a["experiment"]))[0] if arms else None
+
+
+def same_scope(first, second, clip_id):
+    a = next(c for c in first["spec"]["clips"] if c["id"] == clip_id)
+    b = next(c for c in second["spec"]["clips"] if c["id"] == clip_id)
+    require(a == b, "Cadence/deadline source, language or references differ")
+    pa, pb = first["provenance"], second["provenance"]
+    require(pa["source_identity"] == pb["source_identity"], "Frozen implementation differs between component screens")
+    key = f"baseline|e2b|{clip_id}"
+    require(
+        pa["runtime_contracts"][key] == pb["runtime_contracts"][key],
+        "Cadence/deadline runtime model/profile binding differs",
+    )
+    require(pa["reference_contracts"][clip_id] == pb["reference_contracts"][clip_id], "Reference/quality scope differs")
+
+
+def make_plans(data, api):
+    cadence = data["cadence"]
+    result = []
+    for clip in cadence["spec"]["clips"]:
+        lang, clip_id = clip["lang"], clip["id"]
+        deadline = next(
+            (item for item in data["deadlines"] if any(c["id"] == clip_id for c in item["spec"]["clips"])), None
+        )
+        if deadline is None:
+            spec = copy.deepcopy(cadence["spec"])
+            spec.update(id=spec["id"] + "_deadline_only_" + lang, clips=[copy.deepcopy(clip)], partial_interval=0.6)
+            spec["experiments"] = [
+                {"name": "baseline", "env": {}},
+                *[{"name": name, "env": env} for name, env in DEADLINES.items()],
+            ]
+            result.append(
+                {
+                    "stage": "independent_deadline_screen",
+                    "language": lang,
+                    "spec": spec,
+                    "qualification_claim": False,
+                    "p95_claim_eligible": False,
+                    "reason": "Predeclared Lite deadline100/250 screen after complete cadence inventory; unchanged0.6 controls. No Standard success transferred.",
+                }
+            )
+            continue
+        same_scope(cadence, deadline, clip_id)
+        ca, de = best(cadence, clip_id), best(deadline, clip_id)
+        if not ca or not de:
+            result.append(
+                {
+                    "stage": "no_combination",
+                    "language": lang,
+                    "reason": "Both cadence and deadline must independently qualify on this exact Lite scope; no arm invented.",
+                    "spec": None,
+                }
+            )
+            continue
+        merged = copy.deepcopy(cadence["spec"])
+        merged["experiments"] += [copy.deepcopy(c) for c in deadline["spec"]["experiments"] if c["name"] != "baseline"]
+        selection = {"inventory_complete": True, "arms": cadence["selection"]["arms"] + deadline["selection"]["arms"]}
+        spec = api.build_spec(
+            merged, selection, clip_id=clip_id, size="e2b", names=[ca["experiment"], de["experiment"]], combine=True
+        )
+        spec["id"] += "_" + lang
+        result.append(
+            {
+                "stage": "qualified_combination_development_screen",
+                "language": lang,
+                "spec": spec,
+                "component_arms": [ca, de],
+                "p95_claim_eligible": False,
+                "reason": "New interaction screen on unchanged development source; combined arm itself has not qualified. Untouched confirmation remains subsequent.",
+            }
+        )
+    return result
+
+
+def build(bundle, output):
+    frozen = read(bundle)
+    require(frozen.get("schema_version") == 1, "Unknown frozen input schema")
+    data, bindings, api = load_inputs(frozen["inputs"], frozen["bindings"])
+    plans = make_plans(data, api)
+    validate = configuration_validator(Path(frozen["inputs"]["runtime"]))
+    for item in plans:
+        if item["spec"]:
+            for config in item["spec"]["experiments"]:
+                argv, _, _ = validate(item["spec"], config, item["spec"]["clips"][0], "e2b")
+                require(
+                    "--no-tts" in argv and argv[argv.index("--gain") + 1] == "1",
+                    "Actual configuration lost silent/fixed-gain contract",
+                )
+    output = Path(output).resolve()
+    require(
+        re.fullmatch(r"[A-Za-z0-9_-]+", output.name), "Use a simple unique output directory name for valid replay tags"
+    )
+    output.mkdir(parents=True, exist_ok=False)
+    commands = []
+    inputs = frozen["inputs"]
+    for item in plans:
+        if not item["spec"]:
+            continue
+        label = item["language"] + "_" + item["stage"]
+        spec_path = output / (label + ".json")
+        write(spec_path, item.pop("spec"))
+        item["spec_path"], item["spec_sha256"] = str(spec_path), digest(raw(spec_path))
+        runs = output / (label + "_runs")
+        report, selection = output / (label + "_report.json"), output / (label + "_selection.json")
+        common = {
+            "cwd": str(Path(inputs["runtime"]).resolve()),
+            "environment": {
+                "STARK_MODELS_DIR": inputs["models_dir"],
+                "HF_HUB_OFFLINE": "1",
+                "TRANSFORMERS_OFFLINE": "1",
+            },
+            "execute_now": False,
+        }
+        commands.extend(
+            [
+                {
+                    **common,
+                    "label": label,
+                    "argv": [
+                        inputs["python"],
+                        "-m",
+                        "tools.mac_followup_latency",
+                        "run",
+                        "--spec",
+                        str(spec_path),
+                        "--output",
+                        str(runs),
+                        "--tag",
+                        output.name.replace("-", "_") + "_" + label,
+                        "--repeats",
+                        "3",
+                        "--ws-port",
+                        "8865",
+                        "--http-port",
+                        "8866",
+                        "--timeout",
+                        "300",
+                    ],
+                    "expected_runs": 12 if item["stage"] == "independent_deadline_screen" else 9,
+                    "timeout_s": 4500,
+                },
+                {
+                    **common,
+                    "label": label + "_report",
+                    "argv": [
+                        inputs["python"],
+                        "-m",
+                        "tools.mac_followup_latency",
+                        "report",
+                        "--input",
+                        str(runs),
+                        "--output",
+                        str(report),
+                    ],
+                    "timeout_s": 300,
+                },
+                {
+                    **common,
+                    "label": label + "_selection",
+                    "argv": [
+                        inputs["python"],
+                        "-m",
+                        "tools.mac_followup_selection",
+                        "--report",
+                        str(report),
+                        "--output",
+                        str(selection),
+                    ],
+                    "timeout_s": 60,
+                },
+            ]
+        )
+    write(
+        output / "plan.json",
+        {
+            "schema_version": 1,
+            "frozen_inputs": str(Path(bundle).resolve()),
+            "frozen_inputs_sha256": digest(raw(bundle)),
+            "source_bindings": bindings,
+            "plans": plans,
+            "base_quality_by_language": data["quality"],
+            "commands": commands,
+            "execution": "No process is started by this builder. Coordinator may feed these sequential commands to the existing reserved runner after verifying this immutable bundle and an idle model window.",
+            "gates": "Reuse actual report/selection guards unchanged; >=2/3 median successes, every repeat nonlatency guards, no pooling across languages/models/repeats. A p95 claim requires >=100 fixed observations in EACH opening/candidate/closing run.",
+            "defaults_changed": False,
+            "confirmation_completed": False,
+            "audio_policy": "file input only, explicit --no-tts; no device probes, capture or playback",
+        },
+    )
+    return output / "plan.json"
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    freeze = sub.add_parser("freeze")
+    freeze.add_argument("--inputs", type=Path, required=True)
+    freeze.add_argument("--output", type=Path, required=True)
+    prepare = sub.add_parser("build")
+    prepare.add_argument("--bundle", type=Path, required=True)
+    prepare.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.command == "freeze":
+        inputs = read(args.inputs)
+        _, bindings, _ = load_inputs(inputs)
+        write(args.output, {"schema_version": 1, "inputs": inputs, "bindings": bindings, "models_or_audio_read": False})
+        print(args.output)
+    else:
+        print(build(args.bundle, args.output))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,138 @@
+[
+  {
+    "name": "candidate-create",
+    "argv": [
+      "/Users/willem/anaconda3/bin/python3.11",
+      "-m",
+      "venv",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_utc": "2026-09-10T13:18:25.987564+00:00",
+    "ended_utc": "2026-09-10T13:18:28.070548+00:00",
+    "exit_code": 0,
+    "log": "candidate-create.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "candidate-installer-upgrade",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime/bin/python",
+      "-m",
+      "pip",
+      "--isolated",
+      "install",
+      "--only-binary=:all:",
+      "--disable-pip-version-check",
+      "--index-url",
+      "https://pypi.org/simple",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-feasibility-pip-cache",
+      "--upgrade",
+      "pip",
+      "setuptools"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_utc": "2026-09-10T13:18:28.071060+00:00",
+    "ended_utc": "2026-09-10T13:18:30.077758+00:00",
+    "exit_code": 0,
+    "log": "candidate-installer-upgrade.log",
+    "log_sha256": "6cdd42f10653c5e00f8899e241a4a926c4ee8fddbc93aa410af882d1d9634285"
+  },
+  {
+    "name": "candidate-install",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime/bin/python",
+      "-m",
+      "pip",
+      "--isolated",
+      "install",
+      "--only-binary=:all:",
+      "--disable-pip-version-check",
+      "--index-url",
+      "https://pypi.org/simple",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-feasibility-pip-cache",
+      "torch==2.13.0",
+      "torchaudio==2.11.0",
+      "silero-vad==6.2.1",
+      "speechbrain==1.1.1",
+      "transformers==5.12.1"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_utc": "2026-09-10T13:18:30.078147+00:00",
+    "ended_utc": "2026-09-10T13:19:03.973546+00:00",
+    "exit_code": 0,
+    "log": "candidate-install.log",
+    "log_sha256": "3ac91420816da233e9f63a24c47ee7abb1ac2ec8d85ea5df3425afbfa93721cd"
+  },
+  {
+    "name": "candidate-pip-check",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime/bin/python",
+      "-m",
+      "pip",
+      "check"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_utc": "2026-09-10T13:19:03.973905+00:00",
+    "ended_utc": "2026-09-10T13:19:04.238004+00:00",
+    "exit_code": 0,
+    "log": "candidate-pip-check.log",
+    "log_sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+  },
+  {
+    "name": "candidate-offline-cpu-smoke",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime/bin/python",
+      "-c",
+      "import importlib.metadata, json, math, sys\nfrom pathlib import Path\nimport torch\nimport torchaudio\nfrom speechbrain.inference.speaker import EncoderClassifier\nfrom transformers import MarianMTModel, MarianTokenizer\nfrom tools.vad_runtime import load_packaged_vad\n\ntorch.set_num_threads(1)\ntorch.set_num_interop_threads(1)\nassert torch.__version__.split(\"+\")[0] == \"2.13.0\"\nassert torchaudio.__version__.split(\"+\")[0] == \"2.11.0\"\nmodel, _, metadata = load_packaged_vad(\"torch\")\nmodel.reset_states()\nwith torch.no_grad():\n    probabilities = [float(model(torch.zeros(512, dtype=torch.float32), 16000).item()) for _ in range(3)]\nassert all(math.isfinite(value) and 0 <= value <= 1 for value in probabilities)\nresult = {\"python\":sys.version,\"torch\":torch.__version__,\"torchaudio\":torchaudio.__version__,\"speechbrain\":importlib.metadata.version(\"speechbrain\"),\"silero_vad\":importlib.metadata.version(\"silero-vad\"),\"transformers\":importlib.metadata.version(\"transformers\"),\"speaker_class_imported\":EncoderClassifier.__name__,\"marian_model_imported\":MarianMTModel.__name__,\"marian_tokenizer_imported\":MarianTokenizer.__name__,\"vad_provenance\":metadata,\"silence_probabilities\":probabilities,\"device\":\"cpu\",\"scope\":\"Offline imports and three bundled-VAD silence frames only; no speaker/STT/translation models or real-speech validation.\"}\nPath(\"docs/evaluation/security_feasibility_20260910/raw/candidate-smoke.json\").write_text(json.dumps(result,indent=2)+\"\\n\")\nprint(json.dumps(result,indent=2))\n"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_utc": "2026-09-10T13:19:04.238755+00:00",
+    "ended_utc": "2026-09-10T13:19:29.745141+00:00",
+    "exit_code": 0,
+    "log": "candidate-offline-cpu-smoke.log",
+    "log_sha256": "b605637a03739f62afcfde8eadef1f7a69eac1716a7685ca4a0e6ded1cc36253"
+  },
+  {
+    "name": "candidate-inventory",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime/bin/python",
+      "-m",
+      "pip",
+      "list",
+      "--format=json"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_utc": "2026-09-10T13:19:29.745674+00:00",
+    "ended_utc": "2026-09-10T13:19:29.945106+00:00",
+    "exit_code": 0,
+    "log": "candidate-inventory.log",
+    "log_sha256": "c9e9cc4a831c842bf7ecc9b81f3a3d34b37c8e9aa63667aa63392ae3adc37603"
+  },
+  {
+    "name": "candidate-installed-audit",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/pip-audit",
+      "--path",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime/lib/python3.11/site-packages",
+      "--format",
+      "json",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/security_feasibility_20260910/raw/candidate-installed-audit.json",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-audit-cache",
+      "--timeout",
+      "5",
+      "--progress-spinner",
+      "off"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate",
+    "started_utc": "2026-09-10T13:19:29.945630+00:00",
+    "ended_utc": "2026-09-10T13:19:33.304995+00:00",
+    "exit_code": 0,
+    "log": "candidate-installed-audit.log",
+    "log_sha256": "15950a68a7ed99c59779717acefdceb3f69cfd31bde67d2c954f2a3cea4d7955"
+  }
+]

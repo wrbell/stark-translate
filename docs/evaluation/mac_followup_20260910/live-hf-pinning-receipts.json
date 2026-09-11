@@ -1,0 +1,439 @@
+{
+  "recorded_at": "2026-09-10T17:10:19.937180+00:00",
+  "scope": "Mac live loading boundaries and optional live diarization; not whole-repository B615 clearance",
+  "metadata": [
+    {
+      "url": "https://huggingface.co/api/models/pyannote/speaker-diarization-3.1",
+      "retrieved_at": "2026-09-10T16:20:02.254977+00:00",
+      "response_sha256": "90bdd74edfe35ade37d5d9133264dbad01a2d4eb0f72265c804f091c9a3a722d",
+      "repo_id": "pyannote/speaker-diarization-3.1",
+      "revision": "84fd25912480287da0247647c3d2b4853cb3ee5d",
+      "gated": "auto",
+      "siblings": [
+        ".gitattributes",
+        ".github/workflows/sync_to_hub.yaml",
+        "README.md",
+        "config.yaml",
+        "handler.py",
+        "reproducible_research/AISHELL.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/AISHELL.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/AMI-SDM.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/AMI-SDM.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/AMI.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/AMI.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/AVA-AVD.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/AVA-AVD.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/AliMeeting.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/AliMeeting.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/DIHARD.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/DIHARD.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/MSDWILD.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/MSDWILD.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/REPERE.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/REPERE.SpeakerDiarization.Benchmark.test.rttm",
+        "reproducible_research/VoxConverse.SpeakerDiarization.Benchmark.test.eval",
+        "reproducible_research/VoxConverse.SpeakerDiarization.Benchmark.test.rttm",
+        "requirements.txt"
+      ]
+    },
+    {
+      "url": "https://huggingface.co/api/models/pyannote/embedding",
+      "retrieved_at": "2026-09-10T16:20:02.091778+00:00",
+      "response_sha256": "50de5fb2ad6621a0bffbfada5a5741effdbbe2715d3817c6b879f9fc500f8262",
+      "repo_id": "pyannote/embedding",
+      "revision": "4db4899737a38b2d618bbd74350915aa10293cb2",
+      "gated": "auto",
+      "siblings": [
+        ".gitattributes",
+        "LICENSE",
+        "README.md",
+        "config.yaml",
+        "hparams.yaml",
+        "hydra.yaml",
+        "overrides.yaml",
+        "pytorch_model.bin",
+        "tfevents.bin",
+        "train.log"
+      ]
+    },
+    {
+      "url": "https://huggingface.co/api/models/pyannote/segmentation-3.0",
+      "retrieved_at": "2026-09-10T16:22:29.989850+00:00",
+      "response_sha256": "434d1272b06ab8f443adf23d848879885ebf7faf96c2fcc9995757fec1876add",
+      "repo_id": "pyannote/segmentation-3.0",
+      "revision": "e66f3d3b9eb0873085418a7b813d3b369bf160bb",
+      "gated": "auto",
+      "siblings": [
+        ".gitattributes",
+        "LICENSE",
+        "README.md",
+        "config.yaml",
+        "example.png",
+        "pytorch_model.bin"
+      ]
+    },
+    {
+      "retrieved_at": "2026-09-10T16:13:39.540493+00:00",
+      "url": "https://huggingface.co/api/models/speechbrain/spkrec-ecapa-voxceleb",
+      "response_sha256": "36717b26f9e4bb01fe25e23e95e5a1256b6c2155e253829754270c073cb505a3",
+      "repo_id": "speechbrain/spkrec-ecapa-voxceleb",
+      "revision": "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286",
+      "siblings": [
+        ".gitattributes",
+        "README.md",
+        "classifier.ckpt",
+        "config.json",
+        "embedding_model.ckpt",
+        "example1.wav",
+        "example2.flac",
+        "hyperparams.yaml",
+        "label_encoder.txt",
+        "mean_var_norm_emb.ckpt"
+      ],
+      "scope": "public repository metadata only; no weights downloaded"
+    },
+    {
+      "url": "https://huggingface.co/api/models/pyannote/wespeaker-voxceleb-resnet34-LM",
+      "retrieved_at": "2026-09-10T16:22:29.896846+00:00",
+      "response_sha256": "f9580fa1c0213f029b35d3f30fda311566e8cef7261c1e33b20dec46e69ba13a",
+      "repo_id": "pyannote/wespeaker-voxceleb-resnet34-LM",
+      "revision": "837717ddb9ff5507820346191109dc79c958d614",
+      "gated": false,
+      "siblings": [
+        ".gitattributes",
+        "README.md",
+        "config.yaml",
+        "pytorch_model.bin"
+      ]
+    },
+    {
+      "retrieved_at": "2026-09-10T16:13:39.461458+00:00",
+      "url": "https://huggingface.co/api/models/wbell7/distil-whisper-large-v3.5-mlx/revision/31357b406d55cf380abe4101b6a10207b156c4a3",
+      "response_sha256": "eaa1a3820c2e43d80b7c91b5f34b598ede4f862095691ac7d003e0949ec0dcfc",
+      "repo_id": "wbell7/distil-whisper-large-v3.5-mlx",
+      "revision": "31357b406d55cf380abe4101b6a10207b156c4a3",
+      "siblings": [
+        ".gitattributes",
+        "config.json",
+        "weights.safetensors"
+      ],
+      "scope": "public repository metadata only; no weights downloaded"
+    }
+  ],
+  "configuration_access": [
+    {
+      "repo_id": "pyannote/embedding",
+      "revision": "4db4899737a38b2d618bbd74350915aa10293cb2",
+      "filename": "config.yaml",
+      "retrieved_at": "2026-09-10T16:30:53.409856+00:00",
+      "credential_source": "existing environment or HF client stored credential; values omitted",
+      "status": "retrieved",
+      "sha256": "ca62ad63622a8e983ad5254a32a354b9dc69673485424d67f979c75bfffae38a",
+      "bytes": 1996
+    },
+    {
+      "repo_id": "pyannote/segmentation-3.0",
+      "revision": "e66f3d3b9eb0873085418a7b813d3b369bf160bb",
+      "filename": "config.yaml",
+      "retrieved_at": "2026-09-10T16:30:52.732256+00:00",
+      "credential_source": "existing environment or HF client stored credential; values omitted",
+      "status": "unavailable",
+      "error_type": "GatedRepoError",
+      "http_status": 403
+    },
+    {
+      "repo_id": "pyannote/wespeaker-voxceleb-resnet34-LM",
+      "revision": "837717ddb9ff5507820346191109dc79c958d614",
+      "filename": "config.yaml",
+      "retrieved_at": "2026-09-10T16:30:53.106165+00:00",
+      "credential_source": "existing environment or HF client stored credential; values omitted",
+      "status": "retrieved",
+      "sha256": "6ff718cff3c5d7a4493537ab7f4780cad7e3d32453f59099b4076aefa07a9974",
+      "bytes": 221
+    },
+    {
+      "repo_id": "pyannote/speaker-diarization-3.1",
+      "revision": "84fd25912480287da0247647c3d2b4853cb3ee5d",
+      "filename": "config.yaml",
+      "retrieved_at": "2026-09-10T16:21:56.643506+00:00",
+      "credential_source": "existing environment or HF client stored credential; values omitted",
+      "status": "retrieved",
+      "sha256": "04ad9cd59a93c3a7c754200ecc9e1c4ba87bf1657ef8a4debf7555e711daeeda",
+      "bytes": 469
+    },
+    {
+      "repo_id": "speechbrain/spkrec-ecapa-voxceleb",
+      "revision": "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286",
+      "filename": "hyperparams.yaml",
+      "url": "https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb/resolve/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286/hyperparams.yaml",
+      "sha256": "6f78854fa04ba59e761437b76a2575d3aba5e5016de3e9b69f0c9a5077fb1a41",
+      "bytes": 1919,
+      "status": "retrieved",
+      "credential_source": "public anonymous configuration"
+    }
+  ],
+  "api_source_review": [
+    {
+      "url": "https://raw.githubusercontent.com/pyannote/pyannote-audio/3.3.2/pyannote/audio/core/model.py",
+      "sha256": "9b7a2a1d474c62afc72e4e7900887e4a048cc8c5489ad7d4faf62edf2eed84b1",
+      "bytes": 24547,
+      "scope": "source-only API review; never imported/executed"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pyannote/pyannote-audio/3.3.2/pyannote/audio/core/inference.py",
+      "sha256": "6c3472a0588be4939cdc1eb6bc616bdd1e99435233b495391f9e21f48b4fd84f",
+      "bytes": 26075,
+      "scope": "source-only API review; never imported/executed"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pyannote/pyannote-audio/3.3.2/pyannote/audio/core/pipeline.py",
+      "sha256": "f3d590f2f56d644dbcd0571d3569f5bc2d30e0ef7c732b3533105ba681ede426",
+      "bytes": 12482,
+      "scope": "source-only API review; never imported/executed"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pyannote/pyannote-audio/3.3.2/pyannote/audio/pipelines/speaker_diarization.py",
+      "sha256": "5285c85f1623cc1a3b16b9ce5922c1831262fb7a39b8d25517370119084dd150",
+      "bytes": 25600,
+      "scope": "source-only API review; never imported/executed"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pyannote/pyannote-audio/3.3.2/pyannote/audio/pipelines/speaker_verification.py",
+      "sha256": "e6b9faddd67fce9cb83a9c2a83b51051d5e4de62c9b718e3dcbf7849edf7e8c5",
+      "bytes": 28702,
+      "scope": "source-only API review; never imported/executed"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/speechbrain/speechbrain/v1.0.3/speechbrain/inference/interfaces.py",
+      "sha256": "76eb97514d5cd7c356a4c0aeb5bb879a8be80b21228e5159e19b866d1d279f19",
+      "bytes": 27349,
+      "scope": "source-only API review; never imported/executed"
+    },
+    {
+      "path": "stt_env/lib/python3.11/site-packages/mlx_whisper/load_models.py",
+      "sha256": "564920c08e93bce34288aa988e701066c3af669c6794d141680094a98dca2f2c",
+      "scope": "read as text only; no native import"
+    },
+    {
+      "path": "stt_env/lib/python3.11/site-packages/parakeet_mlx/utils.py",
+      "sha256": "62bba06c888428ac07748815e40093b25bf4c5bd5ab683b4448741c4eaab9e47",
+      "scope": "read as text only; no native import"
+    },
+    {
+      "path": "stt_env/lib/python3.11/site-packages/mlx_lm/utils.py",
+      "sha256": "ba0371e9c88d52b34d71271945c2394005fbcb2bfb2ee9f6f82d627a33b72422",
+      "scope": "read as text only; no native import"
+    },
+    {
+      "path": ".cache/package-smoke/lib/python3.11/site-packages/speechbrain/inference/interfaces.py",
+      "sha256": "814d796c894e35e90e98ea33ff23e1ef8035b6a1a1cb77e444a8593e18172b09",
+      "scope": "read as text only; no native import"
+    },
+    {
+      "path": ".cache/package-smoke/lib/python3.11/site-packages/speechbrain/utils/fetching.py",
+      "sha256": "e6cc552a7a2a588903a9c9f7c2705d0b9f474f85b306f8f2eb70bcc8e7e530f4",
+      "scope": "read as text only; no native import"
+    }
+  ],
+  "source_sha256": {
+    "engines/model_paths.py": "e0d820fab595adeaee041f0a09b36f2c4ad9e127f1551f0e8a7592808410c189",
+    "engines/mlx_engine.py": "399c005bb9df2dbf675f0cde8fe53c852ede178578e006c487cbaf1dee7f5046",
+    "engines/parakeet_mlx_engine.py": "a1872fd8febc03a2d753024d068736e6b7c4aa6277c80a91d0d61f31eda3b62a",
+    "features/live_diarize.py": "c985f203a93875eda7f3240dc077ec1b57c5c41a612af79ce25d2659ce293a79",
+    "models.lock.json": "3736cfc8c71bb8492d3812e6da6eceabf7f027af7ea14086923277cb5639037f",
+    "workers.py": "11bc686f45581f184a3c85114ef17959693d918a37def13e240872101a78a909",
+    "dry_run_ab.py": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
+    "tests/test_pinned_mlx_model_loading.py": "453060a375afe702cb0665b523c8e311ba03185500a1b4109dc2ac62e9650139",
+    "tests/test_mlx_stt_fallback_language.py": "d21465e9bf526f9cc46ed353914655d2fb1f142d864350bc351ac050090d57d6",
+    "tests/test_stt_benchmark_identity.py": "23c7d9e8d5149d748c44f88094bf996bbb2a4896929cf8469f93fce23b04762f",
+    "tests/test_parakeet_mlx_engine.py": "41dd1dcce9a0896419cd76d5982269152fe09d69d403e6d06929821379e11706",
+    "tests/test_mlx_turboquant.py": "057be52a9300958b48925fe1ea3ef263a4c92d9cb49639e613dfb9824c5f99bb",
+    "tests/test_mlx_thread_first_forward.py": "440ef18cecf5a2401dd0bad9e2422f975e6c1676c6d155c7fb93abf496a4b5bd",
+    "tests/test_gemma4_eos.py": "f0356da4da0cf261dfd94eb60440b2fa4fa34fd68b1a3a7331120e610fc1ccfd",
+    "operator_app/cli.py": "64b3bd07647ba1ae7c0a6c7b792101e32c43517539f3b5401d093b99b4fcf156",
+    "features/summarize_sermon.py": "e2adcad965cb9214e08f39383464971abca961268ded2599381902c2fb8134c6",
+    "operator_app/setup.py": "a17a378b73e501a8796f6e6cf3a766863bc5f83e6ef27987a0ca4fa358f30097",
+    "tests/test_summarize_sermon.py": "33335f835a1de27e247619cf64e8802da05f2f25f4c5554511025632519b3334",
+    "engines/stt_fallback.py": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4",
+    "tests/test_documentation.py": "a7b00f1d6521cfd9a159ed41e322a9ed07dc9062f604cd660f491c5e742fef76"
+  },
+  "validation": {
+    "stdlib_source_fixtures": {
+      "status": "passed",
+      "count": 16,
+      "script": ".cache/mac-en-es-closeout/live-pinning-preparation/check_stdlib.py",
+      "script_sha256": "6b6e8e738951cf9ce00e33bd5948444e7f653f08ecc490ebef60f25e25022fdb",
+      "scope": "real resolver, setup/parser/Lite policy and daemon main; AST-extracted optional/summary loaders; fake model/download/YAML APIs only; asserts no native modules imported",
+      "fixture_correction": "First harness run expected /var rather than canonical /private/var for an explicit path. Fixed only harness assertion to existing resolve() contract; rerun passed.",
+      "observed_at_prior_receipt": "2026-09-10T16:43:06.639282+00:00",
+      "prior_receipt_sha256": "bf5fd0822d28e64a93635616d8fdd2256eb2f82ed95e426d92bc64c67a917385"
+    },
+    "source_ast": {
+      "status": "passed",
+      "python_files": 17
+    },
+    "manifest_metadata_files": {
+      "status": "passed",
+      "new_entries": 6
+    },
+    "focused_ruff": "passed; check and format check",
+    "pytest": {
+      "source_revision": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+      "status": "pending; final result not established at coordinator report",
+      "scope": "The 476e349 documentation-only repair does not change the 211 inventoried source files; full CI is separate from earlier fb44a0f startup-test success."
+    },
+    "native_runtime": "deferred; no weights/model inference/device streams/build/install executed",
+    "daemon_input_safety": "Actual main exercised missing/directory/empty inputs with zero loader calls; valid tiny stdlib WAV gives one mocked unavailable-loader attempt across three iterations. No audio device calls.",
+    "startup_source_checks": {
+      "receipt_path": ".cache/mac-en-es-closeout/startup-fallback-review/source-checks.json",
+      "receipt_sha256": "931976ec642f83d6be5b203a987822b657688ff4a71a6aa4d66c70b2af22a1e5",
+      "script_path": ".cache/mac-en-es-closeout/startup-fallback-review/check_source.py",
+      "recorded_result": {
+        "status": "passed",
+        "checks": [
+          "actual EN load catches pinned download failure and loads existing fallback cache",
+          "es fixture/primary: correct exception and no fallback inference",
+          "en unregistered/primary: correct exception and no fallback inference",
+          "es unregistered/primary: correct exception and no fallback inference",
+          "native/runtime modules absent after shim restoration"
+        ],
+        "count": 5,
+        "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+        "scope": "AST-extracted actual load_whisper, real resolver/language guard, tiny fake cache, fake downloader/native APIs",
+        "source_sha256": {
+          "dry_run_ab.py": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
+          "tests/test_mlx_stt_fallback_language.py": "d21465e9bf526f9cc46ed353914655d2fb1f142d864350bc351ac050090d57d6",
+          "engines/model_paths.py": "e0d820fab595adeaee041f0a09b36f2c4ad9e127f1551f0e8a7592808410c189",
+          "engines/stt_fallback.py": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4"
+        },
+        "script_sha256": "6c44887e0af1d8e2f75115ad183a062c781869fa83b6da3148d6f923297c6f52",
+        "pytest_executed": false,
+        "weights_downloaded": false,
+        "native_models_or_devices": false
+      },
+      "review": "Receipt and all recorded source/script hashes verified against current files; checks were not rerun by the inventory refresh."
+    },
+    "prior_integrated_ci": {
+      "source_revision": "fad0558f0c1cec282ef47ce06f37f49b894b0abf",
+      "status": "passed",
+      "python311": {
+        "passed": 2809,
+        "skipped": 6,
+        "warnings": 2,
+        "duration_seconds": 127.39,
+        "coverage_percent": 66.24,
+        "url": "https://github.com/wrbell/stark-translate/actions/runs/34504851183/job/102964373192",
+        "log_path": ".cache/mac-en-es-closeout/ci-fad0558-python311.log",
+        "log_sha256": "9de3532c1f0e2133c7c1255051d1d63233e0bff82f4546328f670d95d65d3bb7"
+      },
+      "python312_and_lint": "Passed on the same head; verified and reported by the coordinator.",
+      "scope": "Prior integrated CI after the resolved-model-path fixture correction; does not validate the subsequent fb44a0f startup repair."
+    },
+    "startup_ci": {
+      "source_revision": "fb44a0f7023f1fde539f908ef09c4d85062b4c5c",
+      "status": "failed",
+      "url": "https://github.com/wrbell/stark-translate/actions/runs/34505780125",
+      "python311": {
+        "passed": 2812,
+        "failed": 1,
+        "skipped": 6,
+        "warnings": 2,
+        "duration_seconds": 126.6,
+        "coverage_percent": 66.24,
+        "log_path": ".cache/mac-en-es-closeout/ci-fb44a0f-python311.log",
+        "log_sha256": "188f14923ac4a8823fb1a05704fd2005725958bafedae0253bf0a5b5f4af33fc"
+      },
+      "failure": "Documentation contract still hardcoded historical PR192; current/draft PR196 contract repaired by 476e349. Coordinator reported the same sole failure on Python3.12.",
+      "new_startup_pytest_cases": {
+        "count": 4,
+        "status": "passed",
+        "names": [
+          "test_live_english_primary_download_failure_uses_cached_fallback",
+          "test_live_spanish_primary_download_failure_does_not_attempt_english_fallback",
+          "test_live_unpinned_primary_never_attempts_fallback[en]",
+          "test_live_unpinned_primary_never_attempts_fallback[es]"
+        ]
+      },
+      "test_file": "tests/test_mlx_stt_fallback_language.py",
+      "test_lines": [
+        62,
+        73,
+        84
+      ],
+      "scope": "The four startup pytest cases passed in CI; the local five-check stdlib harness did not execute pytest. The full fb44a0f suite did not pass."
+    },
+    "historical_checks_scope": "The original 16 fixtures, 17-file AST and Ruff checks are retained historical observations, not re-executed for this refresh. The subsequent five-check startup receipt and earlier integrated CI are separate evidence cohorts."
+  },
+  "remaining_gates": [
+    "Existing credential returns HTTP403 for pinned pyannote/segmentation-3.0 config; full optional pipeline gracefully unavailable without access or a complete local copy.",
+    "Final integrated 476e349 CI remains pending. Earlier fad0558 CI passed; fb44a0f passed all four new startup cases but failed its sole stale documentation assertion. Five stdlib source checks passed independently without pytest/native execution.",
+    "Future reserved silent file/no-TTS final artifact EN/ES validation; optional native diarization compatibility and two-speaker quality/latency acceptance remain separate."
+  ],
+  "original_recorded_at": "2026-09-10T16:43:06.639282+00:00",
+  "source_revision": "476e349d6887b9f4e2379f9e57646bdd2bb2c581",
+  "source_commits": {
+    "pinning": "97cfc9f9e5be3794e56757c7ef05fe7e05b6ef71",
+    "resolved_path_test_fixture": "fad0558f0c1cec282ef47ce06f37f49b894b0abf",
+    "startup_fallback": "fb44a0f7023f1fde539f908ef09c4d85062b4c5c",
+    "documentation_contract": "476e349d6887b9f4e2379f9e57646bdd2bb2c581"
+  },
+  "supersedes": {
+    "receipt_sha256": "bf5fd0822d28e64a93635616d8fdd2256eb2f82ed95e426d92bc64c67a917385",
+    "inventory_sha256": "10c9b338347b9118946e770582e3030a8f5f1e0014b71f028f488cffb464c2df",
+    "preserved_in": ".cache/mac-en-es-closeout/live-pinning-preparation/before-startup-fallback-20260910T170347Z",
+    "reason": "Refresh after committed Mac startup fallback repair and resolved-path fixture correction; all model pins and residual call-site classifications unchanged."
+  },
+  "source_hash_changes_since_prior_receipt": [
+    {
+      "path": "dry_run_ab.py",
+      "prior_sha256": "af5d12c90bcae7ed9b5382ba0c064cbcb27ce6906b28bd515bba6e2697025471",
+      "current_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32"
+    },
+    {
+      "path": "tests/test_mlx_stt_fallback_language.py",
+      "prior_sha256": "61babe5e4157ee701c2b710949da5421f66abd385a9701587d96a0ed49837f08",
+      "current_sha256": "d21465e9bf526f9cc46ed353914655d2fb1f142d864350bc351ac050090d57d6"
+    },
+    {
+      "path": "tests/test_mlx_turboquant.py",
+      "prior_sha256": "d0c4d251dc4cde9a1532a06c4976ed9b19ee5564a6877e24258bc442b7aaf090",
+      "current_sha256": "057be52a9300958b48925fe1ea3ef263a4c92d9cb49639e613dfb9824c5f99bb"
+    },
+    {
+      "path": "engines/stt_fallback.py",
+      "prior_sha256": null,
+      "current_sha256": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4"
+    },
+    {
+      "path": "tests/test_documentation.py",
+      "prior_sha256": null,
+      "current_sha256": "a7b00f1d6521cfd9a159ed41e322a9ed07dc9062f604cd660f491c5e742fef76"
+    }
+  ],
+  "startup_fallback_boundary": {
+    "path": "dry_run_ab.py",
+    "symbol": "load_whisper",
+    "line": 1184,
+    "end_line": 1199,
+    "source_file_sha256": "8fd7c85d9ff2383a17786816dc2582d097a2237934aac0a578325c147dbd2d32",
+    "policy": "Primary resolution and warmup share the guarded try. English network/cache/inference failure may resolve the configured pinned/local fallback. Spanish is rejected by require_mlx_fallback_language before fallback resolution or inference. UnpinnedModelError is re-raised for either language rather than silently changing the declared model.",
+    "language_guard": {
+      "path": "engines/stt_fallback.py",
+      "line": 9,
+      "source_file_sha256": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4"
+    }
+  },
+  "refresh_validation": {
+    "recorded_source_file_hashes_verified": 211,
+    "receipt_source_file_hashes_verified": 20,
+    "recorded_local_upstream_api_source_hashes_verified": 5,
+    "all_model_pins_and_metadata_config_api_review_entries_unchanged": true,
+    "no_new_remote_verification": true,
+    "no_pytest_or_native_execution": true
+  },
+  "current_inventory": {
+    "path": "docs/evaluation/mac_followup_20260910/live-hf-source-inventory.json",
+    "sha256": "05a44356ad8f3b9d4bb89c412405895556cb886565c4af6ea001993a3dae7498",
+    "source_revision": "476e349d6887b9f4e2379f9e57646bdd2bb2c581"
+  }
+}

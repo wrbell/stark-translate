@@ -1,0 +1,279 @@
+{
+  "all_results_preserved_outside_replaced_masked_fields": true,
+  "archive_limits_unchanged": {
+    "expanded_bytes": 524288000,
+    "member_bytes": 134217728,
+    "members": 4096,
+    "shard_bytes": 491520
+  },
+  "new_v7_helper_sha256": "35f0abbcbd2c7f829873ee34db6c70368835e48ae9f6387e7b6373accdab98bc",
+  "original_log_payloads_archived": false,
+  "original_logs_unchanged": true,
+  "original_v6_helper_sha256": "897a1aa43f4aca6e662e429d55fbb08603467ff2d1b85af1186a0e9f9250361f",
+  "original_v6_selection_sha256": "bf23a0ac0d06c6eecfe24c964044b40b57de30ca4a0f76354ca58d03e2c35f4a",
+  "prepared_at": "2026-09-11T00:32:56.240703+00:00",
+  "raw_credentials_observed": false,
+  "records": [
+    {
+      "derivative": {
+        "sha256": "3e94d62dd68978affc399dc898ddabb525cd933500a5395642022c0a2a0cfd45",
+        "size_bytes": 576206,
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/redacted-ci/ci-c13f51f-python311.redacted.log"
+      },
+      "derivative_archive_name": "validation/ci/ci-c13f51f-python311.redacted.log",
+      "original": {
+        "expected": {
+          "sha256": "8776d0e88556e724795341ec0a69d8c1857c43ca42415f6a37fddb5648d6c658",
+          "size_bytes": 576191
+        },
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/ci-c13f51f-python311.log",
+        "transformation": {
+          "all_other_bytes_unchanged": true,
+          "fields": [
+            {
+              "line_1based": 98,
+              "original_field_bytes": 24,
+              "original_value_alphanumeric_count": 0,
+              "original_value_asterisk_count": 3,
+              "original_value_bytes": 3,
+              "original_value_classification": "upstream_mask_only",
+              "rule": "github-masked-authorization-field-v1",
+              "scheme": "basic"
+            }
+          ],
+          "line_count_unchanged": true,
+          "raw_credential_observed": false,
+          "redaction_count": 1,
+          "replacement": "Authorization: [CI_AUTH_FIELD_REDACTED]",
+          "rule": "github-masked-authorization-field-v1",
+          "upstream_mask_only": true
+        }
+      },
+      "original_archive_name": "validation/ci/ci-c13f51f-python311.log"
+    },
+    {
+      "derivative": {
+        "sha256": "f42b1d7bec4e90c7a21da8454aac1e5389604259fb8abded0195a798c965ed96",
+        "size_bytes": 532638,
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/redacted-ci/ci-c13f51f-python312.redacted.log"
+      },
+      "derivative_archive_name": "validation/ci/ci-c13f51f-python312.redacted.log",
+      "original": {
+        "expected": {
+          "sha256": "0433a376f8862d27ae92a224b33fb4b6c03c640de02d543644d21a2214286af9",
+          "size_bytes": 532623
+        },
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/ci-c13f51f-python312.log",
+        "transformation": {
+          "all_other_bytes_unchanged": true,
+          "fields": [
+            {
+              "line_1based": 98,
+              "original_field_bytes": 24,
+              "original_value_alphanumeric_count": 0,
+              "original_value_asterisk_count": 3,
+              "original_value_bytes": 3,
+              "original_value_classification": "upstream_mask_only",
+              "rule": "github-masked-authorization-field-v1",
+              "scheme": "basic"
+            }
+          ],
+          "line_count_unchanged": true,
+          "raw_credential_observed": false,
+          "redaction_count": 1,
+          "replacement": "Authorization: [CI_AUTH_FIELD_REDACTED]",
+          "rule": "github-masked-authorization-field-v1",
+          "upstream_mask_only": true
+        }
+      },
+      "original_archive_name": "validation/ci/ci-c13f51f-python312.log"
+    },
+    {
+      "derivative": {
+        "sha256": "3db1934f64b6ee822d6ccfb3c0e3e7f85177243525c3fb7618648a00846f56f9",
+        "size_bytes": 581105,
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/redacted-ci/ci-760e948-python311.redacted.log"
+      },
+      "derivative_archive_name": "validation-760e948/ci-python311.redacted.log",
+      "original": {
+        "expected": {
+          "sha256": "59935f4818e3b6ccbbe01ef23e09598bd519fdc603270dc4261de63223a6d691",
+          "size_bytes": 581090
+        },
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/ci-760e948-python311.log",
+        "transformation": {
+          "all_other_bytes_unchanged": true,
+          "fields": [
+            {
+              "line_1based": 98,
+              "original_field_bytes": 24,
+              "original_value_alphanumeric_count": 0,
+              "original_value_asterisk_count": 3,
+              "original_value_bytes": 3,
+              "original_value_classification": "upstream_mask_only",
+              "rule": "github-masked-authorization-field-v1",
+              "scheme": "basic"
+            }
+          ],
+          "line_count_unchanged": true,
+          "raw_credential_observed": false,
+          "redaction_count": 1,
+          "replacement": "Authorization: [CI_AUTH_FIELD_REDACTED]",
+          "rule": "github-masked-authorization-field-v1",
+          "upstream_mask_only": true
+        }
+      },
+      "original_archive_name": "validation-760e948/ci-python311.log"
+    },
+    {
+      "derivative": {
+        "sha256": "4dcefa20ac088334bb180cd17835f822849886ab8f4897ceb7e9cd525329bf14",
+        "size_bytes": 536552,
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/redacted-ci/ci-760e948-python312.redacted.log"
+      },
+      "derivative_archive_name": "validation-760e948/ci-python312.redacted.log",
+      "original": {
+        "expected": {
+          "sha256": "a228de05af86d52aadb02bca25390128225643ca233cda3a4dc3770404eef88f",
+          "size_bytes": 536537
+        },
+        "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/ci-760e948-python312.log",
+        "transformation": {
+          "all_other_bytes_unchanged": true,
+          "fields": [
+            {
+              "line_1based": 98,
+              "original_field_bytes": 24,
+              "original_value_alphanumeric_count": 0,
+              "original_value_asterisk_count": 3,
+              "original_value_bytes": 3,
+              "original_value_classification": "upstream_mask_only",
+              "rule": "github-masked-authorization-field-v1",
+              "scheme": "basic"
+            }
+          ],
+          "line_count_unchanged": true,
+          "raw_credential_observed": false,
+          "redaction_count": 1,
+          "replacement": "Authorization: [CI_AUTH_FIELD_REDACTED]",
+          "rule": "github-masked-authorization-field-v1",
+          "upstream_mask_only": true
+        }
+      },
+      "original_archive_name": "validation-760e948/ci-python312.log"
+    }
+  ],
+  "redaction_count": 4,
+  "redaction_rule": "Replace the complete authorization scanner match only when its scheme is Basic/Bearer and value is exactly the upstream three-asterisk mask; retain all prefix/suffix bytes and line breaks. Any other finding or shape fails closed.",
+  "redactor_sha256": "568542a7d4f95a5274a45030dd9d3209125437f9e3a9cdf7be3994ed2650fe5d",
+  "resolution_descriptions": {
+    "fields_replaced": 3,
+    "only_field": "/install/53/metadata/description",
+    "original_report_payloads_archived": false,
+    "records": [
+      {
+        "derivative": {
+          "sha256": "a3652be5f9d0fee2ca645d1f26bd92b9eb02b92707298d823eb4c43c10179dd6",
+          "size_bytes": 1650303,
+          "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/redacted-resolution/final-delivery-v2-resolution.redacted.json"
+        },
+        "derivative_archive_name": "failed-v2/install/standard/resolution.redacted.json",
+        "original": {
+          "expected": {
+            "sha256": "c661b9b34feae3cc98797d65279823dbe10b471186b15f05517f9636bf491336",
+            "size_bytes": 1691742
+          },
+          "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-delivery-v2/install/standard/resolution.json",
+          "transformation": {
+            "all_other_parsed_data_unchanged": true,
+            "classification": "Embedded package README prose/examples omitted; no matched value disclosed or asserted to be a live credential.",
+            "formatting": "JSON reserialized; equality is asserted on all other parsed data, not original whitespace.",
+            "json_pointer": "/install/53/metadata/description",
+            "only_selected_json_value_changed": true,
+            "original_description_characters": 39844,
+            "package_name": "openai",
+            "package_version": "3.11.0",
+            "replacement": "[PACKAGE_DESCRIPTION_EXAMPLES_OMITTED_FOR_ARCHIVE]",
+            "resolved_names_versions_urls_hashes_and_outcomes_unchanged": true,
+            "rule": "openai-3.11.0-resolution-description-v1",
+            "scanner_match_count": 8,
+            "scanner_rule": "secret_assignment"
+          }
+        },
+        "original_archive_name": "failed-v2/install/standard/resolution.json"
+      },
+      {
+        "derivative": {
+          "sha256": "cca16354514b17194454594e3021cdd475578eaf6ad1f5d296d992a7d90c5411",
+          "size_bytes": 1650303,
+          "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/redacted-resolution/final-delivery-v5-resolution.redacted.json"
+        },
+        "derivative_archive_name": "historical-v5/install/standard/resolution.redacted.json",
+        "original": {
+          "expected": {
+            "sha256": "a9823b51d48b2742745b5d02977f67440cca5776d328cf32c6839bf27bc912eb",
+            "size_bytes": 1691742
+          },
+          "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-delivery-v5/install/standard/resolution.json",
+          "transformation": {
+            "all_other_parsed_data_unchanged": true,
+            "classification": "Embedded package README prose/examples omitted; no matched value disclosed or asserted to be a live credential.",
+            "formatting": "JSON reserialized; equality is asserted on all other parsed data, not original whitespace.",
+            "json_pointer": "/install/53/metadata/description",
+            "only_selected_json_value_changed": true,
+            "original_description_characters": 39844,
+            "package_name": "openai",
+            "package_version": "3.11.0",
+            "replacement": "[PACKAGE_DESCRIPTION_EXAMPLES_OMITTED_FOR_ARCHIVE]",
+            "resolved_names_versions_urls_hashes_and_outcomes_unchanged": true,
+            "rule": "openai-3.11.0-resolution-description-v1",
+            "scanner_match_count": 8,
+            "scanner_rule": "secret_assignment"
+          }
+        },
+        "original_archive_name": "historical-v5/install/standard/resolution.json"
+      },
+      {
+        "derivative": {
+          "sha256": "23f2d95d582f0e5666d582bd3e8382dfc1ff2d5d9769641ff90d3f443e2e8804",
+          "size_bytes": 1651181,
+          "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/redacted-resolution/final-delivery-v6-resolution.redacted.json"
+        },
+        "derivative_archive_name": "delivery/install/standard/resolution.redacted.json",
+        "original": {
+          "expected": {
+            "sha256": "9b369ae6f766e851056d0c317b31adf551e99416a38d7d8841fa02f75202eaf2",
+            "size_bytes": 1692620
+          },
+          "source": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-delivery-v6/install/standard/resolution.json",
+          "transformation": {
+            "all_other_parsed_data_unchanged": true,
+            "classification": "Embedded package README prose/examples omitted; no matched value disclosed or asserted to be a live credential.",
+            "formatting": "JSON reserialized; equality is asserted on all other parsed data, not original whitespace.",
+            "json_pointer": "/install/53/metadata/description",
+            "only_selected_json_value_changed": true,
+            "original_description_characters": 39844,
+            "package_name": "openai",
+            "package_version": "3.11.0",
+            "replacement": "[PACKAGE_DESCRIPTION_EXAMPLES_OMITTED_FOR_ARCHIVE]",
+            "resolved_names_versions_urls_hashes_and_outcomes_unchanged": true,
+            "rule": "openai-3.11.0-resolution-description-v1",
+            "scanner_match_count": 8,
+            "scanner_rule": "secret_assignment"
+          }
+        },
+        "original_archive_name": "delivery/install/standard/resolution.json"
+      }
+    ],
+    "report_count": 3,
+    "resolved_dependency_data_and_outcomes_unchanged": true,
+    "scanner_match_count": 24
+  },
+  "resolution_redactor_sha256": "d258855f78284eb5f7f092103248fda702224d1a6b04f0e5a0c04add9442505e",
+  "scanner_sha256": "c006c8f2043f153a1688ba5b51b48087dee8117ea4a927ef7387b9535173ad61",
+  "scanner_unchanged": true,
+  "schema_version": 1,
+  "source_760_and_historical_c13_gates_unchanged": true,
+  "status": "prepared_not_archived",
+  "upstream_logs_were_github_masked": true
+}

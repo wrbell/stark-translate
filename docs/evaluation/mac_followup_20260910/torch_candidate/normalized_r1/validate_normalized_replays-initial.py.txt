@@ -1,0 +1,74 @@
+"""Validate preserved candidate replay output without imports of application/model code."""
+import csv
+import hashlib
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[2]
+
+def sha(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+results=[]
+for lang in ('en','es'):
+    work=BASE/'replay-work'/f'torch213_full_normalized_r1_{lang}'
+    receipt=json.loads((work/'receipt.json').read_text())
+    session=receipt['session_id']
+    metrics=work/'metrics'
+    rows=[json.loads(x) for x in (metrics/f'diagnostics_{session}.jsonl').read_text().splitlines() if x.strip()]
+    summaries=[x for x in rows if x.get('event')=='session_summary']
+    captions=[x for x in rows if x.get('event') is None]
+    coverage=summaries[-1]['source_coverage'] if summaries else {}
+    life=receipt['lifecycle']; meta=receipt['session_metadata']
+    health=json.loads((metrics/f'health_{session}.json').read_text())
+    persisted=life['persistence']
+    expected=receipt['expected_models']; models=life['models']
+    marian=models['marian']; export=marian.get('export_manifest',{})
+    source_wavs=sorted((work/'stark_data/live_sessions'/session).glob('chunk_*.wav'))
+    with (metrics/f'ab_metrics_{session}.csv').open() as stream:
+        finals=list(csv.DictReader(stream))
+    checks={
+        'child_exit_and_cleanup': receipt['exit_code']==0 and not receipt['process_group_remained'],
+        'lifecycle_completed': life['status']=='completed' and life['exit_code']==0,
+        'required_persistence': persisted['ok'] is True and persisted['pending']==persisted['failed']==0 and persisted['submitted']==persisted['completed'],
+        'required_recording': health['recording']['ok'] is True and health['recording']['required_failures']==0 and health['recording']['audio_enabled'] is True,
+        'finals_nonempty': bool(finals) and all(x.get('english','').strip() and x.get('spanish_a','').strip() for x in finals),
+        'previews_nonempty': receipt['partial_record_count']>0,
+        'diagnostics_match_finals': len(captions)==len(finals),
+        'retained_audio_matches_finals': len(source_wavs)==len(finals) and all(x.stat().st_size>44 for x in source_wavs),
+        'source_metadata': meta['session_kind']=='replay' and meta['audio_source']=='file' and meta['input_audio_sha256']==receipt['clip']['sha256'] and sha(Path(receipt['clip']['path']))==receipt['clip']['sha256'],
+        'source_accounting_complete': coverage.get('complete') is True and not coverage.get('capture_gaps') and not coverage.get('unclassified_intervals') and all(coverage.get(k)==0 for k in ('dropped_records','unknown_bounds','duplicate_observed_samples','observed_samples_beyond_eof')),
+        'eof_and_drain': coverage.get('eof',{}).get('reader_eof') is True and coverage.get('eof',{}).get('capture_queues_drained') is True,
+        'entire_source_duration': abs(coverage.get('expected_source_samples',0)/coverage.get('sample_rate',1)-receipt['clip']['duration'])<0.0001,
+        'stt_identity': models['stt']['requested_id']==expected['stt'] and models['stt']['manifest_revision']==models['stt']['resolved_revision'] and bool(models['stt']['resolved_revision']),
+        'final_model_identity': models['translation_a']['requested_id']==expected['final'] and models['translation_a']['manifest_revision']==models['translation_a']['resolved_revision'] and bool(models['translation_a']['resolved_revision']),
+        'marian_actual_backend': bool(captions) and all(x.get('marian_backend')=='ct2-int8' for x in captions),
+        'marian_source_direction_and_hash': export.get('source_model_id')==expected['partial'] and export.get('direction')==('en-es' if lang=='en' else 'es-en') and export.get('model_bin_hash_matches') is True,
+        'torch_vad': meta['vad']['backend']=='torch' and meta['vad']['artifact']['backend']=='torch' and meta['vad']['artifact']['source']=='installed_package',
+        'frozen_installed_artifact': meta['pipeline_sha256']==receipt['pipeline_sha256'] and meta['package_artifact_hashes']['sha256']==receipt['wheel_sha256'],
+        'fixed_gain': receipt['argv'][receipt['argv'].index('--gain')+1]=='1' and 'Mic gain used:    1.0x' in (work/'process.log').read_text(),
+    }
+    result={
+        'session_id':session, 'status':'passed_functionality' if all(checks.values()) else 'failed',
+        'checks':checks,'started_at':receipt['started_at'],'ended_at':receipt['ended_at'],
+        'final_count':len(finals),'partial_record_count':receipt['partial_record_count'],
+        'retained_audio_chunks':len(source_wavs),'persistence':persisted,'source_coverage':coverage,
+        'actual_models':models,'selected_marian_setting':meta['translation']['marian_backend'],
+        'runner_sha256':receipt['runner_sha256'],'protocol_sha256':receipt['protocol_sha256'],
+        'pipeline_sha256':receipt['pipeline_sha256'],'wheel_sha256':receipt['wheel_sha256'],
+        'notes':['Full installed candidate functionality only; older frozen source precludes causal performance comparison.',
+                 'Legacy CT2 export has an unknown upstream revision, with exact model.bin hash and matching declared source/direction retained.',
+                 'Source completeness is machine accounting, not acoustic speech recall or bilingual quality approval.',
+                 'No visible browser, attended microphone, speaker or TTS route was exercised.']
+    }
+    if lang=='en':
+        result['notes'].append('The first EN runner used an ignored double-underscore backend environment name; auto selected ct2-int8 as independently recorded. ES uses the corrected single-underscore setting. Earlier print-only plans remain unexecuted.')
+    results.append(result)
+    (work/'validation.json').write_text(json.dumps(result,indent=2)+'\n')
+summary={'created_at':datetime.now(timezone.utc).isoformat(),'scope':'isolated_full_application_dependency_candidate_functionality','results':results,'passed':all(r['status']=='passed_functionality' for r in results)}
+(BASE/'normalized-r1-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+print(json.dumps({'passed':summary['passed'],'sessions':[{'id':r['session_id'],'status':r['status'],'failed_checks':[k for k,v in r['checks'].items() if not v]} for r in results]},indent=2))
+raise SystemExit(0 if summary['passed'] else 1)

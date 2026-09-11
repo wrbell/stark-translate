@@ -1,8 +1,23 @@
 # Mac implementation status — September 10 source and evidence
 
-This document describes v2026.14 source (`2026.14.0.0`), tracked by
-[PR #192](https://github.com/wrbell/stark-translate/pull/192). The last published release recorded here is v2026.13.
-The PR merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z; [closeout evidence](evaluation/overnight_closeout_20260910/README.md) retains actual merge/closure records, final ab66ad2 CI and bootstrap ZIP evidence. Source integration remains separate from the acceptance evidence below.
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
+> The [experiment screens](evaluation/mac_followup_20260910/README.md) selected no
+> default changes. Current [source checks](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+> bind `760e948`; the silent hymn diagnostics retain their earlier c13 identity.
+> [Installed delivery](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+> records artifact and service acceptance separately. Integration status is recorded separately.
+
+
+> **Follow-up, September 10:** [Current EN/ES work](evaluation/mac_followup_20260910/README.md)
+> adds pinned public speech comparisons, isolated dependency remediation and
+> [real microphone capture/readiness checks](evaluation/attended_mic_20260910/README.md).
+> The quiet-room check produced no spoken captions; that gate remains pending.
+> Older experiment and endurance measurements below retain their original source identities.
+
+This document describes v2026.14 source (`2026.14.0.0`), with prior integration in
+[PR #192](https://github.com/wrbell/stark-translate/pull/192) and the EN↔ES follow-up in
+[PR #196](https://github.com/wrbell/stark-translate/pull/196). The last published release recorded here is v2026.13.
+PR #192 merged into main at `3e935fe39b96e7b0aa62a74711307f2b3e31a18c` on 2026-09-10T11:57:22Z; [closeout evidence](evaluation/overnight_closeout_20260910/README.md) retains actual merge/closure records, final ab66ad2 CI and bootstrap ZIP evidence. Source integration remains separate from the acceptance evidence below.
 Package publication and release tags are pending by user choice. The [September 9 snapshot](mac_implementation_status_20260909.md)
 preserves earlier counts and artifact identities; those do not certify later changes.
 
@@ -42,6 +57,45 @@ The [completed 96-run screen](evaluation/overnight_screen_20260910/README.md) se
   and release version/tag identity checks.
 
 ## Evidence and active validation
+
+The current [760e948 source-validation record](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+retains the completed local CPU, static, text-only GPU and pre-commit checks,
+plus exact-source CI. It preserves the original wrapper bookkeeping failure
+separately from the successful checks. [Current installed delivery](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+has its own artifact and full-service gates.
+
+The historical [c13f51f source validation](evaluation/mac_followup_20260910/final-c13f51f/source-validation.md)
+records 2,837 local passing tests, four skips, 20 subtests and 66.62% coverage;
+three actual text-only MLX checks, 11 prescribed static commands and seven isolated
+pre-commit hooks also passed. Exact-head GitHub Python 3.11/3.12 jobs each passed
+2,835 tests, six skips and 20 subtests with 66.49% coverage. Their coverage-comment
+format annotation is a separate reporting defect, addressed by selecting the
+action's JSON input. Later monitor and documentation checks retain their own identities.
+
+The final installed c13 wheel, sdist and Mac ZIP passed build/member checks,
+outside-checkout installation for both Standard and CPU Lite, four read-only
+operator launches and all four EN↔ES file smokes. The Standard full-service
+pipeline completed all 3,946 writes and 563 finals without cleanup intervention.
+Its monitor rejected the valid 91.2 MB diagnostics at a 64 MiB read limit;
+a separate bounded-reader report recovered those artifacts while retaining the
+original failure. The unchanged terminal validator then passed 46/47 checks and
+failed on one blank translated preview out of 2,562. The [producer repair](evaluation/mac_followup_20260910/final-c13f51f/empty-preview-repair.md)
+preserves the prior caption and logs that rejection explicitly; 21 focused
+production-coroutine checks passed. Fresh repaired-source
+Standard/Lite rehearsals on `760e948` passed their separate terminal gates,
+with 5,533/5,533 required writes across all six file sessions. Standard silence-final
+median was 1,458.7 ms; CPU Lite was 3,297.7 ms with sparse previews. The sub-second
+goal remains unmet; c13 is not relabeled as fully passed.
+See the [current installed delivery](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+and the separate [c13 failure record](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md).
+
+The [350-second hymn control](evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md)
+completed without entering music hold. The [102-call boundary comparison](evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md)
+retains raw title/subject errors and supplied delimiter hypotheses. Neither
+establishes human acoustic labels or bilingual approval; #193/#194 remain open.
+The [loader continuity note](evaluation/mac_followup_20260910/final-c13f51f/model-source-continuity.md)
+binds the selected source review without clearing optional/offline residuals.
+
 
 The [integrated browser rehearsal](evaluation/overnight_operator_rehearsal.md)
 records actual EN→ES→EN captions, John 3:16, Pause/Resume, Stop, draft reload,
@@ -169,4 +223,4 @@ keep implementation and certification separate. #134 permits a laptop stand-in
 with a complete recorded hymn, spoken segment and written timing/UX note; live
 microphone and physical-device requirements belong to their own gates.
 
-The final reviewed `ab66ad2` head passed 2,398 tests with four skips on both Python 3.11 and 3.12 CI. Its Mac ZIP contains the patched executable bootstrap; all 152 packaged runtime members match `84832fb`. No additional inference or hardware validation is implied. #134/#176 acceptance is met after their actual completed closures; #177 is closed NOT_PLANNED with implementation deferred and promotion certification pending.
+The earlier reviewed `ab66ad2` head passed 2,398 tests with four skips on both Python 3.11 and 3.12 CI. Its Mac ZIP contains the patched executable bootstrap; all 152 packaged runtime members match `84832fb`. No additional inference or hardware validation is implied. #134/#176 acceptance is met after their actual completed closures; #177 is closed NOT_PLANNED with implementation deferred and promotion certification pending.

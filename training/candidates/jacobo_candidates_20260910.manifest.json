@@ -1,0 +1,53 @@
+{
+  "candidate_count": 60,
+  "sense_counts": {
+    "person_son_of_zebedee": 30,
+    "epistle_title": 30
+  },
+  "unique_core_sentences": 20,
+  "exact_normalized_text_overlaps": 0,
+  "duplicate_source_texts": 0,
+  "holdout_files_checked": [
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/bible_data/aligned/verse_pairs_test.jsonl",
+      "sha256": "465a6b56749bb59127a1bd38c7dce78b755f86d98694b0928514c70672e05e16"
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/bible_data/holdout/verse_pairs_test.jsonl",
+      "sha256": "465a6b56749bb59127a1bd38c7dce78b755f86d98694b0928514c70672e05e16"
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/bible_data/hymns/hymn_pairs_pd_holdout.jsonl",
+      "sha256": "73dcbad3a84accd6f338279f000334c7dc5b2dc2c323b1d1619cff211de9c20a"
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/bible_data/synthetic/deepl_sermon_benchmark_500.jsonl",
+      "sha256": "2f8c1d9cf02c7d77973bb88106095374a87054b7140a0aea4da70c82c7bbde25"
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/tools/stt_bench_manifest.json",
+      "sha256": "08c80d188da828225b5f52f17efe159d45eb0e4582eb62a6ff4b4610a9bbab15"
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_v2026_14_manifest_v2.json",
+      "sha256": "3f000c1cd4d1fedf063ab98b1f7b81fa5b8be60a095531f086a4de3c96cd6716"
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/public_data/manifest.json",
+      "sha256": "9de09bead155cef2a62f58ef0be91c43e35ced2e91672fbcfa641f358c498385"
+    },
+    {
+      "path": "/Users/willem/Code/vibes/SRTranslate/training/theological_canaries.py",
+      "sha256": "a655f3f3eeeeedf70a3e2393a58e3749d01aaedc5aceaad792c303a26e79e5a4"
+    }
+  ],
+  "required_holdouts_missing": [
+    "/Users/willem/Code/vibes/SRTranslate/bible_data/aligned/verse_pairs_test_v2.jsonl"
+  ],
+  "holdout_gate": "pending_missing_inputs",
+  "human_review": "pending",
+  "approved_for_training": false,
+  "semantic_overlap_review": "pending; exact matching does not exclude paraphrase or topic overlap",
+  "candidate_file_sha256": "2fbcefa74bed6f4e33e74cce2917c80c84c5306fa87c254c09a21f2ee1c23222",
+  "generator_sha256": "e0f25c4b14ebe401450459f4dbd70d830a7245999a428aee1c0c04e06c8c4c72"
+}

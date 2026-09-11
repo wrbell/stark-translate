@@ -130,7 +130,7 @@ def summary_runtime(monkeypatch, tmp_path):
     cached.mkdir()
     (cached / "config.json").write_text('{"model_type":"gemma4"}')
     monkeypatch.setattr(
-        summary, "resolve_model_path", lambda identity: calls.append(("resolve", identity)) or str(cached)
+        summary, "resolve_model_for_loading", lambda identity: calls.append(("resolve", identity)) or str(cached)
     )
     return summary, tokenizer, runtime, calls, cached
 

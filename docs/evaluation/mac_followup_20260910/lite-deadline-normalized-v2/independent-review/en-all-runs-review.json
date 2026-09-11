@@ -1,0 +1,3685 @@
+{
+  "schema_version": 1,
+  "language": "en",
+  "source_revision": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+  "bindings": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json": {
+      "sha256": "c3394548708908ed6f93a3369af16f836534aae8b764e490c2d7f27aaf2bc3af",
+      "bytes": 294597
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_selection.json": {
+      "sha256": "f7d94e14c21cf1322bfa31aa00027696574f8c059c16eedc171ccf9a0dae8ce6",
+      "bytes": 1782
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen.json": {
+      "sha256": "2edb40e3c9badfbbc5a723c04fae1f4aaec59ac4c3de13d8bda12334be8bc7ef",
+      "bytes": 6405
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/provenance.json": {
+      "sha256": "a4b8b3f1dcf1838342170e1890c8da8c7f201c41356857c807d004875efd70a1",
+      "bytes": 59779
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_latency.py": {
+      "sha256": "ac12808b61279f6bc452a3943fa54f4775ba26ffec5b983d5b45bdd74f35908d",
+      "bytes": 44432
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_selection.py": {
+      "sha256": "a6553a89914f665c0f7e18fa862ad66eae29ec306830a08d12b63286f6f23045",
+      "bytes": 6143
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_quality.py": {
+      "sha256": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "bytes": 44156
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/fixed_span_delivery.py": {
+      "sha256": "4320ff14f6f9a638a61d96399152feda4ae49943bce10ec182b0a628663af7f1",
+      "bytes": 7006
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/source_coverage.py": {
+      "sha256": "62e7c1b4465d771ccd7f64acd92e8491d6e7c75decf89af9618cdc134d4f2720",
+      "bytes": 4968
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/overnight_bench.py": {
+      "sha256": "49549ce0daae0d9ec7d7c0b37870b30682e5dd536dde90f3359bf7ec7e93a700",
+      "bytes": 33001
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_evaluation.py": {
+      "sha256": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a",
+      "bytes": 69473
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/replay_bench.py": {
+      "sha256": "e0567cc87c9925f37039727f995bcfccde330e882f61f0acf2e4c19a63f5862d",
+      "bytes": 22358
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_en_en.json": {
+      "sha256": "e5719e7852e06dfe523b5f23db7f1fe18eb1a10d6891cc629ce014d12a3d0bc6",
+      "bytes": 2350886
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_en_en.json": {
+      "sha256": "2e2fe9590ce0f551d6487f63b726be58b90ca074a21ba473262439eadd00a78d",
+      "bytes": 2347261
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_en_en.json": {
+      "sha256": "b29c9b9d3a291f0e4b2c0f2861c8d3785d149f63c2b10ea8d379fc17a0767e9d",
+      "bytes": 2344246
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r0_fleurs_development_en_en.json": {
+      "sha256": "c3926314ecd98fbdfc14401f64f8813916b67839d8918fc239576eb6a2e757b2",
+      "bytes": 2350498
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r1_fleurs_development_en_en.json": {
+      "sha256": "39b83037c5d5ea9c1607699e38c2c3ed651aacc64f42d833a942a0f48100101a",
+      "bytes": 2343900
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r2_fleurs_development_en_en.json": {
+      "sha256": "f85516933487eeb2ba95d854ed5c211ae85417c15fb6e40538633ecc5d0f9bca",
+      "bytes": 2348930
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_en_en.json": {
+      "sha256": "2104996bc2636da5b72bcf948078494f8d59d207b7fbea062446f62a1e62aa50",
+      "bytes": 2365295
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_en_en.json": {
+      "sha256": "a4367b25d28d83c6d6d1ddbadb7b0ebe69bfd9a32fc2b03db6399d27bf5c1fcb",
+      "bytes": 2361860
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_en_en.json": {
+      "sha256": "3f1493ed766700ea2c30bc4cbd8b1f779de1e49b081bd3b614caf1d58b09a9d8",
+      "bytes": 2361726
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_en_en.json": {
+      "sha256": "8443e06060cebf67bb6fc188bfef1f8a1913b07e4d17ae6b1efdde0f13ed0f73",
+      "bytes": 2358383
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_en_en.json": {
+      "sha256": "0174a28d5a9d3437bfa2712fee2a765a91289a5b1a36e1a1245b7cc0ba247d47",
+      "bytes": 2363732
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_runs/deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_en_en.json": {
+      "sha256": "a0a71bcfdc7a69a4b8d7f9a3dc84ae77fce50930e2b5f09cd777136ff53d655d",
+      "bytes": 2364247
+    }
+  },
+  "raw_runs_validated": 12,
+  "pairs_recomputed": 6,
+  "selection": {
+    "schema_version": 1,
+    "inventory_complete": true,
+    "arms": [
+      {
+        "experiment": "deadline_100ms",
+        "size": "e2b",
+        "clip_id": "fleurs_development_en",
+        "qualified_for_confirmation": false,
+        "complete_three_repeats": true,
+        "all_repeats_nonlatency_guards_passed": false,
+        "passed_repeats": [],
+        "mean_conservative_gain_ms": null,
+        "p95_claim_eligible": false,
+        "rejection_reasons": [
+          "first_preview_tail_regression",
+          "median_gain_below_gate",
+          "memory_regression",
+          "preview_source_coverage_loss",
+          "stage_queue_tail_regression",
+          "tail_regression"
+        ]
+      },
+      {
+        "experiment": "deadline_250ms",
+        "size": "e2b",
+        "clip_id": "fleurs_development_en",
+        "qualified_for_confirmation": false,
+        "complete_three_repeats": true,
+        "all_repeats_nonlatency_guards_passed": false,
+        "passed_repeats": [],
+        "mean_conservative_gain_ms": null,
+        "p95_claim_eligible": false,
+        "rejection_reasons": [
+          "median_gain_below_gate",
+          "memory_regression",
+          "preview_source_coverage_loss",
+          "stage_queue_tail_regression",
+          "tail_regression"
+        ]
+      }
+    ],
+    "qualified_count": 0,
+    "defaults_changed": false,
+    "limitations": "Engineering selection only. Historical references remain unavailable; independent public confirmation and bilingual review are required. Never pool repeat counts for p95 eligibility.",
+    "source_report": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/en_independent_deadline_screen_report.json",
+      "sha256": "c3394548708908ed6f93a3369af16f836534aae8b764e490c2d7f27aaf2bc3af",
+      "size_bytes": 294597
+    }
+  },
+  "pair_checks": [
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 0,
+      "p50_ms": {
+        "opening": 2625.8975000000028,
+        "candidate": 2946.097499999998,
+        "closing": 3127.0449999999983
+      },
+      "control_closing_minus_opening_ms": 501.1474999999955,
+      "control_closing_drift_percent": 19.084808146547804,
+      "reasons": [
+        "first_preview_tail_regression",
+        "median_gain_below_gate",
+        "memory_regression",
+        "stage_queue_tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 0,
+      "p50_ms": {
+        "opening": 2625.8975000000028,
+        "candidate": 2350.4225000000006,
+        "closing": 3127.0449999999983
+      },
+      "control_closing_minus_opening_ms": 501.1474999999955,
+      "control_closing_drift_percent": 19.084808146547804,
+      "reasons": [
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 1,
+      "p50_ms": {
+        "opening": 2702.063500000002,
+        "candidate": 3065.4429999999993,
+        "closing": 2441.754999999999
+      },
+      "control_closing_minus_opening_ms": -260.3085000000028,
+      "control_closing_drift_percent": -9.633692916543325,
+      "reasons": [
+        "median_gain_below_gate",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 1,
+      "p50_ms": {
+        "opening": 2702.063500000002,
+        "candidate": 3075.8485,
+        "closing": 2441.754999999999
+      },
+      "control_closing_minus_opening_ms": -260.3085000000028,
+      "control_closing_drift_percent": -9.633692916543325,
+      "reasons": [
+        "median_gain_below_gate",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 2,
+      "p50_ms": {
+        "opening": 3030.6085000000003,
+        "candidate": 2574.175500000005,
+        "closing": 2976.4484999999986
+      },
+      "control_closing_minus_opening_ms": -54.16000000000167,
+      "control_closing_drift_percent": -1.7870998513995318,
+      "reasons": [
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.052631578947368196
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 2,
+      "p50_ms": {
+        "opening": 3030.6085000000003,
+        "candidate": 2674.4624999999996,
+        "closing": 2976.4484999999986
+      },
+      "control_closing_minus_opening_ms": -54.16000000000167,
+      "control_closing_drift_percent": -1.7870998513995318,
+      "reasons": [
+        "memory_regression",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.052631578947368196
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    }
+  ],
+  "rejection_reason_counts": {
+    "first_preview_tail_regression": 1,
+    "median_gain_below_gate": 3,
+    "memory_regression": 2,
+    "stage_queue_tail_regression": 6,
+    "tail_regression": 5,
+    "preview_source_coverage_loss": 2
+  },
+  "run_summaries": [
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_en_en",
+      "experiment": "baseline_anchor",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533431.175203,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.6304578855633736,
+        "max_oldest_wait_ms": 0.6304578855633736,
+        "max_queue_wait_ms": 0.6182909710332751,
+        "max_producer_wait_ms": 0.02845795825123787,
+        "first_window_wait_ms": [
+          0.1412919955328107,
+          0.09845790918916464,
+          0.6304578855633736,
+          0.11004204861819744,
+          0.1081250375136733,
+          0.1033339649438858
+        ],
+        "last_window_wait_ms": [
+          0.1412919955328107,
+          0.09845790918916464,
+          0.6304578855633736,
+          0.11004204861819744,
+          0.1081250375136733,
+          0.1033339649438858
+        ],
+        "first_window_mean_wait_ms": 0.1986181402268509,
+        "last_window_mean_wait_ms": 0.1986181402268509,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1648082944,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6225,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 356,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 349,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 37,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_en_en",
+      "experiment": "baseline_anchor",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533670.739727375,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1.1658750008791685,
+        "max_oldest_wait_ms": 1.1658750008791685,
+        "max_queue_wait_ms": 1.1405840050429106,
+        "max_producer_wait_ms": 0.035125063732266426,
+        "first_window_wait_ms": [
+          0.08508400060236454,
+          1.1658750008791685,
+          0.08174998220056295,
+          0.09024993050843477,
+          0.09125005453824997,
+          0.18550001550465822
+        ],
+        "last_window_wait_ms": [
+          0.08508400060236454,
+          1.1658750008791685,
+          0.08174998220056295,
+          0.09024993050843477,
+          0.09125005453824997,
+          0.18550001550465822
+        ],
+        "first_window_mean_wait_ms": 0.28328483070557314,
+        "last_window_mean_wait_ms": 0.28328483070557314,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1754234880,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6222,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 303,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 296,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_en_en",
+      "experiment": "baseline_anchor",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 5,
+      "preview_coverage_seconds": 11.551999999999992,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533915.991977708,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.5050000036135316,
+        "max_oldest_wait_ms": 0.5050000036135316,
+        "max_queue_wait_ms": 0.47145900316536427,
+        "max_producer_wait_ms": 0.053916010074317455,
+        "first_window_wait_ms": [
+          0.20541599951684475,
+          0.21445797756314278,
+          0.1687080366536975,
+          0.5050000036135316,
+          0.11095800437033176,
+          0.0652919989079237
+        ],
+        "last_window_wait_ms": [
+          0.20541599951684475,
+          0.21445797756314278,
+          0.1687080366536975,
+          0.5050000036135316,
+          0.11095800437033176,
+          0.0652919989079237
+        ],
+        "first_window_mean_wait_ms": 0.21163867010424534,
+        "last_window_mean_wait_ms": 0.21163867010424534,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1621114880,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6218,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 325,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 318,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 5,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 5,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r0_fleurs_development_en_en",
+      "experiment": "baseline",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533254.3277525,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.2511669881641865,
+        "max_oldest_wait_ms": 0.2511669881641865,
+        "max_queue_wait_ms": 0.21366693545132875,
+        "max_producer_wait_ms": 0.03750005271285772,
+        "first_window_wait_ms": [
+          0.058125006034970284,
+          0.06216694600880146,
+          0.2511669881641865,
+          0.07254199590533972,
+          0.07358391303569078,
+          0.09887502528727055
+        ],
+        "last_window_wait_ms": [
+          0.058125006034970284,
+          0.06216694600880146,
+          0.2511669881641865,
+          0.07254199590533972,
+          0.07358391303569078,
+          0.09887502528727055
+        ],
+        "first_window_mean_wait_ms": 0.10274331240604322,
+        "last_window_mean_wait_ms": 0.10274331240604322,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1771683840,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6225,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 338,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 331,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 37,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r1_fleurs_development_en_en",
+      "experiment": "baseline",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 5,
+      "preview_coverage_seconds": 10.943999999999996,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533489.433947666,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.15420804265886545,
+        "max_oldest_wait_ms": 0.15420804265886545,
+        "max_queue_wait_ms": 0.12804195284843445,
+        "max_producer_wait_ms": 0.026166089810431004,
+        "first_window_wait_ms": [
+          0.12216705363243818,
+          0.08379202336072922,
+          0.15420804265886545,
+          0.1253330847248435,
+          0.07987499702721834,
+          0.11212495155632496
+        ],
+        "last_window_wait_ms": [
+          0.12216705363243818,
+          0.08379202336072922,
+          0.15420804265886545,
+          0.1253330847248435,
+          0.07987499702721834,
+          0.11212495155632496
+        ],
+        "first_window_mean_wait_ms": 0.11291669216006994,
+        "last_window_mean_wait_ms": 0.11291669216006994,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1633910784,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6217,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 324,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 317,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 5,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 5,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_baseline_e2b_r2_fleurs_development_en_en",
+      "experiment": "baseline",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533729.392301458,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.2101670252159238,
+        "max_oldest_wait_ms": 0.2101670252159238,
+        "max_queue_wait_ms": 0.18575007561594248,
+        "max_producer_wait_ms": 0.04612503107637167,
+        "first_window_wait_ms": [
+          0.05787494592368603,
+          0.1330419909209013,
+          0.13041705824434757,
+          0.18483400344848633,
+          0.1605829456821084,
+          0.2101670252159238
+        ],
+        "last_window_wait_ms": [
+          0.05787494592368603,
+          0.1330419909209013,
+          0.13041705824434757,
+          0.18483400344848633,
+          0.1605829456821084,
+          0.2101670252159238
+        ],
+        "first_window_mean_wait_ms": 0.1461529949059089,
+        "last_window_mean_wait_ms": 0.1461529949059089,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1595441152,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6226,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 347,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 340,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 36,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_en_en",
+      "experiment": "deadline_100ms",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 7,
+      "preview_coverage_seconds": 18.239999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533312.590406291,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.5794999888166785,
+        "max_oldest_wait_ms": 0.5794999888166785,
+        "max_queue_wait_ms": 0.5605829646810889,
+        "max_producer_wait_ms": 0.06374996155500412,
+        "first_window_wait_ms": [
+          0.05745794624090195,
+          0.5794999888166785,
+          0.07629103492945433,
+          0.15920901205390692,
+          0.1599999377503991,
+          0.12466695625334978
+        ],
+        "last_window_wait_ms": [
+          0.05745794624090195,
+          0.5794999888166785,
+          0.07629103492945433,
+          0.15920901205390692,
+          0.1599999377503991,
+          0.12466695625334978
+        ],
+        "first_window_mean_wait_ms": 0.19285414600744843,
+        "last_window_mean_wait_ms": 0.19285414600744843,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 2129461248,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6261,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 100.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 333,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 326,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 37,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 7,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 7,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 17,
+      "partial_admission_cold_prediction_count": 12,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_en_en",
+      "experiment": "deadline_100ms",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533609.956603416,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.19262509886175394,
+        "max_oldest_wait_ms": 0.19262509886175394,
+        "max_queue_wait_ms": 0.16416702419519424,
+        "max_producer_wait_ms": 0.030374969355762005,
+        "first_window_wait_ms": [
+          0.12374995276331902,
+          0.09541702456772327,
+          0.19262509886175394,
+          0.11383299715816975,
+          0.0956669682636857,
+          0.13091706205159426
+        ],
+        "last_window_wait_ms": [
+          0.12374995276331902,
+          0.09541702456772327,
+          0.19262509886175394,
+          0.11383299715816975,
+          0.0956669682636857,
+          0.13091706205159426
+        ],
+        "first_window_mean_wait_ms": 0.12536818394437432,
+        "last_window_mean_wait_ms": 0.12536818394437432,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1565605888,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6255,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 100.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 370,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 363,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1,
+        "partial_suppressed_discarded_utterance": 1
+      },
+      "partial_admission_count": 16,
+      "partial_admission_cold_prediction_count": 12,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_en_en",
+      "experiment": "deadline_100ms",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533790.691050291,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.17012492753565311,
+        "max_oldest_wait_ms": 0.17012492753565311,
+        "max_queue_wait_ms": 0.13520894572138786,
+        "max_producer_wait_ms": 0.03491598181426525,
+        "first_window_wait_ms": [
+          0.06824999582022429,
+          0.14558399561792612,
+          0.07524993270635605,
+          0.08129200432449579,
+          0.17012492753565311,
+          0.11662498582154512
+        ],
+        "last_window_wait_ms": [
+          0.06824999582022429,
+          0.14558399561792612,
+          0.07524993270635605,
+          0.08129200432449579,
+          0.17012492753565311,
+          0.11662498582154512
+        ],
+        "first_window_mean_wait_ms": 0.10952097363770008,
+        "last_window_mean_wait_ms": 0.10952097363770008,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1657503744,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6254,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 100.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 306,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 299,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 38,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 16,
+      "partial_admission_cold_prediction_count": 12,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_en_en",
+      "experiment": "deadline_250ms",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533370.649437166,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.5714580183848739,
+        "max_oldest_wait_ms": 0.5714580183848739,
+        "max_queue_wait_ms": 0.52370794583112,
+        "max_producer_wait_ms": 0.04775007255375385,
+        "first_window_wait_ms": [
+          0.5714580183848739,
+          0.07883296348154545,
+          0.19041704945266247,
+          0.10708300396800041,
+          0.08654198609292507,
+          0.08466700091958046
+        ],
+        "last_window_wait_ms": [
+          0.5714580183848739,
+          0.07883296348154545,
+          0.19041704945266247,
+          0.10708300396800041,
+          0.08654198609292507,
+          0.08466700091958046
+        ],
+        "first_window_mean_wait_ms": 0.18650000371659795,
+        "last_window_mean_wait_ms": 0.18650000371659795,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1796325376,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6248,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 250.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 293,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 286,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 39,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1
+      },
+      "partial_admission_count": 15,
+      "partial_admission_cold_prediction_count": 11,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_en_en",
+      "experiment": "deadline_250ms",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533547.464071458,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.2936249366030097,
+        "max_oldest_wait_ms": 0.2936249366030097,
+        "max_queue_wait_ms": 0.2768340054899454,
+        "max_producer_wait_ms": 0.049791065976023674,
+        "first_window_wait_ms": [
+          0.15479198191314936,
+          0.06287498399615288,
+          0.0950000248849392,
+          0.05258305463939905,
+          0.2936249366030097,
+          0.21991610992699862
+        ],
+        "last_window_wait_ms": [
+          0.15479198191314936,
+          0.06287498399615288,
+          0.0950000248849392,
+          0.05258305463939905,
+          0.2936249366030097,
+          0.21991610992699862
+        ],
+        "first_window_mean_wait_ms": 0.14646518199394146,
+        "last_window_mean_wait_ms": 0.14646518199394146,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1751941120,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6260,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 250.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 358,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 351,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 35,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1,
+        "partial_deferred_deadline": 3
+      },
+      "partial_admission_count": 19,
+      "partial_admission_cold_prediction_count": 12,
+      "partial_admission_deferred_count": 3
+    },
+    {
+      "session_id": "deadline_stage_v2_en_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_en_en",
+      "experiment": "deadline_250ms",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 12.767999999999995,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533854.114323083,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 6,
+        "submitted": 6,
+        "dequeued": 6,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 0.24512503296136856,
+        "max_oldest_wait_ms": 0.24512503296136856,
+        "max_queue_wait_ms": 0.1787500223144889,
+        "max_producer_wait_ms": 0.06637501064687967,
+        "first_window_wait_ms": [
+          0.055750017054378986,
+          0.07291603833436966,
+          0.1264170277863741,
+          0.24512503296136856,
+          0.07175002247095108,
+          0.08762499783188105
+        ],
+        "last_window_wait_ms": [
+          0.055750017054378986,
+          0.07291603833436966,
+          0.1264170277863741,
+          0.24512503296136856,
+          0.07175002247095108,
+          0.08762499783188105
+        ],
+        "first_window_mean_wait_ms": 0.10993052273988724,
+        "last_window_mean_wait_ms": 0.10993052273988724,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "en",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/en-es/build-52cad3f55a694a83961ed08065dc0a66",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "db8dcf6b0cbdc3ebe7572d6810add756333ad507ff677aac40a99f40f9917303",
+            "source_model_id": "Helsinki-NLP/opus-mt-en-es",
+            "source_revision": "5bc4493d463cf000c1f0b50f8d56886a392ed4ab",
+            "ct2_quantization": "int8",
+            "direction": "en-es",
+            "declared_model_bin_sha256": "30c5c2de08329c61860777fbe471e2dd413f64adbde543b2848b5ac3b5d6f865",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "124d89060b1dbc498d570b86df569787558bd378fe1718819996e0564afc742d",
+        "reference_ids": [
+          "fleurs-en-development-1585-3207241257175584099",
+          "fleurs-en-development-1603-561237249582086895",
+          "fleurs-en-development-1519-786465049904960526",
+          "fleurs-en-development-1571-17605417583330616175",
+          "fleurs-en-development-1607-10846227846460802233"
+        ],
+        "source_reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations. In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte. It's worth half an hour to stroll about the intriguing village.",
+        "translation_reference": "Al pasar el tiempo, a medida que la incipiente población se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra población. Los accidentes de avión son habituales en Irán, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares. En muchos casos, inscribirse en un programa de estudios en el extranjero durante un año sabático puede, en efecto, incrementar las posibilidades de acceder a la educación superior una vez se regresa al país de origen. El islam también fue llevado a las tierras por los árabes y se impuso, en buena medida, en las Comores y Mayotte. Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+        "source_hypothesis": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. eher accidents are common in Iran. Which has an aging fleet that is fully maintained for both civil and military operations. In many cases, enrolling on a gap year course abroad can actually improve your chances of moving into higher education back in your home country. The Arabs also brought ids along to the lands, and it took in a big way income rose in my hut. It's worth half an hour to stroll about the intriguing village.",
+        "translation_hypothesis": "Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población. En Irán son comunes los accidentes. Que tiene una flota envejecida que se mantiene plenamente para las operaciones civiles y militares. En muchos casos, matricularse en un curso de año sabático en el extranjero puede mejorar sus posibilidades de mudarse a la educación superior en su país de origen. Los árabes también trajeron identificaciones a las tierras, y se necesitaron grandes ingresos en mi cabaña. Vale media hora para pasear por el pueblo.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 11,
+          "reference_words": 102,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "wer": 0.10784313725490197
+        },
+        "wer": 0.10784313725490197,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            588,
+            497,
+            491
+          ],
+          [
+            587,
+            496,
+            416
+          ],
+          [
+            586,
+            495,
+            319
+          ],
+          [
+            585,
+            494,
+            251
+          ],
+          [
+            584,
+            493,
+            207
+          ],
+          [
+            583,
+            492,
+            179
+          ]
+        ],
+        "chrf": 54.6750798145335,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1971159040,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6262,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 250.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 345,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 338,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 35,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6,
+        "utterance_discarded": 1,
+        "partial_suppressed_discarded_utterance": 1,
+        "partial_deferred_deadline": 3
+      },
+      "partial_admission_count": 19,
+      "partial_admission_cold_prediction_count": 12,
+      "partial_admission_deferred_count": 3
+    }
+  ],
+  "limits": "Retained JSON/source recomputation only. No artifact/audio/weights/archives reopened, no models/devices/tests/Git. No per-run p95 pooling. Control drift is descriptive; unchanged comparisons require both controls."
+}

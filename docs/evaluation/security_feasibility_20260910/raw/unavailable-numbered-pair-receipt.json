@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-feasibility-venv/bin/python",
+    "-m",
+    "pip",
+    "--isolated",
+    "install",
+    "--dry-run",
+    "--ignore-installed",
+    "--only-binary=:all:",
+    "--disable-pip-version-check",
+    "--index-url",
+    "https://pypi.org/simple",
+    "--cache-dir",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-feasibility-pip-cache",
+    "--report",
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/security_feasibility_20260910/raw/unavailable-numbered-pair.json",
+    "torchaudio==2.13.0",
+    "torch==2.13.0"
+  ],
+  "started_utc": "2026-09-10T13:12:03.888774+00:00",
+  "ended_utc": "2026-09-10T13:12:04.479016+00:00",
+  "exit_code": 1,
+  "log": "unavailable-numbered-pair.log",
+  "intent": "Reproduce the old identical-version requirement failure; this is not a valid current ABI-compatibility rule."
+}

@@ -1,0 +1,3708 @@
+{
+  "schema_version": 1,
+  "language": "es",
+  "source_revision": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "source_identity": "eee761239bea363c2f701b5e8055159418c92d1834fddbcb4566cb1d91d258e7",
+  "bindings": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_report.json": {
+      "sha256": "e19fe8f0b1883e13de3168094920563291b7b39dbda2b286e9d3770472858cfc",
+      "bytes": 276589
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_selection.json": {
+      "sha256": "523e89a2f3c799353c338e72bd6c1ed867fc0dba490979b19243d9717128bc9b",
+      "bytes": 2039
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen.json": {
+      "sha256": "865cd29c796bee23533024d755b5a3138355e16018f81fdfa9b7c6d1438d1f1a",
+      "bytes": 5996
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/provenance.json": {
+      "sha256": "7f02a9c18853c3790094b061f42d0a7f1f8aaeced433c67478c6c8bab595435d",
+      "bytes": 58640
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_latency.py": {
+      "sha256": "ac12808b61279f6bc452a3943fa54f4775ba26ffec5b983d5b45bdd74f35908d",
+      "bytes": 44432
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_selection.py": {
+      "sha256": "a6553a89914f665c0f7e18fa862ad66eae29ec306830a08d12b63286f6f23045",
+      "bytes": 6143
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_quality.py": {
+      "sha256": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "bytes": 44156
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/fixed_span_delivery.py": {
+      "sha256": "4320ff14f6f9a638a61d96399152feda4ae49943bce10ec182b0a628663af7f1",
+      "bytes": 7006
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/source_coverage.py": {
+      "sha256": "62e7c1b4465d771ccd7f64acd92e8491d6e7c75decf89af9618cdc134d4f2720",
+      "bytes": 4968
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/overnight_bench.py": {
+      "sha256": "49549ce0daae0d9ec7d7c0b37870b30682e5dd536dde90f3359bf7ec7e93a700",
+      "bytes": 33001
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_evaluation.py": {
+      "sha256": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a",
+      "bytes": 69473
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/replay_bench.py": {
+      "sha256": "e0567cc87c9925f37039727f995bcfccde330e882f61f0acf2e4c19a63f5862d",
+      "bytes": 22358
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.json": {
+      "sha256": "6d3ea6607fe63d700f5463cac33359a29cad1f29b3e99890781e2c68fe097e6b",
+      "bytes": 2372819
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json": {
+      "sha256": "de7cd3391f49b22002bfe8ad5eefac7d02c3d181f50a84f2dbae444db1e1d210",
+      "bytes": 2377046
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.json": {
+      "sha256": "c5d941164b6f1087364c625ed7633ef9b311ff0ce8ef4645b066bf4b15fed8cc",
+      "bytes": 2379836
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.json": {
+      "sha256": "d2f99b4e2ccd628095204cb7f4b4947d39ab578af1e84a26c2da5ac05c14c722",
+      "bytes": 2374842
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json": {
+      "sha256": "60ab0fea451879d3a06242670eeed349b811115ecf6ab06d800ab9e477121516",
+      "bytes": 2370223
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.json": {
+      "sha256": "72e690048222fdf93b54d287d3bff1be5925cfc35feab18f7ba09b502c9ecfdc",
+      "bytes": 2383908
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json": {
+      "sha256": "7b6811930a1f2d9fedb60d772baba14674e83e860a66c6b6271ad7189182c426",
+      "bytes": 2388140
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json": {
+      "sha256": "d43486d0a2382bc399c587487b85a9b39c81384ec49f5f38e9dd851b86089574",
+      "bytes": 2388231
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json": {
+      "sha256": "b0a6b9a2fc5e207c3da07023a6373b602952d2e8b3b3ed2dea6cb0173441d9dc",
+      "bytes": 2394628
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json": {
+      "sha256": "127dc9c598b4a4ae75fdc48259e25245687cb1f59890fe7c794e397ebbcc49ef",
+      "bytes": 2390259
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json": {
+      "sha256": "384ec01dd68346dc395c8e2230e702f2abdbf7f12234d33e9940cd7a38fcd493",
+      "bytes": 2390789
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_runs/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json": {
+      "sha256": "414c7a83ab6bd8e6baaa3fb131c96d7dc036b0990785be79f612e58f7fdd0db9",
+      "bytes": 2396284
+    }
+  },
+  "raw_runs_validated": 12,
+  "pairs_recomputed": 6,
+  "selection": {
+    "schema_version": 1,
+    "inventory_complete": true,
+    "arms": [
+      {
+        "experiment": "deadline_100ms",
+        "size": "e2b",
+        "clip_id": "fleurs_development_es",
+        "qualified_for_confirmation": false,
+        "complete_three_repeats": true,
+        "all_repeats_nonlatency_guards_passed": false,
+        "passed_repeats": [],
+        "mean_conservative_gain_ms": null,
+        "p95_claim_eligible": false,
+        "rejection_reasons": [
+          "final_queue_sustained_growth",
+          "final_queue_wait_regression",
+          "first_preview_tail_regression",
+          "matched_first_preview_tail_regression",
+          "median_gain_below_gate",
+          "preview_source_coverage_loss",
+          "stage_queue_tail_regression",
+          "tail_regression",
+          "update_gap_tail_regression"
+        ]
+      },
+      {
+        "experiment": "deadline_250ms",
+        "size": "e2b",
+        "clip_id": "fleurs_development_es",
+        "qualified_for_confirmation": false,
+        "complete_three_repeats": true,
+        "all_repeats_nonlatency_guards_passed": false,
+        "passed_repeats": [],
+        "mean_conservative_gain_ms": null,
+        "p95_claim_eligible": false,
+        "rejection_reasons": [
+          "final_queue_sustained_growth",
+          "final_queue_wait_regression",
+          "first_preview_tail_regression",
+          "median_gain_below_gate",
+          "memory_regression",
+          "preview_source_coverage_loss",
+          "stage_queue_tail_regression",
+          "tail_regression"
+        ]
+      }
+    ],
+    "qualified_count": 0,
+    "defaults_changed": false,
+    "limitations": "Engineering selection only. Historical references remain unavailable; independent public confirmation and bilingual review are required. Never pool repeat counts for p95 eligibility.",
+    "source_report": {
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-adaptive-followups-v2/deadline-stage-v2/es_independent_deadline_screen_report.json",
+      "sha256": "e19fe8f0b1883e13de3168094920563291b7b39dbda2b286e9d3770472858cfc",
+      "size_bytes": 276589
+    }
+  },
+  "pair_checks": [
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 0,
+      "p50_ms": {
+        "opening": 3327.4919999999984,
+        "candidate": 2998.6935000000003,
+        "closing": 3761.471999999998
+      },
+      "control_closing_minus_opening_ms": 433.97999999999956,
+      "control_closing_drift_percent": 13.042255248096769,
+      "reasons": [
+        "final_queue_sustained_growth",
+        "preview_source_coverage_loss"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.043478260869565015,
+        0.043478260869565015
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 0,
+      "p50_ms": {
+        "opening": 3327.4919999999984,
+        "candidate": 3063.041000000001,
+        "closing": 3761.471999999998
+      },
+      "control_closing_minus_opening_ms": 433.97999999999956,
+      "control_closing_drift_percent": 13.042255248096769,
+      "reasons": [
+        "final_queue_sustained_growth",
+        "memory_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 1,
+      "p50_ms": {
+        "opening": 3382.0785000000014,
+        "candidate": 3264.0615000000016,
+        "closing": 3261.013500000001
+      },
+      "control_closing_minus_opening_ms": -121.06500000000051,
+      "control_closing_drift_percent": -3.579603489392702,
+      "reasons": [
+        "final_queue_sustained_growth",
+        "median_gain_below_gate",
+        "preview_source_coverage_loss",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.05263157894736819,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 1,
+      "p50_ms": {
+        "opening": 3382.0785000000014,
+        "candidate": 3317.571500000002,
+        "closing": 3261.013500000001
+      },
+      "control_closing_minus_opening_ms": -121.06500000000051,
+      "control_closing_drift_percent": -3.579603489392702,
+      "reasons": [
+        "final_queue_sustained_growth",
+        "median_gain_below_gate",
+        "preview_source_coverage_loss",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.05263157894736819,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_100ms",
+      "repeat": 2,
+      "p50_ms": {
+        "opening": 3179.7445000000007,
+        "candidate": 3455.3755,
+        "closing": 3045.6635000000024
+      },
+      "control_closing_minus_opening_ms": -134.0809999999983,
+      "control_closing_drift_percent": -4.216722444208909,
+      "reasons": [
+        "final_queue_wait_regression",
+        "first_preview_tail_regression",
+        "matched_first_preview_tail_regression",
+        "median_gain_below_gate",
+        "stage_queue_tail_regression",
+        "tail_regression",
+        "update_gap_tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    },
+    {
+      "experiment": "deadline_250ms",
+      "repeat": 2,
+      "p50_ms": {
+        "opening": 3179.7445000000007,
+        "candidate": 2793.866499999999,
+        "closing": 3045.6635000000024
+      },
+      "control_closing_minus_opening_ms": -134.0809999999983,
+      "control_closing_drift_percent": -4.216722444208909,
+      "reasons": [
+        "final_queue_wait_regression",
+        "first_preview_tail_regression",
+        "stage_queue_tail_regression",
+        "tail_regression"
+      ],
+      "status": "rejected",
+      "preview_missing_fractions": [
+        0.0,
+        0.0
+      ],
+      "p95_claim_eligible": false,
+      "n_by_role": {
+        "opening": 6,
+        "candidate": 6,
+        "closing": 6
+      }
+    }
+  ],
+  "rejection_reason_counts": {
+    "final_queue_sustained_growth": 4,
+    "preview_source_coverage_loss": 3,
+    "memory_regression": 1,
+    "median_gain_below_gate": 3,
+    "stage_queue_tail_regression": 3,
+    "tail_regression": 4,
+    "final_queue_wait_regression": 2,
+    "first_preview_tail_regression": 2,
+    "matched_first_preview_tail_regression": 1,
+    "update_gap_tail_regression": 1
+  },
+  "run_summaries": [
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es",
+      "experiment": "baseline_anchor",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 13.983999999999996,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534146.378218041,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 2201.8969579366967,
+        "max_oldest_wait_ms": 2201.8969579366967,
+        "max_queue_wait_ms": 2201.8856659997255,
+        "max_producer_wait_ms": 0.046083005145192146,
+        "first_window_wait_ms": [
+          0.12429198250174522,
+          0.1396250445395708,
+          1899.7650420060381,
+          0.1848749816417694,
+          0.14716596342623234,
+          2201.8969579366967,
+          1.376250060275197
+        ],
+        "last_window_wait_ms": [
+          0.12429198250174522,
+          0.1396250445395708,
+          1899.7650420060381,
+          0.1848749816417694,
+          0.14716596342623234,
+          2201.8969579366967,
+          1.376250060275197
+        ],
+        "first_window_mean_wait_ms": 586.2334582821599,
+        "last_window_mean_wait_ms": 586.2334582821599,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1645838336,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6302,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 353,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 347,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 32,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es",
+      "experiment": "baseline_anchor",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 13.376,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534370.046376375,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1742.301290971227,
+        "max_oldest_wait_ms": 1742.301290971227,
+        "max_queue_wait_ms": 1742.288124980405,
+        "max_producer_wait_ms": 0.057292054407298565,
+        "first_window_wait_ms": [
+          0.10354199912399054,
+          0.18954207189381123,
+          0.07275003008544445,
+          0.4188339225947857,
+          0.21725008264183998,
+          1742.301290971227,
+          0.8272910490632057
+        ],
+        "last_window_wait_ms": [
+          0.10354199912399054,
+          0.18954207189381123,
+          0.07275003008544445,
+          0.4188339225947857,
+          0.21725008264183998,
+          1742.301290971227,
+          0.8272910490632057
+        ],
+        "first_window_mean_wait_ms": 249.16150001809,
+        "last_window_mean_wait_ms": 249.16150001809,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1434222592,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6307,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 379,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 373,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 32,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es",
+      "experiment": "baseline_anchor",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 7,
+      "preview_coverage_seconds": 15.199999999999998,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534592.331547333,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 659.1486670076847,
+        "max_oldest_wait_ms": 659.1486670076847,
+        "max_queue_wait_ms": 659.1378750745207,
+        "max_producer_wait_ms": 0.017666025087237358,
+        "first_window_wait_ms": [
+          0.08087500464171171,
+          0.048749963752925396,
+          0.08191599044948816,
+          0.06583298090845346,
+          0.6300419336184859,
+          659.1486670076847,
+          0.0890420051291585
+        ],
+        "last_window_wait_ms": [
+          0.08087500464171171,
+          0.048749963752925396,
+          0.08191599044948816,
+          0.06583298090845346,
+          0.6300419336184859,
+          659.1486670076847,
+          0.0890420051291585
+        ],
+        "first_window_mean_wait_ms": 94.30644641231213,
+        "last_window_mean_wait_ms": 94.30644641231213,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1802452992,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6309,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 318,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 312,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 32,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 7,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 7
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es",
+      "experiment": "baseline",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 13.983999999999996,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 533979.02333,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1083.1261669518426,
+        "max_oldest_wait_ms": 1083.1261669518426,
+        "max_queue_wait_ms": 1083.113458007574,
+        "max_producer_wait_ms": 0.032334006391465664,
+        "first_window_wait_ms": [
+          0.13541593216359615,
+          0.2525829477235675,
+          1083.1261669518426,
+          0.08899997919797897,
+          0.11895899660885334,
+          968.4054160024971,
+          0.2200409071519971
+        ],
+        "last_window_wait_ms": [
+          0.13541593216359615,
+          0.2525829477235675,
+          1083.1261669518426,
+          0.08899997919797897,
+          0.11895899660885334,
+          968.4054160024971,
+          0.2200409071519971
+        ],
+        "first_window_mean_wait_ms": 293.19251167388364,
+        "last_window_mean_wait_ms": 293.19251167388364,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1191444480,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6306,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 330,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 324,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 31,
+        "partial_suppressed_after_stt": 2,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es",
+      "experiment": "baseline",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 5,
+      "preview_coverage_seconds": 11.551999999999994,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534202.188776125,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1574.7010830091313,
+        "max_oldest_wait_ms": 1574.7010830091313,
+        "max_queue_wait_ms": 1574.6900830417871,
+        "max_producer_wait_ms": 0.024000066332519054,
+        "first_window_wait_ms": [
+          0.1315409317612648,
+          0.11395802721381187,
+          1574.7010830091313,
+          0.1189160393550992,
+          0.11133402585983276,
+          944.4424170069396,
+          0.8199999574571848
+        ],
+        "last_window_wait_ms": [
+          0.1315409317612648,
+          0.11395802721381187,
+          1574.7010830091313,
+          0.1189160393550992,
+          0.11133402585983276,
+          944.4424170069396,
+          0.8199999574571848
+        ],
+        "first_window_mean_wait_ms": 360.0627498568169,
+        "last_window_mean_wait_ms": 360.0627498568169,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1384497152,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6300,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 303,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 297,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 32,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 15,
+        "partial_stt_finished": 15,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 5,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 5
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es",
+      "experiment": "baseline",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 8,
+      "preview_coverage_seconds": 17.152,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534425.663885166,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1267.2046250663698,
+        "max_oldest_wait_ms": 1267.2046250663698,
+        "max_queue_wait_ms": 1267.1947090420872,
+        "max_producer_wait_ms": 0.029499991796910763,
+        "first_window_wait_ms": [
+          0.15016598626971245,
+          0.13808405492454767,
+          1267.2046250663698,
+          0.055333017371594906,
+          0.07875007577240467,
+          894.8545830789953,
+          0.07349997758865356
+        ],
+        "last_window_wait_ms": [
+          0.15016598626971245,
+          0.13808405492454767,
+          1267.2046250663698,
+          0.055333017371594906,
+          0.07875007577240467,
+          894.8545830789953,
+          0.07349997758865356
+        ],
+        "first_window_mean_wait_ms": 308.9364344653274,
+        "last_window_mean_wait_ms": 308.9364344653274,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1424687104,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6316,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 0.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 336,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 330,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 29,
+        "partial_suppressed_after_stt": 2,
+        "partial_stt_started": 18,
+        "partial_stt_finished": 18,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 8,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 8
+      },
+      "partial_admission_count": 0,
+      "partial_admission_cold_prediction_count": 0,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es",
+      "experiment": "deadline_100ms",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 13.376,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534035.15699275,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 992.9270830471069,
+        "max_oldest_wait_ms": 992.9270830471069,
+        "max_queue_wait_ms": 992.9144580382854,
+        "max_producer_wait_ms": 0.02670893445611,
+        "first_window_wait_ms": [
+          0.15629094559699297,
+          0.13162498362362385,
+          529.2046660324559,
+          0.06545800715684891,
+          0.1300419680774212,
+          992.9270830471069,
+          0.2519169356673956
+        ],
+        "last_window_wait_ms": [
+          0.15629094559699297,
+          0.13162498362362385,
+          529.2046660324559,
+          0.06545800715684891,
+          0.1300419680774212,
+          992.9270830471069,
+          0.2519169356673956
+        ],
+        "first_window_mean_wait_ms": 217.55244027424072,
+        "last_window_mean_wait_ms": 217.55244027424072,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1292337152,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6337,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 100.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 293,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 287,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 31,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6
+      },
+      "partial_admission_count": 16,
+      "partial_admission_cold_prediction_count": 11,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es",
+      "experiment": "deadline_100ms",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 13.376,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534314.24156,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1035.1524589350447,
+        "max_oldest_wait_ms": 1035.1524589350447,
+        "max_queue_wait_ms": 1035.1409999420866,
+        "max_producer_wait_ms": 0.05462497938424349,
+        "first_window_wait_ms": [
+          0.11187500786036253,
+          1.0680409613996744,
+          568.9088329672813,
+          0.08245895151048899,
+          0.1848330721259117,
+          1035.1524589350447,
+          0.7259590784087777
+        ],
+        "last_window_wait_ms": [
+          0.11187500786036253,
+          1.0680409613996744,
+          568.9088329672813,
+          0.08245895151048899,
+          0.1848330721259117,
+          1035.1524589350447,
+          0.7259590784087777
+        ],
+        "first_window_mean_wait_ms": 229.4620655676616,
+        "last_window_mean_wait_ms": 229.4620655676616,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1341718528,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6337,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 100.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 319,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 313,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 31,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6
+      },
+      "partial_admission_count": 16,
+      "partial_admission_cold_prediction_count": 11,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es",
+      "experiment": "deadline_100ms",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 8,
+      "preview_coverage_seconds": 18.368,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534481.337955458,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1339.5627080462873,
+        "max_oldest_wait_ms": 1339.5627080462873,
+        "max_queue_wait_ms": 1339.5534170558676,
+        "max_producer_wait_ms": 0.01383305061608553,
+        "first_window_wait_ms": [
+          0.0778749817982316,
+          0.5946250166743994,
+          1339.5627080462873,
+          0.0500829191878438,
+          0.07945799734443426,
+          716.8028340674937,
+          0.06845803000032902
+        ],
+        "last_window_wait_ms": [
+          0.0778749817982316,
+          0.5946250166743994,
+          1339.5627080462873,
+          0.0500829191878438,
+          0.07945799734443426,
+          716.8028340674937,
+          0.06845803000032902
+        ],
+        "first_window_mean_wait_ms": 293.890863008398,
+        "last_window_mean_wait_ms": 293.890863008398,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1307770880,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6347,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 100.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 334,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 328,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 31,
+        "partial_suppressed_after_stt": 2,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 8,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 8
+      },
+      "partial_admission_count": 17,
+      "partial_admission_cold_prediction_count": 12,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es",
+      "experiment": "deadline_250ms",
+      "repeat": 0,
+      "final_count": 6,
+      "partial_count": 7,
+      "preview_coverage_seconds": 15.199999999999998,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534090.853232708,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 716.9687499990687,
+        "max_oldest_wait_ms": 716.9687499990687,
+        "max_queue_wait_ms": 716.9594999868423,
+        "max_producer_wait_ms": 0.1983750844374299,
+        "first_window_wait_ms": [
+          0.09091699030250311,
+          0.058333040215075016,
+          0.0729589955881238,
+          0.191416940651834,
+          0.09837490506470203,
+          716.9687499990687,
+          0.8707500528544188
+        ],
+        "last_window_wait_ms": [
+          0.09091699030250311,
+          0.058333040215075016,
+          0.0729589955881238,
+          0.191416940651834,
+          0.09837490506470203,
+          716.9687499990687,
+          0.8707500528544188
+        ],
+        "first_window_mean_wait_ms": 102.62164298910648,
+        "last_window_mean_wait_ms": 102.62164298910648,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1591738368,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6338,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 250.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 321,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 315,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 33,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 16,
+        "partial_stt_finished": 16,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 7,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 7
+      },
+      "partial_admission_count": 16,
+      "partial_admission_cold_prediction_count": 11,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es",
+      "experiment": "deadline_250ms",
+      "repeat": 1,
+      "final_count": 6,
+      "partial_count": 6,
+      "preview_coverage_seconds": 13.376,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534258.09207025,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 864.0131250722334,
+        "max_oldest_wait_ms": 864.0131250722334,
+        "max_queue_wait_ms": 863.9996669953689,
+        "max_producer_wait_ms": 0.0552500132471323,
+        "first_window_wait_ms": [
+          0.08670799434185028,
+          0.1699170097708702,
+          0.5941248964518309,
+          0.07187505252659321,
+          0.14016707427799702,
+          864.0131250722334,
+          0.3559580072760582
+        ],
+        "last_window_wait_ms": [
+          0.08670799434185028,
+          0.1699170097708702,
+          0.5941248964518309,
+          0.07187505252659321,
+          0.14016707427799702,
+          864.0131250722334,
+          0.3559580072760582
+        ],
+        "first_window_mean_wait_ms": 123.63312501526836,
+        "last_window_mean_wait_ms": 123.63312501526836,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1306050560,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6341,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 250.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 363,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 357,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 32,
+        "partial_suppressed_after_stt": 0,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 6,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 6
+      },
+      "partial_admission_count": 17,
+      "partial_admission_cold_prediction_count": 11,
+      "partial_admission_deferred_count": 0
+    },
+    {
+      "session_id": "deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es",
+      "experiment": "deadline_250ms",
+      "repeat": 2,
+      "final_count": 6,
+      "partial_count": 8,
+      "preview_coverage_seconds": 17.759999999999998,
+      "final_queue_pressure": {
+        "schema_version": 1,
+        "clock": "session_monotonic",
+        "origin_perf_counter_s": 534537.305033583,
+        "scope": "final input queue and waiting producers; excludes sentinel, active STT and translation",
+        "wait_definition": "submission request to dequeue; max includes observed outstanding/cancelled ages",
+        "sampling": "submit request, successful put, failed put, successful get, summary; no polling",
+        "queue_capacity": 8,
+        "submit_attempts": 7,
+        "submitted": 7,
+        "dequeued": 7,
+        "put_failed": 0,
+        "max_pending": 1,
+        "max_queued": 1,
+        "max_producer_waiting": 1,
+        "max_wait_ms": 1298.95091697108,
+        "max_oldest_wait_ms": 1298.95091697108,
+        "max_queue_wait_ms": 1298.9397919736803,
+        "max_producer_wait_ms": 0.03999995533376932,
+        "first_window_wait_ms": [
+          0.07962493691593409,
+          0.0576250022277236,
+          1298.95091697108,
+          0.05429098382592201,
+          0.14441600069403648,
+          797.2129159606993,
+          0.5371250445023179
+        ],
+        "last_window_wait_ms": [
+          0.07962493691593409,
+          0.0576250022277236,
+          1298.95091697108,
+          0.05429098382592201,
+          0.14441600069403648,
+          797.2129159606993,
+          0.5371250445023179
+        ],
+        "first_window_mean_wait_ms": 299.5767021285636,
+        "last_window_mean_wait_ms": 299.5767021285636,
+        "wait_window_size": 16,
+        "wait_windows_overlap": true,
+        "terminal_outstanding": 0,
+        "terminal_queued": 0,
+        "terminal_producer_waiting": 0,
+        "terminal_oldest_wait_ms": 0.0,
+        "bookkeeping_capacity": 1024,
+        "bookkeeping_active": 0,
+        "bookkeeping_dropped": 0,
+        "unmatched_dequeues": 0,
+        "bookkeeping_truncated": false
+      },
+      "source_coverage_complete": true,
+      "requested_runtime": {
+        "schema_version": 1,
+        "profile": {
+          "name": "lite-cpu",
+          "backend": "cpu",
+          "stt_model": "whisper-small",
+          "stt_compute_type": "int8",
+          "stt_threads": 3,
+          "stt_workers": 1,
+          "marian_threads": 1,
+          "final_engine": "marian",
+          "translation_model": null,
+          "vad_backend": "onnx",
+          "ram_floor_gb": 8,
+          "physical_core_floor": 4,
+          "vram_floor_gb": 0
+        },
+        "stt_backend": "faster-whisper",
+        "stt": {
+          "requested_id": "whisper-small",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120"
+        },
+        "translation_a": null,
+        "source_lang": "es",
+        "pipeline_gain": 1.0,
+        "vad": {
+          "backend": "onnx",
+          "threshold": 0.3,
+          "max_utterance": 8.0,
+          "silence_trigger": 0.5,
+          "partial_interval": 0.6
+        },
+        "translation": {
+          "model_family": "gemma4",
+          "routing_policy": "legacy",
+          "terminology_prompt": "none",
+          "mlx_mts": false,
+          "idle_warmup_only": false,
+          "final_aware_partials": false
+        },
+        "artifact_scope": "Resolved path/revision and config hash; not a full MLX weight checksum"
+      },
+      "stt_settings": {
+        "whisper_model": "mlx-community/whisper-large-v3-turbo",
+        "whisper_fallback": "wbell7/distil-whisper-large-v3.5-mlx",
+        "cpu_threads": 3,
+        "num_workers": 1,
+        "local_files_only": true,
+        "whisper_cuda_model": "whisper-small",
+        "whisper_cuda_compute_type": "int8",
+        "whisper_prompt": "Sermon at Stark Road Gospel Hall. Christ Jesus, the Holy Spirit, God the Father. Atonement, propitiation, mediator, covenant, righteousness, sanctification, justification, redemption, reconciliation, repentance, reign, grace, mercy, the Gospel, epistle, apostle, Scripture, the Lord, the Word of God.",
+        "use_chunked_algo": false,
+        "chunk_length_s": 30,
+        "fallback_on_low_conf": false,
+        "fallback_threshold": -1.2,
+        "hallucination_threshold": 2.4,
+        "word_timestamps": false,
+        "beam_size": 1,
+        "spec_decode": false,
+        "draft_model": null,
+        "backend": "faster-whisper",
+        "parakeet_mlx_model": "mlx-community/parakeet-tdt-0.6b-v3",
+        "parakeet_model": "nvidia/parakeet-tdt-0.6b-v3",
+        "compile_mode": null,
+        "warmup_seconds": 1
+      },
+      "model_identities": {
+        "stt": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "manifest_revision": null,
+          "resolved_revision": "536b0662742c02347bc0e980a01041f333bce120",
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/whisper-small",
+          "revision_source": "setup_install_marker",
+          "source_repo_id": "Systran/faster-whisper-small",
+          "config_sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+          "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+          "model_bin_size_bytes": 483546902
+        },
+        "marian": {
+          "requested_id": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "manifest_revision": null,
+          "resolved_revision": null,
+          "resolved_path": "/Users/willem/Code/vibes/SRTranslate/.cache/overnight-20260910/lite-models/marian-ct2/es-en/build-6f045611cca34eaaa0e0e879c4506055",
+          "revision_source": "unknown",
+          "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+          "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+          "model_bin_size_bytes": 79567635,
+          "export_manifest": {
+            "sha256": "7d1d86702fb296ad097c3b3aa64c1b487c3b2a3730ee0ce1694323588c4fa54a",
+            "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+            "source_revision": "c96e2c5399ebfae4fc43d9669556b9afa74bb69d",
+            "ct2_quantization": "int8",
+            "direction": "es-en",
+            "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+            "model_bin_hash_matches": true
+          }
+        }
+      },
+      "caption_quality": {
+        "scope": "Concatenated production finals after pipeline corrections, ordered by source sample; not pure engine WER",
+        "human_approved_locally": false,
+        "training_eligible": false,
+        "status": "available",
+        "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+        "reference_ids": [
+          "fleurs-es-development-1638-6927013055416209547",
+          "fleurs-es-development-1592-3930211725609960196",
+          "fleurs-es-development-1624-8750634895258922350",
+          "fleurs-es-development-1587-563233278035086965",
+          "fleurs-es-development-1554-13392988470145802268"
+        ],
+        "source_reference": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors. When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt. Inland waterways can be a good theme to base a holiday around. The first cases of the disease this season were reported in late July. He built a WiFi door bell, he said.",
+        "source_hypothesis": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes. Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas. Pues sabían que los viajeros necesitan adaptarse a un nuevo país. Los canales navegables internos pueden ser una buena temática para las vacaciones. Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio. Él dijo que construyó un timbre wifi.",
+        "translation_hypothesis": "Safaris are likely to be Africa's biggest tourist attraction and the most memorable part for many visitors. When you first traveled abroad, people were probably patient and understanding. They knew that travelers needed to adapt to a new country. Internal waterways can be a good theme for holidays. The first cases of the disease during this season were recorded towards the end of July. He said he built a wifi bell.",
+        "final_count": 6,
+        "wer_counts": {
+          "errors": 0,
+          "reference_words": 80,
+          "substitutions": 0,
+          "deletions": 0,
+          "insertions": 0,
+          "wer": 0.0
+        },
+        "wer": 0.0,
+        "terms": [],
+        "term_hits": [],
+        "term_opportunities": 0,
+        "term_recall": null,
+        "term_scope": "Unique glossary phrase types occurring within original references, per clip; not repeated-token counts or semantic accuracy",
+        "chrf_counts": [
+          [
+            328,
+            348,
+            311
+          ],
+          [
+            327,
+            347,
+            255
+          ],
+          [
+            326,
+            346,
+            209
+          ],
+          [
+            325,
+            345,
+            182
+          ],
+          [
+            324,
+            344,
+            159
+          ],
+          [
+            323,
+            343,
+            140
+          ]
+        ],
+        "chrf": 63.44258784702201,
+        "chrf_scope": "Descriptive character overlap with concatenated reference; meaning review pending"
+      },
+      "peak_memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 1679130624,
+        "peak_metal_bytes": null
+      },
+      "trace_capacity": 131072,
+      "trace_events": 6346,
+      "trace_discarded": 0,
+      "experiment_configuration": {
+        "latest_partial": false,
+        "async_captions": false,
+        "marian_memo": 0,
+        "first_preview_s": 0.0,
+        "pause_preview_ms": 0.0,
+        "speculate_pause_ms": 0.0,
+        "clause_preview_s": 0.0,
+        "vad_worker": false,
+        "incremental_stt": "off",
+        "rolling_window_s": 4.0,
+        "mlx_cache_mb": 256,
+        "gemma_prefix_cache": false,
+        "trace": true,
+        "trace_capacity": 131072,
+        "early_clause_s": 0.0,
+        "early_clause_pause_ms": 0.0,
+        "partial_deadline_margin_ms": 250.0
+      },
+      "experiment_counters": {
+        "warmup_requested": 294,
+        "warmup_executed": 0,
+        "warmup_failed": 0,
+        "warmup_suppressed_busy": 0,
+        "warmup_suppressed_coalesced": 0,
+        "warmup_suppressed_before_run": 0,
+        "warmup_suppressed_no_pending": 288,
+        "warmup_suppressed_model_lock": 0,
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 32,
+        "partial_suppressed_after_stt": 1,
+        "partial_stt_started": 17,
+        "partial_stt_finished": 17,
+        "final_stt_started": 6,
+        "final_stt_finished": 6,
+        "partial_emitted": 8,
+        "final_marian_routes": 6,
+        "final_gemma_requests": 0,
+        "preview_periodic": 8
+      },
+      "partial_admission_count": 17,
+      "partial_admission_cold_prediction_count": 12,
+      "partial_admission_deferred_count": 0
+    }
+  ],
+  "limits": "Retained JSON/source recomputation only. No artifact/audio/weights/archives reopened, no models/devices/tests/Git. No per-run p95 pooling. Control drift is descriptive; unchanged comparisons require both controls."
+}

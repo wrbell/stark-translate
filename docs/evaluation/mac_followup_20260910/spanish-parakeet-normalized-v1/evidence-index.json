@@ -1,0 +1,1035 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "raw-evidence.tar.gz",
+      "sha256": "6ec3aadb9a73165db90a40d8dae28c2b72e7396fce126c678f9832e2e08ae29b",
+      "size_bytes": 8319634,
+      "members": [
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "5114ea5b3bcf949b8f0a48a1e371f700590375a8b9f8b2ba794920bdc506f3fa",
+          "size_bytes": 4463
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "6f9fae5cda2354c7d06550f3e4535aa800edc1c8acc8f2a47df705aba1c9850e",
+          "size_bytes": 4468
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "9695dc6dfea2ae91d4c7edf11e07b99b438c619a78f34f46f70883f2e32b9a46",
+          "size_bytes": 4488
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "b489a4ff2ea065f916b26a0ee09346f23fbeddea6714d6937c35729bb29dda7e",
+          "size_bytes": 4482
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.csv",
+          "sha256": "46ce8ac2ff00801468067be14ecdcd4fccf3cef498ce26510821a452c2da033f",
+          "size_bytes": 4478
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.csv",
+          "sha256": "6e3e85965ed1ce2e723ccbeea3bf9bec3b49ea71ca0f32992e250db1162fea05",
+          "size_bytes": 4491
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "8869c2d49b43d13f80ce174c560df5c0d70d32381bde1926c3fc940fb3046c42",
+          "size_bytes": 4457
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "98600cb14bf7c5de519329dde5e31509fb3903323dd98aa94a50961aa03f171e",
+          "size_bytes": 4487
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "7afbc32ad3647cea070c0edddb93de5167a87f20ca9102a275412e0fa1946871",
+          "size_bytes": 4481
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "8d4adfc86c2b39f9950fb830979c5ad947f3e7bc5895d210b79e9c7a08ab1aee",
+          "size_bytes": 4476
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.csv",
+          "sha256": "e662d98db71ff997de14b3e4f1f6dffe3afab5d9bb11b2ce864858063c715a04",
+          "size_bytes": 4477
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.csv",
+          "sha256": "350e97f3d5a3f861b0d7cc93fbd8094dcd8a554c54f0f25a2e551a093f600dc8",
+          "size_bytes": 4471
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "65e96e2b97f6aacb1763e262ce31a0048f913304285dc08c01c1736a07132b29",
+          "size_bytes": 4479
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "ee2c252ebc691c1b6324ffaf15142a0dcc9885508e1d9b1862d6ff05b28bff04",
+          "size_bytes": 4480
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "4f26f64685efe4318a17208ffbd50a4abac7d5302ecd172dcb14756575822a1a",
+          "size_bytes": 4483
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.csv",
+          "sha256": "ea5456291ff8460e961241b7d86e415675db61aabe8308c93da0b460881ba8a7",
+          "size_bytes": 4489
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.csv",
+          "sha256": "ea3a6eaf691a8549c15d3eac8d876759f26e5060958c3bba4cd935b6846fa50b",
+          "size_bytes": 4475
+        },
+        {
+          "path": "raw/ab_metrics_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.csv",
+          "sha256": "37159e2eff51716fd32688c852711d75255794e9dad900f3a2551bb238256d55",
+          "size_bytes": 4472
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "feec761b0b560b9c114aa437bd40812846605f777f0d0cd8261bf85d81531816",
+          "size_bytes": 1529312
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "ead5d79f8aeadb5ada47d35bfb8228df69c7381082705782160202786accb0fe",
+          "size_bytes": 1554451
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "00b2e738bfc4f761850055de275d6b6f039006c84e6a87006271039f7e508ce0",
+          "size_bytes": 1546155
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "2af5d8d66f4f3cd70a096093c66abb7606555b6612fe7f687939728cf90456e5",
+          "size_bytes": 1527342
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "9cd534c2294741daf10975e88face6c87b4d2eddffe53a5f25f5432955c1ec28",
+          "size_bytes": 1550559
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "933f9a392ffd72ef115d2d55e087ad9bdb557916020741dec28ac1ca00c7a783",
+          "size_bytes": 1537393
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "fb7676229d8583e804641cc80781f7916b7e6aa968159f008e9996ed079e0079",
+          "size_bytes": 1523965
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "a5233b9712e07fd002844d1371859c0e3d190b2c9579eab9e8ee6edf0e9466ce",
+          "size_bytes": 1547292
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "ae3e7c86e3c70dd7e495701ad8aeb9fbf5535dbaf96d5c6d44a284c83eab1808",
+          "size_bytes": 1556392
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "24ed972e2c748182bce15a40fed975970cff1f4b835521aea8fb4a9e7a482cd2",
+          "size_bytes": 1526596
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "952da30cf0cb53751be9c8699af245da5a13d3259f23d0fe80e5c7f57c9e8d75",
+          "size_bytes": 1531396
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "e6fa2e6630ce8046c9248752bdb16803dbfdeace176c3529a589bf905b4ce5a2",
+          "size_bytes": 1556723
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "5e2af47eed536ced6b8a5a3241fd3d1f4278260f39616e25695374ca5448af22",
+          "size_bytes": 1566727
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "9821a9cc329dc86538c3fc388569f9f4491e1e534330e0d5fb22a3e10feb3490",
+          "size_bytes": 1564010
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "15b2c9409de5c513869c533713f89d1385090560259019a583194c3ea5b9a37a",
+          "size_bytes": 1565078
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "5ee5e656bd2d7e73e1a59c203c243d4d70b036fbc2d3469d4801f613c058a263",
+          "size_bytes": 1556251
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "623c5f62939886a243c0ff0378c475d8c6a3e372c15db901eec92197d6c60431",
+          "size_bytes": 1556712
+        },
+        {
+          "path": "raw/diagnostics_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "9ad70e3944dbb69662103047acfee376d59e3159e2fb927f9a120596abbc0c1a",
+          "size_bytes": 1563511
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "7d837e5e0066005a37f9fc707b301c57e0cf9351ef9eee06785c7ac8ec44a12f",
+          "size_bytes": 2415477
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "05e90ed82afef863856d45020c4df9540489f240909499cf8998e0b89b01253a",
+          "size_bytes": 2478963
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "0c01288327334a64dc2682c684584480914177581b10e8a81dda8e5b297adb5a",
+          "size_bytes": 2454961
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "974407e03e2b62eb332960c774c87c35cbcdde1ba5154a1f733038506156d5ae",
+          "size_bytes": 2410079
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "99df4010d0aa5eb4140e0eb7f67b7ed6d4512afebeb34364dcda326913133542",
+          "size_bytes": 2467706
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "d1f3212892bacce1fb16d19d0e9cfc169dd480ae6eb32db532f96cae9510fbab",
+          "size_bytes": 2432904
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "eee40652a5f3ae566c1f44cbdb1a424b2cbce5b880db71f77abb7224c40750cd",
+          "size_bytes": 2398722
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "e8f460c91ceb9737e5efd595de1bba9cd9dfe0bcc6ff2346d034a6b7d55ff3ba",
+          "size_bytes": 2460655
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "37c69cfce4e9d91eba7d3661af1ff13496b4d65dc1cb281e44b3f6864f26cdca",
+          "size_bytes": 2485241
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "100327b5cf07ae82e1c7b01a63121155ab2b7442003ba5c9c881693f6c3ab44d",
+          "size_bytes": 2410548
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "54456948e062c87e7b6a2483b8b54d085f3c9e316ebd321ea58b8a102d3dd62d",
+          "size_bytes": 2417471
+        },
+        {
+          "path": "raw/followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "6cfa42c7450a023f3670f554cde06bd8ef42c2f283598a47ffc43a36c4f87ca0",
+          "size_bytes": 2485596
+        },
+        {
+          "path": "raw/followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "721dc2aa5958388709358a420547d52203dd05f3e77c029561ab46c8b548ccc4",
+          "size_bytes": 2526251
+        },
+        {
+          "path": "raw/followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "f04b75794ffe363843467281f17c3fe4ef88a7da483e2f60b8c33546ee28316f",
+          "size_bytes": 2518749
+        },
+        {
+          "path": "raw/followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "93907c95e3194c9fc4db6730db2e570f2671c0f3f1fea1e36719717684d7eff5",
+          "size_bytes": 2522496
+        },
+        {
+          "path": "raw/followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "e36128b41641e828af4060f4a52c15338b1bd4250466dd93831284dc29079418",
+          "size_bytes": 2497060
+        },
+        {
+          "path": "raw/followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "72abbd6e25a4a8fadc1f97a18798dfe6ed7acaf712e16c45745d8323a421faec",
+          "size_bytes": 2497457
+        },
+        {
+          "path": "raw/followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "e69d1de8cf0195a8f2e9e7fcf791e8b0338d50f1ba3bdb694dfb23ca0a1d1799",
+          "size_bytes": 2515820
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "3a1f519fafb1b3bc141140ed66fa74369460ce8f5e62ef1c77e59551ce90c501",
+          "size_bytes": 3790
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "110e48f9f9d555e71ecfab7d6717d93f1851e848051eec0e58175b844bedbfea",
+          "size_bytes": 2320
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "f20edd70f3ed9486143f36a53c306e8b88ffa9f56d3e41724c9a00b6f28b1d86",
+          "size_bytes": 3251
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "55bf25109bc17e5cdfe9fbda41e1bbb592a8d28db7713c91726f6ae2f9beef24",
+          "size_bytes": 3245
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "07bcd9617ee42bfb9f3095450bf1446961e4c9644bdf21935767a507bee9874e",
+          "size_bytes": 2315
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "024e80bda5fbe555f6dd652d635e3e58dd6735712ed766c8254eb46060cc4599",
+          "size_bytes": 3245
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bcdeb4512af937acc500999e1fa82b47e00f99a28d17e0180c64236d65b6ab95",
+          "size_bytes": 3740
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "0cd0cc8e2a0b91740eed2a8dc03f974c9e7184c31b4dd5e396406d1633d9b9dd",
+          "size_bytes": 2717
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "5d8bc1731303dbf7dda3bdac5afe4aaa31f35eff5d386270d8f1467fea9d9f2d",
+          "size_bytes": 2293
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "c42549d3e0a583048b61227a4880bc8f9ccdcc6af7a3a812a4d09655c39752ec",
+          "size_bytes": 3731
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "9dedcd94d727d41ffdf2a546095fccb808498aa2c44204779821c73dac1a4ade",
+          "size_bytes": 3203
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "73b089367109a0bfded61482b9a3eed4526c7bcfb5ae3989eb88fa0c4c7d7289",
+          "size_bytes": 3205
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "e71bdc52ff5a36832b3ca321232646c686828f16f8e66029102480f16bae61dc",
+          "size_bytes": 1855
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "e98ed7eb1992820033ad38983dbf76b3f24610db2883db0c02d923dc03e93023",
+          "size_bytes": 1854
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "a3ca09aac5fdca39f77fa2a1e1bb2b33a05539efc5153adca7394d53bcdb6754",
+          "size_bytes": 1853
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "c3e263b79de3736f83bed3a12af3b2e5e9f6ba64d84e30383a51e7109d9fa48c",
+          "size_bytes": 1856
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "64cade45211e70954ccccb5b38ce69a96a773dcf2cacb9764647c3c2743748ed",
+          "size_bytes": 1855
+        },
+        {
+          "path": "raw/health_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "935431a2da94076129952ed0f00605b98a8e7d77cb80d2ca4d38ad24b0c2eb46",
+          "size_bytes": 1856
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "07d94f54a86b5376d677a6bea2e949d3a5b85146f12346285f78ad1321afb4f2",
+          "size_bytes": 23054
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "325ef8111d00f2ac55f0562ed9eb63f364d496081c823b8fd95c683f2c76647c",
+          "size_bytes": 41578
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "2c51a2183472af45ab054a83dc3f7db684b3d1552950ef37747c3cbffd4b0e8f",
+          "size_bytes": 33776
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "9ee6671b1ab5d670ca00e26ff4497a0ac86dd1966f9126dd1b0c4c55cd77e12c",
+          "size_bytes": 21651
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "9d8feebd0ff8b9012153a7fecf375ce9758662243949772f33c3f2c9722348d3",
+          "size_bytes": 37927
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "074eff847cfec78cbe7cf1a764fe2a3c10bcdedb9d28e77c4009b63adecad67c",
+          "size_bytes": 27281
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "ad94c7d36b5873d17d34d5f46343ea9f0cf151f4f67fbfe8809d7d87f2cebe36",
+          "size_bytes": 16470
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "dfbc318b41da791fa4ef1fc75a59f5967bb5e9d2f937206d2c7a1cfd7dfed3cd",
+          "size_bytes": 36281
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "ea6e9d039aff78ec544cab52e04e21b932cb2673ef248ff3f81fa2862be7dda7",
+          "size_bytes": 44098
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "03bd48a2453ec3d41e7dac42c0f7ae71a7cfb84f7e3a93073581895dba130026",
+          "size_bytes": 22580
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "48c8050c57e7561f29a1c29a99c02b5642f782836e5bf272ac058a9a7ea5542d",
+          "size_bytes": 22953
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "8b7b9ab82d88d31fdb642c0318ef35021b9f57bb52d83145bc6e775d055a9145",
+          "size_bytes": 44349
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "61a281f7945bbba50c07282955e58333222c87b5be0fb2f87c149764c19d11c9",
+          "size_bytes": 64499
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "fc8e79e6403cdd5fbf0868c567321422daf6adcd40692e20180a262c98715a1a",
+          "size_bytes": 61545
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "e26f6f4021dd62302ebdb284876185aa1a34cc604fc5e0890c294d9de3cda7a0",
+          "size_bytes": 62891
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "0f7b13f0200ce29c391bb055c3cca5d6ea80d6ae547772c022b98ecce2b5e711",
+          "size_bytes": 54111
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "0840ae2d137de20d270807df52ee2a7be71550bdc7d8de2b5c4ad55ddd1ec7dc",
+          "size_bytes": 54197
+        },
+        {
+          "path": "raw/partials_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "7d5ae51c4f0190037c0e9c263e88816c5272d9fbbff1aac0863a7b58e4902ccd",
+          "size_bytes": 59663
+        },
+        {
+          "path": "raw/provenance.json",
+          "sha256": "47061a955ec98a9d5085539cf905be11807c91f64e966b0a752fd91a879e9c71",
+          "size_bytes": 64110
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "fb66e519b293358ae473df56b938f9803fd8b728e2f7962d114c76b13b214679",
+          "size_bytes": 18085
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "21c3c17a4f70d5996e6543d7af2c196441e6428089520aa66702f55bb511f1e7",
+          "size_bytes": 14235
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "5f0809295acd98eb1fb633b8e62e800c35dd7a04fda0418f765ed181451ffe45",
+          "size_bytes": 18083
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "13d3bfacca280c18139a323d9fa29f5c835f66e0b1be698eaf37b6a47f151c1f",
+          "size_bytes": 16924
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "06bd4f4de46d811703a9ee66ff201cc995a5cf6f589d4b8bb488eff8b9dd0095",
+          "size_bytes": 18077
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "7bbc12cce3e52925d148aaf3e256cef9624b55402168cd794d51a617f9a2733d",
+          "size_bytes": 15824
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "2a00df0ed315ec3ddd1ccee3822d26751bfa4d9458dcaf1a979b75ff8e1cf688",
+          "size_bytes": 18118
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "a9f04a91676e597961b4de651298e345a8a1492ddb08c7e94044b40e6c86b694",
+          "size_bytes": 14096
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "65b8fea5ab34f893014f3f11ba54c763885db62f2cd7c87ec3b04365d7da510e",
+          "size_bytes": 18084
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.log",
+          "sha256": "fce1f6bdd5d3f60a8c0f72d67f5cf06768ca056cfd72c7e8fc8aff5430dad830",
+          "size_bytes": 16141
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "66937462831bf5e63b8a4bd5a216023ba353d2345529a6a3b0e6d00d6dd5b792",
+          "size_bytes": 18110
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.log",
+          "sha256": "3ad7149c425e5bc741978fa78a0f3c166d117154de836bb71a6fb338aedfd5c7",
+          "size_bytes": 14660
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "719ab0a91424f7824a0ccad0eb01b80c96ed05b89dbe4edc8360b36e11dda7ca",
+          "size_bytes": 18001
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "b089475968ac0f644fb45061d4dd7ba8bcd618135516558f88a128d2859689e1",
+          "size_bytes": 13178
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "5b57361d128c752d5bf5c273fa5ea9b98e11b2f5ee617514a5252600da922622",
+          "size_bytes": 18069
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "689764edd875ac92ed7acfb53af6a29b71279c57d09d103f590a63608852ee05",
+          "size_bytes": 16089
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "42bcd12722544fdf5034467d4bc49144152ba8803f57c78e9b8928b4e83f8c82",
+          "size_bytes": 18100
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "02fc1193b1a593a5534e5cedd03befca3c83210406654b01bf61b4a0f446d0b6",
+          "size_bytes": 17307
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "fda8514e70f319458ccc2929605e59323658f592465ce993cd18259eec91be7d",
+          "size_bytes": 18073
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "80f1b27188ed75032f30892b1672a4baa01abbc9b38c33bcbfac2ebffd284433",
+          "size_bytes": 14299
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "ec071f6cb21058bd0dfe8c460d2195c878147dc40b4cf2d4c29a4ceece7f53b3",
+          "size_bytes": 18054
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.log",
+          "sha256": "e1cf72efde38bd41c2c4c97d9ce1f2e64a29c0d3783d6c57509101f0618fa008",
+          "size_bytes": 14289
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "a95c161dec3b79e32a0d5ce5b7274eaf05612b3dcd0b218b042a3e962b5ff1c9",
+          "size_bytes": 18077
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.log",
+          "sha256": "c48bfb120f5e6009dea598ebe1d67dddf43fdd371e4683298e7877c48c8443f8",
+          "size_bytes": 17411
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "3dcfa9e9cc01bd6489f60f9ddd273b794fd23884fc04def80f5d5e8efe3868b8",
+          "size_bytes": 18059
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "6c82b476050e5bac349425ec994608ead545c152cf3333397dd9769e50e9abc6",
+          "size_bytes": 19151
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "e29ee4e54374db9d00d75199ffe27d3c7abc1032820906aaf5ee1285d4b48730",
+          "size_bytes": 18052
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "89c081c80ba253ed6860a23971d3b9bdf73e539bfa59216c89298d10dc8087df",
+          "size_bytes": 18842
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "6c697372c16bcbdb290273fea1e5fa434e47a4e1ccb005d3fdbcfdb1db284816",
+          "size_bytes": 18053
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "9882fd50e230233d8a77a8448f6c95e1da4aec4f4fb048c37c7e6829a6d5569b",
+          "size_bytes": 18925
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "cc0354f4caa8e765c6a332a1aa8b19ebe9df4fc8b7471714245066e41b31d7b1",
+          "size_bytes": 18101
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "899f238f5d8cf0b7b0c8c0dee570af74250a837af32b2826247102c170c1da5a",
+          "size_bytes": 17923
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "f4cf86af67811966bcdc3b3026e990e5ad3af7f080751662cea9d9d1f2808b35",
+          "size_bytes": 18043
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.log",
+          "sha256": "8c4386426d1d11ae49695afce88ca869accac2ae41866bff0cf05d1e27f21398",
+          "size_bytes": 17975
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "247624d21228ca3c0fa4d0039445b72612007dd8bfa6977efff454a2f7bbc382",
+          "size_bytes": 18013
+        },
+        {
+          "path": "raw/replay_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.log",
+          "sha256": "f91967afd1a116aac71ef9c7f11c935d21b4f5a97a2efa5c076b9f72918ccea3",
+          "size_bytes": 18363
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "147666954c317e55d4fd440e5b186d2ccbdbca5e988765ef291804da4ec4a8d1",
+          "size_bytes": 364
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "bcee5225aeb01da63efe721259c90333633e07636d870c32d147174bd8585f2d",
+          "size_bytes": 364
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "e94fde09d18ef6a1d1d1ca0e4d92e08ae702c8494dbe2f17455913523873133e",
+          "size_bytes": 364
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "b445b519bc5c4d59d2395350e23067f14fda3e42dad68a9a011e2c5defda068f",
+          "size_bytes": 364
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.log",
+          "sha256": "8cc4c79979c53ab0204f59c485fc38caaa5bf9ad7982334d14351b470d0377d4",
+          "size_bytes": 364
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.log",
+          "sha256": "fddf8aa6bc5edf7119da3d5c2161b8877192eb926ec914161813d4c6e2d88868",
+          "size_bytes": 364
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "6a0ae9634e68b6e92a19381ff27875f046c64ea39f1061956b4e3a5919e5e516",
+          "size_bytes": 350
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "1e7dc4c970a0d983b4b7dfb9c2664aadc30f2a9a7f4c631db81c3e6c3d802a31",
+          "size_bytes": 350
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "5c8bc85fdd6893cfde00462884a45e23e59aeda2900154bdeae647d496aac2c2",
+          "size_bytes": 350
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "5ff2fefb391b01fc22df38df75f7ddfd56cc9283b698c82d4793f8cb9800b81e",
+          "size_bytes": 350
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.log",
+          "sha256": "30fac7babc27dca29ffbfe3328b87d39695799f8b4047837d361504fb0539491",
+          "size_bytes": 350
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.log",
+          "sha256": "395dcf4dacfdd09bb808e2ade0aaa93184d00dbbe96ace0fcc5331dfac376614",
+          "size_bytes": 350
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "a369bec0f3b1eb3a548e447c77042db622cc5d39ca6e613740229b6151941b8e",
+          "size_bytes": 356
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "42351e5448b382071123523af1e394d90045b06069aa262912d6b6e379892ad4",
+          "size_bytes": 356
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "1faea458ad88f1e7e0e8bc06a0952a57d07b0ab0edccb8392534bf0a690fc7cf",
+          "size_bytes": 356
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.log",
+          "sha256": "eaf7e1a745ba087caec580cc374f4a3a53143c259c59cd24cb7b77315aa4c9fa",
+          "size_bytes": 356
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.log",
+          "sha256": "d96115b8bf968cc5cf1f4bfd8a2f002aa69461d59bd4497c91a473fb8d58b7c5",
+          "size_bytes": 356
+        },
+        {
+          "path": "raw/session_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.log",
+          "sha256": "919f9591b3e45832818cfc91c946843b6923079b7f950596a9ee9f4e76c574bf",
+          "size_bytes": 356
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "faaf6779d2567f987da7ddf2ebb2c44856fb9f5a8cd29e7f2ec0330f10c184e4",
+          "size_bytes": 3463
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "8c5a523f2aaf7fc4427ef0e4a49a909e4bbf6b49a772eef324d111b37d53c6e5",
+          "size_bytes": 3463
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "83ee1032879b3320c60208817e4b5ba7db37dfd3be2bdafaffc8cfec3d55b442",
+          "size_bytes": 3463
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "4d403fc0af29b67f7a2010adc175f78facdfaef19e27b6a48c0b20c57dc5c1a0",
+          "size_bytes": 3463
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "c73ed09fbcfdf1fc166eac22d7d30e8e7551d9a6a6d344fa2f1c7cdf63ab8033",
+          "size_bytes": 3463
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "75ce165cc4b6bb3ebd80a88b4ee4a0aead708ae35ca2a3195486077b2d51377a",
+          "size_bytes": 3463
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "65dadb97c763719773bcf001d1e0f7a15a8eb518a4d29e8372186e9062c5c362",
+          "size_bytes": 3456
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "7ee845089b8049ed5e3948897c15bc67f50fcd8ffcaeaf155af9fe08db14506c",
+          "size_bytes": 3456
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "d60403c869051f92b7df048b1de1d120576f00f18e322f0f81fa10d01ad7964b",
+          "size_bytes": 3456
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "7a0926c04492e5413dff2b05a7f28b908f3631170a9071969792c47e73ddc654",
+          "size_bytes": 3456
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "2abb8fbd2f23cfa47d51f5f08ad5474021cc4644b32c0ce65857e75d1a5f613e",
+          "size_bytes": 3456
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "d034c1b5fc9fb1d58cc113cf671c9b2b3b58700480e0ee6cb8e65f26b6fc8d46",
+          "size_bytes": 3456
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "255b11fdeda4389ce0b73241c8eadbbab7aa51cc69b4ee1788183fa9deb40ed4",
+          "size_bytes": 3396
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "4a7139f67d6d226936d8620d62d3364d9f469aef250af96e508c68a67e008c52",
+          "size_bytes": 3396
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "c1085dcb3da4175a780453a790ab2bd952f3e284b23ca7d11dc7810eb8888758",
+          "size_bytes": 3396
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "25dc5e7f1ab91a72e7817b4d44393dc02b5d1937116f230e38487c5f9a21e86f",
+          "size_bytes": 3396
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "85a5abdad87ab6aaad2e971122daa4d8753f79c998c8b1d2c6082afccbb80ec5",
+          "size_bytes": 3396
+        },
+        {
+          "path": "raw/session_lifecycle_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "7cb241ebdfb716485efec898e0f0a72b2306acab0a087c93b1cbf3db06d06a53",
+          "size_bytes": 3396
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "fc347391e74d8ea88e8ca7b17916d00a10c24f26b369f8fda5db31147d52ea70",
+          "size_bytes": 4745
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "5efef58068e89f5ed346635a41fdedb502f2dc3bf6e13790c6f8efa4126bd3d3",
+          "size_bytes": 4745
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "965835ec8204ce019dd5a6046dba26c917b8e6a2bfaa9a47243930efe0220927",
+          "size_bytes": 4745
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "5e61f68919fe5609e7df2f6d466a7cc5e62cf7a6c7384618d7cbf5bf20de4074",
+          "size_bytes": 4745
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "8832a4ea094b13d154b2ff31fb0d27e4cd0894fa5fa4d6fcc0a788b72d90afeb",
+          "size_bytes": 4745
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_anchor_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "5f927bd368cab2f4f2acb8dcc3a853d502769bf900712e722ba874d81fc07b98",
+          "size_bytes": 4745
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "d846e3db04f87cb8c927112527a8516fe3b445303829d2f84ef5451c30f5f827",
+          "size_bytes": 4738
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "4623b7a7c2138b381f7d5ef6e9b7b531b1dc6c6520f42be6b71fcadb13c9efb8",
+          "size_bytes": 4738
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "75a27211def8d02ef3bff73522b3dddcbe46c344a6235871c61028c854c46953",
+          "size_bytes": 4738
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "02362513b110e9eb5aa8e8d05408229b0c94e33f3622879b978d09f7d69aeb6f",
+          "size_bytes": 4738
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "7206c65a1dda953da7bd81dad72da16b73725bd35bd8a4bac5d8af545f01c2fe",
+          "size_bytes": 4738
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_baseline_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "6a4f279889ca69ced3fd785f61f434227c521ec09b777fb1d103c220d60bbdb5",
+          "size_bytes": 4738
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_parakeet_es_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "34c29e07e442de6dd4313427aa5ba2f85b25a78b6e69e25532e3e8425cbe73a5",
+          "size_bytes": 4759
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_parakeet_es_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "665bae1e55b5d57067546585be466b37d0352210148745657d7dd814dfa86811",
+          "size_bytes": 4759
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_parakeet_es_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "597c98ab7d879ea6cc3175c6b60055aa6e1ee7b4dde020d3f49169112d8d80f7",
+          "size_bytes": 4759
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_parakeet_es_e4b_r0_fleurs_development_es_es.json",
+          "sha256": "27b8248860d810c926d190f678e9c0c320fecb8d39732eca26854b66090921d2",
+          "size_bytes": 4759
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.json",
+          "sha256": "d26f468cbe40db691d999013f54b9b7d7124c527fd2cab9ced0c9af75685a47e",
+          "size_bytes": 4759
+        },
+        {
+          "path": "raw/session_metadata_followup_es_pk_v1_parakeet_es_e4b_r2_fleurs_development_es_es.json",
+          "sha256": "baa678ea906a00118508be2a6c49bfa1835704887867c968737df743b4025b9d",
+          "size_bytes": 4759
+        }
+      ]
+    },
+    {
+      "path": "runner.log",
+      "sha256": "a8cfea3086f13e5e69477b85e157eec2e721c081684e129ff43bd54c2e2fcfb2",
+      "size_bytes": 2640
+    },
+    {
+      "path": "report.json",
+      "sha256": "2f26333f2532e144594916027ad3cefd094021c3d9cdb79f7fb4f621869beeff",
+      "size_bytes": 304028
+    },
+    {
+      "path": "selection.json",
+      "sha256": "49f6fb381af6aecd4d2467dd62ab34b93fab7c72d5267ff368b9e2a8dd2d3eee",
+      "size_bytes": 1829
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "47061a955ec98a9d5085539cf905be11807c91f64e966b0a752fd91a879e9c71",
+      "size_bytes": 64110
+    },
+    {
+      "path": "run-summary.json",
+      "sha256": "afa989c618a515a271eff120ba1b8473c8d8aa8de9e54388d5f2d3325ac177a9",
+      "size_bytes": 125999
+    }
+  ],
+  "raw_payloads_unmodified": true,
+  "audio_included": false,
+  "missing_terminal_artifacts": []
+}

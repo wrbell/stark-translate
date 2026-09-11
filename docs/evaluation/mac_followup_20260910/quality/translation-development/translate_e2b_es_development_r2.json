@@ -1,0 +1,3207 @@
+{
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_quality.py",
+    "_worker",
+    "--task",
+    "translate",
+    "--manifest",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/docs/evaluation/mac_followup_20260910/public_data/manifest.json",
+    "--audio-root",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/fleurs-v1",
+    "--engine",
+    "e2b",
+    "--lang",
+    "es",
+    "--partition",
+    "development",
+    "--repeat",
+    "2",
+    "--output",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/quality/translation-development/translate_e2b_es_development_r2.json",
+    "--include-canaries"
+  ],
+  "manifest_sha256": "9de09bead155cef2a62f58ef0be91c43e35ced2e91672fbcfa641f358c498385",
+  "environment": {
+    "code_sha": "12546164d4bbd148d901384b390b01bc912c865a",
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_sha256": {
+      "dry_run_ab.py": "c708e5557035dd480b6b1665e68aa91af0c6947354e28791f64b62895c583872",
+      "settings.py": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568",
+      "engines/mlx_engine.py": "22aa8ebf4b79780958b9f1707b1f79c98d6298ee56a92f5f6384e9263b06da14",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+      "tools/pipeline_timing.py": "729cc42443c5373751da704920c8eca99afa747fd5447cc874bf55c5a2b13f9a",
+      "tools/mac_evaluation.py": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+    "versions": {
+      "mlx": "0.32.2",
+      "mlx-lm": "0.31.3",
+      "mlx-optiq": "0.4.34",
+      "parakeet-mlx": "0.5.2",
+      "mlx-whisper": "0.4.3",
+      "ctranslate2": "4.7.1",
+      "sacrebleu": null,
+      "numpy": "2.3.5",
+      "soundfile": "0.14.0",
+      "faster-whisper": null,
+      "pydantic-settings": "2.13.1"
+    },
+    "created_at": "2026-09-10T14:15:38.961463+00:00",
+    "quality_source_sha256": {
+      "tools/mac_followup_quality.py": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "models.lock.json": "ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273",
+      "settings.py": "3d28e3782a10ea2262797fa28dc871fa3776f9b8fb1aaf8e7d55d04593c2a568",
+      "engines/__init__.py": "45034d1776f5ee1ad620a8b09e654431f0c179b0c8c9320c8a2882fa1d4393fd",
+      "engines/_locks.py": "80bb52edd8441e66e9ed96c24a750c2694e20dcd9ecce3e4121d0ab878daaf90",
+      "engines/active_learning.py": "ca1f5c59afb7cd212393e26c55ea056491217a56274947c82a50effa87ffe5a6",
+      "engines/audio_devices.py": "994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5",
+      "engines/base.py": "a1292b5809bce689579c398040e268d3dacb56a0c9961ca4354c017cb43bc269",
+      "engines/cuda_engine.py": "29f25da984237a0a386ca67c508faa36bdd538c1116fc2274567d09b81c7a9b4",
+      "engines/factory.py": "fef3dc82b0ac990346e20a0aae0f9288207d0fc8581d606d973b160dac7500f0",
+      "engines/hf_whisper_engine.py": "d468ed490459f421c0efa5d2be7494f3f3c7c0541297442abc5aea40ca3036f7",
+      "engines/llamacpp_engine.py": "259900c54808b5abb3fee7b2f901ac218a68e4e4cbe1baf2ede71c6bbc8aac93",
+      "engines/marian_hf_engine.py": "715e4aeddccf18a62702caad443499506425fb96df57606976b1987d46d03e1c",
+      "engines/mlx_engine.py": "22aa8ebf4b79780958b9f1707b1f79c98d6298ee56a92f5f6384e9263b06da14",
+      "engines/mlx_generation_lock.py": "3e9adc6a10366676220ad844e2ca3b6efacfb8d5f61c13cf5b4016b4454a700a",
+      "engines/mlx_spec.py": "0a33aa9d8d8f51ba1a61b38f97a9003d2d924768802a820947d2cfe534e5692a",
+      "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+      "engines/parakeet_engine.py": "833031c842e60af19322f5809a51a4df8721b6664ca65b9ff7fe6ab30c86d1c8",
+      "engines/parakeet_mlx_engine.py": "a2e463974659ef671acc46a1935e13326d44b5f2886704fda22ecb2516e71582",
+      "engines/prefix_cache.py": "c675326e46bd6fa1fbaf126dc06495af1c06e5317396efe79139e3f96b8cd1e0",
+      "engines/spec_decode_logger.py": "c4b1b3fb0f3163687fda5ae9ebbdf2a61ca27e81290e7cbf6349f42ba9709abb",
+      "engines/stt_fallback.py": "35af471888ea49f23e5d89cccd78c3a06bf0fa344e57cac952550264909ee2e4",
+      "engines/translation_prompts.py": "04a0f5f696df3f60417a175c5317d333862aa88d2fc6086a71b80bb8a8d43c59",
+      "engines/tts_engine.py": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3"
+    },
+    "normalization": {
+      "version": 1,
+      "description": "NFKC + casefold; Unicode punctuation becomes spaces; whitespace collapsed; accents and digits retained; no number expansion, STT corrections or reference-dependent rewriting"
+    }
+  },
+  "completed": true,
+  "rows": [
+    {
+      "id": "fleurs-es-development-1638-6927013055416209547",
+      "source": "Es probable que los safaris sean el mayor atractivo turístico de África y la parte más memorable para muchos visitantes.",
+      "reference": "Safaris are perhaps the greatest tourism draw in Africa and the highlight for many visitors.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1638,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Safaris are probably the biggest tourist attraction in Africa and the most memorable part for many visitors.",
+      "engine_latency_ms": 540.0939590181224,
+      "call_wall_ms": 541.0280000069179,
+      "generated_tokens": 20,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 218.30104204127565,
+      "prefill_ms": 55.257208994589746,
+      "decode_ms": 321.79291697684675,
+      "chrf_counts": [
+        [
+          78,
+          92,
+          71
+        ],
+        [
+          77,
+          91,
+          53
+        ],
+        [
+          76,
+          90,
+          44
+        ],
+        [
+          75,
+          89,
+          39
+        ],
+        [
+          74,
+          88,
+          35
+        ],
+        [
+          73,
+          87,
+          31
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1592-3930211725609960196",
+      "source": "Cuando usted viajó al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas, pues sabían que los viajeros necesitan adaptarse a un nuevo país.",
+      "reference": "When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1592,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "When you traveled abroad for the first time, people were probably patient and understanding, as they knew that travelers need to adapt to a new country.",
+      "engine_latency_ms": 746.0259579820558,
+      "call_wall_ms": 746.7377909924835,
+      "generated_tokens": 30,
+      "requested_max_tokens": 78,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 274.14508297806606,
+      "prefill_ms": 50.0079589546658,
+      "decode_ms": 471.8808750039898,
+      "chrf_counts": [
+        [
+          113,
+          127,
+          107
+        ],
+        [
+          112,
+          126,
+          91
+        ],
+        [
+          111,
+          125,
+          81
+        ],
+        [
+          110,
+          124,
+          73
+        ],
+        [
+          109,
+          123,
+          65
+        ],
+        [
+          108,
+          122,
+          58
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1624-8750634895258922350",
+      "source": "Los canales navegables internos pueden ser una buena temática para las vacaciones.",
+      "reference": "Inland waterways can be a good theme to base a holiday around.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1624,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The internal navigable channels can be a good theme for the holidays.",
+      "engine_latency_ms": 489.3095830339007,
+      "call_wall_ms": 490.097958012484,
+      "generated_tokens": 14,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 266.21291699120775,
+      "prefill_ms": 50.68450001999736,
+      "decode_ms": 223.09666604269296,
+      "chrf_counts": [
+        [
+          51,
+          58,
+          41
+        ],
+        [
+          50,
+          57,
+          25
+        ],
+        [
+          49,
+          56,
+          21
+        ],
+        [
+          48,
+          55,
+          17
+        ],
+        [
+          47,
+          54,
+          15
+        ],
+        [
+          46,
+          53,
+          13
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1587-563233278035086965",
+      "source": "Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio.",
+      "reference": "The first cases of the disease this season were reported in late July.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1587,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The first cases of the disease during this season were recorded toward the end of July.",
+      "engine_latency_ms": 543.5163750080392,
+      "call_wall_ms": 544.1410829662345,
+      "generated_tokens": 18,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 258.3886249922216,
+      "prefill_ms": 51.19495798135176,
+      "decode_ms": 285.1277500158176,
+      "chrf_counts": [
+        [
+          58,
+          72,
+          56
+        ],
+        [
+          57,
+          71,
+          46
+        ],
+        [
+          56,
+          70,
+          40
+        ],
+        [
+          55,
+          69,
+          37
+        ],
+        [
+          54,
+          68,
+          34
+        ],
+        [
+          53,
+          67,
+          31
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1554-13392988470145802268",
+      "source": "Él dijo que construyó un timbre wifi.",
+      "reference": "He built a WiFi door bell, he said.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1554,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "He said he built a wifi doorbell.",
+      "engine_latency_ms": 392.0234580291435,
+      "call_wall_ms": 392.7719169878401,
+      "generated_tokens": 9,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 247.29054101044312,
+      "prefill_ms": 47.80858301091939,
+      "decode_ms": 144.7329170187004,
+      "chrf_counts": [
+        [
+          28,
+          27,
+          25
+        ],
+        [
+          27,
+          26,
+          20
+        ],
+        [
+          26,
+          25,
+          15
+        ],
+        [
+          25,
+          24,
+          12
+        ],
+        [
+          24,
+          23,
+          9
+        ],
+        [
+          23,
+          22,
+          6
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1641-2709586772537442969",
+      "source": "Sin perjuicio de ello, los bosques no son solo manglares, sino que poseen algunos de los últimos árboles que quedan de las junglas imponentes que alguna vez cubrieron la llanura de Gangetic.",
+      "reference": "The forests aren't just mangrove swamps though — they include some of the last remaining stands of the mighty jungles which once covered the Gangetic plain.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1641,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Without prejudice to that, forests are not just mangroves, but they possess some of the last trees remaining from the imposing jungles that once covered the Gangetic plain.",
+      "engine_latency_ms": 747.1065840218216,
+      "call_wall_ms": 747.6149579742923,
+      "generated_tokens": 33,
+      "requested_max_tokens": 96,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 227.43187501328066,
+      "prefill_ms": 52.81412496697158,
+      "decode_ms": 519.674709008541,
+      "chrf_counts": [
+        [
+          131,
+          145,
+          117
+        ],
+        [
+          130,
+          144,
+          91
+        ],
+        [
+          129,
+          143,
+          77
+        ],
+        [
+          128,
+          142,
+          66
+        ],
+        [
+          127,
+          141,
+          58
+        ],
+        [
+          126,
+          140,
+          52
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1644-3323600668018464153",
+      "source": "Al pedirle un comentario, Miller dijo: «Mike habla mucho durante la audiencia… Estaba preparándome, así que en verdad no pude escuchar lo que decía».",
+      "reference": "When asked for comment, Miller said, \"Mike talks a lot during the hearing...I was getting ready so I wasn't really hearing what he was saying.\"",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1644,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "When asked for a comment, Miller said: \"Mike talks a lot during the hearing... He was preparing me, so I really couldn't hear what he was saying.\"",
+      "engine_latency_ms": 831.0380000039004,
+      "call_wall_ms": 831.7259169998579,
+      "generated_tokens": 36,
+      "requested_max_tokens": 72,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 263.9607079909183,
+      "prefill_ms": 48.017207998782396,
+      "decode_ms": 567.0772920129821,
+      "chrf_counts": [
+        [
+          119,
+          120,
+          109
+        ],
+        [
+          118,
+          119,
+          94
+        ],
+        [
+          117,
+          118,
+          84
+        ],
+        [
+          116,
+          117,
+          74
+        ],
+        [
+          115,
+          116,
+          67
+        ],
+        [
+          114,
+          115,
+          61
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1651-15070404026815095185",
+      "source": "Combinar viaje y aprendizaje se ha vuelto una opción muy popular entre aquellos que planean tomarse un año sabático.",
+      "reference": "An increasingly more popular option for those planning a gap-year is to travel and learn.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1651,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Combining travel and learning has become a very popular option among those planning to take a gap year.",
+      "engine_latency_ms": 608.6399589548819,
+      "call_wall_ms": 609.3620830215514,
+      "generated_tokens": 20,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 264.71395895350724,
+      "prefill_ms": 53.79595799604431,
+      "decode_ms": 343.92600000137463,
+      "chrf_counts": [
+        [
+          75,
+          86,
+          68
+        ],
+        [
+          74,
+          85,
+          52
+        ],
+        [
+          73,
+          84,
+          41
+        ],
+        [
+          72,
+          83,
+          33
+        ],
+        [
+          71,
+          82,
+          28
+        ],
+        [
+          70,
+          81,
+          25
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1659-15931608150451513857",
+      "source": "Según los expertos, la explosión que generó la colisión fue masiva.",
+      "reference": "Scientists say the explosion caused by the collision was massive.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1659,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "According to experts, the explosion that caused the collision was massive.",
+      "engine_latency_ms": 511.96995796635747,
+      "call_wall_ms": 512.5790410093032,
+      "generated_tokens": 14,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 275.9007079876028,
+      "prefill_ms": 50.214666000101715,
+      "decode_ms": 236.06924997875467,
+      "chrf_counts": [
+        [
+          56,
+          64,
+          49
+        ],
+        [
+          55,
+          63,
+          40
+        ],
+        [
+          54,
+          62,
+          35
+        ],
+        [
+          53,
+          61,
+          32
+        ],
+        [
+          52,
+          60,
+          29
+        ],
+        [
+          51,
+          59,
+          26
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1609-8888603459166420274",
+      "source": "Robin Uthappa obtuvo la mayor puntuación en entradas: 70 anotaciones con solo 41 bolas, al conectar 11 cuatros y 2 seises.",
+      "reference": "Robin Uthappa made the innings highest score, 70 runs in just 41 balls by hitting 11 fours and 2 sixes.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1609,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Robin Uthappa achieved the highest score in innings: 70 runs with only 41 balls, hitting 11 fours and 2 sixes.",
+      "engine_latency_ms": 804.8111249809153,
+      "call_wall_ms": 805.5092499707825,
+      "generated_tokens": 34,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 269.0832079970278,
+      "prefill_ms": 51.72375001711771,
+      "decode_ms": 535.7279169838876,
+      "chrf_counts": [
+        [
+          84,
+          91,
+          79
+        ],
+        [
+          83,
+          90,
+          66
+        ],
+        [
+          82,
+          89,
+          58
+        ],
+        [
+          81,
+          88,
+          50
+        ],
+        [
+          80,
+          87,
+          44
+        ],
+        [
+          79,
+          86,
+          38
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1613-14444456949745319932",
+      "source": "Además, existen monturas, en especial las inglesas, con barras de seguridad que permiten que el cuero del estribo se desprenda de su estructura si un jinete que sale despedido tira hacia atrás.",
+      "reference": "Next, some saddles, particularly English saddles, have safety bars that allow a stirrup leather to fall off the saddle if pulled backwards by a falling rider.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1613,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Furthermore, there are saddles, especially English ones, with safety bars that allow the stirrup leather to detach from its structure if a rider who falls backward pulls back.",
+      "engine_latency_ms": 799.1043329820968,
+      "call_wall_ms": 799.8316670418717,
+      "generated_tokens": 34,
+      "requested_max_tokens": 96,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 260.67979098297656,
+      "prefill_ms": 58.63824998959899,
+      "decode_ms": 538.4245419991203,
+      "chrf_counts": [
+        [
+          133,
+          148,
+          115
+        ],
+        [
+          132,
+          147,
+          84
+        ],
+        [
+          131,
+          146,
+          65
+        ],
+        [
+          130,
+          145,
+          52
+        ],
+        [
+          129,
+          144,
+          43
+        ],
+        [
+          128,
+          143,
+          36
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1515-16255658476875547265",
+      "source": "En cuatro años, es el quinto CEP de Martelly.",
+      "reference": "It is Martelly's fifth CEP in four years.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1515,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "In four years, it is the fifth CEP of Martelly.",
+      "engine_latency_ms": 482.843125006184,
+      "call_wall_ms": 483.43670804752037,
+      "generated_tokens": 14,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 260.3366670082323,
+      "prefill_ms": 46.16079095285386,
+      "decode_ms": 222.50645799795166,
+      "chrf_counts": [
+        [
+          34,
+          38,
+          32
+        ],
+        [
+          33,
+          37,
+          25
+        ],
+        [
+          32,
+          36,
+          21
+        ],
+        [
+          31,
+          35,
+          17
+        ],
+        [
+          30,
+          34,
+          14
+        ],
+        [
+          29,
+          33,
+          11
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1537-11588863747163776837",
+      "source": "En la oscuridad, se pueden ver las pirámides y contemplarlas en silencio antes de que empiece el espectáculo.",
+      "reference": "You can see the pyramids in the dark and you can see them in silence before the show begins.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1537,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "In the darkness, you can see the pyramids and contemplate them in silence before the show begins.",
+      "engine_latency_ms": 566.7465829756111,
+      "call_wall_ms": 567.5751669914462,
+      "generated_tokens": 20,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 249.72004198934883,
+      "prefill_ms": 47.99241595901549,
+      "decode_ms": 317.02654098626226,
+      "chrf_counts": [
+        [
+          74,
+          81,
+          71
+        ],
+        [
+          73,
+          80,
+          61
+        ],
+        [
+          72,
+          79,
+          57
+        ],
+        [
+          71,
+          78,
+          53
+        ],
+        [
+          70,
+          77,
+          50
+        ],
+        [
+          69,
+          76,
+          47
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1555-1193954095328160401",
+      "source": "En el camposanto, hay interesantes esculturas de mármol con forma de paloma sobre algunas tumbas.",
+      "reference": "In the churchyard, there are interesting marble sculptures of doves over some tombs.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1555,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "In the cemetery, there are interesting marble sculptures in the shape of a dove on some graves.",
+      "engine_latency_ms": 577.1637500147335,
+      "call_wall_ms": 577.8609580011107,
+      "generated_tokens": 20,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 261.95495802676305,
+      "prefill_ms": 52.9187920037657,
+      "decode_ms": 315.20879198797047,
+      "chrf_counts": [
+        [
+          72,
+          79,
+          66
+        ],
+        [
+          71,
+          78,
+          52
+        ],
+        [
+          70,
+          77,
+          44
+        ],
+        [
+          69,
+          76,
+          38
+        ],
+        [
+          68,
+          75,
+          34
+        ],
+        [
+          67,
+          74,
+          32
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1631-13434181649028080555",
+      "source": "El antiguo pueblo egipcio del Imperio Nuevo quedó maravillado con los monumentos de sus antepasados, que en ese entonces databan de más de un milenio.",
+      "reference": "New Kingdom ancient Egyptians marvelled at their predecessors monuments, which were then well over a thousand year old.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1631,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The ancient Egyptian town of the New Kingdom was amazed by the monuments of their ancestors, which at that time dated back more than a thousand years.",
+      "engine_latency_ms": 721.1564999888651,
+      "call_wall_ms": 721.8726669671014,
+      "generated_tokens": 30,
+      "requested_max_tokens": 75,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 249.98958298237994,
+      "prefill_ms": 51.181624992750585,
+      "decode_ms": 471.16691700648516,
+      "chrf_counts": [
+        [
+          102,
+          124,
+          89
+        ],
+        [
+          101,
+          123,
+          69
+        ],
+        [
+          100,
+          122,
+          56
+        ],
+        [
+          99,
+          121,
+          44
+        ],
+        [
+          98,
+          120,
+          35
+        ],
+        [
+          97,
+          119,
+          29
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1543-16415711602924019767",
+      "source": "El paciente había estado en Nigeria, donde hubo algunos casos de Ébola.",
+      "reference": "The patient had been to Nigeria, where some cases of the Ebola virus have occurred.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1543,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The patient had been in Nigeria, where there were some Ebola cases.",
+      "engine_latency_ms": 495.55062502622604,
+      "call_wall_ms": 496.18349998490885,
+      "generated_tokens": 15,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 259.6598340314813,
+      "prefill_ms": 47.448750003241,
+      "decode_ms": 235.89079099474475,
+      "chrf_counts": [
+        [
+          69,
+          56,
+          53
+        ],
+        [
+          68,
+          55,
+          44
+        ],
+        [
+          67,
+          54,
+          38
+        ],
+        [
+          66,
+          53,
+          33
+        ],
+        [
+          65,
+          52,
+          28
+        ],
+        [
+          64,
+          51,
+          23
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1648-9424529224418020799",
+      "source": "En la tierra de Canaán no había bosques grandes; por ello, la madera era extremadamente costosa.",
+      "reference": "There were no large forests in the land of Canaan, so wood was extremely expensive.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1648,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "In the land of Canaan there were no large forests; therefore, wood was extremely expensive.",
+      "engine_latency_ms": 553.3216249896213,
+      "call_wall_ms": 553.9367089513689,
+      "generated_tokens": 19,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 252.44479201501235,
+      "prefill_ms": 49.66187500394881,
+      "decode_ms": 300.876832974609,
+      "chrf_counts": [
+        [
+          69,
+          77,
+          66
+        ],
+        [
+          68,
+          76,
+          61
+        ],
+        [
+          67,
+          75,
+          58
+        ],
+        [
+          66,
+          74,
+          55
+        ],
+        [
+          65,
+          73,
+          52
+        ],
+        [
+          64,
+          72,
+          49
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1524-9449585527367687175",
+      "source": "Son muchas sus consecuencias políticas y sociales, tales como el uso del sistema métrico, el desplazamiento del absolutismo hacia el republicanismo, el nacionalismo y la convicción de que el país pertenece al pueblo, y no a un solo soberano.",
+      "reference": "There are a lot of social and political effects such as the use of metric system, a shift from absolutism to republicanism, nationalism and the belief the country belongs to the people not to one sole ruler.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1524,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "They have many political and social consequences, such as the use of the metric system, the shift from absolutism to republicanism, nationalism, and the conviction that the country belongs to the people and not to a single sovereign.",
+      "engine_latency_ms": 986.5242919768207,
+      "call_wall_ms": 987.2898749890737,
+      "generated_tokens": 46,
+      "requested_max_tokens": 117,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 262.07904203329235,
+      "prefill_ms": 58.2691669696942,
+      "decode_ms": 724.4452499435283,
+      "chrf_counts": [
+        [
+          171,
+          196,
+          160
+        ],
+        [
+          170,
+          195,
+          138
+        ],
+        [
+          169,
+          194,
+          120
+        ],
+        [
+          168,
+          193,
+          106
+        ],
+        [
+          167,
+          192,
+          96
+        ],
+        [
+          166,
+          191,
+          87
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1541-7109939569267971011",
+      "source": "Se les paga muy bien a las empresas de mensajería por hacer entregas veloces. Con frecuencia, el tiempo es muy importante cuando se trata de documentos comerciales, mercadería o repuestos para reparaciones urgentes.",
+      "reference": "Courier companies are well paid for delivering things quickly. Frequently, time is very important with business documents, merchandise or spare parts for an urgent repair.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1541,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "They are paid very well by courier companies for making fast deliveries. Often, time is very important when it comes to commercial documents, merchandise, or spare parts for urgent repairs.",
+      "engine_latency_ms": 839.3877079943195,
+      "call_wall_ms": 840.1456249994226,
+      "generated_tokens": 36,
+      "requested_max_tokens": 99,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 271.82449999963865,
+      "prefill_ms": 59.6573330112733,
+      "decode_ms": 567.5632079946809,
+      "chrf_counts": [
+        [
+          147,
+          160,
+          135
+        ],
+        [
+          146,
+          159,
+          101
+        ],
+        [
+          145,
+          158,
+          87
+        ],
+        [
+          144,
+          157,
+          76
+        ],
+        [
+          143,
+          156,
+          68
+        ],
+        [
+          142,
+          155,
+          62
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1582-2572372527541764304",
+      "source": "Las familias hebreas pasaban la mayor parte de su tiempo al aire libre.",
+      "reference": "Most of the life of the Hebrew family happened in the open air.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1582,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Hebrew families spent most of their time outdoors.",
+      "engine_latency_ms": 433.29212500248104,
+      "call_wall_ms": 433.72562498552725,
+      "generated_tokens": 11,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 257.0835840306245,
+      "prefill_ms": 49.626875028479844,
+      "decode_ms": 176.20854097185656,
+      "chrf_counts": [
+        [
+          51,
+          43,
+          34
+        ],
+        [
+          50,
+          42,
+          23
+        ],
+        [
+          49,
+          41,
+          16
+        ],
+        [
+          48,
+          40,
+          13
+        ],
+        [
+          47,
+          39,
+          11
+        ],
+        [
+          46,
+          38,
+          9
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1599-10284528973491487253",
+      "source": "No se han producido cambios en la población original, que aún precisan de las mismas adaptaciones que en el pasado.",
+      "reference": "The original population hasn't changed at all, they still need the same adaptations as before.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1599,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "No changes have occurred in the original population, which still require the same adaptations as in the past.",
+      "engine_latency_ms": 587.9650409915484,
+      "call_wall_ms": 588.670417026151,
+      "generated_tokens": 21,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 254.22745797550306,
+      "prefill_ms": 52.10379196796566,
+      "decode_ms": 333.7375830160454,
+      "chrf_counts": [
+        [
+          80,
+          92,
+          71
+        ],
+        [
+          79,
+          91,
+          53
+        ],
+        [
+          78,
+          90,
+          44
+        ],
+        [
+          77,
+          89,
+          39
+        ],
+        [
+          76,
+          88,
+          35
+        ],
+        [
+          75,
+          87,
+          31
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1635-12716912110208003007",
+      "source": "Podemos comenzar a llevar una vida más amigable con el planeta, formar parte de movimientos ambientalistas o, incluso, podemos volvernos activistas y luchar para aminorar, en alguna medida, el sufrimiento futuro.",
+      "reference": "We can start living more friendly to the environment, we can join to the environmental movement, and we can even be activists in order to reduce the future suffering in some degree.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1635,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "We can start living a more friendly life with the planet, become part of environmental movements, or even become activists and fight to lessen, to some extent, future suffering.",
+      "engine_latency_ms": 833.0766250146553,
+      "call_wall_ms": 833.7914170115255,
+      "generated_tokens": 35,
+      "requested_max_tokens": 93,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 262.9033750272356,
+      "prefill_ms": 56.714125035796314,
+      "decode_ms": 570.1732499874197,
+      "chrf_counts": [
+        [
+          150,
+          149,
+          130
+        ],
+        [
+          149,
+          148,
+          100
+        ],
+        [
+          148,
+          147,
+          77
+        ],
+        [
+          147,
+          146,
+          64
+        ],
+        [
+          146,
+          145,
+          56
+        ],
+        [
+          145,
+          144,
+          50
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1574-13474293391889299943",
+      "source": "El frío invernal puede ser engañoso: si bien es muy raro que las temperaturas sean inferiores al punto de congelación, el viento y la humedad interactúan para hacer que se perciba más frío del que señala el termómetro.",
+      "reference": "The winter can be deceptively chilly: temperatures rarely go below freezing, but the wind and humidity combine to make it feel colder than what the thermometer says.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1574,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The winter cold can be deceptive: although it is very rare for temperatures to be below freezing, the wind and humidity interact to make it feel colder than the thermometer indicates.",
+      "engine_latency_ms": 787.1408750070259,
+      "call_wall_ms": 787.6027090242133,
+      "generated_tokens": 35,
+      "requested_max_tokens": 114,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 235.3126669768244,
+      "prefill_ms": 57.64862499199807,
+      "decode_ms": 551.8282080302015,
+      "chrf_counts": [
+        [
+          139,
+          153,
+          131
+        ],
+        [
+          138,
+          152,
+          107
+        ],
+        [
+          137,
+          151,
+          93
+        ],
+        [
+          136,
+          150,
+          84
+        ],
+        [
+          135,
+          149,
+          76
+        ],
+        [
+          134,
+          148,
+          69
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1547-4522346247754628358",
+      "source": "Además, NHK indicó que la central nuclear de Kashiwazaki-Kariwa, en la prefectura de Niigata, estaba operando con normalidad.",
+      "reference": "NHK also reported that the Kashiwazaki Kariwa nuclear power plant in Niigata prefecture was operating normally.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1547,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "In addition, NHK indicated that the Kashiwazaki-Kariwa nuclear power plant, in Niigata prefecture, was operating normally.",
+      "engine_latency_ms": 735.2555409888737,
+      "call_wall_ms": 735.9467089991085,
+      "generated_tokens": 30,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 262.9811249789782,
+      "prefill_ms": 52.29420796968043,
+      "decode_ms": 472.2744160098955,
+      "chrf_counts": [
+        [
+          96,
+          107,
+          89
+        ],
+        [
+          95,
+          106,
+          83
+        ],
+        [
+          94,
+          105,
+          77
+        ],
+        [
+          93,
+          104,
+          72
+        ],
+        [
+          92,
+          103,
+          68
+        ],
+        [
+          91,
+          102,
+          64
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1570-12567461606544247708",
+      "source": "Tampoco estaba facultado para anular leyes fiscales o aranceles entre estados.",
+      "reference": "It also had no authority to override tax laws and tariffs between states.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1570,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "He was also not authorized to annul tax laws or tariffs between states.",
+      "engine_latency_ms": 498.8458330044523,
+      "call_wall_ms": 499.4826669571921,
+      "generated_tokens": 15,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 258.053999976255,
+      "prefill_ms": 49.704458040650934,
+      "decode_ms": 240.7918330281973,
+      "chrf_counts": [
+        [
+          61,
+          59,
+          52
+        ],
+        [
+          60,
+          58,
+          42
+        ],
+        [
+          59,
+          57,
+          31
+        ],
+        [
+          58,
+          56,
+          27
+        ],
+        [
+          57,
+          55,
+          23
+        ],
+        [
+          56,
+          54,
+          20
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1655-12812403683131158859",
+      "source": "Por ejemplo, se señalan el «aprendizaje» y la «socialización» como incentivos significativos para el uso de Internet (James et al., 1995).",
+      "reference": "For example, “learning” and “socialization” are suggested as important motivations for Internet use (James et al., 1995).",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1655,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "For example, \"learning\" and \"socialization\" are pointed out as significant incentives for the use of the Internet (James et al., 1995).",
+      "engine_latency_ms": 831.1647499795072,
+      "call_wall_ms": 831.9237919640727,
+      "generated_tokens": 35,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 264.89704102277756,
+      "prefill_ms": 52.21179098589346,
+      "decode_ms": 566.2677089567296,
+      "chrf_counts": [
+        [
+          105,
+          115,
+          95
+        ],
+        [
+          104,
+          114,
+          75
+        ],
+        [
+          103,
+          113,
+          57
+        ],
+        [
+          102,
+          112,
+          44
+        ],
+        [
+          101,
+          111,
+          38
+        ],
+        [
+          100,
+          110,
+          33
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1600-12524033974685833914",
+      "source": "Algunos ejemplos de posibles actividades en el lugar son: caza, pesca, fotografía, avistamiento de aves y visita a parques, y estudio de información del ecosistema.",
+      "reference": "Examples of on-site activities include hunting, fishing, photography, bird watching, and visiting parks and studying information about the ecosystem.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1600,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Some examples of possible activities in the area are: hunting, fishing, photography, birdwatching, and visiting parks, and studying ecosystem information.",
+      "engine_latency_ms": 721.0809160023928,
+      "call_wall_ms": 721.792500000447,
+      "generated_tokens": 29,
+      "requested_max_tokens": 75,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 263.4871249902062,
+      "prefill_ms": 51.26124998787419,
+      "decode_ms": 457.59379101218656,
+      "chrf_counts": [
+        [
+          131,
+          135,
+          122
+        ],
+        [
+          130,
+          134,
+          108
+        ],
+        [
+          129,
+          133,
+          99
+        ],
+        [
+          128,
+          132,
+          92
+        ],
+        [
+          127,
+          131,
+          86
+        ],
+        [
+          126,
+          130,
+          80
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1551-809628312584936889",
+      "source": "Aún intentan establecer cuán importante fue el impacto y de qué modo afectará al planeta.",
+      "reference": "They are still trying to determine just how large the crash was and how the Earth will be affected.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1551,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "They are still trying to establish how important the impact was and how it will affect the planet.",
+      "engine_latency_ms": 574.1900829598308,
+      "call_wall_ms": 574.7684999951161,
+      "generated_tokens": 20,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 256.4600000041537,
+      "prefill_ms": 47.36879200208932,
+      "decode_ms": 317.73008295567706,
+      "chrf_counts": [
+        [
+          81,
+          81,
+          67
+        ],
+        [
+          80,
+          80,
+          47
+        ],
+        [
+          79,
+          79,
+          34
+        ],
+        [
+          78,
+          78,
+          27
+        ],
+        [
+          77,
+          77,
+          23
+        ],
+        [
+          76,
+          76,
+          20
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1518-18251544358446811373",
+      "source": "En Manila, capital de Filipinas, un ex agente policial de ese país secuestró un autobús y mantuvo cautivos a turistas que venían de Hong Kong.",
+      "reference": "A former Filipino policeman has kept Hong Kong tourists hostage by hijacking their bus in Manila, the capital of the Philippines.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1518,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "In Manila, the capital of the Philippines, a former police agent from that country kidnapped a bus and held hostage tourists who were coming from Hong Kong.",
+      "engine_latency_ms": 733.4468340268359,
+      "call_wall_ms": 734.0734589961357,
+      "generated_tokens": 31,
+      "requested_max_tokens": 75,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 246.4135839836672,
+      "prefill_ms": 46.79416696308181,
+      "decode_ms": 487.03325004316866,
+      "chrf_counts": [
+        [
+          109,
+          130,
+          98
+        ],
+        [
+          108,
+          129,
+          72
+        ],
+        [
+          107,
+          128,
+          59
+        ],
+        [
+          106,
+          127,
+          51
+        ],
+        [
+          105,
+          126,
+          45
+        ],
+        [
+          104,
+          125,
+          39
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1608-6937193608870883792",
+      "source": "«Perdí a mi hermana y a su amiga, y, de regreso, vi a dos personas en silla de ruedas y los demás les saltaban por encima y las empujaban», relató Armand Versace.",
+      "reference": "I lost my sister and her friend, and on my way there were two disabled people in wheelchairs, people just jumping over and pushing them,\" Armand Versace said.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1608,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "\"I lost my sister and her friend, and on the way back, I saw two people in wheelchairs and the others jumped over them and pushed them,\" recounted Armand Versace.",
+      "engine_latency_ms": 804.3461670167744,
+      "call_wall_ms": 804.7379999770783,
+      "generated_tokens": 36,
+      "requested_max_tokens": 96,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 232.8377920202911,
+      "prefill_ms": 58.441125031095,
+      "decode_ms": 571.5083749964833,
+      "chrf_counts": [
+        [
+          131,
+          133,
+          118
+        ],
+        [
+          130,
+          132,
+          92
+        ],
+        [
+          129,
+          131,
+          74
+        ],
+        [
+          128,
+          130,
+          64
+        ],
+        [
+          127,
+          129,
+          56
+        ],
+        [
+          126,
+          128,
+          51
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1588-4445876756112550206",
+      "source": "Según las autoridades policiales, es poco probable que el conductor del vehículo que embistió al fotógrafo sea procesado penalmente.",
+      "reference": "According to police, the driver of the vehicle that hit the photographer is unlikely to face criminal charges.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1588,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "According to the police authorities, it is unlikely that the driver of the vehicle that hit the photographer will be criminally prosecuted.",
+      "engine_latency_ms": 615.2504159836099,
+      "call_wall_ms": 615.6203750288114,
+      "generated_tokens": 25,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 220.0551249552518,
+      "prefill_ms": 49.96024997672067,
+      "decode_ms": 395.19529102835804,
+      "chrf_counts": [
+        [
+          93,
+          118,
+          90
+        ],
+        [
+          92,
+          117,
+          78
+        ],
+        [
+          91,
+          116,
+          70
+        ],
+        [
+          90,
+          115,
+          65
+        ],
+        [
+          89,
+          114,
+          60
+        ],
+        [
+          88,
+          113,
+          55
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1553-4745240682242570610",
+      "source": "Para la religión cristiana, la Navidad es una de sus festividades más importantes, en la que se celebra el nacimiento de Jesucristo.",
+      "reference": "Christmas is one of the most important holidays of Christianity, and is celebrated as the birthday of Jesus.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1553,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "For the Christian religion, Christmas is one of its most important festivities, in which the birth of Jesus Christ is celebrated.",
+      "engine_latency_ms": 655.6930420338176,
+      "call_wall_ms": 656.289917009417,
+      "generated_tokens": 25,
+      "requested_max_tokens": 66,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 259.434333012905,
+      "prefill_ms": 50.81074999179691,
+      "decode_ms": 396.25870902091265,
+      "chrf_counts": [
+        [
+          91,
+          109,
+          81
+        ],
+        [
+          90,
+          108,
+          65
+        ],
+        [
+          89,
+          107,
+          55
+        ],
+        [
+          88,
+          106,
+          47
+        ],
+        [
+          87,
+          105,
+          41
+        ],
+        [
+          86,
+          104,
+          35
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1559-16515321832816575538",
+      "source": "Pronunciar el italiano es relativamente sencillo, dado que la mayor parte de sus palabras suenan igual a como se escriben.",
+      "reference": "Pronunciation is relatively easy in Italian since most words are pronounced exactly how they are written",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1559,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Pronouncing Italian is relatively easy, given that most of its words sound the same as they are spelled.",
+      "engine_latency_ms": 559.6844999818131,
+      "call_wall_ms": 560.0994169944897,
+      "generated_tokens": 22,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 211.29620802821591,
+      "prefill_ms": 46.424000000115484,
+      "decode_ms": 348.3882919535972,
+      "chrf_counts": [
+        [
+          89,
+          87,
+          73
+        ],
+        [
+          88,
+          86,
+          50
+        ],
+        [
+          87,
+          85,
+          37
+        ],
+        [
+          86,
+          84,
+          31
+        ],
+        [
+          85,
+          83,
+          23
+        ],
+        [
+          84,
+          82,
+          18
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1534-3412089685058336461",
+      "source": "Ello, sumado a que resulta relativamente inaccesible, ha dado a «Tombuctú» una imagen de tierra exótica y lejana.",
+      "reference": "Combined with its relative inaccessibility, \"Timbuktu\" has come to be used as a metaphor for exotic, distant lands.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1534,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "That, added to the fact that it is relatively inaccessible, has given \"Tombuctú\" an image of exotic and distant land.",
+      "engine_latency_ms": 711.7105409852229,
+      "call_wall_ms": 712.359249999281,
+      "generated_tokens": 29,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 255.33524999627843,
+      "prefill_ms": 52.01341700740159,
+      "decode_ms": 456.37529098894447,
+      "chrf_counts": [
+        [
+          98,
+          98,
+          79
+        ],
+        [
+          97,
+          97,
+          43
+        ],
+        [
+          96,
+          96,
+          31
+        ],
+        [
+          95,
+          95,
+          24
+        ],
+        [
+          94,
+          94,
+          20
+        ],
+        [
+          93,
+          93,
+          16
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1579-18224531686984750984",
+      "source": "Advierte que nadie puede dar garantías de que alguna acción iraquí en este punto detendrá la lucha sectaria, la creciente violencia o una inclinación hacia el caos.",
+      "reference": "It warns No one can guarantee that any course of action in Iraq at this point will stop sectarian warfare, growing violence, or a slide toward chaos.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1579,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Warning that no one can guarantee that any action here at this point will stop the sectarian fighting, the growing violence, or a inclination towards chaos.",
+      "engine_latency_ms": 748.4960830188356,
+      "call_wall_ms": 749.3014579522423,
+      "generated_tokens": 30,
+      "requested_max_tokens": 81,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 274.60408298065886,
+      "prefill_ms": 48.07420796714723,
+      "decode_ms": 473.8920000381768,
+      "chrf_counts": [
+        [
+          123,
+          131,
+          107
+        ],
+        [
+          122,
+          130,
+          87
+        ],
+        [
+          121,
+          129,
+          76
+        ],
+        [
+          120,
+          128,
+          67
+        ],
+        [
+          119,
+          127,
+          60
+        ],
+        [
+          118,
+          126,
+          53
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1545-9636595379511704367",
+      "source": "Podemos encontrar curry «seco» y «húmedo», en función del volumen de líquido.",
+      "reference": "A curry can be either \"dry\" or \"wet\" depending on the amount of liquid.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1545,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "We can find \"dry\" and \"wet\" curry, depending on the volume of liquid.",
+      "engine_latency_ms": 579.2707499931566,
+      "call_wall_ms": 579.8329589888453,
+      "generated_tokens": 20,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 264.30358400102705,
+      "prefill_ms": 47.02383297262713,
+      "decode_ms": 314.9671659921296,
+      "chrf_counts": [
+        [
+          58,
+          57,
+          49
+        ],
+        [
+          57,
+          56,
+          35
+        ],
+        [
+          56,
+          55,
+          29
+        ],
+        [
+          55,
+          54,
+          23
+        ],
+        [
+          54,
+          53,
+          18
+        ],
+        [
+          53,
+          52,
+          13
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1528-14516235058824705075",
+      "source": "Algunos festivales cuentan con áreas especiales de acampe, destinadas a los grupos familiares con hijos pequeños.",
+      "reference": "Some festivals have special camping areas for families with young children.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1528,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Some festivals have special camping areas, intended for families with young children.",
+      "engine_latency_ms": 442.8237500251271,
+      "call_wall_ms": 443.1965000112541,
+      "generated_tokens": 15,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 205.61866700882092,
+      "prefill_ms": 51.61875003250316,
+      "decode_ms": 237.20508301630616,
+      "chrf_counts": [
+        [
+          65,
+          74,
+          65
+        ],
+        [
+          64,
+          73,
+          63
+        ],
+        [
+          63,
+          72,
+          61
+        ],
+        [
+          62,
+          71,
+          59
+        ],
+        [
+          61,
+          70,
+          57
+        ],
+        [
+          60,
+          69,
+          55
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1616-4938537836827977056",
+      "source": "Actualmente, los científicos sostienen que esta economía masiva del carbono ha privado a la biosfera de uno de sus estados regulares que ha contribuido con la evolución de la humanidad por los últimos dos millones de años.",
+      "reference": "Science now indicates that this massive carbon economy has dislodged the biosphere from one of its stable states that has supported human evolution for the past two million years.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1616,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Currently, scientists maintain that this massive carbon economy has deprived the biosphere of one of its regular states that has contributed to the evolution of humanity over the last two million years.",
+      "engine_latency_ms": 813.100958999712,
+      "call_wall_ms": 813.7840830022469,
+      "generated_tokens": 35,
+      "requested_max_tokens": 111,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 260.1354169892147,
+      "prefill_ms": 57.26954201236367,
+      "decode_ms": 552.9655420104973,
+      "chrf_counts": [
+        [
+          151,
+          171,
+          143
+        ],
+        [
+          150,
+          170,
+          109
+        ],
+        [
+          149,
+          169,
+          91
+        ],
+        [
+          148,
+          168,
+          81
+        ],
+        [
+          147,
+          167,
+          72
+        ],
+        [
+          146,
+          166,
+          65
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1566-6160188706550380299",
+      "source": "Aun así, los países de América Central gravaron con aranceles el ochenta por ciento de los productos que nosotros elaboramos. los tratamos a ustedes.",
+      "reference": "Yet eighty percent of our goods were taxed through tariffs in Central American countries. we treat you.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1566,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Even so, the Central American countries taxed eighty percent of the products we make with tariffs. we treat you.",
+      "engine_latency_ms": 626.4432499883696,
+      "call_wall_ms": 627.0740419859067,
+      "generated_tokens": 23,
+      "requested_max_tokens": 72,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 260.44833299238235,
+      "prefill_ms": 51.9313330296427,
+      "decode_ms": 365.9949169959873,
+      "chrf_counts": [
+        [
+          87,
+          94,
+          79
+        ],
+        [
+          86,
+          93,
+          65
+        ],
+        [
+          85,
+          92,
+          56
+        ],
+        [
+          84,
+          91,
+          50
+        ],
+        [
+          83,
+          90,
+          45
+        ],
+        [
+          82,
+          89,
+          40
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1658-13286125305730696248",
+      "source": "Con solo dieciocho medallas disponibles por día, son varios los países que no han logrado llegar al podio de las medallas.",
+      "reference": "With only eighteen medals available a day, a number of countries have failed to make the medal podium.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1658,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "With only eighteen medals available per day, several countries have not managed to reach the medal podium.",
+      "engine_latency_ms": 578.8521250360645,
+      "call_wall_ms": 579.4742080033757,
+      "generated_tokens": 20,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 263.4008750319481,
+      "prefill_ms": 50.90370902325958,
+      "decode_ms": 315.45125000411645,
+      "chrf_counts": [
+        [
+          85,
+          90,
+          78
+        ],
+        [
+          84,
+          89,
+          66
+        ],
+        [
+          83,
+          88,
+          57
+        ],
+        [
+          82,
+          87,
+          52
+        ],
+        [
+          81,
+          86,
+          47
+        ],
+        [
+          80,
+          85,
+          44
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1656-8515974555592166175",
+      "source": "La policía manifestó que el cadáver parecía haber estado allí alrededor de un día.",
+      "reference": "Police said that the body appeared to have been there for about a day.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1656,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The police stated that the body had been there for about a day.",
+      "engine_latency_ms": 495.31558400485665,
+      "call_wall_ms": 495.8995830384083,
+      "generated_tokens": 15,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 256.9459999795072,
+      "prefill_ms": 48.56945795472711,
+      "decode_ms": 238.36958402534947,
+      "chrf_counts": [
+        [
+          57,
+          51,
+          48
+        ],
+        [
+          56,
+          50,
+          39
+        ],
+        [
+          55,
+          49,
+          35
+        ],
+        [
+          54,
+          48,
+          31
+        ],
+        [
+          53,
+          47,
+          28
+        ],
+        [
+          52,
+          46,
+          25
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1550-13844047549578925383",
+      "source": "Esquiar es una actividad principal de viaje con muchos adeptos, en ocasiones llamados «amantes del esquí», que organizan sus vacaciones completamente en base al esquí en un sitio específico.",
+      "reference": "Skiing is a major travelling activity with many enthusiasts, occasionally known as \"ski bums,\" planning entire vacations around skiing at a particular location.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1550,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Skiing is a main travel activity with many adherents, sometimes called \"ski lovers,\" who organize their vacations completely based on skiing in a specific place.",
+      "engine_latency_ms": 753.1017910223454,
+      "call_wall_ms": 753.7851670058444,
+      "generated_tokens": 31,
+      "requested_max_tokens": 87,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 265.0172910070978,
+      "prefill_ms": 55.47870899317786,
+      "decode_ms": 488.0845000152476,
+      "chrf_counts": [
+        [
+          138,
+          137,
+          116
+        ],
+        [
+          137,
+          136,
+          76
+        ],
+        [
+          136,
+          135,
+          46
+        ],
+        [
+          135,
+          134,
+          34
+        ],
+        [
+          134,
+          133,
+          28
+        ],
+        [
+          133,
+          132,
+          23
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1540-14733513047073601927",
+      "source": "En términos generales, el laísmo es muy sencillo. Se basa en el kundalini yoga, la meditación y el camino del amor que todo lo abarca.",
+      "reference": "In principle the Tibetan Buddhism is very simple. It consists of Kundalini Yoga, meditation and the path of all-embracing love.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1540,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "In general, laísmo is very simple. It is based on kundalini yoga, meditation, and the path of love that encompasses everything.",
+      "engine_latency_ms": 736.0042079817504,
+      "call_wall_ms": 736.695499974303,
+      "generated_tokens": 29,
+      "requested_max_tokens": 75,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 261.8294580024667,
+      "prefill_ms": 54.53591601690278,
+      "decode_ms": 474.17474997928366,
+      "chrf_counts": [
+        [
+          108,
+          107,
+          91
+        ],
+        [
+          107,
+          106,
+          61
+        ],
+        [
+          106,
+          105,
+          45
+        ],
+        [
+          105,
+          104,
+          38
+        ],
+        [
+          104,
+          103,
+          33
+        ],
+        [
+          103,
+          102,
+          29
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1649-3425771136288028667",
+      "source": "Fue el emperador de Japón quien organizó las primeras celebraciones de los cerezos, solo para él y otros integrantes de la aristocracia de la Corte Imperial.",
+      "reference": "In Japan, the first cherry blossom parties were hosted by the emperor only for himself and other members of the aristocracy around the Imperial Court.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1649,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "It was the emperor of Japan who organized the first cherry blossom celebrations, just for him and other members of the Imperial Court aristocracy.",
+      "engine_latency_ms": 700.94304200029,
+      "call_wall_ms": 701.6938749584369,
+      "generated_tokens": 27,
+      "requested_max_tokens": 78,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 254.3477499857545,
+      "prefill_ms": 46.36199999367818,
+      "decode_ms": 446.5952920145355,
+      "chrf_counts": [
+        [
+          126,
+          123,
+          115
+        ],
+        [
+          125,
+          122,
+          88
+        ],
+        [
+          124,
+          121,
+          76
+        ],
+        [
+          123,
+          120,
+          70
+        ],
+        [
+          122,
+          119,
+          62
+        ],
+        [
+          121,
+          118,
+          55
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1607-4423650568009163367",
+      "source": "Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+      "reference": "It's worth half an hour to stroll about the intriguing village.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1607,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "It is worth spending half an hour taking a walk through the fascinating town.",
+      "engine_latency_ms": 542.6297500380315,
+      "call_wall_ms": 543.2791669736616,
+      "generated_tokens": 16,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 280.4360000300221,
+      "prefill_ms": 52.19912499887869,
+      "decode_ms": 262.1937500080094,
+      "chrf_counts": [
+        [
+          53,
+          64,
+          44
+        ],
+        [
+          52,
+          63,
+          24
+        ],
+        [
+          51,
+          62,
+          15
+        ],
+        [
+          50,
+          61,
+          11
+        ],
+        [
+          49,
+          60,
+          9
+        ],
+        [
+          48,
+          59,
+          7
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1626-1528701247599500084",
+      "source": "El ganador olímpico de la medalla de oro debía nadar en el estilo libre de 100 metros y 200 metros, y en tres relevos en los Juegos de la Commonwealth, pero su condición física ha sido puesta en dudas a raíz de sus quejas.",
+      "reference": "The Olympic gold medalist was due to swim in the 100m and 200m freestyle and in three relays at the Commonwealth Games, but due to his complaints his fitness has been in doubt.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1626,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The Olympic gold medalist was supposed to swim in the freestyle 100 and 200 meters and in three relays in the Commonwealth Games, but his physical condition has been called into question due to his complaints.",
+      "engine_latency_ms": 1023.5683329519816,
+      "call_wall_ms": 1024.4512079516426,
+      "generated_tokens": 45,
+      "requested_max_tokens": 132,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 275.8762500016019,
+      "prefill_ms": 58.97120898589492,
+      "decode_ms": 747.6920829503797,
+      "chrf_counts": [
+        [
+          144,
+          174,
+          141
+        ],
+        [
+          143,
+          173,
+          122
+        ],
+        [
+          142,
+          172,
+          104
+        ],
+        [
+          141,
+          171,
+          94
+        ],
+        [
+          140,
+          170,
+          85
+        ],
+        [
+          139,
+          169,
+          77
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1617-18331243003189041799",
+      "source": "El Parque Nacional Kruger (PNK) se ubica en el noreste sudafricano y se extiende a lo largo del límite con Mozambique en el este, Zimbabwe en el norte y el río Crocodile al sur.",
+      "reference": "The Kruger National Park (KNP) lies in the north-east of South Africa and runs along the border of Mozambique in the east, Zimbabwe in the north, and the southern border is the Crocodile River.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1617,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "Kruger National Park (KNP) is located in northeastern South Africa and extends along the border with Mozambique to the east, Zimbabwe to the north, and the Crocodile River to the south.",
+      "engine_latency_ms": 982.1781250066124,
+      "call_wall_ms": 982.8446669853292,
+      "generated_tokens": 40,
+      "requested_max_tokens": 102,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 347.1492090029642,
+      "prefill_ms": 59.59658301435411,
+      "decode_ms": 635.0289160036482,
+      "chrf_counts": [
+        [
+          160,
+          155,
+          144
+        ],
+        [
+          159,
+          154,
+          124
+        ],
+        [
+          158,
+          153,
+          108
+        ],
+        [
+          157,
+          152,
+          97
+        ],
+        [
+          156,
+          151,
+          87
+        ],
+        [
+          155,
+          150,
+          78
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1636-17972138306496509119",
+      "source": "Los españoles dieron inicio a la etapa de colonización, que se extendió por tres siglos.",
+      "reference": "The Spaniards started the colonization period which lasted for three centuries.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1636,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The Spanish began the colonization stage, which extended for three centuries.",
+      "engine_latency_ms": 446.200417005457,
+      "call_wall_ms": 446.5151670156047,
+      "generated_tokens": 14,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 222.8757080156356,
+      "prefill_ms": 51.44975002622232,
+      "decode_ms": 223.32470898982137,
+      "chrf_counts": [
+        [
+          69,
+          67,
+          57
+        ],
+        [
+          68,
+          66,
+          47
+        ],
+        [
+          67,
+          65,
+          41
+        ],
+        [
+          66,
+          64,
+          36
+        ],
+        [
+          65,
+          63,
+          32
+        ],
+        [
+          64,
+          62,
+          28
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1612-12297370021292966100",
+      "source": "El agua fluye encima del dique en un tramo que tiene un ancho de 100 pies.",
+      "reference": "Water is spilling over the levee in a section 100 feet wide.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1612,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "The water flows over the dike in a section that is 100 feet wide.",
+      "engine_latency_ms": 507.77758401818573,
+      "call_wall_ms": 508.1190419732593,
+      "generated_tokens": 19,
+      "requested_max_tokens": 64,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 207.5980840018019,
+      "prefill_ms": 46.93895898526535,
+      "decode_ms": 300.1795000163838,
+      "chrf_counts": [
+        [
+          49,
+          52,
+          40
+        ],
+        [
+          48,
+          51,
+          31
+        ],
+        [
+          47,
+          50,
+          26
+        ],
+        [
+          46,
+          49,
+          22
+        ],
+        [
+          45,
+          48,
+          18
+        ],
+        [
+          44,
+          47,
+          15
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    },
+    {
+      "id": "fleurs-es-development-1657-5438367140196502608",
+      "source": "Sin embargo, cualquier modificación o solicitud se debe realizar a través del agente de viajes en primer lugar, y no directamente a través del hotel.",
+      "reference": "Any amendments or requests though should be coursed through the travel agent first and not directly with the hotel.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "partition": "development",
+      "sentence_id": 1657,
+      "domain": "fleurs_parallel",
+      "required_substrings": [],
+      "reference_provenance": "upstream_fleurs_annotation",
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "hypothesis": "However, any modification or request must be made through the travel agent first, and not directly through the hotel.",
+      "engine_latency_ms": 617.6171249826439,
+      "call_wall_ms": 618.2595000136644,
+      "generated_tokens": 23,
+      "requested_max_tokens": 75,
+      "budget_exhausted": false,
+      "finish_reason": "stop",
+      "ttft_ms": 255.53979200776666,
+      "prefill_ms": 47.118625021539636,
+      "decode_ms": 362.0773329748772,
+      "chrf_counts": [
+        [
+          97,
+          99,
+          87
+        ],
+        [
+          96,
+          98,
+          62
+        ],
+        [
+          95,
+          97,
+          53
+        ],
+        [
+          94,
+          96,
+          48
+        ],
+        [
+          93,
+          95,
+          43
+        ],
+        [
+          92,
+          94,
+          39
+        ]
+      ],
+      "canary_pass": null,
+      "canary_matching": "existing case-insensitive substring contract; a lexical check, not semantic approval",
+      "status": "ok"
+    }
+  ],
+  "timeout_s": 3600.0,
+  "schema_version": 1,
+  "status": "completed",
+  "task": "translate",
+  "engine": "e2b",
+  "partition": "development",
+  "source_lang": "es",
+  "repeat": 2,
+  "items_sha256": "5ad02f3dbcb3d0749bf9831a2f6634bab9e0be265cd992a0e1fccb5b2a324778",
+  "expected_ids": [
+    "fleurs-es-development-1638-6927013055416209547",
+    "fleurs-es-development-1592-3930211725609960196",
+    "fleurs-es-development-1624-8750634895258922350",
+    "fleurs-es-development-1587-563233278035086965",
+    "fleurs-es-development-1554-13392988470145802268",
+    "fleurs-es-development-1641-2709586772537442969",
+    "fleurs-es-development-1644-3323600668018464153",
+    "fleurs-es-development-1651-15070404026815095185",
+    "fleurs-es-development-1659-15931608150451513857",
+    "fleurs-es-development-1609-8888603459166420274",
+    "fleurs-es-development-1613-14444456949745319932",
+    "fleurs-es-development-1515-16255658476875547265",
+    "fleurs-es-development-1537-11588863747163776837",
+    "fleurs-es-development-1555-1193954095328160401",
+    "fleurs-es-development-1631-13434181649028080555",
+    "fleurs-es-development-1543-16415711602924019767",
+    "fleurs-es-development-1648-9424529224418020799",
+    "fleurs-es-development-1524-9449585527367687175",
+    "fleurs-es-development-1541-7109939569267971011",
+    "fleurs-es-development-1582-2572372527541764304",
+    "fleurs-es-development-1599-10284528973491487253",
+    "fleurs-es-development-1635-12716912110208003007",
+    "fleurs-es-development-1574-13474293391889299943",
+    "fleurs-es-development-1547-4522346247754628358",
+    "fleurs-es-development-1570-12567461606544247708",
+    "fleurs-es-development-1655-12812403683131158859",
+    "fleurs-es-development-1600-12524033974685833914",
+    "fleurs-es-development-1551-809628312584936889",
+    "fleurs-es-development-1518-18251544358446811373",
+    "fleurs-es-development-1608-6937193608870883792",
+    "fleurs-es-development-1588-4445876756112550206",
+    "fleurs-es-development-1553-4745240682242570610",
+    "fleurs-es-development-1559-16515321832816575538",
+    "fleurs-es-development-1534-3412089685058336461",
+    "fleurs-es-development-1579-18224531686984750984",
+    "fleurs-es-development-1545-9636595379511704367",
+    "fleurs-es-development-1528-14516235058824705075",
+    "fleurs-es-development-1616-4938537836827977056",
+    "fleurs-es-development-1566-6160188706550380299",
+    "fleurs-es-development-1658-13286125305730696248",
+    "fleurs-es-development-1656-8515974555592166175",
+    "fleurs-es-development-1550-13844047549578925383",
+    "fleurs-es-development-1540-14733513047073601927",
+    "fleurs-es-development-1649-3425771136288028667",
+    "fleurs-es-development-1607-4423650568009163367",
+    "fleurs-es-development-1626-1528701247599500084",
+    "fleurs-es-development-1617-18331243003189041799",
+    "fleurs-es-development-1636-17972138306496509119",
+    "fleurs-es-development-1612-12297370021292966100",
+    "fleurs-es-development-1657-5438367140196502608"
+  ],
+  "human_approved_locally": false,
+  "training_eligible": false,
+  "started_at": "2026-09-10T14:15:38.967753+00:00",
+  "normalization": {
+    "version": 1,
+    "description": "NFKC + casefold; Unicode punctuation becomes spaces; whitespace collapsed; accents and digits retained; no number expansion, STT corrections or reference-dependent rewriting"
+  },
+  "chrf_contract": {
+    "implementation": "mac_followup_quality.chrf-v1",
+    "character_order": 6,
+    "beta": 2,
+    "case_sensitive": true,
+    "whitespace": "removed with str.split",
+    "aggregation": "sum clipped matching/reference/hypothesis n-gram counts across corpus, then average precision/recall over orders present in both and compute F-beta; no word n-grams",
+    "scale": "0..100; reference overlap, not semantic or human quality"
+  },
+  "config": {
+    "name": "e2b",
+    "task": "translate",
+    "requested_model_id": "mlx-community/gemma-4-e2b-it-OptiQ-4bit",
+    "fallback_on_low_conf": false,
+    "initial_prompt": null,
+    "word_timestamps": false,
+    "beam_size": 5,
+    "language_control": "forced",
+    "device": "mlx",
+    "compute_type": null,
+    "cpu_threads": 4,
+    "num_workers": 1,
+    "terminology_prompt": "none",
+    "prompt_cache": false,
+    "drafting": false,
+    "thinking": false,
+    "cache_limit_mb": 256
+  },
+  "model": {
+    "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-it-OptiQ-4bit/snapshots/0f3495e3e826e95fa21002c327805b840568f489",
+    "snapshot_revision": "0f3495e3e826e95fa21002c327805b840568f489",
+    "files": [
+      {
+        "path": "README.md",
+        "sha256": "4d669c0ccf450cbd6b6b4ac317fdc75f929483fc0b10cee197e1314beaccccfb",
+        "size_bytes": 5365
+      },
+      {
+        "path": "chat_template.jinja",
+        "sha256": "0a2c8073c878ab1da004bee933a998606537bbb62016310352c7285c3f01c5b5",
+        "size_bytes": 18569
+      },
+      {
+        "path": "config.json",
+        "sha256": "e5bbd625c64572f5f7e201bea5e4a703884aceb27f58a3fb484a786edb6b5f8b",
+        "size_bytes": 62708
+      },
+      {
+        "path": "generation_config.json",
+        "sha256": "d4226bbe3117d2d253ba4609720ba82c6c4ce4627a9a6ae05387c78983ac03de",
+        "size_bytes": 208
+      },
+      {
+        "path": "kv_config.json",
+        "sha256": "4ff522a030e9ec4b76a45ba0a51a5e2cf714f3bb6f2839140553172a5f0a38c4",
+        "size_bytes": 982
+      },
+      {
+        "path": "model.safetensors",
+        "sha256": "088c5f8fed7c724dbf0847dedbcafb994b6b2c7ecf2e33353f1dca569a0a1221",
+        "size_bytes": 4274963112
+      },
+      {
+        "path": "model.safetensors.index.json",
+        "sha256": "b3fbd0985009c1c2277ee770812fa18adbf2d5b80ebe907bed654bd301e97f23",
+        "size_bytes": 226372
+      },
+      {
+        "path": "optiq/optiq_vision.safetensors",
+        "sha256": "06968ae7623621d2ec290f48eceacae3c8f5570fb6f07227c50cdd4e3128cfc6",
+        "size_bytes": 951632738
+      },
+      {
+        "path": "optiq_metadata.json",
+        "sha256": "316fca4904668f29e5ffb09be64add2608a16f707d9a07cde08a3a8de03cc922",
+        "size_bytes": 28753
+      },
+      {
+        "path": "tokenizer.json",
+        "sha256": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f",
+        "size_bytes": 32169626
+      },
+      {
+        "path": "tokenizer_config.json",
+        "sha256": "bb2981f7996db023f7f650d1b413df9f517490487050c87217355e479822e743",
+        "size_bytes": 2744
+      }
+    ],
+    "files_sha256": "3bd57136b8b582208ba0497c805bfd7191cf6b5e2f7beaa0e98b9fdd7ee2c117"
+  },
+  "model_identity": {
+    "requested_model_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-it-OptiQ-4bit/snapshots/0f3495e3e826e95fa21002c327805b840568f489",
+    "actual_model_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-it-OptiQ-4bit/snapshots/0f3495e3e826e95fa21002c327805b840568f489",
+    "primary_identity_verified": true
+  },
+  "load_and_builtin_warmup_ms": 3053.211083984934,
+  "warmup": "engine built-in silence/first forward only; no evaluation items warmed or omitted",
+  "peak_rss_bytes": 3490299904,
+  "rss_scope": "process high-water RSS including model load, imports and input decoding; not additive with Metal",
+  "peak_metal_bytes": 4411601310,
+  "ended_at": "2026-09-10T14:16:20.887730+00:00",
+  "returncode": 0
+}

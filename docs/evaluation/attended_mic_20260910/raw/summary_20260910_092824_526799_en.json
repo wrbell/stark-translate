@@ -1,0 +1,24 @@
+{
+  "english": "The grace of God brings salvation.",
+  "spanish": "La gracia de Dios trae la salvación.",
+  "speakers": null,
+  "format": "short-session excerpt",
+  "translation_method": "recorded prediction",
+  "notice": "Too little text for a sermon summary; original excerpts and translations are shown. Translations are unreviewed predictions.",
+  "metadata": {
+    "input_files": [
+      "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_20260910_092824_526799_en.csv"
+    ],
+    "model": null,
+    "timestamp": "2026-09-10T09:32:21.419082",
+    "total_segments": 1,
+    "total_words": 6,
+    "diarized": false,
+    "source_languages": [
+      "en"
+    ],
+    "content_mode": "excerpt",
+    "transcript_truncated": false,
+    "human_reviewed": false
+  }
+}

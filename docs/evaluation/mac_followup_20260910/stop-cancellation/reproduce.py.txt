@@ -1,0 +1,63 @@
+"""Tiny deterministic Python 3.11 cancellation race; no pipeline/native imports."""
+
+import asyncio
+import json
+import platform
+
+
+async def exercise(mode):
+    received = []
+
+    class ControlledQueue(asyncio.Queue):
+        async def get(self):
+            frame = await super().get()
+            if frame == 24:
+                asyncio.get_running_loop().call_soon(task.cancel)
+            return frame
+
+    queue = ControlledQueue()
+    for frame in range(25):
+        queue.put_nowait(frame)
+
+    async def consume():
+        try:
+            while True:
+                try:
+                    if mode == "wait_for":
+                        frame = await asyncio.wait_for(queue.get(), timeout=0.01)
+                    else:
+                        async with asyncio.timeout(0.01):
+                            frame = await queue.get()
+                except TimeoutError:
+                    continue
+                received.append(frame)
+        except asyncio.CancelledError:
+            return {"cancellation_observed": True, "buffer_samples": len(received) * 512}
+
+    task = asyncio.create_task(consume())
+    try:
+        await asyncio.sleep(0.05)
+        result = {
+            "mode": mode,
+            "first_stop_completed": task.done(),
+            "buffer_samples": len(received) * 512,
+            "pending_cancel_requests": task.cancelling(),
+        }
+    finally:
+        if not task.done():
+            task.cancel()
+        cleanup = await task
+    result["cleanup"] = cleanup
+    return result
+
+
+async def main():
+    rows = [await exercise("wait_for"), await exercise("timeout")]
+    assert rows[0]["first_stop_completed"] is False
+    assert rows[1]["first_stop_completed"] is True
+    assert all(row["buffer_samples"] == 25 * 512 for row in rows)
+    print(json.dumps({"python": platform.python_version(), "results": rows}, indent=2))
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

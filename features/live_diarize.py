@@ -60,19 +60,40 @@ def hf_token() -> str | None:
 
 
 def _load_pyannote():
-    """Import pyannote lazily; return None if unavailable or unconfigured.
-
-    ``features.diarize.run_diarization`` calls ``sys.exit(1)`` when ``HF_TOKEN``
-    is missing (SystemExit is not caught by a bare ``except Exception``), so
-    check the token here.
-    """
-    if not hf_token():
+    """Load the optional CPU pipeline with pinned local nested checkpoints."""
+    token = hf_token()
+    if not token:
         logger.warning("HF_TOKEN not set — pyannote needs a HuggingFace token; live diarization disabled")
         return None
     try:
-        from features.diarize import run_diarization
+        import yaml
+        from pyannote.audio import Model
+        from pyannote.audio.pipelines import SpeakerDiarization
 
-        return run_diarization
+        from engines.model_paths import pinned_hf_entry, resolve_model_for_loading
+
+        source = "pyannote/speaker-diarization-3.1"
+        entry = pinned_hf_entry(source)
+        root = Path(resolve_model_for_loading(source, token=token))
+        config = yaml.safe_load((root / "config.yaml").read_text())
+        if config["pipeline"]["name"] != "pyannote.audio.pipelines.SpeakerDiarization":
+            raise ValueError("Unsupported pinned pyannote pipeline class; review the model manifest")
+        params = dict(config["pipeline"]["params"])
+        # The upstream YAML names moving repositories. Resolve every nested
+        # source ourselves and give the pipeline Model objects, never HF IDs.
+        for name in ("segmentation", "embedding"):
+            expected = entry["dependencies"][name]
+            if params[name] != expected:
+                raise ValueError(f"Unregistered pyannote {name} source; review the pinned pipeline config")
+            checkpoint = Path(resolve_model_for_loading(expected, token=token)) / "pytorch_model.bin"
+            if not checkpoint.is_file():
+                raise ValueError(f"Missing local pyannote {name} checkpoint: {checkpoint}")
+            params[name] = Model.from_pretrained(str(checkpoint), map_location="cpu", strict=False)
+            if params[name] is None:
+                raise ValueError(f"Pinned pyannote {name} checkpoint could not be loaded")
+        pipeline = SpeakerDiarization(**params)
+        pipeline.instantiate(config["params"])
+        return pipeline
     except Exception as exc:
         logger.warning("pyannote unavailable: %s — live diarization disabled", exc)
         return None
@@ -218,9 +239,30 @@ def _load_speechbrain_embedder():
             logger.info("SpeechBrain ECAPA unavailable: %s", exc)
             return None
     try:
+        import inspect
+
+        from engines.model_paths import pinned_hf_entry, resolve_model_for_loading
+
+        source = "speechbrain/spkrec-ecapa-voxceleb"
+        revision = pinned_hf_entry(source)["revision"]
+        local_source = resolve_model_for_loading(source)
+        # SpeechBrain 1.0.x takes revision directly. 1.1.x instead forwards a
+        # FetchConfig; sending revision via **kwargs there reaches the model
+        # constructor rather than the downloader. Both use local YAML/weights.
+        fetch_kwargs = {}
+        if "revision" in inspect.signature(EncoderClassifier.from_hparams).parameters:
+            fetch_kwargs["revision"] = revision
+        else:
+            from speechbrain.utils.fetching import FetchConfig
+
+            fetch_kwargs["fetch_config"] = FetchConfig(revision=revision, allow_network=False)
         classifier = EncoderClassifier.from_hparams(
-            source="speechbrain/spkrec-ecapa-voxceleb",
+            source=local_source,
+            # The pinned YAML otherwise sends pretrainer.collect_files back
+            # to the bare remote repo independently of the source argument.
+            overrides={"pretrained_path": local_source},
             run_opts={"device": "cpu"},
+            **fetch_kwargs,
         )
     except Exception as exc:
         logger.warning("SpeechBrain ECAPA failed to load: %s", exc)
@@ -249,7 +291,14 @@ def _load_pyannote_embedder():
         logger.info("pyannote embedding unavailable: %s", exc)
         return None
     try:
-        inference = Inference("pyannote/embedding", use_auth_token=token, window="whole")
+        from engines.model_paths import resolve_model_for_loading
+
+        checkpoint = Path(resolve_model_for_loading("pyannote/embedding", token=token)) / "pytorch_model.bin"
+        if not checkpoint.is_file():
+            raise ValueError(f"Missing pinned pyannote embedding checkpoint: {checkpoint}")
+        # Inference accepts a local checkpoint and passes it to Model's local
+        # file branch. No unsupported revision kwarg or bare HF ID is passed.
+        inference = Inference(str(checkpoint), window="whole")
     except Exception as exc:
         logger.warning("pyannote/embedding failed to load: %s", exc)
         return None
@@ -482,16 +531,13 @@ def main() -> int:
     signal.signal(signal.SIGINT, _stop)
 
     run_diarization = None
+    pyannote_attempted = False
     embedder = None
     embedder_failed = False
     cluster = OnlineSpeakerCluster(threshold=args.cluster_threshold, max_speakers=args.max_speakers)
 
     if args.fake_labels:
         logger.warning("--fake-labels set: emitting synthetic Speaker A/B (tests only)")
-    elif args.mode == "pyannote":
-        run_diarization = _load_pyannote()
-        if run_diarization is None:
-            logger.warning("pyannote mode disabled (no HF_TOKEN or import failed) — daemon idle")
 
     chunk_id = 0
     iters = 0
@@ -540,13 +586,22 @@ def main() -> int:
                     label_id_start=chunk_id,
                 )
                 chunk_id += emitted
-        elif args.mode == "pyannote" and run_diarization is not None:
-            if rolling_wav.exists():
-                emitted = emit_pyannote_segments(out_path, chunk_id, run_diarization, rolling_wav)
-                if emitted:
-                    chunk_id += 1
+        elif args.mode == "pyannote":
+            if rolling_wav.is_file() and _wav_duration_s(rolling_wav) > 0:
+                # The pinned helper loads models, so keep it behind actual
+                # file input readiness. Missing/partial WAVs must not trigger
+                # downloads, and unavailable optional models are tried once.
+                if not pyannote_attempted:
+                    pyannote_attempted = True
+                    run_diarization = _load_pyannote()
+                    if run_diarization is None:
+                        logger.warning("pyannote mode unavailable — daemon idle; restart after resolving model access")
+                if run_diarization is not None:
+                    emitted = emit_pyannote_segments(out_path, chunk_id, run_diarization, rolling_wav)
+                    if emitted:
+                        chunk_id += 1
             else:
-                logger.debug("rolling WAV not yet present at %s, waiting…", rolling_wav)
+                logger.debug("rolling WAV not yet ready at %s, waiting…", rolling_wav)
         elif not rolling_wav.exists():
             logger.debug("rolling WAV not yet present at %s, waiting…", rolling_wav)
 

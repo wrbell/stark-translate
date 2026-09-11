@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+    "-m",
+    "pytest",
+    "tests/test_documentation.py",
+    "-q",
+    "--no-cov"
+  ],
+  "started_at": "2026-09-11T00:52:48.578854+00:00",
+  "ended_at": "2026-09-11T00:52:49.045579+00:00",
+  "exit_code": 0,
+  "log_sha256": "92824878ac375044b0823cff4fc0272826451257c8f0f0041ffad91f4b0c5e53"
+}

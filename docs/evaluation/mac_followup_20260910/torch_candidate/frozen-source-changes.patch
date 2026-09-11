@@ -1,0 +1,329 @@
+--- a/dry_run_ab.py
++++ b/dry_run_ab.py
+@@ -2755,6 +2755,16 @@
+                     **sample_bounds,
+                 },
+             )
++            _latency_trace.record(
++                "partial_physical_result",
++                utterance_id=utterance_id,
++                request_sequence=request_sequence,
++                processed_audio_samples=processed_audio_samples,
++                audio_sample_rate=SAMPLE_RATE,
++                rolling_offset_samples=rolling_start,
++                incremental_mode=_latency.incremental_stt,
++                **sample_bounds,
++            )
+             elapsed = (time.perf_counter() - started) * 1000
+             if margin:
+                 _partial_runtime.observe(original_audio_duration, elapsed)
+@@ -3583,7 +3593,13 @@
+             def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing):
+                 clock.stt_started = time.perf_counter()
+                 try:
+-                    return _run_tracked_stt("final", _run_stt_via_worker if MULTIPROCESS else _run_stt, audio, prompt)
++                    return _run_tracked_stt(
++                        "final",
++                        _run_stt_via_worker if MULTIPROCESS else _run_stt,
++                        audio,
++                        prompt,
++                        trace_fields={"chunk_id": cid, "utterance_id": clock.utterance_id, **clock.sample_metadata()},
++                    )
+                 finally:
+                     clock.stt_finished = time.perf_counter()
+ 
+@@ -4808,11 +4824,13 @@
+ 
+                     # Skip all speech buffering when in music hold
+                     if music_hold_active:
+-                        _source_coverage.observe(vars(frame_stamp), "music_hold")
++                        _source_coverage.observe(vars(frame_stamp), "music_hold", speech=has_speech)
+                         continue
+ 
+                     buffered_frame = has_speech or (len(speech_buffer) > 0 and silence_frames + 1 < max_silence_frames)
+-                    _source_coverage.observe(vars(frame_stamp), "buffered" if buffered_frame else "vad_non_speech")
++                    _source_coverage.observe(
++                        vars(frame_stamp), "buffered" if buffered_frame else "vad_non_speech", speech=has_speech
++                    )
+ 
+                     if has_speech:
+                         if silence_frames:
+--- a/tools/fixed_span_delivery.py
++++ b/tools/fixed_span_delivery.py
+@@ -52,10 +52,24 @@
+     if duplicate_samples:
+         raise ValueError("Overlapping final source spans")
+     results = []
++    masked = any("required_intervals" in anchor for anchor in anchors)
++    if masked and not all("required_intervals" in anchor for anchor in anchors):
++        raise ValueError("Cannot mix buffered-span and VAD-mask anchors")
+     for anchor in anchors:
+         start, end, speech_end = (_number(anchor.get(k)) for k in ("sample_start", "sample_end", "speech_end_sample"))
+         if not 0 <= start < speech_end <= end:
+             raise ValueError("Invalid frozen source anchor")
++        required = anchor.get("required_intervals", [[start, end]])
++        if not isinstance(required, list) or not required:
++            raise ValueError("Frozen source anchor requires nonempty intervals")
++        for interval in required:
++            if not isinstance(interval, (list, tuple)) or len(interval) != 2:
++                raise ValueError("Invalid required source interval")
++            left, right = map(_number, interval)
++            if not start <= left < right <= (speech_end if masked else end):
++                raise ValueError("Required source interval outside anchor")
++        required = merged(required)
++        required_samples = sum(b - a for a, b in required)
+         eligible = anchor.get("endpoint_reason") not in {"eof", "pause", "stop"} and not anchor.get(
+             "padding_samples", 0
+         )
+@@ -63,11 +77,11 @@
+         for row in sorted(records, key=lambda r: r["ready"]):
+             if row["padding"]:
+                 continue  # synthetic tail cannot supply a gain target
+-            left, right = max(start, row["start"]), min(end, row["end"])
+-            if right <= left:
+-                continue
+-            pieces.append((left, right))
+-            if sum(b - a for a, b in merged(pieces)) == end - start:
++            for required_start, required_end in required:
++                left, right = max(required_start, row["start"]), min(required_end, row["end"])
++                if right > left:
++                    pieces.append((left, right))
++            if sum(b - a for a, b in merged(pieces)) == required_samples:
+                 completed_at = row["ready"] - origin
+                 break
+         results.append(
+@@ -76,6 +90,7 @@
+                 "sample_start": start,
+                 "sample_end": end,
+                 "speech_end_sample": speech_end,
++                "required_intervals": required,
+                 "eligible": eligible,
+                 "covered": completed_at is not None,
+                 "speech_end_to_span_final_ms": (
+@@ -84,17 +99,10 @@
+             }
+         )
+     values = sorted(r["speech_end_to_span_final_ms"] for r in results if r["speech_end_to_span_final_ms"] is not None)
+-    # Match NumPy's ordinary linear percentile without importing an inference stack.
+-    position = (len(values) - 1) * 0.95
+-    lower = int(position) if values else 0
+-    p95 = (
+-        values[lower] + (values[min(lower + 1, len(values) - 1)] - values[lower]) * (position - lower)
+-        if values
+-        else None
+-    )
++    p95 = values[math.ceil(len(values) * 0.95) - 1] if values else None
+     return {
+         "schema_version": 1,
+-        "metric": "fixed_source_span_server_delivery",
++        "metric": "fixed_vad_positive_source_server_delivery" if masked else "fixed_source_span_server_delivery",
+         "status": (
+             "no_eligible_anchors"
+             if not any(r["eligible"] for r in results)
+@@ -107,5 +115,7 @@
+         "n": len(values),
+         "p50_ms": statistics.median(values) if values else None,
+         "p95_ms": p95,
+-        "quality_scope": "Audio-span completion only; source/translation references scored separately",
++        "percentile_method": "median p50; nearest-rank ceil(0.95*n) p95",
++        "quality_scope": "Frozen machine-VAD mask completion" if masked else "Audio-span completion only",
++        "reference_quality": "Source/translation references scored separately; VAD mask is not acoustic truth",
+     }
+--- a/tools/mac_followup_latency.py
++++ b/tools/mac_followup_latency.py
+@@ -11,6 +11,7 @@
+ import json
+ import os
+ import re
++from collections import defaultdict
+ from pathlib import Path
+ 
+ from tools.fixed_span_delivery import fixed_span_delivery
+@@ -30,6 +31,7 @@
+     translated_preview,
+ )
+ from tools.replay_bench import run_replay
++from tools.source_coverage import merged
+ 
+ 
+ def configuration(spec, config, clip, size):
+@@ -187,6 +189,21 @@
+         print(f"Finished {session}: {errors or result.get('error') or 'OK'}", flush=True)
+ 
+ 
++def speech_intervals(run, *, finalized_only=False):
++    observed = run["observed"]["session_summary"]["source_coverage"]["observed"]
++    if not observed or any(type(row.get("vad_positive")) is not bool for row in observed):
++        raise ValueError("Missing frozen per-frame VAD classification")
++    positive = [(row["start"], row["end"]) for row in observed if row["vad_positive"]]
++    if finalized_only:
++        positive = [
++            (max(a, row["sample_start"]), min(b, row["speech_end_sample"]))
++            for a, b in positive
++            for row in run["diagnostic_finals"]
++            if max(a, row["sample_start"]) < min(b, row["speech_end_sample"])
++        ]
++    return merged(positive)
++
++
+ def score_pair(opening, candidate, closing):
+     runs = (opening, candidate, closing)
+     if len({r["source_identity"] for r in runs}) != 1 or len({r["clip"]["sha256"] for r in runs}) != 1:
+@@ -202,6 +219,14 @@
+         for i, row in enumerate(opening["diagnostic_finals"])
+     ]
+     rate = opening["diagnostic_finals"][0]["sample_rate"]
++    buffered_metrics = [fixed_span_delivery(anchors, r["diagnostic_finals"], sample_rate=rate) for r in runs]
++    positive = speech_intervals(opening)
++    for anchor in anchors:
++        anchor["required_intervals"] = [
++            [max(a, anchor["sample_start"]), min(b, anchor["speech_end_sample"])]
++            for a, b in positive
++            if max(a, anchor["sample_start"]) < min(b, anchor["speech_end_sample"])
++        ]
+     metrics = [fixed_span_delivery(anchors, r["diagnostic_finals"], sample_rate=rate) for r in runs]
+     before, current, after = metrics
+     reasons = []
+@@ -227,10 +252,8 @@
+         preview_loss.append(loss)
+         if loss > 0.02:
+             reasons.append("preview_source_coverage_loss")
+-        if (
+-            coverage_missing(control["observed"]["coverage_intervals_s"], candidate["observed"]["coverage_intervals_s"])
+-            > 0
+-        ):
++        delivered = merged([(r["sample_start"], r["sample_end"]) for r in candidate["diagnostic_finals"]])
++        if coverage_missing(speech_intervals(control, finalized_only=True), delivered) > 0:
+             reasons.append("final_source_coverage_loss")
+     return {
+         "status": "latency_candidate" if not reasons else "rejected",
+@@ -239,26 +262,45 @@
+         "candidate": current,
+         "closing": after,
+         "preview_missing_fractions": preview_loss,
++        "anchors_sha256": stable_hash(anchors),
++        "buffered_span_diagnostic": buffered_metrics,
++        "p95_claim_eligible": all(m["n"] >= 100 for m in metrics),
+         "promotion": "Requires >=2/3 repeats plus independent quality, queue/memory and untouched confirmation gates",
+     }
+ 
+ 
+ def report(args):
++    provenance = json.loads((args.input / "provenance.json").read_text())
+     runs = [json.loads(p.read_text()) for p in args.input.glob("*.json") if p.name != "provenance.json"]
+     runs = [r for r in runs if "experiment" in r]
++    indexed = defaultdict(list)
++    for item in runs:
++        indexed[tuple(item.get(k) for k in ("repeat", "experiment", "size", "clip_id"))].append(item)
++    planned = list(schedule(provenance["spec"], provenance["repeats"]))
++    expected = {(repeat, config["name"], size, clip["id"]): clip for repeat, config, clip, size in planned}
++    inventory_errors = []
++    for key in set(expected) | set(indexed):
++        if key not in expected:
++            inventory_errors.append(f"Unexpected run key: {key}")
++        elif len(indexed[key]) != 1:
++            inventory_errors.append(f"Expected exactly one run: {key}; found {len(indexed[key])}")
++        else:
++            item = indexed[key][0]
++            repeat, name, size, clip_id = key
++            session = f"{provenance['tag']}_{name}_{size}_r{repeat}_{clip_id}_{expected[key]['lang']}"
++            if item.get("session_id") != session or item.get("source_identity") != provenance["source_identity"]:
++                inventory_errors.append(f"Run identity mismatch: {key}")
+     pairs = []
+-    for candidate in runs:
+-        if candidate["experiment"] in {"baseline", "baseline_anchor"}:
++    for repeat, name, size, clip_id in expected:
++        if name in {"baseline", "baseline_anchor"}:
+             continue
+-        controls = {
+-            r["experiment"]: r
+-            for r in runs
+-            if all(r[k] == candidate[k] for k in ("repeat", "size", "clip_id"))
+-            and r["experiment"] in {"baseline", "baseline_anchor"}
+-        }
+-        record = {k: candidate[k] for k in ("session_id", "experiment", "repeat", "size", "clip_id")}
++        record = dict(experiment=name, repeat=repeat, size=size, clip_id=clip_id)
+         try:
+-            record.update(score_pair(controls["baseline"], candidate, controls["baseline_anchor"]))
++            keys = [(repeat, n, size, clip_id) for n in ("baseline", name, "baseline_anchor")]
++            if any(len(indexed[key]) != 1 for key in keys):
++                raise ValueError("Missing or duplicate candidate/control record")
++            opening, candidate, closing = [indexed[key][0] for key in keys]
++            record.update(session_id=candidate["session_id"], **score_pair(opening, candidate, closing))
+         except (ValueError, KeyError, IndexError) as exc:
+             record.update(status="invalid_comparison", error=str(exc))
+         pairs.append(record)
+@@ -268,6 +310,9 @@
+             "schema_version": 1,
+             "pairs": pairs,
+             "run_count": len(runs),
++            "expected_runs": len(expected),
++            "inventory_complete": not inventory_errors,
++            "inventory_errors": inventory_errors,
+             "observed_final_counts": stats([r["observed"]["final_count"] for r in runs]),
+             "defaults_changed": False,
+         },
+--- a/tools/source_coverage.py
++++ b/tools/source_coverage.py
+@@ -50,7 +50,7 @@
+         self._rate = rate
+         return start, end
+ 
+-    def observe(self, metadata, state):
++    def observe(self, metadata, state, *, speech=None):
+         with self._lock:
+             bounds = self._bounds(metadata)
+             if bounds is None or bounds[0] == bounds[1]:
+@@ -59,10 +59,15 @@
+             if start < self._last_end:
+                 self._overlap += min(end, self._last_end) - start
+             self._last_end = max(end, self._last_end)
+-            if self._observed and self._observed[-1]["state"] == state and self._observed[-1]["end"] == start:
++            if (
++                self._observed
++                and self._observed[-1]["state"] == state
++                and self._observed[-1]["end"] == start
++                and self._observed[-1].get("vad_positive") == speech
++            ):
+                 self._observed[-1]["end"] = end
+             elif len(self._observed) < self.capacity:
+-                self._observed.append({"start": start, "end": end, "state": state})
++                self._observed.append({"start": start, "end": end, "state": state, "vad_positive": speech})
+             else:
+                 self._dropped += 1
+ 
+--- a/tools/training_preflight.py
++++ b/tools/training_preflight.py
+@@ -35,6 +35,7 @@
+     "bible_data/synthetic/deepl_sermon_benchmark_500.jsonl",
+     "tools/stt_bench_manifest.json",
+     "docs/evaluation/mac_v2026_14_manifest_v2.json",
++    "docs/evaluation/mac_followup_20260910/public_data/manifest.json",
+     "training/theological_canaries.py",
+ )
+ TEXT_FIELDS = {
+@@ -48,8 +49,10 @@
+     "reference_text",
+     "reference_translation",
+     "draft_transcript",
++    "reference",
++    "translation_reference",
+ }
+-ID_FIELDS = {"verse_id", "video_id", "chunk_source", "source_id"}
++ID_FIELDS = {"verse_id", "video_id", "chunk_source", "source_id", "sentence_id"}
+ 
+ 
+ class PreflightError(ValueError):
+@@ -168,7 +171,11 @@
+ 
+ 
+ def check_training_row(row: dict, index: dict, label: str) -> None:
+-    if row.get("split", "train") != "train" or row.get("usage") == "evaluation_only":
++    if (
++        row.get("split", "train") != "train"
++        or row.get("usage") == "evaluation_only"
++        or row.get("training_eligible") is False
++    ):
+         raise PreflightError(f"Evaluation row in training input: {label}")
+     if row.get("approved_for_training") is False or row.get("review_status") == "unapproved":
+         raise PreflightError(f"Unapproved candidate in training input: {label}")

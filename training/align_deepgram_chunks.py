@@ -140,43 +140,18 @@ def extract_audio_chunk(source_wav: Path, output_wav: Path, start: float, end: f
     return True
 
 
-_audio_file_cache: dict[str, Path | None] = {}
+def build_audio_file_index(audio_dir: Path) -> dict[str, list[Path]]:
+    """Take an explicit per-run source index using the CPU preflight contract."""
+    from tools.training_preflight import index_source_wavs
+
+    return index_source_wavs(audio_dir)
 
 
-def find_audio_file(audio_dir: Path, source: str) -> Path | None:
-    """Find the WAV file for a given source stem.
+def find_audio_file(audio_dir: Path, source: str, *, audio_files: dict[str, list[Path]] | None = None) -> Path | None:
+    """Find a literal flat/nested WAV stem; fail on ambiguity instead of guessing."""
+    from tools.training_preflight import resolve_source_wav
 
-    Searches flat directory first, then falls back to recursive search.
-    Results are cached to avoid repeated rglob calls.
-    """
-    if source in _audio_file_cache:
-        return _audio_file_cache[source]
-
-    # Fast path: flat directory
-    candidates = [
-        audio_dir / f"{source}.wav",
-        audio_dir / f"{source}.WAV",
-    ]
-    for c in candidates:
-        if c.exists():
-            _audio_file_cache[source] = c
-            return c
-
-    # Glob fallback (flat)
-    matches = list(audio_dir.glob(f"{source}.*"))
-    wav_matches = [m for m in matches if m.suffix.lower() == ".wav"]
-    if wav_matches:
-        _audio_file_cache[source] = wav_matches[0]
-        return wav_matches[0]
-
-    # Recursive fallback for nested directory structures (e.g., stt-data/{type}/{year}/)
-    rmatches = list(audio_dir.rglob(f"{source}.wav"))
-    if rmatches:
-        _audio_file_cache[source] = rmatches[0]
-        return rmatches[0]
-
-    _audio_file_cache[source] = None
-    return None
+    return resolve_source_wav(audio_dir, source, audio_files=audio_files)
 
 
 def determine_eval_sources(chunks: list[dict], eval_sources_arg: str | None) -> set[str]:
@@ -227,6 +202,7 @@ def _generate_examples(rows, grouped_chunks, audio_dir, processor):
     """
     import soundfile as sf
 
+    audio_files = build_audio_file_index(audio_dir)
     for i, row in enumerate(rows):
         fname = row["file_name"]
         text = row["transcription"]
@@ -247,7 +223,7 @@ def _generate_examples(rows, grouped_chunks, audio_dir, processor):
         end = chunk.get("end", 0.0)
 
         # Find source audio
-        audio_path = find_audio_file(audio_dir, source)
+        audio_path = find_audio_file(audio_dir, source, audio_files=audio_files)
         if audio_path is None:
             continue
 
@@ -548,6 +524,7 @@ def main():
         "ffmpeg_errors": 0,
     }
 
+    audio_files = build_audio_file_index(args.audio_dir)
     for source, source_chunks in sorted(grouped.items()):
         # Load Deepgram transcript
         dg = load_deepgram_transcript(args.deepgram_dir, source)
@@ -557,7 +534,7 @@ def main():
             continue
 
         # Find audio file
-        audio_path = find_audio_file(args.audio_dir, source)
+        audio_path = find_audio_file(args.audio_dir, source, audio_files=audio_files)
         if audio_path is None:
             logger.warning("No audio file found for source: %s", source)
             stats["skipped_no_audio"] += len(source_chunks)

@@ -155,3 +155,87 @@ def test_zero_output_summary_still_records_experiment_execution(monkeypatch):
     assert record["event"] == "session_summary"
     assert record["latency_experiment_counters"]["warmup_suppressed_busy"] == 3
     assert record["latency_experiment_counters"]["warmup_executed"] == 0
+
+
+def test_session_drain_joins_cancelled_native_stt_before_summary(monkeypatch):
+    import dry_run_ab as pipeline
+    from tools.latency_trace import LatencyTrace
+
+    started, release = threading.Event(), threading.Event()
+    trace = LatencyTrace(True)
+    monkeypatch.setattr(pipeline, "_latency_trace", trace)
+    monkeypatch.setattr(pipeline, "_active_stt_workers", {"partial": 0, "final": 0})
+    monkeypatch.setattr(pipeline, "_experiment_counters", {})
+    monkeypatch.setattr(pipeline, "_partial_tasks", set())
+    for name in ("_pytorch_pool", "_stt_comm_pool", "_trans_comm_pool", "_vad_pool", "_tts_pool"):
+        monkeypatch.setattr(pipeline, name, None)
+    pool = ThreadPoolExecutor(max_workers=1)
+    monkeypatch.setattr(pipeline, "_pipeline_pool", pool)
+    queued_ran = threading.Event()
+
+    def native():
+        started.set()
+        assert release.wait(3)
+        return "result"
+
+    async def exercise():
+        loop = asyncio.get_running_loop()
+        future = loop.run_in_executor(pool, pipeline._run_tracked_stt, "partial", native)
+        assert await asyncio.to_thread(started.wait, 1)
+        future.cancel()
+        assert future.done() and pipeline._active_stt_workers["partial"] == 1
+        queued = pool.submit(queued_ran.set)
+        drain = asyncio.create_task(pipeline._drain_inference_workers())
+        # Event loop remains available to release native work; the canceled
+        # wrapper alone must not let the drain return or the summary freeze.
+        for _ in range(100):
+            if queued.cancelled():
+                break
+            await asyncio.sleep(0.001)
+        assert queued.cancelled() and not drain.done()
+        release.set()
+        await asyncio.wait_for(drain, 2)
+        events = trace.snapshot()["events"]
+        assert [e["event"] for e in events] == ["physical_stt_started", "physical_stt_finished"]
+        assert pipeline._active_stt_workers == {"partial": 0, "final": 0}
+        assert not queued_ran.is_set()
+
+    try:
+        asyncio.run(exercise())
+    finally:
+        release.set()
+        pool.shutdown(wait=True, cancel_futures=True)
+
+
+def test_session_drain_preserves_queued_tts_for_published_finals(monkeypatch):
+    import dry_run_ab as pipeline
+
+    for name in ("_pipeline_pool", "_pytorch_pool", "_stt_comm_pool", "_trans_comm_pool", "_vad_pool"):
+        monkeypatch.setattr(pipeline, name, None)
+    monkeypatch.setattr(pipeline, "_partial_tasks", set())
+    started, release = threading.Event(), threading.Event()
+    played = []
+    pool = ThreadPoolExecutor(max_workers=1)
+    monkeypatch.setattr(pipeline, "_tts_pool", pool)
+
+    def first():
+        started.set()
+        assert release.wait(3)
+        played.append(1)
+
+    async def exercise():
+        pool.submit(first)
+        assert await asyncio.to_thread(started.wait, 1)
+        second = pool.submit(played.append, 2)
+        drain = asyncio.create_task(pipeline._drain_inference_workers())
+        await asyncio.sleep(0.02)
+        assert not drain.done() and not second.cancelled()
+        release.set()
+        await asyncio.wait_for(drain, 2)
+        assert played == [1, 2]
+
+    try:
+        asyncio.run(exercise())
+    finally:
+        release.set()
+        pool.shutdown(wait=True)

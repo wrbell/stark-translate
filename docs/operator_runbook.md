@@ -223,8 +223,23 @@ Evaluation bundles are rejected by training mergers. Retain the bundle manifest
 with any training run. Older sessions without successful completion evidence remain
 reviewable; do not invent completion or human approval to export them.
 
-Live microphone permission, output routing/unplug/replug, a real two-speaker
-recording, natural Spanish references and bilingual approval remain explicit
-rehearsal gates. Controlled file replay does not certify these physical or human
-steps. The September 10 overnight work defers live microphone and physical outputs
-until the user returns.
+Current [source validation](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+binds the completed software checks to `760e948`. The
+[installed-delivery record](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+records completed package checks and six file replays, including both full
+English services. Human and physical-device acceptance remains separate. Consult [implementation status](mac_implementation_status.md)
+for current service and integration decisions; software checks do not replace the
+attended rehearsal above.
+
+The September 10 [attended checks](evaluation/attended_mic_20260910/README.md)
+passed EN/ES microphone input readiness and Stop, plus EN pause/resume, in a quiet
+room without detected speech. Later [synthetic acoustic checks](evaluation/tts_routing_20260910/README.md)
+produced captions: English completed, while Spanish retained capture loss. The
+[capture-accounting repair](evaluation/mac_followup_20260910/capture-loss-accounting.md)
+reports that loss more accurately; sustained live spoken-caption acceptance is
+still pending. The [routing audit](evaluation/mac_followup_20260910/tts-routing-acceptance.md)
+supports the original per-language output-routing requirement. Integrated native
+TTS, human audibility and physical unplug/replug remain separate pending checks,
+as do natural two-speaker labels, locally reviewed Spanish church references and
+bilingual approval. Public EN/ES read-speech and controlled file replays support
+engineering checks without certifying those physical or human steps.

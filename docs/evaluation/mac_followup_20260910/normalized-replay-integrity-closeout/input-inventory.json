@@ -1,0 +1,103 @@
+{
+  "cohorts": [
+    {
+      "cohort": "standard-screen-normalized-v1",
+      "persisted_run_json_count": 13,
+      "recorded_source_revision": "a8511eed53fde804a688b4dd56a52c077e773eca",
+      "source_identity": "a449ac1cee406b8061815e2d13b45ec7b6f0a6bbacfdb730cda04824463ecdcc",
+      "files": [
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_baseline_e2b_r0_fleurs_development_en_en.json",
+          "size_bytes": 2530833
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_baseline_e2b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2397252
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_baseline_e4b_r0_fleurs_development_en_en.json",
+          "size_bytes": 2512256
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_baseline_e4b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2394097
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_en_en.json",
+          "size_bytes": 2548996
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_160ms_e2b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2414376
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_en_en.json",
+          "size_bytes": 2523084
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_160ms_e4b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2373003
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_en_en.json",
+          "size_bytes": 2529343
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_240ms_e2b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2467370
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_en_en.json",
+          "size_bytes": 2518852
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_2s_240ms_e4b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2426580
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/followup_std_v1_early_4s_160ms_e4b_r0_fleurs_development_en_en.json",
+          "size_bytes": 2496074
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1/provenance.json",
+          "size_bytes": 125369
+        }
+      ]
+    },
+    {
+      "cohort": "measurement-pilot-v4",
+      "persisted_run_json_count": 3,
+      "recorded_source_revision": "eddb0adb4741307680079802c47f33cb21d56aec",
+      "source_identity": "e22411047861089b919965328dcc24ba9e06b170e4c0fe28b280a81436a20047",
+      "files": [
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/measurement-pilot-v4/integrity_v4_baseline_anchor_e4b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2410027
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/measurement-pilot-v4/integrity_v4_baseline_e4b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2452598
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/measurement-pilot-v4/integrity_v4_early_2s_160ms_e4b_r0_fleurs_development_es_es.json",
+          "size_bytes": 2419516
+        },
+        {
+          "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/measurement-pilot-v4/provenance.json",
+          "size_bytes": 58280
+        }
+      ]
+    }
+  ],
+  "interrupted_raw_files": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/ab_metrics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.csv",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/diagnostics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.jsonl",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/hardware_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/health_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/partials_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.jsonl",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/replay_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.log",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/session_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.log",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/session_lifecycle_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/metrics/session_metadata_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json"
+  ]
+}

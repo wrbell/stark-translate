@@ -11,7 +11,7 @@
 - `utterance_discarded` removes only the matching session/utterance's provisional caption and suppresses late matching partials. Final chunk numbers are a separate identity; never remove a final or final stream because its number matches a discarded utterance.
 - An authoritative `translation` complete closes its explicit session/utterance identity against late partials. Preserve previews for newer utterances when an older final or `translation_start` arrives. Publication closure is always active; experimental closure at final admission remains opt-in.
 - Legacy `e2e_latency_ms` / `true_e2e_ms` are processing measurements; do not label them speech-end-to-display in any UI or doc.
-- Operator SPA state must not infer RUNNING from file presence. Since 2026-09-10 `ready` comes from the `tools/pipeline_health.py` channel (`phase`, `stale`) surfaced by `/api/session/status`; keep it that way. The fix is integrated but the real built-in-mic retest is still pending — do not describe #131 as validated.
+- Operator SPA state must not infer RUNNING from file presence. Since 2026-09-10 `ready` comes from the `tools/pipeline_health.py` channel (`phase`, `stale`) surfaced by `/api/session/status`; keep it that way. Real microphone readiness and synthetic acoustic tests ran; the Spanish retest retained upstream sample loss. #131 remains unvalidated, and the current user instruction prohibits further microphone/output tests this session.
 - Review/support endpoints live under `/api/review/...`, `/api/support/...`, `/api/storage/...`, `/api/audio/test-input|test-output`; the overnight widgets (`widgets/captions.js`, `qr.js`, `sparkline.js`) are integrated.
 
 ## Message types

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "raw/integrity_v3_baseline_anchor_e4b_r0_fleurs_development_en_en.json",
+      "sha256": "caf2e2662e384a425ae02dba129f5bf656a429fb1e9e6548f6211766de0bd580",
+      "size_bytes": 2508431
+    },
+    {
+      "path": "raw/integrity_v3_baseline_e4b_r0_fleurs_development_en_en.json",
+      "sha256": "87dafb06a8b45b103eb08579a71ba07faa9c4267e5fa77fb9521ffbf6a2da5ad",
+      "size_bytes": 2501606
+    },
+    {
+      "path": "raw/provenance.json",
+      "sha256": "b4bf52669a2edbfacce97890dd73b26032c3c0fd9d899a9afe27e5455f053496",
+      "size_bytes": 56495
+    },
+    {
+      "path": "runner.log",
+      "sha256": "5c861f1691e55a77fe65e23d9a84b8da41a3bf6a9818e5db2c48501440a0170b",
+      "size_bytes": 274
+    },
+    {
+      "path": "raw/session_integrity_v3_baseline_anchor_e4b_r0_fleurs_development_en_en.log",
+      "sha256": "bbdfd2259493e756bcc7b484d49861240770235624a79210fa7240121613677f",
+      "size_bytes": 741
+    },
+    {
+      "path": "raw/session_integrity_v3_baseline_e4b_r0_fleurs_development_en_en.log",
+      "sha256": "dd4a1b8c1775cf44ffd1cd15611ba92ef270b5fa9e298806393fb0e0090fd28c",
+      "size_bytes": 727
+    },
+    {
+      "path": "run-summary.json",
+      "sha256": "04268dceb501593a8383bd943faa3d805330fe4955fc8d4502c9bdcfaf055680",
+      "size_bytes": 15289
+    },
+    {
+      "path": "raw/ab_metrics_integrity_v3_baseline_e4b_r0_fleurs_development_en_en.csv",
+      "sha256": "ca7e2c3241eb45bdb8ab9cd2fd960313c0489d5eeae7f65df85aa1ba0dbf6cc3",
+      "size_bytes": 4710
+    },
+    {
+      "path": "raw/ab_metrics_integrity_v3_baseline_anchor_e4b_r0_fleurs_development_en_en.csv",
+      "sha256": "2adbe27218387b503d974a07090f9c12c8c94c167038ea1e944248a56cd6c05c",
+      "size_bytes": 4719
+    }
+  ],
+  "raw_payloads_unmodified": true,
+  "audio_included": false
+}

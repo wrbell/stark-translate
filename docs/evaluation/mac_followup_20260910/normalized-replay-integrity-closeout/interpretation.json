@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "v1": {
+    "status": "aborted_technical_experiment",
+    "persisted_run_results": 13,
+    "interrupted_runner_session": "followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en",
+    "interrupted_runner_has_result_json": false,
+    "raw_pipeline_lifecycle_status": "completed",
+    "raw_pipeline_exit_code": 0,
+    "note": "The orchestrator was interrupted; the child handled SIGTERM as graceful stop. Its raw completed marker is preserved, but does not prove complete replay coverage or a completed benchmark result.",
+    "promotion_eligible": false
+  },
+  "v4": {
+    "status": "physical_trace_drain_regression_pilot",
+    "persisted_run_results": 3,
+    "note": "Spanish E4B opening control, early 2s/160ms and closing control after the native-worker drain fix. Supports physical trace completion only; not paired speed, p95 certification, quality or default promotion.",
+    "promotion_eligible": false
+  },
+  "defaults_changed": false,
+  "source_verification": {
+    "standard-screen-normalized-v1": {
+      "code_sha": "a8511eed53fde804a688b4dd56a52c077e773eca",
+      "recorded_code_files_verified": 363,
+      "scope": "all_code_sha256 paths from the original cohort provenance; not model weights or audio"
+    },
+    "measurement-pilot-v4": {
+      "code_sha": "eddb0adb4741307680079802c47f33cb21d56aec",
+      "recorded_code_files_verified": 370,
+      "scope": "all_code_sha256 paths from the original cohort provenance; not model weights or audio"
+    }
+  },
+  "audio_included": false,
+  "original_raw_payloads_rewritten": false
+}

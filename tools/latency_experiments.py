@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -26,12 +27,16 @@ class LatencyExperiments:
     mlx_cache_mb: int = 256
     gemma_prefix_cache: bool = False
     trace: bool = False
+    trace_capacity: int = 8192
+    early_clause_s: float = 0.0
+    early_clause_pause_ms: float = 0.0
+    partial_deadline_margin_ms: float = 0.0
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> LatencyExperiments:
         env = os.environ if env is None else env
         defaults = cls()
-        values = {}
+        values: dict[str, Any] = {}
         for name, default in asdict(defaults).items():
             key = "STARK_EXPERIMENT_" + name.upper()
             raw = env.get(key)
@@ -56,12 +61,20 @@ class LatencyExperiments:
             "clause_preview_s": (0, 8),
             "rolling_window_s": (1, 8),
             "mlx_cache_mb": (0, 1024),
+            "trace_capacity": (1024, 262144),
+            "early_clause_s": (0, 8),
+            "early_clause_pause_ms": (0, 500),
+            "partial_deadline_margin_ms": (0, 1000),
         }
         for name, (low, high) in bounds.items():
             if not low <= getattr(result, name) <= high:
                 raise ValueError(f"STARK_EXPERIMENT_{name.upper()} must be between {low} and {high}")
         if result.incremental_stt not in {"off", "rolling", "stream"}:
             raise ValueError("STARK_EXPERIMENT_INCREMENTAL_STT must be off, rolling, or stream")
+        if bool(result.early_clause_s) != bool(result.early_clause_pause_ms):
+            raise ValueError("Early clause duration and pause must both be enabled or both be zero")
+        if result.early_clause_s and result.early_clause_s < 0.7:
+            raise ValueError("Early clause duration must preserve the 0.7s minimum final length")
         return result
 
     def as_dict(self) -> dict:

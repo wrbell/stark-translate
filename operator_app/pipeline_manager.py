@@ -96,6 +96,8 @@ class SessionConfig:
     run_ab: bool = False
     vad_threshold: float = 0.3
     mic_device: int | None = None
+    mic_device_name: str | None = None
+    mic_host_api: str | None = None
     mic_gain: float | None = None
     log_level: str = "INFO"
     # Phase 9.4.1: TTS output device routing
@@ -406,6 +408,10 @@ class PipelineRunner:
                     argv += [f"--tts-device-{language}", str(device)]
         if config.mic_device is not None:
             argv += ["--device", str(config.mic_device)]
+        if config.mic_device_name is not None:
+            argv += ["--device-name", config.mic_device_name]
+            if config.mic_host_api is not None:
+                argv += ["--device-host-api", config.mic_host_api]
         if config.mic_gain is not None:
             argv += ["--gain", str(config.mic_gain)]
         if config.diarize:

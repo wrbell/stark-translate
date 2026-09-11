@@ -1,0 +1,86 @@
+{
+  "recorded_utc": "2026-09-10T13:13:45.331341+00:00",
+  "cwd": "/Users/willem/Code/vibes/SRTranslate",
+  "source_hashes": {
+    "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+    "engines/marian_hf_engine.py": "715e4aeddccf18a62702caad443499506425fb96df57606976b1987d46d03e1c",
+    "engines/tts_engine.py": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+    "tests/test_pinned_live_model_sources.py": "e706521f835f7a1aa597ee181dbec8f5a320d1bfac33519ccd3121da3af39ec8"
+  },
+  "checks": [
+    {
+      "argv": [
+        "stt_env/bin/python",
+        "-m",
+        "pytest",
+        "tests/test_pinned_live_model_sources.py",
+        "tests/test_tts_engine.py",
+        "tests/test_marian_engine.py",
+        "tests/test_managed_marian_setup.py",
+        "tests/test_mac_setup_runtime.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "output": "95 passed in 3.68s"
+    },
+    {
+      "argv": [
+        "stt_env/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "engines/model_paths.py",
+        "engines/marian_hf_engine.py",
+        "engines/tts_engine.py",
+        "tests/test_pinned_live_model_sources.py"
+      ],
+      "exit_code": 0,
+      "output": "All checks passed!"
+    },
+    {
+      "argv": [
+        "stt_env/bin/python",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "engines/model_paths.py",
+        "engines/marian_hf_engine.py",
+        "engines/tts_engine.py",
+        "tests/test_pinned_live_model_sources.py"
+      ],
+      "exit_code": 0,
+      "output": "4 files already formatted"
+    },
+    {
+      "argv": [
+        "stt_env/bin/python",
+        "-m",
+        "mypy",
+        "engines/model_paths.py",
+        "engines/marian_hf_engine.py",
+        "engines/tts_engine.py"
+      ],
+      "exit_code": 0,
+      "output": "Success: no issues found in 3 source files"
+    },
+    {
+      "argv": [
+        "stt_env/bin/python",
+        "-m",
+        "bandit",
+        "engines/model_paths.py",
+        "engines/marian_hf_engine.py",
+        "engines/tts_engine.py",
+        "-f",
+        "json",
+        "-o",
+        "docs/evaluation/security_feasibility_20260910/raw/bandit-live-model-sources.json",
+        "-q"
+      ],
+      "exit_code": 1,
+      "output": "Four B615 findings remain because the static rule cannot follow manifest validation through runtime kwargs. No suppressions added."
+    }
+  ],
+  "note": "Command results transcribed from tool receipts after completion; individual command start times were not retained."
+}

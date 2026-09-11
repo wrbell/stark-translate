@@ -388,8 +388,11 @@ def run_replay(
     timeout_s: float | None = None,
     env: dict | None = None,
     ports: tuple[int, int] | None = None,
+    backend: str = "mlx",
 ) -> dict:
     """Launch one child and wait before analyzing its flushed metrics."""
+    if backend not in {"mlx", "cpu"}:
+        raise ValueError("Replay backend must be mlx or cpu")
     if any(arg.split("=", 1)[0] in REPLAY_MANAGED_ARGS for arg in extra):
         raise ValueError("Extra args override replay-managed arguments")
     if not re.fullmatch(r"[A-Za-z0-9_-]+", tag):
@@ -415,7 +418,7 @@ def run_replay(
         sys.executable,
         str(ROOT / "dry_run_ab.py"),
         "--backend",
-        "mlx",
+        backend,
         "--no-ab",
         "--lang",
         clip["lang"],

@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "session_id": "torch213_full_normalized_r1_es",
+  "updated_at": 1789051414.963326,
+  "phase": "completed",
+  "input_seen": true,
+  "input_age_s": 0.138611666043289,
+  "caption_age_s": 1.2143190409988165,
+  "input_level": 0.0,
+  "errors": [],
+  "error_count": 0,
+  "captions": [
+    {
+      "session_id": "torch213_full_normalized_r1_es",
+      "utterance_id": 1,
+      "chunk_id": 1,
+      "stage": "complete",
+      "english": "Es probable que los safaris sean el mayor atractivo tur\u00edstico de \u00c1frica y la parte m\u00e1s memorable para muchos visitantes.",
+      "spanish_a": "Safaris are probably the biggest tourist attraction in Africa and the most memorable part for many visitors.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "speaker": null
+    },
+    {
+      "session_id": "torch213_full_normalized_r1_es",
+      "utterance_id": 2,
+      "chunk_id": 2,
+      "stage": "complete",
+      "english": "Cuando usted viaj\u00f3 al extranjero la primera vez, las personas probablemente fueron pacientes y comprensivas.",
+      "spanish_a": "When you traveled abroad for the first time, people were probably patient and understanding.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "speaker": null
+    },
+    {
+      "session_id": "torch213_full_normalized_r1_es",
+      "utterance_id": 3,
+      "chunk_id": 3,
+      "stage": "complete",
+      "english": "Pues sab\u00edan que los viajeros necesitan adaptarse a un nuevo pa\u00eds.",
+      "spanish_a": "Well, they knew that travelers need to adapt to a new country.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "speaker": null
+    },
+    {
+      "session_id": "torch213_full_normalized_r1_es",
+      "utterance_id": 4,
+      "chunk_id": 4,
+      "stage": "complete",
+      "english": "Los canales navegables internos pueden ser una buena tem\u00e1tica para las vacaciones.",
+      "spanish_a": "Inland navigable waterways can be a good theme for a vacation.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "speaker": null
+    },
+    {
+      "session_id": "torch213_full_normalized_r1_es",
+      "utterance_id": 5,
+      "chunk_id": 5,
+      "stage": "complete",
+      "english": "Los primeros casos de la enfermedad durante esta temporada se registraron hacia fines de julio.",
+      "spanish_a": "The first cases of the disease during this season were recorded towards the end of July.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "speaker": null
+    },
+    {
+      "session_id": "torch213_full_normalized_r1_es",
+      "utterance_id": 7,
+      "chunk_id": 7,
+      "stage": "complete",
+      "english": "\u00c9l dijo que construy\u00f3 un timbre Wi-Fi.",
+      "spanish_a": "He said he built a Wi-Fi bell.",
+      "source_lang": "es",
+      "target_lang": "en",
+      "speaker": null
+    }
+  ],
+  "recording": {
+    "audio_enabled": true,
+    "required_failures": 0,
+    "ok": true
+  },
+  "control_sequence": 0,
+  "publish_failures": 0,
+  "persistence": {
+    "submitted": 24,
+    "completed": 24,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "storage": {
+    "free_bytes": 241071177728,
+    "low_space": false
+  },
+  "queues": {
+    "audio": 0,
+    "capture_handoff": 0,
+    "finals": 0,
+    "stream_tokens": 1
+  },
+  "clients": 0,
+  "replay_client_wait": {
+    "requested_seconds": 0.0,
+    "actual_wait_seconds": 0.0,
+    "status": "disabled",
+    "connected_clients": 0,
+    "visibility_confirmed": false
+  }
+}

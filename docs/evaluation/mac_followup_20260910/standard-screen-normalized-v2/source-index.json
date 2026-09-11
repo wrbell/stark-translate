@@ -1,0 +1,20 @@
+{
+  "frozen_source": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "files": [
+    {
+      "path": "archive_cohort.py.txt",
+      "size_bytes": 7650,
+      "sha256": "9e325f98f80971cbd8df5a6b1977e5619448447ddb0aa25d093d0fbd70c3e26f"
+    },
+    {
+      "path": "source-code.tar.gz",
+      "size_bytes": 1157694,
+      "sha256": "e316836753049a4cabf0abec65e864b9cc8cbce465fbc0ef8e44a49f8d4f3e4f"
+    },
+    {
+      "path": "protocol.json",
+      "size_bytes": 12067,
+      "sha256": "5cc2cce38ec3d648b0684d3969e13079a419f6e962d832f7c4aec0e7a64e5a3b"
+    }
+  ]
+}

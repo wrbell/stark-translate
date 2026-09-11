@@ -226,6 +226,11 @@ class FileAudioStream:
         self._thread: threading.Thread | None = None
         self._next_offset = 0
 
+    @property
+    def source_sample_count(self) -> int:
+        """Original recording extent at callback rate, excluding synthetic tail."""
+        return self._audio_sample_count
+
     def resume_from(self, sample_offset: int, *, callback=None) -> None:
         """Resume a stopped replay at an original-rate block boundary.
 
@@ -314,6 +319,8 @@ def open_audio_stream(
     dtype: str,
     blocksize: int,
     device: int | None,
+    device_name: str | None = None,
+    device_host_api: str | None = None,
 ):
     """Factory: return a microphone, WebSocket, or WAV-file stream per env.
 
@@ -356,4 +363,6 @@ def open_audio_stream(
         blocksize=blocksize,
         callback=callback,
         device=device,
+        device_name=device_name,
+        device_host_api=device_host_api,
     )

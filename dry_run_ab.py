@@ -82,11 +82,13 @@ import websockets
 
 from settings import settings
 from stark_translate.profiles import apply_profile, resolve_profile
-from tools.capture_handoff import CaptureHandoff
+from tools.capture_handoff import CaptureHandoff, CaptureTransportSummary
+from tools.final_queue_pressure import FinalQueuePressure
 from tools.isolated_audio import AudioCaptureError
 from tools.latency_experiments import LatencyExperiments
-from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker
+from tools.latency_scheduler import ExactTextMemo, LatestSTTWorker, PartialRuntimePredictor
 from tools.latency_trace import LatencyTrace
+from tools.music_recovery import MusicSpeechRecovery
 from tools.persistence import PersistenceExecutor
 from tools.pipeline_health import PipelineHealth
 from tools.pipeline_timing import (
@@ -103,6 +105,7 @@ from tools.pipeline_timing import (
 )
 from tools.preview_candidates import RollingPreview, TranslationCandidate, common_prefix_words
 from tools.replay_client_barrier import ReplayClientBarrier, validate_replay_client_wait
+from tools.source_coverage import SourceCoverage
 
 RUNTIME_PROFILE = resolve_profile(settings.profile)
 _managed_llama_server = None
@@ -133,6 +136,7 @@ CHUNK_DURATION = 2.0  # seconds of speech — more context = better word accurac
 VAD_THRESHOLD = 0.3  # Lower threshold for better sensitivity
 WS_PORT = 8765
 MIC_DEVICE = None  # None = auto-detect best input device
+MIC_DEVICE_NAME = MIC_DEVICE_HOST_API = None
 # Session paths — set in main() after SOURCE_LANG is resolved so the language
 # tag is included, keeping EN and ES data separate.
 SESSION_ID = f"{datetime.now():%Y%m%d_%H%M%S}"
@@ -147,6 +151,7 @@ _session_main_task = None
 _health = None
 _RECORD_AUDIO = True
 _capture_handoff = None
+_capture_transport = CaptureTransportSummary()
 # Live diarization (Phase 9.6.1) — off unless --diarize. Daemon is a subprocess.
 DIARIZE_ENABLED = False
 DIARIZE_MODE = "embed"
@@ -168,7 +173,11 @@ _active_stt_workers = {"partial": 0, "final": 0}
 _experiment_counters = {}
 _INPUT_AUDIO_HASH = None
 _latency = LatencyExperiments()
-_latency_trace = LatencyTrace()
+_latency_trace = LatencyTrace(origin=_SESSION_CLOCK_ORIGIN)
+_final_queue_pressure = FinalQueuePressure(origin=_SESSION_CLOCK_ORIGIN, on_event=_latency_trace.record)
+_source_coverage = SourceCoverage()
+_partial_runtime = PartialRuntimePredictor()
+_PARTIAL_DEFERRED = object()
 _replay_client_wait = ReplayClientBarrier()
 _stt_scheduler = None
 _caption_delivery = None
@@ -649,7 +658,7 @@ diag_low_confidence = []  # [(chunk_id, confidence, text)]
 diag_empty_stt = []  # [(stage, id, buffer_duration_s)]
 diag_force_cuts = []  # [(chunk_id, cut_type, buffer_duration_s, cut_position_s)]
 diag_near_misses = []  # [(chunk_id, original_word, correction, match_type, text)]
-diag_music_holds = []  # [(start_frame, end_frame, duration_s)]
+diag_music_holds = []  # [(capture_frame_start, capture_frame_end, consumed_frame_duration_s)]; excludes pauses
 diag_stt_corrections = []  # [(chunk_id, original, corrected, correction_type)]
 partial_translations = {}  # utterance_id → last MarianMT translation
 partial_latencies = {}  # utterance_id → {"pt_ms": float}
@@ -730,6 +739,7 @@ def correct_stt_output(text):
 
     Returns (corrected_text, corrections_list) where each correction is
     (original, replacement, correction_type).
+    Existing whitespace is retained; this does not infer missing STT boundaries.
     """
     corrections = []
     result = text
@@ -742,7 +752,7 @@ def correct_stt_output(text):
             corrections.append((phrase, replacement, "phrase"))
 
     # 2. Always apply near-miss corrections (unambiguous misspellings)
-    words = result.split()
+    words = re.split(r"(\s+)", result)
     for i, w in enumerate(words):
         clean = w.lower().strip(".,!?;:'\"()")
         if clean in NEAR_MISS_CORRECTIONS:
@@ -755,7 +765,7 @@ def correct_stt_output(text):
             trailing = w[len(stripped) :]
             words[i] = replacement + trailing
             corrections.append((clean, NEAR_MISS_CORRECTIONS[clean], "near_miss"))
-    result = " ".join(words)
+    result = "".join(words)
 
     # 3. Context-gated homophone corrections
     # Only apply if ANY theological term is present in the text
@@ -763,7 +773,7 @@ def correct_stt_output(text):
     has_theological_context = bool(words_lower & THEOLOGICAL_TERMS)
 
     if has_theological_context:
-        words = result.split()
+        words = re.split(r"(\s+)", result)
         for i, w in enumerate(words):
             clean = w.lower().strip(".,!?;:'\"()")
             if clean in HOMOPHONE_FLAGS:
@@ -774,7 +784,7 @@ def correct_stt_output(text):
                 trailing = w[len(stripped) :]
                 words[i] = replacement + trailing
                 corrections.append((clean, HOMOPHONE_FLAGS[clean], "homophone"))
-        result = " ".join(words)
+        result = "".join(words)
 
     return result, corrections
 
@@ -942,7 +952,7 @@ def print_diagnostics():
 
     if diag_music_holds:
         total_hold = sum(d for _, _, d in diag_music_holds)
-        print(f"\n  Music holds: {len(diag_music_holds)} ({total_hold:.1f}s total)")
+        print(f"\n  Music holds: {len(diag_music_holds)} ({total_hold:.1f}s captured-frame time; excludes pauses)")
         for start, end, dur in diag_music_holds[:10]:
             print(f"    frame {start}-{end}: {dur:.1f}s")
     else:
@@ -1166,21 +1176,23 @@ def load_whisper(backend="mlx"):
         # With 18GB unified memory and ~11.3GB used by models, plenty of headroom.
         mx.set_cache_limit(256 * 1024 * 1024)
 
-        from engines.model_paths import resolve_model_path
+        from engines.model_paths import UnpinnedModelError, resolve_model_for_loading
         from engines.stt_fallback import require_mlx_fallback_language
 
-        model_id = resolve_model_path(settings.stt.whisper_model)
-        print(f"[2/6] Loading {model_id} (MLX)...")
+        print(f"[2/6] Loading {settings.stt.whisper_model} (MLX)...")
         t0 = time.time()
         try:
+            model_id = resolve_model_for_loading(settings.stt.whisper_model)
             # Warm up — first call downloads and compiles the model
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
             print(f"  Whisper ready ({time.time() - t0:.1f}s)")
+        except UnpinnedModelError:
+            raise  # A model policy error must not silently select another model.
         except Exception as e:
             require_mlx_fallback_language(SOURCE_LANG, settings.stt.whisper_fallback)
             print(f"  Whisper load failed ({e}), falling back to {settings.stt.whisper_fallback}...")
-            model_id = resolve_model_path(settings.stt.whisper_fallback)
+            model_id = resolve_model_for_loading(settings.stt.whisper_fallback)
             t0 = time.time()
             silence = np.zeros(16000, dtype=np.float32)
             mlx_whisper.transcribe(silence, path_or_hf_repo=model_id, condition_on_previous_text=False)
@@ -2039,6 +2051,7 @@ def _experiment_snapshot():
                 "partial_suppressed_backlog",
                 "partial_suppressed_in_flight",
                 "partial_suppressed_after_stt",
+                "partial_suppressed_empty_translation",
                 "partial_stt_started",
                 "partial_stt_finished",
                 "final_stt_started",
@@ -2052,13 +2065,22 @@ def _experiment_snapshot():
         return {**counters, **_experiment_counters}
 
 
-def _run_tracked_stt(kind, function, *args):
+def _run_tracked_stt(kind, function, *args, trace_fields=None):
     """Track actual worker lifetime; cancelling its asyncio wrapper is not completion."""
     with _experiment_lock:
         _active_stt_workers[kind] += 1
     _count_experiment(f"{kind}_stt_started")
     try:
-        return function(*args)
+        audio_samples = len(args[0]) if args and hasattr(args[0], "__len__") else None
+        fields = {
+            "kind": kind,
+            "audio_samples": audio_samples,
+            "audio_sample_rate": SAMPLE_RATE,
+            "function": getattr(function, "__name__", type(function).__name__),
+            **(trace_fields or {}),
+        }
+        with _latency_trace.span("physical_stt", **fields):
+            return function(*args)
     finally:
         with _experiment_lock:
             _active_stt_workers[kind] -= 1
@@ -2117,7 +2139,8 @@ def warmup_translation_models():
                 prompt = mlx_a_tokenizer.apply_chat_template(
                     messages, add_generation_prompt=True, **chat_template_extra_kwargs(model_family=family)
                 )
-                generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
+                with _latency_trace.span("translation_warmup", model_family=family):
+                    generate(mlx_a_model, mlx_a_tokenizer, prompt=prompt, max_tokens=1, verbose=False)
                 _count_experiment("warmup_executed")
     except Exception:
         _count_experiment("warmup_failed")
@@ -2176,13 +2199,20 @@ _io_pool = PersistenceExecutor(max_workers=2, max_pending=256)
 
 def audio_callback(indata, frames, time_info, status):
     """Resample from the captured source rate to 16 kHz and push to queue."""
+    from tools.capture_protocol import capture_status
+
     if status:
+        capture_errors = capture_status(status)
         if _health is not None:
             _health.error(
                 "audio", "capture_overflow" if str(status).startswith("capture_overflow:") else "capture_status"
             )
-        if str(status).startswith("capture_overflow:"):
+        if capture_errors.fifo_dropped_samples:
             _io_pool.record_failure("audio_capture", "samples_dropped")
+        if capture_errors.input_overflow_callbacks:
+            _io_pool.record_failure("audio_capture", "portaudio_input_overflow")
+            if _health is not None:
+                _health.error("capture", "portaudio_input_overflow")
         print(f"  Audio status: {status}", file=sys.stderr)
     # File and isolated mic stamps carry their actual callback rate. The
     # WebSocket protocol already delivers 16 kHz PCM, regardless of mic settings.
@@ -2222,6 +2252,24 @@ def audio_callback(indata, frames, time_info, status):
         _io_pool.record_failure("audio_capture", "input_queue_full")
         if _health is not None:
             _health.error("capture", "input_queue_full")
+
+
+def _record_capture_transport(stream, handoff):
+    """Snapshot closed transport and persist unreported/unknown capture failures."""
+    record = _capture_transport.record(stream, handoff)
+    pipe = record.get("pipe", {})
+    failures = list(pipe.get("capture_completeness_failures", []))
+    # Parsed status may still be waiting in a deliberately discarded Stop tail.
+    # Reconcile every known loss, even if its live notification already ran.
+    # Failure notifications are not counts of lost frames or native samples.
+    if pipe.get("upstream_dropped_samples", 0):
+        failures.append("worker_fifo_samples_dropped_observed_at_close")
+    if pipe.get("portaudio_input_overflow_callbacks_observed", 0):
+        failures.append("portaudio_input_overflow_observed_at_close")
+    for code in failures:
+        _io_pool.record_failure("audio_capture", code)
+        if _health is not None:
+            _health.error("capture", code)
 
 
 def is_speech(audio_chunk, model, utils):
@@ -2707,26 +2755,81 @@ async def process_partial(
                 return None
             return english, stt_lat, conf, no_speech, cr
 
+        # Admission is checked on the physical worker, not when a Future is queued.
+        # This works with both ordinary pools and the optional latest-only owner.
+        def _execute_partial():
+            started = time.perf_counter()
+            margin = _latency.partial_deadline_margin_ms
+            predicted = None
+            deadline = captured_start + settings.vad.max_utterance if captured_start is not None else None
+            if margin:
+                admitted, predicted = _partial_runtime.admit(
+                    original_audio_duration, now=started, deadline=deadline, margin_ms=margin
+                )
+                _latency_trace.record(
+                    "partial_admission",
+                    utterance_id=utterance_id,
+                    request_sequence=request_sequence,
+                    admitted=admitted,
+                    predicted_ms=predicted,
+                    request_age_ms=(started - partial_submitted) * 1000,
+                    deadline_at_ms=(deadline - _SESSION_CLOCK_ORIGIN) * 1000 if deadline is not None else None,
+                )
+                if not admitted:
+                    _latency_event("partial_deferred_deadline")
+                    return _PARTIAL_DEFERRED
+            function = (lambda: _run_partial_stt_via_worker(audio_data)) if MULTIPROCESS else _partial_stt
+            result = _run_tracked_stt(
+                "partial",
+                function,
+                trace_fields={
+                    "utterance_id": utterance_id,
+                    "request_sequence": request_sequence,
+                    "audio_samples": len(audio_data),
+                    **sample_bounds,
+                },
+            )
+            _latency_trace.record(
+                "partial_physical_result",
+                utterance_id=utterance_id,
+                request_sequence=request_sequence,
+                processed_audio_samples=processed_audio_samples,
+                audio_sample_rate=SAMPLE_RATE,
+                rolling_offset_samples=rolling_start,
+                incremental_mode=_latency.incremental_stt,
+                **sample_bounds,
+            )
+            elapsed = (time.perf_counter() - started) * 1000
+            if margin:
+                _partial_runtime.observe(original_audio_duration, elapsed)
+                _latency_trace.record(
+                    "partial_prediction_result",
+                    utterance_id=utterance_id,
+                    request_sequence=request_sequence,
+                    observed_ms=elapsed,
+                    predicted_ms=predicted,
+                    prediction_error_ms=elapsed - predicted if predicted is not None else None,
+                )
+            return result
+
         # Submit STT and track the future so process_final can cancel it
         if _stt_scheduler is not None:
-            function = (lambda: _run_partial_stt_via_worker(audio_data)) if MULTIPROCESS else _partial_stt
-            stt_future = asyncio.wrap_future(
-                _stt_scheduler.submit("partial", _run_tracked_stt, "partial", function, key=utterance_id)
-            )
+            stt_future = asyncio.wrap_future(_stt_scheduler.submit("partial", _execute_partial, key=utterance_id))
         elif MULTIPROCESS:
-            stt_future = loop.run_in_executor(
-                _stt_comm_pool, _run_tracked_stt, "partial", _run_partial_stt_via_worker, audio_data
-            )
+            stt_future = loop.run_in_executor(_stt_comm_pool, _execute_partial)
         else:
-            stt_future = loop.run_in_executor(_pipeline_pool, _run_tracked_stt, "partial", _partial_stt)
+            stt_future = loop.run_in_executor(_pipeline_pool, _execute_partial)
         with _partial_future_lock:
             _active_partial_future = stt_future
 
         stt_result = await stt_future
-        _latency_trace.record("partial_stt_resumed", utterance_id=utterance_id)
 
         with _partial_future_lock:
             _active_partial_future = None
+
+        if stt_result is _PARTIAL_DEFERRED:
+            return
+        _latency_trace.record("partial_stt_resumed", utterance_id=utterance_id)
 
         if request_session != SESSION_ID or _preview_was_finalized(utterance_id, request_session):
             _latency_event("partial_suppressed_published_final")
@@ -2789,6 +2892,32 @@ async def process_partial(
             )
         ):
             _latency_event("partial_suppressed_stale_result")
+            return
+        if not spanish.strip():
+            # A blank target is not a translated preview. Keep the last usable
+            # caption while a later partial or final can supply a translation.
+            _latency_event(
+                "partial_suppressed_empty_translation",
+                session_id=request_session,
+                utterance_id=utterance_id,
+                request_sequence=request_sequence,
+                preview_kind=preview_kind,
+                source_lang=SOURCE_LANG,
+                target_lang="es" if SOURCE_LANG == "en" else "en",
+                stt_ms=stt_latency,
+                marian_ms=marian_latency,
+                **sample_bounds,
+            )
+            logger.info(
+                "partial_translation_suppressed session_id=%s utterance_id=%s request_sequence=%s "
+                "reason=empty_translation stt_ms=%.3f marian_ms=%.3f sample_bounds=%s",
+                request_session,
+                utterance_id,
+                request_sequence,
+                stt_latency,
+                marian_latency,
+                sample_bounds,
+            )
             return
         _partial_emitted_sequence[utterance_id] = request_sequence
         previous_source = _partial_source_text.get(utterance_id, "")
@@ -3104,6 +3233,7 @@ async def _pipeline_translate_and_finalize(
     spanish_a = spanish_b = None
     lat_a = lat_b = tps_a = tps_b = 0.0
     qe_a = qe_b = None
+    final_translation_route = None
     timing = timing or ChunkTiming(submitted=e2e_start)
     timing.translation_requested = time.perf_counter()
     try:
@@ -3118,6 +3248,8 @@ async def _pipeline_translate_and_finalize(
                     return fn(*args)
 
                 def submit_translate(pool, fn, *args):
+                    nonlocal final_translation_route
+                    final_translation_route = "marian" if fn is translate_marian else "gemma"
                     _count_experiment("final_marian_routes" if fn is translate_marian else "final_gemma_requests")
                     return loop.run_in_executor(pool, timed_translate, fn, *args)
 
@@ -3127,6 +3259,7 @@ async def _pipeline_translate_and_finalize(
                 confirmed = _confirmed_speculation(timing.utterance_id, english, stt_confidence)
                 # Only a matching final STT result can commit earlier generation.
                 if confirmed is not None:
+                    final_translation_route = "gemma"
                     timing.translation_started = time.perf_counter()
                     spanish_a, lat_a, tps_a = confirmed.text, confirmed.latency_ms, confirmed.tokens_per_second
                     _last_gen_stats[cid] = _generation_stats(confirmed)
@@ -3373,9 +3506,13 @@ async def _pipeline_translate_and_finalize(
             "qe_a": qe_a,
             "qe_b": qe_b,
             "word_stability_pct": word_stability_pct,
+            "final_translation_route": final_translation_route,
             "timestamp": datetime.now().isoformat(),
         }
         result_data.update(gen_stats)
+        if final_translation_route == "marian":
+            # No Gemma lock was acquired: null is not a measured zero wait.
+            result_data["generation_lock_wait_ms_a"] = None
         result_data.update(_session_provenance())
         # Phase 9.6.1: speaker lookup is a JSONL read (no models). Rolling-WAV
         # export happens on _io_pool below so this stays off the GPU path.
@@ -3390,6 +3527,7 @@ async def _pipeline_translate_and_finalize(
         if DIARIZE_ENABLED and utt_start_ts is not None:
             _speaker_pending[cid] = (utt_start_ts, utt_end_ts, result_data.get("speaker"))
         timing.final_ready = time.perf_counter()
+        _source_coverage.outcome(timing.sample_metadata(), "final_ready", timing.utterance_id)
         result_data.update(timing.metrics())
         all_results.append(result_data)
         await broadcast(result_data)
@@ -3444,6 +3582,7 @@ async def _pipeline_translate_and_finalize(
         _io_pool.submit(_save_io)
 
     except Exception as e:
+        _source_coverage.outcome(timing.sample_metadata(), "translation_error", timing.utterance_id)
         if _health is not None:
             _health.error("translation", type(e).__name__)
         logger.error("Translation error chunk #%d: %s", cid, e, exc_info=True)
@@ -3486,6 +3625,7 @@ async def _pipeline_coordinator():
 
         audio_data, e2e_start, utterance_start, timing = item
         timing.dequeued = time.perf_counter()
+        _final_queue_pressure.dequeued(item, now=timing.dequeued)
         dequeue_time = time.perf_counter()
         queue_wait_ms = round((dequeue_time - e2e_start) * 1000, 1)
         chunk_id += 1
@@ -3499,6 +3639,7 @@ async def _pipeline_coordinator():
         # [FILTER] Pre-STT RMS energy gate — skip breath sounds and low-energy noise
         speech_rms = float(np.sqrt(np.mean(audio_data**2)))
         if speech_rms < 0.008:
+            _source_coverage.outcome(timing.sample_metadata(), "rejected_low_energy", timing.utterance_id)
             print(f"  [FILTER] low-energy final #{cid} skipped (RMS={speech_rms:.4f})")
             _final_pending.clear()
             _final_pending_utterance_id = None
@@ -3518,10 +3659,16 @@ async def _pipeline_coordinator():
             whisper_prompt = _whisper_prompt()
             timing.stt_requested = time.perf_counter()
 
-            def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing):
+            def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing, chunk=cid):
                 clock.stt_started = time.perf_counter()
                 try:
-                    return _run_tracked_stt("final", _run_stt_via_worker if MULTIPROCESS else _run_stt, audio, prompt)
+                    return _run_tracked_stt(
+                        "final",
+                        _run_stt_via_worker if MULTIPROCESS else _run_stt,
+                        audio,
+                        prompt,
+                        trace_fields={"chunk_id": chunk, "utterance_id": clock.utterance_id, **clock.sample_metadata()},
+                    )
                 finally:
                     clock.stt_finished = time.perf_counter()
 
@@ -3544,6 +3691,7 @@ async def _pipeline_coordinator():
             _final_pending_utterance_id = None
 
             if not english:
+                _source_coverage.outcome(timing.sample_metadata(), "rejected_empty_stt", timing.utterance_id)
                 buf_dur = len(audio_data) / SAMPLE_RATE
                 _log_stt_drop("final", cid, buf_dur)
                 _chunks_empty_stt += 1
@@ -3551,6 +3699,7 @@ async def _pipeline_coordinator():
 
             # [FILTER] Suppress garbage/hallucinated text
             if _is_garbage_text(english):
+                _source_coverage.outcome(timing.sample_metadata(), "rejected_garbage", timing.utterance_id)
                 print(f"  [FILTER] garbage final suppressed: {english!r}")
                 _chunks_hallucination += 1
                 continue
@@ -3565,12 +3714,16 @@ async def _pipeline_coordinator():
                 compression_ratio=_max_segment_metric(segment_meta, "compression_ratio"),
             )
             if suppress_reason:
+                _source_coverage.outcome(
+                    timing.sample_metadata(), "rejected_hallucination:" + suppress_reason, timing.utterance_id
+                )
                 print(f"  [FILTER] hallucination suppressed: {english!r} — {suppress_reason}")
                 _chunks_hallucination += 1
                 continue
 
             # [DEDUP] Suppress consecutive identical finals (e.g., repeated "Amen")
             if english.strip().lower() == _last_final_text:
+                _source_coverage.outcome(timing.sample_metadata(), "rejected_duplicate", timing.utterance_id)
                 print(f"  [DEDUP] suppressed consecutive duplicate: {english!r}")
                 _chunks_dedup += 1
                 continue
@@ -3626,6 +3779,7 @@ async def _pipeline_coordinator():
             translation_tasks.append(active_translation_task)
 
         except Exception as e:
+            _source_coverage.outcome(timing.sample_metadata(), "stt_error", timing.utterance_id)
             _final_pending.clear()  # [FIX] Don't leave flag stuck on error
             _final_pending_utterance_id = None
             if _health is not None:
@@ -3654,7 +3808,12 @@ async def pipeline_submit(audio_data, utterance_start=None, timing=None):
         submitted = time.perf_counter()
         timing = timing or ChunkTiming()
         timing.submitted = submitted
-        await _pipeline_chunk_queue.put((audio_data, submitted, utterance_start, timing))
+        _source_coverage.outcome(timing.sample_metadata(), "submitted", timing.utterance_id)
+        await _final_queue_pressure.put(
+            _pipeline_chunk_queue,
+            (audio_data, submitted, utterance_start, timing),
+            utterance_id=timing.utterance_id,
+        )
 
 
 async def process_final(audio_data, finalized_utterance_id=None):
@@ -4251,6 +4410,7 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "mic_gain": MIC_GAIN,
         "english": data["english"],
         "spanish_gemma": data.get("spanish_a"),
+        "final_translation_route": data.get("final_translation_route"),
         "spanish_marian": marian_text,
         "stt_confidence": conf,
         "qe_a": data.get("qe_a"),
@@ -4427,6 +4587,9 @@ def print_summary():
             "latency_experiment_counters": _experiment_snapshot(),
             "latency_experiment_configuration": _latency.as_dict(),
             "latency_trace": _latency_trace.snapshot(),
+            "final_queue_pressure": _final_queue_pressure.snapshot(),
+            "capture_transport": _capture_transport.snapshot(),
+            "source_coverage": _source_coverage.snapshot(),
             "replay_client_wait": _replay_client_wait.snapshot(),
         },
     )
@@ -4519,13 +4682,27 @@ async def audio_loop():
     music_hold_active = False
     music_nonspeech_frames = 0  # consecutive non-speech high-RMS frames
     music_speech_frames = 0  # consecutive speech frames (for exiting music hold)
-    music_holdoff_frames = int(MUSIC_HOLDOFF * SAMPLE_RATE / 512)  # ~2s
+    music_holdoff_frames = int(MUSIC_HOLDOFF * SAMPLE_RATE / 512)  # nominal 5s by default
     music_resume_frames = int(0.5 * SAMPLE_RATE / 512)  # ~0.5s speech to exit
     music_hold_start_frame = 0
+    music_capture_frames = 0  # never reset by utterance finalization or operator pause
+    music_hold_started_at = None
+    music_recovery = MusicSpeechRecovery(music_resume_frames)
+
+    def suppress_music_recovery(reason):
+        nonlocal music_speech_frames
+        frames = music_recovery.take()
+        music_speech_frames = 0
+        if frames:
+            bounds = MusicSpeechRecovery.timeline(frames).sample_metadata()
+            _source_coverage.outcome(bounds, "music_resume_suppressed_" + reason)
+            _latency_trace.record("music_resume_suppressed", reason=reason, frames=len(frames), **bounds)
 
     def discard_buffer(reason):
         nonlocal speech_buffer, timeline, silence_frames, speech_frame_count
         nonlocal last_partial_len, last_silence_boundary, pause_preview_fired, pause_speculation_fired
+        if len(speech_buffer):
+            _source_coverage.outcome(timeline.sample_metadata(), "discarded_" + reason, utterance_id)
         _broadcast_discard(
             _discard_utterance(utterance_id, reason, len(speech_buffer) / SAMPLE_RATE, timeline.sample_metadata())
         )
@@ -4560,7 +4737,13 @@ async def audio_loop():
                 audio_callback,
                 lambda: not audio_queue.full(),
                 capture_dropped,
-                wait_for_space=os.environ.get("STARK_AUDIO_SOURCE") == "file",
+                trace=_latency_trace,
+                frame_metadata=lambda item: {
+                    "sample_start": item[2].sample_start,
+                    "sample_end": item[2].sample_end,
+                    "sample_rate": item[2].sample_rate,
+                    "capture_end_perf_counter_s": item[2].end,
+                },
             )
 
             def stream_callback(indata, frames, time_info, status, _handoff=_capture_handoff, _input_rate=input_rate):
@@ -4586,21 +4769,35 @@ async def audio_loop():
                 dtype="float32",
                 blocksize=int(input_rate * 0.032),  # ~32ms frames
                 device=MIC_DEVICE,
+                device_name=MIC_DEVICE_NAME,
+                device_host_api=MIC_DEVICE_HOST_API,
             )
 
             is_replay = isinstance(stream, FileAudioStream)
+            from tools.isolated_audio import IsolatedInputStream
+
+            # These callbacks run on ordinary transport-reader threads. They
+            # may wait for bounded handoff space; the native child callback
+            # remains nonblocking and still reports real upstream overflows.
+            _capture_handoff.wait_for_space = is_replay or isinstance(stream, IsolatedInputStream)
+            if isinstance(stream, IsolatedInputStream):
+                stream.trace = _latency_trace
             if is_replay:
                 replay_stream = stream
                 stream.resume_from(replay_consumed_samples, callback=stream_callback)
             if hasattr(stream, "sample_offset"):
                 stream.sample_offset = sample_clock.next_sample
             with ExitStack() as capture_context:
+                # Register first: snapshot only after the handoff closes and
+                # the native child/reader have stopped, including pause/error.
+                capture_context.callback(_record_capture_transport, stream, _capture_handoff)
                 capture_context.enter_context(stream)
                 capture_context.enter_context(_capture_handoff)
                 if _health is not None:
                     _health.phase("listening")
                 while True:
                     if _health is not None and _health.paused:
+                        suppress_music_recovery("pause")
                         # Stop production before final admission. File prefetch is
                         # replayed from the last consumed sample after Resume.
                         if is_replay:
@@ -4629,7 +4826,11 @@ async def audio_loop():
                     # Get audio frame from sounddevice callback, run VAD inline.
                     # VAD is <1ms so running it on the asyncio thread is fine.
                     try:
-                        audio_frame = await asyncio.wait_for(audio_queue.get(), timeout=0.1)
+                        # Keep queue consumption in this task: Python 3.11's
+                        # wait_for can swallow Stop when its child get() has
+                        # just completed as cancellation arrives.
+                        async with asyncio.timeout(0.1):
+                            audio_frame = await audio_queue.get()
                     except TimeoutError:
                         if getattr(stream, "error", None) is not None:
                             if isinstance(stream.error, AudioCaptureError):
@@ -4646,6 +4847,10 @@ async def audio_loop():
                         ):
                             if getattr(stream, "error", None) is not None:
                                 raise RuntimeError("Audio replay failed") from stream.error
+                            source_count = getattr(stream, "source_sample_count", None)
+                            suppress_music_recovery("eof")
+                            if source_count is not None:
+                                _source_coverage.eof(source_count, stream.samplerate)
                             if len(speech_buffer):
                                 # Tail silence normally finalizes speech. Flush any
                                 # remainder, retaining the live minimum-length gate.
@@ -4678,6 +4883,9 @@ async def audio_loop():
                         "audio_dequeued",
                         capture_age_ms=milliseconds(time.perf_counter(), frame_stamp.end),
                         queue_depth=audio_queue.qsize(),
+                        sample_start=frame_stamp.sample_start,
+                        sample_end=frame_stamp.sample_end,
+                        sample_rate=frame_stamp.sample_rate,
                     )
                     vad_started = time.perf_counter()
                     if _vad_pool is not None:
@@ -4686,9 +4894,10 @@ async def audio_loop():
                         )
                     else:
                         has_speech = is_speech(audio_frame, vad_model, vad_utils)
-                    _latency_trace.record("vad_complete", elapsed_ms=(time.perf_counter() - vad_started) * 1000)
+                    vad_elapsed_ms = (time.perf_counter() - vad_started) * 1000
 
                     frame_count += 1
+                    music_capture_frames += 1
 
                     # --- Music/hymn auto-muting ---
                     frame_rms = float(np.sqrt(np.mean(audio_frame**2)))
@@ -4703,10 +4912,34 @@ async def audio_loop():
                         music_nonspeech_frames = 0
                         music_speech_frames = 0
 
+                    # Extend the existing opt-in event, using the exact decision
+                    # and RMS already consumed here; never run VAD a second time.
+                    # VAD elapsed retains its original call/worker-wait scope.
+                    _latency_trace.record(
+                        "vad_complete",
+                        elapsed_ms=vad_elapsed_ms,
+                        sample_start=frame_stamp.sample_start,
+                        sample_end=frame_stamp.sample_end,
+                        sample_rate=frame_stamp.sample_rate,
+                        padding_samples=frame_stamp.padding_samples,
+                        processed_samples=len(audio_frame),
+                        processing_sample_rate=SAMPLE_RATE,
+                        vad_positive=bool(has_speech),
+                        vad_threshold=VAD_THRESHOLD,
+                        frame_rms=frame_rms,
+                        music_threshold=MUSIC_THRESHOLD,
+                        music_holdoff_frames=music_holdoff_frames,
+                        music_resume_frames=music_resume_frames,
+                        music_nonspeech_frames=music_nonspeech_frames,
+                        music_speech_frames=music_speech_frames,
+                        music_hold_active_before_transition=music_hold_active,
+                    )
+
                     # Enter music hold
                     if not music_hold_active and music_nonspeech_frames >= music_holdoff_frames:
                         music_hold_active = True
-                        music_hold_start_frame = frame_count
+                        music_hold_start_frame = music_capture_frames
+                        music_hold_started_at = time.perf_counter()
                         print(
                             f"\n  [MUSIC] Music detected — muting STT (RMS={frame_rms:.4f}, threshold={MUSIC_THRESHOLD})"
                         )
@@ -4718,21 +4951,47 @@ async def audio_loop():
                         _partial_tasks.add(task)
                         task.add_done_callback(_partial_tasks.discard)
 
-                    # Exit music hold when speech resumes for ~0.5s
-                    if music_hold_active and music_speech_frames >= music_resume_frames:
-                        hold_dur = (frame_count - music_hold_start_frame) * 512 / SAMPLE_RATE
-                        diag_music_holds.append((music_hold_start_frame, frame_count, round(hold_dur, 1)))
+                    # Stage the unchanged ~0.5s recovery decision without losing
+                    # the accepted speech onset. Tentative frames are observed
+                    # exactly once, then explicitly recovered or suppressed.
+                    recovered_frames = ()
+                    if music_hold_active:
+                        if has_speech:
+                            candidate = AudioFrame(audio_frame.copy(), frame_stamp)
+                            if not music_recovery.contiguous(candidate):
+                                suppress_music_recovery("source_discontinuity")
+                            music_recovery.append(candidate)
+                            music_speech_frames = len(music_recovery)
+                            _source_coverage.observe(vars(frame_stamp), "music_resume_pending", speech=True)
+                        else:
+                            suppress_music_recovery("vad_non_speech")
+                            _source_coverage.observe(vars(frame_stamp), "music_hold", speech=False)
+                        if music_speech_frames < music_resume_frames:
+                            continue
+                        recovered_frames = music_recovery.take()
+                        hold_dur = (music_capture_frames - music_hold_start_frame) * 512 / SAMPLE_RATE
+                        wall_ms = milliseconds(time.perf_counter(), music_hold_started_at)
+                        diag_music_holds.append((music_hold_start_frame, music_capture_frames, round(hold_dur, 1)))
+                        _latency_trace.record(
+                            "music_hold_finished",
+                            captured_frame_duration_ms=round(hold_dur * 1000, 3),
+                            captured_frame_time_excludes_operator_pause=True,
+                            wall_elapsed_ms=wall_ms,
+                            wall_time_includes_operator_pause=True,
+                        )
                         music_hold_active = False
                         music_nonspeech_frames = 0
-                        print(f"  [MUSIC] Speech resumed after {hold_dur:.1f}s hold")
+                        print(f"  [MUSIC] Speech resumed after {hold_dur:.1f}s captured-frame hold (excludes pauses)")
                         vad_model.reset_states()
                         task = asyncio.create_task(broadcast({"type": "music_hold", "active": False}))
                         _partial_tasks.add(task)
                         task.add_done_callback(_partial_tasks.discard)
 
-                    # Skip all speech buffering when in music hold
-                    if music_hold_active:
-                        continue
+                    buffered_frame = has_speech or (len(speech_buffer) > 0 and silence_frames + 1 < max_silence_frames)
+                    if not recovered_frames:
+                        _source_coverage.observe(
+                            vars(frame_stamp), "buffered" if buffered_frame else "vad_non_speech", speech=has_speech
+                        )
 
                     if has_speech:
                         if silence_frames:
@@ -4745,10 +5004,24 @@ async def audio_loop():
                             last_partial_len = 0
                             last_silence_boundary = 0
                             logger.debug("vad_speech_start utterance_id=%d frame=%d", utterance_id, frame_count)
-                        speech_buffer = np.concatenate([speech_buffer, audio_frame])
-                        timeline.append(len(audio_frame), frame_stamp, True)
+                        if recovered_frames:
+                            speech_buffer = np.concatenate([speech_buffer, *(f.samples for f in recovered_frames)])
+                            for accepted in recovered_frames:
+                                timeline.append(len(accepted.samples), accepted.stamp, True)
+                            speech_frame_count += len(recovered_frames)
+                            bounds = MusicSpeechRecovery.timeline(recovered_frames).sample_metadata()
+                            _source_coverage.outcome(bounds, "music_resume_recovered", utterance_id)
+                            _latency_trace.record(
+                                "music_resume_recovered",
+                                frames=len(recovered_frames),
+                                utterance_id=utterance_id,
+                                **bounds,
+                            )
+                        else:
+                            speech_buffer = np.concatenate([speech_buffer, audio_frame])
+                            timeline.append(len(audio_frame), frame_stamp, True)
+                            speech_frame_count += 1
                         silence_frames = 0
-                        speech_frame_count += 1
                     else:
                         # Record silence boundary on speech→silence transition
                         if len(speech_buffer) > 0 and silence_frames == 0:
@@ -4774,6 +5047,31 @@ async def audio_loop():
                     new_audio = (len(speech_buffer) - last_partial_len) / SAMPLE_RATE
 
                     pause_ms = silence_frames * 512 / SAMPLE_RATE * 1000
+                    if (
+                        _latency.early_clause_s
+                        and not has_speech
+                        and buffer_duration >= _latency.early_clause_s
+                        and _latency.early_clause_pause_ms <= pause_ms < SILENCE_TRIGGER * 1000
+                        and last_silence_boundary >= int(0.7 * SAMPLE_RATE)
+                    ):
+                        split_pos = last_silence_boundary
+                        taken = timeline.split(split_pos)
+                        _latency_trace.record(
+                            "early_clause_committed",
+                            utterance_id=utterance_id,
+                            observed_pause_ms=pause_ms,
+                            **taken.sample_metadata(),
+                        )
+                        _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
+                            taken, utterance_id, "early_clause"
+                        )
+                        await process_final(speech_buffer[:split_pos].copy(), utterance_id)
+                        speech_buffer = speech_buffer[split_pos:].copy()
+                        utterance_id = _next_capture_utterance_id()
+                        _utterance_start_times[utterance_id] = timeline.first or time.perf_counter()
+                        last_partial_len = last_silence_boundary = 0
+                        pause_preview_fired = pause_speculation_fired = False
+                        continue
                     if not has_speech and buffer_duration >= 0.7 and silence_frames < max_silence_frames:
                         clause = bool(_latency.clause_preview_s and buffer_duration >= _latency.clause_preview_s)
                         preview_delay = _latency.pause_preview_ms or (128 if clause else 0)
@@ -4944,6 +5242,7 @@ async def audio_loop():
                         _schedule_warmup(loop)
 
         except asyncio.CancelledError:
+            suppress_music_recovery("stop" if _session_stop_requested else "cancelled")
             # Admit captured speech before main_async sends the coordinator's
             # sentinel. Pending translation then follows the normal final drain.
             if _session_stop_requested and len(speech_buffer) / SAMPLE_RATE >= 0.7:
@@ -4957,6 +5256,7 @@ async def audio_loop():
                     _health.error("capture", "stop_queued_audio_discarded")
             raise
         except (sd.PortAudioError, AudioCaptureError) as e:
+            suppress_music_recovery("capture_error")
             if len(speech_buffer):
                 _io_pool.record_failure("audio_capture", "interrupted_utterance")
                 if _health is not None:
@@ -4975,6 +5275,9 @@ async def audio_loop():
                 except asyncio.QueueEmpty:
                     break
             await asyncio.sleep(2)
+        finally:
+            # Includes EOF, pause and unexpected source/consumer failures.
+            suppress_music_recovery("capture_closed")
 
 
 _ROLLING_STATS_INTERVAL = 300  # 5 minutes
@@ -5005,6 +5308,28 @@ async def _rolling_stats_task():
             "timestamp": datetime.now().isoformat(),
         }
         await broadcast(stats_data)
+
+
+async def _drain_inference_workers():
+    """Finish physical work before unloading models or freezing the session trace.
+
+    Cancelling an asyncio executor wrapper cannot stop a running native call.
+    Stop its publication task, cancel work that has not started, and join the
+    actual executors off the event loop. The process supervisor still owns the
+    outer stop deadline if a native library never returns.
+    """
+    tasks = tuple(_partial_tasks)
+    for task in tasks:
+        if not task.done():
+            task.cancel()
+    if tasks:
+        await asyncio.gather(*tasks, return_exceptions=True)
+    pools = (_pipeline_pool, _pytorch_pool, _stt_comm_pool, _trans_comm_pool, _vad_pool)
+    for pool in dict.fromkeys(pool for pool in pools if pool is not None):
+        await asyncio.to_thread(pool.shutdown, wait=True, cancel_futures=True)
+    if _tts_pool is not None:
+        # Published finals already promised this audio; preserve queued playback.
+        await asyncio.to_thread(_tts_pool.shutdown, wait=True)
 
 
 async def main_async(args):
@@ -5164,7 +5489,12 @@ async def main_async(args):
 
     # Detect best microphone and auto-calibrate gain
     global MIC_DEVICE, MIC_GAIN
-    if MIC_DEVICE is None and os.environ.get("STARK_AUDIO_SOURCE") != "file":
+    if (
+        MIC_DEVICE is None
+        and MIC_DEVICE_NAME is None
+        and MIC_DEVICE_HOST_API is None
+        and os.environ.get("STARK_AUDIO_SOURCE") != "file"
+    ):
         print("[5/6] Detecting microphone...")
         MIC_DEVICE, mic_rms = detect_macbook_mic()
         if mic_rms > 0 and MIC_GAIN == 1.0:
@@ -5353,17 +5683,12 @@ async def main_async(args):
             if _incremental_stt is not None:
                 await asyncio.wrap_future(_stt_scheduler.submit("final", _incremental_stt.close))
             await asyncio.get_running_loop().run_in_executor(None, _stt_scheduler.shutdown)
-        if _vad_pool is not None:
-            _vad_pool.shutdown(wait=True)
+        await _drain_inference_workers()
         if _caption_delivery is not None:
             await _caption_delivery.close()
-        # Release the Marian engine first, then shut down the PyTorch pool.
+        # All native calls are finished before model state is released.
         if _marian_engine is not None:
             _marian_engine.unload()
-        _pytorch_pool.shutdown(wait=False)
-        # Shut down TTS pool if running
-        if _tts_pool is not None:
-            _tts_pool.shutdown(wait=True)
         if tts_engine is not None:
             tts_engine.unload()
         # Stop multiprocess workers if running
@@ -5452,6 +5777,8 @@ def main():
     parser.add_argument("--routing-policy", choices=["legacy", "conservative", "off"], default=None)
     parser.add_argument("--terminology-prompt", choices=["none", "church"], default=None)
     parser.add_argument("--device", type=int, default=None, help="Audio input device index (default: auto-detect)")
+    parser.add_argument("--device-name", help="Exact input device name, resolved inside the capture process")
+    parser.add_argument("--device-host-api", help="Host API name to disambiguate the selected input device")
     parser.add_argument("--gain", type=float, default=None, help="Mic gain multiplier (default: auto-calibrate)")
     parser.add_argument("--audio-file", help="Replay a WAV through the live audio pipeline")
     parser.add_argument("--replay-speed", type=float, default=1.0, help="Replay speed; <=0 runs unpaced")
@@ -5779,9 +6106,14 @@ def main():
             )
             args.run_ab = False
 
-    global _latency, _latency_trace, _stt_scheduler, _marian_memo, _vad_pool
+    global _latency, _latency_trace, _stt_scheduler, _marian_memo, _vad_pool, _source_coverage, _partial_runtime
+    global _final_queue_pressure, _capture_transport
     _latency = LatencyExperiments.from_env()
-    _latency_trace = LatencyTrace(_latency.trace)
+    _latency_trace = LatencyTrace(_latency.trace, capacity=_latency.trace_capacity, origin=_SESSION_CLOCK_ORIGIN)
+    _final_queue_pressure = FinalQueuePressure(origin=_SESSION_CLOCK_ORIGIN, on_event=_latency_trace.record)
+    _capture_transport = CaptureTransportSummary()
+    _source_coverage = SourceCoverage()
+    _partial_runtime = PartialRuntimePredictor()
     _marian_memo = ExactTextMemo(_latency.marian_memo)
     if _latency.latest_partial or _latency.incremental_stt != "off" or _latency.speculate_pause_ms:
         _stt_scheduler = LatestSTTWorker(on_event=_latency_event)
@@ -5846,6 +6178,7 @@ def main():
     logger.info("Session %s started — log file: %s", SESSION_ID, LOG_PATH)
 
     global CHUNK_DURATION, WS_PORT, VAD_THRESHOLD, MIC_DEVICE, MIC_GAIN, NUM_DRAFT_TOKENS
+    global MIC_DEVICE_NAME, MIC_DEVICE_HOST_API
     global WORD_TIMESTAMPS, BEAM_SIZE, MULTIPROCESS, MUSIC_THRESHOLD, MUSIC_HOLDOFF
     CHUNK_DURATION = args.chunk_duration
     WS_PORT = args.ws_port
@@ -5860,6 +6193,7 @@ def main():
         if getattr(args, name) is not None:
             setattr(settings.translation, name, getattr(args, name))
     MIC_DEVICE = args.device
+    MIC_DEVICE_NAME, MIC_DEVICE_HOST_API = args.device_name, args.device_host_api
     if args.audio_file:
         MIC_GAIN = 1.0
     if args.gain is not None:

@@ -1,0 +1,151 @@
+11:15:42 [INFO] Session followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en started — log file: metrics/session_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.log
+/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/audio_bridge_client.py:199: WavFileWarning: Chunk (non-data) not understood, skipping it.
+  source_rate, samples = wavfile.read(path)
+Parakeet has no prompt biasing; theological terms rely on correct_stt_output
+============================================================
+  Bilingual A/B Dry Run
+  Backend: MLX
+  Language: English→Spanish
+  Mode: 4B only
+  WebSocket: ws://localhost:8865
+============================================================
+
+[1/6] Loading packaged Silero VAD...
+  VAD ready (silero-vad 6.2.1, torch)
+[2/6] Loading mlx-community/parakeet-tdt-0.6b-v3 (Parakeet MLX)...
+  Parakeet ready (0.8s)
+[3/6] Loading Gemma 4 models (MLX)...
+  Loading Approach A (mlx-community/gemma-4-e2b-it-OptiQ-4bit)...
+  Prompt cache skipped (gemma4 instruct path)
+[4/6] Loading Helsinki-NLP/opus-mt-en-es (Marian partial translator)...
+  Marian ready (ct2-int8, 1.6s)
+  Hardware profile: metrics/hardware_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.json
+    arm | 12P+0E cores | 18.0GB RAM | Apple M3 Pro
+[6/6] Starting servers...
+  CSV: metrics/ab_metrics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.csv
+  WebSocket ready on port 8865
+  HTTP server ready on port 8866
+
+  Local displays:
+    A/B display:       file:///Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/displays/ab_display.html
+    Audience display:  file:///Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/displays/audience_display.html
+
+  Mobile / LAN access:
+    http://172.20.10.2:8866/displays/mobile_display.html
+    http://172.20.10.2:8866/displays/audience_display.html
+  [P7-P3-6A] Streaming translation broadcaster started
+  [P7-6C] Pipeline coordinator started (STT/translation overlap enabled)
+
+Listening... (Ctrl+C to stop)
+
+  partial (397ms, Marian:20ms): Over time. | Con el tiempo.            [ws] No clients connected, skipping broadcast
+  partial (131ms, Marian:28ms): Over time as the | Con el tiempo como el            [ws] No clients connected, skipping broadcast
+  [status] frames=92 speech=49 buf=1.6s silence=0 rms=0.1375  partial (143ms, Marian:40ms): Over time, as the new population | Con el tiempo, como la nueva población            [ws] No clients connected, skipping broadcast
+  partial (216ms, Marian:63ms): Over time, as the new population begins to | Con el tiempo, a medida que la nueva población comienza a            [ws] No clients connected, skipping broadcast
+  partial (152ms, Marian:46ms): Over time, as the new population begins to adapt to itself. | Con el tiempo, la nueva población comienza a adaptarse a sí misma.            [ws] No clients connected, skipping broadcast
+  partial (197ms, Marian:77ms): Over time, as the new population begins to adapt to their new environment, | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno,            [ws] No clients connected, skipping broadcast
+  [status] frames=185 speech=140 buf=4.6s silence=0 rms=0.0517  partial (875ms, Marian:65ms): Over time, as the new population begins to adapt to their new environment, | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno,            [ws] No clients connected, skipping broadcast
+  partial (322ms, Marian:78ms): Over time, as the new population begins to adapt to their new environment, they start to look less. | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse menos.            [ws] No clients connected, skipping broadcast
+  partial (317ms, Marian:90ms): Over time, as the new population begins to adapt to their new environment, they start to look less and less to | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a mirar cada vez menos a            [ws] No clients connected, skipping broadcast
+  partial (333ms, Marian:99ms): Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other populations. | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como las otras poblaciones.            [ws] No clients connected, skipping broadcast
+  partial (409ms, Marian:128ms): Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population. | Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, comienzan a verse cada vez menos como la otra población.            [ws] No clients connected, skipping broadcast
+  [status] frames=286 speech=237 buf=7.8s silence=4 rms=0.0041
+============================================================
+Chunk #1 | STT: 230ms | EN: Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population.
+  [ws] No clients connected, skipping broadcast
+11:16:00 [INFO] vad_utterance_discard utterance_id=2 reason=short_silence buffer_s=0.448 sample_bounds={'sample_start': 433152, 'sample_end': 454656, 'sample_rate': 48000, 'speech_end_sample': None, 'padding_samples': 0}
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  [ws] No clients connected, skipping broadcast
+  +1923ms A (57 t/s) tok=30 pre=183ms ttft=1371ms fin=stop: Con el tiempo, a medida que la nueva población comienza a adaptarse a su nuevo entorno, empiezan a parecer menos y menos como la otra población.
+  Processing: 2158ms | utterance-start→processing: 9995ms | conf: 1.00 | QE: A=1.0 | ws: 85%
+  [ws] No clients connected, skipping broadcast
+  [status] frames=380 speech=0 buf=0.0s silence=83 rms=0.0000  partial (154ms, Marian:51ms): Air accident. | Accidente aéreo.            [ws] No clients connected, skipping broadcast
+  partial (139ms, Marian:35ms): Air accidents are common. | Los accidentes aéreos son comunes.            [ws] No clients connected, skipping broadcast
+  [status] frames=475 speech=55 buf=1.8s silence=0 rms=0.0539  partial (151ms, Marian:44ms): Air accidents are common in Iraq. | Los accidentes aéreos son comunes en Iraq.            [ws] No clients connected, skipping broadcast
+  partial (150ms, Marian:43ms): Air accidents are common in Iran. | Los accidentes aéreos son comunes en Irán.            [ws] No clients connected, skipping broadcast
+
+
+============================================================
+Chunk #2 | STT: 400ms | EN: Air accidents are common in Iran.
+  [ws] No clients connected, skipping broadcast
+  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)
+  >> NEAR-MISS (fuzzy 80%): 'common' -> 'communion'?
+  +36ms A (0 t/s): Los accidentes aéreos son comunes en Irán.
+  Processing: 446ms | utterance-start→processing: 3231ms | conf: 0.99 | QE: A=1.0 | ws: 100%
+  [ws] No clients connected, skipping broadcast
+  partial (111ms, Marian:13ms): Which | Que            [ws] No clients connected, skipping broadcast
+
+
+Stopping...
+
+============================================================
+Chunk #3 | STT: 81ms | EN: Which
+  [ws] No clients connected, skipping broadcast
+  [P7-6B] ADAPTIVE: MarianMT-only (simple utterance)
+  +9ms A (0 t/s): Que
+  Processing: 91ms | utterance-start→processing: 710ms | conf: 0.97 | QE: A=0.7 | ws: 100%
+  [ws] No clients connected, skipping broadcast
+
+  [P7-6C] Pipeline stats: 0/3 chunks overlapped (0%)
+
+============================================================
+SESSION SUMMARY — 3 chunks
+============================================================
+  STT avg:     237ms (median 230ms)
+  A (4B) avg:  656ms (median 36ms)
+  B (12B):     not loaded
+  Processing:  3/3 (100.0%) — empty_stt=0, hallucination=0, dedup=0
+  Utterance-start→processing: avg=4645ms (median 3231ms)
+  Stability:   avg=95% (3 chunks with partials)
+  CSV saved:   metrics/ab_metrics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.csv
+============================================================
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DIAGNOSTICS SUMMARY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Homophone flags: 0 (clean)
+
+  Near-miss flags: 1
+    #2: 'common' -> 'communion' (fuzzy) in: Air accidents are common in Iran.
+
+  Bad sentence splits: 0 (clean)
+
+  Marian/Gemma avg similarity: 91% (0 high-divergence)
+    #1 (72%): MT='Con el tiempo, a medida que la nueva pob' | TG='Con el tiempo, a medida que la nueva pob'
+    #2 (100%): MT='Los accidentes aéreos son comunes en Irá' | TG='Los accidentes aéreos son comunes en Irá'
+    #3 (100%): MT='Que' | TG='Que'
+
+  Utterance durations: avg=3.7s, <1s=1, >6s=1, min=0.7s, max=7.7s
+
+  Low confidence chunks: 0 (clean)
+
+  Empty STT drops: 0 (clean)
+
+  Force-cuts: 0 (clean)
+
+  Music holds: 0
+
+  STT corrections: 0
+
+  Resource usage (current):
+    Process RAM: 0.5GB
+    System RAM:  11.5GB / 18GB (83%)
+    CPU:         0%
+
+  [P7-6C] Pipeline overlap: 0/3 chunks (0%) had STT(N) overlapping Translation(N-1)
+
+  Fine-tuning data: stark_data/live_sessions/followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en/
+  Review queue:     metrics/diagnostics_followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en.jsonl
+  Mic gain used:    1.0x
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  WS stats:    connections=0 disconnections=0 send_failures=0

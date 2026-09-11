@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-09-10T17:45:03.385085+00:00",
+  "status": "passed",
+  "source_revision": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "source_identity": "e22411047861089b919965328dcc24ba9e06b170e4c0fe28b280a81436a20047",
+  "bindings": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1-report.json": {
+      "sha256": "2f26333f2532e144594916027ad3cefd094021c3d9cdb79f7fb4f621869beeff",
+      "size_bytes": 304028
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1-selection.json": {
+      "sha256": "49f6fb381af6aecd4d2467dd62ab34b93fab7c72d5267ff368b9e2a8dd2d3eee",
+      "size_bytes": 1829
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1/provenance.json": {
+      "sha256": "47061a955ec98a9d5085539cf905be11807c91f64e966b0a752fd91a879e9c71",
+      "size_bytes": 64110
+    },
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/protocol/spanish-parakeet-screen.json": {
+      "sha256": "82072a269138f5fb48e2b15c937a6068bffae3bf3d6181b1fbf4c5bc6b22547a",
+      "size_bytes": 5857
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_selection.py": {
+      "sha256": "a6553a89914f665c0f7e18fa862ad66eae29ec306830a08d12b63286f6f23045",
+      "size_bytes": 6143
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_evaluation.py": {
+      "sha256": "5c8682ebeb0abbf50b2040cfdfdf7da8c5e2f1f5165104b809787165a6e3110a",
+      "size_bytes": 69473
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/overnight_bench.py": {
+      "sha256": "49549ce0daae0d9ec7d7c0b37870b30682e5dd536dde90f3359bf7ec7e93a700",
+      "size_bytes": 33001
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_latency.py": {
+      "sha256": "ac12808b61279f6bc452a3943fa54f4775ba26ffec5b983d5b45bdd74f35908d",
+      "size_bytes": 44432
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/tools/mac_followup_quality.py": {
+      "sha256": "f6b5b631449e7b2009593f057c96b05e08f8befc0affb632f22081ba3834ee49",
+      "size_bytes": 44156
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1/followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es.json": {
+      "sha256": "54456948e062c87e7b6a2483b8b54d085f3c9e316ebd321ea58b8a102d3dd62d",
+      "size_bytes": 2417471
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1/followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es.json": {
+      "sha256": "72abbd6e25a4a8fadc1f97a18798dfe6ed7acaf712e16c45745d8323a421faec",
+      "size_bytes": 2497457
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/spanish-parakeet-normalized-v1/followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es.json": {
+      "sha256": "99df4010d0aa5eb4140e0eb7f67b7ed6d4512afebeb34364dcda326913133542",
+      "size_bytes": 2467706
+    }
+  },
+  "report_selector_reproduced": true,
+  "pair_metric_anchor_recomputations": 18,
+  "median_gate_pass_count": 5,
+  "qualified_arms": 0,
+  "pairs": [
+    {
+      "size": "e4b",
+      "repeat": 0,
+      "p50_ms": {
+        "opening": 5444.0785,
+        "candidate": 3915.702000000001,
+        "closing": 3384.874
+      },
+      "conservative_median_gain_ms": -530.8280000000013,
+      "median_gate_passed": false,
+      "rejection_reasons": [
+        "matched_update_gap_tail_regression",
+        "median_gain_below_gate",
+        "memory_regression",
+        "stage_queue_tail_regression",
+        "update_gap_tail_regression"
+      ],
+      "eligible_fixed_span_count_per_run": 6,
+      "p95_claim_eligible": false
+    },
+    {
+      "size": "e2b",
+      "repeat": 0,
+      "p50_ms": {
+        "opening": 3194.7065000000002,
+        "candidate": 1692.4789999999957,
+        "closing": 3020.654499999997
+      },
+      "conservative_median_gain_ms": 1328.1755000000012,
+      "median_gate_passed": true,
+      "rejection_reasons": [
+        "matched_first_preview_tail_regression"
+      ],
+      "eligible_fixed_span_count_per_run": 6,
+      "p95_claim_eligible": false
+    },
+    {
+      "size": "e2b",
+      "repeat": 1,
+      "p50_ms": {
+        "opening": 2640.796000000002,
+        "candidate": 1911.178499999999,
+        "closing": 2389.3809999999976
+      },
+      "conservative_median_gain_ms": 478.2024999999985,
+      "median_gate_passed": true,
+      "rejection_reasons": [
+        "final_queue_wait_regression",
+        "matched_update_gap_tail_regression",
+        "update_gap_tail_regression"
+      ],
+      "eligible_fixed_span_count_per_run": 6,
+      "p95_claim_eligible": false
+    },
+    {
+      "size": "e4b",
+      "repeat": 1,
+      "p50_ms": {
+        "opening": 3882.551000000005,
+        "candidate": 2467.5475000000024,
+        "closing": 3483.836999999996
+      },
+      "conservative_median_gain_ms": 1016.2894999999935,
+      "median_gate_passed": true,
+      "rejection_reasons": [
+        "final_queue_sustained_growth",
+        "final_queue_wait_regression",
+        "matched_update_gap_tail_regression",
+        "preview_source_coverage_loss",
+        "update_gap_tail_regression"
+      ],
+      "eligible_fixed_span_count_per_run": 6,
+      "p95_claim_eligible": false
+    },
+    {
+      "size": "e4b",
+      "repeat": 2,
+      "p50_ms": {
+        "opening": 3224.383,
+        "candidate": 2103.8509999999987,
+        "closing": 3239.6500000000015
+      },
+      "conservative_median_gain_ms": 1120.532000000001,
+      "median_gate_passed": true,
+      "rejection_reasons": [
+        "final_queue_wait_regression",
+        "matched_update_gap_tail_regression",
+        "update_gap_tail_regression"
+      ],
+      "eligible_fixed_span_count_per_run": 6,
+      "p95_claim_eligible": false
+    },
+    {
+      "size": "e2b",
+      "repeat": 2,
+      "p50_ms": {
+        "opening": 2284.1039999999994,
+        "candidate": 1801.547499999996,
+        "closing": 2752.318000000001
+      },
+      "conservative_median_gain_ms": 482.5565000000033,
+      "median_gate_passed": true,
+      "rejection_reasons": [
+        "matched_update_gap_tail_regression",
+        "update_gap_tail_regression"
+      ],
+      "eligible_fixed_span_count_per_run": 6,
+      "p95_claim_eligible": false
+    }
+  ],
+  "representative_e4b_repeat_1": [
+    {
+      "session_id": "followup_es_pk_v1_baseline_e4b_r1_fleurs_development_es_es",
+      "requested_stt": {
+        "requested_id": "mlx-community/whisper-large-v3-turbo",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379",
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb"
+      },
+      "actual_stt": {
+        "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "manifest_revision": null,
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379"
+      },
+      "recorded_stt_backend": "mlx",
+      "file_input_no_tts_gain_1": true,
+      "runtime_errors_recomputed": [],
+      "caption_wer_counts_recomputed": {
+        "errors": 2,
+        "reference_words": 80,
+        "substitutions": 1,
+        "deletions": 0,
+        "insertions": 1,
+        "wer": 0.025
+      },
+      "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+      "complete_source_samples": 2284800,
+      "terminal_queue_outstanding": 0,
+      "final_queue_max_wait_ms": 274.55195889342576,
+      "disjoint_queue_growth_ms": 81.39088928389052
+    },
+    {
+      "session_id": "followup_es_pk_v1_parakeet_es_e4b_r1_fleurs_development_es_es",
+      "requested_stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15"
+      },
+      "actual_stt": {
+        "requested_id": "mlx-community/parakeet-tdt-0.6b-v3",
+        "manifest_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_revision": "ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--parakeet-tdt-0.6b-v3/snapshots/ed2b7e8c15f9aaa0b5772e2efb986255eaef7e15",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "f320f1292511f34ec47f513755fe20fd01dbfc09a925d42730e66059a6e1ef4c"
+      },
+      "recorded_stt_backend": "parakeet-mlx",
+      "file_input_no_tts_gain_1": true,
+      "runtime_errors_recomputed": [],
+      "caption_wer_counts_recomputed": {
+        "errors": 1,
+        "reference_words": 80,
+        "substitutions": 1,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": 0.0125
+      },
+      "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+      "complete_source_samples": 2284800,
+      "terminal_queue_outstanding": 0,
+      "final_queue_max_wait_ms": 2369.265832938254,
+      "disjoint_queue_growth_ms": 786.8580267143745
+    },
+    {
+      "session_id": "followup_es_pk_v1_baseline_anchor_e4b_r1_fleurs_development_es_es",
+      "requested_stt": {
+        "requested_id": "mlx-community/whisper-large-v3-turbo",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379",
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb"
+      },
+      "actual_stt": {
+        "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "manifest_revision": null,
+        "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+        "revision_source": "hf_snapshot_path",
+        "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379"
+      },
+      "recorded_stt_backend": "mlx",
+      "file_input_no_tts_gain_1": true,
+      "runtime_errors_recomputed": [],
+      "caption_wer_counts_recomputed": {
+        "errors": 2,
+        "reference_words": 80,
+        "substitutions": 1,
+        "deletions": 0,
+        "insertions": 1,
+        "wer": 0.025
+      },
+      "reference_contract_sha256": "0a2e11443f9be27ad443cf702ce4f9b0e714205f8da68d1cf554ea10972d8bd0",
+      "complete_source_samples": 2284800,
+      "terminal_queue_outstanding": 0,
+      "final_queue_max_wait_ms": 53.218499990180135,
+      "disjoint_queue_growth_ms": 13.610972324386239
+    }
+  ],
+  "raw_preview_and_coverage_reproduced": true,
+  "limits": "Six report pairs; three E4B repeat-1 raw cells. Other raw cells not reloaded here. No native/model/audio/device/archive/Git/build/install calls.",
+  "confirmation_decision": "Neither rejected Spanish arm authorizes confirmation, combination or a default change."
+}

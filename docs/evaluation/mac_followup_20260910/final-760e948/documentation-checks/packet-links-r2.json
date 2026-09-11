@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+    "tools/render_backlog.py",
+    "check-links",
+    "docs/evaluation/mac_followup_20260910/final-760e948/README.md",
+    "docs/evaluation/mac_followup_20260910/final-760e948/guide-review.md",
+    "docs/evaluation/mac_followup_20260910/final-760e948/installed-delivery.md",
+    "docs/evaluation/mac_followup_20260910/final-760e948/sessions-summary-review.md",
+    "docs/evaluation/mac_followup_20260910/final-760e948/source-validation.md",
+    "docs/evaluation/mac_followup_20260910/final-c13f51f/README.md",
+    "docs/evaluation/mac_followup_20260910/final-c13f51f/empty-preview-repair.md",
+    "docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-boundary.md",
+    "docs/evaluation/mac_followup_20260910/final-c13f51f/hymn-capture.md",
+    "docs/evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md",
+    "docs/evaluation/mac_followup_20260910/final-c13f51f/model-source-continuity.md",
+    "docs/evaluation/mac_followup_20260910/final-c13f51f/source-validation.md"
+  ],
+  "started_at": "2026-09-11T00:52:48.593033+00:00",
+  "ended_at": "2026-09-11T00:52:48.634362+00:00",
+  "exit_code": 0,
+  "log_sha256": "3fc79c4274f73f7d9fbf6ad7d77e5f91af5f1333c5a1ccc95dbc1904420ae277"
+}

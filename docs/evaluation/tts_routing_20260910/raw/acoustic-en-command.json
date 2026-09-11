@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python",
+    "docs/evaluation/tts_routing_20260910/probe.py",
+    "--execute-playback",
+    "--play-existing",
+    ".cache/mac-en-es-closeout/tts-routing-20260910/routes-r1/receipt.json",
+    "--language",
+    "en",
+    "--device-en",
+    "MacBook Pro Speakers",
+    "--output",
+    ".cache/mac-en-es-closeout/tts-routing-20260910/acoustic-en-r0"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 6.363587856292725,
+  "stdout": "{\n  \"schema_version\": 1,\n  \"started_at\": \"2026-09-10T14:23:20.203571+00:00\",\n  \"completed\": true,\n  \"rows\": [\n    {\n      \"language\": \"en\",\n      \"text\": \"Hello friends. This is an English microphone routing test. We are checking live captions on this computer.\",\n      \"synthesis_ms\": 867.5417500198819,\n      \"synthesis_this_process\": false,\n      \"audio_path\": \"/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/tts-routing-20260910/routes-r1/synthetic_en.wav\",\n      \"audio_sha256\": \"3ad4650def1bedaa1b6ec33351d66f0fa14be70efc2f2392dd545bf0d5d2877e\",\n      \"duration_s\": 5.955918367346939,\n      \"frames\": 131328,\n      \"sample_rate\": 22050,\n      \"status\": \"passed\",\n      \"playback\": {\n        \"spec\": \"MacBook Pro Speakers\",\n        \"resolved_device\": 2,\n        \"attempts\": [\n          {\n            \"requested_device\": 2,\n            \"started_at\": \"2026-09-10T14:23:20.358662+00:00\",\n            \"actual_device\": 2,\n            \"samplerate\": 22050.0,\n            \"channels\": 1,\n            \"reported_latency_s\": 0.03850340136054422,\n            \"active_after_open\": true,\n            \"host_open_call_ms\": 49.17224997188896,\n            \"wait_completed\": true,\n            \"host_completion_ms\": 6135.708708956372,\n            \"active_after_wait\": false,\n            \"stopped_after_wait\": true,\n            \"closed_after_wait\": true,\n            \"callback_status\": \"None\",\n            \"callback_error\": false\n          }\n        ],\n        \"passed\": true\n      }\n    }\n  ],\n  \"synthetic\": true,\n  \"human_reviewed\": false,\n  \"training_eligible\": false,\n  \"scope\": \"production Piper/route host calls and native completion; no human-heard/physical second-output claim\",\n  \"python\": \"/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python\",\n  \"probe_source_sha256\": \"fa98fca177ad6c6b859bdae5d50cd352212dd0d2300881cffffc35766d942313\",\n  \"versions\": {\n    \"piper-tts\": \"1.8.0\",\n    \"onnxruntime\": \"1.29.0\",\n    \"numpy\": \"2.4.6\",\n    \"sounddevice\": \"0.5.6\"\n  },\n  \"source_sha256\": {\n    \"engines/tts_engine.py\": \"c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3\",\n    \"engines/audio_devices.py\": \"994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5\",\n    \"engines/model_paths.py\": \"1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d\",\n    \"models.lock.json\": \"ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273\"\n  },\n  \"devices\": [\n    {\n      \"index\": 2,\n      \"name\": \"MacBook Pro Speakers\",\n      \"channels\": 2,\n      \"default\": true\n    },\n    {\n      \"index\": 3,\n      \"name\": \"Microsoft Teams Audio\",\n      \"channels\": 1,\n      \"default\": false\n    }\n  ],\n  \"synthetic_source_receipt_sha256\": \"39c318493e98b86dc83545dd4b279ec97546b485fa81836800e7c628c41213c0\",\n  \"ended_at\": \"2026-09-10T14:23:26.494889+00:00\"\n}\n",
+  "stderr": ""
+}

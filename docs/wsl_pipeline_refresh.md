@@ -72,7 +72,7 @@ ls stark_data/raw/*.wav stark_data/raw/*/*.wav 2>/dev/null | head
 #   STARK_WHISPER_DATASET, STARK_W16_ADAPTER, STARK_DEEPGRAM_DIR, STARK_AUDIO_DIR
 #   STARK_HARD_MINED, STARK_HARD_SUBSET, STARK_W17_OUT, STARK_W17_CT2
 #   STARK_GEMMA4_TRAIN / STARK_GEMMA4_VERSE / STARK_GEMMA4_SERMON / STARK_GEMMA4_ADAPTER / STARK_GEMMA4_GGUF
-export STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl   # REQUIRED: script default is the misaligned v1 path
+export STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl   # also the recipe default
 ```
 
 **Gate:** `nvidia-smi` OK; venv active; sermon WAVs discoverable; W16 CT2 or LoRA path known if re-exporting STT (`adapters/whisper_turbo_ct2/active` or `adapters/whisper_turbo/active`).
@@ -105,6 +105,7 @@ v1/v1.1/v2-cpo experiments in [`gemma4_tuning/v1_results.md`](./gemma4_tuning/v1
 used it successfully).
 
 ```bash
+training/run_gemma4_e4b_domain_sft.sh --dry-run   # CPU config/corpus/holdout check; no GPU imports
 training/run_gemma4_e4b_domain_sft.sh
 # trains Unsloth QLoRA → export_gguf.py --qtype Q4_K_M --sanity-test (--sanity-n 8)
 ```
@@ -126,15 +127,30 @@ Do **not** hard-only (W15 lesson). Replay stays ~0.3; init from W16.
 
 ```bash
 # Ensure STARK_W16_ADAPTER / paths match your layout
+training/run_w17_curriculum.sh --dry-run   # CPU config, adapter header and source-data checks
 training/run_w17_curriculum.sh
 
 python tools/benchmark_stt_engines.py --manifest tools/stt_bench_manifest.json
 # 41 clips; compare to docs/archive/v2026.7/STT_BENCHMARK.md
 ```
 
-**Before the first run:** `run_w17_curriculum.sh` lists `o_proj` in its `MODULES` array while
-`train_whisper.py` documents Whisper's attention output projection as `out_proj`; confirm the
-module name against the loaded model (PEFT fails on unknown targets).
+**Before the first run:** the recipe now uses `out_proj` and validates the local Whisper
+`config.json`, adapter rank/alpha, target coverage and tensor shapes before GPU imports.
+Set `STARK_WHISPER_MODEL_CONFIG` when the config is not in the local Hugging Face cache.
+Explicit `--allow-target-expansion` retains every W16 source tensor and permits fresh
+added modules/DoRA magnitudes; `--require-replay` aborts if replay cannot load. The hard
+subset JSON is aligned into a separate `STARK_W17_DATASET` audiofolder before training.
+Preflight, mining and alignment share the same literal source-stem WAV lookup, including
+nested/mixed-case extensions; multiple matching paths fail without guessing.
+Existing outputs are refused. Neither `--dry-run` nor passing fixture tests fulfills the
+CUDA gate; mining, alignment, replay availability and hardware execution remain pending.
+
+Both recipes require the v2 holdout at `bible_data/aligned/verse_pairs_test_v2.jsonl`
+(or the mounted path in `STARK_TRAINING_HOLDOUT`) and check existing local evaluation
+inputs as well. Gemma defaults to the versioned v2 verse corpus; selected missing data
+paths fail. Jacobo/Santiago candidates are prepared separately in
+[`training/candidates/README.md`](../training/candidates/README.md), remain unapproved,
+and cannot enter CPO until holdout and bilingual review gates are satisfied.
 
 **Gate (must beat or match W16, no latency regression).** Reference values are the W16
 rows of [`docs/archive/v2026.7/STT_BENCHMARK.md`](./archive/v2026.7/STT_BENCHMARK.md)

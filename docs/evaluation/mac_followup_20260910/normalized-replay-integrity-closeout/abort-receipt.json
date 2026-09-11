@@ -1,0 +1,16 @@
+{
+  "at": "2026-09-10T15:16:07.320201+00:00",
+  "reason": "Abort entire cohort after persisted physical STT trace mismatch; cancellation outlives summary. Preserve raw failed and interrupted evidence; rerun only as new source cohort.",
+  "actions": [
+    {
+      "pid": 33576,
+      "signal": "SIGINT",
+      "verified_command": "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python -m tools.mac_followup_latency run --spec /Users/willem/Code/vibes/SRTranslate/docs/evaluation/mac_followup_20260910/protocol/standard-screen.json --output /Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/standard-screen-normalized-v1 --tag followup_std_v1 --repeats 3 --ws-port 8865 --http-port 8866 --timeout 300"
+    },
+    {
+      "pid": 37532,
+      "signal": "SIGTERM",
+      "verified_command": "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python /Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/runtime/dry_run_ab.py --backend mlx --no-ab --lang en --audio-file /Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_en.wav --session-id followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en --ws-port 8865 --http-port 8866 --profile standard --no-tts --model-family gemma4 --gemma4-size e2b --no-mts --stt-backend parakeet-mlx --replay-speed 1 --silence-trigger 0.5 --partial-interval 0.6 --gain 1 --routing-policy legacy --terminology-prompt none --no-idle-warmup-only --no-final-aware-partials"
+    }
+  ]
+}

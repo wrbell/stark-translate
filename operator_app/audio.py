@@ -31,6 +31,7 @@ class DeviceInfo:
     direction: str  # "input" | "output"
     channels: int
     default_sample_rate: float
+    host_api: str | None = None
 
     def to_dict(self) -> dict:
         return self.__dict__.copy()
@@ -52,7 +53,7 @@ class DeviceListing:
     def fingerprint(self) -> tuple:
         """Stable identity used to detect changes between polls."""
         return (
-            tuple((d.index, d.name, d.channels) for d in self.inputs),
+            tuple((d.index, d.name, d.channels, d.host_api) for d in self.inputs),
             tuple((d.index, d.name, d.channels) for d in self.outputs),
         )
 
@@ -74,7 +75,22 @@ def list_devices() -> DeviceListing:
         in_ch = int(d.get("max_input_channels", 0) or 0)
         out_ch = int(d.get("max_output_channels", 0) or 0)
         if in_ch > 0:
-            inputs.append(DeviceInfo(index=idx, name=name, direction="input", channels=in_ch, default_sample_rate=sr))
+            from tools.input_devices import input_host_api
+
+            try:
+                host_api = input_host_api(sd, d)
+            except Exception as exc:
+                return DeviceListing(error=f"Input device identity unavailable: {exc}")
+            inputs.append(
+                DeviceInfo(
+                    index=idx,
+                    name=name,
+                    direction="input",
+                    channels=in_ch,
+                    default_sample_rate=sr,
+                    host_api=host_api,
+                )
+            )
         if out_ch > 0:
             outputs.append(
                 DeviceInfo(index=idx, name=name, direction="output", channels=out_ch, default_sample_rate=sr)

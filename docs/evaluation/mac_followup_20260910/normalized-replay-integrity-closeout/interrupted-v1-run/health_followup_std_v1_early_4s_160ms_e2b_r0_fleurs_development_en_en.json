@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "session_id": "followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en",
+  "updated_at": 1789053367.44711,
+  "phase": "completed",
+  "input_seen": true,
+  "input_age_s": 0.11708549998002127,
+  "caption_age_s": 0.024572958995122463,
+  "input_level": 0.01784607023000717,
+  "errors": [],
+  "error_count": 0,
+  "captions": [
+    {
+      "session_id": "followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en",
+      "utterance_id": 1,
+      "chunk_id": 1,
+      "stage": "complete",
+      "english": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population.",
+      "spanish_a": "Con el tiempo, a medida que la nueva poblaci\u00f3n comienza a adaptarse a su nuevo entorno, empiezan a parecer menos y menos como la otra poblaci\u00f3n.",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    },
+    {
+      "session_id": "followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en",
+      "utterance_id": 3,
+      "chunk_id": 2,
+      "stage": "complete",
+      "english": "Air accidents are common in Iran.",
+      "spanish_a": "Los accidentes a\u00e9reos son comunes en Ir\u00e1n.",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    },
+    {
+      "session_id": "followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en",
+      "utterance_id": 4,
+      "chunk_id": 3,
+      "stage": "complete",
+      "english": "Which",
+      "spanish_a": "Que",
+      "source_lang": "en",
+      "target_lang": "es",
+      "speaker": null
+    }
+  ],
+  "recording": {
+    "audio_enabled": true,
+    "required_failures": 0,
+    "ok": true
+  },
+  "control_sequence": 0,
+  "publish_failures": 0,
+  "persistence": {
+    "submitted": 24,
+    "completed": 24,
+    "pending": 0,
+    "failed": 0,
+    "capacity": 256,
+    "ok": true,
+    "failures": []
+  },
+  "storage": {
+    "free_bytes": 241706455040,
+    "low_space": false
+  },
+  "queues": {
+    "audio": 0,
+    "capture_handoff": 0,
+    "finals": 0,
+    "stream_tokens": 1
+  },
+  "clients": 0,
+  "replay_client_wait": {
+    "requested_seconds": 0.0,
+    "actual_wait_seconds": 0.0,
+    "status": "disabled",
+    "connected_clients": 0,
+    "visibility_confirmed": false
+  }
+}

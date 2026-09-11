@@ -1,0 +1,20 @@
+import importlib.metadata, json, math, sys
+from pathlib import Path
+import torch
+import torchaudio
+from speechbrain.inference.speaker import EncoderClassifier
+from transformers import MarianMTModel, MarianTokenizer
+from tools.vad_runtime import load_packaged_vad
+
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
+assert torch.__version__.split("+")[0] == "2.13.0"
+assert torchaudio.__version__.split("+")[0] == "2.11.0"
+model, _, metadata = load_packaged_vad("torch")
+model.reset_states()
+with torch.no_grad():
+    probabilities = [float(model(torch.zeros(512, dtype=torch.float32), 16000).item()) for _ in range(3)]
+assert all(math.isfinite(value) and 0 <= value <= 1 for value in probabilities)
+result = {"python":sys.version,"torch":torch.__version__,"torchaudio":torchaudio.__version__,"speechbrain":importlib.metadata.version("speechbrain"),"silero_vad":importlib.metadata.version("silero-vad"),"transformers":importlib.metadata.version("transformers"),"speaker_class_imported":EncoderClassifier.__name__,"marian_model_imported":MarianMTModel.__name__,"marian_tokenizer_imported":MarianTokenizer.__name__,"vad_provenance":metadata,"silence_probabilities":probabilities,"device":"cpu","scope":"Offline imports and three bundled-VAD silence frames only; no speaker/STT/translation models or real-speech validation."}
+Path("docs/evaluation/security_feasibility_20260910/raw/candidate-smoke.json").write_text(json.dumps(result,indent=2)+"\n")
+print(json.dumps(result,indent=2))

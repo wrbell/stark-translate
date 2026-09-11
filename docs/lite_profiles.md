@@ -21,12 +21,43 @@ The initial budget leaves three CT2 STT threads, one STT worker and one Marian
 thread. Final output quality and sustained backlog must be measured independently
 for each tier. No latency gate has passed for Lite yet.
 
-The [installed natural-English service rehearsal](evaluation/overnight_endurance_20260910/README.md)
+The earlier [installed natural-English service rehearsal](evaluation/overnight_endurance_20260910/README.md)
 completed on this Mac's CPU with consistent retained spans, required writes and
 process cleanup. First translated previews were sparse and observed final latency
 tails were large. Lite is functionally exercised, but cannot be recommended as a
 fast production profile today; the observational Standard/Lite results are not a
 causal paired comparison or a human-quality certificate.
+
+The current [source validation](evaluation/mac_followup_20260910/final-760e948/source-validation.md)
+and [installed-delivery record](evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+bind the repaired source `760e948`, fresh Standard/Lite artifacts, EN/ES file
+smokes and installed dependency assessments. Both full-service technical gates
+passed, with CPU Lite latency and sparse previews still limiting its usefulness; current decisions are tracked in
+[implementation status](mac_implementation_status.md). The earlier
+[c13 cohort](evaluation/mac_followup_20260910/final-c13f51f/installed-delivery.md)
+remains separate: a monitor reconstruction recovered its terminal read, but its
+Standard service still failed one blank translated-preview check. These Mac
+checks do not certify x86/RTX 2070 hardware, a RAM floor or service quality.
+
+**2026-09-10 cadence update:** the
+[normalized CPU Lite screen](evaluation/mac_followup_20260910/lite-cadence-result.md)
+completed 24 file replays with 0/4 language/cadence arms qualified. Slower partial
+intervals lost preview coverage and responsiveness, including cases with faster
+final medians. The 0.6-second cadence remains unchanged. These runs used
+Whisper-small and Marian finals; the harness's `e2b` label does not indicate
+Gemma inference or a test of `lite-cpu-quality`.
+
+The [CPU Whisper small/base comparison](evaluation/mac_followup_20260910/cpu-stt-comparison.md)
+completed 600 calls: base was faster but worsened WER beyond the allowed increase
+in both languages. Whisper-small stays selected; no base pipeline trial follows.
+The [independent CPU Lite deadline screen](evaluation/mac_followup_20260910/lite-deadline-result.md)
+completed 24 runs with 0/4 qualified arms at the default cadence. Neither deadline
+nor cadence candidates enter confirmation or combinations. The separate
+[Standard endpoint/deadline](evaluation/mac_followup_20260910/standard-screen-result.md)
+and [Spanish Parakeet](evaluation/mac_followup_20260910/spanish-parakeet-result.md)
+results leave the Mac Gemma E4B and Spanish Whisper defaults unchanged. None of
+these file cohorts certifies microphone reliability, physical output or bilingual
+service quality.
 
 The profiles disable A/B, speculative drafting, extra STT fallback models,
 multiprocess and live diarization. TTS is an optional CPU extra. E2B failures fail

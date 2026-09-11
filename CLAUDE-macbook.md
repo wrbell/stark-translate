@@ -1,17 +1,28 @@
 # CLAUDE-macbook.md — Mac Inference Environment Guide
 
+> **Mac EN↔ES follow-up:** [PR #196](https://github.com/wrbell/stark-translate/pull/196) records this work.
+> [EN↔ES evidence](docs/evaluation/mac_followup_20260910/README.md) records completed
+> source-accounted screens and silent hymn diagnostics. No screened arm qualified;
+> defaults remain unchanged. Final artifact, service and merge status is recorded in
+> [implementation status](docs/mac_implementation_status.md).
+
+
 > **Machine:** MacBook Pro M3 Pro (Mac15,6), 18 GB unified memory, 12-core CPU, 18-core GPU,
 > macOS 26 (`platform` recorded per session in `metrics/hardware_<session>.json`).
 > **Role:** inference, operator UI, browser displays, Mac evaluation. Training happens on
 > WSL ([`CLAUDE-windows.md`](./CLAUDE-windows.md)). Parent: [`CLAUDE.md`](./CLAUDE.md).
 >
-> **Source (2026-09-10):** v2026.14 (`2026.14.0.0`), tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192).
+> **Source (2026-09-10):** v2026.14 (`2026.14.0.0`), with integration history in [PR #192](https://github.com/wrbell/stark-translate/pull/192)
+> and the EN↔ES follow-up in [PR #196](https://github.com/wrbell/stark-translate/pull/196).
 > The last published release recorded here is v2026.13. Source integration and
 > published artifacts are separate from the acceptance evidence below.
 > Evidence: [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md);
 > contracts: [`docs/current_architecture.md`](docs/current_architecture.md); remaining work:
 > [`docs/backlog.json`](docs/backlog.json). **Do not recreate `stt_env`.** Validation counts
-> and latency numbers live only in the linked evidence documents.
+> and latency numbers live only in the linked evidence documents. Current checks bind
+> [repaired source 760e948](docs/evaluation/mac_followup_20260910/final-760e948/source-validation.md);
+> [installed delivery](docs/evaluation/mac_followup_20260910/final-760e948/installed-delivery.md)
+> records artifact and service acceptance separately.
 
 ---
 
@@ -102,7 +113,7 @@ python dry_run_ab.py                                   # EN→ES, mic, Mac defau
 python dry_run_ab.py --lang es                         # ES→EN
 python dry_run_ab.py --audio-file clip.wav --session-id demo_en   # file replay, exits after drain
 python dry_run_ab.py --dry-run-text "For God so loved the world"  # no mic
-python dry_run_ab.py --gemma4-size e2b                 # separately evaluated fast finals
+python dry_run_ab.py --gemma4-size e2b                 # opt-in model; compare latency and quality
 python dry_run_ab.py --tts --tts-output local --tts-device-en "MacBook Pro Speakers" --tts-device-es "BlackHole 2ch"
 python dry_run_ab.py --diarize --diarize-mode embed    # live speaker labels (gate not run, #133)
 ```
@@ -112,7 +123,7 @@ Displays: `http://localhost:8080/displays/audience_display.html` (projector),
 Ports: 8080 HTTP, 8765 captions, 9000 operator. Protocol and timing semantics:
 [`displays/CLAUDE.md`](displays/CLAUDE.md).
 
-### Built-in microphone stall (2026-09-09) — fix implemented, live retest deferred
+### Built-in microphone stall (2026-09-09) — capture retest passed; spoken captions pending
 
 Session `20260909_233204_799019_en` (`audio_source: mic`) loaded all models, printed
 "Listening...", served the audience page, then received no audio frames; its lifecycle
@@ -134,8 +145,17 @@ What changed (integrated on the candidate branch, `c5fb689`):
 - **Ownership:** `operator_app/processes.py` cleans only owned subprocesses;
   `operator_app/work_lease.py` allows one model/audio job per operator.
 
-**Not yet proven:** a real built-in-microphone session on this Mac (deferred to the next attended session),
-physical second output, hotplug. Until then #131 stays `in_progress`.
+**Attended September 10 retest:** EN and ES real microphone sessions reached ready
+and stopped cleanly; EN pause/resume and language restart passed. The initial
+quiet room had no detected speech. [Exact quiet-room receipts](docs/evaluation/attended_mic_20260910/README.md)
+keep capture separate from the controlled replay with a visible bilingual final.
+Later [synthetic acoustic checks](docs/evaluation/tts_routing_20260910/README.md)
+produced captions: English completed, but Spanish and its traced retest failed.
+The retest measured five dropped worker FIFO callbacks, not a measured PortAudio
+driver overflow. The [accounting repair](docs/evaluation/mac_followup_20260910/capture-loss-accounting.md)
+preserves that failure and reports FIFO loss separately from native overflow
+with an unknown sample count. Sustained live microphone acceptance remains
+pending under #131; physical output and hotplug are separate gates.
 
 ---
 
@@ -145,7 +165,7 @@ physical second output, hotplug. Until then #131 stays `in_progress`.
 - **Stop tokens:** `ensure_stop_tokens()` adds the family's turn terminator and preserves loader EOS ids; Gemma 4 uses `<turn|>`, TranslateGemma `<end_of_turn>`. The old "add id 106 by hand" fix must not be applied to Gemma 4. Details: [`engines/CLAUDE.md`](engines/CLAUDE.md).
 - **Marian/VAD PyTorch:** share `_pytorch_lock`; VAD stays on the asyncio thread.
 - **Confidence flagging:** English Whisper finals can retry with the fallback model when `avg_logprob < -1.2` or `compression_ratio > 2.4`; automatic fallback is disabled for Spanish so English-only Distil cannot produce Spanish results. Words with probability `< 0.5` are listed as low-confidence; fallback events go to the active-learning JSONL. Parakeet confidence is a TDT proxy and does not use this fallback chain.
-- **Music hold:** `--music-threshold` / `--music-holdoff` configure an energy/VAD heuristic: sustained high-energy audio classified as non-speech can hold new STT and emit `music_hold`. It can miss singing; the fresh Standard hour retained hymn-region fragments without recorded hold events. For attended live use, **Pause** before or during congregational singing and **Resume** before spoken prayer/preaching. See the [runbook](docs/operator_runbook.md); automatic singing suppression is not validated.
+- **Music hold:** `--music-threshold` / `--music-holdoff` configure an energy/VAD heuristic: sustained high-energy audio classified as non-speech can hold new STT and emit `music_hold`. It can miss singing; the earlier installed Standard hour retained hymn-region fragments without recorded hold events. For attended live use, **Pause** before or during congregational singing and **Resume** before spoken prayer/preaching. See the [runbook](docs/operator_runbook.md); automatic singing suppression is not validated.
 - **Timing:** schema 2 `speech_end_to_final_ms` (server) and `speech_end_to_ack_upper_bound_ms` (visible browser, includes return network) — legacy `e2e_latency_ms` is processing time. Definitions: [`docs/evaluation/README.md`](docs/evaluation/README.md); measured history: [`docs/archive/v2026.13/MAC_LATENCY.md`](docs/archive/v2026.13/MAC_LATENCY.md).
 
 ---
@@ -170,9 +190,12 @@ physical second output, hotplug. Until then #131 stays `in_progress`.
 | YouTube caption comparison | `tools/live_caption_monitor.py` | Cross-system WER = disagreement |
 | Translation QE | `tools/translation_qe.py` | Tier 1 heuristics, Tier 2 back-translation, Tier 3 LaBSE |
 
-Open Mac gates: natural Spanish references, blinded bilingual review, visible-browser
-timing run, two-speaker diarization clip, second physical output, Sunday dry run —
-[`docs/backlog.json`](docs/backlog.json).
+Open Mac gates include locally reviewed church Spanish references, blinded bilingual
+review, physical display timing, two-speaker diarization and a second physical output.
+Public FLEURS EN/ES engineering comparisons and the laptop Sunday rehearsal (#134)
+have separate recorded evidence; they do not satisfy the remaining human/device gates.
+See [`docs/backlog.json`](docs/backlog.json). The current user instruction prohibits
+further microphone or output playback testing for the rest of this session.
 
 ---
 
@@ -181,7 +204,7 @@ timing run, two-speaker diarization clip, second physical output, Sunday dry run
 | Issue | Fix |
 |-------|-----|
 | Session fails with "Microphone delivered no samples" or health shows `input_error` | Isolated capture timed out (above). Check microphone permission for the launching app, the operator's idle device probe, and `metrics/session_<id>.log`; run `--audio-file` to confirm the rest of the pipeline |
-| Operator shows RUNNING with no partials | Should no longer happen (readiness comes from `pipeline_health`); if it does, capture the session id and health snapshot — it is evidence for `mac-live-mic-stall` |
+| Operator shows RUNNING with no partials | RUNNING means frames are arriving; silence or filtered input can produce no captions. Inspect the input level, frame/heartbeat health and session log. Stale input or an `input_error` indicates capture failure; no-caption silence alone does not |
 | Preflight fails on models | `stark-translate setup --backend mlx` (add `--include ...`); set `STARK_MODELS_DIR` at launch if setup used `--models-dir` |
 | Marian preflight fails | Setup needs a complete CT2 artifact for the selected direction; rerun setup or `scripts/convert_marian_ct2.py` |
 | Gemma output truncated or runs to `max_tokens` | Stop-token regression (#172) — verify `ensure_stop_tokens` logs "added=" for the family; never hand-edit `_eos_token_ids` |

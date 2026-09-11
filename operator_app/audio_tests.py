@@ -12,6 +12,8 @@ router = APIRouter(prefix="/api/audio", tags=["audio"])
 
 class InputProbeRequest(BaseModel):
     device: int | str | None = None
+    device_name: str | None = Field(default=None, min_length=1, max_length=512)
+    device_host_api: str | None = Field(default=None, min_length=1, max_length=512)
     duration_s: float = Field(default=2, ge=0.2, le=5)
 
 
@@ -23,7 +25,10 @@ class OutputProbeRequest(BaseModel):
 def _probe(runner, req, mode):
     try:
         with get_work_lease(runner._project_root).reserve("audio test"):
-            return probe_audio(mode, req.device, req.duration_s)
+            identity = {}
+            if mode == "probe" and (req.device_name is not None or req.device_host_api is not None):
+                identity = {"device_name": req.device_name, "device_host_api": req.device_host_api}
+            return probe_audio(mode, req.device, req.duration_s, **identity)
     except WorkBusyError as exc:
         raise HTTPException(status_code=409, detail={"code": "work_busy", "message": str(exc)}) from exc
     except AudioCaptureError as exc:

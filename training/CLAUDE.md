@@ -27,10 +27,18 @@
 **Corpus rule:** `bible_data/aligned/verse_pairs_train.jsonl` (v1) joined Platense by row order
 and is misaligned from Psalms onward. Train on `bible_data/aligned/verse_pairs_train_v2.jsonl`
 (rebuilt by `tools/rebuild_verse_pairs.py`); postmortem
-[`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md). Note that
-`run_gemma4_e4b_domain_sft.sh` defaults `STARK_GEMMA4_VERSE` to the **v1 path** — export
-`STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl` (or `STARK_GEMMA4_TRAIN`)
-before running it.
+[`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md).
+`run_gemma4_e4b_domain_sft.sh` now defaults `STARK_GEMMA4_VERSE` to the **v2 path**.
+An explicit `STARK_GEMMA4_TRAIN` selects a premixed corpus; otherwise both verse and sermon
+component paths must exist. Missing selected inputs fail instead of silently falling back.
+
+Both production recipes accept `--dry-run` (alias `--preflight`). They read the actual
+trainer parser declarations, local config/adapter metadata and corpus files with the Python
+standard library; they do not import a trainer or GPU library. Set `STARK_TRAINING_PYTHON`
+to a CPU interpreter if desired. The default required holdout is
+`bible_data/aligned/verse_pairs_test_v2.jsonl`; `STARK_TRAINING_HOLDOUT` selects a required
+holdout at another mount, and existing local holdouts/canaries are checked as well.
+Passing preflight does not establish CUDA execution, tokenization, model quality or approval.
 
 ## Data pipeline
 
@@ -113,14 +121,29 @@ adapter weights, fresh optimizer — curriculum), `--use-dora`, `--eval-chunked`
 Extended module set per the parser help: `q_proj v_proj k_proj out_proj fc1 fc2`.
 
 **W17 recipe** (`run_w17_curriculum.sh`, env `STARK_WHISPER_DATASET`, `STARK_W16_ADAPTER`,
-`STARK_HARD_MINED`, `STARK_HARD_SUBSET`, `STARK_W17_OUT`, `STARK_W17_CT2`): mine → WER-bounded
-subset (0.15–0.80, `--include-tier1`) → train with `--init-from` W16, `--use-dora`, expanded
-modules, `--replay-ratio 0.3`, 1 epoch → `export_ct2.py` sanity gate → `manage_adapters.py
+`STARK_HARD_MINED`, `STARK_HARD_SUBSET`, `STARK_W17_DATASET`, `STARK_W17_OUT`, `STARK_W17_CT2`):
+CPU preflight → train-only mining → WER-bounded subset JSON (0.15–0.80, `--include-tier1`) →
+`align_deepgram_chunks.py` into a separate audiofolder → train with `--init-from` W16,
+`--use-dora`, `--allow-target-expansion`, expanded modules, `--replay-ratio 0.3`,
+`--require-replay`, 1 epoch → `export_ct2.py` sanity gate → `manage_adapters.py
 register --model whisper_turbo_ct2`. Never train hard-only (W15 lesson,
 [`docs/archive/v2026.5/w15_postmortem.md`](../docs/archive/v2026.5/w15_postmortem.md)).
-**Check before running:** the script's `MODULES` array names `o_proj`, while
-`train_whisper.py` documents Whisper's attention output projection as `out_proj`; confirm
-the module name against the loaded model before the first W17 run.
+The recipe uses `out_proj`. Set `STARK_WHISPER_MODEL_CONFIG` to the local base
+`config.json` when it cannot be resolved from the Hugging Face cache. Preflight checks
+Whisper geometry against every source adapter tensor header, including rank and alpha.
+Strict init-from remains the trainer default; explicit expansion permits only newly
+selected target modules and newly introduced DoRA magnitudes to initialize fresh. Every
+source tensor must load. Existing recipe output paths are refused to preserve earlier work.
+Missing replay now fails W17 instead of silently producing hard-only training.
+Preflight, mining and alignment share a literal-stem WAV index: nested `.wav`, `.WAV`
+and mixed-case extensions work, filename glob characters are ordinary characters,
+and duplicate matching paths fail instead of choosing a flat file or wildcard sibling.
+Direct `train_whisper.py` invocations also require the local config before GPU imports;
+cache resolution honors `HF_HUB_CACHE`, `HF_HOME` and `XDG_CACHE_HOME`. When introducing
+DoRA on a source LoRA adapter, the trainer recomputes new magnitudes **after** loading W16
+A/B matrices, using PEFT's `DoraLinearLayer.update_layer` so their initial scale follows
+the merged direction. Unsupported PEFT APIs fail before training; CUDA numerical behavior
+still requires the WSL run. This follows the [upstream PEFT implementation](https://github.com/huggingface/peft/blob/main/src/peft/tuners/lora/dora.py).
 
 **Hard-example mining (W15 lineage):**
 
@@ -161,11 +184,18 @@ example; QLoRA through Unsloth to fit 16 GB.
 
 **Production recipe:** `training/run_gemma4_e4b_domain_sft.sh` → `train_gemma4.py` (r=8,
 α=8, 2 epochs, lr 2e-4, packing) → `export_gguf.py --qtype Q4_K_M --sanity-test` →
-`models/gemma-4-e4b-it-q4km-domain.gguf`. Set `STARK_GEMMA4_VERSE` to the v2 corpus first
+`models/gemma-4-e4b-it-q4km-domain.gguf`. The verse component defaults to v2
 (see Corpus rule). Ship rule: stock Gemma 4 E4B stays the default until a Mac A/B note
 (#135) says otherwise; next experiments are ranked in
 [`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md) (few-shot disambiguation in
 the prompt, re-ranking, better preference pools).
+
+Original Jacobo/Santiago preference candidates and their reproducible overlap manifest
+are in [`candidates/README.md`](candidates/README.md). They are unapproved synthetic
+teaching examples, not correction evidence or human translations. The CPO loader rejects
+rows marked unapproved before importing Unsloth; historical triples without approval
+metadata retain their existing format contract. The v2 holdout, semantic overlap review,
+bilingual approval and a separate reviewed/scored export remain pending before CPO use.
 
 ## TranslateGemma QLoRA (historical, `train_gemma.py`)
 

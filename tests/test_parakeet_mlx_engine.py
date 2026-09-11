@@ -28,6 +28,7 @@ def result(*sentences):
 
 @pytest.fixture
 def api(monkeypatch):
+    monkeypatch.setattr("engines.model_paths.resolve_model_for_loading", lambda _: "/installed/parakeet")
     mx = MagicMock()
     mx.array.side_effect = lambda audio: audio
     monkeypatch.setattr(sys.modules["mlx"], "core", mx)
@@ -51,7 +52,7 @@ def engine(api):
 
 
 def test_load_materializes_and_warms_same_transcribe_path(api, monkeypatch):
-    monkeypatch.setattr("engines.model_paths.resolve_model_path", lambda _: "/installed/parakeet")
+    monkeypatch.setattr("engines.model_paths.resolve_model_for_loading", lambda _: "/installed/parakeet")
     engine = ParakeetMLXEngine(warmup_seconds=0.25, cache_limit_mb=32)
     engine.load()
     api.loader.assert_called_once_with("/installed/parakeet", dtype=api.mx.bfloat16)

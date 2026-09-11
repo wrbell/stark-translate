@@ -1,0 +1,705 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "raw-evidence.tar.gz",
+      "sha256": "22966a9aa1ce3b36148bbfbb359e91fe4930be66f17220c16a87418ee9e4870d",
+      "size_bytes": 5366543,
+      "members": [
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "614d475015b0bf3522ae04d70220376a8a827a90dc6e8571802b1f64d803d1a4",
+          "size_bytes": 4020
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "f397fa9531364a10a9cf129a59a776ab6d50367753d75a5275722e0059256b35",
+          "size_bytes": 4012
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "9757c105c8f9e1812f78b000469cf7d757bc241d084ded9f215fea0049dd8f46",
+          "size_bytes": 4008
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "efacb9296e6de8b7d54b02e91700c6a20fa2b258ad9cd2633772910c0e2c0b1b",
+          "size_bytes": 4021
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "a17e92ba6827bfb441a6869c4f076282bc26348c0121fec4bfc015249646e4b3",
+          "size_bytes": 4002
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "1f6ed38adcf23c9810432411ea331ac090529a6a423674807534665477f89e61",
+          "size_bytes": 4035
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "9084429f066eb5fca798581f11de60ffbe187a394f55b9d67295af251ec06684",
+          "size_bytes": 4013
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "38a023424312b3f39c955baa970494906c6220d103684bde9f9a51d7abde8108",
+          "size_bytes": 4016
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "f5b834378bb477736181d2d5b509e469fd0bf80f452c90b2d2ed590d39e6975e",
+          "size_bytes": 4036
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.csv",
+          "sha256": "7203c860040bdcbfcf551fc6449d7a54697a579a1306d8c828ad75bac4fc288e",
+          "size_bytes": 4008
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.csv",
+          "sha256": "117a319e72e72172f6307dcee16ced05e849c6af0d7c87665683be940d73e281",
+          "size_bytes": 4010
+        },
+        {
+          "path": "raw/ab_metrics_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.csv",
+          "sha256": "ac863b9bb6411c345e488bf8c4bb6f603e8e5df4046d5f195dc6545230e276b0",
+          "size_bytes": 4034
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "6d3ea6607fe63d700f5463cac33359a29cad1f29b3e99890781e2c68fe097e6b",
+          "size_bytes": 2372819
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "de7cd3391f49b22002bfe8ad5eefac7d02c3d181f50a84f2dbae444db1e1d210",
+          "size_bytes": 2377046
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "c5d941164b6f1087364c625ed7633ef9b311ff0ce8ef4645b066bf4b15fed8cc",
+          "size_bytes": 2379836
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "d2f99b4e2ccd628095204cb7f4b4947d39ab578af1e84a26c2da5ac05c14c722",
+          "size_bytes": 2374842
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "60ab0fea451879d3a06242670eeed349b811115ecf6ab06d800ab9e477121516",
+          "size_bytes": 2370223
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "72e690048222fdf93b54d287d3bff1be5925cfc35feab18f7ba09b502c9ecfdc",
+          "size_bytes": 2383908
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "7b6811930a1f2d9fedb60d772baba14674e83e860a66c6b6271ad7189182c426",
+          "size_bytes": 2388140
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "d43486d0a2382bc399c587487b85a9b39c81384ec49f5f38e9dd851b86089574",
+          "size_bytes": 2388231
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "b0a6b9a2fc5e207c3da07023a6373b602952d2e8b3b3ed2dea6cb0173441d9dc",
+          "size_bytes": 2394628
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "127dc9c598b4a4ae75fdc48259e25245687cb1f59890fe7c794e397ebbcc49ef",
+          "size_bytes": 2390259
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "384ec01dd68346dc395c8e2230e702f2abdbf7f12234d33e9940cd7a38fcd493",
+          "size_bytes": 2390789
+        },
+        {
+          "path": "raw/deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "414c7a83ab6bd8e6baaa3fb131c96d7dc036b0990785be79f612e58f7fdd0db9",
+          "size_bytes": 2396284
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "435508a64cd01832373b676c963236b4a79cfd1142c5ec1d89ee32033f0f6e84",
+          "size_bytes": 1512876
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "78fd05b3518d6cc5616980e3f04f611639cffb186472df5e377fdcecbc557429",
+          "size_bytes": 1515475
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "f8f2d780bbb168510a9143aa87c2c2b5dcb4be3e92db85c41d7307275526abfc",
+          "size_bytes": 1516135
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "23ffecb8c3da44ecb71f8585787bb42b7200225bffa57ed6868749d8f41b3e9a",
+          "size_bytes": 1514148
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "79b1207608ef3d785ff5e28b87c7af42854556fab50fefedca89d0dfd1a31a73",
+          "size_bytes": 1512492
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "7eb0b29e16a3d41f713fbcc3190591c030ac531f629302003f50bc247656b924",
+          "size_bytes": 1517291
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "b45cca2ac0fd4477a70e002689abf5188e0546311324526aef601d64144b2def",
+          "size_bytes": 1523042
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "8f5684da5642bf9da931e0698ca54c8da8cda7a64d21dee2343d217474589e8f",
+          "size_bytes": 1523105
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "8061eb92406baa81b851af8c187e6ea13d6e4cb412f4653e27f886cf4dc2d7c9",
+          "size_bytes": 1523985
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "aca1bfd6bf80dcf9353be27a94e8ef8b12b3bff653bacbfc0a1e3ae0ab683a0f",
+          "size_bytes": 1523011
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "a4be093a63f5cb40486e26e4bd116ce6b239894324881d1274ece21c2e367042",
+          "size_bytes": 1524609
+        },
+        {
+          "path": "raw/diagnostics_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "da32342815bb4b8b43f34adbeade007fb113c27cc4e52c25b6aea67777e1d2a8",
+          "size_bytes": 1525802
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/hardware_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+          "size_bytes": 262
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "5979e929abe39fa76fcce8c02d58a98ff2c33892ddfbb7321e551c1ef5255427",
+          "size_bytes": 3973
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "b75bab4dea0d022ff433b336be5cef691055294229d0a72a18e6c802a6bac43a",
+          "size_bytes": 3972
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "ca3feeb2869ddb7b159d0d71647ff241936fedeb861de50165e70517154918b0",
+          "size_bytes": 3972
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "2ac82d0d4bc37387ef9092f056a84d1c1fe848a26a9a2973777eaf0e555d5ac4",
+          "size_bytes": 3923
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "b6355e53b8a5047bb4b42f7af83139655d2d2d5efc3dee7d8f895a0f871144c6",
+          "size_bytes": 3923
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "fc8e2c4b53869887731cc5092339bd0484d63754877466ae8079e3c06168bf2b",
+          "size_bytes": 3921
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "633db9c5a8b09f9f7828aa93366176adfc09c9abbac144a384479f90e021b76f",
+          "size_bytes": 3963
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "f013a061907e1e383d16755dd9eee87f3f1774320fcbb2f0060eb3023daaea80",
+          "size_bytes": 3966
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "2350c2a47c43fd1bc0cbdfebd217a996a488f4cc4566367ced8c0a36a6252f67",
+          "size_bytes": 3963
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "add63dcad5e2d17c23176a50616983f0a593c41a39dd81a4ab2f5d49ff0a8e6b",
+          "size_bytes": 3963
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "5d700719610d2d28b19ccfdefe7dc17162044df87850082725ed5f8e7cafa5e7",
+          "size_bytes": 3964
+        },
+        {
+          "path": "raw/health_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "9df19c27a84efbee2679e50d93a70a65c9f5d3fdb276da96bc6622221cef3551",
+          "size_bytes": 3964
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "5a1c5b5c6a9049222a61bb096155df266f4335451412a4e5d9653ac8dfd7d53e",
+          "size_bytes": 9350
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "28647068e2eac196af36b095f4cb6d29abc9e9a819e65e13313f8a1dfd6963a5",
+          "size_bytes": 9338
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "5510c88af6fba7144c117855994d85d64198e5a1384c3f0f33d20ec65245734d",
+          "size_bytes": 11036
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "74cfc7e2eb38f9f6293c25dd964e73463453714cc6b35aa86d45017f39512191",
+          "size_bytes": 9265
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "15dbe0f9ba484c3a5da882a70b2d78bd27e6ab2dbc806c21c4b5b70c74abcdb0",
+          "size_bytes": 7758
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "e9355ecc5ed418d41ddc9c97d219198dfe44ef6719603695d91fe50c3893b10a",
+          "size_bytes": 12441
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "d82674e88e5a47053904587b2f8f076bac3fc7e4ede4b0cb85ec5c86721d54a2",
+          "size_bytes": 9323
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "2ce1e4b81bbf0075d173b4f9b97f141a6be9b08047d745f728bc1abc3c6263d2",
+          "size_bytes": 9325
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "75bd4baf4c5f629185d8648382e1dab585a6a224eabb9a584876cd3ebe38d7b3",
+          "size_bytes": 12589
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.jsonl",
+          "sha256": "20edb43a1dbfab50735857e30a5a277a758cb1310cbd94877c65bc06eb865ee1",
+          "size_bytes": 11029
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.jsonl",
+          "sha256": "6cd0b5a1f8fb938e96ed2faa596cf4bdf2786cd0b014ee1c1eb23db84cc81f78",
+          "size_bytes": 9324
+        },
+        {
+          "path": "raw/partials_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.jsonl",
+          "sha256": "7e0661d5c1d8915e8be676f74f5889ab0b41357816e6263d2ad698fc2b558e66",
+          "size_bytes": 12561
+        },
+        {
+          "path": "raw/provenance.json",
+          "sha256": "7f02a9c18853c3790094b061f42d0a7f1f8aaeced433c67478c6c8bab595435d",
+          "size_bytes": 58640
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "20950138f81e11edff3455dcf039d0190718ed80d4ac6216a895be0bb71a5f2e",
+          "size_bytes": 19603
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "ce86fef1a282e83515f4b06fbe816223775121203f2a38cfb4506552e0feb519",
+          "size_bytes": 10856
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "064c661e9820434fe500bf6e8822ab09fdf64c46c1ad086dd4f1928e9496ea8e",
+          "size_bytes": 19648
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "c57a65c1d69cc1b8e979f8e4665700accca925fe99a8b79108d2fb15f1700aa9",
+          "size_bytes": 10800
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "82cc33121e4af4d5f3c12b0c46abf3842ccdd15c9f10c5957b64f53c000db5d7",
+          "size_bytes": 19600
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "4916969d7f6fbb9cd62f136e5660c8a832ef2dceb7d1ed1949d2e0a30f9d0d7f",
+          "size_bytes": 10995
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "d7b4371bf36fbe657ea2fb37e3234f3df133d718c962183281acc66ac1b84b8a",
+          "size_bytes": 19575
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "d4558f8134c10e2f31291077084639f9753c358f2b8e0d52a08307ddd6a1da73",
+          "size_bytes": 10856
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "609f6ce7452bde6663be0a47ada8ef6f2faa6d0118a857188d3124a1cb5b5f7a",
+          "size_bytes": 19572
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "bbe9e75fd6b5fc44c7cbcd5c959c39cc63f8d5956976cb05b416ab0d350f50fc",
+          "size_bytes": 10551
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "b7f427417319744cba73626a549d888edca4304a6c4bb50c629fec856c7ef97b",
+          "size_bytes": 19622
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "7d3d785d361c1f23a0d6bb88ececc840d9c6040b10be8e7e24658252671e5c1c",
+          "size_bytes": 11420
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "fe950367badca889c6da0fc330233bdbbcc06dd907c4df9f8cb2f41e67e430ae",
+          "size_bytes": 19592
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "5f46a6eb5a30201f428bc4910461b7eb03788505ed4b1976c4c6a604e2f65023",
+          "size_bytes": 10927
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "d9805a989c3bd8e596c9186deeb3d8a03687ea33d40f687bcc3cb73270919fac",
+          "size_bytes": 19627
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "f3a12c3c56feb6380141b0cd2b3a80dd3bb3b5f20328eb3538c66bb57b7fc5fb",
+          "size_bytes": 10930
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "9bad05c72389519ba7e274156aa630ecef9a692924e7722a7bf37aa3bbcbea88",
+          "size_bytes": 19662
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "ebfb598771cfb266add5d194ff10e29469a31292c0c2b442ea68cad7105fafb0",
+          "size_bytes": 11289
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "5473aeb6248021f922669dda91a3e18d54f86fde4ce452c6cb96eae425f3b10d",
+          "size_bytes": 19642
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "9ed2da059ac3d081a82ef52ac4b5fbfc95af11cbc4a76ace663d8511d313902b",
+          "size_bytes": 10839
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "92357830bcc8e24c5c708ffb056871713d63b84e57e6f11df65167da80b4718a",
+          "size_bytes": 19665
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "fbfe610a26db9a5ebe8150374bed12c2efb2d97e85fdb83308c93609bbab1daa",
+          "size_bytes": 10792
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "dab55988fcc7c5bf50dbe62cd74c0f947eba8c346d4671ec04d0b7736641c438",
+          "size_bytes": 19606
+        },
+        {
+          "path": "raw/replay_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "c714c21be75f2464868ad13e17363e1731f124a89b20f0df6068e3486eccc7e1",
+          "size_bytes": 11213
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "5de796407eb41413d6bc9958b8dfcd428343cbb55ad824d763d3b6555e1d1101",
+          "size_bytes": 426
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "06b4c1a2279eff8365c4285c15b7263fd3d1f2c8eb2e91c55fb8a0aaea0be138",
+          "size_bytes": 426
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "6a676e541e86a944f3daa170e4498a67d19e37784d87f4436d15854cb18c203d",
+          "size_bytes": 426
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "2ca2079b49952db950ef5202ecb99f1497ca0d27a96c185673274028a18116e5",
+          "size_bytes": 412
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "63f42e105cc75a7055fff04beabb6ecfff17aefcb7ec9e3625e596272522d3f0",
+          "size_bytes": 412
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "91180c978285382a4f51a252cfe46bdba8ec0b6bb4aa7b10fe5b9c51ae1e792f",
+          "size_bytes": 412
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "e8c4386d851dd1bd0a43e905643656f2e03dc16bfc9196344fa97bb24982bcd1",
+          "size_bytes": 424
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "70784885c25a35825a200a2cb68d6ce59c003a07e1f90e8e3de1192d5eca787d",
+          "size_bytes": 424
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "2c0e58db338f77777ff883b2e1ebe0d4a566bf04a993a803dc9833fc9882bbae",
+          "size_bytes": 424
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.log",
+          "sha256": "f4c3ecee6eb2052d104b151beedb5abe4302c54780546e8443572859e75f0410",
+          "size_bytes": 424
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.log",
+          "sha256": "47f6d3b029cd463f7d92863c4f1765bccef2a4b5f2d3a3c82cdc8ab228290c25",
+          "size_bytes": 424
+        },
+        {
+          "path": "raw/session_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.log",
+          "sha256": "bbb7f473958f52139b3d69532c9ac2a60fb8c351debbe45fdc7a9617bcb29466",
+          "size_bytes": 424
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "0951be19e38f807afbdd437b91c54a210f88dcc878cdc3c35733d6d05ca1d979",
+          "size_bytes": 3127
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "85105b6b85d4e94b67687f0ea2707adf77269f4be0c6cf5ec647a6ccaa705bb6",
+          "size_bytes": 3127
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "197b9f96ba43699473682e5e5ca9e5e7d8c093fec0f52bf3abd3d2de998de078",
+          "size_bytes": 3127
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "5a548f2e456b6b42b63827a2017f5574edfaf2b87f18eb3be34a8691deecb4f7",
+          "size_bytes": 3120
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "7ef27dd9de81c574da8bec49ab373a7005acb7e34d33d4f19fc9395b8fc58792",
+          "size_bytes": 3120
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "a8ca048bbadca1c47fdc907c05e54025038cd49b0ef1f0caced0e981f71effa0",
+          "size_bytes": 3120
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "5c15f3018a40a4eb06ad04acb14aff387f0fb37e1a279986e962b99cfd1c20d9",
+          "size_bytes": 3126
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "fb88f930151822344cd3b6bd461feb8147c5ed30ecafe4f52a68d8c8146151da",
+          "size_bytes": 3126
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "61ac36bc095a4d64e25f67d898dcfc40289e8f737fc97f2d7ceb60d70ec45ca0",
+          "size_bytes": 3126
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "a8e3d87612e86d7144f84de31f70ebafa0d97f66c5326e7bddd7ff6fdd3da5b2",
+          "size_bytes": 3126
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "4798c33422cf4fafc9dd16f4110d507a3cae4c90f4d5d9758f90601e8e727d16",
+          "size_bytes": 3126
+        },
+        {
+          "path": "raw/session_lifecycle_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "6ced1d088f25b34c2280f64733b04bc016d991f10335149444ecbba3df0b7164",
+          "size_bytes": 3126
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "5832910263c4af0d1bd40cb3cf68a20112e45755c235b5e549e1f3771d90e2ab",
+          "size_bytes": 6579
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "b48934776b4719999190a1e16e995128a08d1e5ad7f316075c60e1e8ea518c5e",
+          "size_bytes": 6579
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_baseline_anchor_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "05d38f6ce48269b7f3224bac96b6a254c2d6d27525ea0bba98f76e44267aa531",
+          "size_bytes": 6579
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "ea2b6631703af788f0570dcc7398742e7f6a88f77e0a17d4a96dae813b9be47d",
+          "size_bytes": 6572
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "541c19b8daa5576f3f407c48833c91e773468b6022034d508c286cd4644f6732",
+          "size_bytes": 6572
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_baseline_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "f8293dfa7891d6ecd6c715042c7368157a99473c2811430a2134a9ff719d2745",
+          "size_bytes": 6572
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "2e14af13e456320dd7ea40fe1e34dbcc1df0bc1cf0522f803507ff5c79325144",
+          "size_bytes": 6580
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "e22aed088103300ea242ed12245efee84eb20e0a280d6e11b0f6158bbaf007cd",
+          "size_bytes": 6580
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_deadline_100ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "ebfe030eb20b592f833ecb0c385295c6cb726af21de89a23a3b452b01a1b10bf",
+          "size_bytes": 6580
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r0_fleurs_development_es_es.json",
+          "sha256": "6f4d6ae81d142c80bc9adf3cf46aa48cfa44ed577c4a732a738efbb5abdca3be",
+          "size_bytes": 6580
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r1_fleurs_development_es_es.json",
+          "sha256": "c4bba487f7f8ad2d30be23651eea15c7ebee8922d76bf5f35a65126a1a02fbe3",
+          "size_bytes": 6580
+        },
+        {
+          "path": "raw/session_metadata_deadline_stage_v2_es_independent_deadline_screen_deadline_250ms_e2b_r2_fleurs_development_es_es.json",
+          "sha256": "b854c2cf781f0f5204285f05e4142ac20d5c523e3c4bdbbe3a00982b60115e12",
+          "size_bytes": 6580
+        }
+      ]
+    },
+    {
+      "path": "runner.log",
+      "sha256": "15fbf8fe60f369e8ac1e96570c898da71d5dce4a94122027434205c4872bf796",
+      "size_bytes": 2538
+    },
+    {
+      "path": "report.json",
+      "sha256": "e19fe8f0b1883e13de3168094920563291b7b39dbda2b286e9d3770472858cfc",
+      "size_bytes": 276589
+    },
+    {
+      "path": "selection.json",
+      "sha256": "523e89a2f3c799353c338e72bd6c1ed867fc0dba490979b19243d9717128bc9b",
+      "size_bytes": 2039
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "7f02a9c18853c3790094b061f42d0a7f1f8aaeced433c67478c6c8bab595435d",
+      "size_bytes": 58640
+    },
+    {
+      "path": "run-summary.json",
+      "sha256": "082268854b6782f0e061c6dc80e2551fa2712b20798181ccda8b6b5d38f638a4",
+      "size_bytes": 78545
+    }
+  ],
+  "raw_payloads_unmodified": true,
+  "audio_included": false,
+  "missing_terminal_artifacts": []
+}

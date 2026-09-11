@@ -1,0 +1,46 @@
+{
+  "captured_utc": "2026-09-10T13:29:58.336680+00:00",
+  "result": {
+    "inputs": [
+      {
+        "index": 0,
+        "name": "WR17.1 Microphone",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 1,
+        "name": "MacBook Pro Microphone",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      }
+    ],
+    "outputs": [
+      {
+        "index": 2,
+        "name": "MacBook Pro Speakers",
+        "direction": "output",
+        "channels": 2,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "direction": "output",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      }
+    ],
+    "error": null,
+    "change_seq": 0
+  }
+}

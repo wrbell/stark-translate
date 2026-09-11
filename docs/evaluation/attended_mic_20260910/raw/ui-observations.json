@@ -1,0 +1,41 @@
+{
+  "recorded_utc": "2026-09-10T13:34:21.982007+00:00",
+  "source": "Transcribed from actual CUA accessibility trees and native Chrome screenshot in this task; this file is not a screenshot or screen recording.",
+  "microphone_test": {
+    "selected": "MacBook Pro Microphone (1ch)",
+    "text": "Measured peak 77% (average 2%) of full scale. Sound was detected at a usable level. Listened for 2 s on MacBook Pro Microphone (1ch); nothing was recorded or saved."
+  },
+  "en_ui": [
+    "Starting\u2026 Loading language models.",
+    "Live; Audio feed updated just now; Displays connected: 2; Errors: 0; No captions yet",
+    "Paused; Captions are paused. Press Resume to continue.",
+    "Live; Captions are ready."
+  ],
+  "es_ui": [
+    "Spanish speaker \u2192 English captions",
+    "Connected (Espa\u00f1ol \u2192 English). Partial lines are in italics until the final caption replaces them.",
+    "No captions yet"
+  ],
+  "native_audience_final": {
+    "browser": "Google Chrome Personal profile",
+    "url": "http://127.0.0.1:8080/displays/mobile_display.html?port=8765",
+    "selected_tab": true,
+    "english": "The grace of God brings salvation.",
+    "spanish": "La gracia de Dios trae la salvaci\u00f3n.",
+    "limitation": "Native screenshot was captured after the final arrived, not continuously during every preview; a Browser Guard notice covered the upper-right area but both caption lines were visible. No claim of a separate physical projector."
+  },
+  "review": [
+    "Saved revision 1.",
+    "Unsaved draft \u2014 saved locally in this browser.",
+    "Restored unsaved draft.",
+    "Saved revision 2."
+  ],
+  "approval_controls": {
+    "transcript_checked": false,
+    "translation_bilingual_checked": false
+  },
+  "summary": [
+    "Finished.",
+    "Too little text for a sermon summary; original excerpts and translations are shown. Translations are unreviewed predictions."
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "packet_index": {
+    "schema_version": 1,
+    "completed": true,
+    "packet_id": "02bcfa109507bf2362fb297c",
+    "files": [
+      {
+        "file": "annotations.jsonl",
+        "sha256": "56d7058681752e7b359116da4cd10dc1b76532115af1f470cd0e7ab5171a256e",
+        "size_bytes": 179478
+      },
+      {
+        "file": "packet.json",
+        "sha256": "79be0acc009d456c02a341cdd683999ef871aedf5f72c0555b99dc5d31ae27b1",
+        "size_bytes": 817947
+      },
+      {
+        "file": "packet.md",
+        "sha256": "1efb771d387c5029b1b6881f2e8748307b61e238b0351eb2be738e09a54d4b5c",
+        "size_bytes": 322899
+      },
+      {
+        "file": "review.schema.json",
+        "sha256": "9709ec11e8eae709f7bc3691ddf2c41ec15e94c021fd532f2c034f3a296e3b3d",
+        "size_bytes": 3300
+      }
+    ],
+    "private_key_sha256": "3cce70b3bbc48ca41d9447e3aa12025958d63da5e2b2ba834b9f037fcdaf4a49",
+    "status": "unreviewed",
+    "human_approved_locally": false,
+    "training_eligible": false
+  },
+  "reviewer_zip_sha256": "d62c23dfe0edaf3dd85019be943d1757b3923588b532604643accca75ae2818b",
+  "reviewer_zip_bytes": 143808,
+  "human_review": "pending",
+  "private_key_committed": false
+}

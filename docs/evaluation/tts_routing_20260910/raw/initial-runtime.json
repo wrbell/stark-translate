@@ -1,0 +1,202 @@
+{
+  "captured_utc": "2026-09-10T14:17:58.570477+00:00",
+  "head": "08935a602b1fe0c8c30f1fd3a2039afada82d914",
+  "runtime": "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/python",
+  "source_hashes": {
+    "dry_run_ab.py": "af6ff9a69a3adf747ef106265e6eab4c93d8ada904d7232d5f43d2be25c32359",
+    "engines/tts_engine.py": "c7a92e13390044b07f8b5101f2ccab12771f9d7712f4843eec96a4f0993513a3",
+    "engines/audio_devices.py": "994706f0d9dde96bfde3ad4d653a66cd4f43bd8eefe0be6ea2de7c4f7966efe5",
+    "engines/model_paths.py": "1331781fc31d15ca874047a8b31673149be79368dfc8567ffb921111592a585d",
+    "models.lock.json": "ab309b95a77342544513dbbe98dbf0dcc7c0035d7e5a30994a57a68ec7463273",
+    "operator_app/pipeline_manager.py": "74920f76011d361107b1eff63442693d333875d0c0df1be0397b6309b528e290",
+    "displays/operator/app.js": "90dd116d5e8aa98512ac6faccd92b8cd7809e9df405423fe52ab581e1fb0e2c0"
+  },
+  "versions": {
+    "piper-tts": "1.8.0",
+    "onnxruntime": "1.29.0",
+    "sounddevice": "0.5.6",
+    "torch": "2.10.0",
+    "torchaudio": "2.10.0"
+  },
+  "status": {
+    "state": "idle",
+    "session_id": "20260910_092544_206252_es",
+    "started_at": "2026-09-10T09:25:44",
+    "stopped_at": "2026-09-10T09:26:50",
+    "config": {
+      "lang": "es",
+      "profile": "standard",
+      "record_audio": true,
+      "stt_backend": "auto",
+      "model_family": null,
+      "gemma4_size": null,
+      "low_vram": false,
+      "backend": "auto",
+      "engine": "auto",
+      "tts": false,
+      "run_ab": false,
+      "vad_threshold": 0.3,
+      "mic_device": 1,
+      "mic_gain": null,
+      "log_level": "INFO",
+      "tts_output_mode": "ws",
+      "tts_device": null,
+      "diarize": false,
+      "tts_device_en": null,
+      "tts_device_es": null
+    },
+    "last_event": "Session saved and completed",
+    "csv_path": "/Users/willem/Code/vibes/SRTranslate/metrics/ab_metrics_20260910_092544_206252_es.csv",
+    "log_path": "/Users/willem/Code/vibes/SRTranslate/metrics/session_20260910_092544_206252_es.log",
+    "outcome": "completed",
+    "readiness": {
+      "phase": "completed",
+      "ready": false,
+      "reason": "Pipeline health is unavailable",
+      "updated_at": 1789046808.249242,
+      "age_s": 3070.3468067646027,
+      "stale": true
+    },
+    "health": {
+      "schema_version": 1,
+      "session_id": "20260910_092544_206252_es",
+      "updated_at": 1789046808.249242,
+      "phase": "completed",
+      "input_seen": true,
+      "input_age_s": 0.15177320799557492,
+      "caption_age_s": null,
+      "input_level": 0.0025957736652344465,
+      "errors": [],
+      "error_count": 0,
+      "captions": [],
+      "recording": {
+        "audio_enabled": true,
+        "required_failures": 0,
+        "ok": true
+      },
+      "control_sequence": 1789046800091705000,
+      "publish_failures": 0,
+      "persistence": {
+        "submitted": 2,
+        "completed": 2,
+        "pending": 0,
+        "failed": 0,
+        "capacity": 256,
+        "ok": true,
+        "failures": []
+      },
+      "storage": {
+        "free_bytes": 245508915200,
+        "low_space": false
+      },
+      "queues": {
+        "audio": 0,
+        "capture_handoff": 0,
+        "finals": 0,
+        "stream_tokens": 1
+      },
+      "clients": 0,
+      "replay_client_wait": {
+        "requested_seconds": 0.0,
+        "actual_wait_seconds": 0.0,
+        "status": "disabled",
+        "connected_clients": 0,
+        "visibility_confirmed": false
+      },
+      "age_s": 3070.3468067646027,
+      "stale": true,
+      "operational_logging": {
+        "queued": 0,
+        "dropped": 0,
+        "write_failures": 0
+      }
+    },
+    "effective_profile": {
+      "name": "standard"
+    }
+  },
+  "capabilities": {
+    "profiles": [
+      "standard",
+      "lite-cpu",
+      "lite-cpu-quality",
+      "lite-cuda-8gb"
+    ],
+    "default_profile": "standard",
+    "preflight_required": true,
+    "audio_tests": true,
+    "audio_tests_require_idle": true,
+    "audio_devices_validated": false,
+    "support": true,
+    "storage": true,
+    "display_ports": {
+      "http": 8080,
+      "websocket": 8765
+    },
+    "audience_urls": {
+      "audience": "http://127.0.0.1:8080/displays/audience_display.html?port=8765",
+      "church": "http://127.0.0.1:8080/displays/church_display.html?port=8765",
+      "mobile": "http://127.0.0.1:8080/displays/mobile_display.html?port=8765",
+      "obs": "http://127.0.0.1:8080/displays/obs_overlay.html?port=8765"
+    }
+  },
+  "outputs": {
+    "outputs": [
+      {
+        "index": 2,
+        "name": "MacBook Pro Speakers",
+        "channels": 2,
+        "default": true
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "channels": 1,
+        "default": false
+      }
+    ]
+  },
+  "devices": {
+    "inputs": [
+      {
+        "index": 0,
+        "name": "WR17.1 Microphone",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 1,
+        "name": "MacBook Pro Microphone",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "direction": "input",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      }
+    ],
+    "outputs": [
+      {
+        "index": 2,
+        "name": "MacBook Pro Speakers",
+        "direction": "output",
+        "channels": 2,
+        "default_sample_rate": 48000.0
+      },
+      {
+        "index": 3,
+        "name": "Microsoft Teams Audio",
+        "direction": "output",
+        "channels": 1,
+        "default_sample_rate": 48000.0
+      }
+    ],
+    "error": null,
+    "change_seq": 0
+  }
+}

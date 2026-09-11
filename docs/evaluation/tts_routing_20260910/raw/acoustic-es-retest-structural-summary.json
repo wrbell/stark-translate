@@ -1,0 +1,180 @@
+{
+  "session_id": "20260910_105554_710324_es",
+  "controlled_input": false,
+  "input_scope": "Pre-generated synthetic speech plus incidental room speech; no reference-quality or controlled comparison",
+  "human_reviewed": false,
+  "training_eligible": false,
+  "record_audio": false,
+  "tts": false,
+  "audio_source": "mic",
+  "session_kind": "synthetic",
+  "git_sha": "a8511eed53fde804a688b4dd56a52c077e773eca",
+  "pipeline_sha256": "576d5272491e0e559df09d5f0018d4bf68575a1e752d960c5b4ec02143fa2cd3",
+  "lifecycle_status": "failed",
+  "exit_code": 1,
+  "persistence": {
+    "submitted": 41,
+    "completed": 41,
+    "pending": 0,
+    "failed": 2,
+    "capacity": 256,
+    "ok": false,
+    "failures": [
+      {
+        "operation": "audio_capture",
+        "code": "samples_dropped"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "samples_dropped"
+      }
+    ]
+  },
+  "capture_transport": {
+    "schema_version": 1,
+    "scope": "closed capture segments; original source frames; no PCM",
+    "segments_completed": 1,
+    "handoff_dropped_frames": 0,
+    "upstream_dropped_samples": 7680,
+    "segments": [
+      {
+        "stream_type": "IsolatedInputStream",
+        "handoff": {
+          "schema_version": 1,
+          "clock": "session_monotonic",
+          "origin_perf_counter_s": 520415.213035833,
+          "capacity": 32,
+          "closed": true,
+          "wait_for_space": true,
+          "submitted": 1681,
+          "dequeued": 1681,
+          "pending": 0,
+          "waiting_producers": 0,
+          "high_water": 32,
+          "dropped_frames": 0,
+          "max_producer_wait_ms": 903.8454580004327,
+          "max_handoff_wait_ms": 1592.0302919694223,
+          "max_capture_age_ms": 2201.48958300706,
+          "drop_spans": [],
+          "drop_spans_truncated": false
+        },
+        "pipe": {
+          "frames_received": 1681,
+          "upstream_dropped_samples": 7680,
+          "max_callback_to_pipe_ms": 1508.1467080162838,
+          "max_capture_age_ms": 1509.6756660495885,
+          "source_gaps": [
+            {
+              "sample_start": 436224,
+              "sample_end": 442368,
+              "sample_rate": 48000
+            },
+            {
+              "sample_start": 2537472,
+              "sample_end": 2539008,
+              "sample_rate": 48000
+            }
+          ],
+          "source_gaps_truncated": false,
+          "timeout_stage": null
+        }
+      }
+    ],
+    "segments_truncated": false
+  },
+  "source_coverage": {
+    "schema_version": 1,
+    "classification_scope": "machine VAD/filter/caption decisions; not acoustic truth or approved speech recall",
+    "sample_rate": 48000,
+    "expected_source_samples": 2589696,
+    "eof": null,
+    "dropped_records": 0,
+    "unknown_bounds": 0,
+    "duplicate_observed_samples": 0,
+    "observed_samples_beyond_eof": 0,
+    "capture_gaps": [
+      [
+        436224,
+        442368
+      ],
+      [
+        2537472,
+        2539008
+      ]
+    ],
+    "unclassified_intervals": [],
+    "complete": false
+  },
+  "latency_trace": {
+    "schema_version": 2,
+    "clock": "session_monotonic",
+    "origin_perf_counter_s": 520415.213035833,
+    "clock_scope": "same pipeline process only; not comparable across runs or hosts",
+    "enabled": true,
+    "capacity": 131072,
+    "total_events": 8585,
+    "discarded_old_events": 0
+  },
+  "private_original_artifacts": [
+    {
+      "path": "metrics/display_metrics_20260910_105554_710324_es.jsonl",
+      "sha256": "bff3310d5542d9e9683431deb4a0dc8f4a18e4c4648dfafdc799f6432c19e752",
+      "bytes": 12904,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/session_20260910_105554_710324_es.log",
+      "sha256": "8b4d57c0f4b6c6fbf0c1daeaf00d01c4766aa0557af8663b2601daea3d09a343",
+      "bytes": 69856,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/diagnostics_20260910_105554_710324_es.jsonl",
+      "sha256": "5b5bbf5a2da61559c57a09a9b4334045d4e7e1976eff20d51154bd391d4fe5de",
+      "bytes": 2250521,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/ab_metrics_20260910_105554_710324_es.csv",
+      "sha256": "329a1d13989df7c172fb22d81ed9300ac1063e325b75920e1f60044303480098",
+      "bytes": 4543,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/session_metadata_20260910_105554_710324_es.json",
+      "sha256": "61494b16b8d1dd9c9974cb5e89dedf2eeae1953a57d4e719417b0bc71be2fee5",
+      "bytes": 4629,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/health_20260910_105554_710324_es.json",
+      "sha256": "9f0f63f77da9a02548cccefb81435481895095111a9ebab241a69e21851415f5",
+      "bytes": 4262,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/hardware_20260910_105554_710324_es.json",
+      "sha256": "bdc728fd3cf6ed0e1bd19bca49b06c51609d6a118bffc6c1a57bc2f9d02f5b67",
+      "bytes": 262,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/session_lifecycle_20260910_105554_710324_es.json",
+      "sha256": "c1e158db7f03f089bd2ae4c523aee3f8615a916df53d392b713d87341b6242ea",
+      "bytes": 3380,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/control_20260910_105554_710324_es.json",
+      "sha256": "86fc0c01b1ee55be96a2f140996441cbab7201116c80e298fe4eb7831649164c",
+      "bytes": 106,
+      "retained_in_shared_evidence": false
+    },
+    {
+      "path": "metrics/partials_20260910_105554_710324_es.jsonl",
+      "sha256": "f883311fe257dbb5883d6f449e5698cf36054ef4a428e8e75c9a2261d617eea5",
+      "bytes": 7268,
+      "retained_in_shared_evidence": false
+    }
+  ]
+}

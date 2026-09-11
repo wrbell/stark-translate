@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-09-10T13:36:52.545535+00:00",
+  "owned_pipeline_processes": [
+    {
+      "session_id": "20260910_092405_457769_en",
+      "pid": 7026,
+      "still_exists": false,
+      "lifecycle": "completed"
+    },
+    {
+      "session_id": "20260910_092544_206252_es",
+      "pid": 7675,
+      "still_exists": false,
+      "lifecycle": "completed"
+    },
+    {
+      "session_id": "20260910_092824_526799_en",
+      "pid": 8552,
+      "still_exists": false,
+      "lifecycle": "completed"
+    }
+  ],
+  "replay_operator_still_listening": false,
+  "primary_operator": {
+    "pid": 6564,
+    "url": "http://127.0.0.1:9000/operator/",
+    "state": "idle",
+    "outcome": "completed",
+    "tts": false,
+    "note": "Left in Prepare with English and MacBook Pro microphone selected in the browser; stored last-session API config still truthfully describes the completed Spanish session."
+  }
+}

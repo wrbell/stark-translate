@@ -123,3 +123,62 @@ await h.setStatus({...base, state: 'running', readiness: {ready: true, phase: 'r
 assert.strictEqual(h.text('live-event'), 'Input device recovered');
 assert.strictEqual(h.el('live-event').hidden, false);
 """)
+
+
+def test_selected_microphone_follows_identity_across_device_index_changes_and_missing_inventory():
+    run_operator(r"""
+const h = createHarness({capabilities: {audio_tests: true}, devices: {inputs: [
+  {index: 0, name: 'MacBook Pro Microphone', host_api: 'Core Audio', channels: 1}
+], outputs: []}});
+await h.start();
+h.el('mic-device').value = '0';
+h.state.devices.inputs = [
+  {index: 0, name: 'WR17.1 Microphone', host_api: 'Core Audio', channels: 1},
+  {index: 1, name: 'MacBook Pro Microphone', host_api: 'Core Audio', channels: 1}
+];
+await h.app.refreshDevices(false);
+assert.strictEqual(h.app.readForm().mic_device, 1);
+assert.strictEqual(h.app.readForm().mic_device_name, 'MacBook Pro Microphone');
+assert.strictEqual(h.app.readForm().mic_host_api, 'Core Audio');
+await h.app.refreshPreflight();
+const preflight = new URLSearchParams(h.lastFetch('/api/preflight', 'GET').url.split('?')[1]);
+assert.strictEqual(preflight.get('input_device_name'), 'MacBook Pro Microphone');
+assert.strictEqual(preflight.get('input_host_api'), 'Core Audio');
+
+// A disappeared mic remains explicitly selected, so both start and test-input
+// reject it rather than adopting WR17.1 or the computer default.
+h.state.devices.inputs = h.state.devices.inputs.slice(0, 1);
+await h.app.refreshDevices(false);
+assert.strictEqual(h.app.readForm().mic_device, undefined);
+assert.strictEqual(h.app.readForm().mic_device_name, 'MacBook Pro Microphone');
+h.route('POST', '/api/audio/test-input', () => h.response({ok: false}, 422));
+h.el('mic-test-btn').click();
+await settle();
+const body = JSON.parse(h.lastFetch('/api/audio/test-input').init.body);
+assert.strictEqual(body.device, null);
+assert.strictEqual(body.device_name, 'MacBook Pro Microphone');
+assert.strictEqual(body.device_host_api, 'Core Audio');
+""")
+
+
+def test_status_preserves_full_unavailable_identity_and_bounds_ambiguous_placeholders():
+    run_operator(r"""
+const mic = (index, api) => ({index, name: 'Shared Mic', host_api: api, channels: 1});
+const h = createHarness({devices: {inputs: [mic(0, 'Core Audio'), mic(1, 'Core Audio')], outputs: []}});
+await h.start();
+const status = api => ({state: 'running', session_id: 's1', config: {
+  lang: 'en', mic_device: 8, mic_device_name: 'Shared Mic', mic_host_api: api
+}});
+for (let i = 0; i < 10; i++) await h.setStatus(status('Core Audio'));
+assert.strictEqual(h.el('mic-device').options.length, 4); // default + 2 real + 1 placeholder
+assert.strictEqual(h.app.readForm().mic_device, undefined);
+assert.strictEqual(h.app.readForm().mic_host_api, 'Core Audio');
+await h.setStatus(status('Other API'));
+assert.strictEqual(h.el('mic-device').options.length, 4);
+assert.strictEqual(h.app.readForm().mic_host_api, 'Other API');
+// A service restart can restore the identity before device enumeration finishes.
+h.state.devices.inputs = [mic(7, 'Other API')];
+await h.app.refreshDevices(false);
+assert.strictEqual(h.app.readForm().mic_device, 7);
+assert.strictEqual(h.app.readForm().mic_host_api, 'Other API');
+""")

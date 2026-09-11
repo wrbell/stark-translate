@@ -1,0 +1,18 @@
+Collecting pip==26.2.1
+  Downloading pip-26.2.1-py3-none-any.whl.metadata (4.6 kB)
+Collecting setuptools==84.0.0
+  Downloading setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)
+Downloading pip-26.2.1-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 7.3 MB/s eta 0:00:00
+Downloading setuptools-84.0.0-py3-none-any.whl (818 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 818.2/818.2 kB 12.1 MB/s eta 0:00:00
+Installing collected packages: setuptools, pip
+  Attempting uninstall: setuptools
+    Found existing installation: setuptools 65.5.0
+    Uninstalling setuptools-65.5.0:
+      Successfully uninstalled setuptools-65.5.0
+  Attempting uninstall: pip
+    Found existing installation: pip 24.0
+    Uninstalling pip-24.0:
+      Successfully uninstalled pip-24.0
+Successfully installed pip-26.2.1 setuptools-84.0.0

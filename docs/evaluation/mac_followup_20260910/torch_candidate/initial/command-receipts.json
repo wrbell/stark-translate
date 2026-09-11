@@ -1,0 +1,174 @@
+[
+  {
+    "stage": "venv-create",
+    "argv": [
+      "/Users/willem/anaconda3/bin/python3.11",
+      "-m",
+      "venv",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:42:40.872756+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:42:43.022836+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv-create.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "stage": "installer-bootstrap",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/bin/python",
+      "-m",
+      "pip",
+      "--isolated",
+      "install",
+      "--only-binary=:all:",
+      "--index-url",
+      "https://pypi.org/simple",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/pip-cache",
+      "pip==26.2.1",
+      "setuptools==84.0.0"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:42:43.023368+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:42:45.408505+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/installer-bootstrap.log",
+    "log_sha256": "689b6427b9855d08f2fb4740fcc1c87ec1d2c5c2b026e8685ea8a56c5227b604"
+  },
+  {
+    "stage": "full-application-resolution",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/bin/python",
+      "-m",
+      "pip",
+      "--isolated",
+      "install",
+      "--dry-run",
+      "--ignore-installed",
+      "--only-binary=:all:",
+      "--index-url",
+      "https://pypi.org/simple",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/pip-cache",
+      "--constraint",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/constraints.txt",
+      "--report",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/pip-resolution.json",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/dist/stark_translate-2026.14.0.0-py3-none-any.whl[mlx,diarization]",
+      "jiwer==4.0.0"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:42:45.409144+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:43:03.569553+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/full-application-resolution.log",
+    "log_sha256": "23a532ce20344d55f8e9d397af4ed431b28e67bec2113b1341e35ed2f2b78376"
+  },
+  {
+    "stage": "full-application-install",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/bin/python",
+      "-m",
+      "pip",
+      "--isolated",
+      "install",
+      "--only-binary=:all:",
+      "--index-url",
+      "https://pypi.org/simple",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/pip-cache",
+      "--require-hashes",
+      "-r",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/resolved-requirements.txt"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:46:30.674466+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:47:52.108047+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/full-application-install.log",
+    "log_sha256": "7adb1f8171b7c6fa6c1483e2d72f7066ef0c09a031ec455d46b7803d4c6af4cb"
+  },
+  {
+    "stage": "pip-check",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/bin/python",
+      "-m",
+      "pip",
+      "check"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:47:52.109826+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:47:52.421442+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/pip-check.log",
+    "log_sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+  },
+  {
+    "stage": "installed-inventory",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/bin/python",
+      "-m",
+      "pip",
+      "list",
+      "--format=json"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:47:52.422094+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:47:52.621527+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/installed-inventory.log",
+    "log_sha256": "990f2008be2339178a35fb50345f205dc9fb4f3f861811be0e3f041b5f72a947"
+  },
+  {
+    "stage": "installed-metadata-consistency",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/bin/python",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/verify_install.py"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:47:52.622164+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:47:52.932918+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/installed-metadata-consistency.log",
+    "log_sha256": "c9a9bb819d263979420c98315c696b1302fcdcc7aaaa1bad861a9e997e0f6163"
+  },
+  {
+    "stage": "full-installed-audit",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/package-smoke/bin/pip-audit",
+      "--path",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/lib/python3.11/site-packages",
+      "--format",
+      "json",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/installed-audit.json",
+      "--cache-dir",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/audit-cache",
+      "--timeout",
+      "5",
+      "--progress-spinner",
+      "off"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:48:29.577655+00:00",
+    "exit_code": 1,
+    "ended_at": "2026-09-10T13:48:37.541312+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/full-installed-audit.log",
+    "log_sha256": "ddb53dd1f9bea12ead393b0df959a310981c738b8eb7fe130c108b921814ff95"
+  },
+  {
+    "stage": "native-imports-vad",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/venv/bin/python",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/native_smoke.py"
+    ],
+    "cwd": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/work",
+    "started_at": "2026-09-10T13:48:11.343385+00:00",
+    "exit_code": 0,
+    "ended_at": "2026-09-10T13:48:50.656032+00:00",
+    "log": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/full-application-torch-candidate/native-imports-vad.log",
+    "log_sha256": "f719fd6fa900c571e20d45d8067cf985f35b901cc165b610a601c48fcc98488f"
+  }
+]

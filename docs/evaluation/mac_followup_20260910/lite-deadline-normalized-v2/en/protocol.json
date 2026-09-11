@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "id": "mac_followup_lite_cadence_v1_normalized_v2_deadline_only_en",
+  "purpose": "Independent opt-in server delivery screening; no browser/device or semantic approval claim. Frozen opening spans, paired closing controls, retain all failures.",
+  "profile": "lite-cpu",
+  "clips": [
+    {
+      "id": "fleurs_development_en",
+      "lang": "en",
+      "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/public-replay-v2-normalized/fleurs_development_en.wav",
+      "sha256": "2169fde4d0b8b2f1d2e8df9f26f5b066337da454ccca56f844234cdf34d350c4",
+      "duration": 46.94,
+      "sample_rate": 16000,
+      "provenance": "fleurs_development_read_speech_concatenation",
+      "level_normalization": "rms-0.08",
+      "reference_status": "upstream_public_annotations_not_local_approval",
+      "spans": [
+        {
+          "id": "fleurs-en-development-1585-3207241257175584099",
+          "sample_start": 0,
+          "sample_end": 179520,
+          "original_audio_sha256": "a1942662f19a288c80ce936418669c3c8d88aa6a89b48a7d1b6d8d836f9e3795",
+          "level_transform": {
+            "rule": "rms-0.08",
+            "gain": 63.235035532569654,
+            "original_rms": 0.0012651214524706867,
+            "original_peak": 0.01400059461593628,
+            "output_rms": 0.07999999922856925,
+            "output_peak": 0.8853281140327454,
+            "clipping": false
+          },
+          "reference": "Over time, as the new population begins to adapt to their new environment, they start to look less and less like the other population.",
+          "translation_reference": "Al pasar el tiempo, a medida que la incipiente poblaci\u00f3n se va adaptando al nuevo entorno, comienza a asemejarse cada vez menos a la otra poblaci\u00f3n.",
+          "padding_after_samples": 16000
+        },
+        {
+          "id": "fleurs-en-development-1603-561237249582086895",
+          "sample_start": 195520,
+          "sample_end": 391360,
+          "original_audio_sha256": "68a7e4554855ad270fc02d113e51267c64515000913f52f0439f6b21e06802a6",
+          "level_transform": {
+            "rule": "rms-0.08",
+            "gain": 31.556301324769965,
+            "original_rms": 0.0025351513530264204,
+            "original_peak": 0.018468081951141357,
+            "output_rms": 0.07999999947043027,
+            "output_peak": 0.5827843546867371,
+            "clipping": false
+          },
+          "reference": "Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations.",
+          "translation_reference": "Los accidentes de avi\u00f3n son habituales en Ir\u00e1n, que tiene una flota antigua que no recibe buen mantenimiento, ya sea para operaciones civiles o militares.",
+          "padding_after_samples": 16000
+        },
+        {
+          "id": "fleurs-en-development-1519-786465049904960526",
+          "sample_start": 407360,
+          "sample_end": 532160,
+          "original_audio_sha256": "d733a878fbb3393dac0349cfa1293e4fad9a8bd5ec1f58ce6adc019de4b94f32",
+          "level_transform": {
+            "rule": "rms-0.08",
+            "gain": 160.71790680132162,
+            "original_rms": 0.0004977665624957115,
+            "original_peak": 0.003160715103149414,
+            "output_rms": 0.08000000196909851,
+            "output_peak": 0.5079835057258606,
+            "clipping": false
+          },
+          "reference": "In many cases, enrolling on a gap-year course abroad can actually improve your chances of moving into higher education back in your home country.",
+          "translation_reference": "En muchos casos, inscribirse en un programa de estudios en el extranjero durante un a\u00f1o sab\u00e1tico puede, en efecto, incrementar las posibilidades de acceder a la educaci\u00f3n superior una vez se regresa al pa\u00eds de origen.",
+          "padding_after_samples": 16000
+        },
+        {
+          "id": "fleurs-en-development-1571-17605417583330616175",
+          "sample_start": 548160,
+          "sample_end": 657600,
+          "original_audio_sha256": "417fee0dad20562352aa591b6ed5b1f10752eba60ef2d9f95389e8ba34272191",
+          "level_transform": {
+            "rule": "rms-0.08",
+            "gain": 30.65960534510282,
+            "original_rms": 0.002609296470046644,
+            "original_peak": 0.016126036643981934,
+            "output_rms": 0.07999999915419242,
+            "output_peak": 0.4944179058074951,
+            "clipping": false
+          },
+          "reference": "The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte.",
+          "translation_reference": "El islam tambi\u00e9n fue llevado a las tierras por los \u00e1rabes y se impuso, en buena medida, en las Comores y Mayotte.",
+          "padding_after_samples": 16000
+        },
+        {
+          "id": "fleurs-en-development-1607-10846227846460802233",
+          "sample_start": 673600,
+          "sample_end": 735040,
+          "original_audio_sha256": "cd18277b92bd22d1c2827f6bee287a636cc227365fd9bc1d7e3ef5b81afe6ad3",
+          "level_transform": {
+            "rule": "rms-0.08",
+            "gain": 139.02699291202106,
+            "original_rms": 0.0005754278239379423,
+            "original_peak": 0.0034540891647338867,
+            "output_rms": 0.07999999994641573,
+            "output_peak": 0.48021161556243896,
+            "clipping": false
+          },
+          "reference": "It's worth half an hour to stroll about the intriguing village.",
+          "translation_reference": "Merece la pena dedicar media hora a dar un paseo por el fascinante pueblo.",
+          "padding_after_samples": 16000
+        }
+      ]
+    }
+  ],
+  "sizes": [
+    "e2b"
+  ],
+  "partial_interval": 0.6,
+  "baseline_env": {
+    "STARK_EXPERIMENT_TRACE": "true",
+    "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"
+  },
+  "experiments": [
+    {
+      "name": "baseline",
+      "env": {}
+    },
+    {
+      "name": "deadline_100ms",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS": "100"
+      }
+    },
+    {
+      "name": "deadline_250ms",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_DEADLINE_MARGIN_MS": "250"
+      }
+    }
+  ],
+  "input_level_protocol": "Per original recording: fixed RMS target0.08 with peakcap0.95, float32 gain only, no clipping. Frozen before paired screening; low-level original pilot retained separately."
+}

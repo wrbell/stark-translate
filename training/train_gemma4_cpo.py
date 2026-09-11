@@ -60,7 +60,10 @@ def load_triples(path: Path) -> list[dict]:
         for line in f:
             line = line.strip()
             if line:
-                rows.append(json.loads(line))
+                row = json.loads(line)
+                if row.get("approved_for_training") is False or row.get("review_status") == "unapproved":
+                    raise ValueError("Unapproved preference candidates cannot be used for CPO training")
+                rows.append(row)
     return rows
 
 
@@ -75,6 +78,8 @@ def file_sha256(path: Path | None) -> str | None:
 
 
 def train(args: argparse.Namespace) -> None:
+    # Candidate approval must fail before Unsloth imports or model/output creation.
+    triples = load_triples(args.triples)
     try:
         from unsloth import FastModel
     except ImportError as exc:
@@ -121,7 +126,6 @@ def train(args: argparse.Namespace) -> None:
 
     # Build dataset. CPOTrainer expects {prompt, chosen, rejected} columns.
     log.info("loading triples from %s", args.triples)
-    triples = load_triples(args.triples)
     log.info(
         "loaded %d triples (margin distribution: min=%.3f median=%.3f max=%.3f)",
         len(triples),

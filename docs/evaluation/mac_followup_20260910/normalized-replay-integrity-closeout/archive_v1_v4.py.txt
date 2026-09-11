@@ -1,0 +1,202 @@
+"""Prepare or execute immutable archival of the aborted v1 cohort and v4 pilot.
+
+Default is a lightweight inventory. Execute only in a root-reserved idle window;
+execution copies, compresses, hashes and verifies retained evidence. No inference.
+"""
+
+import argparse
+import gzip
+import hashlib
+import io
+import json
+import subprocess
+import sys
+import tarfile
+from pathlib import Path, PurePosixPath
+
+
+INTERRUPTED = "followup_std_v1_early_4s_160ms_e2b_r0_fleurs_development_en_en"
+COHORTS = (
+    ("standard-screen-normalized-v1", "a8511eed53fde804a688b4dd56a52c077e773eca", 13),
+    ("measurement-pilot-v4", "eddb0adb4741307680079802c47f33cb21d56aec", 3),
+)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def checked_copy(source, target):
+    target.parent.mkdir(parents=True, exist_ok=True)
+    before = source.read_bytes()
+    with target.open("xb") as output:
+        output.write(before)
+    if sha(before) != sha(target.read_bytes()) or before != source.read_bytes():
+        raise ValueError(f"Copy changed: {source}")
+
+
+def dump(path, payload):
+    with path.open("x") as output:
+        output.write(json.dumps(payload, indent=2) + "\n")
+
+
+def source_archive(repo, provenance, destination):
+    """Archive the exact recorded code files from the retained clean commit."""
+    source = provenance["source"]
+    if source["tracked_diff_sha256"] != sha(b""):
+        raise ValueError("A dirty source cohort requires its original patch")
+    expected = source["all_code_sha256"]
+    for name in expected:
+        path = PurePosixPath(name)
+        if path.is_absolute() or ".." in path.parts:
+            raise ValueError(f"Unsafe recorded source path: {name}")
+    payload = subprocess.check_output(
+        ["git", "archive", "--format=tar", source["code_sha"], "--", *sorted(expected)],
+        cwd=repo,
+    )
+    observed = {}
+    with tarfile.open(fileobj=io.BytesIO(payload), mode="r:") as archive:
+        for member in archive.getmembers():
+            if member.isdir():
+                continue
+            if not member.isfile() or member.name not in expected:
+                raise ValueError(f"Unexpected source archive member: {member.name}")
+            observed[member.name] = sha(archive.extractfile(member).read())
+    if observed != expected:
+        raise ValueError("Git source bytes do not match the original frozen code manifest")
+    with destination.open("xb") as output:
+        with gzip.GzipFile(filename="", fileobj=output, mode="wb", mtime=0) as compressed:
+            compressed.write(payload)
+    with gzip.open(destination, "rb") as compressed:
+        if compressed.read() != payload:
+            raise ValueError("Source archive readback changed")
+    return {
+        "code_sha": source["code_sha"],
+        "recorded_code_files_verified": len(expected),
+        "scope": "all_code_sha256 paths from the original cohort provenance; not model weights or audio",
+    }
+
+
+def inventory(repo, cache):
+    result = []
+    for name, revision, count in COHORTS:
+        directory = cache / name
+        provenance = json.loads((directory / "provenance.json").read_text())
+        paths = sorted(directory.glob("*.json"))
+        if len(paths) != count + 1 or provenance["source"]["code_sha"] != revision:
+            raise ValueError(f"Unexpected cohort inventory or source revision: {name}")
+        result.append({
+            "cohort": name,
+            "persisted_run_json_count": count,
+            "recorded_source_revision": revision,
+            "source_identity": provenance["source_identity"],
+            "files": [{"path": str(p), "size_bytes": p.stat().st_size} for p in paths],
+        })
+    metrics = cache / "runtime" / "metrics"
+    interrupted = sorted(metrics.glob(f"*_{INTERRUPTED}.*"))
+    required = [f"{prefix}{INTERRUPTED}{suffix}" for prefix, suffix in (
+        ("ab_metrics_", ".csv"), ("diagnostics_", ".jsonl"),
+        ("session_lifecycle_", ".json"), ("session_metadata_", ".json"),
+        ("replay_", ".log"),
+    )]
+    if not set(required).issubset({p.name for p in interrupted}):
+        raise ValueError("Interrupted-run raw evidence is missing")
+    if (cache / COHORTS[0][0] / f"{INTERRUPTED}.json").exists():
+        raise ValueError("Unexpected later runner result for the interrupted session")
+    return {"cohorts": result, "interrupted_raw_files": [str(p) for p in interrupted]}
+
+
+def execute(repo, cache, output_root, plan):
+    helper = repo / "docs/evaluation/mac_followup_20260910/normalized-integrity-pilot/archive_cohort.py.txt"
+    output_root.mkdir(parents=True, exist_ok=False)
+    checked_copy(helper, output_root / "archive_cohort.py.txt")
+    checked_copy(Path(__file__), output_root / "archive_v1_v4.py.txt")
+    checked_copy(cache / "standard-screen-normalized-v1-abort.json", output_root / "abort-receipt.json")
+    dump(output_root / "input-inventory.json", plan)
+    source_verification = {}
+    for name, revision, count in COHORTS:
+        destination = output_root / name
+        subprocess.run([
+            sys.executable, str(helper), "--input", str(cache / name),
+            "--output", str(destination), "--runner-log", str(cache / f"{name}.log"),
+            "--metrics", str(cache / "runtime/metrics"), "--compress",
+        ], cwd=repo, check=True)
+        provenance = json.loads((cache / name / "provenance.json").read_text())
+        source_verification[name] = source_archive(repo, provenance, destination / "source-code.tar.gz")
+        if name == "measurement-pilot-v4":
+            spec = cache / "measurement-pilot-v4-spec.json"
+            if sha(spec.read_bytes()) != provenance["spec_sha256"]:
+                raise ValueError("Original v4 protocol bytes changed")
+            checked_copy(spec, destination / "protocol.json")
+        else:
+            spec = subprocess.check_output([
+                "git", "show", f"{revision}:docs/evaluation/mac_followup_20260910/protocol/standard-screen.json"
+            ], cwd=repo)
+            if sha(spec) != provenance["spec_sha256"]:
+                raise ValueError("Original v1 protocol bytes disagree with the archived commit")
+            with (destination / "protocol.json").open("xb") as stream:
+                stream.write(spec)
+        runs = json.loads((destination / "run-summary.json").read_text())["runs"]
+        if len(runs) != count:
+            raise ValueError("Archived run count mismatch")
+        if name == "measurement-pilot-v4" and any(
+            r["returncode"] != 0 or r["completion_errors"] or r["integrity_status"] != "passed" for r in runs
+        ):
+            raise ValueError("v4 clean-pilot evidence no longer matches its recorded classification")
+    interrupted_dir = output_root / "interrupted-v1-run"
+    interrupted_dir.mkdir()
+    for item in plan["interrupted_raw_files"]:
+        source = Path(item)
+        checked_copy(source, interrupted_dir / source.name)
+    lifecycle = json.loads((interrupted_dir / f"session_lifecycle_{INTERRUPTED}.json").read_text())
+    metadata = json.loads((interrupted_dir / f"session_metadata_{INTERRUPTED}.json").read_text())
+    if metadata.get("git_sha") != COHORTS[0][1] or lifecycle.get("git_sha") != COHORTS[0][1]:
+        raise ValueError("Interrupted-run source identity differs from the retained v1 source")
+    dump(output_root / "interpretation.json", {
+        "schema_version": 1,
+        "v1": {
+            "status": "aborted_technical_experiment",
+            "persisted_run_results": 13,
+            "interrupted_runner_session": INTERRUPTED,
+            "interrupted_runner_has_result_json": False,
+            "raw_pipeline_lifecycle_status": lifecycle["status"],
+            "raw_pipeline_exit_code": lifecycle.get("exit_code"),
+            "note": "The orchestrator was interrupted; the child handled SIGTERM as graceful stop. Its raw completed marker is preserved, but does not prove complete replay coverage or a completed benchmark result.",
+            "promotion_eligible": False,
+        },
+        "v4": {
+            "status": "physical_trace_drain_regression_pilot",
+            "persisted_run_results": 3,
+            "note": "Spanish E4B opening control, early 2s/160ms and closing control after the native-worker drain fix. Supports physical trace completion only; not paired speed, p95 certification, quality or default promotion.",
+            "promotion_eligible": False,
+        },
+        "defaults_changed": False,
+        "source_verification": source_verification,
+        "audio_included": False,
+        "original_raw_payloads_rewritten": False,
+    })
+    # Index every preserved/generated file, including the original helper indexes.
+    files = [{"path": str(p.relative_to(output_root)), "size_bytes": p.stat().st_size,
+              "sha256": sha(p.read_bytes())} for p in sorted(output_root.rglob("*")) if p.is_file()]
+    dump(output_root / "archive-index.json", {"schema_version": 1, "files": files})
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[3])
+    parser.add_argument("--output-root", type=Path)
+    parser.add_argument("--execute", action="store_true", help="Only after root reserves an inference-idle window")
+    args = parser.parse_args()
+    repo = args.repo.resolve()
+    cache = repo / ".cache/mac-en-es-closeout"
+    plan = inventory(repo, cache)
+    if args.execute:
+        if args.output_root is None:
+            parser.error("--execute requires a new --output-root")
+        execute(repo, cache, args.output_root.resolve(), plan)
+    else:
+        print(json.dumps({"status": "prepared_only_not_archived", **plan}, indent=2))
+
+
+if __name__ == "__main__":
+    main()

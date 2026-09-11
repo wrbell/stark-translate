@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/Users/willem/anaconda3/bin/python3.11",
+    "-S",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-archive-v7-preparation/archive_final.py",
+    "--build",
+    "--reserved-archive-window",
+    "--final-run",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-delivery-v6",
+    "--coordinator",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/final-delivery-resume-v6"
+  ],
+  "started_at": "2026-09-11T00:41:59.196518+00:00",
+  "ended_at": "2026-09-11T00:42:23.592845+00:00",
+  "exit_code": 0,
+  "helper_sha256": "35f0abbcbd2c7f829873ee34db6c70368835e48ae9f6387e7b6373accdab98bc",
+  "selection_sha256": "807b28ce37493ee424512559cc9a289fc2e990a5fd22de562b5b6b199ee02d0c",
+  "log_sha256": "01414e90a23f719cd80966ad980a4dd2226c3757cfc1fa8afed5cbeecefcb9de"
+}

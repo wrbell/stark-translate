@@ -158,16 +158,15 @@ def check_models(
     return _check("Models", "pass", f"{', '.join(names)}; Marian {partial}")
 
 
-def check_microphone(input_device: int | str | None = None) -> Check:
+def check_microphone(input_device: int | str | None = None, *, name=None, host_api=None) -> Check:
     """Enumerate input audio devices via sounddevice (or report unavailable)."""
     try:
         import sounddevice as sd
 
         devices = sd.query_devices()
-        if input_device is not None:
-            selected = sd.query_devices(input_device, "input")
-            if selected.get("max_input_channels", 0) <= 0:
-                return _check("Microphone", "fail", "Selected device has no input channels")
+        from tools.input_devices import resolve_input_device
+
+        selected = resolve_input_device(input_device, name=name, host_api=host_api, sd=sd)
     except Exception as exc:
         return _check("Microphone", "fail", f"Audio input unavailable: {exc}")
 
@@ -176,7 +175,10 @@ def check_microphone(input_device: int | str | None = None) -> Check:
         return _check("Microphone", "fail", "No input devices found")
     names = [d.get("name", "?") for d in inputs[:3]]
     suffix = f" (+{len(inputs) - 3} more)" if len(inputs) > 3 else ""
-    return _check("Microphone", "pass", f"{len(inputs)} input device(s): {', '.join(names)}{suffix}")
+    result = _check("Microphone", "pass", f"{len(inputs)} input device(s): {', '.join(names)}{suffix}")
+    if selected is not None:
+        result["device"] = selected
+    return result
 
 
 def check_adapter_manifest(project_root: Path) -> Check:
@@ -234,6 +236,8 @@ def run_all_checks(
     diarize: bool = False,
     models_dir: Path | None = None,
     input_device: int | str | None = None,
+    input_device_name: str | None = None,
+    input_host_api: str | None = None,
     stt_backend: str = "auto",
     profile: str | None = None,
 ) -> dict:
@@ -255,7 +259,7 @@ def run_all_checks(
             tts=tts,
             diarize=diarize,
         )
-        checks.append(check_microphone(input_device))
+        checks.append(check_microphone(input_device, name=input_device_name, host_api=input_host_api))
         counts = {status: sum(c["status"] == status for c in checks) for status in ("pass", "warn", "fail")}
         return {
             "checks": checks,
@@ -285,7 +289,7 @@ def run_all_checks(
             models_dir=models_dir,
             tts=tts,
         ),
-        check_microphone(input_device),
+        check_microphone(input_device, name=input_device_name, host_api=input_host_api),
         check_adapter_manifest(project_root),
     ]
     if backend == "cuda":

@@ -1,0 +1,47 @@
+{
+  "argv": [
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-feasibility-venv/bin/python",
+    "-m",
+    "pip",
+    "--isolated",
+    "install",
+    "--dry-run",
+    "--ignore-installed",
+    "--only-binary=:all:",
+    "--disable-pip-version-check",
+    "--index-url",
+    "https://pypi.org/simple",
+    "--cache-dir",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-feasibility-pip-cache",
+    "--report",
+    "/Users/willem/Code/vibes/SRTranslate/docs/evaluation/security_feasibility_20260910/raw/compatible-pair-pip-report.json",
+    "torch==2.13.0",
+    "torchaudio==2.11.0"
+  ],
+  "started_utc": "2026-09-10T13:14:09.998892+00:00",
+  "ended_utc": "2026-09-10T13:15:07.594009+00:00",
+  "exit_code": 0,
+  "log": "compatible-pair.log",
+  "isolated_inventory_before": [
+    [
+      "pip",
+      "24.0"
+    ],
+    [
+      "setuptools",
+      "65.5.0"
+    ]
+  ],
+  "isolated_inventory_after": [
+    [
+      "pip",
+      "24.0"
+    ],
+    [
+      "setuptools",
+      "65.5.0"
+    ]
+  ],
+  "inventory_unchanged": true,
+  "note": "pip dry-run downloads candidate wheels for metadata/resolution but does not install them; root confirmed no model timings active."
+}

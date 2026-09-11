@@ -1,0 +1,28 @@
+{
+  "python": "3.11.11 | packaged by conda-forge | (main, Dec  5 2024, 08:47:03) [Clang 18.1.8 ]",
+  "torch": "2.13.0",
+  "torchaudio": "2.11.0",
+  "speechbrain": "1.1.1",
+  "silero_vad": "6.2.1",
+  "transformers": "5.12.1",
+  "speaker_class_imported": "EncoderClassifier",
+  "marian_model_imported": "MarianMTModel",
+  "marian_tokenizer_imported": "MarianTokenizer",
+  "vad_provenance": {
+    "source": "installed_package",
+    "package": "silero-vad",
+    "package_version": "6.2.1",
+    "backend": "torch",
+    "opset_version": null,
+    "path": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/security-candidate-runtime/lib/python3.11/site-packages/silero_vad/data/silero_vad.jit",
+    "sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+    "size_bytes": 2272526
+  },
+  "silence_probabilities": [
+    0.0016698009567335248,
+    0.006883855909109116,
+    0.008910718373954296
+  ],
+  "device": "cpu",
+  "scope": "Offline imports and three bundled-VAD silence frames only; no speaker/STT/translation models or real-speech validation."
+}

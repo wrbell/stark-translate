@@ -1,0 +1,27 @@
+{
+  "session_id": "20260910_105554_710324_es",
+  "state": "idle",
+  "outcome": "failed",
+  "record_audio": false,
+  "tts": false,
+  "temporary_ports_listening": {
+    "9002": false,
+    "9080": false,
+    "9765": false
+  },
+  "owned_processes": [
+    {
+      "pid": 32143,
+      "process": ""
+    },
+    {
+      "pid": 31979,
+      "process": ""
+    },
+    {
+      "pid": 32203,
+      "process": ""
+    }
+  ],
+  "remaining_model_capture_probe_matches": ""
+}

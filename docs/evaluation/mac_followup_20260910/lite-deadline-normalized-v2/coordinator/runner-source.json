@@ -1,0 +1,24 @@
+{
+  "sha256": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/execute_lite_recovery_v2.py": "343bc7f135e423bf23126baa68103cb7bd8a50a9cfac4b042517dc4becdd46ef",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/lite-followup-preparation/prepare.py": "54f28974e0fbf92e77983ea8bf0954a75c31f22109e624512cf29c3158e7abe7",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/inputs.recovery.v2.json": "334a32a4015d9488dec61a129184a36369ac74a536205b04f4ebc44d41d3689d",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/run_cpu_quality_recovery_v2.py": "701d6b380c25853100110c2a39fa57a7193f8b4263517543ec7503920f37e652",
+    "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/serial-model-followups.py": "5a8b915b28064e2d3c9e4b3ccc311679bef3a9bbba98a8fcd57d57417891b6cd",
+    "/Users/willem/Code/vibes/SRTranslate/operator_app/processes.py": "f63e21aec479f7fc20fa08f8cea983798170cc1d43646a9e46de4dec465a66f7"
+  },
+  "frozen_runtime": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "recovery_gate": {
+    "pid": 79689,
+    "created_at": 1789064704.123635,
+    "runner": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/run_cpu_quality_recovery_v2.py",
+    "argv": [
+      "/Users/willem/Code/vibes/SRTranslate/stt_env/bin/python",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/run_cpu_quality_recovery_v2.py",
+      "--output",
+      "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/cpu-quality-recovery-v2",
+      "--execute-reserved-serial-window"
+    ]
+  },
+  "inputs": "/Users/willem/Code/vibes/SRTranslate/.cache/mac-en-es-closeout/recovery-preparation/inputs.recovery.v2.json"
+}

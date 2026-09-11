@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-10T15:32:36.309934+00:00",
+  "git_sha": "eddb0adb4741307680079802c47f33cb21d56aec",
+  "kind": "native_input_identity_only",
+  "audio_saved": false,
+  "stt_run": false,
+  "requested": {
+    "device": 2,
+    "device_name": "MacBook Pro Microphone",
+    "device_host_api": "Core Audio",
+    "duration_s": 2
+  },
+  "result": {
+    "ok": true,
+    "device": 1,
+    "input_device": {
+      "index": 1,
+      "name": "MacBook Pro Microphone",
+      "host_api": "Core Audio"
+    },
+    "duration_s": 2,
+    "rms": 0.08393564820289612,
+    "peak": 0.47758948802948,
+    "samples": 96000,
+    "recorded": false
+  },
+  "missing_identity_rejected": true,
+  "missing_identity_error": "Audio device could not open. Check its connection and microphone permission.",
+  "source_hashes": {
+    "tools/isolated_audio.py": "ccfdd8a949232608fd51a5507b552e43c5b63d76005ecd336b788180796d6c5f",
+    "tools/capture_worker.py": "5ed19921770640b793992163c5b499f19a04e7c79a3391a3487f48de9635c870",
+    "tools/input_devices.py": "789b8b2b30cb57298e9dcf090980df1cb9d75a93104d6a927cf35c78fae981d5"
+  }
+}

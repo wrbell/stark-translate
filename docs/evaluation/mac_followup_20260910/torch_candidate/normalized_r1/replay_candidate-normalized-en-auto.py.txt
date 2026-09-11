@@ -1,0 +1,140 @@
+"""Print a frozen EN/ES candidate replay plan; execution needs a reserved model window."""
+import argparse
+import csv
+import hashlib
+import json
+import os
+import re
+import signal
+import socket
+import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
+
+BASE = Path(__file__).resolve().parent
+ROOT = BASE.parents[2]
+PYTHON = BASE / 'venv/bin/python'
+PROTOCOL = ROOT / 'docs/evaluation/mac_followup_20260910/protocol/standard-screen.json'
+
+def sha(path):
+    with Path(path).open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+def utc():
+    return datetime.now(timezone.utc).isoformat()
+
+def environment():
+    env = dict(os.environ)
+    for key in tuple(env):
+        if key.startswith(('STARK_', 'PIP_')) or key in {'PYTHONPATH', 'PYTHONHOME', 'VIRTUAL_ENV'}:
+            del env[key]
+    env.update({'PYTHONNOUSERSITE': '1', 'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1',
+                'HF_DATASETS_OFFLINE': '1', 'STARK_PROJECT_ROOT': str(ROOT),
+                'STARK_MODELS_DIR': str(ROOT / '.cache/mac-roadmap/ct2-setup-validation/managed'),
+                'STARK_TRANSLATE__MARIAN_BACKEND': 'ct2',
+                'OMP_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1',
+                'STARK_EXPERIMENT_TRACE': 'true'})
+    return env
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--lang', choices=['en', 'es'], required=True)
+parser.add_argument('--label', default='r1')
+parser.add_argument('--ws-port', type=int, default=18965)
+parser.add_argument('--http-port', type=int, default=18966)
+parser.add_argument('--execute', action='store_true')
+parser.add_argument('--reserved-model-window', action='store_true')
+args = parser.parse_args()
+if args.execute and not args.reserved_model_window:
+    parser.error('Execution requires explicit coordinator authorization and --reserved-model-window')
+if not re.fullmatch(r'[A-Za-z0-9_-]{1,40}', args.label):
+    parser.error('label must contain 1-40 letters, numbers, underscores or hyphens')
+clip = next(c for c in json.loads(PROTOCOL.read_text())['clips'] if c['lang'] == args.lang)
+assert sha(clip['path']) == clip['sha256'], 'Frozen replay audio changed'
+preparation = json.loads((BASE / 'preparation.json').read_text())
+assert sha(ROOT / 'models.lock.json') == preparation['model_manifest_sha256'], 'Model manifest changed; freeze a new plan'
+pipeline = BASE / 'venv/lib/python3.11/site-packages/dry_run_ab.py'
+expected_source = next(f['source_sha256'] for f in preparation['copied_files'] if f['path'] == 'dry_run_ab.py')
+assert sha(pipeline) == expected_source, 'Installed pipeline differs from frozen source'
+wheel = next((BASE / 'dist').glob('*.whl'))
+assert sha(wheel) == json.loads((BASE / 'wheel-metadata.json').read_text())['wheel_sha256']
+session = f'torch213_full_{args.label}_{args.lang}'
+work = BASE / 'replay-work' / session
+argv = [str(PYTHON), '-m', 'dry_run_ab', '--profile', 'standard', '--backend', 'mlx', '--no-ab',
+        '--lang', args.lang, '--stt-backend', 'parakeet-mlx' if args.lang == 'en' else 'mlx',
+        '--model-family', 'gemma4', '--gemma4-size', 'e4b', '--vad-backend', 'torch', '--no-mts',
+        '--audio-file', clip['path'], '--gain', '1', '--replay-speed', '1', '--exit-after-replay',
+        '--session-id', session, '--ws-port', str(args.ws_port), '--http-port', str(args.http_port)]
+plan = {'argv': argv, 'cwd': str(work), 'session_id': session, 'clip': clip,
+        'runner_sha256': sha(__file__),
+        'explicit_environment': {k: v for k, v in environment().items() if k.startswith(('STARK_', 'HF_', 'TRANSFORMERS_', 'PYTHONNOUSERSITE', 'OMP_', 'OPENBLAS_', 'MKL_'))},
+        'expected_models': {'stt': 'mlx-community/parakeet-tdt-0.6b-v3' if args.lang == 'en' else 'mlx-community/whisper-large-v3-turbo',
+                            'final': 'mlx-community/gemma-4-e4b-it-OptiQ-4bit',
+                            'partial': 'Helsinki-NLP/opus-mt-en-es' if args.lang == 'en' else 'Helsinki-NLP/opus-mt-es-en',
+                            'partial_backend': 'ct2', 'vad': 'torch'},
+        'protocol_sha256': sha(PROTOCOL), 'wheel_sha256': sha(wheel), 'pipeline_sha256': sha(pipeline),
+        'model_manifest_sha256': sha(ROOT / 'models.lock.json'), 'executed': False,
+        'scope': 'Installed older frozen candidate file-replay functionality and dependency-security feasibility only; no causal latency claims; semantic review, browser ACKs, attended devices and matched-control regression pending.'}
+print(json.dumps(plan, indent=2), flush=True)
+if not args.execute:
+    raise SystemExit(0)
+assert args.ws_port != args.http_port and all(1024 <= p <= 65535 for p in [args.ws_port, args.http_port])
+for port in [args.ws_port, args.http_port]:
+    with socket.socket() as probe:
+        probe.bind(('127.0.0.1', port))
+work.mkdir(parents=True, exist_ok=False)
+receipt = {**plan, 'executed': True, 'started_at': utc()}
+(work / 'plan.json').write_text(json.dumps(plan, indent=2) + '\n')
+with (work / 'process.log').open('x') as log:
+    child = subprocess.Popen(argv, cwd=work, env=environment(), stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+    receipt['pid'] = child.pid
+    try:
+        receipt['exit_code'] = child.wait(timeout=600)
+    except subprocess.TimeoutExpired:
+        receipt['exit_code'] = 124
+    finally:
+        try:
+            os.killpg(child.pid, 0)
+            receipt['process_group_remained'] = True
+            os.killpg(child.pid, signal.SIGTERM)
+            try:
+                child.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                os.killpg(child.pid, signal.SIGKILL)
+                child.wait(timeout=10)
+        except ProcessLookupError:
+            receipt['process_group_remained'] = False
+receipt['ended_at'] = utc()
+issues = []
+if receipt['exit_code'] != 0:
+    issues.append('Nonzero exit or timeout')
+if receipt['process_group_remained']:
+    issues.append('Process group remained at cleanup')
+try:
+    metrics = work / 'metrics'
+    meta = json.loads((metrics / f'session_metadata_{session}.json').read_text())
+    life = json.loads((metrics / f'session_lifecycle_{session}.json').read_text())
+    finals = list(csv.DictReader((metrics / f'ab_metrics_{session}.csv').open()))
+    partial_path = metrics / f'partials_{session}.jsonl'
+    partials = [json.loads(line) for line in partial_path.read_text().splitlines() if line.strip()] if partial_path.exists() else []
+    if life.get('status') != 'completed' or life.get('exit_code') != 0:
+        issues.append('Session lifecycle did not complete')
+    if not life.get('persistence', {}).get('ok'):
+        issues.append('Required persistence not confirmed')
+    if meta.get('backend') != 'mlx' or meta.get('stt_backend') != ('parakeet-mlx' if args.lang == 'en' else 'mlx'):
+        issues.append('Unexpected inference backend')
+    if meta.get('model_a') != 'mlx-community/gemma-4-e4b-it-OptiQ-4bit':
+        issues.append('Unexpected final translation model')
+    if not finals or not all(row.get('english', '').strip() and row.get('spanish_a', '').strip() for row in finals):
+        issues.append('Missing final source or translation')
+    if not partials:
+        issues.append('No preview records')
+    receipt.update({'final_count': len(finals), 'partial_record_count': len(partials),
+                    'lifecycle': life, 'session_metadata': meta})
+except (OSError, ValueError) as exc:
+    issues.append(f'Cannot validate required output: {exc}')
+receipt.update({'status': 'passed_basic_functionality' if not issues else 'failed', 'issues': issues,
+                'artifacts': [{'path': str(p.relative_to(work)), 'sha256': sha(p), 'size_bytes': p.stat().st_size}
+                              for p in sorted(work.rglob('*')) if p.is_file()]})
+(work / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+print(json.dumps({'receipt': str(work / 'receipt.json'), 'status': receipt['status'], 'issues': issues}), flush=True)
+raise SystemExit(1 if issues else 0)

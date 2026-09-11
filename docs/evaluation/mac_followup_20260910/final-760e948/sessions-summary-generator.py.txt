@@ -1,0 +1,145 @@
+"""Summarize completed V6 receipts only; never read media or runtime traces."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path('/Users/willem/Code/vibes/SRTranslate')
+CACHE = ROOT / '.cache/mac-en-es-closeout'
+HEAD = '760e948ec9efb9266a5419cf68ce5f1cb5cfabab'
+RUN = CACHE / 'final-delivery-v6'
+COORDINATOR = CACHE / 'final-delivery-resume-v6'
+CASES = [f'{profile}-{kind}' for profile in ('standard', 'lite')
+         for kind in ('smoke_en', 'smoke_es', 'full_service_en')]
+STAGES = ['delivery-freeze', 'delivery-build', 'delivery-install',
+          'installed-audit', 'delivery-smokes', 'delivery-services', 'delivery-summary']
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def read(path, bindings):
+    require(path.stat().st_size <= 2 * 1024 * 1024, 'Only small terminal metadata allowed')
+    payload = path.read_bytes()
+    require(len(payload) <= 2 * 1024 * 1024, 'Terminal metadata grew beyond bound')
+    bindings[str(path.relative_to(ROOT))] = hashlib.sha256(payload).hexdigest()
+    return json.loads(payload)
+
+
+def metric(row):
+    """Keep the predeclared per-run minimum of 100 observations for p95."""
+    count = row['n']
+    return {'n': count, 'p50_ms': row.get('p50'),
+            'p95_ms': row.get('p95') if count >= 100 else None,
+            'max_ms': row.get('max'),
+            'p95_scope': 'reported' if count >= 100 else 'withheld: fewer than 100 observations'}
+
+
+def summarize():
+    bindings = {}
+    state = read(COORDINATOR / 'state.json', bindings)
+    require(state['stage'] == 'completed' and state['expected_head'] == HEAD,
+            'Coordinator must be complete on the repaired source')
+    require([s['name'] for s in state['completed_stages']] == STAGES
+            and all(s['status'] == 'passed' for s in state['completed_stages']),
+            'All seven stages must have passed')
+    delivery = read(COORDINATOR / 'delivery-summary.log', bindings)
+    summary_receipt = read(COORDINATOR / 'delivery-summary-receipt.json', bindings)
+    require(summary_receipt['status'] == 'passed' and summary_receipt['exit_code'] == 0
+            and summary_receipt['log_sha256'] == bindings[str((COORDINATOR / 'delivery-summary.log').relative_to(ROOT))],
+            'Final summary log differs from the completed stage receipt')
+    require(delivery['status'] == 'passed' and delivery['source_revision'] == HEAD
+            and delivery['all_six_passed'] is True, 'Delivery summary must pass')
+    indexed = {row['case']: row for row in delivery['sessions']}
+    require(len(delivery['sessions']) == len(indexed) == len(CASES)
+            and set(indexed) == set(CASES)
+            and all(row['status'] == 'passed' and row['evidence_valid'] is True for row in indexed.values()),
+            'Summary must bind each of the six unique cases')
+    rows = []
+    for case in CASES:
+        folder = RUN / 'sessions' / case
+        receipt = read(folder / 'receipt.json', bindings)
+        validation = read(folder / 'validation.json', bindings)
+        monitor = read(folder / 'monitor/report.json', bindings)
+        require(indexed[case]['receipt_sha256'] == bindings[str((folder / 'receipt.json').relative_to(ROOT))],
+                'Session receipt differs from the completed delivery summary')
+        for relative in ('validation.json', 'monitor/report.json'):
+            require(receipt['evidence_sha256'][relative] == bindings[str((folder / relative).relative_to(ROOT))],
+                    'Session evidence differs from its completed receipt')
+        require(receipt['session_id'] == validation['session_id'] == monitor['session_id'],
+                'Receipt, validator and monitor session identities differ')
+        require(receipt['status'] == validation['status'] == 'passed'
+                and receipt['source_revision'] == validation['source_revision'] == HEAD,
+                'Session must pass on the repaired source')
+        require(all(v is True for v in validation['checks'].values()), 'A terminal check failed')
+        require(receipt['exit_code'] == receipt['monitor_exit_code'] == 0,
+                'Require actual successful process exits')
+        require(validation['monitor_sha256'] == bindings[str((folder / 'monitor/report.json').relative_to(ROOT))],
+                'Monitor hash differs from validator')
+        require(monitor['monitor_status'] == 'completed'
+                and monitor['artifacts']['completion']['verified'] is True,
+                'Monitor must verify terminal completion')
+        cohorts = []
+        for cohort in monitor['artifacts']['cohorts']:
+            require(cohort['identity']['timing_schema_version'] == '2'
+                    and cohort['identity']['timing_source'] == 'replay_realtime',
+                    'Do not combine timing schemas or accelerated playback')
+            cohorts.append({'identity': cohort['identity'],
+                            'finals_by_endpoint': {k: metric(v) for k, v in cohort['final_metrics_by_endpoint'].items()},
+                            'first_partial_speech_start': metric(cohort['first_partial_speech_start_ms']),
+                            'server_update_gap': metric(cohort['server_update_gap_ms'])})
+        coverage = validation['source_coverage']
+        require(coverage['complete'] is True and coverage['capture_gaps'] == []
+                and coverage['unclassified_intervals'] == [], 'Incomplete source ledger')
+        measurements = monitor['measurements']
+        rows.append({'case': case, 'status': 'passed', 'session_id': validation['session_id'],
+                     'started_at': receipt['started_at'], 'ended_at': receipt['ended_at'],
+                     'source_duration_seconds': validation['source_header']['duration'],
+                     'finals': validation['final_count'], 'previews': validation['partial_record_count'],
+                     'checks_passed': len(validation['checks']), 'persistence': validation['persistence'],
+                     'source_ledger_complete': True, 'eof': coverage['eof'],
+                     'expected_source_samples': coverage['expected_source_samples'],
+                     'physical_trace_available': validation['replay_integrity']['trace_available'],
+                     'physical_trace_status': validation['replay_integrity']['status'],
+                     'completed_physical_calls_in_available_trace': (
+                         validation['replay_integrity']['completed_physical_calls']
+                         if validation['replay_integrity']['trace_available'] else None),
+                     'whole_session_counters': monitor['artifacts']['latest_session_summary']['latency_experiment_counters'],
+                     'monitor_observed_seconds': measurements['observed_seconds'],
+                     'monitor_sample_count': measurements['sample_count'],
+                     'health_stale_samples': measurements['health_stale_samples'],
+                     'monitor_errors': measurements['errors'],
+                     'incomplete_tree_samples': measurements['incomplete_tree_samples'],
+                     'sampled_process_tree_rss_bytes': measurements['rss_sum_bytes'],
+                     'pipeline_lifetime_memory': monitor['artifacts']['pipeline_lifetime_memory'],
+                     'cohorts': cohorts})
+    return {'schema_version': 1, 'source_revision': HEAD,
+            'generated_at': datetime.now(timezone.utc).isoformat(),
+            'status': 'all_six_terminal_sessions_passed', 'sessions': rows,
+            'source_receipt_sha256': bindings,
+            'scope': ['File-only input and no TTS; no microphone or speaker use.',
+                      'Observational installed-delivery sessions, not paired causal performance experiments.',
+                      'Final timing is estimated last VAD-positive frame to server payload readiness.',
+                      'First-partial timing begins at estimated speech start.',
+                      'Intervening music and silence can contribute to gaps between updates; leading/trailing source spans are excluded.',
+                      'Each latency endpoint and session retains its own count; latency p95 withheld below 100.',
+                      'No visible-browser ACKs or human-quality approval.',
+                      'Process-tree RSS and Metal/pipeline peaks are separate and must not be added.',
+                      'Truncated physical traces are unavailable; whole-session counters do not reconstruct them.',
+                      'Historical c13 failures remain separate and failed.']}
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    result = summarize()
+    with args.output.open('x') as stream:
+        json.dump(result, stream, indent=2, ensure_ascii=False)
+        stream.write('\n')
+    print(json.dumps({'output': str(args.output), 'status': result['status'], 'sessions': len(result['sessions'])}))

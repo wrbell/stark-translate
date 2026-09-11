@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "session_id": "20260910_102356_408494_es",
+  "run_id": "6612d50e33a5478fb70e0e0652ca77dc",
+  "status": "failed",
+  "pid": 24409,
+  "hostname": "Invicta91.local",
+  "started_at": "2026-09-10T14:24:00.245779+00:00",
+  "git_sha": "e644fe049d4ae65dbb2e4881c6934a65f68849c8",
+  "source": {
+    "git_sha": "e644fe049d4ae65dbb2e4881c6934a65f68849c8",
+    "pipeline_sha256": "af6ff9a69a3adf747ef106265e6eab4c93d8ada904d7232d5f43d2be25c32359",
+    "package_version": "2026.14.0.0",
+    "package_artifact_hashes": {
+      "sha256": "ac3d5216ce79f2ef004e2ed5be4c42d5eccb3f2ce8612661a2a7d138c7c2c41e"
+    },
+    "package_vcs_commit": null
+  },
+  "pipeline_sha256": "af6ff9a69a3adf747ef106265e6eab4c93d8ada904d7232d5f43d2be25c32359",
+  "persistence": {
+    "submitted": 17,
+    "completed": 17,
+    "pending": 0,
+    "failed": 17,
+    "capacity": 256,
+    "ok": false,
+    "failures": [
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "handoff_overflow"
+      },
+      {
+        "operation": "audio_capture",
+        "code": "samples_dropped"
+      }
+    ]
+  },
+  "exit_code": 1,
+  "ended_at": "2026-09-10T14:25:08.013297+00:00",
+  "memory": {
+    "scope": "pipeline_process_lifetime",
+    "peak_rss_bytes": 3654336512,
+    "peak_metal_bytes": 9281778734
+  },
+  "models": {
+    "stt": {
+      "requested_id": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+      "manifest_revision": null,
+      "resolved_revision": "a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--whisper-large-v3-turbo/snapshots/a4aaeec0636e6fef84abdcbe3544cb2bf7e9f6fb",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "b34fc29e4e11e0a25e812775dd67f4dd16fc2c8eb43d28ae25ff7d660ecb6379"
+    },
+    "translation_a": {
+      "requested_id": "mlx-community/gemma-4-e4b-it-OptiQ-4bit",
+      "manifest_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_revision": "6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "resolved_path": "/Users/willem/.cache/huggingface/hub/models--mlx-community--gemma-4-e4b-it-OptiQ-4bit/snapshots/6be2eaf50f08b88b5dadca0f4a02c0a0880e7bd3",
+      "revision_source": "hf_snapshot_path",
+      "config_sha256": "6ee475892a1bcdb8428ad49dac25664e269cdb4280eea76f446fc75f276716a3"
+    },
+    "marian": {
+      "requested_id": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/es-en/active",
+      "manifest_revision": null,
+      "resolved_revision": null,
+      "resolved_path": "/Users/willem/Code/vibes/SRTranslate/adapters/marian_ct2/es-en/active",
+      "revision_source": "unknown",
+      "config_sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af",
+      "model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+      "model_bin_size_bytes": 79567635,
+      "export_manifest": {
+        "sha256": "239246b3f0d951edef1c14be3f1e37e6c0c6486dce3cba06bd96a84e9abab076",
+        "source_model_id": "Helsinki-NLP/opus-mt-es-en",
+        "source_revision": null,
+        "ct2_quantization": "int8",
+        "direction": "es-en",
+        "declared_model_bin_sha256": "44c5adc2c680f27c14c991e5ab7f74f38b41597153f7123bc8f6455f09a3b38b",
+        "model_bin_hash_matches": true
+      }
+    }
+  }
+}

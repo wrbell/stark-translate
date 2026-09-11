@@ -256,7 +256,7 @@ def test_standard_cpu_does_not_require_unused_gemma_or_server(tmp_path, monkeypa
     assert result["status"] == "pass"
     assert [call.args[0] for call in lookup.call_args_list] == ["whisper-large-v3-turbo"]
     monkeypatch.setattr(preflight, "check_dependencies", lambda *a, **k: preflight._check("deps", "pass", "ok"))
-    monkeypatch.setattr(preflight, "check_microphone", lambda *a: preflight._check("mic", "pass", "ok"))
+    monkeypatch.setattr(preflight, "check_microphone", lambda *a, **kw: preflight._check("mic", "pass", "ok"))
     llama = Mock(side_effect=AssertionError("unused server probed"))
     monkeypatch.setattr(preflight, "check_llamacpp_server", llama)
     assert preflight.run_all_checks(tmp_path, backend="cpu", profile="standard")["ok"]
