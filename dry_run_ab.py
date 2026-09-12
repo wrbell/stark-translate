@@ -2986,6 +2986,7 @@ async def process_partial(
                 "speech_end_sample": sample_bounds.get("speech_end_sample"),
                 "request_sequence": request_sequence,
                 "english": english,
+                "stt_confidence": stt_confidence,
             }
             while len(_partial_reuse_candidates) > 256:
                 _partial_reuse_candidates.pop(next(iter(_partial_reuse_candidates)))
@@ -3775,7 +3776,9 @@ async def _pipeline_coordinator():
             ):
                 timing.stt_requested = timing.stt_started = timing.stt_finished = time.perf_counter()
                 english = candidate["english"]
-                stt_latency, stt_confidence, segment_meta, low_conf_words = 0.0, None, [], []
+                stt_latency, segment_meta, low_conf_words = 0.0, [], []
+                # None forces the Gemma route; the keep-confidence variant lets should_use_marian_only decide.
+                stt_confidence = candidate.get("stt_confidence") if _latency.partial_reuse_keep_confidence else None
                 _latency_trace.record(
                     "final_stt_reused_partial",
                     chunk_id=cid,

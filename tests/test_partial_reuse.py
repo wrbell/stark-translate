@@ -191,6 +191,7 @@ def test_only_emitted_partials_record_exact_source_and_bound_candidates(pipeline
                 "speech_end_sample": 47900,
                 "request_sequence": 1,
                 "english": source,
+                "stt_confidence": None,  # the worker path returns no confidence
             }
             assert 100 not in pipeline._partial_reuse_candidates
         before = dict(pipeline._partial_reuse_candidates)
@@ -257,3 +258,38 @@ def test_final_stt_route_is_not_a_stage_stamp():
     stages = timing.relative_stages(9.0)
     assert stages == {"stt_started": 1000.0}
     assert ChunkTiming(utterance_id=3).final_stt_route is None
+
+
+@pytest.mark.parametrize("keep", [False, True])
+def test_reused_final_keeps_partial_confidence_only_when_enabled(pipeline, monkeypatch, keep):
+    monkeypatch.setattr(
+        pipeline, "_latency", LatencyExperiments(partial_reuse_ms=300, partial_reuse_keep_confidence=keep)
+    )
+    pipeline._partial_reuse_candidates[7] = {
+        "sample_end": 48000,
+        "speech_end_sample": 47500,
+        "request_sequence": 23,
+        "english": "Good morning",
+        "stt_confidence": 0.93,
+    }
+    timing = ChunkTiming(utterance_id=7, endpoint_reason="silence", sample_rate=48000, speech_end_sample=48000)
+    monkeypatch.setattr(pipeline, "_run_stt", Mock(side_effect=AssertionError("full STT must not run")))
+    finalized = AsyncMock()
+    monkeypatch.setattr(pipeline, "_pipeline_translate_and_finalize", finalized)
+    pipeline._final_pending.set()
+    monkeypatch.setattr(pipeline, "_final_pending_utterance_id", 7)
+
+    async def run():
+        queue = asyncio.Queue()
+        queue.put_nowait((np.full(16000, 0.1), 1, 1, timing))
+        queue.put_nowait(None)
+        monkeypatch.setattr(pipeline, "_pipeline_chunk_queue", queue)
+        await pipeline._pipeline_coordinator()
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        monkeypatch.setattr(pipeline, "_pipeline_pool", pool)
+        asyncio.run(run())
+    args = finalized.call_args.args
+    assert args[1] == "Good morning"
+    assert args[3] == (0.93 if keep else None)
+    assert finalized.call_args.kwargs["timing"].final_stt_route == "partial_reuse"
