@@ -65,7 +65,7 @@ Files: `index.html`, `style.css`, `app.js` (page controller, exported as
 
 Required (v2026.6 contract, unchanged): `/api/preflight`, `/api/devices`,
 `/api/audio/output-devices`, `/api/session/{status,start,stop}`,
-`/api/control/{pause,resume,lang_flip,fallback}`, `/api/features/*`,
+`/api/control/{pause,resume,lang_flip,fallback,vad}`, `/api/metrics`, `/api/features/*`,
 `/api/review/*`, `/ws/control`.
 
 Everything below is optional. A 404/405/501, a `false` flag, or a missing field
@@ -102,7 +102,7 @@ that the devices have not been validated yet. The same object embedded as
 |---|---|
 | `outcome` (`null`/`completed`/`interrupted`/`failed`) | Status pill detail and Live subtitle after a session ends. |
 | `readiness {phase, ready, reason, updated_at, age_s, stale}` | "Getting ready: <phase>" (phases such as `loading`, `listening`, `ready`, `paused`, `input_error`); `stale` becomes "has not reported for …". |
-| `health` (`tools/pipeline_health.py`): `input_seen`, `input_age_s`, `caption_age_s`, `input_level`, `captions[]`, `errors[]`/`error_count`, `recording {audio_enabled, required_failures, ok}`, `persistence {ok,…}`, `storage {free_bytes, low_space}`, `queues{}`, `clients`, `publish_failures` | Sound level meter, health chips, status-feed caption preview. Legacy booleans/numbers still render. |
+| `health` (`tools/pipeline_health.py`; `queues{}` and `clients` are added by the pipeline's status provider in `dry_run_ab.py`): `input_seen`, `input_age_s`, `caption_age_s`, `input_level`, `captions[]`, `errors[]`/`error_count`, `recording {audio_enabled, required_failures, ok}`, `persistence {ok,…}`, `storage {free_bytes, low_space}`, `queues{}`, `clients`, `publish_failures` | Sound level meter, health chips, status-feed caption preview. Legacy booleans/numbers still render. |
 | `effective_profile {name}` (or a string) | "profile: …" next to the language on Live. |
 | `work {kind, id}` | "Busy" pill; Start, audio tests and summary wait while set. |
 | `last_event` | Small line under the Live title while active or in error. |

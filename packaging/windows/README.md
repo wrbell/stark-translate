@@ -1,12 +1,13 @@
 # Windows MSI build assets
 
-This directory holds Windows MSI build inputs. Native Windows installation and
-first-launch behavior remain unverified; see the current
-[Windows delivery status](../../docs/packaging/windows.md).
+This directory holds Windows MSI build inputs. The unsigned MSI ships with the
+v2026.14.0.0 GitHub Release (2026-09-11); native Windows installation and first-launch
+behavior remain unverified (`windows-msi-bootstrap` in `docs/backlog.json`). Boundaries and
+gaps: [Windows delivery status](../../docs/packaging/windows.md).
 
 | File | Purpose |
 |---|---|
-| `pyapp-config.toml` | Design reference; the workflow uses environment variables and does not read this file |
+| `pyapp-config.toml` | Design reference only and stale (still carries `2026.7.2.0` and an old exec spec); the workflow uses environment variables and does not read this file |
 | `wix-fragment.wxi` | WiX fragment Briefcase wraps PyApp's binary with (Start Menu shortcut, CUDA detection, ARP metadata) |
 | `icon.ico` | App icon — Stark Road Gospel Hall logo, multi-resolution ICO (16/24/32/48/64/128/256 px). Source: `wp-content/uploads/2015/12/SRGH_Logo.jpg` from starkroadgospelhall.com, padded to square + upscaled to a 512 px LANCZOS master before ICO export. |
 

@@ -69,6 +69,10 @@ Install `.[mlx,eval]` in the selected environment. Existing `stt_env` was retain
 additional reporting packages used for this run live in `.cache/mac-eval-deps`.
 All model runs are sequential to avoid GPU contention.
 
+> **2026-09-12 note:** the launcher default is now the promoted `venv` (Torch 2.13.0) selected by
+> `.stark-python`; `stt_env` is the untouched rollback environment. The commands below run under
+> either; the recorded runs above used the environment named in their receipts.
+
 ```bash
 python tools/mac_evaluation.py validate --manifest docs/evaluation/mac_v2026_14_manifest_v2.json
 python tools/mac_evaluation.py stt --manifest docs/evaluation/mac_v2026_14_manifest_v2.json --output metrics/mac_roadmap/stt --runs 3
@@ -156,3 +160,78 @@ wheel/sdist/Mac ZIP identities, actual unpacked-ZIP launch/build/install checks,
 and installed EN/ES inference. It distinguishes the GPU-exercised artifact from
 the final shell-adjusted wheel using exact member hashes. These are post-build
 records; publication and the human, device and visible-browser gates remain open.
+
+## Index of dated evidence (added 2026-09-12)
+
+Every directory under `docs/evaluation/`, newest first. Files inside are immutable once written;
+corrections are dated appends.
+
+| Directory | Date | What it records |
+|---|---|---|
+| [`series4_20260912/`](series4_20260912/STATUS.md) | 2026-09-12 | Series 4: runtime fixes on a paired identity screen (P1), partial-reuse attribution and arm screen (P2, rejected), Smart Turn v3 end-of-utterance feasibility (P3, no-go), Marian-band review packet (P4), first-visible ACK (P6) |
+| [`series3_20260912/`](series3_20260912/STATUS.md) | 2026-09-12 | Series 3: stage attribution (L-A), tail screen with three rejected arms (L-B), first-token report (L-C), hymn second control, endurance on the promoted runtime, installed smoke and runtime audit |
+| [`followup_20260911/`](followup_20260911/STATUS.md) | 2026-09-11 | Torch 2.13 runtime promotion with the `.stark-python` rollback pointer, tail screen (both arms rejected) |
+| [`overnight_20260911/`](overnight_20260911/STATUS.md) | 2026-09-11 | Stage attribution, opt-in E2B draft (rejected), diarization interpreter, B615 pinning, Torch 2.13 candidate, v2026.14.0.0 publication |
+| [`mac_followup_20260910/`](mac_followup_20260910/README.md) | 2026-09-10 | EN↔ES follow-up: normalized Standard / Spanish Parakeet / Lite cadence and deadline screens, CPU STT comparison, public FLEURS data, hymn diagnostics and source repairs, capture-loss accounting, live HF pinning, source validation and delivery packets (`final-c13f51f/`, `final-760e948/`) |
+| [`attended_mic_20260910/`](attended_mic_20260910/README.md) | 2026-09-10 | Attended quiet-room EN/ES microphone sessions (readiness, pause/resume, restart) |
+| [`tts_routing_20260910/`](tts_routing_20260910/README.md) | 2026-09-10 | Synthetic speaker-to-microphone caption checks, Spanish capture-loss failure, device identity probe, per-language TTS routing |
+| [`overnight_endurance_20260910/`](overnight_endurance_20260910/README.md) | 2026-09-10 | Standard and CPU Lite service hours on the installed wheel (observational) |
+| [`overnight_screen_20260910/`](overnight_screen_20260910/README.md) | 2026-09-10 | 96-run English screen, 0/28 arms selected |
+| [`overnight_closeout_20260910/`](overnight_closeout_20260910/README.md) | 2026-09-10 | PR #192 merge, issue closures, bootstrap ZIP evidence |
+| [`overnight_final_validation_20260910/`](overnight_final_validation_20260910/README.md) | 2026-09-10 | Final integration validation bound to `84832fb` |
+| [`bootstrap_review_20260910/`](bootstrap_review_20260910/README.md) | 2026-09-10 | Bootstrap review corrections |
+| [`security_feasibility_20260910/`](security_feasibility_20260910/README.md), [`overnight_security/`](overnight_security/README.md) | 2026-09-10 | Security feasibility and audit runs |
+| [`mac_v2026_14_report/`](mac_v2026_14_report/README.md), [`mac_v2026_14_quality/`](mac_v2026_14_quality/comparison.md), [`mac_v2026_14_screening/`](mac_v2026_14_screening/README.md), [`mac_v2026_14_routing/`](mac_v2026_14_routing/README.md), [`mac_v2026_14_hindi/`](mac_v2026_14_hindi/README.md) | 2026-09-09/10 | v2026.14 frozen baseline and STT report, translation comparison, 48-run latency screen, routing probes, Hindi probe |
+| [`overnight_hindi/`](overnight_hindi/README.md) | 2026-09-10 | Offline church-audio Hindi baseline (completed R&D, no live path) |
+
+Contracts and plans used by the harnesses: [`audio_sources.md`](audio_sources.md),
+[`overnight_analysis_contract.md`](overnight_analysis_contract.md),
+[`stt_primary_benchmark_contract.md`](stt_primary_benchmark_contract.md),
+[`overnight_experiment_plan.md`](overnight_experiment_plan.md),
+[`overnight_operator_rehearsal.md`](overnight_operator_rehearsal.md),
+[`mac_v2026_14_rehearsal.md`](mac_v2026_14_rehearsal.md),
+[`mac_v2026_14_installation.md`](mac_v2026_14_installation.md),
+[`mac_v2026_14_security.md`](mac_v2026_14_security.md),
+[`overnight_final_validation_20260910.md`](overnight_final_validation_20260910.md).
+Machine-readable receipts at this level (`*_20260910.json`, `mac_v2026_14_*.json`) are named by
+the documents above; the Lite smokes are `lite_cpu_smoke_20260910.json`,
+`lite_cpu_quality_preparation_20260910.json`, `lite_cpu_quality_smoke_20260910.json` and
+`lite_installer_security_20260910.json`.
+
+## Schema 2 field reference (added 2026-09-12)
+
+Producer fields (`tools/pipeline_timing.py`, `ChunkTiming.metrics()`, written to the diagnostics
+rows and `timing_stages_ms`):
+
+| Field | Meaning |
+|---|---|
+| `speech_end_to_final_ms` | Estimated speech end (end of the last VAD-positive frame) → final payload ready on the server; `null` for non-real-time replay |
+| `vad_wait_ms` | Speech end → the endpoint decision (silence countdown or cut) |
+| `stt_queue_wait_ms`, `translation_queue_wait_ms` | Time the final waited for the STT worker / the translation lock |
+| `finalization_overhead_ms`, `broadcast_ms` | Bookkeeping after translation; serialization and send |
+| `endpoint_reason` | Why the utterance ended: silence, smart cut, hard cut, EOF, pause or stop (kept distinct; replay tails on appended silence are labelled separately by the analysis, e.g. `silence_replay_tail`) |
+| `timing_source` | Live capture clock vs replay clock |
+| `final_translation_route`, `final_stt_route` | Which engine produced the final (Gemma or Marian) and whether the final STT was a full call or reused a partial (experiment only) |
+
+First token (derived, series 3): `first_token_ms = timing_stages_ms.translation_started +
+ttft_ms_a − timing_stages_ms.speech_end`, the moment the first translated token could reach the
+wire. It is an engineering measure on machine-timed replays; the browser counterpart is the
+`first_stream` acknowledgement below.
+
+Display fields (`RenderTracker.acknowledge()`, written to `metrics/display_metrics_<session>.jsonl`;
+one record per acknowledged message per client):
+
+| Field | Meaning |
+|---|---|
+| `stage` | `partial`, `complete`, or `first_stream` (the first streamed batch of a final) |
+| `receive_to_render_ms` | Browser receipt → render opportunity (two animation frames after a DOM mutation) |
+| `send_to_ack_ms` | Server send → acknowledgement received |
+| `speech_end_to_ack_upper_bound_ms` | Estimated speech end → acknowledgement, including the return network hop; recorded only when the tab was visible |
+| `speech_start_to_preview_ack_upper_bound_ms`, `captured_end_to_preview_ack_upper_bound_ms`, `speech_end_to_preview_ack_upper_bound_ms` | The same upper bound for previews, measured from speech start, from the captured end of the preview's audio, and from speech end |
+
+The `first_stream` stage is reported as `first_visible_ms` by `tools/overnight_bench.py` and as
+the `first_visible` block by `tools/tail_screen_report.py` and `tools/mac_evaluation.py`; it is
+one acknowledgement per client per chunk, reported and not gated, and it does not exist for
+headless replays. Legacy `e2e_latency_ms` (submission → processing done) and `true_e2e_ms` (first
+speech observed → processing done) are processing measurements and are never compared with the
+fields above.

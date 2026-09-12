@@ -1,8 +1,8 @@
 # features/ — Diarization, Verse Extraction, Sermon Summary
 
-> Paired with [`AGENTS.md`](./AGENTS.md). Describes v2026.14 source tracked by [PR #192](https://github.com/wrbell/stark-translate/pull/192);
-> the last published release recorded here is v2026.13. Acceptance is stated per
-> feature; "implemented" does not mean "certified for a service".
+> Paired with [`AGENTS.md`](./AGENTS.md). Describes v2026.14 source on `main`. Acceptance is
+> stated per feature; "implemented" does not mean "certified for a service". Evidence:
+> [`docs/mac_implementation_status.md`](../docs/mac_implementation_status.md).
 
 Three post-processing capabilities plus a live diarization path. Two are exposed to the
 operator UI through [`operator_app/features.py`](../operator_app/features.py); live
@@ -16,7 +16,7 @@ touches the MLX GPU pool used by STT/translation.
 | Live verse highlights | `extract_verses.py` (`VerseExtractor`) | `GET /api/features/verses` tails the session CSV every few seconds (regex only, inline) | Workflow exercised in the operator rehearsal; parsing safety has recorded-fragment regressions. Spoken-reference accuracy is not certified; no LLM involved |
 | Post-session summary | `summarize_sermon.py` | `POST /api/features/summary` spawns the script out-of-process against the finished CSV; `GET /api/features/summary/{task_id}` polls | Runs on Gemma 4 E4B OptiQ by default (`settings.translation.mlx_model_gemma4_e4b`); output quality not human-reviewed |
 | Offline diarization | `diarize.py` | Batch CLI over a WAV or a `stark_data/live_sessions/<id>/` directory (pyannote 3.1) | Historical; needs HF token and pyannote agreement |
-| Live diarization (9.6.1 / #133) | `live_diarize.py`, `rolling_buffer.py`, `speaker_labels.py` | `dry_run_ab.py --diarize [--diarize-mode embed\|pyannote] [--diarize-interval-s]`; daemon writes `metrics/diarization_<session>.jsonl`, pipeline attaches `speaker` to finals/CSV/JSONL/WebSocket | **Implemented, gate not run.** Issue acceptance needs a two-speaker dry run with distinct labels and final p95 within +50 ms; no natural two-speaker clip exists yet |
+| Live diarization (9.6.1 / #133) | `live_diarize.py`, `rolling_buffer.py`, `speaker_labels.py` | `dry_run_ab.py --diarize [--diarize-mode embed\|pyannote] [--diarize-interval-s] [--diarize-python <interpreter>]`; daemon writes `metrics/diarization_<session>.jsonl`, pipeline attaches `speaker` to finals/CSV/JSONL/WebSocket | **Implemented; natural two-speaker gate not run.** Issue acceptance needs a two-speaker dry run with distinct labels and final p95 within +50 ms. `tools/synthetic_two_voice_clip.py` builds a silent-to-device Piper fixture for the latency half-gate; no natural two-speaker clip exists yet (`natural-two-speaker`) |
 
 Default is diarization **off**. Design and the p95 budget:
 [`docs/live_diarization.md`](../docs/live_diarization.md).
@@ -100,4 +100,4 @@ do not certify native speaker accuracy or latency.
 ## Open items
 
 - `issue-133-diarize-gate` and `natural-two-speaker` in [`docs/backlog.json`](../docs/backlog.json).
-- Summary/verse UI evidence in the operator runbook is root-owned and refreshed after PR #192 integration.
+- Summary/verse UI evidence lives in the operator runbook and rehearsal records, not here.

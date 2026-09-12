@@ -45,6 +45,7 @@ CANONICAL_DOCS = (
         "docs/backlog.md",
         "docs/current_architecture.md",
         "docs/overnight_status.md",
+        "docs/README.md",
         "docs/mac_implementation_status.md",
     ]
     + [pair[0] for pair in GUIDE_PAIRS]
