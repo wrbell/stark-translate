@@ -41,6 +41,7 @@ assert.strictEqual(sent.length, 1);
 assert.strictEqual(sent[0].receive_to_render_ms, 32);
 assert.strictEqual(sent[0].event_id, 'session:2');
 assert.strictEqual(sent[0].visible, true);
+assert(!('stage' in sent[0])); // existing translation ACK payload stays unchanged
 assert(!('browser_time' in sent[0]));
 run('hidden', true);
 assert.strictEqual(sent.length, 1);
@@ -63,6 +64,35 @@ assert.strictEqual(sent.length, 2);
 socket.readyState = 3;
 run('visible', true);
 assert.strictEqual(sent.length, 2);
+assert.strictEqual(observers.size, 0);
+socket.readyState = 1;
+const stream = ctx.window.StarkCaptionTelemetry.wrap(socket, mutate);
+function sendStream(id) {
+  stream({data: JSON.stringify({type: 'translation_stream', event_id: id, chunk_id: 5,
+    partial_spanish_a: 'Dios', tokens_so_far: 3})});
+  drainFrames();
+}
+sendStream('session:stream:5');
+drainFrames();
+assert.strictEqual(sent.length, 3);
+assert.strictEqual(sent[2].stage, 'first_stream');
+assert.strictEqual(sent[2].event_id, 'session:stream:5');
+assert.strictEqual(sent[2].receive_to_render_ms, 32);
+sendStream('session:counter');
+sendStream(undefined);
+sendStream(42);
+assert.strictEqual(sent.length, 3);
+ctx.document.visibilityState = 'hidden';
+sendStream('session:stream:6');
+assert.strictEqual(sent.length, 3);
+ctx.document.visibilityState = 'visible';
+stale({data: JSON.stringify({type: 'translation_stream', event_id: 'session:stream:7'})});
+mutate(); // ignored stream cannot borrow unrelated changes
+drainFrames();
+stream({data: JSON.stringify({type: 'translation_stream', event_id: 'session:stream:8'})});
+ctx.document.visibilityState = 'hidden';
+drainFrames();
+assert.strictEqual(sent.length, 3);
 assert.strictEqual(observers.size, 0);
 for (const name of ['audience_display','ab_display','mobile_display','church_display','obs_overlay']) {
   const html = fs.readFileSync('displays/' + name + '.html', 'utf8');
