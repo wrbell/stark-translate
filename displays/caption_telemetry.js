@@ -9,7 +9,9 @@
       var received = performance.now();
       var message;
       try { message = JSON.parse(event.data); } catch (_) { return; }
-      var caption = message.type === 'translation' && typeof message.event_id === 'string';
+      var firstStream = message.type === 'translation_stream' &&
+        typeof message.event_id === 'string' && message.event_id.indexOf(':stream:') !== -1;
+      var caption = (message.type === 'translation' && typeof message.event_id === 'string') || firstStream;
       var visible = document.visibilityState === 'visible';
       var observer = caption && visible ? new MutationObserver(function () {}) : null;
       if (observer) observer.observe(document.body, {childList: true, subtree: true, characterData: true});
@@ -27,10 +29,12 @@
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           if (socket.readyState !== 1 || document.visibilityState !== 'visible') return;
-          socket.send(JSON.stringify({
+          var ack = {
             type: 'caption_rendered', event_id: message.event_id,
             visible: true, receive_to_render_ms: performance.now() - received
-          }));
+          };
+          if (firstStream) ack.stage = 'first_stream';
+          socket.send(JSON.stringify(ack));
         });
       });
     };

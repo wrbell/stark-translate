@@ -218,6 +218,17 @@ class TestTranslationStreamMessage:
         decoded = json.loads(encoded)
         assert decoded["type"] == "translation_stream"
 
+    def test_first_stream_event_id_survives_serialization(self):
+        message = self._make_stream(event_id="session:stream:5")
+        decoded = json.loads(json.dumps(message))
+        assert decoded == {
+            "type": "translation_stream",
+            "event_id": "session:stream:5",
+            "chunk_id": 5,
+            "partial_spanish_a": "Porque de tal",
+            "tokens_so_far": 3,
+        }
+
 
 # ---------------------------------------------------------------------------
 # Message type: translation / stage: complete (final)
