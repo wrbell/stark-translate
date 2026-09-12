@@ -19,7 +19,7 @@
 | P4 Marian-vs-Gemma review packet (8–12-word Gemma-routed finals) | DONE | 2026-09-11T23:47Z | 2026-09-11T23:55Z | [P4-marian-band-packet/README.md](P4-marian-band-packet/README.md) | #215 (this PR) | packet 031184b1…: 30 unique finals, 22 differ; chrF p50 89; glossary 14/14 both; human review pending |
 | P6 first-visible ACK PR (Codex) | DONE | 2026-09-11T23:41Z | 2026-09-12T00:01Z | [P6-first-visible/README.md](P6-first-visible/README.md) | #216 (merged `2d01840`) | first_stream ACK once per client per chunk; consumers report first_visible_ms, not gated; earlier PRs' hunks verified on main after the merge |
 | P2-R registry rows (P1 engineering result, P2 outcome) | DONE | 2026-09-12T02:12Z | 2026-09-12T04:12Z | [latency_next_experiments.md](../../latency_next_experiments.md) | #215 (this PR) | P1 engineering-change row (wired limit rejected), P2 rejected-arm row, summary paragraph updated |
-| C1 closeout docs | PENDING | | | | | |
+| C1 closeout docs | DONE | 2026-09-12T04:12Z | 2026-09-12T04:25Z | [backlog.md](../../backlog.md) | #215 (this PR) | backlog (caption-delivery-goal, conservative-marian-routing, visible-browser-timing-run, new eou-endpointing-feasibility), CLAUDE.md release-history row, overnight_status pointer; render/validate/check-links/doc tests pass |
 
 ## Log
 
@@ -34,3 +34,25 @@
 - 02:16Z #217 merged (`815dade`, checks green; earlier PRs' hunks verified). #218 updated onto main (`56a045b`, includes P1 and P6); P2 arm screen started from `../SRTranslate-wt-p2` (18 runs).
 - 03:09Z P2 screen clip A interim (9/18 runs): both reuse arms cut the Gemma-silence first-token and payload-ready medians by ≈ 22 % / 17–22 %, but reused finals carry no STT confidence, so ≈ 15 finals per run leave the sub-second Marian route for Gemma; that extra Gemma work regressed the first-token p95 (+15 % / +24 %) and the cut-final p95 (+12 % / +26 %), and the all-silence median gain is only −6 % / 0 %. Declared tail reading fixed before clip B: both screened metrics at p95. A confidence-preserving variant (`partial_reuse_keep_confidence`, branch `codex/series4-p2-reuse-confidence`, worktree `../SRTranslate-wt-p2b`) is implemented and its 12-run screen (`partial_reuse_confidence_screen_series4_20260912`, ctl vs reuse300c) is declared and chained behind the current screen.
 - 04:12Z P2 screen DONE, both arms REJECTED (text guard on clip B; routing side-effect and clip-A tails). Variant screen cancelled at 04:03Z before its first candidate run. #218 merged (`bc5dd8e`, off by default) with the rejection in its description; registry rows written. Closeout starts.
+- 04:25Z C1 closeout applied; status PR #215 marked ready with auto-merge; final verification run on main `bc5dd8e`.
+
+## Summary
+
+**Everything planned ran; nothing waited on a human.** Three code PRs merged (#216 first-visible ACK, #217 runtime fixes, #218 opt-in partial-reuse flag, off by default) plus this status/evidence PR. Production defaults are unchanged; no microphone or speaker was used; `.stark-python` still points at `venv/bin/python`; `stt_env` is unmodified (freeze SHA `a09be8422c195824…`). All local checks run with the untouched `stt_env` tooling because the promoted `venv` carries no pytest/ruff.
+
+| Lane | Outcome | One line |
+|---|---|---|
+| P1 runtime fixes | DONE, merged `815dade` | Paired identity screen PASS (6/6 pairs byte-identical): keep-warm after the final, first stream token at 1, hash-pinned Parakeet joint decode → Gemma-silence first-token p50 −10.8 % / −7.5 %, final STT p50 −23 % / −13 %. The load-time Metal wired limit was rejected (+3.8 GB peak RSS, no speed effect) and is opt-in. |
+| P2 partial reuse | attribution DONE; arm REJECTED; PR merged off by default | Mechanism confirmed (98.5 % coverage, result always ready before finalization) and medians −18…−24 % on Gemma-routed finals, but the 3 % text guard failed on the denser clip (EN WER up to 6.5 %), reused finals lose the Marian route, and clip-A tails regressed. Confidence-preserving variant implemented (`codex/series4-p2-reuse-confidence`), not screened: the text guard is routing-independent. |
+| P3 end-of-utterance classifier | DONE (no-go) | Smart Turn v3.2 calls internal pauses "complete" almost as often as true ends (46–48 % vs 56–57 %, AUC ≈ 0.55); no arm declared; backlog item deferred. |
+| P4 Marian band packet | DONE | 30 unique 8–12-word Gemma-routed finals with the production Marian CT2 output, blinded (packet `031184b1…`); 22 differ; human review pending; no routing change. |
+| P6 first-visible ACK | DONE, merged `2d01840` | First streamed final tokens per chunk carry `<session>:stream:<chunk>` and are acknowledged once per client as `first_stream`; bench/evaluation/screen tools report `first_visible_ms`, never gated. |
+| P2-R / C1 | DONE | Registry rows (P1 engineering change, P2 rejected arm), backlog, CLAUDE.md, overnight status. |
+
+**For Willem**
+1. Bilingual review: the P4 packet (`P4-marian-band-packet/packet/packet.md`, 30 items) and, if the partial-reuse idea is worth keeping, the listed final-text differences in `P2-arm-screen/quality_guard.json` — that judgement decides whether the confidence-preserving variant gets screened.
+2. Saturday attended session on the promoted environment with the audience display connected: it will produce the first `first_visible_ms` numbers next to the `complete` ACK coverage (rollback if needed: `printf '%s\n' "$PWD/stt_env/bin/python" > .stark-python`).
+3. Latency: after P1 the first translated tokens reach the wire ≈ 1.1 s after speech end on the promoted runtime; the remaining levers are the goal restatement, a smaller/faster final model with review (P5 decision), or fewer output tokens.
+4. #133 natural two-speaker clip and #193 hymn labels still need recordings/labelling.
+
+**Not done / caveats:** no human-quality, visible-display, live-microphone or x86/RTX 2070 evidence; all latency numbers are machine-timed replays of two sermons without p95 claims; the identity screen certifies byte-identical output on those replays, not on live audio.
