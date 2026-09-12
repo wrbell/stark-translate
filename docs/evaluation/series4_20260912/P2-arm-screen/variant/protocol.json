@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "id": "partial_reuse_confidence_screen_series4_20260912",
+  "declared_at": "2026-09-12T03:25Z (before any run; the first partial_reuse screen was still on clip B)",
+  "purpose": "Declared screen of the confidence-preserving variant of the partial_reuse arm. Mechanism measured on clip A of the first screen: reused finals carried stt_confidence=None, so ~15 finals per run left the sub-second Marian route for Gemma; that extra Gemma work regressed the first-token and cut-final p95 tails and shrank the all-silence median gain to \u22126 %/0 %. The variant keeps the partial's STT confidence so should_use_marian_only decides as for a full-STT final. Behaviour-changing arm: 15 % median gate on the Gemma-routed AND the all-silence cohorts, tails on both screened metrics, text guards; opt-in; no default change.",
+  "checkout": "/Users/willem/Code/vibes/SRTranslate-wt-p2b (codex/series4-p2-reuse-confidence = codex/series4-p2-reuse @ 56a045b + partial_reuse_keep_confidence; commit recorded at launch)",
+  "interpreter": "venv/bin/python",
+  "profile": "standard",
+  "fixed_argv": "--profile standard --no-tts --stt-backend parakeet-mlx --model-family gemma4 --gemma4-size e4b --vad-backend torch --no-mts --gain 1 --replay-speed 1",
+  "baseline_env": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "STARK_EXPERIMENT_TRACE": "true",
+    "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"
+  },
+  "arms": {
+    "ctl": {
+      "kind": "control",
+      "env": {}
+    },
+    "reuse300c": {
+      "kind": "candidate",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_REUSE_MS": "300",
+        "STARK_EXPERIMENT_PARTIAL_REUSE_KEEP_CONFIDENCE": "true"
+      },
+      "memory_rule": "relative"
+    }
+  },
+  "clips": {
+    "A": {
+      "path": ".cache/followup-20260911/X/clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17",
+      "offset_s": 1290,
+      "duration_s": 360.0
+    },
+    "B": {
+      "path": ".cache/followup-20260911/X/clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c",
+      "duration_s": 360.0
+    }
+  },
+  "design": "per clip: ctl,reuse300c,reuse300c,ctl,ctl,reuse300c (3 repeats each, alternating); 12 runs; one inference process at a time; 300 ms chosen because it reuses ~90 % of silence finals (100 ms: ~62 %) and stayed within the 3 % text guards on clip A of the first screen",
+  "gates": {
+    "G_median": "Gemma-routed silence-final first-token p50 AND speech_end_to_final_ms p50 improve >= 15 % vs control on BOTH clips, AND all-silence speech_end_to_final_ms p50 improves >= 15 % on both clips (the route mix must not be the source of the gain)",
+    "G_tail": "no p95 regression beyond max(5 %, 100 ms) on first-token (Gemma-silence, all-silence) and speech_end_to_final_ms (Gemma-silence, all-silence, all finals); the tool G2 cuts p95 rule is reported",
+    "G_preview": "preview count within 2 pp of control per clip",
+    "G_text": "pooled English WER of candidate finals vs control finals <= 3 % and concatenated Spanish WER <= 3 % per clip; bad_split count not above control; every differing final listed",
+    "G_memory": "Metal peak within max(5 %, 1 GiB) of control (relative rule)",
+    "reported_not_gated": "final_stt_reused_partial / final_stt_full counters, reuse share of silence finals, final STT p50, cut finals unchanged"
+  },
+  "outcome_rule": "PASS (both arms judged separately) = qualified for an attended confirmation with visible ACKs and a human review of the listed text differences -> PR #218 auto-merge enabled (flag stays off by default); REJECTED otherwise -> PR left open with the numbers",
+  "amendments": []
+}
