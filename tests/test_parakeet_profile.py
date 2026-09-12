@@ -217,7 +217,7 @@ def test_import_has_no_model_or_audio_loads():
 
 
 @pytest.mark.parametrize("baseline", [True, False])
-def test_profile_worker_selects_stock_decode_before_loading(monkeypatch, tmp_path, baseline):
+def test_profile_worker_always_selects_stock_decode_before_loading(monkeypatch, tmp_path, baseline):
     from unittest.mock import Mock
 
     from engines import parakeet_mlx_engine
@@ -247,11 +247,7 @@ def test_profile_worker_selects_stock_decode_before_loading(monkeypatch, tmp_pat
     load = Mock(side_effect=RuntimeError("unit test stops before model load"))
     monkeypatch.setattr(benchmark_identity, "load_primary_model", load)
     assert not p.profile_worker(args)
-    if baseline:
-        stock_factory.assert_called_once_with(model_id="/fake/parakeet", joint_scalar_eval=False)
-        default_factory.assert_not_called()
-        assert load.call_args.args[0] is stock_factory.return_value
-    else:
-        stock_factory.assert_not_called()
-        default_factory.assert_called_once()
-        assert load.call_args.args[0] is default_factory.return_value
+    # Both arms parse the stock greedy source, so the flag never changes the engine.
+    stock_factory.assert_called_once_with(model_id="/fake/parakeet", joint_scalar_eval=False)
+    default_factory.assert_not_called()
+    assert load.call_args.args[0] is stock_factory.return_value
