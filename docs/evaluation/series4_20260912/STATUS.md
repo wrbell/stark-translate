@@ -56,3 +56,7 @@
 4. #133 natural two-speaker clip and #193 hymn labels still need recordings/labelling.
 
 **Not done / caveats:** no human-quality, visible-display, live-microphone or x86/RTX 2070 evidence; all latency numbers are machine-timed replays of two sermons without p95 claims; the identity screen certifies byte-identical output on those replays, not on live audio.
+
+## Corrections (dated appends)
+
+- 2026-09-12 (post-closeout): the confidence-preserving variant `partial_reuse_keep_confidence` named in the P2 rows above was merged as an opt-in flag in #219 (`c82447c`), still unscreened; defaults unchanged. The raw run outputs that `P1-runtime/screen/RUNS.json`, `P1-runtime/screen1/RUNS.json`, `P2-arm-screen/RUNS.json` and the `runs.jsonl` files reference under `/Users/willem/Code/vibes/SRTranslate-wt-{base,p2b,p6}/metrics` were moved to `.cache/series4-20260912/raw-metrics/SRTranslate-wt-<name>/metrics` (local, git-ignored) when those worktrees were removed; the copies in this directory are unchanged.

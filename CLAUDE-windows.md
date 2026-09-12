@@ -11,16 +11,15 @@
 > training detail: [`training/CLAUDE.md`](training/CLAUDE.md) · Lite contract:
 > [`docs/lite_profiles.md`](docs/lite_profiles.md).
 >
-> **Status (2026-09-10):** no WSL job has run since 2026-04-30; Phase 4, the E4B domain SFT
-> recipe, W17 and the CUDA latency proposal are scripted and pending hardware time. Lite
-> profiles are implemented and passed an isolated **Mac CPU** synthetic EN+ES caption/TTS
-> smoke plus a pinned E2B GGUF / native llama.cpp download-and-verify preparation
-> ([`docs/lite_profiles.md`](docs/lite_profiles.md)); nothing has run on a real RTX 2070 or
-> native Windows yet, and no Lite latency or memory gate has passed. Commands below were
-> checked against the scripts' argument parsers at commit `c5fb689`; the install steps in
-> Part A are as last executed in 2026-03/04 and were not re-run tonight. The previous
-> long-form version of this guide is archived at
-> [`docs/archive/training/claude_windows_design_notes.md`](docs/archive/training/claude_windows_design_notes.md).
+> **State:** no WSL job has run since 2026-04-30; Phase 4, the E4B domain SFT recipe, W17 and
+> the CUDA latency proposal are scripted and wait for hardware time (the box is not reachable from
+> the Mac, so CUDA work is delivered as scripts). Lite profiles are implemented with Mac CPU
+> evidence only; nothing has run on an RTX 2070 or native Windows and no Lite latency gate has
+> passed ([`docs/lite_profiles.md`](docs/lite_profiles.md)). Flags below were re-read from the
+> scripts' argument parsers at `c00e697` (2026-09-12); Part A install steps are as last executed
+> in 2026-03/04. Paths marked (WSL) exist on the training box, not in a Mac checkout. Long-form
+> history: [`docs/archive/training/claude_windows_design_notes.md`](docs/archive/training/claude_windows_design_notes.md).
+> Standing constraints: [`AGENTS.md`](AGENTS.md).
 
 ---
 
@@ -36,7 +35,7 @@ wsl --install -d Ubuntu-24.04
 nvidia-smi                        # A2000 Ada, ~16 GB visible
 wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
-sudo apt-get update && sudo apt-get -y install cuda-toolkit-12-6
+sudo apt-get update && sudo apt-get -y install cuda-toolkit-12-6   # toolkit only matters for building flash-attn; match it to the torch wheel (cu124 → 12-4) when you build it
 nvcc --version
 ```
 
@@ -73,7 +72,7 @@ export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512     # keep nvidia-smi "shar
 export HF_HOME=/mnt/d/Data/stt-data/cache
 export CUDA_VISIBLE_DEVICES=0
 export STARK_DEEPGRAM__API_KEY=...                        # nested STARK_ settings key
-export STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl   # v2 corpus for the SFT recipe
+export STARK_GEMMA4_VERSE=bible_data/aligned/verse_pairs_train_v2.jsonl   # v2 corpus for the SFT recipe (WSL)
 alias stt='source ~/stt_train_env/bin/activate && cd /mnt/e/Code/stark-translate'
 ```
 
@@ -91,8 +90,8 @@ Execute [`docs/wsl_pipeline_refresh.md`](docs/wsl_pipeline_refresh.md); this is 
 | 6 | Phase 8 active learning | `tools/prepare_finetune_data.py` → human review → `tools/merge_corrections.py translation|whisper` → retrain | Real approved corrections, not fixtures (#137) |
 | 7 | CUDA latency proposal | `scripts/cuda/build_llamacpp.sh` → `convert_gemma4_assistant_gguf.sh` → `bench_mtp.sh` / `retest_flash_attn.sh` | Gates in [`docs/cuda_latency_proposal.md`](docs/cuda_latency_proposal.md); nothing executed yet |
 
-Before starting: `nvidia-smi` OK, venv active, sermon WAVs under `stark_data/raw/`, W16
-located at `adapters/whisper_turbo_ct2/active` (CT2) or `adapters/whisper_turbo/active` (LoRA).
+Before starting: `nvidia-smi` OK, venv active, sermon WAVs under `stark_data/raw/` (WSL), W16
+located at `adapters/whisper_turbo_ct2/active` (CT2, WSL; the Mac checkout's `adapters/` holds only Marian CT2).
 `run_w17_curriculum.sh` now uses `out_proj`. Its mandatory CPU preflight validates
 the actual model configuration, source adapter tensors and intended corpus before
 training. Mac source/fixture checks passed; run the preflight on the real WSL
@@ -165,8 +164,8 @@ python tools/manage_adapters.py activate --model <name> --version <version> --ba
 
 `activate` runs the health check itself; its built-in base-model map only knows the
 TranslateGemma names (`gemma_4b`, `gemma_12b`), so pass `--base-model` for Gemma 4 adapters.
-Versions default to the adapter directory name (`--version` overrides); the manifest
-`adapters/manifest.json` records `versions`, `active`, `previous` and the safetensors SHA-256.
+Versions default to the adapter directory name (`--version` overrides); `register` writes
+`adapters/manifest.json` with `versions`, `active`, `previous` and the safetensors SHA-256.
 Remote endpoints in `tools/deploy_adapters.py` still need SSH keys
 ([`docs/deploy.md`](docs/deploy.md)).
 
@@ -175,8 +174,9 @@ Remote endpoints in `tools/deploy_adapters.py` still need SSH keys
 - **Driver:** install only the CUDA toolkit inside WSL; the Windows driver provides the GPU.
 - **Filesystem:** `/mnt/c/` is slow; keep datasets, checkpoints and caches on D:/WSL storage.
 - **Shared memory spill:** watch `nvidia-smi`; `PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512`.
-- **Memory caps:** `align_deepgram_chunks.py` and `recover_shards.py` set a 12 GB `RLIMIT_AS`;
-  `mine_hard_examples.py` deliberately does not (PyTorch virtual reservations exceed 40 GB).
+- **Memory caps:** `align_deepgram_chunks.py` hard-codes a 12 GB `RLIMIT_AS`; `recover_shards.py`
+  takes `--mem-cap-gb` (default 12); `mine_hard_examples.py` deliberately sets none (PyTorch
+  virtual reservations exceed 40 GB).
 - **FlashAttention-2:** optional for training; the llama.cpp `-fa` retest is a separate CUDA item.
 
 ---
@@ -185,9 +185,10 @@ Remote endpoints in `tools/deploy_adapters.py` still need SSH keys
 
 Lite is the same pipeline, operator UI, displays and Review format with bounded product
 profiles; the source of truth is [`docs/lite_profiles.md`](docs/lite_profiles.md) (implementation and
-acceptance evidence). Packaging plans:
-[`docs/packaging/windows.md`](docs/packaging/windows.md) (MSI, planned/unsigned),
-[`packaging/windows/README.md`](packaging/windows/README.md), [`docs/packaging/models.md`](docs/packaging/models.md).
+acceptance evidence). Packaging: [`docs/packaging/windows.md`](docs/packaging/windows.md) and
+[`packaging/windows/README.md`](packaging/windows/README.md) (the unsigned MSI ships with the
+v2026.14.0.0 GitHub Release; native Windows installation and first launch are unverified),
+[`docs/packaging/models.md`](docs/packaging/models.md).
 
 ## B1. Profiles (`stark_translate/profiles.py`)
 
@@ -234,20 +235,16 @@ $env:STARK_MODELS_DIR = "D:\lite-models"
 - Lite never inherits the standard path's W16 CT2 adapter preference; it always uses the
   pinned artifact in `models.lock.json`.
 
-## B3. Validation state (what is and is not proven)
+## B3. Validation state
 
-| Check | State |
-|-------|-------|
-| Isolated `lite-cpu,tts` install from an outside checkout; import, `pip check`, offline setup reuse | Passed on a Mac (2026-09-10), recorded in `docs/lite_profiles.md` with hashes |
-| CPU replay EN and ES (synthetic ~3 s inputs, Whisper small int8 + Marian, TTS WAV) | Passed on the Mac; **synthetic** — not a quality or latency gate |
-| `lite-cpu-quality` E2B GGUF + native llama.cpp archive download, integrity, `llama-server --version` | Passed on the Mac; no inference started |
-| Later installed CPU E2B synthetic EN→ES inference (`a1d7cdf`) | Completed one silent smoke with owned-server cleanup; [separate receipt](docs/lite_profiles.md#installed-cpu-quality-smoke-observed-on-2026-09-10), no quality, p95 or total-memory certification |
-| RTX 2070 sustained speech, VRAM/OOM, thermal, Windows process cleanup | **Not run** — needs the hardware |
-| Native Windows install path, MSI | **Not run**; MSI is a scaffold plan |
-| Physical microphone, second audio output, human bilingual approval | Separate open gates (#131, #132 and `bilingual-blinded-review`); laptop runbook rehearsal #134 is already closed |
-
-Do not reuse A2000 (Ada) latency figures for the 2070 (Turing, no BF16). Backlog:
-`lite-cpu-inference`, `rtx2070-native-validation`.
+Passed on a Mac (2026-09-10): the isolated `lite-cpu,tts` install, offline setup reuse, synthetic
+EN/ES CPU replays with TTS WAVs, the `lite-cpu-quality` E2B GGUF and native llama.cpp download and
+verification, and one installed CPU E2B synthetic smoke with owned-server cleanup. **Not run:**
+anything on an RTX 2070 or native Windows (sustained speech, VRAM/OOM, thermal, process cleanup,
+MSI first launch). Receipts, hashes and limits: [`docs/lite_profiles.md`](docs/lite_profiles.md);
+backlog `lite-cpu-inference`, `rtx2070-native-validation`, `windows-msi-bootstrap`. Do not reuse
+A2000 (Ada) figures for the 2070 (Turing, no BF16); physical microphone, second audio output and
+bilingual approval are separate gates (#131, `physical-second-output`, `bilingual-blinded-review`).
 
 ---
 
@@ -263,7 +260,7 @@ Do not reuse A2000 (Ada) latency figures for the 2070 (Turing, no BF16). Backlog
 | Deepgram "No API key" | `STARK_DEEPGRAM__API_KEY` (double underscore) or `--api-key` |
 | Domain SFT preflight rejects the corpus | The script defaults to `bible_data/aligned/verse_pairs_train_v2.jsonl` and rejects v1/missing configured inputs. Set explicit paths to the intended prepared corpora; do not bypass the guard |
 | W17 PEFT "target modules not found" | The recipe now uses `out_proj` and preflight rejects `o_proj`. Inspect the selected model config and source adapter rank/tensors with the real WSL preflight before training |
-| `export_ct2.py` sanity gate fails | Try `--quantization int8_bfloat16` or `float16` to isolate; canary clips must exist under `stark_data/whisper_dataset_deepgram/eval/` |
+| `export_ct2.py` sanity gate fails | Try `--quantization int8_bfloat16` or `float16` to isolate; canary clips must exist under `stark_data/whisper_dataset_deepgram/eval/` (WSL) |
 | Adapter won't load on Mac | Both `adapter_config.json` and `adapter_model.safetensors` present; Whisper LoRA is CPU-CT2 only on Mac |
 | Lite `doctor` fails admission | Check cores/RAM/VRAM floors in B1; pick the matching profile explicitly, it will not auto-downgrade |
 | Lite setup: "corrupt native installation" | Move the invalid native directory aside and rerun setup; it fails closed rather than replacing evidence |

@@ -1,8 +1,12 @@
 # Hymn-domain data (`bible_data/hymns/`)
 
-Copyright-safe EN↔ES hymn stanza pairs and glossary candidates for TranslateGemma / Gemma 4 SFT.
-This slice is a **small spice (~5%)** of a translation mix — not a third pillar beside verse + sermon.
-**Do not** mix hymn *singing* audio into Whisper / W16 sermon LoRA datasets.
+Copyright-safe EN↔ES hymn stanza pairs and glossary candidates for Gemma 4 translation SFT
+(prepared in the TranslateGemma era; that program is historical, the current one is
+[`docs/gemma4_tuning/overview.md`](../../docs/gemma4_tuning/overview.md)). This slice is a
+**small spice (~5%)** of a translation mix — not a third pillar beside verse + sermon. No
+training run has used it yet. **Do not** mix hymn *singing* audio into Whisper / W16 sermon LoRA
+datasets. Narrative and provenance: [`docs/hymn_data.md`](../../docs/hymn_data.md); the live-pipeline
+hymn items are `hymn-translation-boundary` and `hymn-capture-suppression` in `docs/backlog.json`.
 
 ## License and copyright
 
@@ -45,10 +49,12 @@ Seeds consumed (checked in; required for CI):
 | `hymn_pairs_pd_holdout.jsonl` | Holdout (disjoint) | **HYMN_HOLD** |
 | `hymn_candidates_synthetic.jsonl` | EN with no PD ES | **HYMN_CAND** |
 | `glossary_hymn_candidates.json` | Proposed glossary terms | **G_HYMN** |
-| `hymn_pairs_deepl.jsonl` | Optional DeepL (flag only) | — |
+| `hymn_pairs_deepl.jsonl` | Optional DeepL synthetic ES; only exists after the `deepl` subcommand runs | — |
 
-## Suggested SFT mix (not an executed run)
+## Suggested SFT mix (historical proposal, not an executed run)
 
-`0.80 * (current S6 sources) + 0.15 * glossary + 0.05 * hymn_pairs_pd`
+`0.80 * (S6 sources) + 0.15 * glossary + 0.05 * hymn_pairs_pd` — "S6" is the superseded
+TranslateGemma sweep winner; a Gemma 4 run would substitute the verse + sermon components of
+`training/run_gemma4_e4b_domain_sft.sh`.
 
 Warn if train hymn pairs exceed 800. Prefer quality `same_original` pairs over thematic fuzzy matches.

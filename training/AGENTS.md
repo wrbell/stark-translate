@@ -1,11 +1,9 @@
 # training/AGENTS.md — Fine-Tuning & Data (Agent Guide)
 
 > Paired with [`CLAUDE.md`](./CLAUDE.md) (programs and their state, data pipeline with
-> verified flags, Whisper LoRA / W17, Gemma 4 tuning, historical TranslateGemma sweep,
-> export and transfer). All training runs on **WSL/A2000**; exported artifacts move to the
-> inference machines. No WSL job has run since 2026-04-30; every WSL item is pending
-> hardware time. Native Windows / RTX 2070 **inference** is the separate Lite runtime
-> ([`docs/lite_profiles.md`](../docs/lite_profiles.md)), not a training topic.
+> verified flags, Whisper LoRA / W17, Gemma 4 tuning, hymn corpus, export and transfer). All
+> training runs on **WSL/A2000**; exported artifacts move to the inference machines. Repo-wide
+> constraints: [`../AGENTS.md`](../AGENTS.md).
 
 ## Agent constraints
 
@@ -37,7 +35,8 @@
 - **Ship rule:** stock Gemma 4 E4B stays the default until a Mac A/B note (#135) says
   otherwise; v2-cpo is at parity and fails the Jacobo canary (#136).
 - **Quoting flags:** every CLI flag in `CLAUDE.md` was read from the script's `argparse`
-  block at `c5fb689`; re-check with `--help` after pulling.
+  block at `c00e697`; re-check with `--help` after pulling. Paths marked (WSL) do not exist in
+  a Mac checkout; a missing WSL artifact is a failed preflight, never a completed gate.
 - Do not paste WER/COMET/latency numbers into guides; link the evidence document that
   defines the measurement.
 
@@ -48,19 +47,14 @@ CT2 → 4. optional Parakeet EN bench on CUDA → 5. Mac transfer + Phase 7 eval
 6. active learning cycle → 7. CUDA latency proposal.
 Runbook: [`docs/wsl_pipeline_refresh.md`](../docs/wsl_pipeline_refresh.md).
 
-## Artifacts and where their numbers live
+## Artifacts
 
-| Artifact | State | Evidence |
-|----------|-------|----------|
-| W16 Whisper LoRA → CT2 | Deployed CUDA STT (`adapters/whisper_turbo_ct2/active`); Mac uses Parakeet/mlx-whisper without LoRA | [`docs/archive/v2026.7/STT_BENCHMARK.md`](../docs/archive/v2026.7/STT_BENCHMARK.md) |
-| W17 | Scripted (`run_w17_curriculum.sh`), untrained | — |
-| Gemma 4 spike / v1 / v1.1 / v2-cpo | Trained 2026-04-29/30; parity with stock E4B, Jacobo failing | [`docs/gemma4_tuning/v1_results.md`](../docs/gemma4_tuning/v1_results.md) |
-| E4B domain SFT (`run_gemma4_e4b_domain_sft.sh`) | Scripted, not run; v2 default, CPU preflight implemented | — |
-| TranslateGemma S1–S9 (S6 winner) | Historical, superseded | [`docs/archive/training/gemma_tuning_test_matrix.md`](../docs/archive/training/gemma_tuning_test_matrix.md) |
-| Hindi / Chinese corpora | Training corpora pending user decision (#138); offline church-audio R&D baseline completed separately, no live path or further EN↔ES-program work | [`docs/evaluation/overnight_hindi/README.md`](../docs/evaluation/overnight_hindi/README.md) |
+States and evidence links for W16/W17, the Gemma 4 runs, the E4B domain SFT recipe, the
+TranslateGemma sweep and the Hindi/Chinese decision are in [`CLAUDE.md`](./CLAUDE.md#programs-and-their-state).
 
 ## Backlog
 
-`wsl-phase4`, `wsl-e4b-domain-sft`, `wsl-w17-export`, `cuda-latency-proposal`,
-`issue-135-mac-ab`, `issue-136-jacobo-cpo`, `issue-138-hindi-zero-shot` in
+`wsl-phase4`, `wsl-e4b-domain-sft`, `wsl-w17-export`, `wsl-training-recipe-checks`,
+`cuda-latency-proposal`, `issue-135-mac-ab`, `issue-136-jacobo-cpo`, `issue-138-hindi-zero-shot`,
+`hymn-translation-boundary`, `hymn-capture-suppression` in
 [`docs/backlog.json`](../docs/backlog.json).

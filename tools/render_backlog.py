@@ -74,6 +74,7 @@ CANONICAL_DOC_PATHS = [
     "docs/backlog.md",
     "docs/current_architecture.md",
     "docs/overnight_status.md",
+    "docs/README.md",
     "docs/mac_implementation_status.md",
     "engines/AGENTS.md",
     "engines/CLAUDE.md",

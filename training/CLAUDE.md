@@ -5,28 +5,29 @@
 > Environment: [`CLAUDE-windows.md`](../CLAUDE-windows.md) · ordered execution:
 > [`docs/wsl_pipeline_refresh.md`](../docs/wsl_pipeline_refresh.md).
 >
-> **Status (2026-09-10):** no WSL job has run since the Gemma 4 v2-cpo iteration
-> (2026-04-30). Phase 4 full preprocess, the E4B domain SFT recipe, W17 and the CUDA latency
-> proposal are scripted and **pending hardware time** (`docs/backlog.json`: `wsl-phase4`,
-> `wsl-e4b-domain-sft`, `wsl-w17-export`, `cuda-latency-proposal`). Flags and defaults below
-> were read from the scripts' `argparse` definitions at commit `c5fb689`; sections marked
-> **historical** describe completed runs whose numbers live only in the linked evidence.
-> Native Windows / RTX 2070 **inference** is a separate Lite runtime, not a training concern
-> ([`docs/lite_profiles.md`](../docs/lite_profiles.md)).
+> **State:** no WSL job has run since the Gemma 4 v2-cpo iteration (2026-04-30). Phase 4 full
+> preprocess, the E4B domain SFT recipe, W17 and the CUDA latency proposal are scripted and wait
+> for hardware time (`docs/backlog.json`: `wsl-phase4`, `wsl-e4b-domain-sft`, `wsl-w17-export`,
+> `wsl-training-recipe-checks`, `cuda-latency-proposal`). Flags and defaults below were re-read
+> from the scripts' `argparse` definitions at `c00e697` (2026-09-12); sections marked
+> **historical** describe completed runs whose numbers live only in the linked evidence. Paths
+> marked (WSL) exist on the training box, not in a Mac checkout. Native Windows / RTX 2070
+> **inference** is the separate Lite runtime ([`docs/lite_profiles.md`](../docs/lite_profiles.md)).
 
 ## Programs and their state
 
 | Program | Scripts | State | Evidence |
 |---------|---------|-------|----------|
-| **Whisper LoRA (STT)** | `train_whisper.py` → `export_ct2.py` | **W16** deployed as the CUDA STT (`adapters/whisper_turbo_ct2/active`, auto-preferred by `FasterWhisperEngine` and by the standard CPU/CUDA STT default). **W17** (DoRA + hard-mix) scripted in `run_w17_curriculum.sh`, untrained. Mac EN default is Parakeet MLX, which loads no LoRA; Mac ES is mlx-whisper, also no LoRA — W16 comparisons on the Mac use the CPU faster-whisper path (#135). | [`docs/archive/v2026.7/STT_BENCHMARK.md`](../docs/archive/v2026.7/STT_BENCHMARK.md) |
+| **Whisper LoRA (STT)** | `train_whisper.py` → `export_ct2.py` | **W16** deployed as the CUDA STT (`adapters/whisper_turbo_ct2/active` (WSL), auto-preferred by `FasterWhisperEngine` and by the standard CPU/CUDA STT default). **W17** (DoRA + hard-mix) scripted in `run_w17_curriculum.sh`, untrained. Mac EN default is Parakeet MLX, which loads no LoRA; Mac ES is mlx-whisper, also no LoRA — W16 comparisons on the Mac use the CPU faster-whisper path (#135). | [`docs/archive/v2026.7/STT_BENCHMARK.md`](../docs/archive/v2026.7/STT_BENCHMARK.md) |
 | **Gemma 4 E2B/E4B QLoRA + CPO (translation)** | `train_gemma4.py`, `train_gemma4_cpo.py`, `export_gguf.py`, `tools/build_preference_triples.py`, `qe_filter.py`, `glossary_annotate.py` | Spike, v1, v1.1 and v2-cpo **ran** (2026-04-29/30); v2-cpo reached statistical parity with stock E4B and still fails the Jacobo canary (#136). Stock E4B remains the default on Mac and CUDA. The production recipe `run_gemma4_e4b_domain_sft.sh` has **not** been run. The three scripts still carry `UNTESTED` file headers written before the first run — read them as "review before each run", not as "never executed". | [`docs/gemma4_tuning/v1_results.md`](../docs/gemma4_tuning/v1_results.md), [`v3_directions.md`](../docs/gemma4_tuning/v3_directions.md) |
 | **TranslateGemma QLoRA** | `train_gemma.py`, `run_ablation.sh`, `run_b_series.sh`, `run_hybrid_*.sh`, `run_scale*.sh` | **Historical** S1–S9 sweep; superseded (TranslateGemma is already a translator; its Platense corpus half was misaligned). | [`docs/archive/training/gemma_tuning_test_matrix.md`](../docs/archive/training/gemma_tuning_test_matrix.md) |
 | **Marian full fine-tune** | `train_marian.py` | Fallback with a lower ceiling; unused in production. Marian is deployed **stock** as the CT2 int8 partial translator. | — |
 | **Piper TTS** | `prepare_piper_dataset.py`, `train_piper.py`, `export_piper_onnx.py`, `evaluate_piper.py` | Scripted; production uses stock Piper voices. | — |
+| **Hymn corpus (translation data)** | `prepare_hymn_corpus.py` (`all --seed 42`, `build-index --fetch`, `deepl`) | Public-domain EN↔ES hymn stanza pairs and glossary candidates, a ~5 % spice for a Gemma 4 SFT mix; no run has used them yet. Hymn *audio* never enters Whisper datasets. | [`bible_data/hymns/README.md`](../bible_data/hymns/README.md), [`docs/hymn_data.md`](../docs/hymn_data.md) |
 
 **Corpus rule:** `bible_data/aligned/verse_pairs_train.jsonl` (v1) joined Platense by row order
 and is misaligned from Psalms onward. Train on `bible_data/aligned/verse_pairs_train_v2.jsonl`
-(rebuilt by `tools/rebuild_verse_pairs.py`); postmortem
+(WSL; rebuilt by `tools/rebuild_verse_pairs.py`, not present in a Mac checkout); postmortem
 [`docs/platense_alignment_bug.md`](../docs/platense_alignment_bug.md).
 `run_gemma4_e4b_domain_sft.sh` now defaults `STARK_GEMMA4_VERSE` to the **v2 path**.
 An explicit `STARK_GEMMA4_TRAIN` selects a premixed corpus; otherwise both verse and sermon
@@ -59,8 +60,8 @@ audio, and training noise should match service conditions.
 
 ### Phase 3 — Quality assessment (`assess_quality.py`)
 
-Subcommands `sample`, `review`, `cross-check`, `evaluate` (`--input`, `--n`, `--seed`,
-`--output`, `--model`, `--spot-check`). Establish a baseline on 50–100 stratified segments
+Subcommands `sample`, `smart-sample` (confidence-stratified, `--spot-check`), `review`,
+`cross-check`, `evaluate` (`--input`, `--n`, `--seed`, `--output`, `--model`). Establish a baseline on 50–100 stratified segments
 before training. The original strategy table (WER band → filtering strategy) predates the
 Deepgram oracle and is kept in the archive; today the label source is Deepgram, so the
 decision is about filtering, not re-transcription.
@@ -100,12 +101,13 @@ Two tiers: Tier 1 boost (50 terms, Deepgram `keyterm`), Tier 2 master (229 terms
 normalization, QE, active learning). Build with `python training/build_glossary.py
 --build-tiers` (`--boost-size`, `--master-size`, `--from-hymns`, `--merge-hymn-allowlist`,
 `--augment`). Files: `bible_data/glossary/tier1_boost.json`, `tier2_master.json`.
-`tools/glossary.py` exposes `load_tier()`, `validate_boost()`, `build_and_save_tiers()`.
+`tools/glossary.py` exposes `load_tier()`, `load_boost_keyterms()`, `validate_boost()`,
+`build_tiers()`, `save_tiers()`, `count_tokens()`.
 
 ### Data organization
 
 - Fixed cutoff **2026-03-14**: train on earlier sermons, evaluate on later ones.
-  `tools/sort_sermons.py --output-dir stt-data --catalog stark_data/playlist_catalog.json`
+  `tools/sort_sermons.py --output-dir stt-data --catalog stark_data/playlist_catalog.json` (WSL)
   lays out `stt-data/{gospel,ministry,conference,throwback}/{year}/` plus `manifest.json`.
 - Never train on the fresh-eval sermons (`4Es8SrciqV0`, `vRT5RswIHu8`, `FOVTvZednUQ`,
   `yOzWGOTvTaA`).
@@ -174,11 +176,11 @@ into the trainers: E2B is a MatFormer slice of E4B, so **train each size separat
 freeze Per-Layer Embeddings and the vision/audio towers; apply `enable_thinking=False` to every
 example; QLoRA through Unsloth to fit 16 GB.
 
-| Script | Parser defaults (c5fb689) |
+| Script | Parser defaults (c00e697) |
 |--------|---------------------------|
 | `train_gemma4.py` | `--base unsloth/gemma-4-E4B-it` (`unsloth/gemma-4-E2B-it` for E2B); data via `--train-data` or `--verse-pairs` / `--sermon-pairs` / `--glossary-pairs` (`--max-pairs`); `--lora-r 8`, `--lora-alpha 8`, `--lr 2e-4`, `--epochs 2` (`--max-steps` overrides), `--per-device-batch-size 2`, `--grad-accum 8`, `--max-seq-length 1024`, `--packing` on, `--warmup-steps 5`, `--save-steps`, `--seed` |
 | `train_gemma4_cpo.py` | `--triples` (required, `{prompt, chosen, rejected}` JSONL), `--init-adapter` (continue an SFT LoRA), `--beta 0.1`, `--epochs 1`, `--lora-r 8` (ignored with `--init-adapter`), `--max-prompt-length`, `--max-seq-length` |
-| `export_gguf.py` | `--adapter`, `--base`, `--output`, `--qtype Q4_K_M`, `--outtype`, `--llama-cpp-dir`, `--sanity-test` (`--sanity-n 8` canaries through a temporary `llama-server` on `--sanity-port`, non-empty output + expected substrings), `--skip-merge`, `--skip-quantize`, `--keep-intermediate` |
+| `export_gguf.py` | `--adapter`, `--base`, `--output`, `--qtype Q4_K_M`, `--merged-dir`, `--llama-cpp-dir`, `--sanity-test` (`--sanity-n 8` canaries through a temporary `llama-server` on `--sanity-port`, default 8092; non-empty output + expected substrings), `--skip-merge`, `--skip-quantize`, `--keep-intermediate` |
 | `tools/build_preference_triples.py` | `generate` (llama-server HTTP: `--server-url`, `--model`, `--candidates`, `--temperature`, `--max-tokens`) and `score` (CometKiwi-XL, `--margin`) |
 | `qe_filter.py` | CometKiwi threshold filter for synthetic sermon pairs (`--threshold`, `--rejected-output`, `--scores-output`) |
 
@@ -245,7 +247,7 @@ to 8), few-shot prompt examples proposed in `v3_directions.md`.
 |------|---------|
 | `export_gguf.py` | Gemma: merge LoRA → bf16 HF → GGUF f16 → Q4_K_M via llama.cpp; feeds `LlamaCppEngine` (CUDA) — MLX uses the safetensors adapter directory directly (`--adapter-dir`). |
 | `export_ct2.py` | Whisper: merge LoRA → HF → CTranslate2 (`--quantization int8_float16` default; `int8` for CPU/Lite-style deployments). Built-in sanity gate transcribes **5 canary clips** from `stark_data/whisper_dataset_deepgram/eval/` and aborts when WER exceeds `--sanity-wer-max 0.30`; `--no-sanity` skips it. Output loads in `FasterWhisperEngine` unchanged. |
-| `tools/manage_adapters.py` | `register --adapter DIR --model NAME [--version V] [--eval-file JSON]` (version defaults to the directory name; SHA-256 of `adapter_model.safetensors` recorded), `activate --model --version [--base-model] [--max-latency]` (runs `health_check.py`), `rollback`, `list`, `export --model --target user@host:path` (rsync). Manifest `adapters/manifest.json` holds `versions`, `active`, `previous` per model. |
+| `tools/manage_adapters.py` | `register --adapter DIR --model NAME [--version V] [--eval-file JSON]` (version defaults to the directory name; SHA-256 of `adapter_model.safetensors` recorded), `activate --model --version [--base-model] [--max-latency]` (runs `health_check.py`), `rollback`, `list`, `export --model --target user@host:path` (rsync). `register` writes `adapters/manifest.json` (`versions`, `active`, `previous` per model). |
 | `tools/deploy_adapters.py` | `--cycle N --models ... --endpoints local|mac-dev [--all-adapters] [--dry-run] [--rollback] [--skip-health]` — version → transfer → health check → activate → verify, local/rsync endpoints ([`docs/deploy.md`](../docs/deploy.md) for what is implemented vs designed). |
 
 Transfer path: WSL `fine_tuned_*/` or `adapters/<model>/<version>/` → scp/rsync/USB → Mac
