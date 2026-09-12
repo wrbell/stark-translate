@@ -285,14 +285,16 @@
       "machine": "mac",
       "dependencies": [],
       "sources": [
-        "docs/evaluation/mac_v2026_14_screening/README.md",
+        "docs/evaluation/README.md",
         "docs/evaluation/mac_v2026_14_routing/README.md",
+        "docs/evaluation/mac_v2026_14_screening/README.md",
+        "docs/evaluation/overnight_endurance_20260910/README.md",
         "docs/evaluation/overnight_screen_20260910/README.md",
-        "docs/evaluation/overnight_endurance_20260910/README.md"
+        "docs/evaluation/series4_20260912/P6-first-visible/README.md"
       ],
       "acceptance": "Replay on the unlocked Mac with the audience display connected records schema 2 speech_end_to_final_ms and non-zero visible final ACK coverage for the acceptance configuration.",
-      "notes": "The separate 96-run screen has per-session browser-DOM ACK evidence. Repaired Standard also has one matched document-visible audience connection acknowledging 563/563 finals and 2,813 nonempty translated previews. The native Mac was observed locked; physical screen visibility was not certified. These observations do not satisfy this item’s existing unlocked-Mac criterion. Earlier no-browser screens remain separate cohorts. Lite also has 468/468 final and271 translated-preview ACKs, but first-preview coverage is174/468. Physical visibility remains uncertified; this is not a human-quality result.",
-      "next_action": "Retain the completed matrix, and verify the separate unlocked/attended physical display gate when the Mac is available. Do not rerun rejected arms as ordinary confirmations."
+      "notes": "The separate 96-run screen has per-session browser-DOM ACK evidence. Repaired Standard also has one matched document-visible audience connection acknowledging 563/563 finals and 2,813 nonempty translated previews. The native Mac was observed locked; physical screen visibility was not certified. These observations do not satisfy this item’s existing unlocked-Mac criterion. Earlier no-browser screens remain separate cohorts. Lite also has 468/468 final and271 translated-preview ACKs, but first-preview coverage is174/468. Physical visibility remains uncertified; this is not a human-quality result. 2026-09-12 (series 4 P6, PR #216): the first streamed final tokens per chunk now carry a deterministic event id and are acknowledged once per client as stage first_stream; overnight_bench, mac_evaluation and tail_screen_report report first_visible_ms (p50/p95) separately from complete, never gated. The attended measurement with a connected display has not been run.",
+      "next_action": "Run the unlocked/attended replay with the audience display connected and record both the complete and the first_stream ACK coverage and p50/p95."
     },
     {
       "id": "caption-delivery-goal",
@@ -583,11 +585,12 @@
       ],
       "sources": [
         "docs/evaluation/mac_v2026_14_routing/README.md",
+        "docs/evaluation/series4_20260912/P4-marian-band-packet/README.md",
         "settings.py"
       ],
       "acceptance": "Natural Spanish references plus human review show no quality loss when Marian handles allowlisted phrases; until then `--routing-policy conservative` stays opt-in.",
-      "notes": "24/24 synthetic EN/ES routing probes exited zero and routed as designed; they are functional checks, not quality evidence.",
-      "next_action": "Keep opt-in."
+      "notes": "24/24 synthetic EN/ES routing probes exited zero and routed as designed; they are functional checks, not quality evidence. 2026-09-12 (series 4 P4): a blinded reference-free review packet of 30 live 8–12-word Gemma-routed finals with the production Marian CT2 output on the same English is ready for a bilingual reviewer (packet 031184b1…; 22/30 differ; chrF p50 89; glossary terms rendered by both). No routing change until it is reviewed.",
+      "next_action": "Keep opt-in. Have a bilingual reviewer annotate the series-4 P4 packet (annotations.jsonl) before any routing decision."
     },
     {
       "id": "mac-defaults-frozen",
@@ -992,6 +995,22 @@
       ],
       "notes": "Open hymn-handling follow-up #193 from the completed #134 rehearsal. Attended Pause during singing and Resume before spoken prayer remains a manual option; no such pause was inserted into the repaired full-service replay. Human correction/training approval remains separate. Earlier operator UX blockers were fixed separately. Commit 26f854c retains accepted speech onset without changing the existing 15-frame recovery decision; pending/recovered source dispositions and pause-spanning hold logs are explicit. Regression CI on ffa34c5 passed Python 3.11/3.12 and lint. The c13f51f 350-second file control completed with 18 finals and all 114 required writes; no music hold activated. Exact VAD/RMS streak accounting explains that observation, without acoustic labels or validating recovery from a natural hold. 2026-09-11: second one-control diagnostic on the promoted runtime (dc983c6, venv Torch 2.13) completed with identical segmentation to the c13f51f control (18 finals: 10 silence, 4 smart, 4 hard cuts; 13 Gemma / 5 Marian); the hold heuristic never entered (max no-speech streak 48 of 156 frames). The 400-470 s and 700-780 s search slices were cut losslessly and hashed (docs/evaluation/series3_20260912/P1H-hymn-control/README.md). No labels exist; nothing was tuned.",
       "next_action": "Independently label the prepared natural search regions, including quiet speech and short replies. Only then compare bounded opt-in detector thresholds against unchanged controls; the completed control and fixed-decision arithmetic do not certify a classifier or justify defaults."
+    },
+    {
+      "id": "eou-endpointing-feasibility",
+      "title": "Semantic end-of-utterance classifier for the silence countdown",
+      "status": "deferred",
+      "certification": "not_applicable",
+      "priority": "P3",
+      "machine": "mac",
+      "dependencies": [],
+      "sources": [
+        "docs/evaluation/series4_20260912/P3-eou-feasibility/README.md",
+        "docs/latency_next_experiments.md"
+      ],
+      "acceptance": "An offline study separates true silence-final ends from internal pauses that resumed speech well enough (false-complete rate on ≥ 192 ms internal pauses far below the hit rate on true ends) that a declared arm could shorten the 0.5 s countdown without adding spurious finals.",
+      "notes": "2026-09-12 (series 4 P3): Smart Turn v3.2 int8 ONNX (Pipecat, BSD-2) at its shipped 0.5 threshold on the six traced 360 s control replays: true ends judged complete 56–57 %, internal pauses 46–48 %, rank AUC 0.54–0.57; clip A misses 76 % of true ends. A 300 ms countdown on a complete verdict would save 180 ms on ≈ 25 finals per run at ≈ 5.5 spurious finals per run. No threshold tuned, no pipeline change.",
+      "next_action": "None planned. The 0.5 s countdown stays a policy floor; a different model would need its own offline study before any arm."
     }
   ]
 }

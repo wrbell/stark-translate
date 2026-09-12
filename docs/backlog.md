@@ -82,10 +82,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P1 · **Machine:** mac · **Certification:** pending
 - **Depends on:** none
-- **Sources:** `docs/evaluation/mac_v2026_14_screening/README.md`, `docs/evaluation/mac_v2026_14_routing/README.md`, `docs/evaluation/overnight_screen_20260910/README.md`, `docs/evaluation/overnight_endurance_20260910/README.md`
+- **Sources:** `docs/evaluation/README.md`, `docs/evaluation/mac_v2026_14_routing/README.md`, `docs/evaluation/mac_v2026_14_screening/README.md`, `docs/evaluation/overnight_endurance_20260910/README.md`, `docs/evaluation/overnight_screen_20260910/README.md`, `docs/evaluation/series4_20260912/P6-first-visible/README.md`
 - **Acceptance:** Replay on the unlocked Mac with the audience display connected records schema 2 speech_end_to_final_ms and non-zero visible final ACK coverage for the acceptance configuration.
-- **Notes:** The separate 96-run screen has per-session browser-DOM ACK evidence. Repaired Standard also has one matched document-visible audience connection acknowledging 563/563 finals and 2,813 nonempty translated previews. The native Mac was observed locked; physical screen visibility was not certified. These observations do not satisfy this item’s existing unlocked-Mac criterion. Earlier no-browser screens remain separate cohorts. Lite also has 468/468 final and271 translated-preview ACKs, but first-preview coverage is174/468. Physical visibility remains uncertified; this is not a human-quality result.
-- **Next action:** Retain the completed matrix, and verify the separate unlocked/attended physical display gate when the Mac is available. Do not rerun rejected arms as ordinary confirmations.
+- **Notes:** The separate 96-run screen has per-session browser-DOM ACK evidence. Repaired Standard also has one matched document-visible audience connection acknowledging 563/563 finals and 2,813 nonempty translated previews. The native Mac was observed locked; physical screen visibility was not certified. These observations do not satisfy this item’s existing unlocked-Mac criterion. Earlier no-browser screens remain separate cohorts. Lite also has 468/468 final and271 translated-preview ACKs, but first-preview coverage is174/468. Physical visibility remains uncertified; this is not a human-quality result. 2026-09-12 (series 4 P6, PR #216): the first streamed final tokens per chunk now carry a deterministic event id and are acknowledged once per client as stage first_stream; overnight_bench, mac_evaluation and tail_screen_report report first_visible_ms (p50/p95) separately from complete, never gated. The attended measurement with a connected display has not been run.
+- **Next action:** Run the unlocked/attended replay with the audience display connected and record both the complete and the first_stream ACK coverage and p50/p95.
 
 ## Pending Input Or Hardware
 
@@ -203,10 +203,10 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 
 - **Priority:** P3 · **Machine:** mac · **Certification:** pending
 - **Depends on:** `natural-spanish-refs`
-- **Sources:** `docs/evaluation/mac_v2026_14_routing/README.md`, `settings.py`
+- **Sources:** `docs/evaluation/mac_v2026_14_routing/README.md`, `docs/evaluation/series4_20260912/P4-marian-band-packet/README.md`, `settings.py`
 - **Acceptance:** Natural Spanish references plus human review show no quality loss when Marian handles allowlisted phrases; until then `--routing-policy conservative` stays opt-in.
-- **Notes:** 24/24 synthetic EN/ES routing probes exited zero and routed as designed; they are functional checks, not quality evidence.
-- **Next action:** Keep opt-in.
+- **Notes:** 24/24 synthetic EN/ES routing probes exited zero and routed as designed; they are functional checks, not quality evidence. 2026-09-12 (series 4 P4): a blinded reference-free review packet of 30 live 8–12-word Gemma-routed finals with the production Marian CT2 output on the same English is ready for a bilingual reviewer (packet 031184b1…; 22/30 differ; chrF p50 89; glossary terms rendered by both). No routing change until it is reviewed.
+- **Next action:** Keep opt-in. Have a bilingual reviewer annotate the series-4 P4 packet (annotations.jsonl) before any routing decision.
 
 ## Deferred
 
@@ -218,6 +218,15 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 - **Acceptance:** Deferred by decision on 2026-09-11: no PyPI publication is planned. If publication is later wanted: map the trusted publisher (owner wrbell, repo stark-translate, workflow pypi.yml, environment pypi), set the repository variable PYPI_PUBLISH_ENABLED=true, push a new version tag, and see the PyPI workflow green.
 - **Notes:** Publication is explicitly pending by user choice; source/issue publishing and final main merge are authorized. Local wheel/sdist/Mac ZIP artifacts are already mechanically validated, which does not authorize PyPI/GHCR/release uploads. 2026-09-11: annotated tag v2026.14.0.0 pushed on main 50f81c6 with user authorization. release.yml succeeded (GitHub Release with wheel/sdist/Mac ZIP), release-win.yml succeeded (MSI uploaded), pypi.yml built but the publish job failed with invalid-publisher (no trusted publisher mapped), docker.yml failed on a pre-existing Dockerfile defect (workers.py not copied into the build context) that had failed every main push since 2026-09-10. 2026-09-11: Willem decided not to publish to PyPI. The publish job in pypi.yml is now gated on the repository variable PYPI_PUBLISH_ENABLED (unset, so it is skipped and no longer fails on tags); the build job still validates the release identity, wheel and out-of-checkout smoke on every tag. Published tags do not move.
 - **Next action:** None while deferred. To publish later: map the trusted publisher, set PYPI_PUBLISH_ENABLED=true and push a new tag; the v2026.14.0.0 tag itself is never re-pushed.
+
+### `eou-endpointing-feasibility` — Semantic end-of-utterance classifier for the silence countdown
+
+- **Priority:** P3 · **Machine:** mac · **Certification:** not applicable
+- **Depends on:** none
+- **Sources:** `docs/evaluation/series4_20260912/P3-eou-feasibility/README.md`, `docs/latency_next_experiments.md`
+- **Acceptance:** An offline study separates true silence-final ends from internal pauses that resumed speech well enough (false-complete rate on ≥ 192 ms internal pauses far below the hit rate on true ends) that a declared arm could shorten the 0.5 s countdown without adding spurious finals.
+- **Notes:** 2026-09-12 (series 4 P3): Smart Turn v3.2 int8 ONNX (Pipecat, BSD-2) at its shipped 0.5 threshold on the six traced 360 s control replays: true ends judged complete 56–57 %, internal pauses 46–48 %, rank AUC 0.54–0.57; clip A misses 76 % of true ends. A 300 ms countdown on a complete verdict would save 180 ms on ≈ 25 finals per run at ≈ 5.5 spurious finals per run. No threshold tuned, no pipeline change.
+- **Next action:** None planned. The 0.5 s countdown stays a policy floor; a different model would need its own offline study before any arm.
 
 ### `issue-138-hindi-zero-shot` — Hindi zero-shot baseline on church audio (#138)
 
@@ -481,6 +490,6 @@ See [`current_architecture.md`](./current_architecture.md) and [`mac_implementat
 | In Progress | 5 |
 | Pending Input Or Hardware | 12 |
 | Experimental | 1 |
-| Deferred | 6 |
+| Deferred | 7 |
 | Implemented | 6 |
 | Validated | 15 |
