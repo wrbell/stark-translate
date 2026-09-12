@@ -200,3 +200,29 @@ def test_unload(engine, api):
 def test_rejects_non_mono_or_integer_audio(engine, audio):
     with pytest.raises(ValueError, match="Parakeet requires"):
         engine.transcribe(audio)
+
+
+@pytest.mark.parametrize("warmup_fails", [False, True])
+def test_joint_decode_installed_before_warmup_and_restored(api, monkeypatch, warmup_fails):
+    restore = MagicMock()
+    installer = MagicMock(return_value=restore)
+    monkeypatch.setattr("engines.parakeet_mlx_engine.install_qualified_joint_decode", installer)
+    engine = ParakeetMLXEngine(joint_scalar_eval=True)
+
+    def warmup(*args, **kwargs):
+        installer.assert_called_once_with(api.model)
+        assert engine.joint_scalar_eval_active
+        if warmup_fails:
+            raise ValueError("warmup failed")
+        return [result()]
+
+    api.model.generate.side_effect = warmup
+    if warmup_fails:
+        with pytest.raises(ValueError, match="warmup failed"):
+            engine.load()
+    else:
+        engine.load()
+        engine.unload()
+    restore.assert_called_once()
+    assert not engine.joint_scalar_eval_active
+    assert engine._model is None
