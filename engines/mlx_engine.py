@@ -26,6 +26,7 @@ from engines.base import (
     TranslationEngine,
     TranslationResult,
 )
+from engines.mlx_memory import apply_wired_limit
 from engines.model_paths import UnpinnedModelError, resolve_model_for_loading
 from engines.stt_fallback import require_mlx_fallback_language
 from engines.translation_prompts import (
@@ -219,6 +220,7 @@ class MLXWhisperEngine(STTEngine):
         ``fallback_model_id`` if the primary model errors out.
         """
         mx.set_cache_limit(self._cache_limit_mb * 1024 * 1024)
+        apply_wired_limit(logger)
 
         logger.info("Loading %s (MLX)...", self._model_id)
         t0 = time.time()
@@ -593,6 +595,7 @@ def generate_translation(
     gen_kwargs: dict,
     token_callback: Callable[[str, int], None] | None = None,
     batch_size: int = 3,
+    first_batch_size: int = 3,
 ) -> TranslationResult:
     """Serialize target/draft access; separate STT and translation models overlap."""
     from engines.mlx_generation_lock import generation_guard
@@ -616,6 +619,7 @@ def generate_translation(
             gen_kwargs=gen_kwargs,
             token_callback=token_callback,
             batch_size=batch_size,
+            first_batch_size=first_batch_size,
         )
         result.generation_lock_wait_ms = lock_ms
         if prepared is not None:
@@ -637,6 +641,7 @@ def _generate_translation(
     gen_kwargs: dict,
     token_callback: Callable[[str, int], None] | None = None,
     batch_size: int = 3,
+    first_batch_size: int = 3,
 ) -> TranslationResult:
     """Consume mlx-lm responses once for text, callbacks, and generation telemetry.
 
@@ -647,6 +652,8 @@ def _generate_translation(
 
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
+    if first_batch_size < 1:
+        raise ValueError("first_batch_size must be positive")
     t0 = time.perf_counter()
     accumulated = ""
     first_ms = None
@@ -660,7 +667,8 @@ def _generate_translation(
         accumulated += response.text
         draft_tokens += int(bool(getattr(response, "from_draft", False)))
         tokens = response.generation_tokens
-        if token_callback and tokens - last_sent_tokens >= batch_size:
+        threshold = first_batch_size if last_sent_tokens == 0 else batch_size
+        if token_callback and tokens - last_sent_tokens >= threshold:
             token_callback(clean_translation(accumulated, model_family=model_family), tokens)
             last_sent_tokens = tokens
 
@@ -697,6 +705,7 @@ def translate_loaded_model(
     suffix_tokens=None,
     token_callback=None,
     batch_size=3,
+    first_batch_size: int = 3,
     terminology_prompt="none",
 ):
     """Canonical preparation/generation path for live, engine and worker calls."""
@@ -744,6 +753,7 @@ def translate_loaded_model(
         gen_kwargs=gen_kwargs,
         token_callback=token_callback,
         batch_size=batch_size,
+        first_batch_size=first_batch_size,
     )
 
 
@@ -817,6 +827,7 @@ class MLXGemmaEngine(TranslationEngine):
                 raise ValueError("Experimental MLX allocation cache must be between 0 and 1024 MiB")
         mx.set_cache_limit(cache_mb * 1024 * 1024)
         logger.info("MLX reusable allocation cache limit: %d MiB", cache_mb)
+        apply_wired_limit(logger)
 
         logger.info("Loading %s (MLX 4-bit)...", self._model_id)
         t0 = time.time()
@@ -905,6 +916,7 @@ class MLXGemmaEngine(TranslationEngine):
         target_lang: str = "es",
         token_callback: Callable[[str, int], None] | None = None,
         batch_size: int = 3,
+        first_batch_size: int = 3,
     ) -> TranslationResult:
         """Call token_callback(cleaned_partial, tokens_so_far) every batch_size tokens."""
         return self._translate(
@@ -913,6 +925,7 @@ class MLXGemmaEngine(TranslationEngine):
             target_lang=target_lang,
             token_callback=token_callback,
             batch_size=batch_size,
+            first_batch_size=first_batch_size,
         )
 
     def _translate(
@@ -923,6 +936,7 @@ class MLXGemmaEngine(TranslationEngine):
         target_lang: str,
         token_callback: Callable[[str, int], None] | None = None,
         batch_size: int = 3,
+        first_batch_size: int = 3,
     ) -> TranslationResult:
         if not self._loaded:
             raise RuntimeError("Engine not loaded -- call load() first")
@@ -944,6 +958,7 @@ class MLXGemmaEngine(TranslationEngine):
             suffix_tokens=self._suffix_tokens if use_cache else None,
             token_callback=token_callback,
             batch_size=batch_size,
+            first_batch_size=first_batch_size,
             terminology_prompt=self._terminology_prompt,
         )
 

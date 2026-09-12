@@ -3,6 +3,8 @@
 Instrumentation exists only in the child process and is restored after each call.
 No library files or production engines are changed. Readback wall time includes
 lazy MLX dependencies, not merely Python conversion or synchronization overhead.
+Both profiling arms always use stock greedy decoding (the instrumented arm parses the stock
+source); --baseline-decode is accepted for compatibility and changes nothing.
 """
 
 from __future__ import annotations
@@ -326,7 +328,12 @@ def profile_worker(args):
         config = quality.engine_config("parakeet-mlx", "stt", args.model_override)
         inventory = quality.model_inventory(config)
         data.update(config=config, model=inventory)
-        engine = quality.make_engine(config, inventory["resolved_path"], "en")
+        # The instrumented arm parses and re-installs the stock greedy source, so the
+        # profiler always loads the engine with the qualified joint decode disabled.
+        from engines.parakeet_mlx_engine import ParakeetMLXEngine
+
+        engine = ParakeetMLXEngine(model_id=inventory["resolved_path"], joint_scalar_eval=False)
+        data["baseline_decode"] = True
         data["model_identity"] = load_primary_model(engine, inventory["resolved_path"])
         import parakeet_mlx.audio as audio_module
         import parakeet_mlx.parakeet as upstream
@@ -406,6 +413,9 @@ def main():
     p.add_argument("--sample-every", type=int, default=4)
     p.add_argument("--timeout-seconds", type=float, default=1800)
     p.add_argument("--model-override")
+    p.add_argument(
+        "--baseline-decode", action="store_true", help="Accepted for compatibility; stock decode is always used"
+    )
     p.add_argument("--_worker", action="store_true", help=argparse.SUPPRESS)
     args = p.parse_args()
     if (

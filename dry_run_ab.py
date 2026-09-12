@@ -1962,6 +1962,10 @@ _first_stream_chunks = set()
 _first_stream_lock = threading.Lock()
 
 STREAM_TOKEN_BATCH_SIZE = 3  # Send every N tokens to reduce WebSocket overhead
+STREAM_FIRST_TOKEN_BATCH_SIZE = int(os.environ.get("STARK_STREAM_FIRST_TOKEN_BATCH_SIZE", "1"))
+if STREAM_FIRST_TOKEN_BATCH_SIZE < 1:
+    raise ValueError("STARK_STREAM_FIRST_TOKEN_BATCH_SIZE must be positive")
+WARMUP_AFTER_FINAL = os.environ.get("STARK_WARMUP_AFTER_FINAL", "1").strip().lower() not in {"0", "false", "off"}
 
 
 def _enqueue_stream_token(item):
@@ -2001,6 +2005,7 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
         suffix_tokens=suffix_tokens,
         token_callback=token_callback,
         batch_size=STREAM_TOKEN_BATCH_SIZE,
+        first_batch_size=STREAM_FIRST_TOKEN_BATCH_SIZE,
         terminology_prompt=settings.translation.terminology_prompt,
     )
     _last_gen_stats[chunk_id] = _generation_stats(result)
@@ -3287,7 +3292,7 @@ async def _pipeline_translate_and_finalize(
     time — multiple concurrent TranslateGemma calls would thrash the Metal
     GPU and actually be slower than sequential.
     """
-    global _chunks_completed
+    global _chunks_completed, _warmup_pending
     # Every branch below assigns the A-model results, but only the A/B branches
     # assign the B-model ones. The single-model MLX path (the Mac default) then
     # hit UnboundLocalError on `qe_b` at the summary print, so every final failed.
@@ -3499,6 +3504,9 @@ async def _pipeline_translate_and_finalize(
                 _translation_active.clear()
                 with _first_stream_lock:
                     _first_stream_chunks.discard(cid)
+                # No await before lock exit: admit keep-warm only after translation.
+                if WARMUP_AFTER_FINAL:
+                    _warmup_pending = True
         timing.translation_started = timing.translation_started or timing.translation_lock_acquired
         timing.translation_finished = time.perf_counter()
         now = time.perf_counter()
@@ -5369,7 +5377,8 @@ async def audio_loop():
                                 last_partial_len = 0
                                 last_silence_boundary = 0
                                 vad_model.reset_states()
-                                _warmup_pending = True
+                                if not WARMUP_AFTER_FINAL:
+                                    _warmup_pending = True
                         else:
                             # Normal silence-triggered finalization
                             _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
@@ -5384,8 +5393,8 @@ async def audio_loop():
                             last_partial_len = 0
                             last_silence_boundary = 0
                             vad_model.reset_states()
-                            # [P7-4A] Schedule a GPU warmup now that speech ended
-                            _warmup_pending = True
+                            if not WARMUP_AFTER_FINAL:
+                                _warmup_pending = True
 
                     # [P7-4A] Pre-warm during silence: run dummy forward pass
                     # after speech→silence transition to keep Metal GPU hot.

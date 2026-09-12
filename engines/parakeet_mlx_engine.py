@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import logging
 import math
+import os
 import re
 import time
+from collections.abc import Callable
 
 import numpy as np
 
 from engines.base import STTEngine, STTResult, text_compression_ratio
+from engines.mlx_memory import apply_wired_limit
+from engines.parakeet_joint_decode import install_qualified_joint_decode
 
 logger = logging.getLogger(__name__)
 DEFAULT_PARAKEET_MLX_MODEL = "mlx-community/parakeet-tdt-0.6b-v3"
@@ -132,6 +136,7 @@ class ParakeetMLXEngine(STTEngine):
         warmup_seconds: float = 1.0,
         stream_context: tuple[int, int] = (256, 256),
         stream_depth: int = 1,
+        joint_scalar_eval: bool | None = None,
     ):
         if dtype not in ("bfloat16", "float16", "float32"):
             raise ValueError(f"Unsupported Parakeet MLX dtype: {dtype!r}")
@@ -143,6 +148,13 @@ class ParakeetMLXEngine(STTEngine):
         self._stream_depth = stream_depth
         self._model = None
         self._prompt_warned = False
+        self._joint_scalar_eval = (
+            os.environ.get("STARK_PARAKEET_JOINT_EVAL", "1").strip().lower() not in {"0", "false", "off"}
+            if joint_scalar_eval is None
+            else joint_scalar_eval
+        )
+        self._restore_joint_decode: Callable[[], None] | None = None
+        self.joint_scalar_eval_active = False
 
     def load(self) -> None:
         if self._model is not None:
@@ -153,16 +165,27 @@ class ParakeetMLXEngine(STTEngine):
         from engines.mlx_engine import materialize_mlx_model
 
         mx.set_cache_limit(self._cache_limit_mb * 1024 * 1024)
+        apply_wired_limit(logger)
         from engines.model_paths import resolve_model_for_loading
 
         logger.info("Loading %s (Parakeet MLX)", self._model_id)
         self._model = from_pretrained(resolve_model_for_loading(self._model_id), dtype=getattr(mx, self._dtype))
         try:
+            if self._joint_scalar_eval:
+                self._restore_joint_decode = install_qualified_joint_decode(self._model)
+                self.joint_scalar_eval_active = self._restore_joint_decode is not None
+                logger.info(
+                    "Parakeet joint scalar decode %s",
+                    "active (qualified transform installed)"
+                    if self.joint_scalar_eval_active
+                    else "not installed; stock decode",
+                )
             if self._warmup_seconds > 0:
                 self.transcribe(np.zeros(int(self._warmup_seconds * 16000), dtype=np.float32))
             materialize_mlx_model(self._model)
             mx.synchronize()
         except Exception:
+            self._restore_stock_decode()
             self._model = None
             raise
 
@@ -241,8 +264,15 @@ class ParakeetMLXEngine(STTEngine):
             import mlx.core as mx
 
             mx.synchronize()
+            self._restore_stock_decode()
             self._model = None
             mx.clear_cache()
+
+    def _restore_stock_decode(self) -> None:
+        if self._restore_joint_decode is not None:
+            self._restore_joint_decode()
+            self._restore_joint_decode = None
+        self.joint_scalar_eval_active = False
 
     @property
     def model_id(self) -> str:

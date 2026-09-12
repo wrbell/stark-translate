@@ -214,3 +214,40 @@ def test_import_has_no_model_or_audio_loads():
     code = "import sys; import tools.parakeet_profile; assert not any(n in sys.modules for n in ('mlx','parakeet_mlx','torch','numpy','soundfile'))"
     result = subprocess.run([sys.executable, "-c", code], cwd=p.ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("baseline", [True, False])
+def test_profile_worker_always_selects_stock_decode_before_loading(monkeypatch, tmp_path, baseline):
+    from unittest.mock import Mock
+
+    from engines import parakeet_mlx_engine
+    from tools import benchmark_identity
+
+    args = SimpleNamespace(
+        manifest=tmp_path / "manifest.json",
+        output=tmp_path / "output.json",
+        languages=["en"],
+        limit=1,
+        repeats=1,
+        sample_every=1,
+        model_override=None,
+        baseline_decode=baseline,
+    )
+    monkeypatch.setattr(p.quality, "read_json", lambda _: {})
+    monkeypatch.setattr(p, "selected", lambda *args: [])
+    monkeypatch.setattr(p.quality, "digest", lambda _: "hash")
+    monkeypatch.setattr(p.quality, "source_identity", lambda: {})
+    monkeypatch.setattr(p.quality, "save", Mock())
+    monkeypatch.setattr(p.quality, "engine_config", lambda *args: {"name": "parakeet-mlx"})
+    monkeypatch.setattr(p.quality, "model_inventory", lambda _: {"resolved_path": "/fake/parakeet"})
+    stock_factory = Mock()
+    default_factory = Mock()
+    monkeypatch.setattr(parakeet_mlx_engine, "ParakeetMLXEngine", stock_factory)
+    monkeypatch.setattr(p.quality, "make_engine", default_factory)
+    load = Mock(side_effect=RuntimeError("unit test stops before model load"))
+    monkeypatch.setattr(benchmark_identity, "load_primary_model", load)
+    assert not p.profile_worker(args)
+    # Both arms parse the stock greedy source, so the flag never changes the engine.
+    stock_factory.assert_called_once_with(model_id="/fake/parakeet", joint_scalar_eval=False)
+    default_factory.assert_not_called()
+    assert load.call_args.args[0] is stock_factory.return_value
