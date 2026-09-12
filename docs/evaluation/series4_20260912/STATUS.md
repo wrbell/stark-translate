@@ -17,7 +17,7 @@
 | P2 arm screen (declared; control vs reuse-100 vs reuse-300) | PENDING | | | | | |
 | P3 EOU classifier offline feasibility (Smart Turn v3, CPU) | DONE | 2026-09-11T23:42Z | 2026-09-11T23:52Z | [P3-eou-feasibility/README.md](P3-eou-feasibility/README.md) | #215 (this PR) | no-go: AUC 0.54–0.57; internal pauses judged complete 46–48 % vs true ends 56–57 %; clip A misses 76 % of ends; no arm declared |
 | P4 Marian-vs-Gemma review packet (8–12-word Gemma-routed finals) | DONE | 2026-09-11T23:47Z | 2026-09-11T23:55Z | [P4-marian-band-packet/README.md](P4-marian-band-packet/README.md) | #215 (this PR) | packet 031184b1…: 30 unique finals, 22 differ; chrF p50 89; glossary 14/14 both; human review pending |
-| P6 first-visible ACK PR (Codex) | RUNNING | 2026-09-11T23:41Z | | | #216 (auto-merge) | reviewed; 258 targeted tests incl. socket-bound modules; CI pending |
+| P6 first-visible ACK PR (Codex) | DONE | 2026-09-11T23:41Z | 2026-09-12T00:01Z | [P6-first-visible/README.md](P6-first-visible/README.md) | #216 (merged `2d01840`) | first_stream ACK once per client per chunk; consumers report first_visible_ms, not gated; earlier PRs' hunks verified on main after the merge |
 | P2-R registry rows (P1 engineering result, P2 outcome) | PENDING | | | | | |
 | C1 closeout docs | PENDING | | | | | |
 
@@ -27,3 +27,4 @@
 - 23:41Z S0 DONE. Status PR #215 opened (draft). Codex C1 (P1 runtime fixes), C2 (P6 first-visible ACK) and C3 (P2 `partial_reuse_ms` arm) launched in their worktrees. Smart Turn v3 pinned download and the P2 attribution / P4 packet builds start off-GPU.
 - 23:55Z P2 attribution, P3 feasibility (no-go) and P4 packet DONE off-GPU. Codex C3 (P2 arm) and C1 (P1) finished; C2 (P6) still running. `venv` has no pytest/ruff (runtime env): unit tests run with `stt_env/bin/python -m pytest` (read-only use of the rollback env).
 - 00:00Z All three Codex lanes reviewed. PRs: #216 (P6, auto-merge), #217 (P1, merge gated on the identity screen), #218 (P2 arm, merge gated on the declared screen). P1 micro-bench started on the GPU (protocol `p1_identity_screen_series4_20260912` declared in `.cache/series4-20260912/P1/protocol.json` before any run).
+- 00:05Z #216 merged (main `2d01840`); #207–#214 hunks verified present. #217 and #218 branches updated to main (CI rerunning); their merges stay gated on the screens. Backlog items for P3 (deferred, no-go), P4 (packet pending review) and P6 (first-visible metric) applied on this branch.
