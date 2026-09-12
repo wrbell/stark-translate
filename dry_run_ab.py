@@ -2018,6 +2018,7 @@ async def stream_token_broadcaster():
 
     Runs as a background task in the event loop. Exits when it receives None.
     """
+    first_seen = {}
     while True:
         item = await _stream_token_queue.get()
         if item is None:
@@ -2026,14 +2027,24 @@ async def stream_token_broadcaster():
         msg_type = item[0]
         if msg_type == "token":
             _, cid, partial_spanish, tokens_so_far = item
-            await broadcast(
-                {
-                    "type": "translation_stream",
-                    "chunk_id": cid,
-                    "partial_spanish_a": partial_spanish,
-                    "tokens_so_far": tokens_so_far,
-                }
-            )
+            payload = {
+                "type": "translation_stream",
+                "chunk_id": cid,
+                "partial_spanish_a": partial_spanish,
+                "tokens_so_far": tokens_so_far,
+            }
+            if cid not in first_seen:
+                payload["event_id"] = f"{SESSION_ID}:stream:{cid}"
+                first_seen[cid] = None
+                if len(first_seen) > 2048:
+                    first_seen.pop(next(iter(first_seen)))
+                if not _latency.async_captions:
+                    # Awaited broadcast only hooks translation messages. No
+                    # await separates this registration from its stream send.
+                    payload["caption_delivery_mode"] = "awaited"
+                    for client in list(ws_clients):
+                        _caption_before_send(client, payload, time.perf_counter(), 0.0)
+            await broadcast(payload)
 
 
 # [P7-4A] Pre-warm translation models during silence to keep Metal GPU hot.
@@ -4032,6 +4043,29 @@ async def ws_handler(websocket, path=None):
 
 def _caption_before_send(client, data, started, queue_ms):
     _latency_trace.record("caption_send_started", event_id=data.get("event_id"), queue_ms=queue_ms)
+    if (
+        data.get("type") == "translation_stream"
+        and isinstance(data.get("event_id"), str)
+        and ":stream:" in data["event_id"]
+    ):
+        timing = _chunk_timings.get(data.get("chunk_id"))
+        _render_tracker.sent(
+            client,
+            data["event_id"],
+            started,
+            timing.speech_end if timing and timing.timing_source != "replay_nonrealtime" else None,
+            "first_stream",
+            {
+                "chunk_id": data.get("chunk_id"),
+                "utterance_id": timing.utterance_id if timing else None,
+                "timing_source": timing.timing_source if timing else "unknown",
+                "caption_delivery_mode": data.get("caption_delivery_mode"),
+                "caption_queue_wait_ms": round(queue_ms, 3),
+                "tokens_so_far": data.get("tokens_so_far"),
+                **(timing.sample_metadata() if timing else dict.fromkeys(SAMPLE_COLUMNS)),
+            },
+        )
+        return
     if data.get("type") != "translation":
         return
     timing = _chunk_timings.get(data.get("chunk_id")) if data.get("stage") != "partial" else None

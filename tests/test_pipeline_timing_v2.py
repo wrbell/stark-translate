@@ -79,6 +79,21 @@ def test_render_ack_upper_bound_is_server_clock_only():
     assert not tracker.pending
 
 
+def test_first_stream_ack_uses_server_stage_and_speech_end_once_per_client():
+    tracker = RenderTracker()
+    clients = [object(), object()]
+    for client in clients:
+        tracker.sent(client, "s:stream:1", 20, 19, "first_stream", {"chunk_id": 1, "tokens_so_far": 3})
+        message = {"event_id": "s:stream:1", "visible": True, "receive_to_render_ms": 32, "stage": "complete"}
+        ack = tracker.acknowledge(client, message, 20.1)
+        assert ack["stage"] == "first_stream"
+        assert ack["speech_end_to_ack_upper_bound_ms"] == 1100
+        assert ack["send_to_ack_ms"] == 100
+        assert ack["tokens_so_far"] == 3
+        assert ack["speech_start_to_preview_ack_upper_bound_ms"] is None
+        assert tracker.acknowledge(client, message, 20.2) is None
+
+
 @pytest.mark.parametrize("confirmed_speculation,use_draft", [(False, False), (True, False), (False, True)])
 def test_real_finalizer_times_payload_after_diagnostics_and_before_broadcast(
     monkeypatch, tmp_path, confirmed_speculation, use_draft

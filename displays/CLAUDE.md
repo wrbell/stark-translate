@@ -52,6 +52,14 @@ IDs as opaque identities rather than parsing them as chunk numbers. Provenance f
 attached to finals so downstream review and evaluation can separate live audio from
 file replay.
 
+The first `translation_stream` batch per chunk uses the deterministic event ID
+`<session_id>:stream:<chunk_id>`; later batches retain ordinary counter IDs.
+The telemetry wrapper acknowledges that first batch with `stage: "first_stream"`
+only when its handler synchronously changes the DOM in a visible tab, using the
+same double-animation-frame render opportunity. This once-per-client/chunk
+measurement is reported separately from `complete` and is not a gate. A first
+batch dropped by delivery coalescing, or ignored by a display, produces no ACK.
+
 Capture `utterance_id` is distinct from final `chunk_id`. At authoritative final
 publication the producer, delivery queue, health inventory and displays close the
 explicit session/utterance identity against late partials. Ordinary previews can

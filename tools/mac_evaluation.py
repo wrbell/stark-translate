@@ -899,7 +899,7 @@ def _preserve_blind_reviews(path: Path, proposed: list[dict]) -> list[dict]:
 
 
 def _report_browser_acknowledgments(rows: list[dict], acknowledgments: list[dict], session_id: str) -> dict:
-    """Join visible final ACKs to unique CSV chunks; never pool clients or endpoints."""
+    """Join visible final/first-stream ACKs; never pool stages, clients or endpoints."""
     chunks: dict[str, list[dict]] = defaultdict(list)
     for row in rows:
         if row.get("chunk_id") not in (None, ""):
@@ -920,6 +920,7 @@ def _report_browser_acknowledgments(rows: list[dict], acknowledgments: list[dict
     received: dict[tuple, set] = defaultdict(set)
     clients = set()
     seen_events, seen_chunks = set(), set()
+    seen_stream_chunks = set()
     unmatched = 0
     for ack in acknowledgments:
         identity = ack.get("client_id"), ack.get("event_id")
@@ -942,12 +943,23 @@ def _report_browser_acknowledgments(rows: list[dict], acknowledgments: list[dict
         if ack.get("stage") in {"partial", "final", "translation_a"}:
             clients.add(client)
             continue
-        if ack.get("stage") != "complete":
+        first_stream = ack.get("stage") == "first_stream"
+        if first_stream:
+            clients.add(client)
+        if ack.get("stage") != "complete" and not first_stream:
             continue
         cid = str(ack["chunk_id"]) if ack.get("chunk_id") is not None else ""
         matching = chunks.get(cid, [])
         if len(matching) != 1 or endpoint_key(matching[0])[0] != "2":
-            unmatched += 1
+            if not first_stream:
+                unmatched += 1
+            continue
+        if first_stream:
+            if (client, cid) not in seen_stream_chunks:
+                seen_stream_chunks.add((client, cid))
+                key = (client, *endpoint_key(matching[0]))
+                if (delay := _numeric(ack.get("speech_end_to_ack_upper_bound_ms"))) is not None:
+                    samples[key]["first_visible"].append(delay)
             continue
         if (client, cid) in seen_chunks:
             continue
@@ -971,7 +983,7 @@ def _report_browser_acknowledgments(rows: list[dict], acknowledgments: list[dict
                     **dict(zip(("schema", "endpoint", "timing_source"), endpoint, strict=True)),
                     "metrics": {
                         field: stats(samples[key][field])
-                        for field in ("receive_to_render_ms", "speech_end_to_ack_upper_bound_ms")
+                        for field in ("receive_to_render_ms", "speech_end_to_ack_upper_bound_ms", "first_visible")
                     },
                     "final_ack_coverage": {
                         "received_final_chunks": len(acknowledged),
@@ -1358,6 +1370,7 @@ def report_results(directory: Path, output: Path, manifest_path: Path) -> dict:
         "### Visible final latency by browser session and endpoint",
         "",
         "Only visible schema-2 final ACKs matched to a unique CSV chunk contribute. Each browser session, capture timing source and endpoint has its own distribution; clients and silence/forced-cut/EOF endpoints are never pooled. Duplicate chunk acknowledgments and unmatched/stale events are excluded. Speech-end-to-ack includes return-network time. Coverage alone does not make a run acceptance eligible; the latency gate remains pending.",
+        "The first_visible metric summarizes first_stream ACKs separately; it is reported only and does not contribute to complete-stage latency or final coverage gates.",
         "",
         "| Experiment | Model | Clip / cohort | Session / client | Endpoint / timing source | Metric | n | p50 ms | p95 ms | ACKs / finals |",
         "|---|---|---|---|---|---|---:|---:|---:|---|",
