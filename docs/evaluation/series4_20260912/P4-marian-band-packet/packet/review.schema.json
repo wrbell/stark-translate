@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unapproved bilingual translation review annotation",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "case_id": {
+      "type": "string"
+    },
+    "immutable_case_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "human_approved_locally": {
+      "const": false
+    },
+    "training_eligible": {
+      "const": false
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "meaning_error": {
+          "type": "object",
+          "properties": {
+            "A": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "B": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "A",
+            "B"
+          ],
+          "additionalProperties": false
+        },
+        "meaning_error_severity": {
+          "type": "object",
+          "properties": {
+            "A": {
+              "enum": [
+                null,
+                "none",
+                "minor",
+                "major",
+                "critical",
+                "not_assessable"
+              ]
+            },
+            "B": {
+              "enum": [
+                null,
+                "none",
+                "minor",
+                "major",
+                "critical",
+                "not_assessable"
+              ]
+            }
+          },
+          "required": [
+            "A",
+            "B"
+          ],
+          "additionalProperties": false
+        },
+        "meaning_error_notes": {
+          "type": "object",
+          "properties": {
+            "A": {
+              "type": "string"
+            },
+            "B": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "A",
+            "B"
+          ],
+          "additionalProperties": false
+        },
+        "terminology_preference": {
+          "enum": [
+            null,
+            "A",
+            "B",
+            "tie",
+            "neither",
+            "not_assessable"
+          ]
+        },
+        "overall_preference": {
+          "enum": [
+            null,
+            "A",
+            "B",
+            "tie",
+            "neither",
+            "not_assessable"
+          ]
+        },
+        "preference_reason": {
+          "type": "string"
+        },
+        "reviewer_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approval": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "meaning_error",
+        "meaning_error_severity",
+        "meaning_error_notes",
+        "terminology_preference",
+        "overall_preference",
+        "preference_reason",
+        "reviewer_id",
+        "reviewed_at",
+        "approval"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "case_id",
+    "immutable_case_sha256",
+    "human_approved_locally",
+    "training_eligible",
+    "review"
+  ],
+  "additionalProperties": false
+}

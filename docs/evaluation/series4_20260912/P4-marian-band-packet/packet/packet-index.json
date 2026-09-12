@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "completed": true,
+  "packet_id": "031184b1e1eba5188a476cb7",
+  "files": [
+    {
+      "file": "annotations.jsonl",
+      "sha256": "95e1d29dcbc47014f94b890f2be8b070c5709935d3e0b18f64d3645d96520b44",
+      "size_bytes": 15210
+    },
+    {
+      "file": "packet.json",
+      "sha256": "1e092042883f4824c9a225cf9a35bdd98cf41a6a5ef22805c3ea8195a6833389",
+      "size_bytes": 63385
+    },
+    {
+      "file": "packet.md",
+      "sha256": "d4ee78ca1ce6113775bc1cb192943ef87aa730de6ef59e9997c8f1c2765d8318",
+      "size_bytes": 13640
+    },
+    {
+      "file": "review.schema.json",
+      "sha256": "9709ec11e8eae709f7bc3691ddf2c41ec15e94c021fd532f2c034f3a296e3b3d",
+      "size_bytes": 3300
+    }
+  ],
+  "private_key_sha256": "cce85311704137d59d9f635d483242ea80a81f6cb32bafb953853617735618f3",
+  "status": "unreviewed",
+  "human_approved_locally": false,
+  "training_eligible": false
+}

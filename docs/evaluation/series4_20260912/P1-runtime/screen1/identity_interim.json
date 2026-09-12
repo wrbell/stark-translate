@@ -1,0 +1,65 @@
+[
+  {
+    "tag": "p1s0912_A_cand_r0",
+    "arm": "cand",
+    "control": "p1s0912_A_ctl_r0",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "aligned_english_finals": 61,
+    "aligned_with_different_spanish": 0,
+    "unmatched_finals": [],
+    "final_stt_route_counts": {
+      "n/a": 61
+    },
+    "counters": {},
+    "experiment_configuration": {}
+  },
+  {
+    "tag": "p1s0912_A_cand_r1",
+    "arm": "cand",
+    "control": "p1s0912_A_ctl_r1",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "aligned_english_finals": 61,
+    "aligned_with_different_spanish": 0,
+    "unmatched_finals": [],
+    "final_stt_route_counts": {
+      "n/a": 61
+    },
+    "counters": {},
+    "experiment_configuration": {}
+  },
+  {
+    "tag": "p1s0912_A_cand_r2",
+    "arm": "cand",
+    "control": "p1s0912_A_ctl_r2",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.0,
+    "spanish_wer_vs_control_pct": 0.0,
+    "aligned_english_finals": 61,
+    "aligned_with_different_spanish": 0,
+    "unmatched_finals": [],
+    "final_stt_route_counts": {
+      "n/a": 61
+    },
+    "counters": {},
+    "experiment_configuration": {}
+  }
+]

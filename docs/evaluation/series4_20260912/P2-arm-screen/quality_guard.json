@@ -1,0 +1,1696 @@
+[
+  {
+    "tag": "p2s0912_A_reuse100_r0",
+    "arm": "reuse100",
+    "control": "p2s0912_A_ctl_r0",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.17,
+    "spanish_wer_vs_control_pct": 0.88,
+    "aligned_english_finals": 59,
+    "aligned_with_different_spanish": 2,
+    "unmatched_finals": [
+      {
+        "candidate_index": 49,
+        "candidate": [
+          "No, I came on I I rem uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo era un um"
+        ]
+      },
+      {
+        "candidate_index": 56,
+        "candidate": [
+          "Uh just like the verse behind me, um John three, sixteen. Well we've all we all know that verse.",
+          "Uh, al igual que el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Bueno, todos conocemos ese vers\u00edculo."
+        ]
+      },
+      {
+        "control_index": 49,
+        "control": [
+          "No, I came on I I re uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo que fue un um"
+        ]
+      },
+      {
+        "control_index": 56,
+        "control": [
+          "Uh just like the verse behind me, um John three, sixteen. Uh we've all we all know that verse.",
+          "Uh, justo como el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Uh, todos conocemos ese vers\u00edculo."
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "full": 48,
+      "partial_reuse": 13
+    },
+    "counters": {
+      "final_stt_reused_partial": 14,
+      "final_stt_full": 48
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 100
+    }
+  },
+  {
+    "tag": "p2s0912_A_reuse300_r0",
+    "arm": "reuse300",
+    "control": "p2s0912_A_ctl_r0",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.34,
+    "spanish_wer_vs_control_pct": 1.28,
+    "aligned_english_finals": 58,
+    "aligned_with_different_spanish": 3,
+    "unmatched_finals": [
+      {
+        "candidate_index": 17,
+        "candidate": [
+          "I I just want you to to to think about that because you have these two men who are similar but also different and",
+          "Solo quiero que pienses en eso porque tienes a estos dos hombres que son similares pero tambi\u00e9n diferentes y"
+        ]
+      },
+      {
+        "candidate_index": 49,
+        "candidate": [
+          "No, I came on I I rem uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo era un um"
+        ]
+      },
+      {
+        "candidate_index": 56,
+        "candidate": [
+          "Uh just like the verse behind me, um John three, sixteen. Well we've all we all know that verse.",
+          "Uh, al igual que el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Bueno, todos conocemos ese vers\u00edculo."
+        ]
+      },
+      {
+        "control_index": 17,
+        "control": [
+          "I I just want you to to to think about that because you have these two men who are similar but also different. And",
+          "Solo quiero que pienses en eso porque tienes a estos dos hombres que son similares pero tambi\u00e9n diferentes. Y"
+        ]
+      },
+      {
+        "control_index": 49,
+        "control": [
+          "No, I came on I I re uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo que fue un um"
+        ]
+      },
+      {
+        "control_index": 56,
+        "control": [
+          "Uh just like the verse behind me, um John three, sixteen. Uh we've all we all know that verse.",
+          "Uh, justo como el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Uh, todos conocemos ese vers\u00edculo."
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "full": 42,
+      "partial_reuse": 19
+    },
+    "counters": {
+      "final_stt_reused_partial": 20,
+      "final_stt_full": 42
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 300
+    }
+  },
+  {
+    "tag": "p2s0912_A_reuse300_r1",
+    "arm": "reuse300",
+    "control": "p2s0912_A_ctl_r1",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.34,
+    "spanish_wer_vs_control_pct": 1.28,
+    "aligned_english_finals": 58,
+    "aligned_with_different_spanish": 3,
+    "unmatched_finals": [
+      {
+        "candidate_index": 17,
+        "candidate": [
+          "I I just want you to to to think about that because you have these two men who are similar but also different and",
+          "Solo quiero que pienses en eso porque tienes a estos dos hombres que son similares pero tambi\u00e9n diferentes y"
+        ]
+      },
+      {
+        "candidate_index": 49,
+        "candidate": [
+          "No, I came on I I rem uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo era un um"
+        ]
+      },
+      {
+        "candidate_index": 56,
+        "candidate": [
+          "Uh just like the verse behind me, um John three, sixteen. Well we've all we all know that verse.",
+          "Uh, al igual que el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Bueno, todos conocemos ese vers\u00edculo."
+        ]
+      },
+      {
+        "control_index": 17,
+        "control": [
+          "I I just want you to to to think about that because you have these two men who are similar but also different. And",
+          "Solo quiero que pienses en eso porque tienes a estos dos hombres que son similares pero tambi\u00e9n diferentes. Y"
+        ]
+      },
+      {
+        "control_index": 49,
+        "control": [
+          "No, I came on I I re uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo que fue un um"
+        ]
+      },
+      {
+        "control_index": 56,
+        "control": [
+          "Uh just like the verse behind me, um John three, sixteen. Uh we've all we all know that verse.",
+          "Uh, justo como el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Uh, todos conocemos ese vers\u00edculo."
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "full": 42,
+      "partial_reuse": 19
+    },
+    "counters": {
+      "final_stt_reused_partial": 20,
+      "final_stt_full": 42
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 300
+    }
+  },
+  {
+    "tag": "p2s0912_A_reuse100_r1",
+    "arm": "reuse100",
+    "control": "p2s0912_A_ctl_r1",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.17,
+    "spanish_wer_vs_control_pct": 1.08,
+    "aligned_english_finals": 59,
+    "aligned_with_different_spanish": 3,
+    "unmatched_finals": [
+      {
+        "candidate_index": 49,
+        "candidate": [
+          "No, I came on I I rem uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo era un um"
+        ]
+      },
+      {
+        "candidate_index": 56,
+        "candidate": [
+          "Uh just like the verse behind me, um John three, sixteen. Well we've all we all know that verse.",
+          "Uh, al igual que el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Bueno, todos conocemos ese vers\u00edculo."
+        ]
+      },
+      {
+        "control_index": 49,
+        "control": [
+          "No, I came on I I re uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo que fue un um"
+        ]
+      },
+      {
+        "control_index": 56,
+        "control": [
+          "Uh just like the verse behind me, um John three, sixteen. Uh we've all we all know that verse.",
+          "Uh, justo como el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Uh, todos conocemos ese vers\u00edculo."
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "full": 46,
+      "partial_reuse": 15
+    },
+    "counters": {
+      "final_stt_reused_partial": 16,
+      "final_stt_full": 46
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 100
+    }
+  },
+  {
+    "tag": "p2s0912_A_reuse300_r2",
+    "arm": "reuse300",
+    "control": "p2s0912_A_ctl_r2",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.34,
+    "spanish_wer_vs_control_pct": 1.28,
+    "aligned_english_finals": 58,
+    "aligned_with_different_spanish": 3,
+    "unmatched_finals": [
+      {
+        "candidate_index": 17,
+        "candidate": [
+          "I I just want you to to to think about that because you have these two men who are similar but also different and",
+          "Solo quiero que pienses en eso porque tienes a estos dos hombres que son similares pero tambi\u00e9n diferentes y"
+        ]
+      },
+      {
+        "candidate_index": 49,
+        "candidate": [
+          "No, I came on I I rem uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo era un um"
+        ]
+      },
+      {
+        "candidate_index": 56,
+        "candidate": [
+          "Uh just like the verse behind me, um John three, sixteen. Well we've all we all know that verse.",
+          "Uh, al igual que el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Bueno, todos conocemos ese vers\u00edculo."
+        ]
+      },
+      {
+        "control_index": 17,
+        "control": [
+          "I I just want you to to to think about that because you have these two men who are similar but also different. And",
+          "Solo quiero que pienses en eso porque tienes a estos dos hombres que son similares pero tambi\u00e9n diferentes. Y"
+        ]
+      },
+      {
+        "control_index": 49,
+        "control": [
+          "No, I came on I I re uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo que fue un um"
+        ]
+      },
+      {
+        "control_index": 56,
+        "control": [
+          "Uh just like the verse behind me, um John three, sixteen. Uh we've all we all know that verse.",
+          "Uh, justo como el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Uh, todos conocemos ese vers\u00edculo."
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "full": 44,
+      "partial_reuse": 17
+    },
+    "counters": {
+      "final_stt_reused_partial": 18,
+      "final_stt_full": 44
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 300
+    }
+  },
+  {
+    "tag": "p2s0912_A_reuse100_r2",
+    "arm": "reuse100",
+    "control": "p2s0912_A_ctl_r2",
+    "finals": 61,
+    "control_finals": 61,
+    "empty_finals": 0,
+    "duplicate_finals": 1,
+    "bad_split": 13,
+    "control_bad_split": 13,
+    "english_wer_vs_control_pct": 0.17,
+    "spanish_wer_vs_control_pct": 0.98,
+    "aligned_english_finals": 59,
+    "aligned_with_different_spanish": 2,
+    "unmatched_finals": [
+      {
+        "candidate_index": 49,
+        "candidate": [
+          "No, I came on I I rem uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo era un um"
+        ]
+      },
+      {
+        "candidate_index": 56,
+        "candidate": [
+          "Uh just like the verse behind me, um John three, sixteen. Well we've all we all know that verse.",
+          "Uh, al igual que el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Bueno, todos conocemos ese vers\u00edculo."
+        ]
+      },
+      {
+        "control_index": 49,
+        "control": [
+          "No, I came on I I re uh I remember it was a um",
+          "No, yo vine en yo yo recuerdo que fue un um"
+        ]
+      },
+      {
+        "control_index": 56,
+        "control": [
+          "Uh just like the verse behind me, um John three, sixteen. Uh we've all we all know that verse.",
+          "Uh, justo como el vers\u00edculo detr\u00e1s de m\u00ed, um Juan tres, diecis\u00e9is. Uh, todos conocemos ese vers\u00edculo."
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "full": 48,
+      "partial_reuse": 13
+    },
+    "counters": {
+      "final_stt_reused_partial": 14,
+      "final_stt_full": 48
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 100
+    }
+  },
+  {
+    "tag": "p2s0912_B_reuse100_r0",
+    "arm": "reuse100",
+    "control": "p2s0912_B_ctl_r0",
+    "finals": 82,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "bad_split": 7,
+    "control_bad_split": 7,
+    "english_wer_vs_control_pct": 4.21,
+    "spanish_wer_vs_control_pct": 5.02,
+    "aligned_english_finals": 71,
+    "aligned_with_different_spanish": 7,
+    "unmatched_finals": [
+      {
+        "candidate_index": 1,
+        "candidate": [
+          "What does a saviour do? A saviour saves.",
+          "\u00bfQu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "candidate_index": 5,
+        "candidate": [
+          "or will w will ever do something to earn us the status of God being willing to save us.",
+          "o haremos algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "candidate_index": 6,
+        "candidate": [
+          "No, God saves because He loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "candidate_index": 14,
+        "candidate": [
+          "what it is that he's teaching",
+          "lo que est\u00e1 ense\u00f1ando"
+        ]
+      },
+      {
+        "candidate_index": 19,
+        "candidate": [
+          "But he wants everyone to come to repentance. God",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento. Dios"
+        ]
+      },
+      {
+        "candidate_index": 20,
+        "candidate": [
+          "He is a saviour and he loves to save.",
+          "Es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "candidate_index": 63,
+        "candidate": [
+          "When there was one God who created the heavens and the earth.",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra."
+        ]
+      },
+      {
+        "candidate_index": 66,
+        "candidate": [
+          "After some time, man and woman, Adam and Eve, they sinned.",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron."
+        ]
+      },
+      {
+        "candidate_index": 75,
+        "candidate": [
+          "To whom everyone is separated from because of their sin.",
+          "A quien todos est\u00e1n separados debido a su pecado."
+        ]
+      },
+      {
+        "candidate_index": 77,
+        "candidate": [
+          "out of his presence. And Isaiah writes",
+          "fuera de su presencia. E Isa\u00edas escribe"
+        ]
+      },
+      {
+        "candidate_index": 78,
+        "candidate": [
+          "that",
+          "eso"
+        ]
+      },
+      {
+        "control_index": 1,
+        "control": [
+          "And what does a savior do? A savior saves.",
+          "\u00bfY qu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "control_index": 5,
+        "control": [
+          "or will we will ever do something to earn us the status of God being willing to save us.",
+          "o haremos alguna vez algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "control_index": 6,
+        "control": [
+          "No, God saves because he loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "control_index": 18,
+        "control": [
+          "But he wants everyone to come to repentance.",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento."
+        ]
+      },
+      {
+        "control_index": 19,
+        "control": [
+          "He is a savior and he loves to save.",
+          "\u00c9l es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "control_index": 62,
+        "control": [
+          "When there was one God who created the heavens and the earth",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra"
+        ]
+      },
+      {
+        "control_index": 65,
+        "control": [
+          "After some time, man and woman, Adam and Eve, they sinned",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron"
+        ]
+      },
+      {
+        "control_index": 75,
+        "control": [
+          "And Isaiah writes",
+          "Y Isa\u00edas escribe"
+        ]
+      },
+      {
+        "control_index": 76,
+        "control": [
+          "That",
+          "Eso"
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "partial_reuse": 48,
+      "full": 34
+    },
+    "counters": {
+      "final_stt_reused_partial": 48,
+      "final_stt_full": 37
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 100
+    }
+  },
+  {
+    "tag": "p2s0912_B_reuse300_r0",
+    "arm": "reuse300",
+    "control": "p2s0912_B_ctl_r0",
+    "finals": 83,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "bad_split": 7,
+    "control_bad_split": 7,
+    "english_wer_vs_control_pct": 6.52,
+    "spanish_wer_vs_control_pct": 8.03,
+    "aligned_english_finals": 63,
+    "aligned_with_different_spanish": 9,
+    "unmatched_finals": [
+      {
+        "candidate_index": 1,
+        "candidate": [
+          "What does a saviour do? A saviour saves.",
+          "\u00bfQu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "candidate_index": 5,
+        "candidate": [
+          "or will w will ever do something to earn us the status of God being willing to save us.",
+          "o haremos algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "candidate_index": 6,
+        "candidate": [
+          "No, God saves because He loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "candidate_index": 14,
+        "candidate": [
+          "what it is that he's teaching",
+          "lo que est\u00e1 ense\u00f1ando"
+        ]
+      },
+      {
+        "candidate_index": 19,
+        "candidate": [
+          "But he wants everyone to come to repentance. God",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento. Dios"
+        ]
+      },
+      {
+        "candidate_index": 20,
+        "candidate": [
+          "He is a saviour and he loves to save.",
+          "Es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "candidate_index": 23,
+        "candidate": [
+          "you know, don't get it twisted and think that therefore you go and save yourself.",
+          "Sabes, no te confundas y pienses que por lo tanto vas y te salvas."
+        ]
+      },
+      {
+        "candidate_index": 24,
+        "candidate": [
+          "God is the Saviour. He does all the saving.",
+          "Dios es el Salvador. \u00c9l hace toda la salvaci\u00f3n."
+        ]
+      },
+      {
+        "candidate_index": 29,
+        "candidate": [
+          "If salvation was something we could do, then we wouldn't be in need of rest.",
+          "Si la salvaci\u00f3n fuera algo que pudi\u00e9ramos hacer, entonces no necesitar\u00edamos descanso."
+        ]
+      },
+      {
+        "candidate_index": 30,
+        "candidate": [
+          "So for my third and final point,",
+          "As\u00ed que para mi tercer y \u00faltimo punto,"
+        ]
+      },
+      {
+        "candidate_index": 47,
+        "candidate": [
+          "It's actually coming to faith.",
+          "En realidad est\u00e1 llegando a la fe."
+        ]
+      },
+      {
+        "candidate_index": 52,
+        "candidate": [
+          "Years and years ago",
+          "Hace a\u00f1os y a\u00f1os"
+        ]
+      },
+      {
+        "candidate_index": 63,
+        "candidate": [
+          "When there was one God who created the heavens and the earth.",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra."
+        ]
+      },
+      {
+        "candidate_index": 66,
+        "candidate": [
+          "After some time, man and woman, Adam and Eve, they sinned.",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron."
+        ]
+      },
+      {
+        "candidate_index": 75,
+        "candidate": [
+          "To whom everyone is separated from because of their sin.",
+          "A quien todos est\u00e1n separados debido a su pecado."
+        ]
+      },
+      {
+        "candidate_index": 77,
+        "candidate": [
+          "out of his presence. And Isaiah writes",
+          "fuera de su presencia. E Isa\u00edas escribe"
+        ]
+      },
+      {
+        "candidate_index": 78,
+        "candidate": [
+          "that",
+          "eso"
+        ]
+      },
+      {
+        "candidate_index": 79,
+        "candidate": [
+          "It doesn't say it's",
+          "No dice que sea"
+        ]
+      },
+      {
+        "candidate_index": 81,
+        "candidate": [
+          "He says your sin",
+          "\u00c9l dice tu pecado"
+        ]
+      },
+      {
+        "candidate_index": 82,
+        "candidate": [
+          "Separate",
+          "Separar"
+        ]
+      },
+      {
+        "control_index": 1,
+        "control": [
+          "And what does a savior do? A savior saves.",
+          "\u00bfY qu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "control_index": 5,
+        "control": [
+          "or will we will ever do something to earn us the status of God being willing to save us.",
+          "o haremos alguna vez algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "control_index": 6,
+        "control": [
+          "No, God saves because he loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "control_index": 18,
+        "control": [
+          "But he wants everyone to come to repentance.",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento."
+        ]
+      },
+      {
+        "control_index": 19,
+        "control": [
+          "He is a savior and he loves to save.",
+          "\u00c9l es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "control_index": 22,
+        "control": [
+          "You know, don't get it twisted and think that therefore you go and save yourself.",
+          "Sabes, no te confundas y pienses que por lo tanto vas y te salvas."
+        ]
+      },
+      {
+        "control_index": 23,
+        "control": [
+          "God is the savior. He does all the saving.",
+          "Dios es el salvador. \u00c9l hace toda la salvaci\u00f3n."
+        ]
+      },
+      {
+        "control_index": 28,
+        "control": [
+          "If salvation was something we could do, then we wouldn't be in need of rescue.",
+          "Si la salvaci\u00f3n fuera algo que pudi\u00e9ramos hacer, entonces no necesitar\u00edamos ser rescatados."
+        ]
+      },
+      {
+        "control_index": 29,
+        "control": [
+          "And so for my third and final point,",
+          "Y as\u00ed, para mi tercer y \u00faltimo punto,"
+        ]
+      },
+      {
+        "control_index": 46,
+        "control": [
+          "But it's actually coming to faith",
+          "Pero en realidad est\u00e1 llegando a la fe"
+        ]
+      },
+      {
+        "control_index": 51,
+        "control": [
+          "Years and years ago.",
+          "Hace a\u00f1os y a\u00f1os."
+        ]
+      },
+      {
+        "control_index": 62,
+        "control": [
+          "When there was one God who created the heavens and the earth",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra"
+        ]
+      },
+      {
+        "control_index": 65,
+        "control": [
+          "After some time, man and woman, Adam and Eve, they sinned",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron"
+        ]
+      },
+      {
+        "control_index": 75,
+        "control": [
+          "And Isaiah writes",
+          "Y Isa\u00edas escribe"
+        ]
+      },
+      {
+        "control_index": 76,
+        "control": [
+          "That",
+          "Eso"
+        ]
+      },
+      {
+        "control_index": 77,
+        "control": [
+          "He doesn't say it's a good idea.",
+          "No dice que sea una buena idea."
+        ]
+      },
+      {
+        "control_index": 79,
+        "control": [
+          "He says,",
+          "Dice,"
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "partial_reuse": 70,
+      "full": 13
+    },
+    "counters": {
+      "final_stt_reused_partial": 70,
+      "final_stt_full": 15
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 300
+    }
+  },
+  {
+    "tag": "p2s0912_B_reuse300_r1",
+    "arm": "reuse300",
+    "control": "p2s0912_B_ctl_r1",
+    "finals": 83,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "bad_split": 7,
+    "control_bad_split": 7,
+    "english_wer_vs_control_pct": 6.25,
+    "spanish_wer_vs_control_pct": 7.89,
+    "aligned_english_finals": 65,
+    "aligned_with_different_spanish": 9,
+    "unmatched_finals": [
+      {
+        "candidate_index": 1,
+        "candidate": [
+          "What does a saviour do? A saviour saves.",
+          "\u00bfQu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "candidate_index": 5,
+        "candidate": [
+          "or will w will ever do something to earn us the status of God being willing to save us.",
+          "o haremos algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "candidate_index": 6,
+        "candidate": [
+          "No, God saves because He loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "candidate_index": 14,
+        "candidate": [
+          "what it is that he's teaching",
+          "lo que est\u00e1 ense\u00f1ando"
+        ]
+      },
+      {
+        "candidate_index": 19,
+        "candidate": [
+          "But he wants everyone to come to repentance. God",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento. Dios"
+        ]
+      },
+      {
+        "candidate_index": 20,
+        "candidate": [
+          "He is a saviour and he loves to save.",
+          "Es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "candidate_index": 24,
+        "candidate": [
+          "God is the Saviour. He does all the saving.",
+          "Dios es el Salvador. \u00c9l hace toda la salvaci\u00f3n."
+        ]
+      },
+      {
+        "candidate_index": 29,
+        "candidate": [
+          "If salvation was something we could do, then we wouldn't be in need of rest.",
+          "Si la salvaci\u00f3n fuera algo que pudi\u00e9ramos hacer, entonces no necesitar\u00edamos descanso."
+        ]
+      },
+      {
+        "candidate_index": 30,
+        "candidate": [
+          "So for my third and final point,",
+          "As\u00ed que para mi tercer y \u00faltimo punto,"
+        ]
+      },
+      {
+        "candidate_index": 47,
+        "candidate": [
+          "It's actually coming to faith.",
+          "En realidad est\u00e1 llegando a la fe."
+        ]
+      },
+      {
+        "candidate_index": 52,
+        "candidate": [
+          "Years and years ago",
+          "Hace a\u00f1os y a\u00f1os"
+        ]
+      },
+      {
+        "candidate_index": 63,
+        "candidate": [
+          "When there was one God who created the heavens and the earth.",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra."
+        ]
+      },
+      {
+        "candidate_index": 75,
+        "candidate": [
+          "To whom everyone is separated from because of their sin.",
+          "A quien todos est\u00e1n separados debido a su pecado."
+        ]
+      },
+      {
+        "candidate_index": 77,
+        "candidate": [
+          "out of his presence. And Isaiah writes",
+          "fuera de su presencia. E Isa\u00edas escribe"
+        ]
+      },
+      {
+        "candidate_index": 78,
+        "candidate": [
+          "that",
+          "eso"
+        ]
+      },
+      {
+        "candidate_index": 79,
+        "candidate": [
+          "It doesn't say it's",
+          "No dice que sea"
+        ]
+      },
+      {
+        "candidate_index": 81,
+        "candidate": [
+          "He says your sin",
+          "\u00c9l dice tu pecado"
+        ]
+      },
+      {
+        "candidate_index": 82,
+        "candidate": [
+          "Separate",
+          "Separar"
+        ]
+      },
+      {
+        "control_index": 1,
+        "control": [
+          "And what does a savior do? A savior saves.",
+          "\u00bfY qu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "control_index": 5,
+        "control": [
+          "or will we will ever do something to earn us the status of God being willing to save us.",
+          "o haremos alguna vez algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "control_index": 6,
+        "control": [
+          "No, God saves because he loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "control_index": 18,
+        "control": [
+          "But he wants everyone to come to repentance.",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento."
+        ]
+      },
+      {
+        "control_index": 19,
+        "control": [
+          "He is a savior and he loves to save.",
+          "\u00c9l es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "control_index": 23,
+        "control": [
+          "God is the savior. He does all the saving.",
+          "Dios es el salvador. \u00c9l hace toda la salvaci\u00f3n."
+        ]
+      },
+      {
+        "control_index": 28,
+        "control": [
+          "If salvation was something we could do, then we wouldn't be in need of rescue.",
+          "Si la salvaci\u00f3n fuera algo que pudi\u00e9ramos hacer, entonces no necesitar\u00edamos ser rescatados."
+        ]
+      },
+      {
+        "control_index": 29,
+        "control": [
+          "And so for my third and final point,",
+          "Y as\u00ed, para mi tercer y \u00faltimo punto,"
+        ]
+      },
+      {
+        "control_index": 46,
+        "control": [
+          "But it's actually coming to faith",
+          "Pero en realidad est\u00e1 llegando a la fe"
+        ]
+      },
+      {
+        "control_index": 51,
+        "control": [
+          "Years and years ago.",
+          "Hace a\u00f1os y a\u00f1os."
+        ]
+      },
+      {
+        "control_index": 62,
+        "control": [
+          "When there was one God who created the heavens and the earth",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra"
+        ]
+      },
+      {
+        "control_index": 75,
+        "control": [
+          "And Isaiah writes",
+          "Y Isa\u00edas escribe"
+        ]
+      },
+      {
+        "control_index": 76,
+        "control": [
+          "That",
+          "Eso"
+        ]
+      },
+      {
+        "control_index": 77,
+        "control": [
+          "He doesn't say it's a good idea.",
+          "No dice que sea una buena idea."
+        ]
+      },
+      {
+        "control_index": 79,
+        "control": [
+          "He says,",
+          "Dice,"
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "partial_reuse": 68,
+      "full": 15
+    },
+    "counters": {
+      "final_stt_reused_partial": 68,
+      "final_stt_full": 17
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 300
+    }
+  },
+  {
+    "tag": "p2s0912_B_reuse100_r1",
+    "arm": "reuse100",
+    "control": "p2s0912_B_ctl_r1",
+    "finals": 81,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "bad_split": 7,
+    "control_bad_split": 7,
+    "english_wer_vs_control_pct": 2.72,
+    "spanish_wer_vs_control_pct": 3.73,
+    "aligned_english_finals": 72,
+    "aligned_with_different_spanish": 7,
+    "unmatched_finals": [
+      {
+        "candidate_index": 1,
+        "candidate": [
+          "What does a saviour do? A saviour saves.",
+          "\u00bfQu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "candidate_index": 5,
+        "candidate": [
+          "or will w will ever do something to earn us the status of God being willing to save us.",
+          "o haremos algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "candidate_index": 6,
+        "candidate": [
+          "No, God saves because He loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "candidate_index": 14,
+        "candidate": [
+          "what it is that he's teaching",
+          "lo que est\u00e1 ense\u00f1ando"
+        ]
+      },
+      {
+        "candidate_index": 19,
+        "candidate": [
+          "But he wants everyone to come to repentance. God",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento. Dios"
+        ]
+      },
+      {
+        "candidate_index": 20,
+        "candidate": [
+          "He is a saviour and he loves to save.",
+          "Es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "candidate_index": 63,
+        "candidate": [
+          "When there was one God who created the heavens and the earth.",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra."
+        ]
+      },
+      {
+        "candidate_index": 76,
+        "candidate": [
+          "out of his presence. And Isaiah writes",
+          "fuera de su presencia. E Isa\u00edas escribe"
+        ]
+      },
+      {
+        "candidate_index": 77,
+        "candidate": [
+          "that",
+          "eso"
+        ]
+      },
+      {
+        "control_index": 1,
+        "control": [
+          "And what does a savior do? A savior saves.",
+          "\u00bfY qu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "control_index": 5,
+        "control": [
+          "or will we will ever do something to earn us the status of God being willing to save us.",
+          "o haremos alguna vez algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "control_index": 6,
+        "control": [
+          "No, God saves because he loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "control_index": 18,
+        "control": [
+          "But he wants everyone to come to repentance.",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento."
+        ]
+      },
+      {
+        "control_index": 19,
+        "control": [
+          "He is a savior and he loves to save.",
+          "\u00c9l es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "control_index": 62,
+        "control": [
+          "When there was one God who created the heavens and the earth",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra"
+        ]
+      },
+      {
+        "control_index": 75,
+        "control": [
+          "And Isaiah writes",
+          "Y Isa\u00edas escribe"
+        ]
+      },
+      {
+        "control_index": 76,
+        "control": [
+          "That",
+          "Eso"
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "partial_reuse": 43,
+      "full": 38
+    },
+    "counters": {
+      "final_stt_reused_partial": 43,
+      "final_stt_full": 42
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 100
+    }
+  },
+  {
+    "tag": "p2s0912_B_reuse300_r2",
+    "arm": "reuse300",
+    "control": "p2s0912_B_ctl_r2",
+    "finals": 83,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "bad_split": 7,
+    "control_bad_split": 7,
+    "english_wer_vs_control_pct": 6.52,
+    "spanish_wer_vs_control_pct": 8.03,
+    "aligned_english_finals": 63,
+    "aligned_with_different_spanish": 9,
+    "unmatched_finals": [
+      {
+        "candidate_index": 1,
+        "candidate": [
+          "What does a saviour do? A saviour saves.",
+          "\u00bfQu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "candidate_index": 5,
+        "candidate": [
+          "or will w will ever do something to earn us the status of God being willing to save us.",
+          "o haremos algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "candidate_index": 6,
+        "candidate": [
+          "No, God saves because He loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "candidate_index": 14,
+        "candidate": [
+          "what it is that he's teaching",
+          "lo que est\u00e1 ense\u00f1ando"
+        ]
+      },
+      {
+        "candidate_index": 19,
+        "candidate": [
+          "But he wants everyone to come to repentance. God",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento. Dios"
+        ]
+      },
+      {
+        "candidate_index": 20,
+        "candidate": [
+          "He is a saviour and he loves to save.",
+          "Es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "candidate_index": 23,
+        "candidate": [
+          "you know, don't get it twisted and think that therefore you go and save yourself.",
+          "Sabes, no te confundas y pienses que por lo tanto vas y te salvas."
+        ]
+      },
+      {
+        "candidate_index": 24,
+        "candidate": [
+          "God is the Saviour. He does all the saving.",
+          "Dios es el Salvador. \u00c9l hace toda la salvaci\u00f3n."
+        ]
+      },
+      {
+        "candidate_index": 29,
+        "candidate": [
+          "If salvation was something we could do, then we wouldn't be in need of rest.",
+          "Si la salvaci\u00f3n fuera algo que pudi\u00e9ramos hacer, entonces no necesitar\u00edamos descanso."
+        ]
+      },
+      {
+        "candidate_index": 30,
+        "candidate": [
+          "So for my third and final point,",
+          "As\u00ed que para mi tercer y \u00faltimo punto,"
+        ]
+      },
+      {
+        "candidate_index": 47,
+        "candidate": [
+          "It's actually coming to faith.",
+          "En realidad est\u00e1 llegando a la fe."
+        ]
+      },
+      {
+        "candidate_index": 52,
+        "candidate": [
+          "Years and years ago",
+          "Hace a\u00f1os y a\u00f1os"
+        ]
+      },
+      {
+        "candidate_index": 63,
+        "candidate": [
+          "When there was one God who created the heavens and the earth.",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra."
+        ]
+      },
+      {
+        "candidate_index": 66,
+        "candidate": [
+          "After some time, man and woman, Adam and Eve, they sinned.",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron."
+        ]
+      },
+      {
+        "candidate_index": 75,
+        "candidate": [
+          "To whom everyone is separated from because of their sin.",
+          "A quien todos est\u00e1n separados debido a su pecado."
+        ]
+      },
+      {
+        "candidate_index": 77,
+        "candidate": [
+          "out of his presence. And Isaiah writes",
+          "fuera de su presencia. E Isa\u00edas escribe"
+        ]
+      },
+      {
+        "candidate_index": 78,
+        "candidate": [
+          "that",
+          "eso"
+        ]
+      },
+      {
+        "candidate_index": 79,
+        "candidate": [
+          "It doesn't say it's",
+          "No dice que sea"
+        ]
+      },
+      {
+        "candidate_index": 81,
+        "candidate": [
+          "He says your sin",
+          "\u00c9l dice tu pecado"
+        ]
+      },
+      {
+        "candidate_index": 82,
+        "candidate": [
+          "Separate",
+          "Separar"
+        ]
+      },
+      {
+        "control_index": 1,
+        "control": [
+          "And what does a savior do? A savior saves.",
+          "\u00bfY qu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "control_index": 5,
+        "control": [
+          "or will we will ever do something to earn us the status of God being willing to save us.",
+          "o haremos alguna vez algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "control_index": 6,
+        "control": [
+          "No, God saves because he loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "control_index": 18,
+        "control": [
+          "But he wants everyone to come to repentance.",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento."
+        ]
+      },
+      {
+        "control_index": 19,
+        "control": [
+          "He is a savior and he loves to save.",
+          "\u00c9l es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "control_index": 22,
+        "control": [
+          "You know, don't get it twisted and think that therefore you go and save yourself.",
+          "Sabes, no te confundas y pienses que por lo tanto vas y te salvas."
+        ]
+      },
+      {
+        "control_index": 23,
+        "control": [
+          "God is the savior. He does all the saving.",
+          "Dios es el salvador. \u00c9l hace toda la salvaci\u00f3n."
+        ]
+      },
+      {
+        "control_index": 28,
+        "control": [
+          "If salvation was something we could do, then we wouldn't be in need of rescue.",
+          "Si la salvaci\u00f3n fuera algo que pudi\u00e9ramos hacer, entonces no necesitar\u00edamos ser rescatados."
+        ]
+      },
+      {
+        "control_index": 29,
+        "control": [
+          "And so for my third and final point,",
+          "Y as\u00ed, para mi tercer y \u00faltimo punto,"
+        ]
+      },
+      {
+        "control_index": 46,
+        "control": [
+          "But it's actually coming to faith",
+          "Pero en realidad est\u00e1 llegando a la fe"
+        ]
+      },
+      {
+        "control_index": 51,
+        "control": [
+          "Years and years ago.",
+          "Hace a\u00f1os y a\u00f1os."
+        ]
+      },
+      {
+        "control_index": 62,
+        "control": [
+          "When there was one God who created the heavens and the earth",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra"
+        ]
+      },
+      {
+        "control_index": 65,
+        "control": [
+          "After some time, man and woman, Adam and Eve, they sinned",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron"
+        ]
+      },
+      {
+        "control_index": 75,
+        "control": [
+          "And Isaiah writes",
+          "Y Isa\u00edas escribe"
+        ]
+      },
+      {
+        "control_index": 76,
+        "control": [
+          "That",
+          "Eso"
+        ]
+      },
+      {
+        "control_index": 77,
+        "control": [
+          "He doesn't say it's a good idea.",
+          "No dice que sea una buena idea."
+        ]
+      },
+      {
+        "control_index": 79,
+        "control": [
+          "He says,",
+          "Dice,"
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "partial_reuse": 68,
+      "full": 15
+    },
+    "counters": {
+      "final_stt_reused_partial": 68,
+      "final_stt_full": 17
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 300
+    }
+  },
+  {
+    "tag": "p2s0912_B_reuse100_r2",
+    "arm": "reuse100",
+    "control": "p2s0912_B_ctl_r2",
+    "finals": 82,
+    "control_finals": 80,
+    "empty_finals": 0,
+    "duplicate_finals": 0,
+    "bad_split": 7,
+    "control_bad_split": 7,
+    "english_wer_vs_control_pct": 4.21,
+    "spanish_wer_vs_control_pct": 5.02,
+    "aligned_english_finals": 71,
+    "aligned_with_different_spanish": 7,
+    "unmatched_finals": [
+      {
+        "candidate_index": 1,
+        "candidate": [
+          "What does a saviour do? A saviour saves.",
+          "\u00bfQu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "candidate_index": 5,
+        "candidate": [
+          "or will w will ever do something to earn us the status of God being willing to save us.",
+          "o haremos algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "candidate_index": 6,
+        "candidate": [
+          "No, God saves because He loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "candidate_index": 14,
+        "candidate": [
+          "what it is that he's teaching",
+          "lo que est\u00e1 ense\u00f1ando"
+        ]
+      },
+      {
+        "candidate_index": 19,
+        "candidate": [
+          "But he wants everyone to come to repentance. God",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento. Dios"
+        ]
+      },
+      {
+        "candidate_index": 20,
+        "candidate": [
+          "He is a saviour and he loves to save.",
+          "Es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "candidate_index": 63,
+        "candidate": [
+          "When there was one God who created the heavens and the earth.",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra."
+        ]
+      },
+      {
+        "candidate_index": 66,
+        "candidate": [
+          "After some time, man and woman, Adam and Eve, they sinned.",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron."
+        ]
+      },
+      {
+        "candidate_index": 75,
+        "candidate": [
+          "To whom everyone is separated from because of their sin.",
+          "A quien todos est\u00e1n separados debido a su pecado."
+        ]
+      },
+      {
+        "candidate_index": 77,
+        "candidate": [
+          "out of his presence. And Isaiah writes",
+          "fuera de su presencia. E Isa\u00edas escribe"
+        ]
+      },
+      {
+        "candidate_index": 78,
+        "candidate": [
+          "that",
+          "eso"
+        ]
+      },
+      {
+        "control_index": 1,
+        "control": [
+          "And what does a savior do? A savior saves.",
+          "\u00bfY qu\u00e9 hace un salvador? Un salvador salva."
+        ]
+      },
+      {
+        "control_index": 5,
+        "control": [
+          "or will we will ever do something to earn us the status of God being willing to save us.",
+          "o haremos alguna vez algo para merecernos el estatus de que Dios est\u00e1 dispuesto a salvarnos."
+        ]
+      },
+      {
+        "control_index": 6,
+        "control": [
+          "No, God saves because he loves to save.",
+          "No, Dios salva porque ama salvar."
+        ]
+      },
+      {
+        "control_index": 18,
+        "control": [
+          "But he wants everyone to come to repentance.",
+          "Pero \u00e9l quiere que todos vengan al arrepentimiento."
+        ]
+      },
+      {
+        "control_index": 19,
+        "control": [
+          "He is a savior and he loves to save.",
+          "\u00c9l es un salvador y le encanta salvar."
+        ]
+      },
+      {
+        "control_index": 62,
+        "control": [
+          "When there was one God who created the heavens and the earth",
+          "Cuando hab\u00eda un solo Dios que cre\u00f3 los cielos y la tierra"
+        ]
+      },
+      {
+        "control_index": 65,
+        "control": [
+          "After some time, man and woman, Adam and Eve, they sinned",
+          "Despu\u00e9s de alg\u00fan tiempo, el hombre y la mujer, Ad\u00e1n y Eva, pecaron"
+        ]
+      },
+      {
+        "control_index": 75,
+        "control": [
+          "And Isaiah writes",
+          "Y Isa\u00edas escribe"
+        ]
+      },
+      {
+        "control_index": 76,
+        "control": [
+          "That",
+          "Eso"
+        ]
+      }
+    ],
+    "final_stt_route_counts": {
+      "partial_reuse": 48,
+      "full": 34
+    },
+    "counters": {
+      "final_stt_reused_partial": 48,
+      "final_stt_full": 37
+    },
+    "experiment_configuration": {
+      "partial_reuse_ms": 100
+    }
+  }
+]

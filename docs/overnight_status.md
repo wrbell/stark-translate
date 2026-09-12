@@ -25,7 +25,7 @@ has its own [integration status](mac_implementation_status.md). The earlier Engl
 96/96 valid runs, 672 finals and 0/28 selected arms. The sub-second final-delivery
 goal was not met on this cohort; E4B remains unchanged. Endurance and the
 source-integration evidence remain separate from that screen. PyPI, package
-PyPI publication is deferred by decision (2026-09-11), with the publish job gated on `PYPI_PUBLISH_ENABLED`; tag `v2026.14.0.0`, its GitHub Release and the MSI were published on 2026-09-11 (see the [overnight 2026-09-11 status](evaluation/overnight_20260911/STATUS.md)).
+PyPI publication is deferred by decision (2026-09-11), with the publish job gated on `PYPI_PUBLISH_ENABLED`; tag `v2026.14.0.0`, its GitHub Release and the MSI were published on 2026-09-11 (see the [overnight 2026-09-11 status](evaluation/overnight_20260911/STATUS.md)). The 2026-09-12 [series 3](evaluation/series3_20260912/STATUS.md) and [series 4](evaluation/series4_20260912/STATUS.md) boards record the later unattended latency work: series 4 merged output-identical runtime fixes on a paired identity screen (#217), the first-visible `first_stream` acknowledgement (#216) and the rejected opt-in `partial_reuse_ms` arm (#218), and closed the semantic end-of-utterance idea; defaults are unchanged.
 
 ## Where to look
 

@@ -1,0 +1,2412 @@
+{
+  "screen": "p1_identity_screen_series4_20260912",
+  "thresholds": {
+    "G1_RATIO": 0.85,
+    "G1_REDUCTION_MS": 300,
+    "REGRESSION_RATIO": 0.05,
+    "G2_ALLOWANCE_MS": 100,
+    "G3_ALLOWANCE_MS": 50,
+    "IDENTITY_SHARE": 0.95,
+    "PREVIEW_RATIO": 0.98,
+    "MEMORY_RATIO": 0.1,
+    "MEMORY_ALLOWANCE_BYTES": 268435456,
+    "CHUNK_RATIO": 0.1,
+    "MIN_GEMMA_SILENCE_PER_CLIP": 50,
+    "MIN_GEMMA_SILENCE_TOTAL": 100,
+    "WORST_DECILE_SHARE": 0.1,
+    "SLOW_STAGE_MS": 800
+  },
+  "inputs": {
+    "/Users/willem/Code/vibes/SRTranslate/.cache/series4-20260912/P1/RUNS.json": {
+      "sha256": "3082ef15c122a015503a4143ecd8e70b81af068ef1fb0af9afdbff34e59b18a6",
+      "size_bytes": 6577
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/followup-20260911/X/clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav": {
+      "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17",
+      "size_bytes": 11520044
+    },
+    "/Users/willem/Code/vibes/SRTranslate/.cache/followup-20260911/X/clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav": {
+      "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c",
+      "size_bytes": 11520044
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "37827f5493bb6889527d8bff60785a21047df8c983eb5684af350a6eb43f9e8a",
+      "size_bytes": 13815
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl": {
+      "sha256": "385be8c89348ba386b143636dec16dcc2f42727036aed4bf51f0a53ce54f64e3",
+      "size_bytes": 16683532
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv": {
+      "sha256": "54a685d6d848ef567e6d9ba144e444ed7c9bde9bd7ec7b4ea5c7dea7c6898cbe",
+      "size_bytes": 38942
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "4c6537ce3fda9fd8299035887d9bc331325b99d64a4356f8655df089b0d9e2d3",
+      "size_bytes": 3305
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "59c549cf59a695b135ed5b225e11d2ff24b1d9a68eba935553e6b20e4426c444",
+      "size_bytes": 5142
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "e5486691119a8dd5758a3796aee5cd2a16c83202d1c88028c542dec626eed188",
+      "size_bytes": 13845
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl": {
+      "sha256": "448ff59c3f6e1734da55e5dffde4f1a56c5b7ba1ef305bc68033ce759cb2fd64",
+      "size_bytes": 16704092
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv": {
+      "sha256": "591478b14b2d1b6fc721ea04c9ec9947b313aa33a5412d2a35c4559796eeb2e4",
+      "size_bytes": 38925
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "0a57ef5738e155f3a261b97fdab9417a7733dacd4b0c97776c6625e1a15da78b",
+      "size_bytes": 3307
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "d206db7e2132e8829113cbb3f7bb935ebd1d209688ce1d972df5be7093db5441",
+      "size_bytes": 5144
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "81c0d7ef8323a5306dae9963cbd12c32cc3bf85f0925c5a7fe1c143de6354427",
+      "size_bytes": 13851
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl": {
+      "sha256": "22c2346f381e8cd28170e2133125acfefed863ff1c07186badb8c2e25cd47471",
+      "size_bytes": 16703656
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv": {
+      "sha256": "8dfbc0314226693ef998e19a069ba9f3c3fd872ba40408735daaa592fe7ab08b",
+      "size_bytes": 38915
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "285cc37b51a33a1bd3c5fa30ad8894846eb51e2513eb92f9f44f4793e4bcd19e",
+      "size_bytes": 3307
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "decad6c095a53393709487c0b01f7273cc6f4d43b64252a4a99ab8d76fa80a58",
+      "size_bytes": 5144
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "3a79da0ca22ee1acfb9f0a325470aec395be14494ac0b35ddfb7ce2acc4dd299",
+      "size_bytes": 13835
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl": {
+      "sha256": "6d68235532a1ae2925b6b8709a8b656c4b39030d6d8e8c61e7b37ce9f79f35b2",
+      "size_bytes": 16679421
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv": {
+      "sha256": "47ba0b8282bef760e99d4b371fde0b26f0fbeab5c96c5523f534b761e500674f",
+      "size_bytes": 38938
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "21b5e5309ae5865240d3c6027408be96d10682f2b721b40746baea9bf0071322",
+      "size_bytes": 3305
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "aa31e8964ef7a12d7a48ddf6a19e48c35c6805ec065a7a744663e44112a41eef",
+      "size_bytes": 5142
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "b28e56683db6d611d800890c1a6234ef7eaaefbb34c5b25958d1258f3e8c9b73",
+      "size_bytes": 13826
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl": {
+      "sha256": "2f3b1a3d76ce3804af8b98892e97c00a553cb1eb7b391b269fd4849844cb0b76",
+      "size_bytes": 16704885
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv": {
+      "sha256": "13eec0cdcfb2bea859d4ea9221ee3f175cbf820c3b8d4b9394ded7d055f57373",
+      "size_bytes": 38946
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "f2d5de40636438faa560134c6dad4c877d5bcc5527e9814a20c37a20882467bc",
+      "size_bytes": 3305
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "16c75d8fe01b713af3379397b8c793f5f6b9745274142a690612542a31a942fe",
+      "size_bytes": 5142
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "d2ea314f3454b1c310d2b538c440ddd9a2b0441e0e5a802b773c746a2405d005",
+      "size_bytes": 13852
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl": {
+      "sha256": "77b30f2092afd32daa3a0a48e7e814d5a568f6c7c4f74f562604b7a7570a49c4",
+      "size_bytes": 16711580
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv": {
+      "sha256": "adba25b9fa385343fd13c040d8277134db60004a715459aa324791c3b815750f",
+      "size_bytes": 38904
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "249e8377983b35c882e8ebd2318fc0b65fde8fd36b30211e46857ff39675aaea",
+      "size_bytes": 3307
+    },
+    "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json": {
+      "sha256": "fba01449523c6eaa49eea0409ca1a3a836a7a67aceec39f9bdacf01f5321b140",
+      "size_bytes": 5144
+    }
+  },
+  "specification": {
+    "screen": "p1_identity_screen_series4_20260912",
+    "clips": {
+      "A": {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/followup-20260911/X/clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+        "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17"
+      },
+      "B": {
+        "path": "/Users/willem/Code/vibes/SRTranslate/.cache/followup-20260911/X/clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+        "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c"
+      }
+    },
+    "arms": {
+      "ctl": {
+        "kind": "control"
+      },
+      "cand": {
+        "kind": "candidate",
+        "memory_rule": "relative"
+      }
+    },
+    "runs": [
+      {
+        "tag": "p1s0912_A_ctl_r0",
+        "clip": "A",
+        "arm": "ctl",
+        "repeat": 0,
+        "order": 0,
+        "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "csv": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+        "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "pageouts": {
+          "before": 374386,
+          "after": 377260
+        }
+      },
+      {
+        "tag": "p1s0912_A_cand_r0",
+        "clip": "A",
+        "arm": "cand",
+        "repeat": 0,
+        "order": 1,
+        "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "csv": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+        "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "pageouts": {
+          "before": 377260,
+          "after": 381427
+        }
+      },
+      {
+        "tag": "p1s0912_A_cand_r1",
+        "clip": "A",
+        "arm": "cand",
+        "repeat": 1,
+        "order": 2,
+        "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "csv": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+        "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "pageouts": {
+          "before": 381427,
+          "after": 385733
+        }
+      },
+      {
+        "tag": "p1s0912_A_ctl_r1",
+        "clip": "A",
+        "arm": "ctl",
+        "repeat": 1,
+        "order": 3,
+        "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "csv": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+        "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "pageouts": {
+          "before": 385733,
+          "after": 388743
+        }
+      },
+      {
+        "tag": "p1s0912_A_ctl_r2",
+        "clip": "A",
+        "arm": "ctl",
+        "repeat": 2,
+        "order": 4,
+        "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "csv": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+        "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "pageouts": {
+          "before": 388743,
+          "after": 389934
+        }
+      },
+      {
+        "tag": "p1s0912_A_cand_r2",
+        "clip": "A",
+        "arm": "cand",
+        "repeat": 2,
+        "order": 5,
+        "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "csv": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+        "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+        "pageouts": {
+          "before": 389934,
+          "after": 392569
+        }
+      }
+    ]
+  },
+  "percentile_method": "nearest-rank: ceil(p / 100 * n) - 1",
+  "clip_count": 2,
+  "scope": "Gates cover every declared clip; p95 claim eligibility is separate.",
+  "runs": [
+    {
+      "tag": "p1s0912_A_ctl_r0",
+      "clip": "A",
+      "arm": "ctl",
+      "repeat": 0,
+      "order": 0,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 374386,
+        "after": 377260
+      },
+      "observations": {
+        "chunk_count": 61,
+        "partial_count": 509,
+        "returncode": 0,
+        "timed_out": false,
+        "lifecycle_status": "completed",
+        "eligible_finals": 61,
+        "excluded_diagnostics_rows": 20
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 3977363456,
+        "peak_metal_bytes": 9229971740
+      },
+      "memory_source": "replay_json.session_lifecycle.memory",
+      "cohorts": {
+        "hard_cut": {
+          "all": {
+            "n": 6,
+            "missing": 0,
+            "mean": 2136.5,
+            "p50": 1985.9,
+            "p95": 2614.4
+          },
+          "gemma": {
+            "n": 6,
+            "missing": 0,
+            "mean": 2136.5,
+            "p50": 1985.9,
+            "p95": 2614.4
+          },
+          "marian": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "silence": {
+          "all": {
+            "n": 21,
+            "missing": 0,
+            "mean": 1829.509523809524,
+            "p50": 1947.4,
+            "p95": 2463.7
+          },
+          "gemma": {
+            "n": 15,
+            "missing": 0,
+            "mean": 2038.2933333333333,
+            "p50": 1963.2,
+            "p95": 3411.4
+          },
+          "marian": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1307.55,
+            "p50": 794.2,
+            "p95": 2209.9
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "smart_cut": {
+          "all": {
+            "n": 34,
+            "missing": 0,
+            "mean": 3459.4058823529413,
+            "p50": 2916.0,
+            "p95": 6956.1
+          },
+          "gemma": {
+            "n": 32,
+            "missing": 0,
+            "mean": 3236.13125,
+            "p50": 2879.6,
+            "p95": 5527.3
+          },
+          "marian": {
+            "n": 2,
+            "missing": 0,
+            "mean": 7031.8,
+            "p50": 6956.1,
+            "p95": 7107.5
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "unknown_route_count": 0,
+      "experiment_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_translation_running": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 13,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "final_stt_waited_for_translation": 0
+      },
+      "experiment_counters_source": "diagnostics_jsonl.session_summary"
+    },
+    {
+      "tag": "p1s0912_A_cand_r0",
+      "clip": "A",
+      "arm": "cand",
+      "repeat": 0,
+      "order": 1,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 377260,
+        "after": 381427
+      },
+      "observations": {
+        "chunk_count": 61,
+        "partial_count": 524,
+        "returncode": 0,
+        "timed_out": false,
+        "lifecycle_status": "completed",
+        "eligible_finals": 61,
+        "excluded_diagnostics_rows": 20
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 7813857280,
+        "peak_metal_bytes": 9049185654
+      },
+      "memory_source": "replay_json.session_lifecycle.memory",
+      "cohorts": {
+        "hard_cut": {
+          "all": {
+            "n": 6,
+            "missing": 0,
+            "mean": 2037.0166666666667,
+            "p50": 1849.0,
+            "p95": 2767.8
+          },
+          "gemma": {
+            "n": 6,
+            "missing": 0,
+            "mean": 2037.0166666666667,
+            "p50": 1849.0,
+            "p95": 2767.8
+          },
+          "marian": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "silence": {
+          "all": {
+            "n": 21,
+            "missing": 0,
+            "mean": 1609.7285714285715,
+            "p50": 1678.4,
+            "p95": 2284.7
+          },
+          "gemma": {
+            "n": 15,
+            "missing": 0,
+            "mean": 1843.78,
+            "p50": 1944.4,
+            "p95": 2366.6
+          },
+          "marian": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1024.6000000000001,
+            "p50": 806.2,
+            "p95": 1678.4
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "smart_cut": {
+          "all": {
+            "n": 34,
+            "missing": 0,
+            "mean": 3285.855882352941,
+            "p50": 2821.3,
+            "p95": 6952.5
+          },
+          "gemma": {
+            "n": 32,
+            "missing": 0,
+            "mean": 3051.625,
+            "p50": 2724.6,
+            "p95": 5330.3
+          },
+          "marian": {
+            "n": 2,
+            "missing": 0,
+            "mean": 7033.55,
+            "p50": 6952.5,
+            "p95": 7114.6
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "unknown_route_count": 0,
+      "experiment_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_translation_running": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 0,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "final_stt_waited_for_translation": 0
+      },
+      "experiment_counters_source": "diagnostics_jsonl.session_summary"
+    },
+    {
+      "tag": "p1s0912_A_cand_r1",
+      "clip": "A",
+      "arm": "cand",
+      "repeat": 1,
+      "order": 2,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 381427,
+        "after": 385733
+      },
+      "observations": {
+        "chunk_count": 61,
+        "partial_count": 523,
+        "returncode": 0,
+        "timed_out": false,
+        "lifecycle_status": "completed",
+        "eligible_finals": 61,
+        "excluded_diagnostics_rows": 20
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 7976173568,
+        "peak_metal_bytes": 8989318660
+      },
+      "memory_source": "replay_json.session_lifecycle.memory",
+      "cohorts": {
+        "hard_cut": {
+          "all": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1951.1333333333334,
+            "p50": 1812.5,
+            "p95": 2356.3
+          },
+          "gemma": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1951.1333333333334,
+            "p50": 1812.5,
+            "p95": 2356.3
+          },
+          "marian": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "silence": {
+          "all": {
+            "n": 21,
+            "missing": 0,
+            "mean": 1584.3904761904762,
+            "p50": 1621.7,
+            "p95": 2177.9
+          },
+          "gemma": {
+            "n": 15,
+            "missing": 0,
+            "mean": 1849.64,
+            "p50": 1824.4,
+            "p95": 2735.9
+          },
+          "marian": {
+            "n": 6,
+            "missing": 0,
+            "mean": 921.2666666666667,
+            "p50": 762.2,
+            "p95": 1397.3
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "smart_cut": {
+          "all": {
+            "n": 34,
+            "missing": 0,
+            "mean": 3245.0882352941176,
+            "p50": 2722.7,
+            "p95": 6966.6
+          },
+          "gemma": {
+            "n": 32,
+            "missing": 0,
+            "mean": 3008.4375,
+            "p50": 2703.7,
+            "p95": 5187.1
+          },
+          "marian": {
+            "n": 2,
+            "missing": 0,
+            "mean": 7031.5,
+            "p50": 6966.6,
+            "p95": 7096.4
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "unknown_route_count": 0,
+      "experiment_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_translation_running": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 0,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "final_stt_waited_for_translation": 0
+      },
+      "experiment_counters_source": "diagnostics_jsonl.session_summary"
+    },
+    {
+      "tag": "p1s0912_A_ctl_r1",
+      "clip": "A",
+      "arm": "ctl",
+      "repeat": 1,
+      "order": 3,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 385733,
+        "after": 388743
+      },
+      "observations": {
+        "chunk_count": 61,
+        "partial_count": 507,
+        "returncode": 0,
+        "timed_out": false,
+        "lifecycle_status": "completed",
+        "eligible_finals": 61,
+        "excluded_diagnostics_rows": 20
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 3535781888,
+        "peak_metal_bytes": 9159730636
+      },
+      "memory_source": "replay_json.session_lifecycle.memory",
+      "cohorts": {
+        "hard_cut": {
+          "all": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1968.1166666666666,
+            "p50": 1892.1,
+            "p95": 2320.1
+          },
+          "gemma": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1968.1166666666666,
+            "p50": 1892.1,
+            "p95": 2320.1
+          },
+          "marian": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "silence": {
+          "all": {
+            "n": 21,
+            "missing": 0,
+            "mean": 1629.557142857143,
+            "p50": 1631.1,
+            "p95": 2377.8
+          },
+          "gemma": {
+            "n": 15,
+            "missing": 0,
+            "mean": 1886.9266666666667,
+            "p50": 1907.4,
+            "p95": 2739.1
+          },
+          "marian": {
+            "n": 6,
+            "missing": 0,
+            "mean": 986.1333333333333,
+            "p50": 798.2,
+            "p95": 1511.1
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "smart_cut": {
+          "all": {
+            "n": 34,
+            "missing": 0,
+            "mean": 3497.526470588235,
+            "p50": 2954.6,
+            "p95": 6952.9
+          },
+          "gemma": {
+            "n": 32,
+            "missing": 0,
+            "mean": 3276.88125,
+            "p50": 2935.7,
+            "p95": 5472.8
+          },
+          "marian": {
+            "n": 2,
+            "missing": 0,
+            "mean": 7027.85,
+            "p50": 6952.9,
+            "p95": 7102.8
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "unknown_route_count": 0,
+      "experiment_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_translation_running": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 16,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "final_stt_waited_for_translation": 0
+      },
+      "experiment_counters_source": "diagnostics_jsonl.session_summary"
+    },
+    {
+      "tag": "p1s0912_A_ctl_r2",
+      "clip": "A",
+      "arm": "ctl",
+      "repeat": 2,
+      "order": 4,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/diagnostics_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/ab_metrics_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_lifecycle_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-base/metrics/session_metadata_p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 388743,
+        "after": 389934
+      },
+      "observations": {
+        "chunk_count": 61,
+        "partial_count": 522,
+        "returncode": 0,
+        "timed_out": false,
+        "lifecycle_status": "completed",
+        "eligible_finals": 61,
+        "excluded_diagnostics_rows": 20
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 4089364480,
+        "peak_metal_bytes": 9207923070
+      },
+      "memory_source": "replay_json.session_lifecycle.memory",
+      "cohorts": {
+        "hard_cut": {
+          "all": {
+            "n": 6,
+            "missing": 0,
+            "mean": 2008.1,
+            "p50": 1932.0,
+            "p95": 2316.3
+          },
+          "gemma": {
+            "n": 6,
+            "missing": 0,
+            "mean": 2008.1,
+            "p50": 1932.0,
+            "p95": 2316.3
+          },
+          "marian": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "silence": {
+          "all": {
+            "n": 21,
+            "missing": 0,
+            "mean": 1601.152380952381,
+            "p50": 1587.1,
+            "p95": 2274.7
+          },
+          "gemma": {
+            "n": 15,
+            "missing": 0,
+            "mean": 1842.08,
+            "p50": 1956.8,
+            "p95": 2346.1
+          },
+          "marian": {
+            "n": 6,
+            "missing": 0,
+            "mean": 998.8333333333334,
+            "p50": 783.9,
+            "p95": 1524.9
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "smart_cut": {
+          "all": {
+            "n": 34,
+            "missing": 0,
+            "mean": 3283.008823529412,
+            "p50": 2756.5,
+            "p95": 6945.8
+          },
+          "gemma": {
+            "n": 32,
+            "missing": 0,
+            "mean": 3049.128125,
+            "p50": 2738.7,
+            "p95": 5176.9
+          },
+          "marian": {
+            "n": 2,
+            "missing": 0,
+            "mean": 7025.1,
+            "p50": 6945.8,
+            "p95": 7104.4
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "unknown_route_count": 0,
+      "experiment_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_translation_running": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 2,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "final_stt_waited_for_translation": 0
+      },
+      "experiment_counters_source": "diagnostics_jsonl.session_summary"
+    },
+    {
+      "tag": "p1s0912_A_cand_r2",
+      "clip": "A",
+      "arm": "cand",
+      "repeat": 2,
+      "order": 5,
+      "replay_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/replay_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "diagnostics_jsonl": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/diagnostics_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+      "csv": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/ab_metrics_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.csv",
+      "lifecycle_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_lifecycle_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "session_metadata_json": "/Users/willem/Code/vibes/SRTranslate-wt-p1/metrics/session_metadata_p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk.json",
+      "pageouts": {
+        "before": 389934,
+        "after": 392569
+      },
+      "observations": {
+        "chunk_count": 61,
+        "partial_count": 524,
+        "returncode": 0,
+        "timed_out": false,
+        "lifecycle_status": "completed",
+        "eligible_finals": 61,
+        "excluded_diagnostics_rows": 20
+      },
+      "memory": {
+        "scope": "pipeline_process_lifetime",
+        "peak_rss_bytes": 7913127936,
+        "peak_metal_bytes": 9124825316
+      },
+      "memory_source": "replay_json.session_lifecycle.memory",
+      "cohorts": {
+        "hard_cut": {
+          "all": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1934.45,
+            "p50": 1796.4,
+            "p95": 2235.6
+          },
+          "gemma": {
+            "n": 6,
+            "missing": 0,
+            "mean": 1934.45,
+            "p50": 1796.4,
+            "p95": 2235.6
+          },
+          "marian": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "silence": {
+          "all": {
+            "n": 21,
+            "missing": 0,
+            "mean": 1519.0523809523809,
+            "p50": 1587.8,
+            "p95": 2175.7
+          },
+          "gemma": {
+            "n": 15,
+            "missing": 0,
+            "mean": 1764.1933333333334,
+            "p50": 1811.7,
+            "p95": 2271.6
+          },
+          "marian": {
+            "n": 6,
+            "missing": 0,
+            "mean": 906.2,
+            "p50": 758.8,
+            "p95": 1389.8
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        },
+        "smart_cut": {
+          "all": {
+            "n": 34,
+            "missing": 0,
+            "mean": 3197.752941176471,
+            "p50": 2651.6,
+            "p95": 6954.8
+          },
+          "gemma": {
+            "n": 32,
+            "missing": 0,
+            "mean": 2959.15,
+            "p50": 2641.5,
+            "p95": 5144.0
+          },
+          "marian": {
+            "n": 2,
+            "missing": 0,
+            "mean": 7015.4,
+            "p50": 6954.8,
+            "p95": 7076.0
+          },
+          "unknown": {
+            "n": 0,
+            "missing": 0,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "unknown_route_count": 0,
+      "experiment_counters": {
+        "partial_suppressed_final_decode": 0,
+        "partial_suppressed_translation_running": 0,
+        "partial_suppressed_final_pending": 0,
+        "partial_suppressed_backlog": 0,
+        "partial_suppressed_in_flight": 0,
+        "partial_suppressed_after_stt": 0,
+        "partial_suppressed_empty_translation": 0,
+        "final_stt_waited_for_translation": 0
+      },
+      "experiment_counters_source": "diagnostics_jsonl.session_summary"
+    }
+  ],
+  "clips": {
+    "A": {
+      "arms": {
+        "ctl": {
+          "cohorts": {
+            "hard_cut": {
+              "all": {
+                "n": 18,
+                "missing": 0,
+                "mean": 2037.5722222222223,
+                "p50": 1937.6,
+                "p95": 2614.4
+              },
+              "gemma": {
+                "n": 18,
+                "missing": 0,
+                "mean": 2037.5722222222223,
+                "p50": 1937.6,
+                "p95": 2614.4
+              },
+              "marian": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "silence": {
+              "all": {
+                "n": 63,
+                "missing": 0,
+                "mean": 1686.7396825396825,
+                "p50": 1661.6,
+                "p95": 2377.8
+              },
+              "gemma": {
+                "n": 45,
+                "missing": 0,
+                "mean": 1922.4333333333334,
+                "p50": 1947.4,
+                "p95": 2463.7
+              },
+              "marian": {
+                "n": 18,
+                "missing": 0,
+                "mean": 1097.5055555555555,
+                "p50": 798.2,
+                "p95": 2209.9
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "smart_cut": {
+              "all": {
+                "n": 102,
+                "missing": 0,
+                "mean": 3413.3137254901962,
+                "p50": 2916.0,
+                "p95": 6945.8
+              },
+              "gemma": {
+                "n": 96,
+                "missing": 0,
+                "mean": 3187.3802083333335,
+                "p50": 2833.7,
+                "p95": 5472.8
+              },
+              "marian": {
+                "n": 6,
+                "missing": 0,
+                "mean": 7028.25,
+                "p50": 6956.1,
+                "p95": 7107.5
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            }
+          },
+          "n_by_route": {
+            "gemma": 159,
+            "marian": 24,
+            "unknown": 0
+          },
+          "secondary": {
+            "stages_by_route": {
+              "gemma": {
+                "stt_call": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 332.9822641509434,
+                  "p50": 250.9199999999837,
+                  "p95": 622.7689999999857
+                },
+                "translation_call": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 1276.1742578616363,
+                  "p50": 1286.433000000019,
+                  "p95": 1891.6959999999963
+                },
+                "translation_lock_wait": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 0.004308176099275786,
+                  "p50": 0.003000000011525117,
+                  "p95": 0.012999999977182597
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 10.4656719255595,
+                  "p50": 0.01270900247618556,
+                  "p95": 73.35366698680446
+                },
+                "decode_ms_a": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 840.9010181068948,
+                  "p50": 837.7700830023969,
+                  "p95": 1397.0949999929871
+                },
+                "gen_tokens_a": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 25.07547169811321,
+                  "p50": 25.0,
+                  "p95": 41.0
+                }
+              },
+              "marian": {
+                "stt_call": {
+                  "n": 24,
+                  "missing": 0,
+                  "mean": 216.13250000000394,
+                  "p50": 217.87699999999313,
+                  "p95": 300.74400000000605
+                },
+                "translation_call": {
+                  "n": 24,
+                  "missing": 0,
+                  "mean": 21.668541666665988,
+                  "p50": 12.89000000001397,
+                  "p95": 31.92399999999907
+                },
+                "translation_lock_wait": {
+                  "n": 24,
+                  "missing": 0,
+                  "mean": 176.66133333333104,
+                  "p50": 0.003999999986262992,
+                  "p95": 811.3219999999856
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 24,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 24,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 24,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              },
+              "unknown": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              }
+            },
+            "worst_decile": {
+              "n": 7,
+              "stt_call_gt_800_share": 0.2857142857142857,
+              "translation_call_gt_800_share": 1.0,
+              "both_gt_800_share": 0.2857142857142857,
+              "stt_missing": 0,
+              "translation_missing": 0
+            },
+            "draft_accept_a": {
+              "n": 159,
+              "missing": 24,
+              "mean": 0.0,
+              "p50": 0.0,
+              "p95": 0.0
+            }
+          }
+        },
+        "cand": {
+          "cohorts": {
+            "hard_cut": {
+              "all": {
+                "n": 18,
+                "missing": 0,
+                "mean": 1974.2,
+                "p50": 1832.5,
+                "p95": 2767.8
+              },
+              "gemma": {
+                "n": 18,
+                "missing": 0,
+                "mean": 1974.2,
+                "p50": 1832.5,
+                "p95": 2767.8
+              },
+              "marian": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "silence": {
+              "all": {
+                "n": 63,
+                "missing": 0,
+                "mean": 1571.057142857143,
+                "p50": 1618.5,
+                "p95": 2271.6
+              },
+              "gemma": {
+                "n": 45,
+                "missing": 0,
+                "mean": 1819.2044444444443,
+                "p50": 1824.4,
+                "p95": 2284.7
+              },
+              "marian": {
+                "n": 18,
+                "missing": 0,
+                "mean": 950.6888888888889,
+                "p50": 770.1,
+                "p95": 1678.4
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            },
+            "smart_cut": {
+              "all": {
+                "n": 102,
+                "missing": 0,
+                "mean": 3242.899019607843,
+                "p50": 2778.7,
+                "p95": 6952.5
+              },
+              "gemma": {
+                "n": 96,
+                "missing": 0,
+                "mean": 3006.4041666666667,
+                "p50": 2703.7,
+                "p95": 5187.1
+              },
+              "marian": {
+                "n": 6,
+                "missing": 0,
+                "mean": 7026.816666666667,
+                "p50": 6966.6,
+                "p95": 7114.6
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            }
+          },
+          "n_by_route": {
+            "gemma": 159,
+            "marian": 24,
+            "unknown": 0
+          },
+          "secondary": {
+            "stages_by_route": {
+              "gemma": {
+                "stt_call": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 258.8189308176098,
+                  "p50": 238.0329999999958,
+                  "p95": 422.4890000000014
+                },
+                "translation_call": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 1211.373817610063,
+                  "p50": 1169.548999999999,
+                  "p95": 1818.6159999999945
+                },
+                "translation_lock_wait": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 0.0045157232728245695,
+                  "p50": 0.003000000026077032,
+                  "p95": 0.010999999998603016
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 17.557070773507107,
+                  "p50": 0.022916996385902166,
+                  "p95": 83.6255419999361
+                },
+                "decode_ms_a": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 871.5950041571332,
+                  "p50": 841.8004580016714,
+                  "p95": 1465.891959000146
+                },
+                "gen_tokens_a": {
+                  "n": 159,
+                  "missing": 0,
+                  "mean": 25.07547169811321,
+                  "p50": 25.0,
+                  "p95": 41.0
+                }
+              },
+              "marian": {
+                "stt_call": {
+                  "n": 24,
+                  "missing": 0,
+                  "mean": 194.87433333332652,
+                  "p50": 185.40000000000873,
+                  "p95": 274.71199999999953
+                },
+                "translation_call": {
+                  "n": 24,
+                  "missing": 0,
+                  "mean": 26.027000000000044,
+                  "p50": 14.207999999984168,
+                  "p95": 29.149999999965075
+                },
+                "translation_lock_wait": {
+                  "n": 24,
+                  "missing": 0,
+                  "mean": 157.18795833333388,
+                  "p50": 0.0040000000153668225,
+                  "p95": 712.185999999987
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 24,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 24,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 24,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              },
+              "unknown": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              }
+            },
+            "worst_decile": {
+              "n": 7,
+              "stt_call_gt_800_share": 0.0,
+              "translation_call_gt_800_share": 1.0,
+              "both_gt_800_share": 0.0,
+              "stt_missing": 0,
+              "translation_missing": 0
+            },
+            "draft_accept_a": {
+              "n": 159,
+              "missing": 24,
+              "mean": 0.0,
+              "p50": 0.0,
+              "p95": 0.0
+            }
+          },
+          "gates": {
+            "G1": {
+              "pass": false,
+              "candidate": 2284.7,
+              "control": 2463.7,
+              "limit": 2163.7
+            },
+            "G2": {
+              "pass": true,
+              "silence": {
+                "pass": true,
+                "candidate": 2271.6,
+                "control": 2377.8,
+                "limit": 2496.69
+              },
+              "cuts": {
+                "pass": true,
+                "candidate": 5431.3,
+                "control": 6498.9,
+                "limit": 6823.844999999999
+              }
+            },
+            "G3": {
+              "pass": true,
+              "candidate": 1618.5,
+              "control": 1661.6,
+              "limit": 1744.6799999999998
+            },
+            "G4": {
+              "pass": true,
+              "comparisons": [
+                {
+                  "candidate_tag": "p1s0912_A_cand_r0",
+                  "control_tag": "p1s0912_A_ctl_r0",
+                  "aligned_length": 61,
+                  "candidate_rows": 61,
+                  "control_rows": 61,
+                  "chunk_count_difference": 0,
+                  "identical_share": 1.0,
+                  "english_identical_share": 1.0,
+                  "differences": [],
+                  "pass": true
+                },
+                {
+                  "candidate_tag": "p1s0912_A_cand_r1",
+                  "control_tag": "p1s0912_A_ctl_r1",
+                  "aligned_length": 61,
+                  "candidate_rows": 61,
+                  "control_rows": 61,
+                  "chunk_count_difference": 0,
+                  "identical_share": 1.0,
+                  "english_identical_share": 1.0,
+                  "differences": [],
+                  "pass": true
+                },
+                {
+                  "candidate_tag": "p1s0912_A_cand_r2",
+                  "control_tag": "p1s0912_A_ctl_r2",
+                  "aligned_length": 61,
+                  "candidate_rows": 61,
+                  "control_rows": 61,
+                  "chunk_count_difference": 0,
+                  "identical_share": 1.0,
+                  "english_identical_share": 1.0,
+                  "differences": [],
+                  "pass": true
+                }
+              ]
+            },
+            "G5": {
+              "pass": true,
+              "control_mean": 512.6666666666666,
+              "minimum": 502.4133333333333,
+              "runs": [
+                {
+                  "tag": "p1s0912_A_cand_r0",
+                  "partial_count": 524,
+                  "pass": true
+                },
+                {
+                  "tag": "p1s0912_A_cand_r1",
+                  "partial_count": 523,
+                  "pass": true
+                },
+                {
+                  "tag": "p1s0912_A_cand_r2",
+                  "partial_count": 524,
+                  "pass": true
+                }
+              ]
+            },
+            "G6": {
+              "pass": false,
+              "runs": [
+                {
+                  "tag": "p1s0912_A_cand_r0",
+                  "memory": {
+                    "scope": "pipeline_process_lifetime",
+                    "peak_rss_bytes": 7813857280,
+                    "peak_metal_bytes": 9049185654
+                  },
+                  "limits": {
+                    "peak_rss_bytes": 4498300928.0,
+                    "peak_metal_bytes": 10152968914.0
+                  },
+                  "checks": {
+                    "peak_rss_bytes": false,
+                    "peak_metal_bytes": true
+                  },
+                  "pageouts": {
+                    "before": 377260,
+                    "after": 381427
+                  },
+                  "pageouts_pass": true,
+                  "pass": false
+                },
+                {
+                  "tag": "p1s0912_A_cand_r1",
+                  "memory": {
+                    "scope": "pipeline_process_lifetime",
+                    "peak_rss_bytes": 7976173568,
+                    "peak_metal_bytes": 8989318660
+                  },
+                  "limits": {
+                    "peak_rss_bytes": 4498300928.0,
+                    "peak_metal_bytes": 10152968914.0
+                  },
+                  "checks": {
+                    "peak_rss_bytes": false,
+                    "peak_metal_bytes": true
+                  },
+                  "pageouts": {
+                    "before": 381427,
+                    "after": 385733
+                  },
+                  "pageouts_pass": true,
+                  "pass": false
+                },
+                {
+                  "tag": "p1s0912_A_cand_r2",
+                  "memory": {
+                    "scope": "pipeline_process_lifetime",
+                    "peak_rss_bytes": 7913127936,
+                    "peak_metal_bytes": 9124825316
+                  },
+                  "limits": {
+                    "peak_rss_bytes": 4498300928.0,
+                    "peak_metal_bytes": 10152968914.0
+                  },
+                  "checks": {
+                    "peak_rss_bytes": false,
+                    "peak_metal_bytes": true
+                  },
+                  "pageouts": {
+                    "before": 389934,
+                    "after": 392569
+                  },
+                  "pageouts_pass": true,
+                  "pass": false
+                }
+              ]
+            },
+            "G7": {
+              "pass": true,
+              "control_chunk_count_mean": 61.0,
+              "runs": [
+                {
+                  "tag": "p1s0912_A_cand_r0",
+                  "returncode": 0,
+                  "timed_out": false,
+                  "lifecycle_status": "completed",
+                  "chunk_count": 61.0,
+                  "checks": {
+                    "returncode": true,
+                    "timed_out": true,
+                    "lifecycle_status_recorded": true,
+                    "chunk_count": true
+                  },
+                  "pass": true
+                },
+                {
+                  "tag": "p1s0912_A_cand_r1",
+                  "returncode": 0,
+                  "timed_out": false,
+                  "lifecycle_status": "completed",
+                  "chunk_count": 61.0,
+                  "checks": {
+                    "returncode": true,
+                    "timed_out": true,
+                    "lifecycle_status_recorded": true,
+                    "chunk_count": true
+                  },
+                  "pass": true
+                },
+                {
+                  "tag": "p1s0912_A_cand_r2",
+                  "returncode": 0,
+                  "timed_out": false,
+                  "lifecycle_status": "completed",
+                  "chunk_count": 61.0,
+                  "checks": {
+                    "returncode": true,
+                    "timed_out": true,
+                    "lifecycle_status_recorded": true,
+                    "chunk_count": true
+                  },
+                  "pass": true
+                }
+              ]
+            }
+          }
+        }
+      },
+      "control_pool": {
+        "tags": [
+          "p1s0912_A_ctl_r0",
+          "p1s0912_A_ctl_r1",
+          "p1s0912_A_ctl_r2"
+        ],
+        "cohorts": {
+          "hard_cut": {
+            "all": {
+              "n": 18,
+              "missing": 0,
+              "mean": 2037.5722222222223,
+              "p50": 1937.6,
+              "p95": 2614.4
+            },
+            "gemma": {
+              "n": 18,
+              "missing": 0,
+              "mean": 2037.5722222222223,
+              "p50": 1937.6,
+              "p95": 2614.4
+            },
+            "marian": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            },
+            "unknown": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            }
+          },
+          "silence": {
+            "all": {
+              "n": 63,
+              "missing": 0,
+              "mean": 1686.7396825396825,
+              "p50": 1661.6,
+              "p95": 2377.8
+            },
+            "gemma": {
+              "n": 45,
+              "missing": 0,
+              "mean": 1922.4333333333334,
+              "p50": 1947.4,
+              "p95": 2463.7
+            },
+            "marian": {
+              "n": 18,
+              "missing": 0,
+              "mean": 1097.5055555555555,
+              "p50": 798.2,
+              "p95": 2209.9
+            },
+            "unknown": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            }
+          },
+          "smart_cut": {
+            "all": {
+              "n": 102,
+              "missing": 0,
+              "mean": 3413.3137254901962,
+              "p50": 2916.0,
+              "p95": 6945.8
+            },
+            "gemma": {
+              "n": 96,
+              "missing": 0,
+              "mean": 3187.3802083333335,
+              "p50": 2833.7,
+              "p95": 5472.8
+            },
+            "marian": {
+              "n": 6,
+              "missing": 0,
+              "mean": 7028.25,
+              "p50": 6956.1,
+              "p95": 7107.5
+            },
+            "unknown": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            }
+          }
+        }
+      }
+    },
+    "B": {
+      "arms": {
+        "ctl": {
+          "cohorts": {
+            "silence": {
+              "all": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "gemma": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "marian": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            }
+          },
+          "n_by_route": {
+            "gemma": 0,
+            "marian": 0,
+            "unknown": 0
+          },
+          "secondary": {
+            "stages_by_route": {
+              "gemma": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              },
+              "marian": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              },
+              "unknown": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              }
+            },
+            "worst_decile": {
+              "n": 0,
+              "stt_call_gt_800_share": null,
+              "translation_call_gt_800_share": null,
+              "both_gt_800_share": null,
+              "stt_missing": 0,
+              "translation_missing": 0
+            },
+            "draft_accept_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            }
+          }
+        },
+        "cand": {
+          "cohorts": {
+            "silence": {
+              "all": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "gemma": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "marian": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              },
+              "unknown": {
+                "n": 0,
+                "missing": 0,
+                "mean": null,
+                "p50": null,
+                "p95": null
+              }
+            }
+          },
+          "n_by_route": {
+            "gemma": 0,
+            "marian": 0,
+            "unknown": 0
+          },
+          "secondary": {
+            "stages_by_route": {
+              "gemma": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              },
+              "marian": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              },
+              "unknown": {
+                "stt_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_call": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "translation_lock_wait": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "generation_lock_wait_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "decode_ms_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                },
+                "gen_tokens_a": {
+                  "n": 0,
+                  "missing": 0,
+                  "mean": null,
+                  "p50": null,
+                  "p95": null
+                }
+              }
+            },
+            "worst_decile": {
+              "n": 0,
+              "stt_call_gt_800_share": null,
+              "translation_call_gt_800_share": null,
+              "both_gt_800_share": null,
+              "stt_missing": 0,
+              "translation_missing": 0
+            },
+            "draft_accept_a": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            }
+          },
+          "gates": {
+            "G1": {
+              "pass": false,
+              "candidate": null,
+              "control": null,
+              "limit": null
+            },
+            "G2": {
+              "pass": false,
+              "silence": {
+                "pass": false,
+                "candidate": null,
+                "control": null,
+                "limit": null
+              },
+              "cuts": {
+                "pass": false,
+                "candidate": null,
+                "control": null,
+                "limit": null
+              }
+            },
+            "G3": {
+              "pass": false,
+              "candidate": null,
+              "control": null,
+              "limit": null
+            },
+            "G4": {
+              "pass": false,
+              "comparisons": []
+            },
+            "G5": {
+              "pass": false,
+              "control_mean": null,
+              "minimum": null,
+              "runs": []
+            },
+            "G6": {
+              "pass": false,
+              "runs": []
+            },
+            "G7": {
+              "pass": false,
+              "control_chunk_count_mean": null,
+              "runs": []
+            }
+          }
+        }
+      },
+      "control_pool": {
+        "tags": [],
+        "cohorts": {
+          "silence": {
+            "all": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            },
+            "gemma": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            },
+            "marian": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            },
+            "unknown": {
+              "n": 0,
+              "missing": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "outcomes": {
+    "ctl": {
+      "gemma_silence_n_by_clip": {
+        "A": 45,
+        "B": 0
+      },
+      "gemma_silence_n_total": 45,
+      "p95_claim_eligible": false,
+      "p95_claim_reason": "screen without p95 claim"
+    },
+    "cand": {
+      "gemma_silence_n_by_clip": {
+        "A": 45,
+        "B": 0
+      },
+      "gemma_silence_n_total": 45,
+      "p95_claim_eligible": false,
+      "p95_claim_reason": "screen without p95 claim",
+      "outcome": "REJECTED",
+      "failing_gates": [
+        "A:G1",
+        "A:G6",
+        "B:G1",
+        "B:G2",
+        "B:G3",
+        "B:G4",
+        "B:G5",
+        "B:G6",
+        "B:G7"
+      ],
+      "gates_on_all_clips": {
+        "G1": false,
+        "G2": false,
+        "G3": false,
+        "G4": false,
+        "G5": false,
+        "G6": false,
+        "G7": false
+      }
+    }
+  }
+}

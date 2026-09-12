@@ -1,0 +1,1858 @@
+{
+  "schema_version": 1,
+  "packet_id": "031184b1e1eba5188a476cb7",
+  "generated_at": "2026-09-11T23:48:34.678160+00:00",
+  "kind": "reference_free_meaning_preference",
+  "provenance": {
+    "sources": [
+      {
+        "tag": "ts0911_A_ctl_r0",
+        "file": "metrics/diagnostics_ts0911_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "sha256": "bd671e2151c50487bd06c3cccf89c14d8a31b451ba695e66fc22611de3a07740",
+        "model_a": null
+      },
+      {
+        "tag": "ts0911_A_ctl_r1",
+        "file": "metrics/diagnostics_ts0911_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "sha256": "4b8a8b51eb33b697eb527128cfe357e4f1b9bd2b31cdb1eda0abb39049798e6a",
+        "model_a": null
+      },
+      {
+        "tag": "ts0911_A_ctl_r2",
+        "file": "metrics/diagnostics_ts0911_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "sha256": "2ba8c719c2b4074ca70f0a6a8fc654b6abde1f912ce4fb6fba5076a287f4ca5e",
+        "model_a": null
+      },
+      {
+        "tag": "ts0911_B_ctl_r0",
+        "file": "metrics/diagnostics_ts0911_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+        "sha256": "8f895ad7727ddf9b26f3b312d79853712c1999122d2aefabe13a63154c4c53cc",
+        "model_a": null
+      },
+      {
+        "tag": "ts0911_B_ctl_r1",
+        "file": "metrics/diagnostics_ts0911_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+        "sha256": "8dd65e1fba7ec90dac07d791f9e30950da60bc90d6c43427c012fe89409c24b6",
+        "model_a": null
+      },
+      {
+        "tag": "ts0911_B_ctl_r2",
+        "file": "metrics/diagnostics_ts0911_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+        "sha256": "c6073a443f3f3292c3ea3f52ec384cc5399798d0e9352eed3526900dd4031078",
+        "model_a": null
+      },
+      {
+        "tag": "lb0912_A_ctl_r0",
+        "file": "metrics/diagnostics_lb0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "sha256": "b9b9b55a7161419ec6986ab5517783071fe9a3aa97688fe133e0edf86426d84d",
+        "model_a": null
+      },
+      {
+        "tag": "lb0912_A_ctl_r1",
+        "file": "metrics/diagnostics_lb0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "sha256": "df7d4884afe961e24f648d4b1bf28fc937c2eebdbe3327acca88ea953e105844",
+        "model_a": null
+      },
+      {
+        "tag": "lb0912_A_ctl_r2",
+        "file": "metrics/diagnostics_lb0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.jsonl",
+        "sha256": "611cbb14ac3448f56f4616cb2c01a4882d4e118fccbd1f2d09a94984631950ad",
+        "model_a": null
+      },
+      {
+        "tag": "lb0912_B_ctl_r0",
+        "file": "metrics/diagnostics_lb0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+        "sha256": "5e0392a14ce9872e78ed1707d4f822d4582a23612b6dab6d50177313f7ba5eeb",
+        "model_a": null
+      },
+      {
+        "tag": "lb0912_B_ctl_r1",
+        "file": "metrics/diagnostics_lb0912_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+        "sha256": "10e6e84df2da4de019d3a749c6f99ecf82f29b1ee03dcf70af7895d0840be525",
+        "model_a": null
+      },
+      {
+        "tag": "lb0912_B_ctl_r2",
+        "file": "metrics/diagnostics_lb0912_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.jsonl",
+        "sha256": "64cc38c695b78ebb0924069a7be021575db85f016329114e8d5d15c75a8b8557",
+        "model_a": null
+      }
+    ],
+    "marian": {
+      "ct2_path": "None",
+      "backend": "ct2-int8",
+      "files": [],
+      "settings": {
+        "model": "Helsinki-NLP/opus-mt-en-es",
+        "backend": "auto",
+        "compute_type": "int8_float16",
+        "intra_threads": 4,
+        "max_new_tokens": 128
+      }
+    },
+    "band_words": [
+      8,
+      12
+    ],
+    "route": "gemma",
+    "dedupe": "normalized english",
+    "selection": "sha256 order of normalized english, first 120"
+  },
+  "provenance_sha256": "d73755ca1b64e96eee8978e6ecc858f90ab6ac503e19ab87571595324d523bc4",
+  "counts": {
+    "cases": 30,
+    "unique_sources": 30,
+    "changed_cases": 22,
+    "sources_with_repeat_drift": 0,
+    "by_word_count": {
+      "8": 10,
+      "9": 8,
+      "10": 2,
+      "11": 4,
+      "12": 6
+    }
+  },
+  "cases": [
+    {
+      "schema_version": 1,
+      "case_id": "864519d8621d7c04fcfd70a9",
+      "source_id": "live:6d4a4fb532111b6b",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "It's not because you or I have done something",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "6d4a4fb532111b6bbe886e4318271723eea9318be592ad6213ff8ea346a53623",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "smart_cut",
+      "occurrences": 6,
+      "input_sha256": "adcb142bb1ffefce7408c7e782f127a67300b3b0e704cf6443d3be9c181db834",
+      "hypotheses": {
+        "A": "No es porque tú o yo hayamos hecho algo.",
+        "B": "No es porque tú o yo hayamos hecho algo"
+      },
+      "hypothesis_sha256": {
+        "A": "68ee1005c62f12c19fe526366d6c9f4d6d2bcab5500457247d1859323c86bb9f",
+        "B": "58fe65fa25d32d98a8c231ea26600c49c1c8d16ff0ad5afda3ea51908743e145"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "234c81632cfa319426d923d64134bf87137c2006132605c26b2e5e82c0b7134f",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "164c7ac9b91fd347d024e732",
+      "source_id": "live:94c143e8c9afadf3",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "So his desire is that you be saved, but don't get it",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "94c143e8c9afadf308e17aa1d24739105910943c60e7e18f9bf0fd14dd62d416",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 12,
+      "endpoint_reason": "smart_cut",
+      "occurrences": 6,
+      "input_sha256": "b691bfda46daa1a008bc3e4558a5cbdd8a555f9eecd1bd3d5d2b49f9ba1d1cf8",
+      "hypotheses": {
+        "A": "Así que su deseo es que seas salvo, pero no lo entiendas",
+        "B": "Así que su deseo es que seas salvo, pero no lo entiendas."
+      },
+      "hypothesis_sha256": {
+        "A": "99db59c03a5e2dc2fa055c7df4020c461261b2d9ea6d92933a0aa021c63402ad",
+        "B": "0fa8e7955c8edb17874845a2e8a28912109c00949a5e7c867e6bacd22e37e73b"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "50eef6f6ce529d008f929599da130957bed4e40f5e9df92e301053b4fbebf98e",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "cbd40c1af8212c00b2d58f33",
+      "source_id": "live:eb8402b37f0c0215",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "But he wants everyone to come to repentance.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "eb8402b37f0c02150049c2474fbe41ff5b5258490039d124671cb5e04dc8d370",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "4c0977f12f24f43b182eeae2acc5a1af7df3973e0863ccdfc450ccc612c346b7",
+      "hypotheses": {
+        "A": "Pero él quiere que todos vengan al arrepentimiento.",
+        "B": "Pero él quiere que todos vengan al arrepentimiento."
+      },
+      "hypothesis_sha256": {
+        "A": "baef7fc6e57e4833d8d69d350141b996dc2a594741ce9fc9b734f2ff2ec3673f",
+        "B": "baef7fc6e57e4833d8d69d350141b996dc2a594741ce9fc9b734f2ff2ec3673f"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "d5bb86306c83db899eb34f4e9ba28c5a133367c4a17da6587a309f2486958d37",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "2e4ff883c1f21dd25967af8e",
+      "source_id": "live:abcf2bac1483dca6",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "And so for my third and final point,",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "abcf2bac1483dca6f70ebd2e0d5d2070172bcebc8bbead76bdaf6452c31c4ec7",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "9279a3dbe28547a06dee435ac6cbd7f9a56f22b3c5aebf82e1f32c210a3264be",
+      "hypotheses": {
+        "A": "Y así para mi tercer y último punto,",
+        "B": "Y así, para mi tercer y último punto,"
+      },
+      "hypothesis_sha256": {
+        "A": "68e170128468fdbcfdd8306c9edfe3eadb13ba95a3ca49767622c679ac3ef547",
+        "B": "3c1e7d034645c672a47cc638ad46e5b9f390e1224955afbf118ced9b8f91dfbf"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "f86db19c7ba8bb6a680848dd25c09a4082d1f93c787f6efc8cab1a18c06a1a17",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "ec43bfca59228dbc0e4ec47b",
+      "source_id": "live:8023f1a88726f616",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "That takes us almost all the way back to the beginning.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "8023f1a88726f61627b0185bb9d178ea1696e2a13d88a959107b65f8f97506f1",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 11,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "9f6d71506b4b5d5ea4ecfccf5eabdcff8b1f53526c6a90637178d4fa797bce7a",
+      "hypotheses": {
+        "A": "Eso nos lleva casi hasta el principio.",
+        "B": "Eso nos lleva casi hasta el principio."
+      },
+      "hypothesis_sha256": {
+        "A": "a48467d88ebce200b52f81241cfa5596a82b86ac48d453d027f729917d13b004",
+        "B": "a48467d88ebce200b52f81241cfa5596a82b86ac48d453d027f729917d13b004"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "c888f3d01c624b4ca02184d19a4cf0f4befd2582c546aa1a3b25ba7d739863da",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "0eb5375438321e9038232391",
+      "source_id": "live:22db2f183e49c478",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "God is the savior. He does all the saving.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "22db2f183e49c478f89de083d17962f719b85e68d0842d6f5dde6d5ef40a50ed",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "574dcffaee75ced43a5cb5946e3d3c24cd180d1bff151731a8f9d7dd6ab36eae",
+      "hypotheses": {
+        "A": "Dios es el salvador. Él hace todo el ahorro.",
+        "B": "Dios es el salvador. Él hace toda la salvación."
+      },
+      "hypothesis_sha256": {
+        "A": "e95d7c5fb4cff0814f5ed98733bd1ac4e930aec9b724d2298e4fd15c8a4b2460",
+        "B": "5787daccf51840a8aa2784aacad1957f59dc27bfc3b6d8e1cc808de720db4e75"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "8fa64231d69c07dc4cfc9beb56d5270c670f5037b0f8f7b3f622519e367ee905",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "d71b6b545db1821dc49eea07",
+      "source_id": "live:96e36febbae41210",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "God is a God who loves to save.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "96e36febbae412103dd48a356b8fedf792fa8b08de68ea6cfd1c34cbe4834373",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "39ef4496dc0ce09051cb6189f0faf37f1ca35c18527d371ec04e2d2daf065690",
+      "hypotheses": {
+        "A": "Dios es un Dios que ama salvar.",
+        "B": "Dios es un Dios que ama salvar."
+      },
+      "hypothesis_sha256": {
+        "A": "c3e93be613bad3c2107c58a3c7a1991274b957116f2478878e58a87a3619079b",
+        "B": "c3e93be613bad3c2107c58a3c7a1991274b957116f2478878e58a87a3619079b"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "69cfb70307c2e813b30dea430070477949cf2ae077764ba198812e34be295f91",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "e3c9fddca5b8c5aab4ff2082",
+      "source_id": "live:60d132e2292fbde3",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "He is a savior and he loves to save.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "60d132e2292fbde3f6887218ea2c97f555170ea9a0ca5f028f1b93076bbc0c6f",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "9335b91b51a99a2a51702aa09b2b8f5d05486a84334925537fd0b3ab0f065c6f",
+      "hypotheses": {
+        "A": "Es un salvador y le encanta salvar.",
+        "B": "Él es un salvador y le encanta salvar."
+      },
+      "hypothesis_sha256": {
+        "A": "d7c6397564917e5c04d7cffe6293d5f8b6d9bbb318a84e7f629c96607a68dab9",
+        "B": "2bc3d075a72e4833fcb08e67dece05f3c3defa2091afd5f26aa0315fdf295aa0"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "fa5a0d82c68fe6758813dea1d7d72aae3ecb1cc75206a021ac97241e9859896a",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "a988b0eef70e7ceae391ad4d",
+      "source_id": "live:4d0a886f5e11b521",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "Man can no longer be in God's presence because of sin.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "4d0a886f5e11b5217a221d399f87ba5b282fe9c1e5f0e6cfc52439472fd9b8a0",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 11,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "94c92bf90f05f837b3e1d1ba96725da3c72c1ca9b7c62a54c4e617be4496bbb0",
+      "hypotheses": {
+        "A": "El hombre ya no puede estar en la presencia de Dios debido al pecado.",
+        "B": "El hombre ya no puede estar en la presencia de Dios debido al pecado."
+      },
+      "hypothesis_sha256": {
+        "A": "1d072b89c5e01feb4463fcf1ee8bed85f763ac840d2d2789ac7a7ef4bc9664d6",
+        "B": "1d072b89c5e01feb4463fcf1ee8bed85f763ac840d2d2789ac7a7ef4bc9664d6"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "6cb7cad25fa250919564b902c869cf92559e66a06c99e33a20fe3eac6bb7d4a7",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "fe9150acfc73308e77c8b3f9",
+      "source_id": "live:2fb11f91eb22e370",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "I want to ask again, are you saved? Um",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "2fb11f91eb22e370723f9a9e8e33c7285b9921b8346a01af01fd1b37fd906052",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "3b04c10a559983ecc6091d09c453f7cea659f6f869b8426df93e9b54ded0229e",
+      "hypotheses": {
+        "A": "Quiero preguntar de nuevo, ¿estás salvado?",
+        "B": "Quiero preguntar de nuevo, ¿estás salvado? Um"
+      },
+      "hypothesis_sha256": {
+        "A": "114567a717c0b8f0d169e1998e5330332a50eebde9e65ae2467178c8efc0d064",
+        "B": "227f8f38961bf41fa430ff1adc40d30fef7eb0b1fd6f29849f9111a0566389e7"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "cf254130ca6c171f2e7b79a6bd2a6a8e3f7294753a1dfd96efbeaa92df2d9259",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "6de11ecce148f17f9ad30cf7",
+      "source_id": "live:707b84d20fa0dd8a",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "When they did this, when they disobeyed, what happened?",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "707b84d20fa0dd8a9c470cd7373c61678e53bbbd9897a150fb615bbe373d0063",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "878664f44c1fa7af71ff45742109b3751a1943a69b179e7efda72e8f1fc45201",
+      "hypotheses": {
+        "A": "Cuando hicieron esto, cuando desobedecían, ¿qué pasó?",
+        "B": "Cuando hicieron esto, cuando desobedecieron, ¿qué pasó?"
+      },
+      "hypothesis_sha256": {
+        "A": "db0f1807c9241e6439128bc13b0c026449699ac9be1691b2af43f3c216cd8f4d",
+        "B": "350d100735df4adff20ac69252124033e398bdd5aa449dea720d2c969eefbd51"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "3f1faee83d58552b91fdb93b72b18c67966ee3e85ec514520e4e278db2c258f0",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "67e3873ef3cbccf6f0654c30",
+      "source_id": "live:1c06292a5d11fabc",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "You you should probably go turn yourself in. Um",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "1c06292a5d11fabc5175e8fdf4dd943fde58ac967cc411972bc361e9305484d9",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "d65da0cf72513147755a6038d860c6c54cddab607af332abc446d8dd139075df",
+      "hypotheses": {
+        "A": "Probablemente deberías entregarte.",
+        "B": "Probablemente deberías entregarte. Um"
+      },
+      "hypothesis_sha256": {
+        "A": "8427ab84def07c1367d1b3add164818720a8a060233279a7474e1f8244a93620",
+        "B": "887cf6b7b0523e5d35fd8008b0dc7ea30abb897bb32be258ca90a81b8f3e3f67"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "2d1b224a52cd950d2150c4e3c43c7f30e751d2ae528161495d5dc6fb0ef8a668",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "f5fd54a7b10da63eb6504ca4",
+      "source_id": "live:70500f6c50ea236a",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "And what does a savior do? A savior saves.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "70500f6c50ea236a2c741d5d62e3990e87568b50618223f2b178570cbc9804d8",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "6cf1c4ea9722a28ace6592bc572e04be17a42d45b6317f0cbb79db9921f628f9",
+      "hypotheses": {
+        "A": "¿Y qué hace un salvador?",
+        "B": "¿Y qué hace un salvador? Un salvador salva."
+      },
+      "hypothesis_sha256": {
+        "A": "a0dc5ecde33488c0242909e8f842da61087e5ec04a6ba9fe73bf2c4b76e3a922",
+        "B": "6622b117c67dd062ea69effc984edf25021babfbd15bf6b09b1f4e8f16e32999"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "6a904fba051fc07fa90446fcce5017cf10fa6b3b0c57f28a280d61e4a486291e",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "745ec28a11e04349875e5a9a",
+      "source_id": "live:c7cfd76ea2b8d9d9",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "When there was one God who created the heavens and the earth",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "c7cfd76ea2b8d9d9b326fb60d8e27821885a26da7dad0193d9b4eca1276eca6e",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 12,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "2ae6690bbb598da15325155ed007775e096bdff2bed5f5ca68408844c534d6a2",
+      "hypotheses": {
+        "A": "Cuando hubo un Dios que creó los cielos y la tierra",
+        "B": "Cuando había un solo Dios que creó los cielos y la tierra"
+      },
+      "hypothesis_sha256": {
+        "A": "c1ab311b8b82cae4b0b51a53a50aa2088ce5f3e11b1d8b02bd09b39ea70209c4",
+        "B": "e1a5bd633935862c417d0d8af19f747b2236a5df79f1f4384f54b609a8f2406f"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "022323ad451abf2c13a2755b3e7875d12332729a45430001e304b794df2c522f",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "34c19c26d0260ec9d2cbc50f",
+      "source_id": "live:c0db461088734138",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "Maybe this is too generic, but a doctor longs to heal people.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "c0db461088734138bfdb4e2437b0af7b5742fb76789479854c957985feb923bf",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 12,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "643ce4ce50823cd54edd063c776623d5ba745114a5774f9987678a34d0c4be64",
+      "hypotheses": {
+        "A": "Quizás esto es demasiado genérico, pero un médico anhela curar a la gente.",
+        "B": "Quizá esto es demasiado genérico, pero un médico anhela curar a la gente."
+      },
+      "hypothesis_sha256": {
+        "A": "77a6753869ae74441f0f5aee221efd1ede70c1e5b6d4bc1872212cfde327dd68",
+        "B": "c29d1db6894aab7a5e379aa01c237e376f057e6663f20feb606a5565670f0228"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "7ee7db954d11ab613da374e3809e3fb3b88b6126f3af75af3e0704d3e8c2bff0",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "79dc9a84c885299438a32adc",
+      "source_id": "live:f3abca70d7424154",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "Adam's sin that has separated you from God, although that is true.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "f3abca70d74241546decee2632a4cbd630ae5f52639877d99558335490048e38",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 12,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "4b26e046256b1778e1095183c9778488b4f21ac913513757f51982cc251d3c62",
+      "hypotheses": {
+        "A": "El pecado de Adán que te ha separado de Dios, aunque eso es cierto.",
+        "B": "El pecado de Adán que te ha separado de Dios, aunque eso es cierto."
+      },
+      "hypothesis_sha256": {
+        "A": "18446e956395a66e11e1c3b21df6c6308817f848a4e897979c32a2481a4fa245",
+        "B": "18446e956395a66e11e1c3b21df6c6308817f848a4e897979c32a2481a4fa245"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "c959f22f7dffd686d969e2e118dad9de5365ce07e23dd7180f38e550972c1291",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "4997a7ffaaffe3ddfdb55690",
+      "source_id": "live:1e695d596d5f9c43",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "to accomplish salvation for you and for me.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "1e695d596d5f9c433050ab1c5a80252264ce93944c557ef45a89821b483fc550",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "e134313419e60dd1eafdb3dd8fe96c0a71db91edbc41f49eecc76e956fd8c919",
+      "hypotheses": {
+        "A": "para lograr la salvación para ti y para mí.",
+        "B": "lograr la salvación para ti y para mí."
+      },
+      "hypothesis_sha256": {
+        "A": "e6f2908415d863f9d3f1b955d218bd915295122d435d7fad16ea16b86ab63e49",
+        "B": "652564cf3ae9aa927d335241fde7fc186dcc99d6fb6454cabc79bb93b06283cb"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "a4528860674ced36b26dcad0951de3597dd2ee417ba74ec6444cb5af9eed1f80",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "71fe096768bb0396ab0a3dce",
+      "source_id": "live:09e4e68a4d81bff1",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "Uh sorry, I just lost my spot here.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "09e4e68a4d81bff1b330ff70fb79ca21030b71624f117ff2d85a9b42ee7e51c0",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "a5e030412a48d12fb70084acc0576d8846c39e708fc48f90e91adfee109f42fe",
+      "hypotheses": {
+        "A": "Uh, lo siento, acabo de perder mi sitio aquí.",
+        "B": "Lo siento, acabo de perder mi lugar aquí."
+      },
+      "hypothesis_sha256": {
+        "A": "7dfc118ef93bfcc95372d9eb7d2e4f040545e6014be5c8c50034e37d83fec668",
+        "B": "1e1aaa78d8fbd2f4d458a128f1f9001681f5b3576a00990d41c46160e741b2f9"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "d8b916c117894c01ae187f769d65c6a2337c300d9dea1b24c14dedf5b85609a3",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "d0eee3825eaae2b88b9b22cb",
+      "source_id": "live:f1f356ac5b78bc4a",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "Now a mediator implies that there is a distance, there's a divide.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "f1f356ac5b78bc4a538aa187f3e71ec30d8d02f512262d644868482d2d17c37d",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 12,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "2aa400c2645f54915a3760826e86243d16c87e98f99bffb503e7eaa7d20b4c8a",
+      "hypotheses": {
+        "A": "Ahora un mediador implica que hay una distancia, hay una división.",
+        "B": "Ahora un mediador implica que hay una distancia, hay una división."
+      },
+      "hypothesis_sha256": {
+        "A": "99c1a208ed699932de86a2ceb66b451c82e167d92dd98b225b466060ff256394",
+        "B": "99c1a208ed699932de86a2ceb66b451c82e167d92dd98b225b466060ff256394"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "1d08421854c182ae87a19042abff8ec83c4be3f2175941f431ba4848a33a297a",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "d3abbeef92325709c70cc8bc",
+      "source_id": "live:ae0562feb3ea99f2",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "No, God saves because he loves to save.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "ae0562feb3ea99f23572e2a178d35297c35b8f8d4c87f6641f301adacb503cc8",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "e18faeadcfcbe5d6e43560860f57094a8e0f1066c035f148cf2de195cba3b80d",
+      "hypotheses": {
+        "A": "No, Dios salva porque ama salvar.",
+        "B": "No, Dios salva porque le encanta salvar."
+      },
+      "hypothesis_sha256": {
+        "A": "4dd1726af49070fd4c3eeca2f1159f88eb52d6135ddcce607b3a16ad1279d9cf",
+        "B": "cd8efb6442cb0ebdfb1321fa6661db4e4f531ed0e26cd5077a5ecdd29cb9d292"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "e77fd24fb5edcd4009b42c995113b17c8edbd1bfa9db6612f7147899c6d6ba00",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "3df8cbb1a87b32aaf1b1e534",
+      "source_id": "live:dfa3dda27e2f10a5",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "There is one mediator between God and men.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "dfa3dda27e2f10a5a95ed28874c6b5f854f0f9fafe8ed4c4b48d392b3089f6a2",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "abf7b9432134f869de84df6c794e11107ba5d41ec4af63a12c2cb8bc1dd0ec8c",
+      "hypotheses": {
+        "A": "Hay un mediador entre Dios y los hombres.",
+        "B": "Hay un mediador entre Dios y los hombres."
+      },
+      "hypothesis_sha256": {
+        "A": "afaa85aa28c61007e7644f9fe1b6eefa91890fb8dc57dc0e918fbd0a2fd866d3",
+        "B": "afaa85aa28c61007e7644f9fe1b6eefa91890fb8dc57dc0e918fbd0a2fd866d3"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "df578efec529e0cfb0b82ab5cdb47a0ab067d4545ae80fc7313774c2aea7ffa3",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "b570c2d4ccb2010dbe2bcdef",
+      "source_id": "live:777bd35e3d97ec3c",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "After some time, man and woman, Adam and Eve, they sinned",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "777bd35e3d97ec3ca4008aa04d93d4b612dcae076588c274f0a078d75f7ebdec",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 11,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "db81835395d39b4868eb210ebe06a120edeb36319a7615f9963a9c0deed47136",
+      "hypotheses": {
+        "A": "Después de algún tiempo, hombre y mujer, Adán y Eva, pecaron",
+        "B": "Después de algún tiempo, el hombre y la mujer, Adán y Eva, pecaron"
+      },
+      "hypothesis_sha256": {
+        "A": "7974e2948daacc36dbf5c6a9487e9c4dbc35a222fcc69f1342cb89f13fe7298b",
+        "B": "77daf46c810691b7fc4ff63acc37483fcf6b1a1ab54c4143530b331d45b8f33b"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "8f388142b439aa455c8aeec0e1883d620afa492de6d84dddebd158df1af2914e",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "795adaa28630bb789f427d91",
+      "source_id": "live:fb6a63bacd20bc8d",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "And what happened? On on the sixth day he created man.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "fb6a63bacd20bc8dc72ed2162bce57e722567a0a836befac54d65552614c4297",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 11,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "39cac1874ee3c78060e32711696957525478bc7efd27fd54c040be915b5920f3",
+      "hypotheses": {
+        "A": "¿Y qué pasó? En el sexto día creó al hombre.",
+        "B": "Y al sexto día creó al hombre."
+      },
+      "hypothesis_sha256": {
+        "A": "d994480fb04d3fb740dad13a807c9161e52d7765c61f0c86fd97ab0f77e63af4",
+        "B": "9bb8d05ab53a9a9c04628c13bb4307b99a85887e7c9d095dd37776e9fb114933"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "8e6ca9d8b09a14cb6ce8c94b31afa4ae83180221e09213a7584f3879442c1b09",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "f48a9ad18af3be21562a14a1",
+      "source_id": "live:42039823779c0b17",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "This outlines the saving method of God. How is it that God",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "42039823779c0b173a13c1d55f1b0b2820c1243cf910fc41f276eca0aa9190be",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 12,
+      "endpoint_reason": "smart_cut",
+      "occurrences": 6,
+      "input_sha256": "548d78b2ab0c0256d28e76c048d4e20296a5a5f78941a75761253ae82ff8ef1a",
+      "hypotheses": {
+        "A": "Esto describe el método de salvación de Dios. ¿Cómo es que Dios",
+        "B": "Esto describe el método de salvación de Dios."
+      },
+      "hypothesis_sha256": {
+        "A": "ad8047567ee02401907a3a02f2406f5efdf0ec128fc30d58594ce8940a371109",
+        "B": "fa320ecd3cdd21d9086bbcb071b616f1b9fe24a834f1da656d688dbcd36c4dab"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "5f051be0175bc88b7f82ad7fe95081afbffc5fb10f7c6cd403d948ebb7d8c3b6",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "98f2568ca113f32d5ff6f2cd",
+      "source_id": "live:9fb437d3acb70d3d",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "Well what does a savior love to do?",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "9fb437d3acb70d3df891001d30190aae10527f811b1a4f6627f1f44d3abfffcc",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "686a2a298988b8a6a5d6d8fd0b629ce2a5cf9a133b444b99191d396f63e1c0f2",
+      "hypotheses": {
+        "A": "Bueno, ¿qué le encanta hacer a un salvador?",
+        "B": "¿Qué le gusta hacer a un salvador?"
+      },
+      "hypothesis_sha256": {
+        "A": "f03f09e2cdf165c47accda91a8dfb1c87148ef6e59283a3c82696550dfedfb01",
+        "B": "b1d6d6051ec2e55a24a8d9934a95709d1b63a997ad51cbfc3609d045de6cf1b0"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "8ce50718bdeb507f8dad2c9edc9643cf5170a5b26aac299e2f9a1f8a789a5c4c",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "5685f64de4c42b2fc4ba4819",
+      "source_id": "live:5c9a9af7e95cf6eb",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "When we read for there is one God",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "5c9a9af7e95cf6ebf0681303a0505f8fb75c751cb1bfa70b0212f6abbb87a2ff",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "c900ea921b13cf5b28eb4d14855044892c046cc0ec08ed6b839ea3ca23cf48db",
+      "hypotheses": {
+        "A": "Cuando leemos que hay un solo Dios",
+        "B": "Cuando leemos que hay un Dios"
+      },
+      "hypothesis_sha256": {
+        "A": "b378bbc3af92c152a4cd12cc99d0dd80bde4fdacec810d72e7bcdf6a7498204a",
+        "B": "e2158347a1280224f997c54afc14548a29a46eacdacc3d4aed21572129cc1aa4"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "1b4b4e77b93642cbd2a9374fb5ec2f24ec931b7cbbfec36030e0df2928ed3ef1",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "2ec6173fa1e7a055e170aeec",
+      "source_id": "live:c04ad6db1c408ebe",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "Um and then also I noticed too that um",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "c04ad6db1c408ebea9c609b1bbb3d03dde054f83570a9ec53101f7246115fbed",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 9,
+      "endpoint_reason": "smart_cut",
+      "occurrences": 6,
+      "input_sha256": "94c0eb350ad29bf3169f34789a7c578d871ad677d1580089a9657d2c08abdc61",
+      "hypotheses": {
+        "A": "Um y también noté que um",
+        "B": "Um y luego también me di cuenta de que um"
+      },
+      "hypothesis_sha256": {
+        "A": "ec4aaaa0e03ada2f5219d366bcd47af600ab6af5aa25e65bbabf3a1886b9e02f",
+        "B": "6682006e7b96539968bd5ed1507ee3ff348ea738679cc59c83a7dae8659d3d7b"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "94c6090b3f444dd0045a9092babdbe9d6dac28846d21a75e5ed8a61f4c8d3fe0",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "cb5c7bdeb7f346602c75b40a",
+      "source_id": "live:e2c51a178664f22d",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "And what is it that God has done?",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "e2c51a178664f22d10251ba593af4a06e98833200839d55c8e7f66ed9b5f2c25",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 8,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "d7a94bae78c33bcc7f2e931ebf2333a51e92e7e5ff3b5921cf1bd88f38d87660",
+      "hypotheses": {
+        "A": "¿Y qué es lo que Dios ha hecho?",
+        "B": "¿Y qué es lo que Dios ha hecho?"
+      },
+      "hypothesis_sha256": {
+        "A": "46a8e28f25ab6bfd939d80f7fbc69cc8c4b6a57ea7fcd762a79fddc69558e7ce",
+        "B": "46a8e28f25ab6bfd939d80f7fbc69cc8c4b6a57ea7fcd762a79fddc69558e7ce"
+      },
+      "outputs_differ": false,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "a21cf524f2087cf06596112ba386b0c15a213e2661a4ba6c522cd06ea27cb1a9",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "d0508062b4a78b6b5336b35c",
+      "source_id": "live:ae32b5955420779d",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "And the answer to that is it's yes. Um but",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "ae32b5955420779d59353c8547062a7b8c3fec6bda1ab156e8d43bdb58a54e7e",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 10,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "a36f0387bcec94700943ca7c244db871bd6d940ba97a5eb8ef666cf6ae99195f",
+      "hypotheses": {
+        "A": "Y la respuesta a eso es que es sí. Um pero",
+        "B": "Y la respuesta a eso es que sí."
+      },
+      "hypothesis_sha256": {
+        "A": "0c66de615b8adff4583bca09e22167c22a359ac8ccc996e90a9f556e31a24dba",
+        "B": "371a911aa6d8747926896b62fda2addb0fc975d29e600fc3ae872b4b271a1714"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "d4ae2e930fcda1edec6f6b99c2a9d180f54d1c00d70d7e967393de6bc60f55bd",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "case_id": "b993d408696d358b9f096557",
+      "source_id": "live:7df75c561d344f5c",
+      "repeat": 0,
+      "source_lang": "en",
+      "target_lang": "es",
+      "partition": "series3_control_replays",
+      "category": "live_sermon_final_8_12_words",
+      "source": "That is how salvation happens for you and for me.",
+      "reference": null,
+      "reference_provenance": "live replay final; no human reference",
+      "required_substrings": [],
+      "source_text_sha256": "7df75c561d344f5cbcbb48251726d8c722d851b72dd6deb718b95af3a8645062",
+      "reference_text_sha256": null,
+      "source_audio_sha256": null,
+      "sentence_id": null,
+      "word_count": 10,
+      "endpoint_reason": "silence",
+      "occurrences": 6,
+      "input_sha256": "4db799a375ca56ea8082526a9c13f1382337af351a3aaa8c14cc86cd928dcf0e",
+      "hypotheses": {
+        "A": "Así es como ocurre la salvación para ti y para mí.",
+        "B": "Así es como la salvación sucede para ti y para mí."
+      },
+      "hypothesis_sha256": {
+        "A": "59c8d1519f956d0aabd8815daf6716d6832829a035326cbaf31f913223d940d7",
+        "B": "daa00840ced2b4d18ffcd7c5a40392980fd15f9b6e8251a90daee031bc4cc220"
+      },
+      "outputs_differ": true,
+      "repeat_output_drift": {
+        "A": false,
+        "B": false
+      },
+      "human_approved_locally": false,
+      "training_eligible": false,
+      "immutable_case_sha256": "43f9e4fe4a64b6795842926a738868456a4fbcf09f16639f8f630524efea116f",
+      "review": {
+        "meaning_error": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_severity": {
+          "A": null,
+          "B": null
+        },
+        "meaning_error_notes": {
+          "A": "",
+          "B": ""
+        },
+        "terminology_preference": null,
+        "overall_preference": null,
+        "preference_reason": "",
+        "reviewer_id": null,
+        "reviewed_at": null,
+        "approval": false
+      }
+    }
+  ],
+  "instructions": "Both hypotheses translate the same live English final; no reference exists. Mark meaning errors per hypothesis, then a preference. Automatic scores are withheld from this packet."
+}

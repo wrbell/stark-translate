@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "id": "partial_reuse_screen_series4_20260912",
+  "declared_at": "2026-09-12T00:15Z (before any run)",
+  "purpose": "Declared screen of the opt-in partial_reuse_ms arm admitted by the series-4 P2 attribution (last emitted partial reaches within 300 ms of the silence-final speech end in 98.5 % of finals, result ready before finalization in 100 %, text equal 84 %). Behaviour-changing arm: keeps the 15 % median gate plus text guards; production defaults unchanged; no visible-ACK, human-quality or default-promotion claim.",
+  "checkout": "/Users/willem/Code/vibes/SRTranslate-wt-p2 (codex/series4-p2-reuse @ 56a045b = P2 arm on main 815dade, which includes P1 #217 and P6 #216)",
+  "interpreter": "venv/bin/python",
+  "profile": "standard",
+  "fixed_argv": "--profile standard --no-tts --stt-backend parakeet-mlx --model-family gemma4 --gemma4-size e4b --vad-backend torch --no-mts --gain 1 --replay-speed 1",
+  "baseline_env": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "STARK_EXPERIMENT_TRACE": "true",
+    "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"
+  },
+  "arms": {
+    "ctl": {
+      "kind": "control",
+      "env": {}
+    },
+    "reuse100": {
+      "kind": "candidate",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_REUSE_MS": "100"
+      },
+      "memory_rule": "relative"
+    },
+    "reuse300": {
+      "kind": "candidate",
+      "env": {
+        "STARK_EXPERIMENT_PARTIAL_REUSE_MS": "300"
+      },
+      "memory_rule": "relative"
+    }
+  },
+  "clips": {
+    "A": {
+      "path": ".cache/followup-20260911/X/clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17",
+      "offset_s": 1290,
+      "duration_s": 360.0
+    },
+    "B": {
+      "path": ".cache/followup-20260911/X/clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c",
+      "duration_s": 360.0
+    }
+  },
+  "design": "per clip: ctl,reuse100,reuse300,reuse300,reuse100,ctl,ctl,reuse300,reuse100 (3 repeats each, order-balanced); 18 runs; one inference process at a time; a crashed run is retried once then BLOCKED",
+  "gates": {
+    "G_median": "Gemma-routed silence-final first-token p50 (translation_started + ttft_ms_a - speech_end) AND speech_end_to_final_ms p50 improve >= 15 % vs control on BOTH clips (expected ~ -0.3 s of ~1.2 s / ~1.7 s)",
+    "G_tail": "no p95 regression beyond max(5 %, 100 ms) on Gemma-routed silence finals, all silence finals, or all finals",
+    "G_preview": "preview count within 2 pp of control per clip",
+    "G_text": "pooled English WER of candidate finals vs control finals <= 3 % and concatenated Spanish WER <= 3 % per clip; bad_split count not above control; every differing final listed",
+    "G_memory": "Metal peak within max(5 %, 1 GiB) of control (relative rule)",
+    "reported_not_gated": "final_stt_reused_partial / final_stt_full counters, reuse share of silence finals, final STT p50, cut finals unchanged"
+  },
+  "outcome_rule": "PASS (both arms judged separately) = qualified for an attended confirmation with visible ACKs and a human review of the listed text differences -> PR #218 auto-merge enabled (flag stays off by default); REJECTED otherwise -> PR left open with the numbers",
+  "amendments": [
+    "2026-09-12T02:16Z, before run 1: checkout commit recorded (56a045b); both arms share it; nothing else changed"
+  ]
+}

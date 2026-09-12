@@ -1,0 +1,4 @@
+=== p2c0912_A_ctl_r0 order=0 start 2026-09-12T04:02:03Z
+  File "/Users/willem/Code/vibes/SRTranslate-wt-p2b/tools/replay_bench.py", line 501, in run_replay
+    raise RuntimeError(f"Replay failed; see {log_path} and {output_path}")
+RuntimeError: Replay failed; see /Users/willem/Code/vibes/SRTranslate-wt-p2b/metrics/replay_p2c0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.log and /Users/willem/Code/vibes/SRTranslate-wt-p2b/metrics/replay_p2c0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk.json
