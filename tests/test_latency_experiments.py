@@ -17,3 +17,15 @@ def test_partial_reuse_configuration_is_bounded_and_serialized(value):
 def test_partial_reuse_configuration_rejects_invalid_values(value):
     with pytest.raises(ValueError, match="STARK_EXPERIMENT_PARTIAL_REUSE_MS"):
         LatencyExperiments.from_env({"STARK_EXPERIMENT_PARTIAL_REUSE_MS": value})
+
+
+def test_partial_reuse_keep_confidence_is_off_by_default_and_parses():
+    assert LatencyExperiments.from_env({}).partial_reuse_keep_confidence is False
+    assert (
+        LatencyExperiments.from_env(
+            {"STARK_EXPERIMENT_PARTIAL_REUSE_KEEP_CONFIDENCE": "true"}
+        ).partial_reuse_keep_confidence
+        is True
+    )
+    with pytest.raises(ValueError):
+        LatencyExperiments.from_env({"STARK_EXPERIMENT_PARTIAL_REUSE_KEEP_CONFIDENCE": "maybe"})

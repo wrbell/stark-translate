@@ -8,6 +8,8 @@ requesting final STT; disabled by default to preserve pipeline overlap.
 when translation is active at worker admission; false by default (true/false/1/0).
 ``STARK_EXPERIMENT_PARTIAL_REUSE_MS`` reuses emitted partial STT for silence
 finals within the capture-sample gap threshold; 0 disables reuse (maximum 600 ms).
+``STARK_EXPERIMENT_PARTIAL_REUSE_KEEP_CONFIDENCE`` lets a reused final keep the
+partial's STT confidence so the conservative Marian route stays available; false by default.
 ``STARK_EXPERIMENT_MLX_CACHE_MB`` applies consistently to STT and translation,
 including spawned workers; its default remains 256 MiB.
 """
@@ -44,6 +46,9 @@ class LatencyExperiments:
     partial_recheck_translation: bool = False  # Recheck translation activity on the partial worker.
     serial_finals: bool = False  # Serialize final STT after the preceding translation.
     partial_reuse_ms: int = 0  # Reuse the last emitted partial for nearby silence finals; 0 is off.
+    partial_reuse_keep_confidence: bool = (
+        False  # Reused finals keep the partial's STT confidence (Marian route stays possible).
+    )
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> LatencyExperiments:
