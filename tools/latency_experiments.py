@@ -6,6 +6,8 @@ selecting an inference backend. Values are validated before session startup.
 requesting final STT; disabled by default to preserve pipeline overlap.
 ``STARK_EXPERIMENT_PARTIAL_RECHECK_TRANSLATION`` suppresses queued partial STT
 when translation is active at worker admission; false by default (true/false/1/0).
+``STARK_EXPERIMENT_PARTIAL_REUSE_MS`` reuses emitted partial STT for silence
+finals within the capture-sample gap threshold; 0 disables reuse (maximum 600 ms).
 ``STARK_EXPERIMENT_MLX_CACHE_MB`` applies consistently to STT and translation,
 including spawned workers; its default remains 256 MiB.
 """
@@ -41,6 +43,7 @@ class LatencyExperiments:
     draft_tokens: int = 0
     partial_recheck_translation: bool = False  # Recheck translation activity on the partial worker.
     serial_finals: bool = False  # Serialize final STT after the preceding translation.
+    partial_reuse_ms: int = 0  # Reuse the last emitted partial for nearby silence finals; 0 is off.
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> LatencyExperiments:
@@ -76,6 +79,7 @@ class LatencyExperiments:
             "early_clause_s": (0, 8),
             "early_clause_pause_ms": (0, 500),
             "partial_deadline_margin_ms": (0, 1000),
+            "partial_reuse_ms": (0, 600),
         }
         for name, (low, high) in bounds.items():
             if not low <= getattr(result, name) <= high:
