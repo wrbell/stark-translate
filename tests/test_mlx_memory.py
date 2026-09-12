@@ -19,7 +19,9 @@ def mx(monkeypatch):
 
 
 @pytest.mark.parametrize("value", [8 * 1024**3, str(8 * 1024**3)])
-def test_recommended_limit_is_applied_as_integer(mx, value):
+@pytest.mark.parametrize("enabled", ["1", "true", " ON "])
+def test_recommended_limit_is_applied_as_integer_when_opted_in(mx, monkeypatch, value, enabled):
+    monkeypatch.setenv("STARK_MLX_WIRED_LIMIT", enabled)
     mx.device_info.return_value = {"max_recommended_working_set_size": value}
     log = MagicMock()
     assert mlx_memory.apply_wired_limit(log) == int(value)
@@ -27,9 +29,10 @@ def test_recommended_limit_is_applied_as_integer(mx, value):
     log.info.assert_called_once_with("MLX wired limit set to %d MiB", 8192)
 
 
-@pytest.mark.parametrize("disabled", ["0", "false", " OFF "])
-def test_disabled_leaves_metal_default(mx, monkeypatch, disabled):
-    monkeypatch.setenv("STARK_MLX_WIRED_LIMIT", disabled)
+@pytest.mark.parametrize("disabled", [None, "0", "false", " OFF ", "yes"])
+def test_default_and_disabled_leave_metal_default(mx, monkeypatch, disabled):
+    if disabled is not None:
+        monkeypatch.setenv("STARK_MLX_WIRED_LIMIT", disabled)
     log = MagicMock()
     assert mlx_memory.apply_wired_limit(log) is None
     mx.device_info.assert_not_called()
@@ -38,7 +41,8 @@ def test_disabled_leaves_metal_default(mx, monkeypatch, disabled):
 
 
 @pytest.mark.parametrize("failure", ["device_info", "set_wired_limit", "missing", "invalid", "mock"])
-def test_failure_is_nonfatal_and_warns_once(mx, failure):
+def test_failure_is_nonfatal_and_warns_once(mx, monkeypatch, failure):
+    monkeypatch.setenv("STARK_MLX_WIRED_LIMIT", "1")
     if failure != "mock":
         mx.device_info.return_value = {"max_recommended_working_set_size": 1024**3}
     if failure in {"device_info", "set_wired_limit"}:

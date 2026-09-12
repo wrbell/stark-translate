@@ -1,4 +1,9 @@
-"""Best-effort Metal working-set wiring, applied once when an engine loads."""
+"""Best-effort Metal working-set wiring, applied once when an engine loads.
+
+Opt-in (``STARK_MLX_WIRED_LIMIT=1``). The series-4 identity screen (2026-09-12)
+found no decode-speed effect from wiring at load but a +3.8 GB peak process RSS
+on the 18 GB Mac, so the default leaves the Metal wired limit untouched.
+"""
 
 import logging
 import os
@@ -11,7 +16,7 @@ def apply_wired_limit(logger=None) -> int | None:
     """Keep mlx-lm's per-generation restore at the recommended working set."""
     global _warning_logged
     logger = logger if logger is not None else _logger
-    if os.environ.get("STARK_MLX_WIRED_LIMIT", "1").strip().lower() in {"0", "false", "off"}:
+    if os.environ.get("STARK_MLX_WIRED_LIMIT", "0").strip().lower() not in {"1", "true", "on"}:
         logger.info("MLX wired limit left at the Metal default")
         return None
     try:
