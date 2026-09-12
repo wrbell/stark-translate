@@ -1,0 +1,61 @@
+=== parakeet profile cand (stock arms, patched profiler) start 2026-09-12T00:10:27Z
+rc=0 end 2026-09-12T00:10:36Z
+=== p1s0912_A_ctl_r0 order=0 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T00:10:38Z
+Replay p1s0912_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 374386 -> 377260
+=== p1s0912_A_cand_r0 order=1 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T00:16:52Z
+Replay p1s0912_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 377260 -> 381427
+=== p1s0912_A_cand_r1 order=2 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T00:23:08Z
+Replay p1s0912_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 381427 -> 385733
+=== p1s0912_A_ctl_r1 order=3 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T00:29:22Z
+Replay p1s0912_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 385733 -> 388743
+=== p1s0912_A_ctl_r2 order=4 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T00:35:37Z
+Replay p1s0912_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 388743 -> 389934
+=== p1s0912_A_cand_r2 order=5 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T00:41:50Z
+Replay p1s0912_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 389934 -> 392569
+=== p1s0912_B_ctl_r0 order=6 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T00:48:02Z
+  File "/Users/willem/Code/vibes/SRTranslate-wt-base/tools/replay_bench.py", line 501, in run_replay
+    raise RuntimeError(f"Replay failed; see {log_path} and {output_path}")
+RuntimeError: Replay failed; see /Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.log and /Users/willem/Code/vibes/SRTranslate-wt-base/metrics/replay_p1s0912_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0.json
+=== p1s0912b_A_ctl_r0 order=0 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T00:50:43Z
+Replay p1s0912b_A_ctl_r0_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 395747 -> 400682
+=== p1s0912b_A_cand_r0 order=1 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T00:57:07Z
+Replay p1s0912b_A_cand_r0_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 400682 -> 403827
+=== p1s0912b_A_cand_r1 order=2 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T01:03:46Z
+Replay p1s0912b_A_cand_r1_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 403827 -> 413645
+=== p1s0912b_A_ctl_r1 order=3 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T01:10:02Z
+Replay p1s0912b_A_ctl_r1_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 413645 -> 425737
+=== p1s0912b_A_ctl_r2 order=4 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T01:16:18Z
+Replay p1s0912b_A_ctl_r2_ctl_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 425737 -> 433628
+=== p1s0912b_A_cand_r2 order=5 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T01:22:34Z
+Replay p1s0912b_A_cand_r2_cand_Gospel_Message__12_14_25__5D2rOMvkwrk: 61 chunks
+rc=0 pageouts 433628 -> 438527
+=== p1s0912b_B_ctl_r0 order=6 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T01:28:49Z
+Replay p1s0912b_B_ctl_r0_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 438527 -> 443934
+=== p1s0912b_B_cand_r0 order=7 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T01:35:04Z
+Replay p1s0912b_B_cand_r0_cand_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 443934 -> 447197
+=== p1s0912b_B_cand_r1 order=8 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T01:41:19Z
+Replay p1s0912b_B_cand_r1_cand_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 447197 -> 452803
+=== p1s0912b_B_ctl_r1 order=9 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T01:47:34Z
+Replay p1s0912b_B_ctl_r1_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 452803 -> 455740
+=== p1s0912b_B_ctl_r2 order=10 dir=/Users/willem/Code/vibes/SRTranslate-wt-base start 2026-09-12T01:53:48Z
+Replay p1s0912b_B_ctl_r2_ctl_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 455740 -> 460201
+=== p1s0912b_B_cand_r2 order=11 dir=/Users/willem/Code/vibes/SRTranslate-wt-p1 start 2026-09-12T02:00:04Z
+Replay p1s0912b_B_cand_r2_cand_Gospel_Message__2_8_26__BpIELcuh8O0: 80 chunks
+rc=0 pageouts 460201 -> 462129
+=== P1 screen done 2026-09-12T02:06:17Z ===

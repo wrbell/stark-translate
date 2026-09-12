@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "id": "p1_identity_screen_series4_20260912_r2",
+  "declared_at": "2026-09-12T00:55Z (before any r2 run)",
+  "purpose": "Paired identity screen for the P1 runtime overhead fixes (wired limit at load, keep-warm after the final, first stream token at 1, Parakeet joint scalar decode). Exact-output engineering change: PASS requires byte-identical finals and no tail regression; it is not a latency-gain experiment arm. Production defaults unchanged; no visible-ACK, human-quality or default-promotion claim.",
+  "control": {
+    "checkout": "/Users/willem/Code/vibes/SRTranslate-wt-base",
+    "source": "main 5227a73"
+  },
+  "candidate": {
+    "checkout": "/Users/willem/Code/vibes/SRTranslate-wt-p1",
+    "source": "codex/series4-p1-runtime @ 53804d4 on main 2d01840: P1 with the load-time wired limit now opt-in (default off), keep-warm after final, first stream token at 1, qualified Parakeet joint decode, profiler fix"
+  },
+  "interpreter": "venv/bin/python (same for both arms)",
+  "profile": "standard",
+  "fixed_argv": "--profile standard --no-tts --stt-backend parakeet-mlx --model-family gemma4 --gemma4-size e4b --vad-backend torch --no-mts --gain 1 --replay-speed 1",
+  "baseline_env": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "STARK_EXPERIMENT_TRACE": "true",
+    "STARK_EXPERIMENT_TRACE_CAPACITY": "131072"
+  },
+  "clips": {
+    "A": {
+      "path": ".cache/followup-20260911/X/clipA/Gospel_Message_(12_14_25)_5D2rOMvkwrk.wav",
+      "sha256": "d55d4db2edc85acdab33a8bd108fcdeb0fd3fb6e39f062955fdf503c83f8fc17",
+      "offset_s": 1290,
+      "duration_s": 360.0
+    },
+    "B": {
+      "path": ".cache/followup-20260911/X/clipB/Gospel_Message_(2_8_26)_BpIELcuh8O0.wav",
+      "sha256": "fc2eccd7a35459ba7b00e9e064a8aa0c5c5b03bcb6c3ffec44b738c3429f176c",
+      "duration_s": 360.0
+    }
+  },
+  "design": "per clip 3 alternating pairs: ctl,cand,cand,ctl,ctl,cand (order rule from tail_screen_20260911); 12 runs total; one inference process at a time; a crashed run is retried once then the pair is dropped and noted",
+  "gates": {
+    "G_identity": "100 % byte-identical finals, sequence-aligned per clip across all ctl/cand runs (tools/tail_screen_report.py aligned G4); every difference listed",
+    "G_tail": "Gemma-routed silence-final speech_end_to_final_ms p95 and stt_call/translation_call p95 not worse than control by more than max(5 %, 100 ms) on either clip",
+    "G_preview": "preview count within 2 pp of control per clip",
+    "G_memory": "Metal peak within 1 GiB of control AND peak process RSS within the tool relative rule (10 % + 256 MiB) of control",
+    "reported_not_gated": "first-token p50 (translation_started + ttft_ms_a - speech_end), speech_end_to_final_ms p50 per route, generation_lock_wait_ms_a, final STT p50, the joint-decode and wired-limit log lines in each candidate session log"
+  },
+  "outcome_rule": "PASS = all gates hold on both clips -> PR auto-merge enabled and the change recorded as an engineering change in docs/latency_next_experiments.md; FAIL = lane REJECTED, PR left open with the numbers, later lanes run from main",
+  "amendments": [
+    "2026-09-12T00:12Z, before run 1: candidate checkout moved from 5227a73+P1 to the PR branch brought up to date with main (2d01840) plus the profiler fix; control stays 5227a73",
+    "2026-09-12T00:55Z: r2 declared with tags p1s0912b_*; gates unchanged; the standard tool G1 (15 % median) is not a criterion for an identity screen and is reported only; G6 (memory, relative rule incl. peak RSS) is a criterion"
+  ],
+  "supersedes": {
+    "id": "p1_identity_screen_series4_20260912",
+    "outcome": "aborted after clip A (3 identical pairs) + 1 control of clip B: candidate byte-identical and faster, but peak process RSS 7.8-8.0 GB vs 4.1 GB control (Metal peak unchanged) from wiring the working set at load; the wired limit had shown no speed effect in isolation, so it is now opt-in and the corrected candidate is screened afresh",
+    "evidence": "screen1/"
+  }
+}

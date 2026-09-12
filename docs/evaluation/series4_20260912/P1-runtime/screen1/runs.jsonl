@@ -1,0 +1,6 @@
+{"tag":"p1s0912_A_ctl_r0","clip":"A","arm":"ctl","repeat":0,"order":0,"rc":0,"checkout":"/Users/willem/Code/vibes/SRTranslate-wt-base","pageouts":{"before":374386,"after":377260},"ended":"2026-09-12T00:16:52Z"}
+{"tag":"p1s0912_A_cand_r0","clip":"A","arm":"cand","repeat":0,"order":1,"rc":0,"checkout":"/Users/willem/Code/vibes/SRTranslate-wt-p1","pageouts":{"before":377260,"after":381427},"ended":"2026-09-12T00:23:08Z"}
+{"tag":"p1s0912_A_cand_r1","clip":"A","arm":"cand","repeat":1,"order":2,"rc":0,"checkout":"/Users/willem/Code/vibes/SRTranslate-wt-p1","pageouts":{"before":381427,"after":385733},"ended":"2026-09-12T00:29:22Z"}
+{"tag":"p1s0912_A_ctl_r1","clip":"A","arm":"ctl","repeat":1,"order":3,"rc":0,"checkout":"/Users/willem/Code/vibes/SRTranslate-wt-base","pageouts":{"before":385733,"after":388743},"ended":"2026-09-12T00:35:37Z"}
+{"tag":"p1s0912_A_ctl_r2","clip":"A","arm":"ctl","repeat":2,"order":4,"rc":0,"checkout":"/Users/willem/Code/vibes/SRTranslate-wt-base","pageouts":{"before":388743,"after":389934},"ended":"2026-09-12T00:41:50Z"}
+{"tag":"p1s0912_A_cand_r2","clip":"A","arm":"cand","repeat":2,"order":5,"rc":0,"checkout":"/Users/willem/Code/vibes/SRTranslate-wt-p1","pageouts":{"before":389934,"after":392569},"ended":"2026-09-12T00:48:02Z"}
