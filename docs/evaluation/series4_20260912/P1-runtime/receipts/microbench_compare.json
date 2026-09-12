@@ -1,0 +1,1316 @@
+{
+ "textbench": {
+  "ctl": {
+   "metal_peak_mib": 6383.065746307373,
+   "rss_delta_mb": -437737.84375,
+   "canary": {
+    "passed": 13,
+    "total": 18
+   },
+   "per_length": {
+    "short": {
+     "p50_ms": 524.8491249949438,
+     "p95_ms": 529.0821660018992,
+     "mean_ms": 519.02505820035,
+     "tps_mean": 37.530812920126074,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+    },
+    "medium": {
+     "p50_ms": 1407.9117909859633,
+     "p95_ms": 1426.3485410046997,
+     "mean_ms": 1409.5968411973445,
+     "tps_mean": 33.81582434059245,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+    },
+    "long": {
+     "p50_ms": 1609.787834007875,
+     "p95_ms": 1659.2818749923026,
+     "mean_ms": 1618.883416999597,
+     "tps_mean": 33.1931672198731,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+    },
+    "canary_01": {
+     "p50_ms": 661.3600419950671,
+     "p95_ms": 673.4399999986636,
+     "mean_ms": 663.5275087988703,
+     "tps_mean": 34.97390153693475,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+    },
+    "canary_02": {
+     "p50_ms": 480.8806669898331,
+     "p95_ms": 497.2034169913968,
+     "mean_ms": 481.52749199362006,
+     "tps_mean": 37.381053697250955,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+    },
+    "canary_03": {
+     "p50_ms": 689.9399579997407,
+     "p95_ms": 691.4342499949271,
+     "mean_ms": 687.9366164008388,
+     "tps_mean": 34.98845570317899,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+    },
+    "canary_04": {
+     "p50_ms": 644.6195839962456,
+     "p95_ms": 662.8898329945514,
+     "mean_ms": 645.2659251983277,
+     "tps_mean": 34.87124713851311,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+    },
+    "canary_05": {
+     "p50_ms": 699.4422909920104,
+     "p95_ms": 712.1357080031885,
+     "mean_ms": 699.6451832033927,
+     "tps_mean": 34.61998628046151,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+    },
+    "canary_06": {
+     "p50_ms": 823.9833330007968,
+     "p95_ms": 838.9414160046726,
+     "mean_ms": 825.0865915993927,
+     "tps_mean": 33.9100554333674,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+    },
+    "canary_07": {
+     "p50_ms": 698.9828750083689,
+     "p95_ms": 717.9767079942394,
+     "mean_ms": 704.4430167996325,
+     "tps_mean": 34.594320730948056,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+    },
+    "canary_08": {
+     "p50_ms": 856.2474999926053,
+     "p95_ms": 869.9424579972401,
+     "mean_ms": 852.5481917982688,
+     "tps_mean": 32.71112136233441,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+    },
+    "canary_09": {
+     "p50_ms": 695.3337089944398,
+     "p95_ms": 731.3464579929132,
+     "mean_ms": 706.4574502001051,
+     "tps_mean": 34.085699131787,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+    },
+    "canary_10": {
+     "p50_ms": 629.803499992704,
+     "p95_ms": 641.7052500037244,
+     "mean_ms": 632.1272330009378,
+     "tps_mean": 35.46015695497178,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+    },
+    "canary_11": {
+     "p50_ms": 694.6849580126582,
+     "p95_ms": 710.6264169997303,
+     "mean_ms": 694.8787002038443,
+     "tps_mean": 34.818631197500636,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+    },
+    "canary_12": {
+     "p50_ms": 551.1294579919195,
+     "p95_ms": 552.8634999936912,
+     "mean_ms": 545.1901913969778,
+     "tps_mean": 36.255502528014034,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+    },
+    "canary_13": {
+     "p50_ms": 638.3700419974048,
+     "p95_ms": 642.5922920025187,
+     "mean_ms": 638.6588335997658,
+     "tps_mean": 34.74526457926157,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+    },
+    "canary_14": {
+     "p50_ms": 652.8138329886133,
+     "p95_ms": 669.8642919945996,
+     "mean_ms": 652.9632583988132,
+     "tps_mean": 34.535474936107626,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+    },
+    "canary_15": {
+     "p50_ms": 665.286916992045,
+     "p95_ms": 673.2285830075853,
+     "mean_ms": 661.2315835984191,
+     "tps_mean": 35.36498735332091,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+    },
+    "canary_16": {
+     "p50_ms": 811.6696249926463,
+     "p95_ms": 850.9921670047333,
+     "mean_ms": 819.4776084012119,
+     "tps_mean": 34.39180099419048,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+    },
+    "canary_17": {
+     "p50_ms": 899.139125001966,
+     "p95_ms": 910.1941670087399,
+     "mean_ms": 891.254841798218,
+     "tps_mean": 34.30363967895396,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+    },
+    "canary_18": {
+     "p50_ms": 797.0341250038473,
+     "p95_ms": 803.78716699488,
+     "mean_ms": 785.3624250012217,
+     "tps_mean": 34.416936746238065,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+    }
+   },
+   "outputs_sha256": {
+    "canary_01": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+    "canary_02": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+    "canary_03": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+    "canary_04": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+    "canary_05": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+    "canary_06": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+    "canary_07": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+    "canary_08": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+    "canary_09": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+    "canary_10": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+    "canary_11": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+    "canary_12": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+    "canary_13": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+    "canary_14": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+    "canary_15": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+    "canary_16": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+    "canary_17": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+    "canary_18": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+   },
+   "canary_latency_ms": {
+    "canary_01": 718.6736250005197,
+    "canary_02": 538.434000001871,
+    "canary_03": 746.2096250092145,
+    "canary_04": 702.4271250120364,
+    "canary_05": 766.1478329973761,
+    "canary_06": 856.0931660031201,
+    "canary_07": 763.1461660057539,
+    "canary_08": 887.2777910000877,
+    "canary_09": 756.3171249930747,
+    "canary_10": 701.2013329949696,
+    "canary_11": 755.1174160034861,
+    "canary_12": 598.2696249993751,
+    "canary_13": 692.5794160051737,
+    "canary_14": 694.0514579910086,
+    "canary_15": 721.498041995801,
+    "canary_16": 876.1097499955213,
+    "canary_17": 911.6937500075437,
+    "canary_18": 787.2626250027679
+   },
+   "canary_ttft_ms": {
+    "canary_01": 326.825916999951,
+    "canary_02": 301.15275000571273,
+    "canary_03": 325.1259160024347,
+    "canary_04": 333.52304200525396,
+    "canary_05": 332.58462499361485,
+    "canary_06": 306.9240409968188,
+    "canary_07": 334.8400000104448,
+    "canary_08": 340.35433300596196,
+    "canary_09": 333.546583991847,
+    "canary_10": 338.46920799987856,
+    "canary_11": 333.01383300567977,
+    "canary_12": 327.79483300691936,
+    "canary_13": 327.14799999666866,
+    "canary_14": 328.5026669909712,
+    "canary_15": 324.9960840039421,
+    "canary_16": 327.7300420013489,
+    "canary_17": 333.04033300373703,
+    "canary_18": 330.6082079943735
+   }
+  },
+  "cand": {
+   "metal_peak_mib": 6383.065746307373,
+   "rss_delta_mb": -437032.671875,
+   "canary": {
+    "passed": 13,
+    "total": 18
+   },
+   "per_length": {
+    "short": {
+     "p50_ms": 547.7746249962365,
+     "p95_ms": 567.7850829961244,
+     "mean_ms": 541.0739247949095,
+     "tps_mean": 36.50060453108145,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+    },
+    "medium": {
+     "p50_ms": 1437.8547499945853,
+     "p95_ms": 1475.8814170054393,
+     "mean_ms": 1445.1946085959207,
+     "tps_mean": 32.95650395625649,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+    },
+    "long": {
+     "p50_ms": 1646.903665998252,
+     "p95_ms": 1660.8029999915743,
+     "mean_ms": 1650.857933194493,
+     "tps_mean": 33.17615190715845,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+    },
+    "canary_01": {
+     "p50_ms": 719.4662080000853,
+     "p95_ms": 731.3184999948135,
+     "mean_ms": 721.974400000181,
+     "tps_mean": 35.31987444632738,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+    },
+    "canary_02": {
+     "p50_ms": 537.6293750014156,
+     "p95_ms": 553.8374580064556,
+     "mean_ms": 539.9788581999019,
+     "tps_mean": 37.092683968675246,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+    },
+    "canary_03": {
+     "p50_ms": 756.6984170116484,
+     "p95_ms": 776.6766249987995,
+     "mean_ms": 757.3507168039214,
+     "tps_mean": 34.397773512669374,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+    },
+    "canary_04": {
+     "p50_ms": 690.7983749988489,
+     "p95_ms": 695.3889580036048,
+     "mean_ms": 688.6617332027527,
+     "tps_mean": 35.58363471142061,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+    },
+    "canary_05": {
+     "p50_ms": 736.1210419912823,
+     "p95_ms": 755.5021250009304,
+     "mean_ms": 742.3908167984337,
+     "tps_mean": 35.02290669324153,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+    },
+    "canary_06": {
+     "p50_ms": 876.5357090014732,
+     "p95_ms": 886.4867919910466,
+     "mean_ms": 874.3734004005091,
+     "tps_mean": 34.45960695132127,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+    },
+    "canary_07": {
+     "p50_ms": 749.3851250037551,
+     "p95_ms": 759.4619579904247,
+     "mean_ms": 751.063833196531,
+     "tps_mean": 35.118722863942835,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+    },
+    "canary_08": {
+     "p50_ms": 885.6319170008646,
+     "p95_ms": 894.5083330036141,
+     "mean_ms": 884.7769914020319,
+     "tps_mean": 33.814408826299626,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+    },
+    "canary_09": {
+     "p50_ms": 752.5057500024559,
+     "p95_ms": 755.0192080088891,
+     "mean_ms": 749.623408401385,
+     "tps_mean": 35.19463427303417,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+    },
+    "canary_10": {
+     "p50_ms": 689.3768329900922,
+     "p95_ms": 697.493375002523,
+     "mean_ms": 690.1522831991315,
+     "tps_mean": 35.38449410979617,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+    },
+    "canary_11": {
+     "p50_ms": 748.4324580000248,
+     "p95_ms": 752.3069169983501,
+     "mean_ms": 749.2823999957182,
+     "tps_mean": 35.078231125570454,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+    },
+    "canary_12": {
+     "p50_ms": 591.9347500021104,
+     "p95_ms": 617.0663329976378,
+     "mean_ms": 589.920658202027,
+     "tps_mean": 36.55203834594774,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+    },
+    "canary_13": {
+     "p50_ms": 686.9896660064114,
+     "p95_ms": 693.2754160079639,
+     "mean_ms": 684.5977080025477,
+     "tps_mean": 35.454194554089355,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+    },
+    "canary_14": {
+     "p50_ms": 687.268125009723,
+     "p95_ms": 701.0214589972747,
+     "mean_ms": 689.5243000006303,
+     "tps_mean": 35.40152392838066,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+    },
+    "canary_15": {
+     "p50_ms": 719.5174169901293,
+     "p95_ms": 735.5722499924013,
+     "mean_ms": 720.9741081955144,
+     "tps_mean": 35.260280933477425,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+    },
+    "canary_16": {
+     "p50_ms": 865.2317079977365,
+     "p95_ms": 904.3336670001736,
+     "mean_ms": 874.9835916009033,
+     "tps_mean": 34.276215741772965,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+    },
+    "canary_17": {
+     "p50_ms": 902.3890829994343,
+     "p95_ms": 907.9998750094092,
+     "mean_ms": 902.8891082038172,
+     "tps_mean": 34.49594650144125,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+    },
+    "canary_18": {
+     "p50_ms": 785.3393339901231,
+     "p95_ms": 798.9814159955131,
+     "mean_ms": 787.5574747973587,
+     "tps_mean": 34.94039960994004,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+    }
+   },
+   "outputs_sha256": {
+    "canary_01": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+    "canary_02": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+    "canary_03": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+    "canary_04": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+    "canary_05": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+    "canary_06": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+    "canary_07": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+    "canary_08": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+    "canary_09": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+    "canary_10": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+    "canary_11": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+    "canary_12": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+    "canary_13": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+    "canary_14": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+    "canary_15": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+    "canary_16": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+    "canary_17": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+    "canary_18": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+   },
+   "canary_latency_ms": {
+    "canary_01": 722.8288750047795,
+    "canary_02": 540.604916997836,
+    "canary_03": 745.7274999906076,
+    "canary_04": 680.5089160043281,
+    "canary_05": 760.8565420086961,
+    "canary_06": 855.8855000010226,
+    "canary_07": 748.5783330048434,
+    "canary_08": 887.3037500015926,
+    "canary_09": 740.461958994274,
+    "canary_10": 690.0441250036238,
+    "canary_11": 757.0017499965616,
+    "canary_12": 587.5958750111749,
+    "canary_13": 690.6640829984099,
+    "canary_14": 684.5079159975285,
+    "canary_15": 713.6119999922812,
+    "canary_16": 875.7056670001475,
+    "canary_17": 910.432208009297,
+    "canary_18": 776.9184999924619
+   },
+   "canary_ttft_ms": {
+    "canary_01": 332.7229580027051,
+    "canary_02": 303.7487090041395,
+    "canary_03": 322.9184169904329,
+    "canary_04": 321.6337080084486,
+    "canary_05": 333.06112499849405,
+    "canary_06": 310.9905410092324,
+    "canary_07": 327.47179199941456,
+    "canary_08": 328.3295829896815,
+    "canary_09": 319.20220899337437,
+    "canary_10": 327.35037500970066,
+    "canary_11": 332.8140420053387,
+    "canary_12": 319.83162500546314,
+    "canary_13": 330.4055829939898,
+    "canary_14": 322.138832998462,
+    "canary_15": 322.16016699385364,
+    "canary_16": 330.79820800048765,
+    "canary_17": 333.3472500089556,
+    "canary_18": 323.27649999933783
+   }
+  },
+  "ctl2": {
+   "metal_peak_mib": 6383.065746307373,
+   "rss_delta_mb": -437191.171875,
+   "canary": {
+    "passed": 13,
+    "total": 18
+   },
+   "per_length": {
+    "short": {
+     "p50_ms": 532.3224999883678,
+     "p95_ms": 544.3379999924218,
+     "mean_ms": 532.4903583939886,
+     "tps_mean": 37.44542645702499,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+    },
+    "medium": {
+     "p50_ms": 1428.1226669991156,
+     "p95_ms": 1436.2500840070425,
+     "mean_ms": 1426.4389081974514,
+     "tps_mean": 33.49357096926914,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+    },
+    "long": {
+     "p50_ms": 1652.0154579920927,
+     "p95_ms": 1675.3667919983855,
+     "mean_ms": 1654.3998417968396,
+     "tps_mean": 33.167624255803055,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+    },
+    "canary_01": {
+     "p50_ms": 723.067833998357,
+     "p95_ms": 729.5592090085847,
+     "mean_ms": 723.334983800305,
+     "tps_mean": 35.41919279580273,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+    },
+    "canary_02": {
+     "p50_ms": 540.999874996487,
+     "p95_ms": 551.3642919977428,
+     "mean_ms": 540.5295751988888,
+     "tps_mean": 37.164892189359435,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+    },
+    "canary_03": {
+     "p50_ms": 747.31375000556,
+     "p95_ms": 752.5342500011902,
+     "mean_ms": 747.2871750011109,
+     "tps_mean": 35.15078763339671,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+    },
+    "canary_04": {
+     "p50_ms": 691.3096250063973,
+     "p95_ms": 696.9812500028638,
+     "mean_ms": 690.4622336034663,
+     "tps_mean": 35.717383474091996,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+    },
+    "canary_05": {
+     "p50_ms": 754.4102090032538,
+     "p95_ms": 761.4281660062261,
+     "mean_ms": 753.8228416000493,
+     "tps_mean": 35.26762636538414,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+    },
+    "canary_06": {
+     "p50_ms": 870.3402079991065,
+     "p95_ms": 935.0760420056758,
+     "mean_ms": 871.2462666007923,
+     "tps_mean": 33.868658306045084,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+    },
+    "canary_07": {
+     "p50_ms": 750.5162500019651,
+     "p95_ms": 791.9227499951376,
+     "mean_ms": 761.3224831991829,
+     "tps_mean": 34.92339561438852,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+    },
+    "canary_08": {
+     "p50_ms": 870.2752499957569,
+     "p95_ms": 907.6756669965107,
+     "mean_ms": 874.8227999982191,
+     "tps_mean": 34.32908799413507,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+    },
+    "canary_09": {
+     "p50_ms": 745.6867909932043,
+     "p95_ms": 748.1870830088155,
+     "mean_ms": 738.3625829970697,
+     "tps_mean": 35.077309615117855,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+    },
+    "canary_10": {
+     "p50_ms": 690.8270840067416,
+     "p95_ms": 700.8686670014868,
+     "mean_ms": 688.4921004006173,
+     "tps_mean": 35.65493180776482,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+    },
+    "canary_11": {
+     "p50_ms": 749.5035839965567,
+     "p95_ms": 755.6332090025535,
+     "mean_ms": 749.9746835994301,
+     "tps_mean": 35.163447203149815,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+    },
+    "canary_12": {
+     "p50_ms": 591.415999995661,
+     "p95_ms": 599.5415000070352,
+     "mean_ms": 593.0489748017862,
+     "tps_mean": 36.76716433957283,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+    },
+    "canary_13": {
+     "p50_ms": 690.3154589963378,
+     "p95_ms": 693.5136670072097,
+     "mean_ms": 688.8928001979366,
+     "tps_mean": 35.609862795138355,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+    },
+    "canary_14": {
+     "p50_ms": 693.8557079993188,
+     "p95_ms": 697.2499580006115,
+     "mean_ms": 674.9477916018805,
+     "tps_mean": 35.21667135309357,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+    },
+    "canary_15": {
+     "p50_ms": 723.0989999952726,
+     "p95_ms": 730.6169589865021,
+     "mean_ms": 720.467991795158,
+     "tps_mean": 35.23037700973799,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+    },
+    "canary_16": {
+     "p50_ms": 870.7319579989417,
+     "p95_ms": 876.8069590005325,
+     "mean_ms": 870.7820250012446,
+     "tps_mean": 34.43455586815532,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+    },
+    "canary_17": {
+     "p50_ms": 930.5605419940548,
+     "p95_ms": 1123.6441660003038,
+     "mean_ms": 961.3142918009544,
+     "tps_mean": 31.786740918099476,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+    },
+    "canary_18": {
+     "p50_ms": 779.7967919905204,
+     "p95_ms": 824.8470420076046,
+     "mean_ms": 791.2156170001253,
+     "tps_mean": 34.33601850802475,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+    }
+   },
+   "outputs_sha256": {
+    "canary_01": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+    "canary_02": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+    "canary_03": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+    "canary_04": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+    "canary_05": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+    "canary_06": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+    "canary_07": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+    "canary_08": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+    "canary_09": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+    "canary_10": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+    "canary_11": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+    "canary_12": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+    "canary_13": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+    "canary_14": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+    "canary_15": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+    "canary_16": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+    "canary_17": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+    "canary_18": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+   },
+   "canary_latency_ms": {
+    "canary_01": 726.6604169999482,
+    "canary_02": 538.9506249921396,
+    "canary_03": 744.7224160132464,
+    "canary_04": 686.7414580046898,
+    "canary_05": 744.6902920055436,
+    "canary_06": 879.4590830075322,
+    "canary_07": 776.4613750041462,
+    "canary_08": 868.0639170052018,
+    "canary_09": 752.0879999938188,
+    "canary_10": 685.069792001741,
+    "canary_11": 745.148165995488,
+    "canary_12": 591.9850420032162,
+    "canary_13": 690.4417500045383,
+    "canary_14": 689.0267499984475,
+    "canary_15": 716.3935830030823,
+    "canary_16": 871.4406249928288,
+    "canary_17": 907.8156250034226,
+    "canary_18": 771.7253330047242
+   },
+   "canary_ttft_ms": {
+    "canary_01": 325.10029200057033,
+    "canary_02": 304.0103329985868,
+    "canary_03": 323.9029579999624,
+    "canary_04": 326.5336659969762,
+    "canary_05": 322.8335000021616,
+    "canary_06": 337.20704101142474,
+    "canary_07": 353.8400840043323,
+    "canary_08": 325.93779200396966,
+    "canary_09": 330.0855409906944,
+    "canary_10": 329.23695900535677,
+    "canary_11": 325.6857499945909,
+    "canary_12": 322.10800000757445,
+    "canary_13": 328.96804199845064,
+    "canary_14": 330.0588330021128,
+    "canary_15": 323.69950000429526,
+    "canary_16": 327.82412499364,
+    "canary_17": 329.86258299206384,
+    "canary_18": 322.09695799974725
+   }
+  },
+  "cand2": {
+   "metal_peak_mib": 6383.081371307373,
+   "rss_delta_mb": -436753.09375,
+   "canary": {
+    "passed": 13,
+    "total": 18
+   },
+   "per_length": {
+    "short": {
+     "p50_ms": 518.7787920003757,
+     "p95_ms": 546.7757080041338,
+     "mean_ms": 522.820833401056,
+     "tps_mean": 37.08620410574606,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "3794fea9357703d3e66df60053ea6c60e00e57ff1659f3b3b07950bd673737b4"
+    },
+    "medium": {
+     "p50_ms": 1454.844249994494,
+     "p95_ms": 1540.0635410042014,
+     "mean_ms": 1474.6495750005124,
+     "tps_mean": 32.39324157082712,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "aa1cf7a99d69fb6497f05f17e9ce3fbb92cccbd4fc2b62122c28729d26da302c"
+    },
+    "long": {
+     "p50_ms": 1647.1949999977369,
+     "p95_ms": 1660.259500000393,
+     "mean_ms": 1644.4327500008512,
+     "tps_mean": 33.30620433141315,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "0cda9c004c805fc84f9deb0ce4de0d0e3162f1316926cd65040ce9e82f82a233"
+    },
+    "canary_01": {
+     "p50_ms": 716.3556250015972,
+     "p95_ms": 719.3877079989761,
+     "mean_ms": 716.0048084013397,
+     "tps_mean": 35.34489631491708,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701"
+    },
+    "canary_02": {
+     "p50_ms": 533.6821660021087,
+     "p95_ms": 537.3317080084234,
+     "mean_ms": 532.9063666053116,
+     "tps_mean": 37.34677882359338,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0"
+    },
+    "canary_03": {
+     "p50_ms": 745.6091250060126,
+     "p95_ms": 763.3059159998083,
+     "mean_ms": 747.871100003249,
+     "tps_mean": 35.34931935261497,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa"
+    },
+    "canary_04": {
+     "p50_ms": 691.6909999999916,
+     "p95_ms": 708.4223749989178,
+     "mean_ms": 694.060441601323,
+     "tps_mean": 35.215908645184975,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1"
+    },
+    "canary_05": {
+     "p50_ms": 755.0872499996331,
+     "p95_ms": 757.6066659967182,
+     "mean_ms": 755.0780665973434,
+     "tps_mean": 34.84128439188072,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492"
+    },
+    "canary_06": {
+     "p50_ms": 881.8559169885702,
+     "p95_ms": 887.3612919996958,
+     "mean_ms": 880.1862919994164,
+     "tps_mean": 34.27965648584677,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae"
+    },
+    "canary_07": {
+     "p50_ms": 755.2800830017077,
+     "p95_ms": 757.6801250106655,
+     "mean_ms": 751.226850002422,
+     "tps_mean": 35.12605074838501,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d"
+    },
+    "canary_08": {
+     "p50_ms": 869.0359590109438,
+     "p95_ms": 884.3865829985589,
+     "mean_ms": 872.9721417999826,
+     "tps_mean": 34.58730809053344,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb"
+    },
+    "canary_09": {
+     "p50_ms": 750.0857920094859,
+     "p95_ms": 765.414832989336,
+     "mean_ms": 751.5098168019904,
+     "tps_mean": 35.093538747684775,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e"
+    },
+    "canary_10": {
+     "p50_ms": 687.2214999893913,
+     "p95_ms": 690.2832079940708,
+     "mean_ms": 686.1172415956389,
+     "tps_mean": 35.647740255476464,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83"
+    },
+    "canary_11": {
+     "p50_ms": 752.3058750084601,
+     "p95_ms": 781.8074999959208,
+     "mean_ms": 757.9466246039374,
+     "tps_mean": 35.10052525740617,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92"
+    },
+    "canary_12": {
+     "p50_ms": 602.3956249991897,
+     "p95_ms": 610.8309169940185,
+     "mean_ms": 599.4048833992565,
+     "tps_mean": 36.77752905073739,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62"
+    },
+    "canary_13": {
+     "p50_ms": 691.2317920068745,
+     "p95_ms": 700.6900410051458,
+     "mean_ms": 688.2994000043254,
+     "tps_mean": 35.614244423227014,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05"
+    },
+    "canary_14": {
+     "p50_ms": 688.9925420109648,
+     "p95_ms": 692.4271250027232,
+     "mean_ms": 687.3389002023032,
+     "tps_mean": 35.56266872634324,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9"
+    },
+    "canary_15": {
+     "p50_ms": 718.0735419970006,
+     "p95_ms": 730.8717080013594,
+     "mean_ms": 720.9131751995301,
+     "tps_mean": 35.20259269347308,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51"
+    },
+    "canary_16": {
+     "p50_ms": 872.6252499909606,
+     "p95_ms": 881.5671670017764,
+     "mean_ms": 868.3261749974918,
+     "tps_mean": 34.38560704298715,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd"
+    },
+    "canary_17": {
+     "p50_ms": 901.3323330000276,
+     "p95_ms": 908.8389160024235,
+     "mean_ms": 901.6378161992179,
+     "tps_mean": 34.58068860718934,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec"
+    },
+    "canary_18": {
+     "p50_ms": 784.4697919936152,
+     "p95_ms": 795.8751660044072,
+     "mean_ms": 786.1653081985423,
+     "tps_mean": 34.8165644869188,
+     "n": 5,
+     "outputs_stable": true,
+     "text_sha256": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+    }
+   },
+   "outputs_sha256": {
+    "canary_01": "56015bddc0551d63998eb43563de4ffc22c400a22bd2de50dd0a395a3f97a701",
+    "canary_02": "124e991ee200bc93f8501075804cb00635d9e7fb522384b94313f92d451820d0",
+    "canary_03": "64e0d85962e6607499d75c8b8c437c4534e3b0b26abdf985d03dfa96e882e1aa",
+    "canary_04": "a8ec8ec36d5cf387dcba727def86f20465e3cda188646b19e9dbd33e2064d5b1",
+    "canary_05": "2aab574a4d80d0dd4bf04823b84d3e76985e76d47161d9797ae5ccbee1ccf492",
+    "canary_06": "2c23da2f590ae167972a6e6b936b62a3c6d9341e77a0be97a982d495869539ae",
+    "canary_07": "92f76865909c2fadc7c6d9b4147ab19e1ce6f7a3e0ef73f74c224ed2ee71dd7d",
+    "canary_08": "46612224d93b9b68174bc487a5e9ff05a10909c65d2c6840061390a282e190fb",
+    "canary_09": "fd153432463fb7e52a57a6c4b416f059cff48a84dfd2cf6440dfb96d329d233e",
+    "canary_10": "6a0762b63fc87b517548d1f374c62f3e1ad8d843597003a81edbd932e803ee83",
+    "canary_11": "c9403a3fff906edda8cefd48af9812593e29313ae831eaffacc86cc47cf2ae92",
+    "canary_12": "cbfac74e402df4e2f79ab4fe265b4780a9f03d21655557e4ef55eda3a56a5e62",
+    "canary_13": "a88f550e604f051b2c4d397fa8bd1e43fd19a2b71d4724db50bc96b7710a7b05",
+    "canary_14": "7d95799e92504576f75845e6534cf9b43e5f00aa5e61030dc9da25dea2a9c8c9",
+    "canary_15": "1d228675279189371ab6b087fc66702ccf965a250c4c593f48476183aef2af51",
+    "canary_16": "705ec22b7fa774c35b4ccce59d0701c52a737fe3e3bb8d457dd65af88c56ddfd",
+    "canary_17": "2ca07b71fa1cf21280200c040b4483630af11f6467dce1150b037a12243ebaec",
+    "canary_18": "35d038ca70964e8f78744d0a746ce154b30da4f4ac0d21c727c6f6fa185b4074"
+   },
+   "canary_latency_ms": {
+    "canary_01": 713.7858750065789,
+    "canary_02": 536.5713749924907,
+    "canary_03": 735.4396660084603,
+    "canary_04": 694.1777920001186,
+    "canary_05": 739.7476250043837,
+    "canary_06": 889.26412499859,
+    "canary_07": 744.8920419992646,
+    "canary_08": 872.7458329958608,
+    "canary_09": 746.9275420007762,
+    "canary_10": 686.1916250054492,
+    "canary_11": 750.5849169974681,
+    "canary_12": 598.780665997765,
+    "canary_13": 690.1130000042031,
+    "canary_14": 706.5462919999845,
+    "canary_15": 718.9592920040013,
+    "canary_16": 863.8877910125302,
+    "canary_17": 902.7295830019284,
+    "canary_18": 771.5356670087203
+   },
+   "canary_ttft_ms": {
+    "canary_01": 323.9823750045616,
+    "canary_02": 300.2925829932792,
+    "canary_03": 315.2247910038568,
+    "canary_04": 328.8670840120176,
+    "canary_05": 322.03941700572614,
+    "canary_06": 333.0724999977974,
+    "canary_07": 321.0281670035329,
+    "canary_08": 327.7957079990301,
+    "canary_09": 320.23866700183135,
+    "canary_10": 325.2696670097066,
+    "canary_11": 329.5301250036573,
+    "canary_12": 331.0103749972768,
+    "canary_13": 328.6160419957014,
+    "canary_14": 347.6719580066856,
+    "canary_15": 326.06904199928977,
+    "canary_16": 319.3346250045579,
+    "canary_17": 329.465375005384,
+    "canary_18": 320.5589169956511
+   }
+  },
+  "canary_outputs_identical": true,
+  "canary_output_diffs": [],
+  "per_length_outputs_identical": true,
+  "per_length_delta_pct": {
+   "short": {
+    "p50_ms": 4.4,
+    "p95_ms": 7.3,
+    "mean_ms": 4.2
+   },
+   "medium": {
+    "p50_ms": 2.1,
+    "p95_ms": 3.5,
+    "mean_ms": 2.5
+   },
+   "long": {
+    "p50_ms": 2.3,
+    "p95_ms": 0.1,
+    "mean_ms": 2.0
+   },
+   "canary_01": {
+    "p50_ms": 8.8,
+    "p95_ms": 8.6,
+    "mean_ms": 8.8
+   },
+   "canary_02": {
+    "p50_ms": 11.8,
+    "p95_ms": 11.4,
+    "mean_ms": 12.1
+   },
+   "canary_03": {
+    "p50_ms": 9.7,
+    "p95_ms": 12.3,
+    "mean_ms": 10.1
+   },
+   "canary_04": {
+    "p50_ms": 7.2,
+    "p95_ms": 4.9,
+    "mean_ms": 6.7
+   },
+   "canary_05": {
+    "p50_ms": 5.2,
+    "p95_ms": 6.1,
+    "mean_ms": 6.1
+   },
+   "canary_06": {
+    "p50_ms": 6.4,
+    "p95_ms": 5.7,
+    "mean_ms": 6.0
+   },
+   "canary_07": {
+    "p50_ms": 7.2,
+    "p95_ms": 5.8,
+    "mean_ms": 6.6
+   },
+   "canary_08": {
+    "p50_ms": 3.4,
+    "p95_ms": 2.8,
+    "mean_ms": 3.8
+   },
+   "canary_09": {
+    "p50_ms": 8.2,
+    "p95_ms": 3.2,
+    "mean_ms": 6.1
+   },
+   "canary_10": {
+    "p50_ms": 9.5,
+    "p95_ms": 8.7,
+    "mean_ms": 9.2
+   },
+   "canary_11": {
+    "p50_ms": 7.7,
+    "p95_ms": 5.9,
+    "mean_ms": 7.8
+   },
+   "canary_12": {
+    "p50_ms": 7.4,
+    "p95_ms": 11.6,
+    "mean_ms": 8.2
+   },
+   "canary_13": {
+    "p50_ms": 7.6,
+    "p95_ms": 7.9,
+    "mean_ms": 7.2
+   },
+   "canary_14": {
+    "p50_ms": 5.3,
+    "p95_ms": 4.7,
+    "mean_ms": 5.6
+   },
+   "canary_15": {
+    "p50_ms": 8.2,
+    "p95_ms": 9.3,
+    "mean_ms": 9.0
+   },
+   "canary_16": {
+    "p50_ms": 6.6,
+    "p95_ms": 6.3,
+    "mean_ms": 6.8
+   },
+   "canary_17": {
+    "p50_ms": 0.4,
+    "p95_ms": -0.2,
+    "mean_ms": 1.3
+   },
+   "canary_18": {
+    "p50_ms": -1.5,
+    "p95_ms": -0.6,
+    "mean_ms": 0.3
+   }
+  },
+  "per_length_delta_pct_round2": {
+   "short": {
+    "p50_ms": -2.5,
+    "p95_ms": 0.4,
+    "mean_ms": -1.8
+   },
+   "medium": {
+    "p50_ms": 1.9,
+    "p95_ms": 7.2,
+    "mean_ms": 3.4
+   },
+   "long": {
+    "p50_ms": -0.3,
+    "p95_ms": -0.9,
+    "mean_ms": -0.6
+   },
+   "canary_01": {
+    "p50_ms": -0.9,
+    "p95_ms": -1.4,
+    "mean_ms": -1.0
+   },
+   "canary_02": {
+    "p50_ms": -1.4,
+    "p95_ms": -2.5,
+    "mean_ms": -1.4
+   },
+   "canary_03": {
+    "p50_ms": -0.2,
+    "p95_ms": 1.4,
+    "mean_ms": 0.1
+   },
+   "canary_04": {
+    "p50_ms": 0.1,
+    "p95_ms": 1.6,
+    "mean_ms": 0.5
+   },
+   "canary_05": {
+    "p50_ms": 0.1,
+    "p95_ms": -0.5,
+    "mean_ms": 0.2
+   },
+   "canary_06": {
+    "p50_ms": 1.3,
+    "p95_ms": -5.1,
+    "mean_ms": 1.0
+   },
+   "canary_07": {
+    "p50_ms": 0.6,
+    "p95_ms": -4.3,
+    "mean_ms": -1.3
+   },
+   "canary_08": {
+    "p50_ms": -0.1,
+    "p95_ms": -2.6,
+    "mean_ms": -0.2
+   },
+   "canary_09": {
+    "p50_ms": 0.6,
+    "p95_ms": 2.3,
+    "mean_ms": 1.8
+   },
+   "canary_10": {
+    "p50_ms": -0.5,
+    "p95_ms": -1.5,
+    "mean_ms": -0.3
+   },
+   "canary_11": {
+    "p50_ms": 0.4,
+    "p95_ms": 3.5,
+    "mean_ms": 1.1
+   },
+   "canary_12": {
+    "p50_ms": 1.9,
+    "p95_ms": 1.9,
+    "mean_ms": 1.1
+   },
+   "canary_13": {
+    "p50_ms": 0.1,
+    "p95_ms": 1.0,
+    "mean_ms": -0.1
+   },
+   "canary_14": {
+    "p50_ms": -0.7,
+    "p95_ms": -0.7,
+    "mean_ms": 1.8
+   },
+   "canary_15": {
+    "p50_ms": -0.7,
+    "p95_ms": 0.0,
+    "mean_ms": 0.1
+   },
+   "canary_16": {
+    "p50_ms": 0.2,
+    "p95_ms": 0.5,
+    "mean_ms": -0.3
+   },
+   "canary_17": {
+    "p50_ms": -3.1,
+    "p95_ms": -19.1,
+    "mean_ms": -6.2
+   },
+   "canary_18": {
+    "p50_ms": 0.6,
+    "p95_ms": -3.5,
+    "mean_ms": -0.6
+   }
+  },
+  "pooled_delta_pct": {
+   "p50_ms": 2.6,
+   "p95_ms": 1.9,
+   "mean_ms": 2.7
+  }
+ },
+ "joint_eval": {
+  "status": "completed",
+  "all_outputs_exact": true,
+  "pairs": 18,
+  "expected_pairs": 18,
+  "summary": {
+   "complete": true,
+   "all_outputs_exact": true,
+   "control_wall_ms": {
+    "n": 18,
+    "p50": 180.0457084973459,
+    "p95": 216.36737500375602
+   },
+   "joint_eval_wall_ms": {
+    "n": 18,
+    "p50": 162.1439794980688,
+    "p95": 191.98216599761508
+   },
+   "paired_saved_ms": {
+    "n": 18,
+    "p50": 17.605708504561335,
+    "p95": 24.495208010193892
+   },
+   "paired_saved_percent": {
+    "n": 18,
+    "p50": 9.642187514900947,
+    "p95": 11.592044796624059
+   },
+   "positive_paired_median_without_pooled_tail_regression": true,
+   "changed_outputs": [],
+   "quantile_method": "median; nearest-rank p95",
+   "production_integration": "not authorized by this report; requires parent review of per-language/per-repeat equivalence, quality, timing and memory",
+   "compile_experiment": "not implemented; conditional follow-up only",
+   "interpretation": "Unprofiled production controls versus joint-evaluation candidate with the same minimal result retention hook. Positive differences mean time saved. Cold/first calls remain included; process RSS/Metal peaks are cumulative, not per-arm allocations."
+  }
+ },
+ "profile": {
+  "ctl": {
+   "status": "running",
+   "baseline_decode": null,
+   "profile_vs_control_wall_percent": {
+    "n": 4,
+    "p50": 0.19579029948745275,
+    "p95": 2.531604544579147
+   },
+   "sampled_readback_share_of_profiled_stt_wall": {
+    "n": 4,
+    "p50": 0.11334820207498306,
+    "p95": 0.12320786596788603
+   },
+   "all_outputs_exact": false,
+   "pairs": 4
+  }
+ }
+}
