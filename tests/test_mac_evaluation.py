@@ -318,6 +318,42 @@ def test_browser_ack_cannot_join_ambiguous_or_legacy_final_chunks():
     assert report["coverage"]["received_final_chunks"] == 0
 
 
+def test_first_stream_browser_metric_is_separate_from_complete_and_coverage():
+    rows = [{"chunk_id": "1", "timing_schema_version": "2", "endpoint_reason": "silence"}]
+    ack = {
+        "event": "caption_rendered",
+        "session_id": "session",
+        "event_id": "session:stream:1",
+        "client_id": "browser",
+        "chunk_id": 1,
+        "timing_schema_version": 2,
+        "stage": "first_stream",
+        "visible": True,
+        "speech_end_to_ack_upper_bound_ms": 1100,
+    }
+    stream_only = evaluation._report_browser_acknowledgments(rows, [ack, ack], "session")
+    assert stream_only["client_count"] == 1
+    assert stream_only["coverage"]["received_final_chunks"] == 0
+    assert stream_only["cohorts"][0]["metrics"]["first_visible"] == {"n": 1, "p50": 1100, "p95": 1100}
+    assert stream_only["cohorts"][0]["metrics"]["speech_end_to_ack_upper_bound_ms"]["n"] == 0
+    both = evaluation._report_browser_acknowledgments(
+        rows,
+        [
+            ack,
+            {**ack, "event_id": "session:duplicate", "speech_end_to_ack_upper_bound_ms": 1200},
+            {**ack, "client_id": "hidden", "visible": False},
+            {**ack, "client_id": "stale", "session_id": "old"},
+            {**ack, "event_id": "session:final", "stage": "complete", "speech_end_to_ack_upper_bound_ms": 1800},
+        ],
+        "session",
+    )
+    assert both["client_count"] == 1
+    assert both["cohorts"][0]["metrics"]["first_visible"]["p95"] == 1100
+    assert both["cohorts"][0]["metrics"]["speech_end_to_ack_upper_bound_ms"] == {"n": 1, "p50": 1800, "p95": 1800}
+    assert both["coverage"]["received_final_chunks"] == 1
+    assert evaluation._report_browser_acknowledgments([], [ack], "session")["client_count"] == 1
+
+
 def test_partial_only_browser_is_counted_even_when_no_final_was_produced(replay_case, tmp_path):
     manifest, inputs, metrics, _ = replay_case
     (metrics / "ab_metrics_session.csv").write_text("chunk_id,timing_schema_version,endpoint_reason\n")

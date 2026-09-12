@@ -110,6 +110,12 @@ Client receipt-to-render is local browser overhead; speech-end-to-ack is an uppe
 bound including return-network time. Hidden tabs and accelerated replay cannot
 pass caption-delivery gates. Legacy `e2e_latency_ms` remains processing time.
 
+Schema-2 `first_stream` stage: speech end → first streamed translation tokens
+visible (upper bound, includes return network); reported, not a gate; one ACK per
+client per chunk. The first batch must actually be sent and synchronously mutate
+the visible display DOM. If delivery coalesces that batch away, no first-stream
+observation is recorded for that client; later batches cannot substitute for it.
+
 **Replay-ending interpretation:** the file stream appends virtual silence to let
 pending captions finish. Older raw/harness tables group by the emitted
 `endpoint_reason`; a `silence` row can therefore include an EOF-assisted ending.

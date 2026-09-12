@@ -1962,6 +1962,10 @@ _first_stream_chunks = set()
 _first_stream_lock = threading.Lock()
 
 STREAM_TOKEN_BATCH_SIZE = 3  # Send every N tokens to reduce WebSocket overhead
+STREAM_FIRST_TOKEN_BATCH_SIZE = int(os.environ.get("STARK_STREAM_FIRST_TOKEN_BATCH_SIZE", "1"))
+if STREAM_FIRST_TOKEN_BATCH_SIZE < 1:
+    raise ValueError("STARK_STREAM_FIRST_TOKEN_BATCH_SIZE must be positive")
+WARMUP_AFTER_FINAL = os.environ.get("STARK_WARMUP_AFTER_FINAL", "1").strip().lower() not in {"0", "false", "off"}
 
 
 def _enqueue_stream_token(item):
@@ -2001,6 +2005,7 @@ def translate_mlx_streaming(model, tokenizer, text, chunk_id, prompt_cache_templ
         suffix_tokens=suffix_tokens,
         token_callback=token_callback,
         batch_size=STREAM_TOKEN_BATCH_SIZE,
+        first_batch_size=STREAM_FIRST_TOKEN_BATCH_SIZE,
         terminology_prompt=settings.translation.terminology_prompt,
     )
     _last_gen_stats[chunk_id] = _generation_stats(result)
@@ -2013,6 +2018,7 @@ async def stream_token_broadcaster():
 
     Runs as a background task in the event loop. Exits when it receives None.
     """
+    first_seen = {}
     while True:
         item = await _stream_token_queue.get()
         if item is None:
@@ -2021,14 +2027,24 @@ async def stream_token_broadcaster():
         msg_type = item[0]
         if msg_type == "token":
             _, cid, partial_spanish, tokens_so_far = item
-            await broadcast(
-                {
-                    "type": "translation_stream",
-                    "chunk_id": cid,
-                    "partial_spanish_a": partial_spanish,
-                    "tokens_so_far": tokens_so_far,
-                }
-            )
+            payload = {
+                "type": "translation_stream",
+                "chunk_id": cid,
+                "partial_spanish_a": partial_spanish,
+                "tokens_so_far": tokens_so_far,
+            }
+            if cid not in first_seen:
+                payload["event_id"] = f"{SESSION_ID}:stream:{cid}"
+                first_seen[cid] = None
+                if len(first_seen) > 2048:
+                    first_seen.pop(next(iter(first_seen)))
+                if not _latency.async_captions:
+                    # Awaited broadcast only hooks translation messages. No
+                    # await separates this registration from its stream send.
+                    payload["caption_delivery_mode"] = "awaited"
+                    for client in list(ws_clients):
+                        _caption_before_send(client, payload, time.perf_counter(), 0.0)
+            await broadcast(payload)
 
 
 # [P7-4A] Pre-warm translation models during silence to keep Metal GPU hot.
@@ -2055,6 +2071,10 @@ def _inference_idle():
 def _count_experiment(name):
     with _experiment_lock:
         _experiment_counters[name] = _experiment_counters.get(name, 0) + 1
+
+
+# Event-loop-owned emitted previews, bounded at insertion and consumed by final STT.
+_partial_reuse_candidates = {}
 
 
 def _experiment_snapshot():
@@ -2087,6 +2107,8 @@ def _experiment_snapshot():
             ),
             0,
         )
+        if _latency.partial_reuse_ms > 0:
+            counters.update(final_stt_reused_partial=0, final_stt_full=0)
         return {**counters, **_experiment_counters}
 
 
@@ -2958,6 +2980,15 @@ async def process_partial(
         previous_source = _partial_source_text.get(utterance_id, "")
         stable_prefix = common_prefix_words(previous_source, english)
         _partial_source_text[utterance_id] = english
+        if _latency.partial_reuse_ms > 0:
+            _partial_reuse_candidates[utterance_id] = {
+                "sample_end": sample_bounds.get("sample_end"),
+                "speech_end_sample": sample_bounds.get("speech_end_sample"),
+                "request_sequence": request_sequence,
+                "english": english,
+            }
+            while len(_partial_reuse_candidates) > 256:
+                _partial_reuse_candidates.pop(next(iter(_partial_reuse_candidates)))
         _latency_event("preview_" + preview_kind)
         total = stt_latency + marian_latency
         _count_experiment("partial_emitted")
@@ -3261,7 +3292,7 @@ async def _pipeline_translate_and_finalize(
     time — multiple concurrent TranslateGemma calls would thrash the Metal
     GPU and actually be slower than sequential.
     """
-    global _chunks_completed
+    global _chunks_completed, _warmup_pending
     # Every branch below assigns the A-model results, but only the A/B branches
     # assign the B-model ones. The single-model MLX path (the Mac default) then
     # hit UnboundLocalError on `qe_b` at the summary print, so every final failed.
@@ -3473,6 +3504,9 @@ async def _pipeline_translate_and_finalize(
                 _translation_active.clear()
                 with _first_stream_lock:
                     _first_stream_chunks.discard(cid)
+                # No await before lock exit: admit keep-warm only after translation.
+                if WARMUP_AFTER_FINAL:
+                    _warmup_pending = True
         timing.translation_started = timing.translation_started or timing.translation_lock_acquired
         timing.translation_finished = time.perf_counter()
         now = time.perf_counter()
@@ -3556,6 +3590,7 @@ async def _pipeline_translate_and_finalize(
             "qe_b": qe_b,
             "word_stability_pct": word_stability_pct,
             "final_translation_route": final_translation_route,
+            "final_stt_route": timing.final_stt_route or "full",
             "timestamp": datetime.now().isoformat(),
         }
         result_data.update(gen_stats)
@@ -3720,34 +3755,74 @@ async def _pipeline_coordinator():
             # --- STT: submit to pipeline pool ---
             loop = asyncio.get_event_loop()
             whisper_prompt = _whisper_prompt()
-            timing.stt_requested = time.perf_counter()
-
-            def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing, chunk=cid):
-                clock.stt_started = time.perf_counter()
-                try:
-                    return _run_tracked_stt(
-                        "final",
-                        _run_stt_via_worker if MULTIPROCESS else _run_stt,
-                        audio,
-                        prompt,
-                        trace_fields={"chunk_id": chunk, "utterance_id": clock.utterance_id, **clock.sample_metadata()},
-                    )
-                finally:
-                    clock.stt_finished = time.perf_counter()
-
-            if _stt_scheduler is not None:
-                stt_future = asyncio.wrap_future(_stt_scheduler.submit("final", timed_stt, key=timing.utterance_id))
+            candidate = None
+            gap_samples = None
+            if _latency.partial_reuse_ms > 0:
+                candidate = _partial_reuse_candidates.pop(timing.utterance_id, None)
+                if (
+                    candidate is not None
+                    and isinstance(candidate["sample_end"], int)
+                    and isinstance(timing.speech_end_sample, int)
+                ):
+                    gap_samples = timing.speech_end_sample - candidate["sample_end"]
+            if (
+                candidate is not None
+                and timing.endpoint_reason == "silence"
+                and gap_samples is not None
+                and isinstance(timing.sample_rate, int)
+                and timing.sample_rate > 0
+                and gap_samples <= _latency.partial_reuse_ms * timing.sample_rate // 1000
+            ):
+                timing.stt_requested = timing.stt_started = timing.stt_finished = time.perf_counter()
+                english = candidate["english"]
+                stt_latency, stt_confidence, segment_meta, low_conf_words = 0.0, None, [], []
+                _latency_trace.record(
+                    "final_stt_reused_partial",
+                    chunk_id=cid,
+                    utterance_id=timing.utterance_id,
+                    gap_samples=gap_samples,
+                    request_sequence=candidate["request_sequence"],
+                )
+                _count_experiment("final_stt_reused_partial")
+                final_stt_route = "partial_reuse"
             else:
-                stt_future = loop.run_in_executor(_stt_comm_pool if MULTIPROCESS else _pipeline_pool, timed_stt)
+                final_stt_route = "full"
+                if _latency.partial_reuse_ms > 0:
+                    _count_experiment("final_stt_full")
+                timing.stt_requested = time.perf_counter()
 
-            # Await STT completion (translation of N-1 may still be running
-            # concurrently in another thread — that's the overlap)
-            english, stt_latency, stt_confidence, segment_meta, low_conf_words = await stt_future
-            _latency_trace.record(
-                "final_stt_resumed",
-                chunk_id=cid,
-                worker_finish_to_resume_ms=milliseconds(time.perf_counter(), timing.stt_finished),
-            )
+                def timed_stt(audio=audio_data, prompt=whisper_prompt, clock=timing, chunk=cid):
+                    clock.stt_started = time.perf_counter()
+                    try:
+                        return _run_tracked_stt(
+                            "final",
+                            _run_stt_via_worker if MULTIPROCESS else _run_stt,
+                            audio,
+                            prompt,
+                            trace_fields={
+                                "chunk_id": chunk,
+                                "utterance_id": clock.utterance_id,
+                                **clock.sample_metadata(),
+                            },
+                        )
+                    finally:
+                        clock.stt_finished = time.perf_counter()
+
+                if _stt_scheduler is not None:
+                    stt_future = asyncio.wrap_future(_stt_scheduler.submit("final", timed_stt, key=timing.utterance_id))
+                else:
+                    stt_future = loop.run_in_executor(_stt_comm_pool if MULTIPROCESS else _pipeline_pool, timed_stt)
+
+                # Await STT completion (translation of N-1 may still be running
+                # concurrently in another thread — that's the overlap)
+                english, stt_latency, stt_confidence, segment_meta, low_conf_words = await stt_future
+                _latency_trace.record(
+                    "final_stt_resumed",
+                    chunk_id=cid,
+                    worker_finish_to_resume_ms=milliseconds(time.perf_counter(), timing.stt_finished),
+                )
+            # Carry the route with this chunk's timing through the async finalizer.
+            timing.final_stt_route = final_stt_route
 
             # [FIX] Final STT done — allow partials again for the next utterance
             _final_pending.clear()
@@ -4024,6 +4099,29 @@ async def ws_handler(websocket, path=None):
 
 def _caption_before_send(client, data, started, queue_ms):
     _latency_trace.record("caption_send_started", event_id=data.get("event_id"), queue_ms=queue_ms)
+    if (
+        data.get("type") == "translation_stream"
+        and isinstance(data.get("event_id"), str)
+        and ":stream:" in data["event_id"]
+    ):
+        timing = _chunk_timings.get(data.get("chunk_id"))
+        _render_tracker.sent(
+            client,
+            data["event_id"],
+            started,
+            timing.speech_end if timing and timing.timing_source != "replay_nonrealtime" else None,
+            "first_stream",
+            {
+                "chunk_id": data.get("chunk_id"),
+                "utterance_id": timing.utterance_id if timing else None,
+                "timing_source": timing.timing_source if timing else "unknown",
+                "caption_delivery_mode": data.get("caption_delivery_mode"),
+                "caption_queue_wait_ms": round(queue_ms, 3),
+                "tokens_so_far": data.get("tokens_so_far"),
+                **(timing.sample_metadata() if timing else dict.fromkeys(SAMPLE_COLUMNS)),
+            },
+        )
+        return
     if data.get("type") != "translation":
         return
     timing = _chunk_timings.get(data.get("chunk_id")) if data.get("stage") != "partial" else None
@@ -4478,6 +4576,7 @@ def write_diag_jsonl(data, audio_path, segment_meta=None, low_conf_words=None, r
         "english": data["english"],
         "spanish_gemma": data.get("spanish_a"),
         "final_translation_route": data.get("final_translation_route"),
+        "final_stt_route": data.get("final_stt_route"),
         "spanish_marian": marian_text,
         "stt_confidence": conf,
         "qe_a": data.get("qe_a"),
@@ -5278,7 +5377,8 @@ async def audio_loop():
                                 last_partial_len = 0
                                 last_silence_boundary = 0
                                 vad_model.reset_states()
-                                _warmup_pending = True
+                                if not WARMUP_AFTER_FINAL:
+                                    _warmup_pending = True
                         else:
                             # Normal silence-triggered finalization
                             _utterance_timings[utterance_id] = ChunkTiming.from_timeline(
@@ -5293,8 +5393,8 @@ async def audio_loop():
                             last_partial_len = 0
                             last_silence_boundary = 0
                             vad_model.reset_states()
-                            # [P7-4A] Schedule a GPU warmup now that speech ended
-                            _warmup_pending = True
+                            if not WARMUP_AFTER_FINAL:
+                                _warmup_pending = True
 
                     # [P7-4A] Pre-warm during silence: run dummy forward pass
                     # after speech→silence transition to keep Metal GPU hot.

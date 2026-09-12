@@ -41,7 +41,14 @@ SLOW_STAGE_MS = 800
 ROUTES = ("gemma", "marian", "unknown")
 STAGE_NAMES = ("stt_call", "translation_call", "translation_lock_wait")
 SCALAR_NAMES = ("generation_lock_wait_ms_a", "decode_ms_a", "gen_tokens_a")
-FILE_KEYS = ("replay_json", "diagnostics_jsonl", "csv", "lifecycle_json", "session_metadata_json")
+FILE_KEYS = (
+    "replay_json",
+    "diagnostics_jsonl",
+    "csv",
+    "lifecycle_json",
+    "session_metadata_json",
+    "display_metrics_jsonl",
+)
 THRESHOLDS = {
     name: value
     for name, value in globals().copy().items()
@@ -351,13 +358,34 @@ def analyze(runs_path: Path) -> dict:
         if key in seen or any(r["tag"] == entry["tag"] for r in runs):
             raise ValueError("Duplicate run tag or clip/arm/repeat")
         seen.add(key)
-        files = {key: read(entry[key]) for key in FILE_KEYS}
+        files = {key: read(entry[key]) for key in FILE_KEYS if key != "display_metrics_jsonl" or key in entry}
         replay = json.loads(files["replay_json"])
         lifecycle = json.loads(files["lifecycle_json"])
         metadata = json.loads(files["session_metadata_json"])
         diagnostics = [json.loads(line) for line in files["diagnostics_jsonl"].splitlines() if line.strip()]
         if any(not isinstance(r, dict) for r in diagnostics):
             raise ValueError("Diagnostics rows must be objects")
+        first_visible = {}
+        if "display_metrics_jsonl" in files:
+            acknowledgments = [json.loads(line) for line in files["display_metrics_jsonl"].splitlines() if line.strip()]
+            if any(not isinstance(r, dict) for r in acknowledgments):
+                raise ValueError("Display metrics rows must be objects")
+            values = []
+            seen_acks = set()
+            for ack in acknowledgments:
+                if (
+                    ack.get("event") != "caption_rendered"
+                    or ack.get("stage") != "first_stream"
+                    or ack.get("visible") is not True
+                ):
+                    continue
+                identity = (ack.get("session_id"), ack.get("client_id"), ack.get("chunk_id"))
+                if all(value is not None for value in identity):
+                    if identity in seen_acks:
+                        continue
+                    seen_acks.add(identity)
+                values.append(_number(ack.get("speech_end_to_ack_upper_bound_ms")))
+            first_visible = {"first_visible": _stats(values), "first_visible_samples": values}
         rows = [
             r
             for r in diagnostics
@@ -376,6 +404,7 @@ def analyze(runs_path: Path) -> dict:
         runs.append(
             {
                 **entry,
+                **first_visible,
                 "rows": rows,
                 "csv_rows": csv_rows,
                 "replay": replay,
@@ -407,6 +436,10 @@ def analyze(runs_path: Path) -> dict:
                 "n_by_route": {route: sum(_route(r) == route for r in rows) for route in ROUTES},
                 "secondary": _secondary(rows),
             }
+            if any("first_visible" in run for run in selected):
+                arms[name]["first_visible"] = _stats(
+                    [value for run in selected for value in run.get("first_visible_samples", [])]
+                )
             if arm["kind"] == "candidate":
                 arms[name]["gates"] = _gates(selected, controls, arm, rows, ctl_rows)
         clips[clip] = {
@@ -450,7 +483,14 @@ def analyze(runs_path: Path) -> dict:
         "percentile_method": "nearest-rank: ceil(p / 100 * n) - 1",
         "clip_count": len(clips),
         "scope": "Gates cover every declared clip; p95 claim eligibility is separate.",
-        "runs": [{k: v for k, v in r.items() if k not in ("rows", "csv_rows", "replay", "lifecycle")} for r in runs],
+        "runs": [
+            {
+                k: v
+                for k, v in r.items()
+                if k not in ("rows", "csv_rows", "replay", "lifecycle", "first_visible_samples")
+            }
+            for r in runs
+        ],
         "clips": clips,
         "outcomes": outcomes,
     }
@@ -492,6 +532,24 @@ def render_markdown(report: dict) -> str:
             )
             lines.append("| " + " | ".join(cells) + " |")
         lines.append("")
+        if any("first_visible" in arm for arm in data["arms"].values()):
+            lines.extend(
+                [
+                    "First streamed tokens visible: speech-end-to-ACK upper bound including return network; reported, not gated.",
+                    "",
+                    "| Arm / run | First visible n | First visible p50 ms | First visible p95 ms |",
+                    "| --- | ---: | ---: | ---: |",
+                ]
+            )
+            observations = [(name, arm) for name, arm in data["arms"].items()]
+            observations.extend((run["tag"], run) for run in report["runs"] if run["clip"] == clip)
+            for label, observation in observations:
+                if "first_visible" in observation:
+                    visible = observation["first_visible"]
+                    lines.append(
+                        f"| {_escape(label)} | {visible['n']} | {_format(visible['p50'])} | {_format(visible['p95'])} |"
+                    )
+            lines.append("")
         for name, arm in data["arms"].items():
             for comparison in arm.get("gates", {}).get("G4", {}).get("comparisons", []):
                 if "reason" in comparison:

@@ -64,6 +64,42 @@ def test_final_only_browser_has_explicitly_missing_preview_coverage():
     assert result["cohorts"][0]["missing_preview_event_ids"] == ["s:p:1"]
 
 
+def test_first_stream_acks_use_client_chunk_identity_without_emitted_previews():
+    ack = {
+        "session_id": "s",
+        "event": "caption_rendered",
+        "event_id": "s:stream:1",
+        "chunk_id": 1,
+        "visible": True,
+        "stage": "first_stream",
+        "timing_schema_version": 2,
+        "timing_source": "replay_realtime",
+        "caption_delivery_mode": "queued",
+        "client_id": "audience",
+        "speech_end_to_ack_upper_bound_ms": 1100,
+    }
+    result = preview_browsers(
+        [],
+        [
+            ack,
+            ack,
+            {**ack, "event_id": "s:other", "chunk_id": "1", "speech_end_to_ack_upper_bound_ms": 9999},
+            {**ack, "client_id": "obs", "speech_end_to_ack_upper_bound_ms": 1200},
+            {**ack, "event_id": "s:complete", "stage": "complete", "speech_end_to_ack_upper_bound_ms": 1800},
+            {**ack, "client_id": "hidden", "visible": False},
+            {**ack, "session_id": "old"},
+        ],
+        "s",
+    )
+    assert result["client_count"] == 2
+    assert result["emitted_translated_preview_events"] == 0
+    assert [row["first_visible_ms"] for row in result["cohorts"]] == [
+        {"n": 1, "p50": 1100, "p95": 1100},
+        {"n": 1, "p50": 1200, "p95": 1200},
+    ]
+    assert all(row["first_preview_ack_upper_bound_ms"]["n"] == 0 for row in result["cohorts"])
+
+
 def test_coverage_union_accounts_for_overlap_and_internal_holes():
     baseline = ranges(
         [
@@ -327,7 +363,16 @@ def test_report_excludes_failed_fast_samples_instead_of_rewarding_them(tmp_path)
                 "first_preview_samples_ms": [latency],
                 "within_utterance_gap_samples_ms": [],
                 "browser": {},
-                "preview_browser": {},
+                "preview_browser": {
+                    "cohorts": [
+                        {
+                            "client_id": "audience",
+                            "timing_source": "replay_realtime",
+                            "caption_delivery_mode": "queued",
+                            "first_visible_ms": bench.stats([latency - 100]),
+                        }
+                    ]
+                },
             },
         }
         if failed:
@@ -339,6 +384,10 @@ def test_report_excludes_failed_fast_samples_instead_of_rewarding_them(tmp_path)
     group = result["groups"][0]
     assert group["endpoints"]["silence|replay_realtime"] == {"n": 1, "p50": 1000, "p95": 1000}
     assert group["first_preview_ms"]["p50"] == 1000 and group["failures"] == 1
+    markdown = (tmp_path / "report/README.md").read_text()
+    assert "First visible p50 / p95 ms" in markdown
+    assert "| s0 | audience | replay_realtime | queued | 900.0 / 900.0 | 1 |" in markdown
+    assert "| s1 | audience" not in markdown
 
 
 @pytest.mark.parametrize(

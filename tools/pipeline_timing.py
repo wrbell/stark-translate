@@ -215,6 +215,7 @@ class ChunkTiming:
     sample_rate: int | None = None
     speech_end_sample: int | None = None
     padding_samples: int = 0
+    final_stt_route: str | None = None  # "full" or "partial_reuse"; not a clock stamp.
 
     @classmethod
     def from_timeline(cls, timeline: AudioTimeline, utterance_id: int, reason: str) -> ChunkTiming:
@@ -249,7 +250,8 @@ class ChunkTiming:
         return {
             name: round((value - origin) * 1000, 3)
             for name, value in vars(self).items()
-            if name not in {"utterance_id", "endpoint_reason", "timing_source", *self.sample_metadata()}
+            if name
+            not in {"utterance_id", "endpoint_reason", "timing_source", "final_stt_route", *self.sample_metadata()}
             and value is not None
         }
 
