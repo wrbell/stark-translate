@@ -124,8 +124,10 @@ metrics/gemma4_optim_phase2/
 training_monitor.log
 todo_windows.md
 
-# Claude Code session data
-.claude/
+# Claude Code session data. The skill link is the one tracked path.
+.claude/*
+!.claude/skills/
+!.claude/skills/simplified-technical-english
 
 # Secrets
 .env

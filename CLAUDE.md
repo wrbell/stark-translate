@@ -190,3 +190,22 @@ Latest recorded suite counts live only in
       ([closeout evidence](docs/evaluation/overnight_closeout_20260910/README.md)).
 
 Statuses, priorities, dependencies and acceptance per item: [`docs/backlog.json`](docs/backlog.json).
+
+## Clarity
+
+- Write explanations to Willem in Simplified Technical English.
+- Write pull request descriptions in Simplified Technical English.
+- Write commit message bodies in Simplified Technical English.
+- Write README prose and other document prose in Simplified Technical English.
+- Use the [vendored skill](.agents/skills/simplified-technical-english/SKILL.md) in `.agents/skills/simplified-technical-english/`.
+- Follow about 80 percent of the STE rules.
+- Do not target full compliance with the specification.
+- Code, identifiers, math, command-line output, and quoted error text do not follow these rules.
+- Use a mermaid diagram to show structure, flow, or architecture.
+- For a complex result, offer one self-contained HTML explainer.
+- The HTML file is temporary.
+- Commit the HTML file only when Willem asks for the file.
+- Make a video explainer only when Willem asks for a video.
+- Do not add API keys or secrets.
+- `scripts/ste_check.py` is an optional and advisory check for documents.
+- Do not use the check as a required CI gate.

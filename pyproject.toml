@@ -205,6 +205,10 @@ exclude = [
     # Newer ruff formats fenced Python in Markdown; those docs are not source.
     "docs",
     "*.md",
+    # Vendored third-party skill (MIT). Ruff check and format rewrite upstream
+    # Python. Keep those files byte-identical to the pinned commit.
+    ".agents",
+    ".claude/skills",
 ]
 
 [tool.ruff.lint]
