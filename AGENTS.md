@@ -99,3 +99,22 @@ Runbooks: [`docs/operator_runbook.md`](docs/operator_runbook.md),
 - New deployment profile → `stark_translate/profiles.py` + `operator_app/lite_preflight.py` + `models.lock.json`
 - New latency experiment → `tools/latency_experiments.py`, protocol declared before run 1, gates from
   `tools/tail_screen_report.py`, outcome row in `docs/latency_next_experiments.md`
+
+## Clarity
+
+- Write explanations to Willem in Simplified Technical English.
+- Write pull request descriptions in Simplified Technical English.
+- Write commit message bodies in Simplified Technical English.
+- Write README prose and other document prose in Simplified Technical English.
+- Use the [vendored skill](.agents/skills/simplified-technical-english/SKILL.md) in `.agents/skills/simplified-technical-english/`.
+- Follow about 80 percent of the STE rules.
+- Do not target full compliance with the specification.
+- Code, identifiers, math, command-line output, and quoted error text do not follow these rules.
+- Use a mermaid diagram to show structure, flow, or architecture.
+- For a complex result, offer one self-contained HTML explainer.
+- The HTML file is temporary.
+- Commit the HTML file only when Willem asks for the file.
+- Make a video explainer only when Willem asks for a video.
+- Do not add API keys or secrets.
+- `scripts/ste_check.py` is an optional and advisory check for documents.
+- Do not use the check as a required CI gate.
