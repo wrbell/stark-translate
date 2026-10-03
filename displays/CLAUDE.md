@@ -135,3 +135,7 @@ not need LAN exposure for audience captions.
 3. Treat `english` / `spanish_a` as source/target per `lang_config`, not by language.
 4. Keep the page static (no build step); add it to `dry_run_ab.py`'s printed "Local displays" list if operators should see it.
 5. Run HTML5 Tidy (the lint workflow runs it on `displays/*.html`; zero warnings expected) before committing.
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

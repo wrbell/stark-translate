@@ -265,3 +265,13 @@ bilingual approval are separate gates (#131, `physical-second-output`, `bilingua
 | Lite `doctor` fails admission | Check cores/RAM/VRAM floors in B1; pick the matching profile explicitly, it will not auto-downgrade |
 | Lite setup: "corrupt native installation" | Move the invalid native directory aside and rerun setup; it fails closed rather than replacing evidence |
 | Lite E2B session fails to start | Expected behavior on a missing/invalid GGUF or server: fix the artifact; there is no silent HF fallback |
+
+<!-- standards:begin -->
+## Collection standards
+
+Every project under `/Users/willem/Code` follows the shared standards in `/Users/willem/Code/standards/` (index: `standards/STANDARDS.md`; future standards: `standards/ROADMAP.md`).
+
+- **Presentations:** build every deck from `standards/powerpoint template/Willem-Default.potx` (theme "Helena": Neue Haas Grotesk Text Pro, 16:9, teal/orange/red accent palette). Spec: `standards/powerpoint template/STANDARD.md`. Generate with `standards/powerpoint template/house_style.py` (open `Willem-Default-Base.pptx`, never the `.potx`) and gate with `standards/powerpoint template/deck_checks.py` before calling a deck done.
+- **Deck rules:** no speaker notes in submitted decks; editable shapes, not chart images; numbered, linked superscript citations with a final References slide; no bottom rules, citation strips, or page counters; footer text only when a course or client requires it (for example `ME460 HWx`), which overrides the default of no footer; export the deliverable PDF with native PowerPoint and use LibreOffice renders only for QA.
+- **Everything else:** do not invent facts, dates, or numbers; mark unknowns TBD and point at the source. Keep copyrighted course material out of git. This block is managed by `standards/tools/apply_standards.py`; edit `standards/ai-files/BLOCK-root.md`, not this copy.
+<!-- standards:end -->

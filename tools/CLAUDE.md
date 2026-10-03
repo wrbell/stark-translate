@@ -102,3 +102,7 @@ Lite CPU smoke evidence (synthetic inputs, hashes, commands):
 `issue-137-active-learning`, `issue-135-mac-ab`, `natural-spanish-refs`,
 `conservative-marian-routing`, `eou-endpointing-feasibility` in
 [`docs/backlog.json`](../docs/backlog.json).
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

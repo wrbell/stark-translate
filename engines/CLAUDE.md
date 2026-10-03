@@ -180,3 +180,7 @@ Nested groups use the group prefix directly (`STARK_STT_`, `STARK_TRANSLATE_`, `
 - [`docs/lite_profiles.md`](../docs/lite_profiles.md) — Lite profile contract, pinned artifacts, Mac CPU smoke evidence
 - [`docs/latency_next_experiments.md`](../docs/latency_next_experiments.md) — closed-arm registry
 - [`docs/backlog.json`](../docs/backlog.json) — engine-related items (`issue-135-mac-ab`, `issue-177-mtp`, `lite-cpu-inference`, `rtx2070-native-validation`, `issue-138-hindi-zero-shot`)
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

@@ -36,3 +36,7 @@ HTML5 Tidy runs in the lint workflow on `displays/*.html` (zero warnings expecte
 page has a Node DOM harness (`tests/frontend/`). Physical projector, second-screen and
 second-output checks remain human gates (`docs/backlog.json`: `visible-browser-timing-run`,
 `physical-second-output`).
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

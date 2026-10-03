@@ -42,3 +42,7 @@ Follow the five steps in [`CLAUDE.md`](./CLAUDE.md#adding-a-new-engine): ABC →
 `factory.py` branch → `tests/conftest.py` mock → `models.lock.json` + setup profile.
 Hindi/Chinese remain pending user decisions; do not wire a new `--lang` without one.
 Engine-related backlog items live in [`docs/backlog.json`](../docs/backlog.json).
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

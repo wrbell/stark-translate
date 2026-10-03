@@ -26,3 +26,7 @@
 ## Backlog
 
 `issue-133-diarize-gate`, `natural-two-speaker` in [`docs/backlog.json`](../docs/backlog.json).
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

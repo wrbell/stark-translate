@@ -101,3 +101,7 @@ do not certify native speaker accuracy or latency.
 
 - `issue-133-diarize-gate` and `natural-two-speaker` in [`docs/backlog.json`](../docs/backlog.json).
 - Summary/verse UI evidence lives in the operator runbook and rehearsal records, not here.
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

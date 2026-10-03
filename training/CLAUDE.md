@@ -275,3 +275,7 @@ EN↔ES latency program. No Hindi training data has been prepared. When a decisi
 eBible Corpus (2023); "From Priest to Doctor" (COLING 2025); BibleNLP community; domain-adapted
 Whisper reports (aviation, industrial jargon). No published Whisper fine-tuning for church
 speech — the gap this project addresses.
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->

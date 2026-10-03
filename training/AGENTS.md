@@ -58,3 +58,7 @@ TranslateGemma sweep and the Hindi/Chinese decision are in [`CLAUDE.md`](./CLAUD
 `cuda-latency-proposal`, `issue-135-mac-ab`, `issue-136-jacobo-cpo`, `issue-138-hindi-zero-shot`,
 `hymn-translation-boundary`, `hymn-capture-suppression` in
 [`docs/backlog.json`](../docs/backlog.json).
+
+<!-- standards:begin -->
+Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+<!-- standards:end -->
