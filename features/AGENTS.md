@@ -1,6 +1,7 @@
 # features/AGENTS.md — Diarization, Verses, Summary (Agent Guide)
 
-> Paired with [`CLAUDE.md`](./CLAUDE.md) (status table, data flow, dependencies). Repo-wide
+> Paired with [`CLAUDE.md`](./CLAUDE.md) (imports this file for Claude Code) and with the
+> reference guide [`docs/agents/features.md`](../docs/agents/features.md) (status table, data flow, dependencies). Repo-wide
 > constraints: [`../AGENTS.md`](../AGENTS.md).
 
 ## Constraints
@@ -9,8 +10,8 @@
 - Diarization is **off by default** (`--diarize`). Budget from `docs/live_diarization.md`: final p95 within +50 ms of baseline; do not move STT/translation code to satisfy a diarization change.
 - `speaker_labels.py` must stay free of model imports (it is unit-tested on CPU).
 - Verse extraction recognizes English book names and number phrases, including whole spaced/hyphenated compounds. Resolve context in text order; a changed book clears the old chapter. Hymn/stanza markers clear Bible context; unresolved numbers, unfinished references and unsupported lists are omitted rather than guessed.
-- Validate chapter/verse bounds before emitting a reference or committing chapter context. [`bible_reference_bounds.py`](./bible_reference_bounds.py) bundles metadata from the existing KJV corpus; see [`CLAUDE.md`](./CLAUDE.md#verse-extraction) for its source hash. Valid bounds prove structural existence only, not what was spoken. Spanish reference grammar and alternative versifications are not implemented.
-- Summary model ids follow the Gemma 4 stop-token rules in `engines/translation_prompts.py`; never inline prompts. Summary and live diarization loaders use pinned local resolution (details and receipts in [`CLAUDE.md`](./CLAUDE.md#dependencies)); do not turn the standalone offline diarization loader into an implicit live download path.
+- Validate chapter/verse bounds before emitting a reference or committing chapter context. [`bible_reference_bounds.py`](./bible_reference_bounds.py) bundles metadata from the existing KJV corpus; see [`docs/agents/features.md`](../docs/agents/features.md#verse-extraction) for its source hash. Valid bounds prove structural existence only, not what was spoken. Spanish reference grammar and alternative versifications are not implemented.
+- Summary model ids follow the Gemma 4 stop-token rules in `engines/translation_prompts.py`; never inline prompts. Summary and live diarization loaders use pinned local resolution (details and receipts in [`docs/agents/features.md`](../docs/agents/features.md#dependencies)); do not turn the standalone offline diarization loader into an implicit live download path.
 - Human-facing claims: verse highlights and summary have workflow evidence in the operator rehearsal only; bilingual accuracy approval is pending. Live diarization has **no** two-speaker evidence — the #133 gate is unmet.
 
 ## Where features surface
@@ -28,5 +29,36 @@
 `issue-133-diarize-gate`, `natural-two-speaker` in [`docs/backlog.json`](../docs/backlog.json).
 
 <!-- standards:begin -->
-Collection standards (presentations, sources, git hygiene) live in `/Users/willem/Code/standards/STANDARDS.md`; decks are built from `standards/powerpoint template/` and gated with its `deck_checks.py`. Managed block: edit `standards/ai-files/BLOCK-nested.md`, not this copy.
+## Collection standards
+
+Every project under `/Users/willem/Code` follows the shared standards in
+`/Users/willem/Code/standards/` (index: `standards/STANDARDS.md`; future
+standards: `standards/ROADMAP.md`).
+
+- **Presentations:** build every deck from
+  `standards/powerpoint template/Willem-Default.potx` (theme "Helena": Neue Haas
+  Grotesk Text Pro, 16:9, teal/orange/red accent palette). Spec:
+  `standards/powerpoint template/STANDARD.md`. Generate with
+  `standards/powerpoint template/house_style.py` (open
+  `Willem-Default-Base.pptx`, never the `.potx`) and gate with
+  `standards/powerpoint template/deck_checks.py` before calling a deck done.
+- **Deck rules:** no speaker notes in submitted decks; editable shapes, not
+  chart images; numbered, linked superscript citations with a final References
+  slide; no bottom rules, citation strips, or page counters; footer text only
+  when a course or client requires it (for example `ME460 HWx`), which overrides
+  the default of no footer; export the deliverable PDF with native PowerPoint
+  and use LibreOffice renders only for QA.
+- **Everything else:** do not invent facts, dates, or numbers; mark unknowns TBD
+  and point at the source. Keep copyrighted course material out of git. This
+  block is managed by `standards/tools/apply_standards.py`; edit
+  `standards/ai-files/BLOCK-root.md`, not this copy.
+- **AI use (school work):** no AI-generated or AI-modified images in any school
+  deliverable; AI-written deliverable text only with written adviser
+  pre-clearance (`docs/ai-clearances/`); never cite an AI tool as a source;
+  never edit graded report text (the repo's `protected-paths.txt`; example:
+  `standards/enforcement/senior-design-repo/sd-protected-paths.txt`). Log AI use
+  in `docs/ai-use-log.md` and disclose it per
+  `standards/standards/ai-use-disclosure/ai-use-disclosure.md`.
+- **AI files:** one `AGENTS.md` (≤ 200 lines, Clarity verbatim); `CLAUDE.md` is
+  `@AGENTS.md`. Gates: `standards/tools/agents_md_lint.py`, `ai_file_lint.py`.
 <!-- standards:end -->

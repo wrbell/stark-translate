@@ -1,0 +1,20 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "useGitignore": true,
+  "dictionaries": ["en", "engineering"],
+  "dictionaryDefinitions": [
+    {
+      "name": "engineering",
+      "path": "words/engineering.txt",
+      "addWords": true
+    }
+  ],
+  "ignorePaths": [
+    ".agents/**",
+    "third_party/**",
+    "enforcement/vale/styles/Google/**",
+    "enforcement/vale/styles/Microsoft/**",
+    "enforcement/vale/styles/write-good/**"
+  ]
+}

@@ -1,5 +1,15 @@
 # stark-translate
 
+On-device live English↔Spanish captions and translation for Stark Road Gospel Hall.
+
+Status (2026-10-04): v2026.14.0.0 (published 2026-09-11) is current; defaults
+are unchanged, the sub-second caption goal is not met, and the human and device
+gates in the backlog are open.
+
+Course: none.
+
+Agent file: [AGENTS.md](AGENTS.md) holds the rules for AI coding agents.
+
 [![Lint](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/lint.yml)
 [![Test](https://github.com/wrbell/stark-translate/actions/workflows/test.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/test.yml)
 [![Security](https://github.com/wrbell/stark-translate/actions/workflows/security.yml/badge.svg)](https://github.com/wrbell/stark-translate/actions/workflows/security.yml)
@@ -17,18 +27,35 @@ and the MSI; PyPI publication deferred by decision). Contracts:
 [`docs/backlog.json`](docs/backlog.json) (rendered [`docs/backlog.md`](docs/backlog.md)) · every
 document: [`docs/README.md`](docs/README.md).
 
+## Contents
+
+- [Start here](#start-here)
+- [Product overview](#product-overview)
+- [How it works](#how-it-works)
+- [Measured performance](#measured-performance)
+- [Quick start](#quick-start)
+- [Common tasks](#common-tasks)
+- [Models](#models), [Displays](#displays), [Training](#training)
+- [Testing & CI](#testing--ci)
+- [Project structure](#project-structure)
+- [Documentation](#documentation)
+- [Status](#status)
+- [Recreate](#recreate)
+- [Deliverables](#deliverables)
+- [License](#license)
+
 ## Start here
 
 | You want to… | Read |
 |---|---|
 | Run captions on a Sunday | [Operator runbook](docs/operator_runbook.md) |
 | Set up the Mac | [macOS installation and readiness](docs/packaging/macos.md) |
-| Run on a church PC or an RTX 2070 | [Lite profiles](docs/lite_profiles.md) and [`CLAUDE-windows.md`](CLAUDE-windows.md) Part B |
-| Change the code | [`CLAUDE.md`](CLAUDE.md), then the guide of the directory you touch (`engines/`, `tools/`, `displays/`, `features/`, `training/`) |
+| Run on a church PC or an RTX 2070 | [Lite profiles](docs/lite_profiles.md) and [Windows guide](docs/agents/platform-windows.md) Part B |
+| Change the code | [`AGENTS.md`](AGENTS.md), then the guide of the directory you touch (`engines/`, `tools/`, `displays/`, `features/`, `training/`) |
 | Delegate work to a coding agent | [`AGENTS.md`](AGENTS.md) (standing constraints, checks, workflow) |
 | Know what is proven and what is not | [Mac implementation status](docs/mac_implementation_status.md), [evaluation index](docs/evaluation/README.md) |
 | See what is left | [Backlog](docs/backlog.md) |
-| Train or fine-tune models | [`training/CLAUDE.md`](training/CLAUDE.md) and [`CLAUDE-windows.md`](CLAUDE-windows.md) Part A |
+| Train or fine-tune models | [`docs/agents/training.md`](docs/agents/training.md) and [Windows guide](docs/agents/platform-windows.md) Part A |
 
 ## Product overview
 
@@ -246,14 +273,14 @@ the WSL training environment.
 | Task | Command | Guide |
 |---|---|---|
 | Run a live session | `./run_operator.sh` → `http://localhost:9000/operator/` | [Operator runbook](docs/operator_runbook.md) |
-| Replay a recording through the pipeline | `venv/bin/python dry_run_ab.py --audio-file clip.wav --session-id demo_en` (`--lang es` for Spanish) | [`CLAUDE-macbook.md`](CLAUDE-macbook.md) |
+| Replay a recording through the pipeline | `venv/bin/python dry_run_ab.py --audio-file clip.wav --session-id demo_en` (`--lang es` for Spanish) | [Mac guide](docs/agents/platform-macbook.md) |
 | Try a caption without a microphone | `venv/bin/python dry_run_ab.py --dry-run-text "For God so loved the world"` | same |
-| Screen a latency experiment | `venv/bin/python -m tools.replay_bench --manifest <runs.json> --tag <tag> --configs "arm=<argv>"` then `venv/bin/python tools/tail_screen_report.py --runs <runs.jsonl> --output <report.json>` | [`tools/CLAUDE.md`](tools/CLAUDE.md), [registry](docs/latency_next_experiments.md) |
+| Screen a latency experiment | `venv/bin/python -m tools.replay_bench --manifest <runs.json> --tag <tag> --configs "arm=<argv>"` then `venv/bin/python tools/tail_screen_report.py --runs <runs.jsonl> --output <report.json>` | [`docs/agents/tools.md`](docs/agents/tools.md), [registry](docs/latency_next_experiments.md) |
 | Run the frozen Mac evaluation | `venv/bin/python tools/mac_evaluation.py validate --manifest docs/evaluation/mac_v2026_14_manifest_v2.json` | [`docs/evaluation/README.md`](docs/evaluation/README.md) |
-| Gate and activate an adapter | `venv/bin/python tools/health_check.py --backend mlx --adapter DIR` then `tools/manage_adapters.py activate …` | [`tools/CLAUDE.md`](tools/CLAUDE.md), [`docs/deploy.md`](docs/deploy.md) |
+| Gate and activate an adapter | `venv/bin/python tools/health_check.py --backend mlx --adapter DIR` then `tools/manage_adapters.py activate …` | [`docs/agents/tools.md`](docs/agents/tools.md), [`docs/deploy.md`](docs/deploy.md) |
 | Audit the installed runtime | `scripts/audit_mac_runtime.sh --output metrics/runtime-audit-$(date +%Y%m%d-%H%M%S)` | [`docs/packaging/macos.md`](docs/packaging/macos.md) |
 | Build and verify release artifacts | `python -m build && python tools/release_artifacts.py verify dist/*.whl dist/*.tar.gz` | [`docs/packaging/macos.md`](docs/packaging/macos.md) |
-| Run every check CI runs | see [Testing & CI](#testing--ci) | [`CLAUDE.md`](CLAUDE.md) |
+| Run every check CI runs | see [Testing & CI](#testing--ci) | [`AGENTS.md`](AGENTS.md) |
 
 ## Models
 
@@ -276,7 +303,7 @@ mlx-community re-quantizations of those.
 
 Browser displays served over the LAN on port 8080 with captions on WebSocket 8765 (TTS audio on
 8766); phones connect through the QR code on the audience display. Protocol and timing semantics:
-[`displays/CLAUDE.md`](displays/CLAUDE.md).
+[`docs/agents/displays.md`](docs/agents/displays.md).
 
 | Display | Purpose |
 |---------|---------|
@@ -290,7 +317,7 @@ Browser displays served over the LAN on port 8080 with captions on WebSocket 876
 ## Training
 
 Fine-tuning runs on Windows/WSL (A2000 Ada 16 GB); exported artifacts transfer to the Mac.
-Guide: [`training/CLAUDE.md`](training/CLAUDE.md). No WSL job has run since 2026-04-30.
+Guide: [`docs/agents/training.md`](docs/agents/training.md). No WSL job has run since 2026-04-30.
 
 - **STT (Whisper LoRA):** W16 is the deployed CUDA adapter ([bench](docs/archive/v2026.7/STT_BENCHMARK.md)); W17 DoRA + hard-mix is scripted for the next WSL cycle. Labels come from the Deepgram Nova-3 oracle with a tiered theological glossary. The Mac engines load no LoRA.
 - **Translation (Gemma 4):** E2B/E4B QLoRA SFT and CPO program in [`docs/gemma4_tuning/`](docs/gemma4_tuning/overview.md); adapters so far reach parity with stock E4B and the Jacobo canary still fails (#136), so stock E4B remains the default. The TranslateGemma S1–S9 sweep is historical ([`docs/archive/training/`](docs/archive/training/benchmark_training.md)).
@@ -307,10 +334,11 @@ python tools/render_backlog.py check-links
 pytest tests/test_documentation.py -v
 ```
 
-10 GitHub Actions workflow files in `.github/workflows/`: Lint (ruff, mypy, bandit, HTML Tidy on
+11 GitHub Actions workflow files in `.github/workflows/`: Lint (ruff, mypy, bandit, HTML Tidy on
 the displays), Test (3.11 + 3.12, coverage gate 65 %), Security (pip-audit + Bandit), Release,
 Windows MSI Release, PyPI Publish (build only; publishing gated on `PYPI_PUBLISH_ENABLED`), Docker
-Image (GHCR), Label PRs, Commitlint, Stale. CalVer in `pyproject.toml`. Suite counts live only in
+Image (GHCR), Label PRs, Commitlint, Stale, Standards (inlined from `wrbell/standards`; not a
+required check). CalVer in `pyproject.toml`. Suite counts live only in
 [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md). On the Mac the promoted
 `venv` is runtime-only; run these checks with the rollback environment's tooling
 (`stt_env/bin/python -m pytest …`).
@@ -328,16 +356,16 @@ start_server.sh                CUDA: launch llama-server with the default Gemma 
 operator_app/                  FastAPI control plane (:9000), setup/doctor/launchd CLI, preflight, review,
                                support bundles, idle-only audio tests, lite preflight, owned-process cleanup
 stark_translate/               Package entry; profiles.py (standard / lite-cpu / lite-cpu-quality / lite-cuda-8gb)
-engines/                       STT + translation + TTS engine layer (engines/CLAUDE.md)
+engines/                       STT + translation + TTS engine layer (engines/AGENTS.md)
   base.py, factory.py          ABCs, result dataclasses, backend detection and construction
   mlx_engine.py                Apple Silicon MLX Whisper + Gemma (streaming, warm-up, generation lock)
   parakeet_mlx_engine.py       Parakeet TDT EN (Mac default); parakeet_joint_decode.py pins its fast decode
   mlx_memory.py                Opt-in Metal wired limit (off by default)
   stt_fallback.py              English-only fallback rule; tts_engine.py Piper TTS
   cuda_engine.py, llamacpp_engine.py, marian_hf_engine.py   CUDA CT2/HF engines, llama-server client, Marian HF fallback
-displays/                      Static browser displays + operator page (displays/CLAUDE.md)
-features/                      Diarization, verse extraction, summary (features/CLAUDE.md)
-tools/                         Evaluation, monitoring, review tooling (tools/CLAUDE.md)
+displays/                      Static browser displays + operator page (displays/AGENTS.md)
+features/                      Diarization, verse extraction, summary (features/AGENTS.md)
+tools/                         Evaluation, monitoring, review tooling (tools/AGENTS.md)
   mac_evaluation.py            Frozen Mac evaluation pipeline
   replay_bench.py              Sequential real-audio replay runs for screens
   tail_screen_report.py        Offline screen gates from recorded artifacts
@@ -350,7 +378,7 @@ tools/                         Evaluation, monitoring, review tooling (tools/CLA
   llama_runtime.py             Pinned native llama.cpp install + session-owned llama-server (Lite)
   health_check.py, manage_adapters.py   Canary gate and adapter lifecycle
   render_backlog.py            Backlog validation/rendering/link check
-training/                      Windows/WSL training scripts (training/CLAUDE.md)
+training/                      Windows/WSL training scripts (training/AGENTS.md)
 scripts/                       runtime_env.sh (interpreter selection), audit_mac_runtime.sh, convert_marian_ct2.py, cuda/
 docs/                          Architecture, evaluation evidence, backlog, dated archives (docs/README.md)
 ```
@@ -361,7 +389,7 @@ The full map is [`docs/README.md`](docs/README.md). The files you will reach for
 
 | Doc | Contents |
 |-----|----------|
-| [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md) | Developer guide / short agent guide (constraints, checks, workflow) |
+| [`AGENTS.md`](AGENTS.md) / [`docs/agents/project-guide.md`](docs/agents/project-guide.md) | Agent rules (constraints, checks, workflow; `CLAUDE.md` imports it) / developer guide |
 | [`docs/current_architecture.md`](docs/current_architecture.md) | Inference and operator contracts for v2026.14 |
 | [`docs/mac_implementation_status.md`](docs/mac_implementation_status.md) | What is implemented, what is proven, open gates |
 | [`docs/backlog.json`](docs/backlog.json) | Remaining work, machine-readable (render: `tools/render_backlog.py`) |
@@ -369,7 +397,8 @@ The full map is [`docs/README.md`](docs/README.md). The files you will reach for
 | [`docs/latency_next_experiments.md`](docs/latency_next_experiments.md) | Closed-arm registry: every latency idea screened and its outcome |
 | [`docs/lite_profiles.md`](docs/lite_profiles.md) | Lite profile contract, pinned artifacts, CPU evidence |
 | [`docs/operator_runbook.md`](docs/operator_runbook.md) | Day-of-event workflow for non-technical operators |
-| [`CLAUDE-macbook.md`](CLAUDE-macbook.md) / [`CLAUDE-windows.md`](CLAUDE-windows.md) | Machine guides: Mac inference; WSL training and native Lite |
+| [`docs/agents/platform-macbook.md`](docs/agents/platform-macbook.md) / [`docs/agents/platform-windows.md`](docs/agents/platform-windows.md) | Machine guides: Mac inference; WSL training and native Lite |
+| [`CHANGELOG.md`](CHANGELOG.md) | Release history and the boards after the v2026.14 tag |
 
 ## Status
 
@@ -390,6 +419,29 @@ boundary review (#193, #194), physical second audio output, blinded bilingual re
 quality, a visible-browser timing run with a connected display, and Lite performance on x86 CPUs
 and an RTX 2070.
 
+## Recreate
+
+| Command | What it does | Limit |
+| --- | --- | --- |
+| `venv/bin/stark-translate setup --backend mlx` | Downloads the pinned models in `models.lock.json` and builds the Marian CT2 int8 artifacts | Needs the network once; Apple Silicon |
+| `python -m build && python tools/release_artifacts.py verify dist/*.whl dist/*.tar.gz` | Builds and verifies the wheel and the source archive | The platform ZIPs and the MSI come from the release workflows |
+| `python tools/mac_evaluation.py validate --manifest docs/evaluation/mac_v2026_14_manifest_v2.json` | Validates the frozen Mac evaluation manifest | Validation only; it does not rerun a screen |
+| `python tools/render_backlog.py render --check` | Checks that `docs/backlog.md` matches `docs/backlog.json` | Docs only |
+
+## Deliverables
+
+Assets of the GitHub Release `v2026.14.0.0`, published 2026-09-11 (UTC). The
+SHA-256 values are the asset digests that GitHub reports for the release.
+
+| File | SHA-256 | Submitted |
+| --- | --- | --- |
+| `stark-translate-v2026.14.0.0-mac.zip` | `80910cea05aa8dc01637a27d0eac9ee9a11d8f437129e371580d20ba37b8a1f7` | 2026-09-11 |
+| `stark-translate-v2026.14.0.0-nvidia.zip` | `a955a4c9bb56a70936e9c2465bd4286d5cfd9ba43d1d71f090df96938bb14c5f` | 2026-09-11 |
+| `stark-translate-v2026.14.0.0-windows.zip` | `5e521f5f0cb27cdd37f5ef7fdc057b40135f765633038b1d5a9c7415623642be` | 2026-09-11 |
+| `Stark.Translate-2026.14.0.0.msi` | `3bb7d40b05e7b64d054d2c0a49b7de47f22486208e653898a943318d418344bb` | 2026-09-11 |
+
 ## License
 
-Private project. All Bible translation training data uses public domain or CC-licensed sources only.
+Proprietary, all rights reserved: see [`LICENSE`](LICENSE) for the permitted and
+prohibited uses. All Bible translation training data uses public domain or
+CC-licensed sources only.

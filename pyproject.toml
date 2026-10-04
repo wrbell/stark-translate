@@ -209,6 +209,11 @@ exclude = [
     # Python. Keep those files byte-identical to the pinned commit.
     ".agents",
     ".claude/skills",
+    # Byte-identical copies from wrbell/standards (adopt_standards.py --check
+    # compares bytes). Ruff check and format would rewrite them.
+    "enforcement",
+    "tools/agents_md_lint.py",
+    "tools/check_docs.py",
 ]
 
 [tool.ruff.lint]
@@ -276,6 +281,17 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "training.*"
 ignore_errors = true
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+# The two checkers are copies from wrbell/standards and are tested there.
+# Without this omit, `--cov=tools` counts them as unexecuted lines.
+[tool.coverage.run]
+omit = [
+    "tools/agents_md_lint.py",
+    "tools/check_docs.py",
+]
 
 # ---------------------------------------------------------------------------
 # Pytest

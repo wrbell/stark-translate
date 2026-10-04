@@ -2,11 +2,15 @@
 
 Every document under `docs/`, grouped by what you are trying to do. Root guides:
 [`README.md`](../README.md) (product overview, measured performance, quick start),
-[`CLAUDE.md`](../CLAUDE.md) (developer guide), [`AGENTS.md`](../AGENTS.md) (short agent guide),
-[`CLAUDE-macbook.md`](../CLAUDE-macbook.md), [`CLAUDE-windows.md`](../CLAUDE-windows.md).
-Directory guides: [`engines/`](../engines/CLAUDE.md), [`tools/`](../tools/CLAUDE.md),
-[`displays/`](../displays/CLAUDE.md), [`features/`](../features/CLAUDE.md),
-[`training/`](../training/CLAUDE.md), each paired with an `AGENTS.md`.
+[`AGENTS.md`](../AGENTS.md) (agent rules; [`CLAUDE.md`](../CLAUDE.md) imports it),
+[`CHANGELOG.md`](../CHANGELOG.md) (release history). Developer guide:
+[`agents/project-guide.md`](agents/project-guide.md). Machine guides:
+[`agents/platform-macbook.md`](agents/platform-macbook.md),
+[`agents/platform-windows.md`](agents/platform-windows.md) (the old `CLAUDE-macbook.md` and
+`CLAUDE-windows.md` are pointers). Directory rules: [`engines/`](../engines/AGENTS.md),
+[`tools/`](../tools/AGENTS.md), [`displays/`](../displays/AGENTS.md),
+[`features/`](../features/AGENTS.md), [`training/`](../training/AGENTS.md), each with a reference
+guide under [`agents/`](agents/).
 
 ## Start here
 

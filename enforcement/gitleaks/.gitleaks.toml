@@ -1,0 +1,14 @@
+# Extend the built-in rules. Do not turn a default rule off.
+# Gitleaks v8.25.0 renamed [allowlist] to [[allowlists]].
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Vendor trees and the intentional failing secret fixture. Do not turn default rules off."
+paths = [
+  '''(?:^|/)\.agents/''', # vendored skills
+  '''(?:^|/)third_party/''', # vendored third-party trees
+  # Intentional sample for tests/test_security_supply_chain.py.
+  # The test copies the file outside this path before it scans.
+  '''tests/fixtures/security-supply-chain/gitleaks-fail/''',
+]
