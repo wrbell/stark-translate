@@ -1,6 +1,6 @@
 # stark-translate
 
-On-device live English↔Spanish captions and translation for Stark Road Gospel Hall.
+On-device English↔Spanish captions and translation for Stark Road Gospel Hall.
 
 Status (2026-10-04): v2026.14.0.0 (published 2026-09-11) is current; defaults
 are unchanged, the sub-second caption goal is not met, and the human and device
