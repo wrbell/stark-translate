@@ -161,3 +161,25 @@ stark_data/corrections/
 # Local overnight execution records; selected immutable reports live in docs/evaluation.
 /metrics/overnight_*/
 /metrics/support/
+
+# --- Collection template (standards/templates/gitignore), merged 2026-10-04 ---
+# Lines the existing rules above did not already cover. No rule was removed.
+.local/
+data/raw/
+*.sqlite
+*.sqlite3
+.env.*
+!.env.example
+# Tracked example env files stay tracked and visible.
+!.env.church.example
+secrets/
+*.pem
+# No PDF is tracked here; re-include your own PDF by exact path after this line.
+*.pdf
+.build/qa/
+.chart-data-*/
+.revisions/
+out/*.html
+~$*
+*.py[cod]
+.ipynb_checkpoints/

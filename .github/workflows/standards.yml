@@ -1,0 +1,213 @@
+---
+# Managed by standards/tools/adopt_standards.py.
+# Re-run the tool to add or remove a domain; do not edit by hand.
+# Jobs copied from wrbell/standards/.github/workflows/ at 0fe6a29de0f22af075ba51fafff9e03d1238d54d.
+name: Standards
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  # From shell.yml.
+  shell-lint:
+    name: shell-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Install ShellCheck
+        if: "${{ hashFiles('**/*.sh', '**/*.bash') != '' }}"
+        run: |
+          curl --retry 5 --retry-all-errors --retry-delay 2 -fsSL \
+            -o /tmp/shellcheck.tar.xz \
+            https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
+          tar -xJf /tmp/shellcheck.tar.xz -C /tmp
+          sudo install -m 755 \
+            /tmp/shellcheck-v0.11.0/shellcheck /usr/local/bin/shellcheck
+      - name: Install shfmt
+        if: "${{ hashFiles('**/*.sh', '**/*.bash') != '' }}"
+        run: |
+          curl --retry 5 --retry-all-errors --retry-delay 2 -fsSL \
+            -o /tmp/shfmt \
+            https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_linux_amd64
+          sudo install -m 755 /tmp/shfmt /usr/local/bin/shfmt
+      - name: Run ShellCheck
+        if: "${{ hashFiles('**/*.sh', '**/*.bash') != '' }}"
+        run: |
+          mapfile -t files < <(
+            git ls-files '*.sh' '*.bash' \
+              | grep -Ev '^(tests/fixtures/shell/fail/|\.agents/|third_party/)' \
+              || true
+          )
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No shell files to check."
+            exit 0
+          fi
+          shellcheck --severity=style \
+            --rcfile enforcement/shellcheck/.shellcheckrc \
+            -- "${files[@]}"
+      - name: Run shfmt
+        if: "${{ hashFiles('**/*.sh', '**/*.bash') != '' }}"
+        run: |
+          mapfile -t files < <(
+            git ls-files '*.sh' '*.bash' \
+              | grep -Ev '^(tests/fixtures/shell/fail/|\.agents/|third_party/)' \
+              || true
+          )
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No shell files to format."
+            exit 0
+          fi
+          shfmt -d -i 2 -ci -bn -- "${files[@]}"
+  # From markdown.yml.
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Lint Markdown
+        if: "${{ hashFiles('**/*.md') != '' }}"
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff  # v24.2.0
+        with:
+          config: enforcement/markdownlint/.markdownlint-cli2.yaml
+          globs: "**/*.md"
+  cspell:
+    name: cspell
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Set up Node
+        if: "${{ hashFiles('**/*.md') != '' }}"
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: "22"
+      - name: Spell check
+        if: "${{ hashFiles('**/*.md') != '' }}"
+        continue-on-error: true
+        run: |
+          npm install --prefix "$RUNNER_TEMP/cspell" cspell@8.19.4
+          "$RUNNER_TEMP/cspell/node_modules/.bin/cspell" \
+            --config enforcement/cspell/cspell.json \
+            "**/*.md"
+  # From docs-structure.yml.
+  docs-lint:
+    name: docs-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Check docs structure
+        if: "${{ hashFiles('tools/check_docs.py') != '' }}"
+        run: python3 tools/check_docs.py
+      - name: Lint README headings
+        if: "${{ hashFiles('templates/README.template.md') != '' }}"
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff  # v24.2.0
+        with:
+          config: enforcement/docs/readme.markdownlint-cli2.jsonc
+          globs: |
+            templates/README.template.md
+      - name: Lint decision record headings
+        if: "${{ hashFiles('docs/decisions/*.md') != '' }}"
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff  # v24.2.0
+        with:
+          config: enforcement/docs/adr.markdownlint-cli2.jsonc
+          globs: |
+            docs/decisions/*.md
+  # From agentic-coding.yml.
+  agents-md-lint:
+    name: agents-md-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      # hashFiles is empty before checkout, so the gate is on this step.
+      - name: Check agent instruction files
+        if: >-
+          ${{ hashFiles('AGENTS.md', 'templates/AGENTS.md', 'CLAUDE.md',
+          'templates/CLAUDE.md', '.cursor/rules/**',
+          'templates/.cursor/rules/**') != '' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f tools/agents_md_lint.py ]; then
+            echo "tools/agents_md_lint.py is missing. Copy it from wrbell/standards."
+            exit 1
+          fi
+          python3 tools/agents_md_lint.py
+      - name: Lint AGENTS.md
+        if: >-
+          ${{ hashFiles('enforcement/markdownlint/.markdownlint-cli2.yaml') != ''
+          && hashFiles('**/AGENTS.md') != '' }}
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff  # v24.2.0
+        with:
+          config: enforcement/markdownlint/.markdownlint-cli2.yaml
+          globs: "**/AGENTS.md"
+  # From security-supply-chain.yml.
+  actions-lint:
+    name: actions-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Check action pins and permissions
+        if: "${{ hashFiles('enforcement/gitleaks/check_workflows.py') != '' }}"
+        run: |
+          python3 enforcement/gitleaks/check_workflows.py \
+            .github/workflows \
+            templates/.github/workflows
+      - name: Check Dependabot config
+        if: "${{ hashFiles('enforcement/dependabot/check_dependabot.py') != '' }}"
+        run: python3 enforcement/dependabot/check_dependabot.py
+      - name: Install actionlint
+        if: "${{ hashFiles('.github/workflows/*.yml', '.github/workflows/*.yaml') != '' }}"
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-all-errors --retry-delay 2 -fsSL \
+            -o /tmp/actionlint.tar.gz \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+          sudo install -m 755 /tmp/actionlint /usr/local/bin/actionlint
+      - name: Run actionlint
+        if: "${{ hashFiles('.github/workflows/*.yml', '.github/workflows/*.yaml') != '' }}"
+        run: actionlint -color
+  secrets-scan:
+    name: secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        if: "${{ hashFiles('enforcement/gitleaks/.gitleaks.toml', '**/.gitleaks.toml') != '' }}"
+        run: |
+          set -euo pipefail
+          version="8.30.1"
+          file="gitleaks_${version}_linux_x64.tar.gz"
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${version}/${file}"
+          curl --retry 5 --retry-all-errors --retry-delay 2 -fsSL \
+            -o "/tmp/${file}" "$url"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  /tmp/${file}" | sha256sum -c
+          tar -xzf "/tmp/${file}" -C /tmp gitleaks
+          sudo install -m 755 /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+      - name: Run gitleaks
+        if: "${{ hashFiles('enforcement/gitleaks/.gitleaks.toml', '**/.gitleaks.toml') != '' }}"
+        run: |
+          set -euo pipefail
+          if [ -f .gitleaks.toml ]; then
+            config=".gitleaks.toml"
+          elif [ -f enforcement/gitleaks/.gitleaks.toml ]; then
+            config="enforcement/gitleaks/.gitleaks.toml"
+          else
+            echo "No .gitleaks.toml found."
+            exit 1
+          fi
+          gitleaks detect --source . --config "$config" --redact --verbose
+      - name: Check gitleaks allow comments
+        if: "${{ hashFiles('enforcement/gitleaks/check_allow_comments.py') != '' }}"
+        run: python3 enforcement/gitleaks/check_allow_comments.py

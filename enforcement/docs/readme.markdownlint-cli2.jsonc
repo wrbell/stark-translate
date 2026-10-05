@@ -1,0 +1,18 @@
+{
+  // MD043 required headings for a README.
+  // "?" is the title. "*" is any middle section. License is last.
+  // Vendored trees stay out of the lint.
+  "ignores": [".agents/**", "third_party/**"],
+  "config": {
+    "default": true,
+    "MD013": {
+      "line_length": 80,
+      "code_blocks": false,
+      "tables": false
+    },
+    "MD043": {
+      "headings": ["?", "*", "## License"],
+      "match_case": true
+    }
+  }
+}

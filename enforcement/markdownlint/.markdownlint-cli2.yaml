@@ -1,0 +1,53 @@
+---
+# Vendored trees. Domain agents do not edit them.
+# vale sync downloads Google, Microsoft, and write-good into styles/.
+# Negative fixtures fail on purpose. Pytest lints them with these rules.
+ignores:
+  - ".agents/**"
+  - "third_party/**"
+  - "enforcement/vale/styles/Google/**"
+  - "enforcement/vale/styles/Microsoft/**"
+  - "enforcement/vale/styles/write-good/**"
+  - "tests/fixtures/**/fail*.md"
+gitignore: true
+config:
+  default: true
+  MD003:
+    style: atx
+  MD004:
+    style: dash
+  MD007:
+    indent: 4
+  # Google Markdown style guide. 80 characters for prose.
+  # Headings, tables, and code blocks are exempt.
+  # A long URL can stay on one line when it has no spaces past column 80.
+  MD013:
+    line_length: 80
+    tables: false
+    headings: false
+    code_blocks: false
+  MD024:
+    siblings_only: false
+  MD033:
+    allowed_elements:
+      - br
+      - sup
+      - sub
+      - details
+      - summary
+  MD035:
+    style: "---"
+  MD040: true
+  MD046:
+    style: fenced
+  MD048:
+    style: backtick
+  MD049:
+    style: underscore
+  MD050:
+    style: asterisk
+  MD059: true
+  # A managed block must start with the marker comment.
+  # CLAUDE.md must start with @AGENTS.md.
+  # An h1 on line 1 would break that contract.
+  MD041: false

@@ -1,0 +1,18 @@
+*.tar.gz filter=lfs diff=lfs merge=lfs -text
+
+# D12 (2026-10-04): new *.tar.gz files go to Git LFS. The 13 tarballs below
+# were committed as normal blobs before that rule. They are immutable
+# evidence, so they keep no LFS filter and are never migrated.
+docs/evaluation/mac_followup_20260910/lite-cadence-normalized-v1/raw-evidence.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/lite-cadence-normalized-v1/source-code.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/lite-deadline-normalized-v2/en/raw-evidence.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/lite-deadline-normalized-v2/es/raw-evidence.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/lite-deadline-normalized-v2/source-code.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/normalized-replay-integrity-closeout/measurement-pilot-v4/raw-evidence.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/normalized-replay-integrity-closeout/measurement-pilot-v4/source-code.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/normalized-replay-integrity-closeout/standard-screen-normalized-v1/raw-evidence.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/normalized-replay-integrity-closeout/standard-screen-normalized-v1/source-code.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/spanish-parakeet-normalized-v1/raw-evidence.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/spanish-parakeet-normalized-v1/source-code.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/standard-screen-normalized-v2/raw-evidence.tar.gz !filter !diff !merge !text
+docs/evaluation/mac_followup_20260910/standard-screen-normalized-v2/source-code.tar.gz !filter !diff !merge !text

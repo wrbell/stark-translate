@@ -1,0 +1,28 @@
+{
+  // MD043 required headings for a MADR 4.0.0 decision record.
+  // The docs workflow passes this file as --config.
+  // Do not copy it to docs/decisions/. A nested config replaces the root one.
+  // MD041 is off because the file starts with front matter.
+  // The other default rules stay on.
+  "ignores": [".agents/**", "third_party/**"],
+  "config": {
+    "default": true,
+    "MD013": {
+      "line_length": 80,
+      "code_blocks": false,
+      "tables": false
+    },
+    "MD041": false,
+    "MD043": {
+      "headings": [
+        "?",
+        "## Context and Problem Statement",
+        "*",
+        "## Considered Options",
+        "## Decision Outcome",
+        "*"
+      ],
+      "match_case": true
+    }
+  }
+}

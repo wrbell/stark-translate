@@ -1,0 +1,5 @@
+# Keys from the shellcheck(1) man page and the Optional checks wiki.
+source-path=SCRIPTDIR
+external-sources=true
+enable=quote-safe-variables
+enable=require-variable-braces
