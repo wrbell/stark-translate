@@ -1,9 +1,11 @@
 ---
 # Vendored trees. Domain agents do not edit them.
+# .claude/skills/ holds symlinks to vendored skills in .agents/skills/.
 # vale sync downloads Google, Microsoft, and write-good into styles/.
 # Negative fixtures fail on purpose. Pytest lints them with these rules.
 ignores:
   - ".agents/**"
+  - ".claude/skills/**"
   - "third_party/**"
   - "enforcement/vale/styles/Google/**"
   - "enforcement/vale/styles/Microsoft/**"
