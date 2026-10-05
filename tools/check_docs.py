@@ -7,7 +7,8 @@ library only.
 README checks:
 
 - ``README.md`` exists at the root and is under 500 KiB.
-- The first line after the title is one description under 120 characters.
+- The first line after the title is one description of at most 80
+  characters, so markdownlint MD013 (80) and this check agree.
 - The last level-2 heading is ``License``.
 - A file longer than 100 lines has a table of contents.
 - Links to files inside the repo are relative.
@@ -37,7 +38,7 @@ from pathlib import Path
 
 SKIP_DIR_NAMES = frozenset({".agents", "third_party"})
 README_LIMIT_BYTES = 500 * 1024
-SHORT_DESCRIPTION_LIMIT = 120
+SHORT_DESCRIPTION_LIMIT = 80
 TOC_LINE_LIMIT = 100
 ADR_NAME = re.compile(r"^[0-9]{4}-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\.md$")
 STATUSES = frozenset({"proposed", "accepted", "rejected", "deprecated", "superseded"})
@@ -127,12 +128,12 @@ def check_readme_file(path: Path, root: Path, *, prose: bool) -> list[Problem]:
             desc_line, desc = rest[0]
             if _heading(desc) is not None:
                 problems.append(Problem(rel, desc_line, "short description is missing"))
-            elif len(desc.strip()) >= SHORT_DESCRIPTION_LIMIT:
+            elif len(desc.strip()) > SHORT_DESCRIPTION_LIMIT:
                 problems.append(
                     Problem(
                         rel,
                         desc_line,
-                        "short description is not under 120 characters",
+                        "short description is over 80 characters",
                     )
                 )
             else:

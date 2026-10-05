@@ -1,7 +1,7 @@
 {
-  "standards_sha": "0fe6a29de0f22af075ba51fafff9e03d1238d54d",
-  "pin": "1d07cb8750a73f3007b348c377e9cf7cd778d39c",
-  "date": "2026-10-04",
+  "standards_sha": "2f2c95edef473ed0b5ec96d07d50b37721995c17",
+  "pin": "2f2c95edef473ed0b5ec96d07d50b37721995c17",
+  "date": "2026-10-05",
   "tier": "code",
   "org_owned": true,
   "domains": [
@@ -14,7 +14,7 @@
   "files": [
     {
       "path": ".editorconfig",
-      "sha256": "85bccbd23a9070becfe1dc0dbb9ad7305fb2bb98f92f54cb9856d7d6eca4ebfe",
+      "sha256": "5b448d53a5f328d691672b76967c2f2554f19c31dcdd89eb994409cdd39cccc0",
       "source": "enforcement/editorconfig/.editorconfig"
     },
     {
@@ -29,7 +29,7 @@
     },
     {
       "path": "enforcement/cspell/words/engineering.txt",
-      "sha256": "f2ce70edb4d1c3ffbf88705d08d95f3e381b65034ca1d51ef095fd3ccced3372",
+      "sha256": "379fc43e6b83bf36f504c68105a3f3279c210bfa4063160e8a3548c50fcddbf1",
       "source": "enforcement/cspell/words/engineering.txt"
     },
     {
@@ -74,7 +74,7 @@
     },
     {
       "path": "enforcement/markdownlint/.markdownlint-cli2.yaml",
-      "sha256": "b43d5a93152be893b1fab471c2c9d83698fff2d8850a16976a1e30c39f4b64a5",
+      "sha256": "04b737804275b040163c2fc062143967be8665ee14dc73faa813fb976dcb6af1",
       "source": "enforcement/markdownlint/.markdownlint-cli2.yaml"
     },
     {
@@ -84,7 +84,7 @@
     },
     {
       "path": "enforcement/yamllint/.yamllint.yml",
-      "sha256": "a80d2d71d65366bb3e3c1590d61328dc07ab345cd45e48950e18837b2889cfbb",
+      "sha256": "1db6c18d724524fa4d6384a8f57bc71ea2a8fb2ef212643daf3b9b135021da00",
       "source": "enforcement/yamllint/.yamllint.yml"
     },
     {
@@ -94,7 +94,7 @@
     },
     {
       "path": "tools/check_docs.py",
-      "sha256": "d5b184f1d81ee03d99deabb9b2d0686636e09082abd5f9ce5c128ebfed324d1a",
+      "sha256": "d769cef5257767a34d732ce5db029b012f3c7c0dc284218d5e3d81092478e919",
       "source": "tools/check_docs.py"
     }
   ],

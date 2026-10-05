@@ -13,3 +13,7 @@ indent_size = 4
 
 [*.md]
 trim_trailing_whitespace = false
+
+# make needs a tab before each recipe line; the [*] space rule breaks it.
+[{Makefile,makefile,GNUmakefile,*.mk}]
+indent_style = tab

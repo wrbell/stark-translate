@@ -12,7 +12,7 @@ standards: `standards/ROADMAP.md`).
 
 - **Presentations:** build every deck from
   `standards/powerpoint template/Willem-Default.potx` (theme "Helena": Neue Haas
-  Grotesk Text Pro, 16:9, teal/orange/red accent palette). Spec:
+  Grotesk Text Pro, 16:9, black on white with a gray ramp, template v2). Spec:
   `standards/powerpoint template/STANDARD.md`. Generate with
   `standards/powerpoint template/house_style.py` (open
   `Willem-Default-Base.pptx`, never the `.potx`) and gate with
@@ -31,9 +31,9 @@ standards: `standards/ROADMAP.md`).
   deliverable; AI-written deliverable text only with written adviser
   pre-clearance (`docs/ai-clearances/`); never cite an AI tool as a source;
   never edit graded report text (the repo's `protected-paths.txt`; example:
-  `standards/enforcement/senior-design-repo/sd-protected-paths.txt`). Log AI use
-  in `docs/ai-use-log.md` and disclose it per
-  `standards/standards/ai-use-disclosure/ai-use-disclosure.md`.
+  `standards/enforcement/senior-design-repo/sd-protected-paths.txt`). AI-use
+  logging and attestation are opt-in per repo via `ai-attestation-roots.txt`;
+  see `standards/standards/ai-use-disclosure/ai-use-disclosure.md`.
 - **AI files:** one `AGENTS.md` (≤ 200 lines, Clarity verbatim); `CLAUDE.md` is
   `@AGENTS.md`. Gates: `standards/tools/agents_md_lint.py`, `ai_file_lint.py`.
 <!-- standards:end -->

@@ -1,7 +1,7 @@
 ---
 # Managed by standards/tools/adopt_standards.py.
 # Re-run the tool to add or remove a domain; do not edit by hand.
-# Jobs copied from wrbell/standards/.github/workflows/ at 0fe6a29de0f22af075ba51fafff9e03d1238d54d.
+# Jobs copied from wrbell/standards/.github/workflows/ at 2f2c95edef473ed0b5ec96d07d50b37721995c17.
 name: Standards
 on:
   pull_request:
