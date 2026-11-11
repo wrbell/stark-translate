@@ -18,6 +18,7 @@ Subcommands:
     stark-translate version
         Print the installed package version.
 
+With no subcommand, ``stark-translate`` runs ``operator`` with its defaults.
 Run ``stark-translate --help`` for full usage.
 """
 
@@ -253,7 +254,10 @@ def main(argv: list[str] | None = None) -> int:
     p_setup.add_argument("--offline", action="store_true", help="Use only verified prepared cache; never download")
     p_setup.add_argument("--build-native", action="store_true", help="Build pinned llama.cpp sm_75 on Linux CUDA")
     p_setup.add_argument("--converter-python", help="Separate interpreter with lite-build extra for Marian CT2 setup")
-    args = parser.parse_args(argv)
+    if argv is None:
+        argv = sys.argv[1:]
+    # A double-click launcher runs the bare command. Start the operator UI then.
+    args = parser.parse_args(argv or ["operator"])
     if hasattr(args, "profile"):
         os.environ["STARK_PROFILE"] = args.profile
     if getattr(args, "offline", False):

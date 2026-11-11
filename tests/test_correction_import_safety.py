@@ -235,6 +235,34 @@ def test_csv_literal_boolean_approvals_preserve_historical_import(tmp_path):
     assert merge_whisper(audio, tmp_path / "train")["added"] == 1
 
 
+@pytest.mark.parametrize("label", ["model_unapproved", "unknown"])
+def test_pseudo_label_rows_never_enter_either_corpus(tmp_path, label):
+    correction = tmp_path / "corrections.jsonl"
+    atomic_jsonl(correction, [pair(label_source=label)])
+    with pytest.raises(ValueError, match="label_source"):
+        merge_translation(correction, tmp_path / "train.jsonl")
+    with pytest.raises(ValueError, match="label_source"):
+        merge_whisper(whisper_export(tmp_path / "audio", label_source=label), tmp_path / "train")
+    assert not (tmp_path / "train.jsonl").exists()
+    assert not (tmp_path / "train").exists()
+
+
+def test_human_approved_label_reimports_into_csv_corpus_with_legacy_rows(tmp_path):
+    corpus = tmp_path / "train"
+    corpus.mkdir()
+    (corpus / "old.wav").write_bytes(b"RIFFold")
+    (corpus / "metadata.csv").write_text(
+        "file_name,transcription,session_kind,source_lang,split\nold.wav,Old,live,en,train\n"
+    )
+    audio = whisper_export(tmp_path / "audio", label_source="human_approved")
+    assert merge_whisper(audio, corpus)["added"] == 1
+    # The CSV rewrite pads the legacy row with an empty label_source; a re-import must still work.
+    assert merge_whisper(audio, corpus)["added"] == 0
+    correction = tmp_path / "corrections.jsonl"
+    atomic_jsonl(correction, [pair(label_source="human_approved")])
+    assert merge_translation(correction, tmp_path / "pairs.jsonl")["added"] == 1
+
+
 def test_existing_unapproved_records_cannot_be_carried_to_new_output(tmp_path):
     correction, original, output = (tmp_path / name for name in ["corrections.jsonl", "old.jsonl", "new.jsonl"])
     atomic_jsonl(correction, [pair()])
