@@ -509,7 +509,7 @@ def main() -> None:
     parser.add_argument(
         "--configs",
         type=str,
-        default="tg4b,e4b,e2b,e4b_mts",
+        default="e4b,e2b,e4b_mts",  # tg4b (retired TranslateGemma) only on explicit request
         help=f"Comma-separated configs. Available: {','.join(CONFIGS)}",
     )
     parser.add_argument("--sentences", choices=("default", "canaries", "all"), default="default")

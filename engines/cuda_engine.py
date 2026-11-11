@@ -27,6 +27,7 @@ from engines.base import (
 )
 from engines.model_paths import resolve_hf_model_source, resolve_local_model_for_loading
 from engines.translation_prompts import (
+    TRANSLATEGEMMA_RETIRED_MESSAGE,
     build_chat_messages,
     clean_translation,
     dynamic_max_tokens,
@@ -413,18 +414,18 @@ class CUDAGemmaEngine(TranslationEngine):
     Uses transformers ``AutoModelForCausalLM`` with bitsandbytes NF4.
 
     Constructor args:
-        model_id:  HuggingFace repo (default: "google/translategemma-4b-it").
+        model_id:  HuggingFace repo. No default: TranslateGemma is retired.
     """
 
     def __init__(
         self,
-        model_id: str = "google/translategemma-4b-it",
+        model_id: str | None = None,
     ):
         if not TORCH_AVAILABLE:
             raise RuntimeError("PyTorch is not installed.")
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA is not available. CUDAGemmaEngine requires an NVIDIA GPU.")
-        self._model_id_str = model_id
+        self._model_id_str = model_id or ""
         self._model = None
         self._tokenizer = None
         self._loaded = False
@@ -433,6 +434,8 @@ class CUDAGemmaEngine(TranslationEngine):
 
     def load(self) -> None:
         """Load TranslateGemma with bitsandbytes 4-bit quantization and apply EOS fix."""
+        if not self._model_id_str:
+            raise ValueError(TRANSLATEGEMMA_RETIRED_MESSAGE)
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         if not BITSANDBYTES_AVAILABLE:
@@ -626,7 +629,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
     - **Speculative decoding**: Optional assistant (draft) model for faster 12B generation.
 
     Constructor args:
-        model_id:            HuggingFace repo (default: ``"google/translategemma-4b-it"``).
+        model_id:            HuggingFace repo. No default: TranslateGemma is retired.
         use_prompt_cache:    Pre-compute KV cache for fixed prefix (default: True).
         assistant_model_id:  Optional 4B model repo for speculative decoding (12B only).
         streaming_batch_size: Tokens per WebSocket batch during streaming (default: 3).
@@ -634,7 +637,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
 
     def __init__(
         self,
-        model_id: str = "google/translategemma-4b-it",
+        model_id: str | None = None,
         use_prompt_cache: bool = True,
         assistant_model_id: str | None = None,
         streaming_batch_size: int = 3,
@@ -644,7 +647,7 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
             raise RuntimeError("PyTorch is not installed.")
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA is not available.")
-        self._model_id_str = model_id
+        self._model_id_str = model_id or ""
         self._use_prompt_cache = use_prompt_cache
         self._assistant_model_id = assistant_model_id
         self._streaming_batch_size = streaming_batch_size
@@ -661,6 +664,8 @@ class CUDAGemmaStreamingEngine(TranslationEngine):
 
     def load(self) -> None:
         """Load model with bitsandbytes 4-bit, apply EOS fix, build prompt cache."""
+        if not self._model_id_str:
+            raise ValueError(TRANSLATEGEMMA_RETIRED_MESSAGE)
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         if not BITSANDBYTES_AVAILABLE:

@@ -410,14 +410,19 @@ def load_ct2_marian():
     return translator, tokenizer
 
 
+TG_MODEL_ID = None  # TranslateGemma is retired: no default; set with --tg-model
+
+
 def load_gemma_4b():
     """Load TranslateGemma 4B via MLX (4-bit quantized)."""
+    if not TG_MODEL_ID:
+        raise ValueError("TranslateGemma is retired; pass --tg-model explicitly or use --quick")
     import mlx.core as mx
     from mlx_lm import load
 
     mx.set_cache_limit(256 * 1024 * 1024)
 
-    model_id = "mlx-community/translategemma-4b-it-4bit"
+    model_id = TG_MODEL_ID
     print(f"  Loading {model_id}...")
     t0 = time.time()
     model, tokenizer = load(model_id)
@@ -797,7 +802,10 @@ def main():
     parser.add_argument(
         "--threshold", type=float, default=0.35, help="Complexity threshold for routing (default: 0.35)"
     )
+    parser.add_argument("--tg-model", default=None, help="Explicit TranslateGemma model ID (no default)")
     args = parser.parse_args()
+    global TG_MODEL_ID
+    TG_MODEL_ID = args.tg_model
 
     if args.csv:
         sentences = load_sentences_from_csv(args.csv)

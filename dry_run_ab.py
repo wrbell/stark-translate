@@ -282,9 +282,9 @@ _partial_future_lock = threading.Lock()
 # prevent fire-and-forget partial tasks from being garbage-collected (RUF006)
 _partial_tasks = set()
 
-# MLX model IDs (4-bit quantized, community-converted) — overridden from settings in main()
-MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"  # ~2.2GB
-MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"  # ~6.6GB
+# MLX model IDs (pinned Gemma 4 OptiQ) — set by _select_mlx_models() in main()
+MLX_MODEL_A = "mlx-community/gemma-4-e4b-it-OptiQ-4bit"
+MLX_MODEL_B: str | None = None  # A/B secondary; E2B for Gemma 4
 # Optional LoRA adapters + TurboQuant (set from CLI / settings in main())
 ADAPTER_DIR_A = None  # 4B adapter path
 ADAPTER_DIR_B = None  # 12B adapter path (optional)
@@ -1378,6 +1378,21 @@ def _draft_metadata():
         "draft": MLX_DRAFT_MODEL_ID if MLX_DRAFT_MODEL is not None else None,
         "draft_tokens": NUM_DRAFT_TOKENS if MLX_DRAFT_MODEL is not None else 0,
     }
+
+
+def _select_mlx_models(model_family, mlx_model, gemma4_size, run_ab=False):
+    """Return the (A, B) MLX model IDs. TranslateGemma is retired: explicit IDs only."""
+    from engines.factory import resolve_mlx_translation_model_id
+    from engines.translation_prompts import TRANSLATEGEMMA_RETIRED_MESSAGE
+
+    if model_family == "gemma4":
+        model_a = mlx_model or resolve_mlx_translation_model_id(model_family="gemma4", size=gemma4_size)
+        return model_a, resolve_mlx_translation_model_id(model_family="gemma4", size="e2b")
+    model_a = mlx_model or settings.translation.mlx_model_4b
+    model_b = settings.translation.mlx_model_12b
+    if not model_a or (run_ab and not model_b):
+        raise ValueError(TRANSLATEGEMMA_RETIRED_MESSAGE)
+    return model_a, model_b
 
 
 def load_translation_models(load_b=True):
@@ -6432,15 +6447,10 @@ def main():
     else:
         MLX_DRAFT_MODEL_ID = None
 
-    if args.mlx_model:
-        MLX_MODEL_A = args.mlx_model
-    elif MODEL_FAMILY == "gemma4":
-        from engines.factory import resolve_mlx_translation_model_id
-
-        MLX_MODEL_A = resolve_mlx_translation_model_id(model_family="gemma4", size=args.gemma4_size)
-    else:
-        MLX_MODEL_A = settings.translation.mlx_model_4b
-    MLX_MODEL_B = settings.translation.mlx_model_12b
+    try:
+        MLX_MODEL_A, MLX_MODEL_B = _select_mlx_models(MODEL_FAMILY, args.mlx_model, args.gemma4_size, args.run_ab)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     # Gemma-4 MTS: prefer gamma=1 on Metal unless user explicitly set --num-draft-tokens
     if MODEL_FAMILY == "gemma4" and USE_MTS and args.num_draft_tokens == 3:

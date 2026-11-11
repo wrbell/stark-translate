@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from engines.base import STTEngine, TranslationEngine, TTSEngine
+from engines.translation_prompts import TRANSLATEGEMMA_RETIRED_MESSAGE
 
 logger = logging.getLogger(__name__)
 
@@ -255,27 +256,25 @@ def resolve_mlx_translation_model_id(
 ) -> str:
     """Pick the MLX translation model id for the active family.
 
-    ``size`` is ``e4b`` / ``e2b`` for Gemma 4, or ignored for TranslateGemma
-    (always returns the 4B TG default when model_id is None).
+    ``size`` is ``e4b`` / ``e2b`` for Gemma 4. TranslateGemma is retired: it
+    resolves only to an explicit ``model_id`` or ``mlx_model_4b`` setting.
     """
     if model_id is not None:
         return model_id
+    small = size.lower() in ("e2b", "2b", "small")
     try:
         from settings import settings as _settings
 
         ts = _settings.translation
-        family = model_family or ts.model_family
-        if family == "gemma4":
-            if size.lower() in ("e2b", "2b", "small"):
-                return ts.mlx_model_gemma4_e2b
-            return ts.mlx_model_gemma4_e4b
-        return ts.mlx_model_4b
     except Exception:
-        if model_family == "gemma4":
-            if size.lower() in ("e2b", "2b", "small"):
-                return "mlx-community/gemma-4-e2b-it-OptiQ-4bit"
-            return "mlx-community/gemma-4-e4b-it-OptiQ-4bit"
-        return "mlx-community/translategemma-4b-it-4bit"
+        if (model_family or "gemma4") != "gemma4":
+            raise ValueError(TRANSLATEGEMMA_RETIRED_MESSAGE) from None
+        return "mlx-community/gemma-4-e2b-it-OptiQ-4bit" if small else "mlx-community/gemma-4-e4b-it-OptiQ-4bit"
+    if (model_family or ts.model_family) == "gemma4":
+        return ts.mlx_model_gemma4_e2b if small else ts.mlx_model_gemma4_e4b
+    if ts.mlx_model_4b:
+        return ts.mlx_model_4b
+    raise ValueError(TRANSLATEGEMMA_RETIRED_MESSAGE)
 
 
 def create_translation_engine(
@@ -413,18 +412,20 @@ def create_translation_engine(
             **kwargs,
         )
     elif backend == "cuda":
+        if not model_id:
+            raise ValueError(TRANSLATEGEMMA_RETIRED_MESSAGE)
         if streaming:
             from engines.cuda_engine import CUDAGemmaStreamingEngine
 
             return CUDAGemmaStreamingEngine(
-                model_id=model_id or "google/translategemma-4b-it",
+                model_id=model_id,
                 assistant_model_id=assistant_model_id,
                 **kwargs,
             )
         from engines.cuda_engine import CUDAGemmaEngine
 
         return CUDAGemmaEngine(
-            model_id=model_id or "google/translategemma-4b-it",
+            model_id=model_id,
             **kwargs,
         )
     else:

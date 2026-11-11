@@ -175,7 +175,7 @@ class TestFactoryTurboQuant:
             "use_turboquant": True,
             "turboquant_key_bits": 3,
             "turboquant_val_bits": 4,
-            "model_family": "translategemma",
+            "model_family": "gemma4",
         }
 
         with (
@@ -198,7 +198,7 @@ class TestFactoryTurboQuant:
             "use_turboquant": True,
             "turboquant_key_bits": 3,
             "turboquant_val_bits": 4,
-            "model_family": "translategemma",
+            "model_family": "gemma4",
         }
 
         with (

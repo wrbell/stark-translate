@@ -21,7 +21,7 @@
 | Partial STT (every 0.6 s of speech) | `--lang en`: Parakeet TDT v3 MLX · `--lang es`: mlx-whisper large-v3-turbo | `--partial-interval`, `--stt-backend mlx` (force Whisper for EN) |
 | Partial translation | Marian CT2 int8 on CPU (4 threads) from `adapters/marian_ct2/<dir>/active` or the managed setup cache; HF PyTorch fallback | `STARK_TRANSLATE_MARIAN_BACKEND=hf\|ct2` |
 | Final STT | Same engine as partials; Whisper automatic fallback is English-only. Spanish keeps multilingual Turbo and never retries English-only Distil | `--word-timestamps` (off by default); confidence thresholds unchanged |
-| Final translation | Gemma 4 E4B OptiQ (`mlx-community/gemma-4-e4b-it-OptiQ-4bit`); short high-confidence finals may take the Marian route | `--gemma4-size e2b`; `--model-family translategemma [--ab]`; `--routing-policy conservative` |
+| Final translation | Gemma 4 E4B OptiQ (`mlx-community/gemma-4-e4b-it-OptiQ-4bit`); short high-confidence finals may take the Marian route | `--gemma4-size e2b`; `--routing-policy conservative` (TranslateGemma is retired: explicit `--mlx-model` only) |
 | TTS (off) | Piper `en_US-lessac-high` / `es_MX-claude-high`; `--tts-output ws\|wav\|both\|local` | `--tts` / explicit `--no-tts`, `--tts-device-en/--tts-device-es` |
 | Runtime fixes on by default (series 4, #217) | Keep-warm after each final (`STARK_WARMUP_AFTER_FINAL`), first stream token at 1 (`STARK_STREAM_FIRST_TOKEN_BATCH_SIZE`), hash-pinned Parakeet joint decode (`STARK_PARAKEET_JOINT_EVAL`) | Set to `0` to disable; the Metal wired limit (`STARK_MLX_WIRED_LIMIT`) is opt-in and was rejected as a default for peak RSS |
 | Experiments (all off) | `--idle-warmup-only`, `--final-aware-partials`, `--terminology-prompt church`, and the `STARK_EXPERIMENT_*` controls in `tools/latency_experiments.py` (validated before startup) | Keep off. Every screened arm is closed: [registry](../latency_next_experiments.md) |
@@ -52,7 +52,7 @@ Authoritative steps, models, launchd and rollback: [`docs/packaging/macos.md`](.
 ```bash
 python3.11 -m venv venv && venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
 venv/bin/python -m pip install -c constraints/macos-arm64-py311-runtime.txt '.[mlx]'   # add ,eval or ,diarization as needed
-venv/bin/stark-translate setup --backend mlx [--include e2b tts translategemma]
+venv/bin/stark-translate setup --backend mlx [--include e2b tts]
 venv/bin/stark-translate doctor --backend mlx --lang en    # and --lang es; no Metal models loaded
 printf '%s\n' "$PWD/venv/bin/python" > .stark-python       # launcher pointer; rollback: stt_env/bin/python
 ./run_operator.sh                                          # operator UI on http://localhost:9000/operator/
@@ -69,8 +69,8 @@ terminal or launcher that runs the pipeline.
 
 `setup --backend mlx` fetches only the Mac defaults for both directions: Parakeet TDT 0.6B v3,
 whisper-large-v3-turbo, Gemma 4 E4B OptiQ, Marian opus-mt en-es / es-en sources plus derived int8
-CT2 artifacts. Optional `--include` profiles add Gemma 4 E2B OptiQ, Piper EN/ES voices and
-TranslateGemma 4B. Resolution order for setup and inference is shared (`engines/model_paths.py`):
+CT2 artifacts. Optional `--include` profiles add Gemma 4 E2B OptiQ and Piper EN/ES voices. Setup
+does not fetch TranslateGemma (retired). Resolution order for setup and inference is shared (`engines/model_paths.py`):
 explicit path → `--models-dir` / `STARK_MODELS_DIR` → project `models/` → Hugging Face cache; pinned
 snapshots already in the HF cache are reused. Existing `adapters/marian_ct2/*/active` directories
 are used first and never modified; the manual converter is `scripts/convert_marian_ct2.py
@@ -80,7 +80,7 @@ are used first and never modified; the manual converter is `scripts/convert_mari
 
 Peak usage is recorded per session in `metrics/session_lifecycle_<id>.json`
 (`memory.peak_rss_bytes`, `memory.peak_metal_bytes`); read that file rather than a static table.
-TranslateGemma A/B (`--ab`) loads two models and is the memory-heavy configuration. The Metal cache
+A/B (`--ab`) loads two models and is the memory-heavy configuration. The Metal cache
 limit is 256 MB per engine (`cache_limit_mb`), overridden process-wide by
 `STARK_EXPERIMENT_MLX_CACHE_MB`. Screens compare peak RSS and Metal against the control with the
 relative rule in `tools/tail_screen_report.py` (10 % + 256 MiB), which is what rejected the wired

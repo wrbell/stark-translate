@@ -165,8 +165,8 @@ python tools/health_check.py --backend mlx --adapter <dir>
 python tools/manage_adapters.py activate --model <name> --version <version> --base-model <hf_repo>
 ```
 
-`activate` runs the health check itself; its built-in base-model map only knows the
-TranslateGemma names (`gemma_4b`, `gemma_12b`), so pass `--base-model` for Gemma 4 adapters.
+`activate` runs the health check itself. It passes `--base-model` on when you give it; otherwise
+the health check uses its backend default (Gemma 4 E4B OptiQ on MLX; CUDA needs `--base-model`).
 Versions default to the adapter directory name (`--version` overrides); `register` writes
 `adapters/manifest.json` with `versions`, `active`, `previous` and the safetensors SHA-256.
 Remote endpoints in `tools/deploy_adapters.py` still need SSH keys

@@ -388,10 +388,11 @@ def test_summary_loaders_use_actual_pinned_resolution_and_preserve_family(source
     assert tokenizer._stark_summary_model_family == "gemma4"
     assert tokenizer._eos_token_ids == {1, 50, 106}
     core.synchronize.assert_called_once()
-    assert summary.translate_with_translategemma("Summary") == "Resumen"
+    assert summary.translate_with_gemma("Summary") == "Resumen"
     second = Path(load.call_args.args[0])
-    assert second.name == model_paths.pinned_hf_entry(summary.TRANSLATE_MODEL_ID)["revision"]
-    assert tokenizer._stark_summary_model_family == "translategemma"
+    assert second.name == model_paths.pinned_hf_entry(summary.settings.translation.mlx_model_gemma4_e4b)["revision"]
+    assert tokenizer._stark_summary_model_family == "gemma4"
+    assert tokenizer._eos_token_ids == {1, 50, 106}
     translate.assert_called_once_with(model, tokenizer, "Summary", max_tokens=600)
 
 

@@ -48,7 +48,7 @@ download sites: [live HF pinning](../evaluation/mac_followup_20260910/live-hf-pi
 | STT ES | `MLXWhisperEngine`, `mlx-community/whisper-large-v3-turbo`; Spanish never retries the English-only Distil fallback | `settings.stt` |
 | Partials | `MarianCT2Engine` from the int8 artifact in `adapters/marian_ct2/<dir>/active` or the managed setup cache (`intra_threads=4`, `marian_compute_type` default `int8_float16`, resolved by CT2 on CPU); `MarianHFEngine` if no CT2 artifact | `factory.create_translation_engine(engine_type="marian")` |
 | Finals | `MLXGemmaEngine`, `mlx-community/gemma-4-e4b-it-OptiQ-4bit`; `--gemma4-size e2b` → E2B OptiQ; `routing_policy` (`legacy` default) may send short high-confidence finals to Marian | `settings.translation.model_family = "gemma4"` |
-| Opt-out | `--model-family translategemma` → `mlx-community/translategemma-4b-it-4bit` (+12B with `--ab`) | `resolve_mlx_translation_model_id()` |
+| Retired | `--model-family translategemma` has no default model; it needs an explicit `--mlx-model` (and `STARK_TRANSLATE_MLX_MODEL_12B` with `--ab`) | `resolve_mlx_translation_model_id()` raises without one |
 | TTS | `PiperTTSEngine`, voices `en_US-lessac-high` / `es_MX-claude-high` (`settings.tts.voices`) | `create_tts_engine()` |
 | VAD | Packaged Silero 6.2.1 through `tools/vad_runtime.py` (no Torch Hub); ONNX via `--vad-backend onnx` | `settings.vad.backend` |
 

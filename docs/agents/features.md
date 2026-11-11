@@ -79,7 +79,7 @@ Reads the session CSV or diarized JSONL and produces EN + ES summaries (five sen
 with speakers, three without). Model family is inferred from the model id
 (`_summary_model_family`), so the Gemma 4 stop-token rules from
 [`docs/agents/engines.md`](engines.md) apply. Spanish comes from the same model or
-`--translate-with-gemma` (TranslateGemma 4B). The operator runs the post-session
+`--translate-with-gemma` (a second, fresh Gemma 4 E4B translation). The operator runs the post-session
 summary in a subprocess after live work releases the exclusive work lease.
 Both model loading paths now use the shared pinned load-time resolver;
 an uncached custom model requires a manifest revision or local path. Tests:

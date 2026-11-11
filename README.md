@@ -72,8 +72,8 @@ Standard, ONNX on Lite) and optional Piper TTS (`--tts`).
 | **`lite-cpu-quality`** | `stark-translate-lite --profile lite-cpu-quality` | 4 cores / 16 GiB | same | Marian CT2 | Gemma 4 E2B Q4_K_M via a session-owned CPU `llama-server` | Implemented; one installed synthetic smoke; no latency gate |
 | **`lite-cuda-8gb`** | `stark-translate-lite --profile lite-cuda-8gb` | 4 cores / 16 GiB / 8 GB VRAM, sm_75+ | Whisper large-v3-turbo CT2 int8_float16 on CUDA | Marian CT2 | Gemma 4 E2B Q4_K_M via CUDA `llama-server` | Implemented; nothing has run on an RTX 2070 or native Windows yet; MSI unverified |
 
-Opt-in variants (never defaults): `--gemma4-size e2b`, `--model-family translategemma [--ab]`
-(historical opt-out), `--routing-policy conservative`, `--diarize` (live speaker labels),
+Opt-in variants (never defaults): `--gemma4-size e2b`, `--model-family translategemma --mlx-model <id>`
+(retired; no default or pinned download), `--routing-policy conservative`, `--diarize` (live speaker labels),
 `--tts` (spoken translation), the `STARK_EXPERIMENT_*` latency controls (every screened arm is
 closed; registry in [`docs/latency_next_experiments.md`](docs/latency_next_experiments.md)).
 `--mts` (MLX drafter) is rejected before any model loads.
@@ -236,7 +236,7 @@ brew install ffmpeg portaudio
 python3.11 -m venv venv
 venv/bin/python -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0'
 venv/bin/python -m pip install -c constraints/macos-arm64-py311-runtime.txt '.[mlx]'
-venv/bin/stark-translate setup --backend mlx    # Mac defaults, both languages; --include e2b tts translategemma
+venv/bin/stark-translate setup --backend mlx    # Mac defaults, both languages; --include e2b tts
 venv/bin/stark-translate doctor --backend mlx --lang en
 printf '%s\n' "$PWD/venv/bin/python" > .stark-python   # launcher pointer; rollback: point it at stt_env/bin/python
 ./run_operator.sh              # Open /operator/ on port 9000
@@ -296,7 +296,7 @@ mlx-community re-quantizations of those.
 | STT ES | mlx-whisper large-v3-turbo | same CT2 model | The English-only Distil fallback is never used for Spanish; confidence thresholds in `settings.py` |
 | Partial translation | Marian opus-mt en-es / es-en → CT2 int8 on CPU (HF fallback) | Marian CT2 int8_float16 on GPU | [Marian benchmark](docs/archive/v2026.8/MARIAN_BENCHMARK.md) |
 | Final translation | Gemma 4 E4B OptiQ 4-bit (`--gemma4-size e2b` opt-in) | Gemma 4 E4B Q4_K_M via llama.cpp (`start_server.sh`), E2B for low VRAM | [CUDA benchmark](docs/archive/v2026.5/BENCHMARK.md); HF NF4 is legacy |
-| Opt-out translation | TranslateGemma 4B / 12B 4-bit (`--model-family translategemma`, `--ab`) | — | Historical default; [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
+| Retired translation | TranslateGemma: no default, no lock entry; only an explicit `--mlx-model <id>` with `--model-family translategemma` | — | Historical default; [`docs/mlx_cuda_parity.md`](docs/mlx_cuda_parity.md) |
 | TTS (off) | Piper `en_US-lessac-high` / `es_MX-claude-high` (ONNX) | same | `--tts --tts-output ws\|wav\|both\|local` |
 
 ## Displays

@@ -41,8 +41,10 @@ import numpy as np
 SAMPLE_RATE = 16000
 MIC_SAMPLE_RATE = 48000
 MODEL_ID = "wbell7/distil-whisper-large-v3.5-mlx"
-MLX_MODEL_A = "mlx-community/translategemma-4b-it-4bit"
-MLX_MODEL_B = "mlx-community/translategemma-12b-it-4bit"
+# TranslateGemma-only benchmarks (EOS fix, prompt cache). The models are
+# retired, so there is no default: pass --tg-model-a / --tg-model-b.
+MLX_MODEL_A = None
+MLX_MODEL_B = None
 
 DEFAULT_RUNS = 5
 DEFAULT_WARMUP = 2
@@ -214,6 +216,8 @@ def _load_mlx_whisper():
 
 def _load_mlx_gemma(model_id, label):
     """Load a TranslateGemma model via MLX with EOS fix."""
+    if not model_id:
+        raise ValueError(f"{label}: TranslateGemma is retired; pass --tg-model-a / --tg-model-b explicitly")
     key = model_id
     if key in _models_loaded:
         return _models_loaded[key]
@@ -1326,7 +1330,11 @@ Examples:
     parser.add_argument(
         "--output", type=str, default=None, help="Output JSON path (default: metrics/latency_benchmark_TIMESTAMP.json)"
     )
+    parser.add_argument("--tg-model-a", default=None, help="Explicit TranslateGemma A model ID (no default)")
+    parser.add_argument("--tg-model-b", default=None, help="Explicit TranslateGemma B model ID (no default)")
     args = parser.parse_args()
+    global MLX_MODEL_A, MLX_MODEL_B
+    MLX_MODEL_A, MLX_MODEL_B = args.tg_model_a, args.tg_model_b
 
     # Resolve run counts
     if args.quick:
