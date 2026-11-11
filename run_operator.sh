@@ -10,6 +10,7 @@
 #     ./run_operator.sh                                # default 127.0.0.1:9000
 #     PORT=9001 ./run_operator.sh                      # custom port
 #     STARK_OPERATOR_LOG_DIR=... ./run_operator.sh     # custom log dir
+#     STARK_OPEN_BROWSER=1 ./run_operator.sh           # also open the operator page
 
 set -euo pipefail
 
@@ -33,4 +34,6 @@ if ! "$PYTHON" -c 'import uvicorn' >/dev/null 2>&1; then
 fi
 
 echo "starting operator at http://$HOST:$PORT (logs: $STARK_OPERATOR_LOG_DIR; python: $PYTHON $("$PYTHON" --version 2>&1 || true))"
-exec "$PYTHON" -m operator_app.cli operator --no-browser --host "$HOST" --port "$PORT"
+NO_BROWSER="--no-browser"
+[ "${STARK_OPEN_BROWSER:-}" = "1" ] && NO_BROWSER=""
+exec "${PYTHON}" -m operator_app.cli operator ${NO_BROWSER:+"${NO_BROWSER}"} --host "${HOST}" --port "${PORT}"

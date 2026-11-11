@@ -230,6 +230,9 @@ Run these from a checkout or an extracted release ZIP. The package is not on PyP
 decision); a checkout or the release ZIP provides the current code. Full Mac setup, model
 preparation and rollback: [`docs/packaging/macos.md`](docs/packaging/macos.md).
 
+On a Mac, double-click `Stark Translate.command` in Finder. It needs Python 3.11; it
+installs on first use, then starts the operator and opens the browser. By hand:
+
 ```bash
 # Mac (Apple Silicon)
 brew install ffmpeg portaudio

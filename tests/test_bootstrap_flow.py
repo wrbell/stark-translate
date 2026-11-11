@@ -12,6 +12,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+MAC_CONSTRAINTS = "constraints/macos-arm64-py311-runtime.txt"
+MAC = {"BOOTSTRAP_TEST_OS": "Darwin", "BOOTSTRAP_TEST_ARCH": "arm64"}
 
 SHIM = r"""
 import json, os
@@ -60,6 +62,8 @@ def bootstrap(tmp_path):
     shims.mkdir()
     (project / "scripts").mkdir()
     shutil.copyfile(ROOT / "scripts/runtime_env.sh", project / "scripts/runtime_env.sh")
+    (project / "constraints").mkdir()
+    shutil.copyfile(ROOT / MAC_CONSTRAINTS, project / MAC_CONSTRAINTS)
     (project / "systemd").mkdir()
     (project / "systemd/stark-translate.service").write_text("[Service]\n")
     # Isolate only the legacy fixed log destination; execute the real control flow.
@@ -70,7 +74,7 @@ def bootstrap(tmp_path):
         path.write_text(f"#!{sys.executable}\n" + SHIM)
         path.chmod(0o755)
     for name, body in {
-        "uname": 'if [ "$1" = "-s" ]; then echo Linux; else echo x86_64; fi',
+        "uname": 'if [ "$1" = "-s" ]; then echo "${BOOTSTRAP_TEST_OS:-Linux}"; else echo "${BOOTSTRAP_TEST_ARCH:-x86_64}"; fi',
         "ffmpeg": "exit 0",
         "systemctl": "exit 0",
     }.items():
@@ -114,7 +118,7 @@ def bootstrap(tmp_path):
             return result, records
 
     harness = Harness()
-    harness.project, harness.dropin = project, dropin
+    harness.project, harness.dropin, harness.shims = project, dropin, shims
     return harness
 
 
@@ -221,3 +225,70 @@ def test_failed_setup_or_doctor_never_mutates_services(bootstrap, service, faile
     assert result.returncode == exit_code, result.stderr
     assert service_records(records) == []
     assert not bootstrap.dropin.exists()
+
+
+def package_install(records):
+    return next(row["args"] for row in installer_records(records) if row["args"][-1].startswith(".["))
+
+
+@pytest.mark.parametrize("mac", [True, False])
+def test_bootstrap_uses_the_documented_mac_constraints_only_on_apple_silicon(bootstrap, mac):
+    result, records = bootstrap.run(MAC if mac else {})
+    assert result.returncode == 0, result.stderr
+    args = package_install(records)
+    if mac:
+        assert args[-3:] == ["-c", str(bootstrap.project / MAC_CONSTRAINTS), ".[mlx]"]
+    else:
+        assert "-c" not in args and args[-1] == ".[cpu]"
+
+
+@pytest.mark.parametrize("launcher_python", [False, True])
+def test_bootstrap_writes_pointer_to_the_venv_it_created(bootstrap, launcher_python):
+    # The double-click launcher passes a base python3.11 as STARK_PYTHON.
+    result, records = bootstrap.run(
+        {**MAC, **({"STARK_PYTHON": str(bootstrap.shims / "python3")} if launcher_python else {})}
+    )
+    assert result.returncode == 0, result.stderr
+    venv_python = bootstrap.project / "venv/bin/python"
+    assert any(row["args"][:2] == ["-m", "venv"] for row in records)
+    assert (bootstrap.project / ".stark-python").read_text() == f"{venv_python}\n"
+
+
+def test_bootstrap_keeps_an_existing_pointer_and_says_so(bootstrap):
+    other = bootstrap.environment("other")
+    pointer = bootstrap.project / ".stark-python"
+    pointer.write_text(f"# chosen by hand\n{other}/bin/python\n")
+    result, _ = bootstrap.run({**MAC, "STARK_PYTHON": str(bootstrap.shims / "python3")})
+    assert result.returncode == 0, result.stderr
+    assert pointer.read_text() == f"# chosen by hand\n{other}/bin/python\n"
+    assert "kept the existing .stark-python" in result.stdout
+
+
+def test_bootstrap_never_points_at_stt_env(bootstrap):
+    rollback = bootstrap.environment("stt_env")
+    (bootstrap.project / "venv").symlink_to(rollback, target_is_directory=True)
+    result, _ = bootstrap.run(MAC)
+    assert result.returncode == 0, result.stderr
+    assert not (bootstrap.project / ".stark-python").exists()
+
+
+@pytest.mark.parametrize("mac", [True, False])
+def test_missing_ffmpeg_is_a_warning_on_mac_and_an_error_elsewhere(bootstrap, mac):
+    (bootstrap.shims / "ffmpeg").unlink()
+    result, records = bootstrap.run(MAC if mac else {})
+    if mac:
+        assert result.returncode == 0, result.stderr
+        assert "Live captions do not need ffmpeg" in result.stdout
+        assert "tools/validate_session.py" in result.stdout
+    else:
+        assert result.returncode == 2
+        assert installer_records(records) == []
+
+
+def test_mac_bootstrap_requires_the_audited_python(bootstrap):
+    old = bootstrap.environment("old")
+    (old / "bin/python").write_text("#!/bin/sh\necho 3.12\n")
+    result, records = bootstrap.run({**MAC, "VENV": str(old)})
+    assert result.returncode == 2
+    assert "Python 3.11" in result.stderr and "brew install python@3.11" in result.stderr
+    assert installer_records(records) == []
