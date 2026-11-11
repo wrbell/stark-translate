@@ -58,6 +58,9 @@ def _review_approvals(rows: list[dict], fields: tuple[str, ...]) -> None:
                 raise ValueError("Excluded/unknown-status correction must not enter training")
         if str(row.get("review_status", "")).strip().lower() == "unapproved":
             raise ValueError("Unapproved correction must not enter training")
+        # An empty value is a legacy row that a CSV rewrite padded; it is not a pseudo-label.
+        if row.get("label_source") not in (None, "", "human_approved"):
+            raise ValueError("Pseudo-label row (label_source is not human_approved) must not enter training")
 
 
 def _training_only(path: Path, rows: list[dict], *, require_live: bool = False) -> None:

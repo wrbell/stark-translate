@@ -16,6 +16,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
+from tools.merge_corrections import merge_translation, merge_whisper
 from tools.prepare_finetune_data import (
     _get_segment_metadata,
     _passes_whisper_filter,
@@ -108,6 +109,27 @@ def _write_corrections_tsv(path: Path, rows: list[dict]) -> Path:
             full.update(row)
             writer.writerow(full)
     return path
+
+
+def _approve(tmp_path: Path, chunk_ids, session="20260301_113532", **fields) -> None:
+    """Append reviewed sidecar rows, as ReviewStore.save writes them."""
+    path = tmp_path / "stark_data" / "corrections" / f"{session}.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        for chunk in chunk_ids:
+            row = {
+                "session": session,
+                "chunk_id": chunk,
+                "revision": 1,
+                "source_lang": "en",
+                "corrected_source_text": "For God so loved the world.",
+                "corrected_translation_text": "Porque de tal manera amó Dios al mundo.",
+                "transcript_approved": True,
+                "translation_approved": True,
+                "excluded": False,
+                **fields,
+            }
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
 # ---------------------------------------------------------------------------
@@ -566,6 +588,7 @@ class TestApplyCorrections:
 
 class TestExportWhisper:
     def test_unknown_provenance_requires_eval_or_named_live_confirmation(self, tmp_path):
+        _approve(tmp_path, [1])
         rec = _make_diag_record(session_kind="unknown")
         rec["audio_path"] = str(tmp_path / "legacy.wav")
         with pytest.raises(ValueError, match="--confirm-live-session"):
@@ -582,6 +605,7 @@ class TestExportWhisper:
         )
 
     def test_unknown_eval_export_cannot_later_be_confirmed_for_training(self, tmp_path):
+        _approve(tmp_path, [1])
         rec = _make_diag_record(session_kind="unknown", audio_path=str(tmp_path / "legacy.wav"))
         out = self._run(tmp_path, [rec], eval_only=True, eval_ratio=0.0)
         with (out / "eval" / "metadata.csv").open() as stream:
@@ -590,6 +614,7 @@ class TestExportWhisper:
             self._run(tmp_path, [rec], confirm_live_session=[rec["session"]], eval_ratio=0.0)
 
     def test_confirmation_cannot_relabel_replay_or_heldout_audio(self, tmp_path):
+        _approve(tmp_path, [1])
         for kind, split in [("replay", None), ("unknown", "eval")]:
             rec = _make_diag_record(session_kind=kind, dataset_split=split)
             rec["audio_path"] = str(tmp_path / "legacy.wav")
@@ -602,6 +627,7 @@ class TestExportWhisper:
             audio = tmp_path / f"{session}.wav"
             audio.write_bytes(session.encode())
             row = _make_diag_record(session=session, audio_path=str(audio))
+            _approve(tmp_path, [1], session=session)
             _write_diag_jsonl(tmp_path / "metrics" / f"diagnostics_{session}.jsonl", [row])
         out = tmp_path / "export"
         cmd_export_whisper(
@@ -643,6 +669,7 @@ class TestExportWhisper:
         return out
 
     def test_creates_audiofolder_structure(self, tmp_path):
+        _approve(tmp_path, range(1, 21))
         records = [_make_diag_record(chunk_id=i) for i in range(1, 21)]
         # Give unique audio paths
         for i, r in enumerate(records, 1):
@@ -655,6 +682,7 @@ class TestExportWhisper:
         assert (out / "eval" / "church_live").is_dir()
 
     def test_metadata_csv_format(self, tmp_path):
+        _approve(tmp_path, [1])
         rec = _make_diag_record(chunk_id=1)
         rec["audio_path"] = str(tmp_path / "stark_data/live_sessions/sess/chunk_0001.wav")
         out = self._run(tmp_path, [rec], eval_ratio=0.0)
@@ -671,6 +699,7 @@ class TestExportWhisper:
         assert not (out / "train" / reader[0]["file_name"]).is_symlink()
         assert reader[0]["transcription"] == "For God so loved the world."
         assert reader[0]["accent"] == "church_live"
+        assert reader[0]["label_source"] == "human_approved"
 
     def test_prefers_corrected_text(self, tmp_path):
         rec = _make_diag_record(
@@ -679,9 +708,9 @@ class TestExportWhisper:
             corrected_english="Corrected.",
         )
         rec["audio_path"] = str(tmp_path / "stark_data/live_sessions/sess/chunk_0001.wav")
-        out = self._run(tmp_path, [rec], eval_ratio=0.0)
+        self._run(tmp_path, [rec], eval_ratio=0.0, allow_pseudo_labels=True)
 
-        meta_path = out / "train" / "metadata.csv"
+        meta_path = tmp_path / "whisper_out_pseudo_labels" / "train" / "metadata.csv"
         with open(meta_path) as f:
             reader = list(csv.DictReader(f))
         assert reader[0]["transcription"] == "Corrected."
@@ -695,9 +724,9 @@ class TestExportWhisper:
             segment_metadata=[{"avg_logprob": -0.2, "compression_ratio": 3.0, "no_speech_prob": 0.0}],
         )
         bad["audio_path"] = str(tmp_path / "stark_data/live_sessions/sess/chunk_0002.wav")
-        out = self._run(tmp_path, [good, bad], eval_ratio=0.0)
+        self._run(tmp_path, [good, bad], eval_ratio=0.0, allow_pseudo_labels=True)
 
-        meta_path = out / "train" / "metadata.csv"
+        meta_path = tmp_path / "whisper_out_pseudo_labels" / "train" / "metadata.csv"
         with open(meta_path) as f:
             reader = list(csv.DictReader(f))
         assert len(reader) == 1  # Only the good record
@@ -705,7 +734,7 @@ class TestExportWhisper:
     def test_skips_empty_transcription(self, tmp_path, capsys):
         rec = _make_diag_record(chunk_id=1, english="", corrected_english=None)
         rec["audio_path"] = str(tmp_path / "stark_data/live_sessions/sess/chunk_0001.wav")
-        out = self._run(tmp_path, [rec], eval_ratio=0.0)
+        out = self._run(tmp_path, [rec], eval_ratio=0.0, allow_pseudo_labels=True)
 
         # No eligible records → function returns early, no output created
         captured = capsys.readouterr()
@@ -713,6 +742,7 @@ class TestExportWhisper:
         assert not (out / "train" / "metadata.csv").exists()
 
     def test_eval_ratio_split(self, tmp_path):
+        _approve(tmp_path, range(1, 21))
         records = []
         for i in range(1, 21):
             rec = _make_diag_record(chunk_id=i)
@@ -753,7 +783,13 @@ class TestExportTranslation:
         cmd_export_translation(args)
         return out
 
+    def _run_pseudo(self, tmp_path, records, **kwargs):
+        """Unreviewed rows export only with the flag, to the separate pseudo-label file."""
+        self._run(tmp_path, records, allow_pseudo_labels=True, **kwargs)
+        return tmp_path / "pairs_pseudo_labels.jsonl"
+
     def test_writes_jsonl_format(self, tmp_path):
+        _approve(tmp_path, [1])
         records = [_make_diag_record(chunk_id=1, qe_a=0.95)]
         out = self._run(tmp_path, records)
 
@@ -761,6 +797,7 @@ class TestExportTranslation:
             pair = json.loads(f.readline())
         assert pair["en"] == "For God so loved the world."
         assert pair["es"] == "Porque de tal manera amó Dios al mundo."
+        assert pair["label_source"] == "human_approved"
 
     def test_spanish_cascade_corrected_first(self, tmp_path):
         records = [
@@ -772,7 +809,7 @@ class TestExportTranslation:
                 spanish_marian="Marian Spanish.",
             )
         ]
-        out = self._run(tmp_path, records)
+        out = self._run_pseudo(tmp_path, records)
 
         with open(out) as f:
             pair = json.loads(f.readline())
@@ -788,7 +825,7 @@ class TestExportTranslation:
                 spanish_marian="Marian Spanish.",
             )
         ]
-        out = self._run(tmp_path, records)
+        out = self._run_pseudo(tmp_path, records)
 
         with open(out) as f:
             pair = json.loads(f.readline())
@@ -804,7 +841,7 @@ class TestExportTranslation:
                 spanish_marian="Marian Spanish.",
             )
         ]
-        out = self._run(tmp_path, records)
+        out = self._run_pseudo(tmp_path, records)
 
         with open(out) as f:
             pair = json.loads(f.readline())
@@ -815,22 +852,15 @@ class TestExportTranslation:
             _make_diag_record(chunk_id=1, qe_a=0.3),
             _make_diag_record(chunk_id=2, qe_a=0.8),
         ]
-        out = self._run(tmp_path, records, min_qe=0.6)
+        out = self._run_pseudo(tmp_path, records, min_qe=0.6)
 
         with open(out) as f:
             pairs = [json.loads(line) for line in f]
         assert len(pairs) == 1
 
     def test_human_correction_bypasses_qe_filter(self, tmp_path):
-        records = [
-            _make_diag_record(
-                chunk_id=1,
-                qe_a=0.2,
-                correction_source="human",
-                corrected_english="Human English.",
-                corrected_spanish="Human Spanish.",
-            )
-        ]
+        _approve(tmp_path, [1], corrected_source_text="Human English.", corrected_translation_text="Human Spanish.")
+        records = [_make_diag_record(chunk_id=1, qe_a=0.2)]
         out = self._run(tmp_path, records, min_qe=0.6)
 
         with open(out) as f:
@@ -840,7 +870,7 @@ class TestExportTranslation:
 
     def test_skips_missing_english(self, tmp_path):
         records = [_make_diag_record(chunk_id=1, english="", qe_a=0.95)]
-        out = self._run(tmp_path, records)
+        out = self._run_pseudo(tmp_path, records)
 
         assert not out.exists() or out.stat().st_size == 0
 
@@ -854,7 +884,7 @@ class TestExportTranslation:
                 corrected_spanish=None,
             )
         ]
-        out = self._run(tmp_path, records)
+        out = self._run_pseudo(tmp_path, records)
 
         assert not out.exists() or out.stat().st_size == 0
 
@@ -867,11 +897,114 @@ class TestExportTranslation:
                 corrected_english="Corrected.",
             )
         ]
-        out = self._run(tmp_path, records)
+        out = self._run_pseudo(tmp_path, records)
 
         with open(out) as f:
             pair = json.loads(f.readline())
         assert pair["en"] == "Corrected."
+
+
+# ---------------------------------------------------------------------------
+# label_source: only human-approved labels enter the training output
+# ---------------------------------------------------------------------------
+
+
+class TestLabelSource:
+    def _diag(self, tmp_path, records):
+        for rec in records:
+            rec["audio_path"] = str(tmp_path / f"audio/chunk_{rec['chunk_id']:04d}.wav")
+            Path(rec["audio_path"]).parent.mkdir(parents=True, exist_ok=True)
+            Path(rec["audio_path"]).write_bytes(b"RIFF" + bytes([rec["chunk_id"]]))
+        _write_diag_jsonl(tmp_path / "metrics" / "diagnostics_20260301_113532.jsonl", records)
+
+    def _args(self, tmp_path, output, **kwargs):
+        defaults = {"session": None, "output": str(output), "metrics_dir": str(tmp_path / "metrics")}
+        defaults.update(accent="church_live", eval_ratio=0.0, min_qe=0.6, **kwargs)
+        return argparse.Namespace(**defaults)
+
+    def _csv(self, path):
+        if not path.exists():
+            return []
+        with path.open(encoding="utf-8") as stream:
+            return list(csv.DictReader(stream))
+
+    def test_default_whisper_export_refuses_unapproved_rows_and_reports_count(self, tmp_path, capsys):
+        self._diag(tmp_path, [_make_diag_record(chunk_id=1), _make_diag_record(chunk_id=2)])
+        out = tmp_path / "whisper_out"
+        cmd_export_whisper(self._args(tmp_path, out))
+        printed = capsys.readouterr().out
+        assert "skipped 2" in printed and "--allow-pseudo-labels" in printed
+        assert self._csv(out / "train" / "metadata.csv") == []
+        assert not (tmp_path / "whisper_out_pseudo_labels").exists()
+
+    def test_default_translation_export_refuses_unapproved_rows_and_reports_count(self, tmp_path, capsys):
+        self._diag(tmp_path, [_make_diag_record(chunk_id=1), _make_diag_record(chunk_id=2)])
+        out = tmp_path / "pairs.jsonl"
+        cmd_export_translation(self._args(tmp_path, out))
+        printed = capsys.readouterr().out
+        assert "skipped 2" in printed and "--allow-pseudo-labels" in printed
+        assert not out.exists() or out.read_text() == ""
+        assert not (tmp_path / "pairs_pseudo_labels.jsonl").exists()
+
+    def test_approved_rows_export_as_human_approved(self, tmp_path):
+        self._diag(tmp_path, [_make_diag_record(chunk_id=1), _make_diag_record(chunk_id=2)])
+        _approve(tmp_path, [1], corrected_source_text="Approved text.", corrected_translation_text="Texto.")
+        out = tmp_path / "whisper_out"
+        cmd_export_whisper(self._args(tmp_path, out))
+        rows = self._csv(out / "train" / "metadata.csv")
+        assert [(r["transcription"], r["label_source"]) for r in rows] == [("Approved text.", "human_approved")]
+        pairs = tmp_path / "pairs.jsonl"
+        cmd_export_translation(self._args(tmp_path, pairs))
+        exported = [json.loads(line) for line in pairs.read_text().splitlines()]
+        assert [(p["en"], p["es"], p["label_source"]) for p in exported] == [
+            ("Approved text.", "Texto.", "human_approved")
+        ]
+
+    def test_flag_writes_unapproved_rows_only_to_separate_pseudo_label_output(self, tmp_path):
+        self._diag(tmp_path, [_make_diag_record(chunk_id=1), _make_diag_record(chunk_id=2, english="Model text.")])
+        _approve(tmp_path, [1])
+        out = tmp_path / "whisper_out"
+        cmd_export_whisper(self._args(tmp_path, out, allow_pseudo_labels=True))
+        main = self._csv(out / "train" / "metadata.csv")
+        pseudo = self._csv(tmp_path / "whisper_out_pseudo_labels" / "train" / "metadata.csv")
+        assert [r["label_source"] for r in main] == ["human_approved"]
+        assert [(r["transcription"], r["label_source"]) for r in pseudo] == [("Model text.", "model_unapproved")]
+        assert (tmp_path / "whisper_out_pseudo_labels" / "train" / pseudo[0]["file_name"]).is_file()
+        pairs = tmp_path / "pairs.jsonl"
+        cmd_export_translation(self._args(tmp_path, pairs, allow_pseudo_labels=True))
+        main_pairs = [json.loads(line) for line in pairs.read_text().splitlines()]
+        pseudo_pairs = [json.loads(line) for line in (tmp_path / "pairs_pseudo_labels.jsonl").read_text().splitlines()]
+        assert [p["label_source"] for p in main_pairs] == ["human_approved"]
+        assert [(p["en"], p["label_source"]) for p in pseudo_pairs] == [("Model text.", "model_unapproved")]
+        with pytest.raises(ValueError, match="label_source"):
+            merge_whisper(tmp_path / "whisper_out_pseudo_labels", tmp_path / "corpus")
+        with pytest.raises(ValueError, match="label_source"):
+            merge_translation(tmp_path / "pairs_pseudo_labels.jsonl", tmp_path / "corpus.jsonl")
+
+    def test_reviewed_but_unapproved_or_excluded_rows_never_export(self, tmp_path):
+        self._diag(tmp_path, [_make_diag_record(chunk_id=1), _make_diag_record(chunk_id=2)])
+        _approve(tmp_path, [1], transcript_approved=False, translation_approved=False)
+        _approve(tmp_path, [2], excluded=True)
+        out = tmp_path / "whisper_out"
+        cmd_export_whisper(self._args(tmp_path, out, allow_pseudo_labels=True))
+        assert self._csv(out / "train" / "metadata.csv") == []
+        assert self._csv(tmp_path / "whisper_out_pseudo_labels" / "train" / "metadata.csv") == []
+        pairs = tmp_path / "pairs.jsonl"
+        cmd_export_translation(self._args(tmp_path, pairs, allow_pseudo_labels=True))
+        assert not pairs.exists() and not (tmp_path / "pairs_pseudo_labels.jsonl").exists()
+
+    def test_translation_needs_both_approvals(self, tmp_path):
+        self._diag(tmp_path, [_make_diag_record(chunk_id=1)])
+        _approve(tmp_path, [1], translation_approved=False)
+        pairs = tmp_path / "pairs.jsonl"
+        cmd_export_translation(self._args(tmp_path, pairs, allow_pseudo_labels=True))
+        assert not pairs.exists() and not (tmp_path / "pairs_pseudo_labels.jsonl").exists()
+
+    def test_parser_flag_defaults_off(self):
+        parser = build_parser()
+        for command in ("export-whisper", "export-translation"):
+            assert parser.parse_args([command]).allow_pseudo_labels is False
+            assert parser.parse_args([command, "--allow-pseudo-labels"]).allow_pseudo_labels is True
 
 
 # ---------------------------------------------------------------------------

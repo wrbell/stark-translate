@@ -51,6 +51,7 @@ module must not load a model; scripts that need one spawn `dry_run_ab.py` or a w
 - Corrections are revisioned sidecars; predictions and audio are never rewritten.
 - Only sessions with recorded completion (`session_lifecycle_<id>.json`, `status: completed`) and explicit per-item approvals export training data. Transcript and translation approvals are independent; unknown language requires an explicit choice.
 - Evaluation and training splits cannot cross (`tests/test_operator_review.py`, `tests/test_correction_import_safety.py`).
+- `prepare_finetune_data.py export-*` exports only human-approved rows. `--allow-pseudo-labels` writes unreviewed model output to a separate `*_pseudo_labels` output, and `merge_corrections.py` refuses those rows.
 - Portable bundles round-trip and merge idempotently; older revisions cannot overwrite newer corrections.
 - **Evidence status:** these paths are tested with fixtures. No human-approved correction from a real session exists yet (#137), so no "active learning loop closed" claim is allowed.
 
