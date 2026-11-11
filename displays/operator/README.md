@@ -85,16 +85,27 @@ degrades to explicit "not available" text.
   "storage": true,
   "display_ports": {"http": 8080, "websocket": 8765},
   "audience_urls": {"audience": "http://host:8080/displays/audience_display.html?port=8765",
-                    "church": "...", "mobile": "...", "obs": "..."}
+                    "church": "...", "mobile": "...", "obs": "..."},
+  "audience_lan_host": "192.168.1.20",
+  "audience_lan_urls": {"mobile": "http://192.168.1.20:8080/displays/...",
+                        "audience": "...", "church": "...", "obs": "..."}
 }
 ```
 
 `profiles` are ids the installed code can select (objects with
 `{id, label, description, available}` are also accepted). `audience_urls` are
-built from the request host, so a page opened as `localhost` still gets a
-non-shareable link and no QR code. `audio_devices_validated: false` shows a note
-that the devices have not been validated yet. The same object embedded as
-`capabilities` in the status snapshot is honoured.
+built from the request host. `audience_lan_host` and `audience_lan_urls` are
+optional. The server adds them only when it finds a LAN IPv4 address of this
+computer (`operator_app/lan.py`). They point at the audience display server,
+which listens on all interfaces. They never point at the operator page, which
+stays on its own bind address. When the page host is loopback and
+`audience_lan_urls.mobile` is not loopback, the phone link and QR code use that
+LAN link. The projector button keeps the local link. Without the field, a page
+opened as `localhost` shows a non-shareable link and no QR code. The page reads
+capabilities once at load, so reload it after the computer joins a network.
+`audio_devices_validated: false` shows a note that the devices have not been
+validated yet. The same object embedded as `capabilities` in the status
+snapshot is honoured.
 
 ### `GET /api/session/status` additive fields
 

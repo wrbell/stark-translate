@@ -39,12 +39,15 @@ In **Live**, use **Open audience display** for the projector. Put that browser o
 the projector and enter full screen using the browser's controls.
 
 The **Projector and phones** area provides the phone link and QR code. Phones must
-be on a network that can reach the caption computer. A link containing `localhost`
-or `127.0.0.1` only works on that computer. Use the LAN audience-display bookmark
-prepared by the setup owner, then click that display's header for its phone QR code.
-The setup owner can replace the loopback host in the audience URL with the
-computer's LAN address, retaining its display port and `?port=` query. Keep the
-operator controls on their default local address. Custom ports come from the service.
+be on the same Wi-Fi as the caption computer. When the operator page is open as
+`localhost`, the link and QR code use this computer's LAN address for the audience
+display only. The operator controls stay on their default local address. If the
+page says the link only works on this computer, the service found no LAN address.
+Connect the computer to the room Wi-Fi and reload the page. If the message stays,
+use the LAN audience-display bookmark prepared by the setup owner, then click that
+display's header for its phone QR code. A guest Wi-Fi that isolates devices, or
+a firewall that blocks the display ports, also stops phones.
+Custom ports come from the service.
 The caption display reconnects automatically between sessions.
 
 The operator's **What the audience sees** preview helps check content. Also inspect
