@@ -27,6 +27,7 @@ from operator_app.audio import get_watcher, shutdown_watcher
 from operator_app.audio_ingest import get_bus as get_audio_bus
 from operator_app.audio_ingest import handle_audio_ingest, handle_audio_subscribe
 from operator_app.features import get_summary_runner, get_verse_watcher, shutdown_features
+from operator_app.lan import lan_ipv4
 from operator_app.metrics import get_collector, healthz_snapshot, shutdown_collector
 from operator_app.pipeline_manager import (
     InvalidStateError,
@@ -161,8 +162,17 @@ def api_capabilities(request: Request) -> dict:
     if ":" in host:
         host = "[" + host + "]"
     http_port, ws_port = settings.server.http_port, settings.server.ws_port
-    base = f"{request.url.scheme}://{host}:{http_port}"
-    return {
+    pages = {
+        "audience": "audience_display",
+        "church": "church_display",
+        "mobile": "mobile_display",
+        "obs": "obs_overlay",
+    }
+
+    def urls(base: str) -> dict[str, str]:
+        return {name: f"{base}/displays/{page}.html?port={ws_port}" for name, page in pages.items()}
+
+    caps = {
         "profiles": profiles,
         "default_profile": os.environ.get("STARK_PROFILE", "standard"),
         "preflight_required": True,
@@ -172,16 +182,15 @@ def api_capabilities(request: Request) -> dict:
         "support": True,
         "storage": True,
         "display_ports": {"http": http_port, "websocket": ws_port},
-        "audience_urls": {
-            name: f"{base}/displays/{filename}?port={ws_port}"
-            for name, filename in {
-                "audience": "audience_display.html",
-                "church": "church_display.html",
-                "mobile": "mobile_display.html",
-                "obs": "obs_overlay.html",
-            }.items()
-        },
+        "audience_urls": urls(f"{request.url.scheme}://{host}:{http_port}"),
     }
+    # The audience display server listens on all interfaces over plain HTTP, so a
+    # loopback operator page can still give phones a LAN link. Never the operator URL.
+    lan = lan_ipv4()
+    if lan:
+        caps["audience_lan_host"] = lan
+        caps["audience_lan_urls"] = urls(f"http://{lan}:{http_port}")
+    return caps
 
 
 def _resolve_session_config(cfg):

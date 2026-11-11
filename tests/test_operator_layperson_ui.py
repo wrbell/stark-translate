@@ -882,6 +882,31 @@ assert.strictEqual(links.shareable, false);
 """)
 
 
+def test_loopback_page_shares_the_server_lan_audience_link():
+    run_node(r"""
+const lanMobile = 'http://192.168.1.20:8080/displays/mobile_display.html?port=8765';
+const h = createHarness({capabilities: realCapabilities({lanHost: '192.168.1.20'})});
+await h.start();
+assert.strictEqual(h.text('audience-url'), lanMobile);
+assert(h.text('audience-note').includes('same Wi-Fi'), h.text('audience-note'));
+assert.strictEqual(h.el('audience-qr').hidden, false);
+assert(h.el('audience-qr').getContext('2d').calls.some(c => c[0] === 'fillRect'));
+assert.strictEqual(h.el('audience-copy').disabled, false);
+await h.el('audience-copy').click();
+assert.deepStrictEqual(h.clipboard, [lanMobile]);
+// The projector browser is on this computer: it keeps the local link. No link names the operator page.
+await h.el('audience-open').click();
+assert.deepStrictEqual(h.opened, ['http://localhost:8080/displays/audience_display.html?port=8765']);
+assert(!h.panelText('live').includes(':9000'));
+assert.strictEqual(h.text('caption-endpoint'), 'ws://localhost:8765'); // the operator preview stays local
+// A loopback LAN entry is not shareable; the page keeps the old message.
+const bad = createHarness({capabilities: realCapabilities({lanHost: '127.0.0.1'})});
+await bad.start();
+assert(bad.text('audience-note').includes('only works on this computer'));
+assert.strictEqual(bad.el('audience-qr').hidden, true);
+""")
+
+
 def test_storage_and_support_bundle_degrade_gracefully():
     run_node(r"""
 const sessions = [{session: '20260909_101500_000000_en', pending: 3, status: 'completed', exportable: true},
