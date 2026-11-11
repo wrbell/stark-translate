@@ -34,8 +34,9 @@ strategy and extras field are therefore not proof of launcher behavior.
 The WiX fragment proposes NVIDIA detection through `STARK_INSTALL_EXTRAS`, but
 an end-to-end test must prove that the launcher actually consumes the selected
 runtime extras, obtains a published matching wheel, starts the operator when
-launched from the Start Menu and completes model setup. The current CLI entry
-point expects a subcommand. Do not promise volunteers a verified one-click MSI
+launched from the Start Menu and completes model setup. With no subcommand, the
+CLI entry point starts the operator with its defaults; no native Windows run has
+tested that path. Do not promise volunteers a verified one-click MSI
 installation until this bootstrap chain is exercised and repaired as necessary.
 
 ## Remaining release gates
