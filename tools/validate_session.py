@@ -637,11 +637,10 @@ def compare_stt_aligned(
         if wer_t is not None and (wer_n is None or wer_t < wer_n):
             _offset = text_offset
             logger.info("Validation: text-anchor wins at mid-session")
-    elif not narrow_ok:
-        if text_ok:
-            _offset = text_offset
-            logger.info("Using text-anchor offset: %.1fs", _offset)
-        # else: both failed, _offset stays at 0 or whatever narrow returned
+    elif not narrow_ok and text_ok:
+        _offset = text_offset
+        logger.info("Using text-anchor offset: %.1fs", _offset)
+    # When both fail, _offset stays at 0 or the value that the narrow search returned.
 
     # Apply offset to YouTube segments
     if abs(_offset) > 0.01:

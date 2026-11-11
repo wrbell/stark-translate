@@ -112,7 +112,10 @@ cpu = [
 dev = [
     "ruff>=0.9",
     "mypy>=1.14",
-    "pytest>=8.0",
+    # pytest 9.2.0 monkeypatch undo deletes MagicMock children that the
+    # conftest module mocks share (pytest-dev/pytest#15287). Remove the
+    # upper bound when a release fixes that issue.
+    "pytest>=8.0,<9.2",
     "pytest-cov>=6.0",
     "pre-commit>=4.0",
     "bandit>=1.7",
