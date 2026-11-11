@@ -1,6 +1,7 @@
 """Real ASGI routes enforce operator boundaries without model/device work."""
 
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -9,10 +10,13 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+import yaml
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from operator_app.security import _policy
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture
@@ -163,6 +167,61 @@ def test_source_launcher_passes_loopback_and_explicit_remote_host_to_guarded_cli
         args = result.stdout.splitlines()[1:]
         assert args[:3] == ["-m", "operator_app.cli", "operator"]
         assert args[args.index("--host") + 1] == expected
+
+
+def _compose_value(value, host_env):
+    """Resolve ${VAR} and ${VAR:-default} the way docker compose does."""
+    return re.sub(r"\$\{(\w+)(?::-([^}]*))?\}", lambda m: host_env.get(m[1]) or m[2] or "", str(value))
+
+
+def _start_docker_operator(monkeypatch, tmp_path, host_env=None):
+    """Apply the compose environment, run the real entrypoint, and give its argv to the CLI."""
+    import psutil
+    import uvicorn
+
+    from operator_app.cli import main
+
+    service = yaml.safe_load((ROOT / "docker-compose.yml").read_text())["services"]["operator"]
+    env = {key: _compose_value(value, host_env or {}) for key, value in service["environment"].items()}
+    python = tmp_path / "python"
+    python.write_text(f'#!/bin/sh\nprintf "%s\\n" "$@" > "{tmp_path}/argv"\n')
+    python.chmod(0o755)
+    shell_env = {**env, "PATH": os.environ["PATH"], "MODEL_DIR": str(tmp_path), "STARK_PYTHON": str(python)}
+    entry = subprocess.run(["bash", str(ROOT / "docker/entrypoint.sh")], env=shell_env, capture_output=True, text=True)
+    assert entry.returncode == 0, entry.stderr
+    argv = (tmp_path / "argv").read_text().splitlines()
+    assert argv[:2] == ["-m", "operator_app.cli"], "the container must start the operator through the guarded CLI"
+    assert "--no-browser" in argv
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.setenv("STARK_OPERATOR_BIND_HOST", "")  # main() writes os.environ; monkeypatch restores it.
+    container_if = SimpleNamespace(family=socket.AF_INET, address="172.18.0.2")
+    monkeypatch.setattr(psutil, "net_if_addrs", lambda: {"eth0": [container_if]})
+    monkeypatch.setattr(uvicorn, "run", Mock())
+    assert main(argv[2:]) == 0
+    assert uvicorn.run.call_args.kwargs["host"] == "0.0.0.0"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX container entrypoint")
+def test_docker_operator_accepts_peer_from_published_port(guarded_operator, monkeypatch, tmp_path):
+    app, runner = guarded_operator
+    _start_docker_operator(monkeypatch, tmp_path)
+    for host, expected in (("localhost", 200), ("127.0.0.1", 200), ("operator", 403)):
+        client = TestClient(app, base_url=f"http://{host}:9000", client=("172.18.0.1", 40000))
+        response = client.post("/api/session/stop", headers={"Origin": f"http://{host}:9000"})
+        assert response.status_code == expected, (host, response.text)
+    assert runner.stop.call_count == 2
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX container entrypoint")
+def test_docker_operator_rejects_hosts_not_in_allowed_list(guarded_operator, monkeypatch, tmp_path):
+    app, runner = guarded_operator
+    _start_docker_operator(monkeypatch, tmp_path, {"STARK_OPERATOR_ALLOWED_HOSTS": "church-pc.local,operator"})
+    hosts = (("church-pc.local", 200), ("operator", 200), ("192.168.1.50", 403), ("evil.example", 403))
+    for host, expected in hosts:
+        client = TestClient(app, base_url=f"http://{host}:9000", client=("172.18.0.1", 40000))
+        assert client.post("/api/session/stop").status_code == expected, host
+    assert runner.stop.call_count == 2
 
 
 def test_launchd_default_is_loopback(tmp_path):

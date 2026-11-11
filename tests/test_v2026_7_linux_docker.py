@@ -12,8 +12,11 @@ from __future__ import annotations
 
 import ast
 import os
+import re
+import socket
 import subprocess
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 import yaml
@@ -136,9 +139,10 @@ class TestEntrypoint:
         for cmd in ("operator)", "llama-server)", "audio-bridge)", "bash"):
             assert cmd in text, f"entrypoint missing dispatch for {cmd}"
 
-    def test_operator_runs_uvicorn(self):
+    def test_operator_runs_guarded_cli(self):
+        # Behavior check: tests/test_operator_security.py runs this entrypoint.
         text = (ROOT / "docker" / "entrypoint.sh").read_text()
-        assert "uvicorn" in text and "operator_app.main:app" in text
+        assert "-m operator_app.cli operator" in text
 
     def test_llama_server_falls_back_to_e2b(self):
         text = (ROOT / "docker" / "entrypoint.sh").read_text()
@@ -175,6 +179,94 @@ class TestStartServer:
         text = (ROOT / "start_server.sh").read_text()
         assert "Quantized KV" in text or "f16 KV" in text
         assert "--spec-type draft-mtp" in text
+
+
+# ---------------------------------------------------------------------------
+# Container network: run the real shell scripts with stub programs
+# ---------------------------------------------------------------------------
+
+
+def _free_port():
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+def _recording_stub(path, argv_file):
+    path.write_text(f'#!/bin/sh\nprintf "%s\\n" "$@" > "{argv_file}"\n')
+    path.chmod(0o755)
+
+
+def _run_start_server(tmp_path, *args):
+    """Run start_server.sh with a stub llama-server; return the stub's argv."""
+    (tmp_path / "gemma-4-e4b-it-q4km.gguf").touch()
+    _recording_stub(tmp_path / "llama-server", tmp_path / "server-argv")
+    env = {"PATH": os.environ["PATH"], "HOME": str(tmp_path), "SERVER": str(tmp_path / "llama-server")}
+    env["MODEL_DIR"] = str(tmp_path)
+    cmd = ["bash", str(ROOT / "start_server.sh"), "--port", str(_free_port()), *args]
+    result = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=10)
+    assert (tmp_path / "server-argv").exists(), result.stdout + result.stderr
+    return (tmp_path / "server-argv").read_text().splitlines()
+
+
+class TestContainerNetwork:
+    @staticmethod
+    def services():
+        return yaml.safe_load((ROOT / "docker-compose.yml").read_text())["services"]
+
+    def test_operator_reaches_llama_server_by_service_name(self):
+        url = urlsplit(self.services()["operator"]["environment"]["STARK_CUDA__LLAMACPP_URL"])
+        assert url.hostname in self.services()
+        assert str(url.port) == self.services()[url.hostname]["environment"]["LLAMA_PORT"]
+
+    def test_only_loopback_publishes_operator_and_no_llama_publish(self):
+        ports = [re.sub(r"\$\{\w+:-([^}]*)\}", r"\1", p) for p in self.services()["operator"]["ports"]]
+        assert "127.0.0.1:9000:9000" in ports
+        assert not self.services()["llama-server"].get("ports")
+
+    def test_entrypoint_makes_llama_server_listen_on_all_interfaces(self, tmp_path):
+        (tmp_path / "models").mkdir()
+        (tmp_path / "models" / "gemma-4-e4b-it-q4km.gguf").touch()
+        _recording_stub(tmp_path / "start_server.sh", tmp_path / "entry-argv")
+        env = {
+            **self.services()["llama-server"]["environment"],
+            "PATH": os.environ["PATH"],
+            "STARK_PROJECT_ROOT": str(tmp_path),
+            "MODEL_DIR": str(tmp_path / "models"),
+        }
+        entry = ROOT / "docker" / "entrypoint.sh"
+        result = subprocess.run(["bash", str(entry), "llama-server"], env=env, capture_output=True, text=True)
+        assert result.returncode == 0, result.stderr
+        args = (tmp_path / "entry-argv").read_text().splitlines()
+        assert args[args.index("--host") + 1] == "0.0.0.0"
+        # start_server.sh accepts the same flags and gives them to llama-server.
+        passed = [a for i, a in enumerate(args) if a != "--port" and args[i - 1] != "--port"]
+        served = _run_start_server(tmp_path / "models", *passed)
+        assert served[served.index("--host") + 1] == "0.0.0.0"
+
+    def test_start_server_default_stays_loopback(self, tmp_path):
+        served = _run_start_server(tmp_path)
+        assert served[served.index("--host") + 1] == "127.0.0.1"
+
+
+def _missing_copy_sources(dockerfile_text):
+    missing = []
+    for line in dockerfile_text.replace("\\\n", " ").splitlines():
+        words = line.split()
+        if not words or words[0] != "COPY" or any(w.startswith("--from=") for w in words):
+            continue
+        sources = [w for w in words[1:] if not w.startswith("--")][:-1]
+        missing += [s for s in sources if not (ROOT / s).exists()]
+    return missing
+
+
+class TestDockerfileCopySources:
+    def test_every_build_context_copy_source_exists(self):
+        assert _missing_copy_sources((ROOT / "Dockerfile").read_text()) == []
+
+    def test_check_detects_a_missing_source(self):
+        text = "COPY --from=builder /opt/venv /opt/venv\nCOPY settings.py \\\n    nope.py /app/\n"
+        assert _missing_copy_sources(text) == ["nope.py"]
 
 
 # ---------------------------------------------------------------------------
