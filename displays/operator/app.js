@@ -228,7 +228,11 @@
     const wsPort = Number(ports.websocket) || 8765;
     const query = wsPort !== 8765 ? `?port=${wsPort}` : "";
     const audience = urls.audience || `http://${host}:${httpPort}/displays/audience_display.html${query}`;
-    const mobile = urls.mobile || `http://${host}:${httpPort}/displays/mobile_display.html${query}`;
+    let mobile = urls.mobile || `http://${host}:${httpPort}/displays/mobile_display.html${query}`;
+    // A loopback page shares the server's LAN audience link instead (never the operator URL).
+    const lan = caps.audience_lan_urls && typeof caps.audience_lan_urls === "object" ? caps.audience_lan_urls : {};
+    const lanHost = typeof lan.mobile === "string" ? hostOf(lan.mobile) : "";
+    if (isLocalHost(hostOf(mobile) || host) && lanHost && !isLocalHost(lanHost)) mobile = lan.mobile;
     const shareHost = hostOf(mobile) || host;
     const shareable = !isLocalHost(shareHost);
     const note = shareable

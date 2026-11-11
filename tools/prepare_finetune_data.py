@@ -228,6 +228,43 @@ def apply_auto_corrections_to_record(record: dict) -> tuple[str, list]:
     return corrected, corrections
 
 
+HUMAN_APPROVED = "human_approved"
+MODEL_UNAPPROVED = "model_unapproved"
+
+
+def _label_records(records: list[dict], args: argparse.Namespace, *, translation: bool) -> list[dict]:
+    """Keep rows with a human-approved label; keep unreviewed rows only with --allow-pseudo-labels.
+
+    The approval rule is the ReviewStore.export rule: a sidecar revision that is not
+    excluded and has transcript approval (and translation approval for pairs).
+    """
+    allow = getattr(args, "allow_pseudo_labels", False)
+    kept, skipped = [], {}
+    for rec in records:
+        approved = rec["transcript_approved"] and (rec["translation_approved"] or not translation)
+        if rec["excluded"]:
+            reason = "excluded by a reviewer"
+        elif rec["revision"] and approved:
+            kept.append({**rec, "label_source": HUMAN_APPROVED})
+            continue
+        elif rec["revision"]:
+            reason = "reviewed without the necessary approval"
+        elif allow:
+            kept.append({**rec, "label_source": MODEL_UNAPPROVED})
+            continue
+        else:
+            reason = "no human approval; the label is model output (use --allow-pseudo-labels for a separate output)"
+        skipped[reason] = skipped.get(reason, 0) + 1
+    for reason, count in skipped.items():
+        print(f"  skipped {count} record(s): {reason}")
+    return kept
+
+
+def _pseudo_label_path(path: Path) -> Path:
+    """Unapproved rows go next to the approved output, never into the same file."""
+    return path.with_name(f"{path.stem}_pseudo_labels{path.suffix}")
+
+
 def _get_segment_metadata(record: dict) -> dict:
     """Extract aggregate segment metadata for confidence filtering."""
     seg_meta = record.get("segment_metadata") or []
@@ -448,15 +485,10 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
     records = load_diagnostics(paths)
     print(f"Loaded {len(records)} chunk records")
 
-    # Filter by confidence thresholds
-    eligible = [
-        r
-        for r in records
-        if not r.get("excluded")
-        and (not r.get("revision") or r.get("transcript_approved"))
-        and (_passes_whisper_filter(r) or r.get("transcript_approved"))
-    ]
-    print(f"  {len(eligible)} pass confidence filter (rejected {len(records) - len(eligible)})")
+    labelled = _label_records(records, args, translation=False)
+    # Filter by confidence thresholds; a human-approved transcript does not need them.
+    eligible = [r for r in labelled if r["label_source"] == HUMAN_APPROVED or _passes_whisper_filter(r)]
+    print(f"  {len(eligible)} pass confidence filter (rejected {len(labelled) - len(eligible)})")
 
     # Filter out empty transcriptions
     eligible = [r for r in eligible if (r.get("corrected_english") or r.get("english", "")).strip()]
@@ -477,16 +509,21 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
         fraction = int(hashlib.sha256(rec["session"].encode()).hexdigest()[:8], 16) / 2**32
         return fraction < args.eval_ratio
 
-    eval_set = [r for r in eligible if is_eval(r)]
-    train_set = [r for r in eligible if not is_eval(r)]
-
     out_dir = Path(args.output)
     accent = args.accent
     if not accent or Path(accent).name != accent or accent in (".", "..") or "\\" in accent:
         raise ValueError("Accent must be a single directory name")
 
-    for split_name, split_data in [("train", train_set), ("eval", eval_set)]:
-        split_dir = out_dir / split_name / accent
+    targets = [(out_dir, HUMAN_APPROVED)]
+    if any(r["label_source"] == MODEL_UNAPPROVED for r in eligible):
+        targets.append((_pseudo_label_path(out_dir), MODEL_UNAPPROVED))
+    jobs = [
+        (root, split_name, [r for r in eligible if r["label_source"] == label and is_eval(r) == (split_name == "eval")])
+        for root, label in targets
+        for split_name in ("train", "eval")
+    ]
+    for root, split_name, split_data in jobs:
+        split_dir = root / split_name / accent
         split_dir.mkdir(parents=True, exist_ok=True)
 
         metadata_rows = []
@@ -527,11 +564,12 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
                     "split": split_name,
                     "transcription": transcription,
                     "accent": accent,
+                    "label_source": rec["label_source"],
                 }
             )
 
         # Write metadata.csv
-        meta_path = out_dir / split_name / "metadata.csv"
+        meta_path = root / split_name / "metadata.csv"
         with open(meta_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(
                 f,
@@ -546,6 +584,7 @@ def cmd_export_whisper(args: argparse.Namespace) -> None:
                     "session_kind",
                     "revision",
                     "audio_sha256",
+                    "label_source",
                 ],
             )
             writer.writeheader()
@@ -573,11 +612,7 @@ def cmd_export_translation(args: argparse.Namespace) -> None:
     print(f"Loaded {len(records)} chunk records")
 
     eligible = []
-    for rec in records:
-        if rec.get("excluded") or (
-            rec.get("revision") and not (rec.get("transcript_approved") and rec.get("translation_approved"))
-        ):
-            continue
+    for rec in _label_records(records, args, translation=True):
         source_lang = rec.get("source_lang") or getattr(args, "source_lang", None)
         if source_lang not in ("en", "es"):
             print(f"  skipping unknown-language session {rec['session']}; pass --source-lang", file=sys.stderr)
@@ -597,9 +632,8 @@ def cmd_export_translation(args: argparse.Namespace) -> None:
         if not es:
             continue
 
-        # QE filter (skip for human corrections)
-        is_human = rec.get("correction_source") == "human"
-        if not is_human and args.min_qe > 0:
+        # QE filter (skip for human-approved pairs)
+        if rec["label_source"] != HUMAN_APPROVED and args.min_qe > 0:
             try:
                 qe = float(rec.get("qe_a") or 0)
             except (ValueError, TypeError):
@@ -622,6 +656,7 @@ def cmd_export_translation(args: argparse.Namespace) -> None:
                 "revision": rec["revision"],
                 "source_lang": rec["source_lang"],
                 "split": rec.get("dataset_split", rec.get("split", "train")),
+                "label_source": rec["label_source"],
             }
         )
 
@@ -631,12 +666,14 @@ def cmd_export_translation(args: argparse.Namespace) -> None:
 
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(out_path, "w", encoding="utf-8") as f:
-        for pair in pairs:
-            f.write(json.dumps(pair, ensure_ascii=False) + "\n")
-
-    print(f"Wrote {len(pairs)} translation pairs to {out_path}")
+    for path, label in ((out_path, HUMAN_APPROVED), (_pseudo_label_path(out_path), MODEL_UNAPPROVED)):
+        selected = [pair for pair in pairs if pair["label_source"] == label]
+        if label == MODEL_UNAPPROVED and not selected:
+            continue
+        with open(path, "w", encoding="utf-8") as f:
+            for pair in selected:
+                f.write(json.dumps(pair, ensure_ascii=False) + "\n")
+        print(f"Wrote {len(selected)} {label} translation pairs to {path}")
 
 
 # ---------------------------------------------------------------------------
@@ -906,6 +943,12 @@ def build_parser() -> argparse.ArgumentParser:
             default=[],
             metavar="SESSION",
             help="Record explicit live provenance for a named legacy session; never overrides replay/holdout flags",
+        )
+        export_parser.add_argument(
+            "--allow-pseudo-labels",
+            action="store_true",
+            help="Also export unreviewed rows (model output, label_source=model_unapproved) "
+            "to a separate *_pseudo_labels output; merge_corrections.py refuses them",
         )
 
     # --- summary ---

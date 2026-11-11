@@ -75,7 +75,7 @@ Export schema 2 binds the selected revisions, audio hashes, and approved text pr
 
 | Request | Body / response |
 | --- | --- |
-| `GET /api/capabilities` | Selectable `profiles`, `default_profile`, `preflight_required`, `audio_tests`, `audio_tests_require_idle`, `audio_devices_validated:false`, `support`, `storage`, effective `display_ports` and `audience_urls`. |
+| `GET /api/capabilities` | Selectable `profiles`, `default_profile`, `preflight_required`, `audio_tests`, `audio_tests_require_idle`, `audio_devices_validated:false`, `support`, `storage`, effective `display_ports` and `audience_urls`; optional `audience_lan_host` / `audience_lan_urls` when a LAN address exists. |
 | `GET /api/preflight` | Query selected `profile`, `backend`, `lang`, `tts`, `diarize`, `input_device`; returns checks and effective profile/configuration. |
 | `POST /api/session/start` | Selected configuration, including `profile` and `record_audio`. Explicit profile selection overrides inherited `STARK_PROFILE`. |
 | `POST /api/audio/test-input` | `{device, duration_s}`; returns `ok`, `rms`, `peak`, `samples`, `recorded:false`. |

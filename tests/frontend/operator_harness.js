@@ -64,7 +64,9 @@ function realCapabilities(overrides = {}) {
   const host = overrides.host || "localhost";
   const http = overrides.http || 8080;
   const ws = overrides.ws || 8765;
-  const base = `http://${host}:${http}/displays`;
+  const pages = {audience: "audience_display", church: "church_display", mobile: "mobile_display", obs: "obs_overlay"};
+  const urls = name => Object.fromEntries(Object.entries(pages).map(([key, page]) =>
+    [key, `http://${name}:${http}/displays/${page}.html?port=${ws}`]));
   const caps = {
     profiles: ["standard", "lite-cpu", "lite-cpu-quality", "lite-cuda-8gb"],
     default_profile: "standard",
@@ -75,14 +77,11 @@ function realCapabilities(overrides = {}) {
     support: true,
     storage: true,
     display_ports: {http, websocket: ws},
-    audience_urls: {
-      audience: `${base}/audience_display.html?port=${ws}`,
-      church: `${base}/church_display.html?port=${ws}`,
-      mobile: `${base}/mobile_display.html?port=${ws}`,
-      obs: `${base}/obs_overlay.html?port=${ws}`,
-    },
+    audience_urls: urls(host),
   };
-  for (const key of Object.keys(overrides)) if (!["host", "http", "ws"].includes(key)) caps[key] = overrides[key];
+  // Optional: the server adds LAN audience links when it finds a LAN address.
+  if (overrides.lanHost) Object.assign(caps, {audience_lan_host: overrides.lanHost, audience_lan_urls: urls(overrides.lanHost)});
+  for (const key of Object.keys(overrides)) if (!["host", "http", "ws", "lanHost"].includes(key)) caps[key] = overrides[key];
   return caps;
 }
 

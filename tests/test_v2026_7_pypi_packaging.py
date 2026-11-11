@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 from unittest.mock import patch
@@ -93,15 +94,48 @@ class TestModelsLockShape:
 
 
 class TestCli:
-    def test_no_args_prints_help_and_returns_2(self, capsys):
+    @staticmethod
+    def _assert_operator_defaults(mock_cmd):
+        mock_cmd.assert_called_once()
+        args = mock_cmd.call_args.args[0]
+        assert (args.host, args.port, args.no_browser, args.log_level) == ("127.0.0.1", 9000, False, "INFO")
+
+    @pytest.mark.parametrize("argv", [[], None])
+    def test_bare_command_runs_operator_with_defaults(self, monkeypatch, argv):
+        from operator_app import cli
+
+        monkeypatch.setattr("sys.argv", ["stark-translate"])
+        monkeypatch.setenv("STARK_PROFILE", "standard")  # main() writes it; restore after
+        with patch.object(cli, "cmd_operator", return_value=0) as mock_cmd:
+            assert cli.main(argv) == 0
+        self._assert_operator_defaults(mock_cmd)
+
+    def test_bare_lite_command_runs_operator_with_lite_profile(self, monkeypatch):
+        from operator_app import cli
+
+        monkeypatch.setenv("STARK_PROFILE", "placeholder")
+        monkeypatch.delenv("STARK_PROFILE")
+        with patch.object(cli, "cmd_operator", return_value=0) as mock_cmd:
+            assert cli.lite_main([]) == 0
+        self._assert_operator_defaults(mock_cmd)
+        assert mock_cmd.call_args.args[0].profile == "lite-cpu"
+        assert os.environ["STARK_PROFILE"] == "lite-cpu"
+
+    def test_help_still_prints_help_and_exits_0(self, capsys):
         from operator_app.cli import main
 
-        rc = main([])
-        captured = capsys.readouterr()
-        assert rc == 2
-        assert "operator" in captured.err
-        assert "setup" in captured.err
-        assert "doctor" in captured.err
+        with pytest.raises(SystemExit) as exc:
+            main(["--help"])
+        assert exc.value.code == 0
+        out = capsys.readouterr().out
+        assert "operator" in out and "setup" in out and "doctor" in out
+
+    def test_unknown_subcommand_is_argparse_error(self):
+        from operator_app.cli import main
+
+        with pytest.raises(SystemExit) as exc:
+            main(["no-such-command"])
+        assert exc.value.code == 2
 
     def test_version_prints_and_returns_0(self, capsys):
         from operator_app.cli import main
