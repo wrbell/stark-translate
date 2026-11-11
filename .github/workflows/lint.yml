@@ -22,7 +22,8 @@ jobs:
             pyproject.toml
 
       - name: Install lint dependencies
-        run: pip install ruff mypy pydantic pydantic-settings numpy bandit vulture
+        # Keep ruff equal to the ruff-pre-commit rev in .pre-commit-config.yaml.
+        run: pip install ruff==0.15.2 mypy pydantic pydantic-settings numpy bandit vulture
 
       - name: Ruff check
         run: ruff check .
@@ -41,7 +42,8 @@ jobs:
 
       - name: Validate HTML displays
         run: |
-          sudo apt-get -qq install -y tidy
+          sudo apt-get -qq -o Acquire::Retries=3 update
+          sudo apt-get -qq -o Acquire::Retries=3 install -y tidy
           ERRORS=0
           for f in displays/*.html displays/operator/*.html; do
             STATUS=0
