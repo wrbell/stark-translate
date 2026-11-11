@@ -2,13 +2,17 @@
 #
 # Three services on one network:
 #   - operator      → FastAPI control plane on :9000 + audience HTTP/:8080 + WS/:8765/:8766
-#   - llama-server  → llama.cpp HTTP API on :8090 (wrapped by start_server.sh)
+#   - llama-server  → llama.cpp HTTP API on :8090, compose network only (start_server.sh)
 #   - audio-bridge  → opt-in profile when host PulseAudio passthrough doesn't work
 #
 # Quick start:
 #   docker compose pull
 #   STARK_MODELS_DIR=$HOME/.cache/stark-translate/models docker compose up
 #   open http://localhost:9000/operator/
+#
+# The operator has no authentication, so port 9000 is published on the host
+# loopback only. For LAN access, set STARK_OPERATOR_PUBLISH_HOST=0.0.0.0 and
+# add the LAN name to STARK_OPERATOR_ALLOWED_HOSTS (exact hostnames, no ports).
 #
 # GPU access uses CDI mode (NVIDIA Container Toolkit ≥1.18). For older toolkits,
 # replace `devices:` with `runtime: nvidia` + `environment: NVIDIA_VISIBLE_DEVICES=all`.
@@ -24,10 +28,12 @@ services:
       STARK_OPERATOR_LOG_DIR: /app/metrics
       STARK_CUDA__LLAMACPP_URL: http://llama-server:8090
       STARK_CUDA__ENGINE: ${STARK_ENGINE:-auto}
+      # Host header names the operator accepts (it also accepts loopback names).
+      STARK_OPERATOR_ALLOWED_HOSTS: ${STARK_OPERATOR_ALLOWED_HOSTS:-localhost,127.0.0.1}
       # Pulse passthrough — disable by setting STARK_NO_PULSE=1
       PULSE_SERVER: ${PULSE_SERVER:-unix:/run/user/1000/pulse/native}
     ports:
-      - "9000:9000"   # operator UI + REST + /ws/control
+      - "${STARK_OPERATOR_PUBLISH_HOST:-127.0.0.1}:9000:9000"   # operator UI + REST + /ws/control
       - "8080:8080"   # audience displays HTTP
       - "8765:8765"   # transcript WebSocket
       - "8766:8766"   # TTS audio WebSocket
@@ -54,8 +60,6 @@ services:
       LLAMA_PORT: "8090"
     volumes:
       - ${STARK_MODELS_DIR:-./models}:/app/models:ro
-    ports:
-      - "8090:8090"   # local development; remove for prod-only intra-compose access
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8090/health"]
       interval: 15s
