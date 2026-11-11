@@ -183,8 +183,9 @@ do not prove that captions are being generated.
 Run one operator service for an installation. It coordinates sessions, summaries
 and audio tests, but cannot reserve resources used by unrelated command-line jobs.
 An installed package starts with `stark-translate operator`; a checkout starts with
-`./run_operator.sh`. The setup owner should supply a working shortcut/service so
-volunteers do not need a terminal. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`. A dedicated `STARK_PROJECT_ROOT` holds writable session data when
+`./run_operator.sh`. On a Mac checkout or Mac ZIP, volunteers double-click
+`Stark Translate.command` in Finder. It installs on first use, starts the operator
+and opens the operator page. If the operator already runs, it only opens the page. `stt_env` (Torch 2.10) is retained unmodified as the rollback environment; the launcher default is the promoted `venv` (Torch 2.13.0 / TorchAudio 2.11.0, audited 2026-09-11) selected by `.stark-python`. A dedicated `STARK_PROJECT_ROOT` holds writable session data when
 running an installed package outside the checkout.
 
 Operator controls and private recordings are local by default (`127.0.0.1:9000`).

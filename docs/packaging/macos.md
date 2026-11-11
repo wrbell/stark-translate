@@ -18,6 +18,11 @@ does not establish successful monitoring or a certified service.
 
 ## Install from a checkout or Mac ZIP
 
+Double-click `Stark Translate.command` in Finder. The first time, it runs
+`bootstrap.sh --skip-systemd` with Python 3.11 and writes `.stark-python`. Then it
+starts the operator and opens the browser. It needs `python3.11` on `PATH`. The
+log is `metrics/install.log`. The commands below are the same install by hand.
+
 Use Python 3.11 or newer and install ffmpeg/PortAudio with your system package manager.
 Create an isolated environment; an existing `stt_env` is kept unmodified as the rollback environment.
 

@@ -35,6 +35,8 @@ MAC_ROOTS = (
     "LICENSE",
     "run_operator.sh",
     "bootstrap.sh",
+    "Stark Translate.command",
+    "constraints",
     "start_server.sh",
     "requirements-mac.txt",
 )

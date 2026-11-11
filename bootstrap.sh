@@ -6,7 +6,9 @@
 #
 #   1. Verify prerequisites (Python 3.11+, ffmpeg, CUDA toolkit, etc.)
 #   2. Select or create a venv and install the platform's pyproject extras
-#   3. Download models and run doctor (the local checks behind /api/preflight)
+#      (Apple Silicon: Python 3.11 and the audited Mac constraints file)
+#   3. Download models and run doctor (the local checks behind /api/preflight);
+#      then write .stark-python for a new ./venv when no pointer exists
 #   4. Install the requested service only after setup and pre-flight succeed
 #   5. Print final URLs the operator should bookmark
 #
@@ -59,14 +61,14 @@ log() { printf '[bootstrap] %s\n' "$*"; }
 fail() { printf '[bootstrap] ERROR: %s\n' "$*" >&2; exit "${2:-2}"; }
 
 # 1. Prerequisites ------------------------------------------------------------
-log "checking prerequisites…"
+log "Step 1 of 4: check the computer."
 
 EXTRA="cpu"
 if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
     EXTRA="mlx"
     log "  Apple Silicon detected — operator will use MLX/Metal. NVIDIA CUDA is not required."
     PYTHON_HINT="install Python 3.11+ (for example: brew install python@3.11)"
-    AUDIO_HINT="brew install ffmpeg portaudio"
+    AUDIO_HINT="brew install ffmpeg"
 else
     PYTHON_HINT="install Python 3.11+ (Ubuntu: apt install python3.11 python3.11-venv)"
     AUDIO_HINT="install ffmpeg and PortAudio using your system package manager"
@@ -81,14 +83,23 @@ fi
 command -v python3 >/dev/null || fail "python3 not found — $PYTHON_HINT" 2
 
 PY_VER=$("$PYTHON" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-case "$PY_VER" in
-    3.11|3.12|3.13|3.14) ;;
-    *) fail "python $PY_VER unsupported — $PYTHON_HINT" 2 ;;
+case "${EXTRA}:${PY_VER}" in
+    mlx:3.11|cpu:3.1[1-4]|cuda:3.1[1-4]) ;;
+    mlx:*) fail "python ${PY_VER} unsupported — the audited Mac install needs Python 3.11; ${PYTHON_HINT}" 2 ;;
+    *) fail "python ${PY_VER} unsupported — ${PYTHON_HINT}" 2 ;;
 esac
-log "  python $PY_VER OK"
+log "  python ${PY_VER} OK"
 
-command -v ffmpeg >/dev/null || fail "ffmpeg not found — $AUDIO_HINT" 2
-log "  ffmpeg OK"
+if command -v ffmpeg >/dev/null; then
+    log "  ffmpeg OK"
+elif [ "${EXTRA}" = "mlx" ]; then
+    # The live path decodes no files; the sounddevice wheel bundles PortAudio.
+    log "  WARNING: ffmpeg not found. Live captions do not need ffmpeg."
+    log "  These tools need it: tools/validate_session.py, tools/live_caption_monitor.py,"
+    log "  tools/batch_translate.py, tools/stt_benchmark.py, tools/benchmark_latency.py, training/. Fix: ${AUDIO_HINT}"
+else
+    fail "ffmpeg not found — ${AUDIO_HINT}" 2
+fi
 
 # 2. venv + dependencies ------------------------------------------------------
 # Prefer the pyproject.toml extras (v2026.7+); fall back to the legacy
@@ -119,17 +130,39 @@ fi
 # Service executables must be absolute, even for an explicit relative target.
 VENV="$(cd -- "$VENV" && pwd)"
 
+log "Step 2 of 4: install the program. This can take 5 to 15 minutes."
 log "installing stark-translate[$EXTRA] into venv (this may take 5–15 minutes)…"
+# Apple Silicon uses the same audited constraints as README.md and docs/packaging/macos.md.
+set --
+if [ "${EXTRA}" = "mlx" ]; then
+    CONSTRAINTS="${ROOT}/constraints/macos-arm64-py311-runtime.txt"
+    [ -f "${CONSTRAINTS}" ] || fail "constraints file missing: ${CONSTRAINTS}" 3
+    set -- -c "${CONSTRAINTS}"
+fi
 "$VENV/bin/python" -m pip install --upgrade 'pip>=26.2' 'setuptools>=83.0.0' wheel >/tmp/bootstrap-pip.log 2>&1 \
     || fail "installer tool upgrade failed (see /tmp/bootstrap-pip.log)" 3
-"$VENV/bin/python" -m pip install ".[$EXTRA]" >>/tmp/bootstrap-pip.log 2>&1 \
+"${VENV}/bin/python" -m pip install "$@" ".[$EXTRA]" >>/tmp/bootstrap-pip.log 2>&1 \
     || fail "dependency install failed (see /tmp/bootstrap-pip.log)" 3
 log "  pip install OK"
 
 # 3. Model setup and preflight: works even when no server is running.
+log "Step 3 of 4: download the speech and translation models. This can take a long time."
 log "downloading models for $EXTRA (existing snapshots are reused)…"
 "$VENV/bin/python" -m operator_app.cli setup --backend "$EXTRA" || fail "model setup failed" 3
+log "Step 4 of 4: check the installation."
 "$VENV/bin/python" -m operator_app.cli doctor --backend "$EXTRA" || fail "pre-flight failed; inspect missing models/dependencies/audio" 5
+
+# Launchers find the default ./venv through .stark-python. Never name stt_env.
+VENV_REAL="$(cd -- "${VENV}" && pwd -P)"
+if [ -d "${ROOT}/venv" ] && [ "${VENV_REAL}" = "$(cd -- "${ROOT}/venv" && pwd -P)" ] \
+    && { [ ! -d "${ROOT}/stt_env" ] || [ "${VENV_REAL}" != "$(cd -- "${ROOT}/stt_env" && pwd -P)" ]; }; then
+    if [ -e "${ROOT}/.stark-python" ]; then
+        log "  kept the existing .stark-python; bootstrap does not change it"
+    else
+        printf '%s\n' "${VENV}/bin/python" > "${ROOT}/.stark-python"
+        log "  wrote .stark-python -> ${VENV}/bin/python"
+    fi
+fi
 
 # 4. Services ---------------------------------------------------------------
 if [ "$SKIP_SYSTEMD" -eq 0 ] && command -v systemctl >/dev/null 2>&1; then
