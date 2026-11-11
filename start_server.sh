@@ -7,6 +7,7 @@
 #   ./start_server.sh --mtp              # E4B + official Gemma 4 MTP assistant
 #   ./start_server.sh --e2b-draft        # legacy T4 (measured LOSS — not recommended)
 #   ./start_server.sh --model <path>     # Custom target GGUF
+#   ./start_server.sh --host 0.0.0.0     # Listen on all interfaces (container only)
 #   ./start_server.sh --help
 #
 # llama.cpp pin: tag b10883 (2026-09-09). Must match Dockerfile ARG LLAMA_CPP_REF
@@ -49,6 +50,7 @@ Start llama-server for Stark Road translation.
   ./start_server.sh --assistant PATH
   ./start_server.sh --draft PATH    E2B GGUF for --e2b-draft
   ./start_server.sh --port N
+  ./start_server.sh --host ADDR     listen address (default 127.0.0.1)
 
 Env: LLAMA_DIR, SERVER, MODEL_DIR, ASSISTANT, SPEC_N (default 3), FLASH_ATTN=on|off
 Pin: llama.cpp b10883 — see docs/cuda_latency_proposal.md
@@ -66,6 +68,7 @@ while [[ $# -gt 0 ]]; do
         --draft) DRAFT="$2"; shift 2 ;;
         --assistant) ASSISTANT="$2"; shift 2 ;;
         --port) PORT="$2"; shift 2 ;;
+        --host) HOST="$2"; shift 2 ;;
         *) echo "Unknown arg: $1 (try --help)" >&2; exit 1 ;;
     esac
 done
@@ -117,9 +120,13 @@ echo "  Target: $TARGET"
 echo "  URL:    http://$HOST:$PORT"
 echo ""
 
+# Local checks connect to loopback when the server listens on all interfaces.
+PROBE_HOST="$HOST"
+case "$HOST" in 0.0.0.0|::) PROBE_HOST=127.0.0.1 ;; esac
+
 # Pre-flight: refuse to start if port is already in use. /dev/tcp is bash-built-in
 # so no extra dependency. Honors HOST so we can run two servers on different ports.
-if (timeout 2 bash -c "exec 3<>/dev/tcp/$HOST/$PORT" 2>/dev/null); then
+if (timeout 2 bash -c "exec 3<>/dev/tcp/$PROBE_HOST/$PORT" 2>/dev/null); then
     echo "ERROR: $HOST:$PORT is already in use — another llama-server (or other process)" >&2
     echo "       is bound there. Stop it first: pkill -f 'llama-server.*--port $PORT'" >&2
     exit 2
@@ -159,7 +166,7 @@ trap 'kill -TERM $SERVER_PID 2>/dev/null; wait $SERVER_PID 2>/dev/null; exit 0' 
 # Wait up to 120s for /health to return ok (E4B cold-load takes ~30-90s on 16GB).
 for _ in $(seq 1 120); do
     sleep 1
-    if curl -s --max-time 1 "http://$HOST:$PORT/health" 2>/dev/null | grep -q '"status":"ok"'; then
+    if curl -s --max-time 1 "http://$PROBE_HOST:$PORT/health" 2>/dev/null | grep -q '"status":"ok"'; then
         echo "READY"
         wait $SERVER_PID
         exit $?

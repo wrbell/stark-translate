@@ -2,9 +2,9 @@
 # Entrypoint for the stark-translate container. Dispatches based on the
 # command (CMD or `docker compose run … <command>`):
 #
-#   operator       → uvicorn operator_app.main:app --host 0.0.0.0 --port 9000
-#   llama-server   → ./start_server.sh --no-draft (E4B or E2B GGUF in $MODEL_DIR;
-#                    STARK_LLAMA_MTP=1 enables --mtp)
+#   operator       → python -m operator_app.cli operator --host 0.0.0.0 --port 9000
+#   llama-server   → ./start_server.sh --host 0.0.0.0 --no-draft (E4B or E2B GGUF
+#                    in $MODEL_DIR; STARK_LLAMA_MTP=1 enables --mtp)
 #   audio-bridge   → tools/audio_bridge.py (Phase 9.4 fallback; not yet built)
 #   bash           → drop into a shell for debugging
 #
@@ -18,26 +18,30 @@ shift || true
 
 case "$cmd" in
     operator)
-        echo "[entrypoint] launching operator (uvicorn) on 0.0.0.0:9000"
+        echo "[entrypoint] launching operator on 0.0.0.0:9000"
         # Pre-flight: check that the GGUFs exist when the operator path expects them.
         if [ -n "${STARK_CUDA__LLAMACPP_URL:-}" ] && [ ! -d "${MODEL_DIR:-/app/models}" ]; then
             echo "[entrypoint] WARN: \$MODEL_DIR ($MODEL_DIR) not mounted; preflight will be yellow."
         fi
-        exec /opt/venv/bin/uvicorn operator_app.main:app \
-             --host 0.0.0.0 --port 9000 \
-             --log-level "${STARK_LOG_LEVEL:-info}"
+        # Start through the CLI: it records the bind host for the request guard.
+        # Without that record, the guard accepts loopback peers only, and every
+        # request through a published port gets HTTP 403.
+        log_level="$(printf '%s' "${STARK_LOG_LEVEL:-info}" | tr '[:lower:]' '[:upper:]')"
+        exec "${STARK_PYTHON:-/opt/venv/bin/python}" -m operator_app.cli operator \
+             --host 0.0.0.0 --port 9000 --no-browser --log-level "$log_level"
         ;;
 
     llama-server)
         : "${LLAMA_PORT:=8090}"
         : "${MODEL_DIR:=/app/models}"
         echo "[entrypoint] launching llama-server on 0.0.0.0:${LLAMA_PORT} (models: ${MODEL_DIR})"
-        cd /app
+        cd "${STARK_PROJECT_ROOT:-/app}"
         # Production default is target-only (NO_DRAFT=true). The old implicit
         # E2B draft when gemma-4-e2b-it-q4km.gguf was present is a measured
         # single-GPU loss — do not re-enable. MTP is opt-in via STARK_LLAMA_MTP=1
         # (maps to start_server.sh --mtp; requires the assistant GGUF).
-        extra=()
+        # Listen on all container interfaces so the operator service can connect.
+        extra=(--host 0.0.0.0)
         case "${STARK_LLAMA_MTP:-0}" in
             1|true|TRUE|yes|YES) extra+=(--mtp) ;;
             *) extra+=(--no-draft) ;;

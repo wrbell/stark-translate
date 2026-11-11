@@ -15,7 +15,11 @@ docker compose pull
 docker compose up
 ```
 
-Open <http://localhost:9000/operator/> and the operator UI loads.
+Then open <http://localhost:9000/operator/>.
+
+Status: this stack has not been run end to end on Linux/NVIDIA hardware. The
+tests run the entrypoint, `start_server.sh` and the compose settings without
+Docker.
 
 ---
 
@@ -24,7 +28,7 @@ Open <http://localhost:9000/operator/> and the operator UI loads.
 | Service | Image | Purpose |
 |---|---|---|
 | `operator` | `ghcr.io/wrbell/stark-translate:${TAG:-latest}` | FastAPI control plane on `:9000` + audience HTTP on `:8080` + transcript WS on `:8765` + TTS WS on `:8766` |
-| `llama-server` | same image, different `command` | llama.cpp HTTP API on `:8090` (auto-picks E4B if present, falls back to E2B with `--no-draft`) |
+| `llama-server` | same image, different `command` | llama.cpp HTTP API on `:8090` on the compose network only; not published to the host (auto-picks E4B if present, falls back to E2B with `--no-draft`) |
 | `audio-bridge` | same image, profile-gated | Phase 9.4.2 stub. Run with `docker compose --profile audio-bridge up` when host PulseAudio passthrough doesn't work. |
 
 The image is built from a multi-stage `Dockerfile` against
@@ -36,6 +40,30 @@ GGUFs are **bind-mounted, never baked** — same pattern OpenWebUI, LocalAI,
 LM Studio, vLLM all use. Run `stark-translate setup` (Track 4 PyPI install) or
 manually copy the GGUFs into `$STARK_MODELS_DIR` first; see
 [`models.md`](./models.md) for the lockfile format.
+
+---
+
+## Network and operator access
+
+- The operator has no authentication. Compose publishes port `9000` on the
+  host loopback address only (`127.0.0.1:9000`).
+- In the container, the entrypoint starts the operator through
+  `python -m operator_app.cli operator --host 0.0.0.0`. This sets the request
+  guard for a remote bind. A request must still name an allowed host in its
+  `Host` header.
+- Allowed hosts are the loopback names, the container's own interface
+  addresses, and `STARK_OPERATOR_ALLOWED_HOSTS` (exact names or IP addresses,
+  no ports). The compose default is `localhost,127.0.0.1`.
+- For LAN access, set both variables in `.env`, for example
+  `STARK_OPERATOR_PUBLISH_HOST=0.0.0.0` and
+  `STARK_OPERATOR_ALLOWED_HOSTS=church-pc.local,192.168.1.20`. Put each name
+  or host IP address that users type in the list. Use a trusted network only.
+- A client in another container that uses `http://operator:9000` (for example
+  Prometheus or the `audio-bridge` profile) needs `operator` in
+  `STARK_OPERATOR_ALLOWED_HOSTS`.
+- `llama-server` listens on `0.0.0.0` in its container. The operator connects
+  to `http://llama-server:8090` on the compose network. A native
+  `start_server.sh` run keeps the `127.0.0.1` default.
 
 ---
 
@@ -94,7 +122,8 @@ stark_vram_mib 4912
 …
 ```
 
-Wire it into Prometheus by scraping `http://operator:9000/metrics`. The same
+Wire it into Prometheus by scraping `http://operator:9000/metrics` (add
+`operator` to `STARK_OPERATOR_ALLOWED_HOSTS`). The same
 data is also available as JSON at `/api/metrics` and pushed at ~1 Hz over
 `/ws/control`.
 
