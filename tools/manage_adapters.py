@@ -181,20 +181,11 @@ def cmd_activate(args) -> int:
 
     # Run health check
     logger.info(f"Running health check on {model}/{version}...")
-    base_model_map = {
-        "gemma_4b": "google/translategemma-4b-it",
-        "gemma_12b": "google/translategemma-12b-it",
-    }
-    base_model = base_model_map.get(model, args.base_model or "google/translategemma-4b-it")
-
-    health_cmd = [
-        sys.executable,
-        str(HEALTH_CHECK_SCRIPT),
-        "--adapter",
-        adapter_path,
-        "--base-model",
-        base_model,
-    ]
+    # TranslateGemma bases are retired: pass --base-model on, else health_check
+    # uses its backend default (pinned Gemma 4 E4B on MLX; required on CUDA).
+    health_cmd = [sys.executable, str(HEALTH_CHECK_SCRIPT), "--adapter", adapter_path]
+    if args.base_model:
+        health_cmd.extend(["--base-model", args.base_model])
     if args.max_latency:
         health_cmd.extend(["--max-latency", str(args.max_latency)])
 

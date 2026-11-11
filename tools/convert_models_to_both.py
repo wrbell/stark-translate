@@ -760,9 +760,9 @@ def run_exports(args):
                 validate_whisper_ct2(ct2_dir)
 
     # -----------------------------------------------------------------------
-    # TranslateGemma
+    # TranslateGemma (retired: explicit --gemma only, never part of --all)
     # -----------------------------------------------------------------------
-    if args.gemma or args.all:
+    if args.gemma:
         logger.info("")
         logger.info("=" * 60)
         logger.info("  TRANSLATEGEMMA 4B")
@@ -818,7 +818,7 @@ def main():
     model_group.add_argument(
         "--gemma",
         action="store_true",
-        help="Export TranslateGemma 4B for both targets",
+        help="Export the retired TranslateGemma 4B for both targets (explicit only; not in --all)",
     )
     model_group.add_argument(
         "--marian",
@@ -828,7 +828,7 @@ def main():
     model_group.add_argument(
         "--all",
         action="store_true",
-        help="Export all models (Whisper + TranslateGemma + MarianMT)",
+        help="Export Whisper + MarianMT (TranslateGemma is retired: use --gemma explicitly)",
     )
 
     # Target selection

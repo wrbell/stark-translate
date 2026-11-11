@@ -136,14 +136,17 @@ def check_models(
     tts: bool = False,
 ) -> Check:
     """Require the selected backend's local models; no downloads or GPU loads."""
+    if backend == "mlx" and model_family != "gemma4":
+        from engines.translation_prompts import TRANSLATEGEMMA_RETIRED_MESSAGE
+
+        return _check("Models", "fail", TRANSLATEGEMMA_RETIRED_MESSAGE)
     if backend == "mlx":
         stt = (
             "mlx-parakeet-v3"
             if stt_backend == "parakeet-mlx" or (stt_backend == "auto" and lang == "en")
             else "mlx-whisper-large-v3-turbo"
         )
-        translation = f"mlx-gemma4-{gemma4_size}" if model_family == "gemma4" else "translategemma-4b-it-mlx"
-        names = [stt, translation]
+        names = [stt, f"mlx-gemma4-{gemma4_size}"]
     elif backend == "cpu":
         names = ["whisper-large-v3-turbo"]
     else:

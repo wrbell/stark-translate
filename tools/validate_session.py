@@ -1346,7 +1346,7 @@ def run_validation(
 
     Returns the path to the generated report.
     """
-    from engines.factory import create_stt_engine, create_translation_engine
+    from engines.factory import create_stt_engine, create_translation_engine, resolve_mlx_translation_model_id
 
     # Normalize to list
     csv_paths = [session_csv] if isinstance(session_csv, str) else list(session_csv)
@@ -1380,17 +1380,21 @@ def run_validation(
     gemma_4b_engine = None
     gemma_engine = None
     if not skip_gemma:
-        logger.info("Loading Gemma 4B engine...")
+        # TranslateGemma is retired. The "4B" (small) slot uses pinned Gemma 4
+        # E2B and the "12B" (reference) slot uses pinned Gemma 4 E4B.
+        logger.info("Loading Gemma 4 E2B engine (4B column)...")
         try:
-            gemma_4b_engine = create_translation_engine(model_id="mlx-community/translategemma-4b-it-4bit")
+            small_id = resolve_mlx_translation_model_id(model_family="gemma4", size="e2b")
+            gemma_4b_engine = create_translation_engine(model_id=small_id, model_family="gemma4")
             gemma_4b_engine.load()
         except Exception:
             logger.warning("Could not load Gemma 4B, skipping 4B translation", exc_info=True)
             gemma_4b_engine = None
 
-        logger.info("Loading Gemma 12B engine...")
+        logger.info("Loading Gemma 4 E4B engine (12B column)...")
         try:
-            gemma_engine = create_translation_engine(model_id="mlx-community/translategemma-12b-it-4bit")
+            reference_id = resolve_mlx_translation_model_id(model_family="gemma4", size="e4b")
+            gemma_engine = create_translation_engine(model_id=reference_id, model_family="gemma4")
             gemma_engine.load()
         except Exception:
             logger.warning("Could not load Gemma 12B, skipping re-translation", exc_info=True)

@@ -54,20 +54,6 @@
       ],
       "comment": "MLX-converted Whisper Turbo for Apple Silicon."
     },
-    "translategemma-4b-it-mlx": {
-      "type": "hf-snapshot",
-      "repo_id": "mlx-community/translategemma-4b-it-4bit",
-      "revision": "5788ec08c047f3f2e17808101b8d9566ac930d58",
-      "subdir": "translategemma-4b-it-mlx",
-      "required_for": [],
-      "comment": "MLX 4-bit TranslateGemma 4B \u2014 Mac translation A model (E2B/E4B GGUF is CUDA-only).",
-      "optional_group": "translategemma",
-      "required_files": [
-        "config.json",
-        "tokenizer_config.json",
-        "tokenizer.json"
-      ]
-    },
     "marian-en-es": {
       "type": "hf-snapshot",
       "repo_id": "Helsinki-NLP/opus-mt-en-es",

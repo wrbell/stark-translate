@@ -220,7 +220,7 @@ def main(argv: list[str] | None = None) -> int:
     p_setup.add_argument(
         "--include",
         nargs="*",
-        choices=["e2b", "tts", "translategemma", "whisper-fallback", "diarization", "diarization-pyannote"],
+        choices=["e2b", "tts", "whisper-fallback", "diarization", "diarization-pyannote"],
         default=[],
     )
     p_setup.set_defaults(func=cmd_setup)

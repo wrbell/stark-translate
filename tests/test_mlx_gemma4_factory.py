@@ -2,6 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 
 class TestGemma4Settings:
     def test_defaults_are_gemma4(self):
@@ -47,11 +49,11 @@ class TestResolveMlxTranslationModelId:
         mid = resolve_mlx_translation_model_id(model_family="gemma4", size="e2b")
         assert "e2b" in mid.lower()
 
-    def test_translategemma_default(self):
+    def test_translategemma_has_no_default(self):
         from engines.factory import resolve_mlx_translation_model_id
 
-        mid = resolve_mlx_translation_model_id(model_family="translategemma")
-        assert "translategemma" in mid
+        with pytest.raises(ValueError, match="retired"):
+            resolve_mlx_translation_model_id(model_family="translategemma")
 
 
 class TestFactoryGemma4Mts:

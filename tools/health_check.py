@@ -60,7 +60,6 @@ HALLUCINATION_MIN = 0.5
 HALLUCINATION_MAX = 2.5
 
 DEFAULT_MLX_MODEL = "mlx-community/gemma-4-e4b-it-OptiQ-4bit"
-DEFAULT_CUDA_MODEL = "google/translategemma-4b-it"
 
 
 def _detect_backend() -> str:
@@ -281,7 +280,7 @@ def main():
     parser.add_argument(
         "--base-model",
         default=None,
-        help=(f"Base model ID (default: {DEFAULT_MLX_MODEL} for mlx, {DEFAULT_CUDA_MODEL} for cuda)"),
+        help=f"Base model ID (default: {DEFAULT_MLX_MODEL} for mlx; required for cuda/hf)",
     )
     parser.add_argument(
         "--model-family",
@@ -312,9 +311,9 @@ def main():
     backend = args.backend
     if backend == "auto":
         backend = _detect_backend()
-    base_model = args.base_model
+    base_model = args.base_model or (DEFAULT_MLX_MODEL if backend == "mlx" else None)
     if not base_model:
-        base_model = DEFAULT_MLX_MODEL if backend == "mlx" else DEFAULT_CUDA_MODEL
+        parser.error("--base-model is required for the cuda/hf backend (the TranslateGemma default is retired)")
 
     result = run_health_check(
         base_model=base_model,

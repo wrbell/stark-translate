@@ -232,15 +232,15 @@ class TranslationSettings(BaseSettings):
     )
 
     # MLX models (Apple Silicon) — Gemma 4 OptiQ is the Mac finals default
-    # (parity with CUDA Gemma 4). TranslateGemma IDs remain for --model-family
-    # translategemma / A/B. See docs/mlx_cuda_parity.md.
-    mlx_model_4b: str = Field(
-        default="mlx-community/translategemma-4b-it-4bit",
-        description="TranslateGemma 4B 4-bit MLX model (~2.2GB disk, ~2.5GB RAM)",
+    # (parity with CUDA Gemma 4). TranslateGemma is retired: its slots have no
+    # default and are used only when a person sets an explicit model ID.
+    mlx_model_4b: str | None = Field(
+        default=None,
+        description="Retired TranslateGemma A slot (--model-family translategemma); explicit model ID only",
     )
-    mlx_model_12b: str = Field(
-        default="mlx-community/translategemma-12b-it-4bit",
-        description="TranslateGemma 12B 4-bit MLX model (~6.6GB disk, ~7GB RAM)",
+    mlx_model_12b: str | None = Field(
+        default=None,
+        description="Retired TranslateGemma B slot (--model-family translategemma --ab); explicit model ID only",
     )
     # Gemma 4 OptiQ / PLE-safe (Mac default via model_family=gemma4).
     # Naïve mlx-community uniform 4-bit Gemma 4 quants are known-broken
@@ -268,13 +268,13 @@ class TranslationSettings(BaseSettings):
         ),
     )
     # CUDA models (NVIDIA)
-    cuda_model_4b: str = Field(
-        default="google/translategemma-4b-it",
-        description="TranslateGemma 4B for CUDA (loaded with bitsandbytes 4-bit)",
+    cuda_model_4b: str | None = Field(
+        default=None,
+        description="HF NF4 CUDA fallback model (retired TranslateGemma slot); explicit model ID only",
     )
-    cuda_model_12b: str = Field(
-        default="google/translategemma-12b-it",
-        description="TranslateGemma 12B for CUDA A/B mode (loaded with bitsandbytes 4-bit)",
+    cuda_model_12b: str | None = Field(
+        default=None,
+        description="HF NF4 CUDA A/B model (retired TranslateGemma slot); explicit model ID only",
     )
     # MarianMT (all backends — CPU inference, lightweight)
     marian_model: str = Field(

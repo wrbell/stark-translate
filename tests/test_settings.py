@@ -62,8 +62,8 @@ class TestTranslationSettings:
         from settings import TranslationSettings
 
         s = TranslationSettings()
-        assert "translategemma-4b" in s.mlx_model_4b
-        assert "translategemma-12b" in s.mlx_model_12b
+        assert s.mlx_model_4b is None  # TranslateGemma retired: explicit IDs only
+        assert s.mlx_model_12b is None
         assert "opus-mt-en-es" in s.marian_model
         assert s.default_source_lang == "en"
         assert s.default_target_lang == "es"

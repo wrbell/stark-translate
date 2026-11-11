@@ -267,7 +267,7 @@ class TestFactoryStreamingParam:
             patch("engines.cuda_engine.CUDAGemmaStreamingEngine") as mock_cls,
         ):
             mock_cls.return_value = MagicMock()
-            create_translation_engine(backend="cuda", streaming=True)
+            create_translation_engine(backend="cuda", model_id="test/model", streaming=True)
             mock_cls.assert_called_once()
 
     def test_cuda_streaming_false_returns_basic_engine(self):
@@ -278,7 +278,7 @@ class TestFactoryStreamingParam:
             patch("engines.cuda_engine.CUDAGemmaEngine") as mock_cls,
         ):
             mock_cls.return_value = MagicMock()
-            create_translation_engine(backend="cuda", streaming=False)
+            create_translation_engine(backend="cuda", model_id="test/model", streaming=False)
             mock_cls.assert_called_once()
 
     def test_assistant_model_forwarded(self):
@@ -291,6 +291,7 @@ class TestFactoryStreamingParam:
             mock_cls.return_value = MagicMock()
             create_translation_engine(
                 backend="cuda",
+                model_id="test/model",
                 streaming=True,
                 assistant_model_id="google/translategemma-4b-it",
             )
@@ -321,4 +322,4 @@ class TestCUDASettings:
         from settings import PipelineSettings
 
         s = PipelineSettings()
-        assert s.translation.cuda_model_12b == "google/translategemma-12b-it"
+        assert s.translation.cuda_model_12b is None  # TranslateGemma retired: explicit IDs only

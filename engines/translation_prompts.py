@@ -13,6 +13,11 @@ logger = logging.getLogger(__name__)
 
 GEMMA4_STOP_TOKENS = ("<turn|>",)
 TRANSLATEGEMMA_STOP_TOKENS = ("<end_of_turn>",)
+TRANSLATEGEMMA_RETIRED_MESSAGE = (
+    "TranslateGemma is retired and has no default model or pinned download. "
+    "Pass an explicit model ID (--mlx-model, --base-model, or STARK_TRANSLATE_MLX_MODEL_4B / "
+    "_MLX_MODEL_12B / _CUDA_MODEL_4B / _CUDA_MODEL_12B), or use the Gemma 4 family."
+)
 
 
 def stop_token_strings(model_family: str) -> tuple[str, ...]:

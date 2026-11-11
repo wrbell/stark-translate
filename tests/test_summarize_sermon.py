@@ -218,6 +218,19 @@ def test_spanish_translation_preserves_overridden_model_template(summary_runtime
     assert len([call for call in calls if call[0] == "load"]) == 1
 
 
+def test_translate_with_gemma_uses_pinned_e4b_and_gemma4_prompt(summary_runtime):
+    from engines.translation_prompts import build_chat_messages
+
+    summary, tokenizer, runtime, calls, _ = summary_runtime
+    runtime.generate = lambda *args, **kwargs: "Dios es amor.<turn|>"
+    assert summary.translate_with_gemma("God is love.") == "Dios es amor."
+    assert ("resolve", "mlx-community/gemma-4-e4b-it-OptiQ-4bit") in calls
+    assert tokenizer._stark_summary_model_family == "gemma4"
+    template = [call for call in calls if call[0] == "template"][-1]
+    assert template[1] == build_chat_messages("God is love.", source_lang="en", target_lang="es", model_family="gemma4")
+    assert template[2]["enable_thinking"] is False
+
+
 # ===================================================================
 # _format_timestamp
 # ===================================================================
