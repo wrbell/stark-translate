@@ -145,8 +145,10 @@ def test_mlx_preflight_never_probes_llama(tmp_path):
 
 
 def test_mac_model_selection_changes_with_language(tmp_path):
+    # Use an empty models directory, so a managed Marian CT2 in the user cache cannot change the result.
     with patch.object(preflight, "resolve_model_path", return_value="/cached") as resolve:
-        assert preflight.check_models(tmp_path, backend="mlx", lang="es")["status"] == "pass"
+        result = preflight.check_models(tmp_path, backend="mlx", lang="es", models_dir=tmp_path / "models")
+        assert result["status"] == "pass"
     requested = [call.args[0] for call in resolve.call_args_list]
     assert "mlx-whisper-large-v3-turbo" in requested
     assert "mlx-parakeet-v3" not in requested
