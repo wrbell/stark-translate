@@ -29,7 +29,9 @@ jobs:
             pyproject.toml
 
       - name: Install native audio import dependency
-        run: sudo apt-get -qq update && sudo apt-get -qq install -y libportaudio2
+        run: >
+          sudo apt-get -qq -o Acquire::Retries=3 update &&
+          sudo apt-get -qq -o Acquire::Retries=3 install -y libportaudio2
 
       - name: Install test dependencies
         run: pip install '.[dev]' scipy jiwer openpyxl
